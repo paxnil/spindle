@@ -100,6 +100,9 @@ public class TapestryArtifactManager implements ITemplateFinderListener
 
     public synchronized Object getLastBuildState(IProject project, IRunnableContext context)
     {
+        if (project == null)
+            return null;
+            
         if (!TapestryCore.hasTapestryNature(project))
             return null;
 
@@ -241,6 +244,14 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         State state = (State) getLastBuildState(project);
         if (state != null)
             return state.fPrimaryNamespace;
+        return null;
+    }
+
+    public INamespace getFrameworkNamespace(IProject project)
+    {
+        State state = (State) getLastBuildState(project);
+        if (state != null)
+            return state.fFrameworkNamespace;
         return null;
     }
 

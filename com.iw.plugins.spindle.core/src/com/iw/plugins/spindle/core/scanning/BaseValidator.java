@@ -340,7 +340,7 @@ public class BaseValidator implements IScannerValidator
         ISourceLocation source)
         throws ScannerException
     {
-        return true;
+        return false;
     }
 
     /* (non-Javadoc)

@@ -85,6 +85,9 @@ public class State
 
     // the main namespace result of the last build.
     ICoreNamespace fPrimaryNamespace;
+    
+    // the frameowrk namespace for this project
+    ICoreNamespace fFrameworkNamespace;
 
     /**
      * Constructor for State.
@@ -125,6 +128,7 @@ public class State
             lastState.fLastKnownClasspath.length);
         fApplicationServlet = lastState.fApplicationServlet;
         fPrimaryNamespace = lastState.fPrimaryNamespace;
+        fFrameworkNamespace = lastState.fFrameworkNamespace;
 
     }
 

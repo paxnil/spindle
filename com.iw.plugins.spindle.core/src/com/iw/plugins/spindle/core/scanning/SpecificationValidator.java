@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.engine.ITemplateSource;
 import org.apache.tapestry.spec.AssetType;
 import org.apache.tapestry.spec.IAssetSpecification;
@@ -431,15 +432,15 @@ public class SpecificationValidator extends BaseValidator
     }
 
     public boolean validateLibraryResourceLocation(
-        IResourceWorkspaceLocation specLocation,
+        IResourceLocation specLocation,
         String path,
         String errorKey,
         ISourceLocation source)
         throws ScannerException
     {
-        IResourceWorkspaceLocation useLocation = specLocation;
+        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation)specLocation;
 
-        if (!specLocation.isOnClasspath())
+        if (!useLocation.isOnClasspath())
             useLocation = fClasspathRoot;
 
         return validateResourceLocation(useLocation, path, errorKey, source);

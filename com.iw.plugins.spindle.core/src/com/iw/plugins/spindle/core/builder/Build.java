@@ -500,7 +500,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 result = (IApplicationSpecification) scanner.scan(document, fValidator);
                 Markers.recordProblems(useLocation, scanner.getProblems());
 
-                return result;
+               
             } else
             {
                 PluginApplicationSpecification dummy = new PluginApplicationSpecification();

@@ -171,10 +171,9 @@ public class XMLUtil
 
         writeXMLHeader(component.getPublicId(), rootElement, writer);
 
-        
         writer.print("<" + rootElement + " class=\"");
-            writer.print(component.getComponentClassName());
-            writer.print("\"");
+        writer.print(component.getComponentClassName());
+        writer.print("\"");
         if (!isPage)
         {
             writer.print(" allow-body=\"" + (component.getAllowBody() ? "yes" : "no") + "\"");
@@ -195,6 +194,31 @@ public class XMLUtil
         writeAssets(component, writer, indent + 1);
 
         writer.println("</" + rootElement + ">");
+    }
+
+    public static void writeComponentSpecificationHeader(
+        PrintWriter writer,
+        IComponentSpecification component,
+        int indent)
+    {
+
+        boolean isPage = component.isPageSpecification();
+        String rootElement = isPage ? "page-specification" : "component-specification";
+
+        writer.println("<" + rootElement);
+        Indenter.printIndented(writer, 1, "class=\"");
+        writer.print(component.getComponentClassName());
+        writer.print("\"");
+        if (!isPage)
+        {
+            writer.println();
+            Indenter.printlnIndented(writer, 1, "allow-body=\"" + (component.getAllowBody() ? "yes" : "no") + "\"");
+            Indenter.printIndented(
+                writer,
+                1,
+                "allow-informal-parameters=\"" + (component.getAllowInformalParameters() ? "yes" : "no") + "\"");
+        }
+        writer.println(">");
     }
 
     /**
@@ -460,14 +484,18 @@ public class XMLUtil
         Indenter.printIndented(writer, indent + 1, "direction=\"");
         Direction direction = parameter.getDirection();
         String useDirection = "";
-        if (direction.equals(Direction.AUTO))
-            useDirection = "auto";
-        else if (direction.equals(Direction.CUSTOM))
-            useDirection = "custom";
-        else if (direction.equals(Direction.FORM))
-            useDirection = "form";
-        else if (direction.equals(Direction.IN))
-            useDirection = "in";
+        if (direction != null)
+        {
+            if (direction.equals(Direction.AUTO))
+                useDirection = "auto";
+            else if (direction.equals(Direction.CUSTOM))
+                useDirection = "custom";
+            else if (direction.equals(Direction.FORM))
+                useDirection = "form";
+            else if (direction.equals(Direction.IN))
+                useDirection = "in";
+        }
+
         writer.print(useDirection);
         writer.println("\"");
 
@@ -1042,16 +1070,22 @@ public class XMLUtil
             {
 
                 String name = (String) libraryNames.next();
-                Indenter.printIndented(writer, indent, "<library id=\"");
-                writer.print(name);
-                writer.print("\" specification-path=\"");
-                writer.print(libraryMap.get(name));
-                writer.println("\" />");
+                writeLibrary(name, (String)libraryMap.get(name), writer, indent);
             }
         }
 
     }
 
+    public static void writeLibrary(String name, String speclocation, PrintWriter writer, int indent)
+    {
+        Indenter.printIndented(writer, indent, "<library id=\"");
+        writer.print(name);
+        writer.print("\" specification-path=\"");
+        writer.print(speclocation);
+        writer.println("\" />");
+    }
+    
+ 
     static public void writeMultiLine(PrintWriter writer, String message)
     {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(message.getBytes())));

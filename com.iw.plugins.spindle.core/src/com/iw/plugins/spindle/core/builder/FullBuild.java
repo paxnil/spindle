@@ -81,8 +81,8 @@ public class FullBuild extends Build
     protected void resolveFramework()
     {
         IResourceWorkspaceLocation frameworkLocation =
-                    (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot.getRelativeLocation(
-                        "/org/apache/tapestry/Framework.library");
+            (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot.getRelativeLocation(
+                "/org/apache/tapestry/Framework.library");
         fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace(frameworkLocation);
     }
 
@@ -107,6 +107,7 @@ public class FullBuild extends Build
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
         newState.fApplicationServlet = fApplicationServlet;
         newState.fPrimaryNamespace = fApplicationNamespace;
+        newState.fFrameworkNamespace = fFrameworkNamespace;
 
         // save the processed binary libraries
         saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
@@ -125,11 +126,16 @@ public class FullBuild extends Build
         {
             String id = (String) iter.next();
             ICoreNamespace child = (ICoreNamespace) namespace.getChildNamespace(id);
-            IResourceWorkspaceLocation childLocation = (IResourceWorkspaceLocation) child.getSpecificationLocation();
-            if (childLocation.isBinary())
+            if (child != null)
             {
-                state.fBinaryNamespaces.put(childLocation, child);
+                IResourceWorkspaceLocation childLocation =
+                    (IResourceWorkspaceLocation) child.getSpecificationLocation();
+                if (childLocation.isBinary())
+                {
+                    state.fBinaryNamespaces.put(childLocation, child);
+                }
             }
+
         }
     }
 
@@ -150,7 +156,7 @@ public class FullBuild extends Build
         // uses a validating parser here.
         // Parser does not validate by default.
         // Scanners use the Spindle validator.
-        
+
         IResourceWorkspaceLocation webXML =
             (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot.getRelativeLocation("WEB-INF/web.xml");
         //        IFile webXML = tapestryBuilder.contextRoot.getFile("WEB-INF/web.xml");
@@ -165,7 +171,8 @@ public class FullBuild extends Build
             } catch (IOException e1)
             {
                 TapestryCore.log(e1);
-            } finally {
+            } finally
+            {
                 servletParser = null;
             }
             if (wxmlElement == null)

@@ -260,7 +260,7 @@ public class TemplateScanner extends AbstractScanner
                 TapestryCore.getTapestryString(
                     "PageLoader.required-parameter-not-bound",
                     required.toString(),
-                    containedSpecification.getSpecificationLocation().getName()));
+                    "'"+token.getComponentType()+"'"));
         }
 
         Iterator i = bindingNames.iterator();

@@ -297,16 +297,21 @@ public class LibraryScanner extends SpecificationScanner
                     INamespace.FRAMEWORK_NAMESPACE));
 
         String specificationPath = getAttribute(node, "specification-path", true);
+        
+        if (specificationPath.startsWith(getDummyStringPrefix())) {
+            addProblem(IProblem.ERROR, getAttributeSourceLocation(node, "specification-path"), "blank value");
+        } else {
+            boolean validLibLoc =
+                validateLibraryResourceLocation(
+                    specification.getSpecificationLocation(),
+                    specificationPath,
+                    "scan-library-missing-library",
+                    getAttributeSourceLocation(node, "specification-path"));
+        }
 
-        boolean validLibLoc =
-            validateLibraryResourceLocation(
-                specification.getSpecificationLocation(),
-                specificationPath,
-                "scan-library-missing-library",
-                getAttributeSourceLocation(node, "specification-path"));
 
-        if (validLibLoc)
-            specification.setLibrarySpecificationPath(id, specificationPath);
+        
+        specification.setLibrarySpecificationPath(id, specificationPath);
 
     }
 

@@ -20,7 +20,8 @@
     <classpathentry kind="src" path="/org.eclipse.core.runtime"/>
     <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
     <classpathentry exported="true" kind="lib" path="commons-digester-1.5.jar"/>
-    <classpathentry exported="true" kind="lib" path="tapestry-3.0-beta-3.jar"/>
+    <classpathentry exported="true" kind="lib"
+        path="tapestry-3.0-beta-3.jar" sourcepath="/jakarta-tapestry/framework/src"/>
     <classpathentry exported="true" kind="lib" path="tapestry-contrib-3.0-beta-3.jar"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
