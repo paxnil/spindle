@@ -128,7 +128,25 @@ public abstract class NewTapestryElementWizard extends BasicNewResourceWizard
     return true;
   }
 
-  protected IJavaElement getInitElement()
+  protected IResource getInitResource()
+  {
+    IStructuredSelection selection = getSelection();
+    IResource resource = null;
+    if (selection != null && !selection.isEmpty())
+    {
+      Object selectedElement = selection.getFirstElement();
+      if (selectedElement instanceof IAdaptable)
+      {
+        IAdaptable adaptable = (IAdaptable) selectedElement;
+        resource = (IResource) adaptable.getAdapter(IResource.class);
+      }
+    }
+    if (resource == null) 
+      resource = UIPlugin.getActiveEditorFileInput();
+    return resource;
+  }
+
+  protected IJavaElement getInitJavaElement()
   {
     IStructuredSelection selection = getSelection();
     IJavaElement jelem = null;
@@ -146,27 +164,21 @@ public abstract class NewTapestryElementWizard extends BasicNewResourceWizard
           IResource resource = (IResource) adaptable.getAdapter(IResource.class);
           if (resource != null)
           {
-            IResource parent = resource.getParent();
-            jelem = (IJavaElement) ((IAdaptable) parent).getAdapter(IJavaElement.class);
+            jelem = (IJavaElement) ((IAdaptable) resource.getParent())
+                .getAdapter(IJavaElement.class);
             if (jelem == null)
             {
-              if (resource != null)
-              {
-                IProject proj = resource.getProject();
-                if (proj != null)
-                {
-                  jelem = JavaCore.create(proj);
-                }
-              }
+              IProject proj = resource.getProject();
+              if (proj != null)
+                jelem = JavaCore.create(proj);
             }
           }
         }
       }
     }
     if (jelem == null)
-    {
       jelem = UIPlugin.getActiveEditorJavaInput();
-    }
+
     return jelem;
   }
 

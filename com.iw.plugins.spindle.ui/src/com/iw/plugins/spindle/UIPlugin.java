@@ -211,6 +211,23 @@ public class UIPlugin extends AbstractUIPlugin
     log.log(status);
   }
 
+  public static IResource getActiveEditorFileInput()
+  {
+    IWorkbenchPage page = getDefault().getActivePage();
+
+    if (page != null)
+    {
+      IEditorPart part = page.getActiveEditor();
+      if (part != null)
+      {
+        IEditorInput editorInput = part.getEditorInput();
+        if (editorInput != null)
+          return (IResource) editorInput.getAdapter(IResource.class);
+      }
+    }
+    return null;
+  }
+
   public static IJavaElement getActiveEditorJavaInput()
   {
 
@@ -308,7 +325,7 @@ public class UIPlugin extends AbstractUIPlugin
   private TemplateTextTools fTemplatelTextTools;
 
   private ILabelProvider fStorageLableProvider;
-  
+
   private IXMLModelProvider fModelProvider = new SpecDocumentSetupParticipant();
 
   /**
@@ -377,8 +394,10 @@ public class UIPlugin extends AbstractUIPlugin
 
   public synchronized FileDocumentProvider getTemplateFileDocumentProvider()
   {
-    if (fTemplateFileDocumentProvider == null) {
-      fTemplateFileDocumentProvider = new SpindleFileDocumentProvider(new TemplateDocumentSetupParticipant());
+    if (fTemplateFileDocumentProvider == null)
+    {
+      fTemplateFileDocumentProvider = new SpindleFileDocumentProvider(
+          new TemplateDocumentSetupParticipant());
     }
 
     return fTemplateFileDocumentProvider;
@@ -387,7 +406,8 @@ public class UIPlugin extends AbstractUIPlugin
   public synchronized StorageDocumentProvider getTemplateStorageDocumentProvider()
   {
     if (fTemplateStorageDocumentProvider == null)
-      fTemplateStorageDocumentProvider =new SpindleStorageDocumentProvider(new TemplateDocumentSetupParticipant());
+      fTemplateStorageDocumentProvider = new SpindleStorageDocumentProvider(
+          new TemplateDocumentSetupParticipant());
 
     return fTemplateStorageDocumentProvider;
   }
@@ -395,7 +415,8 @@ public class UIPlugin extends AbstractUIPlugin
   public synchronized FileDocumentProvider getSpecFileDocumentProvider()
   {
     if (fSpecFileDocumentProvider == null)
-      fSpecFileDocumentProvider = new SpindleFileDocumentProvider(new SpecDocumentSetupParticipant());
+      fSpecFileDocumentProvider = new SpindleFileDocumentProvider(
+          new SpecDocumentSetupParticipant());
 
     return fSpecFileDocumentProvider;
   }
@@ -403,7 +424,8 @@ public class UIPlugin extends AbstractUIPlugin
   public synchronized StorageDocumentProvider getSpecStorageDocumentProvider()
   {
     if (fSpecStorageDocumentProvider == null)
-      fSpecStorageDocumentProvider = new SpindleStorageDocumentProvider(new SpecDocumentSetupParticipant());
+      fSpecStorageDocumentProvider = new SpindleStorageDocumentProvider(
+          new SpecDocumentSetupParticipant());
 
     return fSpecStorageDocumentProvider;
   }
@@ -509,8 +531,8 @@ public class UIPlugin extends AbstractUIPlugin
   }
 
   public IXMLModelProvider getXMLModelProvider()
-  {    
+  {
     return fModelProvider;
   }
-  
+
 }

@@ -63,7 +63,7 @@ import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: TapestryProjectDialogField.java,v 1.3 2003/11/06 22:06:39
- *          glongman Exp $
+ *                     glongman Exp $
  */
 public class TapestryProjectDialogField extends StringButtonField
 {
@@ -103,10 +103,12 @@ public class TapestryProjectDialogField extends StringButtonField
   public void dialogFieldChanged(DialogField field)
   {
     if (field == this)
-    {
-      setStatus(projectChanged());
-    }
+      refreshStatus();
+  }
 
+  public void refreshStatus()
+  {
+    setStatus(projectChanged());
   }
 
   public String getContainerText()
@@ -355,7 +357,7 @@ public class TapestryProjectDialogField extends StringButtonField
    * @return
    */
   public boolean isProjectBroken()
-  { 
+  {
     return fCurrentProjectIsBroken;
   }
 

@@ -39,8 +39,7 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
  * @author GWL
- * @version 
- * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
+ * @version Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
 public abstract class TapestryWizardPage extends WizardPage
 {
@@ -67,12 +66,13 @@ public abstract class TapestryWizardPage extends WizardPage
     super.setVisible(visible);
     fPageVisible = visible;
     // policy: wizards are not allowed to come up with an error message
-//    if (visible && (fCurrStatus != null && fCurrStatus.matches(IStatus.ERROR)))
-//    {
-//      SpindleStatus status = new SpindleStatus();
-//      status.setError(""); //$NON-NLS-1$
-//      fCurrStatus = status;
-//    }
+    //    if (visible && (fCurrStatus != null &&
+    // fCurrStatus.matches(IStatus.ERROR)))
+    //    {
+    //      SpindleStatus status = new SpindleStatus();
+    //      status.setError(""); //$NON-NLS-1$
+    //      fCurrStatus = status;
+    //    }
     updateStatus(fCurrStatus);
   }
 
@@ -81,12 +81,19 @@ public abstract class TapestryWizardPage extends WizardPage
     updateStatus(statusContainer.getStatus(true));
   }
 
+  protected void refreshStatus()
+  {
+    statusContainer.refresh();
+    updateStatus();
+  }
+
   /**
    * Updates the status line and the ok button depending on the status
    */
   protected void updateStatus(IStatus status)
   {
-    fCurrStatus = status;;
+    fCurrStatus = status;
+    ;
 
     setPageComplete(fCurrStatus != null && !fCurrStatus.matches(IStatus.ERROR));
     if (fPageVisible)

@@ -270,9 +270,20 @@ public class DialogField implements IDialogFieldChangedListener
   /**
    * @return
    */
-  public  boolean isVisible()
+  public boolean isVisible()
   {
-    return  labelControl != null && !labelControl.isDisposed() && labelControl.isVisible();
+    return labelControl != null && !labelControl.isDisposed() && labelControl.isVisible();
+  }
+
+  public void setVisible(boolean flag)
+  {
+    if (labelControl != null && !labelControl.isDisposed())
+      labelControl.setVisible(flag);
+  }
+
+  public void refreshStatus()
+  {
+
   }
 
 }

@@ -128,10 +128,15 @@ public class PackageDialogField extends StringButtonField
   public void dialogFieldChanged(DialogField field)
   {
     if (field == this || field == container)
-      setStatus(packageChanged());
+      refreshStatus();
 
     if (nameField != null && field == nameField)
-      setStatus(packageChanged());
+      refreshStatus();
+  }
+
+  public void refreshStatus()
+  {
+    setStatus(packageChanged());
   }
 
   public IStatus packageChanged()

@@ -29,7 +29,6 @@ package com.iw.plugins.spindle.editors.template.assist;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -46,10 +45,8 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
-import com.iw.plugins.spindle.editors.assist.DTDAccess;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
-import com.wutka.dtd.DTD;
 
 /**
  * Base class for Template completion assist. Basicly here to set a flag if

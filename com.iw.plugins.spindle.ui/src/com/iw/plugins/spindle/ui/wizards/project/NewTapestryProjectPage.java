@@ -148,7 +148,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         XMLFileContextType.APPLICATION_FILE_CONTEXT_TYPE,
         PreferenceConstants.APP_TEMPLATE,
         UIPlugin.getDefault().getPreferenceStore());
-    
+
     fApplicationTemplateSelector.setReadOnly(true);
   }
 
@@ -473,15 +473,17 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     monitor.worked(1);
 
     //the home page spec
-    fReveal.add(fPageFactory.createPage(webInfFolder, fTemplateSource
-        .getTemplate(fPageFactory), "Home", TapestryCore
+    IFile pageFile = webInfFolder.getFile("Home.page");
+    fReveal.add(fPageFactory.createPage(pageFile, fTemplateSource
+        .getTemplate(fPageFactory), TapestryCore
         .getString("TapestryPageSpec.defaultSpec"), monitor));
 
     monitor.worked(1);
 
     // the home page template
-    fReveal.add(fTemplateFactory.createTapestryTemplate(webInfFolder, fTemplateSource
-        .getTemplate(fTemplateFactory), "Home", "html", monitor));
+    IFile templateFile = webInfFolder.getFile("Home.html");
+    fReveal.add(fTemplateFactory.createTapestryTemplate(templateFile, fTemplateSource
+        .getTemplate(fTemplateFactory), monitor));
 
     monitor.done();
   }

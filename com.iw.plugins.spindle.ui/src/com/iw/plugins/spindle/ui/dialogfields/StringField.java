@@ -62,8 +62,14 @@ public class StringField extends DialogField
   {
     return super.isVisible() && textControl.isVisible();
   }
-  
-  
+
+  public void setVisible(boolean flag)
+  {
+    super.setVisible(flag);
+    if (textControl != null && !textControl.isDisposed())
+      textControl.setVisible(flag);
+  }
+
   public Control getControl(Composite parent)
   {
 
@@ -159,11 +165,9 @@ public class StringField extends DialogField
   public boolean setFocus()
   {
     if (textControl != null && !textControl.isDisposed())
-    {
-      textControl.setFocus();
-      textControl.selectAll();
-    }
-    return true;
+      return textControl.setFocus();
+
+    return false;
   }
 
 }

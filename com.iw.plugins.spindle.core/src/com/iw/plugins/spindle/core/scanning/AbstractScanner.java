@@ -85,30 +85,27 @@ public abstract class AbstractScanner implements IProblemCollector
       if (resultObject == null)
         return null;
 
-      try
-      {
-        doScan(source, resultObject);
-
-      } catch (Exception e)
-      {
-        // do nothing - return what we have so far
-        // this could only happen when pull parsing!
-        TapestryCore.log(e);
-        if (e instanceof RuntimeException)
-          throw (RuntimeException) e;
-      }
+      doScan(source, resultObject);
       return afterScan(resultObject);
 
     } catch (ScannerException scex)
     {
-      addProblem(new DefaultProblem(
-          ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
-          IProblem.ERROR,
-          scex.getMessage(),
-          0,
-          0,
-          0,
-          false));
+
+      if (scex.getLocation() != null)
+      {
+        addProblem(IProblem.ERROR, scex.getLocation(), scex.getMessage(), scex
+            .isTemporary());
+      } else
+      {
+        addProblem(new DefaultProblem(
+            ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+            IProblem.ERROR,
+            scex.getMessage(),
+            0,
+            0,
+            0,
+            false));
+      }
       return null;
     } catch (RuntimeException e)
     {
@@ -122,7 +119,6 @@ public abstract class AbstractScanner implements IProblemCollector
     }
 
   }
-
   protected abstract void doScan(Object source, Object resultObject) throws ScannerException;
 
   protected abstract Object beforeScan(Object source) throws ScannerException;

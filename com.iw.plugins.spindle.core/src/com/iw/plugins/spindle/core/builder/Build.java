@@ -756,16 +756,18 @@ public abstract class Build
 
           Markers.recordProblems(location, scanner.getProblems());
 
-        } else
-        {
-          PluginComponentSpecification dummy = new PluginComponentSpecification();
-          dummy.setSpecificationLocation(location);
-          dummy.setNamespace(namespace);
-          dummy.setTemplateLocations(TapestryBuilder.scanForTemplates(dummy, null));
-          result = dummy;
-        }
+          rememberSpecification(storage, result);
+        } 
+//        else
+//        {
+//          PluginComponentSpecification dummy = new PluginComponentSpecification();
+//          dummy.setSpecificationLocation(location);
+//          dummy.setNamespace(namespace);
+//          dummy.setTemplateLocations(TapestryBuilder.scanForTemplates(dummy, null));
+//          result = dummy;
+//        }
 
-        rememberSpecification(storage, result);
+        
 
       } catch (IOException e)
       {

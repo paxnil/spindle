@@ -61,16 +61,24 @@ public class StringButtonField extends StringField
   {
     this(label, -1);
   }
-  
+
   public StringButtonField(String label, int labelWidth)
   {
     super(label, labelWidth);
   }
-  
+
   public boolean isVisible()
-  {   
+  {
     return super.isVisible() && fButtonControl.isVisible();
   }
+
+  public void setVisible(boolean flag)
+  {
+    super.setVisible(flag);
+    if (fButtonControl != null && !fButtonControl.isDisposed())
+      fButtonControl.setVisible(flag);
+  }
+
   public void init(IRunnableContext context)
   {
     this.fRunnableContext = context;
@@ -81,8 +89,6 @@ public class StringButtonField extends StringField
     return (fRunnableContext == null
         ? PlatformUI.getWorkbench().getProgressService() : fRunnableContext);
   }
-
-  
 
   public Control getControl(Composite parent)
   {

@@ -69,16 +69,13 @@ public class PageFactory extends TemplateFactory
   }
 
   public IFile createPage(
-      IContainer container,
-      Template template,
-      String pageName,
+      IFile file,
+      Template template,    
       String qualifiedPageClass,
       IProgressMonitor monitor) throws CoreException, InterruptedException
   {
-    monitor
-        .beginTask(UIPlugin.getString("ApplicationFactory.operationdesc", pageName), 3);
-    String fileName = pageName + ".page";
-    IFile newFile = container.getFile(new Path("/" + fileName));
+    monitor.beginTask(UIPlugin.getString("ApplicationFactory.operationdesc", file
+        .getName()), 3);    
 
     monitor.worked(1);
 
@@ -94,31 +91,15 @@ public class PageFactory extends TemplateFactory
           .getBytes());
     }
     monitor.worked(1);
-    newFile.create(contents, false, new SubProgressMonitor(monitor, 1));
-    monitor.worked(1);
-    monitor.done();
-    return newFile;
-  }
-
-  public IFile createPage(
-      IResourceWorkspaceLocation namespaceLocation,
-      Template template,
-      String pageName,
-      String specClass,
-      IProgressMonitor monitor) throws CoreException, InterruptedException
-  {
-    IContainer container = null;
-    if (namespaceLocation.getName().length() == 0
-        && namespaceLocation.isWorkspaceResource())
+    if (!file.exists())
     {
-      //we might be using a stand-in application - in the workspace
-      container = ((ContextResourceWorkspaceLocation) namespaceLocation).getContainer();
+      file.create(contents, false, new SubProgressMonitor(monitor, 1));
     } else
     {
-      IFile namespaceFile = (IFile) namespaceLocation.getStorage();
-      container = (IContainer) namespaceFile.getParent();
+      file.setContents(contents, true, true, new SubProgressMonitor(monitor, 1));
     }
-    return createPage(container, template, pageName, specClass, monitor);
+    monitor.worked(1);
+    monitor.done();
+    return file;
   }
-
 }

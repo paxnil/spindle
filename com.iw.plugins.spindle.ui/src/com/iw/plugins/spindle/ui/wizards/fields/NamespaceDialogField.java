@@ -29,8 +29,11 @@ import java.util.List;
 
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceLocation;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryProject;
@@ -74,6 +77,8 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
   public void init(
       TapestryProjectDialogField projectField,
       ComponentNameField componentNameField,
+      IJavaElement initElement,
+      IResource initResource,
       boolean isComponentWizard)
   {
 
@@ -84,6 +89,70 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
     this.fIsComponentWizard = isComponentWizard;
     populateNamespaces();
     addListener(this);
+    if (initResource != null)
+    {
+      initSelection(initResource);
+    } else
+    {
+      initSelectionJava(initElement);
+    }
+
+  }
+
+  private void initSelectionJava(IJavaElement initElement)
+  {
+    int firstClasspathNamespace = -1;
+    int count = 0;
+    for (Iterator iter = fValidNamespaces.iterator(); iter.hasNext();)
+    {
+      INamespace namespace = (INamespace) iter.next();
+
+      if (firstClasspathNamespace == -1 && ((IResourceWorkspaceLocation) namespace
+          .getSpecificationLocation()).isOnClasspath())
+        firstClasspathNamespace = count;
+
+    }
+    if (firstClasspathNamespace >= 0)
+    {
+      select(firstClasspathNamespace);
+    }
+
+  }
+
+  /**
+   * @param initResource
+   */
+  private void initSelection(IResource initResource)
+  {
+    int found = -1;
+    boolean isOnClasspath = JavaCore.create(initResource.getParent()) != null;
+    int firstClasspathNamespace = -1;
+    int count = 0;
+    for (Iterator iter = fValidNamespaces.iterator(); iter.hasNext();)
+    {
+      INamespace namespace = (INamespace) iter.next();
+
+      IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+          .getSpecificationLocation();
+
+      if (firstClasspathNamespace == -1 && location.isOnClasspath())
+        firstClasspathNamespace = count;
+
+      if (location.getStorage().equals(initResource))
+      {
+        found = count;
+        break;
+      }
+      count++;
+    }
+    if (found >= 0)
+    {
+      select(found);
+    } else if (isOnClasspath && firstClasspathNamespace >= 0)
+    {
+      select(firstClasspathNamespace);
+    }
+
   }
 
   public void dialogFieldChanged(DialogField field)
@@ -99,7 +168,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
       }
     } else if (field == this || field == fComponentNameField)
     {
-      updateStatus();
+      refreshStatus();
     }
   }
 
@@ -177,7 +246,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
       }
     }
     namespaceChanged();
-    updateStatus();
+    refreshStatus();
   }
 
   /**
@@ -209,7 +278,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
     return results;
   }
 
-  public void updateStatus()
+  public void refreshStatus()
   {
     setStatus(namespaceChanged());
   }
@@ -232,55 +301,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
       return newStatus;
     }
 
-    ICoreNamespace selectedTarget = (ICoreNamespace) fValidNamespaces.get(selectedIndex);
-//    IResourceWorkspaceLocation targetLocation = (IResourceWorkspaceLocation) selectedTarget
-//        .getSpecificationLocation();
-//
-//    IStorage storage = targetLocation.getStorage();
-//
-//    ILibrarySpecification spec = selectedTarget.getSpecification();
-//
-//    String newName = fComponentNameField.getTextValue();
-//
-//    if (fIsComponentWizard && spec.getComponentSpecificationPath(newName) != null)
-//    {
-//      if (pathExists(spec.getSpecificationLocation(), spec
-//          .getComponentSpecificationPath(newName)))
-//      {
-//        newStatus.setError(UIPlugin.getString(
-//            fName + ".NameAlreadyExists",
-//            newName,
-//            storage.getName()));
-//        return newStatus;
-//      }
-//    } else if (spec.getPageSpecificationPath(newName) != null)
-//    {
-//      if (pathExists(spec.getSpecificationLocation(), spec
-//          .getPageSpecificationPath(newName)))
-//      {
-//        newStatus.setError(UIPlugin.getString(
-//            fName + ".NameAlreadyExists",
-//            newName,
-//            storage.getName()));
-//      }
-//      return newStatus;
-//    }
-//
-//    String fileName = newName + (fIsComponentWizard ? ".jwc" : ".page");
-//
-//    IResourceWorkspaceLocation newLocation = (IResourceWorkspaceLocation) targetLocation
-//        .getRelativeLocation(fileName);
-//
-//    if (newLocation.getStorage() != null)
-//    {
-//      newStatus.setError(UIPlugin.getString(
-//          fName + ".NameAlreadyExists",
-//          newName,
-//          storage.getName()));
-//      return newStatus;
-//    }
-
-    fSelectedNamespace = selectedTarget;
+    fSelectedNamespace = ((ICoreNamespace) fValidNamespaces.get(selectedIndex));
 
     return newStatus;
   }

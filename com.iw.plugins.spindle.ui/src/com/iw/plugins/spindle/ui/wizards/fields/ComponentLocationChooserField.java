@@ -29,18 +29,21 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryProject;
@@ -57,30 +60,55 @@ import com.iw.plugins.spindle.ui.widgets.ContainerSelectionDialog;
  */
 public class ComponentLocationChooserField extends StringButtonField
 {
-
-  private IContainer fResultLocation;
+  private IFolder fResultLocation;
   private String fName;
+  private boolean fForPage;
+  private Button fTemplateLocationButton;
 
   private AbstractNameField fNameField;
   private TapestryProjectDialogField fTapestryProjectField;
 
   public ComponentLocationChooserField(String name)
   {
-    super(UIPlugin.getString(name + ".label"));
-    fName = name;
+    this(name, false);
   }
 
+  public ComponentLocationChooserField(String name, boolean forPage)
+  {
+    super(UIPlugin.getString(name + ".label"));
+    fName = name;
+    fForPage = forPage;
+  }
+
+  public void fillIntoGrid(Composite parent, int numcols)
+  {
+    super.fillIntoGrid(parent, numcols);
+    if (fForPage)
+    {
+      Font font = parent.getFont();
+      fTemplateLocationButton = new Button(parent, SWT.CHECK);
+      GridData data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+      data.horizontalSpan = numcols;
+      fTemplateLocationButton.setLayoutData(data);
+    }
+  }
   public void init(
       AbstractNameField nameField,
       TapestryProjectDialogField projectField,
+      IResource initResource,
       IRunnableContext context)
   {
     fNameField = nameField;
     nameField.addListener(this);
-    this.init(projectField, context);
+    this.init(projectField, initResource, context);
+
+    
   }
 
-  public void init(TapestryProjectDialogField projectField, IRunnableContext context)
+  public void init(
+      TapestryProjectDialogField projectField,
+      IResource initResource,
+      IRunnableContext context)
   {
     super.init(context);
     fTapestryProjectField = projectField;
@@ -92,7 +120,37 @@ public class ComponentLocationChooserField extends StringButtonField
       setTextValue("");
     } else
     {
-      setTextValue("WEB-INF/");
+      IFolder webinf = tproject.getWebContextFolder().getFolder("WEB-INF");
+      
+      if (fForPage)
+      {       
+        if (tproject != null)
+          fTemplateLocationButton.setText(UIPlugin.getString(fName
+              + ".templateInContextQuestion", tproject
+              .getWebContextFolder()
+              .getFullPath()
+              .toString()));
+      }
+
+      if (initResource != null && webinf.exists())
+      {
+        IContainer container = (initResource instanceof IContainer)
+            ? (IContainer) initResource : initResource.getParent();
+        IPath webinfPath = webinf.getFullPath();
+        IPath containerPath = container.getFullPath();
+        if (webinfPath.isPrefixOf(containerPath))
+        {
+          setTextValue(containerPath
+              .removeFirstSegments(webinfPath.segmentCount() - 1)
+              .toString());
+        } else
+        {
+          setTextValue("WEB-INF/");
+        }
+      } else
+      {
+        setTextValue("WEB-INF/");
+      }
     }
   }
 
@@ -103,20 +161,28 @@ public class ComponentLocationChooserField extends StringButtonField
       projectChanged();
 
     if (field == this)
-      setStatus(locationChanged());
+      refreshStatus();
 
     if (fNameField != null && field == fNameField)
-      setStatus(locationChanged());
+      refreshStatus();
   }
 
-  public void setLocation(IContainer container)
+  public void refreshStatus()
   {
-    throw new Error("not implemented yet");
+    setStatus(locationChanged());
   }
 
-  public IContainer getLocation()
+  public IFolder getSpecLocation()
   {
     return fResultLocation;
+  }
+  
+  public IFolder getTemplateLocation() {
+    if (!fForPage || !fTemplateLocationButton.getSelection())
+      return fResultLocation;
+    
+    TapestryProject tproject = fTapestryProjectField.getTapestryProject();
+    return tproject.getWebContextFolder();
   }
 
   public void dialogFieldButtonPressed(DialogField field)
@@ -143,11 +209,23 @@ public class ComponentLocationChooserField extends StringButtonField
         .getFolder("WEB-INF");
     IPath webinfPath = webinf.getFullPath();
 
+    IFolder selection;
+
+    if (fResultLocation != null && fResultLocation.exists()
+        && webinfPath.isPrefixOf(fResultLocation.getFullPath()))
+    {
+      selection = fResultLocation;
+    } else
+    {
+      selection = webinf;
+    }
+
     ContainerSelectionDialog dialog = new ContainerSelectionDialog(
         getShell(),
         webinf,
         true,
         null);
+    dialog.setInitialSelections(new Object[]{selection});
     dialog.setFilter(new OutputDirFilter());
     if (dialog.open() == dialog.OK)
     {
@@ -278,6 +356,18 @@ public class ComponentLocationChooserField extends StringButtonField
     {
       setStatus(new SpindleStatus());
     }
+    
+    if (fForPage)
+    {    
+      TapestryProject tproject = fTapestryProjectField.getTapestryProject();
+      if (tproject != null)
+        fTemplateLocationButton.setText(UIPlugin.getString(fName
+            + ".templateInContextQuestion", tproject
+            .getWebContextFolder()
+            .getFullPath()
+            .toString()));
+    }
+    
     setTextValue("");
   }
 }

@@ -88,36 +88,4 @@ public class TapestryTemplateFactory extends TemplateFactory
     monitor.done();
     return file;
   }
-
-  /** @deprecated */
-  public IFile createTapestryTemplate(
-      IContainer container,
-      Template template,
-      String templateName,
-      String fileExtension,
-      IProgressMonitor monitor) throws CoreException, InterruptedException
-  {
-    monitor.beginTask(UIPlugin
-        .getString("ApplicationFactory.operationdesc", templateName), 3);
-    String fileName = templateName + "." + fileExtension;
-    IFile newFile = container.getFile(new Path("/" + fileName));
-
-    monitor.worked(1);
-
-    InputStream contents;
-    try
-    {
-      contents = new ByteArrayInputStream(getContent(template).getBytes());
-    } catch (Exception e)
-    {
-      UIPlugin.log(e);
-      contents = new ByteArrayInputStream("\n\n\n\nan error occured. Check the log"
-          .getBytes());
-    }
-    monitor.worked(1);
-    newFile.create(contents, false, new SubProgressMonitor(monitor, 1));
-    monitor.worked(1);
-    monitor.done();
-    return newFile;
-  }
 }

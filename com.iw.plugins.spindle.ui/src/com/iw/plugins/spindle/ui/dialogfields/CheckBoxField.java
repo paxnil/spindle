@@ -72,9 +72,14 @@ public class CheckBoxField extends DialogField
   
 
   public boolean isVisible()
-  {
-   
+  {   
     return super.isVisible() && fCheckboxControl.isVisible();
+  }
+  
+  public void setVisible(boolean flag) {
+    super.setVisible(flag);
+    if (fCheckboxControl != null && !fCheckboxControl.isDisposed())
+      fCheckboxControl.setVisible(flag);
   }
   public Control getControl(Composite parent)
   {

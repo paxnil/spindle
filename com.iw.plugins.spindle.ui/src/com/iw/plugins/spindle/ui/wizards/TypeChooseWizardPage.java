@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.tapestry.INamespace;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -37,8 +38,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -61,12 +64,14 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.wizards.fields.ContainerDialogField;
+import com.iw.plugins.spindle.ui.wizards.fields.NamespaceDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.PackageDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.RawTypeDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.TapestryProjectDialogField;
@@ -141,6 +146,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
   private NewTapComponentWizardPage fFirstWizardPage;
   private DialogField fFirstPageNameField;
   private TapestryProjectDialogField fFirstPageProjectField;
+  private NamespaceDialogField fFirstPageNamespaceField;
   private ContainerDialogField fFirstPageContainerField;
   private PackageDialogField fFirstPagePackageField;
 
@@ -162,6 +168,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
     fFirstPageNameField.addListener(fListener);
     fFirstPageProjectField = fFirstWizardPage.getProjectField();
     fFirstPageProjectField.addListener(fListener);
+    fFirstPageNamespaceField = fFirstWizardPage.getNamespaceField();
     fFirstPageContainerField = fFirstWizardPage.getContainerField();
     fFirstPagePackageField = fFirstWizardPage.getPackageField();
 
@@ -190,19 +197,69 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
     super.setVisible(visible);
     if (visible)
     {
-      boolean updateContainerAndPackage = fFirstPageContainerField
+      boolean updateAdvancedClasspath = fFirstPageContainerField
           .getButtonControl(null)
           .isVisible();
-      if (updateContainerAndPackage)
+      if (updateAdvancedClasspath)
       {
         setPackageFragmentRoot(fFirstPageContainerField.getPackageFragmentRoot(), true);
         setPackageFragment(fFirstPagePackageField.getPackageFragment(), true);
       } else
       {
-        setPackageFragmentRoot(null, true);
-        setPackageFragment(null, true);
+        updateDefaultContainerAndPackage();
       }
     }
+  }
+
+  private void updateDefaultContainerAndPackage()
+  {
+    IPackageFragmentRoot root = null;
+    IPackageFragment fragment = null;
+    INamespace namespace = fFirstPageNamespaceField.getSelectedNamespace();
+
+    if (namespace != null)
+    {
+      IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+          .getSpecificationLocation();
+      if (location.isOnClasspath())
+      {
+
+        IFile file = (IFile) location.getStorage();
+        fragment = (IPackageFragment) JavaCore.create(file.getParent());
+        if (fragment != null)
+          root = CoreUtils.getPackageFragmentRoot(fragment);
+      }
+    }
+
+    if (root == null)
+      root = getFirstRoot(fFirstPageProjectField.getTapestryProject());
+
+    setPackageFragmentRoot(root, true);
+    setPackageFragment(fragment, true);
+
+  }
+
+  private IPackageFragmentRoot getFirstRoot(TapestryProject tproject)
+  {
+    if (tproject == null)
+      return null;
+    try
+    {
+      IJavaProject jproject = tproject.getJavaProject();
+      if (jproject == null)
+        return null;
+
+      IPackageFragmentRoot[] roots = jproject.getPackageFragmentRoots();
+      for (int i = 0; i < roots.length; i++)
+      {
+        if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE)
+          return roots[i];
+      }
+    } catch (CoreException e)
+    {
+      //eat it
+    }
+    return null;
   }
   /**
    * Find the file generated, if it was
@@ -436,7 +493,8 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         if (isEnclosingTypeSelected())
           checkEnclosingModifiers(spindle);
 
-        if (!isEnclosingTypeSelected() && getPackageFragment().isDefaultPackage() && fContainerStatus.isOK())
+        if (!isEnclosingTypeSelected() && getPackageFragment().isDefaultPackage()
+            && fContainerStatus.isOK())
         {
           spindle.setError(UIPlugin.getString(PAGE_NAME + ".newclass.package"));
         }

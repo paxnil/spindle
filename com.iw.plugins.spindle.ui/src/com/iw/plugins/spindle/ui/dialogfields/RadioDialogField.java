@@ -160,6 +160,11 @@ public class RadioDialogField extends DialogField
     return composite != null && !composite.isDisposed() && composite.isVisible();
   }
   
+  public void setVisible(boolean flag) {
+    if (composite != null && !composite.isDisposed())
+      composite.setVisible(flag);
+  }
+  
   public Control[] getRadioButtonControls(Composite parent)
   {
     if (radioButtons == null)

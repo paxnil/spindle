@@ -79,9 +79,15 @@ public abstract class AbstractNameField extends StringField
   {
     //        if (field == this || field == fPackageField)
     if (field == this)
-      setStatus(nameChanged());
+      refreshStatus();
   }
+  
+  
 
+  public void refreshStatus()
+  {
+   setStatus(nameChanged());
+  }
   protected abstract IStatus nameChanged();
 
 }

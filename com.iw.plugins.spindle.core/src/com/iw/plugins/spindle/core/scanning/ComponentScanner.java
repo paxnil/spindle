@@ -62,7 +62,7 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
  * Scanner that turns a node tree into a IComponentSpecification
  * 
  * @author glongman@intelligentworks.com
- * 
+ *  
  */
 public class ComponentScanner extends SpecificationScanner
 {
@@ -474,28 +474,36 @@ public class ComponentScanner extends SpecificationScanner
       // not revalidatable - error state would only change if the file changed!
       if (!rootName.equals("page-specification"))
       {
-        addProblem(
-            IProblem.ERROR,
-            getBestGuessSourceLocation(rootNode, false),
-            TapestryCore.getTapestryString(
-                "AbstractDocumentParser.incorrect-document-type",
-                "page-specification",
-                rootName),
-            false);
-        return;
+        throw new ScannerException(TapestryCore.getTapestryString(
+            "AbstractDocumentParser.incorrect-document-type",
+            "page-specification",
+            rootName), getBestGuessSourceLocation(rootNode, false), false);
+//        addProblem(
+//            IProblem.ERROR,
+//            getBestGuessSourceLocation(rootNode, false),
+//            TapestryCore.getTapestryString(
+//                "AbstractDocumentParser.incorrect-document-type",
+//                "page-specification",
+//                rootName),
+//            false);
+//        return;
       }
       // not revalidatable - error state would only change if the file changed!
     } else if (!rootName.equals("component-specification"))
     {
-      addProblem(
-          IProblem.ERROR,
-          getBestGuessSourceLocation(rootNode, false),
-          TapestryCore.getTapestryString(
-              "AbstractDocumentParser.incorrect-document-type",
-              "component-specification",
-              rootName),
-          false);
-      return;
+      throw new ScannerException(TapestryCore.getTapestryString(
+          "AbstractDocumentParser.incorrect-document-type",
+          "component-specification",
+          rootName), getBestGuessSourceLocation(rootNode, false), false);
+//      addProblem(
+//          IProblem.ERROR,
+//          getBestGuessSourceLocation(rootNode, false),
+//          TapestryCore.getTapestryString(
+//              "AbstractDocumentParser.incorrect-document-type",
+//              "component-specification",
+//              rootName),
+//          false);
+//      return;
     }
     String componentClassname = getAttribute(rootNode, "class");
 

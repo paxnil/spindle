@@ -60,6 +60,13 @@ public class UpdateStatusContainer implements IDialogFieldChangedListener
     map.remove(widget);
   }
 
+  public void refresh()
+  {
+    Set entries = map.keySet();
+    for (Iterator iter = entries.iterator(); iter.hasNext();)
+      ((DialogField) iter.next()).refreshStatus();
+  }
+
   /**
    * @see IUpdateStatus#getStatus()
    */
@@ -95,7 +102,7 @@ public class UpdateStatusContainer implements IDialogFieldChangedListener
         try
         {
           DialogField field = (DialogField) i.next();
-          if (!field.isEnabled() || !field.isVisible())
+          if (! (field.isEnabled() && field.isVisible()))
             continue;
           enabled.add(field);
         } catch (ClassCastException e)
@@ -156,7 +163,7 @@ public class UpdateStatusContainer implements IDialogFieldChangedListener
 
   /**
    * @see IDialogFieldChangedListener#dialogFieldStatusChanged(IStatus,
-   *      DialogField)
+   *              DialogField)
    */
   public void dialogFieldStatusChanged(IStatus status, DialogField field)
   {

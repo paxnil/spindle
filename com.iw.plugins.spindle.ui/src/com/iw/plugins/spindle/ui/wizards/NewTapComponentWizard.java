@@ -28,7 +28,6 @@ import java.io.IOException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -87,6 +86,8 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
     createRunnable.addFile(spec);
     if (template != null)
       createRunnable.addFile(template);
+    
+    
 
     IRunnableWithProgress op = new WorkspaceModifyDelegatingOperation(createRunnable);
     try
@@ -125,7 +126,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
       IRunnableWithProgress autoAdd = null;
       try
       {
-         autoAdd = fPage1.getAutoAddRunnable();
+        autoAdd = fPage1.getAutoAddRunnable();
       } catch (CoreException e1)
       {
         ErrorDialog.openError(getShell(), "Operation Failed", null, e1.getStatus());
@@ -200,9 +201,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
   {
     super.createPageControls(pageContainer);
     setWindowTitle(UIPlugin.getString("NewTapComponentWizard.windowtitle"));
-    IJavaElement initElem = getInitElement();
-    fPage1.init(initElem, prepopulateName);
-    //        fPage2.init(initElem);
+    fPage1.init(getInitJavaElement(), getInitResource(), prepopulateName);    
   }
 
 }

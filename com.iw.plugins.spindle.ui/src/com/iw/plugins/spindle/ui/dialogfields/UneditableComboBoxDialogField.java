@@ -64,6 +64,13 @@ public class UneditableComboBoxDialogField extends DialogField
   {
     return combo != null && !combo.isDisposed() && combo.isVisible();
   }
+  
+  public void setVisible(boolean flag)
+  {
+    super.setVisible(flag);
+    if (combo != null && !combo.isDisposed())
+      combo.setVisible(flag);
+  }
   // ------- layout helpers
 
   /**
@@ -174,8 +181,6 @@ public class UneditableComboBoxDialogField extends DialogField
     if (combo != null && !combo.isDisposed())
     {
       combo.select(index);
-    } else
-    {
       fireDialogFieldChanged(this);
     }
   }
@@ -185,6 +190,7 @@ public class UneditableComboBoxDialogField extends DialogField
     if (combo != null && !combo.isDisposed())
     {
       combo.select(value);
+      fireDialogFieldChanged(this);
     }
   }
 

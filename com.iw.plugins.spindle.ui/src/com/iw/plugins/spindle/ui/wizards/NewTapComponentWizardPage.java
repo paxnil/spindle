@@ -29,12 +29,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import org.apache.tapestry.INamespace;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -44,6 +46,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -88,6 +91,7 @@ import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.Files;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.editors.documentsAndModels.ApplicationEdits;
 import com.iw.plugins.spindle.editors.documentsAndModels.LibraryEdits;
@@ -113,6 +117,8 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   /** @deprecated */
   public static final String P_OPENALL = "new.component.open.all";
 
+  public static final String SHOW_ADVANCED_OPTIONS = UIPlugin.PLUGIN_ID + "showAdvanced";
+
   String PAGE_NAME;
 
   private static int LABEL_WIDTH = 64;
@@ -124,11 +130,10 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   String AUTO_ADD;
   String GENERATE_HTML;
   String OPEN_ALL;
-
   String LIBRARY_CONTAINER;
   String LIBRARY_PACKAGE;
-
   String APPLICATION_CONTAINER;
+  String DEFAULT_LOCATION;
 
   protected IWorkspaceRoot fRoot;
 
@@ -136,6 +141,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   protected NamespaceDialogField fNamespaceDialogField;
   protected ComponentNameField fComponentNameDialogField;
   protected Button fGenerateHTML;
+  protected Button fToggleAdvancedOptions;
   protected DialogField fNextLabel;
   protected IFile fComponentFile = null;
   protected IFile fTemplateFile = null;
@@ -155,7 +161,13 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   private ComponentLocationChooserField fApplicationLocationField;
 
   private FieldEventsAdapter fListener;
-  private boolean fBroken = false;
+  protected boolean fBroken = false;
+  protected boolean fShowingAdvanced = UIPlugin
+      .getDefault()
+      .getPreferenceStore()
+      .getBoolean(SHOW_ADVANCED_OPTIONS);
+
+  protected DialogDefaultLocation fDefaultLocation;
 
   public static void initializeDefaultPreferences(IPreferenceStore pstore)
   {
@@ -185,6 +197,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     LIBRARY_CONTAINER = PAGE_NAME + ".libraryContainer";
     LIBRARY_PACKAGE = PAGE_NAME + ".libraryPackage";
     APPLICATION_CONTAINER = PAGE_NAME + ".applicationContainer";
+    DEFAULT_LOCATION = ".defaultLocation";
 
     this.setImageDescriptor(ImageDescriptor.createFromURL(Images.getImageURL(UIPlugin
         .getString(PAGE_NAME + ".image"))));
@@ -219,14 +232,22 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         PreferenceConstants.TAP_TEMPLATE_TEMPLATE);
 
     fLibraryContainerField = new ContainerDialogField(LIBRARY_CONTAINER, fRoot, 0, true);
+    fLibraryContainerField.setAcceptSourceContainers(true);
     connect(fLibraryContainerField);
     fLibraryContainerField.addListener(fListener);
     fLibraryPackageField = new PackageDialogField(LIBRARY_PACKAGE);
+    fLibraryPackageField.setAcceptSourcePackagesOnly(true);
     connect(fLibraryPackageField);
     fLibraryPackageField.addListener(fListener);
-    fApplicationLocationField = new ComponentLocationChooserField(APPLICATION_CONTAINER);
+    fApplicationLocationField = new ComponentLocationChooserField(
+        APPLICATION_CONTAINER,
+        getClass() != NewTapComponentWizardPage.class);
     connect(fApplicationLocationField);
     fApplicationLocationField.addListener(fListener);
+
+    fDefaultLocation = new DialogDefaultLocation(
+        PAGE_NAME + DEFAULT_LOCATION,
+        this instanceof NewTapComponentWizardPage);
 
   }
 
@@ -252,7 +273,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   /**
    * Should be called from the wizard with the input element.
    */
-  public void init(IJavaElement jelem, String prepopulateName)
+  public void init(IJavaElement jelem, IResource initResource, String prepopulateName)
   {
     WizardDialog container = (WizardDialog) getWizard().getContainer();
     IRunnableContext context = (IRunnableContext) container;
@@ -270,16 +291,17 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
       fComponentNameDialogField.setTextValue(prepopulateName);
       setCompositeEnabled(fTemplatesGroup, false);
       setCompositeEnabled(fPageBook, false);
-      //      fGenerateHTML.setSelection(false);
-      //      fGenerateHTML.setEnabled(false);
+      fGenerateHTML.setSelection(true);
+      fGenerateHTML.setEnabled(false);
     } else
     {
       fComponentNameDialogField.setTextValue("");
     }
-    //    fComponentNameDialogField.init(null);
     fNamespaceDialogField.init(
         fTapestryProjectDialogField,
         fComponentNameDialogField,
+        jelem,
+        initResource,
         getWizard().getClass() == NewTapComponentWizard.class);
 
     fLibraryContainerField.init(jelem, context);
@@ -296,9 +318,17 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     fApplicationLocationField.init(
         fComponentNameDialogField,
         fTapestryProjectDialogField,
+        initResource,
         context);
 
     namespaceChanged();
+
+    fDefaultLocation
+        .init(fComponentNameDialogField, fNamespaceDialogField, fGenerateHTML);
+    connect(fDefaultLocation);
+    fDefaultLocation.addListener(fListener);
+
+    updateAdvancedOptionWidgets();
 
     updateStatus();
   }
@@ -338,6 +368,14 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     }
   }
 
+  private void updateAdvancedOptionWidgets()
+  {
+    fTemplatesGroup.setVisible(fShowingAdvanced);
+    fPageBook.setVisible(fShowingAdvanced);
+    fDefaultLocation.setVisible(!fShowingAdvanced);
+    refreshStatus();
+  }
+
   /**
    * @see DialogPage#createControl(Composite)
    */
@@ -359,22 +397,28 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
     Control projectFieldControl = fTapestryProjectDialogField.getControl(composite);
     Control namespaceFieldControl = fNamespaceDialogField.getControl(composite);
-    Control nameFieldControl = fComponentNameDialogField.getControl(composite);
 
     Control labelControl = fNextLabel.getControl(composite);
-    fTemplatesGroup = createGroup(composite);
+    fTemplatesGroup = createTemplateGroup(composite);
     fPageBook = createLocationPageBook(composite);
 
-    addControl(nameFieldControl, composite, 10);
+    Control nameFields = createComponentNameControl(composite);
 
-    Control separator = createSeparator(composite, nameFieldControl);
+    addControl(nameFields, composite, 5);
+
+    Control separator = createSeparator(composite, nameFields);
 
     addControl(projectFieldControl, separator, 4);
     addControl(namespaceFieldControl, projectFieldControl, 10);
 
     separator = createSeparator(composite, namespaceFieldControl);
 
-    addControl(fTemplatesGroup, separator, 10);
+    fGenerateHTML = new Button(composite, SWT.CHECK);
+    fGenerateHTML.setText(UIPlugin.getString(GENERATE_HTML + ".label"));
+
+    addControl(fGenerateHTML, separator, 10);
+
+    addControl(fTemplatesGroup, fGenerateHTML, 10);
 
     addControl(fPageBook, fTemplatesGroup, 10);
 
@@ -383,13 +427,49 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     setControl(composite);
     setFocus();
 
-    fNamespaceDialogField.updateStatus();
+    fNamespaceDialogField.refreshStatus();
     IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
+    fGenerateHTML.addSelectionListener(fListener);
     fGenerateHTML.setSelection(pstore.getBoolean(P_GENERATE_HTML));
-
   }
 
-  private Group createGroup(Composite container)
+  private Composite createComponentNameControl(Composite parent)
+  {
+
+    Font font = parent.getFont();
+    Composite container = new Composite(parent, SWT.NULL);
+    GridLayout layout = new GridLayout();
+    int columnCount = 5;
+    layout.numColumns = columnCount;
+    layout.marginHeight = 0;
+    layout.marginWidth = 0;
+    container.setLayout(layout);
+    GridData data = new GridData(GridData.FILL_HORIZONTAL);
+    container.setLayoutData(data);
+    container.setFont(font);
+
+    fComponentNameDialogField.fillIntoGrid(container, 3);
+
+    int heightHint = convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
+    int widthHint = convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+
+    fToggleAdvancedOptions = new Button(container, SWT.PUSH);
+    fToggleAdvancedOptions.setText(fShowingAdvanced
+        ? "Hide Advanced Options" : "Show Advanced Options");
+    data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+    data.horizontalSpan = 2;
+    //    data.heightHint = heightHint;
+    //    data.widthHint = Math.max(widthHint, buttonControl.computeSize(
+    //        SWT.DEFAULT,
+    //        SWT.DEFAULT,
+    //        true).x);
+    fToggleAdvancedOptions.setLayoutData(data);
+    fToggleAdvancedOptions.addSelectionListener(fListener);
+
+    return container;
+  }
+
+  private Group createTemplateGroup(Composite container)
   {
     Font font = container.getFont();
     Group group = new Group(container, SWT.NONE);
@@ -402,17 +482,8 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     group.setText("File Generation: ");
 
     fComponentTemplateSelector.createControl(group, columnCount);
-    //    fComponentTemplateSelector.addSelectionChangedListener(f);
-
-    fGenerateHTML = new Button(group, SWT.CHECK);
-    fGenerateHTML.setText(UIPlugin.getString(GENERATE_HTML + ".label"));
-    GridData data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-    data.horizontalSpan = columnCount;
-    fGenerateHTML.setLayoutData(data);
-    fGenerateHTML.addSelectionListener(fListener);
 
     fTapestryTemplateSelector.createControl(group, columnCount);
-    //    fTapestryTemplateSelector.addSelectionChangedListener(fListener);
 
     return group;
   }
@@ -440,7 +511,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     return book;
   }
 
-  private Group createLibraryLocationGroup(PageBook book) 
+  private Group createLibraryLocationGroup(PageBook book)
   {
 
     Font font = book.getFont();
@@ -543,6 +614,9 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   public IRunnableWithProgress getAutoAddRunnable() throws IOException, CoreException
   {
 
+    if (!fShowingAdvanced)
+      return null;
+
     final INamespace namespace = fNamespaceDialogField.getSelectedNamespace();
 
     if (namespace == null)
@@ -551,6 +625,9 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     final boolean addingNewComponent = getWizard().getClass() == NewTapComponentWizard.class;
     final String name = fComponentNameDialogField.getTextValue();
     final Shell useShell = getShell();
+    final IFolder applicationLocation = fApplicationLocationField.getSpecLocation();
+    TapestryProject tproject = fTapestryProjectDialogField.getTapestryProject();
+    final IFolder webInf = tproject.getWebContextFolder().getFolder("WEB-INF");
 
     return new IRunnableWithProgress()
     {
@@ -576,8 +653,48 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         if (namespace.isApplicationNamespace()
             && !((CoreNamespace) namespace).isOnClassPath())
         {
-          //      if (!mustModifyApplicationNamespace())
-          return;
+
+          IFolder applicationSpecFolder = (IFolder) file.getParent();
+
+          // first eliminate folders where no changes to .application are
+          // needed.
+
+          //not needed if web-inf.
+          IFolder chosenFolder = fApplicationLocationField.getSpecLocation();
+          if (chosenFolder.equals(webInf))
+            return;
+
+          // not needed if same folder as .application
+          if (applicationSpecFolder.equals(chosenFolder))
+            return;
+
+          //not needed if same folder as WEB-INF/servletname TODO confirm
+          String appName = ((PluginApplicationSpecification) library).getName();
+          if (webInf.getFolder(appName).equals(chosenFolder))
+            return;
+
+          IPath webInfPath = webInf.getFullPath();
+          IPath applicationFileFolderPath = applicationSpecFolder.getFullPath();
+          IPath usePath = chosenFolder.getFullPath();
+
+          //now that we have eliminated all the ones that need no mods...
+          //two options, a relative path if the chosen location is a subFolder
+          // of the .applciation file
+          if (applicationFileFolderPath.isPrefixOf(usePath))
+          {
+            usePath = usePath.removeFirstSegments(
+                applicationFileFolderPath.segmentCount()).makeRelative();
+          } else
+          {
+            // or otherwise an absolute path including WEB-INF
+            usePath = usePath
+                .removeFirstSegments(webInfPath.segmentCount() - 1)
+                .makeAbsolute();
+          }
+
+          specificationPath = usePath.toString() + "/" + name
+              + (addingNewComponent ? ".jwc" : ".page");
+
         } else
         {
           IPackageFragment fragment = fLibraryPackageField.getPackageFragment();
@@ -591,7 +708,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         {
 
           RequiredSaveEditorAction saver = new RequiredSaveEditorAction(editor);
-          if (!saver.save())
+          if (!saver.save("Save files", "It is strongly recommended you save all here."))
             throw new InterruptedException("ack!");
 
           try
@@ -683,7 +800,6 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
       }
     };
   }
-
   public boolean performFinish()
   {
     return true;
@@ -699,7 +815,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     if (fTemplateFile == null)
       fTemplateFile = findResource(
           fComponentNameDialogField.getTextValue() + ".html",
-          fNamespaceDialogField.getSelectedNamespace());
+          fNamespaceDialogField.getSelectedNamespace(), true);
 
     return fTemplateFile;
   }
@@ -718,7 +834,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
           + (getClass() == NewTapComponentWizardPage.class ? ".jwc" : ".page");
 
       fComponentFile = findResource(fileName, fNamespaceDialogField
-          .getSelectedNamespace());
+          .getSelectedNamespace(), false);
     }
     return fComponentFile;
   }
@@ -728,13 +844,25 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     fComponentFile = null;
   }
 
-  private IFile findResource(String fileName, INamespace namespace)
+  private IFile findResource(String fileName, INamespace namespace, boolean forTemplate)
   {
     IFile result = null;
+
+    if (!fShowingAdvanced)
+      return fDefaultLocation.getResultFolder().getFile(fileName);
+
     if (namespace.isApplicationNamespace()
         && !((CoreNamespace) namespace).isOnClassPath())
     {
-      result = ((IFolder) fApplicationLocationField.getLocation()).getFile(fileName);
+      if (forTemplate)
+      {
+        result = result = ((IFolder) fApplicationLocationField.getTemplateLocation())
+            .getFile(fileName);
+      } else
+      {
+        result = ((IFolder) fApplicationLocationField.getSpecLocation())
+            .getFile(fileName);
+      }
     } else
     {
       try
@@ -760,6 +888,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     boolean flag = fComponentNameDialogField.getStatus().getSeverity() != IStatus.ERROR;
     fTapestryProjectDialogField.setEnabled(flag);
     fNamespaceDialogField.setEnabled(flag);
+    fGenerateHTML.setEnabled(flag);
     setCompositeEnabled(fTemplatesGroup, flag);
     setCompositeEnabled(fPageBook, flag);
     if (fGenerateHTML.isEnabled())
@@ -770,46 +899,6 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   {
     super.updateStatus();
     checkEnabled(fComponentNameDialogField.getStatus());
-  }
-
-  class FieldEventsAdapter implements IDialogFieldChangedListener, SelectionListener
-  {
-
-    public void dialogFieldChanged(DialogField field)
-    {
-      updateStatus();
-      if (field == fTapestryProjectDialogField)
-        findPreferenceStore();
-
-      if (field == fNamespaceDialogField)
-        namespaceChanged();
-    }
-    /**
-     * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
-     */
-    public void dialogFieldButtonPressed(DialogField field)
-    {
-    }
-
-    /**
-     * @see IDialogFieldChangedListener#dialogFieldStatusChanged(IStatus,
-     *              DialogField)
-     */
-    public void dialogFieldStatusChanged(IStatus status, DialogField field)
-    {
-      updateStatus();
-    }
-
-    public void widgetDefaultSelected(SelectionEvent e)
-    {
-      //do nothing
-    }
-    public void widgetSelected(SelectionEvent e)
-    {
-      if (e.getSource() == fGenerateHTML)
-        fTapestryTemplateSelector.setEnabled(fGenerateHTML.isEnabled()
-            && fGenerateHTML.getSelection());
-    }
   }
 
   /**
@@ -831,20 +920,47 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         && !((CoreNamespace) namespace).isOnClassPath())
     {
       fPageBook.showPage(fApplicationLocationGroup);
-      fApplicationLocationField.setTextValue(fApplicationLocationField.getTextValue());
+      //      fApplicationLocationField.setTextValue(fApplicationLocationField.getTextValue());
     } else
     {
       fPageBook.showPage(fLibraryLocationGroup);
-      fLibraryContainerField.setTextValue(fLibraryContainerField.getTextValue());
-      fLibraryPackageField.setTextValue(fLibraryPackageField.getTextValue());
+      //      fLibraryContainerField.setTextValue(fLibraryContainerField.getTextValue());
+      //      fLibraryPackageField.setTextValue(fLibraryPackageField.getTextValue());
     }
+
+    refreshStatus();
 
     ((Composite) getControl()).layout(true);
 
     updateStatus();
-
   }
 
+  /**
+   *  
+   */
+  private void simpleComponentNameChanged()
+  {
+    if (fComponentNameDialogField.getStatus().getSeverity() == IStatus.ERROR)
+      return;
+    if (fNamespaceDialogField.getStatus().getSeverity() == IStatus.ERROR)
+      return;
+    SpindleStatus status = (SpindleStatus) fComponentNameDialogField.getStatus();
+    String name = fComponentNameDialogField.getTextValue();
+    INamespace namespace = fNamespaceDialogField.getSelectedNamespace();
+    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+        .getSpecificationLocation();
+    if (location.isOnClasspath())
+    {
+      //check if location exists!
+      IFile file = (IFile) location.getStorage();
+      IContainer container = file.getParent();
+      //        file =
+    } else
+    {
+      //check if exists in webinf.,
+    }
+
+  }
   public String getChosenComponentName()
   {
     return fComponentNameDialogField.getTextValue();
@@ -853,6 +969,11 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   public DialogField getComponentNameField()
   {
     return fComponentNameDialogField;
+  }
+
+  public NamespaceDialogField getNamespaceField()
+  {
+    return fNamespaceDialogField;
   }
 
   /**
@@ -883,5 +1004,189 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   public TapestryProject getChosenProject()
   {
     return fTapestryProjectDialogField.getTapestryProject();
+  }
+
+  class FieldEventsAdapter implements IDialogFieldChangedListener, SelectionListener
+  {
+
+    public void dialogFieldChanged(DialogField field)
+    {
+      updateStatus();
+
+      if (field == fTapestryProjectDialogField)
+        findPreferenceStore();
+
+      if (field == fNamespaceDialogField)
+        namespaceChanged();
+    }
+
+    /**
+     * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
+     */
+    public void dialogFieldButtonPressed(DialogField field)
+    {
+    }
+
+    /**
+     * @see IDialogFieldChangedListener#dialogFieldStatusChanged(IStatus,
+     *              DialogField)
+     */
+    public void dialogFieldStatusChanged(IStatus status, DialogField field)
+    {
+      updateStatus();
+    }
+
+    public void widgetDefaultSelected(SelectionEvent e)
+    {
+      //do nothing
+    }
+    public void widgetSelected(SelectionEvent e)
+    {
+      Object source = e.getSource();
+      if (source == fGenerateHTML)
+      {
+        fTapestryTemplateSelector.setEnabled(fGenerateHTML.isEnabled()
+            && fGenerateHTML.getSelection());
+      } else if (source == fToggleAdvancedOptions)
+      {
+        fShowingAdvanced = !fShowingAdvanced;
+        fToggleAdvancedOptions.setText(fShowingAdvanced
+            ? "Hide Advanced Options" : "Show Advanced Options");
+        UIPlugin.getDefault().getPreferenceStore().setValue(
+            SHOW_ADVANCED_OPTIONS,
+            fShowingAdvanced);
+        updateAdvancedOptionWidgets();
+      }
+    }
+  }
+
+  //This is a sneaky non visible field that tracks the default location
+  // for artifacts.
+  class DialogDefaultLocation extends DialogField
+  {
+
+    private String fieldName;
+    private ComponentNameField nameField;
+    private NamespaceDialogField namespaceField;
+    private Button generateTemplateSwitch;
+    private boolean visible;
+    private IFolder resultFolder;
+    private boolean addingComponent;
+
+    public DialogDefaultLocation(String name, boolean addingComponent)
+    {
+      super(name);
+      this.fieldName = name;
+      this.addingComponent = addingComponent;
+    }
+
+    public void init(
+        ComponentNameField nameField,
+        NamespaceDialogField namespaceField,
+        Button generateTemplateSwitch)
+    {
+      this.nameField = nameField;
+      this.namespaceField = namespaceField;
+      this.generateTemplateSwitch = generateTemplateSwitch;
+
+      nameField.addListener(this);
+      namespaceField.addListener(this);
+      generateTemplateSwitch.addSelectionListener(new SelectionListener()
+      {
+        public void widgetSelected(SelectionEvent e)
+        {
+          refreshStatus();
+        }
+        public void widgetDefaultSelected(SelectionEvent e)
+        {
+          // do nothing
+        }
+      });
+    }
+
+    public void dialogFieldChanged(DialogField field)
+    {
+      if (field == fComponentNameDialogField || field == namespaceField)
+        refreshStatus();
+    }
+
+    public void refreshStatus()
+    {
+      setStatus(somethingChanged());
+    }
+    /**
+     * @return
+     */
+    private IStatus somethingChanged()
+    {
+      resultFolder = null;
+      SpindleStatus result = new SpindleStatus();
+      if (fComponentNameDialogField.getStatus().getSeverity() != IStatus.ERROR
+          && namespaceField.getStatus().getSeverity() != IStatus.ERROR)
+      {
+        String name = fComponentNameDialogField.getTextValue();
+        INamespace namespace = namespaceField.getSelectedNamespace();
+
+        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+            .getSpecificationLocation();
+
+        IFolder folder = (IFolder) ((IFile) location.getStorage()).getParent();
+
+        IFile specFile = folder.getFile(name + (addingComponent ? ".jwc" : ".page"));
+        if (specFile.exists())
+        {
+          result.setError(UIPlugin.getString(
+              fieldName + ".error.ComponentAlreadyExists",
+              specFile.getFullPath().toString()));
+          return result;
+        }
+
+        if (fGenerateHTML.getSelection())
+        {
+          IFile templateFile = folder.getFile(name + ".html");
+          if (templateFile.exists())
+          {
+            result.setError(UIPlugin.getString(
+                fieldName + ".error.TemplateAlreadyExists",
+                templateFile.getFullPath().toString()));
+            return result;
+          }
+        }
+
+        resultFolder = folder;
+      }
+      return result;
+    }
+
+    public IFolder getResultFolder()
+    {
+      return resultFolder;
+    }
+
+    public boolean isEnabled()
+    {
+      return true;
+    }
+    public boolean isVisible()
+    {
+      return visible;
+    }
+    public void setVisible(boolean flag)
+    {
+      visible = flag;
+    }
+
+    public void setEnabled(boolean flag)
+    {
+      //eat it
+    }
+    public void fillIntoGrid(Composite parent, int numcols)
+    {
+      throw new IllegalStateException("not implemented");
+    }
+    public Control getControl(Composite parent)
+    {
+      throw new IllegalStateException("no implemented");
+    }
   }
 }

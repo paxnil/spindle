@@ -113,9 +113,12 @@ public class RawTypeDialogField extends StringButtonField
   public void dialogFieldChanged(DialogField field)
   {
     if (field == this)
-    {
       setStatus(typeChanged());
-    }
+  }
+
+  public void refreshStatus()
+  {
+    setStatus(typeChanged());
   }
 
   protected IStatus typeChanged()

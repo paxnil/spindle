@@ -87,6 +87,13 @@ public class UneditableStringField extends DialogField
     return super.isVisible() && textControl.isVisible();
   }
 
+  public void setVisible(boolean flag)
+  {
+    super.setVisible(flag);
+    if (textControl != null && !textControl.isDisposed())
+      textControl.setVisible(flag);
+  }
+
   public Label getTextControl(Composite parent)
   {
     if (textControl == null)
