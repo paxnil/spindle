@@ -114,8 +114,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             fTag = XMLNode.getArtifactAt(viewer.getDocument(), fDocumentOffset);
             fTagName = fTag.getName();
             String type = fTag.getType();
-            if (fTagName == null
-                || (type != XMLDocumentPartitioner.TAG && type != XMLDocumentPartitioner.EMPTYTAG))
+            if (fTagName == null || (type != XMLDocumentPartitioner.TAG && type != XMLDocumentPartitioner.EMPTYTAG))
                 return NoProposals;
 
             XMLNode attribute = fTag.getAttributeAt(fDocumentOffset);
@@ -338,35 +337,35 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             return computeBindingNameProposals();
 
         if ("application".equals(fTagName) && "engine-class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals();
+            return chooseJavaTypeNameProposals(false);
 
         if ("bean".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals();
+            return chooseJavaTypeNameProposals(false);
 
         if ("component-specification".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals();
+            return chooseJavaTypeNameProposals(false);
 
         if ("page-specification".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals();
+            return chooseJavaTypeNameProposals(false);
 
         if ("extension".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals();
+            return chooseJavaTypeNameProposals(false);
 
         if ("service".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals();
+            return chooseJavaTypeNameProposals(false);
 
         if ("property-specification".equals(fTagName) && "type".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals();
+            return chooseJavaTypeNameProposals(true);
 
         if ("parameter".equals(fTagName) && fIsAttributeTerminated)
         {
             if (fDTD.getPublicId().equals(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID)
                 && "java-type".equals(fAttributeName))
             {
-                return chooseJavaTypeNameProposals();
+                return chooseJavaTypeNameProposals(true);
             } else if ("type".equals(fAttributeName))
             {
-                return chooseJavaTypeNameProposals();
+                return chooseJavaTypeNameProposals(true);
             }
         }
 
@@ -544,14 +543,20 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     /**
      * @return
      */
-    private List chooseJavaTypeNameProposals()
+    private List chooseJavaTypeNameProposals(boolean includeInterfaces)
     {
         IJavaProject jproject = TapestryCore.getDefault().getJavaProjectFor(fEditor.getStorage());
         if (jproject == null)
             return Collections.EMPTY_LIST;
 
         List result = new ArrayList();
-        result.add(new ChooseTypeProposal(jproject, fDocumentOffset, fValueLocation.x, fAttributeValue.length()));
+        result.add(
+            new ChooseTypeProposal(
+                jproject,
+                includeInterfaces,
+                fDocumentOffset,
+                fValueLocation.x,
+                fAttributeValue.length()));
         return result;
     }
 
@@ -560,18 +565,21 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
         protected IJavaProject jproject;
         String chosenType;
+        boolean includeInterfaces;
         int documentOffset;
         int replacementOffset;
         int replacementLength;
 
         public ChooseTypeProposal(
             IJavaProject project,
+            boolean includeInterfaces,
             int documentOffset,
             int replacementOffset,
             int replacementLength)
         {
             Assert.isNotNull(project);
             jproject = project;
+            this.includeInterfaces = includeInterfaces;
             this.documentOffset = documentOffset;
             this.replacementOffset = replacementOffset;
             this.replacementLength = replacementLength;
@@ -611,9 +619,8 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             {
 
                 if (jproject == null)
-                {
                     return null;
-                }
+
                 IJavaSearchScope scope = createSearchScope(jproject);
 
                 SelectionDialog dialog =
@@ -621,11 +628,13 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
                         shell,
                         new ProgressMonitorDialog(shell),
                         scope,
-                        IJavaElementSearchConstants.CONSIDER_CLASSES,
+                        (includeInterfaces
+                            ? IJavaElementSearchConstants.CONSIDER_TYPES
+                            : IJavaElementSearchConstants.CONSIDER_CLASSES),
                         false);
 
-                dialog.setTitle("Java Type Chooser");
-                dialog.setMessage("Choose Type");
+                dialog.setTitle(includeInterfaces ? "Java Type Chooser" : "Java Class Chooser");
+                dialog.setMessage("Choose "+(includeInterfaces ? "Type" : "a Class"));
 
                 if (dialog.open() == dialog.OK)
                 {

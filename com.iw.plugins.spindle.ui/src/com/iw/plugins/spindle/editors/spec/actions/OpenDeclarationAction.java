@@ -308,7 +308,7 @@ public class OpenDeclarationAction extends BaseSpecAction
 
     private void handleRelativeLookup(XMLNode artifact, String attrName)
     {
-        XMLNode attribute = artifact.getAttributeAt(fDocumentOffset);
+        XMLNode attribute = (XMLNode) artifact.getAttributesMap().get(attrName);
         if (attribute == null)
             return;
 
