@@ -52,7 +52,7 @@ import com.iw.plugins.spindle.core.util.Utils;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public class WebXMLProcessor extends AbstractScanner
+public class WebXMLScanner extends AbstractScanner
 {
 
     protected FullBuild builder;
@@ -62,7 +62,7 @@ public class WebXMLProcessor extends AbstractScanner
     /**
      * Constructor for WebXMLProcessor.
      */
-    public WebXMLProcessor(FullBuild fullBuilder)
+    public WebXMLScanner(FullBuild fullBuilder)
     {
         this.builder = fullBuilder;
         this.javaProject = builder.javaProject;
@@ -70,7 +70,7 @@ public class WebXMLProcessor extends AbstractScanner
 
     public FullBuild.ServletInfo[] getServletInformation(Node webxml) throws ScannerException
     {
-        List result = (List) scan(builder.parser, webxml);
+        List result = (List) scan(builder.parser, null, webxml);
         return (FullBuild.ServletInfo[]) result.toArray(new FullBuild.ServletInfo[result.size()]);
     }
 

@@ -29,6 +29,9 @@ package com.iw.plugins.spindle.core.scanning;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.tapestry.spec.IAssetSpecification;
+import org.apache.tapestry.spec.IComponentSpecification;
+import org.apache.tapestry.spec.IContainedComponent;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
@@ -303,6 +306,14 @@ public abstract class AbstractScanner implements IScannerValidator, IProblemColl
     public void validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
     {
         validator.validateTypeName(fullyQualifiedType, severity, location);
+    }
+    
+    public void validateContainedComponent(IComponentSpecification specification, IContainedComponent component, ISourceLocationInfo sourceLocation) throws ScannerException {
+        validator.validateContainedComponent(specification, component, sourceLocation);
+    }
+    
+    public void validateAsset(IComponentSpecification specification, IAssetSpecification asset, ISourceLocationInfo sourceLocation) throws ScannerException {
+        validator.validateAsset(specification, asset, sourceLocation);
     }
 
     /* (non-Javadoc)

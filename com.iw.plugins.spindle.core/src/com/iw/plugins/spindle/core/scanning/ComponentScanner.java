@@ -27,7 +27,6 @@
 package com.iw.plugins.spindle.core.scanning;
 
 import org.apache.tapestry.Tapestry;
-import org.apache.tapestry.engine.ITemplateSource;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.AssetType;
 import org.apache.tapestry.spec.BeanLifecycle;
@@ -93,21 +92,25 @@ public class ComponentScanner extends SpecificationScanner
         throws ScannerException
     {
         String name = getAttribute(node, "name", true);
+        
+        if (name == null) {
+            name = getNextDummyString();
+        }
 
         // As a special case, allow the exact value through (even though
         // it is not, technically, a valid asset name).
 
-        if (!name.equals(ITemplateSource.TEMPLATE_ASSET_NAME))
-        {
-
-            validatePattern(
-                name,
-                SpecificationParser.ASSET_NAME_PATTERN,
-                "SpecificationParser.invalid-asset-name",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"));
-
-        }
+//        if (!name.equals(ITemplateSource.TEMPLATE_ASSET_NAME))
+//        {
+//
+//            validatePattern(
+//                name,
+//                SpecificationParser.ASSET_NAME_PATTERN,
+//                "SpecificationParser.invalid-asset-name",
+//                IProblem.ERROR,
+//                getAttributeSourceLocation(node, "name"));
+//
+//        }
 
         String value = getAttribute(node, attributeName);
         IAssetSpecification asset = specificationFactory.createAssetSpecification();
@@ -118,10 +121,12 @@ public class ComponentScanner extends SpecificationScanner
         ISourceLocationInfo location = parser.getSourceLocationInfo(node);
         location.setResourceLocation(specification.getSpecificationLocation());
         asset.setLocation(location);
+        
+        validateAsset(specification, asset, getSourceLocationInfo(node));
 
         specification.addAsset(name, asset);
 
-        processPropertiesInNode(asset, node);
+        scanPropertiesInNode(asset, node);
     }
 
     /**
@@ -141,6 +146,13 @@ public class ComponentScanner extends SpecificationScanner
             getAttributeSourceLocation(node, "name"));
 
         String className = getAttribute(node, "class");
+        
+        if (className == null) {
+            className = getNextDummyString();
+        }
+        
+        validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
+        
         String lifecycleString = getAttribute(node, "lifecycle");
 
         BeanLifecycle lifecycle = (BeanLifecycle) SpecificationScanner.conversionMap.get(lifecycleString);
@@ -166,7 +178,7 @@ public class ComponentScanner extends SpecificationScanner
 
             if (isElement(child, "property"))
             {
-                processProperty(bspec, child);
+                scanProperty(bspec, child);
                 continue;
             }
 
@@ -291,7 +303,7 @@ public class ComponentScanner extends SpecificationScanner
                 c = specificationFactory.createContainedComponent();
                 c.setType(getNextDummyString());
             }
-
+            
             ISourceLocationInfo location = parser.getSourceLocationInfo(node);
             location.setResourceLocation(specification.getSpecificationLocation());
             c.setLocation(location);
@@ -349,10 +361,13 @@ public class ComponentScanner extends SpecificationScanner
 
                 if (isElement(child, "property"))
                 {
-                    processProperty(c, child);
+                    scanProperty(c, child);
                     continue;
                 }
             }
+            
+            validateContainedComponent(specification, c, getSourceLocationInfo(node));
+            
             specification.addComponent(id, c);
         }
 
@@ -422,7 +437,7 @@ public class ComponentScanner extends SpecificationScanner
 
             if (isElement(node, "property"))
             {
-                processProperty(specification, node);
+                scanProperty(specification, node);
                 continue;
             }
 

@@ -208,9 +208,9 @@ public class FullBuild extends Build
             ServletInfo[] servletInfos = null;
             try
             {
-                WebXMLScanner wprocessor = new WebXMLScanner(this);
-                servletInfos = wprocessor.getServletInformation(wxmlElement);
-                Markers.addTapestryProblemMarkersToResource(tapestryBuilder.webXML, wprocessor.getProblems());
+                WebXMLScanner wscanner = new WebXMLScanner(this);
+                servletInfos = wscanner.getServletInformation(wxmlElement);
+                Markers.addTapestryProblemMarkersToResource(tapestryBuilder.webXML, wscanner.getProblems());
             } catch (ScannerException e)
             {
                 TapestryCore.log(e);

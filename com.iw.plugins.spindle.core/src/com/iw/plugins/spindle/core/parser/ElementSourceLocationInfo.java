@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.tapestry.ILocation;
 import org.apache.tapestry.IResourceLocation;
 
 import com.iw.plugins.spindle.core.parser.xml.event.ElementXMLEventInfo;

@@ -164,10 +164,18 @@ public abstract class SpecificationScanner extends AbstractScanner
         conversionMap.put("custom", Direction.CUSTOM);
     }
 
-    protected void processProperty(IPropertyHolder holder, Node node)
+    protected void scanProperty(IPropertyHolder holder, Node node)
     {
         String name = getAttribute(node, "name", true);
 
+        if (name == null) {
+            name = getNextDummyString();
+        }
+        
+        if (holder.getPropertyNames().contains(name)) {
+            addProblem(IProblem.WARNING, getAttributeSourceLocation(node, "name"), "duplicate definition of property: "+name);            
+        }
+        
         // Starting in DTD 1.4, the value may be specified
         // as an attribute.  Only if that is null do we
         // extract the node's value.
@@ -189,13 +197,13 @@ public abstract class SpecificationScanner extends AbstractScanner
      * 
      **/
 
-    protected void processPropertiesInNode(IPropertyHolder holder, Node node)
+    protected void scanPropertiesInNode(IPropertyHolder holder, Node node)
     {
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
         {
             if (isElement(child, "property"))
             {
-                processProperty(holder, child);
+                scanProperty(holder, child);
                 continue;
             }
         }

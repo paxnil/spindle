@@ -93,7 +93,7 @@ public class LibraryScanner extends SpecificationScanner
 
             if (isElement(node, "property"))
             {
-                processProperty(specification, node);
+                scanProperty(specification, node);
                 continue;
             }
 
@@ -216,7 +216,7 @@ public class LibraryScanner extends SpecificationScanner
 
             if (isElement(child, "property"))
             {
-                processProperty(exSpec, child);
+                scanProperty(exSpec, child);
                 continue;
             }
         }
