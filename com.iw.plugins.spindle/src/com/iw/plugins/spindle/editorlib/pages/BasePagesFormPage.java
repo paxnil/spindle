@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editorapp.pages;
+package com.iw.plugins.spindle.editorlib.pages;
 
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -37,14 +37,14 @@ import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.editors.SpindleForm;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.util.IStimulatable;
 
-public class PagesFormPage extends SpindleFormPage {
+public abstract class BasePagesFormPage extends SpindleFormPage {
 
   private IStimulatable form;
 
-  public PagesFormPage(SpindleMultipageEditor editor, String title) {
+  public BasePagesFormPage(SpindleMultipageEditor editor, String title) {
     super(editor, title);
   }
 
@@ -67,11 +67,16 @@ public class PagesFormPage extends SpindleFormPage {
   public void openTo(Object object) {
     form.stimulate(object);
   }
+  
+  public abstract BasePagesSection createPagesSection(SpindleFormPage page);
+  
+  public abstract BasePagesSummarySection createSummarySection(SpindleFormPage page);
+  
 
   public class PagesForm extends SpindleForm implements IStimulatable {
 
-    PagesSection pageSection;
-    PagesSummarySection summarySection;
+    BasePagesSection pageSection;
+    BasePagesSummarySection summarySection;
 
     public PagesForm(SpindleFormPage page) {
       super(page);
@@ -80,8 +85,8 @@ public class PagesFormPage extends SpindleFormPage {
     public void initialize(Object modelObject) {
       super.initialize(modelObject);
       if (hasBeenInitialized()) {
-        TapestryApplicationModel model = (TapestryApplicationModel) modelObject;
-        String name = model.getApplicationSpec().getName();
+        TapestryLibraryModel model = (TapestryLibraryModel) modelObject;
+        String name = model.getUnderlyingStorage().getName();
         if (model.isEditable() == false) {
           name = MessageUtil.getFormattedString("TapistryComponentsForm.readonly", name);
         }
@@ -121,13 +126,13 @@ public class PagesFormPage extends SpindleFormPage {
       rightLayout.marginWidth = 0;
       rightColumn.setLayout(rightLayout);
 
-      pageSection = new PagesSection((SpindleFormPage) page);
+      pageSection = createPagesSection((SpindleFormPage) page);
       control = pageSection.createControl(leftColumn, getFactory());
       gd = new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING);
       gd.verticalSpan = 75;
       control.setLayoutData(gd);
 
-      summarySection = new PagesSummarySection((SpindleFormPage) page);
+      summarySection = createSummarySection((SpindleFormPage) page);
       control = summarySection.createControl(rightColumn, getFactory());
       gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
       control.setLayoutData(gd);

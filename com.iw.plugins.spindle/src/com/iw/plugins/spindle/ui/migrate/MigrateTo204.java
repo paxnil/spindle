@@ -73,7 +73,7 @@ public class MigrateTo204 implements IModelMigrator {
    * @param tapestryApplicationModel
    */
   private void migrateApplicationModel(TapestryApplicationModel model) {
-    PluginApplicationSpecification spec = (PluginApplicationSpecification) model.getApplicationSpec();
+    PluginApplicationSpecification spec = (PluginApplicationSpecification) model.getSpecification();
     String DTD = spec.getDTDVersion();
     if (DTD == null || "1.1".equals(DTD)) {
       spec.setDTDVersion("1.2");
@@ -111,7 +111,7 @@ public class MigrateTo204 implements IModelMigrator {
       String name = (String) iter.next();
       String newServiceClass = migratePackage(spec.getServiceClassName(name));
       if (newServiceClass != null) {
-        spec.setService(name, newServiceClass);
+        spec.setServiceClassName(name, newServiceClass);
       }
     }
   }

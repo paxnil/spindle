@@ -65,7 +65,6 @@ import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.spec.PluginPageSpecification;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
@@ -322,7 +321,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
           );
           return;
         }
-        PluginApplicationSpecification spec = useModel.getApplicationSpec();
+        PluginApplicationSpecification spec = (PluginApplicationSpecification)useModel.getSpecification();
 
         if (componentAlreadyExists(spec)) {
           return;
@@ -342,7 +341,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
             useSelectedModel.getUnderlyingStorage(),
             consumer);
 
-        PluginApplicationSpecification spec = useModel.getApplicationSpec();
+        PluginApplicationSpecification spec = (PluginApplicationSpecification)useModel.getSpecification();
 
         if (componentAlreadyExists(spec)) {
           return;
@@ -356,9 +355,9 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
       private boolean componentAlreadyExists(PluginApplicationSpecification spec) {
         boolean result = false;
         if (addingNewComponent) {
-          result = spec.getComponentAlias(useComponentName) != null;
+          result = spec.getComponentSpecificationPath(useComponentName) != null;
         } else {
-          result = spec.getPageSpecification(useComponentName) != null;
+          result = spec.getPageSpecificationPath(useComponentName) != null;
         }
         if (result) {
           MessageDialog
@@ -382,9 +381,9 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
 
       private void performAddToModel(PluginApplicationSpecification spec) {
         if (addingNewComponent) {
-          spec.setComponentAlias(useComponentName, useTapestryPath);
+          spec.setComponentSpecificationPath(useComponentName, useTapestryPath);
         } else {
-          spec.setPageSpecification(useComponentName, new PluginPageSpecification(useTapestryPath));
+          spec.setPageSpecificationPath(useComponentName, useTapestryPath);
         }
       }
 

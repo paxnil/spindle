@@ -54,6 +54,10 @@ public interface ILookupAcceptor {
    */
   public int WRITEABLE = 0x00000010;
   
+  public int ACCEPT_LIBRARIES = 0x00000020;
+  
+  public int ACCEPT_PAGES = 0x00000040;
+  
   public int NULL_FLAG = 0x00000000;
 
   public boolean acceptAsTapestry(IStorage s, int acceptFlags);

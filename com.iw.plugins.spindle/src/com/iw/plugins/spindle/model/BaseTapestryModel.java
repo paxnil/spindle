@@ -127,13 +127,17 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
     IStorage storage = getUnderlyingStorage();
     if (storage instanceof IResource) {
       try {
-        IMarker marker = ((IResource) storage).createMarker("com.iw.plugins.spindle.tapestryproblem");
-        marker.setAttribute(IMarker.MESSAGE, message);
-        marker.setAttribute(IMarker.SEVERITY, severity);
-        marker.setAttribute(IMarker.LINE_NUMBER, new Integer(line));
-        marker.setAttribute(IMarker.CHAR_START, column);
-        marker.setAttribute(IMarker.CHAR_END, column + 1);
-     } catch (CoreException corex) {
+        Map attributes = new HashMap();
+        attributes.put(IMarker.MESSAGE, message);
+        attributes.put(IMarker.SEVERITY, new Integer(severity));
+        attributes.put(IMarker.LINE_NUMBER, new Integer(line));
+        attributes.put(IMarker.CHAR_START, new Integer(column));
+        attributes.put(IMarker.CHAR_END, new Integer(column + 1));
+        MarkerUtilities.createMarker(
+          (IResource) storage,
+          attributes,
+          "com.iw.plugins.spindle.tapestryproblem");
+      } catch (CoreException corex) {
       }
     }
 

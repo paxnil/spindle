@@ -70,16 +70,17 @@ public class PluginFieldBeanInitializer
   }
 
   public String getFieldName() {
-    return fieldName;
+  	
+    return _fieldName;
   }
 
   public void setFieldName(String value) {
-    fieldName = value;
+    _fieldName = value;
     propertySupport.firePropertyChange("fieldName", null, value);
   }
 
   public void setPropertyName(String name) {
-    propertyName = name;
+    _propertyName = name;
     propertySupport.firePropertyChange("propertyName", null, name);
   }
 

@@ -23,20 +23,20 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editorapp;
+package com.iw.plugins.spindle.editorlib;
 
+import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.TapestryImages;
-import com.iw.plugins.spindle.editorapp.components.*;
-import com.iw.plugins.spindle.editorapp.pages.*;
+import com.iw.plugins.spindle.editorlib.components.ComponentsFormPage;
+import com.iw.plugins.spindle.editorlib.pages.LibraryPagesFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormOutlinePage;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
 
-public class ApplicationContentOutlinePage extends SpindleFormOutlinePage {
+public class LibraryContentOutlinePage extends SpindleFormOutlinePage {
   private Image pageImage;
   private Image componentImage;
 
@@ -44,7 +44,7 @@ public class ApplicationContentOutlinePage extends SpindleFormOutlinePage {
   /**
    * Constructor for AppFormOutlinePage
    */
-  public ApplicationContentOutlinePage(SpindleFormPage page) {
+  public LibraryContentOutlinePage(SpindleFormPage page) {
     super(page);
     //Image disposal handled by Plugin
     componentImage = TapestryImages.getSharedImage("component16.gif");
@@ -71,13 +71,13 @@ public class ApplicationContentOutlinePage extends SpindleFormOutlinePage {
 
   class AppContentProvider extends BasicContentProvider {
     public Object[] getChildren(Object parent) {
-      TapestryApplicationModel model = (TapestryApplicationModel) formPage.getModel();
-      PluginApplicationSpecification spec = model.getApplicationSpec();
+      TapestryLibraryModel model = (TapestryLibraryModel) formPage.getModel();
+      ILibrarySpecification spec = (ILibrarySpecification)model.getSpecification();
       if (spec != null) {
         if (parent instanceof ComponentsFormPage) {
-          return getObjects(spec.getComponentMapAliases(), (SpindleFormPage) parent);
+          return getObjects(spec.getComponentAliases(), (SpindleFormPage) parent);
         }
-        if (parent instanceof PagesFormPage) {
+        if (parent instanceof LibraryPagesFormPage) {
           return getObjects(spec.getPageNames(), (SpindleFormPage) parent);
         }
       }

@@ -34,23 +34,30 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.spec.ApplicationSpecification;
-import net.sf.tapestry.spec.PageSpecification;
+import net.sf.tapestry.spec.ExtensionSpecification;
+import net.sf.tapestry.spec.IApplicationSpecification;
+import net.sf.tapestry.spec.ILibrarySpecification;
+import net.sf.tapestry.util.IPropertyHolder;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.util.Indenter;
 
 public class PluginApplicationSpecification
   extends ApplicationSpecification
-  implements IIdentifiable, PropertyChangeListener {
+  implements PropertyChangeListener, IPluginLibrarySpecification, IApplicationSpecification {
 
   private PropertyChangeSupport propertySupport;
 
@@ -62,14 +69,15 @@ public class PluginApplicationSpecification
   }
 
   public Set getPageNamesSorted() {
-    return new TreeSet(pageMap.keySet());
+    return new TreeSet(getPages().keySet());
   }
 
   public Set getComponentMapAliases() {
-    if (componentMap == null) {
+    Map components = getComponents();
+    if (components == null) {
       return new HashSet();
     }
-    return componentMap.keySet();
+    return components.keySet();
   }
 
   public void setName(String name) {
@@ -78,42 +86,61 @@ public class PluginApplicationSpecification
     propertySupport.firePropertyChange("name", old, name);
   }
 
-  public void setService(String name, String classname) {
-    if (serviceMap == null) {
-      super.addService(name, classname);
+  public void setServiceClassName(String name, String classname) {
+    Map services = getServices();
+    if (services == null) {
+      super.setServiceClassName(name, classname);
     } else {
-      serviceMap.put(name, classname);
+      services.put(name, classname);
     }
     propertySupport.firePropertyChange("services", null, null);
   }
 
   public void removeService(String name) {
-    if (serviceMap != null) {
-      serviceMap.remove(name);
+    Map services = getServices();
+    if (services != null) {
+      services.remove(name);
       propertySupport.firePropertyChange("services", null, null);
     }
   }
 
   public boolean canRevertService(String name) {
+    Map services = getServices();
     String useName = name.toLowerCase();
-    if (serviceMap != null
-      && serviceMap.containsKey(useName)
-      && getDefaultServiceMap().containsKey(useName)) {
+    if (services != null
+      && services.containsKey(useName)
+      && getDefaultServiceNames().contains(useName)) {
       return true;
     }
     return false;
   }
 
+  /**
+   * Method getDefaultServiceMap.
+   */
+  private List getDefaultServiceNames() {
+
+    TapestryLibraryModel defaultLib = TapestryModelManager.getDefaultLibrary();
+
+    if (defaultLib != null) {
+
+      return defaultLib.getSpecification().getServiceNames();
+    }
+
+    return null;
+  }
+
   public boolean isDefaultService(String name) {
-    return getDefaultServiceMap().containsKey(name.toLowerCase());
+    return getDefaultServiceNames().contains(name.toLowerCase());
   }
 
   public boolean canDeleteService(String name) {
     String useName = name.toLowerCase();
-    if (getDefaultServiceMap().containsKey(useName)) {
+    if (getDefaultServiceNames().contains(useName)) {
       return false;
     }
-    return serviceMap != null && serviceMap.containsKey(useName);
+    Map services = getServices();
+    return services != null && services.containsKey(useName);
   }
 
   public void setProperty(String name, String value) {
@@ -129,98 +156,154 @@ public class PluginApplicationSpecification
   }
 
   public void setEngineClassName(String name) {
-    String old = engineClassName;
-    engineClassName = name;
-    propertySupport.firePropertyChange("engineClassName", old, name);
+    super.setEngineClassName(name);
+    propertySupport.firePropertyChange("engineClassName", null, name);
   }
 
-  public void setComponentAlias(String alias, String resourceName) {
-    if (componentMap == null) {
-      super.setComponentAlias(alias, resourceName);
-    } else {
-      componentMap.put(alias, resourceName);
+  public void setComponentSpecificationPath(String alias, String path) {
+    Map components = getComponents();
+
+    if (components == null) {
+
+      components = new HashMap(7);
+      setComponents(components);
     }
-    propertySupport.firePropertyChange("componentMap", null, componentMap);
+
+    components.put(alias, path);
+
+    propertySupport.firePropertyChange("componentMap", null, getComponents());
   }
 
-  public void removeComponentAlias(String alias) {
-    if (componentMap.containsKey(alias)) {
-      componentMap.remove(alias);
-      propertySupport.firePropertyChange("componentMap", null, componentMap);
+  public void removeComponentSpecificationPath(String alias) {
+    Map components = getComponents();
+    
+    if (components != null && components.containsKey(alias)) {
+
+      components.remove(alias);
+      propertySupport.firePropertyChange("componentMap", null, components);
     }
   }
 
   public Collection getNonDefaultPageNames() {
-    if (pageMap == null) {
+    Map pages = getPages();
+    if (pages == null) {
       return new HashSet();
     }
-    return pageMap.keySet();
+    return pages.keySet();
   }
 
-  public void setPageSpecification(String name, PageSpecification spec) {
-    if (pageMap == null) {
-      super.setPageSpecification(name, spec);
-    } else {
-      pageMap.put(name, spec);
+  public void setPageSpecificationPath(String name, String spec) {
+
+    Map pages = getPages();
+
+    if (pages == null) {
+
+      pages = new HashMap(7);
+
+      setPages(pages);
     }
 
-    PluginPageSpecification pageSpec = (PluginPageSpecification) spec;
-    pageSpec.setIdentifier(name);
-    pageSpec.setParent(this);
-    pageSpec.addPropertyChangeListener(this);
-    propertySupport.firePropertyChange("pageMap", null, pageMap);
+    pages.put(name, spec);
+
+    propertySupport.firePropertyChange("pageMap", null, getPages());
   }
 
-  public void removePageSpecification(String name) {
-    if (pageMap.containsKey(name)) {
-      pageMap.remove(name);
-      propertySupport.firePropertyChange("pageMap", null, pageMap);
+  public void removePageSpecificationPath(String name) {
+    Map pages = getPages();
+    
+    if (pages != null && pages.containsKey(name)) {
+    	
+      pages.remove(name);
+      propertySupport.firePropertyChange("pageMap", null, pages);
     }
   }
 
   public String getPageName(String componentSpecLocation) {
+    Map pages = getPages();
     String useName = componentSpecLocation;
     //if (useName.indexOf("/") >= 0) {
     // useName = useName.substring(1).replace('/', '.');
     //}
     String pageName = null;
-    if (pageMap != null) {
-      pageName = findKeyInPageMap(useName, pageMap);
+    if (pages != null) {
+      pageName = findKeyInMap(useName, pages);
     }
     if (pageName == null) {
-      pageName = findKeyInPageMap(useName, getDefaultPageMap());
+      pageName = findKeyInDefaultPageMap(useName);
     }
     return pageName;
   }
 
-  private String findKeyInPageMap(String componentLocation, Map map) {
-    Iterator i = map.entrySet().iterator();
-    while (i.hasNext()) {
-      Map.Entry entry = (Map.Entry) i.next();
-      PageSpecification pageSpec = (PageSpecification) entry.getValue();
-      if (pageSpec.getSpecificationPath().equals(componentLocation)) {
-        return (String) entry.getKey();
+  private String findKeyInDefaultPageMap(String value) {
+    ILibrarySpecification defaultLib = TapestryModelManager.getDefaultLibrary().getSpecification();
+
+    if (defaultLib != null) {
+
+      List defaultPageNames = defaultLib.getPageNames();
+
+      for (Iterator iter = defaultPageNames.iterator(); iter.hasNext();) {
+
+        String defaultName = (String) iter.next();
+        String defaultValue = (String) defaultLib.getPageSpecificationPath(defaultName);
+
+        if (value.equals(defaultValue)) {
+
+          return defaultName;
+        }
       }
+
     }
+
     return null;
   }
 
   public String findAliasFor(String componentSpecLocation) {
     String result = null;
-    if (componentMap != null) {
-      result = findKeyInComponentMap(componentSpecLocation, componentMap);
+    Map components = getComponents();
+    if (components != null) {
+
+      result = findKeyInMap(componentSpecLocation, components);
+
     }
     if (result == null) {
-      result = findKeyInComponentMap(componentSpecLocation, getDefaultComponentMap());
+
+      result = findKeyInDefaultComponentMap(componentSpecLocation);
     }
     return result;
   }
 
-  private String findKeyInComponentMap(String componentLocation, Map map) {
+  private String findKeyInDefaultComponentMap(String value) {
+    ILibrarySpecification defaultLib = TapestryModelManager.getDefaultLibrary().getSpecification();
+
+    if (defaultLib != null) {
+
+      List defaultPageNames = defaultLib.getComponentAliases();
+
+      for (Iterator iter = defaultPageNames.iterator(); iter.hasNext();) {
+
+        String defaultName = (String) iter.next();
+        String defaultValue = (String) defaultLib.getComponentSpecificationPath(defaultName);
+
+        if (value.equals(defaultValue)) {
+
+          return defaultName;
+        }
+      }
+
+    }
+
+    return null;
+  }
+
+  private String findKeyInMap(String componentLocation, Map map) {
     Iterator i = map.entrySet().iterator();
+
     while (i.hasNext()) {
+
       Map.Entry entry = (Map.Entry) i.next();
+
       if (entry.getValue().equals(componentLocation)) {
+
         return (String) entry.getKey();
       }
     }
@@ -236,134 +319,34 @@ public class PluginApplicationSpecification
   }
 
   public void write(PrintWriter writer) {
+
     int indent = 0;
-    writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-    writer.println("<!DOCTYPE application ");
-    writer.print("      PUBLIC \"");
-    String DTDversion = getDTDVersion();
-    if (DTDversion == null || "1.2".equals(DTDversion)) {
-      writer.print(SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID);
-      writer.println("\"");
-      writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
-    } else {
-      writer.print(SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID);
-      writer.println("\"");
-      writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
-    }
-    writer.println(MessageUtil.getString("TAPESTRY.xmlComment"));
+
+    XMLUtil.writeXMLHeader(getPublicId(), "application", writer);
 
     writer.println();
+
     writer.print("<application name=\"");
     writer.print(getName());
     writer.print("\" engine-class=\"");
     writer.print(getEngineClassName());
     writer.println("\" >");
+    
+    XMLUtil.writeDescription(writer, indent + 1, getDescription());
 
-    String description = getDescription();
-    if (description != null && !"".equals(description.trim())) {
-      writer.println();
-      writeDescription(description.trim(), writer, indent + 1);
-    }
+    XMLUtil.writeProperties((IPropertyHolder) this, writer, indent + 1);
 
-    Collection properties = getPropertyNames();
-    if (properties != null) {
-      writer.println();
-      Iterator propertyNames = new TreeSet(properties).iterator();
-      while (propertyNames.hasNext()) {
-        String propertyName = (String) propertyNames.next();
-        writeProperty(propertyName, getProperty(propertyName), writer, indent + 1);
-      }
-    }
+    XMLUtil.writeLibraryPages(getPages(), writer, indent + 1);
 
-    if (pageMap != null) {
-      Iterator pageNames = new TreeSet(pageMap.keySet()).iterator();
-      if (pageNames.hasNext()) {
-        writer.println();
-      }
-      while (pageNames.hasNext()) {
-        String pname = (String) pageNames.next();
-        ((PluginPageSpecification) getPageSpecification(pname)).write(pname, writer, indent + 1);
-      }
-      if (componentMap != null) {
-        Iterator componentAliases = new TreeSet(componentMap.keySet()).iterator();
-        if (componentAliases.hasNext()) {
-          writer.println();
-        }
-        while (componentAliases.hasNext()) {
-          String alias = (String) componentAliases.next();
-          Indenter.printIndented(writer, indent + 1, "<component-alias type=\"");
-          writer.print(alias);
-          writer.print("\" specification-path=\"");
-          writer.print(componentMap.get(alias));
-          writer.println("\" />");
-        }
-      }
-    }
+    XMLUtil.writeLibraryComponents(getComponents(), writer, indent + 1);
 
-    if (serviceMap != null) {
-      Iterator serviceNames = new TreeSet(serviceMap.keySet()).iterator();
-      if (serviceNames.hasNext()) {
-        writer.println();
-      }
-      while (serviceNames.hasNext()) {
-        String serviceName = (String) serviceNames.next();
-        String classname = getServiceClassName(serviceName);
-        if (classname != null) {
-          Indenter.printIndented(writer, indent + 1, "<service name=\"");
-          writer.print(serviceName);
-          writer.print("\" class=\"");
-          writer.print(classname);
-          writer.println("\" />");
-        }
-      }
-    }
+    XMLUtil.writeLibraryServices(getServices(), writer, indent + 1);
+
+    XMLUtil.writeLibraries(getLibraries(), writer, indent + 1);
 
     writer.println();
+    
     writer.println("</application>");
-  }
-
-  static public void writeDescription(String description, PrintWriter writer, int indent) {
-    boolean tooLong = description.length() > 40;
-    boolean singleLine = description.indexOf("\r") <= 0 && description.indexOf("\n") <= 0;
-    Indenter.printIndented(writer, indent, "<description>");
-    if (singleLine && !tooLong) {
-      writer.print("<![CDATA[   " + description + "   ]]>");
-      writer.println("</description>");
-    } else if (singleLine && tooLong) {
-      writer.println();
-      Indenter.printlnIndented(writer, indent + 1, "<![CDATA[   " + description + "   ]]>");
-      Indenter.printlnIndented(writer, indent, "</description>");
-    } else {
-      writer.println();
-      writer.println("<![CDATA[");
-      writeMultiLine(writer, description);
-      writer.println("]]>");
-      Indenter.printlnIndented(writer, indent, "</description>");
-    }
-  }
-
-  static public void writeMultiLine(PrintWriter writer, String message) {
-    BufferedReader reader =
-      new BufferedReader(new InputStreamReader(new ByteArrayInputStream(message.getBytes())));
-    try {
-      String line = reader.readLine();
-      while (line != null) {
-        writer.println(line);
-        line = reader.readLine();
-      }
-    } catch (IOException e) {
-    }
-  }
-
-  static public void writeProperty(String name, String value, PrintWriter writer, int indent) {
-    Indenter.printIndented(writer, indent, "<property name=\"" + name);
-    if (value == null || "".equals(value)) {
-      writer.println("\"/>");
-    } else {
-      writer.println("\">");
-      Indenter.printlnIndented(writer, indent + 1, value);
-      Indenter.printlnIndented(writer, indent, "</property>");
-    }
   }
 
   /**
@@ -406,9 +389,26 @@ public class PluginApplicationSpecification
     this.parent = (TapestryApplicationModel) parent;
   }
 
-  
   public void propertyChange(PropertyChangeEvent event) {
     propertySupport.firePropertyChange(event);
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.spec.IApplicationOrLibrary#removeExtensionSpecification(String)
+   */
+  public void removeExtensionSpecification(String name) {
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.spec.IApplicationOrLibrary#removeLibrarySpecificationPath(String)
+   */
+  public void removeLibrarySpecificationPath(String name) {
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.spec.IApplicationOrLibrary#setExtensionSpecification(String, ExtensionSpecification)
+   */
+  public void setExtensionSpecification(String name, ExtensionSpecification extension) {
   }
 
 }

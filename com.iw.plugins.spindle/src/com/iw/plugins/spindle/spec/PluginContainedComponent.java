@@ -87,31 +87,44 @@ public class PluginContainedComponent
     propertySupport.removePropertyChangeListener(listener);
   }
 
-  // e.g.  <component id="link" type="Direct">
-  public void write(String name, PrintWriter writer, int indent, boolean isDTD12) {
+  public void write(String name, PrintWriter writer, int indent, String publicId) {
+
     Indenter.printIndented(writer, indent, "<component id=\"" + name);
+    
     if (getCopyOf() != null) {
+    	
       writer.print("\" copy-of=\"" + getCopyOf());
       writer.println("\"/>");
       return;
+      
     } else {
+    	
       writer.print("\" type=\"" + getType());
       writer.print("\"");
+      
       Collection bns = getBindingNames();
+      
       if (bns != null) {
+      	
         if (bns.isEmpty()) {
+        	
           writer.println("/>");
           return;
+          
         } else {
+        	
           writer.println(">");
+          
           Iterator bindingNames = new TreeSet(bns).iterator();
+          
           while (bindingNames.hasNext()) {
+          	
             String bindingName = (String) bindingNames.next();
-            ((PluginBindingSpecification) getBinding(bindingName)).write(
-              bindingName,
-              writer,
-              indent + 1,
-              isDTD12);
+            
+            PluginBindingSpecification binding =
+              (PluginBindingSpecification) getBinding(bindingName);
+              
+            binding.write(bindingName, writer, indent + 1, publicId);
           }
         }
       }
@@ -164,12 +177,18 @@ public class PluginContainedComponent
 
         newId = oldId;
 
-      } else if (parentComponent.getComponent(newId) != null) {
+      } else {
 
-        newId = newId + "Copy";
-        PluginContainedComponent copy = copy();
-        parentComponent.addComponent(newId, copy);
-        return;
+        Object componentObject = parentComponent.getComponent(newId);
+
+        if (componentObject != null && componentObject.getClass() != ContainedComponent.class) {
+
+          newId = newId + "Copy";
+          PluginContainedComponent copy = copy();
+          parentComponent.addComponent(newId, copy);
+          return;
+
+        }
       }
       this.identifier = newId;
       parentComponent.removeComponent(oldId);
@@ -180,6 +199,7 @@ public class PluginContainedComponent
     } else if ("copy-of".equals(key)) {
 
       if (!"".equals(((String) value).trim())) {
+
         setCopyOf((String) value);
       }
     }

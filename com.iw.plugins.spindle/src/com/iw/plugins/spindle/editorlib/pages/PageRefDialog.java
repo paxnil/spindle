@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editorapp.components;
+package com.iw.plugins.spindle.editorlib.pages;
 
 import java.util.Collection;
 
@@ -38,7 +38,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.editorapp.pages.PageRefDialog;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.ui.AbstractDialog;
 import com.iw.plugins.spindle.ui.ChooseComponentDialog;
@@ -47,7 +46,7 @@ import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 import com.iw.plugins.spindle.ui.dialogfields.StringField;
 
-public class ComponentRefDialog extends AbstractDialog {
+public class PageRefDialog extends AbstractDialog {
 
   private boolean editing;
   private StringField pageName;
@@ -65,9 +64,9 @@ public class ComponentRefDialog extends AbstractDialog {
   /**
    * Constructor for PageRefDialog
    */
-  public ComponentRefDialog(Shell shell, ITapestryModel model, Collection existingNames) {
+  public PageRefDialog(Shell shell, ITapestryModel model, Collection existingNames) {
     super(shell);
-    String windowTitle = (editing ? "Edit Component Reference" : "New Component Reference");
+    String windowTitle = (editing ? "Edit Page Reference" : "New Page Reference");
     String description = (editing ? "This will replace the existing reference" : "Enter the new information");
     updateWindowTitle(windowTitle);
     updateMessage(description);
@@ -80,29 +79,27 @@ public class ComponentRefDialog extends AbstractDialog {
    */
   protected Composite createAreaContents(Composite parent) {
     Composite container = new Composite(parent, SWT.NONE);
-    
     FormLayout layout = new FormLayout();
     layout.marginHeight = 4;
-    layout.marginWidth = 4;
+    layout.marginWidth= 4;
     container.setLayout(layout);
 
-    pageName = new StringField("Alias:", 64);
+    pageName = new StringField("Page name:", 100);
     pageName.addListener(adapter);
     Control pageNameControl = pageName.getControl(container);
     
     FormData formData = new FormData();
-    
     formData.top = new FormAttachment(0,0);
     formData.left = new FormAttachment(0,0);
     formData.right = new FormAttachment(100,0);
     pageNameControl.setLayoutData(formData);
 
-    pageRef = new StringButtonField("Component:", 64);
+    pageRef = new StringButtonField("Page component:", 100);
     pageRef.addListener(adapter);
     Control pageRefControl = pageRef.getControl(container);
     
     formData = new FormData();
-    formData.top = new FormAttachment(pageNameControl, 4);
+    formData.top = new FormAttachment(pageNameControl,4);
     formData.left = new FormAttachment(0,0);
     formData.right = new FormAttachment(100,0);
     pageRefControl.setLayoutData(formData);
@@ -140,7 +137,7 @@ public class ComponentRefDialog extends AbstractDialog {
       if (editing && resultName.equals(editingName)) {
         return true;
       }
-      setErrorMessage("The alias'" + resultName + "'already exists. Try another");
+      setErrorMessage("There is already a page by the name '" + resultName + "'. Try another");
       setReturnCode(CANCEL);
       resultName = null;
       return false;
@@ -174,15 +171,22 @@ public class ComponentRefDialog extends AbstractDialog {
 
   protected class DialogAdapter implements IDialogFieldChangedListener {
 
+    /**
+    * @see IStringButtonAdapter#changeControlPressed(DialogField)    
+    */
+    public void changeControlPressed(DialogField field) {
+
+    }
+
     public void dialogFieldChanged(DialogField field) {
       update();
     }
-
     /**
      * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
      */
     public void dialogFieldButtonPressed(DialogField field) {
-      ChooseComponentDialog dialog = new ChooseComponentDialog(getShell(), jproject, "Component Aliasing", "Choose a component", false);
+      ChooseComponentDialog dialog =
+        new ChooseComponentDialog(getShell(), jproject, "Page Component Reference", "Choose a page component", false);
       dialog.create();
       int result = dialog.open();
       if (result == PageRefDialog.OK) {

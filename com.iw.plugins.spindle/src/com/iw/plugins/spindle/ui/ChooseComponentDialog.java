@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
@@ -523,7 +524,7 @@ public class ChooseComponentDialog extends AbstractDialog {
       
       if (selectedApp != null) {
       	
-        PluginApplicationSpecification spec = selectedApp.getApplicationSpec();
+        PluginApplicationSpecification spec = (PluginApplicationSpecification)selectedApp.getSpecification();
 
         mgr.connect(storage, this);
 

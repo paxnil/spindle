@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.wizards.fields;
 
 import java.util.ArrayList;
 
+import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
@@ -235,25 +236,25 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
             selected.getUnderlyingStorage().getName() + " is open in an non-Spindle editor");
           return newStatus;
         }
-        if (selected.getApplicationSpec() == null) {
+        if (selected.getSpecification() == null) {
           try {
             selected.load();
           } catch (CoreException e) {
           }
-          if (selected.getApplicationSpec() == null) {
+          if (selected.getSpecification() == null) {
             newStatus.setError("failed to resolve " + getSelectedValue());
             return newStatus;
           }
         }
-        PluginApplicationSpecification spec = selected.getApplicationSpec();
+        ILibrarySpecification spec = selected.getSpecification();
         String newName = nameField.getTextValue();
-        if (isComponentWizard && spec.getComponentAlias(newName) != null) {
+        if (isComponentWizard && spec.getComponentSpecificationPath(newName) != null) {
           newStatus.setError(
             newName
               + " already exists as a component in "
               + selected.getUnderlyingStorage().getName());
           return newStatus;
-        } else if (spec.getPageSpecification(newName) != null) {
+        } else if (spec.getPageSpecificationPath(newName) != null) {
           newStatus.setError(
             newName + " already exists as page in " + selected.getUnderlyingStorage().getName());
           return newStatus;

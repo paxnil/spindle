@@ -68,7 +68,7 @@ public class AssetsEditorSection extends AbstractPropertySheetEditorSection {
     setNewAction(newButtonAction);
     setDeleteAction(deleteAction);
     setHeaderText("Assets");
-    setDescription("This section allows one to edit the component's assets");
+    setDescription("This section allows one to edit assets");
   }
 
   public void initialize(Object object) {

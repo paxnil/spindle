@@ -23,21 +23,17 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editorapp;
+package com.iw.plugins.spindle.editorlib;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
+import com.iw.plugins.spindle.editors.SpindleMultipageEditorContributor;
 
-import com.iw.plugins.spindle.editors.AbstractAlertSection;
-import com.iw.plugins.spindle.editors.SpindleFormPage;
+public class LibraryMultipageEditorContributor extends SpindleMultipageEditorContributor {
 
-public class OverviewAlertSection extends AbstractAlertSection {
-
-  public OverviewAlertSection(SpindleFormPage page) {
-    super("TapistryAppAlert", page);
+  /**
+   * Constructor for TapestryMultipageEditorContributor
+   */
+  public LibraryMultipageEditorContributor() {
+    super();
   }
 
-  protected boolean checkReferences(Composite parent, FormWidgetFactory factory) {
-    return false;
-  }
 }

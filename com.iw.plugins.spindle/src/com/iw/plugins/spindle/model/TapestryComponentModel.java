@@ -296,4 +296,14 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
     return null;
   }
 
+  /**
+   * @see com.iw.plugins.spindle.model.ITapestryModel#getPublicId()
+   */
+  public String getPublicId() {
+  	if (componentSpec != null) {
+  		return componentSpec.getPublicId();
+  	}
+  	return "";
+  }
+
 }

@@ -24,20 +24,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editorapp.components;
+package com.iw.plugins.spindle.editorlib.components;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.pde.core.IModel;
 import org.eclipse.pde.core.IModelChangedEvent;
@@ -54,10 +52,10 @@ import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.spec.IIdentifiable;
+import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.spec.PluginPageSpecification;
-import com.iw.plugins.spindle.ui.EmptySelection;
 import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
 
 public class ComponentAliasSection
@@ -80,11 +78,11 @@ public class ComponentAliasSection
   }
 
   protected void fillContextMenu(IMenuManager manager) {
-    PluginPageSpecification pageSpec = (PluginPageSpecification) getSelected();
+    Object selected =  getSelected();
     boolean isEditable = isModelEditable();
     if (isEditable) {
       manager.add(newAliasAction);
-      if (pageSpec != null) {
+      if (selected != null) {
         manager.add(new Separator());
         manager.add(deleteAliasAction);
         manager.add(new Separator());
@@ -109,7 +107,7 @@ public class ComponentAliasSection
 
       if ((hasFocus || updateSelection) && isEditable) {
 
-        getFormPage().setSelection(event.getSelection());
+        setPageSelection();
       }
       newButton.setEnabled(isEditable);
       deleteButton.setEnabled(isEditable);
@@ -121,16 +119,16 @@ public class ComponentAliasSection
   public void update(BaseTapestryModel model) {
     holderArray.removeAll(holderArray);
 
-    PluginApplicationSpecification appSpec =
-      (PluginApplicationSpecification) ((TapestryApplicationModel) getModel()).getApplicationSpec();
+    IPluginLibrarySpecification librarySpec =
+      (IPluginLibrarySpecification) ((TapestryLibraryModel) getModel()).getSpecification();
 
-    Set ids = new TreeSet(appSpec.getComponentMapAliases());
+    List ids = librarySpec.getComponentAliases();
 
     if (ids.isEmpty()) {
 
       setInput(holderArray);
       fireSelectionNotification(null);
-      getFormPage().setSelection(EmptySelection.Instance);
+      clearPageSelection();
       return;
     }
 
@@ -141,7 +139,7 @@ public class ComponentAliasSection
 
       String name = (String) iter.next();
       AliasHolder holder = new AliasHolder(name);
-      holder.setParent(appSpec);
+      holder.setParent(librarySpec);
       holderArray.add(holder);
     }
     setInput(holderArray);
@@ -181,7 +179,7 @@ public class ComponentAliasSection
   protected class AliasHolder implements IIdentifiable, IPropertySource {
 
     private String identifier;
-    private PluginApplicationSpecification parent;
+    private IPluginLibrarySpecification parent;
 
     /**
      * Constructor for PropertyHolder
@@ -198,25 +196,25 @@ public class ComponentAliasSection
       if ("name".equals(key)) {
 
         String oldName = this.identifier;
-        String specPath = parent.getComponentAlias(oldName);
+        String specPath = parent.getComponentSpecificationPath(oldName);
         String newName = (String) value;
 
         if ("".equals(newName.trim())) {
 
           newName = oldName;
 
-        } else if (parent.getComponentAlias(newName) != null) {
+        } else if (parent.getComponentSpecificationPath(newName) != null) {
 
           newName = "Copy of " + newName;
-          parent.setComponentAlias(newName, specPath);
+          parent.setComponentSpecificationPath(newName, specPath);
           return;
         }
         this.identifier = newName;
-        parent.removeComponentAlias(oldName);
-        parent.setComponentAlias(this.identifier, specPath);
+        parent.removeComponentSpecificationPath(oldName);
+        parent.setComponentSpecificationPath(this.identifier, specPath);
 
       } else if ("spec".equals(key)) {
-        parent.setComponentAlias(this.identifier, (String) value);
+        parent.setComponentSpecificationPath(this.identifier, (String) value);
       }
 
     }
@@ -229,7 +227,7 @@ public class ComponentAliasSection
 
       } else if ("spec".equals(key)) {
 
-        return parent.getComponentAlias((String) key) != null;
+        return parent.getComponentSpecificationPath((String) key) != null;
 
       }
 
@@ -244,7 +242,7 @@ public class ComponentAliasSection
 
       } else if ("spec".equals(key)) {
 
-        return parent.getComponentAlias(this.identifier);
+        return parent.getComponentSpecificationPath(this.identifier);
 
       }
       return null;
@@ -288,7 +286,7 @@ public class ComponentAliasSection
      * @see com.iw.plugins.spindle.spec.IIdentifiable#setParent(Object)
      */
     public void setParent(Object parent) {
-      this.parent = (PluginApplicationSpecification) parent;
+      this.parent = (IPluginLibrarySpecification) parent;
     }
 
   }
@@ -309,7 +307,7 @@ public class ComponentAliasSection
 
       PluginApplicationSpecification appSpec =
         (PluginApplicationSpecification) ((TapestryApplicationModel) getModel())
-          .getApplicationSpec();
+          .getSpecification();
 
       ComponentRefDialog dialog =
         new ComponentRefDialog(newButton.getShell(), getModel(), appSpec.getComponentMapAliases());
@@ -318,14 +316,14 @@ public class ComponentAliasSection
       if (dialog.open() == dialog.OK) {
         String name = dialog.getResultName();
         String componentString = dialog.getResultComponent();
-        if (appSpec.getComponentAlias(name) != null) {
+        if (appSpec.getComponentSpecificationPath(name) != null) {
           int counter = 1;
-          while (appSpec.getComponentAlias(name + counter) != null) {
+          while (appSpec.getComponentSpecificationPath(name + counter) != null) {
             counter++;
           }
           name = name + counter;
         }
-        appSpec.setComponentAlias(name, componentString);
+        appSpec.setComponentSpecificationPath(name, componentString);
         forceDirty();
         update();
         setSelection(name);
@@ -354,7 +352,7 @@ public class ComponentAliasSection
           (PluginApplicationSpecification) holder.getParent();
 
         String prev = findPrevious(holder.getIdentifier());
-        appSpec.removeComponentAlias(holder.getIdentifier());
+        appSpec.removeComponentSpecificationPath(holder.getIdentifier());
         holder.setParent(null);
         forceDirty();
         update();

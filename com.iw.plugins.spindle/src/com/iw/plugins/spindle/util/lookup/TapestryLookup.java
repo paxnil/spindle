@@ -138,6 +138,20 @@ public class TapestryLookup implements ILookupAcceptor {
     findAll(tapestryPath, false, ACCEPT_COMPONENTS | FULL_TAPESTRY_PATH, request);
     return request.getResults();
   }
+  
+    /**
+   * Method findPage.
+   * @param specificationPath
+   * @return IStorage[]
+   */
+  public IStorage[] findPage(String tapestryPath) {
+    if (!initialized) {
+      throw new Error("not initialized");
+    }
+    StorageOnlyRequest request = new StorageOnlyRequest();
+    findAll(tapestryPath, false, ACCEPT_PAGES | FULL_TAPESTRY_PATH, request);
+    return request.getResults();
+  }
 
   public IStorage[] findApplication(String tapestryPath) {
     if (!initialized) {
@@ -149,9 +163,7 @@ public class TapestryLookup implements ILookupAcceptor {
   }
   
   public IStorage[] findHtmlFor(String tapestryPath) {
-    if (!tapestryPath.endsWith(".jwc")) {
-      return new IStorage[0];
-    }
+  	
     String usePath = tapestryPath.substring(0, tapestryPath.lastIndexOf("."));
     usePath += ".html";
     StorageOnlyRequest request = new StorageOnlyRequest();
@@ -482,4 +494,6 @@ public class TapestryLookup implements ILookupAcceptor {
   }
   
   
+
+
 }

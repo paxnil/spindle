@@ -217,7 +217,7 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
               + firstModel.getUnderlyingStorage().getFullPath()
               + "\n");
           buffer.append(
-            alias + " maps to " + firstModel.getApplicationSpec().getComponentAlias(alias) + "\n");
+            alias + " maps to " + firstModel.getSpecification().getComponentSpecificationPath(alias) + "\n");
           if (keyArray.length > 1) {
             buffer.append(
               "press F1 to check "

@@ -23,11 +23,11 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editorapp;
+package com.iw.plugins.spindle.editorlib;
 
 import java.util.Iterator;
-import java.util.TreeSet;
 
+import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
@@ -36,7 +36,9 @@ import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.editors.BasicLinksSection;
 import com.iw.plugins.spindle.editors.HyperLinkAdapter;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
+import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 
 public class OverviewComponentRefSection extends BasicLinksSection {
 
@@ -44,23 +46,24 @@ public class OverviewComponentRefSection extends BasicLinksSection {
     super(
       page,
       "Component Aliases",
-      "This section describes the components referred to in this application");
+      "This section describes the components defined in this file");
 
   }
 
   protected SpindleFormPage getGotoPage() {
-    return (SpindleFormPage)getFormPage().getEditor().getPage(APPMultipageEditor.COMPONENTS);
+    return (SpindleFormPage)getFormPage().getEditor().getPage(LibraryMultipageEditor.COMPONENTS);
   }
 
   public void update(boolean removePrevious) {
     if (removePrevious) {
       removeAll();
     }
-    TapestryApplicationModel model = (TapestryApplicationModel) getFormPage().getModel();
-    Iterator i = new TreeSet(model.getApplicationSpec().getComponentMapAliases()).iterator();
+    TapestryLibraryModel model = (TapestryLibraryModel) getFormPage().getModel();
+    ILibrarySpecification librarySpec = (ILibrarySpecification)model.getSpecification();
+    Iterator i = librarySpec.getComponentAliases().iterator();
     while (i.hasNext()) {
       String alias = (String) i.next();
-      String linkLabel = alias + " [" + model.getApplicationSpec().getComponentAlias(alias) + "]";
+      String linkLabel = alias + " [" + librarySpec.getComponentSpecificationPath(alias) + "]";
       Image image = TapestryImages.getSharedImage("component16.gif");
       addHyperLink(alias, linkLabel, image, new PagesHyperLinkAdapter());
     }

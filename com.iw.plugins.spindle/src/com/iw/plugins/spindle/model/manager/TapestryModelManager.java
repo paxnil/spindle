@@ -42,6 +42,7 @@ import org.eclipse.pde.internal.core.ModelProviderEvent;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
@@ -55,6 +56,7 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 public class TapestryModelManager implements IResourceChangeListener, IResourceDeltaVisitor {
 
   static private final String EXTENSION_ID = "modelManagers";
+  static private TapestryLibraryModel defaultLibrary = null;
 
   private HashMap models = new HashMap();
   private List listeners = new ArrayList();
@@ -541,11 +543,17 @@ public class TapestryModelManager implements IResourceChangeListener, IResourceD
 
     Iterator foundElements = lookupCollector.getResults().iterator();
     while (foundElements.hasNext()) {
+    	
       IStorage storage = (IStorage) foundElements.next();
       ITapestryModel model = createModel(storage); 
       if (model != null) {
-        addModel(model);
-
+      	
+        addModel(model);    
+            
+        if (storage.getName().equals("Framework.library")) {
+        	
+        	defaultLibrary = (TapestryLibraryModel)model;
+        }        	
       }
     }
 
@@ -940,6 +948,14 @@ public class TapestryModelManager implements IResourceChangeListener, IResourceD
    */
   public boolean modelExists(Object element) {
     return models.get(element) != null;
+  }
+
+  /**
+   * Returns the defaultLibrary.
+   * @return TapestryLibraryModel
+   */
+  public static TapestryLibraryModel getDefaultLibrary() {
+    return defaultLibrary;
   }
 
 }

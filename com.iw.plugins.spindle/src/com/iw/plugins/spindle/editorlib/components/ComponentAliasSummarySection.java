@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editorapp.pages;
+package com.iw.plugins.spindle.editorlib.components;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.pde.internal.ui.editor.text.ColorManager;
+import org.eclipse.pde.internal.ui.editor.text.IColorManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -52,26 +54,31 @@ import com.iw.plugins.spindle.editors.SummaryHTMLViewer;
 import com.iw.plugins.spindle.editors.SummarySourceViewer;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public class PagesSummarySection extends SpindleFormSection implements IResourceChangeListener {
+public class ComponentAliasSummarySection
+  extends SpindleFormSection
+  implements IResourceChangeListener {
 
-  private FormEntry pageName;
+  private FormEntry componentName;
   private FormEntry specText;
   private Label resolveFailedLabel;
   private SummarySourceViewer sourceViewer;
   private SummarySourceViewer htmlViewer;
   private Composite container;
 
-  private String selectedPage;
+  private IColorManager colorManager;
+
+  private String selectedAlias;
 
   /**
    * Constructor for ComponentAliasSummarySection
    */
-  public PagesSummarySection(SpindleFormPage page) {
+  public ComponentAliasSummarySection(SpindleFormPage page) {
     super(page);
-    setHeaderText("Page Summary");
-    setDescription("This section will show a summary of the selected Page (if it can be resolved).");
+    setHeaderText("Component Summary");
+    setDescription("This section will show a summary of the selected Component (if it can be resolved).");
   }
 
   /**
@@ -85,9 +92,9 @@ public class PagesSummarySection extends SpindleFormSection implements IResource
     layout.horizontalSpacing = 6;
     container.setLayout(layout);
 
-    String labelName = "Page Name";
-    pageName = new FormEntry(createText(container, labelName, factory));
-    Text text = (Text) pageName.getControl();
+    String labelName = "Component Name";
+    componentName = new FormEntry(createText(container, labelName, factory));
+    Text text = (Text) componentName.getControl();
     text.setEditable(false);
     text.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_BLUE));
 
@@ -112,6 +119,8 @@ public class PagesSummarySection extends SpindleFormSection implements IResource
     data.verticalSpan = 75;
     sashForm.setLayoutData(data);
     sashForm.SASH_WIDTH = 10;
+
+    colorManager = new ColorManager();
 
     sourceViewer = new SummarySourceViewer(sashForm);
     data = new GridData();
@@ -174,8 +183,8 @@ public class PagesSummarySection extends SpindleFormSection implements IResource
     }
   }
 
-  private TapestryApplicationModel getModel() {
-    return ((TapestryApplicationModel) getFormPage().getModel());
+  private TapestryLibraryModel getModel() {
+    return ((TapestryLibraryModel) getFormPage().getModel());
   }
 
   public void dispose() {
@@ -186,21 +195,20 @@ public class PagesSummarySection extends SpindleFormSection implements IResource
   public void sectionChanged(FormSection source, int changeType, Object changeObject) {
     // this can only come from the ComponentAliasSection and it can only be
     // that an alias was selected! or null if the selection was cleared   
-    selectedPage = (String) changeObject;
+    selectedAlias = (String) changeObject;
     updateSummary();
   }
 
   private void updateSummary() {
     resolveFailedLabel.setVisible(false);
-    if (selectedPage == null) {
-      pageName.setValue("", false);
+    if (selectedAlias == null) {
+      componentName.setValue("", false);
       specText.setValue("", false);
       sourceViewer.updateNotFound();
       htmlViewer.updateNotFound();
     } else {
-      pageName.setValue(selectedPage, false);
-      String specificationPath =
-        getModel().getApplicationSpec().getPageSpecification(selectedPage).getSpecificationPath();
+      componentName.setValue(selectedAlias, false);
+      String specificationPath = getModel().getSpecification().getComponentSpecificationPath(selectedAlias);
       specText.setValue(specificationPath, false);
       if (!specificationPath.endsWith(".jwc")) {
         resolveFailed(specificationPath);
@@ -243,13 +251,15 @@ public class PagesSummarySection extends SpindleFormSection implements IResource
   }
 
   /**
-  * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
-  */
+   * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
+   */
   public void resourceChanged(IResourceChangeEvent event) {
-    if (selectedPage == null)
+    if (selectedAlias == null)
       return;
 
     updateSummary();
   }
+
+  
 
 }

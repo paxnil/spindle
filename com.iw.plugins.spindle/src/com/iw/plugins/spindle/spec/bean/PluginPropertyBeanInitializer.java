@@ -62,7 +62,7 @@ public class PluginPropertyBeanInitializer
   
 
   public String[] getPropertyPath() {
-    return propertyPath;
+    return _propertyPath;
   }
 
   public String getOriginalPropertyPath() {
@@ -70,13 +70,13 @@ public class PluginPropertyBeanInitializer
   }
 
   public void setPropertyPath(String path) {
-    propertyPath = PropertyHelper.splitPropertyPath(path);
+    _propertyPath = PropertyHelper.splitPropertyPath(path);
     originalPropertyPath = path;
     propertySupport.firePropertyChange("propertyPath", null, path);
   }
 
   public void setPropertyName(String name) {
-    propertyName = name;
+    _propertyName = name;
     propertySupport.firePropertyChange("propertyName", null, name);
   }
 

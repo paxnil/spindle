@@ -45,6 +45,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.pde.core.IModel;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
@@ -135,7 +136,7 @@ public class ComponentSelectionSection
       String copyOf = component.getCopyOf();
       fireSelectionNotification(component);
       if (hasFocus || updateSelection) {
-        getFormPage().setSelection(event.getSelection());
+        setPageSelection();
       }
       newButton.setEnabled(isEditable);
       deleteButton.setEnabled(isEditable);
@@ -160,10 +161,10 @@ public class ComponentSelectionSection
     while (applications.hasNext()) {
       TapestryApplicationModel appModel = (TapestryApplicationModel) applications.next();
       PluginApplicationSpecification appSpec =
-        (PluginApplicationSpecification) (appModel).getApplicationSpec();
+        (PluginApplicationSpecification) (appModel).getSpecification();
       TapestryComponentModel cmodel =
         (TapestryComponentModel) ModelUtils.findComponent(
-          appSpec.getComponentAlias(alias),
+          appSpec.getComponentSpecificationPath(alias),
           getModel());
       if (cmodel == null) {
         continue;
@@ -237,7 +238,7 @@ public class ComponentSelectionSection
 
       setInput(holderArray);
       fireSelectionNotification(null);
-      getFormPage().setSelection(EmptySelection.Instance);
+      clearPageSelection();
       return;
     }
     Iterator iter = ids.iterator();
@@ -355,7 +356,7 @@ public class ComponentSelectionSection
               + firstModel.getUnderlyingStorage().getFullPath()
               + "\n");
           buffer.append(
-            alias + " maps to " + firstModel.getApplicationSpec().getComponentAlias(alias) + "\n");
+            alias + " maps to " + firstModel.getSpecification().getComponentSpecificationPath(alias) + "\n");
           if (keys.length > 1) {
             buffer.append(
               "press F1 to check "

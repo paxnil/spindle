@@ -71,16 +71,16 @@ public class PluginStaticBeanInitializer
   
 
   public Object getValue() {
-    return value;
+    return _value;
   }
 
   public void setValue(Object newValue) {
-    value = newValue;
+    _value = newValue;
     propertySupport.firePropertyChange("staticValue", null, newValue);
   }
 
   public void setPropertyName(String name) {
-    propertyName = name;
+    _propertyName = name;
     propertySupport.firePropertyChange("propertyName", null, name);
   }
 

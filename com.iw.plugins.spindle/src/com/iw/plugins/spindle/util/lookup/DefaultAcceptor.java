@@ -58,6 +58,12 @@ public class DefaultAcceptor implements ILookupAcceptor {
     if ("html".equals(extension)) {
       return (acceptFlags & ACCEPT_HTML) != 0;
     }
+    if ("library".equals(extension)) {
+    	return (acceptFlags & ACCEPT_LIBRARIES) != 0;
+    }
+    if ("page".equals(extension)) {
+    	return (acceptFlags & ACCEPT_PAGES) != 0;
+    }
     return false;
   }
 

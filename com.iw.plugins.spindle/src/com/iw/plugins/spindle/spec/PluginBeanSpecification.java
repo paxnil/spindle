@@ -131,30 +131,47 @@ public class PluginBeanSpecification
     Indenter.printIndented(writer, indent, "<bean name=\"" + name);
     writer.print("\" class=\"" + getClassName());
     writer.print("\" lifecycle=\"");
+    
     if (getLifecycle().equals(BeanLifecycle.NONE)) {
+    	
       writer.print("none\"");
+      
     } else if (getLifecycle().equals(BeanLifecycle.PAGE)) {
+    	
       writer.print("page\"");
+      
     } else if (getLifecycle().equals(BeanLifecycle.REQUEST)) {
+    	
       writer.print("request\"");
+      
     }
     String description = getDescription();
     Collection inits = getInitializers();
+    
     boolean writeableDescription = description != null && !"".equals(description.trim());
     boolean writeableInitializers = inits != null && !inits.isEmpty();
+    
     if (writeableDescription || writeableInitializers) {
+    	
       writer.println(">");
+      
       if (writeableDescription) {
-        PluginApplicationSpecification.writeDescription(description.trim(), writer, indent + 1);
+      	
+        XMLUtil.writeDescription(writer, indent + 1, description.trim(), false);
       }
+      
       if (writeableInitializers) {
+      	
         Iterator initializers = inits.iterator();
+        
         while (initializers.hasNext()) {
+        	
           IBeanInitializer initer = (IBeanInitializer) initializers.next();
           write(initer, writer, indent + 1);
         }
       }
     } else {
+    	
       writer.println("/>");
       return;
     }

@@ -25,9 +25,9 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorapp;
 
-import com.iw.plugins.spindle.editors.SpindleMultipageEditorContributor;
+import com.iw.plugins.spindle.editorlib.LibraryMultipageEditorContributor;
 
-public class APPMultipageEditorContributor extends SpindleMultipageEditorContributor {
+public class APPMultipageEditorContributor extends LibraryMultipageEditorContributor {
 
   /**
    * Constructor for TapestryMultipageEditorContributor

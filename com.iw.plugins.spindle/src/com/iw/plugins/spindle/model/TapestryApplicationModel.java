@@ -34,7 +34,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.sf.tapestry.parse.SpecificationParser;
-import net.sf.tapestry.spec.PageSpecification;
+import net.sf.tapestry.spec.IApplicationSpecification;
+import net.sf.tapestry.spec.ILibrarySpecification;
 import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;
@@ -46,9 +47,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.util.SourceWriter;
 
-public class TapestryApplicationModel extends BaseTapestryModel implements PropertyChangeListener {
-
-  private PluginApplicationSpecification applicationSpec;
+public class TapestryApplicationModel extends TapestryLibraryModel implements PropertyChangeListener {
 
   /**
    * Constructor for TapestryApplicationModel
@@ -57,41 +56,40 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
     super(storage);
   }
 
-  public PluginApplicationSpecification getApplicationSpec() {
-    if (applicationSpec == null || !loaded) {
-      return null;
-    }
-    return applicationSpec;
-  }
 
   public void load(final InputStream source) throws CoreException {
   	final TapestryApplicationModel thisModel = this;
     TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) {
+      	
+      	PluginApplicationSpecification pluginSpec = (PluginApplicationSpecification)librarySpecification;
 
         removeAllProblemMarkers();
-        if (applicationSpec != null) {
+        if (librarySpecification != null) {
 
-          applicationSpec.removePropertyChangeListener(TapestryApplicationModel.this);
-          applicationSpec.setParent(null);
+          pluginSpec.removePropertyChangeListener(TapestryApplicationModel.this);
+          pluginSpec.setParent(null);
         }
         try {
 
           SpecificationParser parser =
             (SpecificationParser) TapestryPlugin.getTapestryModelManager().getParserFor(
               "application");
-          applicationSpec =
+          librarySpecification =
             (PluginApplicationSpecification) parser.parseApplicationSpecification(
               source,
-              getUnderlyingStorage().getName());
-          applicationSpec.addPropertyChangeListener(TapestryApplicationModel.this);
+              getUnderlyingStorage().getName(),
+              null);
+              
+          pluginSpec = (PluginApplicationSpecification)librarySpecification;
+          pluginSpec.addPropertyChangeListener(TapestryApplicationModel.this);
           loaded = true;
           editable = !(getUnderlyingStorage().isReadOnly());
           dirty = false;
 
-          applicationSpec.setIdentifier(getUnderlyingStorage().getName());
-          applicationSpec.setParent(thisModel);
-          fireModelObjectChanged(applicationSpec, "applicationSpec");
+          pluginSpec.setIdentifier(getUnderlyingStorage().getName());
+          pluginSpec.setParent(thisModel);
+          fireModelObjectChanged(librarySpecification, "applicationSpec");
 
         } catch (DocumentParseException dpex) {
 
@@ -112,28 +110,13 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
    * @see IEditable#save()
    */
   public void save(PrintWriter writer) {
-    PluginApplicationSpecification spec = (PluginApplicationSpecification) getApplicationSpec();
+    PluginApplicationSpecification spec = (PluginApplicationSpecification) getSpecification();
     StringWriter stringwriter = new StringWriter();
     spec.write(new SourceWriter(stringwriter));
     writer.print(stringwriter.toString());
   }
 
-  public void setDescription(String description) {
-    PluginApplicationSpecification spec = getApplicationSpec();
 
-    if (spec != null) {
-      spec.setDescription(description);
-      fireModelObjectChanged(this, "description");
-    }
-  }
-
-  public String getDescription() {
-    PluginApplicationSpecification spec = getApplicationSpec();
-    if (spec != null) {
-      return spec.getDescription();
-    }
-    return "";
-  }
 
   public ReferenceInfo resolveReferences(boolean reverse) {
     return null;
@@ -277,11 +260,11 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
   //  }
 
   public boolean containsReference(String name) {
-    PluginApplicationSpecification spec = getApplicationSpec();
+    PluginApplicationSpecification spec = (PluginApplicationSpecification)getSpecification();
     Iterator aliases = spec.getComponentMapAliases().iterator();
     while (aliases.hasNext()) {
       String alias = (String) aliases.next();
-      if (spec.getComponentAlias(alias).equals(name)) {
+      if (spec.getComponentSpecificationPath(alias).equals(name)) {
         return true;
       }
     }
@@ -289,8 +272,7 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
     while (pages.hasNext()) {
       String pageName = (String) pages.next();
 
-      PageSpecification pageSpec = spec.getPageSpecification(pageName);
-      String path = pageSpec.getSpecificationPath();
+      String path =  spec.getPageSpecificationPath(pageName);
       if (path.equals(name)) {
         return true;
       }
@@ -299,28 +281,18 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
   }
 
   public Set getPropertyNames() {
-    return new TreeSet(getApplicationSpec().getPropertyNames());
+    return new TreeSet(getSpecification().getPropertyNames());
   }
 
   public String getProperty(String name) {
-    return getApplicationSpec().getProperty(name);
+    return getSpecification().getProperty(name);
   }
 
   public void setProperty(String name, String value) {
     if (isEditable()) {
-      getApplicationSpec().setProperty(name, value);
+      getSpecification().setProperty(name, value);
     }
   }
 
-  /**
-   * @see com.iw.plugins.spindle.model.ITapestryModel#getDTDVersion()
-   */
-  public String getDTDVersion() {
-    PluginApplicationSpecification spec = getApplicationSpec();
-    if (spec != null) {
-      return spec.getDTDVersion();
-    }
-    return null;
-  }
 
 }

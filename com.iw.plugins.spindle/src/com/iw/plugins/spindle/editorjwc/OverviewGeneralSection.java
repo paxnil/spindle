@@ -91,7 +91,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
   public OverviewGeneralSection(SpindleFormPage page) {
     super(page);
     setHeaderText("General Information");
-    setDescription("This section describes general information about this component");
+    setDescription("This section describes general information");
   }
 
   public void initialize(Object input) {

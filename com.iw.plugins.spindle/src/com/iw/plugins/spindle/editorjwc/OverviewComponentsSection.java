@@ -45,7 +45,7 @@ public class OverviewComponentsSection extends BasicLinksSection {
    * Constructor for OverviewComponentsSection
    */
   public OverviewComponentsSection(SpindleFormPage page) {
-    super(page, "Components", "This section describes the components used in this component");
+    super(page, "Components", "This section lists any Contained Components ");
   }
 
   public void update(boolean removePrevious) {

@@ -23,10 +23,13 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editorapp;
+package com.iw.plugins.spindle.editorlib;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
+import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.jface.action.Action;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
@@ -48,12 +51,13 @@ import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.ui.descriptors.TypeDialogPropertyDescriptor;
 
-public class ApplicationServicesSection
+public class LibraryServicesSection
   extends AbstractPropertySheetEditorSection
   implements IModelChangedListener {
 
@@ -63,13 +67,13 @@ public class ApplicationServicesSection
   /**
    * Constructor for PropertySection 
    */
-  public ApplicationServicesSection(SpindleFormPage page) {
+  public LibraryServicesSection(SpindleFormPage page) {
     super(page);
     setLabelProvider(new ServiceLabelProvider());
     setNewAction(new NewServiceAction());
     setDeleteAction(new DeleteServiceAction());
-    setHeaderText("Application Services");
-    setDescription("In this section you can add/override application services. Note that service names are case insensitive.");
+    setHeaderText("Services");
+    setDescription("In this section you can add/override services. Note that service names are case insensitive.");
   }
 
   public void dispose() {
@@ -102,11 +106,29 @@ public class ApplicationServicesSection
   }
 
   public void update(BaseTapestryModel model) {
-    PluginApplicationSpecification spec =
-      (PluginApplicationSpecification) ((TapestryApplicationModel) model).getApplicationSpec();
-
-    Iterator iter = spec.getServiceNames().iterator();
     holderArray.removeAll(holderArray);
+
+    ILibrarySpecification spec =
+      (ILibrarySpecification) ((TapestryLibraryModel) model).getSpecification();
+
+    List myServices = spec.getServiceNames();
+
+    ILibrarySpecification framework = TapestryModelManager.getDefaultLibrary().getSpecification();
+
+    ArrayList defaultServices = (ArrayList) ((ArrayList) framework.getServiceNames()).clone();
+
+    defaultServices.removeAll(myServices);
+
+    for (Iterator iter = defaultServices.iterator(); iter.hasNext();) {
+
+      String defaultName = (String) iter.next();
+      ServiceHolder holder =
+        new ServiceHolder(defaultName, framework.getServiceClassName(defaultName));
+      holderArray.add(holder);
+    }
+
+    Iterator iter = myServices.iterator();
+
     while (iter.hasNext()) {
       String name = (String) iter.next();
       ServiceHolder holder = new ServiceHolder(name, spec.getServiceClassName(name));
@@ -121,6 +143,15 @@ public class ApplicationServicesSection
 
     public Image getImage(Object object) {
       return image;
+    }
+
+    /**
+     * @see org.eclipse.jface.viewers.ILabelProvider#getText(Object)
+     */
+    public String getText(Object element) {
+    	
+      ServiceHolder holder = (ServiceHolder)element;
+      return holder.getIdentifier() + " = " + holder.getPropertyValue("class");
     }
 
   }
@@ -179,9 +210,9 @@ public class ApplicationServicesSection
     */
     public void run() {
       updateSelection = true;
-      TapestryApplicationModel model = (TapestryApplicationModel) getModel();
+      TapestryLibraryModel model = (TapestryLibraryModel) getModel();
       PluginApplicationSpecification spec =
-        (PluginApplicationSpecification) model.getApplicationSpec();
+        (PluginApplicationSpecification) model.getSpecification();
       String useSeviceName = "service";
       if (spec.getServiceClassName(useSeviceName + 1) != null) {
         int counter = 2;
@@ -192,7 +223,7 @@ public class ApplicationServicesSection
       } else {
         useSeviceName = useSeviceName + 1;
       }
-      spec.setService(useSeviceName, "fill in value");
+      spec.setServiceClassName(useSeviceName, "fill in value");
       forceDirty();
       update();
       setSelection(useSeviceName);
@@ -226,9 +257,9 @@ public class ApplicationServicesSection
      * @see com.iw.plugins.spindle.spec.IIdentifiable#getParent()
      */
     public Object getParent() {
-      TapestryApplicationModel model = (TapestryApplicationModel) getFormPage().getModel();
+      TapestryLibraryModel model = (TapestryLibraryModel) getFormPage().getModel();
 
-      return (PluginApplicationSpecification) model.getApplicationSpec();
+      return (PluginApplicationSpecification) model.getSpecification();
     }
 
     /**
@@ -271,11 +302,11 @@ public class ApplicationServicesSection
         }
         this.identifier = newName;
         spec.removeService(oldName);
-        spec.setService(this.identifier, this.classname);
+        spec.setServiceClassName(this.identifier, this.classname);
 
       } else if ("class".equals(key)) {
         this.classname = (String) value;
-        spec.setService(this.identifier, this.classname);
+        spec.setServiceClassName(this.identifier, this.classname);
 
       }
 
@@ -318,8 +349,8 @@ public class ApplicationServicesSection
   protected void updateButtons(Object selected) {
     boolean isEditable = isModelEditable();
     ServiceHolder holder = (ServiceHolder) selected;
-    TapestryApplicationModel model = (TapestryApplicationModel) getModel();
-    PluginApplicationSpecification spec = model.getApplicationSpec();
+    TapestryLibraryModel model = (TapestryLibraryModel) getModel();
+    PluginApplicationSpecification spec = (PluginApplicationSpecification) model.getSpecification();
     newButton.setEnabled(isEditable);
     if (deleteButton != null) {
       deleteButton.setEnabled(

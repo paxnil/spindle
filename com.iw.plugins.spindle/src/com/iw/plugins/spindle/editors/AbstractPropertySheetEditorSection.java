@@ -70,6 +70,7 @@ import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.spec.IIdentifiable;
+import com.iw.plugins.spindle.ui.EmptySelection;
 import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 import com.iw.plugins.spindle.ui.TreeViewerWithToolTips;
@@ -336,7 +337,7 @@ public abstract class AbstractPropertySheetEditorSection
 
   public void setFocus() {
     treeViewer.getTree().setFocus();
-    getFormPage().setSelection(treeViewer.getSelection());
+    setPageSelection();
   }
 
   protected void updateButtons(Object selected) {
@@ -377,9 +378,19 @@ public abstract class AbstractPropertySheetEditorSection
     if (!selection.isEmpty()) {
       Object object = ((IStructuredSelection) selection).getFirstElement();
       fireSelectionNotification(object);
-      getFormPage().setSelection(selection);
+      setPageSelection();
       pAction.run();
     }
+  }
+
+  protected void setPageSelection() {
+  	
+    getFormPage().setSelection(new StructuredSelection(this));
+  }
+  
+  protected void clearPageSelection() {
+  	
+  	getFormPage().setSelection(EmptySelection.Instance);
   }
 
   protected void handleDelete() {
@@ -409,7 +420,7 @@ public abstract class AbstractPropertySheetEditorSection
     }
     fireSelectionNotification(object);
     if (hasFocus || updateSelection) {
-      getFormPage().setSelection(new StructuredSelection(this));
+      setPageSelection();
     }
     updateButtons(object);
   }

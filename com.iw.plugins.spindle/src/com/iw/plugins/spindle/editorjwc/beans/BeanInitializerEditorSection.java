@@ -140,7 +140,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
 
       setInput(holderArray);
       fireSelectionNotification(EmptySelection.Instance);
-      getFormPage().setSelection(EmptySelection.Instance);
+      clearPageSelection();
       return;
     }
 

@@ -65,7 +65,7 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.manager.TapestryModelManager;
-import com.iw.plugins.spindle.spec.TapestryPluginFactory;
+import com.iw.plugins.spindle.spec.TapestryPluginSpecFactory;
 import com.iw.plugins.spindle.ui.text.ColorManager;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
@@ -104,7 +104,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
 
   static {
     parser = new SpecificationParser();
-    parser.setFactory(new TapestryPluginFactory());
+    parser.setFactory(new TapestryPluginSpecFactory());
     builtInAliasLookup = new HashMap();
     builtInAliasLookup.put("Insert", "/com/primix/tapestry/components/Insert.jwc");
     builtInAliasLookup.put("Action", "/com/primix/tapestry/link/Action.jwc");

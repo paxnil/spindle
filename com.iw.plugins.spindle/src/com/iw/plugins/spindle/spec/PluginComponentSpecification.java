@@ -35,6 +35,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -44,6 +46,7 @@ import net.sf.tapestry.spec.BeanSpecification;
 import net.sf.tapestry.spec.ComponentSpecification;
 import net.sf.tapestry.spec.ContainedComponent;
 import net.sf.tapestry.spec.ParameterSpecification;
+import net.sf.tapestry.util.IPropertyHolder;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
@@ -56,7 +59,7 @@ public class PluginComponentSpecification
 
   private String identifier;
   private TapestryComponentModel parent;
-  
+
   private PropertyChangeSupport propertySupport;
 
   public PluginComponentSpecification() {
@@ -65,19 +68,19 @@ public class PluginComponentSpecification
 
   public Set getReservedParameters() {
 
-    return reservedParameterNames;
+    return _reservedParameterNames;
   }
 
   public void setReservedParameter(String name, boolean flag) {
-    if (reservedParameterNames == null) {
-      reservedParameterNames = new HashSet();
+    if (_reservedParameterNames == null) {
+      _reservedParameterNames = new HashSet();
     }
     String value = name.toLowerCase();
-    boolean contains = reservedParameterNames.contains(value);
+    boolean contains = _reservedParameterNames.contains(value);
     if (flag && !contains) {
-      reservedParameterNames.add(value);
+      _reservedParameterNames.add(value);
     } else if (!flag && contains) {
-      reservedParameterNames.remove(value);
+      _reservedParameterNames.remove(value);
     }
     propertySupport.firePropertyChange("parameters", flag, !flag);
   }
@@ -100,107 +103,107 @@ public class PluginComponentSpecification
   }
 
   public void removeAsset(String name) {
-    assets.remove(name);
-    propertySupport.firePropertyChange("assets", null, assets);
+    _assets.remove(name);
+    propertySupport.firePropertyChange("_assets", null, _assets);
   }
 
   public void setAsset(String name, PluginAssetSpecification spec) {
-    if (assets == null) {
+    if (_assets == null) {
       addAsset(name, spec);
     } else {
-      assets.put(name, spec);
+      _assets.put(name, spec);
       spec.setIdentifier(name);
       spec.setParent(this);
     }
-    propertySupport.firePropertyChange("assets", null, assets);
+    propertySupport.firePropertyChange("_assets", null, _assets);
   }
 
   public void addBeanSpecification(String name, BeanSpecification spec) {
     super.addBeanSpecification(name, spec);
-    
-    PluginBeanSpecification pluginSpec = (PluginBeanSpecification)spec;
+
+    PluginBeanSpecification pluginSpec = (PluginBeanSpecification) spec;
     pluginSpec.setIdentifier(name);
     pluginSpec.setParent(this);
     pluginSpec.addPropertyChangeListener(this);
-    propertySupport.firePropertyChange("beans", null, beans);
+    propertySupport.firePropertyChange("_beans", null, _beans);
   }
 
   public void removeBeanSpecification(String name) {
-    if (beans.containsKey(name)) {
-      beans.remove(name);
-      propertySupport.firePropertyChange("beans", null, beans);
+    if (_beans.containsKey(name)) {
+      _beans.remove(name);
+      propertySupport.firePropertyChange("_beans", null, _beans);
     }
   }
 
   public void setBeanSpecification(String name, PluginBeanSpecification spec) {
-    if (beans == null) {
+    if (_beans == null) {
       addBeanSpecification(name, spec);
     } else {
-      PluginBeanSpecification old = (PluginBeanSpecification) beans.get(name);
+      PluginBeanSpecification old = (PluginBeanSpecification) _beans.get(name);
       if (old != null) {
         old.removePropertyChangeListener(this);
         old.setParent(null);
       }
-      beans.put(name, spec);
+      _beans.put(name, spec);
       spec.setIdentifier(name);
       spec.setParent(this);
       spec.addPropertyChangeListener(this);
     }
-    propertySupport.firePropertyChange("beans", null, beans);
+    propertySupport.firePropertyChange("_beans", null, _beans);
   }
 
   public void addComponent(String name, ContainedComponent component) {
     super.addComponent(name, component);
-    PluginContainedComponent pcomponent = (PluginContainedComponent)component;
-    
+    PluginContainedComponent pcomponent = (PluginContainedComponent) component;
+
     pcomponent.addPropertyChangeListener(this);
     pcomponent.setIdentifier(name);
     pcomponent.setParent(this);
-    propertySupport.firePropertyChange("components", null, components);
+    propertySupport.firePropertyChange("components", null, _components);
   }
 
   public void setComponent(String name, PluginContainedComponent component) {
-    if (components == null) {
+    if (_components == null) {
       addComponent(name, component);
     } else {
-      PluginContainedComponent old = (PluginContainedComponent) components.get(name);
+      PluginContainedComponent old = (PluginContainedComponent) _components.get(name);
       if (old != null) {
         old.removePropertyChangeListener(this);
         old.setParent(null);
       }
 
-      components.put(name, component);
+      _components.put(name, component);
       component.setIdentifier(name);
       component.setParent(this);
       component.addPropertyChangeListener(this);
 
-      propertySupport.firePropertyChange("components", null, components);
+      propertySupport.firePropertyChange("components", null, _components);
     }
 
   }
 
   public void removeComponent(String name) {
-    PluginContainedComponent oldComponent = (PluginContainedComponent) components.get(name);
-    components.remove(name);
+    PluginContainedComponent oldComponent = (PluginContainedComponent) _components.get(name);
+    _components.remove(name);
     if (oldComponent != null) {
       oldComponent.removePropertyChangeListener(this);
     }
-    propertySupport.firePropertyChange("components", null, components);
+    propertySupport.firePropertyChange("components", null, _components);
   }
 
   public void removeParameter(String name) {
-    if (parameters.containsKey(name)) {
-      parameters.remove(name);
+    if (_parameters.containsKey(name)) {
+      _parameters.remove(name);
       setReservedParameter(name, false);
-      propertySupport.firePropertyChange("parameters", null, components);
+      propertySupport.firePropertyChange("parameters", null, _parameters);
     }
   }
 
   public void setParameter(String name, PluginParameterSpecification spec) {
-    if (parameters == null) {
+    if (_parameters == null) {
       addParameter(name, spec);
     } else {
-      parameters.put(name, spec);
+      _parameters.put(name, spec);
       spec.setIdentifier(name);
       spec.setParent(this);
     }
@@ -214,9 +217,8 @@ public class PluginComponentSpecification
   }
 
   public void setSpecificationResourcePath(String resourcePath) {
-    String old = specificationResourcePath;
-    specificationResourcePath = resourcePath;
-    propertySupport.firePropertyChange("specificationResourcePath", old, resourcePath);
+    super.setSpecificationResourcePath(resourcePath);
+    propertySupport.firePropertyChange("specificationResourcePath", null, resourcePath);
   }
 
   public void setProperty(String name, String value) {
@@ -242,176 +244,277 @@ public class PluginComponentSpecification
   public void propertyChange(PropertyChangeEvent event) {
     propertySupport.firePropertyChange(event);
   }
-  
-  public void write(PrintWriter writer) {
-  	
-  		
-  	String DTDversion = getDTDVersion();
-  	boolean isDTD12 = DTDversion != null && "1.2".equals(DTDversion);
-    int indent = 1;
-    writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-    writer.println("<!DOCTYPE specification ");
-    writer.print("      PUBLIC \"");
-    
-    if (isDTD12) {
-      writer.print(SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID);
-      writer.println("\"");
-      writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
-    } else {
-      writer.print(SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID);
-      writer.println("\"");
-      writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
-    }
-    writer.println(MessageUtil.getString("TAPESTRY.xmlComment"));
-    writer.println();
 
-    writeFirstLine(writer);
+  private String getSpecTagName(String publicId) {
 
-    String description = getDescription();
-    if (description != null && !"".equals(description.trim())) {
-      writer.println();
-      PluginApplicationSpecification.writeDescription(description.trim(), writer, 1);
-    }
+    String tagname = "specification";
 
-    if (parameters != null) {
-      Collection parms = new TreeSet(parameters.keySet());
-      if (!parms.isEmpty()) {
-        writer.println();
-        Iterator parameterNames = parms.iterator();
-        while (parameterNames.hasNext()) {
-          String paramName = (String) parameterNames.next();
-          ((PluginParameterSpecification) getParameter(paramName)).write(paramName, writer, indent, isDTD12);
-        }
-      }
-    }
+    if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID)) {
 
-    if (reservedParameterNames != null && !reservedParameterNames.isEmpty()) {
-      Collection reservedParameters = (Collection) (((HashSet) reservedParameterNames).clone());
-      if (parameters != null && !parameters.isEmpty()) {
-        reservedParameters.removeAll(parameters.keySet());
-      }
-      if (!reservedParameters.isEmpty()) {
-        writer.println();
-        Iterator reservedInformals = reservedParameters.iterator();
-        while (reservedInformals.hasNext()) {
-          Indenter.printIndented(writer, indent, "<reserved-parameter name=\"");
-          writer.print(reservedInformals.next());
-          writer.println("\"/>");
-        }
-      }
-    }
+      if (isPageSpecification()) {
 
-    Collection pns = getPropertyNames();
-    if (pns != null && !pns.isEmpty()) {
-      writer.println();
-      Iterator propertyNames = new TreeSet(pns).iterator();
-      while (propertyNames.hasNext()) {
-        String propertyName = (String) propertyNames.next();
-        PluginApplicationSpecification.writeProperty(propertyName, getProperty(propertyName), writer, indent);
-      }
-    }
+        tagname = "page-specification";
 
-    Collection bns = getBeanNames();
-    if (bns != null && !bns.isEmpty()) {
-      writer.println();
-      Iterator beanNames = new TreeSet(bns).iterator();
-      while (beanNames.hasNext()) {
-        String beanName = (String) beanNames.next();
-        ((PluginBeanSpecification) getBeanSpecification(beanName)).write(beanName, writer, indent);
-      }
-    }
-
-    if (components != null && !components.isEmpty()) {
-      writeComponents(writer, indent, isDTD12);
-    }
-
-    Collection ans = getAssetNames();
-    if (ans != null && !ans.isEmpty()) {
-      writer.println();
-      Iterator assetNames = new TreeSet(ans).iterator();
-      while (assetNames.hasNext()) {
-        String assetName = (String) assetNames.next();
-        ((PluginAssetSpecification) getAsset(assetName)).write(assetName, writer, indent);
-      }
-    }
-
-    writer.println("</specification>");
-  }
-
-  /** Need to do some funky stuff here to ensure "copy-of" components are written AFTER
-   *  thier parents
-   */
-  protected void writeComponents(PrintWriter writer, int indent, boolean isDTD12) {
-    ArrayList keysList = new ArrayList(components.keySet());
-    HashMap nonCopyOfs = new HashMap();
-    HashMap copyOfMap = new HashMap();
-    for (int i = 0; i < keysList.size(); i++) {
-      String containedName = (String) keysList.get(i);
-      PluginContainedComponent component = (PluginContainedComponent) getComponent(containedName);
-      String copyOf = component.getCopyOf();
-      if (copyOf == null || "".equals(copyOf.trim())) {
-        nonCopyOfs.put(containedName, component);
       } else {
-        if (!copyOfMap.containsKey(copyOf)) {
-          copyOfMap.put(copyOf, new ArrayList());
-        }
-        ArrayList listForCopyOf = (ArrayList) copyOfMap.get(copyOf);
-        listForCopyOf.add(containedName);
-      }
-    }
-    Iterator iter = new TreeSet(nonCopyOfs.keySet()).iterator();
-    if (copyOfMap.isEmpty()) {
-      while (iter.hasNext()) {
-        writer.println();
-        String containedName = (String) iter.next();
-        ((PluginContainedComponent) getComponent(containedName)).write(containedName, writer, indent, isDTD12);
-      }
-    } else {
-      while (iter.hasNext()) {
-        writer.println();
-        String containedName = (String) iter.next();
-        ((PluginContainedComponent) getComponent(containedName)).write(containedName, writer, indent, isDTD12);
-        if (copyOfMap.containsKey(containedName)) {
-          ArrayList listForCopyOf = (ArrayList) copyOfMap.get(containedName);
-          if (listForCopyOf == null | listForCopyOf.isEmpty()) {
-            continue;
-          }
-          Iterator copies = listForCopyOf.iterator();
-          while (copies.hasNext()) {
-            writer.println();
-            String copyOfName = (String) copies.next();
-            ((PluginContainedComponent) getComponent(copyOfName)).write(copyOfName, writer, indent, isDTD12);
-          }
-          copyOfMap.remove(containedName);
-        }
-      }
-      if (!copyOfMap.isEmpty()) {
-        Iterator leftovers = new TreeSet(copyOfMap.keySet()).iterator();
-        while (leftovers.hasNext()) {
-          ArrayList leftoverIds = (ArrayList) copyOfMap.get(leftovers.next());
-          if (leftoverIds == null || leftoverIds.isEmpty()) {
-            continue;
-          }
-          Iterator leftoverIter = leftoverIds.iterator();
-          while (leftoverIter.hasNext()) {
-            writer.println();
-            String copyOfName = (String) leftoverIter.next();
-            ((PluginContainedComponent) getComponent(copyOfName)).write(copyOfName, writer, indent, isDTD12);
-          }
-        }
-      }
 
+        tagname = "component-specification";
+      }
     }
+    return tagname;
   }
 
   public void writeFirstLine(PrintWriter writer) {
-    writer.print("<specification class=\"");
+
+    String tagname = getSpecTagName(getPublicId());
+
+    writer.print("<" + tagname + " class=\"");
     writer.print(getComponentClassName());
     writer.print("\" allow-body=\"");
     writer.print((getAllowBody() ? "yes" : "no"));
     writer.print("\" allow-informal-parameters=\"");
     writer.print((getAllowInformalParameters() ? "yes" : "no"));
     writer.println("\" >");
+  }
+
+  public void write(PrintWriter writer) {
+
+    String publicId = getPublicId();
+
+    String tagname = getSpecTagName(publicId);
+
+    XMLUtil.writeXMLHeader(publicId, tagname, writer);
+
+    writer.println();
+
+    writeFirstLine(writer);
+
+    int indent = 1;
+
+    XMLUtil.writeDescription(writer, indent, getDescription());
+
+    writeComponentParameters(_parameters, writer, publicId, indent);
+
+    writeReservedParameters(_reservedParameterNames, _parameters, writer, indent);
+
+    XMLUtil.writeProperties((IPropertyHolder) this, writer, indent);
+
+    writeBeans(getBeanNames(), writer, indent);
+
+    writeContainedComponents(_components, writer, indent, publicId);
+
+    writeAssets(getAssetNames(), writer, indent);
+
+    writer.println();
+
+    writer.println("</" + tagname + ">");
+  }
+
+  public void writeAssets(List assetNames, PrintWriter writer, int indent) {
+
+    if (assetNames != null && !assetNames.isEmpty()) {
+
+      writer.println();
+      Iterator names = new TreeSet(assetNames).iterator();
+
+      while (names.hasNext()) {
+
+        String assetName = (String) names.next();
+        ((PluginAssetSpecification) getAsset(assetName)).write(assetName, writer, indent);
+      }
+    }
+  }
+
+  public void writeBeans(Collection beanNames, PrintWriter writer, int indent) {
+
+    if (beanNames != null && !beanNames.isEmpty()) {
+
+      writer.println();
+      Iterator names = new TreeSet(beanNames).iterator();
+
+      while (names.hasNext()) {
+
+        String beanName = (String) names.next();
+        ((PluginBeanSpecification) getBeanSpecification(beanName)).write(beanName, writer, indent);
+      }
+    }
+  }
+
+  public void writeReservedParameters(
+    Set names,
+    Map parameterMap,
+    PrintWriter writer,
+    int indent) {
+
+    if (isPageSpecification()) {
+
+      return;
+    }
+
+    if (names != null && !names.isEmpty()) {
+
+      Collection reservedParameters = (Collection) (((HashSet) names).clone());
+
+      if (parameterMap != null && !parameterMap.isEmpty()) {
+
+        reservedParameters.removeAll(parameterMap.keySet());
+
+      }
+      if (!reservedParameters.isEmpty()) {
+
+        writer.println();
+        Iterator reservedInformals = reservedParameters.iterator();
+
+        while (reservedInformals.hasNext()) {
+
+          Indenter.printIndented(writer, indent, "<reserved-parameter name=\"");
+          writer.print(reservedInformals.next());
+          writer.println("\"/>");
+        }
+      }
+    }
+  }
+
+  public void writeComponentParameters(
+    Map parameterMap,
+    PrintWriter writer,
+    String publicId,
+    int indent) {
+
+    if (isPageSpecification()) {
+
+      return;
+    }
+
+    if (parameterMap != null) {
+
+      Collection parms = new TreeSet(parameterMap.keySet());
+
+      if (!parms.isEmpty()) {
+
+        writer.println();
+        Iterator parameterNames = parms.iterator();
+
+        while (parameterNames.hasNext()) {
+
+          String paramName = (String) parameterNames.next();
+
+          PluginParameterSpecification parameterSpec =
+            (PluginParameterSpecification) parameterMap.get(paramName);
+
+          parameterSpec.write(paramName, writer, indent, publicId);
+        }
+      }
+    }
+  }
+
+  /** Need to do some funky stuff here to ensure "copy-of" components are written AFTER
+   *  thier parents
+   */
+  public void writeContainedComponents(
+    Map containedComponents,
+    PrintWriter writer,
+    int indent,
+    String publicId) {
+
+    ArrayList keysList = new ArrayList(containedComponents.keySet());
+    HashMap nonCopyOfs = new HashMap();
+    HashMap copyOfMap = new HashMap();
+
+    PluginContainedComponent currentComponent;
+
+    for (int i = 0; i < keysList.size(); i++) {
+
+      String containedName = (String) keysList.get(i);
+      currentComponent = (PluginContainedComponent) getComponent(containedName);
+      String copyOf = currentComponent.getCopyOf();
+
+      if (copyOf == null || "".equals(copyOf.trim())) {
+
+        nonCopyOfs.put(containedName, currentComponent);
+
+      } else {
+
+        if (!copyOfMap.containsKey(copyOf)) {
+
+          copyOfMap.put(copyOf, new ArrayList());
+        }
+
+        ArrayList listForCopyOf = (ArrayList) copyOfMap.get(copyOf);
+        listForCopyOf.add(containedName);
+      }
+    }
+
+    Iterator iter = new TreeSet(nonCopyOfs.keySet()).iterator();
+
+    if (copyOfMap.isEmpty()) {
+
+      while (iter.hasNext()) {
+
+        writer.println();
+        String containedName = (String) iter.next();
+        currentComponent = (PluginContainedComponent) getComponent(containedName);
+        currentComponent.write(containedName, writer, indent, publicId);
+      }
+
+    } else {
+
+      while (iter.hasNext()) {
+
+        writer.println();
+        String containedName = (String) iter.next();
+        currentComponent = (PluginContainedComponent) getComponent(containedName);
+        currentComponent.write(containedName, writer, indent, publicId);
+
+        if (copyOfMap.containsKey(containedName)) {
+
+          ArrayList listForCopyOf = (ArrayList) copyOfMap.get(containedName);
+
+          if (listForCopyOf == null | listForCopyOf.isEmpty()) {
+
+            continue;
+          }
+
+          Iterator copies = listForCopyOf.iterator();
+
+          while (copies.hasNext()) {
+
+            writer.println();
+            String copyOfName = (String) copies.next();
+
+            currentComponent = (PluginContainedComponent) getComponent(copyOfName);
+            currentComponent.write(copyOfName, writer, indent, publicId);
+          }
+
+          copyOfMap.remove(containedName);
+        }
+      }
+      if (!copyOfMap.isEmpty()) {
+
+        Iterator leftovers = new TreeSet(copyOfMap.keySet()).iterator();
+
+        while (leftovers.hasNext()) {
+
+          ArrayList leftoverIds = (ArrayList) copyOfMap.get(leftovers.next());
+
+          if (leftoverIds == null || leftoverIds.isEmpty()) {
+
+            continue;
+
+          }
+
+          Iterator leftoverIter = leftoverIds.iterator();
+
+          while (leftoverIter.hasNext()) {
+
+            writer.println();
+            String copyOfName = (String) leftoverIter.next();
+            currentComponent = (PluginContainedComponent) getComponent(copyOfName); 
+            currentComponent.write(copyOfName, writer, indent, publicId);
+          }
+        }
+      }
+
+    }
   }
 
   public void getHelpText(String name, StringBuffer buffer) {
@@ -430,25 +533,24 @@ public class PluginComponentSpecification
     }
     return swriter.toString();
   }
-
-  /**
-   * @see net.sf.tapestry.spec.ComponentSpecification#setDTDVersion(String)
-   */
-  public void setDTDVersion(String dtdVersion) {
-    super.setDTDVersion(dtdVersion);
-    propertySupport.firePropertyChange("dtd", null, dtdVersion);
+  
+  public void setPublicId(String publicId) {
+  	
+  	super.setPublicId(publicId);
+    propertySupport.firePropertyChange("dtd", null, publicId);
+    
   }
-
+ 
   /**
    * @see net.sf.tapestry.spec.ComponentSpecification#addAsset(String, AssetSpecification)
    */
   public void addAsset(String name, AssetSpecification asset) {
     super.addAsset(name, asset);
-    
-    PluginAssetSpecification pluginAsset = (PluginAssetSpecification)asset;
+
+    PluginAssetSpecification pluginAsset = (PluginAssetSpecification) asset;
     pluginAsset.setIdentifier(name);
     pluginAsset.setParent(this);
- 
+
   }
 
   /**
@@ -456,10 +558,10 @@ public class PluginComponentSpecification
    */
   public void addParameter(String name, ParameterSpecification spec) {
     super.addParameter(name, spec);
-    PluginParameterSpecification pluginParam = (PluginParameterSpecification)spec;
+    PluginParameterSpecification pluginParam = (PluginParameterSpecification) spec;
     pluginParam.setIdentifier(name);
     pluginParam.setParent(this);
-    propertySupport.firePropertyChange("parameters", null, parameters);
+    propertySupport.firePropertyChange("parameters", null, _parameters);
   }
 
   /**
@@ -491,7 +593,7 @@ public class PluginComponentSpecification
    * @param parent The parent to set
    */
   public void setParent(Object parent) {
-    this.parent = (TapestryComponentModel)parent;
+    this.parent = (TapestryComponentModel) parent;
   }
 
 }

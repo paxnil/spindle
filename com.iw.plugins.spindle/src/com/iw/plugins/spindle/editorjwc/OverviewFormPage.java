@@ -33,8 +33,6 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.update.ui.forms.internal.AbstractSectionForm;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.editorapp.OverviewAlertSection;
-import com.iw.plugins.spindle.editorjwc.components.*;
 import com.iw.plugins.spindle.editors.ParameterEditorSection;
 import com.iw.plugins.spindle.editors.PropertyEditableSection;
 import com.iw.plugins.spindle.editors.SpindleForm;
@@ -67,7 +65,6 @@ public class OverviewFormPage extends SpindleFormPage {
 
   class OverviewForm extends SpindleForm {
 
-    private OverviewAlertSection alertSection;
     private OverviewGeneralSection generalSection;
     private PropertyEditableSection propertySection;
     private OverviewComponentsSection componentsSection;

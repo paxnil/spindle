@@ -80,28 +80,43 @@ public class PluginBindingSpecification
     this.parent = (IBindingHolder) parent;
   }
 
-  public void write(String name, PrintWriter writer, int indent, boolean isDTD12) {
+  public void write(String name, PrintWriter writer, int indent, String publicId) { 	
+    
+    boolean isDTD12OrBetter = XMLUtil.getDTDVersion(publicId) >= XMLUtil.DTD_1_2;
+    
     Indenter.printIndented(writer, indent, "<");
+    
     BindingType type = getType();
+    
     if (type.equals(BindingType.FIELD)) {
+    	
       writer.print("field-binding name=\"" + name);
       writer.print("\" field-name=\"");
+      
     } else if (type.equals(BindingType.INHERITED)) {
+    	
       writer.print("inherited-binding name=\"" + name);
       writer.print("\" parameter-name=\"");
+      
     } else if (type.equals(BindingType.STATIC)) {
+    	
       writer.print("static-binding name=\"" + name);
       writer.print("\">");
       writer.print(getValue());
       writer.println("</static-binding>");
-      return;
+      
     } else if (type.equals(BindingType.DYNAMIC)) {
+    	
       writer.print("binding name=\"" + name);
       writer.print("\" property-path=\"");
-    } else if (isDTD12 && type.equals(BindingType.STRING)) {
+      
+    } else if (isDTD12OrBetter && type.equals(BindingType.STRING)) {
+    	
       writer.print("string-binding name=\"" + name);
       writer.print("\" key=\"");
+      
     }
+    
     writer.print(getValue());
     writer.println("\"/>");
   }

@@ -134,7 +134,7 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
     if (spec == null) {
       setInput(holderArray);
       fireSelectionNotification(EmptySelection.Instance);
-      getFormPage().setSelection(EmptySelection.Instance);
+      clearPageSelection();
       return;
     }
     Iterator iter = spec.getBindingNames().iterator();

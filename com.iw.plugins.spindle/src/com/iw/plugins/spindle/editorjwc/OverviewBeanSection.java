@@ -45,7 +45,7 @@ public class OverviewBeanSection extends BasicLinksSection {
    * Constructor for OverviewParametersSection
    */
   public OverviewBeanSection(SpindleFormPage page) {
-    super(page, "Beans", "This section describes the beans used by this component");
+    super(page, "Beans", "This section lists any Beans");
   }
   public void update(boolean removePrevious) {
     if (removePrevious) {

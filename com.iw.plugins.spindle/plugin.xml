@@ -10,7 +10,7 @@
       <library name="javax.xml.jaxp.jar">
          <export name="*"/>
       </library>
-      <library name="log4j-core.jar">
+      <library name="log4j-1.2.6.jar">
          <export name="*"/>
       </library>
       <library name="org.apache.crimson.jar">
@@ -22,7 +22,10 @@
       <library name="iw_tapestry.jar">
          <export name="*"/>
       </library>
-      <library name="net.sf.tapestry-2.1.jar">
+      <library name="net.sf.tapestry-2.2.jar">
+         <export name="*"/>
+      </library>
+      <library name="jakarta-oro-2.0.6.jar">
          <export name="*"/>
       </library>
    </runtime>
@@ -47,6 +50,16 @@
             name="Spindle (Tapestry)"
             id="com.iw.plugins.spindle.new">
       </category>
+      <wizard
+            name="Tapestry Library"
+            icon="./icons/basic/library16.gif"
+            category="com.iw.plugins.spindle.new"
+            class="com.iw.plugins.spindle.wizards.NewTapLibraryWizard"
+            id="com.iw.plugins.spindle.new_library_wizard">
+         <description>
+            Create a new Tapestry Library
+         </description>
+      </wizard>      
       <wizard
             name="Tapestry Application"
             icon="./icons/basic/application16.gif"
@@ -74,7 +87,7 @@
             class="com.iw.plugins.spindle.wizards.NewTapPageWizard"
             id="com.iw.plugins.spindle.new_page_wizard">
          <description>
-            Create a new Tapestry Component
+            Create a new Tapestry Page
          </description>
       </wizard>
    </extension>
@@ -113,6 +126,15 @@
             id="com.iw.plugins.spindle.editors.jwc_editor">
       </editor>
       <editor
+            name="Spindle Editor for Tapestry Pages"
+            default="true"
+            icon="./icons/basic/page16.gif"
+            filenames="*.page"
+            contributorClass="com.iw.plugins.spindle.editorjwc.JWCMultipageEditorContributor"
+            class="com.iw.plugins.spindle.editorjwc.JWCPageMultipageEditor"
+            id="com.iw.plugins.spindle.editors.jwc_editor">
+      </editor>
+      <editor
             name="Spindle HTML Editor for Tapestry"
             default="true"
             icon="./icons/basic/html16.gif"
@@ -120,6 +142,15 @@
             contributorClass="com.iw.plugins.spindle.html.TapestryHTMLEditorContributor"
             class="com.iw.plugins.spindle.html.TapestryHTMLEditor"
             id="com.iw.plugins.spindle.editors.html">
+      </editor>
+      <editor
+            name="Spindle Editor for Tapestry Libraries"
+            default="true"
+            icon="icons/full/library16.gif"
+            filenames="*.library"
+            contributorClass="com.iw.plugins.spindle.editorlib.LibraryMultipageEditorContributor"
+            class="com.iw.plugins.spindle.editorlib.LibraryMultipageEditor"
+            id="com.iw.plugins.spindle.editors.library_editor">
       </editor>
    </extension>
    <extension
@@ -142,6 +173,15 @@
             label="Spindle Toolbar Action Set"
             visible="false"
             id="com.iw.spindle.actions.set">
+          <action
+               label="New Tapestry Library"
+               icon="icons/full/library16_dark.gif"
+               tooltip="Create a new Tapestry Library"
+               class="com.iw.plugins.spindle.wizards.OpenTapestryLibraryWizard"
+               toolbarPath="Normal/spindle"
+               id="com.iw.spindle.actions.set.OpenTapestryLibraryWizard">
+         </action>
+
          <action
                label="New Tapestry Application"
                icon="icons/full/application16_dark.gif"
@@ -216,6 +256,14 @@
       <manager
             file-extension="jwc"
             class="com.iw.plugins.spindle.model.manager.ComponentManagerDelegate">
+      </manager>
+      <manager
+            file-extension="page"
+            class="com.iw.plugins.spindle.model.manager.ComponentManagerDelegate">
+      </manager>
+      <manager
+            file-extension="library"
+            class="com.iw.plugins.spindle.model.manager.LibraryManagerDelegate">
       </manager>
    </extension>
 

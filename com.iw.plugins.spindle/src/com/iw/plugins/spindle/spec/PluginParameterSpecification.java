@@ -29,8 +29,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
+import net.sf.tapestry.spec.ComponentSpecification;
 import net.sf.tapestry.spec.Direction;
 import net.sf.tapestry.spec.ParameterSpecification;
+
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
@@ -88,31 +91,44 @@ public class PluginParameterSpecification
   public String getHelpText(String name) {
     StringWriter swriter = new StringWriter();
     SourceWriter writer = new SourceWriter(swriter);
-    write(name, writer, 0, true);
+    write(name, writer, 0, ((ComponentSpecification)parent).getPublicId());
     return swriter.toString();
   }
 
   // e.g. -- <parameter name="book" java-type="com.primix.vlib.ejb.Book" required="yes" parameterName="poo" direction="in"/>
-  public void write(String name, PrintWriter writer, int indent, boolean isDTD12) {
+  public void write(String name, PrintWriter writer, int indent, String publicId) {
+  	
+    boolean isDTD12OrBetter = XMLUtil.getDTDVersion(publicId) >= XMLUtil.DTD_1_2;
+  	
     Indenter.printIndented(writer, indent, "<parameter name=\"" + name);
     writer.print("\" java-type=\"" + getType());
     writer.print("\" required=\"" + (isRequired() ? "yes" : "no"));
-    if (isDTD12) {
+    
+    if (isDTD12OrBetter) {
+    	
       String propertyName = getPropertyName();
+      
       if (propertyName != null && !"".equals(propertyName) && !propertyName.equals(name)) {
+      	
         writer.print("\" property-name=\"" + getPropertyName());
       }
       if (getDirection() != Direction.CUSTOM) {
+      	
         writer.print("\" direction=\"");
         writer.print(getDirection() == Direction.CUSTOM ? "custom" : "in");
+        
       }
     }
     String description = getDescription();
+    
     if (description == null || "".equals(description.trim())) {
+    	
       writer.println("\"/>");
+      
     } else {
+    	
       writer.println("\">");
-      PluginApplicationSpecification.writeDescription(description, writer, indent + 1);
+      XMLUtil.writeDescription(writer, indent + 1, description, false);
       Indenter.printlnIndented(writer, indent, "</parameter>");
     }
   }
@@ -153,6 +169,7 @@ public class PluginParameterSpecification
 
       this.identifier = newName;
       componentSpec.removeParameter(oldName);
+      componentSpec.setParameter(this.identifier, this);
 
     } else if ("propertyName".equals(key)) {
 

@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
-import net.sf.tapestry.spec.PageSpecification;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -417,7 +416,7 @@ public class ChooseApplicationPageDialog extends AbstractDialog {
         TapestryApplicationModel model = (TapestryApplicationModel) appIter.next();
 
         PluginApplicationSpecification spec =
-          (PluginApplicationSpecification) model.getApplicationSpec();
+          (PluginApplicationSpecification) model.getSpecification();
 
         for (Iterator iter = spec.getPageNames().iterator(); iter.hasNext();) {
 
@@ -453,12 +452,12 @@ public class ChooseApplicationPageDialog extends AbstractDialog {
         TapestryApplicationModel model = (TapestryApplicationModel) appIter.next();
 
         PluginApplicationSpecification spec =
-          (PluginApplicationSpecification) model.getApplicationSpec();
-        PageSpecification pspec = spec.getPageSpecification(name);
+          (PluginApplicationSpecification) model.getSpecification();
+        String path = spec.getPageSpecificationPath(name);
 
-        if (pspec != null) {
+        if (path != null) {
 
-          apps.add(model.getUnderlyingStorage().getName() + " " + pspec.getSpecificationPath());
+          apps.add(model.getUnderlyingStorage().getName() + " " +path);
         }
       }
       TreeSet sorted = new TreeSet(apps);

@@ -196,8 +196,8 @@ public class Utils {
         }
       }
       PluginApplicationSpecification spec =
-        (PluginApplicationSpecification) model.getApplicationSpec();
-      if (spec != null && spec.getComponentAlias(alias) != null) {
+        (PluginApplicationSpecification) model.getSpecification();
+      if (spec != null && spec.getComponentSpecificationPath(alias) != null) {
         result.add(model);
       }
     }

@@ -64,7 +64,7 @@ import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.util.Utils;
 
-public class OverviewGeneralSection extends SpindleFormSection implements IModelChangedListener {
+public class OverviewAppGeneralSection extends SpindleFormSection implements IModelChangedListener {
 
   private Text dtdText;
   private FormEntry nameText;
@@ -74,7 +74,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
   private OpenEngineClassAction openEngineClassAction = new OpenEngineClassAction();
   private String hierarchyRoot = "net.sf.tapestry.IEngine";
 
-  public OverviewGeneralSection(SpindleFormPage page) {
+  public OverviewAppGeneralSection(SpindleFormPage page) {
     super(page);
     setHeaderText("General Information");
     setDescription("This section describes general information about this application");
@@ -104,7 +104,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
 
   public void update(Object input) {
     TapestryApplicationModel model = (TapestryApplicationModel) input;
-    PluginApplicationSpecification spec = model.getApplicationSpec();
+    PluginApplicationSpecification spec = (PluginApplicationSpecification) model.getSpecification();
     String name = spec.getName();
     String dtdVersion = spec.getDTDVersion();
     if (dtdVersion == null) {
@@ -117,8 +117,8 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
 
     getFormPage().getForm().setHeadingText(name);
     ((SpindleMultipageEditor) getFormPage().getEditor()).updateTitle();
-    nameText.setValue(model.getApplicationSpec().getName(), true);
-    engineClassText.setValue(model.getApplicationSpec().getEngineClassName(), true);
+    nameText.setValue(spec.getName(), true);
+    engineClassText.setValue(spec.getEngineClassName(), true);
     dtdText.setText(dtdVersion);
     updateNeeded = false;
   }
@@ -141,12 +141,14 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
 
     final TapestryApplicationModel model = (TapestryApplicationModel) getFormPage().getModel();
 
+
     labelName = "Application Name";
     nameText = new FormEntry(createText(container, labelName, factory));
     nameText.addFormTextListener(new IFormTextListener() {
       public void textValueChanged(FormEntry text) {
-        String name = model.getApplicationSpec().getName();
-        model.getApplicationSpec().setName(text.getValue());
+      	PluginApplicationSpecification appSpec = (PluginApplicationSpecification)model.getSpecification();
+        String name = appSpec.getName();
+        appSpec.setName(text.getValue());
         if (model.isEditable() == false) {
           name = MessageUtil.getFormattedString("{0} is READ ONLY", name);
         }
@@ -162,15 +164,17 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     engineClassText = new FormEntry(createText(container, labelName, factory));
     engineClassText.addFormTextListener(new IFormTextListener() {
       public void textValueChanged(FormEntry text) {
+      	PluginApplicationSpecification appSpec = (PluginApplicationSpecification)model.getSpecification();
         if (model.isEditable() == false) {
-          String name = model.getApplicationSpec().getEngineClassName();
-          model.getApplicationSpec().setEngineClassName(text.getValue());
+        
+          String name = appSpec.getEngineClassName();
+          appSpec.setEngineClassName(text.getValue());
           name = MessageUtil.getFormattedString("{0} can't change engine class, application is READON", name);
           getFormPage().getForm().setHeadingText(name);
           return;
         }
         String newValue = text.getValue();
-        model.getApplicationSpec().setEngineClassName(newValue);
+        appSpec.setEngineClassName(newValue);
       }
       public void textDirty(FormEntry text) {
         forceDirty();

@@ -77,7 +77,7 @@ public class BeanSelectionSection
     if (bean != null) {
       fireSelectionNotification(bean);
       if (hasFocus || updateSelection) {
-        getFormPage().setSelection(event.getSelection());
+        setPageSelection();
       }
     }
 
@@ -104,7 +104,7 @@ public class BeanSelectionSection
     if (ids.isEmpty()) {
       setInput(holderArray);
       fireSelectionNotification(null);
-      getFormPage().setSelection(EmptySelection.Instance);
+      clearPageSelection();
       return;
     }
     Iterator iter = ids.iterator();

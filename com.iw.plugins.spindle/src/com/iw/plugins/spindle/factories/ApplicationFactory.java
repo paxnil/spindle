@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import net.sf.tapestry.parse.SpecificationParser;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -42,7 +43,6 @@ import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.spec.PluginPageSpecification;
 
 public class ApplicationFactory {
 
@@ -87,11 +87,11 @@ public class ApplicationFactory {
     throws CoreException, InterruptedException {
 
     PluginApplicationSpecification appSpec = new PluginApplicationSpecification();
-    appSpec.setDTDVersion("1.2");
+    appSpec.setPublicId(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID);
     appSpec.setName(appname);
     appSpec.setEngineClassName(qualifiedEngineClassname);
     String path = "/" + packageFragment.replace('.', '/') + "/Home.jwc";
-    appSpec.setPageSpecification("Home", new PluginPageSpecification(path));
+    appSpec.setPageSpecificationPath("Home", path);
     StringWriter swriter = new StringWriter();
     PrintWriter pwriter = new PrintWriter(swriter);
     appSpec.write(pwriter);

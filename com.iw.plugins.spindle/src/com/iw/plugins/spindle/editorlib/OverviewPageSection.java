@@ -23,10 +23,9 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editorapp;
+package com.iw.plugins.spindle.editorlib;
 
 import java.util.Iterator;
-import java.util.TreeSet;
 
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.swt.graphics.Image;
@@ -36,8 +35,8 @@ import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.editors.BasicLinksSection;
 import com.iw.plugins.spindle.editors.HyperLinkAdapter;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 
 public class OverviewPageSection extends BasicLinksSection {
 
@@ -47,23 +46,23 @@ public class OverviewPageSection extends BasicLinksSection {
 	public OverviewPageSection(SpindleFormPage page) {
 		super(
 			page,
-			"Application Pages",
-			"This section describes the pages defined in this application");
+			"Pages",
+			"This section describes the pages defined in this file");
 
 	}
 
 	protected SpindleFormPage getGotoPage() {
-		return (SpindleFormPage)getFormPage().getEditor().getPage(APPMultipageEditor.PAGES);
+		return (SpindleFormPage)getFormPage().getEditor().getPage(LibraryMultipageEditor.PAGES);
 	}
 
 	public void update(boolean removePrevious) {
 		if (removePrevious) {
 			removeAll();
 		}
-		TapestryApplicationModel model =
-			(TapestryApplicationModel) getFormPage().getModel();
-		PluginApplicationSpecification spec = model.getApplicationSpec();
-		Iterator i = new TreeSet(spec.getNonDefaultPageNames()).iterator();
+		TapestryLibraryModel model =
+			(TapestryLibraryModel) getFormPage().getModel();
+		IPluginLibrarySpecification spec = (IPluginLibrarySpecification)model.getSpecification();
+		Iterator i = spec.getPageNames().iterator();
 		while (i.hasNext()) {
 			String pageName = (String) i.next();
 			Image image = TapestryImages.getSharedImage("page16.gif");

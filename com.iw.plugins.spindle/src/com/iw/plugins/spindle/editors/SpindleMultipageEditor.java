@@ -46,6 +46,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.IDocument;
@@ -60,8 +61,11 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.part.FileEditorInput;
@@ -192,7 +196,22 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
         TapestryPlugin.getDefault().logException(x);
       }
       try {
-        ((BaseTapestryModel) model).reload();
+
+        BaseTapestryModel tmodel = (BaseTapestryModel) model;
+        tmodel.reload();
+
+        if (!tmodel.isLoaded()) {
+          IWorkbenchWindow window = TapestryPlugin.getDefault().getActiveWorkbenchWindow();
+          IWorkbenchPage page = window.getActivePage();
+          if (page != null) {
+            try {
+              page.showView(PlatformUI.PLUGIN_ID+".views.TaskList");
+            } catch (PartInitException e) {
+              ErrorDialog.openError(window.getShell(), "Could not show the Task View!", //$NON-NLS-1$
+              e.getMessage(), e.getStatus());
+            }
+          }
+        }
       } catch (Exception e) {
       }
       dirty = false;
@@ -284,7 +303,7 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
     modelProvider.connect(storage, this);
     BaseTapestryModel model = (BaseTapestryModel) modelProvider.getEditableModel(storage, this);
     if (!model.isInSync() || model.isDirty()) {
-    	Utils.saveModel(model, new NullProgressMonitor());
+      Utils.saveModel(model, new NullProgressMonitor());
     }
     try {
       stream = storage.getContents();
@@ -304,7 +323,7 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
     } catch (IOException e) {
       TapestryPlugin.getDefault().logException(e);
     }
-	dirty = false;
+    dirty = false;
     return model;
   }
 
@@ -466,7 +485,7 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
     if (!duringInit) {
       dirty = true;
       super.fireSaveNeeded();
-     
+
     }
   }
 
@@ -488,9 +507,9 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
    */
   public void dispose() {
     super.dispose();
-    ITapestryModel model = (ITapestryModel)getModel();
+    ITapestryModel model = (ITapestryModel) getModel();
     if (model != null) {
-    	TapestryPlugin.getTapestryModelManager().disconnect(model.getUnderlyingStorage(), this);
+      TapestryPlugin.getTapestryModelManager().disconnect(model.getUnderlyingStorage(), this);
     }
   }
 

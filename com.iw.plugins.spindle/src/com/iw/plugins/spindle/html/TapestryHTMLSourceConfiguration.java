@@ -69,14 +69,6 @@ public class TapestryHTMLSourceConfiguration extends SourceViewerConfiguration i
       TapestryHTMLPartitionScanner.JWC_TAG,
       TapestryHTMLPartitionScanner.HTML_TAG };
   }
-//  	public ITextDoubleClickStrategy getDoubleClickStrategy(
-//		ISourceViewer sourceViewer,
-//		String contentType) {
-//		if (doubleClickStrategy == null)
-////			doubleClickStrategy = new XMLDoubleClickStrategy();
-//			doubleClickStrategy = new DefaultTextDoubleClickStrategy();
-//		return doubleClickStrategy;
-//	}
 
 
   protected TagAttributeScanner getTagScanner() {

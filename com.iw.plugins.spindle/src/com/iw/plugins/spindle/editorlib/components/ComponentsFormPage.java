@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editorapp.components;
+package com.iw.plugins.spindle.editorlib.components;
 
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -38,6 +38,7 @@ import com.iw.plugins.spindle.editors.SpindleForm;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.util.IStimulatable;
 
 public class ComponentsFormPage extends SpindleFormPage {
@@ -89,8 +90,8 @@ public class ComponentsFormPage extends SpindleFormPage {
     public void initialize(Object modelObject) {
       super.initialize(modelObject);
       if (hasBeenInitialized()) {
-        TapestryApplicationModel model = (TapestryApplicationModel) modelObject;
-        String name = model.getApplicationSpec().getName();
+        TapestryLibraryModel model = (TapestryLibraryModel) modelObject;
+        String name = model.getUnderlyingStorage().getName();
         if (model.isEditable() == false) {
           name = MessageUtil.getFormattedString("TapistryComponentsForm.readonly", name);
         }

@@ -23,8 +23,9 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editorapp.components;
+package com.iw.plugins.spindle.editorlib.pages;
 
+import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IStorage;
@@ -33,8 +34,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.pde.internal.ui.editor.text.ColorManager;
-import org.eclipse.pde.internal.ui.editor.text.IColorManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -53,31 +52,30 @@ import com.iw.plugins.spindle.editors.SpindleFormSection;
 import com.iw.plugins.spindle.editors.SummaryHTMLViewer;
 import com.iw.plugins.spindle.editors.SummarySourceViewer;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public class ComponentAliasSummarySection
+public abstract class BasePagesSummarySection
   extends SpindleFormSection
   implements IResourceChangeListener {
 
-  private FormEntry componentName;
+  private FormEntry pageName;
   private FormEntry specText;
   private Label resolveFailedLabel;
   private SummarySourceViewer sourceViewer;
   private SummarySourceViewer htmlViewer;
   private Composite container;
 
-  private IColorManager colorManager;
-
-  private String selectedAlias;
+  private String selectedPage;
 
   /**
    * Constructor for ComponentAliasSummarySection
    */
-  public ComponentAliasSummarySection(SpindleFormPage page) {
+  public BasePagesSummarySection(SpindleFormPage page) {
     super(page);
-    setHeaderText("Component Summary");
-    setDescription("This section will show a summary of the selected Component (if it can be resolved).");
+    setHeaderText("Page Summary");
+    setDescription("This section will show a summary of the selected Page (if it can be resolved).");
   }
 
   /**
@@ -91,9 +89,9 @@ public class ComponentAliasSummarySection
     layout.horizontalSpacing = 6;
     container.setLayout(layout);
 
-    String labelName = "Component Name";
-    componentName = new FormEntry(createText(container, labelName, factory));
-    Text text = (Text) componentName.getControl();
+    String labelName = "Page Name";
+    pageName = new FormEntry(createText(container, labelName, factory));
+    Text text = (Text) pageName.getControl();
     text.setEditable(false);
     text.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_BLUE));
 
@@ -118,8 +116,6 @@ public class ComponentAliasSummarySection
     data.verticalSpan = 75;
     sashForm.setLayoutData(data);
     sashForm.SASH_WIDTH = 10;
-
-    colorManager = new ColorManager();
 
     sourceViewer = new SummarySourceViewer(sashForm);
     data = new GridData();
@@ -182,8 +178,8 @@ public class ComponentAliasSummarySection
     }
   }
 
-  private TapestryApplicationModel getModel() {
-    return ((TapestryApplicationModel) getFormPage().getModel());
+  protected ITapestryModel getModel() {
+    return ((ITapestryModel) getFormPage().getModel());
   }
 
   public void dispose() {
@@ -191,28 +187,53 @@ public class ComponentAliasSummarySection
     super.dispose();
   }
 
+  protected abstract ILibrarySpecification getSpec();
+
   public void sectionChanged(FormSection source, int changeType, Object changeObject) {
     // this can only come from the ComponentAliasSection and it can only be
     // that an alias was selected! or null if the selection was cleared   
-    selectedAlias = (String) changeObject;
+    selectedPage = (String) changeObject;
     updateSummary();
   }
 
   private void updateSummary() {
+
     resolveFailedLabel.setVisible(false);
-    if (selectedAlias == null) {
-      componentName.setValue("", false);
+
+    String specificationPath = null;
+
+    if (selectedPage != null) {
+
+      specificationPath = getSpec().getPageSpecificationPath(selectedPage);
+
+      if (specificationPath == null) {
+
+        // we must resolve it from Framework.library
+        ILibrarySpecification framework =
+          TapestryModelManager.getDefaultLibrary().getSpecification();
+
+        specificationPath = framework.getPageSpecificationPath(selectedPage);
+      }
+    }
+
+    if (selectedPage == null) {
+
+      pageName.setValue("", false);
       specText.setValue("", false);
       sourceViewer.updateNotFound();
       htmlViewer.updateNotFound();
+
     } else {
-      componentName.setValue(selectedAlias, false);
-      String specificationPath = getModel().getApplicationSpec().getComponentAlias(selectedAlias);
+
+      pageName.setValue(selectedPage, false);
+
       specText.setValue(specificationPath, false);
-      if (!specificationPath.endsWith(".jwc")) {
+
+      if (specificationPath == null || !(specificationPath.endsWith(".jwc") || specificationPath.endsWith("page"))) {
         resolveFailed(specificationPath);
         return;
       }
+
       ITapestryModel model = (ITapestryModel) getModel();
       IStorage thisStorage = model.getUnderlyingStorage();
       IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisStorage);
@@ -225,7 +246,7 @@ public class ComponentAliasSummarySection
       } catch (JavaModelException jmex) {
         resolveFailed(specificationPath);
       }
-      IStorage[] found = lookup.findComponent(specificationPath);
+      IStorage[] found = lookup.findPage(specificationPath);
       if (found.length != 1) {
         resolveFailed(specificationPath);
         return;
@@ -250,15 +271,13 @@ public class ComponentAliasSummarySection
   }
 
   /**
-   * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
-   */
+  * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
+  */
   public void resourceChanged(IResourceChangeEvent event) {
-    if (selectedAlias == null)
+    if (selectedPage == null)
       return;
 
     updateSummary();
   }
-
-  
 
 }

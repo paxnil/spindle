@@ -35,7 +35,9 @@ import net.sf.tapestry.spec.BindingSpecification;
 import net.sf.tapestry.spec.BindingType;
 import net.sf.tapestry.spec.ComponentSpecification;
 import net.sf.tapestry.spec.ContainedComponent;
-import net.sf.tapestry.spec.PageSpecification;
+import net.sf.tapestry.spec.ExtensionSpecification;
+import net.sf.tapestry.spec.IApplicationSpecification;
+import net.sf.tapestry.spec.ILibrarySpecification;
 import net.sf.tapestry.spec.ParameterSpecification;
 import net.sf.tapestry.spec.SpecFactory;
 
@@ -43,16 +45,16 @@ import com.iw.plugins.spindle.spec.bean.PluginFieldBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginPropertyBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginStaticBeanInitializer;
 
-public class TapestryPluginFactory extends SpecFactory {
+public class TapestryPluginSpecFactory extends SpecFactory {
 
   /**
    * Constructor for TapestryPluginFactory
    */
-  public TapestryPluginFactory() {
+  public TapestryPluginSpecFactory() {
     super();
   }
 
-  public ApplicationSpecification createApplicationSpecification() {
+  public IApplicationSpecification createApplicationSpecification() {
     return new PluginApplicationSpecification();
   }
 
@@ -76,14 +78,6 @@ public class TapestryPluginFactory extends SpecFactory {
     return new PluginContainedComponent();
   }
 
-  public PageSpecification createPageSpecification() {
-    return new PluginPageSpecification("");
-  }
-
-  public PageSpecification createPageSpecification(String specificationPath) {
-    return new PluginPageSpecification(specificationPath);
-  }
-
   public ParameterSpecification createParameterSpecification() {
     return new PluginParameterSpecification();
   }
@@ -101,6 +95,27 @@ public class TapestryPluginFactory extends SpecFactory {
    */
   public IBeanInitializer createFieldBeanInitializer(String propertyName, String fieldName) {
     return new PluginFieldBeanInitializer(propertyName, fieldName);
+  }
+
+  /**
+   * @see net.sf.tapestry.spec.SpecFactory#createExtensionSpecification()
+   */
+  public ExtensionSpecification createExtensionSpecification() {
+    return super.createExtensionSpecification();
+  }
+
+  /**
+   * @see net.sf.tapestry.spec.SpecFactory#createLibrarySpecification()
+   */
+  public ILibrarySpecification createLibrarySpecification() {
+    return new PluginLibrarySpecification();
+  }
+
+  /**
+   * @see net.sf.tapestry.spec.SpecFactory#createStringBeanInitializer(String, String)
+   */
+  public IBeanInitializer createStringBeanInitializer(String propertyName, String key) {
+    return super.createStringBeanInitializer(propertyName, key);
   }
 
 }
