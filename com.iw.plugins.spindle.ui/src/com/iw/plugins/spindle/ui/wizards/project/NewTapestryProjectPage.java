@@ -80,7 +80,7 @@ import com.iw.plugins.spindle.ui.properties.ProjectPropertyPage;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: NewTapestryProjectPage.java,v 1.12 2004/05/07 15:33:58 glongman
- *          Exp $
+ *                     Exp $
  */
 public class NewTapestryProjectPage extends WizardNewProjectCreationPage
 {
@@ -182,16 +182,18 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
 
     // servlet spec version combo
     fServletSpecVersionCombo = new Combo(projectGroup, SWT.READ_ONLY);
+    fServletSpecVersionCombo.add(TapestryCore.SERVLET_2_4_SCHEMA);
     fServletSpecVersionCombo.add(TapestryCore.SERVLET_2_3_PUBLIC_ID);
     fServletSpecVersionCombo.add(TapestryCore.SERVLET_2_2_PUBLIC_ID);
     fServletSpecVersionCombo.setFont(parent.getFont());
-    fServletSpecVersionCombo.select(0);
+    fServletSpecVersionCombo.select(1);
     fServletSpecVersionCombo.addSelectionListener(new SelectionListener()
     {
       public void widgetSelected(SelectionEvent e)
       {
-        fInsertTapestryFilter.setEnabled(TapestryCore.SERVLET_2_3_PUBLIC_ID
-            .equals(getServletSpecPublicId()));
+        int dtdId = XMLUtil.getDTDVersion(getServletSpecPublicId());
+        if (fInsertTapestryFilter != null)
+          fInsertTapestryFilter.setEnabled(dtdId >= XMLUtil.DTD_SERVLET_2_3);
       }
 
       public void widgetDefaultSelected(SelectionEvent e)
@@ -218,9 +220,9 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     if (fServletSpecVersionCombo != null)
       fServletSpecVersionCombo.setEnabled(nameSpecified);
 
+    int dtdId = XMLUtil.getDTDVersion(getServletSpecPublicId());
     if (fInsertTapestryFilter != null)
-      fInsertTapestryFilter.setEnabled(nameSpecified
-          && TapestryCore.SERVLET_2_3_PUBLIC_ID.equals(getServletSpecPublicId()));
+      fInsertTapestryFilter.setEnabled(nameSpecified && dtdId >= XMLUtil.DTD_SERVLET_2_3);
 
     if (!superValid)
       return false;
@@ -313,8 +315,6 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     project.setPersistentProperty(new QualifiedName(
         "",
         ProjectPropertyPage.CONTEXT_ROOT_PROPERTY), "/" + getContextFolderName());
-    //        project.setPersistentProperty(new QualifiedName("",
-    // ProjectPropertyPage.LIBRARY_SPEC_PROPERTY), "");
 
     // now configure/deconfigure the project
 
@@ -323,8 +323,15 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     // No longer required, library projects are deprecated
     //        prj.setProjectType(TapestryProject.APPLICATION_PROJECT_TYPE);
     prj.setWebContext("/" + getContextFolderName());
+    
+    int version = XMLUtil.getDTDVersion(getServletSpecPublicId());
+    if (version == XMLUtil.UNKNOWN_DTD)
+      prj.setValidateWebXML(false);
+
+    
     prj.saveProperties();
 
+   
   }
 
   /**

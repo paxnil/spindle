@@ -34,8 +34,10 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -62,6 +64,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -83,872 +86,764 @@ import com.iw.plugins.spindle.ui.util.Revealer;
 /**
  * Property Page that is added to all Java Projects.
  * <p>
- *  Allows users to add/remove the Tapestry Project nature to any Java Project easily.
+ * Allows users to add/remove the Tapestry Project nature to any Java Project
+ * easily.
  * </p>
  * <p>
- * Also allows users to designate two non source folders as application root and servlet 
- * context root.
+ * Also allows users to designate two non source folders as application root and
+ * servlet context root.
  * </p>
  * 
  * @author glongman@intelligentworks.com
- * 
+ *  
  */
 
 public class ProjectPropertyPage extends PropertyPage
 {
 
-    private static boolean DEBUG = false;
+  private static boolean DEBUG = false;
 
-    abstract class Validator implements ISelectionValidator
+  abstract class Validator implements ISelectionValidator
+  {
+    protected boolean isOnOutputPath(IJavaProject project, IPath candidate)
     {
-        protected boolean isOnOutputPath(IJavaProject project, IPath candidate)
-        {
-            try
-            {
-                IPath output = project.getOutputLocation();
-                return pathCheck(output, candidate);
-            } catch (JavaModelException e)
-            {}
-            return false;
-        }
-        protected boolean isOnSourcePath(IJavaProject project, IPath candidate)
-        {
-            try
-            {
-                IPackageFragmentRoot[] roots = project.getPackageFragmentRoots();
-                for (int i = 0; i < roots.length; i++)
-                {
-                    if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE)
-                    {
-                        IPath rootpath = roots[i].getUnderlyingResource().getFullPath();
-                        if (pathCheck(rootpath, candidate))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            } catch (JavaModelException e)
-            {}
-            return false;
-        }
-        protected boolean pathCheck(IPath existing, IPath candidate)
-        {
-            if (existing.equals(candidate))
-            {
-                return true;
-            }
-            if (candidate.segmentCount() < existing.segmentCount())
-            {
-                return false;
-            }
-            return existing.matchingFirstSegments(candidate) == existing.segmentCount();
-        }
+      try
+      {
+        IPath output = project.getOutputLocation();
+        return pathCheck(output, candidate);
+      } catch (JavaModelException e)
+      {}
+      return false;
     }
-
-    class ApplicationContextValidator extends Validator
+    protected boolean isOnSourcePath(IJavaProject project, IPath candidate)
     {
-        public String isValidString(String value)
+      try
+      {
+        IPackageFragmentRoot[] roots = project.getPackageFragmentRoots();
+        for (int i = 0; i < roots.length; i++)
         {
-            return isValid(new Path(value));
-        }
-
-        public String isValid(Object selection)
-        {
-            try
+          if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE)
+          {
+            IPath rootpath = roots[i].getUnderlyingResource().getFullPath();
+            if (pathCheck(rootpath, candidate))
             {
-                IJavaProject jproject = getJavaProject();
-                IProject project = (IProject) jproject.getAdapter(IProject.class);
-                Path selected = (Path) selection;
-
-                if (!project.getFolder(selected).exists())
-                {
-                    return UIPlugin.getString("property-page-wrong-project");
-                }
-                if (isOnOutputPath(jproject, selected))
-                {
-                    return UIPlugin.getString("property-page-output-folder");
-                }
-                if (isOnSourcePath(jproject, selected))
-                {
-                    return UIPlugin.getString("property-page-no-source-path");
-                }
-                return null;
-            } catch (CoreException e)
-            {
-                return "error occured!";
+              return true;
             }
+          }
         }
+      } catch (JavaModelException e)
+      {}
+      return false;
     }
-
-    class DialogContextValidator extends Validator
+    protected boolean pathCheck(IPath existing, IPath candidate)
     {
-
-        public String isValid(Object selection)
-        {
-            try
-            {
-                IPath selected = (IPath) selection;
-
-                if (DEBUG)
-                    UIPlugin.log("validation path: " + selected);
-
-                IWorkspaceRoot root = UIPlugin.getWorkspace().getRoot();
-
-                IProject selectedProject = root.getProject(selected.segment(0));
-
-                IJavaProject jproject = getJavaProject();
-                IProject project = (IProject) jproject.getAdapter(IProject.class);
-
-                if (!project.equals(selectedProject))
-                {
-                    if (DEBUG)
-                        UIPlugin.log("validation failed: wrong project");
-                    return UIPlugin.getString("property-page-wrong-project");
-                }
-
-                selected = (IPath) selected.removeFirstSegments(0);
-                if (isOnOutputPath(jproject, selected))
-                {
-                    if (DEBUG)
-                        UIPlugin.log("validation failed: path is in the compiler output folder");
-                    return UIPlugin.getString("property-page-output-folder");
-                }
-                if (isOnSourcePath(jproject, selected))
-                {
-                    if (DEBUG)
-                        UIPlugin.log("validation failed: path is in the java source path");
-                    return UIPlugin.getString("property-page-no-source-path");
-                }
-
-                if (DEBUG)
-                    UIPlugin.log("validation passed");
-                return null;
-            } catch (CoreException e)
-            {
-                return "error occured!";
-            }
-        }
-    }
-
-    public static final String PROJECT_TYPE_PROPERTY = TapestryCore.PLUGIN_ID + ".project-type";
-    public static final String CONTEXT_ROOT_PROPERTY = TapestryCore.PLUGIN_ID + ".context-root";
-    //    public static final String LIBRARY_SPEC_PROPERTY = TapestryCore.PLUGIN_ID + ".library-spec";
-
-    private static final int TEXT_FIELD_WIDTH = 30;
-
-    private Text fOwnerText;
-
-    private Button fIsTapestryProjectCheck;
-    //    private Combo fProjectTypeCombo;
-    private Label fContextRootLabel;
-    private Text fWebContextRoot;
-    private Button fBrowseContextRoot;
-    //    private Label fLibrarySpecLabel;
-    //    private Text fLibrarySpec;
-    //    private Button fBrowseLibrarySpecification;
-
-    //    private ApplicationContextValidator fContextValidator = new ApplicationContextValidator();
-    private DialogContextValidator fDialogContextValidator = new DialogContextValidator();
-
-    /**
-     * Constructor for SamplePropertyPage.
-     */
-    public ProjectPropertyPage()
-    {
-        super();
-    }
-
-    private void addFirstSection(Composite parent)
-    {
-        Composite composite = createDefaultComposite(parent);
-
-        GridLayout layout = new GridLayout();
-        layout.numColumns = 2;
-        composite.setLayout(layout);
-        composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        fIsTapestryProjectCheck = new Button(composite, SWT.CHECK | SWT.LEFT);
-        fIsTapestryProjectCheck.setText(UIPlugin.getString("property-page-is-tapestry-project"));
-        fIsTapestryProjectCheck.setEnabled(true);
-
-        fIsTapestryProjectCheck.addSelectionListener(new SelectionListener()
-        {
-            public void widgetSelected(SelectionEvent e)
-            {
-                updateApplyButton();
-                checkEnabled();
-            }
-
-            public void widgetDefaultSelected(SelectionEvent e)
-            {
-                //do nothing
-            }
-        });
-        try
-        {
-            fIsTapestryProjectCheck.setSelection(getJavaProject().getProject().hasNature(TapestryCore.NATURE_ID));
-        } catch (CoreException ex)
-        {
-            TapestryCore.log(ex.getMessage());
-        }
-        //        fProjectTypeCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
-
-        // commented out until a real library build can occur
-
-        //        fProjectTypeCombo.setItems(
-        //            new String[] {
-        //                UIPlugin.getString("property-page-project-type-application"),
-        //                UIPlugin.getString("property-page-project-type-library")});
-        //        fProjectTypeCombo.setItems(new String[] { UIPlugin.getString("property-page-project-type-application")});
-        //
-        //        fProjectTypeCombo.select(getProjectType());
-        //        fProjectTypeCombo.setEnabled(fIsTapestryProjectCheck.getSelection());
-        //        fProjectTypeCombo.addSelectionListener(new SelectionListener()
-        //        {
-        //            public void widgetSelected(SelectionEvent e)
-        //            {
-        //                updateApplyButton();
-        //                checkEnabled();
-        //            }
-        //
-        //            public void widgetDefaultSelected(SelectionEvent e)
-        //            {
-        //                // do nothing
-        //            }
-        //        });
-    }
-
-    private void checkEnabled()
-    {
-        boolean enable = fIsTapestryProjectCheck.getSelection();
-        fContextRootLabel.setEnabled(enable);
-        fWebContextRoot.setEnabled(enable);
-        fBrowseContextRoot.setEnabled(enable);
-        //        if (fBrowseLibrarySpecification != null)
-        //        {
-        //            boolean canEnable = fIsTapestryProjectCheck.getSelection();
-        //
-        //            fProjectTypeCombo.setEnabled(canEnable);
-        //
-        //            boolean appSelected = fProjectTypeCombo.getSelectionIndex() == TapestryProject.APPLICATION_PROJECT_TYPE;
-        //            boolean libSelected = fProjectTypeCombo.getSelectionIndex() == TapestryProject.LIBRARY_PROJECT_TYPE;
-        //            boolean showApp = appSelected && canEnable;
-        //            boolean showLib = libSelected && canEnable;
-        //
-        //            fContextRootLabel.setEnabled(showApp);
-        //            fWebContextRoot.setEnabled(showApp);
-        //            fBrowseContextRoot.setEnabled(showApp);
-        //            fLibrarySpecLabel.setEnabled(showLib);
-        //            fLibrarySpec.setEnabled(showLib);
-        //            fBrowseLibrarySpecification.setEnabled(showLib);
-        //        }
-    }
-
-    private void addSeparator(Composite parent)
-    {
-        Label separator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
-        GridData gridData = new GridData();
-        gridData.horizontalAlignment = GridData.FILL;
-        gridData.grabExcessHorizontalSpace = true;
-        separator.setLayoutData(gridData);
-    }
-
-    private void addApplicationSection(Composite parent)
-    {
-        Composite composite = createDefaultComposite(parent);
-
-        GridLayout layout = new GridLayout();
-        layout.numColumns = 1;
-        composite.setLayout(layout);
-        composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        //        boolean isEnabled =
-        //            fIsTapestryProjectCheck.getSelection()
-        //                && fProjectTypeCombo.getSelectionIndex() == TapestryProject.APPLICATION_PROJECT_TYPE;
-        boolean isEnabled = fIsTapestryProjectCheck.getSelection();
-
-        Composite fieldGroup = new Composite(composite, SWT.NONE);
-        layout = new GridLayout();
-        layout.numColumns = 3;
-        fieldGroup.setLayout(layout);
-        fieldGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        fContextRootLabel = new Label(fieldGroup, SWT.NONE);
-        fContextRootLabel.setText(UIPlugin.getString("property-page-contextRoot"));
-        fContextRootLabel.setEnabled(true);
-
-        fWebContextRoot = new Text(fieldGroup, SWT.BORDER);
-        fWebContextRoot.setEditable(false);
-        fWebContextRoot.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-        GridData data = new GridData(GridData.FILL_HORIZONTAL);
-        data.widthHint = convertWidthInCharsToPixels(TEXT_FIELD_WIDTH);
-        fWebContextRoot.setLayoutData(data);
-        fWebContextRoot.setText(getContextRootLocation());
-        fWebContextRoot.setEnabled(isEnabled);
-        fWebContextRoot.addModifyListener(new ModifyListener()
-        {
-            public void modifyText(ModifyEvent e)
-            {
-                updateApplyButton();
-            }
-        });
-
-        fBrowseContextRoot = new Button(fieldGroup, SWT.PUSH);
-        fBrowseContextRoot.setText(UIPlugin.getString("browse-button-label"));
-        fBrowseContextRoot.addSelectionListener(new SelectionAdapter()
-        {
-            public void widgetSelected(SelectionEvent evt)
-            {
-                String newValue = chooseContextFolder();
-                if (newValue != null)
-                {
-                    fWebContextRoot.setText(newValue);
-                    isValid();
-                }
-            }
-        });
-
-        fBrowseContextRoot.setEnabled(isEnabled);
-
-    }
-
-    //    private void addLibrarySection(Composite parent)
-    //    {
-    //        Composite composite = createDefaultComposite(parent);
-    //
-    //        GridLayout layout = new GridLayout();
-    //        layout.numColumns = 1;
-    //        composite.setLayout(layout);
-    //        composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    //
-    //        boolean isEnabled =
-    //            fIsTapestryProjectCheck.getSelection()
-    //                && fProjectTypeCombo.getSelectionIndex() == TapestryProject.LIBRARY_PROJECT_TYPE;
-    //
-    //        Composite fieldGroup = new Composite(composite, SWT.NONE);
-    //        layout = new GridLayout();
-    //        layout.numColumns = 3;
-    //        fieldGroup.setLayout(layout);
-    //        fieldGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    //
-    //        fLibrarySpecLabel = new Label(fieldGroup, SWT.NONE);
-    //        fLibrarySpecLabel.setText(UIPlugin.getString("property-page-project-library-spec"));
-    //        fLibrarySpecLabel.setEnabled(true);
-    //
-    //        fLibrarySpec = new Text(fieldGroup, SWT.BORDER);
-    //        fLibrarySpec.setEditable(false);
-    //        fLibrarySpec.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-    //        GridData data = new GridData(GridData.FILL_HORIZONTAL);
-    //        data.widthHint = convertWidthInCharsToPixels(TEXT_FIELD_WIDTH);
-    //        fLibrarySpec.setLayoutData(data);
-    //        fLibrarySpec.setText(this.getLibrarySpecLocation());
-    //        fLibrarySpec.setEnabled(isEnabled);
-    //        fLibrarySpec.addModifyListener(new ModifyListener()
-    //        {
-    //            public void modifyText(ModifyEvent e)
-    //            {
-    //                updateApplyButton();
-    //            }
-    //        });
-    //
-    //        fBrowseLibrarySpecification = new Button(fieldGroup, SWT.PUSH);
-    //        fBrowseLibrarySpecification.setText(UIPlugin.getString("browse-button-label"));
-    //        fBrowseLibrarySpecification.addSelectionListener(new SelectionAdapter()
-    //        {
-    //            public void widgetSelected(SelectionEvent evt)
-    //            {
-    //                String newValue = chooseLibraryFile();
-    //                if (newValue != null)
-    //                {
-    //                    fLibrarySpec.setText(newValue);
-    //                }
-    //            }
-    //        });
-    //
-    //        fBrowseLibrarySpecification.setEnabled(isEnabled);
-    //    }
-
-    public boolean isValid()
-    {
-        setErrorMessage(null);
-
-        IJavaProject jproject = null;
-        try
-        {
-            jproject = getJavaProject();
-        } catch (CoreException e)
-        {
-            UIPlugin.log(e);
-        }
-
-        if (jproject == null)
-        {
-            setErrorMessage(UIPlugin.getString("property-page-no-java-project"));
-            disableAll();
-            return true;
-        }
-
-        IProject project = jproject.getProject();
-
-        try
-        {
-            // old spindle and new spindle can't co-exist!
-            if (project.hasNature("com.iw.plugins.spindle.project.TapestryProject"))
-            {
-                setErrorMessage(UIPlugin.getString("property-page-conflicts-with-old-spindle"));
-                disableAll();
-                return false;
-            }
-        } catch (CoreException e1)
-        {
-            UIPlugin.log(e1);
-        }
-
-        if (!fIsTapestryProjectCheck.getSelection())
-        {
-            return true;
-        }
-        //        int type = fProjectTypeCombo.getSelectionIndex();
-        //        switch (type)
-        //        {
-        //            case TapestryProject.APPLICATION_PROJECT_TYPE :
-        String wcroot = fWebContextRoot.getText();
-        if (wcroot == null || wcroot.trim().length() == 0)
-            return false;
-
-        wcroot = wcroot.trim();
-
-        if (!wcroot.startsWith("/"))
-            wcroot = "/" + wcroot;
-
-        IPath projPath = project.getFullPath();
-        String fullPath = projPath.toString() + wcroot;
-        if (!projPath.isValidPath(fullPath))
-        {
-            setErrorMessage("not a valid path: " + fullPath); // TODO I10N
-            return false;
-        }
-        if (DEBUG)
-            UIPlugin.log("isValid() ->about to validate the context root: " + wcroot);
-        String badApp;
-        try
-        {
-            badApp = fDialogContextValidator.isValid(new Path(fullPath));
-        } catch (RuntimeException e2)
-        {
-            if (DEBUG)
-                UIPlugin.log("isValid() -> an exception ocurred");
-            throw e2;
-        }
-        if (badApp != null)
-        {
-            setErrorMessage(badApp);
-            return false;
-        }
-        //                break;
-        //
-        //            case TapestryProject.LIBRARY_PROJECT_TYPE :
-        //                String libFile = fLibrarySpec.getText();
-        //                String badLib = validateLibraryPath(libFile);
-        //                if (badLib != null)
-        //                {
-        //                    setErrorMessage(badLib);
-        //                    return false;
-        //                }
-        //            default :
-        //                break;
-        //        }
+      if (existing.equals(candidate))
+      {
         return true;
+      }
+      if (candidate.segmentCount() < existing.segmentCount())
+      {
+        return false;
+      }
+      return existing.matchingFirstSegments(candidate) == existing.segmentCount();
     }
+  }
 
-    //called by isValid() disable if the project is already an old (1.1.X) Spindle project
-    private void disableAll()
-    {
-        fIsTapestryProjectCheck.setEnabled(false);
-        //        fProjectTypeCombo.setEnabled(false);
-        fContextRootLabel.setEnabled(false);
-        fWebContextRoot.setEnabled(false);
-        fBrowseContextRoot.setEnabled(false);
-        //        fLibrarySpecLabel.setEnabled(false);
-        //        fLibrarySpec.setEnabled(false);
-        //        fBrowseLibrarySpecification.setEnabled(false);
-    }
+  //    class ApplicationContextValidator extends Validator
+  //    {
+  //        public String isValidString(String value)
+  //        {
+  //            return isValid(new Path(value));
+  //        }
+  //
+  //        public String isValid(Object selection)
+  //        {
+  //            try
+  //            {
+  //                IJavaProject jproject = getJavaProject();
+  //                IProject project = (IProject) jproject.getAdapter(IProject.class);
+  //                Path selected = (Path) selection;
+  //
+  //                if (!project.getFolder(selected).exists())
+  //                {
+  //                    return UIPlugin.getString("property-page-wrong-project");
+  //                }
+  //                if (isOnOutputPath(jproject, selected))
+  //                {
+  //                    return UIPlugin.getString("property-page-output-folder");
+  //                }
+  //                if (isOnSourcePath(jproject, selected))
+  //                {
+  //                    return UIPlugin.getString("property-page-no-source-path");
+  //                }
+  //                return null;
+  //            } catch (CoreException e)
+  //            {
+  //                return "error occured!";
+  //            }
+  //        }
+  //    }
 
-    private String validateLibraryPath(String value)
+  class DialogContextValidator extends Validator
+  {
+
+    public String isValid(Object selection)
     {
-        if (value == null || value.trim().length() == 0)
+      try
+      {
+        IPath selected = (IPath) selection;
+
+        if (DEBUG)
+          UIPlugin.log("validation path: " + selected);
+
+        IWorkspaceRoot root = UIPlugin.getWorkspace().getRoot();
+
+        IProject selectedProject = root.getProject(selected.segment(0));
+
+        IJavaProject jproject = getJavaProject();
+        IProject project = (IProject) jproject.getAdapter(IProject.class);
+
+        if (!project.equals(selectedProject))
         {
-            return UIPlugin.getString("property-page-lib-not-empty");
+          if (DEBUG)
+            UIPlugin.log("validation failed: wrong project");
+          return UIPlugin.getString("property-page-wrong-project");
         }
-        if (!value.endsWith(".library"))
+
+        selected = (IPath) selected.removeFirstSegments(0);
+        if (isOnOutputPath(jproject, selected))
         {
-            return UIPlugin.getString("property-page-must-be-library");
+          if (DEBUG)
+            UIPlugin.log("validation failed: path is in the compiler output folder");
+          return UIPlugin.getString("property-page-output-folder");
         }
+        if (isOnSourcePath(jproject, selected))
+        {
+          if (DEBUG)
+            UIPlugin.log("validation failed: path is in the java source path");
+          return UIPlugin.getString("property-page-no-source-path");
+        }
+
+        if (DEBUG)
+          UIPlugin.log("validation passed");
         return null;
+      } catch (CoreException e)
+      {
+        return "error occured!";
+      }
     }
+  }
 
-    protected String chooseContextFolder()
+  public static final String PROJECT_TYPE_PROPERTY = TapestryCore.PLUGIN_ID
+      + ".project-type";
+  public static final String CONTEXT_ROOT_PROPERTY = TapestryCore.PLUGIN_ID
+      + ".context-root";
+  public static final String VALIDATE_WEBXML_PROPERTY = TapestryCore.PLUGIN_ID
+      + ".validate-web-xml";
+
+  private static final int TEXT_FIELD_WIDTH = 30;
+
+  private Text fOwnerText;
+
+  private Button fIsTapestryProjectCheck;
+  private Label fContextRootLabel;
+  private Text fWebContextRoot;
+  private Button fBrowseContextRoot;
+  private Button fValidateWebXML;
+
+  private DialogContextValidator fDialogContextValidator = new DialogContextValidator();
+
+  /**
+   * Constructor for SamplePropertyPage.
+   */
+  public ProjectPropertyPage()
+  {
+    super();
+  }
+
+  private void addFirstSection(Composite parent)
+  {
+    Composite composite = createDefaultComposite(parent);
+
+    GridLayout layout = new GridLayout();
+    layout.numColumns = 2;
+    composite.setLayout(layout);
+    composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+    fIsTapestryProjectCheck = new Button(composite, SWT.CHECK | SWT.LEFT);
+    fIsTapestryProjectCheck.setText(UIPlugin
+        .getString("property-page-is-tapestry-project"));
+    fIsTapestryProjectCheck.setEnabled(true);
+
+    fIsTapestryProjectCheck.addSelectionListener(new SelectionListener()
     {
-        IContainer project = (IContainer) getElement().getAdapter(IContainer.class);
-        ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(), project, true, "");
-        dialog.setValidator(fDialogContextValidator);
-        dialog.showClosedProjects(false);
-        if (dialog.open() == ContainerSelectionDialog.OK)
+      public void widgetSelected(SelectionEvent e)
+      {
+        updateApplyButton();
+        checkEnabled();
+      }
+
+      public void widgetDefaultSelected(SelectionEvent e)
+      {
+        //do nothing
+      }
+    });
+    try
+    {
+      fIsTapestryProjectCheck.setSelection(getJavaProject().getProject().hasNature(
+          TapestryCore.NATURE_ID));
+    } catch (CoreException ex)
+    {
+      TapestryCore.log(ex.getMessage());
+    }
+  }
+
+  private void checkEnabled()
+  {
+    boolean enable = fIsTapestryProjectCheck.getSelection();
+    fContextRootLabel.setEnabled(enable);
+    fWebContextRoot.setEnabled(enable);
+    fBrowseContextRoot.setEnabled(enable);
+    fValidateWebXML.setEnabled(enable);
+  }
+
+  private void addSeparator(Composite parent)
+  {
+    Label separator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
+    GridData gridData = new GridData();
+    gridData.horizontalAlignment = GridData.FILL;
+    gridData.grabExcessHorizontalSpace = true;
+    separator.setLayoutData(gridData);
+  }
+
+  private void addApplicationSection(Composite parent)
+  {
+    Font font = parent.getFont();
+    Composite composite = createDefaultComposite(parent);
+    composite.setFont(font);
+
+    GridLayout layout = new GridLayout();
+    layout.numColumns = 1;
+    composite.setLayout(layout);
+    composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+    boolean isEnabled = fIsTapestryProjectCheck.getSelection();
+
+    Composite fieldGroup = new Composite(composite, SWT.NONE);
+    fieldGroup.setFont(font);
+    layout = new GridLayout();
+    layout.numColumns = 3;
+    fieldGroup.setLayout(layout);
+    fieldGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+    fContextRootLabel = new Label(fieldGroup, SWT.NONE);
+    fContextRootLabel.setFont(font);
+    fContextRootLabel.setText(UIPlugin.getString("property-page-contextRoot"));
+    fContextRootLabel.setEnabled(true);
+
+    fWebContextRoot = new Text(fieldGroup, SWT.BORDER);
+    fWebContextRoot.setFont(font);
+    fWebContextRoot.setEditable(false);
+    fWebContextRoot.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+    GridData data = new GridData(GridData.FILL_HORIZONTAL);
+    data.widthHint = convertWidthInCharsToPixels(TEXT_FIELD_WIDTH);
+    fWebContextRoot.setLayoutData(data);
+    fWebContextRoot.setText(getContextRootLocation());
+    fWebContextRoot.setEnabled(isEnabled);
+    fWebContextRoot.addModifyListener(new ModifyListener()
+    {
+      public void modifyText(ModifyEvent e)
+      {
+        updateApplyButton();
+      }
+    });
+
+    fBrowseContextRoot = new Button(fieldGroup, SWT.PUSH);
+    fBrowseContextRoot.setFont(font);
+    fBrowseContextRoot.setText(UIPlugin.getString("browse-button-label"));
+    fBrowseContextRoot.addSelectionListener(new SelectionAdapter()
+    {
+      public void widgetSelected(SelectionEvent evt)
+      {
+        String newValue = chooseContextFolder();
+        if (newValue != null)
         {
-            Object[] result = dialog.getResult();
-            IPath selected = (IPath) result[0];
-            selected = selected.removeFirstSegments(1);
-            return selected.makeAbsolute().toString();
+          fWebContextRoot.setText(newValue);
+          isValid();
         }
-        return null;
+      }
+    });
+
+    fBrowseContextRoot.setEnabled(isEnabled);
+
+    fValidateWebXML = new Button(fieldGroup, SWT.CHECK);
+    fValidateWebXML.setText(UIPlugin.getString("property-page-validate-web-xml"));
+    fValidateWebXML.setFont(parent.getFont());
+    fValidateWebXML.setSelection(isValidatingWebXML());
+
+    GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+    gd.horizontalIndent = 1;
+    gd.horizontalSpan = 3;
+    fValidateWebXML.setLayoutData(gd);
+
+    checkEnabled();
+
+  }
+
+  public boolean isValid()
+  {
+    setErrorMessage(null);
+
+    IJavaProject jproject = null;
+    try
+    {
+      jproject = getJavaProject();
+    } catch (CoreException e)
+    {
+      UIPlugin.log(e);
     }
 
-    //    protected String chooseLibraryFile()
-    //    {
-    //        IJavaProject jproject = null;
-    //        try
-    //        {
-    //            jproject = getJavaProject();
-    //        } catch (CoreException e)
-    //        {
-    //            UIPlugin.log(e);
-    //        }
-    //        if (jproject == null)
-    //        {
-    //            return fLibrarySpec.getText();
-    //        }
-    //        LibrarySearchDialog dialog =
-    //            new LibrarySearchDialog(
-    //                getShell(),
-    //                jproject,
-    //                UIPlugin.getString("property-page-library-dialog-window-title"),
-    //                UIPlugin.getString("property-page-library-dialog-description"));
-    //        if (dialog.open() == LibrarySearchDialog.OK)
-    //        {
-    //            return dialog.getResult();
-    //        }
-    //        return null;
-    //    }
-
-    private int getIntPropertyFromWorkspace(QualifiedName key) throws CoreException
+    if (jproject == null)
     {
-        String result = getPropertyFromWorkspace(key);
-        try
+      setErrorMessage(UIPlugin.getString("property-page-no-java-project"));
+      disableAll();
+      return true;
+    }
+
+    IProject project = jproject.getProject();
+
+    try
+    {
+      // old spindle and new spindle can't co-exist!
+      if (project.hasNature("com.iw.plugins.spindle.project.TapestryProject"))
+      {
+        setErrorMessage(UIPlugin.getString("property-page-conflicts-with-old-spindle"));
+        disableAll();
+        return false;
+      }
+    } catch (CoreException e1)
+    {
+      UIPlugin.log(e1);
+    }
+
+    if (!fIsTapestryProjectCheck.getSelection())
+    {
+      return true;
+    }
+
+    String wcroot = fWebContextRoot.getText();
+    if (wcroot == null || wcroot.trim().length() == 0)
+      return false;
+
+    wcroot = wcroot.trim();
+
+    if (!wcroot.startsWith("/"))
+      wcroot = "/" + wcroot;
+
+    IPath projPath = project.getFullPath();
+    String fullPath = projPath.toString() + wcroot;
+    if (!projPath.isValidPath(fullPath))
+    {
+      setErrorMessage("not a valid path: " + fullPath); // TODO
+
+      return false;
+    }
+    if (DEBUG)
+      UIPlugin.log("isValid() ->about to validate the context root: " + wcroot);
+    String badApp;
+    try
+    {
+      badApp = fDialogContextValidator.isValid(new Path(fullPath));
+    } catch (RuntimeException e2)
+    {
+      if (DEBUG)
+        UIPlugin.log("isValid() -> an exception ocurred");
+      throw e2;
+    }
+    if (badApp != null)
+    {
+      setErrorMessage(badApp);
+      return false;
+    }
+
+    return true;
+  }
+
+  //called by isValid() disable if the project is already an old (1.1.X)
+  // Spindle project
+  private void disableAll()
+  {
+    fIsTapestryProjectCheck.setEnabled(false);
+    fContextRootLabel.setEnabled(false);
+    fWebContextRoot.setEnabled(false);
+    fBrowseContextRoot.setEnabled(false);
+  }
+
+  private String validateLibraryPath(String value)
+  {
+    if (value == null || value.trim().length() == 0)
+    {
+      return UIPlugin.getString("property-page-lib-not-empty");
+    }
+    if (!value.endsWith(".library"))
+    {
+      return UIPlugin.getString("property-page-must-be-library");
+    }
+    return null;
+  }
+
+  protected String chooseContextFolder()
+  {
+    IContainer project = (IContainer) getElement().getAdapter(IContainer.class);
+    ContainerSelectionDialog dialog = new ContainerSelectionDialog(
+        getShell(),
+        project,
+        true,
+        "");
+    dialog.setValidator(fDialogContextValidator);
+    dialog.showClosedProjects(false);
+    if (dialog.open() == ContainerSelectionDialog.OK)
+    {
+      Object[] result = dialog.getResult();
+      IPath selected = (IPath) result[0];
+      selected = selected.removeFirstSegments(1);
+      return selected.makeAbsolute().toString();
+    }
+    return null;
+  }
+
+  private int getIntPropertyFromWorkspace(QualifiedName key) throws CoreException
+  {
+    String result = getPropertyFromWorkspace(key);
+    try
+    {
+      return new Integer(result).intValue();
+    } catch (NumberFormatException e)
+    {
+      return TapestryProject.APPLICATION_PROJECT_TYPE;
+    }
+  }
+
+  private String getPropertyFromWorkspace(QualifiedName key) throws CoreException
+  {
+    String result = ((IResource) getElement()).getPersistentProperty(key);
+    if (result == null)
+    {
+      throw new CoreException(new Status(
+          IStatus.ERROR,
+          TapestryCore.PLUGIN_ID,
+          0,
+          "not found",
+          null));
+    }
+    return result;
+  }
+
+  protected int getProjectType()
+  {
+    int result = TapestryProject.APPLICATION_PROJECT_TYPE;
+    try
+    {
+      QualifiedName key = new QualifiedName("", PROJECT_TYPE_PROPERTY);
+      TapestryProject prj = getTapestryProject();
+      if (prj != null)
+      {
+        result = prj.getProjectType();
+
+        if (result == -1)
         {
-            return new Integer(result).intValue();
-        } catch (NumberFormatException e)
-        {
-            return TapestryProject.APPLICATION_PROJECT_TYPE;
+          result = getIntPropertyFromWorkspace(key);
         }
-    }
+      } else
+      {
+        result = getIntPropertyFromWorkspace(key);
+      }
+    } catch (CoreException ex)
+    {}
+    return result;
 
-    private String getPropertyFromWorkspace(QualifiedName key) throws CoreException
+  }
+
+  private boolean isValidatingWebXML()
+  {
+
+    try
     {
-        String result = ((IResource) getElement()).getPersistentProperty(key);
-        if (result == null)
-        {
-            throw new CoreException(new Status(IStatus.ERROR, TapestryCore.PLUGIN_ID, 0, "not found", null));
-        }
-        return result;
-    }
-
-    protected int getProjectType()
+      QualifiedName key = new QualifiedName("", VALIDATE_WEBXML_PROPERTY);
+      TapestryProject prj = getTapestryProject();
+      if (prj != null)
+      {
+        return prj.isValidatingWebXML();
+      } else
+      {
+        String property = getPropertyFromWorkspace(key);
+        if (property != null)
+          return "true".equals(property);
+      }
+    } catch (CoreException ex)
     {
-        int result = TapestryProject.APPLICATION_PROJECT_TYPE;
-        try
-        {
-            QualifiedName key = new QualifiedName("", PROJECT_TYPE_PROPERTY);
-            TapestryProject prj = getTapestryProject();
-            if (prj != null)
-            {
-                result = prj.getProjectType();
-
-                if (result == -1)
-                {
-                    result = getIntPropertyFromWorkspace(key);
-                }
-            } else
-            {
-                result = getIntPropertyFromWorkspace(key);
-            }
-        } catch (CoreException ex)
-        {}
-        return result;
-
+      // do nothing.
     }
+    return true;
+  }
+  protected String getContextRootLocation()
+  {
+    if (DEBUG)
+      UIPlugin.log("getting the context root");
 
-    protected String getContextRootLocation()
+    String result = "/context";
+    try
     {
+      QualifiedName key = new QualifiedName("", CONTEXT_ROOT_PROPERTY);
+      TapestryProject prj = getTapestryProject();
+      if (prj != null)
+      {
         if (DEBUG)
-            UIPlugin.log("getting the context root");
-
-        String result = "/context";
-        try
+          UIPlugin
+              .log("tapestry project is not null - trying to get the context from it..");
+        result = prj.getWebContext();
+        if (result == null || "".equals(result.trim()))
         {
-            QualifiedName key = new QualifiedName("", CONTEXT_ROOT_PROPERTY);
-            TapestryProject prj = getTapestryProject();
-            if (prj != null)
-            {
-                if (DEBUG)
-                    UIPlugin.log("tapestry project is not null - trying to get the context from it..");
-                result = prj.getWebContext();
-                if (result == null || "".equals(result.trim()))
-                {
-                    if (DEBUG)
-                        UIPlugin.log(
-                            "The tapestry project returned: '" + result + "' going to the workspace properties....");
+          if (DEBUG)
+            UIPlugin.log("The tapestry project returned: '" + result
+                + "' going to the workspace properties....");
 
-                    result = getPropertyFromWorkspace(key);
+          result = getPropertyFromWorkspace(key);
 
-                    if (DEBUG)
-                        UIPlugin.log("got: " + result + " from the workspace properites.");
+          if (DEBUG)
+            UIPlugin.log("got: " + result + " from the workspace properites.");
 
-                } else
-                {
-                    if (DEBUG)
-                        UIPlugin.log("got: " + result + " from the tapestry project");
-                }
-            } else
-            {
-                if (DEBUG)
-                    UIPlugin.log("No Tapeestry project, going to the workspace properties...");
-
-                result = getPropertyFromWorkspace(key);
-
-                if (DEBUG)
-                    UIPlugin.log("got: " + result + " from the workspace properites.");
-            }
-
-        } catch (CoreException ex)
-        {
-            if (DEBUG)
-                UIPlugin.log("A CoreException occurred accessing the context root");
-        }
-
-        if (DEBUG)
-            UIPlugin.log("returning context root = " + result);
-        return result;
-    }
-
-    //    protected String getLibrarySpecLocation()
-    //    {
-    //        String result = "";
-    //        try
-    //        {
-    //            QualifiedName key = new QualifiedName("", LIBRARY_SPEC_PROPERTY);
-    //            TapestryProject prj = getTapestryProject();
-    //            if (prj != null)
-    //            {
-    //                result = prj.getLibrarySpecPath();
-    //                if (result == null || "".equals(result.trim()))
-    //                {
-    //                    result = getPropertyFromWorkspace(key);
-    //                }
-    //            } else
-    //            {
-    //                result = getPropertyFromWorkspace(key);
-    //            }
-    //
-    //        } catch (CoreException ex)
-    //        {}
-    //        return result;
-    //    }
-
-    /**
-     * @see PreferencePage#createContents(Composite)
-     */
-    protected Control createContents(Composite parent)
-    {
-        if (DEBUG)
-            UIPlugin.log("Tapestry Properties Page creation started.");
-        Composite composite = new Composite(parent, SWT.NONE);
-        GridLayout layout = new GridLayout();
-        composite.setLayout(layout);
-        GridData data = new GridData(GridData.FILL);
-        data.grabExcessHorizontalSpace = true;
-        composite.setLayoutData(data);
-
-        addFirstSection(composite);
-        addSeparator(composite);
-        addApplicationSection(composite);
-        addSeparator(composite);
-        //        addLibrarySection(composite);
-
-        if (DEBUG)
-            UIPlugin.log("Tapestry Properties Page creation done.");
-        return composite;
-    }
-
-    private Composite createDefaultComposite(Composite parent)
-    {
-        Composite composite = new Composite(parent, SWT.NULL);
-        return composite;
-    }
-
-    protected void performDefaults()
-    {
-        fWebContextRoot.setText("/context");
-    }
-
-    public boolean performOk()
-    {
-        Shell shell = UIPlugin.getDefault().getActiveWorkbenchShell();
-        if (shell == null)
-        {
-            try
-            {
-                doOk(new NullProgressMonitor());
-            } catch (CoreException e)
-            {
-                UIPlugin.log(e);
-            }
         } else
         {
+          if (DEBUG)
+            UIPlugin.log("got: " + result + " from the tapestry project");
+        }
+      } else
+      {
+        if (DEBUG)
+          UIPlugin.log("No Tapeestry project, going to the workspace properties...");
+
+        result = getPropertyFromWorkspace(key);
+
+        if (DEBUG)
+          UIPlugin.log("got: " + result + " from the workspace properites.");
+      }
+
+    } catch (CoreException ex)
+    {
+      if (DEBUG)
+        UIPlugin.log("A CoreException occurred accessing the context root");
+    }
+
+    if (DEBUG)
+      UIPlugin.log("returning context root = " + result);
+    return result;
+  }
+
+  /**
+   * @see PreferencePage#createContents(Composite)
+   */
+  protected Control createContents(Composite parent)
+  {
+    if (DEBUG)
+      UIPlugin.log("Tapestry Properties Page creation started.");
+    Composite composite = new Composite(parent, SWT.NONE);
+    GridLayout layout = new GridLayout();
+    composite.setLayout(layout);
+    GridData data = new GridData(GridData.FILL);
+    data.grabExcessHorizontalSpace = true;
+    composite.setLayoutData(data);
+
+    addFirstSection(composite);
+    addSeparator(composite);
+    addApplicationSection(composite);
+    addSeparator(composite);
+    //        addLibrarySection(composite);
+
+    if (DEBUG)
+      UIPlugin.log("Tapestry Properties Page creation done.");
+    return composite;
+  }
+
+  private Composite createDefaultComposite(Composite parent)
+  {
+    Composite composite = new Composite(parent, SWT.NULL);
+    return composite;
+  }
+
+  protected void performDefaults()
+  {
+    fWebContextRoot.setText("/context");
+    fValidateWebXML.setSelection(true);
+  }
+
+  public boolean performOk()
+  {
+    Shell shell = UIPlugin.getDefault().getActiveWorkbenchShell();
+    if (shell == null)
+    {
+      try
+      {
+        doOk(new NullProgressMonitor());
+      } catch (CoreException e)
+      {
+        UIPlugin.log(e);
+      }
+    } else
+    {
+      try
+      {
+        new ProgressMonitorDialog(shell).run(false, false, new IRunnableWithProgress()
+        {
+          public void run(IProgressMonitor monitor) throws InvocationTargetException,
+              InterruptedException
+          {
             try
             {
-                new ProgressMonitorDialog(shell).run(false, false, new IRunnableWithProgress()
-                {
-                    public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
-                    {
-                        try
-                        {
-                            doOk(monitor);
-                        } catch (CoreException e)
-                        {
-                            UIPlugin.log(e);
-                        }
-                    }
-                });
-            } catch (InvocationTargetException e)
+              doOk(monitor);
+            } catch (CoreException e)
             {
-                UIPlugin.log(e);
-            } catch (InterruptedException e)
-            {
-                UIPlugin.log(e);
+              UIPlugin.log(e);
             }
+          }
+        });
+      } catch (InvocationTargetException e)
+      {
+        UIPlugin.log(e);
+      } catch (InterruptedException e)
+      {
+        UIPlugin.log(e);
+      }
+    }
+
+    return true;
+  }
+
+  private void doOk(IProgressMonitor monitor) throws CoreException
+  {
+    // store the values as properties
+    IResource resource = (IResource) getElement();
+
+    resource.setPersistentProperty(
+        new QualifiedName("", PROJECT_TYPE_PROPERTY),
+        new Integer(TapestryProject.APPLICATION_PROJECT_TYPE).toString());
+
+    resource.setPersistentProperty(
+        new QualifiedName("", CONTEXT_ROOT_PROPERTY),
+        fWebContextRoot.getText());
+
+    resource.setPersistentProperty(
+        new QualifiedName("", VALIDATE_WEBXML_PROPERTY),
+        Boolean.toString(fValidateWebXML.getSelection()));
+
+    IWorkspaceRunnable runnable = new IWorkspaceRunnable()
+    {
+      public void run(IProgressMonitor monitor) throws CoreException
+      {
+        if (fIsTapestryProjectCheck.getSelection())
+        {
+          if (getTapestryProject() == null)
+            TapestryProject.addTapestryNature(getJavaProject());
+          TapestryProject prj = getTapestryProject();
+
+          String projectName = prj.getProject().getName();
+          String temp = fWebContextRoot.getText();
+          createFolderIfRequired(projectName + temp);
+          prj.setWebContext(temp);
+          prj.setValidateWebXML(fValidateWebXML.getSelection());
+          prj.saveProperties();
+          IJavaProject jproject = getJavaProject();
+          try
+          {
+            if (jproject.findType(TapestryCore
+                .getString("TapestryComponentSpec.specInterface")) == null)
+            {
+              MessageDialog dialog = new MessageDialog(
+                  getShell(),
+                  "Tapestry jars missing",
+                  null,
+                  "Add the Tapestry jars to the classpath?",
+                  MessageDialog.INFORMATION,
+                  new String[]{IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL},
+                  0);
+              // OK is the default
+              int result = dialog.open();
+              if (result == 0)
+              {
+                List entries = Arrays.asList(jproject.getRawClasspath());
+                ArrayList useEntries = new ArrayList(entries);
+                useEntries.add(JavaCore.newContainerEntry(new Path(
+                    TapestryCore.CORE_CONTAINER)));
+                jproject.setRawClasspath((IClasspathEntry[]) useEntries
+                    .toArray(new IClasspathEntry[entries.size()]), monitor);
+              }
+            }
+          } catch (JavaModelException e)
+          {
+            UIPlugin.log(e);
+          }
+
+        } else
+        {
+          TapestryProject.removeTapestryNature(getJavaProject());
         }
 
-        return true;
-    }
-
-    private void doOk(IProgressMonitor monitor) throws CoreException
-    {
-        // store the values as properties
-        IResource resource = (IResource) getElement();
-        resource.setPersistentProperty(
-            new QualifiedName("", PROJECT_TYPE_PROPERTY),
-            new Integer(TapestryProject.APPLICATION_PROJECT_TYPE).toString());
-        //                new Integer(fProjectTypeCombo.getSelectionIndex()).toString());
-        resource.setPersistentProperty(new QualifiedName("", CONTEXT_ROOT_PROPERTY), fWebContextRoot.getText());
-        //            resource.setPersistentProperty(new QualifiedName("", LIBRARY_SPEC_PROPERTY), fLibrarySpec.getText());
-        // now configure/deconfigure the project
-        IWorkspaceRunnable runnable = new IWorkspaceRunnable()
+        if (fIsTapestryProjectCheck.getSelection())
         {
-            public void run(IProgressMonitor monitor) throws CoreException
-            {
-                if (fIsTapestryProjectCheck.getSelection())
-                {
-                    if (getTapestryProject() == null)
-                        TapestryProject.addTapestryNature(getJavaProject());
-                    TapestryProject prj = getTapestryProject();
-                    //                switch (fProjectTypeCombo.getSelectionIndex())
-                    //                {
-                    //                    case TapestryProject.APPLICATION_PROJECT_TYPE :
-                    //                      prj.setProjectType(TapestryProject.APPLICATION_PROJECT_TYPE);
-                    String projectName = prj.getProject().getName();
-                    String temp = fWebContextRoot.getText();
-                    createFolderIfRequired(projectName + temp);
-                    prj.setWebContext(temp);
-                    //                        break;
-                    //
-                    //                    case TapestryProject.LIBRARY_PROJECT_TYPE :
-                    //                        prj.setProjectType(TapestryProject.LIBRARY_PROJECT_TYPE);
-                    //                        prj.setLibrarySpecPath(fLibrarySpec.getText());
-                    //                        break;
-                    //                }
-                    prj.saveProperties();
-                    IJavaProject jproject = getJavaProject();
-                    try
-                    {
-                        if (jproject.findType(TapestryCore.getString("TapestryComponentSpec.specInterface")) == null)
-                        {
-                            MessageDialog dialog =
-                                new MessageDialog(
-                                    getShell(),
-                                    "Tapestry jars missing",
-                                    null,
-                                    "Add the Tapestry jars to the classpath?",
-                                    MessageDialog.INFORMATION,
-                                    new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL },
-                                    0);
-                            // OK is the default
-                            int result = dialog.open();
-                            if (result == 0)
-                            {
-                                List entries = Arrays.asList(jproject.getRawClasspath());
-                                ArrayList useEntries = new ArrayList(entries);
-                                useEntries.add(JavaCore.newContainerEntry(new Path(TapestryCore.CORE_CONTAINER)));
-                                jproject.setRawClasspath(
-                                    (IClasspathEntry[]) useEntries.toArray(new IClasspathEntry[entries.size()]),
-                                    monitor);
-                            }
-                        }
-                    } catch (JavaModelException e)
-                    {
-                        UIPlugin.log(e);
-                    }
-
-                } else
-                {
-                    TapestryProject.removeTapestryNature(getJavaProject());
-                }
-
-            }
-        };
-
-        UIPlugin.getWorkspace().run(runnable, monitor);
-    }
-
-    private void createFolderIfRequired(String value)
-    {
-        IPath path = new Path(value);
-        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        IFolder folder = (IFolder) root.getFolder(path);
-        try
-        {
-            if (!folder.exists())
-            {
-
-                folder.create(false, true, null);
-
-            }
-            Revealer.selectAndReveal(new StructuredSelection(folder), UIPlugin.getDefault().getActiveWorkbenchWindow());
-        } catch (CoreException e)
-        {
-            TapestryCore.log(e);
-            System.err.println(e.getStatus().getMessage());
+          IProject project = getJavaProject().getProject();
+          project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
         }
-    }
+      }
 
-    /* helper methods */
-    protected IJavaProject getJavaProject() throws CoreException
-    {
-        IProject project = (IProject) (this.getElement().getAdapter(IProject.class));
-        return (IJavaProject) (project.getNature(JavaCore.NATURE_ID));
-    }
-    protected TapestryProject getTapestryProject() throws CoreException
-    {
-        return TapestryProject.create(getJavaProject());
-    }
+    };
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.dialogs.IDialogPage#dispose()
-     */
-    public void dispose()
+    UIPlugin.getWorkspace().run(runnable, monitor);
+  }
+
+  private void createFolderIfRequired(String value)
+  {
+    IPath path = new Path(value);
+    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    IFolder folder = (IFolder) root.getFolder(path);
+    try
     {
-        if (DEBUG)
-            UIPlugin.log("Tapestry Property Page closed (disposed)\n\n\n");
-        super.dispose();
+      if (!folder.exists())
+      {
+
+        folder.create(false, true, null);
+
+      }
+      Revealer.selectAndReveal(new StructuredSelection(folder), UIPlugin
+          .getDefault()
+          .getActiveWorkbenchWindow());
+    } catch (CoreException e)
+    {
+      TapestryCore.log(e);
+      System.err.println(e.getStatus().getMessage());
     }
+  }
+
+  /* helper methods */
+  protected IJavaProject getJavaProject() throws CoreException
+  {
+    IProject project = (IProject) (this.getElement().getAdapter(IProject.class));
+    return (IJavaProject) (project.getNature(JavaCore.NATURE_ID));
+  }
+  protected TapestryProject getTapestryProject() throws CoreException
+  {
+    return TapestryProject.create(getJavaProject());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.dialogs.IDialogPage#dispose()
+   */
+  public void dispose()
+  {
+    if (DEBUG)
+      UIPlugin.log("Tapestry Property Page closed (disposed)\n\n\n");
+    super.dispose();
+  }
 
 }

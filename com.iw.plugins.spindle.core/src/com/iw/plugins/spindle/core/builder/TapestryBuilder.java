@@ -114,7 +114,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
   public static final String APP_SPEC_PATH_PARAM = "org.apache.tapestry.application-specification";
   public static final String ENGINE_CLASS_PARAM = "org.apache.tapestry.engine-class";
 
-  public static boolean DEBUG = false;
+  public static boolean DEBUG = true;
 
   //TODO this is really ugly, but I need this fast.
   public static List fDeferredActions = new ArrayList();
@@ -163,6 +163,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
   ContextRootLocation fContextRoot;
   ClasspathRootLocation fClasspathRoot;
   int fProjectType;
+  boolean fValidateWebXML;
 
   private IBuild fBuild;
 
@@ -529,6 +530,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     {
       throw new BuilderException("could not obtain the Classpath Root!");
     }
+    
+    fValidateWebXML = fTapestryProject.isValidatingWebXML();
 
   }
 
