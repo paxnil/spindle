@@ -52,6 +52,7 @@ public abstract class SpindleFormOutlinePage extends FormOutlinePage {
   public SpindleFormOutlinePage(SpindleFormPage page) {
     super(page);
   }
+  
 
   public void createControl(Composite parent) {
 

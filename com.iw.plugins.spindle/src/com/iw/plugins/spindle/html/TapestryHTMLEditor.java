@@ -45,7 +45,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -70,7 +69,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.StorageDocumentProvider;
@@ -260,25 +258,27 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     try {
       TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
         public void run(IProgressMonitor monitor) {
-          IEditorInput input = getEditorInput();
-          if (input instanceof IStorageEditorInput) {
-            return;
-          }
-          IFile file = (IFile) input.getAdapter(IFile.class);
-          removeAllProblemMarkers(file);
-          char[] content = getDocumentProvider().getDocument(input).get().toCharArray();
+          IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
+          if (file != null) {
 
-          TemplateParser parser = new TemplateParser();
-          TapestryComponentModel model = ModelUtils.findComponentWithHTML(file);
-          if (model == null) {
-            addProblemMarker("There is no .jwc file for this template.", 0, 0, IMarker.SEVERITY_WARNING);
-            return;
-          }
-          ITemplateParserDelegate delegate = new TemplateParseDelegate(model);
-          try {
-            parser.parse(content, delegate, file.getLocation().toString());
-          } catch (TemplateParseException e) {
-            addProblemMarker(e.getMessage(), e.getLine(), 1, IMarker.SEVERITY_ERROR);
+            removeAllProblemMarkers(file);
+            char[] content = getDocumentProvider().getDocument(input).get().toCharArray();
+
+            TemplateParser parser = new TemplateParser();
+            TapestryComponentModel model = ModelUtils.findComponentWithHTML(file);
+            if (model == null) {
+              model = ModelUtils.findPageWithHTML(file);
+            }
+            if (model == null) {
+              addProblemMarker("There is no .jwc or .page file for this template.", 0, IMarker.SEVERITY_WARNING);
+              return;
+            }
+            ITemplateParserDelegate delegate = new TemplateParseDelegate(model);
+            try {
+              parser.parse(content, delegate, file.getLocation().toString());
+            } catch (TemplateParseException e) {
+              addProblemMarker(e.getMessage(), e.getLine() - 1, IMarker.SEVERITY_ERROR);
+            }
           }
         }
       }, null);
@@ -288,7 +288,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
 
   }
 
-  protected void addProblemMarker(String message, int line, int column, int severity) {
+  protected void addProblemMarker(String message, int line, int severity) {
 
     IStorage storage = (IStorage) getEditorInput().getAdapter(IStorage.class);
     if (storage instanceof IResource) {
@@ -297,8 +297,14 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
         map.put(IMarker.MESSAGE, message);
         map.put(IMarker.SEVERITY, new Integer(severity));
         map.put(IMarker.LINE_NUMBER, new Integer(line));
-        map.put(IMarker.CHAR_START, new Integer(column));
-        map.put(IMarker.CHAR_END, new Integer(column + 1));
+        int lineOffset = line;
+        try {
+          IDocument document = getDocumentProvider().getDocument(getEditorInput());
+          lineOffset = document.getLineOffset(line);
+        } catch (BadLocationException e) {
+        }
+        map.put(IMarker.CHAR_START, new Integer(lineOffset));
+        map.put(IMarker.CHAR_END, new Integer(lineOffset));
         MarkerUtilities.createMarker((IResource) storage, map, "com.iw.plugins.spindle.tapestryproblem");
       } catch (CoreException corex) {
       }
@@ -361,6 +367,56 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
       }
     }
     return documentProvider;
+
+  }
+
+  boolean alreadyHasJWCID(String jwcid, IStorage componentStorage) {
+
+    if (jwcid == null || "".equals(jwcid.trim()) || componentStorage == null) {
+
+      return false;
+
+    }
+
+    TapestryComponentModel model = getComponentModel(componentStorage);
+
+    return alreadyHasJWCID(jwcid, model);
+
+  }
+
+  boolean alreadyHasJWCID(String jwcid, TapestryComponentModel model) {
+    if (model != null) {
+
+      PluginComponentSpecification spec = (PluginComponentSpecification) model.getComponentSpecification();
+
+      if (spec != null) {
+        return spec.getComponent(jwcid) != null;
+      }
+    }
+
+    return false;
+  }
+
+  TapestryComponentModel getComponentModel(IStorage storage) {
+
+    try {
+      TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(storage);
+
+      IEditorPart part = Utils.getEditorFor(storage);
+
+      if (part != null && part instanceof SpindleMultipageEditor) {
+
+        return (TapestryComponentModel) ((SpindleMultipageEditor) part).getModel();
+
+      } else {
+
+        return (TapestryComponentModel) mgr.getReadOnlyModel(storage);
+
+      }
+    } catch (CoreException e) {
+
+      return null;
+    }
 
   }
 
@@ -464,7 +520,6 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
 
   }
 
-
   static public final String SAVE_HTML_TEMPLATE = "com.iw.plugins.spindle.html.saveTemplateAction";
   static public final String REVERT_HTML_TEMPLATE = "com.iw.plugins.spindle.html.revertTemplateAction";
   static public final String JUMPTO = "com.iw.plugins.spindle.html.jumpToAction";
@@ -491,16 +546,15 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
    * @see org.eclipse.ui.texteditor.AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
    */
   protected void editorContextMenuAboutToShow(IMenuManager menu) {
-    super.editorContextMenuAboutToShow(menu);
+    super.editorContextMenuAboutToShow(menu);    
     addAction(menu, SAVE_HTML_TEMPLATE);
     addAction(menu, REVERT_HTML_TEMPLATE);
     JumpToAction jumpTo = (JumpToAction) getAction(JUMPTO);
     jumpTo.configure();
     if (jumpTo.isEnabled()) {
       menu.add(new Separator());
-      MenuManager jumpToMenu = new MenuManager("Jump to...");
-      addAction(jumpToMenu, JUMPTO);
-      menu.add(jumpToMenu);
+      addAction(menu, JUMPTO);
+
     }
   }
 
@@ -664,15 +718,15 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
         return;
 
       }
-      
-	  Point p = stext.getSelection();
+
+      Point p = stext.getSelection();
 
       int offset = p.x;
-      
+
       if (offset == 0) {
-      	
-      	offset = stext.getCaretOffset();
-      	
+
+        offset = stext.getCaretOffset();
+
       }
 
       ITypedRegion region = document.getDocumentPartitioner().getPartition(offset);
@@ -682,8 +736,8 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
       relatedComponent = findRelatedComponent();
 
       if (relatedComponent != null) {
-      	
-      	setText(relatedComponent.getName());
+
+        setText("Jump to " + (alreadyHasJWCID(jwcid, relatedComponent) ? "'" + jwcid + "' in " : "") + relatedComponent.getName());
 
         setEnabled(true);
 

@@ -45,60 +45,68 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
  *
  */
 public class ModelUtils {
-	
-// NOT REFERENCED
-//  /**
-//   * returns a readonly model, if found!
-//   * the model called root is used only to figure out which project to search
-//   */
-//  public static TapestryApplicationModel findApplication(
-//    String specificationPath,
-//    ITapestryModel root) {
-//    Assert.isNotNull(specificationPath);
-//    Assert.isNotNull(root);
-//    
-//    if (!specificationPath.endsWith(".application")) {
-//      return null;
-//    }
-//    
-//    TapestryLookup lookup = new TapestryLookup();
-//    
-//    try {
-//    	
-//      IJavaProject jproject =
-//        TapestryPlugin.getDefault().getJavaProjectFor(root.getUnderlyingStorage());
-//        
-//      lookup.configure(jproject);
-//      
-//      IStorage[] results = lookup.findApplication(specificationPath);
-//      
-//      if (results.length == 0) {
-//        return null;
-//      }
-//      
-//      return (TapestryApplicationModel) TapestryPlugin.getTapestryModelManager().getReadOnlyModel(
-//        results[0]);
-//        
-//    } catch (CoreException jmex) {
-//      return null;
-//    }
-//  }
 
+  // NOT REFERENCED
+  //  /**
+  //   * returns a readonly model, if found!
+  //   * the model called root is used only to figure out which project to search
+  //   */
+  //  public static TapestryApplicationModel findApplication(
+  //    String specificationPath,
+  //    ITapestryModel root) {
+  //    Assert.isNotNull(specificationPath);
+  //    Assert.isNotNull(root);
+  //    
+  //    if (!specificationPath.endsWith(".application")) {
+  //      return null;
+  //    }
+  //    
+  //    TapestryLookup lookup = new TapestryLookup();
+  //    
+  //    try {
+  //    	
+  //      IJavaProject jproject =
+  //        TapestryPlugin.getDefault().getJavaProjectFor(root.getUnderlyingStorage());
+  //        
+  //      lookup.configure(jproject);
+  //      
+  //      IStorage[] results = lookup.findApplication(specificationPath);
+  //      
+  //      if (results.length == 0) {
+  //        return null;
+  //      }
+  //      
+  //      return (TapestryApplicationModel) TapestryPlugin.getTapestryModelManager().getReadOnlyModel(
+  //        results[0]);
+  //        
+  //    } catch (CoreException jmex) {
+  //      return null;
+  //    }
+  //  }
 
+  public static TapestryComponentModel findPageWithHTML(IStorage storage) {
+    return findWithHTML(storage, "page");
+
+  }
 
   public static TapestryComponentModel findComponentWithHTML(IStorage storage) {
-  	
-  	List componentModels = null;
-  	
+    return findWithHTML(storage, "jwc");
+
+  }
+
+  public static TapestryComponentModel findWithHTML(IStorage storage, String extension) {
+
+    List componentModels = null;
+
     try {
-    	
-      componentModels = TapestryPlugin.getTapestryModelManager(storage).getAllModels(storage, "jwc");
-      
+
+      componentModels = TapestryPlugin.getTapestryModelManager(storage).getAllModels(storage, extension);
+
     } catch (CoreException e) {
     }
     if (componentModels != null && !componentModels.isEmpty()) {
       IPath htmlPath = storage.getFullPath().removeFileExtension();
-      IPath jwcPath = new Path(htmlPath.toString() + ".jwc");
+      IPath jwcPath = new Path(htmlPath.toString() + "."+extension);
       Iterator iter = componentModels.iterator();
       while (iter.hasNext()) {
         TapestryComponentModel model = (TapestryComponentModel) iter.next();
@@ -120,62 +128,56 @@ public class ModelUtils {
    * returns a readonly model, if found!
    * the model called root is used only to figure out which project to search
    */
-  public static TapestryComponentModel findComponent(
-    String specificationPath,
-    ITapestryModel root) {
+  public static TapestryComponentModel findComponent(String specificationPath, ITapestryModel root) {
     Assert.isNotNull(specificationPath);
     Assert.isNotNull(root);
-    
+
     if (!specificationPath.endsWith(".jwc")) {
       return null;
     }
-    
+
     TapestryLookup lookup = new TapestryLookup();
-    
+
     try {
-    	
-      ITapestryProject tproject =
-        TapestryPlugin.getDefault().getTapestryProjectFor(root.getUnderlyingStorage());
-        
+
+      ITapestryProject tproject = TapestryPlugin.getDefault().getTapestryProjectFor(root.getUnderlyingStorage());
+
       lookup = tproject.getLookup();
-      
+
       IStorage[] results = lookup.findComponent(specificationPath);
-      
+
       if (results.length == 0) {
         return null;
       }
-      
-      return (TapestryComponentModel) tproject.getModelManager().getReadOnlyModel(
-        results[0]);
-        
+
+      return (TapestryComponentModel) tproject.getModelManager().getReadOnlyModel(results[0]);
+
     } catch (CoreException jmex) {
       return null;
     }
   }
-  
-// NOT REFERENCED
-//  public static List findComponentsUsingAlias(String alias) {
-//    ArrayList result = new ArrayList();
-//    List componentModels = TapestryPlugin.getTapestryModelManager().getAllModels(null, "jwc");
-//    Iterator iter = componentModels.iterator();
-//    while (iter.hasNext()) {
-//      TapestryComponentModel model = (TapestryComponentModel) iter.next();
-//      PluginComponentSpecification componentSpec = model.getComponentSpecification();
-//      if (componentSpec == null) {
-//        continue;
-//      }
-//      if (componentSpec.usesAlias(alias)) {
-//        result.add(model);
-//      }
-//    }
-//    return result;
-//  }
 
+  // NOT REFERENCED
+  //  public static List findComponentsUsingAlias(String alias) {
+  //    ArrayList result = new ArrayList();
+  //    List componentModels = TapestryPlugin.getTapestryModelManager().getAllModels(null, "jwc");
+  //    Iterator iter = componentModels.iterator();
+  //    while (iter.hasNext()) {
+  //      TapestryComponentModel model = (TapestryComponentModel) iter.next();
+  //      PluginComponentSpecification componentSpec = model.getComponentSpecification();
+  //      if (componentSpec == null) {
+  //        continue;
+  //      }
+  //      if (componentSpec.usesAlias(alias)) {
+  //        result.add(model);
+  //      }
+  //    }
+  //    return result;
+  //  }
 
   public static Iterator getComponentModels(IStorage storage) throws CoreException {
     return TapestryPlugin.getTapestryModelManager(storage).getAllModels(null, "jwc").iterator();
   }
-
 
   public static Iterator getApplicationModels(IStorage storage) throws CoreException {
     return TapestryPlugin.getTapestryModelManager(storage).getAllModels(null, "application").iterator();

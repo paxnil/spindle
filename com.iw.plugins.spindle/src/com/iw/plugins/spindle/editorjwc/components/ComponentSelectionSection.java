@@ -248,7 +248,7 @@ public class ComponentSelectionSection
 
     if (jumpToComponent.isEnabled()) {
 
-      IStorage storage = jumpToComponent.getOpenStorage();
+      IStorage storage = getModel().getUnderlyingStorage();
 
       if (storage != null && storage instanceof IFile) {
 
@@ -288,6 +288,10 @@ public class ComponentSelectionSection
         IFile element = (IFile) iter.next();
         jumpMenu.add(new JumpToTemplateAction((IStorage) element, component.getIdentifier()));
       }
+      
+      
+      
+      
       manager.add(jumpMenu);
     }
 
@@ -426,7 +430,7 @@ public class ComponentSelectionSection
 
     protected NewComponentAction() {
       super();
-      setText("Add");
+      setText("&Add");
     }
 
     /**
@@ -493,7 +497,7 @@ public class ComponentSelectionSection
      */
     protected CopyToAction() {
       super();
-      setText("Copy To");
+      setText("Copy &To");
       setToolTipText("copy this contained component \n and all its bindings to another component");
     }
 
@@ -679,7 +683,7 @@ public class ComponentSelectionSection
 
     protected CopyComponentAction() {
       super();
-      setText("Copy Of");
+      setText("Copy &Of");
     }
 
     public void run() {
@@ -710,7 +714,7 @@ public class ComponentSelectionSection
 
     protected DeleteComponentAction() {
       super();
-      setText("Delete");
+      setText("&Delete");
     }
 
     /**

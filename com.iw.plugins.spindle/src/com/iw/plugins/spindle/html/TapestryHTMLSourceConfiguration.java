@@ -25,6 +25,10 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.html;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.TextAttribute;
@@ -32,9 +36,12 @@ import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.Token;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.pde.internal.ui.editor.text.NonRuleBasedDamagerRepairer;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
 import com.iw.plugins.spindle.ui.text.CommentScanner;
 import com.iw.plugins.spindle.ui.text.DefaultScanner;
@@ -54,7 +61,6 @@ public class TapestryHTMLSourceConfiguration extends SourceViewerConfiguration i
   private ISpindleColorManager colorManager;
 
   private ITextDoubleClickStrategy doubleClickStrategy;
-  
 
   public TapestryHTMLSourceConfiguration(ISpindleColorManager colorManager) {
     this.colorManager = colorManager;
@@ -68,12 +74,10 @@ public class TapestryHTMLSourceConfiguration extends SourceViewerConfiguration i
       TapestryHTMLPartitionScanner.HTML_TAG };
   }
 
-
   protected TagAttributeScanner getTagScanner() {
     if (tagScanner == null) {
       tagScanner = new TagAttributeScanner(colorManager);
-      tagScanner.setDefaultReturnToken(new Token(
-      	new TextAttribute(colorManager.getColor(P_TAG))));
+      tagScanner.setDefaultReturnToken(new Token(new TextAttribute(colorManager.getColor(P_TAG))));
     }
     return tagScanner;
   }
@@ -81,53 +85,78 @@ public class TapestryHTMLSourceConfiguration extends SourceViewerConfiguration i
   protected JWCIDTagScanner getJWCIDTagScanner() {
     if (jwcidTagScanner == null) {
       jwcidTagScanner = new JWCIDTagScanner(colorManager);
-      jwcidTagScanner.setDefaultReturnToken(new Token(
-      	new TextAttribute(colorManager.getColor(P_TAG))));
+      jwcidTagScanner.setDefaultReturnToken(new Token(new TextAttribute(colorManager.getColor(P_TAG))));
     }
     return jwcidTagScanner;
   }
-  
+
   protected JWCTagScanner getJWCTagScanner() {
     if (jwcTagScanner == null) {
       jwcTagScanner = new JWCTagScanner(colorManager);
-      jwcTagScanner.setDefaultReturnToken(new Token(
-      	new TextAttribute(colorManager.getColor(P_TAG))));
+      jwcTagScanner.setDefaultReturnToken(new Token(new TextAttribute(colorManager.getColor(P_TAG))));
     }
     return jwcTagScanner;
-  }  
+  }
 
   public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
     PresentationReconciler reconciler = new PresentationReconciler();
 
-    NonRuleBasedDamagerRepairer dr = 
-      new NonRuleBasedDamagerRepairer(new TextAttribute(colorManager.getColor(P_DEFAULT)));
+    NonRuleBasedDamagerRepairer dr = new NonRuleBasedDamagerRepairer(new TextAttribute(colorManager.getColor(P_DEFAULT)));
     reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
     reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
-    
-     dr =
-      new NonRuleBasedDamagerRepairer(
-        new TextAttribute(colorManager.getColor(P_XML_COMMENT)));
+
+    dr = new NonRuleBasedDamagerRepairer(new TextAttribute(colorManager.getColor(P_XML_COMMENT)));
     reconciler.setDamager(dr, TapestryHTMLPartitionScanner.HTML_COMMENT);
     reconciler.setRepairer(dr, TapestryHTMLPartitionScanner.HTML_COMMENT);
 
-    DefaultDamagerRepairer ddr =
-      new DefaultDamagerRepairer(
-        getJWCTagScanner());
+    DefaultDamagerRepairer ddr = new DefaultDamagerRepairer(getJWCTagScanner());
     reconciler.setDamager(ddr, TapestryHTMLPartitionScanner.JWC_TAG);
     reconciler.setRepairer(ddr, TapestryHTMLPartitionScanner.JWC_TAG);
-    
-    ddr =
-      new DefaultDamagerRepairer(
-        getJWCIDTagScanner());
+
+    ddr = new DefaultDamagerRepairer(getJWCIDTagScanner());
     reconciler.setDamager(ddr, TapestryHTMLPartitionScanner.JWCID_TAG);
     reconciler.setRepairer(ddr, TapestryHTMLPartitionScanner.JWCID_TAG);
 
-    ddr =
-      new DefaultDamagerRepairer(
-        getTagScanner());
+    ddr = new DefaultDamagerRepairer(getTagScanner());
     reconciler.setDamager(ddr, TapestryHTMLPartitionScanner.HTML_TAG);
     reconciler.setRepairer(ddr, TapestryHTMLPartitionScanner.HTML_TAG);
 
     return reconciler;
   }
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAnnotationHover(org.eclipse.jface.text.source.ISourceViewer)
+   */
+  public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+
+    return new IAnnotationHover() {
+      public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
+        ResourceMarkerAnnotationModel model = (ResourceMarkerAnnotationModel) sourceViewer.getAnnotationModel();
+        Iterator e = model.getAnnotationIterator();
+        ArrayList list = new ArrayList();
+        while (e.hasNext()) {
+          MarkerAnnotation element = (MarkerAnnotation) e.next();
+          IMarker marker = element.getMarker();
+          if (lineNumber == marker.getAttribute(IMarker.LINE_NUMBER, -1)) {
+            list.add(marker.getAttribute(IMarker.MESSAGE, "no message found"));
+          }
+        }
+        if (!list.isEmpty()) {
+          if (list.size() == 1) {
+            return (String) list.get(0);
+          } else {
+            StringBuffer buffer = new StringBuffer("multiple markers found on this line:\n\n");
+            for (Iterator iter = list.iterator(); iter.hasNext();) {
+              buffer.append((String) iter.next());
+              if (iter.hasNext()) {
+                buffer.append("\n");
+              }
+
+            }
+          }
+        }
+        return null;
+      }
+    };
+  }
+
 }

@@ -78,7 +78,6 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
-import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.ui.ChooseFromNamespaceDialog;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.util.StringSorter;
@@ -240,7 +239,7 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
       return StructuredSelection.EMPTY;
     }
 
-    TapestryComponentModel model = getComponentModel(file);
+    TapestryComponentModel model = editor.getComponentModel(file);
 
     if (model == null || !model.isLoaded()) {
 
@@ -259,7 +258,7 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
         continue;
       }
 
-      if (alreadyHasJWCID(jwcId, file)) {
+      if (editor.alreadyHasJWCID(jwcId, model)) {
         continue;
       }
       collected.add(jwcId);
@@ -270,55 +269,9 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
 
   }
 
-  private boolean alreadyHasJWCID(String jwcid, IFile componentResource) {
+  
 
-    if (jwcid == null || "".equals(jwcid.trim()) || componentResource == null) {
-
-      return false;
-
-    }
-
-    TapestryComponentModel model = getComponentModel(componentResource);
-
-    return alreadyHasJWCID(jwcid, model);
-
-  }
-
-  private boolean alreadyHasJWCID(String jwcid, TapestryComponentModel model) {
-    if (model != null) {
-
-      PluginComponentSpecification spec = (PluginComponentSpecification) model.getComponentSpecification();
-
-      if (spec != null) {
-        return spec.getComponent(jwcid) != null;
-      }
-    }
-
-    return false;
-  }
-
-  private TapestryComponentModel getComponentModel(IFile file) {
-
-    try {
-      TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(file);
-
-      IEditorPart part = Utils.getEditorFor(file);
-
-      if (part != null && part instanceof SpindleMultipageEditor) {
-
-        return (TapestryComponentModel) ((SpindleMultipageEditor) part).getModel();
-
-      } else {
-
-        return (TapestryComponentModel) mgr.getReadOnlyModel(file);
-
-      }
-    } catch (CoreException e) {
-
-      return null;
-    }
-
-  }
+ 
 
   
   private String getJWCID(ITypedRegion region) {
@@ -492,7 +445,7 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
       } catch (Exception e) {
       }
 
-      if (jwcid != null && alreadyHasJWCID(jwcid, Utils.findRelatedComponent(documentFile))) {
+      if (jwcid != null && editor.alreadyHasJWCID(jwcid, Utils.findRelatedComponent(documentFile))) {
 
         return jwcImage;
 
@@ -779,7 +732,7 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
       this.modelFile = model;
       this.jwcid = jwcid;
       setText("Jump to: " + jwcid);
-      setEnabled(model == null);
+      setEnabled(model != null);
     }
 
     public void run() {
@@ -807,7 +760,7 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
           ComponentsFormPage desiredPage = (ComponentsFormPage) jwc.getPage(jwc.COMPONENTS);
 
           if (currentPage != desiredPage) {
-            jwc.showPage(jwc.COMPONENTS);
+            jwc.showPage(desiredPage);
           }
           desiredPage.openTo(this.jwcid);
         }
