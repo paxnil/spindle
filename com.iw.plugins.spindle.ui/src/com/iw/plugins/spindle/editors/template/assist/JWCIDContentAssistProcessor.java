@@ -38,7 +38,9 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
@@ -47,6 +49,9 @@ import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.template.TemplatePartitionScanner;
+import com.iw.plugins.spindle.editors.util.CompletionProposal;
+import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
+import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 
 /**
  *  Content assist inside of jwcid attributes
@@ -75,7 +80,7 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
      */
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        DocumentArtifact tag = getArtifactAt(viewer.getDocument(), documentOffset);
+        DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
         if (tag.getStateAt(documentOffset) == DocumentArtifact.ATT_VALUE)
             return NoProposals;
         Map attributeMap = tag.getAttributesMap();
@@ -84,7 +89,7 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
         fAssistHelper = null;
         try
         {
-            fAssistHelper = new ContentAssistHelper(fEditor);
+            fAssistHelper = new ContentAssistHelper((TemplateEditor) fEditor);
             IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
             IProject project = TapestryCore.getDefault().getProjectFor(storage);
             fAssistHelper.setJwcid(
@@ -181,7 +186,7 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
             if (matches)
             {
                 int delta = foundTopLevel[i].name.length() - implicitLength;
-                
+
                 proposals.add(
                     new CompletionProposal(
                         foundTopLevel[i].name,
@@ -215,29 +220,29 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
             }
         }
 
-//        ContentAssistHelper.CAHelperResult[] declaredLibraries = fAssistHelper.getChildNamespaceIds();
-//        for (int i = 0; i < declaredLibraries.length; i++)
-//        {
-//
-//            boolean matches = matchString == null ? true : foundChild[i].name.toLowerCase().startsWith(matchString);
-//            if (matches)
-//            {
-//                int delta = declaredLibraries[i].name.length() - implicitLength;
-//
-//                CompletionProposal proposal =
-//                    new CompletionProposal(
-//                        declaredLibraries[i].name + ":",
-//                        startOffset,
-//                        implicitLength,
-//                        new Point(declaredLibraries[i].name.length() + delta, 0),
-//                        Images.getSharedImage("bullet_lib.gif"),
-//                        null,
-//                        null,
-//                        declaredLibraries[i].description);
-//
-//                proposals.add(proposal);
-//            }
-//        }
+        //        ContentAssistHelper.CAHelperResult[] declaredLibraries = fAssistHelper.getChildNamespaceIds();
+        //        for (int i = 0; i < declaredLibraries.length; i++)
+        //        {
+        //
+        //            boolean matches = matchString == null ? true : foundChild[i].name.toLowerCase().startsWith(matchString);
+        //            if (matches)
+        //            {
+        //                int delta = declaredLibraries[i].name.length() - implicitLength;
+        //
+        //                CompletionProposal proposal =
+        //                    new CompletionProposal(
+        //                        declaredLibraries[i].name + ":",
+        //                        startOffset,
+        //                        implicitLength,
+        //                        new Point(declaredLibraries[i].name.length() + delta, 0),
+        //                        Images.getSharedImage("bullet_lib.gif"),
+        //                        null,
+        //                        null,
+        //                        declaredLibraries[i].description);
+        //
+        //                proposals.add(proposal);
+        //            }
+        //        }
 
         return proposals;
     }
@@ -274,7 +279,7 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
                 if (!partitions[i].getType().equals(TemplatePartitionScanner.TAPESTRY_JWCID_ATTRIBUTE))
                     continue;
 
-                DocumentArtifact tag = getArtifactAt(document, partitions[i].getOffset());
+                DocumentArtifact tag = DocumentArtifact.getArtifactAt(document, partitions[i].getOffset());
                 DocumentArtifact attr = tag.getAttributeAt(partitions[i].getOffset());
                 String temp = attr.getAttributeValue().trim();
                 int tempAt = temp.indexOf('@');
@@ -340,6 +345,36 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
         }
 
         return proposals;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer, int)
+     */
+    public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
+    {
+        DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
+        Map attributeMap = tag.getAttributesMap();
+        DocumentArtifact jwcidAttr = (DocumentArtifact) attributeMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
+        String attributeValue = jwcidAttr.getAttributeValue();
+        fAssistHelper = null;
+        try
+        {
+            fAssistHelper = new ContentAssistHelper((TemplateEditor) fEditor);
+            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
+            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+            fAssistHelper.setJwcid(
+                attributeValue,
+                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+        } catch (IllegalArgumentException e)
+        {
+            return NoInformation;
+        }
+
+        ContentAssistHelper.CAHelperResult result = fAssistHelper.getComponentContextInformation();
+        if (result == null)
+            return NoInformation;
+
+        return new IContextInformation[] { new ContextInformation(result.displayName, result.description)};
     }
 
 }

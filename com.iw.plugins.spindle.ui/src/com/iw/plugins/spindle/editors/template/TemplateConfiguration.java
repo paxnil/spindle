@@ -62,7 +62,7 @@ import com.iw.plugins.spindle.editors.template.assist.TagContentAssistProcessor;
 public class TemplateConfiguration extends BaseSourceConfiguration
 {
     //TODO debug flag
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     private TemplateTextTools fTextTools;
 
@@ -232,19 +232,22 @@ public class TemplateConfiguration extends BaseSourceConfiguration
     }
 
     public IContentAssistant getContentAssistant(ISourceViewer sourceViewer)
-    { 
-        ContentAssistant assistant = new ContentAssistant();
+    {
+        ContentAssistant assistant = getEditor().getContentAssistant();
         TagContentAssistProcessor contentAssistForTag = new TagContentAssistProcessor((TemplateEditor) getEditor());
-        AttributeContentAssistProcessor contentAssistForAttribute = new AttributeContentAssistProcessor((TemplateEditor) getEditor());
-        JWCIDContentAssistProcessor contentAssistForJWCID = new JWCIDContentAssistProcessor((TemplateEditor) getEditor());
+        AttributeContentAssistProcessor contentAssistForAttribute =
+            new AttributeContentAssistProcessor((TemplateEditor) getEditor());
+        JWCIDContentAssistProcessor contentAssistForJWCID =
+            new JWCIDContentAssistProcessor((TemplateEditor) getEditor());
 
         assistant.setContentAssistProcessor(contentAssistForTag, TemplatePartitionScanner.XML_TAG);
         assistant.setContentAssistProcessor(contentAssistForAttribute, TemplatePartitionScanner.XML_ATTRIBUTE);
         assistant.setContentAssistProcessor(contentAssistForJWCID, TemplatePartitionScanner.TAPESTRY_JWCID_ATTRIBUTE);
         assistant.enableAutoActivation(true);
         assistant.enableAutoInsert(false);
-        assistant.setProposalSelectorBackground(UIPlugin.getDefault().getSharedTextColors().getColor(new RGB(254, 241, 233)));
-        assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));        
+        assistant.setProposalSelectorBackground(
+            UIPlugin.getDefault().getSharedTextColors().getColor(new RGB(254, 241, 233)));
+        assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
         assistant.install(sourceViewer);
 
         return assistant;

@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.0.7"
+   version="0.0.9"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -131,17 +131,99 @@
             extensions="htm,html"
             contributorClass="com.iw.plugins.spindle.editors.template.TemplateEditorContributor"
             class="com.iw.plugins.spindle.editors.template.TemplateEditor"
-            id="com.iw.plugins.spindle.editors.template">
+            id="com.iw.plugins.spindle.ui.editors.template">
       </editor>
       <editor
             name="Tapestry Spec Editor"
             default="false"
             icon="./icons/basic/application16.gif"
             extensions="application, page, jwc, library"
-            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            contributorClass="com.iw.plugins.spindle.editors.spec.SpecEditorContributor"
             class="com.iw.plugins.spindle.editors.spec.SpecEditor"
-            id="com.iw.plugins.spindle.editors.spec">
+            id="com.iw.plugins.spindle.ui.editors.spec">
       </editor>
+      <editor
+            name="New Tapestry Spec Editor"
+            default="false"
+            icon="./icons/basic/application16.gif"
+            extensions="jwc"
+            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            class="com.iw.plugins.spindle.editors.neweditor.NewXMLEditor"
+            id="com.iw.plugins.spindle.ui.editors.spec.new_editor">
+      </editor>
+
    </extension>
+   <!--
+      <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="com.iw.plugins.spindle.project.popupMenus.project">
+         <menu
+               label="Tapestry"
+               id="org.eclipse.ui.popupMenus.project.menu1">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Open Application Specification"
+               class="com.iw.plugins.spindle.project.actions.JumpToApplicationSpecAction"
+               menubarPath="org.eclipse.ui.popupMenus.project.menu1/group1"
+               enablesFor="1"
+               id="com.iw.plugins.spindle.project.popupMenus.project.JumpToTapestryProjectAction">
+         </action>
+
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            nameFilter="*.html"
+            id="com.iw.plugins.spindle.popupMenus">
+         <menu
+               label="Spindle"
+               id="com.iw.plugins.spindle.popupMenus.createComponents">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Create Tapestry Component"
+               icon="icons/full/component16_dark.gif"
+               class="com.iw.plugins.spindle.wizards.extra.CreateComponentFromTemplateAction"
+               menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
+               enablesFor="+"
+               id="com.iw.plugins.spindle.popupMenus.createComponents.componentFromTemplate">
+         </action>
+         <action
+               label="Create Tapestry Page"
+               icon="icons/full/page16.gif"
+               class="com.iw.plugins.spindle.wizards.extra.CreatePageFromTemplateAction"
+               menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
+               enablesFor="+"
+               id="com.iw.plugins.spindle.popupMenus.createComponents.pageFromTemplate">
+         </action>
+      </objectContribution>
+     <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            nameFilter="*.jwc"
+            id="com.iw.plugins.spindle.popupMenus">
+         <menu
+               label="Spindle"
+               id="com.iw.plugins.spindle.popupMenus.convert">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Convert to Tapestry Page (.page)"
+               icon="icons/full/page16.gif"
+               class="com.iw.plugins.spindle.wizards.extra.ConvertComponentIntoPageAction"
+               menubarPath="com.iw.plugins.spindle.popupMenus.convert/group1"
+               enablesFor="1"
+               id="com.iw.plugins.spindle.popupMenus.convert.ConvertToTapestryPage">
+         </action>         
+      </objectContribution>
+
+   </extension> -->
 
 </plugin>

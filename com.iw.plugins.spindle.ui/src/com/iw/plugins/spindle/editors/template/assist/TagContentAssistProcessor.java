@@ -37,7 +37,9 @@ import org.apache.tapestry.parse.TemplateParser;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
@@ -45,6 +47,10 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
+import com.iw.plugins.spindle.editors.util.CompletionProposal;
+import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
+import com.iw.plugins.spindle.editors.util.DocumentArtifact;
+import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  *  Content assist inside of Tags (but not attributes)
@@ -65,7 +71,7 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
      */
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        DocumentArtifact tag = getArtifactAt(viewer.getDocument(), documentOffset);
+        DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
         int baseState = tag.getStateAt(documentOffset);
         if (tag.getType() == DocumentArtifactPartitioner.ENDTAG)
             return new ICompletionProposal[] {};
@@ -201,7 +207,7 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
 
         try
         {
-            ContentAssistHelper helper = new ContentAssistHelper(fEditor);
+            ContentAssistHelper helper = new ContentAssistHelper((TemplateEditor) fEditor);
             IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
             IProject project = TapestryCore.getDefault().getProjectFor(storage);
             helper.setJwcid(
@@ -252,7 +258,7 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
         try
         {
             // first get the matches
-            ContentAssistHelper helper = new ContentAssistHelper(fEditor);
+            ContentAssistHelper helper = new ContentAssistHelper((TemplateEditor) fEditor);
             helper.setJwcid(jwcid);
 
             ContentAssistHelper.CAHelperResult[] infos = helper.findParameters(fragment, existingAttributeNames);
@@ -301,5 +307,45 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
         {
             //do nothing
         }
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer, int)
+     */
+    public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
+    {
+        DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
+        int baseState = tag.getStateAt(documentOffset);
+        if (tag.getType() == DocumentArtifactPartitioner.ENDTAG)
+            return NoInformation;
+
+        Map attrMap = tag.getAttributesMap();
+
+        if (!attrMap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME))
+            return NoInformation;
+
+        DocumentArtifact attr = tag.getAttributeAt(documentOffset);
+        if (attr == null || attr.getName().equalsIgnoreCase(TemplateParser.JWCID_ATTRIBUTE_NAME))
+        {
+            return NoInformation;
+        }
+
+        try
+        {
+            ContentAssistHelper helper = new ContentAssistHelper((TemplateEditor) fEditor);
+            DocumentArtifact jwcidAttr = (DocumentArtifact) attrMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
+            helper.setJwcid(jwcidAttr.getAttributeValue());
+
+            ContentAssistHelper.CAHelperResult result = helper.getParameterContextInformation(attr.getName());
+
+            if (result != null)
+                return new IContextInformation[] { new ContextInformation(result.displayName, result.description)};
+
+        } catch (IllegalArgumentException e)
+        {
+            //do nothing
+        }
+
+        return NoInformation;
     }
 }

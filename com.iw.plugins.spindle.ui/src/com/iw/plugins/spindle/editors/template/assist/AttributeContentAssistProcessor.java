@@ -35,6 +35,9 @@ import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
+import com.iw.plugins.spindle.editors.util.CompletionProposal;
+import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
+import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 
 /**
  *  Content assist inside of Tags (but not attributes)
@@ -57,7 +60,7 @@ public class AttributeContentAssistProcessor extends ContentAssistProcessor
      */
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        DocumentArtifact tag = getArtifactAt(viewer.getDocument(), documentOffset);
+        DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
         DocumentArtifact attribute = tag.getAttributeAt(documentOffset);
 
         int state = attribute.getStateAt(documentOffset);

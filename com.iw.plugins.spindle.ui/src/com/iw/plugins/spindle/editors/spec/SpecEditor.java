@@ -36,10 +36,14 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -134,7 +138,25 @@ public class SpecEditor extends Editor
      */
     protected SourceViewerConfiguration createSourceViewerConfiguration()
     {
-        return new XMLConfiguration(UIPlugin.getDefault().getXMLTextTools(), this);
+        return new SpecConfiguration(UIPlugin.getDefault().getXMLTextTools(), this);
+    }
+
+    /**
+     * @see org.eclipse.ui.texteditor.AbstractTextEditor#createActions()
+     */
+    protected void createActions()
+    {
+        super.createActions();
+        IAction action =
+            new TextOperationAction(
+                UIPlugin.getResourceBundle(),
+                "ContentAssistProposal.",
+                this,
+                ISourceViewer.CONTENTASSIST_PROPOSALS);
+        action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+        markAsStateDependentAction(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, true);
+        setAction("ContentAssistProposal", action);
+
     }
 
     /* (non-Javadoc)
@@ -145,7 +167,7 @@ public class SpecEditor extends Editor
         fReconciledSpec = null;
 
         if (fReconciler != null)
-            fReconciler.reconcile(collector, monitor); 
+            fReconciler.reconcile(collector, monitor);
 
         //        (() fOutline.setSpec(fReconciledSpec));
     }
@@ -379,5 +401,8 @@ public class SpecEditor extends Editor
             return spec instanceof IApplicationSpecification;
         }
     }
+
+   
+    
 
 }

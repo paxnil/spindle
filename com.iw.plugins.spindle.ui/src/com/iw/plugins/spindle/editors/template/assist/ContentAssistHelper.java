@@ -234,14 +234,14 @@ class ContentAssistHelper
 
         StringWriter swriter = new StringWriter();
         PrintWriter pwriter = new PrintWriter(swriter);
+        pwriter.println(name);
+        pwriter.println();
+        pwriter.println(description == null ? "no description available" : description);
+        pwriter.println();
         XMLUtil.writeParameter(name, parameterSpec, pwriter, 0, publicId);
 
-        StringBuffer extraInfo = new StringBuffer(name);
-        extraInfo.append("\n\n");
-        extraInfo.append(description == null ? "no description available" : description);
-        extraInfo.append("\n\n");
-        extraInfo.append(swriter.toString());
-        result.description = extraInfo.toString();
+        result.description = swriter.toString();
+
         if (parameterSpec.isRequired())
             result.required = true;
         return result;
@@ -402,6 +402,35 @@ class ContentAssistHelper
             }
         }
         return (CAHelperResult[]) result.toArray(new CAHelperResult[result.size()]);
+
+    }
+
+    CAHelperResult getComponentContextInformation()
+    {
+        resolveContainedComponent();
+
+        if (fContainedComponentSpecification == null)
+        {
+            return null;
+        }
+
+        return createResult(
+            fContainedComponent != null ? fContainedComponent.getType() : fFullType,
+            null,
+            fContainedComponentSpecification);
+    }
+
+    CAHelperResult getParameterContextInformation(String parameterName)
+    {
+        resolveContainedComponent();
+        if (fContainedComponentSpecification == null)
+            return null;
+
+        IParameterSpecification parameterSpec = fContainedComponentSpecification.getParameter(parameterName);
+        if (parameterSpec == null)
+            return null;
+
+        return createResult(parameterName, parameterSpec, fContainedComponentSpecification.getPublicId());
 
     }
 

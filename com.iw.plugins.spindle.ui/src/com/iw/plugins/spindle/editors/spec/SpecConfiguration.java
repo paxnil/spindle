@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.editors.spec;
 
-import net.sf.solareclipse.text.TextDoubleClickStrategy;
 import net.sf.solareclipse.xml.internal.ui.text.AttValueDoubleClickStrategy;
 import net.sf.solareclipse.xml.internal.ui.text.SimpleDoubleClickStrategy;
 import net.sf.solareclipse.xml.internal.ui.text.TagDoubleClickStrategy;
@@ -40,14 +39,27 @@ import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
+import com.iw.plugins.spindle.editors.DefaultDoubleClickStrategy;
+import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.spec.assist.CDATACompletionProposal;
+import com.iw.plugins.spindle.editors.spec.assist.CommentCompletionProcessor;
+import com.iw.plugins.spindle.editors.spec.assist.DeclCompletionProcessor;
+import com.iw.plugins.spindle.editors.spec.assist.SpecCompletionProcessor;
+import com.iw.plugins.spindle.editors.util.CompletionProposal;
+import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
+import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 
 /**
  *  SourceViewerConfiguration for the TemplateEditor
@@ -55,14 +67,13 @@ import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class XMLConfiguration extends BaseSourceConfiguration
+public class SpecConfiguration extends BaseSourceConfiguration
 {
-    public static final boolean DEBUG = false;
-
+    public static final boolean DEBUG = true;
 
     private XMLTextTools fTextTools;
 
-    private ITextDoubleClickStrategy dcsDefault;
+    private ITextDoubleClickStrategy fDefaultDoubleClick;
     private ITextDoubleClickStrategy dcsSimple;
     private ITextDoubleClickStrategy dcsTag;
     private ITextDoubleClickStrategy dcsAttValue;
@@ -71,11 +82,11 @@ public class XMLConfiguration extends BaseSourceConfiguration
      * @param colorManager
      * @param editor
      */
-    public XMLConfiguration(XMLTextTools tools, AbstractTextEditor editor)
+    public SpecConfiguration(XMLTextTools tools, Editor editor)
     {
         super(editor);
         fTextTools = tools;
-        dcsDefault = new TextDoubleClickStrategy();
+        fDefaultDoubleClick = new DefaultDoubleClickStrategy();
         dcsSimple = new SimpleDoubleClickStrategy();
         dcsTag = new TagDoubleClickStrategy();
         dcsAttValue = new AttValueDoubleClickStrategy();
@@ -104,7 +115,7 @@ public class XMLConfiguration extends BaseSourceConfiguration
         if (contentType.startsWith(XMLPartitionScanner.DTD_INTERNAL))
             return dcsSimple;
 
-        return dcsDefault;
+        return fDefaultDoubleClick;
     }
 
     /*
@@ -170,7 +181,6 @@ public class XMLConfiguration extends BaseSourceConfiguration
         reconciler.setDamager(dr, XMLPartitionScanner.XML_TAG);
         reconciler.setRepairer(dr, XMLPartitionScanner.XML_TAG);
 
-
         reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
         reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
 
@@ -193,7 +203,6 @@ public class XMLConfiguration extends BaseSourceConfiguration
     {
         if (DEBUG)
         {
-            // TODO Auto-generated method stub
             return new ITextHover()
             {
                 public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion)
@@ -216,6 +225,64 @@ public class XMLConfiguration extends BaseSourceConfiguration
             };
         }
         return super.getTextHover(sourceViewer, contentType);
+    }
+
+    public IContentAssistant getContentAssistant(ISourceViewer sourceViewer)
+    {
+        ContentAssistant assistant = getEditor().getContentAssistant();
+        SpecCompletionProcessor defaultProcessor = new SpecCompletionProcessor(fEditor)
+        {
+            protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
+            {
+                return NoProposals;
+            }
+        };
+
+        ContentAssistProcessor commentProcessor = new CommentCompletionProcessor(fEditor);
+        
+        ContentAssistProcessor declProcessor = new DeclCompletionProcessor(fEditor);
+        
+        ContentAssistProcessor cdataProcessor = new CDATACompletionProposal(fEditor);
+        
+        ContentAssistProcessor standard = new ContentAssistProcessor(fEditor)
+        {
+            protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
+            {
+                DocumentArtifact artifact = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
+                DocumentArtifact root = null;
+                try
+                {
+                    root = DocumentArtifact.createTree(viewer.getDocument(), documentOffset);
+                } catch (BadLocationException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                DocumentArtifact prevSib = artifact.getPreviousSibling();
+                return new ICompletionProposal[] {
+                     new CompletionProposal.NullProposal(
+                        artifact.toString(),
+                        root == null ? "error" : root.fPublicId,
+                        documentOffset)};
+
+            }
+        };
+        
+
+        assistant.setContentAssistProcessor(standard, XMLPartitionScanner.XML_TAG);
+        assistant.setContentAssistProcessor(commentProcessor, XMLPartitionScanner.XML_COMMENT);
+        assistant.setContentAssistProcessor(standard, XMLPartitionScanner.XML_ATTRIBUTE);
+        assistant.setContentAssistProcessor(declProcessor, XMLPartitionScanner.XML_DECL);
+        assistant.setContentAssistProcessor(defaultProcessor, IDocument.DEFAULT_CONTENT_TYPE);
+        assistant.setContentAssistProcessor(cdataProcessor, XMLPartitionScanner.XML_CDATA);
+        assistant.enableAutoActivation(true);
+        assistant.enableAutoInsert(false);
+        assistant.setProposalSelectorBackground(
+            UIPlugin.getDefault().getSharedTextColors().getColor(new RGB(254, 241, 233)));
+        assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+        assistant.install(sourceViewer);
+
+        return assistant;
     }
 
 }

@@ -32,6 +32,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -156,6 +157,8 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
     protected IEditorInput fInput;
 
     protected IContentOutlinePage fOutline = null;
+    
+    protected ContentAssistant fContentAssistant = new ContentAssistant();
 
     public Editor()
     {
@@ -182,7 +185,7 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
     {
         super.createPartControl(parent);
         fSourceViewerDecorationSupport.install(getPreferenceStore());
-        fReadyToReconcile = true;
+        fReadyToReconcile = true;       
     }
 
     protected void doSetInput(IEditorInput input) throws CoreException
@@ -193,6 +196,8 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
             fOutline.dispose();
         fOutline = createContentOutlinePage(input);
     }
+    
+    
     
     protected void configureSourceViewerDecorationSupport()
     {
@@ -291,6 +296,12 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
     }
 
     public abstract IContentOutlinePage createContentOutlinePage(IEditorInput input);
+        
+    public ContentAssistant getContentAssistant() {
+        if (fContentAssistant == null)
+            fContentAssistant = new ContentAssistant();
+        return fContentAssistant;
+    }
 
     public Object getAdapter(Class clazz)
     {

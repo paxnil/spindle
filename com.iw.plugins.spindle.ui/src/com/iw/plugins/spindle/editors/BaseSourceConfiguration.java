@@ -31,16 +31,15 @@ import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 public abstract class BaseSourceConfiguration extends SourceViewerConfiguration 
 {
 
-    private AbstractTextEditor fTextEditor;
+    protected Editor fEditor;
 
-    public BaseSourceConfiguration(AbstractTextEditor editor)
+    public BaseSourceConfiguration(Editor editor)
     {
-        fTextEditor = editor;
+        fEditor = editor;
     }
 
     /*
@@ -51,9 +50,9 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
         return new ProblemAnnotationHover();
     }
 
-    protected AbstractTextEditor getEditor()
+    protected Editor getEditor()
     {
-        return fTextEditor;
+        return fEditor;
     }
     
     public IReconciler getReconciler(ISourceViewer sourceViewer)

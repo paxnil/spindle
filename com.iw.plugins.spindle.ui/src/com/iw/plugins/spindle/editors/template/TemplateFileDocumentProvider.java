@@ -49,7 +49,7 @@ public class TemplateFileDocumentProvider extends FileDocumentProvider
         IDocument document = super.createDocument(element);
         if (document != null)
         {
-            DefaultPartitioner defaultPartitioner = UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
+            DefaultPartitioner defaultPartitioner = createParitioner();
 
             if (defaultPartitioner != null)
             {
@@ -59,6 +59,10 @@ public class TemplateFileDocumentProvider extends FileDocumentProvider
         }
 
         return document;
+    }
+    
+    protected DefaultPartitioner createParitioner() {
+        return UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
     }
 
     protected IAnnotationModel createAnnotationModel(Object element) throws CoreException

@@ -31,13 +31,11 @@ import java.util.Iterator;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 /**
@@ -46,14 +44,13 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class ProblemAnnotationTextHover implements ITextHover
+public class ProblemAnnotationTextHover extends DefaultTextHover
 {
 
-    AbstractTextEditor fEditor;
 
-    public ProblemAnnotationTextHover(AbstractTextEditor editor)
+    public ProblemAnnotationTextHover(Editor editor)
     {
-        fEditor = editor;
+        super(editor);
     }
 
     /*
@@ -72,6 +69,8 @@ public class ProblemAnnotationTextHover implements ITextHover
         if (fEditor == null)
             return null;
 
+        String result = null;
+
         IDocumentProvider provider = fEditor.getDocumentProvider();
         IAnnotationModel model = provider.getAnnotationModel(fEditor.getEditorInput());
 
@@ -86,20 +85,22 @@ public class ProblemAnnotationTextHover implements ITextHover
                 {
                     String msg = ((IProblemAnnotation) a).getMessage();
                     if (msg != null && msg.trim().length() > 0)
-                        return formatMessage(msg);
+                        result = formatMessage(msg);
                 }
             }
         }
-        return null;
+        if (result == null)
+            result = super.getHoverInfo(textViewer, hoverRegion);
+        return result;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.ITextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
-     */
-    public IRegion getHoverRegion(ITextViewer textViewer, int offset)
-    {
-        return findWord(textViewer.getDocument(), offset);
-    }
+    //    /* (non-Javadoc)
+    //     * @see org.eclipse.jface.text.ITextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
+    //     */
+    //    public IRegion getHoverRegion(ITextViewer textViewer, int offset)
+    //    {
+    //        return findWord(textViewer.getDocument(), offset);
+    //    }
 
     private IRegion findWord(IDocument document, int offset)
     {

@@ -24,16 +24,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors.template.assist;
+package com.iw.plugins.spindle.editors.util;
 
 import java.util.Map;
 
 import org.apache.tapestry.parse.TemplateParser;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -42,9 +40,9 @@ import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
  *  Content Assist for Templates
@@ -61,16 +59,19 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
             new ContentAssistProcessor.MessageProposal("no suggestions available"),
             new ContentAssistProcessor.MessageProposal("")};
 
+    protected static final IContextInformation[] NoInformation = new IContextInformation[0];
+
     static {
         SCANNER = new RuleBasedPartitionScanner();
         SCANNER.setPredicateRules(new IPredicateRule[] { new DocumentArtifactRule()});
     }
 
-    protected TemplateEditor fEditor;
+    protected AbstractTextEditor fEditor;
     protected IPreferenceStore fPreferenceStore = UIPlugin.getDefault().getPreferenceStore();
     protected DocumentArtifactPartitioner fAssistParititioner;
+    protected boolean fDoingContextInformation = false;
 
-    public ContentAssistProcessor(TemplateEditor editor)
+    public ContentAssistProcessor(AbstractTextEditor editor)
     {
         this.fEditor = editor;
         fAssistParititioner = new DocumentArtifactPartitioner(SCANNER, DocumentArtifactPartitioner.TYPES);
@@ -102,12 +103,37 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
 
     protected abstract ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset);
 
+    public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset)
+    {
+        if (!fDoingContextInformation)
+            return null;
+
+        return computeInformation(viewer, documentOffset);
+    }
     /* (non-Javadoc)
      * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
      */
-    public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset)
+    public IContextInformation[] computeInformation(ITextViewer viewer, int documentOffset)
     {
-        return null;
+        try
+        {
+            IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+            fAssistParititioner.connect(document);
+            //            Point p = viewer.getSelectedRange();
+            //            if (p.y > 0)
+            //                return NoInformation;
+
+            return doComputeContextInformation(viewer, documentOffset);
+
+        } finally
+        {
+            fAssistParititioner.disconnect();
+        }
+    }
+
+    public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
+    {
+        return NoInformation;
     }
 
     /* (non-Javadoc)
@@ -139,27 +165,6 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
      */
     public IContextInformationValidator getContextInformationValidator()
     {
-        return null;
-    }
-
-    protected DocumentArtifact getArtifactAt(IDocument doc, int offset)
-    {
-        try
-        {
-            Position[] pos = doc.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
-
-            for (int i = 0; i < pos.length; i++)
-            {
-                if (offset >= pos[i].getOffset() && offset <= pos[i].getOffset() + pos[i].getLength())
-                {
-                    return (DocumentArtifact) pos[i];
-                }
-            }
-        } catch (BadPositionCategoryException e)
-        {
-            //do nothing
-        }
-
         return null;
     }
 

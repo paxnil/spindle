@@ -4,9 +4,11 @@
  * To change the template for this generated file go to
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
-package com.iw.plugins.spindle.editors.template.assist;
+package com.iw.plugins.spindle.editors.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,7 +16,9 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -36,7 +40,98 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     public static final int AFTER_ATTRIBUTE = 6;
     public static final int AFTER_ATT_VALUE = 7;
 
+    public static synchronized DocumentArtifact createTree(IDocument document, int stopOffset)
+        throws BadLocationException
+    {
+        Position[] pos = null;
+        try
+        {
+            pos = document.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
+        } catch (BadPositionCategoryException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+        Arrays.sort(pos, new Comparator()
+        {
+            public int compare(Object o1, Object o2)
+            {
+                int offset1 = ((DocumentArtifact) o1).getOffset();
+                int offset2 = ((DocumentArtifact) o2).getOffset();
+                return (offset1 > offset2) ? 1 : ((offset1 < offset2) ? -1 : 0);
+            }
+        });
+
+        DocumentArtifact root = new DocumentArtifact(0, 0, "/", document);
+        root.fParent = null;
+        DocumentArtifact parent = root;
+        for (int i = 0; i < pos.length; i++)
+        {
+            DocumentArtifact node = (DocumentArtifact) pos[i];
+
+            String type = node.getType();
+            if (type != DocumentArtifactPartitioner.ENDTAG)
+            {
+                if (root.fPublicId == null && type == DocumentArtifactPartitioner.DECL)
+                {
+                    root.fPublicId = node.readPublicId();
+                    root.fRootNodeId = node.getRootNodeId();
+                }
+                node.fParent = parent;
+            }
+
+            if (type == DocumentArtifactPartitioner.TAG)
+                parent = node;
+
+            if (type == DocumentArtifactPartitioner.ENDTAG)
+            {
+                node.fParent = parent.fParent;
+                node.fCorrespondingNode = parent;
+                parent.fCorrespondingNode = node;
+                parent = parent.fParent;
+            }
+        }
+        for (int i = 0; i < pos.length; i++)
+        {
+            DocumentArtifact node = (DocumentArtifact) pos[i];
+            DocumentArtifact p = node.getParent();
+            DocumentArtifact c = node.getCorrespondingNode();
+            System.out.println(
+                (node == null ? "null" : node.toString())
+                    + " p: "
+                    + (p == null ? "null" : p.toString())
+                    + "c= "
+                    + (c == null ? "null" : c.toString()));
+        }
+        return root;
+    }
+
+    public static DocumentArtifact getArtifactAt(IDocument doc, int offset)
+    {
+        try
+        {
+            Position[] pos = doc.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
+
+            for (int i = 0; i < pos.length; i++)
+            {
+                if (offset >= pos[i].getOffset() && offset <= pos[i].getOffset() + pos[i].getLength())
+                {
+                    return (DocumentArtifact) pos[i];
+                }
+            }
+        } catch (BadPositionCategoryException e)
+        {
+            //do nothing
+        }
+
+        return null;
+    }
+
     protected IDocument fDocument = null;
+    protected DocumentArtifact fParent;
+    protected DocumentArtifact fCorrespondingNode;
+    public String fPublicId; // only available in the root artifact
+    public String fRootNodeId; // only available in the root artifact
 
     public DocumentArtifact(int offset, int length, String type, IDocument document)
     {
@@ -99,6 +194,56 @@ public class DocumentArtifact extends TypedPosition implements Comparable
             // do nothing
         }
         return "";
+    }
+
+    public String readPublicId()
+    {
+        String content = getContent();
+        int start = -1;
+        int end = -1;
+        content = content.substring("<!DOCTYPE".length());
+        start = content.indexOf("PUBLIC");
+        if (start >= 0)
+        {
+            start = content.indexOf("\"", start + "PUBLIC".length());
+            if (start >= 0)
+            {
+                String test = content.substring(start + 1);
+                end = content.indexOf("\"", ++start);
+
+                if (end >= 0)
+                    return content.substring(start, end);
+
+            }
+        }
+        return null;
+    }
+
+    public String getRootNodeId()
+    {
+        String content = getContent();
+        int index = -1;
+        int end = -1;
+        content = content.substring("<!DOCTYPE".length());
+
+        index = content.indexOf("PUBLIC");
+        if (index >= 0)
+        {
+            content = content.substring(0, index).trim();
+            return content.length() == 0 ? null : content;
+        } else
+        {
+            index = content.indexOf("SYSTEM");
+            if (index >= 0)
+            {
+                content = content.substring(0, index).trim();
+                return content.length() == 0 ? null : content;
+            } else
+            {
+                content = content.trim();
+                return content.length() == 0 ? null : content;
+            }
+        }
     }
 
     /* (non-Javadoc)
@@ -234,7 +379,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         {
             DocumentArtifact node = (DocumentArtifact) it.next();
 
-            if (node.getOffset() <= offset && offset <= node.getOffset() + node.getLength())
+            if (node.getOffset() <= offset && offset <= node.getOffset() + node.getLength() )
             {
                 return node;
             }
@@ -496,4 +641,88 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         }
     }
 
+    /**
+     * @return
+     */
+    public DocumentArtifact getCorrespondingNode()
+    {
+        return fCorrespondingNode;
+    }
+
+    /**
+     * @return
+     */
+    public DocumentArtifact getParent()
+    {
+        return fParent;
+    }
+
+    /**
+     * @param artifact
+     */
+    public void setCorrespondingNode(DocumentArtifact artifact)
+    {
+        fCorrespondingNode = artifact;
+    }
+
+    /**
+     * @param artifact
+     */
+    public void setParent(DocumentArtifact artifact)
+    {
+        fParent = artifact;
+    }
+
+    public DocumentArtifact getPreviousSibling()
+    {
+        if (fParent == null)
+        {
+            throw new IllegalStateException("create tree first");
+        }
+
+        String myType = getType();
+        if (fParent.getType().equals("/"))
+            return null;
+
+        if (myType.equals(DocumentArtifactPartitioner.ENDTAG))
+        {
+            if (fCorrespondingNode != null)
+            {
+                return fCorrespondingNode.getPreviousSibling();
+            } else
+            {
+                return null;
+            }
+        }
+
+        DocumentArtifact candidate = getPreviousArtifact();
+        if (candidate == null)
+            return null;
+
+        if (candidate.fParent == fParent)
+            return candidate;
+
+        return null;
+    }
+
+    public DocumentArtifact getPreviousArtifact()
+    {
+        return getArtifactAt(fDocument, getOffset() - 1);
+    }
+
+    /** may be the prev sibling or the parent */
+    public DocumentArtifact getPreviousTag()
+    {
+        DocumentArtifact root = this;
+        String type = root.getType();
+        if (type.equals(DocumentArtifactPartitioner.TEXT))
+        {
+            root = getPreviousArtifact();
+        }
+        DocumentArtifact candidate = root.getPreviousSibling();
+        if (candidate == null)
+            return root.fParent;
+        
+        return candidate;
+    }
 }

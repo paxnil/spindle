@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors.template.assist;
+package com.iw.plugins.spindle.editors.util;
 
 import java.util.Comparator;
 
@@ -252,6 +252,72 @@ public class CompletionProposal implements ICompletionProposal
     public String getAdditionalProposalInfo()
     {
         return fAdditionalProposalInfo;
+    }
+
+    static public class NullProposal implements ICompletionProposal
+    {
+        private String fMessage;
+        private String fExtraInfo = null;
+        private int fOffset;
+
+        public NullProposal(String message, String xtraInfo, int documentOffset)
+        {
+            fMessage = message;
+            fExtraInfo = xtraInfo;
+            fOffset = documentOffset;
+
+        }
+
+        public NullProposal(String message, int documentOffset)
+        {
+            this(message, null, documentOffset);
+        }
+        /* (non-Javadoc)
+        * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
+        */
+        public void apply(IDocument document)
+        {}
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+         */
+        public String getAdditionalProposalInfo()
+        {
+            return fExtraInfo;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
+         */
+        public IContextInformation getContextInformation()
+        {
+            return null;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
+         */
+        public String getDisplayString()
+        {
+            return fMessage;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
+         */
+        public Image getImage()
+        {
+            return null;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
+         */
+        public Point getSelection(IDocument document)
+        {
+            return new Point(fOffset, 0);
+        }
+
     }
 
 }
