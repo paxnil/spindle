@@ -102,6 +102,9 @@ public class CoreClasspathContainer implements IClasspathContainer
 
             if (jarName.equals("core.jar"))
                 continue;
+                
+            if (jarName.equals("javax.servlet.jar"))
+                continue;
 
             try
             {

@@ -31,6 +31,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -44,8 +46,6 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
@@ -82,9 +82,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     private Text fProjectContextFolderField;
     private Combo fServletSpecVersionCombo;
 
-    private TapestryProject fTapestryProject;
-
-    private BuildPathsBlock fBuildPathsBlock;
+    private List fReveal;
 
     private Listener fieldModifyListener = new Listener()
     {
@@ -100,15 +98,6 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     public NewTapestryProjectPage(String pageName)
     {
         super(pageName);
-        IStatusChangeListener listener = new IStatusChangeListener()
-        {
-            public void statusChanged(IStatus status)
-            {
-                    //do nothing
-    }
-        };
-
-        fBuildPathsBlock = new BuildPathsBlock(listener, 0);
     }
 
     /** (non-Javadoc)
@@ -305,14 +294,19 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
      */
     protected void configureTapestryProject(IJavaProject jproject, IProgressMonitor monitor) throws CoreException
     {
+        fReveal = new ArrayList();
         monitor.beginTask(UIPlugin.getString("new-project-wizard-page-initializing"), 6);
         IProject underlyingProject = jproject.getProject();
         String projectName = underlyingProject.getName();
         IFolder contextFolder = underlyingProject.getFolder(getContextFolderName());
-        contextFolder.create(true, true, monitor);
+        fReveal.add(contextFolder);
+        if (!contextFolder.exists())
+            contextFolder.create(true, true, monitor);
         monitor.worked(1);
         IFolder webInfFolder = contextFolder.getFolder("WEB-INF");
-        webInfFolder.create(true, true, monitor);
+        fReveal.add(webInfFolder);
+        if (!webInfFolder.exists())
+            webInfFolder.create(true, true, monitor);
         monitor.worked(1);
         configureWebXML(projectName, webInfFolder, monitor);
         monitor.worked(1);
@@ -336,6 +330,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         XMLUtil.writeWebDOTXML(projectName, getServletSpecPublicId(), writer);
         writer.flush();
         IFile webDotXML = webInfFolder.getFile("web.xml");
+        fReveal.add(webDotXML);
         InputStream contents = new ByteArrayInputStream(swriter.toString().getBytes());
         webDotXML.create(contents, true, new SubProgressMonitor(monitor, 1));
     }
@@ -351,12 +346,14 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         spec.setName(projectName);
         spec.setEngineClassName(TapestryCore.getString("TapestryEngine.defaultEngine"));
         spec.setDescription("add a description");
-        spec.setPageSpecificationPath("Home", "Home");
+        spec.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
+        spec.setPageSpecificationPath("Home", "Home.page");
         StringWriter swriter = new StringWriter();
         PrintWriter writer = new PrintWriter(swriter);
         XMLUtil.writeApplicationSpecification(writer, spec, 0);
         writer.flush();
         IFile appFile = webInfFolder.getFile(projectName + ".application");
+        fReveal.add(appFile);
         InputStream contents = new ByteArrayInputStream(swriter.toString().getBytes());
         appFile.create(contents, true, new SubProgressMonitor(monitor, 1));
     }
@@ -368,11 +365,13 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         homeSpec.setPageSpecification(true);
         homeSpec.setComponentClassName(TapestryCore.getString("TapestryPageSpec.defaultSpec"));
         homeSpec.setDescription("add a description");
+        homeSpec.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
         StringWriter swriter = new StringWriter();
         PrintWriter writer = new PrintWriter(swriter);
         XMLUtil.writeSpecification(writer, homeSpec, 0);
         writer.flush();
         IFile pageFile = webInfFolder.getFile("Home.page");
+        fReveal.add(pageFile);
         InputStream contents = new ByteArrayInputStream(swriter.toString().getBytes());
         pageFile.create(contents, true, new SubProgressMonitor(monitor, 1));
     }
@@ -386,8 +385,20 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
         String source = pstore.getString(UIPlugin.P_HTML_TO_GENERATE);
         IFile pageFile = contextFolder.getFile("Home.html");
+        fReveal.add(pageFile);
         InputStream contents = new ByteArrayInputStream(source.getBytes());
         pageFile.create(contents, true, new SubProgressMonitor(monitor, 1));
+    }
+
+    /**
+     * 
+     */
+    public IResource[] getReveal()
+    {
+        if (fReveal == null)
+            return new IResource[0];
+
+        return (IResource[]) fReveal.toArray(new IResource[fReveal.size()]);
     }
 
 }

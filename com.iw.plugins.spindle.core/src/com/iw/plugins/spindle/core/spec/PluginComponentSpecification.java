@@ -224,6 +224,14 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
         fParameters.put(name, spec);
     }
 
+    public Map getParameterMap()
+    {
+        if (fParameters == null)
+            return Collections.EMPTY_MAP;
+
+        return fParameters;
+    }
+
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#getAllowBody()
      */
@@ -394,6 +402,14 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
             return remove(fReservedParameterNames, value);
 
         return false;
+    }
+
+    public Set getReservedParameterNames()
+    {
+        if (fReservedParameterNames == null)
+            return Collections.EMPTY_SET;
+
+        return fReservedParameterNames;
     }
 
     /* (non-Javadoc)

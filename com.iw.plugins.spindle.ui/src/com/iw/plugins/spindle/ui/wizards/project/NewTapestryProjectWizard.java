@@ -26,6 +26,7 @@
 
 package com.iw.plugins.spindle.ui.wizards.project;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -85,6 +86,11 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
             {
                 jproject.open(null);
                 finishPage(fMainPage.getRunnable(jproject));
+                IResource [] reveal = fMainPage.getReveal();
+                for (int i = 0; i < reveal.length; i++)
+                {
+                    selectAndReveal(reveal[i]);
+                }
             } catch (JavaModelException e)
             {
                 UIPlugin.log(e);

@@ -91,20 +91,7 @@ public class CoreClasspathContainerInitializer extends ClasspathContainerInitial
      */
     public String getDescription(IPath containerPath, IJavaProject project)
     {
-        //        if (containerPath.segmentCount() == 3)
-        //        {
-        //            StringBuffer desc = new StringBuffer(LaunchingMessages.getString("JREContainer.JRE_System_Library_1")); //$NON-NLS-1$
-        //            desc.append(" ["); //$NON-NLS-1$
-        //            desc.append(containerPath.segment(2));
-        //            desc.append("]"); //$NON-NLS-1$
-        //            return desc.toString();
-        //        } else
-        //        {
-        //            return LaunchingMessages.getString("JREContainerInitializer.Default_System_Library_1"); //$NON-NLS-1$
-        //        }
-
-        //TODO this is fake
-        return "Test Container";
+        return "Tapestry Framework Container";
     }
 
 }
