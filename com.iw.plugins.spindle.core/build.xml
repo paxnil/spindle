@@ -4,6 +4,7 @@
   <property name="buildRelease" value="${basedir}/buildRelease"/>  
   <property name="plugin-home" value="${buildRelease}/plugin"/>
   <property name="version" value="0.0.1"/>
+  <property name="tapestry-install-dir" value="Q:\\etc\\tapestry\\Tapestry-3.0-beta-2"/>
   
   <target name="init">
     <available property="buildReleaseAvailable" file="${basedir}/buildRelease"/>
@@ -35,11 +36,21 @@
   
   
   <target name="build-src-jar" depends="release-build-dir">  	
-  	<jar jarfile="${plugin-home}/core-src.jar">
+  	<jar jarfile="${basedir}/core-src.jar">
   		<fileset dir="${basedir}/src"> 
     	 <exclude name="**/scratchpad/**/*.*"/>    	 
   		</fileset>   	
-  	</jar> 
+  	</jar>
+  	<jar jarfile="${basedir}/tapestry-src.jar">
+  		<fileset dir="${tapestry-install-dir}/framework/src"> 
+    	 	<include name="**/*.java"/>    	 
+  		</fileset>   	
+  	</jar>
+  	<jar jarfile="${basedir}/tapestry-contrib-src.jar">
+  		<fileset dir="${tapestry-install-dir}/contrib/src"> 
+    	 	<include name="**/*.java"/>    	 
+  		</fileset>   	
+  	</jar>
   </target>
   
   <target name="build-plugin-release" depends="prepare-to-build-release">

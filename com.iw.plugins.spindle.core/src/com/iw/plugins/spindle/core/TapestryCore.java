@@ -79,6 +79,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
     public static final String BUILDER_ID = PLUGIN_ID + ".tapestrybuilder";
 
     public static final String CACHE_GRAMMAR_PREFERENCE = PLUGIN_ID + ".cachinggrammars";
+    public static final String CORE_CONTAINER = PLUGIN_ID + ".TAPESTRY_FRAMEWORK";
 
     /**
      * SpecFactory instance used by the Scanners

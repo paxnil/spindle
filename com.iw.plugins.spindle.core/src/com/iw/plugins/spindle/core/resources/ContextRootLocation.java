@@ -26,6 +26,8 @@
 
 package com.iw.plugins.spindle.core.resources;
 
+import java.util.Locale;
+
 import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -201,6 +203,15 @@ public class ContextRootLocation extends AbstractRootLocation
         }
 
         return false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.tapestry.IResourceLocation#getLocale()
+     */
+    public Locale getLocale()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

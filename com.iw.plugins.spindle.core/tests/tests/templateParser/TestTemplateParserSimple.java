@@ -72,6 +72,15 @@ public class TestTemplateParserSimple extends TestCase
         {
             return null;
         }
+        /* (non-Javadoc)
+         * @see org.apache.tapestry.IResourceLocation#getLocale()
+         */
+        public Locale getLocale()
+        {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
     }
     /**
      * Constructor for TestTemplateParser.

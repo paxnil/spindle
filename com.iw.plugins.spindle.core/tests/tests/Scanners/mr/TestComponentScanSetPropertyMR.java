@@ -96,6 +96,10 @@ public class TestComponentScanSetPropertyMR extends BaseComponentScannerTest
             {
                 return null;
             }
+            
+            public Locale getLocale() {
+                return null;
+            }
         });
         result.setLocation(location);
         return result;

@@ -22,7 +22,7 @@
       <library name="commons-collections-2.1.jar">
          <export name="*"/>
       </library>
-      <library name="commons-fileupload-1.0-beta-1.jar">
+      <library name="commons-fileupload-1.0.jar">
          <export name="*"/>
       </library>
       <library name="commons-lang-1.0.jar">
@@ -31,13 +31,22 @@
       <library name="jakarta-oro-2.0.6.jar">
          <export name="*"/>
       </library>
-      <library name="ognl-2.4.2.jar">
+      <library name="javassist-2.5.1.jar">
          <export name="*"/>
       </library>
       <library name="javax.servlet.jar">
          <export name="*"/>
       </library>
-      <library name="tapestry-3.0.jar">
+      <library name="ognl-2.5.1.jar">
+         <export name="*"/>
+      </library>
+      <library name="tapestry-3.0-beta-2.jar">
+         <export name="*"/>
+      </library>
+      <library name="tapestry-contrib-3.0-beta-2.jar">
+         <export name="*"/>
+      </library>
+      <library name="bsf-2.3.0.jar">
          <export name="*"/>
       </library>
    </runtime>
@@ -127,6 +136,13 @@
       <persistent
             value="true">
       </persistent>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            class="com.iw.plugins.spindle.core.classpath.CoreClasspathContainerInitializer"
+            id="com.iw.plugins.spindle.core.TAPESTRY_FRAMEWORK">
+      </classpathContainerInitializer>
    </extension>
 
 </plugin>

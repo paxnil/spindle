@@ -163,4 +163,13 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
         return (fRoot.toHashString() + toHashString()).hashCode();
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.tapestry.IResourceLocation#getLocale()
+     */
+    public Locale getLocale()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
