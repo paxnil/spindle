@@ -50,6 +50,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
 import com.iw.plugins.spindle.core.spec.PluginAssetSpecification;
+import com.iw.plugins.spindle.core.spec.PluginBeanSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginDescriptionDeclaration;
 import com.iw.plugins.spindle.core.spec.PluginReservedParameterDeclaration;
@@ -143,80 +144,79 @@ public class ComponentScanner extends SpecificationScanner
     protected void scanBean(IComponentSpecification specification, Node node) throws ScannerException
     {
         String name = getAttribute(node, "name", true);
-        if (specification.getBeanSpecification(name) != null)
+//        if (specification.getBeanSpecification(name) != null)
+//        {
+//            addProblem(
+//                IProblem.ERROR,
+//                getAttributeSourceLocation(node, "name"),
+//                TapestryCore.getTapestryString(
+//                    "ComponentSpecification.duplicate-bean",
+//                    specification.getSpecificationLocation().getName(),
+//                    name));
+//        }
+//        validatePattern(
+//            name,
+//            SpecificationParser.BEAN_NAME_PATTERN,
+//            "SpecificationParser.invalid-bean-name",
+//            IProblem.ERROR,
+//            getAttributeSourceLocation(node, "name"));
+
+        String className = getAttribute(node, "class", true);
+
+//        validateTypeName(
+//            (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
+//            className,
+//            IProblem.ERROR,
+//            getAttributeSourceLocation(node, "class"));
+
+        String lifecycleString = getAttribute(node, "lifecycle");
+
+        BeanLifecycle lifecycle = (BeanLifecycle) SpecificationScanner.conversionMap.get(lifecycleString);
+
+        PluginBeanSpecification bspec = (PluginBeanSpecification) fSpecificationFactory.createBeanSpecification();
+
+        bspec.setClassName(className);
+        bspec.setLifecycle(lifecycle);
+
+        ISourceLocationInfo location = getSourceLocationInfo(node);
+        location.setResourceLocation(specification.getSpecificationLocation());
+        bspec.setLocation(location);
+
+        specification.addBeanSpecification(name, bspec);
+
+        bspec.validateSelf(specification, fValidator);
+
+        for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
         {
-            addProblem(
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"),
-                TapestryCore.getTapestryString(
-                    "ComponentSpecification.duplicate-bean",
-                    specification.getSpecificationLocation().getName(),
-                    name));
-        } else
-        {
-            validatePattern(
-                name,
-                SpecificationParser.BEAN_NAME_PATTERN,
-                "SpecificationParser.invalid-bean-name",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"));
-
-            String className = getAttribute(node, "class", true);
-
-            validateTypeName(
-                (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
-                className,
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "class"));
-
-            String lifecycleString = getAttribute(node, "lifecycle");
-
-            BeanLifecycle lifecycle = (BeanLifecycle) SpecificationScanner.conversionMap.get(lifecycleString);
-
-            IBeanSpecification bspec = fSpecificationFactory.createBeanSpecification();
-
-            bspec.setClassName(className);
-            bspec.setLifecycle(lifecycle);
-
-            ISourceLocationInfo location = getSourceLocationInfo(node);
-            location.setResourceLocation(specification.getSpecificationLocation());
-            bspec.setLocation(location);
-
-            specification.addBeanSpecification(name, bspec);
-
-            for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
+            if (isElement(child, "description"))
             {
-                if (isElement(child, "description"))
-                {
-                    bspec.setDescription(getValue(child));
-                   //TODO record description declaration
-                    continue;
-                }
+                bspec.setDescription(getValue(child));
+                //TODO record description declaration
+                continue;
+            }
 
-                if (isElement(child, "property"))
-                {
-                    scanProperty((IPluginPropertyHolder) bspec, child);
-                    continue;
-                }
+            if (isElement(child, "property"))
+            {
+                scanProperty((IPluginPropertyHolder) bspec, child);
+                continue;
+            }
 
-                if (isElement(child, "set-property"))
-                {
-                    scanSetProperty(bspec, child);
-                    continue;
-                }
+            if (isElement(child, "set-property"))
+            {
+                scanSetProperty(bspec, child);
+                continue;
+            }
 
-                if (isElement(child, "set-string-property"))
-                {
-                    scanSetMessageProperty(bspec, child);
-                    continue;
-                }
+            if (isElement(child, "set-string-property"))
+            {
+                scanSetMessageProperty(bspec, child);
+                continue;
+            }
 
-                if (isElement(child, "set-message-property"))
-                {
-                    scanSetMessageProperty(bspec, child);
-                    continue;
-                }
-
+            if (isElement(child, "set-message-property"))
+            {
+                scanSetMessageProperty(bspec, child);
+                continue;
             }
         }
     }
@@ -856,8 +856,8 @@ public class ComponentScanner extends SpecificationScanner
 
         PluginExpressionBeanInitializer iz =
             (PluginExpressionBeanInitializer) fSpecificationFactory.createExpressionBeanInitializer();
-      
-        iz.setPropertyName(name);  
+
+        iz.setPropertyName(name);
         iz.setExpression(expression);
         iz.setDeclaredValueIsFromAttribute(result == null ? true : result.fromAttribute);
 
@@ -885,7 +885,7 @@ public class ComponentScanner extends SpecificationScanner
 
         PluginMessageBeanInitializer iz =
             (PluginMessageBeanInitializer) fSpecificationFactory.createMessageBeanInitializer();
-            
+
         iz.setPropertyName(name);
         iz.setKey(key);
 
@@ -894,7 +894,7 @@ public class ComponentScanner extends SpecificationScanner
         iz.setLocation(location);
 
         spec.addInitializer(iz);
-        
+
         iz.validate(spec, fValidator);
     }
 

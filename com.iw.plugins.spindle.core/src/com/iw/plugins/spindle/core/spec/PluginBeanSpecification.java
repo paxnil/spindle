@@ -27,11 +27,21 @@
 package com.iw.plugins.spindle.core.spec;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.tapestry.bean.IBeanInitializer;
+import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.IBeanSpecification;
+
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.spec.bean.AbstractPluginBeanInitializer;
 
 /**
  *  Spindle aware concrete implementation of IBeanSpecification
@@ -144,6 +154,59 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
         BeanLifecycle old = this.fLifecycle;
         fLifecycle = lifecycle;
         firePropertyChange("lifecycle", old, this.fLifecycle);
+    }
+
+    public void validate(Object parent, IScannerValidator validator)
+    {
+        try
+        {
+            validateSelf(parent, validator);
+
+            for (Iterator iter = getInitializers().iterator(); iter.hasNext();)
+            {
+                AbstractPluginBeanInitializer element = (AbstractPluginBeanInitializer) iter.next();
+                element.validate(this, validator);
+            }
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+    }
+
+    public void validateSelf(Object parent, IScannerValidator validator) throws ScannerException
+    {
+
+        PluginComponentSpecification component = (PluginComponentSpecification) parent;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        String name = getIdentifier();
+
+        if (component.getBeanSpecification(name) != this)
+        {
+            validator.addProblem(
+                IProblem.ERROR,
+                sourceInfo.getAttributeSourceLocation("name"),
+                TapestryCore.getTapestryString(
+                    "ComponentSpecification.duplicate-bean",
+                    component.getSpecificationLocation().getName(),
+                    name));
+        }
+
+        validator.validatePattern(
+            name,
+            SpecificationParser.BEAN_NAME_PATTERN,
+            "SpecificationParser.invalid-bean-name",
+            IProblem.ERROR,
+            sourceInfo.getAttributeSourceLocation("name"));
+
+        validator.validateTypeName(
+            (IResourceWorkspaceLocation) component.getSpecificationLocation(),
+            fClassName,
+            IProblem.ERROR,
+            sourceInfo.getAttributeSourceLocation("class"));
+
     }
 
 }

@@ -89,6 +89,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      **/
 
     protected Map fBeans;
+    protected List fBeanSpecifications;
 
     /**
      *  The names of all reserved informal parameter names (as lower-case).  This
@@ -203,7 +204,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
         pAsset.setIdentifier(name);
 
         fAssetObjects.add(asset);
-        
+
         if (!fAssets.containsKey(name))
             fAssets.put(name, asset);
 
@@ -360,22 +361,18 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     public void addBeanSpecification(String name, IBeanSpecification specification)
     {
         if (fBeans == null)
-            fBeans = new IIdentifiableMap(this, "beans");
+        {
+            fBeanSpecifications = new ArrayList();
+            fBeans = new HashMap();
+        }
 
-        fBeans.put(name, specification);
-    }
+        PluginBeanSpecification pluginBean = (PluginBeanSpecification) specification;
+        pluginBean.setIdentifier(name);
 
-    public void removeBeanSpecification(String name)
-    {
-        remove(fBeans, name);
-    }
+        fBeanSpecifications.add(specification);
 
-    public void setBeanSpecification(String name, IBeanSpecification specification)
-    {
-        if (fBeans == null)
-            fBeans = new IIdentifiableMap(this, "beans");
-
-        fParameters.put(name, specification);
+        if (!fBeans.containsKey(name))
+            fBeans.put(name, specification);
     }
 
     /* (non-Javadoc)
