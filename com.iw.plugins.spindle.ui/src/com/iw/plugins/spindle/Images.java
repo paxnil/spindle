@@ -25,97 +25,119 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
+
 /**
  * Convenience class for accessing shared images
  */
 public class Images
 {
-    static private URL BASE_URL = UIPlugin.getDefault().getDescriptor().getInstallURL();
-    static private ImageRegistry Registry = null;
+  static private URL BASE_URL = null;
+  static private ImageRegistry Registry = null;
 
-    public static Image getSharedImage(String name)
+  public static Image getSharedImage(String name)
+  {
+    ImageRegistry registry = getImageRegistry();
+    URL imageURL = getImageURL(name);
+    String urlString = null;
+    if (imageURL != null)
     {
-        ImageRegistry registry = getImageRegistry();
-        URL imageURL = getImageURL(name);
-        String urlString = null;
-        if (imageURL != null)
-        {
-            urlString = imageURL.toString();
-        } else
-        {
-            return getSharedImage("missing.gif");
-        }
-        Image result = registry.get(urlString);
-        if (result == null)
-        {
-            ImageDescriptor descriptor = ImageDescriptor.createFromURL(imageURL);
-            Registry.put(urlString, descriptor.createImage());
-            result = registry.get(urlString);
-        }
-        return result;
-    }
-
-    public static ImageDescriptor getImageDescriptor(String name)
+      urlString = imageURL.toString();
+    } else
     {
-        return createImageDescriptor(getImageURL(name));
+      return getSharedImage("missing.gif");
     }
-
-    static private ImageRegistry getImageRegistry()
+    Image result = registry.get(urlString);
+    if (result == null)
     {
-        if (Registry == null)
-        {
-            Registry = UIPlugin.getDefault().getImageRegistry();
-            Registry.put("missing", ImageDescriptor.getMissingImageDescriptor().createImage());
-        }
-        return Registry;
+      ImageDescriptor descriptor = ImageDescriptor.createFromURL(imageURL);
+      Registry.put(urlString, descriptor.createImage());
+      result = registry.get(urlString);
     }
+    return result;
+  }
 
-    /**
-     * Utility method to create an <code>ImageDescriptor</code>
-     * from a path to a file.
-     */
-    public static ImageDescriptor createImageDescriptor(URL imageURL)
+  public static ImageDescriptor getImageDescriptor(String name)
+  {
+    return createImageDescriptor(getImageURL(name));
+  }
+
+  static private ImageRegistry getImageRegistry()
+  {
+    if (Registry == null)
     {
-        if (imageURL == null)
-        {
-            return ImageDescriptor.getMissingImageDescriptor();
-        }
-        return ImageDescriptor.createFromURL(imageURL);
+      Registry = UIPlugin.getDefault().getImageRegistry();
+      Registry.put("missing", ImageDescriptor.getMissingImageDescriptor().createImage());
     }
+    return Registry;
+  }
 
-    public static URL getImageURL(String name)
+  /**
+   * Utility method to create an <code>ImageDescriptor</code> from a path to a
+   * file.
+   */
+  public static ImageDescriptor createImageDescriptor(URL imageURL)
+  {
+    if (imageURL == null)
     {
-        checkBase();
-        String iconPath = "icons/full/"+name;
-        
-        try
-        {
-            return new URL(BASE_URL, iconPath);
-
-        } catch (MalformedURLException e)
-        {}
-        return null;
+      return ImageDescriptor.getMissingImageDescriptor();
     }
+    return ImageDescriptor.createFromURL(imageURL);
+  }
 
-    static private void checkBase()
+  public static URL getImageURL(String name)
+  {
+    String iconPath = "icons/full/" + name;
+
+    try
     {
-        String current = BASE_URL.getPath();
-        int index = current.indexOf("_");
-        if (index != -1)
-        {
-            try
-            {
-                current = current.substring(0, index) + "/";
-                BASE_URL = new URL(BASE_URL.getProtocol(), "", current);
-            } catch (MalformedURLException mex)
-            {}
-        }
+      return new URL(getBaseURL(), iconPath);
+
+    } catch (MalformedURLException e)
+    {
     }
+    return null;
+  }
+
+  static private URL checkBase(URL candidate)
+  {
+    String current = candidate.getPath();
+    int index = current.indexOf("_");
+    if (index != -1)
+    {
+      try
+      {
+        current = current.substring(0, index) + "/";
+        return new URL(candidate.getProtocol(), "", current);
+      } catch (MalformedURLException mex)
+      {
+        UIPlugin.log(mex);
+      }
+    }
+    return candidate;
+  }
+
+  private static synchronized final URL getBaseURL()
+  {
+    if (BASE_URL == null)
+    {
+      URL installUrl = UIPlugin.getDefault().getBundle().getEntry("/");
+      try
+      {
+        BASE_URL = checkBase(Platform.resolve(installUrl));
+      } catch (IOException e)
+      {
+        UIPlugin.log(e);
+      }
+    }
+    return BASE_URL;
+  }
 
 }
