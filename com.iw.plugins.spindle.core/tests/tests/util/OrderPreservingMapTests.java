@@ -40,7 +40,7 @@ import com.iw.plugins.spindle.core.util.OrderPreservingMap;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class OrderPreservingMapTests extends TestCase    
+public class OrderPreservingMapTests extends TestCase
 {
 
     String[] defaultKeys = { "dog", "cat", "mouse", "gerbil", "degu" };
@@ -80,6 +80,78 @@ public class OrderPreservingMapTests extends TestCase
                 fail("map is missing key:" + keys[i]);
             }
         }
+    }
+
+    /**
+    * @param map
+    * @param keys
+    * @author bgarson
+    * @return
+    */
+    
+    
+    public void testValues(){
+        Map map = createDefaultMap();
+        Map map2 = createDefaultMap();
+        if(!(map.values().containsAll(map2.values())))
+        {
+            fail("this should have passed");
+        }
+        
+        //create a new map
+        OrderPreservingMap map3 = new OrderPreservingMap();
+        for(int i=0; i < defaultKeys.length ; i++)
+        {
+            map3.put(defaultValues[i], defaultKeys[i]);    
+        }
+        
+        //test to make sure the values aren't the same
+        if((map.values().containsAll(map3.values())))
+        {
+            fail("this should have failed");
+        }
+        map.clear();
+        if((map.values().containsAll(map2.values()))){
+            fail("this should have failed");
+        }
+    }
+    
+    
+    public void testIsEmpty(){
+        OrderPreservingMap mapInOrder = new OrderPreservingMap();
+        if(!mapInOrder.isEmpty())
+        {
+            fail("map should have been empty");
+        }
+        
+        for (int i=0; i<defaultKeys.length; i++)
+        {
+            mapInOrder.put(defaultKeys, defaultValues);   
+        }
+        if(mapInOrder.isEmpty())
+        {
+            fail("map should have 5 values in it");
+        }
+        mapInOrder.clear();
+        String[] k1 = { "a", "b", "c" };
+        String[] v1 = { "A", "B", "C" };
+        Map map = createMap(k1, v1);
+        
+        mapInOrder.putAll(map);
+        assertTrue(mapInOrder.size() == 3);
+    }
+
+    public void testEntrySet()
+    {
+       OrderPreservingMap mapresult = new OrderPreservingMap();
+      try
+    {
+         mapresult.entrySet();
+         fail("we expected this to fail but it didn't");
+    } catch (RuntimeException e)
+    {
+
+    }
     }
 
     private void checkKeyValueOrder(Map map, String[] keys, String[] values)
