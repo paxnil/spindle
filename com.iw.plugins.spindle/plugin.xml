@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle"
    name="Spindle, an Eclipse Plugin for Tapestry (tapestry.sourceforge.net)"
-   version="1.1.0.rc3"
+   version="1.1.1"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.TapestryPlugin">
 
@@ -94,19 +94,6 @@
             extension="script">
       </fileTypes>
    </extension>
-   <extension point="org.eclipse.ui.preferencePages">
- 	<page id="RefactorPreferencesPage"
- 		name="Spindle Refactoring"
-    		class="com.iw.plugins.spindle.refactor.preferences.SpindleRefactorPreferencePage">
-   	</page>
-   	
- 	<!--<page id="BadWordsColorPreferencePage"
-  	      	name="Colors"
-	      	class="org.eclipse.ui.articles.badwordchecker.BadWordsColorPreferencePage"
-		category="BadWordsPreferencePage">
-   	</page>-->
-</extension>
-
    <extension
          point="org.eclipse.ui.newWizards">
       <category
