@@ -28,7 +28,6 @@ package tests.util;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Collection;
 
 import com.iw.plugins.spindle.core.util.PropertyFiringSet;
 

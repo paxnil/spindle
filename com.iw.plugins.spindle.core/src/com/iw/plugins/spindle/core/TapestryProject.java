@@ -44,6 +44,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import com.iw.plugins.spindle.core.resources.ContextRootLocation;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.*;
 
 /**
@@ -268,7 +270,8 @@ public class TapestryProject implements IProjectNature
     private int readIntProperty(String key)
     {
         String result = readProperty(key);
-        if (result == null || result.trim().length() == 0) {
+        if (result == null || result.trim().length() == 0)
+        {
             return 0;
         }
         if (result != null)
@@ -337,7 +340,9 @@ public class TapestryProject implements IProjectNature
             } else
             {
                 fileContent.append(
-                    "    <library-spec>" + (librarySpecPath != null ? librarySpecPath : "NOT_SPECIFIED") + "</library-spec>\n");
+                    "    <library-spec>"
+                        + (librarySpecPath != null ? librarySpecPath : "NOT_SPECIFIED")
+                        + "</library-spec>\n");
             }
             fileContent.append("</tapestry-project-properties>\n");
             Files.toTextFile(getPropertiesFile(), fileContent.toString());
@@ -354,6 +359,15 @@ public class TapestryProject implements IProjectNature
             return initWebContextFolder();
         }
         return webContextFolder;
+    }
+
+    public IResourceWorkspaceLocation getWebContextLocation()
+    {
+        IFolder folder = getWebContextFolder();
+        if (folder == null || !folder.exists()) {
+            return null;
+        }
+        return new ContextRootLocation(folder);
     }
 
     private IFolder initWebContextFolder()

@@ -29,7 +29,7 @@ package com.iw.plugins.spindle.core.resources.search;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- *  TODO Add Type comment
+ *  Interface for all kinds of searches in the Tapestry context
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
