@@ -213,7 +213,7 @@ public class ComponentScanner extends SpecificationScanner
 
                 if (isElement(child, "property"))
                 {
-                    scanProperty((IPluginPropertyHolder)bspec, child);
+                    scanProperty((IPluginPropertyHolder) bspec, child);
                     continue;
                 }
 
@@ -443,7 +443,7 @@ public class ComponentScanner extends SpecificationScanner
 
                     if (isElement(child, "property"))
                     {
-                        scanProperty((IPluginPropertyHolder)c, child);
+                        scanProperty((IPluginPropertyHolder) c, child);
                         continue;
                     }
                 }
@@ -461,10 +461,10 @@ public class ComponentScanner extends SpecificationScanner
     protected void scanComponentSpecification(Node rootNode, IComponentSpecification specification, boolean isPage)
         throws ScannerException
     {
-        
+
         ISourceLocationInfo location = getSourceLocationInfo(rootNode);
         specification.setLocation(location);
-        
+
         String rootName = rootNode.getNodeName();
         if (isPage)
         {
@@ -572,7 +572,7 @@ public class ComponentScanner extends SpecificationScanner
 
             if (isElement(node, "property"))
             {
-                scanProperty((IPluginPropertyHolder)specification, node);
+                scanProperty((IPluginPropertyHolder) specification, node);
                 continue;
             }
 
@@ -580,8 +580,9 @@ public class ComponentScanner extends SpecificationScanner
             {
                 String value = getValue(node);
                 specification.setDescription(value);
-                PluginDescriptionDeclaration declaration = new PluginDescriptionDeclaration(null, value, getSourceLocationInfo(node));
-                ((PluginComponentSpecification)specification).addDescriptionDeclaration(declaration);
+                PluginDescriptionDeclaration declaration =
+                    new PluginDescriptionDeclaration(null, value, getSourceLocationInfo(node));
+                ((PluginComponentSpecification) specification).addDescriptionDeclaration(declaration);
                 continue;
             }
 
@@ -674,6 +675,26 @@ public class ComponentScanner extends SpecificationScanner
 
             param.setRequired(getBooleanAttribute(node, "required"));
 
+            //new rule in Tapestry 3.0-beta4 
+            //if a parameter is required, its not allowed to have a default  value.
+            // BTW default values are only allowed in DTD 3.0
+            if (DTDVersion >= XMLUtil.DTD_3_0)
+            {
+                String defaultValue = getAttribute(node, "default-value");
+                param.setDefaultValue(defaultValue);
+                if (param.isRequired() && defaultValue != null)
+                {
+                    addProblem(
+                        IProblem.ERROR,
+                        getAttributeSourceLocation(node, "default-value"),
+                        TapestryCore.getTapestryString(
+                            "EstablishDefaultParameterValuesVisitor.parameter-must-have-no-default-value",
+                            specification.getSpecificationLocation().getName(),
+                            name));
+                }
+
+            }
+
             String propertyName = getAttribute(node, "property-name");
 
             // If not specified, use the name of the parameter.
@@ -750,7 +771,20 @@ public class ComponentScanner extends SpecificationScanner
 
             if (!typeList.contains(type))
             {
-                validateTypeName(type, IProblem.ERROR, getAttributeSourceLocation(node, "type"));
+                if (type.endsWith("[]"))
+                {
+                    String fixedType = type.substring(0, type.length() - 2);
+                    while (fixedType.endsWith("[]"))
+                    {
+                        fixedType = fixedType.substring(0, fixedType.length() - 2);
+                    }
+                    validateTypeName(fixedType, IProblem.ERROR, getAttributeSourceLocation(node, "type"));
+
+                } else
+                {
+
+                    validateTypeName(type, IProblem.ERROR, getAttributeSourceLocation(node, "type"));
+                }
             }
 
             ps.setType(type);
@@ -791,8 +825,9 @@ public class ComponentScanner extends SpecificationScanner
                 getAttributeSourceLocation(node, "name"),
                 "duplicate reserved paramter name: " + name);
         }
-        PluginReservedParameterDeclaration declaration = new PluginReservedParameterDeclaration(name, getSourceLocationInfo(node));
-        ((PluginComponentSpecification)spec).addReservedParameterDeclaration(declaration);
+        PluginReservedParameterDeclaration declaration =
+            new PluginReservedParameterDeclaration(name, getSourceLocationInfo(node));
+        ((PluginComponentSpecification) spec).addReservedParameterDeclaration(declaration);
         spec.addReservedParameterName(name);
     }
 

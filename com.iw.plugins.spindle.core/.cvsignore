@@ -6,3 +6,4 @@ core.jar
 core-src.jar
 *.zip
 dtdparser.jar
+.checkstyle

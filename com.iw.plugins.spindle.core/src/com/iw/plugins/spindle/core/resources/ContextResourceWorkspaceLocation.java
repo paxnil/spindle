@@ -80,7 +80,7 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
         return false;
     }
 
-    private IContainer getContainer()
+    public IContainer getContainer()
     {
         return ((ContextRootLocation) fRoot).getContainer(this);
     }
@@ -95,7 +95,7 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
         {
             IStorage storage = (IStorage) container.getFile(new Path(getName()));
             IResource resource = (IResource) storage.getAdapter(IResource.class);
-            if (resource == null || resource.exists())
+            if (resource != null && resource.exists())
                 return storage;
         }
 
