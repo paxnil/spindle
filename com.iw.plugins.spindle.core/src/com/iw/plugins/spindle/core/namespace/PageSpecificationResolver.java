@@ -36,7 +36,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: PageSpecificationResolver.java,v 1.1 2003/08/14 19:11:47
- *          glongman Exp $
+ *                     glongman Exp $
  */
 
 public class PageSpecificationResolver
@@ -76,7 +76,10 @@ public class PageSpecificationResolver
       namespace = fContainerNamespace;
 
     if (namespace == null)
-      return null;
+//      namespace = findApplicationNamespace(); FIXME waiting for howards readon things
+//    
+//    if (namespace == null)
+      	return null;
 
     if (namespace.containsPage(pageName))
     {
@@ -97,6 +100,23 @@ public class PageSpecificationResolver
       return fFrameworkNamespace.getPageSpecification(pageName);
     }
     return null;
+  }
+
+  protected INamespace findApplicationNamespace()
+  {
+    //quick check
+    INamespace parent = fContainerNamespace.getParentNamespace();
+    if (parent == null)
+      return null;
+
+    if (parent.isApplicationNamespace())
+      return parent;
+
+    while (parent != null && !parent.isApplicationNamespace())
+      parent = parent.getParentNamespace();
+
+    return parent;
+
   }
 
 }
