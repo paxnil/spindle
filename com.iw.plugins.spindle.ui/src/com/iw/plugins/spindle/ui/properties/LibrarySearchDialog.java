@@ -45,114 +45,111 @@ import org.eclipse.swt.widgets.Shell;
 import com.iw.plugins.spindle.Images;
 
 /**
- *  A search dialog for choosing a library for a Library Project
+ * A search dialog for choosing a library for a Library Project
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class LibrarySearchDialog
-    extends TitleAreaDialog
-    implements ISelectionChangedListener, IDoubleClickListener
+public class LibrarySearchDialog extends TitleAreaDialog
+    implements
+      ISelectionChangedListener,
+      IDoubleClickListener
 {
 
-    private SearchForLibraryWidget searchWidget;
-    private String title;
-    private String description;
+  private SearchForLibraryWidget searchWidget;
+  private String title;
+  private String description;
 
-    public LibrarySearchDialog(
-        Shell shell,
-        IJavaProject project,
-        String windowTitle,
-        String description
-        )
+  public LibrarySearchDialog(Shell shell, IJavaProject project, String windowTitle,
+      String description)
+  {
+    super(shell);
+    this.title = windowTitle == null ? "" : windowTitle;
+    this.description = description == null ? "" : description;
+    searchWidget = new SearchForLibraryWidget(project);
+
+    searchWidget.addSelectionChangedListener(this);
+    searchWidget.addDoubleClickListener(this);
+  }
+
+  public void create()
+  {
+    super.create();
+    setTitle(title);
+    setMessage(description, IMessageProvider.NONE);
+    searchWidget.setFocus();
+    updateOkState();
+  }
+
+  /**
+   * @see AbstractDialog#performCancel()
+   */
+  protected boolean performCancel()
+  {
+    setReturnCode(CANCEL);
+    return true;
+
+  }
+
+  protected void okPressed()
+  {
+    setReturnCode(OK);
+    hardClose();
+  }
+
+  protected boolean hardClose()
+  {
+    // dispose any contained stuff
+    searchWidget.dispose();
+    return super.close();
+  }
+
+  protected Control createDialogArea(Composite parent)
+  {
+    Composite container = (Composite) super.createDialogArea(parent);
+    container.setFont(parent.getFont());
+    Composite useContainer = new Composite(container, SWT.NONE);
+    FillLayout layout = new FillLayout();
+    useContainer.setLayout(layout);
+    useContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
+    searchWidget.createControl(useContainer);
+    setTitleImage(Images.getSharedImage("applicationDialog.gif"));
+    return container;
+  }
+
+  private void updateOkState()
+  {
+    Button okButton = getButton(IDialogConstants.OK_ID);
+    if (okButton != null)
     {
-        super(shell);
-        this.title = windowTitle == null ? "" : windowTitle;
-        this.description = description == null ? "" : description;
-        searchWidget = new SearchForLibraryWidget(project);
-
-        searchWidget.addSelectionChangedListener(this);
-        searchWidget.addDoubleClickListener(this);
+      ISelection selection = searchWidget.getSelection();
+      okButton.setEnabled(selection != null && !selection.isEmpty());
     }
+  }
 
-    public void create()
+  public String getResult()
+  {
+    return searchWidget.getResult();
+  }
+
+  /**
+   * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
+   */
+  public void selectionChanged(SelectionChangedEvent event)
+  {
+    updateOkState();
+  }
+
+  /**
+   * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(DoubleClickEvent)
+   */
+  public void doubleClick(DoubleClickEvent event)
+  {
+    ISelection selection = searchWidget.getSelection();
+    if (selection != null && !selection.isEmpty())
     {
-        super.create();
-        setTitle(title);
-        setMessage(description, IMessageProvider.NONE);
-        searchWidget.setFocus();
-        updateOkState();
+      buttonPressed(IDialogConstants.OK_ID);
     }
-
-    /**
-     * @see AbstractDialog#performCancel()
-     */
-    protected boolean performCancel()
-    {
-        setReturnCode(CANCEL);
-        return true;
-
-    }
-
-    protected void okPressed()
-    {
-        setReturnCode(OK);
-        hardClose();
-    }
-
-    protected boolean hardClose()
-    {
-        // dispose any contained stuff
-        searchWidget.dispose();
-        return super.close();
-    }
-
-    protected Control createDialogArea(Composite parent)
-    {       
-        Composite container = (Composite) super.createDialogArea(parent);
-        container.setFont(parent.getFont());
-        Composite useContainer = new Composite(container, SWT.NONE);
-        FillLayout layout = new FillLayout();
-        useContainer.setLayout(layout);
-        useContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
-        searchWidget.createControl(useContainer);
-        setTitleImage(Images.getSharedImage("applicationDialog.gif"));
-        return container;
-    }
-
-    private void updateOkState()
-    {
-        Button okButton = getButton(IDialogConstants.OK_ID);
-        if (okButton != null)
-        {
-            ISelection selection = searchWidget.getSelection();
-            okButton.setEnabled(selection != null && !selection.isEmpty());
-        }
-    }
-
-    public String getResult()
-    {
-        return searchWidget.getResult();
-    }
-
-    /**
-     * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
-     */
-    public void selectionChanged(SelectionChangedEvent event)
-    {
-        updateOkState();
-    }
-
-    /**
-     * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(DoubleClickEvent)
-     */
-    public void doubleClick(DoubleClickEvent event)
-    {
-        ISelection selection = searchWidget.getSelection();
-        if (selection != null && !selection.isEmpty())
-        {
-            buttonPressed(IDialogConstants.OK_ID);
-        }
-    }
+  }
 
 }

@@ -46,150 +46,144 @@ import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
  * @author GWL
- * @version $Id$
- *
- * Copryright 2002, Intelligent Works Inc.
- * All Rights Reserved
+ * @version $Id: SpindleGeneralPreferencePage.java,v 1.5 2004/05/05 19:24:58
+ *          glongman Exp $
+ * 
+ * Copryright 2002, Intelligent Works Inc. All Rights Reserved
  */
-public class SpindleGeneralPreferencePage
-    extends PreferencePage
-    implements IWorkbenchPreferencePage, IPropertyChangeListener
+public class SpindleGeneralPreferencePage extends PreferencePage
+    implements
+      IWorkbenchPreferencePage,
+      IPropertyChangeListener
 {
-    private static final String BUILD_MISS = TapestryCore.BUILDER_MARKER_MISSES;
-    private static final String HANDLE_ASSETS = TapestryCore.BUILDER_HANDLE_ASSETS;
-    private static final String[][] CORE_STATUS_OPTIONS =
-        new String[][] {
-            new String[] { TapestryCore.CORE_STATUS_INFO, TapestryCore.CORE_STATUS_INFO },
-            new String[] { TapestryCore.CORE_STATUS_WARN, TapestryCore.CORE_STATUS_WARN },
-            new String[] { TapestryCore.CORE_STATUS_ERROR, TapestryCore.CORE_STATUS_ERROR },
-            new String[] { TapestryCore.CORE_STATUS_IGNORE, TapestryCore.CORE_STATUS_IGNORE }
-    };
+  private static final String BUILD_MISS = TapestryCore.BUILDER_MARKER_MISSES;
+  private static final String HANDLE_ASSETS = TapestryCore.BUILDER_HANDLE_ASSETS;
+  private static final String[][] CORE_STATUS_OPTIONS = new String[][]{
+      new String[]{TapestryCore.CORE_STATUS_INFO, TapestryCore.CORE_STATUS_INFO},
+      new String[]{TapestryCore.CORE_STATUS_WARN, TapestryCore.CORE_STATUS_WARN},
+      new String[]{TapestryCore.CORE_STATUS_ERROR, TapestryCore.CORE_STATUS_ERROR},
+      new String[]{TapestryCore.CORE_STATUS_IGNORE, TapestryCore.CORE_STATUS_IGNORE}};
 
-    private RadioGroupFieldEditor fBuildMisses;
-    private RadioGroupFieldEditor fHandleAssets;
- 
-    /**
-     * Constructor for SpindleRefactorPreferencePage.
-     * @param style
-     */
-    public SpindleGeneralPreferencePage()
+  private RadioGroupFieldEditor fBuildMisses;
+  private RadioGroupFieldEditor fHandleAssets;
+
+  /**
+   * Constructor for SpindleRefactorPreferencePage.
+   * 
+   * @param style
+   */
+  public SpindleGeneralPreferencePage()
+  {
+    super(UIPlugin.getString("preference-general-title"), Images
+        .getImageDescriptor("applicationDialog.gif"));
+    setDescription(UIPlugin.getString("preference-general-settings"));
+  }
+
+  /**
+   * @see org.eclipse.ui.IWorkbenchPreferencePage#init(IWorkbench)
+   */
+  public void init(IWorkbench workbench)
+  {
+  }
+
+  protected Control createContents(Composite parent)
+  {
+    Font font = parent.getFont();
+    GridData gd;
+
+    Composite top = new Composite(parent, SWT.LEFT);
+    top.setFont(font);
+
+    // Sets the layout data for the top composite's
+    // place in its parent's layout.
+    top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+    createVerticalSpacer(top, 1);
+
+    fBuildMisses = new RadioGroupFieldEditor(BUILD_MISS, UIPlugin
+        .getString("preference-build-miss"), 4, CORE_STATUS_OPTIONS, top);
+
+    fBuildMisses.setPreferencePage(this);
+    fBuildMisses.setPreferenceStore(TapestryCore.getDefault().getPreferenceStore());
+    fBuildMisses.load();
+    setValid(fBuildMisses.isValid());
+    fBuildMisses.setPropertyChangeListener(this);
+
+    createVerticalSpacer(top, 1);
+
+    fHandleAssets = new RadioGroupFieldEditor(HANDLE_ASSETS, UIPlugin
+        .getString("preference-handle-assets"), 4, CORE_STATUS_OPTIONS, top);
+
+    fHandleAssets.setPreferencePage(this);
+    fHandleAssets.setPreferenceStore(TapestryCore.getDefault().getPreferenceStore());
+    fHandleAssets.load();
+    setValid(fHandleAssets.isValid());
+    fHandleAssets.setPropertyChangeListener(this);
+
+    createVerticalSpacer(top, 1);
+
+    Composite displayComp = new Composite(top, SWT.NONE);
+    GridLayout displayCompLayout = new GridLayout();
+    displayCompLayout.numColumns = 2;
+    displayCompLayout.marginHeight = 0;
+    displayCompLayout.marginWidth = 0;
+    displayComp.setLayout(displayCompLayout);
+    gd = new GridData(GridData.FILL_HORIZONTAL);
+    displayComp.setLayoutData(gd);
+    displayComp.setFont(font);
+
+    return top;
+  }
+
+  /**
+   * Create some empty space.
+   */
+  protected void createVerticalSpacer(Composite comp, int colSpan)
+  {
+    Label label = new Label(comp, SWT.NONE);
+    GridData gd = new GridData();
+    gd.horizontalSpan = colSpan;
+    label.setLayoutData(gd);
+  }
+
+  protected void performDefaults()
+  {
+    fBuildMisses.loadDefault();
+    fHandleAssets.loadDefault();
+
+    super.performDefaults();
+  }
+
+  public boolean performOk()
+  {
+    fBuildMisses.store();
+    fHandleAssets.store();
+
+    return super.performOk();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.preference.IPreferencePage#isValid()
+   */
+  public boolean isValid()
+  {
+    return true;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+   */
+  public void propertyChange(PropertyChangeEvent event)
+  {
+    if (event.getProperty().equals(FieldEditor.IS_VALID))
     {
-        super(UIPlugin.getString("preference-general-title"), Images.getImageDescriptor("applicationDialog.gif"));
-        setDescription(UIPlugin.getString("preference-general-settings"));
+      boolean newValue = ((Boolean) event.getNewValue()).booleanValue();
+      setValid(newValue);
     }
-
-    /**
-     * @see org.eclipse.ui.IWorkbenchPreferencePage#init(IWorkbench)
-     */
-    public void init(IWorkbench workbench)
-    {}
-
-    protected Control createContents(Composite parent)
-    {
-        Font font = parent.getFont();
-        GridData gd;
-
-        Composite top = new Composite(parent, SWT.LEFT);
-        top.setFont(font);
-
-        // Sets the layout data for the top composite's 
-        // place in its parent's layout.
-        top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        createVerticalSpacer(top, 1);
-
-        fBuildMisses =
-            new RadioGroupFieldEditor(
-                BUILD_MISS,
-                UIPlugin.getString("preference-build-miss"),
-                4,
-                CORE_STATUS_OPTIONS,
-                top);
-
-        fBuildMisses.setPreferencePage(this);
-        fBuildMisses.setPreferenceStore(TapestryCore.getDefault().getPreferenceStore());
-        fBuildMisses.load();
-        setValid(fBuildMisses.isValid());
-        fBuildMisses.setPropertyChangeListener(this);
-
-        createVerticalSpacer(top, 1);
-
-        fHandleAssets =
-            new RadioGroupFieldEditor(
-                HANDLE_ASSETS,
-                UIPlugin.getString("preference-handle-assets"),
-                4,
-                CORE_STATUS_OPTIONS,
-                top);
-
-        fHandleAssets.setPreferencePage(this);
-        fHandleAssets.setPreferenceStore(TapestryCore.getDefault().getPreferenceStore());
-        fHandleAssets.load();
-        setValid(fHandleAssets.isValid());
-        fHandleAssets.setPropertyChangeListener(this);
-
-        createVerticalSpacer(top, 1);
-
-        Composite displayComp = new Composite(top, SWT.NONE);
-        GridLayout displayCompLayout = new GridLayout();
-        displayCompLayout.numColumns = 2;
-        displayCompLayout.marginHeight = 0;
-        displayCompLayout.marginWidth = 0;
-        displayComp.setLayout(displayCompLayout);
-        gd = new GridData(GridData.FILL_HORIZONTAL);
-        displayComp.setLayoutData(gd);
-        displayComp.setFont(font);
-
-
-
-        return top;
-    }
-
-    /**
-     * Create some empty space.
-     */
-    protected void createVerticalSpacer(Composite comp, int colSpan)
-    {
-        Label label = new Label(comp, SWT.NONE);
-        GridData gd = new GridData();
-        gd.horizontalSpan = colSpan;
-        label.setLayoutData(gd);
-    }
-
-    protected void performDefaults()
-    {
-        fBuildMisses.loadDefault();
-        fHandleAssets.loadDefault();
- 
-        super.performDefaults();
-    }
-
-    public boolean performOk()
-    {
-        fBuildMisses.store();
-        fHandleAssets.store();
-        
-         return super.performOk();
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.preference.IPreferencePage#isValid()
-     */
-    public boolean isValid()
-    {
-        return true;
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
-     */
-    public void propertyChange(PropertyChangeEvent event)
-    {
-        if (event.getProperty().equals(FieldEditor.IS_VALID))
-        {
-            boolean newValue = ((Boolean) event.getNewValue()).booleanValue();
-            setValid(newValue);
-        }
-    }
+  }
 
 }

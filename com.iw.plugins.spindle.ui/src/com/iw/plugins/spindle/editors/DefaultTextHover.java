@@ -38,7 +38,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
 /**
- *  Text Hover for Editor annotations
+ * Text Hover for Editor annotations
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -46,63 +46,69 @@ import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 public class DefaultTextHover implements ITextHover
 {
 
-    Editor fEditor;
+  Editor fEditor;
 
-    public DefaultTextHover(Editor editor)
+  public DefaultTextHover(Editor editor)
+  {
+    fEditor = editor;
+  }
+
+  /*
+   * Formats a message as HTML text.
+   */
+  private String formatMessage(String message)
+  {
+    return message;
+  }
+
+  /*
+   * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
+   */
+  public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion)
+  {
+    if (fEditor == null)
+      return null;
+
+    try
     {
-        fEditor = editor;
-    }
+      ITypedRegion typedRegion = textViewer.getDocument().getPartition(
+          hoverRegion.getOffset());
 
-    /*
-     * Formats a message as HTML text.
-     */
-    private String formatMessage(String message)
-    {
-        return message;
-    }
-
-    /*
-     * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
-     */
-    public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion)
-    {
-        if (fEditor == null)
-            return null;
-
-        try
-        {
-            ITypedRegion typedRegion = textViewer.getDocument().getPartition(hoverRegion.getOffset());
-
-            ContentAssistant assistant = fEditor.getContentAssistant();
-            if (assistant == null)
-                return null;
-
-            synchronized (fEditor)
-            {
-                ContentAssistProcessor assister =
-                    (ContentAssistProcessor) assistant.getContentAssistProcessor(typedRegion.getType());
-                if (assister != null)
-                {
-                    IContextInformation[] infos = assister.computeInformation(textViewer, hoverRegion.getOffset());
-                    if (infos != null && infos.length > 0)
-                        return infos[0].getInformationDisplayString();
-                }
-            }
-
-        } catch (BadLocationException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+      ContentAssistant assistant = fEditor.getContentAssistant();
+      if (assistant == null)
         return null;
-    }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.ITextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
-     */
-    public IRegion getHoverRegion(ITextViewer textViewer, int offset)
+      synchronized (fEditor)
+      {
+        ContentAssistProcessor assister = (ContentAssistProcessor) assistant
+            .getContentAssistProcessor(typedRegion.getType());
+        if (assister != null)
+        {
+          IContextInformation[] infos = assister.computeInformation(
+              textViewer,
+              hoverRegion.getOffset());
+          if (infos != null && infos.length > 0)
+            return infos[0].getInformationDisplayString();
+        }
+      }
+
+    } catch (BadLocationException e)
     {
-        return new Region(offset, 0);
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.ITextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer,
+   *      int)
+   */
+  public IRegion getHoverRegion(ITextViewer textViewer, int offset)
+  {
+    return new Region(offset, 0);
+  }
 
 }

@@ -39,128 +39,131 @@ import com.wutka.dtd.OrderPreservingMap;
 
 /**
  * @author GWL
- *
+ *  
  */
 public class UpdateStatusContainer implements IDialogFieldChangedListener
 {
 
-    private Map map = new OrderPreservingMap();
-    private PropertyChangeSupport propertySupport;
+  private Map map = new OrderPreservingMap();
+  private PropertyChangeSupport propertySupport;
 
-    public void add(DialogField widget)
+  public void add(DialogField widget)
+  {
+    widget.addListener(this);
+    IStatus widgetStatus = new SpindleStatus();
+    map.put(widget, widgetStatus);
+  }
+
+  public void remove(DialogField widget)
+  {
+    widget.removeListener(this);
+    map.remove(widget);
+  }
+
+  /**
+   * @see IUpdateStatus#getStatus()
+   */
+  public IStatus getStatus()
+  {
+    return findMostSevereStatus();
+  }
+
+  public IStatus getStatus(boolean ignoreDisabled)
+  {
+    return findMostSevereStatus(ignoreDisabled);
+  }
+
+  public IStatus getStatusFor(Object obj)
+  {
+    if (map.containsKey(obj))
     {
-        widget.addListener(this);
-        IStatus widgetStatus = new SpindleStatus();
-        map.put(widget, widgetStatus);
+      return (IStatus) map.get(obj);
     }
+    return null;
+  }
 
-    public void remove(DialogField widget)
+  protected IStatus findMostSevereStatus(boolean ignoreDisabled)
+  {
+    Set entries = map.keySet();
+    IStatus[] statii = null;
+    if (ignoreDisabled)
     {
-        widget.removeListener(this);
-        map.remove(widget);
-    }
-
-    /**
-     * @see IUpdateStatus#getStatus()
-     */
-    public IStatus getStatus()
-    {
-        return findMostSevereStatus();
-    }
-
-    public IStatus getStatus(boolean ignoreDisabled)
-    {
-        return findMostSevereStatus(ignoreDisabled);
-    }
-
-    public IStatus getStatusFor(Object obj)
-    {
-        if (map.containsKey(obj))
+      Set enabled = new HashSet();
+      Iterator i = entries.iterator();
+      while (i.hasNext())
+      {
+        try
         {
-            return (IStatus) map.get(obj);
-        }
-        return null;
-    }
-
-    protected IStatus findMostSevereStatus(boolean ignoreDisabled)
-    {
-        Set entries = map.keySet();
-        IStatus[] statii = null;
-        if (ignoreDisabled)
+          DialogField field = (DialogField) i.next();
+          if (!field.isEnabled())
+            continue;
+          enabled.add(field);
+        } catch (ClassCastException e)
         {
-            Set enabled = new HashSet();
-            Iterator i = entries.iterator();
-            while (i.hasNext())
-            {
-                try
-                {
-                    DialogField field = (DialogField) i.next();
-                    if (!field.isEnabled())
-                        continue;
-                    enabled.add(field);
-                } catch (ClassCastException e)
-                {
-                    UIPlugin.log(e);
-                }
-            }
-            entries = enabled;
+          UIPlugin.log(e);
         }
-        statii = new IStatus[entries.size()];
-        int i = 0;
-        for (Iterator iter = entries.iterator(); iter.hasNext();)
-        {
-            DialogField enabled = (DialogField) iter.next();
-            statii[i++] = (IStatus) map.get(enabled);
-        }
-        return getMostSevere(statii);
+      }
+      entries = enabled;
     }
-
-    protected IStatus findMostSevereStatus()
+    statii = new IStatus[entries.size()];
+    int i = 0;
+    for (Iterator iter = entries.iterator(); iter.hasNext();)
     {
-        return findMostSevereStatus(false);
+      DialogField enabled = (DialogField) iter.next();
+      statii[i++] = (IStatus) map.get(enabled);
     }
+    return getMostSevere(statii);
+  }
 
-    public IStatus getMostSevere(IStatus[] status)
+  protected IStatus findMostSevereStatus()
+  {
+    return findMostSevereStatus(false);
+  }
+
+  public IStatus getMostSevere(IStatus[] status)
+  {
+    IStatus max = null;
+    for (int i = 0; i < status.length; i++)
     {
-        IStatus max = null;
-        for (int i = 0; i < status.length; i++)
-        {
-            IStatus curr = status[i];
-            if (curr == null)
-                continue;
-            if (curr.matches(IStatus.ERROR))
-            {
-                return curr;
-            }
-            if (max == null || curr.getSeverity() > max.getSeverity())
-            {
-                max = curr;
-            }
-        }
-        return max;
+      IStatus curr = status[i];
+      if (curr == null)
+        continue;
+      if (curr.matches(IStatus.ERROR))
+      {
+        return curr;
+      }
+      if (max == null || curr.getSeverity() > max.getSeverity())
+      {
+        max = curr;
+      }
     }
+    return max;
+  }
 
-    /**
-     * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
-     */
-    public void dialogFieldButtonPressed(DialogField field)
-    {}
+  /**
+   * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
+   */
+  public void dialogFieldButtonPressed(DialogField field)
+  {
+  }
 
-    /**
-     * @see IDialogFieldChangedListener#dialogFieldChanged(DialogField)
-     */
-    public void dialogFieldChanged(DialogField field)
-    {}
+  /**
+   * @see IDialogFieldChangedListener#dialogFieldChanged(DialogField)
+   */
+  public void dialogFieldChanged(DialogField field)
+  {
+  }
 
-    /**
-     * @see IDialogFieldChangedListener#dialogFieldStatusChanged(IStatus, DialogField)
-     */
-    public void dialogFieldStatusChanged(IStatus status, DialogField field)
+  /**
+   * @see IDialogFieldChangedListener#dialogFieldStatusChanged(IStatus,
+   *      DialogField)
+   */
+  public void dialogFieldStatusChanged(IStatus status, DialogField field)
+  {
+    if (map.containsKey(field))
     {
-        if (map.containsKey(field))
-        {
-            map.put(field, status);
-        }
+      map.put(field, status);
     }
+  }
 
 }

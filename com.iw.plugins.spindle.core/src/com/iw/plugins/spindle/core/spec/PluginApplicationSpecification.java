@@ -36,81 +36,95 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
- *  Spindle implementation of IApplicationSpecification
+ * Spindle implementation of IApplicationSpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginApplicationSpecification.java,v 1.3 2004/05/17 02:31:49
+ *          glongman Exp $
  */
-public class PluginApplicationSpecification extends PluginLibrarySpecification implements IApplicationSpecification
+public class PluginApplicationSpecification extends PluginLibrarySpecification
+    implements
+      IApplicationSpecification
 {
-    private String fName;
-    private String fEngineClassName;
+  private String fName;
+  private String fEngineClassName;
 
-    public PluginApplicationSpecification()
+  public PluginApplicationSpecification()
+  {
+    super(BaseSpecification.APPLICATION_SPEC);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IApplicationSpecification#getName()
+   */
+  public String getName()
+  {
+    return fName;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IApplicationSpecification#setEngineClassName(java.lang.String)
+   */
+  public void setEngineClassName(String value)
+  {
+    this.fEngineClassName = value;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IApplicationSpecification#getEngineClassName()
+   */
+  public String getEngineClassName()
+  {
+    return fEngineClassName;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IApplicationSpecification#setName(java.lang.String)
+   */
+  public void setName(String name)
+  {
+    this.fName = name;
+  }
+
+  public void validateSelf(IScannerValidator validator)
+  {
+    ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+    if (fEngineClassName != null)
     {
-        super(BaseSpecification.APPLICATION_SPEC);
+      try
+      {
+        validator.validateTypeName(
+            (IResourceWorkspaceLocation) getSpecificationLocation(),
+            fEngineClassName,
+            IProblem.ERROR,
+            sourceInfo.getAttributeSourceLocation("engine-class"));
+
+      } catch (ScannerException e)
+      {
+        TapestryCore.log(e);
+        e.printStackTrace();
+      }
     }
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IApplicationSpecification#getName()
-     */
-    public String getName()
-    {
-        return fName;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IApplicationSpecification#setEngineClassName(java.lang.String)
-     */
-    public void setEngineClassName(String value)
-    {
-        this.fEngineClassName = value;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IApplicationSpecification#getEngineClassName()
-     */
-    public String getEngineClassName()
-    {
-        return fEngineClassName;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IApplicationSpecification#setName(java.lang.String)
-     */
-    public void setName(String name)
-    {
-        this.fName = name;
-     }
-
-    public void validateSelf(IScannerValidator validator)
-    {
-        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-       if (fEngineClassName != null ) {
-        try
-        {
-            validator.validateTypeName(
-                (IResourceWorkspaceLocation) getSpecificationLocation(),
-                fEngineClassName,
-                IProblem.ERROR,
-                sourceInfo.getAttributeSourceLocation("engine-class"));
-
-        } catch (ScannerException e)
-        {
-            TapestryCore.log(e);
-            e.printStackTrace();
-        }
-       }
-   }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.PluginLibrarySpecification#validate(com.iw.plugins.spindle.core.scanning.IScannerValidator)
-     */
-    public void validate(IScannerValidator validator)
-    {
-        validateSelf(validator);
-        super.validate(validator);
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.spec.PluginLibrarySpecification#validate(com.iw.plugins.spindle.core.scanning.IScannerValidator)
+   */
+  public void validate(IScannerValidator validator)
+  {
+    validateSelf(validator);
+    super.validate(validator);
+  }
 
 }

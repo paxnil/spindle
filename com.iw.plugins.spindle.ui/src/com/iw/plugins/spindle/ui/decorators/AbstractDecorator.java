@@ -37,54 +37,58 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
- *  Base class for label decorators
+ * Base class for label decorators
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: AbstractDecorator.java,v 1.1.4.1 2004/06/10 16:48:19 glongman
+ *          Exp $
  */
-public abstract class AbstractDecorator implements ILightweightLabelDecorator, TapestryCore.ICoreListener
+public abstract class AbstractDecorator
+    implements
+      ILightweightLabelDecorator,
+      TapestryCore.ICoreListener
 {
-    public AbstractDecorator()
+  public AbstractDecorator()
+  {
+    TapestryCore.addCoreListener(this);
+  }
+
+  protected List fLabelProviderListeners;
+
+  public void addListener(ILabelProviderListener listener)
+  {
+    if (fLabelProviderListeners == null)
     {
+      fLabelProviderListeners = new ArrayList();
       TapestryCore.addCoreListener(this);
     }
 
-    protected List fLabelProviderListeners;
+    if (!fLabelProviderListeners.contains(listener))
+      fLabelProviderListeners.add(listener);
+  }
 
-    public void addListener(ILabelProviderListener listener)
+  public void removeListener(ILabelProviderListener listener)
+  {
+    if (fLabelProviderListeners != null)
     {
-        if (fLabelProviderListeners == null)
-        {
-            fLabelProviderListeners = new ArrayList();
-            TapestryCore.addCoreListener(this);
-        }
 
-        if (!fLabelProviderListeners.contains(listener))
-            fLabelProviderListeners.add(listener);
+      fLabelProviderListeners.remove(listener);
+      if (fLabelProviderListeners.isEmpty())
+      {
+        TapestryCore.removeCoreListener(this);
+        fLabelProviderListeners = null;
+      }
     }
+  }
 
-    public void removeListener(ILabelProviderListener listener)
-    {
-        if (fLabelProviderListeners != null)
-        {
-
-            fLabelProviderListeners.remove(listener);
-            if (fLabelProviderListeners.isEmpty())
-            {
-                TapestryCore.removeCoreListener(this);
-                fLabelProviderListeners = null;
-            }
-        }
-    }
-
-    public void coreChanged()
-    {
-        if (fLabelProviderListeners != null)
-            for (Iterator iter = fLabelProviderListeners.iterator(); iter.hasNext();)
-            {
-                ILabelProviderListener listener = (ILabelProviderListener) iter.next();
-                listener.labelProviderChanged(new LabelProviderChangedEvent(this));
-            }
-    }
+  public void coreChanged()
+  {
+    if (fLabelProviderListeners != null)
+      for (Iterator iter = fLabelProviderListeners.iterator(); iter.hasNext();)
+      {
+        ILabelProviderListener listener = (ILabelProviderListener) iter.next();
+        listener.labelProviderChanged(new LabelProviderChangedEvent(this));
+      }
+  }
 
 }

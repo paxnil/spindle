@@ -62,284 +62,325 @@ import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
 
 /**
- *  Reveals IStorages in the workbench as editors are selected
+ * Reveals IStorages in the workbench as editors are selected
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public class Revealer implements IWindowListener, IPageListener, IPartListener
 {
-    private static Revealer instance;
+  private static Revealer instance;
 
-    private static List Known_Extensions = Arrays.asList(TapestryBuilder.KnownExtensions);
+  private static List Known_Extensions = Arrays.asList(TapestryBuilder.KnownExtensions);
 
-    public static synchronized void start()
+  public static synchronized void start()
+  {
+    if (instance != null)
+      throw new IllegalStateException("revealer already started!");
+
+    instance = new Revealer();
+  }
+
+  public static void selectAndReveal(ISelection selection, IWorkbenchWindow window)
+  {
+    selectAndReveal(selection, window, null);
+  }
+  public static void selectAndReveal(
+      ISelection selection,
+      IWorkbenchWindow window,
+      IJavaProject jproject)
+  {
+    // validate the input
+    if (window == null || selection == null || selection.isEmpty())
+      return;
+    IWorkbenchPage page = window.getActivePage();
+    if (page == null)
+      return;
+
+    // get all the view and editor parts
+    List parts = new ArrayList();
+    IWorkbenchPartReference refs[] = page.getViewReferences();
+    for (int i = 0; i < refs.length; i++)
     {
-        if (instance != null)
-            throw new IllegalStateException("revealer already started!");
-
-        instance = new Revealer();
+      IWorkbenchPart part = refs[i].getPart(false);
+      if (part != null)
+        parts.add(part);
+    }
+    refs = page.getEditorReferences();
+    for (int i = 0; i < refs.length; i++)
+    {
+      if (refs[i].getPart(false) != null)
+        parts.add(refs[i].getPart(false));
     }
 
-    public static void selectAndReveal(ISelection selection, IWorkbenchWindow window)
+    final ISelection useSelection = checkSelectionForJarEntryFile(selection, jproject);
+    Iterator enum = parts.iterator();
+    while (enum.hasNext())
     {
-        selectAndReveal(selection, window, null);
+      IWorkbenchPart part = (IWorkbenchPart) enum.next();
+
+      // get the part's ISetSelectionTarget implementation
+      ISetSelectionTarget target = null;
+      if (part instanceof ISetSelectionTarget)
+        target = (ISetSelectionTarget) part;
+      else
+        target = (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
+
+      if (target != null)
+      {
+        // select and reveal resource
+        final ISetSelectionTarget finalTarget = target;
+        window.getShell().getDisplay().asyncExec(new Runnable()
+        {
+          public void run()
+          {
+            finalTarget.selectReveal(useSelection);
+          }
+        });
+      }
     }
-    public static void selectAndReveal(ISelection selection, IWorkbenchWindow window, IJavaProject jproject)
+  }
+
+  /**
+   * @param useSelection
+   * @return
+   */
+  private static ISelection checkSelectionForJarEntryFile(
+      ISelection useSelection,
+      IJavaProject jproject)
+  {
+    if (useSelection.isEmpty() || !(useSelection instanceof IStructuredSelection))
+      return useSelection;
+
+    IStructuredSelection structured = (IStructuredSelection) useSelection;
+    Object first = structured.getFirstElement();
+    if (structured.size() > 1 || !(first instanceof JarEntryFile))
+      return useSelection;
+
+    JarEntryFile entry = (JarEntryFile) first;
+    IPath path = entry.getFullPath().removeFileExtension();
+    String name = path.lastSegment();
+
+    IPackageFragment[] fragments = null;
+    try
     {
-        // validate the input
-        if (window == null || selection == null || selection.isEmpty())
-            return;
-        IWorkbenchPage page = window.getActivePage();
-        if (page == null)
-            return;
+      if (jproject != null)
+      {
+        IPackageFragment frag = JarEntryFileUtil.getPackageFragment(jproject, entry);
+        if (frag != null)
+          fragments = new IPackageFragment[]{frag};
 
-        // get all the view and editor parts
-        List parts = new ArrayList();
-        IWorkbenchPartReference refs[] = page.getViewReferences();
-        for (int i = 0; i < refs.length; i++)
-        {
-            IWorkbenchPart part = refs[i].getPart(false);
-            if (part != null)
-                parts.add(part);
-        }
-        refs = page.getEditorReferences();
-        for (int i = 0; i < refs.length; i++)
-        {
-            if (refs[i].getPart(false) != null)
-                parts.add(refs[i].getPart(false));
-        }
-
-        final ISelection useSelection = checkSelectionForJarEntryFile(selection, jproject);
-        Iterator enum = parts.iterator();
-        while (enum.hasNext())
-        {
-            IWorkbenchPart part = (IWorkbenchPart) enum.next();
-
-            // get the part's ISetSelectionTarget implementation
-            ISetSelectionTarget target = null;
-            if (part instanceof ISetSelectionTarget)
-                target = (ISetSelectionTarget) part;
-            else
-                target = (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
-
-            if (target != null)
-            {
-                // select and reveal resource
-                final ISetSelectionTarget finalTarget = target;
-                window.getShell().getDisplay().asyncExec(new Runnable()
-                {
-                    public void run()
-                    {
-                        finalTarget.selectReveal(useSelection);
-                    }
-                });
-            }
-        }
-    }
-
-    /**
-     * @param useSelection
-     * @return
-     */
-    private static ISelection checkSelectionForJarEntryFile(ISelection useSelection, IJavaProject jproject)
-    {
-        if (useSelection.isEmpty() || !(useSelection instanceof IStructuredSelection))
-            return useSelection;
-
-        IStructuredSelection structured = (IStructuredSelection) useSelection;
-        Object first = structured.getFirstElement();
-        if (structured.size() > 1 || !(first instanceof JarEntryFile))
-            return useSelection;
-
-        JarEntryFile entry = (JarEntryFile) first;
-        IPath path = entry.getFullPath().removeFileExtension();
-        String name = path.lastSegment();
-
-        IPackageFragment[] fragments = null;
-        try
-        {
-            if (jproject != null)
-            {
-                IPackageFragment frag = JarEntryFileUtil.getPackageFragment(jproject, entry);
-                if (frag != null)
-                    fragments = new IPackageFragment[] { frag };
-
-            } else
-            {
-                fragments = JarEntryFileUtil.getPackageFragments(ResourcesPlugin.getWorkspace().getRoot(), entry);
-            }
-            if (fragments.length != 1)
-                return useSelection;
-
-            //check to see if there is an IClassFile in the package
-            IJavaElement[] children = fragments[0].getChildren();
-            if (children.length > 0)
-            {
-                IClassFile revealInstead = null;
-                for (int i = 0; i < children.length; i++)
-                {
-                    if (children[i].getElementType() != IJavaElement.CLASS_FILE)
-                        continue;
-
-                    revealInstead = (IClassFile) children[i];
-                    String temp = revealInstead.getElementName();
-                    temp = temp.substring(0, temp.length() - 6);
-                    if (temp.equals(name))
-                        return new StructuredSelection(revealInstead);
-                }
-                if (revealInstead != null)
-                    return new StructuredSelection(revealInstead);
-            }
-            return new StructuredSelection(fragments[0]);
-
-        } catch (CoreException e)
-        {
-            UIPlugin.log(e);
-        }
+      } else
+      {
+        fragments = JarEntryFileUtil.getPackageFragments(ResourcesPlugin
+            .getWorkspace()
+            .getRoot(), entry);
+      }
+      if (fragments.length != 1)
         return useSelection;
-    }
 
-    private IWorkbenchWindow fCurrentWindow;
-    private IWorkbenchPage fCurrentPage;
-
-    private Revealer()
-    {
-        UIPlugin.getDefault().getWorkbench().addWindowListener(this);
-        //        register(UIPlugin.getDefault().getActiveWorkbenchWindow());
-    }
-
-    private void register(IWorkbenchWindow window)
-    {
-        if (fCurrentWindow != null)
-            fCurrentWindow.removePageListener(this);
-        window.addPageListener(this);
-        fCurrentWindow = window;
-        register(fCurrentWindow.getActivePage());
-    }
-
-    private void register(IWorkbenchPage page)
-    {
-        if (fCurrentPage != null)
-            fCurrentPage.removePartListener(this);
-        page.addPartListener(this);
-        fCurrentPage = page;
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IPartListener#partActivated(org.eclipse.ui.IWorkbenchPart)
-     */
-    public void partActivated(IWorkbenchPart part)
-    {
-
-        if (!PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.LINK_PACKAGES_TO_EDITOR))
-            return;
-        try
+      //check to see if there is an IClassFile in the package
+      IJavaElement[] children = fragments[0].getChildren();
+      if (children.length > 0)
+      {
+        IClassFile revealInstead = null;
+        for (int i = 0; i < children.length; i++)
         {
-            IEditorPart editor = (IEditorPart) part.getAdapter(IEditorPart.class);
-            if (editor != null)
-            {
-                IStorage storage = null;
-                IEditorInput input = editor.getEditorInput();
-                if (input instanceof FileEditorInput)
-                {
+          if (children[i].getElementType() != IJavaElement.CLASS_FILE)
+            continue;
 
-                    FileEditorInput fei = (FileEditorInput) input;
-                    storage = fei.getStorage();
-
-                } else if (input instanceof JarEntryEditorInput)
-                {
-                    JarEntryEditorInput jeei = (JarEntryEditorInput) input;
-                    storage = jeei.getStorage();
-                }
-                if (storage != null && isTapestry(storage))
-                    selectAndReveal(new StructuredSelection(storage), fCurrentWindow);
-
-            }
-        } catch (CoreException e)
-        {
-            // do nothing
+          revealInstead = (IClassFile) children[i];
+          String temp = revealInstead.getElementName();
+          temp = temp.substring(0, temp.length() - 6);
+          if (temp.equals(name))
+            return new StructuredSelection(revealInstead);
         }
-    }
+        if (revealInstead != null)
+          return new StructuredSelection(revealInstead);
+      }
+      return new StructuredSelection(fragments[0]);
 
-    /**
-     * @param string
-     * @return
-     */
-    private boolean isTapestry(IStorage storage)
+    } catch (CoreException e)
     {
-        String extension = storage.getFullPath().getFileExtension();
-        return Known_Extensions.contains(extension);
+      UIPlugin.log(e);
     }
+    return useSelection;
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IPartListener#partBroughtToTop(org.eclipse.ui.IWorkbenchPart)
-     */
-    public void partBroughtToTop(IWorkbenchPart part)
-    {}
+  private IWorkbenchWindow fCurrentWindow;
+  private IWorkbenchPage fCurrentPage;
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IPartListener#partClosed(org.eclipse.ui.IWorkbenchPart)
-     */
-    public void partClosed(IWorkbenchPart part)
-    {}
+  private Revealer()
+  {
+    UIPlugin.getDefault().getWorkbench().addWindowListener(this);
+    //        register(UIPlugin.getDefault().getActiveWorkbenchWindow());
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IPartListener#partDeactivated(org.eclipse.ui.IWorkbenchPart)
-     */
-    public void partDeactivated(IWorkbenchPart part)
-    {}
+  private void register(IWorkbenchWindow window)
+  {
+    if (fCurrentWindow != null)
+      fCurrentWindow.removePageListener(this);
+    window.addPageListener(this);
+    fCurrentWindow = window;
+    register(fCurrentWindow.getActivePage());
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IPartListener#partOpened(org.eclipse.ui.IWorkbenchPart)
-     */
-    public void partOpened(IWorkbenchPart part)
-    {}
+  private void register(IWorkbenchPage page)
+  {
+    if (fCurrentPage != null)
+      fCurrentPage.removePartListener(this);
+    page.addPartListener(this);
+    fCurrentPage = page;
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IWindowListener#windowActivated(org.eclipse.ui.IWorkbenchWindow)
-     */
-    public void windowActivated(IWorkbenchWindow window)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IPartListener#partActivated(org.eclipse.ui.IWorkbenchPart)
+   */
+  public void partActivated(IWorkbenchPart part)
+  {
+
+    if (!PreferenceConstants.getPreferenceStore().getBoolean(
+        PreferenceConstants.LINK_PACKAGES_TO_EDITOR))
+      return;
+    try
     {
-        register(window);
-    }
+      IEditorPart editor = (IEditorPart) part.getAdapter(IEditorPart.class);
+      if (editor != null)
+      {
+        IStorage storage = null;
+        IEditorInput input = editor.getEditorInput();
+        if (input instanceof FileEditorInput)
+        {
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IWindowListener#windowClosed(org.eclipse.ui.IWorkbenchWindow)
-     */
-    public void windowClosed(IWorkbenchWindow window)
-    {}
+          FileEditorInput fei = (FileEditorInput) input;
+          storage = fei.getStorage();
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IWindowListener#windowDeactivated(org.eclipse.ui.IWorkbenchWindow)
-     */
-    public void windowDeactivated(IWorkbenchWindow window)
-    {}
+        } else if (input instanceof JarEntryEditorInput)
+        {
+          JarEntryEditorInput jeei = (JarEntryEditorInput) input;
+          storage = jeei.getStorage();
+        }
+        if (storage != null && isTapestry(storage))
+          selectAndReveal(new StructuredSelection(storage), fCurrentWindow);
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IWindowListener#windowOpened(org.eclipse.ui.IWorkbenchWindow)
-     */
-    public void windowOpened(IWorkbenchWindow window)
-    {}
-
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IPageListener#pageActivated(org.eclipse.ui.IWorkbenchPage)
-     */
-    public void pageActivated(IWorkbenchPage page)
+      }
+    } catch (CoreException e)
     {
-        register(page);
+      // do nothing
     }
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IPageListener#pageClosed(org.eclipse.ui.IWorkbenchPage)
-     */
-    public void pageClosed(IWorkbenchPage page)
-    {}
+  /**
+   * @param string
+   * @return
+   */
+  private boolean isTapestry(IStorage storage)
+  {
+    String extension = storage.getFullPath().getFileExtension();
+    return Known_Extensions.contains(extension);
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IPageListener#pageOpened(org.eclipse.ui.IWorkbenchPage)
-     */
-    public void pageOpened(IWorkbenchPage page)
-    {}
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IPartListener#partBroughtToTop(org.eclipse.ui.IWorkbenchPart)
+   */
+  public void partBroughtToTop(IWorkbenchPart part)
+  {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IPartListener#partClosed(org.eclipse.ui.IWorkbenchPart)
+   */
+  public void partClosed(IWorkbenchPart part)
+  {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IPartListener#partDeactivated(org.eclipse.ui.IWorkbenchPart)
+   */
+  public void partDeactivated(IWorkbenchPart part)
+  {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IPartListener#partOpened(org.eclipse.ui.IWorkbenchPart)
+   */
+  public void partOpened(IWorkbenchPart part)
+  {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IWindowListener#windowActivated(org.eclipse.ui.IWorkbenchWindow)
+   */
+  public void windowActivated(IWorkbenchWindow window)
+  {
+    register(window);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IWindowListener#windowClosed(org.eclipse.ui.IWorkbenchWindow)
+   */
+  public void windowClosed(IWorkbenchWindow window)
+  {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IWindowListener#windowDeactivated(org.eclipse.ui.IWorkbenchWindow)
+   */
+  public void windowDeactivated(IWorkbenchWindow window)
+  {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IWindowListener#windowOpened(org.eclipse.ui.IWorkbenchWindow)
+   */
+  public void windowOpened(IWorkbenchWindow window)
+  {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IPageListener#pageActivated(org.eclipse.ui.IWorkbenchPage)
+   */
+  public void pageActivated(IWorkbenchPage page)
+  {
+    register(page);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IPageListener#pageClosed(org.eclipse.ui.IWorkbenchPage)
+   */
+  public void pageClosed(IWorkbenchPage page)
+  {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IPageListener#pageOpened(org.eclipse.ui.IWorkbenchPage)
+   */
+  public void pageOpened(IWorkbenchPage page)
+  {
+  }
 
 }

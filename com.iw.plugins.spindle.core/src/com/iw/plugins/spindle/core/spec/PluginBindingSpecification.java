@@ -30,57 +30,68 @@ import org.apache.tapestry.spec.BindingType;
 import org.apache.tapestry.spec.IBindingSpecification;
 
 /**
- *  Spindle aware concrete implementation of IBindingSpecification
+ * Spindle aware concrete implementation of IBindingSpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginBindingSpecification.java,v 1.2 2004/05/17 02:31:49
+ *          glongman Exp $
  */
-public class PluginBindingSpecification extends DescribableSpecification implements IBindingSpecification
+public class PluginBindingSpecification extends DescribableSpecification
+    implements
+      IBindingSpecification
 {
 
-    private BindingType fBindingType;
-    private String fValue;
+  private BindingType fBindingType;
+  private String fValue;
 
-    public PluginBindingSpecification()
-    {
-        super(BaseSpecification.BINDING_SPEC);
-    }
+  public PluginBindingSpecification()
+  {
+    super(BaseSpecification.BINDING_SPEC);
+  }
 
-    protected PluginBindingSpecification(int type)
-    {
-        super(type);
-    }
+  protected PluginBindingSpecification(int type)
+  {
+    super(type);
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IBindingSpecification#getType()
-     */
-    public BindingType getType()
-    {
-        return fBindingType;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IBindingSpecification#getType()
+   */
+  public BindingType getType()
+  {
+    return fBindingType;
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IBindingSpecification#getValue()
-     */
-    public String getValue()
-    {
-        return fValue;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IBindingSpecification#getValue()
+   */
+  public String getValue()
+  {
+    return fValue;
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IBindingSpecification#setType(org.apache.tapestry.spec.BindingType)
-     */
-    public void setType(BindingType type)
-    {
-        fBindingType = type;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IBindingSpecification#setType(org.apache.tapestry.spec.BindingType)
+   */
+  public void setType(BindingType type)
+  {
+    fBindingType = type;
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IBindingSpecification#setValue(java.lang.String)
-     */
-    public void setValue(String value)
-    {
-        fValue = value;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IBindingSpecification#setValue(java.lang.String)
+   */
+  public void setValue(String value)
+  {
+    fValue = value;
+  }
 
 }

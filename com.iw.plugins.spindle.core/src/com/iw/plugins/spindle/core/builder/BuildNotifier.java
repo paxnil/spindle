@@ -41,124 +41,126 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 public class BuildNotifier
 {
 
-    protected IProgressMonitor fMonitor;
-    protected boolean fCancelling;
-    protected float fPercentComplete;
-    protected float fProcessingProgress;
-    protected int fWorkDone;
-    protected int fTotalWork;
-    protected String fPreviousSubtask;
-    protected IProject fCurrentProject;
+  protected IProgressMonitor fMonitor;
+  protected boolean fCancelling;
+  protected float fPercentComplete;
+  protected float fProcessingProgress;
+  protected int fWorkDone;
+  protected int fTotalWork;
+  protected String fPreviousSubtask;
+  protected IProject fCurrentProject;
 
-    public BuildNotifier(IProgressMonitor monitor, IProject currentProject)
-    {
-        this.fMonitor = monitor;
-        this.fCancelling = false;
-        this.fWorkDone = 0;
-        this.fTotalWork = 1000000;
-        this.fCurrentProject = currentProject;
-    }
+  public BuildNotifier(IProgressMonitor monitor, IProject currentProject)
+  {
+    this.fMonitor = monitor;
+    this.fCancelling = false;
+    this.fWorkDone = 0;
+    this.fTotalWork = 1000000;
+    this.fCurrentProject = currentProject;
+  }
 
-    public void aboutToProcess(IResource resource)
-    {
-        aboutToProcess(resource.getName());
-    }
+  public void aboutToProcess(IResource resource)
+  {
+    aboutToProcess(resource.getName());
+  }
 
-    public void aboutToProcess(IResourceWorkspaceLocation descriptor)
-    {
-        aboutToProcess(descriptor.getName());
-    }
+  public void aboutToProcess(IResourceWorkspaceLocation descriptor)
+  {
+    aboutToProcess(descriptor.getName());
+  }
 
-    private void aboutToProcess(String message)
-    {
-        subTask("processing " + message);
-    }
+  private void aboutToProcess(String message)
+  {
+    subTask("processing " + message);
+  }
 
-    public void processed(IResource resource)
-    {
-        processed(resource.getName());
-    }
+  public void processed(IResource resource)
+  {
+    processed(resource.getName());
+  }
 
-    public void processed(IResourceLocation descriptor)
-    {
-        processed(descriptor.getName());
-    }
+  public void processed(IResourceLocation descriptor)
+  {
+    processed(descriptor.getName());
+  }
 
-    private void processed(String message)
-    {
-        subTask("processed " + message);
-        updateProgressDelta(fProcessingProgress);
-        checkCancel();
-    }
+  private void processed(String message)
+  {
+    subTask("processed " + message);
+    updateProgressDelta(fProcessingProgress);
+    checkCancel();
+  }
 
-    public void setProcessingProgressPer(float progress)
-    {
-        this.fProcessingProgress = progress;
-    }
+  public void setProcessingProgressPer(float progress)
+  {
+    this.fProcessingProgress = progress;
+  }
 
-    public void begin()
+  public void begin()
+  {
+    if (fMonitor != null)
+      fMonitor.beginTask("", fTotalWork);
+
+    this.fPreviousSubtask = null;
+  }
+
+  public void checkCancel()
+  {
+    if (fMonitor != null && fMonitor.isCanceled())
+      throw new OperationCanceledException();
+  }
+
+  /**
+   * Method done.
+   */
+  public void done()
+  {
+    updateProgress(1.0f);
+    subTask("Tapestry Builder is finished");
+    if (fMonitor != null)
+      fMonitor.done();
+
+    this.fPreviousSubtask = null;
+  }
+
+  public void updateProgress(float percentComplete)
+  {
+    if (percentComplete > this.fPercentComplete)
     {
+      this.fPercentComplete = Math.min(percentComplete, 1.0f);
+      int work = Math.round(this.fPercentComplete * this.fTotalWork);
+      if (work > this.fWorkDone)
+      {
         if (fMonitor != null)
-            fMonitor.beginTask("", fTotalWork);
+          fMonitor.worked(work - this.fWorkDone);
 
-        this.fPreviousSubtask = null;
+        if (TapestryBuilder.DEBUG)
+          System.out.println(java.text.NumberFormat.getPercentInstance().format(
+              this.fPercentComplete));
+
+        this.fWorkDone = work;
+      }
     }
+  }
 
-    public void checkCancel()
-    {
-        if (fMonitor != null && fMonitor.isCanceled())
-            throw new OperationCanceledException();
-    }
+  public void updateProgressDelta(float percentWorked)
+  {
+    updateProgress(fPercentComplete + percentWorked);
+  }
 
-    /**
-     * Method done.
-     */
-    public void done()
-    {
-        updateProgress(1.0f);
-        subTask("Tapestry Builder is finished");
-        if (fMonitor != null)
-            fMonitor.done();
+  public void subTask(String message)
+  {
+    //	String pm = problemsMessage();
+    //	String msg = pm.length() == 0 ? message : pm + " " + message;
+    // //$NON-NLS-1$
 
-        this.fPreviousSubtask = null;
-    }
+    if (message.equals(this.fPreviousSubtask))
+      return; // avoid refreshing with same one
+    //if (JavaBuilder.DEBUG) System.out.println(msg);
+    if (fMonitor != null)
+      fMonitor.subTask(message);
 
-    public void updateProgress(float percentComplete)
-    {
-        if (percentComplete > this.fPercentComplete)
-        {
-            this.fPercentComplete = Math.min(percentComplete, 1.0f);
-            int work = Math.round(this.fPercentComplete * this.fTotalWork);
-            if (work > this.fWorkDone)
-            {
-                if (fMonitor != null)
-                    fMonitor.worked(work - this.fWorkDone);
-
-                if (TapestryBuilder.DEBUG)
-                    System.out.println(java.text.NumberFormat.getPercentInstance().format(this.fPercentComplete));
-
-                this.fWorkDone = work;
-            }
-        }
-    }
-
-    public void updateProgressDelta(float percentWorked)
-    {
-        updateProgress(fPercentComplete + percentWorked);
-    }
-
-    public void subTask(String message)
-    {
-        //	String pm = problemsMessage();
-        //	String msg = pm.length() == 0 ? message : pm + " " + message; //$NON-NLS-1$
-
-        if (message.equals(this.fPreviousSubtask))
-            return; // avoid refreshing with same one
-        //if (JavaBuilder.DEBUG) System.out.println(msg);
-        if (fMonitor != null)
-            fMonitor.subTask(message);
-
-        this.fPreviousSubtask = message;
-    }
+    this.fPreviousSubtask = message;
+  }
 
 }

@@ -38,7 +38,6 @@ import com.iw.plugins.spindle.editors.documentsAndModels.FileDocumentModelProvid
  */
 public class TemplateFileDocumentProvider extends FileDocumentModelProvider
 {
- 
 
   protected IAnnotationModel createAnnotationModel(Object element) throws CoreException
   {

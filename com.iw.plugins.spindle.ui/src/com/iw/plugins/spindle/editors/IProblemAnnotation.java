@@ -33,7 +33,7 @@ public interface IProblemAnnotation
 
   int getId();
 
-//  Image getImage(Display display);
+  //  Image getImage(Display display);
 
   /**
    * Returns whether this annotation is relavant.
@@ -57,7 +57,6 @@ public interface IProblemAnnotation
 
   IProblemAnnotation getOverlay();
 
-
   /**
    * Returns an iterator for iterating over the annotation which are overlaid by
    * this annotation.
@@ -70,8 +69,7 @@ public interface IProblemAnnotation
    * Adds the given annotation to the list of annotations which are overlaid by
    * this annotations.
    * 
-   * @param annotation
-   *          the problem annoation
+   * @param annotation the problem annoation
    */
   void addOverlaid(IProblemAnnotation annotation);
 
@@ -79,8 +77,7 @@ public interface IProblemAnnotation
    * Removes the given annotation from the list of annotations which are
    * overlaid by this annotation.
    * 
-   * @param annotation
-   *          the problem annoation
+   * @param annotation the problem annoation
    */
   void removeOverlaid(IProblemAnnotation annotation);
 

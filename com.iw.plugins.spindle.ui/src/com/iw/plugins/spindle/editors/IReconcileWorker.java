@@ -31,18 +31,18 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 
 /**
- *  Called by Reconcilers on editors that perform thier own.
+ * Called by Reconcilers on editors that perform thier own.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public interface IReconcileWorker
 {
-    public void addReconcileListener(IReconcileListener listener);
+  public void addReconcileListener(IReconcileListener listener);
 
-    public void removeReconcileListener(IReconcileListener listener);
-    
-    public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor);
+  public void removeReconcileListener(IReconcileListener listener);
 
-    public boolean isReadyToReconcile();
+  public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor);
+
+  public boolean isReadyToReconcile();
 }

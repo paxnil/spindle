@@ -53,334 +53,336 @@ import com.iw.plugins.spindle.core.util.Markers;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
- *  Additional validation for Framework components.
- *  These are recorded in the Tapestry builder as IBuildActions.
- *  The TapestryBuilder will execute them last!
+ * Additional validation for Framework components. These are recorded in the
+ * Tapestry builder as IBuildActions. The TapestryBuilder will execute them
+ * last!
  * 
- *  This is because some validations here involve pages
- *  and pages are not resolved by the builder until after all
- *  of the components are.
+ * This is because some validations here involve pages and pages are not
+ * resolved by the builder until after all of the components are.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: FrameworkComponentValidator.java,v 1.9.2.1 2004/06/10 16:47:46
+ *          glongman Exp $
  */
 public class FrameworkComponentValidator
 {
 
-    public static void validateContainedComponent(
-        IResourceWorkspaceLocation putErrorsHere,
-        INamespace requestorNamespace,
-        String frameworkComponentName,
-        IComponentSpecification frameworkComponentSpecification,
-        IContainedComponent contained,
-        Object sourceInfo,
-        String publicId)
+  public static void validateContainedComponent(
+      IResourceWorkspaceLocation putErrorsHere,
+      INamespace requestorNamespace,
+      String frameworkComponentName,
+      IComponentSpecification frameworkComponentSpecification,
+      IContainedComponent contained,
+      Object sourceInfo,
+      String publicId)
+  {
+
+    IResource putProblemsResource = CoreUtils.toResource(putErrorsHere);
+    if (putProblemsResource == null)
+      return;
+
+    PluginComponentSpecification frameworkSpec = (PluginComponentSpecification) frameworkComponentSpecification;
+    //check to see if we are really talking about a framework component.
+    if (TapestryCore.getTapestryString("Namespace.framework-namespace").equals(
+        frameworkSpec.getNamespace().getNamespaceId()))
+    {
+      if ("PageLink".equals(frameworkComponentName))
+      {
+        TapestryBuilder.fDeferredActions.add(new PageLinkComponentValidation(
+            putProblemsResource,
+            (ICoreNamespace) requestorNamespace,
+            contained,
+            sourceInfo,
+            publicId));
+
+      } else if ("Script".equals(frameworkComponentName))
+      {
+
+        //                if (putErrorsHere.getName().endsWith("html")) {
+        //                    // its an specless page, need to get the Tapestry generated spec
+        //                    // in order to have valid location to base the script file lookup on.
+        //                    IProject project = putProblemsResource.getProject();
+        //                    TapestryArtifactManager manager =
+        // TapestryArtifactManager.getTapestryArtifactManager();
+        //                    Map specMap = manager.getSpecMap(project);
+        //                    if (specMap == null)
+        //                        return;
+        //                     BaseSpecLocatable tapestryGeneratedSpec =
+        // (BaseSpecLocatable)specMap.get(putProblemsResource);
+        //                     if (tapestryGeneratedSpec == null)
+        //                        return;
+        //                     putErrorsHere = (IResourceWorkspaceLocation)
+        // tapestryGeneratedSpec.getSpecificationLocation();
+        //                }
+
+        TapestryBuilder.fDeferredActions.add(new ScriptComponentValidation(
+            putErrorsHere,
+            putProblemsResource,
+            (ICoreNamespace) requestorNamespace,
+            contained,
+            sourceInfo,
+            publicId));
+      }
+    }
+
+  }
+
+  public static void validateImplictComponent(
+      IResourceWorkspaceLocation specificationLocation,
+      IResourceWorkspaceLocation putErrorsHere,
+      INamespace requestorNamespace,
+      String frameworkComponentName,
+      IComponentSpecification frameworkComponentSpecification,
+      IContainedComponent contained,
+      Object sourceInfo,
+      String publicId)
+  {
+    if ("PageLink".equals(frameworkComponentName))
+    {
+      validateContainedComponent(
+          putErrorsHere,
+          requestorNamespace,
+          frameworkComponentName,
+          frameworkComponentSpecification,
+          contained,
+          sourceInfo,
+          publicId);
+    } else
     {
 
-        IResource putProblemsResource = CoreUtils.toResource(putErrorsHere);
-        if (putProblemsResource == null)
-            return;
+      IResource putProblemsResource = CoreUtils.toResource(putErrorsHere);
+      if (putProblemsResource == null)
+        return;
 
-        PluginComponentSpecification frameworkSpec = (PluginComponentSpecification) frameworkComponentSpecification;
-        //check to see if we are really talking about a framework component.
-        if (TapestryCore
-            .getTapestryString("Namespace.framework-namespace")
-            .equals(frameworkSpec.getNamespace().getNamespaceId()))
+      PluginComponentSpecification frameworkSpec = (PluginComponentSpecification) frameworkComponentSpecification;
+      //check to see if we are really talking about a framework component.
+      if (TapestryCore.getTapestryString("Namespace.framework-namespace").equals(
+          frameworkSpec.getNamespace().getNamespaceId()))
+      {
+        if ("Script".equals(frameworkComponentName))
         {
-            if ("PageLink".equals(frameworkComponentName))
-            {
-                TapestryBuilder.fDeferredActions.add(
-                    new PageLinkComponentValidation(
-                        putProblemsResource,
-                        (ICoreNamespace) requestorNamespace,
-                        contained,
-                        sourceInfo,
-                        publicId));
 
-            } else if ("Script".equals(frameworkComponentName))
-            {
+          //                    if (putErrorsHere.getName().endsWith("html")) {
+          //                        // its an specless page, need to get the Tapestry generated spec
+          //                        // in order to have valid location to base the script file lookup
+          // on.
+          //                        IProject project = putProblemsResource.getProject();
+          //                        TapestryArtifactManager manager =
+          // TapestryArtifactManager.getTapestryArtifactManager();
+          //                        Map specMap = manager.getSpecMap(project);
+          //                        if (specMap == null)
+          //                            return;
+          //                         BaseSpecLocatable tapestryGeneratedSpec =
+          // (BaseSpecLocatable)specMap.get(putProblemsResource);
+          //                         if (tapestryGeneratedSpec == null)
+          //                            return;
+          //                         putErrorsHere = (IResourceWorkspaceLocation)
+          // tapestryGeneratedSpec.getSpecificationLocation();
+          //                    }
 
-                //                if (putErrorsHere.getName().endsWith("html")) {
-                //                    // its an specless page, need to get the Tapestry generated spec
-                //                    // in order to have valid location to base the script file lookup on.
-                //                    IProject project = putProblemsResource.getProject();
-                //                    TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-                //                    Map specMap = manager.getSpecMap(project);
-                //                    if (specMap == null)
-                //                        return;
-                //                     BaseSpecLocatable tapestryGeneratedSpec = (BaseSpecLocatable)specMap.get(putProblemsResource);
-                //                     if (tapestryGeneratedSpec == null)
-                //                        return;
-                //                     putErrorsHere = (IResourceWorkspaceLocation) tapestryGeneratedSpec.getSpecificationLocation();
-                //                }
-
-                TapestryBuilder.fDeferredActions.add(
-                    new ScriptComponentValidation(
-                        putErrorsHere,
-                        putProblemsResource,
-                        (ICoreNamespace) requestorNamespace,
-                        contained,
-                        sourceInfo,
-                        publicId));
-            }
+          TapestryBuilder.fDeferredActions.add(new ScriptComponentValidation(
+              specificationLocation,
+              putProblemsResource,
+              (ICoreNamespace) requestorNamespace,
+              contained,
+              sourceInfo,
+              publicId));
         }
+      }
+    }
+
+  }
+
+  abstract static class BaseAction implements IBuildAction
+  {
+    IResource fPutProblemsHere;
+    ICoreNamespace fReqNamespace;
+    IContainedComponent fContainedComponent;
+    Object fSourceInfo;
+    String fPublicId;
+
+    public BaseAction(IResource putProblemsHere, ICoreNamespace requestorNamespace,
+        IContainedComponent contained, Object sourceInfo, String publicId)
+    {
+      fPutProblemsHere = putProblemsHere;
+      fReqNamespace = requestorNamespace;
+      fContainedComponent = contained;
+      fSourceInfo = sourceInfo;
+      fPublicId = publicId;
 
     }
 
-    public static void validateImplictComponent(
-        IResourceWorkspaceLocation specificationLocation,
-        IResourceWorkspaceLocation putErrorsHere,
-        INamespace requestorNamespace,
-        String frameworkComponentName,
-        IComponentSpecification frameworkComponentSpecification,
-        IContainedComponent contained,
-        Object sourceInfo,
-        String publicId)
+    protected boolean isTemplate()
     {
-        if ("PageLink".equals(frameworkComponentName))
-        {
-            validateContainedComponent(
-                putErrorsHere,
-                requestorNamespace,
-                frameworkComponentName,
-                frameworkComponentSpecification,
-                contained,
-                sourceInfo,
-                publicId);
-        } else
-        {
-           
-            IResource putProblemsResource = CoreUtils.toResource(putErrorsHere);
-            if (putProblemsResource == null)
-                return;
-
-            PluginComponentSpecification frameworkSpec = (PluginComponentSpecification) frameworkComponentSpecification;
-            //check to see if we are really talking about a framework component.
-            if (TapestryCore
-                .getTapestryString("Namespace.framework-namespace")
-                .equals(frameworkSpec.getNamespace().getNamespaceId()))
-            {
-                if ("Script".equals(frameworkComponentName))
-                {
-
-                    //                    if (putErrorsHere.getName().endsWith("html")) {
-                    //                        // its an specless page, need to get the Tapestry generated spec
-                    //                        // in order to have valid location to base the script file lookup on.
-                    //                        IProject project = putProblemsResource.getProject();
-                    //                        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-                    //                        Map specMap = manager.getSpecMap(project);
-                    //                        if (specMap == null)
-                    //                            return;
-                    //                         BaseSpecLocatable tapestryGeneratedSpec = (BaseSpecLocatable)specMap.get(putProblemsResource);
-                    //                         if (tapestryGeneratedSpec == null)
-                    //                            return;
-                    //                         putErrorsHere = (IResourceWorkspaceLocation) tapestryGeneratedSpec.getSpecificationLocation();
-                    //                    }
-
-                    TapestryBuilder.fDeferredActions.add(
-                        new ScriptComponentValidation(
-                            specificationLocation,
-                            putProblemsResource,
-                            (ICoreNamespace) requestorNamespace,
-                            contained,
-                            sourceInfo,
-                            publicId));
-                }
-            }
-        }
-
+      return fSourceInfo instanceof TagEventInfo;
     }
 
-    abstract static class BaseAction implements IBuildAction
+    protected ISourceLocation getAttributeSourceLocation(String attrName)
     {
-        IResource fPutProblemsHere;
-        ICoreNamespace fReqNamespace;
-        IContainedComponent fContainedComponent;
-        Object fSourceInfo;
-        String fPublicId;
+      if (isTemplate())
+        return (ISourceLocation) ((TagEventInfo) fSourceInfo).getAttributeMap().get(
+            attrName);
 
-        public BaseAction(
-            IResource putProblemsHere,
-            ICoreNamespace requestorNamespace,
-            IContainedComponent contained,
-            Object sourceInfo,
-            String publicId)
+      return ((ISourceLocationInfo) fSourceInfo).getAttributeSourceLocation(attrName);
+    }
+
+  }
+
+  static class PageLinkComponentValidation extends BaseAction implements IBuildAction
+  {
+
+    public PageLinkComponentValidation(IResource putProblemsHere,
+        ICoreNamespace requestorNamespace, IContainedComponent contained,
+        Object sourceInfo, String publicId)
+    {
+      super(putProblemsHere, requestorNamespace, contained, sourceInfo, publicId);
+    }
+
+    public void run()
+    {
+      //look for static bindings for the 'page' parameter
+      IBindingSpecification pageBinding = fContainedComponent.getBinding("page");
+      if (pageBinding != null && pageBinding.getType() == BindingType.STATIC)
+      {
+        String value = pageBinding.getValue();
+        if (value != null)
         {
-            fPutProblemsHere = putProblemsHere;
-            fReqNamespace = requestorNamespace;
-            fContainedComponent = contained;
-            fSourceInfo = sourceInfo;
-            fPublicId = publicId;
+          PageSpecificationResolver resolver = fReqNamespace.getPageResolver();
+          IComponentSpecification pageSpec = resolver.resolve(pageBinding.getValue());
+          ISourceLocation location;
+          if (isTemplate())
+          {
+            location = getAttributeSourceLocation("page");
+          } else
+          {
+            ISourceLocationInfo bindingInfo = (ISourceLocationInfo) pageBinding
+                .getLocation();
+            location = bindingInfo.getAttributeSourceLocation("value");
+          }
+          if (pageSpec == null)
+          {
+            String namespaceId = fReqNamespace.getNamespaceId();
+            if (fReqNamespace.isApplicationNamespace())
+              namespaceId = "application namespace";
+            if (location != null)
+            {
 
+              Markers.addTapestryProblemMarkerToResource(
+                  fPutProblemsHere,
+                  new DefaultProblem(
+                      ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+                      IProblem.ERROR,
+                      TapestryCore.getTapestryString(
+                          "Namespace.no-such-page",
+                          value,
+                          namespaceId),
+                      location.getLineNumber(),
+                      location.getCharStart(),
+                      location.getCharEnd(),
+                      true));
+            } else
+            {
+              StringWriter swriter = new StringWriter();
+              PrintWriter pwriter = new PrintWriter(swriter);
+              pwriter.println("FCV - page - no location");
+              pwriter.println(TapestryCore.getTapestryString(
+                  "Namespace.no-such-page",
+                  value,
+                  namespaceId));
+              pwriter.println(fPutProblemsHere == null ? "null" : fPutProblemsHere
+                  .toString());
+              pwriter.println();
+              try
+              {
+                XMLUtil.writeBinding("page", pageBinding, pwriter, 0, fPublicId);
+              } catch (RuntimeException e)
+              {
+                // do nothing
+              }
+              TapestryCore.log(swriter.toString());
+            }
+          }
         }
+      }
+    }
+  }
 
-        protected boolean isTemplate()
-        {
-            return fSourceInfo instanceof TagEventInfo;
-        }
+  static class ScriptComponentValidation extends BaseAction implements IBuildAction
+  {
+    IResourceWorkspaceLocation scriptOwnerLocation;
+    public ScriptComponentValidation(IResourceWorkspaceLocation scriptOwnerLocation,
+        IResource putProblemsHere, ICoreNamespace requestorNamespace,
+        IContainedComponent contained, Object sourceInfo, String publicId)
+    {
+      super(putProblemsHere, requestorNamespace, contained, sourceInfo, publicId);
+      this.scriptOwnerLocation = scriptOwnerLocation;
+    }
 
-        protected ISourceLocation getAttributeSourceLocation(String attrName)
+    public void run()
+    {
+      //look for static bindings for the 'script' parameter
+      IBindingSpecification scriptBinding = fContainedComponent.getBinding("script");
+      if (scriptBinding != null && scriptBinding.getType() == BindingType.STATIC)
+      {
+        String value = scriptBinding.getValue();
+        if (value != null && value.trim().length() > 0
+            && !value.startsWith(BaseValidator.DefaultDummyString))
         {
+          IResourceWorkspaceLocation scriptLocation = (IResourceWorkspaceLocation) scriptOwnerLocation
+              .getRelativeLocation(value);
+          if (scriptLocation.getStorage() == null)
+          {
+            ISourceLocation location;
             if (isTemplate())
-                return (ISourceLocation) ((TagEventInfo) fSourceInfo).getAttributeMap().get(attrName);
-
-            return ((ISourceLocationInfo) fSourceInfo).getAttributeSourceLocation(attrName);
-        }
-
-    }
-
-    static class PageLinkComponentValidation extends BaseAction implements IBuildAction
-    {
-
-        public PageLinkComponentValidation(
-            IResource putProblemsHere,
-            ICoreNamespace requestorNamespace,
-            IContainedComponent contained,
-            Object sourceInfo,
-            String publicId)
-        {
-            super(putProblemsHere, requestorNamespace, contained, sourceInfo, publicId);
-        }
-
-        public void run()
-        {
-            //look for static bindings for the 'page' parameter
-            IBindingSpecification pageBinding = fContainedComponent.getBinding("page");
-            if (pageBinding != null && pageBinding.getType() == BindingType.STATIC)
             {
-                String value = pageBinding.getValue();
-                if (value != null)
-                {
-                    PageSpecificationResolver resolver = fReqNamespace.getPageResolver();
-                    IComponentSpecification pageSpec = resolver.resolve(pageBinding.getValue());
-                    ISourceLocation location;
-                    if (isTemplate())
-                    {
-                        location = getAttributeSourceLocation("page");
-                    } else
-                    {
-                        ISourceLocationInfo bindingInfo = (ISourceLocationInfo) pageBinding.getLocation();
-                        location = bindingInfo.getAttributeSourceLocation("value");
-                    }
-                    if (pageSpec == null)
-                    {
-                        String namespaceId = fReqNamespace.getNamespaceId();
-                        if (fReqNamespace.isApplicationNamespace())
-                            namespaceId = "application namespace";
-                        if (location != null)
-                        {
-
-                            Markers.addTapestryProblemMarkerToResource(
-                                fPutProblemsHere,
-                                new DefaultProblem(
-                                    ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
-                                    IProblem.ERROR,
-                                    TapestryCore.getTapestryString("Namespace.no-such-page", value, namespaceId),
-                                    location.getLineNumber(),
-                                    location.getCharStart(),
-                                    location.getCharEnd(),
-                                    true));
-                        } else
-                        {
-                            StringWriter swriter = new StringWriter();
-                            PrintWriter pwriter = new PrintWriter(swriter);
-                            pwriter.println("FCV - page - no location");
-                            pwriter.println(
-                                TapestryCore.getTapestryString("Namespace.no-such-page", value, namespaceId));
-                            pwriter.println(fPutProblemsHere == null ? "null" : fPutProblemsHere.toString());
-                            pwriter.println();
-                            try
-                            {
-                                XMLUtil.writeBinding("page", pageBinding, pwriter, 0, fPublicId);
-                            } catch (RuntimeException e)
-                            {
-                                // do nothing
-                            }
-                            TapestryCore.log(swriter.toString());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    static class ScriptComponentValidation extends BaseAction implements IBuildAction
-    {
-        IResourceWorkspaceLocation scriptOwnerLocation;
-        public ScriptComponentValidation(
-            IResourceWorkspaceLocation scriptOwnerLocation,
-            IResource putProblemsHere,
-            ICoreNamespace requestorNamespace,
-            IContainedComponent contained,
-            Object sourceInfo,
-            String publicId)
-        {
-            super(putProblemsHere, requestorNamespace, contained, sourceInfo, publicId);
-            this.scriptOwnerLocation = scriptOwnerLocation;
-        }
-
-        public void run()
-        {
-            //look for static bindings for the 'script' parameter
-            IBindingSpecification scriptBinding = fContainedComponent.getBinding("script");
-            if (scriptBinding != null && scriptBinding.getType() == BindingType.STATIC)
+              location = getAttributeSourceLocation("script");
+            } else
             {
-                String value = scriptBinding.getValue();
-                if (value != null && value.trim().length() > 0 && !value.startsWith(BaseValidator.DefaultDummyString))
-                {
-                    IResourceWorkspaceLocation scriptLocation =
-                        (IResourceWorkspaceLocation) scriptOwnerLocation.getRelativeLocation(value);
-                    if (scriptLocation.getStorage() == null)
-                    {
-                        ISourceLocation location;
-                        if (isTemplate())
-                        {
-                            location = getAttributeSourceLocation("script");
-                        } else
-                        {
-                            ISourceLocationInfo bindingInfo = (ISourceLocationInfo) scriptBinding.getLocation();
-                            location = bindingInfo.getAttributeSourceLocation("value");
-                            if (location == null)
-                                location = bindingInfo.getContentSourceLocation();
-                        }
-
-                        if (location != null)
-                        {
-
-                            Markers.addTapestryProblemMarkerToResource(
-                                fPutProblemsHere,
-                                new DefaultProblem(
-                                    ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
-                                    IProblem.ERROR,
-                                    "Unable to find script: " + scriptLocation.toString(),
-                                    location.getLineNumber(),
-                                    location.getCharStart(),
-                                    location.getCharEnd(),
-                                    true));
-                        } else
-                        {
-                            StringWriter swriter = new StringWriter();
-                            PrintWriter pwriter = new PrintWriter(swriter);
-                            pwriter.println("FCV - script - no location");
-                            pwriter.println("Unable to find script: " + scriptLocation.toString());
-                            pwriter.println(fPutProblemsHere == null ? "null" : fPutProblemsHere.toString());
-                            pwriter.println();
-                            try
-                            {
-                                XMLUtil.writeBinding("script", scriptBinding, pwriter, 0, fPublicId);
-                            } catch (RuntimeException e)
-                            {
-                                // do nothing
-                            }
-                            TapestryCore.log(swriter.toString());
-                        }
-                    }
-
-                }
+              ISourceLocationInfo bindingInfo = (ISourceLocationInfo) scriptBinding
+                  .getLocation();
+              location = bindingInfo.getAttributeSourceLocation("value");
+              if (location == null)
+                location = bindingInfo.getContentSourceLocation();
             }
 
+            if (location != null)
+            {
+
+              Markers.addTapestryProblemMarkerToResource(
+                  fPutProblemsHere,
+                  new DefaultProblem(
+                      ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+                      IProblem.ERROR,
+                      "Unable to find script: " + scriptLocation.toString(),
+                      location.getLineNumber(),
+                      location.getCharStart(),
+                      location.getCharEnd(),
+                      true));
+            } else
+            {
+              StringWriter swriter = new StringWriter();
+              PrintWriter pwriter = new PrintWriter(swriter);
+              pwriter.println("FCV - script - no location");
+              pwriter.println("Unable to find script: " + scriptLocation.toString());
+              pwriter.println(fPutProblemsHere == null ? "null" : fPutProblemsHere
+                  .toString());
+              pwriter.println();
+              try
+              {
+                XMLUtil.writeBinding("script", scriptBinding, pwriter, 0, fPublicId);
+              } catch (RuntimeException e)
+              {
+                // do nothing
+              }
+              TapestryCore.log(swriter.toString());
+            }
+          }
+
         }
+      }
 
     }
+
+  }
 
 }

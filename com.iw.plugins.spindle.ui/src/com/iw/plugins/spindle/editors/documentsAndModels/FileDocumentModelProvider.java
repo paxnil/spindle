@@ -44,13 +44,14 @@ import com.iw.plugins.spindle.editors.template.TemplateTextTools;
  * FileDocumentModelProvider TODO add something here
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: FileDocumentModelProvider.java,v 1.1.2.1 2004/06/22 12:13:52
+ *          glongman Exp $
  */
 public class FileDocumentModelProvider extends FileDocumentProvider
     implements
       IXMLModelProvider
 {
-  private Map fModelMap = new HashMap(); 
+  private Map fModelMap = new HashMap();
 
   /*
    * (non-Javadoc)
@@ -90,7 +91,7 @@ public class FileDocumentModelProvider extends FileDocumentProvider
       model.createTree(document);
       document.addDocumentListener(model);
       fModelMap.put(document, model);
-    }   
+    }
     return document;
   }
 

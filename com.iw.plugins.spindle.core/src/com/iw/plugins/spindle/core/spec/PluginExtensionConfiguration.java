@@ -41,296 +41,293 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  * @author gwl
- * @version $Id$
- *
- * Copyright 2002, Intelligent Work Inc.
- * All Rights Reserved.
+ * @version $Id: PluginExtensionConfiguration.java,v 1.6 2004/05/17 02:31:49
+ *          glongman Exp $
+ * 
+ * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
  */
 public class PluginExtensionConfiguration extends DescribableSpecification
 {
 
-    static final String[] typeNames = { "boolean", "String", "double", "int", "long" };
-    static final Double trueD = new Double(1.0);
-    static final Double falseD = new Double(0.0);
-    static final Integer trueI = new Integer(1);
-    static final Integer falseI = new Integer(0);
-    static final Long trueL = new Long(1);
-    static final Long falseL = new Long(0);
+  static final String[] typeNames = {"boolean", "String", "double", "int", "long"};
+  static final Double trueD = new Double(1.0);
+  static final Double falseD = new Double(0.0);
+  static final Integer trueI = new Integer(1);
+  static final Integer falseI = new Integer(0);
+  static final Long trueL = new Long(1);
+  static final Long falseL = new Long(0);
 
-    static final public Map classToString;
-    static final public Map stringToClass;
+  static final public Map classToString;
+  static final public Map stringToClass;
 
-    static {
+  static
+  {
 
-        classToString = new HashMap();
-        classToString.put(String.class, "String");
-        classToString.put(Boolean.class, "boolean");
-        classToString.put(Integer.class, "int");
-        classToString.put(Double.class, "double");
-        classToString.put(Long.class, "long");
+    classToString = new HashMap();
+    classToString.put(String.class, "String");
+    classToString.put(Boolean.class, "boolean");
+    classToString.put(Integer.class, "int");
+    classToString.put(Double.class, "double");
+    classToString.put(Long.class, "long");
 
-        stringToClass = new HashMap();
-        stringToClass.put("String", String.class);
-        stringToClass.put("boolean", Boolean.class);
-        stringToClass.put("int", Integer.class);
-        stringToClass.put("double", Double.class);
-        stringToClass.put("long", Long.class);
+    stringToClass = new HashMap();
+    stringToClass.put("String", String.class);
+    stringToClass.put("boolean", Boolean.class);
+    stringToClass.put("int", Integer.class);
+    stringToClass.put("double", Double.class);
+    stringToClass.put("long", Long.class);
 
+  }
+
+  public Object fValueObject;
+  public Class fType;
+
+  private String fDeclaredType;
+  private String fDeclaredValue;
+  private boolean fDeclaredValueIsFromAttribute;
+
+  /**
+   * Constructor for PluginExtensionConfiguration.
+   */
+  public PluginExtensionConfiguration(String propertyName, Object value)
+  {
+    super(BaseSpecification.EXTENSION_CONFIGURATION);
+    setIdentifier(propertyName);
+    fValueObject = value;
+    fType = value == null ? null : value.getClass();
+  }
+
+  public PluginExtensionConfiguration(String propertyName, String declaredValue,
+      String declaredType, ILocation location)
+  {
+    this(propertyName, null);
+    fDeclaredType = declaredType;
+    fDeclaredValue = declaredValue;
+    setLocation(location);
+  }
+
+  private Class checkType(String newType)
+  {
+    return (Class) stringToClass.get(newType);
+  }
+
+  private Object convertValue(Class type, Object value)
+  {
+
+    if (type == value.getClass())
+      return value;
+
+    if (type == String.class)
+      return value.toString();
+
+    if (type == Boolean.class)
+      return convertToBoolean(value);
+
+    if (type == Double.class)
+      return convertToDouble(value);
+
+    if (type == Long.class)
+      return convertToLong(value);
+
+    if (type == Integer.class)
+      return convertToInteger(value);
+
+    return value;
+  }
+
+  private Boolean convertToBoolean(Object value)
+  {
+    Class clazz = value.getClass();
+    if (clazz == Boolean.class)
+      return (Boolean) value;
+
+    if (value instanceof Number)
+    {
+      if (((Number) value).longValue() == 0)
+      {
+        return Boolean.FALSE;
+      } else
+      {
+        return Boolean.TRUE;
+      }
     }
 
-    public Object fValueObject;
-    public Class fType;
-
-    private String fDeclaredType;
-    private String fDeclaredValue;
-    private boolean fDeclaredValueIsFromAttribute;
-
-    /**
-     * Constructor for PluginExtensionConfiguration.
-     */
-    public PluginExtensionConfiguration(String propertyName, Object value)
+    if (clazz == String.class)
     {
-        super(BaseSpecification.EXTENSION_CONFIGURATION);
-        setIdentifier(propertyName);
-        fValueObject = value;
-        fType = value == null ? null : value.getClass();
+      String svalue = (String) value;
+      if (svalue.equalsIgnoreCase("true") || svalue.equalsIgnoreCase("yes"))
+        return Boolean.TRUE;
+
+      if (svalue.equalsIgnoreCase("false") || svalue.equalsIgnoreCase("no"))
+        return Boolean.FALSE;
+
+      return new Boolean(svalue != null && !"".equals(svalue));
+    }
+    return Boolean.TRUE;
+  }
+
+  private Long convertToLong(Object value)
+  {
+    Class clazz = value.getClass();
+    if (clazz == Long.class)
+      return (Long) value;
+
+    if (clazz == Boolean.class)
+    {
+      boolean flag = ((Boolean) value).booleanValue();
+
+      if (flag)
+        return trueL;
+
+      return falseL;
+    }
+    if (value instanceof Number)
+      return new Long(((Number) value).longValue());
+
+    if (clazz == String.class)
+    {
+      try
+      {
+        return new Long((String) value);
+      } catch (NumberFormatException e)
+      {}
+
+    }
+    return falseL;
+  }
+
+  private Double convertToDouble(Object value)
+  {
+    Class clazz = value.getClass();
+    if (clazz == Double.class)
+      return (Double) value;
+
+    if (clazz == Boolean.class)
+    {
+      boolean flag = ((Boolean) value).booleanValue();
+      if (flag)
+        return trueD;
+
+      return falseD;
     }
 
-    public PluginExtensionConfiguration(
-        String propertyName,
-        String declaredValue,
-        String declaredType,
-        ILocation location)
+    if (value instanceof Number)
     {
-        this(propertyName, null);
-        fDeclaredType = declaredType;
-        fDeclaredValue = declaredValue;
-        setLocation(location);
+      return new Double(((Number) value).doubleValue());
     }
 
-    private Class checkType(String newType)
+    if (clazz == String.class)
     {
-        return (Class) stringToClass.get(newType);
+      try
+      {
+        return new Double((String) value);
+      } catch (NumberFormatException e)
+      {}
+    }
+    return falseD;
+  }
+
+  private Integer convertToInteger(Object value)
+  {
+    Class clazz = value.getClass();
+    if (clazz == Integer.class)
+      return (Integer) value;
+
+    if (clazz == Boolean.class)
+    {
+      if (((Boolean) value).booleanValue())
+        return trueI;
+
+      return falseI;
     }
 
-    private Object convertValue(Class type, Object value)
+    if (value instanceof Number)
+      return new Integer(((Number) value).intValue());
+
+    if (clazz == String.class)
     {
-
-        if (type == value.getClass())
-            return value;
-
-        if (type == String.class)
-            return value.toString();
-
-        if (type == Boolean.class)
-            return convertToBoolean(value);
-
-        if (type == Double.class)
-            return convertToDouble(value);
-
-        if (type == Long.class)
-            return convertToLong(value);
-
-        if (type == Integer.class)
-            return convertToInteger(value);
-
-        return value;
+      try
+      {
+        return new Integer((String) value);
+      } catch (NumberFormatException e)
+      {}
     }
+    return falseI;
+  }
 
-    private Boolean convertToBoolean(Object value)
+  /**
+   * Revalidate this declaration. Note that validating the existence of the
+   * value is only possible during a parse/scan cycle. But that's ok 'cuz those
+   * kinds of problems would have already been caught.
+   * 
+   * @param parent the object holding this
+   * @param validator a validator helper
+   */
+
+  public void validate(Object parent, IScannerValidator validator)
+  {
+
+    IExtensionSpecification extension = (IExtensionSpecification) parent;
+
+    ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+    try
     {
-        Class clazz = value.getClass();
-        if (clazz == Boolean.class)
-            return (Boolean) value;
 
-        if (value instanceof Number)
+      if (fDeclaredType != null)
+      {
+        SpecificationScanner.IConverter converter = (SpecificationScanner.IConverter) SpecificationScanner.TYPE_CONVERSION_MAP
+            .get(fDeclaredType);
+        Object objectValue = null;
+
+        if (converter == null)
         {
-            if (((Number) value).longValue() == 0)
+          validator.addProblem(IProblem.ERROR, sourceInfo
+              .getAttributeSourceLocation("type"), TapestryCore.getTapestryString(
+              "SpecificationParser.unknown-static-value-type",
+              fDeclaredType), true);
+        } else if (fDeclaredValue != null)
+        {
+          try
+          {
+            objectValue = converter.convert(fDeclaredValue);
+          } catch (ScannerException e2)
+          {
+            ISourceLocation problemLocation = null;
+
+            if (fDeclaredValueIsFromAttribute)
             {
-                return Boolean.FALSE;
+              problemLocation = sourceInfo.getAttributeSourceLocation("value");
             } else
             {
-                return Boolean.TRUE;
+              problemLocation = sourceInfo.getContentSourceLocation();
             }
+            validator.addProblem(IProblem.ERROR, problemLocation, e2.getMessage(), true);
+          }
         }
+      }
 
-        if (clazz == String.class)
-        {
-            String svalue = (String) value;
-            if (svalue.equalsIgnoreCase("true") || svalue.equalsIgnoreCase("yes"))
-                return Boolean.TRUE;
-
-            if (svalue.equalsIgnoreCase("false") || svalue.equalsIgnoreCase("no"))
-                return Boolean.FALSE;
-
-            return new Boolean(svalue != null && !"".equals(svalue));
-        }
-        return Boolean.TRUE;
-    }
-
-    private Long convertToLong(Object value)
+    } catch (ScannerException e)
     {
-        Class clazz = value.getClass();
-        if (clazz == Long.class)
-            return (Long) value;
-
-        if (clazz == Boolean.class)
-        {
-            boolean flag = ((Boolean) value).booleanValue();
-
-            if (flag)
-                return trueL;
-
-            return falseL;
-        }
-        if (value instanceof Number)
-            return new Long(((Number) value).longValue());
-
-        if (clazz == String.class)
-        {
-            try
-            {
-                return new Long((String) value);
-            } catch (NumberFormatException e)
-            {}
-
-        }
-        return falseL;
+      TapestryCore.log(e);
     }
 
-    private Double convertToDouble(Object value)
-    {
-        Class clazz = value.getClass();
-        if (clazz == Double.class)
-            return (Double) value;
+  }
 
-        if (clazz == Boolean.class)
-        {
-            boolean flag = ((Boolean) value).booleanValue();
-            if (flag)
-                return trueD;
+  /**
+   * @return
+   */
+  public boolean isDeclaredValueIsFromAttribute()
+  {
+    return fDeclaredValueIsFromAttribute;
+  }
 
-            return falseD;
-        }
-
-        if (value instanceof Number)
-        {
-            return new Double(((Number) value).doubleValue());
-        }
-
-        if (clazz == String.class)
-        {
-            try
-            {
-                return new Double((String) value);
-            } catch (NumberFormatException e)
-            {}
-        }
-        return falseD;
-    }
-
-    private Integer convertToInteger(Object value)
-    {
-        Class clazz = value.getClass();
-        if (clazz == Integer.class)
-            return (Integer) value;
-
-        if (clazz == Boolean.class)
-        {
-            if (((Boolean) value).booleanValue())
-                return trueI;
-
-            return falseI;
-        }
-
-        if (value instanceof Number)
-            return new Integer(((Number) value).intValue());
-
-        if (clazz == String.class)
-        {
-            try
-            {
-                return new Integer((String) value);
-            } catch (NumberFormatException e)
-            {}
-        }
-        return falseI;
-    }
-
-    /**
-      *  Revalidate this declaration. Note that validating the existence of the value is only possible
-      *  during a parse/scan cycle. But that's ok 'cuz those kinds of problems
-      *  would have already been caught.
-      * 
-      * @param parent the object holding this
-      * @param validator a validator helper
-      */
-
-    public void validate(Object parent, IScannerValidator validator)
-    {
-
-        IExtensionSpecification extension = (IExtensionSpecification) parent;
-
-        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-        try
-        {
-
-            if (fDeclaredType != null)
-            {
-                SpecificationScanner.IConverter converter =
-                    (SpecificationScanner.IConverter) SpecificationScanner.TYPE_CONVERSION_MAP.get(fDeclaredType);
-                Object objectValue = null;
-
-                if (converter == null)
-                {
-                    validator.addProblem(
-                        IProblem.ERROR,
-                        sourceInfo.getAttributeSourceLocation("type"),
-                        TapestryCore.getTapestryString("SpecificationParser.unknown-static-value-type", fDeclaredType),
-                        true);
-                } else if (fDeclaredValue != null)
-                {
-                    try
-                    {
-                        objectValue = converter.convert(fDeclaredValue);
-                    } catch (ScannerException e2)
-                    {
-                        ISourceLocation problemLocation = null;
-
-                        if (fDeclaredValueIsFromAttribute)
-                        {
-                            problemLocation = sourceInfo.getAttributeSourceLocation("value");
-                        } else
-                        {
-                            problemLocation = sourceInfo.getContentSourceLocation();
-                        }
-                        validator.addProblem(IProblem.ERROR, problemLocation, e2.getMessage(), true);
-                    }
-                }
-            }
-
-        } catch (ScannerException e)
-        {
-             TapestryCore.log(e);
-        }
-
-    }
-
-    /**
-     * @return
-     */
-    public boolean isDeclaredValueIsFromAttribute()
-    {
-        return fDeclaredValueIsFromAttribute;
-    }
-
-    /**
-     * @param b
-     */
-    public void setDeclaredValueIsFromAttribute(boolean b)
-    {
-        fDeclaredValueIsFromAttribute = b;
-    }
+  /**
+   * @param b
+   */
+  public void setDeclaredValueIsFromAttribute(boolean b)
+  {
+    fDeclaredValueIsFromAttribute = b;
+  }
 
 }

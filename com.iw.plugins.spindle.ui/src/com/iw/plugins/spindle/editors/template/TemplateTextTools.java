@@ -48,7 +48,8 @@ import org.xmen.internal.ui.text.XMLDocumentPartitioner;
  * tags.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: TemplateTextTools.java,v 1.2.4.2 2004/06/22 12:23:34 glongman
+ *          Exp $
  */
 public class TemplateTextTools extends AbstractTextTools
 {
@@ -106,7 +107,7 @@ public class TemplateTextTools extends AbstractTextTools
   {
     super(store, TOKENS);
 
-    fTemplatePartitionScanner = new TemplatePartitionScanner(false);   
+    fTemplatePartitionScanner = new TemplatePartitionScanner(false);
 
     Map tokens = getTokens();
 

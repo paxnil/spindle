@@ -73,7 +73,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 
     IXMLModelProvider modelProvider = (IXMLModelProvider) fEditor.getDocumentProvider();
     XMLReconciler model = modelProvider.getModel(fEditor.getEditorInput());
-    
+
     if (model != null)
       fDTD = DOMValidator.getDTD(model.getPublicId());
 

@@ -84,8 +84,7 @@ public class CoreClasspathContainer implements IClasspathContainer
    * Computes the Tapestry framework classpath entries associated with the core
    * plugin bundle.
    * 
-   * @param bundle
-   *          the Bundle associated with the plugin object.
+   * @param bundle the Bundle associated with the plugin object.
    * @return an array of classpath entries.
    */
   private static IClasspathEntry[] computeClasspathEntries(Bundle bundle)
@@ -96,8 +95,9 @@ public class CoreClasspathContainer implements IClasspathContainer
 
     try
     {
-      ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, (String) bundle.getHeaders().get(
-          Constants.BUNDLE_CLASSPATH));
+      ManifestElement[] elements = ManifestElement.parseHeader(
+          Constants.BUNDLE_CLASSPATH,
+          (String) bundle.getHeaders().get(Constants.BUNDLE_CLASSPATH));
 
       for (int i = 0; i < elements.length; i++)
       {
@@ -121,7 +121,9 @@ public class CoreClasspathContainer implements IClasspathContainer
             sourceAttachmentPath = getSourceAttachmentPath(installUrl, "tapestry-src.jar");
           } else if (jarName.startsWith("tapestry-contrib"))
           {
-            sourceAttachmentPath = getSourceAttachmentPath(installUrl, "tapestry-contrib-src.jar");
+            sourceAttachmentPath = getSourceAttachmentPath(
+                installUrl,
+                "tapestry-contrib-src.jar");
           } else
           {
 
@@ -136,8 +138,11 @@ public class CoreClasspathContainer implements IClasspathContainer
           URL libUrl = new URL(installUrl, jarName);
           libUrl = Platform.resolve(libUrl);
 
-          entries
-              .add(JavaCore.newLibraryEntry(new Path(libUrl.getFile()), sourceAttachmentPath, sourceAttachmentRootPath, false));
+          entries.add(JavaCore.newLibraryEntry(
+              new Path(libUrl.getFile()),
+              sourceAttachmentPath,
+              sourceAttachmentRootPath,
+              false));
 
         } catch (MalformedURLException e)
         {
@@ -162,10 +167,8 @@ public class CoreClasspathContainer implements IClasspathContainer
    * Locate the path of a jar containing the source code for a named library.
    * The location is relative to the plugin install directory.
    * 
-   * @param installUrl
-   *          the URL for the plugin install
-   * @param srcJar
-   *          the name of the expected src jar
+   * @param installUrl the URL for the plugin install
+   * @param srcJar the name of the expected src jar
    * @return a path to the source jar or null if no such jar is found.
    */
   private static IPath getSourceAttachmentPath(URL installUrl, String srcJar)
@@ -194,8 +197,7 @@ public class CoreClasspathContainer implements IClasspathContainer
   /**
    * Constructs a Tapestry classpath container
    * 
-   * @param path
-   *          container path used to resolve this container
+   * @param path container path used to resolve this container
    */
   public CoreClasspathContainer(IPath path)
   {

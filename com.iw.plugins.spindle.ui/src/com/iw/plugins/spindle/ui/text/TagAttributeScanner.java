@@ -33,31 +33,28 @@ import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 
-
-
 /**
  * @author administrator
- *
+ * 
  * To change this generated comment edit the template variable "typecomment":
  * Window>Preferences>Java>Templates.
  */
-public class TagAttributeScanner extends RuleBasedScanner {
+public class TagAttributeScanner extends RuleBasedScanner
+{
 
-	/**
-	 * Constructor for TagScanner.
-	 * @param manager
-	 */
-	public TagAttributeScanner(IColorManager manager) {
-		IToken string =
-			new Token(new TextAttribute(manager.getColor(IColorConstants.P_STRING)));
-		
-		setRules(
-			new IRule[] {
-				new SingleLineRule("\"", "\"", string, '\\'),
-				new SingleLineRule("'", "'", string, '\\'),
-				new WhitespaceRule(new WhitespaceDetector())
-			}
-		);
-	}
+  /**
+   * Constructor for TagScanner.
+   * 
+   * @param manager
+   */
+  public TagAttributeScanner(IColorManager manager)
+  {
+    IToken string = new Token(new TextAttribute(manager
+        .getColor(IColorConstants.P_STRING)));
+
+    setRules(new IRule[]{new SingleLineRule("\"", "\"", string, '\\'),
+        new SingleLineRule("'", "'", string, '\\'),
+        new WhitespaceRule(new WhitespaceDetector())});
+  }
 
 }

@@ -37,67 +37,67 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
- *  Record <service> tags in a document
+ * Record <service>tags in a document
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginEngineServiceDeclaration.java,v 1.2 2004/05/17 02:31:49
+ *          glongman Exp $
  */
 public class PluginEngineServiceDeclaration extends DescribableSpecification
 {
 
-    String fName;
-    String fServiceClass;
+  String fName;
+  String fServiceClass;
 
-    public PluginEngineServiceDeclaration(String name, String serviceClass, ILocation location)
+  public PluginEngineServiceDeclaration(String name, String serviceClass,
+      ILocation location)
+  {
+    super(BaseSpecification.ENGINE_SERVICE_DECLARATION);
+    fName = name;
+    fServiceClass = serviceClass;
+    setLocation(location);
+  }
+
+  public String getIdentifier()
+  {
+    return getName();
+  }
+
+  public String getName()
+  {
+    return fName;
+  }
+
+  public String getServiceClass()
+  {
+    return fServiceClass;
+  }
+
+  /**
+   * Revalidate this declaration. Note that some validations, like duplicate
+   * ids, are only possible during a parse/scan cycle. But that's ok 'cuz those
+   * kinds of problems would have already been caught.
+   * 
+   * @param parent the object holding this
+   * @param validator a validator helper
+   */
+  public void validate(Object parent, IScannerValidator validator)
+  {
+    ISourceLocationInfo info = (ISourceLocationInfo) getLocation();
+
+    try
     {
-        super(BaseSpecification.ENGINE_SERVICE_DECLARATION);
-        fName = name;
-        fServiceClass = serviceClass;
-        setLocation(location);
+      ILibrarySpecification parentLib = (ILibrarySpecification) parent;
+
+      validator.validateTypeName((IResourceWorkspaceLocation) parentLib
+          .getSpecificationLocation(), fServiceClass, IProblem.ERROR, info
+          .getAttributeSourceLocation("class"));
+
+    } catch (ScannerException e)
+    {
+      TapestryCore.log(e);
     }
 
-    public String getIdentifier()
-    {
-        return getName();
-    }
-
-    public String getName()
-    {
-        return fName;
-    }
-
-    public String getServiceClass()
-    {
-        return fServiceClass;
-    }
-
-    /**
-          *  Revalidate this declaration. Note that some validations, like duplicate ids, are
-          *  only possible during a parse/scan cycle. But that's ok 'cuz those kinds of problems
-          *  would have already been caught.
-          * 
-          * @param parent the object holding this
-          * @param validator a validator helper
-          */
-    public void validate(Object parent, IScannerValidator validator)
-    {
-        ISourceLocationInfo info = (ISourceLocationInfo) getLocation();
-
-        try
-        {           
-            ILibrarySpecification parentLib = (ILibrarySpecification) parent;
-
-            validator.validateTypeName(
-                (IResourceWorkspaceLocation) parentLib.getSpecificationLocation(),
-                fServiceClass,
-                IProblem.ERROR,
-                info.getAttributeSourceLocation("class"));
-
-        } catch (ScannerException e)
-        {
-            TapestryCore.log(e);
-        }
-
-    }
+  }
 
 }

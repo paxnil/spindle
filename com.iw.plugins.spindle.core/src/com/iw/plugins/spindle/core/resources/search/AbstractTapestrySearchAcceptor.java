@@ -35,111 +35,115 @@ import org.eclipse.core.resources.IStorage;
 import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 
 /**
- *  Acceptor that will accept/reject things based on the flags set in it.
+ * Acceptor that will accept/reject things based on the flags set in it.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: AbstractTapestrySearchAcceptor.java,v 1.3 2003/08/14 19:11:48
+ *          glongman Exp $
  */
 public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
 {
 
-    public static final int ACCEPT_NONE = 0x0100000;
+  public static final int ACCEPT_NONE = 0x0100000;
 
-    public static final int ACCEPT_LIBRARIES = 0x0000001;
+  public static final int ACCEPT_LIBRARIES = 0x0000001;
 
-    /**
-    * Accept flag for specifying components.
-    */
-    public static final int ACCEPT_COMPONENTS = 0x00000002;
-    /**
-     * Accept flag for specifying application.
-     */
-    public static final int ACCEPT_APPLICATIONS = 0x00000004;
-    /**
-     *  Accept flag for specifying HTML files
-     */
-    public static final int ACCEPT_HTML = 0x00000008;
-    /**
-     *  Accept flag for specifying page files
-     */
-    public static final int ACCEPT_PAGES = 0x00000010;
-    /**
-     *  Accept flag for specifying script files
-     */
-    public static final int ACCEPT_SCRIPT = 0x00000020;
-    /**
-     *  Accept flag for specifying any tapestry files
-     */
-    public static final int ACCEPT_ANY = 0x00000100;
+  /**
+   * Accept flag for specifying components.
+   */
+  public static final int ACCEPT_COMPONENTS = 0x00000002;
+  /**
+   * Accept flag for specifying application.
+   */
+  public static final int ACCEPT_APPLICATIONS = 0x00000004;
+  /**
+   * Accept flag for specifying HTML files
+   */
+  public static final int ACCEPT_HTML = 0x00000008;
+  /**
+   * Accept flag for specifying page files
+   */
+  public static final int ACCEPT_PAGES = 0x00000010;
+  /**
+   * Accept flag for specifying script files
+   */
+  public static final int ACCEPT_SCRIPT = 0x00000020;
+  /**
+   * Accept flag for specifying any tapestry files
+   */
+  public static final int ACCEPT_ANY = 0x00000100;
 
-    private List fSeekExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
+  private List fSeekExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
 
-    private List fResults = new ArrayList();
+  private List fResults = new ArrayList();
 
-    private int fAcceptFlags;
+  private int fAcceptFlags;
 
-    public AbstractTapestrySearchAcceptor()
-    {
-        reset(ACCEPT_ANY);
-    }
-    
-    public AbstractTapestrySearchAcceptor(int acceptFlags)
-    {
-        reset(acceptFlags);
-    }
+  public AbstractTapestrySearchAcceptor()
+  {
+    reset(ACCEPT_ANY);
+  }
 
-    public void reset()
-    {
-        fResults.clear();
-    }
+  public AbstractTapestrySearchAcceptor(int acceptFlags)
+  {
+    reset(acceptFlags);
+  }
 
-    public void reset(int flags)
-    {
-        reset();
-        this.fAcceptFlags = flags;
-    }
+  public void reset()
+  {
+    fResults.clear();
+  }
 
-    protected boolean acceptAsTapestry(IStorage storage)
-    {
-        String extension = storage.getFullPath().getFileExtension();
-        if (!fSeekExtensions.contains(extension))
-            return false;
+  public void reset(int flags)
+  {
+    reset();
+    this.fAcceptFlags = flags;
+  }
 
-        if ((fAcceptFlags & ACCEPT_ANY) != 0)
-            return true;
+  protected boolean acceptAsTapestry(IStorage storage)
+  {
+    String extension = storage.getFullPath().getFileExtension();
+    if (!fSeekExtensions.contains(extension))
+      return false;
 
-        if ("jwc".equals(extension) && (fAcceptFlags & ACCEPT_COMPONENTS) == 0)
-            return false;
+    if ((fAcceptFlags & ACCEPT_ANY) != 0)
+      return true;
 
-        if ("application".equals(extension) && (fAcceptFlags & ACCEPT_APPLICATIONS) == 0)
-            return false;
+    if ("jwc".equals(extension) && (fAcceptFlags & ACCEPT_COMPONENTS) == 0)
+      return false;
 
-        if ("html".equals(extension) && (fAcceptFlags & ACCEPT_HTML) == 0)
-            return false;
+    if ("application".equals(extension) && (fAcceptFlags & ACCEPT_APPLICATIONS) == 0)
+      return false;
 
-        if ("library".equals(extension) && (fAcceptFlags & ACCEPT_LIBRARIES) == 0)
-            return false;
+    if ("html".equals(extension) && (fAcceptFlags & ACCEPT_HTML) == 0)
+      return false;
 
-        if ("page".equals(extension) && (fAcceptFlags & ACCEPT_PAGES) == 0)
-            return false;
+    if ("library".equals(extension) && (fAcceptFlags & ACCEPT_LIBRARIES) == 0)
+      return false;
 
-        if ("script".equals(extension) && (fAcceptFlags & ACCEPT_SCRIPT) == 0)
-            return false;
+    if ("page".equals(extension) && (fAcceptFlags & ACCEPT_PAGES) == 0)
+      return false;
 
-        return true;
-    }
+    if ("script".equals(extension) && (fAcceptFlags & ACCEPT_SCRIPT) == 0)
+      return false;
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.search.ISearchAcceptor#accept(java.lang.Object, org.eclipse.core.resources.IStorage)
-     */
-    public final boolean accept(Object parent, IStorage storage)
-    {
-        if (!acceptAsTapestry(storage))
-            return true; // continue the search
+    return true;
+  }
 
-        return acceptTapestry(parent, storage);
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.search.ISearchAcceptor#accept(java.lang.Object,
+   *      org.eclipse.core.resources.IStorage)
+   */
+  public final boolean accept(Object parent, IStorage storage)
+  {
+    if (!acceptAsTapestry(storage))
+      return true; // continue the search
 
-    /** return false to abort the search **/
-    public abstract boolean acceptTapestry(Object parent, IStorage storage);
+    return acceptTapestry(parent, storage);
+  }
+
+  /** return false to abort the search * */
+  public abstract boolean acceptTapestry(Object parent, IStorage storage);
 }

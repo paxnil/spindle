@@ -29,38 +29,39 @@ package com.iw.plugins.spindle.core.spec;
 import org.apache.tapestry.ILocation;
 
 /**
- *  Record <description> tags in a document
+ * Record <description>tags in a document
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginDescriptionDeclaration.java,v 1.1 2003/11/21 17:46:26
+ *          glongman Exp $
  */
 public class PluginDescriptionDeclaration extends BaseSpecification
 {
 
-    String fLang;
-    String fValue;
+  String fLang;
+  String fValue;
 
-    public PluginDescriptionDeclaration(String lang, String value, ILocation location)
-    {
-        super(BaseSpecification.DESCRIPTION_DECLARATION);
-        fLang = lang;
-        fValue = value;
-        setLocation(location);
-    }
+  public PluginDescriptionDeclaration(String lang, String value, ILocation location)
+  {
+    super(BaseSpecification.DESCRIPTION_DECLARATION);
+    fLang = lang;
+    fValue = value;
+    setLocation(location);
+  }
 
-    public String getIdentifier()
-    {
-        return (fLang != null ? fLang + " : " + fValue : fValue);
-    }
+  public String getIdentifier()
+  {
+    return (fLang != null ? fLang + " : " + fValue : fValue);
+  }
 
-    public String getLang()
-    {
-        return fLang;
-    }
+  public String getLang()
+  {
+    return fLang;
+  }
 
-    public String getValue()
-    {
-        return fValue;
-    }
+  public String getValue()
+  {
+    return fValue;
+  }
 
 }

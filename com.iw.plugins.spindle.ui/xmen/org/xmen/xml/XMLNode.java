@@ -104,7 +104,6 @@ public class XMLNode extends TypedPosition
   public String publicId; //valid only for the root node
   public String rootNodeId; //valid only for the root node
 
-
   /**
    * @param offset
    * @param length
@@ -474,7 +473,7 @@ public class XMLNode extends TypedPosition
       return candidate;
     return null;
   }
-  
+
   public XMLNode getPreviousSiblingTag(String allowed)
   {
     if (parent == null || parent.getType().equals("/") || allowed == null)
@@ -502,8 +501,7 @@ public class XMLNode extends TypedPosition
           return null;
         String type = result.getType();
         if (result.getParent() != parent
-            || (type.equals(ITypeConstants.TEXT)
-                || type.equals(ITypeConstants.COMMENT) || type
+            || (type.equals(ITypeConstants.TEXT) || type.equals(ITypeConstants.COMMENT) || type
                 .equals(ITypeConstants.DECL)))
         {
           continue;
@@ -1081,7 +1079,7 @@ public class XMLNode extends TypedPosition
     }
     return false;
   }
-  
+
   public String readPublicId()
   {
     String content = getContent();

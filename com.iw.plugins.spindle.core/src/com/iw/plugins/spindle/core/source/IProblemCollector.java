@@ -27,8 +27,7 @@
 package com.iw.plugins.spindle.core.source;
 
 /**
- *  Interface for collecting the problems found by Spindle parsers
- *  and Scanners.
+ * Interface for collecting the problems found by Spindle parsers and Scanners.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -36,14 +35,18 @@ package com.iw.plugins.spindle.core.source;
 public interface IProblemCollector
 {
 
-    public void addProblem(IProblem problem);
+  public void addProblem(IProblem problem);
 
-    public void addProblem(int severity, ISourceLocation location, String message, boolean isTemporary);
+  public void addProblem(
+      int severity,
+      ISourceLocation location,
+      String message,
+      boolean isTemporary);
 
-    public IProblem[] getProblems();
+  public IProblem[] getProblems();
 
-    public void beginCollecting();
+  public void beginCollecting();
 
-    public void endCollecting();
+  public void endCollecting();
 
 }

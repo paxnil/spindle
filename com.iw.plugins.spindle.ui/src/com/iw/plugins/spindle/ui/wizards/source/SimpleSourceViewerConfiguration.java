@@ -41,84 +41,87 @@ import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
- *  TODO Add Type comment
+ * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: SimpleSourceViewerConfiguration.java,v 1.1 2004/01/02 20:00:15
+ *          glongman Exp $
  */
 public class SimpleSourceViewerConfiguration extends SourceViewerConfiguration
 {
 
-    XMLTextTools fTextTools = UIPlugin.getDefault().getXMLTextTools();
-    IPreferenceStore fPreferenceStore = UIPlugin.getDefault().getPreferenceStore();
+  XMLTextTools fTextTools = UIPlugin.getDefault().getXMLTextTools();
+  IPreferenceStore fPreferenceStore = UIPlugin.getDefault().getPreferenceStore();
 
-    public SimpleSourceViewerConfiguration()
-    {
-        super();
-    }
+  public SimpleSourceViewerConfiguration()
+  {
+    super();
+  }
 
-    public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer)
-    {
-        PresentationReconciler reconciler = new PresentationReconciler();
+  public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer)
+  {
+    PresentationReconciler reconciler = new PresentationReconciler();
 
-        DefaultDamagerRepairer dr;
+    DefaultDamagerRepairer dr;
 
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLTextScanner());
-        reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
-        reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLTextScanner());
+    reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
+    reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
 
-        dr = new DefaultDamagerRepairer(fTextTools.getDTDTextScanner());
-        reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL);
-        reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL);
+    dr = new DefaultDamagerRepairer(fTextTools.getDTDTextScanner());
+    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL);
+    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL);
 
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLPIScanner());
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLPIScanner());
 
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_PI);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_PI);
-        reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
-        reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_PI);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_PI);
+    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
+    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
 
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLCommentScanner());
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLCommentScanner());
 
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_COMMENT);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_COMMENT);
-        reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
-        reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_COMMENT);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_COMMENT);
+    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
+    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
 
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLDeclScanner());
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLDeclScanner());
 
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_DECL);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_DECL);
-        reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
-        reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_DECL);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_DECL);
+    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
+    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
 
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLTagScanner());
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLTagScanner());
 
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_TAG);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_TAG);
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_TAG);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_TAG);
 
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
 
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLAttributeScanner());
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLAttributeScanner());
 
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
 
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLCDATAScanner());
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLCDATAScanner());
 
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_CDATA);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_CDATA);
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_CDATA);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_CDATA);
 
-        return reconciler;
-    }
+    return reconciler;
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTabWidth(org.eclipse.jface.text.source.ISourceViewer)
-     */
-    public int getTabWidth(ISourceViewer sourceViewer)
-    {
-        return fPreferenceStore.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTabWidth(org.eclipse.jface.text.source.ISourceViewer)
+   */
+  public int getTabWidth(ISourceViewer sourceViewer)
+  {
+    return fPreferenceStore.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+  }
 
 }

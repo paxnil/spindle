@@ -42,59 +42,63 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
 /**
- * Base class for Template completion assist. Basicly here to set a flag if XHTML
- * completions have been requested via the property page.
+ * Base class for Template completion assist. Basicly here to set a flag if
+ * XHTML completions have been requested via the property page.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: TemplateContentAssistProcessor.java,v 1.1.2.2 2004/06/22
+ *          12:23:59 glongman Exp $
  */
 public abstract class TemplateContentAssistProcessor extends ContentAssistProcessor
 {
 
-    private boolean fHasHTMLExtension;
-    public TemplateContentAssistProcessor(Editor editor)
+  private boolean fHasHTMLExtension;
+  public TemplateContentAssistProcessor(Editor editor)
+  {
+    super(editor);
+    IEditorInput input = editor.getEditorInput();
+    IStorage storage = (IStorage) input.getAdapter(IStorage.class);
+    fHasHTMLExtension = storage != null && storage.getName().endsWith(".html");
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect(org.eclipse.jface.text.IDocument)
+   */
+  protected void init(IDocument document) throws IllegalStateException
+  {
+    fDTD = null;
+    // TODO remove super.connect(document);
+    IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+    if (fHasHTMLExtension)
     {
-        super(editor);
-        IEditorInput input = editor.getEditorInput();
-        IStorage storage = (IStorage) input.getAdapter(IStorage.class);
-        fHasHTMLExtension = storage != null && storage.getName().endsWith(".html");
+      String dtdString = store
+          .getString(PreferenceConstants.TEMPLATE_EDITOR_HTML_SHOW_XHTML);
+      if (dtdString.equals(TemplateEditor.XHTML_NONE_LABEL))
+        return;
+
+      if (dtdString.equals(TemplateEditor.XHTML_STRICT_LABEL))
+      {
+        fDTD = TemplateEditor.XHTML_STRICT;
+      } else if (dtdString.equals(TemplateEditor.XHTML_TRANSITIONAL_LABEL))
+      {
+        fDTD = TemplateEditor.XHTML_TRANSITIONAL;
+      } else if (dtdString.equals(TemplateEditor.XHTML_FRAMES_LABEL))
+      {
+        fDTD = TemplateEditor.XHTML_FRAMESET;
+      }
+
     }
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect(org.eclipse.jface.text.IDocument)
-     */
-    protected void init(IDocument document) throws IllegalStateException
-    {
-        fDTD = null;
-// TODO remove       super.connect(document);
-        IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-        if (fHasHTMLExtension)
-        {
-            String dtdString = store.getString(PreferenceConstants.TEMPLATE_EDITOR_HTML_SHOW_XHTML);
-            if (dtdString.equals(TemplateEditor.XHTML_NONE_LABEL))
-                return;
+  protected String getJwcid(Map attributeMap)
+  {
+    XMLNode jwcidArt = (XMLNode) attributeMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
+    if (jwcidArt != null)
+      return jwcidArt.getAttributeValue();
 
-            if (dtdString.equals(TemplateEditor.XHTML_STRICT_LABEL))
-            {
-                fDTD = TemplateEditor.XHTML_STRICT;
-            } else if (dtdString.equals(TemplateEditor.XHTML_TRANSITIONAL_LABEL))
-            {
-                fDTD = TemplateEditor.XHTML_TRANSITIONAL;
-            } else if (dtdString.equals(TemplateEditor.XHTML_FRAMES_LABEL))
-            {
-                fDTD = TemplateEditor.XHTML_FRAMESET;
-            }
-
-        }
-    }
-
-    protected String getJwcid(Map attributeMap)
-    {
-        XMLNode jwcidArt = (XMLNode) attributeMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
-        if (jwcidArt != null)
-            return jwcidArt.getAttributeValue();
-
-        return null;
-    }
+    return null;
+  }
 
 }

@@ -54,7 +54,8 @@ import com.iw.plugins.spindle.core.util.Assert;
  * Proposal that gets it contents from the user!
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ChooseTypeProposal.java,v 1.2.2.2 2004/06/22 12:23:19 glongman
+ *          Exp $
  */
 public class ChooseTypeProposal implements ICompletionProposal
 {
@@ -216,7 +217,8 @@ public class ChooseTypeProposal implements ICompletionProposal
    */
   public String getDisplayString()
   {
-    return "Choose Type Dialog" + (fHierarchyRoot != null ? " implements ("+fHierarchyRoot+")": "");
+    return "Choose Type Dialog"
+        + (fHierarchyRoot != null ? " implements (" + fHierarchyRoot + ")" : "");
   }
 
   /*

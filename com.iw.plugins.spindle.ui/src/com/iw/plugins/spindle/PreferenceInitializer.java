@@ -41,9 +41,12 @@ import com.iw.plugins.spindle.ui.wizards.NewTapComponentWizardPage;
  * Preference Initializer for the Spindle UI
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PreferenceInitializer.java,v 1.1.2.1 2004/06/10 16:48:21
+ *          glongman Exp $
  */
-public class PreferenceInitializer extends AbstractPreferenceInitializer implements PreferenceConstants
+public class PreferenceInitializer extends AbstractPreferenceInitializer
+    implements
+      PreferenceConstants
 {
 
   public PreferenceInitializer()
@@ -124,10 +127,19 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer impleme
     //        store.setDefault(PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER,
     // false);
 
-    store.setDefault(PreferenceConstants.P_HTML_TO_GENERATE, UIPlugin.getString("TAPESTRY.genHTMLSource"));
+    store.setDefault(PreferenceConstants.P_HTML_TO_GENERATE, UIPlugin
+        .getString("TAPESTRY.genHTMLSource"));
 
-    setDefaultTextStyleInfo(store, ITemplateSyntaxConstants.TAPESTRY_ATT_NAME, "0,64,128", ITextStylePreferences.STYLE_NORMAL);
-    setDefaultTextStyleInfo(store, ITemplateSyntaxConstants.TAPESTRY_ATT_VALUE, "0,64,128", ITextStylePreferences.STYLE_BOLD);
+    setDefaultTextStyleInfo(
+        store,
+        ITemplateSyntaxConstants.TAPESTRY_ATT_NAME,
+        "0,64,128",
+        ITextStylePreferences.STYLE_NORMAL);
+    setDefaultTextStyleInfo(
+        store,
+        ITemplateSyntaxConstants.TAPESTRY_ATT_VALUE,
+        "0,64,128",
+        ITextStylePreferences.STYLE_BOLD);
 
     store.setDefault(EDITOR_DISPLAY_TAB_WIDTH, 4);
     store.setDefault(EDITOR_USE_SMART_INDENT, true);
@@ -138,7 +150,11 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer impleme
 
   }
 
-  private void setDefaultTextStyleInfo(IPreferenceStore store, String constant, String color, String style)
+  private void setDefaultTextStyleInfo(
+      IPreferenceStore store,
+      String constant,
+      String color,
+      String style)
   {
     store.setDefault(constant + ITextStylePreferences.SUFFIX_FOREGROUND, color);
     store.setDefault(constant + ITextStylePreferences.SUFFIX_STYLE, style);

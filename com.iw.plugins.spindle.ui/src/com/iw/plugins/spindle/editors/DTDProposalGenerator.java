@@ -90,10 +90,8 @@ public class DTDProposalGenerator
    * 
    * Results are cached
    * 
-   * @param dtd
-   *          the DTD we are basing the lookup on
-   * @param elementName
-   *          the element whose children we are seeking.
+   * @param dtd the DTD we are basing the lookup on
+   * @param elementName the element whose children we are seeking.
    * @return a String containing the child names, or null if the elementName is
    *         not a valid element in the DTDs
    */
@@ -151,33 +149,37 @@ public class DTDProposalGenerator
    * 
    * Results are cached.
    * 
-   * @param dtd
-   *          the DTD in use by the document
-   * @param parentElement
-   *          the name of the element that is parent
-   * @param lastChild
-   *          the name of the last child of the parent before the place we are
-   *          interested
-   * @param sort
-   *          if true place the last child at the front of a sorted list of
+   * @param dtd the DTD in use by the document
+   * @param parentElement the name of the element that is parent
+   * @param lastChild the name of the last child of the parent before the place
+   *          we are interested
+   * @param sort if true place the last child at the front of a sorted list of
    *          elementNames
    * @return list of String
    */
-  public static List getAllowedChildren(DTD dtd, String parentElement, String lastChild, boolean sort)
+  public static List getAllowedChildren(
+      DTD dtd,
+      String parentElement,
+      String lastChild,
+      boolean sort)
   {
     Assert.isLegal(dtd != null);
 
     String useParent = parentElement.toLowerCase();
     String useChild = lastChild == null ? "~NULL_CHILD" : lastChild.toLowerCase();
-    MultiKey key = new MultiKey(new Object[]{dtd, useParent, useChild, new Boolean(sort)}, false);
+    MultiKey key = new MultiKey(
+        new Object[]{dtd, useParent, useChild, new Boolean(sort)},
+        false);
 
     List result = (List) DTDInfoMap.get(key);
 
     if (result == null)
     {
 
-      MultiKey nonSorted = new MultiKey(new Object[]{dtd, useParent, useChild, new Boolean(false)}, false);
-      MultiKey sorted = new MultiKey(new Object[]{dtd, useParent, useChild, new Boolean(true)}, false);
+      MultiKey nonSorted = new MultiKey(new Object[]{dtd, useParent, useChild,
+          new Boolean(false)}, false);
+      MultiKey sorted = new MultiKey(new Object[]{dtd, useParent, useChild,
+          new Boolean(true)}, false);
       String allowed = getAllowedElements(dtd, useParent);
       if (allowed == null || allowed.equals("EMPTY") || allowed.equals("(PCDATA)"))
       {
@@ -275,7 +277,8 @@ public class DTDProposalGenerator
     Assert.isLegal(elementName != null);
 
     String useName = elementName.toLowerCase();
-    MultiKey defaultKey = new MultiKey(new Object[]{dtd, useName, DEFAULT_NEW_ELEMENT_PROPOSAL}, false);
+    MultiKey defaultKey = new MultiKey(new Object[]{dtd, useName,
+        DEFAULT_NEW_ELEMENT_PROPOSAL}, false);
     Object defaultProposal = DTDInfoMap.get(defaultKey);
     if (defaultProposal == null)
     {
@@ -288,7 +291,8 @@ public class DTDProposalGenerator
     ArrayList result = new ArrayList();
     result.add(defaultProposal);
 
-    MultiKey optionalKey = new MultiKey(new Object[]{dtd, useName, OPTIONAL_NEW_ELEMENT_PROPOSAL}, false);
+    MultiKey optionalKey = new MultiKey(new Object[]{dtd, useName,
+        OPTIONAL_NEW_ELEMENT_PROPOSAL}, false);
     Object optionalProposal = DTDInfoMap.get(optionalKey);
 
     if (optionalProposal != null)
@@ -357,7 +361,14 @@ public class DTDProposalGenerator
       nonEmptyOption = prelude + "></" + elementName + ">";
     }
 
-    emptyProposal = new CompletionProposal(emptyOption, -1, -1, new Point(offset, 0), null, elementName + " (empty)", null,
+    emptyProposal = new CompletionProposal(
+        emptyOption,
+        -1,
+        -1,
+        new Point(offset, 0),
+        null,
+        elementName + " (empty)",
+        null,
         commentString != null && commentString.length() > 0 ? commentString : emptyOption);
 
     if (nonEmptyOption != null)
@@ -365,8 +376,10 @@ public class DTDProposalGenerator
       if (!hasAttibutes)
         offset -= 1;
 
-      nonEmptyProposal = new CompletionProposal(nonEmptyOption, -1, -1, new Point(offset, 0), null, elementName, null,
-          commentString != null && commentString.length() > 0 ? commentString : nonEmptyOption);
+      nonEmptyProposal = new CompletionProposal(nonEmptyOption, -1, -1, new Point(
+          offset,
+          0), null, elementName, null, commentString != null
+          && commentString.length() > 0 ? commentString : nonEmptyOption);
     }
 
     CompletionProposal defaultProposal = emptyProposal;
@@ -375,13 +388,16 @@ public class DTDProposalGenerator
     if (isTapestryDTD(dtd))
     {
       if (nonEmptyProposal != null
-          && (elementName.equals("application") || elementName.equals("library") || elementName.equals("component-specification")
-              || elementName.equals("page-specification") || elementName.equals("description") || elementName.equals("extension")))
+          && (elementName.equals("application") || elementName.equals("library")
+              || elementName.equals("component-specification")
+              || elementName.equals("page-specification")
+              || elementName.equals("description") || elementName.equals("extension")))
       {
         // non empty only!
         defaultProposal = nonEmptyProposal;
         optionalProposal = null;
-      } else if (nonEmptyProposal != null && (elementName.equals("component") || elementName.equals("listener-binding")))
+      } else if (nonEmptyProposal != null
+          && (elementName.equals("component") || elementName.equals("listener-binding")))
       { // non empty first!
         defaultProposal = nonEmptyProposal;
         optionalProposal = emptyProposal;
@@ -408,9 +424,11 @@ public class DTDProposalGenerator
 
     }
 
-    MultiKey defaultKey = new MultiKey(new Object[]{dtd, elementName, DEFAULT_NEW_ELEMENT_PROPOSAL}, false);
+    MultiKey defaultKey = new MultiKey(new Object[]{dtd, elementName,
+        DEFAULT_NEW_ELEMENT_PROPOSAL}, false);
     DTDInfoMap.put(defaultKey, defaultProposal);
-    MultiKey optionalKey = new MultiKey(new Object[]{dtd, elementName, OPTIONAL_NEW_ELEMENT_PROPOSAL}, false);
+    MultiKey optionalKey = new MultiKey(new Object[]{dtd, elementName,
+        OPTIONAL_NEW_ELEMENT_PROPOSAL}, false);
     DTDInfoMap.put(optionalKey, optionalProposal);
   }
 
@@ -503,16 +521,21 @@ public class DTDProposalGenerator
             {
               allowedValues = null;
             }
-            defaultKey = new MultiKey(new Object[]{dtd, elementName, attrName, ELEMENT_ATTRIBUTE_DEFAULT_VALUE}, false);
+            defaultKey = new MultiKey(new Object[]{dtd, elementName, attrName,
+                ELEMENT_ATTRIBUTE_DEFAULT_VALUE}, false);
             DTDInfoMap.put(defaultKey, defaultValue != null ? defaultValue : "");
-            allowedValuesKey = new MultiKey(new Object[]{dtd, elementName, attrName, ELEMENT_ATTRIBUTE_ALLOWED_VALUES}, false);
-            DTDInfoMap.put(allowedValuesKey, (allowedValues == null || allowedValues.isEmpty())
-                ? Collections.EMPTY_LIST
-                : Collections.unmodifiableList(allowedValues));
+            allowedValuesKey = new MultiKey(new Object[]{dtd, elementName, attrName,
+                ELEMENT_ATTRIBUTE_ALLOWED_VALUES}, false);
+            DTDInfoMap.put(allowedValuesKey, (allowedValues == null || allowedValues
+                .isEmpty()) ? Collections.EMPTY_LIST : Collections
+                .unmodifiableList(allowedValues));
           }
-          DTDInfoMap.put(key, attributes.isEmpty() ? Collections.EMPTY_LIST : Collections.unmodifiableList(attributes));
-          MultiKey requiredKey = new MultiKey(new Object[]{dtd, elementName, ELEMENT_REQUIRED_ATTRIBUTES}, false);
-          DTDInfoMap.put(requiredKey, required.isEmpty() ? Collections.EMPTY_LIST : Collections.unmodifiableList(required));
+          DTDInfoMap.put(key, attributes.isEmpty() ? Collections.EMPTY_LIST : Collections
+              .unmodifiableList(attributes));
+          MultiKey requiredKey = new MultiKey(new Object[]{dtd, elementName,
+              ELEMENT_REQUIRED_ATTRIBUTES}, false);
+          DTDInfoMap.put(requiredKey, required.isEmpty()
+              ? Collections.EMPTY_LIST : Collections.unmodifiableList(required));
         }
       }
     }
@@ -564,12 +587,19 @@ public class DTDProposalGenerator
   //        }
   //    }
 
-  public static String getTapestryDefaultValue(DTD dtd, String elementName, String attrName)
+  public static String getTapestryDefaultValue(
+      DTD dtd,
+      String elementName,
+      String attrName)
   {
-    return internalGetTapestryDefaultValue(dtd, elementName.toLowerCase(), attrName.toLowerCase());
+    return internalGetTapestryDefaultValue(dtd, elementName.toLowerCase(), attrName
+        .toLowerCase());
   }
 
-  private static String internalGetTapestryDefaultValue(DTD dtd, String elementName, String attrName)
+  private static String internalGetTapestryDefaultValue(
+      DTD dtd,
+      String elementName,
+      String attrName)
   {
     String result = null;
     if (isTapestryDTD(dtd))
@@ -607,7 +637,8 @@ public class DTDProposalGenerator
     if (dtd == null)
       return Collections.EMPTY_LIST;
 
-    MultiKey key = new MultiKey(new Object[]{dtd, elementName, ELEMENT_REQUIRED_ATTRIBUTES}, false);
+    MultiKey key = new MultiKey(new Object[]{dtd, elementName,
+        ELEMENT_REQUIRED_ATTRIBUTES}, false);
     List result = (List) DTDInfoMap.get(key);
     if (result == null)
     {
@@ -617,17 +648,25 @@ public class DTDProposalGenerator
     return result;
   }
 
-  public static String getDefaultAttributeValue(DTD dtd, String elementName, String attrName)
+  public static String getDefaultAttributeValue(
+      DTD dtd,
+      String elementName,
+      String attrName)
   {
-    return internalGetDefaultAttributeValue(dtd, elementName.toLowerCase(), attrName.toLowerCase());
+    return internalGetDefaultAttributeValue(dtd, elementName.toLowerCase(), attrName
+        .toLowerCase());
   }
 
-  private static String internalGetDefaultAttributeValue(DTD dtd, String elementName, String attrName)
+  private static String internalGetDefaultAttributeValue(
+      DTD dtd,
+      String elementName,
+      String attrName)
   {
     if (dtd == null)
       return null;
 
-    MultiKey key = new MultiKey(new Object[]{dtd, elementName, attrName, ELEMENT_ATTRIBUTE_DEFAULT_VALUE}, false);
+    MultiKey key = new MultiKey(new Object[]{dtd, elementName, attrName,
+        ELEMENT_ATTRIBUTE_DEFAULT_VALUE}, false);
     String result = (String) DTDInfoMap.get(key);
     if (result == null)
     {
@@ -637,16 +676,24 @@ public class DTDProposalGenerator
     return result;
   }
 
-  public static List getAllowedAttributeValues(DTD dtd, String elementName, String attrName)
+  public static List getAllowedAttributeValues(
+      DTD dtd,
+      String elementName,
+      String attrName)
   {
-    return internalGetAllowedAttributeValues(dtd, elementName.toLowerCase(), attrName.toLowerCase());
+    return internalGetAllowedAttributeValues(dtd, elementName.toLowerCase(), attrName
+        .toLowerCase());
   }
 
-  private static List internalGetAllowedAttributeValues(DTD dtd, String elementName, String attrName)
+  private static List internalGetAllowedAttributeValues(
+      DTD dtd,
+      String elementName,
+      String attrName)
   {
     if (dtd == null)
       return Collections.EMPTY_LIST;
-    MultiKey key = new MultiKey(new Object[]{dtd, elementName, attrName, ELEMENT_ATTRIBUTE_ALLOWED_VALUES}, false);
+    MultiKey key = new MultiKey(new Object[]{dtd, elementName, attrName,
+        ELEMENT_ATTRIBUTE_ALLOWED_VALUES}, false);
     List result = (List) DTDInfoMap.get(key);
     if (result == null)
     {
@@ -679,7 +726,7 @@ public class DTDProposalGenerator
         String parentName = parent.getName();
         if (parentName != null)
         {
-          String parentAllowedContent = getAllowedElements(dtd, parentName); 
+          String parentAllowedContent = getAllowedElements(dtd, parentName);
           if (parentAllowedContent != null)
           {
             String sibName = null;

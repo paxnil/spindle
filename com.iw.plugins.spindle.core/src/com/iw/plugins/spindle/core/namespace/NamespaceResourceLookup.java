@@ -39,57 +39,59 @@ import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 
 /**
- *  A Lookup that bases its searches on the namespace it is configured with.
- *  Does not take into account any sub namespaces.
+ * A Lookup that bases its searches on the namespace it is configured with. Does
+ * not take into account any sub namespaces.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: NamespaceResourceLookup.java,v 1.7 2003/11/17 18:47:04 glongman
+ *          Exp $
  */
 public class NamespaceResourceLookup
 {
 
-    private List fLocations;
+  private List fLocations;
 
-    public void configure(PluginLibrarySpecification specification)
+  public void configure(PluginLibrarySpecification specification)
+  {
+    fLocations = new ArrayList();
+    fLocations.add(specification.getSpecificationLocation());
+  }
+
+  public void configure(
+      PluginApplicationSpecification specification,
+      IResourceWorkspaceLocation contextRoot,
+      String servletName)
+  {
+    fLocations = new ArrayList();
+    IResourceWorkspaceLocation base = (IResourceWorkspaceLocation) specification
+        .getSpecificationLocation();
+
+    fLocations.add(base);
+    if (servletName != null)
     {
-        fLocations = new ArrayList();
-        fLocations.add(specification.getSpecificationLocation());
+      fLocations.add(contextRoot.getRelativeLocation("/WEB-INF/" + servletName));
     }
+    fLocations.add(contextRoot.getRelativeLocation("/WEB-INF/"));
+    fLocations.add(contextRoot);
+  }
 
-    public void configure(
-        PluginApplicationSpecification specification,
-        IResourceWorkspaceLocation contextRoot,
-        String servletName)
+  public IResourceWorkspaceLocation[] lookup(IResourceLocationAcceptor acceptor)
+  {
+    if (fLocations == null)
+      throw new Error("not initialized");
+
+    try
     {
-        fLocations = new ArrayList();
-        IResourceWorkspaceLocation base = (IResourceWorkspaceLocation) specification.getSpecificationLocation();
-
-        fLocations.add(base);
-        if (servletName != null)
-        {
-            fLocations.add(contextRoot.getRelativeLocation("/WEB-INF/" + servletName));
-        }
-        fLocations.add(contextRoot.getRelativeLocation("/WEB-INF/"));
-        fLocations.add(contextRoot);
-    }
-
-    public IResourceWorkspaceLocation[] lookup(IResourceLocationAcceptor acceptor)
+      for (Iterator iter = fLocations.iterator(); iter.hasNext();)
+      {
+        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
+        location.lookup(acceptor);
+      }
+    } catch (CoreException e)
     {
-        if (fLocations == null)
-            throw new Error("not initialized");
-
-        try
-        {
-            for (Iterator iter = fLocations.iterator(); iter.hasNext();)
-            {
-                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
-                location.lookup(acceptor);
-            }
-        } catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
-        return acceptor.getResults();
+      TapestryCore.log(e);
     }
+    return acceptor.getResults();
+  }
 
 }

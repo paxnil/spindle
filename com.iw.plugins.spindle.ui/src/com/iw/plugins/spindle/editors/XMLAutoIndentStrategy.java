@@ -56,8 +56,9 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
   private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
   private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
 
-//  private XMLDocumentPartitioner fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
-//      XMLDocumentPartitioner.TYPES);
+  //  private XMLDocumentPartitioner fPartitioner = new
+  // XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
+  //      XMLDocumentPartitioner.TYPES);
 
   private TypedPosition[] fTypedPositions;
   private IPreferenceStore fPreferences;
@@ -79,7 +80,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
    */
   public void customizeDocumentCommand(IDocument document, DocumentCommand command)
   {
-    if (command.length == 0 && command.text != null && containsOnlyDelimiter(document, command.text))
+    if (command.length == 0 && command.text != null
+        && containsOnlyDelimiter(document, command.text))
     {
       int docLength = document.getLength();
       if (command.offset == -1 || docLength == 0)
@@ -100,7 +102,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
         } else
         {
           String type = artifact.getType();
-          boolean inside = offset <= artifact.getOffset() && offset < artifact.getOffset() + artifact.getLength();
+          boolean inside = offset <= artifact.getOffset()
+              && offset < artifact.getOffset() + artifact.getLength();
 
           String newType = null;
           if (inside && type != ITypeConstants.TEXT)
@@ -142,11 +145,11 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
       {
         UIPlugin.log(e);
         super.customizeDocumentCommand(document, command);
-      } 
-//      finally
-//      {
-//        disconnect();
-//      }
+      }
+      //      finally
+      //      {
+      //        disconnect();
+      //      }
     }
   }
 
@@ -183,7 +186,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
     return false;
   }
 
-  private void collectPositions(IDocument d) throws BadLocationException, BadPositionCategoryException
+  private void collectPositions(IDocument d) throws BadLocationException,
+      BadPositionCategoryException
   {
     Position[] pos = d.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
     Arrays.sort(pos, XMLNode.COMPARATOR);
@@ -191,24 +195,22 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
     System.arraycopy(pos, 0, fTypedPositions, 0, pos.length);
   }
 
-//  private void disconnect()
-//  {
-////    try
-////    {
-////      fPartitioner.disconnect();
-////    } catch (Exception e)
-////    {
-////      UIPlugin.log(e);
-////    }
-//  }
+  //  private void disconnect()
+  //  {
+  //// try
+  //// {
+  //// fPartitioner.disconnect();
+  //// } catch (Exception e)
+  //// {
+  //// UIPlugin.log(e);
+  //// }
+  //  }
 
   /**
    * Returns the indentation of the line of the given offset.
    * 
-   * @param document
-   *          the document
-   * @param offset
-   *          the offset
+   * @param document the document
+   * @param offset the offset
    * @return the indentation of the line of the offset
    */
   private int getIndent(IDocument document, int offset)
@@ -264,10 +266,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
    * write a given number of whitespace columns, using tabs or spaces depending
    * on preference
    * 
-   * @param indentCount
-   *          the number of indents to write
-   * @param buffer
-   *          the buffer to write to
+   * @param indentCount the number of indents to write
+   * @param buffer the buffer to write to
    * @return the number of characters inserted into the buffer
    */
   private int writeIndent(int indentCount, StringBuffer buffer, boolean useTabsToIndent)

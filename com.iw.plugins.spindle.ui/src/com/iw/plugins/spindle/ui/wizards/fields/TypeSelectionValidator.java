@@ -36,78 +36,79 @@ import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 
 /**
- * an ISelectionValidator that validates the
- * type of the elements.
+ * an ISelectionValidator that validates the type of the elements.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: TypeSelectionValidator.java,v 1.1 2003/10/20 20:19:13 glongman
+ *          Exp $
  */
 public class TypeSelectionValidator implements ISelectionStatusValidator
 {
 
-    private Class[] fAcceptedTypes;
-    private boolean fAllowMultipleSelection;
-    private Collection fRejected;
+  private Class[] fAcceptedTypes;
+  private boolean fAllowMultipleSelection;
+  private Collection fRejected;
 
-    private IStatus fError = new SpindleStatus(IStatus.ERROR, "");
-    private IStatus fOK = new SpindleStatus();
+  private IStatus fError = new SpindleStatus(IStatus.ERROR, "");
+  private IStatus fOK = new SpindleStatus();
 
-    public TypeSelectionValidator(Class[] acceptedTypes, boolean allowMultipleSelection)
+  public TypeSelectionValidator(Class[] acceptedTypes, boolean allowMultipleSelection)
+  {
+    this(acceptedTypes, allowMultipleSelection, null);
+  }
+
+  public TypeSelectionValidator(Class[] acceptedTypes, boolean allowMultipleSelection,
+      List rejectedElements)
+  {
+    Assert.isNotNull(acceptedTypes);
+    fAcceptedTypes = acceptedTypes;
+    fAllowMultipleSelection = allowMultipleSelection;
+    fRejected = rejectedElements;
+  }
+
+  /*
+   * @see org.eclipse.ui.dialogs.ISelectionValidator#isValid(java.lang.Object)
+   */
+  public IStatus validate(Object[] elements)
+  {
+    if (isValid(elements))
+      return fOK;
+
+    return fError;
+  }
+
+  private boolean accept(Object o)
+  {
+    for (int i = 0; i < fAcceptedTypes.length; i++)
     {
-        this(acceptedTypes, allowMultipleSelection, null);
-    }
-
-    public TypeSelectionValidator(Class[] acceptedTypes, boolean allowMultipleSelection, List rejectedElements)
-    {
-        Assert.isNotNull(acceptedTypes);
-        fAcceptedTypes = acceptedTypes;
-        fAllowMultipleSelection = allowMultipleSelection;
-        fRejected = rejectedElements;
-    }
-
-    /*
-     * @see org.eclipse.ui.dialogs.ISelectionValidator#isValid(java.lang.Object)
-     */
-    public IStatus validate(Object[] elements)
-    {
-        if (isValid(elements))
-            return fOK;
-
-        return fError;
-    }
-
-    private boolean accept(Object o)
-    {
-        for (int i = 0; i < fAcceptedTypes.length; i++)
-        {
-            if (fAcceptedTypes[i].isInstance(o))
-                return true;
-
-        }
-        return false;
-    }
-
-    private boolean reject(Object elem)
-    {
-        return (fRejected != null) && fRejected.contains(elem);
-    }
-
-    private boolean isValid(Object[] selection)
-    {
-        if (selection.length == 0)
-            return false;
-
-        if (!fAllowMultipleSelection && selection.length != 1)
-            return false;
-
-        for (int i = 0; i < selection.length; i++)
-        {
-            Object o = selection[i];
-            if (!accept(o) || reject(o))
-                return false;
-
-        }
+      if (fAcceptedTypes[i].isInstance(o))
         return true;
+
     }
+    return false;
+  }
+
+  private boolean reject(Object elem)
+  {
+    return (fRejected != null) && fRejected.contains(elem);
+  }
+
+  private boolean isValid(Object[] selection)
+  {
+    if (selection.length == 0)
+      return false;
+
+    if (!fAllowMultipleSelection && selection.length != 1)
+      return false;
+
+    for (int i = 0; i < selection.length; i++)
+    {
+      Object o = selection[i];
+      if (!accept(o) || reject(o))
+        return false;
+
+    }
+    return true;
+  }
 
 }

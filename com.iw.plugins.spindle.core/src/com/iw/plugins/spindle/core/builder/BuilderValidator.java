@@ -31,9 +31,9 @@ import org.eclipse.core.runtime.CoreException;
 import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
 
 /**
- *  A validator that knows about the project
- *  <p>
- *  i.e. it can resolve type names in the project buildpath
+ * A validator that knows about the project
+ * <p>
+ * i.e. it can resolve type names in the project buildpath
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -41,11 +41,11 @@ import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
 public class BuilderValidator extends SpecificationValidator
 {
 
-    public BuilderValidator(Build build, SpecificationValidator.TypeFinder finder, boolean performDeferredValidations)
-        throws CoreException
-    {
-        super(build.fTapestryBuilder.fTapestryProject, performDeferredValidations);
-        setTypeFinder(finder);
-    }
+  public BuilderValidator(Build build, SpecificationValidator.TypeFinder finder,
+      boolean performDeferredValidations) throws CoreException
+  {
+    super(build.fTapestryBuilder.fTapestryProject, performDeferredValidations);
+    setTypeFinder(finder);
+  }
 
 }

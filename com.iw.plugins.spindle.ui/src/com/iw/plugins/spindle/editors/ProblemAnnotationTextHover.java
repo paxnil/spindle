@@ -39,188 +39,190 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 /**
- *  Text Hover for Editor annotations
+ * Text Hover for Editor annotations
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ProblemAnnotationTextHover.java,v 1.2 2003/10/29 12:33:58
+ *          glongman Exp $
  */
 public class ProblemAnnotationTextHover extends DefaultTextHover
 {
 
+  public ProblemAnnotationTextHover(Editor editor)
+  {
+    super(editor);
+  }
 
-    public ProblemAnnotationTextHover(Editor editor)
+  /*
+   * Formats a message as HTML text.
+   */
+  private String formatMessage(String message)
+  {
+    return message;
+  }
+
+  /*
+   * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
+   */
+  public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion)
+  {
+    if (fEditor == null)
+      return null;
+
+    String result = null;
+
+    IDocumentProvider provider = fEditor.getDocumentProvider();
+    IAnnotationModel model = provider.getAnnotationModel(fEditor.getEditorInput());
+
+    if (model != null)
     {
-        super(editor);
+      Iterator e = new AnnotationIterator(model, true);
+      while (e.hasNext())
+      {
+        Annotation a = (Annotation) e.next();
+        Position p = model.getPosition(a);
+        if (p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength()))
+        {
+          String msg = ((IProblemAnnotation) a).getMessage();
+          if (msg != null && msg.trim().length() > 0)
+            result = formatMessage(msg);
+        }
+      }
+    }
+    if (result == null)
+      result = super.getHoverInfo(textViewer, hoverRegion);
+    return result;
+  }
+
+  //    /* (non-Javadoc)
+  //     * @see
+  // org.eclipse.jface.text.ITextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer,
+  // int)
+  //     */
+  //    public IRegion getHoverRegion(ITextViewer textViewer, int offset)
+  //    {
+  //        return findWord(textViewer.getDocument(), offset);
+  //    }
+
+  private IRegion findWord(IDocument document, int offset)
+  {
+
+    int start = -1;
+    int end = -1;
+
+    try
+    {
+
+      int pos = offset;
+      char c;
+
+      while (pos >= 0)
+      {
+        c = document.getChar(pos);
+        if (!Character.isJavaIdentifierPart(c))
+          break;
+        --pos;
+      }
+
+      start = pos;
+
+      pos = offset;
+      int length = document.getLength();
+
+      while (pos < length)
+      {
+        c = document.getChar(pos);
+        if (!Character.isJavaIdentifierPart(c))
+          break;
+        ++pos;
+      }
+
+      end = pos;
+
+    } catch (BadLocationException x)
+    {}
+
+    if (start > -1 && end > -1)
+    {
+      if (start == offset && end == offset)
+        return new Region(offset, 0);
+      else if (start == offset)
+        return new Region(start, end - start);
+      else
+        return new Region(start + 1, end - start - 1);
+    }
+
+    return null;
+  }
+
+  class AnnotationIterator implements Iterator
+  {
+
+    private Iterator fIterator;
+    private IProblemAnnotation fNext;
+    private boolean fSkipIrrelevants;
+
+    public AnnotationIterator(IAnnotationModel model, boolean skipIrrelevants)
+    {
+      fIterator = model.getAnnotationIterator();
+      fSkipIrrelevants = skipIrrelevants;
+      skip();
+    }
+
+    private void skip()
+    {
+      while (fIterator.hasNext())
+      {
+        Object next = fIterator.next();
+        if (next instanceof IProblemAnnotation)
+        {
+          IProblemAnnotation a = (IProblemAnnotation) next;
+          if (fSkipIrrelevants)
+          {
+            if (a.isRelevant())
+            {
+              fNext = a;
+              return;
+            }
+          } else
+          {
+            fNext = a;
+            return;
+          }
+        }
+      }
+      fNext = null;
     }
 
     /*
-     * Formats a message as HTML text.
+     * @see Iterator#hasNext()
      */
-    private String formatMessage(String message)
+    public boolean hasNext()
     {
-        return message;
+      return fNext != null;
     }
 
     /*
-     * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
+     * @see Iterator#next()
      */
-    public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion)
+    public Object next()
     {
-        if (fEditor == null)
-            return null;
-
-        String result = null;
-
-        IDocumentProvider provider = fEditor.getDocumentProvider();
-        IAnnotationModel model = provider.getAnnotationModel(fEditor.getEditorInput());
-
-        if (model != null)
-        {
-            Iterator e = new AnnotationIterator(model, true);
-            while (e.hasNext())
-            {
-                Annotation a = (Annotation) e.next();
-                Position p = model.getPosition(a);
-                if (p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength()))
-                {
-                    String msg = ((IProblemAnnotation) a).getMessage();
-                    if (msg != null && msg.trim().length() > 0)
-                        result = formatMessage(msg);
-                }
-            }
-        }
-        if (result == null)
-            result = super.getHoverInfo(textViewer, hoverRegion);
-        return result;
+      try
+      {
+        return fNext;
+      } finally
+      {
+        skip();
+      }
     }
 
-    //    /* (non-Javadoc)
-    //     * @see org.eclipse.jface.text.ITextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
-    //     */
-    //    public IRegion getHoverRegion(ITextViewer textViewer, int offset)
-    //    {
-    //        return findWord(textViewer.getDocument(), offset);
-    //    }
-
-    private IRegion findWord(IDocument document, int offset)
+    /*
+     * @see Iterator#remove()
+     */
+    public void remove()
     {
-
-        int start = -1;
-        int end = -1;
-
-        try
-        {
-
-            int pos = offset;
-            char c;
-
-            while (pos >= 0)
-            {
-                c = document.getChar(pos);
-                if (!Character.isJavaIdentifierPart(c))
-                    break;
-                --pos;
-            }
-
-            start = pos;
-
-            pos = offset;
-            int length = document.getLength();
-
-            while (pos < length)
-            {
-                c = document.getChar(pos);
-                if (!Character.isJavaIdentifierPart(c))
-                    break;
-                ++pos;
-            }
-
-            end = pos;
-
-        } catch (BadLocationException x)
-        {}
-
-        if (start > -1 && end > -1)
-        {
-            if (start == offset && end == offset)
-                return new Region(offset, 0);
-            else if (start == offset)
-                return new Region(start, end - start);
-            else
-                return new Region(start + 1, end - start - 1);
-        }
-
-        return null;
+      throw new UnsupportedOperationException();
     }
-
-    class AnnotationIterator implements Iterator
-    {
-
-        private Iterator fIterator;
-        private IProblemAnnotation fNext;
-        private boolean fSkipIrrelevants;
-
-        public AnnotationIterator(IAnnotationModel model, boolean skipIrrelevants)
-        {
-            fIterator = model.getAnnotationIterator();
-            fSkipIrrelevants = skipIrrelevants;
-            skip();
-        }
-
-        private void skip()
-        {
-            while (fIterator.hasNext())
-            {
-                Object next = fIterator.next();
-                if (next instanceof IProblemAnnotation)
-                {
-                    IProblemAnnotation a = (IProblemAnnotation) next;
-                    if (fSkipIrrelevants)
-                    {
-                        if (a.isRelevant())
-                        {
-                            fNext = a;
-                            return;
-                        }
-                    } else
-                    {
-                        fNext = a;
-                        return;
-                    }
-                }
-            }
-            fNext = null;
-        }
-
-        /*
-         * @see Iterator#hasNext()
-         */
-        public boolean hasNext()
-        {
-            return fNext != null;
-        }
-
-        /*
-         * @see Iterator#next()
-         */
-        public Object next()
-        {
-            try
-            {
-                return fNext;
-            } finally
-            {
-                skip();
-            }
-        }
-
-        /*
-         * @see Iterator#remove()
-         */
-        public void remove()
-        {
-            throw new UnsupportedOperationException();
-        }
-    }
+  }
 
 }

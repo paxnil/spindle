@@ -26,31 +26,30 @@
 
 package com.iw.plugins.spindle.core.builder;
 
-
 /**
- *  Common Question asked of all kinds of Incremental Builders
+ * Common Question asked of all kinds of Incremental Builders
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public interface IIncrementalBuild extends IBuild
 {
-    /**
-     * A question asked of Incremental Builds by the TapestryBuilder.
-     * <p>
-     * Answering false prompts a Full Build
-     * 
-     * @return true if an incremental build is indicated, false otherwise.
-     */
-    public boolean canIncrementalBuild();
-    
-    /**
-     * A question asked of Incremental Builds by the TapestryBuilder.
-     * <p>
-     * Answering false prompts aborts an incremental build
-     * 
-     * @return true if an build is indicated, false otherwise.
-     */
-    public boolean needsIncrementalBuild();
+  /**
+   * A question asked of Incremental Builds by the TapestryBuilder.
+   * <p>
+   * Answering false prompts a Full Build
+   * 
+   * @return true if an incremental build is indicated, false otherwise.
+   */
+  public boolean canIncrementalBuild();
+
+  /**
+   * A question asked of Incremental Builds by the TapestryBuilder.
+   * <p>
+   * Answering false prompts aborts an incremental build
+   * 
+   * @return true if an build is indicated, false otherwise.
+   */
+  public boolean needsIncrementalBuild();
 
 }

@@ -44,7 +44,8 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
  * Jump from spec/template editors to associated java files
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: JumpToJavaAction.java,v 1.4.4.1 2004/06/22 12:13:30 glongman
+ *          Exp $
  */
 public class JumpToJavaAction extends BaseJumpAction
 {
@@ -99,7 +100,7 @@ public class JumpToJavaAction extends BaseJumpAction
     XMLNode root = getRootNode();
     if (root == null)
       return null;
-    
+
     List children = root.getChildren();
     for (Iterator iter = children.iterator(); iter.hasNext();)
     {

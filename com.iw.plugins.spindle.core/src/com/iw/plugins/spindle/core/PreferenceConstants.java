@@ -28,7 +28,8 @@ package com.iw.plugins.spindle.core;
  * Preference contstants for the Core plugin.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PreferenceConstants.java,v 1.1.2.1 2004/06/10 16:47:47 glongman
+ *          Exp $
  */
 public interface PreferenceConstants
 {
@@ -41,6 +42,7 @@ public interface PreferenceConstants
   String CORE_STATUS_ERROR = "error";
   String CORE_STATUS_IGNORE = "ignore";
 
-  String[] CORE_STATUS_ARRAY = new String[]{CORE_STATUS_INFO, CORE_STATUS_WARN, CORE_STATUS_ERROR, CORE_STATUS_IGNORE};
+  String[] CORE_STATUS_ARRAY = new String[]{CORE_STATUS_INFO, CORE_STATUS_WARN,
+      CORE_STATUS_ERROR, CORE_STATUS_IGNORE};
 
 }

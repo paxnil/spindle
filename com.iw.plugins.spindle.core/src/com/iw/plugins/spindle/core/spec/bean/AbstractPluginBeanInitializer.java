@@ -32,50 +32,59 @@ import org.apache.tapestry.bean.IBeanInitializer;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 
 /**
- *  Base class for PluginBeanInitializers
+ * Base class for PluginBeanInitializers
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: AbstractPluginBeanInitializer.java,v 1.5 2004/05/17 02:31:48
+ *          glongman Exp $
  */
-public class AbstractPluginBeanInitializer extends BaseSpecification implements IBeanInitializer
+public class AbstractPluginBeanInitializer extends BaseSpecification
+    implements
+      IBeanInitializer
 {
 
-    private String fValue;
-    protected AbstractPluginBeanInitializer(int type)
-    {
-        super(type);
-    }
+  private String fValue;
+  protected AbstractPluginBeanInitializer(int type)
+  {
+    super(type);
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.bean.IBeanInitializer#setBeanProperty(org.apache.tapestry.IBeanProvider, java.lang.Object)
-     */
-    public void setBeanProperty(IBeanProvider provider, Object bean)
-    {
-        // do nothing - this is Tapestry runtime behaviour which is not germain to Spindle
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.bean.IBeanInitializer#setBeanProperty(org.apache.tapestry.IBeanProvider,
+   *      java.lang.Object)
+   */
+  public void setBeanProperty(IBeanProvider provider, Object bean)
+  {
+    // do nothing - this is Tapestry runtime behaviour which is not germain to
+    // Spindle
 
-    }
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.bean.IBeanInitializer#getPropertyName()
-     */
-    public String getPropertyName()
-    {
-        return getIdentifier();
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.bean.IBeanInitializer#getPropertyName()
+   */
+  public String getPropertyName()
+  {
+    return getIdentifier();
+  }
 
-    public void setPropertyName(String name)
-    {
-        setIdentifier(name);
-    }
+  public void setPropertyName(String name)
+  {
+    setIdentifier(name);
+  }
 
-    public String getValue()
-    {
-        return fValue;
-    }
+  public String getValue()
+  {
+    return fValue;
+  }
 
-    public void setValue(String value)
-    {
-        fValue = value;
-    }
+  public void setValue(String value)
+  {
+    fValue = value;
+  }
 
 }

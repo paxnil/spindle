@@ -211,7 +211,8 @@ public abstract class Build
 
   protected void recordBuildMiss(int missPriority, IResource resource)
   {
-    if ("package.html".equals(resource.getName())) //TODO add real filter capability.
+    if ("package.html".equals(resource.getName())) //TODO add real filter
+                                                   // capability.
       return;
 
     Markers.addProblemMarkerToResource(

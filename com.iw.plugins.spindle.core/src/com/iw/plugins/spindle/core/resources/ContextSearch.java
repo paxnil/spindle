@@ -1,28 +1,26 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
+/*******************************************************************************
+ * ***** BEGIN LICENSE BLOCK Version: MPL 1.1
+ * 
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
+ * 1.1 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at http://www.mozilla.org/MPL/
+ * 
  * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+ * the specific language governing rights and limitations under the License.
+ * 
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
- *
- * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
- * the Initial Developer. All Rights Reserved.
- *
+ * 
+ * The Initial Developer of the Original Code is Intelligent Works Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2003 the Initial
+ * Developer. All Rights Reserved.
+ * 
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
- *
- * ***** END LICENSE BLOCK ***** */
+ * glongman@intelligentworks.com
+ * 
+ * ***** END LICENSE BLOCK *****
+ */
 package com.iw.plugins.spindle.core.resources;
 
 import java.util.HashMap;
@@ -44,72 +42,75 @@ import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 public class ContextSearch implements ISearch
 {
 
-    private Visitor fVisitor;
+  private Visitor fVisitor;
 
-    protected IPackageFragmentRoot[] fPackageFragmentRoots = null;
+  protected IPackageFragmentRoot[] fPackageFragmentRoots = null;
 
-    protected HashMap fPackageFragments;
+  protected HashMap fPackageFragments;
 
-    protected IContainer fRootContainer;
+  protected IContainer fRootContainer;
 
-    private boolean fInitialized = false;
+  private boolean fInitialized = false;
 
-    public ContextSearch()
+  public ContextSearch()
+  {
+  }
+
+  public void configure(Object root) throws CoreException
+  {
+    this.fRootContainer = (IContainer) root;
+    fVisitor = new Visitor();
+    fInitialized = true;
+  }
+
+  public void search(ISearchAcceptor acceptor)
+  {
+    if (!fInitialized)
+      throw new Error("not initialized");
+
+    fVisitor.setAcceptor(acceptor);
+    try
+    {
+      fRootContainer.accept(fVisitor);
+    } catch (CoreException e)
+    {
+      TapestryCore.log(e);
+    } catch (StopSearchingException e1)
     {}
+  }
 
-    public void configure(Object root) throws CoreException
+  class Visitor implements IResourceVisitor
+  {
+    ISearchAcceptor acceptor;
+
+    public void setAcceptor(ISearchAcceptor acceptor)
     {
-        this.fRootContainer = (IContainer) root;
-        fVisitor = new Visitor();
-        fInitialized = true;
+      this.acceptor = acceptor;
     }
 
-    public void search(ISearchAcceptor acceptor)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.core.resources.IResourceVisitor#visit(org.eclipse.core.resources.IResource)
+     */
+    public boolean visit(IResource resource) throws CoreException
     {
-        if (!fInitialized)
-            throw new Error("not initialized");
+      if (resource instanceof IFile)
+      {
+        boolean keepGoing = acceptor.accept(resource.getParent(), (IStorage) resource);
+        if (!keepGoing)
+          throw new StopSearchingException();
+      }
+      return true;
+    }
+  }
 
-        fVisitor.setAcceptor(acceptor);
-        try
-        {
-            fRootContainer.accept(fVisitor);
-        } catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        } catch (StopSearchingException e1)
-        {}
+  class StopSearchingException extends RuntimeException
+  {
+    public StopSearchingException()
+    {
+      super();
     }
 
-    class Visitor implements IResourceVisitor
-    {
-        ISearchAcceptor acceptor;
-
-        public void setAcceptor(ISearchAcceptor acceptor)
-        {
-            this.acceptor = acceptor;
-        }
-
-        /* (non-Javadoc)
-        * @see org.eclipse.core.resources.IResourceVisitor#visit(org.eclipse.core.resources.IResource)
-        */
-        public boolean visit(IResource resource) throws CoreException
-        {
-            if (resource instanceof IFile)
-            {
-                boolean keepGoing = acceptor.accept(resource.getParent(), (IStorage) resource);
-                if (!keepGoing)
-                    throw new StopSearchingException();
-            }
-            return true;
-        }
-    }
-
-    class StopSearchingException extends RuntimeException
-    {
-        public StopSearchingException()
-        {
-            super();
-        }
-
-    }
+  }
 }

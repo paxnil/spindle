@@ -29,31 +29,32 @@ package com.iw.plugins.spindle.core.spec;
 import org.apache.tapestry.ILocation;
 
 /**
- *  Record <reserved-parameter> tags in a document
+ * Record <reserved-parameter>tags in a document
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginReservedParameterDeclaration.java,v 1.1 2003/11/21
+ *          17:46:26 glongman Exp $
  */
 public class PluginReservedParameterDeclaration extends BaseSpecification
 {
 
-    String fReservedName;
+  String fReservedName;
 
-    public PluginReservedParameterDeclaration(String reservedName, ILocation location)
-    {
-        super(BaseSpecification.RESERVED_PARAMETER_DECLARATION);
-        fReservedName = reservedName;
-        setLocation(location);
-    }
+  public PluginReservedParameterDeclaration(String reservedName, ILocation location)
+  {
+    super(BaseSpecification.RESERVED_PARAMETER_DECLARATION);
+    fReservedName = reservedName;
+    setLocation(location);
+  }
 
-    public String getIdentfier()
-    {
-        return getResevedName();
-    }
+  public String getIdentfier()
+  {
+    return getResevedName();
+  }
 
-    public String getResevedName()
-    {
-        return fReservedName;
-    }
+  public String getResevedName()
+  {
+    return fReservedName;
+  }
 
 }

@@ -31,48 +31,55 @@ import org.apache.tapestry.spec.IListenerBindingSpecification;
  * Spindle implementation of IListenerBindingSpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginListenerBindingSpecification.java,v 1.4 2004/05/17
+ *          02:31:49 glongman Exp $
  */
-public class PluginListenerBindingSpecification
-    extends PluginBindingSpecification
-    implements IListenerBindingSpecification
+public class PluginListenerBindingSpecification extends PluginBindingSpecification
+    implements
+      IListenerBindingSpecification
 {
 
-    private String fLanguage;
-    private String fScript;
+  private String fLanguage;
+  private String fScript;
 
-    public PluginListenerBindingSpecification()
-    {
-        super(BaseSpecification.LISTENER_BINDING_SPEC);
-    }
+  public PluginListenerBindingSpecification()
+  {
+    super(BaseSpecification.LISTENER_BINDING_SPEC);
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IListenerBindingSpecification#getLanguage()
-     */
-    public String getLanguage()
-    {
-        return fLanguage;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IListenerBindingSpecification#getLanguage()
+   */
+  public String getLanguage()
+  {
+    return fLanguage;
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IListenerBindingSpecification#getScript()
-     */
-    public String getScript()
-    {
-        return getValue();
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IListenerBindingSpecification#getScript()
+   */
+  public String getScript()
+  {
+    return getValue();
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IListenerBindingSpecification#setLanguage(java.lang.String)
-     */
-    public void setLanguage(String language)
-    {
-        fLanguage = language;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IListenerBindingSpecification#setLanguage(java.lang.String)
+   */
+  public void setLanguage(String language)
+  {
+    fLanguage = language;
+  }
 
-    public void setScript(String value)
-    {
-        super.setValue(value);
-    }
+  public void setScript(String value)
+  {
+    super.setValue(value);
+  }
 
 }

@@ -43,162 +43,184 @@ import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
- *  Spindle aware concrete implementation of IContainedComponent
+ * Spindle aware concrete implementation of IContainedComponent
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginContainedComponent.java,v 1.8 2004/05/17 02:31:49
+ *          glongman Exp $
  */
-public class PluginContainedComponent extends BasePropertyHolder implements IContainedComponent
+public class PluginContainedComponent extends BasePropertyHolder
+    implements
+      IContainedComponent
 {
 
-    private String fType;
+  private String fType;
 
-    private String fCopyOf;
+  private String fCopyOf;
 
-    private boolean fInheritInformalParameters;
+  private boolean fInheritInformalParameters;
 
-    protected Map fBindings;
-    private List fDeclaredBindings;
+  protected Map fBindings;
+  private List fDeclaredBindings;
 
-    /**
-     * @param type
-     */
-    public PluginContainedComponent()
+  /**
+   * @param type
+   */
+  public PluginContainedComponent()
+  {
+    super(BaseSpecification.CONTAINED_COMPONENT_SPEC);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IContainedComponent#getBinding(java.lang.String)
+   */
+  public IBindingSpecification getBinding(String name)
+  {
+    return (IBindingSpecification) get(fBindings, name);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IContainedComponent#getBindingNames()
+   */
+  public Collection getBindingNames()
+  {
+    return keys(fBindings);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IContainedComponent#getType()
+   */
+  public String getType()
+  {
+    if (fType != null && fCopyOf != null)
+      return "";
+
+    if (fCopyOf != null)
     {
-        super(BaseSpecification.CONTAINED_COMPONENT_SPEC);
+      IComponentSpecification spec = (IComponentSpecification) getParent();
+      IContainedComponent parentComponent = spec.getComponent(fCopyOf);
+
+      if (parentComponent == null)
+        return "";
+
+      return parentComponent.getType();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IContainedComponent#getBinding(java.lang.String)
-     */
-    public IBindingSpecification getBinding(String name)
+    return fType;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IContainedComponent#setBinding(java.lang.String,
+   *      org.apache.tapestry.spec.IBindingSpecification)
+   */
+  public void setBinding(String name, IBindingSpecification spec)
+  {
+    if (fBindings == null)
     {
-        return (IBindingSpecification) get(fBindings, name);
+      fBindings = new HashMap();
+      fDeclaredBindings = new ArrayList();
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IContainedComponent#getBindingNames()
-     */
-    public Collection getBindingNames()
+    PluginBindingSpecification pluginSpec = (PluginBindingSpecification) spec;
+
+    pluginSpec.setIdentifier(name);
+    pluginSpec.setParent(this);
+
+    fDeclaredBindings.add(spec);
+
+    if (!fBindings.containsKey(name))
+      fBindings.put(name, spec);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IContainedComponent#setType(java.lang.String)
+   */
+  public void setType(String value)
+  {
+    fType = value;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IContainedComponent#setCopyOf(java.lang.String)
+   */
+  public void setCopyOf(String id)
+  {
+    fCopyOf = id;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IContainedComponent#getCopyOf()
+   */
+  public String getCopyOf()
+  {
+    return fCopyOf;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IContainedComponent#getInheritInformalParameters()
+   */
+  public boolean getInheritInformalParameters()
+  {
+    return fInheritInformalParameters;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IContainedComponent#setInheritInformalParameters(boolean)
+   */
+  public void setInheritInformalParameters(boolean value)
+  {
+    fInheritInformalParameters = value;
+  }
+
+  public void validate(Object parent, IScannerValidator validator)
+  {
+
+    PluginComponentSpecification spec = (PluginComponentSpecification) parent;
+
+    ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+    String id = getIdentifier();
+
+    try
     {
-        return keys(fBindings);
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IContainedComponent#getType()
-     */
-    public String getType()
+      if (fCopyOf == null)
+      {
+        validator.validateContainedComponent(spec, this, sourceInfo);
+      }
+    } catch (ScannerException e)
     {
-        if (fType != null && fCopyOf != null)
-            return "";
-
-        if (fCopyOf != null)
-        {
-            IComponentSpecification spec = (IComponentSpecification) getParent();
-            IContainedComponent parentComponent = spec.getComponent(fCopyOf);
-
-            if (parentComponent == null)
-                return "";
-
-            return parentComponent.getType();
-        }
-
-        return fType;
+      TapestryCore.log(e);
+      e.printStackTrace();
     }
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IContainedComponent#setBinding(java.lang.String, org.apache.tapestry.spec.IBindingSpecification)
-     */
-    public void setBinding(String name, IBindingSpecification spec)
-    {
-        if (fBindings == null)
-        {
-            fBindings = new HashMap();
-            fDeclaredBindings = new ArrayList();
-        }
+  /**
+   * @return List of bindings as declared in the XML source.
+   */
+  public List getDeclaredBindings()
+  {
+    if (fDeclaredBindings == null)
+      return Collections.EMPTY_LIST;
 
-        PluginBindingSpecification pluginSpec = (PluginBindingSpecification) spec;
-
-        pluginSpec.setIdentifier(name);
-        pluginSpec.setParent(this);
-
-        fDeclaredBindings.add(spec);
-
-        if (!fBindings.containsKey(name))
-            fBindings.put(name, spec);
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IContainedComponent#setType(java.lang.String)
-     */
-    public void setType(String value)
-    {
-        fType = value;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IContainedComponent#setCopyOf(java.lang.String)
-     */
-    public void setCopyOf(String id)
-    {
-        fCopyOf = id;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IContainedComponent#getCopyOf()
-     */
-    public String getCopyOf()
-    {
-        return fCopyOf;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IContainedComponent#getInheritInformalParameters()
-     */
-    public boolean getInheritInformalParameters()
-    {
-        return fInheritInformalParameters;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IContainedComponent#setInheritInformalParameters(boolean)
-     */
-    public void setInheritInformalParameters(boolean value)
-    {
-        fInheritInformalParameters = value;
-    }
-
-    public void validate(Object parent, IScannerValidator validator)
-    {
-
-        PluginComponentSpecification spec = (PluginComponentSpecification) parent;
-
-        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-        String id = getIdentifier();
-
-        try
-        {
-            if (fCopyOf == null)
-            {
-                validator.validateContainedComponent(spec, this, sourceInfo);
-            }
-        } catch (ScannerException e)
-        {
-            TapestryCore.log(e);
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * @return List of bindings as declared in the XML source.
-     */
-    public List getDeclaredBindings()
-    {
-        if (fDeclaredBindings == null)
-            return Collections.EMPTY_LIST;
-
-        return Collections.unmodifiableList(fDeclaredBindings);
-    }
+    return Collections.unmodifiableList(fDeclaredBindings);
+  }
 
 }

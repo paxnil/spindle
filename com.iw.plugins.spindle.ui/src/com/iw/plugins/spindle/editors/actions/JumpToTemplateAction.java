@@ -49,134 +49,141 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
  * Jump from spec/template editors to associated java files
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: JumpToTemplateAction.java,v 1.5 2004/05/16 05:14:03 glongman
+ *          Exp $
  */
 public class JumpToTemplateAction extends BaseJumpAction
 {
+  /**
+   *  
+   */
+  public JumpToTemplateAction()
+  {
+    super();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.actions.BaseJumpAction#doRun()
+   */
+  protected void doRun()
+  {
+    BaseSpecification spec = getEditorSpecification();
+
+    if (spec instanceof ILibrarySpecification)
+      return;
+
+    if (fEditor.getEditorInput() instanceof JarEntryEditorInput)
+    {
+      MessageDialog.openInformation(
+          fEditor.getEditorSite().getShell(),
+          "Operation Aborted",
+          "Unable to Jump to Templates from  a jar based Specification");
+      return;
+    }
+
+    List possibles = getTemplateLocations((PluginComponentSpecification) spec);
+    if (possibles == null || possibles.isEmpty())
+      return;
+    if (possibles.size() > 1)
+    {
+      new ChooseTemplateLocationPopup(possibles, true).run();
+    } else
+    {
+      reveal((IResourceWorkspaceLocation) possibles.get(0));
+    }
+
+  }
+
+  /**
+   * @return
+   */
+  private BaseSpecification getEditorSpecification()
+  {
+    return (BaseSpecification) fEditor.getSpecification();
+  }
+
+  private List getTemplateLocations(PluginComponentSpecification spec)
+  {
+    List locations = spec.getTemplateLocations();
+
+    if (locations.isEmpty() || !(fEditor instanceof TemplateEditor))
+      return locations;
+
+    IStorage currentStorage = fEditor.getStorage();
+    List finalResult = new ArrayList();
+    for (Iterator iter = locations.iterator(); iter.hasNext();)
+    {
+      IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
+      IStorage storage = element.getStorage();
+      if (storage == null || storage.equals(currentStorage))
+        continue;
+      finalResult.add(element);
+    }
+    return finalResult;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+   */
+  public void editorContextMenuAboutToShow(IMenuManager menu)
+  {
+    BaseSpecification spec = getEditorSpecification();
+    if (spec != null && spec instanceof PluginComponentSpecification)
+    {
+      List possibles = getTemplateLocations((PluginComponentSpecification) spec);
+      for (Iterator iter = possibles.iterator(); iter.hasNext();)
+      {
+        IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
+        Action openAction = new MenuOpenTemplateAction(element);
+        openAction.setEnabled(element.getStorage() != null);
+        menu.add(openAction);
+      }
+    }
+
+  }
+
+  class MenuOpenTemplateAction extends Action
+  {
+    IResourceWorkspaceLocation location;
+
+    public MenuOpenTemplateAction(IResourceWorkspaceLocation location)
+    {
+      Assert.isNotNull(location);
+      this.location = location;
+      setText(location.getName());
+    }
+
+    public void run()
+    {
+      reveal(location);
+    }
+  }
+
+  class ChooseTemplateLocationPopup extends ChooseLocationPopup
+  {
     /**
+     * @param templateLocations
+     * @param forward
+     */
+    public ChooseTemplateLocationPopup(List templateLocations, boolean forward)
+    {
+      super(templateLocations, forward);
+    }
+
+    /*
+     * (non-Javadoc)
      * 
+     * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
      */
-    public JumpToTemplateAction()
+    protected Image getImage(IResourceWorkspaceLocation location)
     {
-        super();
+      return Images.getSharedImage("html16.gif");
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.actions.BaseJumpAction#doRun()
-     */
-    protected void doRun()
-    {
-        BaseSpecification spec = getEditorSpecification();
-
-        if (spec instanceof ILibrarySpecification)
-            return;
-
-        if (fEditor.getEditorInput() instanceof JarEntryEditorInput)
-        {
-            MessageDialog.openInformation(
-                fEditor.getEditorSite().getShell(),
-                "Operation Aborted",
-                "Unable to Jump to Templates from  a jar based Specification");
-            return;
-        }
-
-        List possibles = getTemplateLocations((PluginComponentSpecification) spec);
-        if (possibles == null || possibles.isEmpty())
-            return;
-        if (possibles.size() > 1)
-        {
-            new ChooseTemplateLocationPopup(possibles, true).run();
-        } else
-        {
-            reveal((IResourceWorkspaceLocation) possibles.get(0));
-        }
-
-    }
-
-    /**
-     * @return
-     */
-    private BaseSpecification getEditorSpecification()
-    {
-        return (BaseSpecification) fEditor.getSpecification();
-    }
-
-    private List getTemplateLocations(PluginComponentSpecification spec)
-    {
-        List locations = spec.getTemplateLocations();
-
-        if (locations.isEmpty() || !(fEditor instanceof TemplateEditor))
-            return locations;
-
-        IStorage currentStorage = fEditor.getStorage();
-        List finalResult = new ArrayList();
-        for (Iterator iter = locations.iterator(); iter.hasNext();)
-        {
-            IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
-            IStorage storage = element.getStorage();
-            if (storage == null || storage.equals(currentStorage))
-                continue;
-            finalResult.add(element);
-        }
-        return finalResult;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
-     */
-    public void editorContextMenuAboutToShow(IMenuManager menu)
-    {
-        BaseSpecification spec = getEditorSpecification();
-        if (spec != null && spec instanceof PluginComponentSpecification)
-        {
-            List possibles = getTemplateLocations((PluginComponentSpecification) spec);
-            for (Iterator iter = possibles.iterator(); iter.hasNext();)
-            {
-                IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
-                Action openAction = new MenuOpenTemplateAction(element);
-                openAction.setEnabled(element.getStorage() != null);
-                menu.add(openAction);
-            }
-        }
-
-    }
-
-    class MenuOpenTemplateAction extends Action
-    {
-        IResourceWorkspaceLocation location;
-
-        public MenuOpenTemplateAction(IResourceWorkspaceLocation location)
-        {
-            Assert.isNotNull(location);
-            this.location = location;
-            setText(location.getName());
-        }
-
-        public void run()
-        {
-            reveal(location);
-        }
-    }
-
-    class ChooseTemplateLocationPopup extends ChooseLocationPopup
-    {
-        /**
-         * @param templateLocations
-         * @param forward
-         */
-        public ChooseTemplateLocationPopup(List templateLocations, boolean forward)
-        {
-            super(templateLocations, forward);
-        }
-
-        /* (non-Javadoc)
-        * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
-        */
-        protected Image getImage(IResourceWorkspaceLocation location)
-        {
-            return Images.getSharedImage("html16.gif");
-        }
-
-    }
+  }
 
 }

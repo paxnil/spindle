@@ -37,42 +37,44 @@ import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.editors.ProblemAnnotationModel;
 
 /**
- *  Model for Template annotations - of course only files and not jar entries will
- *  have an annotation model.
+ * Model for Template annotations - of course only files and not jar entries
+ * will have an annotation model.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: TemplateAnnotationModel.java,v 1.4 2003/10/20 20:19:14 glongman
+ *          Exp $
  */
 public class TemplateAnnotationModel extends ProblemAnnotationModel
 {
 
-    public TemplateAnnotationModel(IFileEditorInput input)
-    {
-        super(input);
-    }
+  public TemplateAnnotationModel(IFileEditorInput input)
+  {
+    super(input);
+  }
 
-    // Must be a resource
-    public void beginCollecting()
-    {
-        IComponentSpecification component = getComponent();
-        if (component != null)
-            setIsActive(true);
-        else
-            setIsActive(false);
-    }
+  // Must be a resource
+  public void beginCollecting()
+  {
+    IComponentSpecification component = getComponent();
+    if (component != null)
+      setIsActive(true);
+    else
+      setIsActive(false);
+  }
 
-    private IComponentSpecification getComponent()
-    {
-        IFile file = fInput.getFile();
+  private IComponentSpecification getComponent()
+  {
+    IFile file = fInput.getFile();
 
-        IProject project = file.getProject();
-        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-        Map templates = manager.getTemplateMap(project);
-        if (templates != null)
-        {
-            return (IComponentSpecification) templates.get(file);
-        }
-        return null;
+    IProject project = file.getProject();
+    TapestryArtifactManager manager = TapestryArtifactManager
+        .getTapestryArtifactManager();
+    Map templates = manager.getTemplateMap(project);
+    if (templates != null)
+    {
+      return (IComponentSpecification) templates.get(file);
     }
+    return null;
+  }
 
 }

@@ -55,278 +55,307 @@ import org.eclipse.swt.widgets.Control;
 import com.iw.plugins.spindle.Images;
 
 /**
- *  Preview the changes that will be made to move an implicit component declaration
- *  from a template to its specification
+ * Preview the changes that will be made to move an implicit component
+ * declaration from a template to its specification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: MoveImplicitPreviewPage.java,v 1.2 2004/01/09 18:41:42 glongman
+ *          Exp $
  */
 public class MoveImplicitPreviewPage extends WizardPage
 {
 
-    static private final SourceViewerConfiguration fViewerConfig = new SimpleSourceViewerConfiguration();
+  static private final SourceViewerConfiguration fViewerConfig = new SimpleSourceViewerConfiguration();
 
-    private MoveImplicitToSpecWizard fWizard;
-    private TextMergeViewer fTextViewer;
-    private CompareConfiguration fConfiguration = new Configuration();
+  private MoveImplicitToSpecWizard fWizard;
+  private TextMergeViewer fTextViewer;
+  private CompareConfiguration fConfiguration = new Configuration();
 
-    private TableViewer fTableViewer;
-    private ILabelProvider fLabelProvider;
-    private Object[] fViewerContents;
+  private TableViewer fTableViewer;
+  private ILabelProvider fLabelProvider;
+  private Object[] fViewerContents;
 
-    public MoveImplicitPreviewPage(String pageName, MoveImplicitToSpecWizard wizard)
+  public MoveImplicitPreviewPage(String pageName, MoveImplicitToSpecWizard wizard)
+  {
+    super(pageName);
+    fWizard = wizard;
+    setImageDescriptor(Images.getImageDescriptor("applicationDialog.gif"));
+    setDescription("Preview. Warning: clicking 'finish' is not undoable!");
+    ArrayList contents = new ArrayList();
+    contents.add(wizard.getTemplateStorage());
+    contents.add(wizard.getSpecStorage());
+    fViewerContents = contents.toArray();
+  }
+
+  public void refresh()
+  {
+    // bump the viewer to update its view
+    if (fTextViewer != null)
+      fTextViewer.setInput(new Long(System.currentTimeMillis()));
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+   */
+  public void createControl(Composite parent)
+  {
+    Composite container = new Composite(parent, SWT.NULL);
+    GridLayout layout = new GridLayout();
+    container.setLayout(layout);
+    container.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+    createSelectionViewer(container);
+
+    ContentProvider provider = new ContentProvider(fConfiguration);
+    fTextViewer = new XMLTextViewer(container, fConfiguration);
+    fTextViewer.setContentProvider(provider);
+    fTextViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
+    setControl(container);
+  }
+
+  private void createSelectionViewer(Composite parent)
+  {
+    fTableViewer = new TableViewer(parent);
+    Control tree = fTableViewer.getControl();
+    GridData data = new GridData(GridData.FILL_HORIZONTAL);
+    tree.setLayoutData(data);
+    fTableViewer.setContentProvider(new IStructuredContentProvider()
     {
-        super(pageName);
-        fWizard = wizard;
-        setImageDescriptor(Images.getImageDescriptor("applicationDialog.gif"));
-        setDescription("Preview. Warning: clicking 'finish' is not undoable!");
-        ArrayList contents = new ArrayList();
-        contents.add(wizard.getTemplateStorage());
-        contents.add(wizard.getSpecStorage());
-        fViewerContents = contents.toArray();
-    }
+      public Object[] getElements(Object inputElement)
+      {
+        return fViewerContents;
+      }
 
-    public void refresh()
+      public void dispose()
+      {
+      }
+
+      public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
+      {
+      }
+    });
+    fLabelProvider = new ILabelProvider()
     {
-        // bump the viewer to update its view
-        if (fTextViewer != null)
-            fTextViewer.setInput(new Long(System.currentTimeMillis()));
-    }
+      public Image getImage(Object element)
+      {
+        String name = ((IStorage) element).getName();
+        if (name.endsWith(".page"))
+        {
+          return Images.getSharedImage("page16.gif");
+        } else if (name.endsWith(".jwc"))
+        {
+          return Images.getSharedImage("component16.gif");
+        } else
+        {
+          return Images.getSharedImage("html16.gif");
+        }
+      }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+      public String getText(Object element)
+      {
+        return ((IStorage) element).getName();
+      }
+
+      public void addListener(ILabelProviderListener listener)
+      {
+      }
+
+      public void dispose()
+      {
+      }
+
+      public boolean isLabelProperty(Object element, String property)
+      {
+        return false;
+      }
+
+      public void removeListener(ILabelProviderListener listener)
+      {
+      }
+    };
+    fTableViewer.setLabelProvider(fLabelProvider);
+    fTableViewer.setInput("dummy");
+    fTableViewer.addSelectionChangedListener(new ISelectionChangedListener()
+    {
+      public void selectionChanged(SelectionChangedEvent event)
+      {
+        refresh();
+      }
+    });
+    fTableViewer.setSelection(new StructuredSelection(fViewerContents[0]));
+  }
+
+  private Object getSelection()
+  {
+    IStructuredSelection selection = (IStructuredSelection) fTableViewer.getSelection();
+    if (selection.isEmpty())
+      return null;
+    return selection.getFirstElement();
+  }
+
+  class Configuration extends CompareConfiguration
+  {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.compare.CompareConfiguration#getLeftImage(java.lang.Object)
      */
-    public void createControl(Composite parent)
+    public Image getLeftImage(Object element)
     {
-        Composite container = new Composite(parent, SWT.NULL);
-        GridLayout layout = new GridLayout();
-        container.setLayout(layout);
-        container.setLayoutData(new GridData(GridData.FILL_BOTH));
-
-        createSelectionViewer(container);
-
-        ContentProvider provider = new ContentProvider(fConfiguration);
-        fTextViewer = new XMLTextViewer(container, fConfiguration);
-        fTextViewer.setContentProvider(provider);
-        fTextViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
-        setControl(container);
+      return getRightImage(element);
     }
 
-    private void createSelectionViewer(Composite parent)
-    {
-        fTableViewer = new TableViewer(parent);
-        Control tree = fTableViewer.getControl();
-        GridData data = new GridData(GridData.FILL_HORIZONTAL);
-        tree.setLayoutData(data);
-        fTableViewer.setContentProvider(new IStructuredContentProvider()
-        {
-            public Object[] getElements(Object inputElement)
-            {
-                return fViewerContents;
-            }
-
-            public void dispose()
-            {}
-
-            public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
-            {}
-        });
-        fLabelProvider = new ILabelProvider()
-        {
-            public Image getImage(Object element)
-            {
-                String name = ((IStorage) element).getName();
-                if (name.endsWith(".page"))
-                {
-                    return Images.getSharedImage("page16.gif");
-                } else if (name.endsWith(".jwc"))
-                {
-                    return Images.getSharedImage("component16.gif");
-                } else
-                {
-                    return Images.getSharedImage("html16.gif");
-                }
-            }
-
-            public String getText(Object element)
-            {
-                return ((IStorage) element).getName();
-            }
-
-            public void addListener(ILabelProviderListener listener)
-            {}
-
-            public void dispose()
-            {}
-
-            public boolean isLabelProperty(Object element, String property)
-            {
-                return false;
-            }
-
-            public void removeListener(ILabelProviderListener listener)
-            {}
-        };
-        fTableViewer.setLabelProvider(fLabelProvider);
-        fTableViewer.setInput("dummy");
-        fTableViewer.addSelectionChangedListener(new ISelectionChangedListener()
-        {
-            public void selectionChanged(SelectionChangedEvent event)
-            {
-                refresh();
-            }
-        });
-        fTableViewer.setSelection(new StructuredSelection(fViewerContents[0]));
-    }
-
-    private Object getSelection()
-    {
-        IStructuredSelection selection = (IStructuredSelection) fTableViewer.getSelection();
-        if (selection.isEmpty())
-            return null;
-        return selection.getFirstElement();
-    }
-
-    class Configuration extends CompareConfiguration
-    {
-        /* (non-Javadoc)
-         * @see org.eclipse.compare.CompareConfiguration#getLeftImage(java.lang.Object)
-         */
-        public Image getLeftImage(Object element)
-        {
-            return getRightImage(element);
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.compare.CompareConfiguration#getLeftLabel(java.lang.Object)
-         */
-        public String getLeftLabel(Object element)
-        {
-            Object realElement = getSelection();
-            if (realElement == null)
-                return null;
-            return fLabelProvider.getText(realElement);
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.compare.CompareConfiguration#getRightImage(java.lang.Object)
-         */
-        public Image getRightImage(Object element)
-        {
-            Object realElement = getSelection();
-            if (realElement == null)
-                return null;
-            return fLabelProvider.getImage(realElement);
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.compare.CompareConfiguration#getRightLabel(java.lang.Object)
-         */
-        public String getRightLabel(Object element)
-        {
-            Object realElement = getSelection();
-            if (realElement == null)
-                return null;
-            return fLabelProvider.getText(realElement) + " : MODIFIED";
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.compare.CompareConfiguration#isLeftEditable()
-         */
-        public boolean isLeftEditable()
-        {
-            return false;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.compare.CompareConfiguration#isRightEditable()
-         */
-        public boolean isRightEditable()
-        {
-            return false;
-        }
-    }
-
-    class ContentProvider extends MergeViewerContentProvider
-    {
-        public ContentProvider(CompareConfiguration cc)
-        {
-            super(cc);
-        }
-        /* (non-Javadoc)
-         * @see org.eclipse.compare.contentmergeviewer.IMergeViewerContentProvider#getLeftContent(java.lang.Object)
-         */
-        public Object getLeftContent(Object element)
-        {
-            Object selection = getSelection();
-            if (selection == null)
-                return null;
-            if (selection == fViewerContents[0])
-            {
-                return fWizard.getOriginalTemplateDocument();
-            } else
-            {
-                return fWizard.getOriginalSpecDocument();
-            }
-
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.compare.contentmergeviewer.IMergeViewerContentProvider#getRightContent(java.lang.Object)
-         */
-        public Object getRightContent(Object element)
-        {
-            Object selection = getSelection();
-            if (selection == null)
-                return null;
-            if (selection == fViewerContents[0])
-            {
-                return fWizard.getModifiedTemplateDocument();
-            } else
-            {
-                return fWizard.getModifiedSpecDocument();
-            }
-        }
-
-    }
-
-    class XMLTextViewer extends TextMergeViewer
-    {
-        public XMLTextViewer(Composite parent, CompareConfiguration configuration)
-        {
-            super(parent, SWT.BORDER, configuration);
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#configureTextViewer(org.eclipse.jface.text.TextViewer)
-         */
-        protected void configureTextViewer(TextViewer textViewer)
-        {
-            if (textViewer instanceof SourceViewer)
-            {
-                ((SourceViewer) textViewer).configure(fViewerConfig);
-            }
-        }
-
-        // to avoid pointless 'save' messages!
-        protected boolean doSave(Object newInput, Object oldInput)
-        {
-            return true;
-        }
-    }
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.compare.CompareConfiguration#getLeftLabel(java.lang.Object)
      */
-    public void setVisible(boolean visible)
+    public String getLeftLabel(Object element)
     {
-        super.setVisible(visible);
-        if (visible)
-        {
-            fWizard.performModifications();
-            refresh();
-        } else {
-            fWizard.clearModifications();
-        }
+      Object realElement = getSelection();
+      if (realElement == null)
+        return null;
+      return fLabelProvider.getText(realElement);
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.compare.CompareConfiguration#getRightImage(java.lang.Object)
+     */
+    public Image getRightImage(Object element)
+    {
+      Object realElement = getSelection();
+      if (realElement == null)
+        return null;
+      return fLabelProvider.getImage(realElement);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.compare.CompareConfiguration#getRightLabel(java.lang.Object)
+     */
+    public String getRightLabel(Object element)
+    {
+      Object realElement = getSelection();
+      if (realElement == null)
+        return null;
+      return fLabelProvider.getText(realElement) + " : MODIFIED";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.compare.CompareConfiguration#isLeftEditable()
+     */
+    public boolean isLeftEditable()
+    {
+      return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.compare.CompareConfiguration#isRightEditable()
+     */
+    public boolean isRightEditable()
+    {
+      return false;
+    }
+  }
+
+  class ContentProvider extends MergeViewerContentProvider
+  {
+    public ContentProvider(CompareConfiguration cc)
+    {
+      super(cc);
+    }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.compare.contentmergeviewer.IMergeViewerContentProvider#getLeftContent(java.lang.Object)
+     */
+    public Object getLeftContent(Object element)
+    {
+      Object selection = getSelection();
+      if (selection == null)
+        return null;
+      if (selection == fViewerContents[0])
+      {
+        return fWizard.getOriginalTemplateDocument();
+      } else
+      {
+        return fWizard.getOriginalSpecDocument();
+      }
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.compare.contentmergeviewer.IMergeViewerContentProvider#getRightContent(java.lang.Object)
+     */
+    public Object getRightContent(Object element)
+    {
+      Object selection = getSelection();
+      if (selection == null)
+        return null;
+      if (selection == fViewerContents[0])
+      {
+        return fWizard.getModifiedTemplateDocument();
+      } else
+      {
+        return fWizard.getModifiedSpecDocument();
+      }
+    }
+
+  }
+
+  class XMLTextViewer extends TextMergeViewer
+  {
+    public XMLTextViewer(Composite parent, CompareConfiguration configuration)
+    {
+      super(parent, SWT.BORDER, configuration);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.compare.contentmergeviewer.TextMergeViewer#configureTextViewer(org.eclipse.jface.text.TextViewer)
+     */
+    protected void configureTextViewer(TextViewer textViewer)
+    {
+      if (textViewer instanceof SourceViewer)
+      {
+        ((SourceViewer) textViewer).configure(fViewerConfig);
+      }
+    }
+
+    // to avoid pointless 'save' messages!
+    protected boolean doSave(Object newInput, Object oldInput)
+    {
+      return true;
+    }
+  }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+   */
+  public void setVisible(boolean visible)
+  {
+    super.setVisible(visible);
+    if (visible)
+    {
+      fWizard.performModifications();
+      refresh();
+    } else
+    {
+      fWizard.clearModifications();
+    }
+  }
 
 }

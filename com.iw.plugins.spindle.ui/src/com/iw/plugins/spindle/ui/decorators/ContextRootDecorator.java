@@ -40,102 +40,117 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 
 /**
- *  Decorator that indicates Tapestry projects
+ * Decorator that indicates Tapestry projects
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ContextRootDecorator.java,v 1.5 2003/11/17 18:49:37 glongman
+ *          Exp $
  */
-public class ContextRootDecorator
-    extends AbstractDecorator
-    implements ILightweightLabelDecorator, TapestryCore.ICoreListener
+public class ContextRootDecorator extends AbstractDecorator
+    implements
+      ILightweightLabelDecorator,
+      TapestryCore.ICoreListener
 {
 
-    public ContextRootDecorator()
+  public ContextRootDecorator()
+  {
+    super();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.ILightweightLabelDecorator#decorate(java.lang.Object,
+   *      org.eclipse.jface.viewers.IDecoration)
+   */
+  public void decorate(Object element, IDecoration decoration)
+  {
+
+    if (decoration == null)
     {
-        super();
+      UIPlugin.log("ContextRootDecorator.decorate() called with null decoration");
+      return;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.ILightweightLabelDecorator#decorate(java.lang.Object, org.eclipse.jface.viewers.IDecoration)
-     */
-    public void decorate(Object element, IDecoration decoration)
+    IContainer container = (IContainer) ((IAdaptable) element)
+        .getAdapter(IContainer.class);
+    if (container != null)
     {
-
-        if (decoration == null) {
-            UIPlugin.log("ContextRootDecorator.decorate() called with null decoration");
-            return; 
-        }
-            
-        IContainer container = (IContainer) ((IAdaptable) element).getAdapter(IContainer.class);
-        if (container != null)
+      try
+      {
+        IProject project = container.getProject();
+        TapestryProject tproject = (TapestryProject) project
+            .getNature(TapestryCore.NATURE_ID);
+        if (tproject != null
+            && tproject.getProjectType() == tproject.APPLICATION_PROJECT_TYPE)
         {
-            try
-            {
-                IProject project = container.getProject();
-                TapestryProject tproject = (TapestryProject) project.getNature(TapestryCore.NATURE_ID);
-                if (tproject != null && tproject.getProjectType() == tproject.APPLICATION_PROJECT_TYPE)
-                {
-                    IContainer projectWebContextRoot = tproject.getWebContextFolder();
-                    if (container.equals(projectWebContextRoot))
-                    {
-                        decoration.addOverlay(Images.getImageDescriptor("project_ovr.gif"));
-                    } else if (projectWebContextRoot != null && onContextPath(container, projectWebContextRoot))
-                    {
-                        decoration.addOverlay(Images.getImageDescriptor("project_ovr_grey.gif"));
-                    }
-                }
-            } catch (CoreException e)
-            {}
+          IContainer projectWebContextRoot = tproject.getWebContextFolder();
+          if (container.equals(projectWebContextRoot))
+          {
+            decoration.addOverlay(Images.getImageDescriptor("project_ovr.gif"));
+          } else if (projectWebContextRoot != null
+              && onContextPath(container, projectWebContextRoot))
+          {
+            decoration.addOverlay(Images.getImageDescriptor("project_ovr_grey.gif"));
+          }
         }
-
+      } catch (CoreException e)
+      {}
     }
 
-    /**
-     * @param container
-     * @param projectWebContextRoot
-     * @return
-     */
-    private boolean onContextPath(IContainer container, IContainer projectWebContextRoot)
-    {
+  }
 
-        try
+  /**
+   * @param container
+   * @param projectWebContextRoot
+   * @return
+   */
+  private boolean onContextPath(IContainer container, IContainer projectWebContextRoot)
+  {
+
+    try
+    {
+      IPath containerPath = container.getFullPath();
+      IPath contextPath = projectWebContextRoot.getFullPath();
+      int containerLength = containerPath.segmentCount();
+      int contextLength = contextPath.segmentCount();
+      if (containerLength < contextLength)
+      {
+        IContainer parent = projectWebContextRoot.getParent();
+        do
         {
-            IPath containerPath = container.getFullPath();
-            IPath contextPath = projectWebContextRoot.getFullPath();
-            int containerLength = containerPath.segmentCount();
-            int contextLength = contextPath.segmentCount();
-            if (containerLength < contextLength)
-            {
-                IContainer parent = projectWebContextRoot.getParent();
-                do
-                {
-                    if (parent.equals(container))
-                        return true;
-            
-                    parent = parent.getParent();
-                } while (parent != null);
-            }
-        } catch (RuntimeException e)
-        {
-            return false;
-        }
-        return false;
-    }
+          if (parent.equals(container))
+            return true;
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
-     */
-    public void dispose()
+          parent = parent.getParent();
+        } while (parent != null);
+      }
+    } catch (RuntimeException e)
     {
-        // no need, the image is managed by the plugin!
+      return false;
     }
+    return false;
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.IBaseLabelProvider#isLabelProperty(java.lang.Object, java.lang.String)
-     */
-    public boolean isLabelProperty(Object element, String property)
-    {
-        return true;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
+   */
+  public void dispose()
+  {
+    // no need, the image is managed by the plugin!
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.IBaseLabelProvider#isLabelProperty(java.lang.Object,
+   *      java.lang.String)
+   */
+  public boolean isLabelProperty(Object element, String property)
+  {
+    return true;
+  }
 
 }

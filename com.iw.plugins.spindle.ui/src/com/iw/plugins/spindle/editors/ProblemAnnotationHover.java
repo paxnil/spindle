@@ -25,181 +25,185 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 /**
- * Determines all markers for the given line and collects, concatenates, and formates
- * their messages.
+ * Determines all markers for the given line and collects, concatenates, and
+ * formates their messages.
  */
 public class ProblemAnnotationHover implements IAnnotationHover
 {
 
-    /**
-     * Returns the distance to the ruler line. 
-     */
-    protected int compareRulerLine(Position position, IDocument document, int line)
-    {
+  /**
+   * Returns the distance to the ruler line.
+   */
+  protected int compareRulerLine(Position position, IDocument document, int line)
+  {
 
-        if (position.getOffset() > -1 && position.getLength() > -1)
+    if (position.getOffset() > -1 && position.getLength() > -1)
+    {
+      try
+      {
+        int annotationLine = document.getLineOfOffset(position.getOffset());
+        if (line == annotationLine)
+          return 1;
+        if (annotationLine <= line
+            && line <= document.getLineOfOffset(position.getOffset()
+                + position.getLength()))
+          return 2;
+      } catch (BadLocationException x)
+      {}
+    }
+
+    return 0;
+  }
+
+  /**
+   * Selects a set of markers from the two lists. By default, it just returns
+   * the set of exact matches.
+   */
+  protected List select(List exactMatch, List including)
+  {
+    return exactMatch;
+  }
+
+  /**
+   * Returns one marker which includes the ruler's line of activity.
+   */
+  protected List getAnnotationsForLine(ISourceViewer viewer, int line)
+  {
+
+    IDocument document = viewer.getDocument();
+    IAnnotationModel model = viewer.getAnnotationModel();
+
+    if (model == null)
+      return null;
+
+    List exact = new ArrayList();
+    List including = new ArrayList();
+
+    Iterator e = model.getAnnotationIterator();
+    HashMap messagesAtPosition = new HashMap();
+    while (e.hasNext())
+    {
+      Object o = e.next();
+      if (o instanceof IProblemAnnotation)
+      {
+        IProblemAnnotation a = (IProblemAnnotation) o;
+        if (!a.hasOverlay())
         {
-            try
-            {
-                int annotationLine = document.getLineOfOffset(position.getOffset());
-                if (line == annotationLine)
-                    return 1;
-                if (annotationLine <= line
-                    && line <= document.getLineOfOffset(position.getOffset() + position.getLength()))
-                    return 2;
-            } catch (BadLocationException x)
-            {}
+          Position position = model.getPosition((Annotation) a);
+          if (position == null)
+            continue;
+
+          if (isDuplicateAnnotation(messagesAtPosition, position, a.getMessage()))
+            continue;
+
+          switch (compareRulerLine(position, document, line))
+          {
+            case 1 :
+              exact.add(a);
+              break;
+            case 2 :
+              including.add(a);
+              break;
+          }
         }
-
-        return 0;
+      }
     }
 
-    /**
-     * Selects a set of markers from the two lists. By default, it just returns
-     * the set of exact matches.
-     */
-    protected List select(List exactMatch, List including)
+    return select(exact, including);
+  }
+
+  private boolean isDuplicateAnnotation(
+      Map messagesAtPosition,
+      Position position,
+      String message)
+  {
+    if (messagesAtPosition.containsKey(position))
     {
-        return exactMatch;
-    }
+      Object value = messagesAtPosition.get(position);
+      if (message.equals(value))
+        return true;
 
-    /**
-     * Returns one marker which includes the ruler's line of activity.
-     */
-    protected List getAnnotationsForLine(ISourceViewer viewer, int line)
+      if (value instanceof List)
+      {
+        List messages = (List) value;
+        if (messages.contains(message))
+          return true;
+        else
+          messages.add(message);
+      } else
+      {
+        ArrayList messages = new ArrayList();
+        messages.add(value);
+        messages.add(message);
+        messagesAtPosition.put(position, messages);
+      }
+    } else
+      messagesAtPosition.put(position, message);
+    return false;
+  }
+
+  /*
+   * @see IVerticalRulerHover#getHoverInfo(ISourceViewer, int)
+   */
+  public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber)
+  {
+    List annotations = getAnnotationsForLine(sourceViewer, lineNumber);
+    if (annotations != null)
     {
 
-        IDocument document = viewer.getDocument();
-        IAnnotationModel model = viewer.getAnnotationModel();
+      if (annotations.size() == 1)
+      {
 
-        if (model == null)
-            return null;
+        // optimization
+        IProblemAnnotation annotation = (IProblemAnnotation) annotations.get(0);
+        String message = annotation.getMessage();
+        if (message != null && message.trim().length() > 0)
+          return formatSingleMessage(message);
 
-        List exact = new ArrayList();
-        List including = new ArrayList();
+      } else
+      {
 
-        Iterator e = model.getAnnotationIterator();
-        HashMap messagesAtPosition = new HashMap();
+        List messages = new ArrayList();
+
+        Iterator e = annotations.iterator();
         while (e.hasNext())
         {
-            Object o = e.next();
-            if (o instanceof IProblemAnnotation)
-            {
-                IProblemAnnotation a = (IProblemAnnotation) o;
-                if (!a.hasOverlay())
-                {
-                    Position position = model.getPosition((Annotation) a);
-                    if (position == null)
-                        continue;
-
-                    if (isDuplicateAnnotation(messagesAtPosition, position, a.getMessage()))
-                        continue;
-
-                    switch (compareRulerLine(position, document, line))
-                    {
-                        case 1 :
-                            exact.add(a);
-                            break;
-                        case 2 :
-                            including.add(a);
-                            break;
-                    }
-                }
-            }
+          IProblemAnnotation annotation = (IProblemAnnotation) e.next();
+          String message = annotation.getMessage();
+          if (message != null && message.trim().length() > 0)
+            messages.add(message.trim());
         }
 
-        return select(exact, including);
+        if (messages.size() == 1)
+          return formatSingleMessage((String) messages.get(0));
+
+        if (messages.size() > 1)
+          return formatMultipleMessages(messages);
+      }
     }
 
-    private boolean isDuplicateAnnotation(Map messagesAtPosition, Position position, String message)
+    return null;
+  }
+
+  private String formatSingleMessage(String message)
+  {
+    return message;
+  }
+
+  /*
+   * Formats several message as text.
+   */
+  private String formatMultipleMessages(List messages)
+  {
+    StringBuffer buffer = new StringBuffer();
+    for (Iterator iter = messages.iterator(); iter.hasNext();)
     {
-        if (messagesAtPosition.containsKey(position))
-        {
-            Object value = messagesAtPosition.get(position);
-            if (message.equals(value))
-                return true;
+      String message = (String) iter.next();
+      buffer.append(message);
+      if (iter.hasNext())
+        buffer.append(System.getProperty("line.separator"));
 
-            if (value instanceof List)
-            {
-                List messages = (List) value;
-                if (messages.contains(message))
-                    return true;
-                else
-                    messages.add(message);
-            } else
-            {
-                ArrayList messages = new ArrayList();
-                messages.add(value);
-                messages.add(message);
-                messagesAtPosition.put(position, messages);
-            }
-        } else
-            messagesAtPosition.put(position, message);
-        return false;
     }
-
-    /*
-     * @see IVerticalRulerHover#getHoverInfo(ISourceViewer, int)
-     */
-    public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber)
-    {
-        List annotations = getAnnotationsForLine(sourceViewer, lineNumber);
-        if (annotations != null)
-        {
-
-            if (annotations.size() == 1)
-            {
-
-                // optimization
-                IProblemAnnotation annotation = (IProblemAnnotation) annotations.get(0);
-                String message = annotation.getMessage();
-                if (message != null && message.trim().length() > 0)
-                    return formatSingleMessage(message);
-
-            } else
-            {
-
-                List messages = new ArrayList();
-
-                Iterator e = annotations.iterator();
-                while (e.hasNext())
-                {
-                    IProblemAnnotation annotation = (IProblemAnnotation) e.next();
-                    String message = annotation.getMessage();
-                    if (message != null && message.trim().length() > 0)
-                        messages.add(message.trim());
-                }
-
-                if (messages.size() == 1)
-                    return formatSingleMessage((String) messages.get(0));
-
-                if (messages.size() > 1)
-                    return formatMultipleMessages(messages);
-            }
-        }
-
-        return null;
-    }
-
-    private String formatSingleMessage(String message)
-    {
-        return message;
-    }
-
-    /*
-     * Formats several message as text.
-     */
-    private String formatMultipleMessages(List messages)
-    {
-        StringBuffer buffer = new StringBuffer();
-        for (Iterator iter = messages.iterator(); iter.hasNext();)
-        {
-            String message = (String) iter.next();
-            buffer.append(message);
-            if (iter.hasNext())
-                buffer.append(System.getProperty("line.separator"));
-
-        }
-        return buffer.toString();
-    }
+    return buffer.toString();
+  }
 }

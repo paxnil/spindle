@@ -35,51 +35,54 @@ import com.iw.plugins.spindle.core.parser.ParserRuntimeException;
 import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
 
 /**
- *  A configuration used by TapestryPullParser
+ * A configuration used by TapestryPullParser
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: TapestryPullParserConfiguration.java,v 1.3 2003/05/30 20:40:34
+ *          glongman Exp $
  */
 public class TapestryPullParserConfiguration extends TapestryDOMParserConfiguration
 {
-    private boolean fStopParsing = false;
+  private boolean fStopParsing = false;
 
-    public TapestryPullParserConfiguration()
+  public TapestryPullParserConfiguration()
+  {
+    super();
+  }
+
+  public boolean parse() throws ParserRuntimeException, IOException
+  {
+    try
     {
-        super();
-    }
-
-    public boolean parse() throws ParserRuntimeException, IOException
+      return parse(false);
+    } catch (XMLParseException e)
     {
-        try
-        {
-            return parse(false);
-        } catch (XMLParseException e)
-        {
-            throw new ParserRuntimeException(e);
-        }
+      throw new ParserRuntimeException(e);
     }
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.xerces.xni.parser.XMLPullParserConfiguration#parse(boolean)
-     */
-    public boolean parse(boolean complete) throws XNIException, IOException
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.xerces.xni.parser.XMLPullParserConfiguration#parse(boolean)
+   */
+  public boolean parse(boolean complete) throws XNIException, IOException
+  {
+    boolean more = super.parse(complete);
+    if (!more || fStopParsing)
     {
-        boolean more = super.parse(complete);
-        if (!more || fStopParsing)
-        {
-            fStopParsing = false;
-            return more;
-        }
-        return parse(complete);
-
+      fStopParsing = false;
+      return more;
     }
+    return parse(complete);
 
-    public void stopParsing()
-    {
-        if (TapestryPullParser.Debug)
-            System.err.println("stopParsing called!");
-        fStopParsing = true;
-    }
+  }
+
+  public void stopParsing()
+  {
+    if (TapestryPullParser.Debug)
+      System.err.println("stopParsing called!");
+    fStopParsing = true;
+  }
 
 }

@@ -36,79 +36,90 @@ import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
- *  Spindle's implementation of IAssetSpecification
+ * Spindle's implementation of IAssetSpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginAssetSpecification.java,v 1.5 2004/05/17 02:31:49
+ *          glongman Exp $
  */
-public class PluginAssetSpecification extends BasePropertyHolder implements IAssetSpecification
+public class PluginAssetSpecification extends BasePropertyHolder
+    implements
+      IAssetSpecification
 {
 
-    private String fPath;
-    private AssetType fAssetType;
+  private String fPath;
+  private AssetType fAssetType;
 
-    /**
-     * @param type
-     */
-    public PluginAssetSpecification()
+  /**
+   * @param type
+   */
+  public PluginAssetSpecification()
+  {
+    super(BaseSpecification.ASSET_SPEC);
+  }
+
+  public PluginAssetSpecification(AssetType type, String path)
+  {
+    this();
+    this.fAssetType = type;
+    this.fPath = path;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IAssetSpecification#getPath()
+   */
+  public String getPath()
+  {
+    return fPath;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IAssetSpecification#getType()
+   */
+  public AssetType getType()
+  {
+    return fAssetType;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IAssetSpecification#setPath(java.lang.String)
+   */
+  public void setPath(String path)
+  {
+    this.fPath = path;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IAssetSpecification#setType(org.apache.tapestry.spec.AssetType)
+   */
+  public void setType(AssetType type)
+  {
+    this.fAssetType = type;
+  }
+
+  public void validate(Object parent, IScannerValidator validator)
+  {
+
+    IComponentSpecification component = (IComponentSpecification) parent;
+
+    ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+    try
     {
-        super(BaseSpecification.ASSET_SPEC);
+      validator.validateAsset(component, this, sourceInfo);
+
+    } catch (ScannerException e)
+    {
+      TapestryCore.log(e);
+      e.printStackTrace();
     }
-
-    public PluginAssetSpecification(AssetType type, String path)
-    {
-        this();
-        this.fAssetType = type;
-        this.fPath = path;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IAssetSpecification#getPath()
-     */
-    public String getPath()
-    {
-        return fPath;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IAssetSpecification#getType()
-     */
-    public AssetType getType()
-    {
-        return fAssetType;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IAssetSpecification#setPath(java.lang.String)
-     */
-    public void setPath(String path)
-    {
-        this.fPath = path;
-     }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IAssetSpecification#setType(org.apache.tapestry.spec.AssetType)
-     */
-    public void setType(AssetType type)
-    {
-        this.fAssetType = type;
-    }
-
-    public void validate(Object parent, IScannerValidator validator)
-    {
-
-        IComponentSpecification component = (IComponentSpecification) parent;
-
-        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-        
-        try
-        {           
-            validator.validateAsset(component, this, sourceInfo);
-
-        } catch (ScannerException e)
-        {
-            TapestryCore.log(e);
-            e.printStackTrace();
-        }
-    }
+  }
 }

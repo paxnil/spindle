@@ -46,116 +46,123 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 
 /**
- *  TODO Add Type comment
+ * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: AbstractTapestryResourceAction.java,v 1.1 2003/10/29 12:33:56
+ *          glongman Exp $
  */
-public abstract class AbstractTapestryResourceAction extends Action implements IObjectActionDelegate
+public abstract class AbstractTapestryResourceAction extends Action
+    implements
+      IObjectActionDelegate
 {
 
-    protected IWorkbenchPart fPart;
-    protected IStructuredSelection fSelection;
+  protected IWorkbenchPart fPart;
+  protected IStructuredSelection fSelection;
 
-    /**
-     * Constructor for AbstractCreateFromTemplateAction.
-     */
-    public AbstractTapestryResourceAction()
+  /**
+   * Constructor for AbstractCreateFromTemplateAction.
+   */
+  public AbstractTapestryResourceAction()
+  {
+    super();
+  }
+
+  /**
+   * @see org.eclipse.ui.IObjectActionDelegate#setActivePart(IAction,
+   *      IWorkbenchPart)
+   */
+  public void setActivePart(IAction action, IWorkbenchPart targetPart)
+  {
+    fPart = targetPart;
+  }
+
+  /**
+   * @see org.eclipse.ui.IActionDelegate#selectionChanged(IAction, ISelection)
+   */
+  public void selectionChanged(IAction action, ISelection sel)
+  {
+    boolean enable = false;
+    this.fSelection = null;
+
+    IStructuredSelection selection = null;
+    if (sel instanceof IStructuredSelection)
     {
-        super();
+      selection = (IStructuredSelection) sel;
+      if (!selection.isEmpty())
+        enable = checkSelection(selection);
+
     }
+    if (enable)
+      this.fSelection = selection;
 
-    /**
-     * @see org.eclipse.ui.IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
-     */
-    public void setActivePart(IAction action, IWorkbenchPart targetPart)
+    action.setEnabled(enable);
+  }
+
+  /**
+   * Method checkMultiSelection.
+   * 
+   * @param selection
+   * @return boolean
+   */
+  private boolean checkSelection(IStructuredSelection selection)
+  {
+    boolean result = true;
+
+    if (selection == null || selection.isEmpty())
     {
-        fPart = targetPart;
-    }
+      result = false;
 
-    /**
-     * @see org.eclipse.ui.IActionDelegate#selectionChanged(IAction, ISelection)
-     */
-    public void selectionChanged(IAction action, ISelection sel)
+    } else
     {
-        boolean enable = false;
-        this.fSelection = null;
 
-        IStructuredSelection selection = null;
-        if (sel instanceof IStructuredSelection)
+      for (Iterator iter = selection.iterator(); iter.hasNext();)
+      {
+        IFile candidateFile = (IFile) iter.next();
+
+        IProject project = candidateFile.getProject();
+
+        try
         {
-            selection = (IStructuredSelection) sel;
-            if (!selection.isEmpty())
-                enable = checkSelection(selection);
 
+          if (!project.isOpen() || !project.hasNature(TapestryCore.NATURE_ID))
+            return false;
+
+          if (project.findMarkers(
+              ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER,
+              false,
+              IResource.DEPTH_INFINITE).length > 0)
+            return false;
+
+        } catch (CoreException e)
+        {
+          return false;
         }
-        if (enable)
-            this.fSelection = selection;
 
-        action.setEnabled(enable);
+        if (checkSpecificationExists(candidateFile))
+          result = false;
+      }
     }
+    return result;
+  }
 
-    /**
-     * Method checkMultiSelection.
-     * @param selection
-     * @return boolean
-     */
-    private boolean checkSelection(IStructuredSelection selection)
-    {
-        boolean result = true;
+  protected String getName(IFile file)
+  {
 
-        if (selection == null || selection.isEmpty())
-        {
-            result = false;
+    IPath path = file.getFullPath();
+    path = path.removeFileExtension();
+    return path.lastSegment();
+  }
 
-        } else
-        {
+  private boolean checkSpecificationExists(IFile file)
+  {
+    Map templateMap = TapestryArtifactManager
+        .getTapestryArtifactManager()
+        .getTemplateMap(file.getProject());
+    if (templateMap != null && templateMap.containsKey(file))
+      return templateMap.get(file) != null;
 
-            for (Iterator iter = selection.iterator(); iter.hasNext();)
-            {
-                IFile candidateFile = (IFile) iter.next();
-
-                IProject project = candidateFile.getProject();
-
-                try
-                {
-
-                    if (!project.isOpen() || !project.hasNature(TapestryCore.NATURE_ID))
-                        return false;
-
-                    if (project
-                        .findMarkers(ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER, false, IResource.DEPTH_INFINITE)
-                        .length
-                        > 0)
-                        return false;
-
-                } catch (CoreException e)
-                {
-                    return false;
-                }
-
-                if (checkSpecificationExists(candidateFile))
-                    result = false;
-            }
-        }
-        return result;
-    }
-
-    protected String getName(IFile file)
-    {
-
-        IPath path = file.getFullPath();
-        path = path.removeFileExtension();
-        return path.lastSegment();
-    }
-
-    private boolean checkSpecificationExists(IFile file)
-    {
-        Map templateMap = TapestryArtifactManager.getTapestryArtifactManager().getTemplateMap(file.getProject());
-        if (templateMap != null && templateMap.containsKey(file))
-            return templateMap.get(file) != null;
-
-        return false;
-    }
+    return false;
+  }
 
 }

@@ -36,98 +36,104 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.ui.wizards.NewTapestryElementWizard;
 
 /**
- *  Wizard for creating new Tapestry projects.
+ * Wizard for creating new Tapestry projects.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: NewTapestryProjectWizard.java,v 1.4 2003/11/17 18:49:37
+ *          glongman Exp $
  */
 public class NewTapestryProjectWizard extends NewTapestryElementWizard
 {
-    private NewTapestryProjectPage fMainPage;
-    private NewTapestryProjectJavaPage fJavaPage;
+  private NewTapestryProjectPage fMainPage;
+  private NewTapestryProjectJavaPage fJavaPage;
 
-    private boolean beenThere = false;
+  private boolean beenThere = false;
 
-    public NewTapestryProjectWizard()
+  public NewTapestryProjectWizard()
+  {
+    super();
+    setNeedsProgressMonitor(true);
+    setWindowTitle(UIPlugin.getString("new-project-wizard-window-title"));
+  }
+
+  /**
+   * @see Wizard#createPages
+   */
+  public void addPages()
+  {
+    ImageDescriptor descriptor = Images.getImageDescriptor("applicationDialog.gif");
+
+    fMainPage = new NewTapestryProjectPage(UIPlugin
+        .getString("new-project-wizard-page-title"));
+    fMainPage.setImageDescriptor(descriptor);
+    fMainPage.setDescription(UIPlugin.getString("new-project-wizard-page-title"));
+
+    addPage(fMainPage);
+
+    fJavaPage = new NewTapestryProjectJavaPage(fMainPage);
+    fJavaPage.setImageDescriptor(descriptor);
+    addPage(fJavaPage);
+    // bug [ 843021 ] Is this what 3 Beta is supposed to do
+    // for some reason sometimes the page's wizard is not set
+    //
+    // should have been set by addPagr()
+    fJavaPage.setWizard(this);
+  }
+
+  /**
+   * @see Wizard#performFinish()
+   */
+  public boolean performFinish()
+  {
+    if (finishPage(fJavaPage.getRunnable()))
     {
-        super();
-        setNeedsProgressMonitor(true);
-        setWindowTitle(UIPlugin.getString("new-project-wizard-window-title"));
-    }
-
-    /**
-     * @see Wizard#createPages
-     */
-    public void addPages()
-    {
-        ImageDescriptor descriptor = Images.getImageDescriptor("applicationDialog.gif");
-
-        fMainPage = new NewTapestryProjectPage(UIPlugin.getString("new-project-wizard-page-title"));
-        fMainPage.setImageDescriptor(descriptor);
-        fMainPage.setDescription(UIPlugin.getString("new-project-wizard-page-title"));
-
-        addPage(fMainPage);
-
-        fJavaPage = new NewTapestryProjectJavaPage(fMainPage);
-        fJavaPage.setImageDescriptor(descriptor);        
-        addPage(fJavaPage);
-        // bug [ 843021 ] Is this what 3 Beta is supposed to do
-        // for some reason sometimes the page's wizard is not set
-        //
-        // should have been set by addPagr()
-        fJavaPage.setWizard(this);
-    }
-
-    /**
-      * @see Wizard#performFinish()
-      */
-    public boolean performFinish()
-    {
-        if (finishPage(fJavaPage.getRunnable()))
+      IJavaProject jproject = fJavaPage.getJavaProject();
+      try
+      {
+        jproject.open(null);
+        finishPage(fMainPage.getRunnable(jproject));
+        IResource[] reveal = fMainPage.getReveal();
+        for (int i = 0; i < reveal.length; i++)
         {
-            IJavaProject jproject = fJavaPage.getJavaProject();
-            try
-            {
-                jproject.open(null);
-                finishPage(fMainPage.getRunnable(jproject));
-                IResource [] reveal = fMainPage.getReveal();
-                for (int i = 0; i < reveal.length; i++)
-                {
-                    selectAndReveal(reveal[i]);
-                }
-            } catch (JavaModelException e)
-            {
-                UIPlugin.log(e);
-            }
+          selectAndReveal(reveal[i]);
         }
-        return true;
+      } catch (JavaModelException e)
+      {
+        UIPlugin.log(e);
+      }
     }
+    return true;
+  }
 
-    /* (non-Javadoc)
-         * @see IWizard#performCancel()
-         */
-    public boolean performCancel()
-    {
-        fJavaPage.performCancel();
-        return super.performCancel();
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see IWizard#performCancel()
+   */
+  public boolean performCancel()
+  {
+    fJavaPage.performCancel();
+    return super.performCancel();
+  }
 
-    /**
-     * @return
-     */
-    public String getContextFolderName()
-    {
-        return fMainPage.getContextFolderName();
-    }
+  /**
+   * @return
+   */
+  public String getContextFolderName()
+  {
+    return fMainPage.getContextFolderName();
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.wizard.IWizard#canFinish()
-     */
-    public boolean canFinish()
-    {
-        if (getContainer().getCurrentPage() == fMainPage)
-            return false;
-        return super.canFinish();
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.wizard.IWizard#canFinish()
+   */
+  public boolean canFinish()
+  {
+    if (getContainer().getCurrentPage() == fMainPage)
+      return false;
+    return super.canFinish();
+  }
 
 }

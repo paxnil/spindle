@@ -39,97 +39,111 @@ import org.apache.xerces.xni.parser.XMLConfigurationException;
 import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
- *  Adds ability to use cached DTD Grammars
+ * Adds ability to use cached DTD Grammars
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: TapestryXMLDTDValidator.java,v 1.5 2003/07/06 18:35:41 glongman
+ *          Exp $
  */
 public class TapestryXMLDTDValidator extends XMLDTDValidator
 {
 
-    private boolean fSeenRootElement;
-    private String fPublicId;
-    private XMLGrammarPoolImpl fGrammarPool;
-    /**
-     * 
-     */
-    public TapestryXMLDTDValidator()
+  private boolean fSeenRootElement;
+  private String fPublicId;
+  private XMLGrammarPoolImpl fGrammarPool;
+  /**
+   *  
+   */
+  public TapestryXMLDTDValidator()
+  {
+    super();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.xerces.xni.XMLDocumentHandler#doctypeDecl(java.lang.String,
+   *      java.lang.String, java.lang.String,
+   *      org.apache.xerces.xni.Augmentations)
+   */
+  public void doctypeDecl(
+      String rootElement,
+      String publicId,
+      String systemId,
+      Augmentations augs) throws XNIException
+  {
+    this.fPublicId = publicId;
+    super.doctypeDecl(rootElement, publicId, systemId, augs);
+  }
+
+  /*
+   * (non-Javadoc) If the grammar is null, the cache has it.
+   * 
+   * @see org.apache.xerces.impl.dtd.XMLDTDValidator#handleStartElement(org.apache.xerces.xni.QName,
+   *      org.apache.xerces.xni.XMLAttributes)
+   */
+  protected void handleStartElement(QName element, XMLAttributes attributes) throws XNIException
+  {
+    if (!fSeenRootElement)
     {
-        super();
+      fSeenRootElement = true;
+
+      if (fDTDGrammar == null)
+        fDTDGrammar = getGrammar(fPublicId);
+    }
+    super.handleStartElement(element, attributes);
+
+  }
+
+  /**
+   * @param publicId
+   * @return
+   */
+  private DTDGrammar getGrammar(String publicId)
+  {
+    if (TapestryCore.isCachingDTDGrammars() && publicId != null)
+      return (DTDGrammar) fGrammarPool.getGrammar(publicId);
+
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.xerces.xni.parser.XMLComponent#setProperty(java.lang.String,
+   *      java.lang.Object)
+   */
+  public void setProperty(String propertyId, Object value) throws XMLConfigurationException
+  {
+
+    super.setProperty(propertyId, value);
+    if (propertyId.equals(XMLDTDValidator.GRAMMAR_POOL))
+    {
+      fGrammarPool = (XMLGrammarPoolImpl) value;
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.xerces.xni.parser.XMLComponent#reset(org.apache.xerces.xni.parser.XMLComponentManager)
+   */
+  public void reset(XMLComponentManager componentManager) throws XMLConfigurationException
+  {
+    if (fGrammarPool == null)
+      fGrammarPool = (XMLGrammarPoolImpl) componentManager
+          .getProperty("http://apache.org/xml/properties/internal/grammar-pool");
+
+    if (fPublicId != null && TapestryCore.isCachingDTDGrammars())
+    {
+      if (fGrammarPool != null && fDTDGrammar != null
+          && fGrammarPool.getGrammar(fPublicId) == null)
+        fGrammarPool.putGrammar(fPublicId, fDTDGrammar);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.xerces.xni.XMLDocumentHandler#doctypeDecl(java.lang.String, java.lang.String, java.lang.String, org.apache.xerces.xni.Augmentations)
-     */
-    public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs)
-        throws XNIException
-    {
-        this.fPublicId = publicId;
-        super.doctypeDecl(rootElement, publicId, systemId, augs);
-    }
-
-    /* (non-Javadoc)
-     * If the grammar is null, the cache has it. 
-     * 
-     * @see org.apache.xerces.impl.dtd.XMLDTDValidator#handleStartElement(org.apache.xerces.xni.QName, org.apache.xerces.xni.XMLAttributes)
-     */
-    protected void handleStartElement(QName element, XMLAttributes attributes) throws XNIException
-    {
-        if (!fSeenRootElement)
-        {
-            fSeenRootElement = true;
-
-            if (fDTDGrammar == null)
-                fDTDGrammar = getGrammar(fPublicId);
-        }
-        super.handleStartElement(element, attributes);
-
-    }
-
-    /**
-     * @param publicId
-     * @return
-     */
-    private DTDGrammar getGrammar(String publicId)
-    {
-        if (TapestryCore.isCachingDTDGrammars() && publicId != null)
-            return (DTDGrammar) fGrammarPool.getGrammar(publicId);
-
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.xerces.xni.parser.XMLComponent#setProperty(java.lang.String, java.lang.Object)
-     */
-    public void setProperty(String propertyId, Object value) throws XMLConfigurationException
-    {
-
-        super.setProperty(propertyId, value);
-        if (propertyId.equals(XMLDTDValidator.GRAMMAR_POOL))
-        {
-            fGrammarPool = (XMLGrammarPoolImpl) value;
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.xerces.xni.parser.XMLComponent#reset(org.apache.xerces.xni.parser.XMLComponentManager)
-     */
-    public void reset(XMLComponentManager componentManager) throws XMLConfigurationException
-    {
-        if (fGrammarPool == null)
-            fGrammarPool =
-                (XMLGrammarPoolImpl) componentManager.getProperty(
-                    "http://apache.org/xml/properties/internal/grammar-pool");
-
-        if (fPublicId != null && TapestryCore.isCachingDTDGrammars())
-        {
-            if (fGrammarPool != null && fDTDGrammar != null && fGrammarPool.getGrammar(fPublicId) == null)
-                fGrammarPool.putGrammar(fPublicId, fDTDGrammar);
-        }
-
-        fSeenRootElement = false;
-        fPublicId = null;
-        super.reset(componentManager);
-    }
+    fSeenRootElement = false;
+    fPublicId = null;
+    super.reset(componentManager);
+  }
 
 }

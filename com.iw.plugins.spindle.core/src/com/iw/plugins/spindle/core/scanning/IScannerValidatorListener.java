@@ -29,21 +29,22 @@ package com.iw.plugins.spindle.core.scanning;
 import org.eclipse.jdt.core.IType;
 
 /**
- *  Listener interface for classes that are interested in things the
- *  Validators find/don't find.
+ * Listener interface for classes that are interested in things the Validators
+ * find/don't find.
  * 
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: IScannerValidatorListener.java,v 1.2 2004/05/17 02:31:48
+ *          glongman Exp $
  */
 public interface IScannerValidatorListener
 {
-    /**
-     * @deprecated use recordTypeDependency
-     *  @param fullyQualifiedName the fully qualified name of a type defined in a Tapestry artifact
-     *  @param result the IType the fullyQualifiedName resolved to, if any
-     */
-    void typeChecked(String fullyQualifiedName, IType result);
-
+  /**
+   * @deprecated use recordTypeDependency
+   * @param fullyQualifiedName the fully qualified name of a type defined in a
+   *          Tapestry artifact
+   * @param result the IType the fullyQualifiedName resolved to, if any
+   */
+  void typeChecked(String fullyQualifiedName, IType result);
 
 }

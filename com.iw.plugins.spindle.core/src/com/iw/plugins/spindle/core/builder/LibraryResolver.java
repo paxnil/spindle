@@ -31,7 +31,7 @@ import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /**
- *  Namespace resolver for libraries.
+ * Namespace resolver for libraries.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -39,45 +39,40 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 public class LibraryResolver extends NamespaceResolver
 {
 
-    private ICoreNamespace fParentNamespace;
-    private String fLibraryId;
-    private IResourceWorkspaceLocation fLibLocation;
+  private ICoreNamespace fParentNamespace;
+  private String fLibraryId;
+  private IResourceWorkspaceLocation fLibLocation;
 
-    /**
-     * @param build
-     * @param parser
-     */
-    public LibraryResolver(
-        Build build,
-        Parser parser,
-        ICoreNamespace framework,
-        ICoreNamespace parent,
-        String libraryId,
-        IResourceWorkspaceLocation location)
+  /**
+   * @param build
+   * @param parser
+   */
+  public LibraryResolver(Build build, Parser parser, ICoreNamespace framework,
+      ICoreNamespace parent, String libraryId, IResourceWorkspaceLocation location)
+  {
+    super(build, parser);
+    fFrameworkNamespace = framework;
+    fParentNamespace = parent;
+    fLibraryId = libraryId;
+    fLibLocation = location;
+  }
+
+  public ICoreNamespace resolve()
+  {
+    try
     {
-        super(build, parser);
-        fFrameworkNamespace = framework;
-        fParentNamespace = parent;
-        fLibraryId = libraryId;
-        fLibLocation = location;
-    }
 
-    public ICoreNamespace resolve()
+      resolve(fLibraryId, fLibLocation);
+
+      if (fParentNamespace != null && fResultNamespace != null)
+        fParentNamespace.installChildNamespace(fLibraryId, fResultNamespace);
+
+      return fResultNamespace;
+
+    } finally
     {
-        try
-        {
-
-            resolve(fLibraryId, fLibLocation);
-
-            if (fParentNamespace != null && fResultNamespace != null)
-                fParentNamespace.installChildNamespace(fLibraryId, fResultNamespace);
-
-            return fResultNamespace;
-            
-        } finally
-        {
-            cleanup();
-        }
+      cleanup();
     }
+  }
 
 }

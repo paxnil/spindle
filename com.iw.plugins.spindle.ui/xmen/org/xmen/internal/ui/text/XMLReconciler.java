@@ -272,7 +272,7 @@ public class XMLReconciler implements IDocumentListener
               }
               if (n.getType().equals(ITypeConstants.DECL))
               {
-                
+
                 //   TODO revisit if (n.getName().equals("!DOCTYPE")) {
                 //                                    String dtdLocation = n.getDTDLocation();
                 //                                    if (dtdLocation != null) {
@@ -554,7 +554,7 @@ public class XMLReconciler implements IDocumentListener
           root.publicId = null;
           root.rootNodeId = null;
           System.out.println("dtd removed");
-        }       
+        }
       }
       if (node.getParent() != null)
       {

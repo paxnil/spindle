@@ -36,89 +36,89 @@ import org.apache.tapestry.ApplicationRuntimeException;
 import org.apache.tapestry.parse.TemplateParser;
 
 /**
- *  Perl expression matcher for implicit components found in Tapestry templates.
+ * Perl expression matcher for implicit components found in Tapestry templates.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public class ImplicitIdMatcher
 {
-    private static final int IMPLICIT_ID_PATTERN_ID_GROUP = 1;
-    private static final int IMPLICIT_ID_PATTERN_TYPE_GROUP = 2;
-    private static final int IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP = 4;
-    private static final int IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP = 5;
+  private static final int IMPLICIT_ID_PATTERN_ID_GROUP = 1;
+  private static final int IMPLICIT_ID_PATTERN_TYPE_GROUP = 2;
+  private static final int IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP = 4;
+  private static final int IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP = 5;
 
-    private Pattern fImplicitIdPattern;
-    private PatternMatcher fPatternMatcher;
+  private Pattern fImplicitIdPattern;
+  private PatternMatcher fPatternMatcher;
 
-    private String fJwcId;
-    private String fType;
-    private String fLibraryId;
-    private String fSimpleType;
-    private boolean fValid;
+  private String fJwcId;
+  private String fType;
+  private String fLibraryId;
+  private String fSimpleType;
+  private boolean fValid;
 
-    public ImplicitIdMatcher()
+  public ImplicitIdMatcher()
+  {
+    super();
+    Perl5Compiler compiler = new Perl5Compiler();
+
+    try
     {
-        super();
-        Perl5Compiler compiler = new Perl5Compiler();
-
-        try
-        {
-            fImplicitIdPattern = compiler.compile(TemplateParser.IMPLICIT_ID_PATTERN);
-        } catch (MalformedPatternException ex)
-        {
-            throw new ApplicationRuntimeException(ex);
-        }
-
-        fPatternMatcher = new Perl5Matcher();
+      fImplicitIdPattern = compiler.compile(TemplateParser.IMPLICIT_ID_PATTERN);
+    } catch (MalformedPatternException ex)
+    {
+      throw new ApplicationRuntimeException(ex);
     }
 
-    public boolean isMatch(String candidateJwcid)
+    fPatternMatcher = new Perl5Matcher();
+  }
+
+  public boolean isMatch(String candidateJwcid)
+  {
+    fValid = false;
+    if (fPatternMatcher.matches(candidateJwcid, fImplicitIdPattern))
     {
-        fValid = false;
-        if (fPatternMatcher.matches(candidateJwcid, fImplicitIdPattern))
-        {
-            fValid = true;
+      fValid = true;
 
-            MatchResult match = fPatternMatcher.getMatch();
+      MatchResult match = fPatternMatcher.getMatch();
 
-            fJwcId = match.group(IMPLICIT_ID_PATTERN_ID_GROUP);
-            fType = match.group(IMPLICIT_ID_PATTERN_TYPE_GROUP);
+      fJwcId = match.group(IMPLICIT_ID_PATTERN_ID_GROUP);
+      fType = match.group(IMPLICIT_ID_PATTERN_TYPE_GROUP);
 
-            fLibraryId = match.group(IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP);
-            fSimpleType = match.group(IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP);
-        }
-        return fValid;
+      fLibraryId = match.group(IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP);
+      fSimpleType = match.group(IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP);
     }
+    return fValid;
+  }
 
-    private void checkValid()
-    {
-        if (!fValid)
-            throw new Error("Invalid Access to ImplicitIdMatcher");
-    }
+  private void checkValid()
+  {
+    if (!fValid)
+      throw new Error("Invalid Access to ImplicitIdMatcher");
+  }
 
-    public String getJwcId()
-    {
-        checkValid();
-        return fJwcId;
-    }
+  public String getJwcId()
+  {
+    checkValid();
+    return fJwcId;
+  }
 
-    public String getLibraryId()
-    {
-        checkValid();
-        return fLibraryId;
-    }
+  public String getLibraryId()
+  {
+    checkValid();
+    return fLibraryId;
+  }
 
-    public String getSimpleType()
-    {
-        checkValid();
-        return fSimpleType;
-    }
+  public String getSimpleType()
+  {
+    checkValid();
+    return fSimpleType;
+  }
 
-    public String getType()
-    {
-        checkValid();
-        return fType;
-    }
+  public String getType()
+  {
+    checkValid();
+    return fType;
+  }
 
 }

@@ -40,23 +40,26 @@ import com.iw.plugins.spindle.UIPlugin;
  */
 public class TemplateStorageDocumentProvider extends StorageDocumentProvider
 {
-    /*
-     * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createDocument(Object)
-     */
-    protected IDocument createDocument(Object element) throws CoreException
+  /*
+   * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createDocument(Object)
+   */
+  protected IDocument createDocument(Object element) throws CoreException
+  {
+    IDocument document = super.createDocument(element);
+    if (document != null)
     {
-        IDocument document = super.createDocument(element);
-        if (document != null)
-        {
-            IDocumentPartitioner partitioner = UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
+      IDocumentPartitioner partitioner = UIPlugin
+          .getDefault()
+          .getTemplateTextTools()
+          .createXMLPartitioner();
 
-            if (partitioner != null)
-            {
-                partitioner.connect(document);
-                document.setDocumentPartitioner(partitioner);
-            }
-        }
-
-        return document;
+      if (partitioner != null)
+      {
+        partitioner.connect(document);
+        document.setDocumentPartitioner(partitioner);
+      }
     }
+
+    return document;
+  }
 }

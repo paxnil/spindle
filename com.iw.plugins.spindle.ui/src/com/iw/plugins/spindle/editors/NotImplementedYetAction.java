@@ -32,30 +32,33 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
- *  Place holder Action while development is underway.
+ * Place holder Action while development is underway.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: NotImplementedYetAction.java,v 1.1 2003/11/06 22:06:37 glongman
+ *          Exp $
  */
 public class NotImplementedYetAction extends Action
 {
 
-    public NotImplementedYetAction()
-    {
-        super();
-        setText("Not implemented yet");
-        setToolTipText("Not implemented yet");
-    }
+  public NotImplementedYetAction()
+  {
+    super();
+    setText("Not implemented yet");
+    setToolTipText("Not implemented yet");
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.action.IAction#run()
-     */
-    public void run()
-    {
-        MessageDialog.openInformation(
-            UIPlugin.getDefault().getActiveWorkbenchShell(),
-            "Not implemented",
-            "This action is coming soon");
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.action.IAction#run()
+   */
+  public void run()
+  {
+    MessageDialog.openInformation(
+        UIPlugin.getDefault().getActiveWorkbenchShell(),
+        "Not implemented",
+        "This action is coming soon");
+  }
 
 }

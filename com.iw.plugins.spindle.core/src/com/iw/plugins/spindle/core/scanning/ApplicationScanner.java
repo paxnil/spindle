@@ -35,7 +35,7 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 
 /**
- *  Scanner that turns a node tree into a IApplicationSpecification
+ * Scanner that turns a node tree into a IApplicationSpecification
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -43,63 +43,68 @@ import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 public class ApplicationScanner extends LibraryScanner
 {
 
-    /* Don't need to throw an exception or add a problem here, the Parser will already have caught this
-     * @see com.iw.plugins.spindle.core.scanner.AbstractScanner#beforeScan()
-     */
-    protected Object beforeScan(Object source) throws ScannerException
+  /*
+   * Don't need to throw an exception or add a problem here, the Parser will
+   * already have caught this
+   * 
+   * @see com.iw.plugins.spindle.core.scanner.AbstractScanner#beforeScan()
+   */
+  protected Object beforeScan(Object source) throws ScannerException
+  {
+    return super.beforeScan(source);
+  }
+
+  protected Object createResult()
+  {
+    if (!isElement(fRootNode, "application"))
     {
-        return super.beforeScan(source);
+      return null;
     }
+    return fSpecificationFactory.createApplicationSpecification();
+  }
 
-    protected Object createResult()
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(org.w3c.dom.Node)
+   */
+  protected void doScan(Object source, Object resultObject) throws ScannerException
+  {
+    validate(source);
+    IApplicationSpecification specification = (IApplicationSpecification) resultObject;
+    specification.setPublicId(fPublicId);
+    specification.setSpecificationLocation(fResourceLocation);
+    specification.setLocation(getSourceLocationInfo(fRootNode));
+    String rootName = fRootNode.getNodeName();
+    if (!rootName.equals("application"))
     {
-        if (!isElement(fRootNode, "application"))
-        {
-            return null;
-        }
-        return fSpecificationFactory.createApplicationSpecification();
+      addProblem(
+          IProblem.ERROR,
+          getBestGuessSourceLocation(fRootNode, false),
+          TapestryCore.getTapestryString(
+              "AbstractDocumentParser.incorrect-document-type",
+              "application",
+              rootName),
+          false);
+      return;
     }
+    scanApplicationSpecification(fRootNode, specification, null);
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(org.w3c.dom.Node)
-     */
-    protected void doScan(Object source, Object resultObject) throws ScannerException
-    {
-        validate(source);
-        IApplicationSpecification specification = (IApplicationSpecification) resultObject;
-        specification.setPublicId(fPublicId);
-        specification.setSpecificationLocation(fResourceLocation);
-        specification.setLocation(getSourceLocationInfo(fRootNode));
-        String rootName = fRootNode.getNodeName();
-        if (!rootName.equals("application"))
-        {
-            addProblem(
-                IProblem.ERROR,
-                getBestGuessSourceLocation(fRootNode, false),
-                TapestryCore.getTapestryString(
-                    "AbstractDocumentParser.incorrect-document-type",
-                    "application",
-                    rootName), false);
-            return;
-        }
-        scanApplicationSpecification(fRootNode, specification, null);
-    }
+  protected IApplicationSpecification scanApplicationSpecification(
+      Node rootNode,
+      IApplicationSpecification specification,
+      IResourceResolver resolver) throws ScannerException
+  {
 
-    protected IApplicationSpecification scanApplicationSpecification(
-        Node rootNode,
-        IApplicationSpecification specification,
-        IResourceResolver resolver)
-        throws ScannerException
-    {
+    specification.setName(getAttribute(rootNode, "name"));
 
-        specification.setName(getAttribute(rootNode, "name"));
+    specification.setEngineClassName(getAttribute(rootNode, "engine-class"));
 
-        specification.setEngineClassName(getAttribute(rootNode, "engine-class"));
+    ((PluginApplicationSpecification) specification).validateSelf(fValidator);
 
-        ((PluginApplicationSpecification) specification).validateSelf(fValidator);
+    scanLibrarySpecification(rootNode, specification, resolver);
 
-        scanLibrarySpecification(rootNode, specification, resolver);
-
-        return specification;
-    }
+    return specification;
+  }
 }

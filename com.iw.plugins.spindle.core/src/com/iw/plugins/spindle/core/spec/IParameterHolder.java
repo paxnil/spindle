@@ -24,8 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.core.spec;
 
 import java.util.List;
@@ -35,16 +33,16 @@ import org.apache.tapestry.spec.ParameterSpecification;
 /**
  * @author gwl
  * @version $Id$
- *
- * Copyright 2002, Intelligent Work Inc.
- * All Rights Reserved.
+ * 
+ * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
  */
-public interface IParameterHolder {
-	
-	public ParameterSpecification getParameter(String name);
-	public void setParameter(String name, PluginParameterSpecification spec);
-	public void addParameter(String name, ParameterSpecification spec);
-	public List getParameterNames();
-	public void removeParameter(String name);
+public interface IParameterHolder
+{
+
+  public ParameterSpecification getParameter(String name);
+  public void setParameter(String name, PluginParameterSpecification spec);
+  public void addParameter(String name, ParameterSpecification spec);
+  public List getParameterNames();
+  public void removeParameter(String name);
 
 }

@@ -1,29 +1,26 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
+/*******************************************************************************
+ * ***** BEGIN LICENSE BLOCK Version: MPL 1.1
+ * 
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
+ * 1.1 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at http://www.mozilla.org/MPL/
+ * 
  * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+ * the specific language governing rights and limitations under the License.
+ * 
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
- *
- * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
- * the Initial Developer. All Rights Reserved.
- *
+ * 
+ * The Initial Developer of the Original Code is Intelligent Works Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2003 the Initial
+ * Developer. All Rights Reserved.
+ * 
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
- *  phraktle@imapmail.org
- *
- * ***** END LICENSE BLOCK ***** */
+ * glongman@intelligentworks.com phraktle@imapmail.org
+ * 
+ * ***** END LICENSE BLOCK *****
+ */
 package com.iw.plugins.spindle.editors.template;
 
 import java.util.Map;
@@ -39,86 +36,86 @@ import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WordRule;
 
-
 public class TemplateTagScanner extends BufferedRuleBasedScanner
 {
-    
-    public TemplateTagScanner(Map tokens)
+
+  public TemplateTagScanner(Map tokens)
+  {
+    setDefaultReturnToken((Token) tokens.get(ITemplateSyntaxConstants.XML_DEFAULT));
+
+    IToken tag = (Token) tokens.get(ITemplateSyntaxConstants.XML_TAG);
+    IToken jwcidAttribute = (Token) tokens
+        .get(ITemplateSyntaxConstants.TAPESTRY_ATT_NAME);
+    IToken attribute = (Token) tokens.get(ITemplateSyntaxConstants.XML_ATT_NAME);
+
+    IRule[] rules = {new XMLTagRule(tag), new JWCIDRule(jwcidAttribute),
+        new WordRule(new NameDetector(), attribute)};
+
+    setRules(rules);
+  }
+
+  private static class JWCIDRule implements IRule
+  {
+
+    private IWordDetector fDetector = new JWCIDDetector();
+    private IToken fSuccessToken;
+    private StringBuffer fBuffer = new StringBuffer();
+
+    public JWCIDRule(IToken successToken)
     {
-        setDefaultReturnToken((Token) tokens.get(ITemplateSyntaxConstants.XML_DEFAULT));
-
-        IToken tag = (Token) tokens.get(ITemplateSyntaxConstants.XML_TAG);
-        IToken jwcidAttribute = (Token) tokens.get(ITemplateSyntaxConstants.TAPESTRY_ATT_NAME);
-        IToken attribute = (Token) tokens.get(ITemplateSyntaxConstants.XML_ATT_NAME);
-
-        IRule[] rules =
-            { new XMLTagRule(tag), new JWCIDRule(jwcidAttribute), new WordRule(new NameDetector(), attribute)};
-
-        setRules(rules);
+      fSuccessToken = successToken;
     }
 
-    private static class JWCIDRule implements IRule
+    /*
+     * @see IRule#evaluate(ICharacterScanner)
+     */
+    public IToken evaluate(ICharacterScanner scanner)
     {
+      int c = scanner.read();
+      if (fDetector.isWordStart((char) c))
+      {
 
-        private IWordDetector fDetector = new JWCIDDetector();
-        private IToken fSuccessToken;
-        private StringBuffer fBuffer = new StringBuffer();
-
-        public JWCIDRule(IToken successToken)
+        fBuffer.setLength(0);
+        do
         {
-            fSuccessToken = successToken;
-        }
+          fBuffer.append((char) c);
+          c = scanner.read();
+        } while (c != ICharacterScanner.EOF && fDetector.isWordPart((char) c));
+        scanner.unread();
 
-        /*
-         * @see IRule#evaluate(ICharacterScanner)
-         */
-        public IToken evaluate(ICharacterScanner scanner)
-        {
-            int c = scanner.read();
-            if (fDetector.isWordStart((char) c))
-            {
+        String test = fBuffer.toString().toLowerCase();
 
-                fBuffer.setLength(0);
-                do
-                {
-                    fBuffer.append((char) c);
-                    c = scanner.read();
-                } while (c != ICharacterScanner.EOF && fDetector.isWordPart((char) c));
-                scanner.unread();
+        if (test.equals("jwcid"))
+          return fSuccessToken;
 
-                String test = fBuffer.toString().toLowerCase();
+        unreadBuffer(scanner);
 
-                if (test.equals("jwcid"))
-                    return fSuccessToken;
+        return Token.UNDEFINED;
+      }
 
-                unreadBuffer(scanner);
-
-                return Token.UNDEFINED;
-            }
-
-            scanner.unread();
-            return Token.UNDEFINED;
-        }
-
-        protected void unreadBuffer(ICharacterScanner scanner)
-        {
-            for (int i = fBuffer.length() - 1; i >= 0; i--)
-                scanner.unread();
-        }
+      scanner.unread();
+      return Token.UNDEFINED;
     }
 
-    private static class JWCIDDetector implements IWordDetector
+    protected void unreadBuffer(ICharacterScanner scanner)
     {
+      for (int i = fBuffer.length() - 1; i >= 0; i--)
+        scanner.unread();
+    }
+  }
 
-        public boolean isWordStart(char c)
-        {
-            return Character.isLetter(c);
-        }
+  private static class JWCIDDetector implements IWordDetector
+  {
 
-        public boolean isWordPart(char c)
-        {
-            return Character.isLetter(c);
-        }
-    };
+    public boolean isWordStart(char c)
+    {
+      return Character.isLetter(c);
+    }
+
+    public boolean isWordPart(char c)
+    {
+      return Character.isLetter(c);
+    }
+  };
 
 }

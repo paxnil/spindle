@@ -24,18 +24,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.core.spec;
 
 /**
  * @author gwl
  * @version $Id$
- *
- * Copyright 2002, Intelligent Work Inc.
- * All Rights Reserved.
+ * 
+ * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
  */
-public interface IIdentifiable {
+public interface IIdentifiable
+{
 
   public String getIdentifier();
   public void setIdentifier(String id);

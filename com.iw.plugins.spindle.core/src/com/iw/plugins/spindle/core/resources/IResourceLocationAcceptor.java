@@ -27,15 +27,16 @@
 package com.iw.plugins.spindle.core.resources;
 
 /**
- *  A requestor that is invoked by the seek method in IResourceWorkspaceLocation.
+ * A requestor that is invoked by the seek method in IResourceWorkspaceLocation.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: IResourceLocationAcceptor.java,v 1.2 2003/06/17 20:05:16
+ *          glongman Exp $
  */
 public interface IResourceLocationAcceptor
 {
-    /** should return false to cancel the operation */
-    public boolean accept(IResourceWorkspaceLocation location);
-    
-    public IResourceWorkspaceLocation[] getResults();
+  /** should return false to cancel the operation */
+  public boolean accept(IResourceWorkspaceLocation location);
+
+  public IResourceWorkspaceLocation[] getResults();
 }

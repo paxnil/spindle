@@ -232,7 +232,6 @@ public class TapestryCore extends AbstractUIPlugin
     //    fireCoreListenerEvent();
   }
 
-
   public static boolean hasTapestryNature(IProject project)
   {
     try

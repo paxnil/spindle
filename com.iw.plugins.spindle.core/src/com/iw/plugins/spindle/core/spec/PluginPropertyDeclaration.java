@@ -26,57 +26,57 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-
 /**
- *  Record <property> tags in a document
+ * Record <property>tags in a document
  * 
- *  These can only be validated at the time the document is parsed/scanned.
+ * These can only be validated at the time the document is parsed/scanned.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginPropertyDeclaration.java,v 1.2 2004/05/17 02:31:49
+ *          glongman Exp $
  */
 public class PluginPropertyDeclaration extends BaseSpecification
 {
-    String fKey;
-    String fValue;
-    boolean fValueIsFromAttribute;
+  String fKey;
+  String fValue;
+  boolean fValueIsFromAttribute;
 
-    public PluginPropertyDeclaration(String key, String value)
-    {
-        super(BaseSpecification.PROPERTY_DECLARATION);
-        setKey(key);
-        fValue = value;
-    }
+  public PluginPropertyDeclaration(String key, String value)
+  {
+    super(BaseSpecification.PROPERTY_DECLARATION);
+    setKey(key);
+    fValue = value;
+  }
 
-    public String getKey()
-    {
-        return getIdentifier();
-    }
+  public String getKey()
+  {
+    return getIdentifier();
+  }
 
-    public void setKey(String key)
-    {
-        setIdentifier(key);
-    }
+  public void setKey(String key)
+  {
+    setIdentifier(key);
+  }
 
-    public String getValue()
-    {
-        return fValue;
-    }
+  public String getValue()
+  {
+    return fValue;
+  }
 
-    /**
-     * @return
-     */
-    public boolean isValueIsFromAttribute()
-    {
-        return fValueIsFromAttribute;
-    }
+  /**
+   * @return
+   */
+  public boolean isValueIsFromAttribute()
+  {
+    return fValueIsFromAttribute;
+  }
 
-    /**
-     * @param b
-     */
-    public void setValueIsFromAttribute(boolean flag)
-    {
-        fValueIsFromAttribute = flag;
-    }
+  /**
+   * @param b
+   */
+  public void setValueIsFromAttribute(boolean flag)
+  {
+    fValueIsFromAttribute = flag;
+  }
 
 }

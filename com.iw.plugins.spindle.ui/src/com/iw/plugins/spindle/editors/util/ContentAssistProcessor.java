@@ -41,196 +41,233 @@ import com.iw.plugins.spindle.editors.Editor;
 import com.wutka.dtd.DTD;
 
 /**
- *  Content Assist for Templates
+ * Content Assist for Templates
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ContentAssistProcessor.java,v 1.7.2.3 2004/06/22 12:24:20
+ *          glongman Exp $
  */
 public abstract class ContentAssistProcessor implements IContentAssistProcessor
 {
-    protected static final ICompletionProposal[] NoProposals = new ICompletionProposal[0];
-    protected static final ICompletionProposal[] NoSuggestions =
-        new ICompletionProposal[] {
-            new ContentAssistProcessor.MessageProposal("no suggestions available"),
-            new ContentAssistProcessor.MessageProposal("")};
+  protected static final ICompletionProposal[] NoProposals = new ICompletionProposal[0];
+  protected static final ICompletionProposal[] NoSuggestions = new ICompletionProposal[]{
+      new ContentAssistProcessor.MessageProposal("no suggestions available"),
+      new ContentAssistProcessor.MessageProposal("")};
 
-    protected static final IContextInformation[] NoInformation = new IContextInformation[0];
+  protected static final IContextInformation[] NoInformation = new IContextInformation[0];
 
-    protected Editor fEditor;
-    protected IPreferenceStore fPreferenceStore = UIPlugin.getDefault().getPreferenceStore();
-//  TODO remove  protected XMLDocumentPartitioner fAssistParititioner;
-    protected boolean fDoingContextInformation = false;
-    protected DTD fDTD;
+  protected Editor fEditor;
+  protected IPreferenceStore fPreferenceStore = UIPlugin
+      .getDefault()
+      .getPreferenceStore();
+  //  TODO remove protected XMLDocumentPartitioner fAssistParititioner;
+  protected boolean fDoingContextInformation = false;
+  protected DTD fDTD;
 
-    public ContentAssistProcessor(Editor editor)
+  public ContentAssistProcessor(Editor editor)
+  {
+    this.fEditor = editor;
+    //  TODO remove fAssistParititioner = new
+    // XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
+    // XMLDocumentPartitioner.TYPES);
+  }
+
+  protected abstract void init(IDocument document) throws IllegalStateException;
+  {
+    // TODO remove fAssistParititioner.connect(document);
+    //        try
+    //        {
+    //            XMLNode.createTree(document, -1);
+    //        } catch (BadLocationException e)
+    //        {
+    //            UIPlugin.log(e);
+    //            throw new IllegalStateException();
+    //        }
+  }
+
+  public ICompletionProposal[] computeCompletionProposals(
+      ITextViewer viewer,
+      int documentOffset)
+  {
+    IDocument document = viewer.getDocument();
+    if (document.getLength() == 0 || document.get().trim().length() == 0)
+      return computeEmptyDocumentProposal(viewer, documentOffset);
+
+    try
     {
-        this.fEditor = editor;
-//  TODO remove      fAssistParititioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
-    }
-
-    
-    protected  abstract void init(IDocument document) throws IllegalStateException;
-    {
-// TODO remove       fAssistParititioner.connect(document);
-//        try
-//        {
-//            XMLNode.createTree(document, -1);
-//        } catch (BadLocationException e)
-//        {
-//            UIPlugin.log(e);
-//            throw new IllegalStateException();
-//        }
-    }
-   
-    public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset)
-    {
-        IDocument document = viewer.getDocument();
-        if (document.getLength() == 0 || document.get().trim().length() == 0)
-            return computeEmptyDocumentProposal(viewer, documentOffset);
-
-        try
-        {
-            init(document);
-            Point p = viewer.getSelectedRange();
-            if (p.y > 0)
-                return NoProposals;
-
-            return doComputeCompletionProposals(viewer, documentOffset);
-
-        } catch (IllegalStateException e)
-        {
-            return NoProposals;
-        } catch (RuntimeException e)
-        {
-            UIPlugin.log(e);
-            throw e;
-        } 
-    }
-
-    protected  ICompletionProposal[] computeEmptyDocumentProposal(ITextViewer viewer, int documentOffset) {
+      init(document);
+      Point p = viewer.getSelectedRange();
+      if (p.y > 0)
         return NoProposals;
+
+      return doComputeCompletionProposals(viewer, documentOffset);
+
+    } catch (IllegalStateException e)
+    {
+      return NoProposals;
+    } catch (RuntimeException e)
+    {
+      UIPlugin.log(e);
+      throw e;
+    }
+  }
+
+  protected ICompletionProposal[] computeEmptyDocumentProposal(
+      ITextViewer viewer,
+      int documentOffset)
+  {
+    return NoProposals;
+  }
+
+  protected abstract ICompletionProposal[] doComputeCompletionProposals(
+      ITextViewer viewer,
+      int documentOffset);
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer,
+   *      int)
+   */
+  public IContextInformation[] computeContextInformation(
+      ITextViewer viewer,
+      int documentOffset)
+  {
+    return NoInformation;
+  }
+
+  public IContextInformation[] computeInformation(ITextViewer viewer, int documentOffset)
+  {
+    try
+    {
+      init(viewer.getDocument());
+      return doComputeContextInformation(viewer, documentOffset);
+    } catch (IllegalStateException e)
+    {
+      return NoInformation;
+    }
+  }
+
+  // default result, override in subclass
+  public IContextInformation[] doComputeContextInformation(
+      ITextViewer viewer,
+      int documentOffset)
+  {
+    return NoInformation;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
+   */
+  public char[] getCompletionProposalAutoActivationCharacters()
+  {
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationAutoActivationCharacters()
+   */
+  public char[] getContextInformationAutoActivationCharacters()
+  {
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
+   */
+  public String getErrorMessage()
+  { //TODO I10N
+    return "no completions available";
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
+   */
+  public IContextInformationValidator getContextInformationValidator()
+  {
+    return null;
+  }
+
+  public static class MessageProposal implements ICompletionProposal
+  {
+    String fLabel = "coming soon!";
+
+    public MessageProposal()
+    {
     }
 
-    protected abstract ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset);
+    public MessageProposal(String label)
+    {
+      fLabel = label;
+    }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
      */
-    public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset)
+    public void apply(IDocument document)
     {
-        return NoInformation;
     }
 
-   
-   
-    public IContextInformation[] computeInformation(ITextViewer viewer, int documentOffset)
-    {
-        try
-        {
-            init(viewer.getDocument());
-            return doComputeContextInformation(viewer, documentOffset);
-        } catch (IllegalStateException e)
-        {
-            return NoInformation;
-        } 
-    }
-
-    // default result, override in subclass
-    public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
-    {
-        return NoInformation;
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
      */
-    public char[] getCompletionProposalAutoActivationCharacters()
+    public String getAdditionalProposalInfo()
     {
-        return null;
+      return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationAutoActivationCharacters()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
      */
-    public char[] getContextInformationAutoActivationCharacters()
+    public IContextInformation getContextInformation()
     {
-        return null;
+      return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
      */
-    public String getErrorMessage()
-    { //TODO I10N
-        return "no completions available";
+    public String getDisplayString()
+    {
+      return fLabel;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
      */
-    public IContextInformationValidator getContextInformationValidator()
+    public Image getImage()
     {
-        return null;
+      return null;
     }
 
-    public static class MessageProposal implements ICompletionProposal
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
+     */
+    public Point getSelection(IDocument document)
     {
-        String fLabel = "coming soon!";
-
-        public MessageProposal()
-        {}
-
-        public MessageProposal(String label)
-        {
-            fLabel = label;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
-         */
-        public void apply(IDocument document)
-        {}
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-         */
-        public String getAdditionalProposalInfo()
-        {
-            return null;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
-         */
-        public IContextInformation getContextInformation()
-        {
-            return null;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
-         */
-        public String getDisplayString()
-        {
-            return fLabel;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-         */
-        public Image getImage()
-        {
-            return null;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-         */
-        public Point getSelection(IDocument document)
-        {
-            return null;
-        }
-
+      return null;
     }
+
+  }
 
 }

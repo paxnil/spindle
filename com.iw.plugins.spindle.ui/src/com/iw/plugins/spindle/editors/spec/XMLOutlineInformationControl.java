@@ -35,74 +35,82 @@ import com.iw.plugins.spindle.editors.util.XMLNodeContentProvider;
 import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
 
 /**
- *  TODO Add Type comment
+ * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: XMLOutlineInformationControl.java,v 1.2.2.2 2004/06/22 12:22:52
+ *          glongman Exp $
  */
 public class XMLOutlineInformationControl extends TreeInformationControl
 {
 
-    protected static class XMLPatternFilter extends NamePatternFilter
+  protected static class XMLPatternFilter extends NamePatternFilter
+  {
+    public boolean select(Viewer viewer, Object parentElement, Object element)
     {
-        public boolean select(Viewer viewer, Object parentElement, Object element)
-        {
-            XMLNode node = (XMLNode) element;
+      XMLNode node = (XMLNode) element;
 
-            if (node.getType() == ITypeConstants.ATTR)
-            {
-                if (match(node.getAttributeValue()))
-                    return true;
+      if (node.getType() == ITypeConstants.ATTR)
+      {
+        if (match(node.getAttributeValue()))
+          return true;
 
-                return hasUnfilteredChild(viewer, element);
-            }
+        return hasUnfilteredChild(viewer, element);
+      }
 
-            return super.select(viewer, parentElement, element);
-        }
+      return super.select(viewer, parentElement, element);
     }
+  }
 
-    private SpecEditor fEditor;
+  private SpecEditor fEditor;
 
-    public XMLOutlineInformationControl(Shell parent, int shellStyle, int treeStyle, SpecEditor editor)
+  public XMLOutlineInformationControl(Shell parent, int shellStyle, int treeStyle,
+      SpecEditor editor)
+  {
+    super(parent, shellStyle, treeStyle);
+    setContentProvider(new XMLNodeContentProvider());
+    setLabelProvider(new XMLNodeLabelProvider());
+    fEditor = editor;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#createFilter()
+   */
+  protected NamePatternFilter createFilter()
+  {
+    return new XMLPatternFilter();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#doSetInput(java.lang.Object)
+   */
+  protected void doSetInput(Object information)
+  {
+    if (information instanceof XMLNode)
+      fTreeViewer.setInput((XMLNode) information);
+    else
+      fTreeViewer.setInput(null);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#doGotoSelectedElement(java.lang.Object)
+   */
+  protected boolean doHandleSelectedElement(Object selected)
+  {
+    try
     {
-        super(parent, shellStyle, treeStyle);
-        setContentProvider(new XMLNodeContentProvider());
-        setLabelProvider(new XMLNodeLabelProvider());
-        fEditor = editor;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#createFilter()
-     */
-    protected NamePatternFilter createFilter()
+      fEditor.openTo(selected);
+    } finally
     {
-        return new XMLPatternFilter();
+      //Do nothing
     }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#doSetInput(java.lang.Object)
-     */
-    protected void doSetInput(Object information)
-    {
-        if (information instanceof XMLNode)
-            fTreeViewer.setInput((XMLNode) information);
-        else
-            fTreeViewer.setInput(null);
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#doGotoSelectedElement(java.lang.Object)
-     */
-    protected boolean doHandleSelectedElement(Object selected)
-    {
-        try
-        {
-            fEditor.openTo(selected);
-        } finally
-        {
-            //Do nothing
-        }
-        return true;
-    }
+    return true;
+  }
 
 }

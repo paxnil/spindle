@@ -475,32 +475,33 @@ public class SpecEditor extends Editor
     //      fOutlinePartitioner = new
     // XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
     // XMLDocumentPartitioner.TYPES);
-// TODO remove ?   try
-//    {
-//      IDocument document = getDocumentProvider().getDocument(getEditorInput());
-//      if (document.getLength() == 0 || document.get().trim().length() == 0)
-//      {
-//        ((MultiPageContentOutline) fOutline).setInput(null);
-//      } else
-//      {
-//
-//        //        fOutlinePartitioner.connect(document);
-//        try
-//        {
-//          ((MultiPageContentOutline) fOutline).setInput(XMLNode.createTree(document, -1));
-//        } catch (BadLocationException e)
-//        {
-//          // do nothing
-//        }
-//      }
-//      if (fUpdater != null)
-//        fUpdater.post();
-//
-//    } catch (RuntimeException e)
-//    {
-//      UIPlugin.log(e);
-//      throw e;
-//    }
+    // TODO remove ? try
+    //    {
+    //      IDocument document = getDocumentProvider().getDocument(getEditorInput());
+    //      if (document.getLength() == 0 || document.get().trim().length() == 0)
+    //      {
+    //        ((MultiPageContentOutline) fOutline).setInput(null);
+    //      } else
+    //      {
+    //
+    //        // fOutlinePartitioner.connect(document);
+    //        try
+    //        {
+    //          ((MultiPageContentOutline)
+    // fOutline).setInput(XMLNode.createTree(document, -1));
+    //        } catch (BadLocationException e)
+    //        {
+    //          // do nothing
+    //        }
+    //      }
+    //      if (fUpdater != null)
+    //        fUpdater.post();
+    //
+    //    } catch (RuntimeException e)
+    //    {
+    //      UIPlugin.log(e);
+    //      throw e;
+    //    }
     //    finally
     //    {
     //      fOutlinePartitioner.disconnect();

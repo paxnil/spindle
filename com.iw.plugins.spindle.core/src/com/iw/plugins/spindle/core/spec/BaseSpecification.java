@@ -38,195 +38,206 @@ import org.apache.tapestry.ILocation;
 import org.apache.tapestry.ILocationHolder;
 
 /**
- *  Base class for all Spec classes.
+ * Base class for all Spec classes.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class BaseSpecification implements IIdentifiable,  ILocatable, ILocationHolder
+public abstract class BaseSpecification
+    implements
+      IIdentifiable,
+      ILocatable,
+      ILocationHolder
 {
 
-    private static ThreadLocal INTERNAL_CALL_TRACKER = new ThreadLocal();
+  private static ThreadLocal INTERNAL_CALL_TRACKER = new ThreadLocal();
 
-    protected static void beginInternalCall(String debugMessage)
+  protected static void beginInternalCall(String debugMessage)
+  {
+
+    Stack internalStack = (Stack) INTERNAL_CALL_TRACKER.get();
+
+    if (internalStack == null)
     {
-
-        Stack internalStack = (Stack) INTERNAL_CALL_TRACKER.get();
-
-        if (internalStack == null)
-        {
-            internalStack = new Stack();
-            INTERNAL_CALL_TRACKER.set(internalStack);
-        }
-
-        internalStack.push(debugMessage);
-
+      internalStack = new Stack();
+      INTERNAL_CALL_TRACKER.set(internalStack);
     }
 
-    protected static void endInternalCall()
+    internalStack.push(debugMessage);
+
+  }
+
+  protected static void endInternalCall()
+  {
+
+    Stack internalStack = (Stack) INTERNAL_CALL_TRACKER.get();
+
+    if (internalStack == null)
+      throw new IllegalStateException("stack is null ");
+
+    internalStack.pop();
+
+  }
+
+  protected static void checkInternalCall(String errorMessage)
+  {
+    Stack internalStack = (Stack) INTERNAL_CALL_TRACKER.get();
+    if (internalStack == null || internalStack.isEmpty())
     {
-
-        Stack internalStack = (Stack) INTERNAL_CALL_TRACKER.get();
-
-        if (internalStack == null)
-            throw new IllegalStateException("stack is null ");
-
-        internalStack.pop();
-
+      throw new IllegalStateException(errorMessage);
     }
 
-    protected static void checkInternalCall(String errorMessage)
-    {
-        Stack internalStack = (Stack) INTERNAL_CALL_TRACKER.get();
-        if (internalStack == null || internalStack.isEmpty())
-        {
-            throw new IllegalStateException(errorMessage);
-        }
+  }
 
-    }
+  public static final int APPLICATION_SPEC = 0;
+  public static final int ASSET_SPEC = 1;
+  public static final int BEAN_SPEC = 2;
+  public static final int BINDING_SPEC = 3;
+  public static final int COMPONENT_SPEC = 4;
+  public static final int CONTAINED_COMPONENT_SPEC = 5;
+  public static final int EXTENSION_CONFIGURATION = 6;
+  public static final int EXTENSION_SPEC = 7;
+  public static final int LIBRARY_SPEC = 8;
+  public static final int LISTENER_BINDING_SPEC = 9;
+  public static final int PARAMETER_SPEC = 10;
+  public static final int PROPERTY_SPEC = 11;
 
-    public static final int APPLICATION_SPEC = 0;
-    public static final int ASSET_SPEC = 1;
-    public static final int BEAN_SPEC = 2;
-    public static final int BINDING_SPEC = 3;
-    public static final int COMPONENT_SPEC = 4;
-    public static final int CONTAINED_COMPONENT_SPEC = 5;
-    public static final int EXTENSION_CONFIGURATION = 6;
-    public static final int EXTENSION_SPEC = 7;
-    public static final int LIBRARY_SPEC = 8;
-    public static final int LISTENER_BINDING_SPEC = 9;
-    public static final int PARAMETER_SPEC = 10;
-    public static final int PROPERTY_SPEC = 11;
+  public static final int EXPRESSION_BEAN_INIT = 20;
+  public static final int FIELD_BEAN_INIT = 21;
+  public static final int STATIC_BEAN_INIT = 22;
+  public static final int STRING_BEAN_INIT = 23;
 
-    public static final int EXPRESSION_BEAN_INIT = 20;
-    public static final int FIELD_BEAN_INIT = 21;
-    public static final int STATIC_BEAN_INIT = 22;
-    public static final int STRING_BEAN_INIT = 23;
+  public static final int PROPERTY_DECLARATION = 24;
+  public static final int PAGE_DECLARATION = 25;
+  public static final int COMPONENT_TYPE_DECLARATION = 26;
+  public static final int DESCRIPTION_DECLARATION = 27;
+  public static final int RESERVED_PARAMETER_DECLARATION = 28;
+  public static final int ENGINE_SERVICE_DECLARATION = 29;
+  public static final int LIBRARY_DECLARATION = 30;
+  public static final int CONFIGURE_DECLARATION = 31;
 
-    public static final int PROPERTY_DECLARATION = 24;
-    public static final int PAGE_DECLARATION = 25;
-    public static final int COMPONENT_TYPE_DECLARATION = 26;
-    public static final int DESCRIPTION_DECLARATION = 27;
-    public static final int RESERVED_PARAMETER_DECLARATION = 28;
-    public static final int ENGINE_SERVICE_DECLARATION = 29;
-    public static final int LIBRARY_DECLARATION = 30;
-    public static final int CONFIGURE_DECLARATION = 31;
+  private String fIdentifier;
+  private Object fParent;
+  protected ILocation fILocation;
+  private boolean fDirty;
 
-    private String fIdentifier;
-    private Object fParent;
-    protected ILocation fILocation;
-    private boolean fDirty;
+  private int fSpecificationType = -1;
 
-     private int fSpecificationType = -1;
+  public BaseSpecification(int type)
+  {
+    super();
+    fSpecificationType = type;
+  }
 
-    public BaseSpecification(int type)
-    {
-        super();
-        fSpecificationType = type;
-    }
+  protected Object get(Map map, Object key)
+  {
+    if (map == null)
+      return null;
 
-    protected Object get(Map map, Object key)
-    {
-        if (map == null)
-            return null;
+    return map.get(key);
+  }
 
-        return map.get(key);
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.spec.IIdentifiable#getIdentifier()
+   */
+  public String getIdentifier()
+  {
+    return fIdentifier;
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.spec.IIdentifiable#getIdentifier()
-     */
-    public String getIdentifier()
-    {
-        return fIdentifier;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.spec.IIdentifiable#getParent()
+   */
+  public Object getParent()
+  {
+    return fParent;
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.spec.IIdentifiable#getParent()
-     */
-    public Object getParent()
-    {
-        return fParent;
-    }
+  public int getSpecificationType()
+  {
+    return fSpecificationType;
+  }
 
-    public int getSpecificationType()
-    {
-        return fSpecificationType;
-    }
+  protected List keys(Map map)
+  {
+    if (map == null)
+      return Collections.EMPTY_LIST;
 
-    protected List keys(Map map)
-    {
-        if (map == null)
-            return Collections.EMPTY_LIST;
+    List result = new ArrayList(map.keySet());
 
-        List result = new ArrayList(map.keySet());
+    return result;
+  }
 
-        return result;
-    }
+  protected void remove(Map map, Object key)
+  {
+    if (map != null)
+      map.remove(key);
+  }
 
+  protected boolean remove(Set set, Object obj)
+  {
+    if (set != null)
+      return set.remove(obj);
 
-    protected void remove(Map map, Object key)
-    {
-        if (map != null)
-            map.remove(key);
-    }
+    return false;
+  }
 
-    protected boolean remove(Set set, Object obj)
-    {
-        if (set != null)
-            return set.remove(obj);
+  protected boolean remove(List list, Object obj)
+  {
+    if (list != null)
+      return list.remove(obj);
 
-        return false;
-    }
+    return false;
+  }
 
-    protected boolean remove(List list, Object obj)
-    {
-        if (list != null)
-            return list.remove(obj);
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.spec.IIdentifiable#setIdentifier(java.lang.String)
+   */
+  public void setIdentifier(String id)
+  {
+    this.fIdentifier = id;
+  }
 
-        return false;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.spec.IIdentifiable#setParent(java.lang.Object)
+   */
+  public void setParent(Object parent)
+  {
+    this.fParent = parent;
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.spec.IIdentifiable#setIdentifier(java.lang.String)
-     */
-    public void setIdentifier(String id)
-    {
-        this.fIdentifier = id;
-    }
+  public ILocation getLocation()
+  {
+    return fILocation;
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.spec.IIdentifiable#setParent(java.lang.Object)
-     */
-    public void setParent(Object parent)
-    {
-        this.fParent = parent;
-    }
+  public void setLocation(ILocation location)
+  {
+    this.fILocation = location;
+  }
 
-    public ILocation getLocation()
-    {
-        return fILocation;
-    }
+  /**
+   * @return
+   */
+  public boolean isDirty()
+  {
+    return fDirty;
+  }
 
-    public void setLocation(ILocation location)
-    {
-        this.fILocation = location;
-    }
-
-    /**
-     * @return
-     */
-    public boolean isDirty()
-    {
-        return fDirty;
-    }
-
-    /**
-     * @param b
-     */
-    public void setDirty(boolean flag)
-    {
-        fDirty = flag;
-    }
+  /**
+   * @param b
+   */
+  public void setDirty(boolean flag)
+  {
+    fDirty = flag;
+  }
 
 }

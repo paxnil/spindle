@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
- package com.iw.plugins.spindle.ui.dialogfields;
+package com.iw.plugins.spindle.ui.dialogfields;
 
 import java.util.Iterator;
 
@@ -44,118 +44,134 @@ import org.eclipse.swt.widgets.Text;
 /**
  * @author GWL
  * @version 
- *
- * Copyright 2002, Intelligent Works Incoporated
- * All Rights Reserved
+ * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
-public class StringButtonField extends StringField {
+public class StringButtonField extends StringField
+{
 
-	private Button fButtonControl;
-	
-	protected IRunnableContext fRunnableContext;
+  private Button fButtonControl;
 
-	public StringButtonField(String label) {
-		super(label);
-	}
-	
-	public void init(IRunnableContext context) {
-	  this.fRunnableContext = context;
-	}
-	
-	protected IRunnableContext getRunnableContext() {
-	  return (fRunnableContext == null ? new ProgressMonitorDialog(getShell()) : fRunnableContext);
-	}
+  protected IRunnableContext fRunnableContext;
 
-	public StringButtonField(String label, int labelWidth) {
-		super(label, labelWidth);
-	}
+  public StringButtonField(String label)
+  {
+    super(label);
+  }
 
-	public Control getControl(Composite parent) {
+  public void init(IRunnableContext context)
+  {
+    this.fRunnableContext = context;
+  }
 
-		Composite container = new Composite(parent, SWT.NULL);
+  protected IRunnableContext getRunnableContext()
+  {
+    return (fRunnableContext == null
+        ? new ProgressMonitorDialog(getShell()) : fRunnableContext);
+  }
 
-		Label labelWidget = getLabelControl(container);
-		Text textControl = getTextControl(container);
-		Button buttonControl = getButtonControl(container);
+  public StringButtonField(String label, int labelWidth)
+  {
+    super(label, labelWidth);
+  }
 
-		FormLayout layout = new FormLayout();
-		container.setLayout(layout);
+  public Control getControl(Composite parent)
+  {
 
-		FormData formData;
+    Composite container = new Composite(parent, SWT.NULL);
 
-		formData = new FormData();
-		formData.height = 20;
-		formData.width = getLabelWidth();
-		formData.top = new FormAttachment(0, 5);
-		formData.left = new FormAttachment(0, 0);
-		//formData.right = new FormAttachment(text, SWT.CENTER);
-		labelWidget.setLayoutData(formData);
+    Label labelWidget = getLabelControl(container);
+    Text textControl = getTextControl(container);
+    Button buttonControl = getButtonControl(container);
 
-		formData = new FormData();
-		formData.top = new FormAttachment(0, 3);
-		formData.left = new FormAttachment(labelWidget, 4);
-		formData.right = new FormAttachment(buttonControl, -4);
-		textControl.setLayoutData(formData);
+    FormLayout layout = new FormLayout();
+    container.setLayout(layout);
 
-		
-		formData = new FormData();
-		formData.width = 75;
-		formData.height = 25;
-		//formData.top = new FormAttachment(0, 60);
-		formData.right = new FormAttachment(100, 0);
-		buttonControl.setLayoutData(formData);
-		return container;
+    FormData formData;
 
-	}
+    formData = new FormData();
+    formData.height = 20;
+    formData.width = getLabelWidth();
+    formData.top = new FormAttachment(0, 5);
+    formData.left = new FormAttachment(0, 0);
+    //formData.right = new FormAttachment(text, SWT.CENTER);
+    labelWidget.setLayoutData(formData);
 
-	public Button getButtonControl(Composite parent) {
-		if (fButtonControl == null) {
+    formData = new FormData();
+    formData.top = new FormAttachment(0, 3);
+    formData.left = new FormAttachment(labelWidget, 4);
+    formData.right = new FormAttachment(buttonControl, -4);
+    textControl.setLayoutData(formData);
 
-			fButtonControl = new Button(parent, SWT.PUSH);
-			fButtonControl.setText("Browse...");
-			fButtonControl.setFont(parent.getFont());
+    formData = new FormData();
+    formData.width = 75;
+    formData.height = 25;
+    //formData.top = new FormAttachment(0, 60);
+    formData.right = new FormAttachment(100, 0);
+    buttonControl.setLayoutData(formData);
+    return container;
 
-			final DialogField field = this;
-			fButtonControl.addSelectionListener(new SelectionListener() {
+  }
 
-				public void widgetDefaultSelected(SelectionEvent e) {
-					fireButtonPressed();
-				}
+  public Button getButtonControl(Composite parent)
+  {
+    if (fButtonControl == null)
+    {
 
-				public void widgetSelected(SelectionEvent e) {
-					fireButtonPressed();
-				}
-			});
+      fButtonControl = new Button(parent, SWT.PUSH);
+      fButtonControl.setText("Browse...");
+      fButtonControl.setFont(parent.getFont());
 
-		}
-		return fButtonControl;
-	}
+      final DialogField field = this;
+      fButtonControl.addSelectionListener(new SelectionListener()
+      {
 
-	private void fireButtonPressed() {
-		for (Iterator iterator = getListeners().iterator(); iterator.hasNext();) {
-			IDialogFieldChangedListener element =
-				(IDialogFieldChangedListener) iterator.next();
-			element.dialogFieldButtonPressed(this);
-		}
-	}
+        public void widgetDefaultSelected(SelectionEvent e)
+        {
+          fireButtonPressed();
+        }
 
-	public void setEnabled(boolean flag) {
-		if (fButtonControl != null && !fButtonControl.isDisposed()) {
-			fButtonControl.setEnabled(flag);
-		}
-		super.setEnabled(flag);
-	}
+        public void widgetSelected(SelectionEvent e)
+        {
+          fireButtonPressed();
+        }
+      });
 
-	public void setButtonLabel(String value) {
-		if (fButtonControl != null && !fButtonControl.isDisposed()) {
-			fButtonControl.setText(value);
-		}
-	}
+    }
+    return fButtonControl;
+  }
 
-	public void enableButton(boolean flag) {
-		if (fButtonControl != null && !fButtonControl.isDisposed()) {
-			fButtonControl.setEnabled(flag);
-		}
-	}
+  private void fireButtonPressed()
+  {
+    for (Iterator iterator = getListeners().iterator(); iterator.hasNext();)
+    {
+      IDialogFieldChangedListener element = (IDialogFieldChangedListener) iterator.next();
+      element.dialogFieldButtonPressed(this);
+    }
+  }
+
+  public void setEnabled(boolean flag)
+  {
+    if (fButtonControl != null && !fButtonControl.isDisposed())
+    {
+      fButtonControl.setEnabled(flag);
+    }
+    super.setEnabled(flag);
+  }
+
+  public void setButtonLabel(String value)
+  {
+    if (fButtonControl != null && !fButtonControl.isDisposed())
+    {
+      fButtonControl.setText(value);
+    }
+  }
+
+  public void enableButton(boolean flag)
+  {
+    if (fButtonControl != null && !fButtonControl.isDisposed())
+    {
+      fButtonControl.setEnabled(flag);
+    }
+  }
 
 }

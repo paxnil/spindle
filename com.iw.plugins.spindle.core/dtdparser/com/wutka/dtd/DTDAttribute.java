@@ -2,169 +2,174 @@ package com.wutka.dtd;
 
 import java.io.*;
 
-/** Represents a DTD Attribute in an ATTLIST declaration
- *
+/**
+ * Represents a DTD Attribute in an ATTLIST declaration
+ * 
  * @author Mark Wutka
  * @version $Revision$ $Date$ by $Author$
  */
 
 public class DTDAttribute implements DTDOutput
 {
-/** The name of the attribute */
-    public String name;
+  /** The name of the attribute */
+  public String name;
 
-/** The type of the attribute (either String, DTDEnumeration or
-    DTDNotationList) */
-    public Object type;
+  /**
+   * The type of the attribute (either String, DTDEnumeration or
+   * DTDNotationList)
+   */
+  public Object type;
 
-/** The attribute's declaration (required, fixed, implied) */
-    public DTDDecl decl;
+  /** The attribute's declaration (required, fixed, implied) */
+  public DTDDecl decl;
 
-/** The attribute's default value (null if not declared) */
-    public String defaultValue;
+  /** The attribute's default value (null if not declared) */
+  public String defaultValue;
 
-    public DTDAttribute()
+  public DTDAttribute()
+  {
+  }
+
+  public DTDAttribute(String aName)
+  {
+    name = aName;
+  }
+
+  /** Writes this attribute to an output stream */
+  public void write(PrintWriter out) throws IOException
+  {
+    out.print(name + " ");
+    if (type instanceof String)
     {
+      out.print(type);
+    } else if (type instanceof DTDEnumeration)
+    {
+      DTDEnumeration dtdEnum = (DTDEnumeration) type;
+      dtdEnum.write(out);
+    } else if (type instanceof DTDNotationList)
+    {
+      DTDNotationList dtdnl = (DTDNotationList) type;
+      dtdnl.write(out);
     }
 
-    public DTDAttribute(String aName)
+    if (decl != null)
     {
-        name = aName;
+      decl.write(out);
     }
 
-/** Writes this attribute to an output stream */
-    public void write(PrintWriter out)
-        throws IOException
+    if (defaultValue != null)
     {
-        out.print(name+" ");
-        if (type instanceof String)
-        {
-            out.print(type);
-        }
-        else if (type instanceof DTDEnumeration)
-        {
-            DTDEnumeration dtdEnum = (DTDEnumeration) type;
-            dtdEnum.write(out);
-        }
-        else if (type instanceof DTDNotationList)
-        {
-            DTDNotationList dtdnl = (DTDNotationList) type;
-            dtdnl.write(out);
-        }
+      out.print(" \"");
+      out.print(defaultValue);
+      out.print("\"");
+    }
+    //out.println(">"); Bug!
+  }
 
-        if (decl != null)
-        {
-            decl.write(out);
-        }
+  public boolean equals(Object ob)
+  {
+    if (ob == this)
+      return true;
+    if (!(ob instanceof DTDAttribute))
+      return false;
 
-        if (defaultValue != null)
-        {
-            out.print(" \"");
-            out.print(defaultValue);
-            out.print("\"");
-        }
-        //out.println(">");                            Bug!
+    DTDAttribute other = (DTDAttribute) ob;
+
+    if (name == null)
+    {
+      if (other.name != null)
+        return false;
+    } else
+    {
+      if (!name.equals(other.name))
+        return false;
     }
 
-    public boolean equals(Object ob)
+    if (type == null)
     {
-        if (ob == this) return true;
-        if (!(ob instanceof DTDAttribute)) return false;
-
-        DTDAttribute other = (DTDAttribute) ob;
-
-        if (name == null)
-        {
-            if (other.name != null) return false;
-        }
-        else
-        {
-            if (!name.equals(other.name)) return false;
-        }
-
-        if (type == null)
-        {
-            if (other.type != null) return false;
-        }
-        else
-        {
-            if (!type.equals(other.type)) return false;
-        }
-
-        if (decl == null)
-        {
-            if (other.decl != null) return false;
-        }
-        else
-        {
-            if (!decl.equals(other.decl)) return false;
-        }
-
-        if (defaultValue == null)
-        {
-            if (other.defaultValue != null) return false;
-        }
-        else
-        {
-            if (!defaultValue.equals(other.defaultValue)) return false;
-        }
-
-        return true;
+      if (other.type != null)
+        return false;
+    } else
+    {
+      if (!type.equals(other.type))
+        return false;
     }
 
-/** Sets the name of the attribute */
-    public void setName(String aName)
+    if (decl == null)
     {
-        name = aName;
+      if (other.decl != null)
+        return false;
+    } else
+    {
+      if (!decl.equals(other.decl))
+        return false;
     }
 
-/** Returns the attribute name */
-    public String getName()
+    if (defaultValue == null)
     {
-        return name;
+      if (other.defaultValue != null)
+        return false;
+    } else
+    {
+      if (!defaultValue.equals(other.defaultValue))
+        return false;
     }
 
-/** Sets the type of the attribute */
-    public void setType(Object aType)
-    {
-        if (!(aType instanceof String) &&
-            !(aType instanceof DTDEnumeration) &&
-            !(aType instanceof DTDNotationList))
-        {
-            throw new IllegalArgumentException(
-                "Must be String, DTDEnumeration or DTDNotationList");
-        }
+    return true;
+  }
 
-        type = aType;
+  /** Sets the name of the attribute */
+  public void setName(String aName)
+  {
+    name = aName;
+  }
+
+  /** Returns the attribute name */
+  public String getName()
+  {
+    return name;
+  }
+
+  /** Sets the type of the attribute */
+  public void setType(Object aType)
+  {
+    if (!(aType instanceof String) && !(aType instanceof DTDEnumeration)
+        && !(aType instanceof DTDNotationList))
+    {
+      throw new IllegalArgumentException(
+          "Must be String, DTDEnumeration or DTDNotationList");
     }
 
-/** Gets the type of the attribute */
-    public Object getType()
-    {
-        return type;
-    }
+    type = aType;
+  }
 
-/** Sets the declaration (fixed, required, implied) */
-    public void setDecl(DTDDecl aDecl)
-    {
-        decl = aDecl;
-    }
+  /** Gets the type of the attribute */
+  public Object getType()
+  {
+    return type;
+  }
 
-/** Returns the declaration */
-    public DTDDecl getDecl()
-    {
-        return decl;
-    }
+  /** Sets the declaration (fixed, required, implied) */
+  public void setDecl(DTDDecl aDecl)
+  {
+    decl = aDecl;
+  }
 
-/** Sets the default value */
-    public void setDefaultValue(String aDefaultValue)
-    {
-        defaultValue = aDefaultValue;
-    }
+  /** Returns the declaration */
+  public DTDDecl getDecl()
+  {
+    return decl;
+  }
 
-/** Returns the default value */
-    public String getDefaultValue()
-    {
-        return defaultValue;
-    }
+  /** Sets the default value */
+  public void setDefaultValue(String aDefaultValue)
+  {
+    defaultValue = aDefaultValue;
+  }
+
+  /** Returns the default value */
+  public String getDefaultValue()
+  {
+    return defaultValue;
+  }
 }

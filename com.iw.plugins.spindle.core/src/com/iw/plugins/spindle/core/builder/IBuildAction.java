@@ -27,13 +27,13 @@
 package com.iw.plugins.spindle.core.builder;
 
 /**
- *  Some action that needs to be run at the end of a build!
+ * Some action that needs to be run at the end of a build!
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public interface IBuildAction
 {
-    public void run();
+  public void run();
 
 }

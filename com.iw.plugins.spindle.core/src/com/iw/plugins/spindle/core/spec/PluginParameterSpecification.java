@@ -41,163 +41,178 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
- *  Spindle aware concrete implementation of ILibrarySpecification
+ * Spindle aware concrete implementation of ILibrarySpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginParameterSpecification.java,v 1.6 2004/05/17 02:31:49
+ *          glongman Exp $
  */
-public class PluginParameterSpecification extends DescribableSpecification implements IParameterSpecification
+public class PluginParameterSpecification extends DescribableSpecification
+    implements
+      IParameterSpecification
 {
-    private boolean fRequired = false;
-    private String fType;
+  private boolean fRequired = false;
+  private String fType;
 
-    /** @since 2.0.3 **/
-    private String fPropertyName;
+  /** @since 2.0.3 * */
+  private String fPropertyName;
 
-    private Direction fDirection = Direction.CUSTOM;
+  private Direction fDirection = Direction.CUSTOM;
 
-    private String fDefaultValue;
+  private String fDefaultValue;
 
-    public PluginParameterSpecification()
+  public PluginParameterSpecification()
+  {
+    super(BaseSpecification.PARAMETER_SPEC);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IParameterSpecification#getType()
+   */
+  public String getType()
+  {
+    return fType;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IParameterSpecification#isRequired()
+   */
+  public boolean isRequired()
+  {
+    return fRequired;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IParameterSpecification#setRequired(boolean)
+   */
+  public void setRequired(boolean value)
+  {
+    fRequired = value;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IParameterSpecification#setType(java.lang.String)
+   */
+  public void setType(String value)
+  {
+    fType = value;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IParameterSpecification#setPropertyName(java.lang.String)
+   */
+  public void setPropertyName(String propertyName)
+  {
+    fPropertyName = propertyName;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IParameterSpecification#getPropertyName()
+   */
+  public String getPropertyName()
+  {
+    return fPropertyName;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IParameterSpecification#getDirection()
+   */
+  public Direction getDirection()
+  {
+    return fDirection;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IParameterSpecification#setDirection(org.apache.tapestry.spec.Direction)
+   */
+  public void setDirection(Direction direction)
+  {
+    fDirection = direction;
+  }
+
+  /**
+   * @see org.apache.tapestry.spec.IParameterSpecification#getDefaultValue()
+   */
+  public String getDefaultValue()
+  {
+    return fDefaultValue;
+  }
+
+  /**
+   * @see org.apache.tapestry.spec.IParameterSpecification#setDefaultValue(java.lang.String)
+   */
+  public void setDefaultValue(String defaultValue)
+  {
+    fDefaultValue = defaultValue;
+  }
+
+  public void validate(Object parent, IScannerValidator validator)
+  {
+
+    IComponentSpecification component = (IComponentSpecification) parent;
+    ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+    if (!"java.lang.Object".equals(fType))
     {
-        super(BaseSpecification.PARAMETER_SPEC);
-    }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IParameterSpecification#getType()
-     */
-    public String getType()
-    {
-        return fType;
-    }
+      String typeAttr = "type";
+      int DTDVersion = XMLUtil.getDTDVersion(component.getPublicId());
+      switch (DTDVersion)
+      {
+        case XMLUtil.DTD_1_3 :
+          typeAttr = "java-type";
+          break;
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IParameterSpecification#isRequired()
-     */
-    public boolean isRequired()
-    {
-        return fRequired;
-    }
+        case XMLUtil.DTD_3_0 :
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IParameterSpecification#setRequired(boolean)
-     */
-    public void setRequired(boolean value)
-    {
-        fRequired = value;
-    }
+          break;
+      }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IParameterSpecification#setType(java.lang.String)
-     */
-    public void setType(String value)
-    {
-        fType = value;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IParameterSpecification#setPropertyName(java.lang.String)
-     */
-    public void setPropertyName(String propertyName)
-    {
-        fPropertyName = propertyName;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IParameterSpecification#getPropertyName()
-     */
-    public String getPropertyName()
-    {
-        return fPropertyName;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IParameterSpecification#getDirection()
-     */
-    public Direction getDirection()
-    {
-        return fDirection;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IParameterSpecification#setDirection(org.apache.tapestry.spec.Direction)
-     */
-    public void setDirection(Direction direction)
-    {
-        fDirection = direction;
-    }
-
-    /**
-     * @see org.apache.tapestry.spec.IParameterSpecification#getDefaultValue()
-     */
-    public String getDefaultValue()
-    {
-        return fDefaultValue;
-    }
-
-    /**
-     * @see org.apache.tapestry.spec.IParameterSpecification#setDefaultValue(java.lang.String)
-     */
-    public void setDefaultValue(String defaultValue)
-    {
-        fDefaultValue = defaultValue;
-    }
-
-    public void validate(Object parent, IScannerValidator validator)
-    {
-
-        IComponentSpecification component = (IComponentSpecification) parent;
-        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-        if (!"java.lang.Object".equals(fType))
+      if (!SpecificationScanner.TYPE_LIST.contains(fType))
+      {
+        try
         {
-
-            String typeAttr = "type";
-            int DTDVersion = XMLUtil.getDTDVersion(component.getPublicId());
-            switch (DTDVersion)
-            {
-                case XMLUtil.DTD_1_3 :
-                    typeAttr = "java-type";
-                    break;
-
-                case XMLUtil.DTD_3_0 :
-
-                    break;
-            }
-
-            if (!SpecificationScanner.TYPE_LIST.contains(fType))
-            {
-                try
-                {
-                    validateTypeSpecial(
-                        validator,
-                        (IResourceWorkspaceLocation) component.getSpecificationLocation(),
-                        fType,
-                        IProblem.ERROR,
-                        sourceInfo.getAttributeSourceLocation(typeAttr));
-                } catch (ScannerException e)
-                {
-                    TapestryCore.log(e);
-                    e.printStackTrace();
-                }
-            }
+          validateTypeSpecial(validator, (IResourceWorkspaceLocation) component
+              .getSpecificationLocation(), fType, IProblem.ERROR, sourceInfo
+              .getAttributeSourceLocation(typeAttr));
+        } catch (ScannerException e)
+        {
+          TapestryCore.log(e);
+          e.printStackTrace();
         }
+      }
     }
+  }
 
-    private boolean validateTypeSpecial(
-        IScannerValidator validator,
-        IResourceWorkspaceLocation dependant,
-        String typeName,
-        int severity,
-        ISourceLocation location)
-        throws ScannerException
-    {
-        String useName = typeName;
-        if (useName.indexOf(".") < 0)
-            useName = "java.lang." + useName;
+  private boolean validateTypeSpecial(
+      IScannerValidator validator,
+      IResourceWorkspaceLocation dependant,
+      String typeName,
+      int severity,
+      ISourceLocation location) throws ScannerException
+  {
+    String useName = typeName;
+    if (useName.indexOf(".") < 0)
+      useName = "java.lang." + useName;
 
-        return validator.validateTypeName(dependant, useName, severity, location);
+    return validator.validateTypeName(dependant, useName, severity, location);
 
-    }
+  }
 
 }

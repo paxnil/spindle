@@ -29,24 +29,24 @@ package com.wutka.dtd;
 import org.apache.commons.lang.enums.Enum;
 
 /**
- *  An easy way to determine the type of a DTDContainer
+ * An easy way to determine the type of a DTDContainer
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public class DTDItemType extends Enum
-{    
-    public static final DTDItemType DTD_NAME = new DTDItemType("DTD_NAME");
-    public static final DTDItemType DTD_EMPTY = new DTDItemType("DTD_EMPTY");
-    public static final DTDItemType DTD_PCDATA = new DTDItemType("DTD_PCDATA");
-    public static final DTDItemType DTD_ANY = new DTDItemType("DTD_ANY");
-    public static final DTDItemType DTD_CHOICE = new DTDItemType("DTD_CHOICE");
-    public static final DTDItemType DTD_MIXED = new DTDItemType("DTD_MIXED");
-    public static final DTDItemType DTD_SEQUENCE = new DTDItemType("DTD_SEQUENCE");
-    
-    public DTDItemType(String name)
-    {
-        super(name);
-    }
+{
+  public static final DTDItemType DTD_NAME = new DTDItemType("DTD_NAME");
+  public static final DTDItemType DTD_EMPTY = new DTDItemType("DTD_EMPTY");
+  public static final DTDItemType DTD_PCDATA = new DTDItemType("DTD_PCDATA");
+  public static final DTDItemType DTD_ANY = new DTDItemType("DTD_ANY");
+  public static final DTDItemType DTD_CHOICE = new DTDItemType("DTD_CHOICE");
+  public static final DTDItemType DTD_MIXED = new DTDItemType("DTD_MIXED");
+  public static final DTDItemType DTD_SEQUENCE = new DTDItemType("DTD_SEQUENCE");
+
+  public DTDItemType(String name)
+  {
+    super(name);
+  }
 
 }

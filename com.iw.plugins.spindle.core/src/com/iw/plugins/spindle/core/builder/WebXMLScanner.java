@@ -47,7 +47,8 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 
 /**
- * A Processor class used by FullBuild that extracts Tapestry information from the file web.xml
+ * A Processor class used by FullBuild that extracts Tapestry information from
+ * the file web.xml
  * 
  * @version $Id$
  * @author glongman@intelligentworks.com
@@ -55,462 +56,461 @@ import com.iw.plugins.spindle.core.source.ISourceLocation;
 public class WebXMLScanner extends AbstractScanner
 {
 
-    protected FullBuild fBuilder;
-    protected IJavaProject fJavaProject;
-    protected ArrayList fServletNames;
-    protected ArrayList fSeenServletNames;
+  protected FullBuild fBuilder;
+  protected IJavaProject fJavaProject;
+  protected ArrayList fServletNames;
+  protected ArrayList fSeenServletNames;
 
-    /**
-     * Constructor for WebXMLProcessor.
-     */
-    public WebXMLScanner(FullBuild fullBuilder)
+  /**
+   * Constructor for WebXMLProcessor.
+   */
+  public WebXMLScanner(FullBuild fullBuilder)
+  {
+    super();
+    this.fBuilder = fullBuilder;
+    this.fJavaProject = fBuilder.fJavaProject;
+  }
+
+  public ServletInfo[] scanServletInformation(Object source) throws ScannerException
+  {
+    Node webxml = ((Document) source).getDocumentElement();
+    List result = (List) scan(webxml, null);
+    return (ServletInfo[]) result.toArray(new ServletInfo[result.size()]);
+  }
+
+  public Object beforeScan(Object source)
+  {
+    fSeenServletNames = new ArrayList();
+    return new ArrayList(11);
+  }
+
+  protected void checkApplicationLocation(IResourceWorkspaceLocation location) throws ScannerException
+  {
+    if (location == null)
+      return;
+
+    if (location.getStorage() == null)
+      throw new ScannerException(TapestryCore.getString(
+          "web-xml-ignore-application-path-not-found",
+          location == null ? "no location found" : location.toString()), false);
+
+    IPath ws_path = new Path(location.getName());
+    String extension = ws_path.getFileExtension();
+    if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
+      throw new ScannerException(TapestryCore.getString(
+          "web-xml-wrong-file-extension",
+          location.toString()), false);
+
+  }
+
+  protected void checkApplicationServletPathParam(
+      String value,
+      ServletInfo currentInfo,
+      ISourceLocation location)
+  {
+    if (currentInfo.isServletSubclass && currentInfo.applicationSpecLocation != null)
     {
-        super();
-        this.fBuilder = fullBuilder;
-        this.fJavaProject = fBuilder.fJavaProject;
+      addProblem(IProblem.WARNING, location, TapestryCore.getString(
+          "web-xml-application-path-param-but-servlet-defines",
+          currentInfo.classname), false);
+      return;
     }
-
-    public ServletInfo[] scanServletInformation(Object source) throws ScannerException
+    IResourceWorkspaceLocation ws_location = getApplicationLocation(currentInfo, value);
+    if (ws_location == null)
     {
-        Node webxml = ((Document) source).getDocumentElement();
-        List result = (List) scan(webxml, null);
-        return (ServletInfo[]) result.toArray(new ServletInfo[result.size()]);
+      addProblem(IProblem.ERROR, location, TapestryCore.getString(
+          "web-xml-ignore-application-path-not-found",
+          value), false);
+      return;
     }
+    currentInfo.applicationSpecLocation = ws_location;
+  }
 
-    public Object beforeScan(Object source)
+  protected boolean checkJavaSubclassOfImplements(
+      IType superclass,
+      IType candidate,
+      ISourceLocation location)
+  {
+    boolean match = false;
+    if (superclass.equals(candidate))
+      return match;
+
+    try
     {
-        fSeenServletNames = new ArrayList();
-        return new ArrayList(11);
-    }
+      if (candidate.isInterface())
+        addProblem(IProblem.ERROR, location, "web-xml-must-be-class-not-interface", false);
 
-    protected void checkApplicationLocation(IResourceWorkspaceLocation location) throws ScannerException
-    {
-        if (location == null)
-            return;
-
-        if (location.getStorage() == null)
-            throw new ScannerException(
-                TapestryCore.getString(
-                    "web-xml-ignore-application-path-not-found",
-                    location == null ? "no location found" : location.toString()),
-                false);
-
-        IPath ws_path = new Path(location.getName());
-        String extension = ws_path.getFileExtension();
-        if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
-            throw new ScannerException(
-                TapestryCore.getString("web-xml-wrong-file-extension", location.toString()),
-                false);
-
-    }
-
-    protected void checkApplicationServletPathParam(String value, ServletInfo currentInfo, ISourceLocation location)
-    {
-        if (currentInfo.isServletSubclass && currentInfo.applicationSpecLocation != null)
+      ITypeHierarchy hierarchy = candidate.newSupertypeHierarchy(null);
+      if (hierarchy.exists())
+      {
+        IType[] superClasses = hierarchy.getAllSupertypes(candidate);
+        for (int i = 0; i < superClasses.length; i++)
         {
-            addProblem(
-                IProblem.WARNING,
-                location,
-                TapestryCore.getString("web-xml-application-path-param-but-servlet-defines", currentInfo.classname),
-                false);
-            return;
+          match = superClasses[i].equals(superclass);
+          if (match)
+            break;
+
         }
-        IResourceWorkspaceLocation ws_location = getApplicationLocation(currentInfo, value);
-        if (ws_location == null)
+      }
+    } catch (JavaModelException e)
+    {
+      TapestryCore.log(e);
+      e.printStackTrace();
+    }
+    //        if (!match)
+    //            addProblem(IProblem.ERROR, location, "web-xml-does-not-subclass");
+
+    return match;
+  }
+
+  protected IType checkJavaType(String className, ISourceLocation location)
+  {
+    IType found = fBuilder.fTapestryBuilder.getType(className);
+    fBuilder.typeChecked(className, found);
+
+    if (found == null)
+      addProblem(IProblem.ERROR, location, TapestryCore.getTapestryString(
+          "unable-to-resolve-class",
+          className), false);
+
+    return found;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.processing.AbstractProcessor#doProcessing(org.w3c.dom.Node)
+   */
+  protected void doScan(Object source, Object resultObject) throws ScannerException
+  {
+    Node rootNode = (Node) source;
+    ArrayList infos = (ArrayList) resultObject;
+    for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
+    {
+      if (isElement(node, "servlet"))
+      {
+        ServletInfo info = getServletInfo(node);
+        if (info != null)
+          infos.add(info);
+
+      }
+    }
+  }
+
+  protected void cleanup()
+  {
+  }
+
+  protected IResourceWorkspaceLocation getApplicationLocation(
+      ServletInfo info,
+      String path)
+  {
+    if (path != null)
+    {
+      return check(fBuilder.fTapestryBuilder.fClasspathRoot, path);
+    } else
+    {
+
+      IResourceWorkspaceLocation context = fBuilder.fTapestryBuilder.fContextRoot;
+      String servletName = info.name;
+      String expectedName = servletName + ".application";
+
+      IResourceWorkspaceLocation webInfLocation = (IResourceWorkspaceLocation) context
+          .getRelativeLocation("/WEB-INF/");
+      IResourceWorkspaceLocation webInfAppLocation = (IResourceWorkspaceLocation) webInfLocation
+          .getRelativeLocation(servletName + "/");
+
+      IResourceWorkspaceLocation result = check(webInfAppLocation, expectedName);
+      if (result != null)
+        return result;
+
+      return check(webInfLocation, expectedName);
+    }
+  }
+
+  private IResourceWorkspaceLocation check(
+      IResourceWorkspaceLocation location,
+      String name)
+  {
+    if (location == null)
+      return null;
+
+    IResourceWorkspaceLocation result = (IResourceWorkspaceLocation) location
+        .getRelativeLocation(name);
+
+    if (result != null && result.getStorage() != null)
+      return result;
+
+    return null;
+  }
+
+  private String getApplicationPathFromServlet(IType servletType) throws ScannerException
+  {
+    String result = null;
+
+    try
+    {
+      IMethod pathMethod = servletType.getMethod(
+          "getApplicationSpecificationPath",
+          new String[0]);
+      if (pathMethod != null)
+      {
+        String methodSource = pathMethod.getSource();
+        if (methodSource == null)
         {
-            addProblem(
-                IProblem.ERROR,
-                location,
-                TapestryCore.getString("web-xml-ignore-application-path-not-found", value),
-                false);
-            return;
+          if (servletType.isBinary())
+            throw new ScannerException(TapestryCore.getString(
+                "builder-error-servlet-subclass-is-binary-attach-source",
+                servletType.getFullyQualifiedName()), false);
+
+        } else if (methodSource.trim().length() > 0)
+        {
+          if (servletType.isBinary())
+          {
+            int signatureIndex = methodSource
+                .indexOf("public String getApplicationSpecificationPath");
+            if (signatureIndex > 0)
+            {
+              int start = methodSource.indexOf('{', signatureIndex);
+              int end = methodSource.indexOf('}', start);
+              methodSource = methodSource.substring(start, end);
+            } else
+            {
+              return null;
+            }
+          }
+
+          int start = methodSource.indexOf("return");
+
+          methodSource = methodSource.substring(start);
+          int first = methodSource.indexOf("\"");
+          int last = methodSource.lastIndexOf("\"");
+          if (first >= 0 && last > first)
+            result = methodSource.substring(first + 1, last);
+
         }
-        currentInfo.applicationSpecLocation = ws_location;
+      }
+    } catch (JavaModelException e)
+    {
+      TapestryCore.log(e);
     }
 
-    protected boolean checkJavaSubclassOfImplements(IType superclass, IType candidate, ISourceLocation location)
-    {
-        boolean match = false;
-        if (superclass.equals(candidate))
-            return match;
+    return result;
+  }
 
+  protected ServletInfo getServletInfo(Node servletNode)
+  {
+    ServletInfo newInfo = new ServletInfo();
+    for (Node node = servletNode.getFirstChild(); node != null; node = node
+        .getNextSibling())
+    {
+      if (isElement(node, "servlet-name"))
+      {
+        if (!scanServletName(node, newInfo))
+          return null;
+
+      }
+      if (isElement(node, "servlet-class"))
+      {
+        if (!scanServletClass(node, newInfo))
+          return null;
+
+      }
+      if (isElement(node, "init-param"))
+      {
         try
         {
-            if (candidate.isInterface())
-                addProblem(IProblem.ERROR, location, "web-xml-must-be-class-not-interface", false);
-
-            ITypeHierarchy hierarchy = candidate.newSupertypeHierarchy(null);
-            if (hierarchy.exists())
-            {
-                IType[] superClasses = hierarchy.getAllSupertypes(candidate);
-                for (int i = 0; i < superClasses.length; i++)
-                {
-                    match = superClasses[i].equals(superclass);
-                    if (match)
-                        break;
-
-                }
-            }
-        } catch (JavaModelException e)
-        {
-            TapestryCore.log(e);
-            e.printStackTrace();
-        }
-        //        if (!match)
-        //            addProblem(IProblem.ERROR, location, "web-xml-does-not-subclass");
-
-        return match;
-    }
-
-    protected IType checkJavaType(String className, ISourceLocation location)
-    {
-        IType found = fBuilder.fTapestryBuilder.getType(className);
-        fBuilder.typeChecked(className, found);
-
-        if (found == null)
-            addProblem(
-                IProblem.ERROR,
-                location,
-                TapestryCore.getTapestryString("unable-to-resolve-class", className),
-                false);
-
-        return found;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.processing.AbstractProcessor#doProcessing(org.w3c.dom.Node)
-     */
-    protected void doScan(Object source, Object resultObject) throws ScannerException
-    {
-        Node rootNode = (Node) source;
-        ArrayList infos = (ArrayList) resultObject;
-        for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
-        {
-            if (isElement(node, "servlet"))
-            {
-                ServletInfo info = getServletInfo(node);
-                if (info != null)
-                    infos.add(info);
-
-            }
-        }
-    }
-
-    protected void cleanup()
-    {}
-
-    protected IResourceWorkspaceLocation getApplicationLocation(ServletInfo info, String path)
-    {
-        if (path != null)
-        {
-            return check(fBuilder.fTapestryBuilder.fClasspathRoot, path);
-        } else
-        {
-
-            IResourceWorkspaceLocation context = fBuilder.fTapestryBuilder.fContextRoot;
-            String servletName = info.name;
-            String expectedName = servletName + ".application";
-
-            IResourceWorkspaceLocation webInfLocation =
-                (IResourceWorkspaceLocation) context.getRelativeLocation("/WEB-INF/");
-            IResourceWorkspaceLocation webInfAppLocation =
-                (IResourceWorkspaceLocation) webInfLocation.getRelativeLocation(servletName + "/");
-
-            IResourceWorkspaceLocation result = check(webInfAppLocation, expectedName);
-            if (result != null)
-                return result;
-
-            return check(webInfLocation, expectedName);
-        }
-    }
-
-    private IResourceWorkspaceLocation check(IResourceWorkspaceLocation location, String name)
-    {
-        if (location == null)
+          if (!scanInitParam(node, newInfo))
             return null;
 
-        IResourceWorkspaceLocation result = (IResourceWorkspaceLocation) location.getRelativeLocation(name);
-
-        if (result != null && result.getStorage() != null)
-            return result;
-
-        return null;
+        } catch (ScannerException e)
+        {
+          TapestryCore.log(e.getMessage());
+          return null;
+        }
+      }
     }
-
-    private String getApplicationPathFromServlet(IType servletType) throws ScannerException
+    if (TapestryBuilder.DEBUG)
     {
-        String result = null;
-
-        try
-        {
-            IMethod pathMethod = servletType.getMethod("getApplicationSpecificationPath", new String[0]);
-            if (pathMethod != null)
-            {
-                String methodSource = pathMethod.getSource();
-                if (methodSource == null)
-                {
-                    if (servletType.isBinary())
-                        throw new ScannerException(
-                            TapestryCore.getString(
-                                "builder-error-servlet-subclass-is-binary-attach-source",
-                                servletType.getFullyQualifiedName()),
-                            false);
-
-                } else if (methodSource.trim().length() > 0)
-                {
-                    if (servletType.isBinary())
-                    {
-                        int signatureIndex = methodSource.indexOf("public String getApplicationSpecificationPath");
-                        if (signatureIndex > 0)
-                        {
-                            int start = methodSource.indexOf('{', signatureIndex);
-                            int end = methodSource.indexOf('}', start);
-                            methodSource = methodSource.substring(start, end);
-                        } else
-                        {
-                            return null;
-                        }
-                    }
-
-                    int start = methodSource.indexOf("return");
-
-                    methodSource = methodSource.substring(start);
-                    int first = methodSource.indexOf("\"");
-                    int last = methodSource.lastIndexOf("\"");
-                    if (first >= 0 && last > first)
-                        result = methodSource.substring(first + 1, last);
-
-                }
-            }
-        } catch (JavaModelException e)
-        {
-            TapestryCore.log(e);
-        }
-
-        return result;
+      System.out.println("parsing web.xml found servlet:");
+      System.out.println(newInfo.toString());
     }
+    return newInfo;
+  }
 
-    protected ServletInfo getServletInfo(Node servletNode)
+  private boolean isTapestryServlet(IType candidate, ISourceLocation location)
+  {
+    if (candidate == null)
+      return false;
+
+    if (candidate.equals(fBuilder.fTapestryServletType))
+      return true;
+
+    return checkJavaSubclassOfImplements(
+        fBuilder.fTapestryServletType,
+        candidate,
+        location);
+
+  }
+
+  protected boolean scanInitParam(Node initParamNode, ServletInfo currentInfo) throws ScannerException
+  {
+    String key = null;
+    String value = null;
+    ISourceLocation keyLoc = null;
+    ISourceLocation valueLoc = null;
+    for (Node node = initParamNode.getFirstChild(); node != null; node = node
+        .getNextSibling())
     {
-        ServletInfo newInfo = new ServletInfo();
-        for (Node node = servletNode.getFirstChild(); node != null; node = node.getNextSibling())
+      if (isElement(node, "param-name"))
+      {
+        key = getValue(node);
+        keyLoc = getBestGuessSourceLocation(node, true);
+        if (key == null)
         {
-            if (isElement(node, "servlet-name"))
-            {
-                if (!scanServletName(node, newInfo))
-                    return null;
-
-            }
-            if (isElement(node, "servlet-class"))
-            {
-                if (!scanServletClass(node, newInfo))
-                    return null;
-
-            }
-            if (isElement(node, "init-param"))
-            {
-                try
-                {
-                    if (!scanInitParam(node, newInfo))
-                        return null;
-
-                } catch (ScannerException e)
-                {
-                    TapestryCore.log(e.getMessage());
-                    return null;
-                }
-            }
-        }
-        if (TapestryBuilder.DEBUG)
+          addProblem(IProblem.ERROR, keyLoc, TapestryCore
+              .getString("web-xml-init-param-null-key"), false);
+          return false;
+        } else if (currentInfo.parameters.containsKey(key))
         {
-            System.out.println("parsing web.xml found servlet:");
-            System.out.println(newInfo.toString());
+          addProblem(IProblem.ERROR, keyLoc, TapestryCore.getString(
+              "web-xml-init-param-duplicate-key",
+              key), false);
+          return false;
         }
-        return newInfo;
+      }
+
+      if (isElement(node, "param-value"))
+      {
+        value = getValue(node);
+        valueLoc = getBestGuessSourceLocation(node, true);
+        if (value == null)
+          addProblem(IProblem.ERROR, valueLoc, TapestryCore
+              .getString("web-xml-init-param-null-value"), false);
+
+      }
     }
-
-    private boolean isTapestryServlet(IType candidate, ISourceLocation location)
+    if (key != null && value != null)
     {
-        if (candidate == null)
-            return false;
+      if (TapestryBuilder.APP_SPEC_PATH_PARAM.equals(key))
+        checkApplicationServletPathParam(value, currentInfo, valueLoc);
 
-        if (candidate.equals(fBuilder.fTapestryServletType))
-            return true;
-
-        return checkJavaSubclassOfImplements(fBuilder.fTapestryServletType, candidate, location);
+      currentInfo.parameters.put(key, value);
 
     }
+    return true;
+  }
+  protected boolean scanServletClass(Node node, ServletInfo newInfo)
+  {
+    newInfo.classname = getValue(node);
+    ISourceLocation nodeLocation = getBestGuessSourceLocation(node, true);
 
-    protected boolean scanInitParam(Node initParamNode, ServletInfo currentInfo) throws ScannerException
+    if (newInfo.classname == null)
     {
-        String key = null;
-        String value = null;
-        ISourceLocation keyLoc = null;
-        ISourceLocation valueLoc = null;
-        for (Node node = initParamNode.getFirstChild(); node != null; node = node.getNextSibling())
-        {
-            if (isElement(node, "param-name"))
-            {
-                key = getValue(node);
-                keyLoc = getBestGuessSourceLocation(node, true);
-                if (key == null)
-                {
-                    addProblem(IProblem.ERROR, keyLoc, TapestryCore.getString("web-xml-init-param-null-key"), false);
-                    return false;
-                } else if (currentInfo.parameters.containsKey(key))
-                {
-                    addProblem(
-                        IProblem.ERROR,
-                        keyLoc,
-                        TapestryCore.getString("web-xml-init-param-duplicate-key", key),
-                        false);
-                    return false;
-                }
-            }
-
-            if (isElement(node, "param-value"))
-            {
-                value = getValue(node);
-                valueLoc = getBestGuessSourceLocation(node, true);
-                if (value == null)
-                    addProblem(
-                        IProblem.ERROR,
-                        valueLoc,
-                        TapestryCore.getString("web-xml-init-param-null-value"),
-                        false);
-
-            }
-        }
-        if (key != null && value != null)
-        {
-            if (TapestryBuilder.APP_SPEC_PATH_PARAM.equals(key))
-                checkApplicationServletPathParam(value, currentInfo, valueLoc);
-
-            currentInfo.parameters.put(key, value);
-
-        }
-        return true;
+      String message = TapestryCore.getString(
+          "web-xml-servlet-null-classname",
+          newInfo.name);
+      addProblem(IMarker.SEVERITY_WARNING, nodeLocation, message, false);
+      return false;
     }
-    protected boolean scanServletClass(Node node, ServletInfo newInfo)
+
+    IType servletType = checkJavaType(newInfo.classname, nodeLocation);
+    if (servletType == null)
+      return false;
+
+    IResourceWorkspaceLocation location = null;
+    if (!isTapestryServlet(servletType, nodeLocation))
     {
-        newInfo.classname = getValue(node);
-        ISourceLocation nodeLocation = getBestGuessSourceLocation(node, true);
+      return false;
 
-        if (newInfo.classname == null)
-        {
-            String message = TapestryCore.getString("web-xml-servlet-null-classname", newInfo.name);
-            addProblem(IMarker.SEVERITY_WARNING, nodeLocation, message, false);
-            return false;
-        }
-
-        IType servletType = checkJavaType(newInfo.classname, nodeLocation);
-        if (servletType == null)
-            return false;
-
-        IResourceWorkspaceLocation location = null;
-        if (!isTapestryServlet(servletType, nodeLocation))
-        {
-            return false;
-
-        }
-
-        if (!fBuilder.fTapestryServletType.equals(servletType))
-        {
-            newInfo.isServletSubclass = true; // its a subclass
-            String path = null;
-            try
-            {
-                path = getApplicationPathFromServlet(servletType);
-            } catch (ScannerException e1)
-            {
-                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, e1.getMessage(), false);
-                return false;
-            }
-
-            try
-            {
-                location = getApplicationLocation(newInfo, path);
-                checkApplicationLocation(location);
-            } catch (ScannerException e)
-            {
-                addProblem(
-                    IMarker.SEVERITY_ERROR,
-                    nodeLocation,
-                    TapestryCore.getString(
-                        "web-xml-ignore-invalid-application-path",
-                        servletType.getElementName(),
-                        path.toString()),
-                    false);
-
-                return false;
-            }
-
-        } else
-        {
-            try
-            {
-                location = getApplicationLocation(newInfo, null);
-                checkApplicationLocation(location);
-            } catch (ScannerException e)
-            {
-                addProblem(
-                    IMarker.SEVERITY_ERROR,
-                    nodeLocation,
-                    TapestryCore.getString(
-                        "web-xml-ignore-invalid-application-path",
-                        servletType.getElementName(),
-                        null),
-                    false);
-
-                return false;
-            }
-        }
-
-        newInfo.applicationSpecLocation = location;
-        return true;
     }
 
-    protected boolean scanServletName(Node node, ServletInfo newInfo)
+    if (!fBuilder.fTapestryServletType.equals(servletType))
     {
-        newInfo.name = getValue(node);
-        ISourceLocation bestGuessSourceLocation = getBestGuessSourceLocation(node, true);
-        if (newInfo.name == null || "".equals(newInfo.name.trim()))
-        {
-            addProblem(
-                IProblem.WARNING,
-                bestGuessSourceLocation,
-                TapestryCore.getString("web-xml-servlet-has-null-name"),
-                false);
-            return false;
+      newInfo.isServletSubclass = true; // its a subclass
+      String path = null;
+      try
+      {
+        path = getApplicationPathFromServlet(servletType);
+      } catch (ScannerException e1)
+      {
+        addProblem(IMarker.SEVERITY_ERROR, nodeLocation, e1.getMessage(), false);
+        return false;
+      }
 
-        }
-        if (fSeenServletNames.contains(newInfo.name))
-        {
-            addProblem(
-                IProblem.WARNING,
-                bestGuessSourceLocation,
-                TapestryCore.getString("web-xml-servlet-duplicate-name", newInfo.name),
-                false);
-            return false;
-        } else
-        {
-            fSeenServletNames.add(newInfo.name);
-        }
+      try
+      {
+        location = getApplicationLocation(newInfo, path);
+        checkApplicationLocation(location);
+      } catch (ScannerException e)
+      {
+        addProblem(IMarker.SEVERITY_ERROR, nodeLocation, TapestryCore.getString(
+            "web-xml-ignore-invalid-application-path",
+            servletType.getElementName(),
+            path.toString()), false);
 
-        if (fServletNames == null)
-            fServletNames = new ArrayList(11);
+        return false;
+      }
 
-        if (fServletNames.contains(newInfo.name))
-        {
-            String message = TapestryCore.getString("web-xml-servlet-duplicate-name", newInfo.name);
-            addProblem(IProblem.WARNING, bestGuessSourceLocation, message, false);
-            if (TapestryBuilder.DEBUG)
-            {
-                System.out.println(message);
-            }
-            return false;
-        }
-        return true;
+    } else
+    {
+      try
+      {
+        location = getApplicationLocation(newInfo, null);
+        checkApplicationLocation(location);
+      } catch (ScannerException e)
+      {
+        addProblem(IMarker.SEVERITY_ERROR, nodeLocation, TapestryCore.getString(
+            "web-xml-ignore-invalid-application-path",
+            servletType.getElementName(),
+            null), false);
+
+        return false;
+      }
     }
+
+    newInfo.applicationSpecLocation = location;
+    return true;
+  }
+
+  protected boolean scanServletName(Node node, ServletInfo newInfo)
+  {
+    newInfo.name = getValue(node);
+    ISourceLocation bestGuessSourceLocation = getBestGuessSourceLocation(node, true);
+    if (newInfo.name == null || "".equals(newInfo.name.trim()))
+    {
+      addProblem(IProblem.WARNING, bestGuessSourceLocation, TapestryCore
+          .getString("web-xml-servlet-has-null-name"), false);
+      return false;
+
+    }
+    if (fSeenServletNames.contains(newInfo.name))
+    {
+      addProblem(IProblem.WARNING, bestGuessSourceLocation, TapestryCore.getString(
+          "web-xml-servlet-duplicate-name",
+          newInfo.name), false);
+      return false;
+    } else
+    {
+      fSeenServletNames.add(newInfo.name);
+    }
+
+    if (fServletNames == null)
+      fServletNames = new ArrayList(11);
+
+    if (fServletNames.contains(newInfo.name))
+    {
+      String message = TapestryCore.getString(
+          "web-xml-servlet-duplicate-name",
+          newInfo.name);
+      addProblem(IProblem.WARNING, bestGuessSourceLocation, message, false);
+      if (TapestryBuilder.DEBUG)
+      {
+        System.out.println(message);
+      }
+      return false;
+    }
+    return true;
+  }
 
 }

@@ -33,13 +33,17 @@ import org.apache.tapestry.spec.ILibrarySpecification;
 
 /**
  * @author gwl
- * @version $Id$
- *
- * Copyright 2002, Intelligent Work Inc.
- * All Rights Reserved.
+ * @version $Id: IPluginLibrarySpecification.java,v 1.2 2003/09/02 18:27:42
+ *          glongman Exp $
+ * 
+ * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
  */
 public interface IPluginLibrarySpecification
-  extends PropertyChangeListener, ILibrarySpecification, IIdentifiable {
+    extends
+      PropertyChangeListener,
+      ILibrarySpecification,
+      IIdentifiable
+{
 
   public void removePageSpecificationPath(String name);
 

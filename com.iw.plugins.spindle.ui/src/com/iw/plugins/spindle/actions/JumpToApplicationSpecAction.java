@@ -40,60 +40,63 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
- * Copyright 2002 Intelligent Works Inc.
- * All rights reserved
+ * Copyright 2002 Intelligent Works Inc. All rights reserved
  * 
  * @author gwl
- * @version $Id$
+ * @version $Id: JumpToApplicationSpecAction.java,v 1.1 2003/10/29 12:33:56
+ *          glongman Exp $
  */
 public class JumpToApplicationSpecAction extends AbstractTapestryProjectAction
 {
 
-    /**
-     * Constructor for OpenTapestryProjectAction.
-     */
-    public JumpToApplicationSpecAction()
+  /**
+   * Constructor for OpenTapestryProjectAction.
+   */
+  public JumpToApplicationSpecAction()
+  {
+    super();
+  }
+
+  protected boolean checkSelection(IStructuredSelection selection)
+  {
+    return true;
+  }
+
+  public void run(IAction action)
+  {
+
+    IStorage storage = getApplicationStorage(selection);
+
+    if (storage == null)
+      return;
+
+    IEditorPart editor = UIUtils.getEditorFor(storage);
+
+    if (editor != null)
     {
-        super();
-    }
-
-    protected boolean checkSelection(IStructuredSelection selection)
+      UIPlugin.getDefault().getActiveWorkbenchWindow().getActivePage().bringToTop(editor);
+    } else
     {
-        return true;
+      UIPlugin.getDefault().openTapestryEditor(storage);
     }
+  }
 
-    public void run(IAction action)
-    {
+  private IStorage getApplicationStorage(IStructuredSelection selection)
+  {
+    IJavaProject jproject = (IJavaProject) selection.getFirstElement();
+    IProject project = jproject.getProject();
 
-        IStorage storage = getApplicationStorage(selection);
+    INamespace namespace = TapestryArtifactManager
+        .getTapestryArtifactManager()
+        .getProjectNamespace(project);
 
-        if (storage == null)
-            return;
+    if (namespace == null)
+      return null;
 
-        IEditorPart editor = UIUtils.getEditorFor(storage);
+    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+        .getSpecificationLocation();
 
-        if (editor != null)
-        {
-            UIPlugin.getDefault().getActiveWorkbenchWindow().getActivePage().bringToTop(editor);
-        } else
-        {
-            UIPlugin.getDefault().openTapestryEditor(storage);
-        }
-    }
+    return location.getStorage();
 
-    private IStorage getApplicationStorage(IStructuredSelection selection)
-    {
-        IJavaProject jproject = (IJavaProject) selection.getFirstElement();
-        IProject project = jproject.getProject();
-
-        INamespace namespace = TapestryArtifactManager.getTapestryArtifactManager().getProjectNamespace(project);
-
-        if (namespace == null)
-            return null;
-
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
-
-        return location.getStorage();
-
-    }
+  }
 }

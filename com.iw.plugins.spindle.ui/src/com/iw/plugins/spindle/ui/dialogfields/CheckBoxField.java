@@ -39,161 +39,158 @@ import org.eclipse.swt.widgets.Label;
 /**
  * @author GWL
  * @version 
- *
- * Copyright 2002, Intelligent Works Incoporated
- * All Rights Reserved
+ * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
 public class CheckBoxField extends DialogField
 {
 
-    private Button fCheckboxControl;
+  private Button fCheckboxControl;
 
-    private DialogField[] fAttachedFields;
+  private DialogField[] fAttachedFields;
 
-    private boolean fFireEvent = true;
+  private boolean fFireEvent = true;
 
-    private boolean fLabelFirst;
+  private boolean fLabelFirst;
 
-    public CheckBoxField(String label)
+  public CheckBoxField(String label)
+  {
+    this(label, false);
+  }
+
+  public CheckBoxField(String label, boolean labelFirst)
+  {
+    super(label);
+    fLabelFirst = labelFirst;
+  }
+
+  public CheckBoxField(String label, int labelWidth, boolean labelFirst)
+  {
+    super(label, labelWidth);
+    fLabelFirst = labelFirst;
+  }
+
+  public Control getControl(Composite parent)
+  {
+
+    Composite container = new Composite(parent, SWT.NULL);
+    FormLayout layout = new FormLayout();
+    container.setLayout(layout);
+
+    FormData formData;
+
+    if (fLabelFirst)
     {
-        this(label, false);
+      Label labelControl = getLabelControl(container);
+      formData = new FormData();
+      formData.width = getLabelWidth();
+      formData.top = new FormAttachment(0, 3);
+      formData.left = new FormAttachment(0, 0);
+      labelControl.setLayoutData(formData);
+
+      Button checkBox = getCheckBoxControl(container, SWT.CHECK);
+      formData = new FormData();
+      formData.top = new FormAttachment(0, 3);
+      formData.left = new FormAttachment(labelControl, 4);
+      formData.right = new FormAttachment(100, 0);
+      checkBox.setLayoutData(formData);
+
+    } else
+    {
+
+      Button checkBox = getCheckBoxControl(container, SWT.CHECK);
+      formData = new FormData();
+      formData.top = new FormAttachment(0, 3);
+      formData.left = new FormAttachment(0, 0);
+      checkBox.setLayoutData(formData);
+
+      Label labelControl = getLabelControl(container);
+      formData = new FormData();
+      formData.width = getLabelWidth();
+      formData.top = new FormAttachment(0, 3);
+      formData.left = new FormAttachment(checkBox, 10);
+      formData.right = new FormAttachment(100, 0);
+      labelControl.setLayoutData(formData);
     }
 
-    public CheckBoxField(String label, boolean labelFirst)
-    {
-        super(label);
-        fLabelFirst = labelFirst;
-    }
+    return container;
+  }
 
-    public CheckBoxField(String label, int labelWidth, boolean labelFirst)
-    {
-        super(label, labelWidth);
-        fLabelFirst = labelFirst;
-    }
-
-    public Control getControl(Composite parent)
+  public Button getCheckBoxControl(Composite parent, int modifier)
+  {
+    if (fCheckboxControl == null)
     {
 
-        Composite container = new Composite(parent, SWT.NULL);
-        FormLayout layout = new FormLayout();
-        container.setLayout(layout);
+      fCheckboxControl = new Button(parent, modifier);
+      final DialogField field = this;
+      fCheckboxControl.addSelectionListener(new SelectionListener()
+      {
 
-        FormData formData;
-
-        if (fLabelFirst)
+        public void widgetDefaultSelected(SelectionEvent e)
         {
-            Label labelControl = getLabelControl(container);
-            formData = new FormData();
-            formData.width = getLabelWidth();
-            formData.top = new FormAttachment(0, 3);
-            formData.left = new FormAttachment(0, 0);
-            labelControl.setLayoutData(formData);
-
-            Button checkBox = getCheckBoxControl(container, SWT.CHECK);
-            formData = new FormData();
-            formData.top = new FormAttachment(0, 3);
-            formData.left = new FormAttachment(labelControl, 4);
-            formData.right = new FormAttachment(100, 0);
-            checkBox.setLayoutData(formData);
-
-        } else
-        {
-
-            Button checkBox = getCheckBoxControl(container, SWT.CHECK);
-            formData = new FormData();
-            formData.top = new FormAttachment(0, 3);
-            formData.left = new FormAttachment(0, 0);
-            checkBox.setLayoutData(formData);
-
-            Label labelControl = getLabelControl(container);
-            formData = new FormData();
-            formData.width = getLabelWidth();
-            formData.top = new FormAttachment(0, 3);
-            formData.left = new FormAttachment(checkBox, 10);
-            formData.right = new FormAttachment(100, 0);
-            labelControl.setLayoutData(formData);
+          updateAttachedFields();
+          fireDialogButtonPressed(field);
         }
-
-        return container;
-    }
-
-    public Button getCheckBoxControl(Composite parent, int modifier)
-    {
-        if (fCheckboxControl == null)
+        public void widgetSelected(SelectionEvent e)
         {
-
-            fCheckboxControl = new Button(parent, modifier);
-            final DialogField field = this;
-            fCheckboxControl.addSelectionListener(new SelectionListener()
-            {
-
-                public void widgetDefaultSelected(SelectionEvent e)
-                {
-                    updateAttachedFields();
-                    fireDialogButtonPressed(field);
-                }
-                public void widgetSelected(SelectionEvent e)
-                {
-                    updateAttachedFields();
-                    fireDialogButtonPressed(field);
-                }
-            });
-            fCheckboxControl.setFont(parent.getFont());
-
+          updateAttachedFields();
+          fireDialogButtonPressed(field);
         }
-        return fCheckboxControl;
-    }
+      });
+      fCheckboxControl.setFont(parent.getFont());
 
-    public void setCheckBoxValue(boolean value, boolean fireEvent)
-    {
-        if (fCheckboxControl != null && !fCheckboxControl.isDisposed())
-        {
-            updateAttachedFields();
-            
-            fCheckboxControl.setSelection(value);
-            if (fireEvent)
-              fireDialogButtonPressed(this);
-            
-           
-        }
     }
+    return fCheckboxControl;
+  }
 
-    public void setCheckBoxValue(boolean value)
+  public void setCheckBoxValue(boolean value, boolean fireEvent)
+  {
+    if (fCheckboxControl != null && !fCheckboxControl.isDisposed())
     {
-        setCheckBoxValue(value, true);
-    }
+      updateAttachedFields();
 
-    public boolean getCheckBoxValue()
-    {
-        if (fCheckboxControl != null && !fCheckboxControl.isDisposed())
-        {
-            return fCheckboxControl.getSelection();
-        }
-        return false;
-    }
+      fCheckboxControl.setSelection(value);
+      if (fireEvent)
+        fireDialogButtonPressed(this);
 
-    public void setEnabled(boolean flag)
-    {
-        if (fCheckboxControl != null && !fCheckboxControl.isDisposed())
-        {
-            fCheckboxControl.setEnabled(flag);
-        }
-        super.setEnabled(flag);
     }
+  }
 
-    public void attachDialogFields(DialogField[] fields)
-    {
-        fAttachedFields = fields;
-    }
+  public void setCheckBoxValue(boolean value)
+  {
+    setCheckBoxValue(value, true);
+  }
 
-    private void updateAttachedFields()
+  public boolean getCheckBoxValue()
+  {
+    if (fCheckboxControl != null && !fCheckboxControl.isDisposed())
     {
-        if (fAttachedFields != null)
-        {
-            for (int i = 0; i < fAttachedFields.length; i++)
-            {
-                fAttachedFields[i].setEnabled(getCheckBoxValue());
-            }
-        }
+      return fCheckboxControl.getSelection();
     }
+    return false;
+  }
+
+  public void setEnabled(boolean flag)
+  {
+    if (fCheckboxControl != null && !fCheckboxControl.isDisposed())
+    {
+      fCheckboxControl.setEnabled(flag);
+    }
+    super.setEnabled(flag);
+  }
+
+  public void attachDialogFields(DialogField[] fields)
+  {
+    fAttachedFields = fields;
+  }
+
+  private void updateAttachedFields()
+  {
+    if (fAttachedFields != null)
+    {
+      for (int i = 0; i < fAttachedFields.length; i++)
+      {
+        fAttachedFields[i].setEnabled(getCheckBoxValue());
+      }
+    }
+  }
 }

@@ -38,26 +38,29 @@ import org.eclipse.swt.widgets.Label;
 /**
  * @author GWL
  * @version 
- *
- * Copyright 2002, Intelligent Works Incoporated
- * All Rights Reserved
+ * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
-public class UneditableStringField extends DialogField {
+public class UneditableStringField extends DialogField
+{
 
   private Label textControl;
 
   private Color enabledColor = Display.getDefault().getSystemColor(SWT.COLOR_WHITE);
-  private Color disabledColor = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND);
+  private Color disabledColor = Display.getDefault().getSystemColor(
+      SWT.COLOR_WIDGET_BACKGROUND);
 
-  public UneditableStringField(String label) {
+  public UneditableStringField(String label)
+  {
     super(label);
   }
 
-  public UneditableStringField(String label, int labelWidth) {
+  public UneditableStringField(String label, int labelWidth)
+  {
     super(label, labelWidth);
   }
 
-  public Control getControl(Composite parent) {
+  public Control getControl(Composite parent)
+  {
 
     Composite container = new Composite(parent, SWT.NULL);
     FormLayout layout = new FormLayout();
@@ -80,8 +83,10 @@ public class UneditableStringField extends DialogField {
     return container;
   }
 
-  public Label getTextControl(Composite parent) {
-    if (textControl == null) {
+  public Label getTextControl(Composite parent)
+  {
+    if (textControl == null)
+    {
       final DialogField field = this;
       textControl = new Label(parent, SWT.BORDER);
       textControl.setBackground(enabledColor);
@@ -91,39 +96,51 @@ public class UneditableStringField extends DialogField {
     return textControl;
   }
 
-  public void setTextValue(String value) {
+  public void setTextValue(String value)
+  {
     setTextValue(value, true);
   }
 
-  public void setTextValue(String value, boolean update) {
-    if (textControl != null && !textControl.isDisposed()) {
+  public void setTextValue(String value, boolean update)
+  {
+    if (textControl != null && !textControl.isDisposed())
+    {
       textControl.setText(value);
-      if (update) {
+      if (update)
+      {
         fireDialogButtonPressed(this);
       }
     }
   }
 
-  public String getTextValue() {
-    if (textControl != null && !textControl.isDisposed()) {
+  public String getTextValue()
+  {
+    if (textControl != null && !textControl.isDisposed())
+    {
       return textControl.getText();
     }
     return null;
   }
 
-  public void setEnabled(boolean flag) {
-    if (textControl != null && !textControl.isDisposed()) {
-      if (flag) {
+  public void setEnabled(boolean flag)
+  {
+    if (textControl != null && !textControl.isDisposed())
+    {
+      if (flag)
+      {
         textControl.setBackground(enabledColor);
-      } else {
+      } else
+      {
         textControl.setBackground(disabledColor);
       }
     }
     super.setEnabled(flag);
   }
 
-  public boolean setFocus() {
-    if (textControl != null && !textControl.isDisposed()) {
+  public boolean setFocus()
+  {
+    if (textControl != null && !textControl.isDisposed())
+    {
       textControl.setFocus();
     }
     return true;

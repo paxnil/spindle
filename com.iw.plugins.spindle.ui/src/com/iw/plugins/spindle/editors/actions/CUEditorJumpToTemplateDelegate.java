@@ -16,82 +16,87 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 
 /**
  * TODO: Provide description for "CUEditorJumpToSpecDelegate".
+ * 
  * @see IEditorActionDelegate
  */
-public class CUEditorJumpToTemplateDelegate extends CUEditorJumpToSpecDelegate implements IEditorActionDelegate
+public class CUEditorJumpToTemplateDelegate extends CUEditorJumpToSpecDelegate
+    implements
+      IEditorActionDelegate
 {
 
-    public CUEditorJumpToTemplateDelegate()
-    {}
+  public CUEditorJumpToTemplateDelegate()
+  {
+  }
 
-    protected void doRun()
+  protected void doRun()
+  {
+    List foundSpecs = TapestryArtifactManager
+        .getTapestryArtifactManager()
+        .findTypeRefences(fProject, fType.getFullyQualifiedName());
+    if (foundSpecs.isEmpty())
+      return;
+
+    if (foundSpecs.size() == 1)
     {
-        List foundSpecs =
-            TapestryArtifactManager.getTapestryArtifactManager().findTypeRefences(
-                fProject,
-                fType.getFullyQualifiedName());
-        if (foundSpecs.isEmpty())
-            return;
+      BaseSpecLocatable locatable = (BaseSpecLocatable) foundSpecs.get(0);
+      if (locatable.getSpecificationType() != BaseSpecification.COMPONENT_SPEC)
+        return;
+      PluginComponentSpecification spec = (PluginComponentSpecification) locatable;
+      revealTemplates(spec.getTemplateLocations());
 
-        if (foundSpecs.size() == 1)
-        {
-            BaseSpecLocatable locatable = (BaseSpecLocatable) foundSpecs.get(0);
-            if (locatable.getSpecificationType() != BaseSpecification.COMPONENT_SPEC)
-                return;
-            PluginComponentSpecification spec = (PluginComponentSpecification) locatable;
-            revealTemplates(spec.getTemplateLocations());
+    } else
+    {
+      List locations = new ArrayList();
+      for (Iterator iter = foundSpecs.iterator(); iter.hasNext();)
+      {
+        BaseSpecLocatable element = (BaseSpecLocatable) iter.next();
+        if (element.getSpecificationType() != BaseSpecification.COMPONENT_SPEC)
+          continue;
+        PluginComponentSpecification spec = (PluginComponentSpecification) element;
+        locations.addAll(spec.getTemplateLocations());
 
-        } else
-        {
-            List locations = new ArrayList();
-            for (Iterator iter = foundSpecs.iterator(); iter.hasNext();)
-            {
-                BaseSpecLocatable element = (BaseSpecLocatable) iter.next();
-                if (element.getSpecificationType() != BaseSpecification.COMPONENT_SPEC)
-                    continue;
-                PluginComponentSpecification spec = (PluginComponentSpecification) element;
-                locations.addAll(spec.getTemplateLocations());
-
-            }
-            revealTemplates(locations);
-        }
+      }
+      revealTemplates(locations);
     }
+  }
 
+  /**
+   * @param list
+   */
+  private void revealTemplates(List locations)
+  {
+    if (locations == null || locations.isEmpty())
+      return;
+
+    if (locations.size() == 1)
+    {
+      reveal((IResourceWorkspaceLocation) locations.get(0));
+    } else
+    {
+      new ChooseTemplateLocationPopup(locations, true).run();
+    }
+  }
+
+  protected class ChooseTemplateLocationPopup extends ChooseLocationPopup
+  {
     /**
-     * @param list
+     * @param templateLocations
+     * @param forward
      */
-    private void revealTemplates(List locations)
+    public ChooseTemplateLocationPopup(List templateLocations, boolean forward)
     {
-        if (locations == null || locations.isEmpty())
-            return;
-
-        if (locations.size() == 1)
-        {
-            reveal((IResourceWorkspaceLocation) locations.get(0));
-        } else
-        {
-            new ChooseTemplateLocationPopup(locations, true).run();
-        }
+      super(templateLocations, forward);
     }
 
-    protected class ChooseTemplateLocationPopup extends ChooseLocationPopup
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
+     */
+    protected Image getImage(IResourceWorkspaceLocation location)
     {
-        /**
-         * @param templateLocations
-         * @param forward
-         */
-        public ChooseTemplateLocationPopup(List templateLocations, boolean forward)
-        {
-            super(templateLocations, forward);
-        }
-        
-        /* (non-Javadoc)
-        * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
-        */
-        protected Image getImage(IResourceWorkspaceLocation location)
-        {
-            return Images.getSharedImage("html16.gif");
-        }      
-
+      return Images.getSharedImage("html16.gif");
     }
+
+  }
 }

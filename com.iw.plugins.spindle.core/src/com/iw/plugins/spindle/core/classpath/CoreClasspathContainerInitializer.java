@@ -36,62 +36,66 @@ import org.eclipse.jdt.core.JavaCore;
 import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
- *  Resolves a container for a Tapestry classpath container entry
+ * Resolves a container for a Tapestry classpath container entry
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: CoreClasspathContainerInitializer.java,v 1.2 2003/09/01
+ *          22:25:29 glongman Exp $
  */
 public class CoreClasspathContainerInitializer extends ClasspathContainerInitializer
 {
 
-    /**
-     * @see ClasspathContainerInitializer#initialize(IPath, IJavaProject)
-     */
-    public void initialize(IPath containerPath, IJavaProject project) throws CoreException
+  /**
+   * @see ClasspathContainerInitializer#initialize(IPath, IJavaProject)
+   */
+  public void initialize(IPath containerPath, IJavaProject project) throws CoreException
+  {
+    int size = containerPath.segmentCount();
+    if (size > 0)
     {
-        int size = containerPath.segmentCount();
-        if (size > 0)
-        {
-            if (containerPath.segment(0).equals(TapestryCore.CORE_CONTAINER))
-            {
-                CoreClasspathContainer container = new CoreClasspathContainer(containerPath);
-                JavaCore.setClasspathContainer(
-                    containerPath,
-                    new IJavaProject[] { project },
-                    new IClasspathContainer[] { container },
-                    null);
-            }
-        }
+      if (containerPath.segment(0).equals(TapestryCore.CORE_CONTAINER))
+      {
+        CoreClasspathContainer container = new CoreClasspathContainer(containerPath);
+        JavaCore.setClasspathContainer(
+            containerPath,
+            new IJavaProject[]{project},
+            new IClasspathContainer[]{container},
+            null);
+      }
     }
+  }
 
-    /**
-     * The container is never updated.
-     * 
-     * @see org.eclipse.jdt.core.ClasspathContainerInitializer#canUpdateClasspathContainer(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)
-     */
-    public boolean canUpdateClasspathContainer(IPath containerPath, IJavaProject project)
-    {
-        return false;
-    }
+  /**
+   * The container is never updated.
+   * 
+   * @see org.eclipse.jdt.core.ClasspathContainerInitializer#canUpdateClasspathContainer(org.eclipse.core.runtime.IPath,
+   *      org.eclipse.jdt.core.IJavaProject)
+   */
+  public boolean canUpdateClasspathContainer(IPath containerPath, IJavaProject project)
+  {
+    return false;
+  }
 
-    /**
-     * @see org.eclipse.jdt.core.ClasspathContainerInitializer#requestClasspathContainerUpdate(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject, org.eclipse.jdt.core.IClasspathContainer)
-     */
-    public void requestClasspathContainerUpdate(
-        IPath containerPath,
-        IJavaProject project,
-        IClasspathContainer containerSuggestion)
-        throws CoreException
-    {
-        // do nothing, the container is never updated.
-    }
+  /**
+   * @see org.eclipse.jdt.core.ClasspathContainerInitializer#requestClasspathContainerUpdate(org.eclipse.core.runtime.IPath,
+   *      org.eclipse.jdt.core.IJavaProject,
+   *      org.eclipse.jdt.core.IClasspathContainer)
+   */
+  public void requestClasspathContainerUpdate(
+      IPath containerPath,
+      IJavaProject project,
+      IClasspathContainer containerSuggestion) throws CoreException
+  {
+    // do nothing, the container is never updated.
+  }
 
-    /**
-     * @see org.eclipse.jdt.core.ClasspathContainerInitializer#getDescription(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)
-     */
-    public String getDescription(IPath containerPath, IJavaProject project)
-    {
-        return "Tapestry Framework Container";
-    }
+  /**
+   * @see org.eclipse.jdt.core.ClasspathContainerInitializer#getDescription(org.eclipse.core.runtime.IPath,
+   *      org.eclipse.jdt.core.IJavaProject)
+   */
+  public String getDescription(IPath containerPath, IJavaProject project)
+  {
+    return "Tapestry Framework Container";
+  }
 
 }

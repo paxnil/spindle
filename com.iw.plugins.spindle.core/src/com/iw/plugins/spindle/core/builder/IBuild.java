@@ -29,13 +29,13 @@ package com.iw.plugins.spindle.core.builder;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- *  Interface for Builders
+ * Interface for Builders
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public interface IBuild
 {
-    public void build() throws BuilderException, CoreException;
-    public void cleanUp();
+  public void build() throws BuilderException, CoreException;
+  public void cleanUp();
 }

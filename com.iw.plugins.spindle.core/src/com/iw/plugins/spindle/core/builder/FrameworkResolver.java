@@ -31,65 +31,68 @@ import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /**
- *  Namespace reolver for the Tapestry framework and its contained libraries.
+ * Namespace reolver for the Tapestry framework and its contained libraries.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public class FrameworkResolver extends NamespaceResolver
 {
-    private IResourceWorkspaceLocation fFrameworkLocation;
+  private IResourceWorkspaceLocation fFrameworkLocation;
 
-    /**
-     * @param build
-     * @param parser
-     */
-    public FrameworkResolver(Build build, Parser parser, IResourceWorkspaceLocation location)
+  /**
+   * @param build
+   * @param parser
+   */
+  public FrameworkResolver(Build build, Parser parser, IResourceWorkspaceLocation location)
+  {
+    super(build, parser);
+    fFrameworkLocation = location;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.builder.NamespaceResolver#doResolve()
+   */
+  public ICoreNamespace resolve()
+  {
+    try
     {
-        super(build, parser);
-        fFrameworkLocation = location;
-    }
+      resolve(ICoreNamespace.FRAMEWORK_NAMESPACE, fFrameworkLocation);
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.builder.NamespaceResolver#doResolve()
-     */
-    public ICoreNamespace resolve()
+      return fResultNamespace;
+    } finally
     {
-        try
-        {
-            resolve(ICoreNamespace.FRAMEWORK_NAMESPACE, fFrameworkLocation);
-
-            return fResultNamespace;
-        } finally
-        {
-            cleanup();
-        }
+      cleanup();
     }
+  }
 
-    /**
-     *  We need to resolve child libraries late, after this framework is resolved.
-     *  So we override this method to do nothing - the superclass resolves child libraries here.
-     * 
-     * @see com.iw.plugins.spindle.core.builder.NamespaceResolver#namespaceConfigured()
-     */
-    protected void namespaceConfigured()
-    {
-        //do nothing
-    }
+  /**
+   * We need to resolve child libraries late, after this framework is resolved.
+   * So we override this method to do nothing - the superclass resolves child
+   * libraries here.
+   * 
+   * @see com.iw.plugins.spindle.core.builder.NamespaceResolver#namespaceConfigured()
+   */
+  protected void namespaceConfigured()
+  {
+    //do nothing
+  }
 
-    /**
-     *  We need to resolve child libraries late, after the framework is resolved.
-     *  We do it here.
-     * 
-     * @see com.iw.plugins.spindle.core.builder.NamespaceResolver#namespaceResolved()
-     */
-    protected void namespaceResolved()
-    {
-        fFrameworkNamespace = fResultNamespace;
+  /**
+   * We need to resolve child libraries late, after the framework is resolved.
+   * We do it here.
+   * 
+   * @see com.iw.plugins.spindle.core.builder.NamespaceResolver#namespaceResolved()
+   */
+  protected void namespaceResolved()
+  {
+    fFrameworkNamespace = fResultNamespace;
 
-        resolveChildNamespaces();
+    resolveChildNamespaces();
 
-        super.namespaceResolved();
-    }
+    super.namespaceResolved();
+  }
 
 }

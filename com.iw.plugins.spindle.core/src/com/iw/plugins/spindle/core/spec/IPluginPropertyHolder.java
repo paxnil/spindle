@@ -31,17 +31,18 @@ import java.util.List;
 import org.apache.tapestry.util.IPropertyHolder;
 
 /**
- *  Extends org.apache.tapestry.util.IPropertyHolder to also
- *  Hold the property declarations found in a document during a parse/scan episode.
+ * Extends org.apache.tapestry.util.IPropertyHolder to also Hold the property
+ * declarations found in a document during a parse/scan episode.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: IPluginPropertyHolder.java,v 1.1 2003/11/21 17:46:26 glongman
+ *          Exp $
  */
 public interface IPluginPropertyHolder extends IPropertyHolder
 {
 
-    public void addPropertyDeclaration(PluginPropertyDeclaration declaration);
+  public void addPropertyDeclaration(PluginPropertyDeclaration declaration);
 
-    public List getPropertyDeclarations();
+  public List getPropertyDeclarations();
 
 }

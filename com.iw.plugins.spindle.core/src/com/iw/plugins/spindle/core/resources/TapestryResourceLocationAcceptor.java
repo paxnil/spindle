@@ -1,28 +1,26 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
+/*******************************************************************************
+ * ***** BEGIN LICENSE BLOCK Version: MPL 1.1
+ * 
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
+ * 1.1 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at http://www.mozilla.org/MPL/
+ * 
  * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+ * the specific language governing rights and limitations under the License.
+ * 
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
- *
- * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
- * the Initial Developer. All Rights Reserved.
- *
+ * 
+ * The Initial Developer of the Original Code is Intelligent Works Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2003 the Initial
+ * Developer. All Rights Reserved.
+ * 
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
- *
- * ***** END LICENSE BLOCK ***** */
+ * glongman@intelligentworks.com
+ * 
+ * ***** END LICENSE BLOCK *****
+ */
 
 package com.iw.plugins.spindle.core.resources;
 
@@ -31,101 +29,104 @@ import java.util.List;
 
 public class TapestryResourceLocationAcceptor implements IResourceLocationAcceptor
 {
-    /**
-     * Accept flag for specifying .jwc files.
-     */
-    public static int ACCEPT_JWC = 0x00000001;
+  /**
+   * Accept flag for specifying .jwc files.
+   */
+  public static int ACCEPT_JWC = 0x00000001;
 
-    /**
-     * Accept flag for specifying .page files.
-     */
-    public static int ACCEPT_PAGE = 0x00000002;
+  /**
+   * Accept flag for specifying .page files.
+   */
+  public static int ACCEPT_PAGE = 0x00000002;
 
-    /**
-     * Accept flag for specifying any file
-     */
-    public static int ACCEPT_ANY = 0x00000004;
+  /**
+   * Accept flag for specifying any file
+   */
+  public static int ACCEPT_ANY = 0x00000004;
 
-    List fResults = new ArrayList();
-    String fExpectedName;
-    boolean fExactMatch;
-    int fAcceptFlags;
+  List fResults = new ArrayList();
+  String fExpectedName;
+  boolean fExactMatch;
+  int fAcceptFlags;
 
-    public TapestryResourceLocationAcceptor(String name, boolean exactMatch, int acceptFlags)
+  public TapestryResourceLocationAcceptor(String name, boolean exactMatch, int acceptFlags)
+  {
+    reset(name, exactMatch, acceptFlags);
+  }
+
+  public void reset(String name, boolean exactMatch, int acceptFlags)
+  {
+    fResults.clear();
+    fExpectedName = name;
+    fExactMatch = exactMatch;
+    fAcceptFlags = acceptFlags;
+  }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.IResourceLocationRequestor#accept(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
+   */
+  public boolean accept(IResourceWorkspaceLocation location)
+  {
+    String fullname = location.getName();
+    String name = null;
+    String extension = null;
+
+    boolean match = false;
+    if (fullname != null)
     {
-        reset(name, exactMatch, acceptFlags);
+      int cut = fullname.lastIndexOf('.');
+      if (cut < 0)
+      {
+        name = fullname;
+      } else if (cut == 0)
+      {
+        extension = fullname;
+      } else
+      {
+        name = fullname.substring(0, cut);
+        extension = fullname.substring(cut + 1);
+      }
     }
-
-    public void reset(String name, boolean exactMatch, int acceptFlags)
+    if (name != null)
     {
-        fResults.clear();
-        fExpectedName = name;
-        fExactMatch = exactMatch;
-        fAcceptFlags = acceptFlags;
+      if ("*".equals(fExpectedName))
+      {
+        match = true;
+      } else if (fExactMatch)
+      {
+        match = fExpectedName.equals(name);
+      } else
+      {
+        match = name.startsWith(fExpectedName);
+      }
     }
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.IResourceLocationRequestor#accept(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
-     */
-    public boolean accept(IResourceWorkspaceLocation location)
+    if (match)
     {
-        String fullname = location.getName();
-        String name = null;
-        String extension = null;
-
-        boolean match = false;
-        if (fullname != null)
+      if ((fAcceptFlags & ACCEPT_ANY) == 0)
+      {
+        if ("jwc".equals(extension))
         {
-            int cut = fullname.lastIndexOf('.');
-            if (cut < 0)
-            {
-                name = fullname;
-            } else if (cut == 0)
-            {
-                extension = fullname;
-            } else
-            {
-                name = fullname.substring(0, cut);
-                extension = fullname.substring(cut + 1);
-            }
-        }
-        if (name != null)
+          match = (fAcceptFlags & ACCEPT_JWC) != 0;
+        } else if ("page".equals(extension))
         {
-            if ("*".equals(fExpectedName))
-            {
-                match = true;
-            } else if (fExactMatch)
-            {
-                match = fExpectedName.equals(name);
-            } else
-            {
-                match = name.startsWith(fExpectedName);
-            }
-        }
-        if (match)
+          match = (fAcceptFlags & ACCEPT_PAGE) != 0;
+        } else
         {
-            if ((fAcceptFlags & ACCEPT_ANY) == 0)
-            {
-                if ("jwc".equals(extension))
-                {
-                    match = (fAcceptFlags & ACCEPT_JWC) != 0;
-                } else if ("page".equals(extension))
-                {
-                    match = (fAcceptFlags & ACCEPT_PAGE) != 0;
-                } else
-                {
-                    match = false;
-                }
-            }
+          match = false;
         }
-        if (match && !fResults.contains(location))
-            fResults.add(location);
-
-        return true;
+      }
     }
+    if (match && !fResults.contains(location))
+      fResults.add(location);
 
-    public IResourceWorkspaceLocation[] getResults()
-    {
-        return (IResourceWorkspaceLocation[]) fResults.toArray(new IResourceWorkspaceLocation[fResults.size()]);
-    }
+    return true;
+  }
+
+  public IResourceWorkspaceLocation[] getResults()
+  {
+    return (IResourceWorkspaceLocation[]) fResults
+        .toArray(new IResourceWorkspaceLocation[fResults.size()]);
+  }
 
 }

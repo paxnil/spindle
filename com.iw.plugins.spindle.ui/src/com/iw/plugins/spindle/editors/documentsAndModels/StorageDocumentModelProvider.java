@@ -44,7 +44,8 @@ import com.iw.plugins.spindle.editors.template.TemplateTextTools;
  * StorageDocumentModelProvider documents and models for files in jars
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: StorageDocumentModelProvider.java,v 1.1.2.1 2004/06/22 12:13:52
+ *          glongman Exp $
  */
 public class StorageDocumentModelProvider extends StorageDocumentProvider
     implements
@@ -73,7 +74,7 @@ public class StorageDocumentModelProvider extends StorageDocumentProvider
    */
   public void resetModel(IEditorInput input)
   {
-   // do nothing, these are read only files!
+    // do nothing, these are read only files!
   }
 
   protected IDocument createDocument(Object element) throws CoreException
@@ -86,7 +87,7 @@ public class StorageDocumentModelProvider extends StorageDocumentProvider
       XMLReconciler model = new XMLReconciler();
       model.createTree(document);
       fModelMap.put(document, model);
-    }   
+    }
     return document;
   }
 

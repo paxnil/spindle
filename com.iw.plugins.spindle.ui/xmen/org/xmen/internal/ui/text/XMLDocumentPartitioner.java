@@ -39,7 +39,8 @@ import org.xmen.xml.XMLNode;
  * XMLDocumentPartitioner modded version to create node positions
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: XMLDocumentPartitioner.java,v 1.2.2.2 2004/06/22 12:25:19
+ *          glongman Exp $
  */
 public class XMLDocumentPartitioner
     implements

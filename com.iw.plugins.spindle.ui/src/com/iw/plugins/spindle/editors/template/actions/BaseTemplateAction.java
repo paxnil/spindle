@@ -34,67 +34,66 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
 
 /**
- *  Base class for spec actions that need the xml partitioning.
+ * Base class for spec actions that need the xml partitioning.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: BaseTemplateAction.java,v 1.4.2.1 2004/06/22 12:23:46 glongman
+ *          Exp $
  */
 public abstract class BaseTemplateAction extends BaseEditorAction
 {
 
-    protected INamespace fNamespace;
-    protected INamespace fFrameworkNamespace;
+  protected INamespace fNamespace;
+  protected INamespace fFrameworkNamespace;
 
-    protected IDocument fDocument;
+  protected IDocument fDocument;
 
-    public BaseTemplateAction()
+  public BaseTemplateAction()
+  {
+    super();
+  }
+
+  public BaseTemplateAction(String text)
+  {
+    super(text);
+  }
+
+  public BaseTemplateAction(String text, ImageDescriptor image)
+  {
+    super(text, image);
+  }
+
+  public BaseTemplateAction(String text, int style)
+  {
+    super(text, style);
+  }
+
+  public final void run()
+  {
+    super.run();
+
+    INamespace namespace = fEditor.getNamespace();
+    if (namespace == null)
+      return;
+
+    if (fDocumentOffset < 0)
+      return;
+
+    try
     {
-        super();
-     }
+      fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+      if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
+        return;
+      doRun();
 
-    public BaseTemplateAction(String text)
+    } catch (RuntimeException e)
     {
-        super(text);
+      UIPlugin.log(e);
+      throw e;
     }
 
-    public BaseTemplateAction(String text, ImageDescriptor image)
-    {
-        super(text, image);
-    }
+  }
 
-    public BaseTemplateAction(String text, int style)
-    {
-        super(text, style);
-    }
-
-   
-
-    public final void run()
-    {
-        super.run();
-
-        INamespace namespace = fEditor.getNamespace();
-        if (namespace == null)
-            return;
-
-        if (fDocumentOffset < 0)
-            return;
-
-        try
-        {
-            fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-             if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
-                return;
-            doRun();
-
-        } catch (RuntimeException e)
-        {
-            UIPlugin.log(e);
-            throw e;
-        }
-
-    }
-
-    protected abstract void doRun();
+  protected abstract void doRun();
 
 }

@@ -27,13 +27,13 @@
 package com.iw.plugins.spindle.editors;
 
 /**
- *  Objects interested in the results of an Editor reconcile should implement.
+ * Objects interested in the results of an Editor reconcile should implement.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public interface IReconcileListener
 {
-    public void reconcileStarted();
-    public void reconciled(Object reconcileResults);
+  public void reconcileStarted();
+  public void reconciled(Object reconcileResults);
 }
