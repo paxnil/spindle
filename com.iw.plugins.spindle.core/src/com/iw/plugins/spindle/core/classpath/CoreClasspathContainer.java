@@ -39,8 +39,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.internal.core.ClasspathEntry;
+import org.eclipse.jdt.core.JavaCore;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 
@@ -126,10 +125,13 @@ public class CoreClasspathContainer implements IClasspathContainer {
 
                 URL libUrl = new URL(installUrl, path.toString());
                 libUrl = Platform.resolve(libUrl);
-                entries.add(new ClasspathEntry(IPackageFragmentRoot.K_BINARY,
-                        ClasspathEntry.CPE_LIBRARY, new Path(libUrl.getFile()),
-                        new Path[] {}, sourceAttachmentPath,
-                        sourceAttachmentRootPath, null, false));
+                
+                entries.add(JavaCore.newLibraryEntry(new Path(libUrl.getFile()), sourceAttachmentPath, sourceAttachmentRootPath, false ));
+                
+//                entries.add(new ClasspathEntry(IPackageFragmentRoot.K_BINARY,
+//                        ClasspathEntry.CPE_LIBRARY, new Path(libUrl.getFile()),
+//                        new Path[] {}, sourceAttachmentPath,
+//                        sourceAttachmentRootPath, null, false));
             } catch (MalformedURLException e) {
                 TapestryCore.log(e);
             } catch (IOException e) {
@@ -155,8 +157,8 @@ public class CoreClasspathContainer implements IClasspathContainer {
             return result;
 
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            TapestryCore.log("could not resolve src attachment URL: " + temp);
+           e.printStackTrace();
+//            TapestryCore.log("could not resolve src attachment URL: " + temp);
         }
         return null;
     }
