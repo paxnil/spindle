@@ -252,7 +252,7 @@ public class ApplicationWizardPage extends NewTapestryProjectPage {
 
     String packageName = fPackageDialogField.getTextValue();
     applicationPackage = root.createPackageFragment(packageName, true, monitor);
-    String engineClass = "net.sf.tapestry.SimpleEngine";
+    String engineClass = MessageUtil.getString("TapestryEngine.defaultEngine");
 
     application =
       ApplicationFactory.createApplication(root, applicationPackage, appname, engineClass, monitor);

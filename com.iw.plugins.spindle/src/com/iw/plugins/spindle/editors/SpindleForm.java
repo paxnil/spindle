@@ -26,6 +26,7 @@
 package com.iw.plugins.spindle.editors;
 
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.swt.widgets.Control;
 
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 
@@ -93,6 +94,21 @@ public class SpindleForm extends EditorForm {
    */
   public void fillContextMenu(IMenuManager mng) {
     // do nothing
+  }
+
+  /**
+   * @see org.eclipse.update.ui.forms.internal.IForm#setFocus()
+   */
+  public void setFocus() {
+  	
+  	Control thisControl = getControl();
+  	if (!thisControl.isVisible()) {
+  	
+  		super.setFocus();
+  	}
+  	
+  	
+    
   }
 
 }

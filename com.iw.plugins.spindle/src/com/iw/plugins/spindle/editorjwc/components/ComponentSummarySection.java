@@ -25,8 +25,6 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorjwc.components;
 
-import java.util.Iterator;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -38,8 +36,6 @@ import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormSection;
-import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 
 public class ComponentSummarySection extends SpindleFormSection {
@@ -111,16 +107,12 @@ public class ComponentSummarySection extends SpindleFormSection {
   }
 
   private String findContainedComponentId() {
-    PluginComponentSpecification spec =
-      ((TapestryComponentModel) getFormPage().getModel()).getComponentSpecification();
+  
+   
     if (selectedComponent != null) {
-      Iterator ids = spec.getComponentIds().iterator();
-      while (ids.hasNext()) {
-        String id = (String) ids.next();
-        if (spec.getComponent(id) == selectedComponent) {
-          return id;
-        }
-      }
+      
+      	return selectedComponent.getIdentifier();
+      
     }
     return "";
   }
