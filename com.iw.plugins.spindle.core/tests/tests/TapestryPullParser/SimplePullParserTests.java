@@ -65,7 +65,7 @@ public class SimplePullParserTests extends ConfiguredPullParserBase
 
     protected final String GRAMMAR_POOL = Constants.XERCES_PROPERTY_PREFIX + Constants.XMLGRAMMAR_POOL_PROPERTY;
 
-    protected final String TAPESTRY_1_3_PUBLIC_ID = SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID;
+    protected final String TAPESTRY_3_0_PUBLIC_ID = SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID;
     /**
      * Constructor for SimplePullParser.
      * @param arg0
@@ -122,7 +122,7 @@ public class SimplePullParserTests extends ConfiguredPullParserBase
 
     public void testTapestryEntityResolver() throws Exception
     {
-        TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID, "Tapestry_1_3.dtd");
+        TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, "Tapestry_3_0.dtd");
         final TapestryEntityResolver RESOLVER = new TapestryEntityResolver();
         // lets wrap the resolver so that the default fallback behaviour of xerces is short circuited
         XMLEntityResolver testResolver = new XMLEntityResolver()
@@ -149,7 +149,7 @@ public class SimplePullParserTests extends ConfiguredPullParserBase
         {
             fail("resolver fail test: IOException " + e.getMessage());
         }
-        id.setPublicId(TAPESTRY_1_3_PUBLIC_ID);
+        id.setPublicId(TAPESTRY_3_0_PUBLIC_ID);
         try
         {
             testResolver.resolveEntity(id);
@@ -188,7 +188,7 @@ public class SimplePullParserTests extends ConfiguredPullParserBase
     {
         XMLGrammarPoolImpl pool = (XMLGrammarPoolImpl) pullParseConfiguration.getProperty(GRAMMAR_POOL);
         assertNotNull("no pool configured!", pool);
-        assertNull("pool is not empty!", pool.getGrammar(TAPESTRY_1_3_PUBLIC_ID));
+        assertNull("pool is not empty!", pool.getGrammar(TAPESTRY_3_0_PUBLIC_ID));
 
         InputStream in = getClass().getResourceAsStream("/testdata/basicTapestryComponent.jwc");
         assertNotNull(in);
@@ -209,14 +209,14 @@ public class SimplePullParserTests extends ConfiguredPullParserBase
             in.close();
         }
 
-        assertNull("pool shouldn't cache DTD until the parser is reset!", pool.getGrammar(TAPESTRY_1_3_PUBLIC_ID));
+        assertNull("pool shouldn't cache DTD until the parser is reset!", pool.getGrammar(TAPESTRY_3_0_PUBLIC_ID));
 
         // setInputSource in the parser forces a reset, which triggers the caching
         Reader reader =
             new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/testdata/basicTapestryComponent.jwc")));
         pullParseConfiguration.setInputSource(new XMLInputSource(null, "", null, reader, null));
         pullParseConfiguration.parse();
-        assertNotNull("pool didn't cache the DTD", pool.getGrammar(TAPESTRY_1_3_PUBLIC_ID));
+        assertNotNull("pool didn't cache the DTD", pool.getGrammar(TAPESTRY_3_0_PUBLIC_ID));
 
     }
 

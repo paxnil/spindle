@@ -297,8 +297,11 @@ public class BaseValidator implements IScannerValidator
         ISourceLocation location)
         throws ScannerException
     {
-
-        if (value != null && !value.startsWith(fDummyString))
+        
+        if (value != null && value.startsWith(fDummyString))
+            return true;
+            
+        if (value != null)
         {
             if (fCompiledPatterns == null)
                 fCompiledPatterns = new HashMap();

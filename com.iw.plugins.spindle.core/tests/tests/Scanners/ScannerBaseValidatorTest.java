@@ -262,7 +262,7 @@ public class ScannerBaseValidatorTest extends TestCase
         // OGNL only
         String valid = "#fact = :[#this<=1? 1 : #this*#fact(#this-1)], #fact(30H)";
         // missing trailing }
-        String invalid = "listeners.{?#this instanceof antlr.TokenListener";
+        String invalid = "~listeners.{?#this instanceof antlr.TokenListener";
 
         //first without collector
         BaseValidator validator = new BaseValidator();
@@ -606,7 +606,7 @@ public class ScannerBaseValidatorTest extends TestCase
          */
         public void addProblem(int severity, ISourceLocation location, String message)
         {
-            // TODO Auto-generated method stub
+            problems.add(new DefaultProblem("poo", severity, message, location.getLineNumber(), location.getCharStart(), location.getCharEnd()));
 
         }
 
