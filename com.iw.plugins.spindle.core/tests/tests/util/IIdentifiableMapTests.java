@@ -59,10 +59,10 @@ public class IIdentifiableMapTests extends PropertyFiringBase
             public void propertyChange(PropertyChangeEvent evt)
             {
                 super.propertyChange(evt);
-                assertEquals("wrong property source!", source, this);
+                assertEquals("wrong property source!", eventSource, this);
                 assertEquals(evt.getPropertyName(), "testMap");
-                assertTrue(newValue == mock);
-                assertNull(oldValue);
+                assertTrue(eventNewValue == mock);
+                assertNull(eventOldValue);
 
             }
         };
