@@ -46,7 +46,7 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
-import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
+import com.iw.plugins.spindle.editors.assist.DTDAccess;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.wutka.dtd.DTD;
@@ -61,116 +61,6 @@ public abstract class TemplateContentAssistProcessor
     extends
       AbstractContentAssistProcessor
 {
-
-  public static List getWebProposals(
-      DTD dtd,
-      IDocument document,
-      int completionOffset,
-      int completionLength,
-      String tagName,
-      List excludeNames,
-      HashSet existingAttributeNames,
-      String prefix,
-      boolean addLeadingSpace)
-  {
-
-    List webAttributeNames;
-
-    if (dtd != null && tagName != null)
-    {
-      webAttributeNames = DTDProposalGenerator.getAttributes(dtd, tagName);
-    } else
-    {
-      return Collections.EMPTY_LIST;
-    }
-
-    List result = new ArrayList();
-
-    boolean ignorePrefix = prefix == null || prefix.trim().length() == 0;
-    
-    List requiredAttributes = DTDProposalGenerator.getRequiredAttributes(dtd, tagName);
-
-    for (Iterator iter = webAttributeNames.iterator(); iter.hasNext();)
-    {
-      String attrname = ((String) iter.next()).toLowerCase();
-
-      if (existingAttributeNames.contains(attrname))
-        continue;
-
-      boolean match = true;
-      if (!ignorePrefix)
-        match = attrname.startsWith(prefix);
-
-      if (match && !excludeNames.contains(attrname))
-      {
-        result.add(ProposalFactory.getElementAttributeProposal(
-            document,
-            attrname,
-            completionOffset,
-            completionLength,
-            addLeadingSpace,
-            requiredAttributes.contains(attrname)? Images.getSharedImage("bullet_pink.gif") : Images.getSharedImage("bullet_web.gif"),
-            null,
-            requiredAttributes.contains(attrname)? 98: 99));
-      }
-    }
-    return result;
-  }
-
-  public static List getParameterProposals(
-      TemplateEditor editor,
-      IDocument document,
-      int completionOffset,
-      int completionLength,
-      String prefix,
-      String jwcid,
-      HashSet existingAttributeNames,
-      List usedNames,
-      boolean addLeadingSpace)
-  {
-    ArrayList result = new ArrayList();
-    TemplateTapestryAccess helper = new TemplateTapestryAccess(editor);
-    helper.setJwcid(jwcid);
-
-    UITapestryAccess.Result [] infos = null;
-    try
-    {
-      infos = helper.findParameters(prefix, existingAttributeNames);
-    } catch (IllegalArgumentException e)
-    {
-      return Collections.EMPTY_LIST;
-    }
-
-    boolean ignorePrefix = prefix == null || prefix.trim().length() == 0;
-
-    for (int i = 0; i < infos.length; i++)
-    {
-      String parameterName = infos[i].name;
-
-      if (existingAttributeNames.contains(parameterName))
-        continue;
-
-      if (!ignorePrefix && !parameterName.toLowerCase().startsWith(prefix))
-        continue;
-
-      if (usedNames.contains(parameterName))
-        continue;
-
-      usedNames.add(parameterName);
-
-      result.add(ProposalFactory.getElementAttributeProposal(
-          document,
-          parameterName,
-          completionOffset,
-          completionLength,
-          addLeadingSpace,
-          (infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
-              .getSharedImage("bullet.gif")),
-          infos[i].description,
-          infos[i].required ? 0 : 1));
-    }
-    return result;
-  }
 
   private boolean fHasHTMLExtension;
   public TemplateContentAssistProcessor(Editor editor)
@@ -218,6 +108,61 @@ public abstract class TemplateContentAssistProcessor
       return jwcidArt.getAttributeValue();
 
     return null;
+  }
+
+  protected List getParameterProposals(
+      TemplateEditor editor,
+      IDocument document,
+      int completionOffset,
+      int completionLength,
+      String prefix,
+      String jwcid,
+      HashSet existingAttributeNames,
+      List usedNames,
+      boolean addLeadingSpace)
+  {
+    ArrayList result = new ArrayList();
+    TemplateTapestryAccess helper = new TemplateTapestryAccess(editor);
+    helper.setJwcid(jwcid);
+
+    UITapestryAccess.Result [] infos = null;
+    try
+    {
+      infos = helper.findParameters(prefix, existingAttributeNames);
+    } catch (IllegalArgumentException e)
+    {
+      return Collections.EMPTY_LIST;
+    }
+
+    boolean ignorePrefix = prefix == null || prefix.trim().length() == 0;
+
+    for (int i = 0; i < infos.length; i++)
+    {
+      String parameterName = infos[i].name;
+
+      if (existingAttributeNames.contains(parameterName))
+        continue;
+
+      if (!ignorePrefix && !parameterName.toLowerCase().startsWith(prefix))
+        continue;
+
+      if (usedNames.contains(parameterName))
+        continue;
+
+      usedNames.add(parameterName);
+
+      result.add(ProposalFactory.createElementAttributeProposal(
+          document,
+          parameterName,
+          completionOffset,
+          completionLength,
+          addLeadingSpace,
+          (infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
+              .getSharedImage("bullet.gif")),
+          infos[i].description,
+          infos[i].required ? 0 : 1));
+    }
+    return result;
   }
 
 }

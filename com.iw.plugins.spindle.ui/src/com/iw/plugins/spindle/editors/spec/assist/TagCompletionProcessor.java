@@ -47,7 +47,7 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
-import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
+import com.iw.plugins.spindle.editors.assist.DTDAccess;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 
 /**
@@ -55,8 +55,6 @@ import com.iw.plugins.spindle.editors.assist.ProposalFactory;
  * the body of the XML
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: TagCompletionProcessor.java,v 1.11.2.2 2004/06/22 12:23:19
- *                     glongman Exp $
  */
 public class TagCompletionProcessor extends SpecCompletionProcessor
 {
@@ -126,7 +124,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         int replacementLength = i;
 
-        proposals = DTDProposalGenerator.findRawNewTagProposals(
+        proposals = ProposalFactory.findRawNewTagProposals(
             document,
             tag.getOffset(),
             replacementLength,
@@ -186,7 +184,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
     XMLNode parent = tag.getParent();
     if (parent != null
-        && (parent.getType().equals("/") || DTDProposalGenerator.getAllowedChildren(
+        && (parent.getType().equals("/") || DTDAccess.getAllowedChildren(
             fDTD,
             parent.getName(),
             null,
@@ -318,7 +316,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
     int replacementOffset = existingAttribute.getOffset();
     int replacementLength = existingAttribute.getLength();
 
-    proposals.addAll(SpecCompletionProcessor.getAttributeProposals(
+    proposals.addAll(ProposalFactory.getAttributeProposals(
         fDTD,
         document,
         replacementOffset,
@@ -328,63 +326,6 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         existingAttributeNames,
         prefix,
         false));
-    //    int matchLength = matchString.length();
-    //    if (matchLength == 0 || matchLength > name.length())
-    //      matchString = null;
-    //
-    //    try
-    //    {
-    //      List attrs = DTDProposalGenerator.getAttributes(fDTD, tagName);
-    //
-    //      if (!attrs.isEmpty())
-    //      {
-    //        List requiredAttributes = DTDProposalGenerator.getRequiredAttributes(
-    //            fDTD,
-    //            tagName);
-    //        for (Iterator iter = attrs.iterator(); iter.hasNext();)
-    //        {
-    //          String attrName = (String) iter.next();
-    //          if (existingAttributeNames.contains(attrName)
-    //              || (matchString != null && !attrName.startsWith(matchString)))
-    //            continue;
-    //
-    //          CompletionProposal proposal;
-    //          if (value == null)
-    //          {
-    //            proposal = new CompletionProposal(
-    //                attrName + "=\"\"",
-    //                replacementOffset,
-    //                replacementLength,
-    //                new Point(attrName.length(), 0),
-    //                requiredAttributes.contains(attrName) ? Images
-    //                    .getSharedImage("bullet_pink.gif") : Images
-    //                    .getSharedImage("bullet.gif"),
-    //                null,
-    //                null,
-    //                null);
-    //          } else
-    //          {
-    //            proposal = new CompletionProposal(
-    //                attrName,
-    //                replacementOffset,
-    //                replacementLength,
-    //                new Point(attrName.length(), 0),
-    //                requiredAttributes.contains(attrName) ? Images
-    //                    .getSharedImage("bullet_pink.gif") : Images
-    //                    .getSharedImage("bullet.gif"),
-    //                null,
-    //                null,
-    //                null);
-    //          }
-    //
-    //          proposals.add(proposal);
-    //        }
-    //      }
-    //
-    //    } catch (IllegalArgumentException e)
-    //    {
-    //      //do nothing
-    //    }
 
   }
 
@@ -397,7 +338,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
       List proposals)
   {
 
-    proposals.addAll(SpecCompletionProcessor.getAttributeProposals(
+    proposals.addAll(ProposalFactory.getAttributeProposals(
         fDTD,
         document,
         documentOffset,
@@ -407,31 +348,6 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         existingAttributeNames,
         null,
         addLeadingSpace));
-
-    //    List attrs = DTDProposalGenerator.getAttributes(fDTD, tagName);
-    //
-    //    if (!attrs.isEmpty())
-    //    {
-    //      List requiredAttributes =
-    // DTDProposalGenerator.getRequiredAttributes(fDTD, tagName);
-    //      for (Iterator iter = attrs.iterator(); iter.hasNext();)
-    //      {
-    //        String attrname = (String) iter.next();
-    //        if (!existingAttributeNames.contains(attrname))
-    //        {
-    //          CompletionProposal proposal = ProposalFactory.getAttributeProposal(
-    //              attrname,
-    //              addLeadingSpace,
-    //              documentOffset);
-    //
-    //          if (requiredAttributes.contains(attrname))
-    //            proposal.setImage(Images.getSharedImage("bullet_pink.gif"));
-    //          proposals.add(proposal);
-    //        }
-    //
-    //      }
-    //    }
-
   }
 
   /*
@@ -463,7 +379,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
     if (documentOffset - tag.getOffset() <= name.length() + 1)
     {
-      String comment = DTDProposalGenerator.getElementComment(fDTD, name);
+      String comment = DTDAccess.getElementComment(fDTD, name);
       if (comment != null)
         return new IContextInformation[]{new ContextInformation(
             name,

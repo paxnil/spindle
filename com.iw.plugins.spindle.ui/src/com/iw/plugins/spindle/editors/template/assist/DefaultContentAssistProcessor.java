@@ -151,29 +151,31 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
 
           if (TemplateParser.JWCID_ATTRIBUTE_NAME.startsWith(currentName))
           {
-            return new ICompletionProposal[]{ProposalFactory.getElementAttributeProposal(
-                document,
-                TemplateParser.JWCID_ATTRIBUTE_NAME,
-                documentOffset,
-                0,
-                addLeadingSpace,
-                null,
-                null,
-                -1)};
+            return new ICompletionProposal[]{ProposalFactory
+                .createElementAttributeProposal(
+                    document,
+                    TemplateParser.JWCID_ATTRIBUTE_NAME,
+                    documentOffset,
+                    0,
+                    addLeadingSpace,
+                    null,
+                    null,
+                    -1)};
 
           } else if (TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME
               .startsWith(currentName))
           {
 
-            return new ICompletionProposal[]{ProposalFactory.getElementAttributeProposal(
-                document,
-                TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
-                documentOffset,
-                0,
-                addLeadingSpace,
-                null,
-                null,
-                -1)};
+            return new ICompletionProposal[]{ProposalFactory
+                .createElementAttributeProposal(
+                    document,
+                    TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
+                    documentOffset,
+                    0,
+                    addLeadingSpace,
+                    null,
+                    null,
+                    -1)};
           }
 
           return NoProposals;
@@ -197,7 +199,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
 
       List usedNames = new ArrayList();
 
-      proposals.add(ProposalFactory.getElementAttributeProposal(
+      proposals.add(ProposalFactory.createElementAttributeProposal(
           document,
           TemplateParser.JWCID_ATTRIBUTE_NAME,
           documentOffset,
@@ -207,7 +209,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
           null,
           -1));
 
-      proposals.add(ProposalFactory.getElementAttributeProposal(
+      proposals.add(ProposalFactory.createElementAttributeProposal(
           document,
           TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
           documentOffset,
@@ -261,8 +263,8 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
 
     List excludeName = new ArrayList();
 
-    proposals.addAll(TemplateContentAssistProcessor.getParameterProposals(
-        (TemplateEditor) fEditor, 
+    proposals.addAll(getParameterProposals(
+        (TemplateEditor) fEditor,
         document,
         documentOffset,
         0,
@@ -272,7 +274,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
         excludeName,
         addLeadingSpace));
 
-    proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
+    proposals.addAll(ProposalFactory.getAttributeProposals(
         fDTD,
         document,
         documentOffset,
@@ -307,7 +309,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
     if (fragment.length() == 0)
       fragment = null;
 
-    proposals.addAll(TemplateContentAssistProcessor.getParameterProposals(
+    proposals.addAll(getParameterProposals(
         (TemplateEditor) fEditor,
         document,
         documentOffset,
@@ -315,9 +317,10 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
         fragment,
         jwcid,
         existingAttributeNames,
-        usedNames, false));
+        usedNames,
+        false));
 
-    proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
+    proposals.addAll(ProposalFactory.getAttributeProposals(
         fDTD,
         document,
         documentOffset,
@@ -325,7 +328,8 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
         tagName,
         usedNames,
         existingAttributeNames,
-        fragment, false));
+        fragment,
+        false));
   }
 
   private ICompletionProposal[] computeTextProposals(

@@ -62,7 +62,7 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
-import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
+import com.iw.plugins.spindle.editors.assist.DTDAccess;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.spec.SpecEditor;
 
@@ -174,7 +174,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
       String special = null;
 
       if (dtdAllowed.isEmpty())
-        special = DTDProposalGenerator.getTapestryDefaultValue(
+        special = DTDAccess.getTapestryDefaultValue(
             fDTD,
             fTagName,
             fAttributeName);
@@ -514,11 +514,11 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
    */
   private List computeDTDAllowedProposals()
   {
-    List allowedValues = DTDProposalGenerator.getAllowedAttributeValues(
+    List allowedValues = DTDAccess.getAllowedAttributeValues(
         fDTD,
         fTagName,
         fAttributeName);
-    String defaultValue = DTDProposalGenerator.getDefaultAttributeValue(
+    String defaultValue = DTDAccess.getDefaultAttributeValue(
         fDTD,
         fTagName,
         fAttributeName);

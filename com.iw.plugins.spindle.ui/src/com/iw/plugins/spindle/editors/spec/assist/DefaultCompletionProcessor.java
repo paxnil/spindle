@@ -46,7 +46,7 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
-import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
+import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.assist.usertemplates.UserTemplateCompletionProcessor;
 
 /**
@@ -82,7 +82,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     if (node == null || document.get().trim().length() == 0)
       return fUserTemplates.computeCompletionProposals(viewer, documentOffset);
 
-    
+    List proposals;
 
     XMLNode nextNode = node;
     XMLNode parentNode = null;
@@ -90,9 +90,21 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     if (node.getOffset() + node.getLength() == documentOffset)
     {
       nextNode = node.getNextArtifact();
-      // at the end of the document
       if (nextNode == null)
+      {
         return computeLastPositionProposals(node, viewer, documentOffset);
+      } else if (node.isTagPart())
+      {
+        proposals = ProposalFactory.getRawNewTagProposals(
+            document,
+            documentOffset,
+            0,
+            fDTD,
+            node,
+            ! ITypeConstants.TAG.equals(node.getType()));
+        return (ICompletionProposal[]) proposals
+            .toArray(new ICompletionProposal[proposals.size()]);
+      }
     }
     String type = node.getType();
     if (node == nextNode
@@ -146,7 +158,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
       UIPlugin.log(e);
     }
 
-    List proposals = DTDProposalGenerator.findRawNewTagProposals(
+    proposals = ProposalFactory.findRawNewTagProposals(
         document,
         offset,
         length,
@@ -188,7 +200,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     HashSet existingAttributeNames = new HashSet();
     existingAttributeNames.addAll(node.getAttributesMap().keySet());
 
-    proposals.addAll(SpecCompletionProcessor.getAttributeProposals(
+    proposals.addAll(ProposalFactory.getAttributeProposals(
         fDTD,
         document,
         documentOffset,
@@ -255,7 +267,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     List proposals = null;
     if (name.endsWith(".jwc"))
     {
-      proposals = DTDProposalGenerator.getNewElementCompletionProposals(
+      proposals = ProposalFactory.getNewElementCompletionProposals(
           document,
           completionOffset,
           0,
@@ -263,7 +275,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
           "component-specification");
     } else if (name.endsWith(".page"))
     {
-      proposals = DTDProposalGenerator.getNewElementCompletionProposals(
+      proposals = ProposalFactory.getNewElementCompletionProposals(
           document,
           completionOffset,
           0,
@@ -271,7 +283,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
           "page-specification");
     } else if (name.endsWith(".application"))
     {
-      proposals = DTDProposalGenerator.getNewElementCompletionProposals(
+      proposals = ProposalFactory.getNewElementCompletionProposals(
           document,
           completionOffset,
           0,
@@ -279,7 +291,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
           "application");
     } else if (name.endsWith(".library"))
     {
-      proposals = DTDProposalGenerator.getNewElementCompletionProposals(
+      proposals = ProposalFactory.getNewElementCompletionProposals(
           document,
           completionOffset,
           0,
@@ -316,7 +328,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     if (name == null)
       return NoProposals;
 
-    List proposals = DTDProposalGenerator.getRawNewTagProposals(
+    List proposals = ProposalFactory.getRawNewTagProposals(
         viewer.getDocument(),
         documentOffset,
         0,

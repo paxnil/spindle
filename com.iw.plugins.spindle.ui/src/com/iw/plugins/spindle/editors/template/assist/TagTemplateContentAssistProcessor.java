@@ -45,7 +45,7 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
-import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
+import com.iw.plugins.spindle.editors.assist.DTDAccess;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
@@ -117,7 +117,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
 
         int replacementLength = i;
 
-        proposals = DTDProposalGenerator.getRawNewTagProposalsSimple(
+        proposals = ProposalFactory.getRawNewTagProposals(
             viewer.getDocument(),
             tag.getOffset(),
             replacementLength,
@@ -237,7 +237,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
   {
     List proposals = new ArrayList();
 
-    proposals.add(ProposalFactory.getElementAttributeProposal(
+    proposals.add(ProposalFactory.createElementAttributeProposal(
         document,
         TemplateParser.JWCID_ATTRIBUTE_NAME,
         documentOffset,
@@ -247,7 +247,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
         null,
         -1));
 
-    proposals.add(ProposalFactory.getElementAttributeProposal(
+    proposals.add(ProposalFactory.createElementAttributeProposal(
         document,
         TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
         documentOffset,
@@ -257,7 +257,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
         null,
         -1));
 
-    proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
+    proposals.addAll(ProposalFactory.getAttributeProposals(
         fDTD,
         document,
         documentOffset,
@@ -306,7 +306,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
 
     if (TemplateParser.JWCID_ATTRIBUTE_NAME.startsWith(prefix))
     {
-      proposals.add(ProposalFactory.getElementAttributeProposal(
+      proposals.add(ProposalFactory.createElementAttributeProposal(
           document,
           TemplateParser.JWCID_ATTRIBUTE_NAME,
           replacementOffset,
@@ -320,7 +320,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
 
     if (TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME.startsWith(prefix))
     {
-      proposals.add(ProposalFactory.getElementAttributeProposal(
+      proposals.add(ProposalFactory.createElementAttributeProposal(
           document,
           TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
           replacementOffset,
@@ -334,7 +334,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
 
     if (jwcid != null && jwcid.trim().length() > 0)
     {
-      proposals.addAll(TemplateContentAssistProcessor.getParameterProposals(
+      proposals.addAll(getParameterProposals(
           (TemplateEditor) fEditor,
           document,
           replacementOffset,
@@ -346,7 +346,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
           false));
     }
 
-    proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
+    proposals.addAll(ProposalFactory.getAttributeProposals(
         fDTD,
         document,
         replacementOffset,
@@ -373,7 +373,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
 
     List usedNames = new ArrayList();
 
-    proposals.addAll(TemplateContentAssistProcessor.getParameterProposals(
+    proposals.addAll(getParameterProposals(
         (TemplateEditor) fEditor,
         document,
         documentOffset,
@@ -384,7 +384,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
         usedNames,
         addLeadingSpace));
 
-    proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
+    proposals.addAll(ProposalFactory.getAttributeProposals(
         fDTD,
         document,
         documentOffset,
@@ -397,127 +397,6 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
     return proposals;
   }
 
-  //  protected List computeParameterNameReplacements(
-  //      int documentOffset,
-  //      XMLNode existingAttribute,
-  //      String jwcid,
-  //      HashSet existingAttributeNames,
-  //      List proposals)
-  //  {
-  //    List parameterNames = new ArrayList();
-  //    String name = existingAttribute.getName();
-  //    String value = existingAttribute.getAttributeValue();
-  //    //get index of whitespace
-  //    String fragment = existingAttribute.getContentTo(documentOffset, false);
-  //    if (fragment.length() > name.length())
-  //      return Collections.EMPTY_LIST;
-  //
-  //    int replacementOffset = existingAttribute.getOffset();
-  //    int replacementLength = name.length();
-  //
-  //    if (fragment.length() == 0)
-  //      fragment = null;
-  //
-  //    try
-  //    {
-  //      // first get the matches
-  //      TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor)
-  // fEditor);
-  //      helper.setJwcid(jwcid);
-  //
-  //      UITapestryAccess.Result[] infos = helper.findParameters(
-  //          fragment,
-  //          existingAttributeNames);
-  //      for (int i = 0; i < infos.length; i++)
-  //      {
-  //        parameterNames.add(infos[i].name);
-  //        CompletionProposal proposal;
-  //        if (value == null)
-  //        {
-  //          proposal = new CompletionProposal(
-  //              infos[i].name + "=\"\"",
-  //              replacementOffset,
-  //              replacementLength,
-  //              new Point(infos[i].name.length(), 0),
-  //              infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
-  //                  .getSharedImage("bullet.gif"),
-  //              null,
-  //              null,
-  //              infos[i].description);
-  //        } else
-  //        {
-  //          proposal = new CompletionProposal(
-  //              infos[i].name,
-  //              replacementOffset,
-  //              replacementLength,
-  //              new Point(infos[i].name.length(), 0),
-  //              infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
-  //                  .getSharedImage("bullet.gif"),
-  //              null,
-  //              null,
-  //              infos[i].description);
-  //        }
-  //
-  //        proposals.add(proposal);
-  //        existingAttributeNames.add(infos[i].name.toLowerCase());
-  //      }
-  //
-  //      //then get the replaces
-  //
-  //      if (fDTD == null)
-  //      // its confusing to include the non matching parameter if we are including
-  //      // XHTML ones too.
-  //      {
-  //        infos = helper.findParameters(null, existingAttributeNames);
-  //        for (int i = 0; i < infos.length; i++)
-  //        {
-  //
-  //          CompletionProposal proposal;
-  //          if (value == null)
-  //          {
-  //            proposal = new CompletionProposal(
-  //                infos[i].name + "=\"\"",
-  //                replacementOffset,
-  //                replacementLength,
-  //                new Point(infos[i].name.length(), 0),
-  //                infos[i].required ? Images.getSharedImage("bullet_weird.gif") : Images
-  //                    .getSharedImage("bullet_d.gif"),
-  //                null,
-  //                null,
-  //                infos[i].description);
-  //          } else
-  //          {
-  //
-  //            proposal = new CompletionProposal(
-  //                infos[i].name,
-  //                replacementOffset,
-  //                replacementLength,
-  //                new Point(infos[i].name.length(), 0),
-  //                infos[i].required ? Images.getSharedImage("bullet_weird.gif") : Images
-  //                    .getSharedImage("bullet_d.gif"),
-  //                null,
-  //                null,
-  //                infos[i].description);
-  //          }
-  //
-  //          proposal.setYOrder(1);
-  //          proposals.add(proposal);
-  //        }
-  //      }
-  //
-  //    } catch (IllegalArgumentException e)
-  //    {
-  //      //do nothing
-  //    }
-  //    return parameterNames;
-  //  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
-   *              int)
-   */
   public IContextInformation[] doComputeContextInformation(
       ITextViewer viewer,
       int documentOffset)
