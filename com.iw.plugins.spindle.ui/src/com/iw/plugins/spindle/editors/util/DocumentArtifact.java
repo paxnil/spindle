@@ -84,7 +84,8 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         TERMINATORS.put(DocumentArtifactPartitioner.EMPTYTAG, "/>");
     }
 
-    public static synchronized DocumentArtifact createTree(IDocument document, int stopOffset) throws BadLocationException
+    public static synchronized DocumentArtifact createTree(IDocument document, int stopOffset)
+        throws BadLocationException
     {
         Position[] pos = null;
         try
@@ -501,7 +502,11 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                     if (state == DOUBLEQUOTE)
                     {
                         attrs.add(
-                            new DocumentArtifact(getOffset() + start, i - start + 1, DocumentArtifactPartitioner.ATTR, fDocument));
+                            new DocumentArtifact(
+                                getOffset() + start,
+                                i - start + 1,
+                                DocumentArtifactPartitioner.ATTR,
+                                fDocument));
                         start = -1;
                         state = TAG;
                     } else
@@ -513,7 +518,11 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                     if (state == SINGLEQUOTE)
                     {
                         attrs.add(
-                            new DocumentArtifact(getOffset() + start, i - start + 1, DocumentArtifactPartitioner.ATTR, fDocument));
+                            new DocumentArtifact(
+                                getOffset() + start,
+                                i - start + 1,
+                                DocumentArtifactPartitioner.ATTR,
+                                fDocument));
                         start = -1;
                         state = TAG;
                     } else
@@ -727,26 +736,26 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                 return Integer.toString(state);
         }
     } /**
-                                                                                           * @return
-                                                                                           */
+                                                                                                    * @return
+                                                                                                    */
     public DocumentArtifact getCorrespondingNode()
     {
         return fCorrespondingNode;
     } /**
-                                                                                               * @return
-                                                                                               */
+                                                                                                        * @return
+                                                                                                        */
     public DocumentArtifact getParent()
     {
         return fParent;
     } /**
-                                                                                               * @param artifact
-                                                                                               */
+                                                                                                        * @param artifact
+                                                                                                        */
     public void setCorrespondingNode(DocumentArtifact artifact)
     {
         fCorrespondingNode = artifact;
     } /**
-                                                                                               * @param artifact
-                                                                                               */
+                                                                                                        * @param artifact
+                                                                                                        */
     public void setParent(DocumentArtifact artifact)
     {
         fParent = artifact;
@@ -775,11 +784,24 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         int index = 0;
         while (pos[index] != this)
             index++;
-        if (index > 0)
+        DocumentArtifact result = null;
+        DocumentArtifact next = null;
+        if (index > 0 && index < pos.length)
         {
+            for (int i = index + 1; i < pos.length; i++)
+            {
+                next = (DocumentArtifact) pos[i];
+                if (next.getParent() == fParent)
+                    break;
+                if (next.getType() != DocumentArtifactPartitioner.TAG
+                    || next.getType() != DocumentArtifactPartitioner.EMPTYTAG
+                    || next.getParent() != this)
+                    continue;                
+                result = next;
+            }
         }
-        
 
+        return result;
     }
 
     public DocumentArtifact getPreviousSibling()

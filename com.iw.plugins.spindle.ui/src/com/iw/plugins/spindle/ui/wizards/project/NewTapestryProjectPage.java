@@ -316,7 +316,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         monitor.worked(1);
         configureHomePage(webInfFolder, monitor);
         monitor.worked(1);
-        configureHomeTemplate(contextFolder, monitor);
+        configureHomeTemplate(webInfFolder, monitor);
         monitor.done();
     }
 
@@ -382,11 +382,11 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
      * @param webInfFolder
      * @param monitor
      */
-    private void configureHomeTemplate(IFolder contextFolder, IProgressMonitor monitor) throws CoreException
+    private void configureHomeTemplate(IFolder webInfFolder, IProgressMonitor monitor) throws CoreException
     {
         IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
         String source = pstore.getString(PreferenceConstants.P_HTML_TO_GENERATE);
-        IFile pageFile = contextFolder.getFile("Home.html");
+        IFile pageFile = webInfFolder.getFile("Home.html");
         fReveal.add(pageFile);
         InputStream contents = new ByteArrayInputStream(source.getBytes());
         pageFile.create(contents, true, new SubProgressMonitor(monitor, 1));

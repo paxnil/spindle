@@ -26,6 +26,16 @@
 
 package com.iw.plugins.spindle.editors.spec;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IDocument;
+
+import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.template.TemplateStorageDocumentProvider;
 
 /**
@@ -37,4 +47,42 @@ import com.iw.plugins.spindle.editors.template.TemplateStorageDocumentProvider;
  * @version $Id$
  */
 public class SpecStorageDocumentProvider extends TemplateStorageDocumentProvider
-{}
+{
+    protected void setDocumentContent(IDocument document, InputStream contentStream, String encoding)
+        throws CoreException
+    {
+
+        Reader in = null;
+
+        try
+        {
+
+            in = new InputStreamReader(new BufferedInputStream(contentStream), "UTF-8");
+            StringBuffer buffer = new StringBuffer();
+            char[] readBuffer = new char[2048];
+            int n = in.read(readBuffer);
+            while (n > 0)
+            {
+                buffer.append(readBuffer, 0, n);
+                n = in.read(readBuffer);
+            }
+
+            document.set(buffer.toString());
+
+        } catch (IOException x)
+        {
+            UIPlugin.log(x);
+        } finally
+        {
+            if (in != null)
+            {
+                try
+                {
+                    in.close();
+                } catch (IOException x)
+                {}
+            }
+        }
+    }
+
+}

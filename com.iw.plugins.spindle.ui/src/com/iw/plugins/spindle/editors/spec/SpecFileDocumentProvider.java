@@ -26,6 +26,7 @@
 
 package com.iw.plugins.spindle.editors.spec;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,6 +59,8 @@ import com.iw.plugins.spindle.editors.template.TemplateFileDocumentProvider;
  */
 public class SpecFileDocumentProvider extends TemplateFileDocumentProvider
 {
+    public static String DEFAULT_ENCODING = "UTF-8";
+
     /* (non-Javadoc)
      * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createAnnotationModel(java.lang.Object)
      */
@@ -94,7 +97,45 @@ public class SpecFileDocumentProvider extends TemplateFileDocumentProvider
             }
             return true;
         }
+
         return super.setDocumentContent(document, editorInput, encoding);
+    }
+
+    protected void setDocumentContent(IDocument document, InputStream contentStream, String encoding)
+        throws CoreException
+    {
+
+        Reader in = null;
+
+        try
+        {
+
+            in = new InputStreamReader(new BufferedInputStream(contentStream), "UTF-8");
+            StringBuffer buffer = new StringBuffer();
+            char[] readBuffer = new char[2048];
+            int n = in.read(readBuffer);
+            while (n > 0)
+            {
+                buffer.append(readBuffer, 0, n);
+                n = in.read(readBuffer);
+            }
+
+            document.set(buffer.toString());
+
+        } catch (IOException x)
+        {
+            UIPlugin.log(x);
+        } finally
+        {
+            if (in != null)
+            {
+                try
+                {
+                    in.close();
+                } catch (IOException x)
+                {}
+            }
+        }
     }
 
     private String getSkeletonSpecification(String extension)
