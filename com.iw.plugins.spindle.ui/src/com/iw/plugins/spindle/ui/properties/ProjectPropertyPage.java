@@ -222,10 +222,17 @@ public class ProjectPropertyPage extends PropertyPage
             TapestryCore.log(ex.getMessage());
         }
         fProjectTypeCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        
+// commented out until a real library build can occur
+        
+//        fProjectTypeCombo.setItems(
+//            new String[] {
+//                UIPlugin.getString("property-page-project-type-application"),
+//                UIPlugin.getString("property-page-project-type-library")});
         fProjectTypeCombo.setItems(
             new String[] {
-                UIPlugin.getString("property-page-project-type-application"),
-                UIPlugin.getString("property-page-project-type-library")});
+                UIPlugin.getString("property-page-project-type-application")});
+                
         fProjectTypeCombo.select(getProjectType());
         fProjectTypeCombo.setEnabled(fIsTapestryProjectCheck.getSelection());
         fProjectTypeCombo.addSelectionListener(new SelectionListener()
@@ -402,7 +409,7 @@ public class ProjectPropertyPage extends PropertyPage
 
         if (jproject == null)
         {
-            setErrorMessage("Could not determine the Java Project"); //TODO internationalize!
+            setErrorMessage(UIPlugin.getString("property-page-no-java-project")); 
             disableAll();
             return true;
         }
@@ -414,8 +421,7 @@ public class ProjectPropertyPage extends PropertyPage
             // old spindle and new spindle can't co-exist!
             if (project.hasNature("com.iw.plugins.spindle.project.TapestryProject"))
             {
-                setErrorMessage("Spindle 2.0 and Spindle 1.1.X can't coexist in the same project");
-                //TODO internationalize!
+                setErrorMessage(UIPlugin.getString("property-page-conflicts-with-old-spindle"));                
                 disableAll();
                 return true;
             }
@@ -459,7 +465,7 @@ public class ProjectPropertyPage extends PropertyPage
         return true;
     }
 
-    //called by isValid() disable if the project is already an old Tapestry project
+    //called by isValid() disable if the project is already an old (1.1.X) Spindle project
     private void disableAll()
     {
         fIsTapestryProjectCheck.setEnabled(false);
