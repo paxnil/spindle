@@ -130,12 +130,12 @@ public class CheckBoxField extends DialogField
                 public void widgetDefaultSelected(SelectionEvent e)
                 {
                     updateAttachedFields();
-                    fireDialogChanged(field);
+                    fireDialogButtonPressed(field);
                 }
                 public void widgetSelected(SelectionEvent e)
                 {
                     updateAttachedFields();
-                    fireDialogChanged(field);
+                    fireDialogButtonPressed(field);
                 }
             });
             fCheckboxControl.setFont(parent.getFont());
@@ -149,9 +149,12 @@ public class CheckBoxField extends DialogField
         if (fCheckboxControl != null && !fCheckboxControl.isDisposed())
         {
             updateAttachedFields();
-            this.fFireEvent = fireEvent;
+            
             fCheckboxControl.setSelection(value);
-            this.fFireEvent = true;
+            if (fireEvent)
+              fireDialogButtonPressed(this);
+            
+           
         }
     }
 
@@ -193,17 +196,4 @@ public class CheckBoxField extends DialogField
             }
         }
     }
-
-    /**
-     * @see DialogField#fireDialogChanged(DialogField)
-     */
-    protected void fireDialogChanged(DialogField field)
-    {
-
-        if (fFireEvent)
-        {
-            super.fireDialogChanged(field);
-        }
-    }
-
 }

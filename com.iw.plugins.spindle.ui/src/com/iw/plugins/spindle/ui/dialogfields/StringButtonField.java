@@ -97,7 +97,7 @@ public class StringButtonField extends StringField {
 		formData.right = new FormAttachment(buttonControl, -4);
 		textControl.setLayoutData(formData);
 
-		buttonControl.setText("Browse...");
+		
 		formData = new FormData();
 		formData.width = 75;
 		formData.height = 25;
@@ -112,6 +112,7 @@ public class StringButtonField extends StringField {
 		if (fButtonControl == null) {
 
 			fButtonControl = new Button(parent, SWT.PUSH);
+			fButtonControl.setText("Browse...");
 			fButtonControl.setFont(parent.getFont());
 
 			final DialogField field = this;

@@ -86,7 +86,7 @@ public class StringField extends DialogField {
       textControl.addModifyListener(new ModifyListener() {
 
         public void modifyText(ModifyEvent e) {
-          fireDialogChanged(field);
+          fireDialogFieldChanged(field);
         }
 
       });
@@ -103,7 +103,7 @@ public class StringField extends DialogField {
     if (textControl != null && !textControl.isDisposed()) {
       textControl.setText(value);
       if (update) {
-        fireDialogChanged(this);
+        fireDialogFieldChanged(this);
       }
     }
   }

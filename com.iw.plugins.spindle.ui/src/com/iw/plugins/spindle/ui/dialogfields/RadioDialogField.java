@@ -157,12 +157,12 @@ public class RadioDialogField extends DialogField {
 				radioButtons[i].addSelectionListener(new SelectionListener() {
 
 					public void widgetDefaultSelected(SelectionEvent e) {					  	
-						fireDialogChanged(field);
+						fireDialogButtonPressed(field);
 					}
 
 					public void widgetSelected(SelectionEvent e) {
 					    
-						fireDialogChanged(field);
+						fireDialogButtonPressed(field);
 					}
 
 				});
