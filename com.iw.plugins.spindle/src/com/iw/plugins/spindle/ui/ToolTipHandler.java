@@ -67,7 +67,15 @@ public class ToolTipHandler {
     final Display display = parent.getDisplay();
     this.parentShell = parent;
 
-    tipShell = new Shell(parent, SWT.NONE);
+  }
+
+  protected void createTipShell() {
+    if (parentShell.isDisposed()) {
+    	tipShell = null;
+    	return;
+    }
+    Display display = parentShell.getDisplay();
+    tipShell = new Shell(parentShell, SWT.NONE);
     GridLayout gridLayout = new GridLayout();
     gridLayout.numColumns = 1;
     gridLayout.marginWidth = 2;
@@ -86,6 +94,14 @@ public class ToolTipHandler {
     tipLabelText.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
     tipLabelText.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
     tipLabelText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_CENTER));
+  }
+  
+  private Shell getTipShell() {  	
+  	
+  	if (tipShell == null || tipShell.isDisposed()) {
+  		createTipShell();
+  	}
+  	return tipShell;
   }
 
   protected String getToolTipText(Object object) {
@@ -120,14 +136,16 @@ public class ToolTipHandler {
      */
     control.addMouseListener(new MouseAdapter() {
       public void mouseDown(MouseEvent e) {
-        if (!tipShell.isDisposed() && tipShell.isVisible())
+      	Shell shell = getTipShell();
+        if (shell != null && tipShell.isVisible())
           tipShell.setVisible(false);
       }
     });
 
     control.addDisposeListener(new DisposeListener() {
       public void widgetDisposed(DisposeEvent e) {
-        if (!tipShell.isDisposed() && tipShell.isVisible())
+      	Shell shell = getTipShell();
+        if (shell != null && tipShell.isVisible())
           tipShell.setVisible(false);
 
       }
@@ -138,11 +156,16 @@ public class ToolTipHandler {
      */
     control.addMouseTrackListener(new MouseTrackAdapter() {
       public void mouseExit(MouseEvent e) {
-        if (!tipShell.isDisposed() && tipShell.isVisible())
+      	Shell shell = getTipShell();
+        if (shell != null && tipShell.isVisible())
           tipShell.setVisible(false);
         tipWidget = null;
       }
       public void mouseHover(MouseEvent event) {
+      	Shell shell = getTipShell();
+      	if (shell == null) {
+      		return;
+      	}
         widgetPosition = new Point(event.x, event.y);
         Widget widget = event.widget;
         if (widget instanceof ToolBar) {
@@ -186,7 +209,8 @@ public class ToolTipHandler {
      */
     control.addHelpListener(new HelpListener() {
       public void helpRequested(HelpEvent event) {
-        if (tipWidget == null)
+      	Shell shell = getTipShell();
+        if (shell == null || tipWidget == null)
           return;
         Object help = getToolTipHelp(tipWidget);
         if (help == null)
