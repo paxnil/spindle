@@ -160,7 +160,7 @@ public class UpdateStatusContainer implements IDialogFieldChangedListener
    */
   public void dialogFieldStatusChanged(IStatus status, DialogField field)
   {
-    if (map.containsKey(field))
+    if (map.containsKey(field) && field.isVisible())
     {
       map.put(field, status);
     }
