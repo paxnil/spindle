@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.editors.assist;
 
 import java.util.Comparator;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.templates.Template;
@@ -74,6 +75,13 @@ public class ProposalFactory
 
   public static final String DEFAULT_ATTR_VALUE = "";
 
+  /**
+   * @deprecated
+   * @param attributeName
+   * @param addLeadingSpace
+   * @param replacementOffset
+   * @return
+   */
   public static CompletionProposal getAttributeProposal(
       String attributeName,
       boolean addLeadingSpace,
@@ -88,6 +96,16 @@ public class ProposalFactory
         replacementOffset);
   }
 
+  /**
+   * @deprecated
+   * @param attributeName
+   * @param displayName
+   * @param defaultValue
+   * @param extraInfo
+   * @param addLeadingSpace
+   * @param replacementOffset
+   * @return
+   */
   public static CompletionProposal getAttributeProposal(
       String attributeName,
       String displayName,
@@ -120,17 +138,39 @@ public class ProposalFactory
       String extraInfo,
       int yOrder)
   {
+    
+    if (image == null)
+      image = Images.getSharedImage("bullet.gif");
     return new SpindleTemplateProposal(template, context, region, extraInfo, image, yOrder);
   }
-  
-  public static OrderedProposal createTemplateProposal(
-      Template template,
-      TemplateContext context,
-      Region region,   
+
+  public static OrderedProposal getElementAttributeProposal(
+      IDocument document,
+      String attributeName,
+      int completionOffset,
+      int completionLength,
+      boolean addLeadingSpace,
+      Image image,
       String extraInfo,
       int yOrder)
   {
-    return new SpindleTemplateProposal(template, context, region,  extraInfo, Images.getSharedImage("bullet.gif"), yOrder);
+    AttributeTemplateContext context;
+    context = new AttributeTemplateContext(
+        document,
+        completionOffset,
+        completionLength,
+        addLeadingSpace);
+    context.setAttributeName(attributeName);
+  
+    return createTemplateProposal(
+        context.getTemplate(),
+        context,
+        new Region(completionOffset, completionLength),
+        image,
+        extraInfo,
+        yOrder);
   }
+  
+  
 
 }

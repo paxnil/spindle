@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editors.template.assist;
+package com.iw.plugins.spindle.editors.assist;
 
 import java.util.ArrayList;
 import java.util.Iterator;

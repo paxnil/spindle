@@ -31,7 +31,6 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateProposal;
 import org.eclipse.swt.graphics.Image;
 
-import com.iw.plugins.spindle.editors.template.assist.AttributeTemplateContext;
 
 /**
  * SpindleTemplateProposal orderable template proposal.

@@ -622,6 +622,10 @@ public class XMLNode extends TypedPosition
 
   public String getAttributeValue()
   {
+     
+    if (!attributeHasValue())
+      return null;
+    
     int index = getAttributeValueStart();
 
     if (index < 0)
@@ -643,13 +647,27 @@ public class XMLNode extends TypedPosition
 
     return null;
   }
+  
+  private boolean attributeHasValue() {
+    try
+    {
+      String content = document.get(getOffset(), getLength());
+      return content.indexOf('=') > 0 && getAttributeValueStart() > 0;
+    } catch (BadLocationException e)
+    {
+      UIPlugin.log(e);
+    }
+    return false;
+  }
 
   private int getAttributeValueStart()
   {
     int index = 0;
     try
-    {
+    {   
       String content = document.get(getOffset(), getLength());
+      
+      
       int singleIndex = content.indexOf("\"");
       int doubleIndex = content.indexOf("'");
 

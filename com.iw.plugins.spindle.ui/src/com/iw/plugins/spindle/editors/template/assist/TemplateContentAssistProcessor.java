@@ -26,6 +26,11 @@
 
 package com.iw.plugins.spindle.editors.template.assist;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.parse.TemplateParser;
@@ -35,11 +40,16 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
 import org.xmen.xml.XMLNode;
 
+import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
+import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
+import com.wutka.dtd.DTD;
 
 /**
  * Base class for Template completion assist. Basicly here to set a flag if
@@ -49,6 +59,112 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
  */
 public abstract class TemplateContentAssistProcessor extends AbstractContentAssistProcessor
 {
+  
+  public static List getWebProposals(
+      DTD dtd,
+      IDocument document,
+      int completionOffset,
+      int completionLength,
+      String tagName,
+      List excludeNames,
+      HashSet existingAttributeNames,
+      String prefix)
+  {
+  
+    List webAttributeNames;
+  
+    if (dtd != null && tagName != null)
+    {
+      webAttributeNames = DTDProposalGenerator.getAttributes(dtd, tagName);
+    } else
+    {
+      return Collections.EMPTY_LIST;
+    }
+  
+    List result = new ArrayList();
+  
+    boolean ignorePrefix = prefix == null || prefix.trim().length() == 0;
+  
+    for (Iterator iter = webAttributeNames.iterator(); iter.hasNext();)
+    {
+      String attrname = ((String) iter.next()).toLowerCase();
+  
+      if (existingAttributeNames.contains(attrname))
+        continue;
+  
+      boolean match = true;
+      if (!ignorePrefix)
+        match = attrname.startsWith(prefix);
+  
+      if (match && !excludeNames.contains(attrname))
+      {
+        result.add(ProposalFactory.getElementAttributeProposal(
+            document,
+            attrname,
+            completionOffset,
+            completionLength,
+            false,
+            Images.getSharedImage("bullet_web.gif"),
+            null,
+            99));
+      }
+    }
+    return result;
+  }
+
+  public static List getParameterProposals(
+      TemplateEditor editor,
+      IDocument document,
+      int completionOffset,
+      int completionLength,
+      String prefix,
+      String jwcid,
+      HashSet existingAttributeNames,
+      List usedNames)
+  {
+    ArrayList result = new ArrayList();
+    TemplateTapestryAccess helper = new TemplateTapestryAccess(editor);
+    helper.setJwcid(jwcid);
+  
+    UITapestryAccess.Result [] infos = null;
+    try
+    {
+      infos = helper.findParameters(prefix, existingAttributeNames);
+    } catch (IllegalArgumentException e)
+    {
+      return Collections.EMPTY_LIST;
+    }
+  
+    boolean ignorePrefix = prefix == null || prefix.trim().length() == 0;
+  
+    for (int i = 0; i < infos.length; i++)
+    {
+      String parameterName = infos[i].name;
+  
+      if (existingAttributeNames.contains(parameterName))
+        continue;
+  
+      if (!ignorePrefix && !parameterName.toLowerCase().startsWith(prefix))
+        continue;
+  
+      if (usedNames.contains(parameterName))
+        continue;
+  
+      usedNames.add(parameterName);
+  
+      result.add(ProposalFactory.getElementAttributeProposal(
+          document,
+          parameterName,
+          completionOffset,
+          completionLength,
+          false,
+          (infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
+              .getSharedImage("bullet.gif")),
+          infos[i].description,
+          infos[i].required ? 0 : 1));
+    }
+    return result;
+  }
 
   private boolean fHasHTMLExtension;
   public TemplateContentAssistProcessor(Editor editor)
@@ -97,5 +213,7 @@ public abstract class TemplateContentAssistProcessor extends AbstractContentAssi
 
     return null;
   }
+
+  
 
 }

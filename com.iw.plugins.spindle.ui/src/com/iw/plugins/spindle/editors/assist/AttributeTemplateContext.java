@@ -21,7 +21,7 @@
  * 
  * ***** END LICENSE BLOCK *****
  */
-package com.iw.plugins.spindle.editors.template.assist;
+package com.iw.plugins.spindle.editors.assist;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;

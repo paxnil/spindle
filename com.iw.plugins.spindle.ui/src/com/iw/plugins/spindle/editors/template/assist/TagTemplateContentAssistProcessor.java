@@ -36,7 +36,6 @@ import java.util.Map;
 import org.apache.tapestry.parse.TemplateParser;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -44,11 +43,9 @@ import org.eclipse.swt.graphics.Point;
 import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
-import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
-import com.iw.plugins.spindle.editors.assist.OrderedProposal;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
@@ -80,15 +77,19 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
       int documentOffset)
   {
     XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
-    String tagName = tag.getName();
+
     int baseState = tag.getStateAt(documentOffset);
     if (tag.getType() != ITypeConstants.TAG && tag.getType() != ITypeConstants.EMPTYTAG)
+      return NoProposals;
+
+    String tagName = tag.getName();
+    if (tag.isTerminated() && (tagName == null || tag.getOffset() + tagName.length() + 1 >= documentOffset))
       return NoProposals;
 
     if (baseState == XMLNode.IN_TERMINATOR)
       return NoProposals;
 
-    List proposals;
+    List proposals = new ArrayList();
 
     boolean addLeadingSpace = false;
     if (baseState == XMLNode.TAG)
@@ -106,7 +107,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
 
         String content = tag.getContent();
         int length = tag.getLength();
-        proposals = new ArrayList();
+     
         int i = 0;
         if (!atStart)
         {
@@ -172,15 +173,38 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
     HashSet existingAttributeNames = new HashSet(attrmap.keySet());
 
     XMLNode existingAttr = tag.getAttributeAt(documentOffset);
-    if (baseState != XMLNode.AFTER_ATT_VALUE && existingAttr != null
-        && existingAttr.getOffset() < documentOffset)
+    String attributeName = null;
+    String attributeValue = null;
+    if (existingAttr != null)
     {
-      proposals = computeAllAttributeReplacements(
-          documentOffset,
-          attrmap,
-          tagName,
-          jwcid,
-          existingAttr);
+      attributeName = existingAttr.getName();
+      attributeValue = existingAttr.getValue();
+
+      if (attributeValue != null)
+      {
+        if (documentOffset > existingAttr.getOffset())
+        {
+          return NoProposals;
+        } else
+        {
+          proposals = computeNewAttributeProposalsWithParameters(
+              viewer.getDocument(),
+              documentOffset,
+              addLeadingSpace,
+              tagName,
+              jwcid,
+              existingAttributeNames);
+        }
+      } else if (existingAttr.getOffset() + attributeName.length() >= documentOffset)
+      {
+        proposals = computeAllAttributeReplacements(
+            viewer.getDocument(),
+            documentOffset,
+            attrmap,
+            tagName,
+            jwcid,
+            existingAttr);
+      }
 
     } else if (!attrmap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME)
         && !attrmap.containsKey(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME))
@@ -194,6 +218,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
     } else
     {
       proposals = computeNewAttributeProposalsWithParameters(
+          viewer.getDocument(),
           documentOffset,
           addLeadingSpace,
           tagName,
@@ -210,7 +235,6 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
         .size()]);
 
   }
-
   private List computeNewAttributeProposalsNoParameters(
       IDocument document,
       int documentOffset,
@@ -219,208 +243,129 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
       boolean addLeadingSpace)
   {
     List proposals = new ArrayList();
-    List webAttributeNames = Collections.EMPTY_LIST;
-    OrderedProposal proposal;
 
-    if (fDTD != null && tagName != null)
-      webAttributeNames = DTDProposalGenerator.getAttributes(fDTD, tagName);
+    proposals.add(ProposalFactory.getElementAttributeProposal(
+        document,
+        TemplateParser.JWCID_ATTRIBUTE_NAME,
+        documentOffset,
+        0,
+        addLeadingSpace,
+        null,
+        null,
+        -1));
 
-    AttributeTemplateContext context = new AttributeTemplateContext(
+    proposals.add(ProposalFactory.getElementAttributeProposal(
+        document,
+        TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
+        documentOffset,
+        0,
+        addLeadingSpace,
+        null,
+        null,
+        -1));
+
+    proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
+        fDTD,
         document,
         documentOffset,
         0,
-        addLeadingSpace);
-    context.setAttributeName(TemplateParser.JWCID_ATTRIBUTE_NAME);
-
-    proposals.add(ProposalFactory.createTemplateProposal(
-        context.getTemplate(),
-        context,
-        new Region(documentOffset, 0),
-        null,
-        -1));
-
-    context = new AttributeTemplateContext(document, documentOffset, 0, addLeadingSpace);
-    context.setAttributeName(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME);
-
-    proposals.add(ProposalFactory.createTemplateProposal(
-        context.getTemplate(),
-        context,
-        new Region(documentOffset, 0),
-        null,
-        -1));
-
-    for (Iterator iter = webAttributeNames.iterator(); iter.hasNext();)
-    {
-      String name = (String) iter.next();
-
-      if (existingAttributeNames.contains(name))
-        continue;
-
-      context = new AttributeTemplateContext(document, documentOffset, 0, addLeadingSpace);
-      context.setAttributeName(name);
-
-      proposals.add(ProposalFactory.createTemplateProposal(
-          context.getTemplate(),
-          context,
-          new Region(documentOffset, 0),
-          Images.getSharedImage("bullet_web.gif"),
-          null,
-          0));
-    }
+        tagName,
+        Collections.EMPTY_LIST,
+        existingAttributeNames,
+        null));
 
     return proposals;
+
   }
 
-  private List computeAllAttributeReplacements(
+  protected List computeAllAttributeReplacements(
+      IDocument document,
       int documentOffset,
       Map attrmap,
       String tagName,
       String jwcid,
-      XMLNode existingAttr)
+      XMLNode existingAttribute)
   {
     List proposals = new ArrayList();
-    List webAttributeNames = Collections.EMPTY_LIST;
+    List usedNames = new ArrayList();
+
+    String attrName = existingAttribute.getName();
+    String attrValue = existingAttribute.getAttributeValue();
+
+    if (attrValue != null)
+    {
+      return Collections.EMPTY_LIST;
+    }
+
     HashSet existingAttributeNames = new HashSet(attrmap.keySet());
-    String attrName = existingAttr.getName();
-    String attrValue = existingAttr.getAttributeValue();
-    int replacementOffset = existingAttr.getOffset();
-    int replacementLength = (attrName == null ? 0 : attrName.length());
+    existingAttributeNames.remove(existingAttribute.getName());
 
-    if (fDTD != null && tagName != null)
-      webAttributeNames = DTDProposalGenerator.getAttributes(fDTD, tagName);
+    String content = existingAttribute.getContent();
+    int start = 0;
+    for (; Character.isWhitespace(content.charAt(start)); start++);
+    String prefix = content.substring(start, start + attrName.length()).toLowerCase();
 
-    // no proposals if the attribute name is jwcid!
-    if (!TemplateParser.JWCID_ATTRIBUTE_NAME.equalsIgnoreCase(existingAttr.getName()))
+    boolean ignorePrefix = prefix == null || prefix.trim().length() == 0;
+
+    int replacementOffset = existingAttribute.getOffset();
+    int replacementLength = existingAttribute.getLength();
+
+    if (TemplateParser.JWCID_ATTRIBUTE_NAME.startsWith(prefix))
     {
-
-      // if there's no jwcid already....
-      if (!attrmap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME)
-          && !attrmap.containsKey(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME))
-      {
-        if (existingAttr.getStateAt(documentOffset) == XMLNode.TAG)
-        {
-
-          String currentName = existingAttr
-              .getContentTo(documentOffset, false)
-              .toLowerCase();
-          if (TemplateParser.JWCID_ATTRIBUTE_NAME.startsWith(currentName))
-          {
-            if (attrValue == null)
-            {
-              proposals.add(ProposalFactory.getAttributeProposal(
-                  TemplateParser.JWCID_ATTRIBUTE_NAME.substring(currentName.length()),
-                  TemplateParser.JWCID_ATTRIBUTE_NAME,
-                  "",
-                  null,
-                  false,
-                  documentOffset));
-
-            } else
-            {
-              proposals.add(new CompletionProposal(
-                  TemplateParser.JWCID_ATTRIBUTE_NAME,
-                  replacementOffset,
-                  replacementLength,
-                  new Point(TemplateParser.JWCID_ATTRIBUTE_NAME.length(), 0),
-                  Images.getSharedImage("bullet.gif"),
-                  TemplateParser.JWCID_ATTRIBUTE_NAME,
-                  null,
-                  null));
-            }
-
-          } else if (TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME
-              .startsWith(currentName))
-          {
-            if (attrValue == null)
-            {
-              proposals.add(ProposalFactory.getAttributeProposal(
-                  TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME.substring(currentName
-                      .length()),
-                  TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
-                  "",
-                  null,
-                  false,
-                  documentOffset));
-
-            } else
-            {
-              proposals.add(new CompletionProposal(
-                  TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
-                  replacementOffset,
-                  replacementLength,
-                  new Point(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME.length(), 0),
-                  Images.getSharedImage("bullet.gif"),
-                  TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
-                  null,
-                  null));
-            }
-          }
-        }
-      } else
-      {
-        // we need to find parameter name replacements
-        existingAttributeNames.addAll(computeParameterNameReplacements(
-            documentOffset,
-            existingAttr,
-            jwcid,
-            existingAttributeNames,
-            proposals));
-      }
+      proposals.add(ProposalFactory.getElementAttributeProposal(
+          document,
+          TemplateParser.JWCID_ATTRIBUTE_NAME,
+          replacementOffset,
+          replacementLength,
+          false,
+          null,
+          null,
+          -1));
+      usedNames.add(TemplateParser.JWCID_ATTRIBUTE_NAME);
     }
 
-    if (!webAttributeNames.isEmpty())
+    if (TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME.startsWith(prefix))
     {
-      CompletionProposal proposal;
-      //get index of whitespace
-      String fragment = existingAttr.getContentTo(documentOffset, false).toLowerCase();
-      if (fragment.length() <= attrName.length())
-      {
-
-        if (fragment.length() == 0)
-          fragment = null;
-
-        for (Iterator iter = webAttributeNames.iterator(); iter.hasNext();)
-        {
-          String name = (String) iter.next();
-          if (existingAttributeNames.contains(name))
-            continue;
-          if (fragment != null && !name.startsWith(fragment))
-            continue;
-          if (attrValue == null)
-          {
-            proposal = new CompletionProposal(
-                name + "=\"\"",
-                replacementOffset,
-                replacementLength,
-                new Point(name.length(), 0),
-                Images.getSharedImage("bullet_web.gif"),
-                null,
-                null,
-                null);
-          } else
-          {
-            proposal = new CompletionProposal(
-                name,
-                replacementOffset,
-                replacementLength,
-                new Point(name.length(), 0),
-                Images.getSharedImage("bullet_web.gif"),
-                null,
-                null,
-                null);
-          }
-
-          proposal.setYOrder(1000);
-          proposals.add(proposal);
-        }
-      }
-
+      proposals.add(ProposalFactory.getElementAttributeProposal(
+          document,
+          TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
+          replacementOffset,
+          replacementLength,
+          false,
+          null,
+          null,
+          -1));
+      usedNames.add(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME);
     }
+
+    if (jwcid != null && jwcid.trim().length() > 0)
+    {
+      proposals.addAll(TemplateContentAssistProcessor.getParameterProposals(
+          (TemplateEditor) fEditor,
+          document,
+          replacementOffset,
+          replacementLength,
+          prefix,
+          jwcid,
+          existingAttributeNames,
+          usedNames));
+    }
+
+    proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
+        fDTD,
+        document,
+        replacementOffset,
+        replacementLength,
+        tagName,
+        usedNames,
+        existingAttributeNames,
+        prefix));
 
     return proposals;
   }
 
   protected List computeNewAttributeProposalsWithParameters(
+      IDocument document,
       int documentOffset,
       boolean addLeadingSpace,
       String tagName,
@@ -430,175 +375,144 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
     List proposals = new ArrayList();
     List webAttributeNames = Collections.EMPTY_LIST;
 
-    if (fDTD != null && tagName != null)
-      webAttributeNames = DTDProposalGenerator.getAttributes(fDTD, tagName);
+    List usedNames = new ArrayList();
 
-    try
-    {
-      TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-      helper.setJwcid(jwcid);
-      UITapestryAccess.Result[] infos = helper.findParameters(
-          null,
-          existingAttributeNames);
-      for (int i = 0; i < infos.length; i++)
-      {
-        existingAttributeNames.add(infos[i].name);
-        CompletionProposal proposal = ProposalFactory.getAttributeProposal(
-            infos[i].name,
-            infos[i].name,
-            ProposalFactory.DEFAULT_ATTR_VALUE,
-            infos[i].description,
-            addLeadingSpace,
-            documentOffset);
+    proposals.addAll(TemplateContentAssistProcessor.getParameterProposals(
+        (TemplateEditor) fEditor,
+        document,
+        documentOffset,
+        0,
+        null,
+        jwcid,
+        existingAttributeNames,
+        usedNames));
 
-        if (infos[i].required)
-        {
-          proposal.setImage(Images.getSharedImage("bullet_pink.gif"));
-          proposal.setYOrder(-2);
-        } else
-        {
-          proposal.setYOrder(-1);
-        }
-        proposals.add(proposal);
-      }
-
-    } catch (IllegalArgumentException e)
-    {
-      //do nothing
-    }
-
-    for (Iterator iter = webAttributeNames.iterator(); iter.hasNext();)
-    {
-      String name = (String) iter.next();
-      if (existingAttributeNames.contains(name))
-        continue;
-      CompletionProposal proposal = ProposalFactory.getAttributeProposal(
-          name,
-          name,
-          ProposalFactory.DEFAULT_ATTR_VALUE,
-          null,
-          addLeadingSpace,
-          documentOffset);
-
-      proposal.setImage(Images.getSharedImage("bullet_web.gif"));
-      proposals.add(proposal);
-    }
+    proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
+        fDTD,
+        document,
+        documentOffset,
+        0,
+        tagName,
+        usedNames,
+        existingAttributeNames,
+        null));
     return proposals;
   }
 
-  protected List computeParameterNameReplacements(
-      int documentOffset,
-      XMLNode existingAttribute,
-      String jwcid,
-      HashSet existingAttributeNames,
-      List proposals)
-  {
-    List parameterNames = new ArrayList();
-    String name = existingAttribute.getName();
-    String value = existingAttribute.getAttributeValue();
-    //get index of whitespace
-    String fragment = existingAttribute.getContentTo(documentOffset, false);
-    if (fragment.length() > name.length())
-      return Collections.EMPTY_LIST;
-
-    int replacementOffset = existingAttribute.getOffset();
-    int replacementLength = name.length();
-
-    if (fragment.length() == 0)
-      fragment = null;
-
-    try
-    {
-      // first get the matches
-      TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-      helper.setJwcid(jwcid);
-
-      UITapestryAccess.Result[] infos = helper.findParameters(
-          fragment,
-          existingAttributeNames);
-      for (int i = 0; i < infos.length; i++)
-      {
-        parameterNames.add(infos[i].name);
-        CompletionProposal proposal;
-        if (value == null)
-        {
-          proposal = new CompletionProposal(
-              infos[i].name + "=\"\"",
-              replacementOffset,
-              replacementLength,
-              new Point(infos[i].name.length(), 0),
-              infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
-                  .getSharedImage("bullet.gif"),
-              null,
-              null,
-              infos[i].description);
-        } else
-        {
-          proposal = new CompletionProposal(
-              infos[i].name,
-              replacementOffset,
-              replacementLength,
-              new Point(infos[i].name.length(), 0),
-              infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
-                  .getSharedImage("bullet.gif"),
-              null,
-              null,
-              infos[i].description);
-        }
-
-        proposals.add(proposal);
-        existingAttributeNames.add(infos[i].name.toLowerCase());
-      }
-
-      //then get the replaces
-
-      if (fDTD == null)
-      // its confusing to include the non matching parameter if we are including
-      // XHTML ones too.
-      {
-        infos = helper.findParameters(null, existingAttributeNames);
-        for (int i = 0; i < infos.length; i++)
-        {
-
-          CompletionProposal proposal;
-          if (value == null)
-          {
-            proposal = new CompletionProposal(
-                infos[i].name + "=\"\"",
-                replacementOffset,
-                replacementLength,
-                new Point(infos[i].name.length(), 0),
-                infos[i].required ? Images.getSharedImage("bullet_weird.gif") : Images
-                    .getSharedImage("bullet_d.gif"),
-                null,
-                null,
-                infos[i].description);
-          } else
-          {
-
-            proposal = new CompletionProposal(
-                infos[i].name,
-                replacementOffset,
-                replacementLength,
-                new Point(infos[i].name.length(), 0),
-                infos[i].required ? Images.getSharedImage("bullet_weird.gif") : Images
-                    .getSharedImage("bullet_d.gif"),
-                null,
-                null,
-                infos[i].description);
-          }
-
-          proposal.setYOrder(1);
-          proposals.add(proposal);
-        }
-      }
-
-    } catch (IllegalArgumentException e)
-    {
-      //do nothing
-    }
-    return parameterNames;
-  }
+  //  protected List computeParameterNameReplacements(
+  //      int documentOffset,
+  //      XMLNode existingAttribute,
+  //      String jwcid,
+  //      HashSet existingAttributeNames,
+  //      List proposals)
+  //  {
+  //    List parameterNames = new ArrayList();
+  //    String name = existingAttribute.getName();
+  //    String value = existingAttribute.getAttributeValue();
+  //    //get index of whitespace
+  //    String fragment = existingAttribute.getContentTo(documentOffset, false);
+  //    if (fragment.length() > name.length())
+  //      return Collections.EMPTY_LIST;
+  //
+  //    int replacementOffset = existingAttribute.getOffset();
+  //    int replacementLength = name.length();
+  //
+  //    if (fragment.length() == 0)
+  //      fragment = null;
+  //
+  //    try
+  //    {
+  //      // first get the matches
+  //      TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor)
+  // fEditor);
+  //      helper.setJwcid(jwcid);
+  //
+  //      UITapestryAccess.Result[] infos = helper.findParameters(
+  //          fragment,
+  //          existingAttributeNames);
+  //      for (int i = 0; i < infos.length; i++)
+  //      {
+  //        parameterNames.add(infos[i].name);
+  //        CompletionProposal proposal;
+  //        if (value == null)
+  //        {
+  //          proposal = new CompletionProposal(
+  //              infos[i].name + "=\"\"",
+  //              replacementOffset,
+  //              replacementLength,
+  //              new Point(infos[i].name.length(), 0),
+  //              infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
+  //                  .getSharedImage("bullet.gif"),
+  //              null,
+  //              null,
+  //              infos[i].description);
+  //        } else
+  //        {
+  //          proposal = new CompletionProposal(
+  //              infos[i].name,
+  //              replacementOffset,
+  //              replacementLength,
+  //              new Point(infos[i].name.length(), 0),
+  //              infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
+  //                  .getSharedImage("bullet.gif"),
+  //              null,
+  //              null,
+  //              infos[i].description);
+  //        }
+  //
+  //        proposals.add(proposal);
+  //        existingAttributeNames.add(infos[i].name.toLowerCase());
+  //      }
+  //
+  //      //then get the replaces
+  //
+  //      if (fDTD == null)
+  //      // its confusing to include the non matching parameter if we are including
+  //      // XHTML ones too.
+  //      {
+  //        infos = helper.findParameters(null, existingAttributeNames);
+  //        for (int i = 0; i < infos.length; i++)
+  //        {
+  //
+  //          CompletionProposal proposal;
+  //          if (value == null)
+  //          {
+  //            proposal = new CompletionProposal(
+  //                infos[i].name + "=\"\"",
+  //                replacementOffset,
+  //                replacementLength,
+  //                new Point(infos[i].name.length(), 0),
+  //                infos[i].required ? Images.getSharedImage("bullet_weird.gif") : Images
+  //                    .getSharedImage("bullet_d.gif"),
+  //                null,
+  //                null,
+  //                infos[i].description);
+  //          } else
+  //          {
+  //
+  //            proposal = new CompletionProposal(
+  //                infos[i].name,
+  //                replacementOffset,
+  //                replacementLength,
+  //                new Point(infos[i].name.length(), 0),
+  //                infos[i].required ? Images.getSharedImage("bullet_weird.gif") : Images
+  //                    .getSharedImage("bullet_d.gif"),
+  //                null,
+  //                null,
+  //                infos[i].description);
+  //          }
+  //
+  //          proposal.setYOrder(1);
+  //          proposals.add(proposal);
+  //        }
+  //      }
+  //
+  //    } catch (IllegalArgumentException e)
+  //    {
+  //      //do nothing
+  //    }
+  //    return parameterNames;
+  //  }
 
   /*
    * (non-Javadoc)

@@ -46,10 +46,11 @@ import com.wutka.dtd.DTD;
  */
 public abstract class AbstractContentAssistProcessor implements IContentAssistProcessor
 {
-  protected static final ICompletionProposal[] NoProposals = new ICompletionProposal[0];
+ 
   protected static final ICompletionProposal[] NoSuggestions = new ICompletionProposal[]{
       new AbstractContentAssistProcessor.MessageProposal("no suggestions available"),
       new AbstractContentAssistProcessor.MessageProposal("")};
+  protected static final ICompletionProposal[] NoProposals =NoSuggestions;
 
   protected static final IContextInformation[] NoInformation = new IContextInformation[0];
 

@@ -54,7 +54,7 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
 {
 
-  public  final static int PROPOSAL_MODE_NEWFILE = 1;
+  private final static int PROPOSAL_MODE_NEWFILE = 1;
 
   private int fProposalMode;
   /**
@@ -85,11 +85,9 @@ public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
     super();
     fEditor = editor;
   }
-  
-  
 
   public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset)
-  {    
+  {
     fProposalMode = -1;
     this.viewer = viewer;
     return super.computeCompletionProposals(viewer, offset);
@@ -99,7 +97,7 @@ public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
    */
   private String getCurrentPrefix()
   {
-   
+
     ITextSelection selection = (ITextSelection) viewer
         .getSelectionProvider()
         .getSelection();
@@ -194,8 +192,11 @@ public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
       String aPrefix)
   {
     if (document.getLength() == 0
-        || (document.getLength() == 1 && document.get().equals("<") || document.get().trim().length() == 0))
-      fProposalMode =  PROPOSAL_MODE_NEWFILE;    
+        || (document.getLength() == 1 && document.get().equals("<") || document
+            .get()
+            .trim()
+            .length() == 0))
+      fProposalMode = PROPOSAL_MODE_NEWFILE;
   }
 
   /*
@@ -206,11 +207,8 @@ public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
    */
   protected TemplateContextType getContextType(ITextViewer textViewer, IRegion region)
   {
-    determineProposalMode(
-        textViewer.getDocument(),
-        cursorPosition,
-        getCurrentPrefix());
-    
+    determineProposalMode(textViewer.getDocument(), cursorPosition, getCurrentPrefix());
+
     switch (fProposalMode)
     {
       case PROPOSAL_MODE_NEWFILE :
@@ -218,7 +216,7 @@ public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
         if (contextTypeId == null)
           return null;
         return UserTemplateAccess.getDefault().getContextTypeRegistry().getContextType(
-            getNewFileContextTypeId());
+            contextTypeId);
       default :
         return null;
     }
@@ -230,14 +228,12 @@ public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
     IEditorInput input = fEditor.getEditorInput();
     IFile file = ((IFileEditorInput) input).getFile();
 
-    
-
     if (fEditor instanceof SpecEditor)
     {
       String extension = file.getFileExtension();
       if (extension == null || fEditor == null)
         return null;
-      
+
       if ("application".equals(extension))
       {
         return XMLFileContextType.APPLICATION_FILE_CONTEXT_TYPE;
@@ -307,8 +303,4 @@ public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
         relevance);
   }
 
-  public int getProposalMode()
-  {
-    return fProposalMode;
-  }
 }
