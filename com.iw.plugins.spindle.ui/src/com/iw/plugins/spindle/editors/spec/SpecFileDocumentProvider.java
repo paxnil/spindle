@@ -160,8 +160,8 @@ public class SpecFileDocumentProvider extends FileDocumentModelProvider
   private String getSkeletonSpecification(String extension)
   {
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
-    int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_TAB_CHAR);
+    int tabSize = store.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
     StringWriter swriter = new StringWriter();
     IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
     if ("jwc".equals(extension))
