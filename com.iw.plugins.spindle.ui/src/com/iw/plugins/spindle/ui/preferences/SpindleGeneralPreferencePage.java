@@ -29,6 +29,7 @@ import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
@@ -44,6 +45,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
  * @author GWL
@@ -52,11 +54,23 @@ import com.iw.plugins.spindle.UIPlugin;
  * Copryright 2002, Intelligent Works Inc.
  * All Rights Reserved
  */
-public class SpindleGeneralPreferencePage extends PreferencePage implements IWorkbenchPreferencePage,  IPropertyChangeListener
+public class SpindleGeneralPreferencePage
+    extends PreferencePage
+    implements IWorkbenchPreferencePage, IPropertyChangeListener
 {
     private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
     private static final String FORMATTER_PRESERVE_BLANK_LINES = PreferenceConstants.FORMATTER_PRESERVE_BLANK_LINES;
     private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
+    private static final String BUILD_MISS = TapestryCore.BUILDER_MARKER_MISSES;
+    private static final String[][] BUILD_MISS_OPTIONS =
+        new String[][] {
+            new String[] { TapestryCore.BUILDER_MARKER_MISSES_INFO, TapestryCore.BUILDER_MARKER_MISSES_INFO },
+            new String[] { TapestryCore.BUILDER_MARKER_MISSES_WARN, TapestryCore.BUILDER_MARKER_MISSES_WARN },
+            new String[] { TapestryCore.BUILDER_MARKER_MISSES_ERROR, TapestryCore.BUILDER_MARKER_MISSES_ERROR },
+            new String[] { TapestryCore.BUILDER_MARKER_MISSES_IGNORE, TapestryCore.BUILDER_MARKER_MISSES_IGNORE }
+    };
+
+    private RadioGroupFieldEditor fBuildMisses;
     private IntegerFieldEditor fDisplayTabWidth;
     private BooleanFieldEditor fPreserveBlankLines;
     private BooleanFieldEditor fUseTabsForIndentation;
@@ -90,6 +104,22 @@ public class SpindleGeneralPreferencePage extends PreferencePage implements IWor
         // place in its parent's layout.
         top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+        createVerticalSpacer(top, 1);
+
+        fBuildMisses =
+            new RadioGroupFieldEditor(
+                BUILD_MISS,
+                UIPlugin.getString("preference-build-miss"),
+                4,
+                BUILD_MISS_OPTIONS,
+                top);
+
+        fBuildMisses.setPreferencePage(this);
+        fBuildMisses.setPreferenceStore(TapestryCore.getDefault().getPreferenceStore());
+        fBuildMisses.load();
+        setValid(fBuildMisses.isValid());
+        fBuildMisses.setPropertyChangeListener(this);
+        
         createVerticalSpacer(top, 1);
 
         Composite displayComp = new Composite(top, SWT.NONE);
@@ -135,7 +165,6 @@ public class SpindleGeneralPreferencePage extends PreferencePage implements IWor
         fPreserveBlankLines.load();
         fPreserveBlankLines.setPropertyChangeListener(this);
 
-
         fUseTabsForIndentation =
             new BooleanFieldEditor(
                 FORMATTER_USE_TABS_TO_INDENT,
@@ -147,7 +176,6 @@ public class SpindleGeneralPreferencePage extends PreferencePage implements IWor
         fUseTabsForIndentation.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
         fUseTabsForIndentation.load();
         fUseTabsForIndentation.setPropertyChangeListener(this);
-
 
         //        createVerticalSpacer(top, 1);
 
@@ -208,6 +236,7 @@ public class SpindleGeneralPreferencePage extends PreferencePage implements IWor
 
     protected void performDefaults()
     {
+        fBuildMisses.loadDefault();
         fDisplayTabWidth.loadDefault();
         fPreserveBlankLines.loadDefault();
         fUseTabsForIndentation.loadDefault();
@@ -218,6 +247,7 @@ public class SpindleGeneralPreferencePage extends PreferencePage implements IWor
 
     public boolean performOk()
     {
+        fBuildMisses.store();
         fDisplayTabWidth.store();
         fPreserveBlankLines.store();
         fUseTabsForIndentation.store();

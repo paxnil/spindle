@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?> 
-<!-- these are the topics visible in the Elipse Help (right pane) -->
-<toc label="Jetty Web Quick Start" topic="docs/index.html"> <!-- the heading -->
-	<topic label="Using jetty.xml files" href="docs/jettyxml.html"/> <!-- the sub topics (may be nested) -->
-	<topic label="JSPs and Jetty Web" href="docs/jsp.html"/>
-	<topic label="Launch Working Directory" href="docs/workdir.html"/>
-	<topic label="Action Set" href="docs/actionset.html"/> 	   
+
+<toc label="Spindle 3" topic="docs/index.html"> 
+	
 </toc>
 	

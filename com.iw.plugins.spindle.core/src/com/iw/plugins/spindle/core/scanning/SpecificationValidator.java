@@ -180,7 +180,7 @@ public class SpecificationValidator extends BaseValidator
             return false;
         }
         validateContainedComponentBindings(specification, containedSpecification, component, info);
-
+        
         // if the contained is a framework component, extra validation might occur at the end of the
         // entire build!
         FrameworkComponentValidator.validate(

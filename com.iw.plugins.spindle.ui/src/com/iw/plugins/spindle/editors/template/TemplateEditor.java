@@ -135,9 +135,9 @@ public class TemplateEditor extends Editor
     {
         super.editorContextMenuAboutToShow(menu);
         menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
-       if (!(getStorage() instanceof JarEntryFile))
+        if (!(getStorage() instanceof JarEntryFile))
         {
-             addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
+            addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
             addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
         }
         IMenuManager moreNav = new MenuManager("Jump");
@@ -145,7 +145,8 @@ public class TemplateEditor extends Editor
         {
             fJumpActions[i].editorContextMenuAboutToShow(moreNav);
         }
-        menu.appendToGroup(NAV_GROUP, moreNav);
+        if (!moreNav.isEmpty())
+            menu.appendToGroup(NAV_GROUP, moreNav);
 
         //        menu.insertBefore(ITextEditorActionConstants.GROUP_SAVE, new GroupMarker(HTML_GROUP));
         //        MenuManager templateMenu = new MenuManager("Template");
@@ -185,7 +186,10 @@ public class TemplateEditor extends Editor
      */
     protected SourceViewerConfiguration createSourceViewerConfiguration()
     {
-        return new TemplateConfiguration(UIPlugin.getDefault().getTemplateTextTools(), this,  UIPlugin.getDefault().getPreferenceStore());
+        return new TemplateConfiguration(
+            UIPlugin.getDefault().getTemplateTextTools(),
+            this,
+            UIPlugin.getDefault().getPreferenceStore());
     }
 
     public ICoreNamespace getNamespace()

@@ -202,6 +202,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fNotifier.updateProgressDelta(0.15f);
         if (fBuildQueue.hasWaiting())
         {
+            int missPriority = TapestryCore.getDefault().getBuildMissPriority();
             fNotifier.setProcessingProgressPer(0.75f / fBuildQueue.getWaitingCount());
             while (fBuildQueue.getWaitingCount() > 0)
             {
@@ -209,6 +210,21 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fBuildQueue.peekWaiting();
                 fNotifier.processed(location);
                 fBuildQueue.finished(location);
+
+                IStorage storage = location.getStorage();
+                if (missPriority >= 0 && storage != null && storage.getAdapter(IResource.class) != null)
+                {
+                    IResource resource = (IResource) storage.getAdapter(IResource.class);
+                    Markers.addProblemMarkerToResource(
+                        resource,
+                        ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+                        TapestryCore.getString("builder-missed-file-message", resource.getName()),
+                        missPriority,
+                        0,
+                        0,
+                        0);
+                }
+
             }
         }
         saveState();
@@ -364,9 +380,11 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 public boolean acceptTapestry(Object parent, IStorage storage)
                 {
 
-                    IResourceWorkspaceLocation location =
-                        fTapestryBuilder.fContextRoot.getRelativeLocation((IResource) storage);
-                    found.add(location);
+                    IResource resource = (IResource) storage;
+                    IResourceWorkspaceLocation location = fTapestryBuilder.fContextRoot.getRelativeLocation(resource);
+
+                    if (!fTapestryBuilder.conflictsWithJavaOutputDirectory(resource))
+                        found.add(location);
                     if (TapestryBuilder.DEBUG)
                         System.out.println(location);
 
@@ -529,6 +547,13 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         } catch (ScannerException e)
         {
             recordFatalProblem(location, e);
+        } finally
+        {
+            if (fBuildQueue.isWaiting(useLocation))
+            {
+                fBuildQueue.finished(useLocation);
+                fNotifier.processed(useLocation);
+            }
         }
         return result;
     }
@@ -595,6 +620,13 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         } catch (ScannerException e)
         {
             recordFatalProblem(location, e);
+        } finally
+        {
+            if (fBuildQueue.isWaiting(useLocation))
+            {
+                fBuildQueue.finished(useLocation);
+                fNotifier.processed(useLocation);
+            }
         }
         if (result != null)
             fProcessedLocations.put(useLocation, result);

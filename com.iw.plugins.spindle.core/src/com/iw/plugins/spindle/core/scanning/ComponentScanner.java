@@ -592,7 +592,7 @@ public class ComponentScanner extends SpecificationScanner
         // The script itself is the character data wrapped by the element.
 
         String script = getValue(node);
-        
+
         IListenerBindingSpecification binding = fSpecificationFactory.createListenerBindingSpecification();
 
         component.setBinding(name, binding);

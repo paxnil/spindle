@@ -96,10 +96,12 @@ public class FrameworkComponentValidator
                         contained,
                         sourceInfo,
                         publicId));
+
             } else if ("Script".equals(frameworkComponentName))
             {
                 TapestryBuilder.fDeferredActions.add(
                     new ScriptComponentValidation(
+                        putErrorsHere,
                         putProblemsResource,
                         (ICoreNamespace) requestorNamespace,
                         contained,
@@ -203,7 +205,8 @@ public class FrameworkComponentValidator
                             StringWriter swriter = new StringWriter();
                             PrintWriter pwriter = new PrintWriter(swriter);
                             pwriter.println("FCV - page - no location");
-                            pwriter.println(TapestryCore.getTapestryString("Namespace.no-such-page", value, namespaceId));
+                            pwriter.println(
+                                TapestryCore.getTapestryString("Namespace.no-such-page", value, namespaceId));
                             pwriter.println(fPutProblemsHere == null ? "null" : fPutProblemsHere.toString());
                             pwriter.println();
                             try
@@ -223,8 +226,9 @@ public class FrameworkComponentValidator
 
     static class ScriptComponentValidation extends BaseAction implements IBuildAction
     {
-
+        IResourceWorkspaceLocation scriptOwnerLocation;
         public ScriptComponentValidation(
+            IResourceWorkspaceLocation scriptOwnerLocation,
             IResource putProblemsHere,
             ICoreNamespace requestorNamespace,
             IContainedComponent contained,
@@ -232,6 +236,7 @@ public class FrameworkComponentValidator
             String publicId)
         {
             super(putProblemsHere, requestorNamespace, contained, sourceInfo, publicId);
+            this.scriptOwnerLocation = scriptOwnerLocation;
         }
 
         public void run()
@@ -243,10 +248,8 @@ public class FrameworkComponentValidator
                 String value = scriptBinding.getValue();
                 if (value != null && value.trim().length() > 0 && !value.startsWith(BaseValidator.DefaultDummyString))
                 {
-                    IResourceWorkspaceLocation namespaceLocation =
-                        (IResourceWorkspaceLocation) fReqNamespace.getSpecificationLocation();
                     IResourceWorkspaceLocation scriptLocation =
-                        (IResourceWorkspaceLocation) namespaceLocation.getRelativeLocation(value);
+                        (IResourceWorkspaceLocation) scriptOwnerLocation.getRelativeLocation(value);
                     if (scriptLocation.getStorage() == null)
                     {
                         ISourceLocation location;
@@ -257,6 +260,8 @@ public class FrameworkComponentValidator
                         {
                             ISourceLocationInfo bindingInfo = (ISourceLocationInfo) scriptBinding.getLocation();
                             location = bindingInfo.getAttributeSourceLocation("value");
+                            if (location == null )
+                                location = bindingInfo.getContentSourceLocation();
                         }
 
                         if (location != null)
@@ -284,7 +289,7 @@ public class FrameworkComponentValidator
                                 XMLUtil.writeBinding("script", scriptBinding, pwriter, 0, fPublicId);
                             } catch (RuntimeException e)
                             {
-                               // do nothing
+                                // do nothing
                             }
                             TapestryCore.log(swriter.toString());
                         }

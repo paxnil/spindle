@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.0.22"
+   version="0.0.24"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -45,6 +45,9 @@
             state="true"
             class="com.iw.plugins.spindle.ui.decorators.ProjectDecorator"
             id="com.iw.plugins.spindle.ui.projectDecorator">
+         <description>
+            Indicates projects that have the Tapestry nature
+         </description>
          <enablement>
             <objectClass
                   name="org.eclipse.core.resources.IProject">
@@ -62,9 +65,31 @@
             state="true"
             class="com.iw.plugins.spindle.ui.decorators.ContextRootDecorator"
             id="com.iw.plugins.spindle.ui.contextDecorator">
+         <description>
+            Indicates the path to the project&apos;s context root
+         </description>
          <enablement>
             <objectClass
                   name="org.eclipse.core.resources.IFolder">
+            </objectClass>
+         </enablement>
+      </decorator>
+   </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            lightweight="true"
+            adaptable="true"
+            label="Extra information for Tapestry Projects"
+            state="true"
+            class="com.iw.plugins.spindle.ui.decorators.ProjectInfoDecorator"
+            id="com.iw.plugins.spindle.ui.projectInfoDecorator">
+         <description>
+            Shows the application specification, or the build state of the project
+         </description>
+         <enablement>
+            <objectClass
+                  name="org.eclipse.core.resources.IProject">
             </objectClass>
          </enablement>
       </decorator>

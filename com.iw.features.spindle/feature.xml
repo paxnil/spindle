@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.iw.features.spindle"
-      label="com.iw.features.spindle"
-      version="3.0.19"
+      label="Spindle 3, an Eclipse Plugin for Tapestry"
+      version="3.0.24"
       provider-name="Intelligent Works Inc"
       image="spindle.gif">
 
@@ -65,18 +65,24 @@ All Rights Reserved
          id="net.sf.solareclipse.xml.ui"
          download-size="0"
          install-size="0"
-         version="0.4.0.spindle-dep"/>
+         version="0.4.0.spindle-dep1"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.docs"
+         download-size="0"
+         install-size="0"
+         version="0.0.1"/>
 
    <plugin
          id="com.iw.plugins.spindle.core"
          download-size="0"
          install-size="0"
-         version="0.0.19"/>
+         version="0.0.24"/>
 
    <plugin
          id="com.iw.plugins.spindle.ui"
          download-size="0"
          install-size="0"
-         version="0.0.19"/>
+         version="0.0.24"/>
 
 </feature>

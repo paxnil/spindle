@@ -81,7 +81,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             COMPONENT_EXTENSION,
             PAGE_EXTENSION,
             TEMPLATE_EXTENSION,
-            SCRIPT_EXTENSION,
+//            SCRIPT_EXTENSION,
             LIBRARY_EXTENSION };
     public static final String APP_SPEC_PATH_PARAM = "org.apache.tapestry.application-specification";
     public static final String ENGINE_CLASS_PARAM = "org.apache.tapestry.engine-class";
@@ -174,32 +174,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         } catch (BuilderException e)
         {
             Markers.addBuildBrokenProblemMarkerToResource(getProject(), e.getMessage());
-            //    } catch (CoreException e) {
-            //      Util.log(e, "JavaBuilder handling CoreException"); //$NON-NLS-1$
-            //      IMarker marker = currentProject.createMarker(ProblemMarkerTag);
-            //      marker.setAttribute(IMarker.MESSAGE, Util.bind("build.inconsistentProject")); //$NON-NLS-1$
-            //      marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-            //    } catch (ImageBuilderInternalException e) {
-            //      Util.log(e.getThrowable(), "JavaBuilder handling ImageBuilderInternalException"); //$NON-NLS-1$
-            //      IMarker marker = currentProject.createMarker(ProblemMarkerTag);
-            //      marker.setAttribute(IMarker.MESSAGE, Util.bind("build.inconsistentProject")); //$NON-NLS-1$
-            //      marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-            //    } catch (MissingClassFileException e) {
-            //      // do not log this exception since its thrown to handle aborted compiles because of missing class files
-            //      if (DEBUG)
-            //        System.out.println(Util.bind("build.incompleteClassPath", e.missingClassFile)); //$NON-NLS-1$
-            //      IMarker marker = currentProject.createMarker(ProblemMarkerTag);
-            //      marker.setAttribute(IMarker.MESSAGE, Util.bind("build.incompleteClassPath", e.missingClassFile)); //$NON-NLS-1$
-            //      marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-            //    } catch (MissingSourceFileException e) {
-            //      // do not log this exception since its thrown to handle aborted compiles because of missing source files
-            //      if (DEBUG)
-            //        System.out.println(Util.bind("build.missingSourceFile", e.missingSourceFile)); //$NON-NLS-1$
-            //      removeProblemsFor(currentProject); // make this the only problem for this project
-            //      IMarker marker = currentProject.createMarker(ProblemMarkerTag);
-            //      marker.setAttribute(IMarker.MESSAGE, Util.bind("build.missingSourceFile", e.missingSourceFile)); //$NON-NLS-1$
-            //      marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-        } catch (NullPointerException e) {
+        } catch (NullPointerException e)
+        {
             TapestryCore.log(e);
             throw e;
         } finally
@@ -468,56 +444,56 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 return false;
             }
             //        } else if (projectType == TapestryProject.LIBRARY_PROJECT_TYPE)
-        } else 
+        } else
         {
             throw new BuilderException("unsupported project type");
-//            ClasspathResourceWorkspaceLocation libLoc = null;
-//            try
-//            {
-//                libLoc = (ClasspathResourceWorkspaceLocation) fTapestryProject.getLibraryLocation();
-//            } catch (CoreException e2)
-//            {}
-//            if (libLoc == null || !libLoc.exists())
-//            {
-//                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
-//                Markers.addBuildBrokenProblemMarkerToResource(
-//                    fCurrentProject,
-//                    TapestryCore.getString(STRING_KEY + "abort-missing-library-spec", libLoc.toString()));
-//                return false;
-//            }
-//                        IPackageFragment fragment = null;
-//                        boolean isBinaryPackage = false;
-//                        try
-//                        {
-//                            IFolder container = (IFolder) librarySpec.getParent();
-//                            fragment = (IPackageFragment) JavaCore.create(container);
-//                            if (fragment != null)
-//                            {
-//                                IPackageFragmentRoot fragRoot = (IPackageFragmentRoot) fragment.getParent();
-//                                isBinaryPackage = fragRoot.getKind() == IPackageFragmentRoot.K_BINARY;
-//                            }
-//                        } catch (JavaModelException e2)
-//                        {
-//                            // do nothing
-//                        }
-//            
-//                        if (fragment == null || isBinaryPackage)
-//                        {
-//                            Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
-//                            Markers.addBuildBrokenProblemMarkerToResource(
-//                                fCurrentProject,
-//                                TapestryCore.getString(
-//                                    STRING_KEY + "-abort-library-spec-not-on-classpath",
-//                                    librarySpec.getFullPath()));
-//                            return false;
-//            if (!libLoc.getProject().equals(fJavaProject.getProject()))
-//            {
-//                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
-//                Markers.addBuildBrokenProblemMarkerToResource(
-//                    fCurrentProject,
-//                    TapestryCore.getString(STRING_KEY + "abort-library-not-in-this-project", libLoc.toString()));
-//                return false;
-//            }
+            //            ClasspathResourceWorkspaceLocation libLoc = null;
+            //            try
+            //            {
+            //                libLoc = (ClasspathResourceWorkspaceLocation) fTapestryProject.getLibraryLocation();
+            //            } catch (CoreException e2)
+            //            {}
+            //            if (libLoc == null || !libLoc.exists())
+            //            {
+            //                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
+            //                Markers.addBuildBrokenProblemMarkerToResource(
+            //                    fCurrentProject,
+            //                    TapestryCore.getString(STRING_KEY + "abort-missing-library-spec", libLoc.toString()));
+            //                return false;
+            //            }
+            //                        IPackageFragment fragment = null;
+            //                        boolean isBinaryPackage = false;
+            //                        try
+            //                        {
+            //                            IFolder container = (IFolder) librarySpec.getParent();
+            //                            fragment = (IPackageFragment) JavaCore.create(container);
+            //                            if (fragment != null)
+            //                            {
+            //                                IPackageFragmentRoot fragRoot = (IPackageFragmentRoot) fragment.getParent();
+            //                                isBinaryPackage = fragRoot.getKind() == IPackageFragmentRoot.K_BINARY;
+            //                            }
+            //                        } catch (JavaModelException e2)
+            //                        {
+            //                            // do nothing
+            //                        }
+            //            
+            //                        if (fragment == null || isBinaryPackage)
+            //                        {
+            //                            Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
+            //                            Markers.addBuildBrokenProblemMarkerToResource(
+            //                                fCurrentProject,
+            //                                TapestryCore.getString(
+            //                                    STRING_KEY + "-abort-library-spec-not-on-classpath",
+            //                                    librarySpec.getFullPath()));
+            //                            return false;
+            //            if (!libLoc.getProject().equals(fJavaProject.getProject()))
+            //            {
+            //                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
+            //                Markers.addBuildBrokenProblemMarkerToResource(
+            //                    fCurrentProject,
+            //                    TapestryCore.getString(STRING_KEY + "abort-library-not-in-this-project", libLoc.toString()));
+            //                return false;
+            //            }
         }
 
         return true;
@@ -569,6 +545,19 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         {
             return null;
         }
+    }
+
+    protected boolean conflictsWithJavaOutputDirectory(IResource resource)
+    {
+        try
+        {
+            IPath containerPath = fJavaProject.getOutputLocation();
+            return containerPath.isPrefixOf(resource.getFullPath());
+        } catch (JavaModelException e)
+        {
+            // do nothing
+        }
+        return false;
     }
 
 }

@@ -70,6 +70,7 @@ public abstract class BaseSpecification implements IIdentifiable, PropertyChange
     private String fIdentifier;
     private Object fParent;
     protected ILocation fILocation;
+    private boolean fDirty;
 
     private PropertyChangeSupport fPropertySupport;
     private int fSpecificationType = -1;
@@ -215,5 +216,21 @@ public abstract class BaseSpecification implements IIdentifiable, PropertyChange
     public abstract INamespace getNamespace();
 
     public abstract void setNamespace(INamespace ns);
+
+    /**
+     * @return
+     */
+    public boolean isDirty()
+    {
+        return fDirty;
+    }
+
+    /**
+     * @param b
+     */
+    public void setDirty(boolean flag)
+    {
+        fDirty = flag;
+    }
 
 }

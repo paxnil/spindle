@@ -93,6 +93,20 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
     public static final String SERVLET_2_2_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
     public static final String SERVLET_2_3_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN";
 
+    public static final String BUILDER_MARKER_MISSES = PLUGIN_ID + ".FORMATTER_USE_TABS_TO_INDENT";
+
+    public static final String BUILDER_MARKER_MISSES_INFO = "info";
+    public static final String BUILDER_MARKER_MISSES_WARN = "warn";
+    public static final String BUILDER_MARKER_MISSES_ERROR = "error";
+    public static final String BUILDER_MARKER_MISSES_IGNORE = "ignore";
+
+    public static final String[] BUILDER_MARKER_MISSES_ARRAY =
+        new String[] {
+            BUILDER_MARKER_MISSES_INFO,
+            BUILDER_MARKER_MISSES_WARN,
+            BUILDER_MARKER_MISSES_ERROR,
+            BUILDER_MARKER_MISSES_IGNORE };
+
     /**
      * SpecFactory instance used by the Scanners
      */
@@ -436,7 +450,22 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
     protected void initializeDefaultPreferences(IPreferenceStore store)
     {
         store.setDefault(CACHE_GRAMMAR_PREFERENCE, true);
+        store.setDefault(BUILDER_MARKER_MISSES, BUILDER_MARKER_MISSES_WARN);
         store.addPropertyChangeListener(this);
+    }
+
+    public int getBuildMissPriority()
+    {
+        String pref = getPreferenceStore().getString(BUILDER_MARKER_MISSES);
+        if (pref.equals(BUILDER_MARKER_MISSES_IGNORE))
+            return -1;
+
+        for (int i = 0; i < BUILDER_MARKER_MISSES_ARRAY.length; i++)
+        {
+            if (pref.equals(BUILDER_MARKER_MISSES_ARRAY[i]))
+                return i;
+        }
+        return 0;
     }
 
     /* (non-Javadoc)

@@ -302,7 +302,10 @@ public class SpecEditor extends Editor implements IMultiPage
      */
     protected SourceViewerConfiguration createSourceViewerConfiguration()
     {
-        return new SpecConfiguration(UIPlugin.getDefault().getXMLTextTools(), this, UIPlugin.getDefault().getPreferenceStore());
+        return new SpecConfiguration(
+            UIPlugin.getDefault().getXMLTextTools(),
+            this,
+            UIPlugin.getDefault().getPreferenceStore());
     }
 
     /**
@@ -772,7 +775,7 @@ public class SpecEditor extends Editor implements IMultiPage
     {
         super.editorContextMenuAboutToShow(menu);
         menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
-       if (!(getStorage() instanceof JarEntryFile))
+        if (!(getStorage() instanceof JarEntryFile))
         {
             addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
             addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
@@ -782,7 +785,8 @@ public class SpecEditor extends Editor implements IMultiPage
         {
             fJumpActions[i].editorContextMenuAboutToShow(moreNav);
         }
-        menu.appendToGroup(NAV_GROUP, moreNav);
+        if (!moreNav.isEmpty())
+            menu.appendToGroup(NAV_GROUP, moreNav);
         menu.insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
         MenuManager sourceMenu = new MenuManager("Source");
         sourceMenu.add(getAction("Format"));

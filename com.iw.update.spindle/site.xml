@@ -2,45 +2,8 @@
 <site>
 
    <description>
-      Eclipse update site for Spindle 3 alphas
+      Eclipse update site for Spindle 3 integration builds. Select builds on this site are promoted to beta status and made available at http://spindle.sourceforge.net/updates.
    </description>
-   <feature url="features/com.iw.features.spindle_3.0.4.jar" id="com.iw.features.spindle" version="3.0.4">
-      <category name="spindle3_0"/>
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.5.jar" id="com.iw.features.spindle" version="3.0.5">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.3.jar" id="com.iw.features.spindle" version="3.0.3">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.2.jar" id="com.iw.features.spindle" version="3.0.2">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.0.alpha1.jar" id="com.iw.features.spindle" version="3.0.0.alpha1">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.6.jar" id="com.iw.features.spindle" version="3.0.6">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.7.jar" id="com.iw.features.spindle" version="3.0.7">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.8.jar" id="com.iw.features.spindle" version="3.0.8">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.9.jar" id="com.iw.features.spindle" version="3.0.9">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.10.jar" id="com.iw.features.spindle" version="3.0.10">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.11.jar" id="com.iw.features.spindle" version="3.0.11">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.12.jar" id="com.iw.features.spindle" version="3.0.12">
-      <category name="older_alphas"/>
-   </feature>
    <feature url="features/com.iw.features.spindle_3.0.14.jar" id="com.iw.features.spindle" version="3.0.14">
       <category name="older_alphas"/>
    </feature>
@@ -57,14 +20,29 @@
       <category name="older_alphas"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.0.19.jar" id="com.iw.features.spindle" version="3.0.19">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.20.jar" id="com.iw.features.spindle" version="3.0.20">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.21.jar" id="com.iw.features.spindle" version="3.0.21">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.22.jar" id="com.iw.features.spindle" version="3.0.22">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.23.jar" id="com.iw.features.spindle" version="3.0.23">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.24.jar" id="com.iw.features.spindle" version="3.0.24">
       <category name="spindle3_0_latest"/>
    </feature>
-   <category-def name="spindle3_0_latest" label="Spindle 3 alpha latest">
+   <category-def name="spindle3_0_latest" label="Spindle 3 latest integration build">
       <description>
-         Here are the latest alpha releases of Spindle 3 supporting Tapestry 3.0
+         Here are the latest intergration builds of Spindle 3 supporting Tapestry 3.0
       </description>
    </category-def>
-   <category-def name="older_alphas" label="Older Alpha releases">
+   <category-def name="older_alphas" label="Older integration builds">
       <description>
          Not the latest, or the greatest
       </description>

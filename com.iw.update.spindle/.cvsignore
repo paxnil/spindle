@@ -1,1 +1,6 @@
 .sitebuild
+distro
+images
+*.tar.gz
+package.xml
+*.zip
