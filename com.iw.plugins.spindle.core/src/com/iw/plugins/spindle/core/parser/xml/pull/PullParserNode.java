@@ -59,6 +59,8 @@ import com.iw.plugins.spindle.core.util.Assert;
  *  
  *  methods setFirstChild(), setPreviousSibling(), and setNextSibling()
  * 
+ *  You also need to call completed() when it appropriate
+ * 
  * @author bgarson@intelligentworks.com, glongman@intelligentworks.com
  * @version $Id$
  */
@@ -72,7 +74,8 @@ public class PullParserNode implements Node
      * @param elementName = Qname.rawname
      * @param attributes the XMLAttributes passed to startElement
      * @return
-     */public static PullParserNode createElementNode(
+     */
+    public static PullParserNode createElementNode(
         TapestryPullParser parser,
         PullParserNode parentNode,
         String elementName,
@@ -202,6 +205,16 @@ public class PullParserNode implements Node
         }
     }
 
+    /** 
+     * The parser must call this when all processing 
+     * for this node is complete.
+     *
+     */
+    protected void completed()
+    {
+        this.complete = true;
+    }
+
     /**
      * 
      * Method used to bump the parser into reading the next
@@ -280,8 +293,9 @@ public class PullParserNode implements Node
         return firstChild;
 
     }
-    
-    protected void setFirstChild(PullParserNode node) {
+
+    protected void setFirstChild(PullParserNode node)
+    {
         this.firstChild = node;
     }
 
