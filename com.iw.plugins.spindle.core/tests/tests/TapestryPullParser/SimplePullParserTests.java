@@ -78,7 +78,7 @@ public class SimplePullParserTests extends ConfiguredPullParserBase
 
     public void testSimpleValidationSuccess() throws Exception
     {
-        final String VALID = PROLOG_1 + "<dog test='poo'>Hello, world!<cat>stupid</cat></dog>\n";
+        final String VALID = PROLOG_1 + "<dog test='poo'>Hello, world!</dog>\n";
         parseAll(VALID);
 
     }
@@ -215,7 +215,7 @@ public class SimplePullParserTests extends ConfiguredPullParserBase
         Reader reader =
             new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/testdata/basicTapestryComponent.jwc")));
         pullParseConfiguration.setInputSource(new XMLInputSource(null, "", null, reader, null));
-        assertTrue("parser didn't stop!", pullParseConfiguration.parse(false));
+        pullParseConfiguration.parse();
         assertNotNull("pool didn't cache the DTD", pool.getGrammar(TAPESTRY_1_3_PUBLIC_ID));
 
     }

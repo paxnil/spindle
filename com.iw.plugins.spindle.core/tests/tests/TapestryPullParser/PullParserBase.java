@@ -28,9 +28,7 @@ package tests.TapestryPullParser;
 
 import junit.framework.TestCase;
 
-import org.apache.xerces.xni.parser.XMLPullParserConfiguration;
-
-import com.iw.plugins.spindle.core.parser.xml.TapestryParserConfiguration;
+import com.iw.plugins.spindle.core.parser.xml.TapestryPullParserConfiguration;
 import com.iw.plugins.spindle.core.parser.xml.pull.TapestryPullParser;
 
 /**
@@ -41,7 +39,7 @@ import com.iw.plugins.spindle.core.parser.xml.pull.TapestryPullParser;
  */
 public class PullParserBase extends TestCase {
 
-  protected XMLPullParserConfiguration pullParseConfiguration;
+  protected TapestryPullParserConfiguration pullParseConfiguration;
   protected TapestryPullParser pullParser;
 
   public PullParserBase(String arg0) {
@@ -52,7 +50,7 @@ public class PullParserBase extends TestCase {
    * @see junit.framework.TestCase#setUp()
    */
   protected void setUp() throws Exception {
-    pullParseConfiguration = new TapestryParserConfiguration();
+    pullParseConfiguration = new TapestryPullParserConfiguration();
     pullParser = new TapestryPullParser(pullParseConfiguration);
   }
 

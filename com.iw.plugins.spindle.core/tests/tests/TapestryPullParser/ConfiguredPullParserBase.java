@@ -86,6 +86,7 @@ public class ConfiguredPullParserBase extends PullParserBase
         pullParseConfiguration.setInputSource(new XMLInputSource(null, "", null, reader, null));
         while (true)
         {
+            System.err.println("BUMP!\n");
             if (!pullParseConfiguration.parse(false))
             {
                 break;
