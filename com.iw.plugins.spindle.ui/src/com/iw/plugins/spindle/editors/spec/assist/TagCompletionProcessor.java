@@ -77,7 +77,8 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         int baseState = tag.getStateAt(documentOffset);
         String tagName = tag.getName();
-        if ((tag.getType() == DocumentArtifactPartitioner.ENDTAG && !atStart) || baseState == DocumentArtifact.IN_TERMINATOR)
+        if ((tag.getType() == DocumentArtifactPartitioner.ENDTAG && !atStart)
+            || baseState == DocumentArtifact.IN_TERMINATOR)
             return NoSuggestions;
 
         boolean addLeadingSpace = false;
@@ -87,15 +88,15 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         {
             if (atStart && tag.getType() == DocumentArtifactPartitioner.ENDTAG)
             {
-            	DocumentArtifact parentTag = tag.getCorrespondingNode();
-            	String parentName = parentTag.getName();
-				if (parentTag == null || parentName == null)
-					return NoSuggestions;
-				DocumentArtifact prevSib = parentTag.findLastChild();
-            	String sibName = null;
-            	if (prevSib != null)
-            		sibName = prevSib.getName();
-            		                        		
+                DocumentArtifact parentTag = tag.getCorrespondingNode();
+                String parentName = parentTag.getName();
+                if (parentTag == null || parentName == null)
+                    return NoSuggestions;
+                DocumentArtifact prevSib = parentTag.findLastChild();
+                String sibName = null;
+                if (prevSib != null)
+                    sibName = prevSib.getName();
+
                 List candidates = getRawNewTagProposals(fDTD, parentName, sibName);
                 if (candidates.isEmpty())
                     return NoSuggestions;
@@ -108,7 +109,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
                     proposals.add(proposal);
                 }
                 proposals.add(SpecAssistHelper.getDefaultInsertCommentProposal(documentOffset, 0));
-				return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+                return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 
             } else if (atStart || (tag.getAttributes().isEmpty() && !tag.isTerminated()))
             {
@@ -143,12 +144,12 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
                             proposal.setReplacementLength(replacementLength);
                             proposals.add(proposal);
                         }
-                        if (proposals.isEmpty())
-                        {
-                            return NoSuggestions;
-                        }
-
                     }
+                    if (proposals.isEmpty())
+                    {
+                        return NoSuggestions;
+                    }
+
                 } else
                 {
                     for (Iterator iter = candidates.iterator(); iter.hasNext();)
@@ -184,11 +185,18 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         Map attrmap = tag.getAttributesMap();
 
         DocumentArtifact existingAttr = tag.getAttributeAt(documentOffset);
-        if (baseState != DocumentArtifact.AFTER_ATT_VALUE && existingAttr != null && existingAttr.getOffset() < documentOffset)
+        if (existingAttr != null)
         {
-            computeAttributeNameReplacements(documentOffset, existingAttr, tagName, attrmap.keySet(), proposals);
-        } else
-        {
+            if (baseState != DocumentArtifact.AFTER_ATT_VALUE
+                && existingAttr != null
+                && existingAttr.getOffset() < documentOffset)
+            {
+                computeAttributeNameReplacements(documentOffset, existingAttr, tagName, attrmap.keySet(), proposals);
+            } else
+            {
+                computeAttributeProposals(documentOffset, addLeadingSpace, tagName, attrmap.keySet(), proposals);
+            }
+        } else {
             computeAttributeProposals(documentOffset, addLeadingSpace, tagName, attrmap.keySet(), proposals);
         }
 
@@ -210,12 +218,77 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
      */
     private void computeAttributeNameReplacements(
         int documentOffset,
-        DocumentArtifact existingAttr,
+        DocumentArtifact existingAttribute,
         String tagName,
-        Set set,
+        Set existingAttributeNames,
         List proposals)
     {
-        // TODO Auto-generated method stub
+        String name = existingAttribute.getName();
+        String value = existingAttribute.getAttributeValue();
+        //get index of whitespace
+        String matchString = existingAttribute.getContentTo(documentOffset, false).toLowerCase();
+        if (matchString.length() > name.length())
+            return;
+
+        int replacementOffset = existingAttribute.getOffset();
+        int replacementLength = name.length();
+
+        int matchLength = matchString.length();
+        if (matchLength == 0 || matchLength > name.length())
+            matchString = null;
+
+        try
+        {
+            List attrs = SpecAssistHelper.getAttributes(fDTD, tagName);
+
+            if (!attrs.isEmpty())
+            {
+                List requiredAttributes = SpecAssistHelper.getRequiredAttributes(fDTD, tagName);
+                for (Iterator iter = attrs.iterator(); iter.hasNext();)
+                {
+                    String attrName = (String) iter.next();
+                    if (existingAttributeNames.contains(attrName) || (matchString != null && !attrName.startsWith(matchString)))
+                        continue;
+
+                    CompletionProposal proposal;
+                    if (value == null)
+                    {
+                        proposal =
+                            new CompletionProposal(
+                                attrName + "=\"\"",
+                                replacementOffset,
+                                replacementLength,
+                                new Point(attrName.length(), 0),
+                                requiredAttributes.contains(attrName)
+                                    ? Images.getSharedImage("bullet_pink.gif")
+                                    : Images.getSharedImage("bullet.gif"),
+                                null,
+                                null,
+                                null);
+                    } else
+                    {
+                        proposal =
+                            new CompletionProposal(
+                                attrName,
+                                replacementOffset,
+                                replacementLength,
+                                new Point(attrName.length(), 0),
+                                requiredAttributes.contains(attrName)
+                                    ? Images.getSharedImage("bullet_pink.gif")
+                                    : Images.getSharedImage("bullet.gif"),
+                                null,
+                                null,
+                                null);
+                    }
+
+                    proposals.add(proposal);
+                }
+            }
+
+        } catch (IllegalArgumentException e)
+        {
+            //do nothing
+        }
 
     }
 
@@ -274,7 +347,8 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         if (documentOffset - tag.getOffset() <= name.length() + 1)
         {
             String comment = SpecAssistHelper.getElementComment(fDTD, name);
-            return new IContextInformation[] { new ContextInformation(name, comment.length() == 0 ? "No Information" : comment)};
+            return new IContextInformation[] {
+                 new ContextInformation(name, comment.length() == 0 ? "No Information" : comment)};
         }
 
         return NoInformation;
