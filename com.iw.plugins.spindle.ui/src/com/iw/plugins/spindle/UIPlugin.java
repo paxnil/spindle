@@ -356,6 +356,8 @@ public class UIPlugin extends AbstractUIPlugin
     }
   };
 
+  public static final String SPINDLEUI_PREFS_FILE = ".spindleUI.prefs";
+
   private void setUpDeferredRevealer()
   {
     getWorkbench().addWindowListener(RevealerTrigger);

@@ -47,6 +47,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -68,8 +70,10 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
+import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.properties.ProjectPropertyPage;
+import com.iw.plugins.spindle.ui.widgets.PreferenceTemplateSelector;
 import com.iw.plugins.spindle.ui.wizards.factories.ApplicationFactory;
 import com.iw.plugins.spindle.ui.wizards.factories.ITemplateSource;
 import com.iw.plugins.spindle.ui.wizards.factories.PageFactory;
@@ -82,6 +86,14 @@ import com.iw.plugins.spindle.ui.wizards.factories.TapestryTemplateFactory;
  */
 public class NewTapestryProjectPage extends WizardNewProjectCreationPage
 {
+
+  class TemplateListener implements ISelectionChangedListener
+  {
+    public void selectionChanged(SelectionChangedEvent event)
+    {
+      setPageComplete(validatePage());
+    }
+  }
   private String fInitialContextFolderFieldValue = "context";
 
   private Text fProjectContextFolderField;
@@ -92,6 +104,11 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
 
   private List fReveal;
 
+  private PreferenceTemplateSelector fApplicationTemplateSelector;
+
+  private Group fTapestryGroup;
+  private Group fTemplateGroup;
+
   private Listener fieldModifyListener = new Listener()
   {
     public void handleEvent(Event e)
@@ -99,6 +116,8 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
       setPageComplete(validatePage());
     }
   };
+
+  private TemplateListener fTemplateListener;
 
   /* the file factories used by this wizard */
   private ApplicationFactory fAppFactory;
@@ -121,6 +140,12 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     fPageFactory = new PageFactory();
     fTemplateFactory = new TapestryTemplateFactory();
     fTemplateSource = source;
+    fTemplateListener = new TemplateListener();
+
+    fApplicationTemplateSelector = new PreferenceTemplateSelector(
+        XMLFileContextType.APPLICATION_FILE_CONTEXT_TYPE,
+        PreferenceConstants.APP_TEMPLATE,
+        UIPlugin.getDefault().getPreferenceStore());
   }
 
   /**
@@ -132,23 +157,48 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     wrapper.setFont(parent.getFont());
 
     wrapper.setLayout(new GridLayout());
-    wrapper.setLayoutData(new GridData(GridData.FILL_BOTH));
+    wrapper.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
     super.createControl(wrapper);
+
+    Composite superComp = (Composite) getControl();
+    superComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
     Composite composite = new Composite(wrapper, SWT.NULL);
     composite.setFont(parent.getFont());
 
     composite.setLayout(new GridLayout());
-    composite.setLayoutData(new GridData(GridData.FILL_BOTH
-        | GridData.VERTICAL_ALIGN_BEGINNING));
+    composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
     createTapestryGroup(composite);
+
+    createTemplateGroup(composite);
+
+    fApplicationTemplateSelector.load();
+
     setPageComplete(validatePage());
     // Show description on opening
     setErrorMessage(null);
     setMessage(null);
     setControl(wrapper);
+  }
+
+  /**
+   * @param wrapper
+   */
+  private void createTemplateGroup(Composite parent)
+  {
+    fTemplateGroup = new Group(parent, SWT.NONE);
+    GridLayout layout = new GridLayout();
+    layout.numColumns = 3;
+    fTemplateGroup.setLayout(layout);
+    fTemplateGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    fTemplateGroup.setFont(parent.getFont());
+    fTemplateGroup.setText(UIPlugin
+        .getString("new-project-wizard-page-template-group-label"));
+
+    fApplicationTemplateSelector.createControl(fTemplateGroup, 3);
+    fApplicationTemplateSelector.addSelectionChangedListener(fTemplateListener);
   }
 
   /**
@@ -158,22 +208,22 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
    */
   private final void createTapestryGroup(Composite parent)
   {
-    Group projectGroup = new Group(parent, SWT.NONE);
+    fTapestryGroup = new Group(parent, SWT.NONE);
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;
-    projectGroup.setLayout(layout);
-    projectGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    projectGroup.setFont(parent.getFont());
-    projectGroup.setText(UIPlugin
+    fTapestryGroup.setLayout(layout);
+    fTapestryGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    fTapestryGroup.setFont(parent.getFont());
+    fTapestryGroup.setText(UIPlugin
         .getString("new-project-wizard-page-context-group-label"));
 
     // context folder label
-    Label projectLabel = new Label(projectGroup, SWT.NONE);
+    Label projectLabel = new Label(fTapestryGroup, SWT.NONE);
     projectLabel.setText(UIPlugin.getString("new-project-wizard-page-context-folder"));
     projectLabel.setFont(parent.getFont());
 
     // context folder entry field
-    fProjectContextFolderField = new Text(projectGroup, SWT.BORDER);
+    fProjectContextFolderField = new Text(fTapestryGroup, SWT.BORDER);
     GridData data = new GridData(GridData.FILL_HORIZONTAL);
     data.widthHint = 250;
     fProjectContextFolderField.setLayoutData(data);
@@ -186,12 +236,12 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     fProjectContextFolderField.addListener(SWT.Modify, fieldModifyListener);
 
     // context folder label
-    Label specLabel = new Label(projectGroup, SWT.NONE);
+    Label specLabel = new Label(fTapestryGroup, SWT.NONE);
     specLabel.setText(UIPlugin.getString("new-project-wizard-page-servlet-spec"));
     specLabel.setFont(parent.getFont());
 
     // servlet spec version combo
-    fServletSpecVersionCombo = new Combo(projectGroup, SWT.READ_ONLY);
+    fServletSpecVersionCombo = new Combo(fTapestryGroup, SWT.READ_ONLY);
     fServletSpecVersionCombo.add(TapestryCore.SERVLET_2_4_SCHEMA);
     fServletSpecVersionCombo.add(TapestryCore.SERVLET_2_3_PUBLIC_ID);
     fServletSpecVersionCombo.add(TapestryCore.SERVLET_2_2_PUBLIC_ID);
@@ -203,7 +253,8 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
       {
         int dtdId = XMLUtil.getDTDVersion(getServletSpecPublicId());
         if (fInsertTapestryFilter != null)
-          fInsertTapestryFilter.setEnabled(dtdId >= XMLUtil.DTD_SERVLET_2_3);
+          fInsertTapestryFilter.setEnabled(
+              dtdId >= XMLUtil.DTD_SERVLET_2_3);
       }
 
       public void widgetDefaultSelected(SelectionEvent e)
@@ -212,7 +263,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
       }
     });
 
-    Control control = fInsertTapestryFilter.getControl(projectGroup);
+    Control control = fInsertTapestryFilter.getControl(fTapestryGroup);
     data = new GridData(GridData.FILL_HORIZONTAL);
     data.horizontalSpan = 2;
     control.setLayoutData(data);
@@ -224,41 +275,64 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     boolean superValid = super.validatePage();
     boolean nameSpecified = !"".equals(getProjectName());
 
-    if (fProjectContextFolderField != null)
-      fProjectContextFolderField.setEnabled(nameSpecified);
+    if (fTapestryGroup == null)
+      return superValid;
 
-    if (fServletSpecVersionCombo != null)
-      fServletSpecVersionCombo.setEnabled(nameSpecified);
-
+    setGroupEnabled(fTapestryGroup, nameSpecified);
+    setGroupEnabled(fTemplateGroup, nameSpecified);
+    
     int dtdId = XMLUtil.getDTDVersion(getServletSpecPublicId());
     if (fInsertTapestryFilter != null)
-      fInsertTapestryFilter.setEnabled(nameSpecified && dtdId >= XMLUtil.DTD_SERVLET_2_3);
+      fInsertTapestryFilter.setEnabled(fServletSpecVersionCombo.isEnabled() && nameSpecified && dtdId >= XMLUtil.DTD_SERVLET_2_3);
 
     if (!superValid)
       return false;
 
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-
-    String contextFolderContents = fProjectContextFolderField == null
-        ? "" : fProjectContextFolderField.getText().trim();
-
-    if (contextFolderContents.equals(""))
+  
+    if (nameSpecified)
     {
-      setErrorMessage(null);
-      setMessage(UIPlugin.getString("new-project-wizard-page-empty-context-folder"));
-      return false;
-    }
+      
 
-    IStatus status = workspace.validateName(contextFolderContents, IResource.FOLDER);
-    if (!status.isOK())
-    {
-      setErrorMessage(status.getMessage());
-      return false;
+      IWorkspace workspace = ResourcesPlugin.getWorkspace();
+
+      String contextFolderContents = fProjectContextFolderField == null
+          ? "" : fProjectContextFolderField.getText().trim();
+
+      if (contextFolderContents.equals(""))
+      {
+        setErrorMessage(null);
+        setMessage(UIPlugin.getString("new-project-wizard-page-empty-context-folder"));
+        return false;
+      }
+
+      IStatus status = workspace.validateName(contextFolderContents, IResource.FOLDER);
+      if (!status.isOK())
+      {
+        setErrorMessage(status.getMessage());
+        return false;
+      }
+
+      status = fApplicationTemplateSelector.validate();
+      if (!status.isOK())
+      {
+        setErrorMessage(status.getMessage());
+        return false;
+      }
+
     }
 
     setErrorMessage(null);
     setMessage(null);
     return true;
+  }
+
+  private void setGroupEnabled(Group group, boolean flag)
+  {
+    Control[] children = group.getChildren();
+    for (int i = 0; i < children.length; i++)
+    {
+      children[i].setEnabled(flag);
+    }
   }
 
   public String getContextFolderName()

@@ -41,6 +41,17 @@
                value="org.eclipse.jdt.core.javanature">
          </filter>
       </page>
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            name="Tapestry Project Templates"
+            class="com.iw.plugins.spindle.ui.properties.ProjectTemplatesPropertyPage"
+            id="TemplatePropertyPage">         
+         <filter
+               name="nature"
+               value="com.iw.plugins.spindle.core.tapestrynature">
+         </filter>
+      </page>
    </extension>     
    <extension
          point="org.eclipse.ui.decorators">

@@ -25,8 +25,11 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.wizards.project;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -93,8 +96,7 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
   }
 
   private Button fUseWorkspaceDefaultTemplates;
-  private PreferenceTemplateSelector fApplicationTemplateSelector;
-  private PreferenceTemplateSelector fLibraryTemplateSelector;
+   private PreferenceTemplateSelector fLibraryTemplateSelector;
   private PreferenceTemplateSelector fComponentTemplateSelector;
   private PreferenceTemplateSelector fPageTemplateSelector;
   private PreferenceTemplateSelector fTapestryTemplateSelector;
@@ -112,16 +114,12 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
     PAGE_NAME = name;
     //    this.setImageDescriptor(ImageDescriptor.createFromURL(Images.getImageURL(UIPlugin
     //        .getString(PAGE_NAME + ".image"))));
-    this.setDescription(UIPlugin.getString(PAGE_NAME + ".description"));
+//    this.setDescription(UIPlugin.getString(PAGE_NAME + ".description"));
+    this.setDescription("Project file generation templates");
 
-    fProjectPreferences = ProjectPreferenceStore.createEmptyStore("", UIPlugin
+    fProjectPreferences = ProjectPreferenceStore.createEmptyStore(UIPlugin
         .getDefault()
         .getPreferenceStore());
-
-    fApplicationTemplateSelector = new PreferenceTemplateSelector(
-        XMLFileContextType.APPLICATION_FILE_CONTEXT_TYPE,
-        PreferenceConstants.APP_TEMPLATE,
-        fProjectPreferences);
 
     fLibraryTemplateSelector = new PreferenceTemplateSelector(
         XMLFileContextType.LIBRARY_FILE_CONTEXT_TYPE,
@@ -214,15 +212,14 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
 
     fUseWorkspaceDefaultTemplates.setSelection(true);
     updateEnabled(false);
-    
-    fApplicationTemplateSelector.load();
+
     fLibraryTemplateSelector.load();
     fComponentTemplateSelector.load();
     fPageTemplateSelector.load();
     fTapestryTemplateSelector.load();
 
     UIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fListener);
-    
+
     validate();
   }
 
@@ -249,9 +246,6 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
     fProjectTemplateGroup.setFont(font);
     fProjectTemplateGroup.setText("Setup project default templates:");
 
-    fApplicationTemplateSelector.createControl(fProjectTemplateGroup, columnCount);
-    fApplicationTemplateSelector.addSelectionChangedListener(fListener);
-
     fLibraryTemplateSelector.createControl(fProjectTemplateGroup, columnCount);
     fLibraryTemplateSelector.addSelectionChangedListener(fListener);
 
@@ -262,14 +256,13 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
     fPageTemplateSelector.addSelectionChangedListener(fListener);
 
     fTapestryTemplateSelector.createControl(fProjectTemplateGroup, columnCount);
-    fTapestryTemplateSelector.addSelectionChangedListener(fListener);  
+    fTapestryTemplateSelector.addSelectionChangedListener(fListener);
 
   }
 
   private void updateEnabled(boolean flag)
   {
-   
-    
+
     fProjectTemplateGroup.setEnabled(flag);
     Control[] children = fProjectTemplateGroup.getChildren();
     for (int i = 0; i < children.length; i++)
@@ -286,7 +279,6 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
   public void dispose()
   {
     super.dispose();
-    fApplicationTemplateSelector.dispose();
     fLibraryTemplateSelector.dispose();
     fComponentTemplateSelector.dispose();
     fPageTemplateSelector.dispose();
@@ -323,12 +315,20 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
         {
           try
           {
-            IFile file = useProject.getFile(".spindleUI.prefs");
+            IFile dataFile = useProject.getFile(UIPlugin.SPINDLEUI_PREFS_FILE);
 
-            FileOutputStream out = new FileOutputStream(file.getFullPath().toOSString());
-            dirtyStore.save(
-                out,
-                "These are the project specific prefs for the Spindle UI");
+            String fullname;
+            if (dataFile.exists())
+            {
+              fullname = dataFile.getLocation().toOSString();
+            } else
+            {
+              fullname = useProject.getLocation().toOSString() + File.separator
+                  + UIPlugin.SPINDLEUI_PREFS_FILE;
+            }
+
+            dirtyStore.setFilename(fullname);
+            dirtyStore.save();
 
           } catch (Exception e)
           {
@@ -342,18 +342,29 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
   }
   public Template getTemplate(String templateContextId)
   {
-    //these are the only ones we care about for the purposes of
-    //the wizard "finish".
-    if (ApplicationFactory.CONTEXT_TYPE.equals(templateContextId))
-      return fApplicationTemplateSelector.getSelectedTemplate();
+    if (fUseWorkspaceDefaultTemplates.getSelection())
+    {
+      String name = UIPlugin.getDefault().getPreferenceStore().getString(
+          templateContextId);
+      List templates = TemplateFactory.getAllTemplates(templateContextId);
+      for (Iterator iter = templates.iterator(); iter.hasNext();)
+      {
+        Template element = (Template) iter.next();
+        if (element.getName().equals(name))
+          return element;
+      }
+      return null;
 
-    if (PageFactory.CONTEXT_TYPE.equals(templateContextId))
-      return fPageTemplateSelector.getSelectedTemplate();
+    } else
+    {
+      if (PageFactory.CONTEXT_TYPE.equals(templateContextId))
+        return fPageTemplateSelector.getSelectedTemplate();
 
-    if (TapestryTemplateFactory.CONTEXT_TYPE.equals(templateContextId))
-      return fTapestryTemplateSelector.getSelectedTemplate();
+      if (TapestryTemplateFactory.CONTEXT_TYPE.equals(templateContextId))
+        return fTapestryTemplateSelector.getSelectedTemplate();
 
-    return null;
+      return null;
+    }
   }
 
   public Template getTemplate(TemplateFactory factory)
@@ -374,8 +385,7 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
     } else
     {
       SpindleMultiStatus status = new SpindleMultiStatus();
-      status.addStatus(fApplicationTemplateSelector.validate());
-      status.addStatus(fComponentTemplateSelector.validate());
+       status.addStatus(fComponentTemplateSelector.validate());
       status.addStatus(fPageTemplateSelector.validate());
       status.addStatus(fTapestryTemplateSelector.validate());
 

@@ -64,7 +64,7 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
   {
     ImageDescriptor descriptor = Images.getImageDescriptor("applicationDialog.gif");
 
-    fTemplatePage = new TemplateSelectionPage("File generation");
+    fTemplatePage = new TemplateSelectionPage("FileGeneration");
 
     fMainPage = new NewTapestryProjectPage(UIPlugin
         .getString("new-project-wizard-page-title"), this, fTemplatePage);

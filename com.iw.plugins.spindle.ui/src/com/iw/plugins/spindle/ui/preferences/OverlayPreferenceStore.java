@@ -18,7 +18,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 /**
  * An overlaying preference store.
  */
-class OverlayPreferenceStore implements IPreferenceStore
+public class OverlayPreferenceStore implements IPreferenceStore
 {
 
   public static final class TypeDescriptor
