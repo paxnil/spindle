@@ -118,8 +118,7 @@ public class SpecEditor extends Editor implements IMultiPage
     private OutlinePageSelectionUpdater fUpdater;
     private List fReconcileListeners;
     private Control fControl;
-    
-   
+
     /** only here if this editor is embedded in a MultiPageSpecEditor */
     private MultiPageSpecEditor fMultiPageEditor;
 
@@ -127,7 +126,7 @@ public class SpecEditor extends Editor implements IMultiPage
     {
         super();
         fOutline = new SpecificationOutlinePage(this, fPreferenceStore);
-        
+
     }
 
     /* (non-Javadoc)
@@ -159,6 +158,9 @@ public class SpecEditor extends Editor implements IMultiPage
 
         if (fOutline != null)
             fOutline.addSelectionChangedListener(fSelectionChangedListener);
+
+        // setup the outline view!
+        reconcileOutline();
 
     }
 
@@ -274,8 +276,6 @@ public class SpecEditor extends Editor implements IMultiPage
 
         }
         super.doSetInput(input);
-        // setup the outline view!
-        reconcileOutline();
     }
 
     /* (non-Javadoc)
@@ -378,7 +378,8 @@ public class SpecEditor extends Editor implements IMultiPage
                     // do nothing
                 }
             }
-            fUpdater.post();
+            if (fUpdater != null)
+                fUpdater.post();
 
         } catch (RuntimeException e)
         {
@@ -389,21 +390,11 @@ public class SpecEditor extends Editor implements IMultiPage
             fOutlinePartitioner.disconnect();
         }
     }
-
     /** 
      * return the Tapestry specification object obtained during the last build 
      * note this method may trigger a build!
      */
-    Object getSpec(IFile file)
-    {
-        IProject project = file.getProject();
-        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-        Map specs = manager.getSpecMap(project);
-        if (specs != null)
-            return specs.get(file);
-
-        return null;
-    }
+    
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
@@ -480,7 +471,7 @@ public class SpecEditor extends Editor implements IMultiPage
                 {
                     IFile file = ((IFileEditorInput) input).getFile();
                     TapestryProject project = TapestryCore.getDefault().getTapestryProjectFor(file);
-                    Object spec = getSpec(file);
+                    Object spec = getSpecification();
                     if (project != null && spec != null)
                     {
 
@@ -530,7 +521,7 @@ public class SpecEditor extends Editor implements IMultiPage
                 collector.addProblem(problems[i]);
             }
             collector.endCollecting();
-             if (fParser.getProblems().length > 0)
+            if (fParser.getProblems().length > 0)
                 return null;
             return result;
         }

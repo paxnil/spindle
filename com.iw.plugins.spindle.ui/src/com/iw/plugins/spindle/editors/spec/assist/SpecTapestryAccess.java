@@ -43,6 +43,7 @@ import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
@@ -339,8 +340,8 @@ public class SpecTapestryAccess extends UITapestryAccess
             // non empty only!
             defaultProposal = nonEmptyProposal;
             optionalProposal = null;
-        } else if (nonEmptyProposal != null 
-                        && (elementName.equals("component") || elementName.equals("listener-binding")))
+        } else if (
+            nonEmptyProposal != null && (elementName.equals("component") || elementName.equals("listener-binding")))
         { // non empty first!
             defaultProposal = nonEmptyProposal;
             optionalProposal = emptyProposal;
@@ -397,9 +398,9 @@ public class SpecTapestryAccess extends UITapestryAccess
     {
         return internalGetAttributes(dtd, elementName.toLowerCase());
     } /**
-            * @param dtd
-            * @param elementName assumed to be lowercase
-            */
+                        * @param dtd
+                        * @param elementName assumed to be lowercase
+                        */
     private static List internalGetAttributes(DTD dtd, String elementName)
     {
         MultiKey key = new MultiKey(new Object[] { dtd, elementName, ELEMENT_ATTRIBUTES }, false);
@@ -497,19 +498,19 @@ public class SpecTapestryAccess extends UITapestryAccess
         }
         return result;
     } /**
-            * @param dtd
-            * @param elementName
-            * @param elementName 
-            * @return
-            */
+                        * @param dtd
+                        * @param elementName
+                        * @param elementName 
+                        * @return
+                        */
     public static List getRequiredAttributes(DTD dtd, String elementName)
     {
         return internalGetRequiredAttributes(dtd, elementName.toLowerCase());
     } /**
-            * @param dtd
-            * @param elementName assumed to be lowercase
-            * @return
-            */
+                        * @param dtd
+                        * @param elementName assumed to be lowercase
+                        * @return
+                        */
     private static List internalGetRequiredAttributes(DTD dtd, String elementName)
     {
         MultiKey key = new MultiKey(new Object[] { dtd, elementName, ELEMENT_REQUIRED_ATTRIBUTES }, false);
@@ -521,20 +522,20 @@ public class SpecTapestryAccess extends UITapestryAccess
         }
         return result;
     } /**
-            * @param dtd
-            * @param elementName
-            * @param elementName 
-            * @return
-            */
+                        * @param dtd
+                        * @param elementName
+                        * @param elementName 
+                        * @return
+                        */
     public static String getDefaultAttributeValue(DTD dtd, String elementName, String attrName)
     {
         return internalGetDefaultAttributeValue(dtd, elementName.toLowerCase(), attrName.toLowerCase());
     } /**
-            * @param dtd
-            * @param elementName
-            * @param elementName assumed to be lowercase
-            * @return
-            */
+                        * @param dtd
+                        * @param elementName
+                        * @param elementName assumed to be lowercase
+                        * @return
+                        */
     private static String internalGetDefaultAttributeValue(DTD dtd, String elementName, String attrName)
     {
         MultiKey key =
@@ -547,20 +548,20 @@ public class SpecTapestryAccess extends UITapestryAccess
         }
         return result;
     } /**
-            * @param dtd
-            * @param elementName
-            * @param elementName 
-            * @return
-            */
+                        * @param dtd
+                        * @param elementName
+                        * @param elementName 
+                        * @return
+                        */
     public static List getAllowedAttributeValues(DTD dtd, String elementName, String attrName)
     {
         return internalGetAllowedAttributeValues(dtd, elementName.toLowerCase(), attrName.toLowerCase());
     } /**
-            * @param dtd
-            * @param elementName
-            * @param elementName assumed to be lowercase
-            * @return
-            */
+                        * @param dtd
+                        * @param elementName
+                        * @param elementName assumed to be lowercase
+                        * @return
+                        */
     private static List internalGetAllowedAttributeValues(DTD dtd, String elementName, String attrName)
     {
         MultiKey key =
@@ -573,17 +574,18 @@ public class SpecTapestryAccess extends UITapestryAccess
         }
 
         return result;
-    } /**
-            * Return the default ICompletionProposal for inserting an XML Comment.
-            * <pre>
-            *  <!--  -->
-            * </pre>
-            * The cursor position after the proposal is applied is in the middle.
-            * 
-            * @param replacementOffset the location in the document where the proposal will be applied
-            * @param replacementLength the number of characters in the document from replacementOffset that will be replaced.
-            * @return
-            */
+    }
+    /**
+      * Return the default ICompletionProposal for inserting an XML Comment.
+      * <pre>
+      *  <!--  -->
+      * </pre>
+      * The cursor position after the proposal is applied is in the middle.
+      * 
+      * @param replacementOffset the location in the document where the proposal will be applied
+      * @param replacementLength the number of characters in the document from replacementOffset that will be replaced.
+      * @return
+      */
     public static ICompletionProposal getDefaultInsertCommentProposal(int replacementOffset, int replacementLength)
     {
         CompletionProposal proposal =
@@ -603,6 +605,9 @@ public class SpecTapestryAccess extends UITapestryAccess
     public SpecTapestryAccess(Editor editor) throws IllegalArgumentException
     {
         super(editor);
-        fComponentSpecification = editor.getComponent();
+        Object spec = editor.getSpecification();
+        Assert.isLegal(spec != null);
+        if (spec instanceof IComponentSpecification)
+            fComponentSpecification = (IComponentSpecification) spec;
     }
 }

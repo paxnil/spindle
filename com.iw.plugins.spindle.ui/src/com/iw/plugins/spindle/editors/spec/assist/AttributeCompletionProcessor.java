@@ -257,10 +257,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             }
             return NoInformation;
         } catch (RuntimeException e)
-       {
-           UIPlugin.log(e);
-           throw e;
-       } finally
+        {
+            UIPlugin.log(e);
+            throw e;
+        } finally
         {
             fAssistHelper = null;
         }
@@ -374,9 +374,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
     private PluginComponentSpecification findParentSpecification()
     {
-        PluginComponentSpecification fileComponent = (PluginComponentSpecification) fEditor.getComponent();
-        if (fileComponent == null)
+        Object spec = fEditor.getSpecification();
+        if (spec == null || !(spec instanceof PluginComponentSpecification))
             return null;
+        PluginComponentSpecification fileComponent = (PluginComponentSpecification) spec;
 
         // need to determine:
         // 1. the component type

@@ -142,9 +142,9 @@
             contributorClass="com.iw.plugins.spindle.editors.spec.SpecEditorContributor"
             class="com.iw.plugins.spindle.editors.spec.SpecEditor"
             id="com.iw.plugins.spindle.ui.editors.spec">
-      </editor>     
+      </editor>
    </extension>
-   <!--
+<!--
       <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
@@ -216,5 +216,65 @@
       </objectContribution>
 
    </extension> -->
+   <extension
+         point="org.eclipse.ui.commands">
+<!-- define a scope so that the command will work only in our editor! -->
+      <scope
+            name="TapestryEditorScope"
+            parent="org.eclipse.ui.textEditorScope"
+            description="scope for key bidings only seen by Tapestry editors"
+            id="com.iw.plugins.spindle.ui.editor.commands">
+      </scope>
+<!-- define a format command that we will associate with the key binding Ctrl-Shift-F -->
+      <command
+            name="Format"
+            description="Format this file"
+            category="source"
+            id="com.iw.plugins.spindle.ui.editor.commands.format">
+      </command>
+      <command
+            name="Jump to Java"
+            description="Jump to the java source (if possible)"
+            category="jump"
+            id="com.iw.plugins.spindle.ui.editor.commands.jump.java">
+      </command>
+      <command
+            name="Jump to Specification"
+            description="Jump to the specification file (if possible)"
+            category="jump"
+            id="com.iw.plugins.spindle.ui.editor.commands.jump.spec">
+      </command>
+      <command
+            name="Jump to Template"
+            description="Jump to the template file (if possible)"
+            category="jump"
+            id="com.iw.plugins.spindle.ui.editor.commands.jump.template">
+      </command>
+<!-- the key binding -->
+      <keyBinding
+            string="Ctrl+Shift+F"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.format"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            string="Ctrl+F12"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.jump.java"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            string="Ctrl+F11"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.jump.spec"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            string="Ctrl+F10"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.jump.template"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+   </extension>
 
 </plugin>

@@ -242,21 +242,26 @@ public class UIPlugin extends AbstractUIPlugin
         String extension = storage.getFullPath().getFileExtension();
 
         editorId = (String) EDITOR_ID_LOOKUP.get(extension);
-
-        if (editorId == null)
-            editorId = (String) EDITOR_ID_LOOKUP.get("html");
-
-        IEditorInput input = null;
-
-        if (storage instanceof JarEntryFile)
-        {
-            input = new JarEntryEditorInput(storage);
-        } else
-        {
-            input = new FileEditorInput((IFile) storage);
-        }
         try
         {
+
+            if (editorId == null && storage instanceof IFile)
+            {
+                UIPlugin.getDefault().getActivePage().openEditor((IFile) storage);
+            } else
+            {
+                editorId = (String) EDITOR_ID_LOOKUP.get("html");
+            }
+
+            IEditorInput input = null;
+
+            if (storage instanceof JarEntryFile)
+            {
+                input = new JarEntryEditorInput(storage);
+            } else
+            {
+                input = new FileEditorInput((IFile) storage);
+            }
             UIPlugin.getDefault().getActivePage().openEditor(input, editorId);
         } catch (PartInitException piex)
         {

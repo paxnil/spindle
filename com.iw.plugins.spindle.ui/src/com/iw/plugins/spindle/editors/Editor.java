@@ -26,14 +26,17 @@
 
 package com.iw.plugins.spindle.editors;
 
+import java.util.Map;
+
 import net.sf.solareclipse.xml.ui.XMLPlugin;
 
-import org.apache.tapestry.spec.IComponentSpecification;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
@@ -54,12 +57,20 @@ import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.StatusTextEditor;
+import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
+import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
+import com.iw.plugins.spindle.editors.actions.JumpToJavaAction;
+import com.iw.plugins.spindle.editors.actions.JumpToSpecAction;
+import com.iw.plugins.spindle.editors.actions.JumpToTemplateAction;
 import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 
 /**
@@ -148,8 +159,12 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
         PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
 
     protected final static String OVERVIEW_RULER = PreferenceConstants.EDITOR_OVERVIEW_RULER;
-    
-    protected final static String NAV_GROUP = UIPlugin.PLUGIN_ID+".navigationGroup";
+
+    protected final static String NAV_GROUP = UIPlugin.PLUGIN_ID + ".navigationGroup";
+
+    protected final static String JUMP_JAVA_ACTION_ID = UIPlugin.PLUGIN_ID + ".editor.commands.jump.java";
+    protected final static String JUMP_SPEC_ACTION_ID = UIPlugin.PLUGIN_ID + ".editor.commands.jump.spec";
+    protected final static String JUMP_TEMPLATE_ACTION_ID = UIPlugin.PLUGIN_ID + ".editor.commands.jump.template";
 
     /** The annotation access */
     protected IAnnotationAccess fAnnotationAccess = new ProblemAnnotationAccess();
@@ -180,6 +195,7 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
                 XMLPlugin.getDefault().getPreferenceStore());
         setPreferenceStore(fPreferenceStore);
         setRangeIndicator(new DefaultRangeIndicator());
+        setKeyBindingScopes(new String[] { "com.iw.plugins.spindle.ui.editor.commands" });
     }
 
     public void init(IEditorSite site, IEditorInput input) throws PartInitException
@@ -190,6 +206,37 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
             // force a build if necessary
             TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(project, true);
         super.init(site, input);
+    }
+
+    protected void createActions()
+    {
+        super.createActions();
+        Action action = new TextOperationAction(UIPlugin.getDefault().getResourceBundle(), "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
+        //Hook the action to the format command (plugin.xml)
+        action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.format");
+        setAction("Format", action);
+        // should be updated as the editor state changes
+        markAsStateDependentAction("Format", true);
+        // action depends on the state of editor selection
+        // in this case the format command is not called if there is
+        // a text selection in the editor
+        markAsSelectionDependentAction("Format", true);
+
+        BaseEditorAction jumpToJava = new JumpToJavaAction();
+        jumpToJava.setActiveEditor(this);
+        jumpToJava.setActionDefinitionId(JUMP_JAVA_ACTION_ID);
+        setAction(JUMP_JAVA_ACTION_ID, jumpToJava);
+
+        BaseEditorAction jumpToSpec = new JumpToSpecAction();
+        jumpToSpec.setActiveEditor(this);
+        jumpToSpec.setActionDefinitionId(JUMP_SPEC_ACTION_ID);
+        setAction(JUMP_SPEC_ACTION_ID, jumpToSpec);
+
+        BaseEditorAction jumpToTemplate = new JumpToTemplateAction();
+        jumpToTemplate.setActiveEditor(this);
+        jumpToTemplate.setActionDefinitionId(JUMP_TEMPLATE_ACTION_ID);
+        setAction(JUMP_TEMPLATE_ACTION_ID, jumpToTemplate);
+
     }
 
     public void createPartControl(Composite parent)
@@ -207,19 +254,45 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
             fOutline.dispose();
         fOutline = createContentOutlinePage(input);
     }
-    
-    public IStorage getStorage() {
+
+    public IStorage getStorage()
+    {
         IEditorInput input = getEditorInput();
         if (input instanceof JarEntryEditorInput)
-            return ((JarEntryEditorInput)input).getStorage();
-            
-        return (IStorage)input.getAdapter(IStorage.class);
+            return ((JarEntryEditorInput) input).getStorage();
+
+        return (IStorage) input.getAdapter(IStorage.class);
     }
 
     public abstract ICoreNamespace getNamespace();
 
-    /** may return null if not a 'componenty' thing. */
-    public abstract IComponentSpecification getComponent();
+    public Object getSpecification()
+    {
+        IStorage storage = getStorage();
+        IProject project = null;
+        if (storage instanceof IFile)
+        {
+            project = ((IFile) storage).getProject();
+        } else
+        {
+            project = TapestryCore.getDefault().getProjectFor(storage);
+        }
+        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+        Map specs = manager.getSpecMap(project);
+        if (specs != null)
+            return specs.get(storage);
+
+        return null;
+    }
+
+    public IResourceWorkspaceLocation getLocation()
+    {
+        BaseSpecLocatable spec = (BaseSpecLocatable) getSpecification();
+        if (spec != null)
+            return (IResourceWorkspaceLocation) spec.getSpecificationLocation();
+
+        return null;
+    }
 
     protected void configureSourceViewerDecorationSupport()
     {
@@ -353,7 +426,7 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
         ISourceViewer sourceViewer = getSourceViewer();
         if (sourceViewer == null || fOutline == null)
             return -1;
-    
+
         StyledText styledText = sourceViewer.getTextWidget();
         if (styledText == null)
             return -1;

@@ -319,7 +319,16 @@ public class SpecificationOutlinePage extends ContentOutlinePage
     public void setRoot(final DocumentArtifact artifact)
     {
         fRoot = artifact;
-        Display d = getControl().getDisplay();
+        Display d = null;
+        if (getControl() != null)
+        {
+            d = getControl().getDisplay();
+        } else
+        {
+            d = Display.getCurrent();
+            if (d == null)
+                d = Display.getDefault();
+        }
         d.asyncExec(new Runnable()
         {
             public void run()

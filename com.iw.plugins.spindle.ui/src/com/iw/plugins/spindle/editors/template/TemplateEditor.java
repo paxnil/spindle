@@ -32,8 +32,11 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
@@ -47,6 +50,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -64,6 +68,8 @@ import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
+import com.iw.plugins.spindle.editors.template.actions.OpenDeclarationAction;
+import com.iw.plugins.spindle.editors.template.actions.ShowInPackageExplorerAction;
 
 /**
  * HTML Editor.
@@ -72,8 +78,9 @@ import com.iw.plugins.spindle.editors.IReconcileListener;
  */
 public class TemplateEditor extends Editor
 {
-    static public final String SAVE_HTML_TEMPLATE = "com.iw.plugins.spindle.html.saveTemplateAction";
-    static public final String REVERT_HTML_TEMPLATE = "com.iw.plugins.spindle.html.revertTemplateAction";
+    static public final String HTML_GROUP = UIPlugin.PLUGIN_ID + ".html.group";
+    static public final String SAVE_HTML_TEMPLATE = HTML_GROUP + ".saveTemplateAction";
+    static public final String REVERT_HTML_TEMPLATE = HTML_GROUP + ".revertTemplateAction";
 
     private TemplateScanner fScanner = new TemplateScanner();
     private IScannerValidator fValidator = new BaseValidator();
@@ -96,10 +103,10 @@ public class TemplateEditor extends Editor
     {
         super.createActions();
 
-        IAction action = new SaveHTMLTemplateAction("Save current as template used by Tapestry Wizards");
+        IAction action = new SaveHTMLTemplateAction("Save this file as the template used by Tapestry Wizards"); //TODO I10N
         action.setActionDefinitionId(SAVE_HTML_TEMPLATE);
         setAction(SAVE_HTML_TEMPLATE, action);
-        action = new RevertTemplateAction("Revert the saved template to the default value");
+        action = new RevertTemplateAction("Revert the saved template to the default value"); //TODO I10N
         action.setActionDefinitionId(REVERT_HTML_TEMPLATE);
         setAction(REVERT_HTML_TEMPLATE, action);
 
@@ -112,7 +119,33 @@ public class TemplateEditor extends Editor
         action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
         markAsStateDependentAction(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, true);
         setAction("ContentAssistProposal", action);
+        
+        OpenDeclarationAction openDeclaration = new OpenDeclarationAction();
+        openDeclaration.setActiveEditor(this);
+        setAction(OpenDeclarationAction.ACTION_ID, openDeclaration);
+        ShowInPackageExplorerAction showInPackage = new ShowInPackageExplorerAction();
+        showInPackage.setActiveEditor(this);
+        setAction(ShowInPackageExplorerAction.ACTION_ID, showInPackage);
 
+
+    }
+
+    protected void editorContextMenuAboutToShow(IMenuManager menu)
+    {
+        super.editorContextMenuAboutToShow(menu);
+        if (!(getStorage() instanceof JarEntryFile))
+        {
+            menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
+            addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
+            addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
+        }
+//        menu.insertBefore(ITextEditorActionConstants.GROUP_SAVE, new GroupMarker(HTML_GROUP));
+//        MenuManager templateMenu = new MenuManager("Template");
+//        templateMenu.add(getAction(SAVE_HTML_TEMPLATE));
+//        templateMenu.add(getAction(REVERT_HTML_TEMPLATE));
+//        menu.appendToGroup(HTML_GROUP, templateMenu);
+//        addAction(menu, HTML_GROUP, SAVE_HTML_TEMPLATE);
+//        addAction(menu, HTML_GROUP, REVERT_HTML_TEMPLATE);
     }
 
     /* (non-Javadoc)
@@ -149,14 +182,17 @@ public class TemplateEditor extends Editor
 
     public ICoreNamespace getNamespace()
     {
-        PluginComponentSpecification spec = (PluginComponentSpecification) getComponent();
+        PluginComponentSpecification spec = (PluginComponentSpecification) getSpecification();
         if (spec != null)
             return (ICoreNamespace) spec.getNamespace();
 
         return null;
     }
 
-    public IComponentSpecification getComponent()
+    /**
+     * Override: template return the spec they belong to!
+     */
+    public Object getSpecification()
     {
         IStorage storage = getStorage();
         IProject project = TapestryCore.getDefault().getProjectFor(storage);
@@ -173,7 +209,7 @@ public class TemplateEditor extends Editor
         boolean didReconcile = false;
         if ((getEditorInput() instanceof IFileEditorInput))
         {
-            PluginComponentSpecification component = (PluginComponentSpecification) getComponent();
+            PluginComponentSpecification component = (PluginComponentSpecification) getSpecification();
 
             if (component != null)
             {
@@ -231,8 +267,8 @@ public class TemplateEditor extends Editor
             if (MessageDialog
                 .openConfirm(
                     getEditorSite().getShell(),
-                    "Confirm revert to Default",
-                    "All new components/pages created with the wizard will use the default template.\n\nProceed?"))
+                    "Confirm revert to Default", //TODO I10N
+                    "All new components or pages created with the wizard will use the default template.\n\nProceed?"))
             {
                 IEditorInput input = getEditorInput();
                 IPreferenceStore pstore = getPreferenceStore();

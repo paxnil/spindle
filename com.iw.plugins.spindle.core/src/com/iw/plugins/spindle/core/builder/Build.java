@@ -635,6 +635,10 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 //TODO remove
                 e.printStackTrace();
                 TapestryCore.log(e);
+            } catch (RuntimeException e)
+            {
+                TapestryCore.log(e);
+                throw e;
             } finally
             {
                 if (fBuildQueue.isWaiting(location))

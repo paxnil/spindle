@@ -43,6 +43,7 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
+import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
  *  Helper class for Template ContentAssistProcessors
@@ -52,8 +53,7 @@ import com.iw.plugins.spindle.editors.UITapestryAccess;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-/*package*/
-class TemplateTapestryAccess extends UITapestryAccess
+public class TemplateTapestryAccess extends UITapestryAccess
 {
 
     private static Pattern SIMPLE_ID_PATTERN;
@@ -90,15 +90,15 @@ class TemplateTapestryAccess extends UITapestryAccess
     /** not null iff fSimpleId is not null**/
     private IContainedComponent fContainedComponent = null;
 
-    TemplateTapestryAccess(Editor editor) throws IllegalArgumentException
+    public TemplateTapestryAccess(Editor editor) throws IllegalArgumentException
     {
         super(editor);
-        fSpecification = (PluginComponentSpecification) editor.getComponent();
+        fSpecification = (PluginComponentSpecification) ((TemplateEditor)editor).getSpecification();
 
         Assert.isLegal(fSpecification != null);
     }
 
-    void setJwcid(String jwcid)
+    public void setJwcid(String jwcid)
     {
 
         if (jwcid == null || jwcid.trim().length() == 0)
@@ -128,12 +128,12 @@ class TemplateTapestryAccess extends UITapestryAccess
         resolveContainedComponent();
     }
 
-    private void resolveContainedComponent()
+    void resolveContainedComponent()
     {
         fContainedComponent = null;
         fContainedComponentSpecification = null;
 
-        if (fSimpleId != null && fFullType == null)
+        if (isSimpleIdOnly())
         {
             fContainedComponent = fSpecification.getComponent(fSimpleId);
             if (fContainedComponent == null)
@@ -151,6 +151,31 @@ class TemplateTapestryAccess extends UITapestryAccess
         {
             fContainedComponentSpecification = (PluginComponentSpecification) resolveComponentType(fFullType);
         }
+    }
+
+    public boolean isSimpleIdOnly()
+    {
+        return fSimpleId != null && fFullType == null;
+    }
+
+    public IComponentSpecification getBaseSpecification()
+    {
+        return fSpecification;
+    }
+
+    public IComponentSpecification getResolvedComponent()
+    {
+        return fContainedComponentSpecification;
+    }
+
+    public IContainedComponent getContainedComponent()
+    {
+        return fContainedComponent;
+    }
+
+    public String getSimpleId()
+    {
+        return fSimpleId;
     }
 
     Result[] findParameters()

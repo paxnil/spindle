@@ -24,65 +24,39 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors;
+package com.iw.plugins.spindle.editors.actions;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.resource.ImageDescriptor;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
+import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
- *  TODO Add Type comment
+ * Jump from spec/template editors to associated java files
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class BaseEditorAction extends Action
+public class JumpToSpecAction extends BaseJumpAction
 {
-
-    protected Editor fEditor;
-    protected int fDocumentOffset;
-
-    /**
-     * 
-     */
-    public BaseEditorAction()
+    
+    public JumpToSpecAction()
     {
         super();
     }
 
-    /**
-     * @param text
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.action.IAction#run()
      */
-    public BaseEditorAction(String text)
+    protected void doRun()
     {
-        super(text);
-    }
+        if (!(fEditor instanceof TemplateEditor))
+            return;
 
-    /**
-     * @param text
-     * @param image
-     */
-    public BaseEditorAction(String text, ImageDescriptor image)
-    {
-        super(text, image);
-    }
+        BaseSpecLocatable spec = (BaseSpecLocatable) fEditor.getSpecification();
+        if (spec == null)
+            return;
 
-    /**
-     * @param text
-     * @param style
-     */
-    public BaseEditorAction(String text, int style)
-    {
-        super(text, style);
-    }
-
-    public void setActiveEditor(Editor editor)
-    {
-        fEditor = editor;
-    }
-
-    public void run()
-    {
-        fDocumentOffset = fEditor.getCaretOffset();
+        reveal((IResourceWorkspaceLocation) spec.getSpecificationLocation());
     }
 
 }

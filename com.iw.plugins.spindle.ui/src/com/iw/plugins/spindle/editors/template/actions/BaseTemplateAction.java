@@ -24,20 +24,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors.spec.actions;
+package com.iw.plugins.spindle.editors.template.actions;
 
 import org.apache.tapestry.INamespace;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
-import com.wutka.dtd.DTD;
 
 /**
  *  Base class for spec actions that need the xml partitioning.
@@ -45,35 +42,34 @@ import com.wutka.dtd.DTD;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class BaseSpecAction extends BaseEditorAction
+public abstract class BaseTemplateAction extends BaseEditorAction
 {
 
-    protected String fDeclaredRootElementName;
-    protected String fPublicId;
-    protected DTD fDTD;
+    protected DocumentArtifact fArtifact;
     protected DocumentArtifactPartitioner fPartitioner;
     protected INamespace fNamespace;
- 
+    protected INamespace fFrameworkNamespace;
+
     protected IDocument fDocument;
 
-    public BaseSpecAction()
+    public BaseTemplateAction()
     {
         super();
         fPartitioner =
             new DocumentArtifactPartitioner(ContentAssistProcessor.SCANNER, DocumentArtifactPartitioner.TYPES);
     }
 
-    public BaseSpecAction(String text)
+    public BaseTemplateAction(String text)
     {
         super(text);
     }
 
-    public BaseSpecAction(String text, ImageDescriptor image)
+    public BaseTemplateAction(String text, ImageDescriptor image)
     {
         super(text, image);
     }
 
-    public BaseSpecAction(String text, int style)
+    public BaseTemplateAction(String text, int style)
     {
         super(text, style);
     }
@@ -89,31 +85,11 @@ public abstract class BaseSpecAction extends BaseEditorAction
         if (fDocumentOffset < 0)
             return;
 
-        fDeclaredRootElementName = null;
-        fPublicId = null;
-        fDTD = null;
-
         try
         {
             fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
             fPartitioner.connect(fDocument);
             if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
-                return;
-
-            try
-            {
-                DocumentArtifact root = DocumentArtifact.createTree(fDocument, -1);
-                fPublicId = root.fPublicId;
-                fDeclaredRootElementName = root.fRootNodeId;
-                fDTD = DOMValidator.getDTD(fPublicId);
-
-            } catch (BadLocationException e)
-            {
-                UIPlugin.log(e);
-                return;
-            }
-
-            if (fDTD == null || fDeclaredRootElementName == null)
                 return;
 
             doRun();

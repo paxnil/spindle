@@ -97,6 +97,11 @@ public abstract class AbstractScanner implements IProblemCollector
                     throw (RuntimeException)e;
             }
             return afterScan(resultObject);
+        } catch (RuntimeException e)
+        {
+            TapestryCore.log(e);
+            throw e;
+        
         } finally
         {
             cleanup();

@@ -307,7 +307,7 @@ public class TemplateContentOutlinePage
 
             if (jwcid != null)
             {
-                IComponentSpecification component = fEditor.getComponent();
+                IComponentSpecification component = (IComponentSpecification) fEditor.getSpecification();
 
                 if (component != null)
                 {

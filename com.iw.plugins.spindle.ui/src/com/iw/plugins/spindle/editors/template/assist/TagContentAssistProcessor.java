@@ -33,8 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.parse.TemplateParser;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -42,10 +40,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.editors.*;
+import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;

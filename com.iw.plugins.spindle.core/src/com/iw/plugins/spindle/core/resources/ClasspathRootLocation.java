@@ -45,10 +45,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
-import org.eclipse.jdt.internal.core.JavaModel;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.search.*;
+import com.iw.plugins.spindle.core.resources.search.ISearch;
+import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
 
 /**

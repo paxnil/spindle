@@ -40,6 +40,7 @@ import org.apache.tapestry.parse.TemplateParseException;
 import org.apache.tapestry.parse.TemplateParser;
 import org.apache.tapestry.parse.TemplateToken;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
@@ -135,6 +136,10 @@ public class CoreTemplateParser extends TemplateParser
             List tokens = getTokens();
 
             result = (TemplateToken[]) tokens.toArray(new TemplateToken[tokens.size()]);
+        } catch (RuntimeException e)
+        {
+            TapestryCore.log(e);
+            throw e;
         } finally
         {
             afterParse();

@@ -31,7 +31,7 @@ import java.util.Map;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
@@ -43,7 +43,11 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
+import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.spec.assist.SpecTapestryAccess;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
@@ -136,6 +140,26 @@ public class OpenDeclarationAction extends BaseSpecAction
         else if ("property-specification".equals(name))
             handleTypeLookup(artifact, "type");
 
+        else if ("private-asset".equals(name))
+            handlePrivateAsset(artifact);
+
+        else if ("context-asset".equals(name))
+            handleContextAsset(artifact);
+
+        else if (
+            SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID.equals(fDTD.getPublicId())
+                && "component-alias".equals(name))
+            handleRelativeLookup(artifact, "specification-path");
+        else if (
+            SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID.equals(fDTD.getPublicId()) && "component-type".equals(name))
+            handleRelativeLookup(artifact, "specification-path");
+
+        else if ("page".equals(name))
+            handleRelativeLookup(artifact, "specification-path");
+
+        else if ("library".equals(name))
+            handleRelativeLookup(artifact, "specification-path");
+
         else if ("parameter".equals(name))
         {
             if (fDTD.getPublicId() == SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID)
@@ -147,6 +171,127 @@ public class OpenDeclarationAction extends BaseSpecAction
             }
         }
 
+    }
+
+    /**
+     * @param artifact
+     */
+    private void handlePrivateAsset(DocumentArtifact artifact)
+    {
+        DocumentArtifact attribute = artifact.getAttributeAt(fDocumentOffset);
+        if (attribute == null)
+            return;
+
+        String name = attribute.getName();
+
+        if (name == null)
+            return;
+
+        if (!"resource-path".equals(name.toLowerCase()))
+            return;
+
+        String path = attribute.getAttributeValue();
+        if (path == null)
+            return;
+
+        //here we are doing a classpath lookup,
+        //need to get access to the ClasspathRoot
+        IStorage storage = fEditor.getStorage();
+        if (storage != null)
+        {
+            TapestryProject project = TapestryCore.getDefault().getTapestryProjectFor(storage);
+            if (project == null)
+                return;
+
+            try
+            {
+                ClasspathRootLocation root = project.getClasspathRoot();
+                if (root == null)
+                    return;
+
+                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root.getRelativeLocation(path);
+                if (location != null && location.exists())
+                    foundResult(location.getStorage(), null, null);
+            } catch (CoreException e)
+            {
+                UIPlugin.log(e);
+            }
+        }
+
+    }
+
+    /**
+     * @param artifact
+     */
+    private void handleContextAsset(DocumentArtifact artifact)
+    {
+        DocumentArtifact attribute = artifact.getAttributeAt(fDocumentOffset);
+        if (attribute == null)
+            return;
+
+        String name = attribute.getName();
+
+        if (name == null)
+            return;
+
+        if (!"path".equals(name.toLowerCase()))
+            return;
+
+        String path = attribute.getAttributeValue();
+        if (path == null)
+            return;
+
+        //here we are doing a context lookup,
+        //need to get access to the ContextRoot
+        IStorage storage = fEditor.getStorage();
+        if (storage != null)
+        {
+            TapestryProject project = TapestryCore.getDefault().getTapestryProjectFor(storage);
+            if (project == null)
+                return;
+
+            ContextRootLocation contextRoot = project.getWebContextLocation();
+            if (contextRoot == null)
+                return;
+
+            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) contextRoot.getRelativeLocation(path);
+            if (location != null && location.exists())
+                foundResult(location.getStorage(), null, null);
+        }
+    }
+
+    private void handleRelativeLookup(DocumentArtifact artifact, String attrName)
+    {
+        DocumentArtifact attribute = artifact.getAttributeAt(fDocumentOffset);
+        if (attribute == null)
+            return;
+
+        String name = attribute.getName();
+
+        if (name == null)
+            return;
+
+        if (!attrName.equals(name.toLowerCase()))
+            return;
+
+        String path = attribute.getAttributeValue();
+        if (path == null)
+            return;
+
+        //here we are doing a relative lookup
+        //need to get the location object for the Spec we are editing
+        //That means it can have no error markers (parsed without error in the last build)
+        BaseSpecLocatable spec = (BaseSpecLocatable) fEditor.getSpecification();
+        if (spec != null)
+        {
+            IResourceWorkspaceLocation rootLocation = (IResourceWorkspaceLocation) spec.getSpecificationLocation();
+            if (rootLocation == null)
+                return;
+
+            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) rootLocation.getRelativeLocation(path);
+            if (location != null && location.exists())
+                foundResult(location.getStorage(), null, null);
+        }
     }
 
     /**
@@ -257,20 +402,7 @@ public class OpenDeclarationAction extends BaseSpecAction
 
         if (typeName == null)
             return;
-
-        IJavaProject jproject = TapestryCore.getDefault().getJavaProjectFor(fEditor.getStorage());
-        if (jproject == null)
-            return;
-
-        IType type = null;
-
-        try
-        {
-            type = jproject.findType(typeName);
-        } catch (JavaModelException e)
-        {
-            //do nothing
-        }
+        IType type = resolveType(typeName);
 
         if (type == null)
             return;
@@ -343,7 +475,7 @@ public class OpenDeclarationAction extends BaseSpecAction
                 }
             }
             if (reveal != null)
-                 editor.setHighlightRange(reveal.getOffset(), reveal.getLength(), true);
+                editor.setHighlightRange(reveal.getOffset(), reveal.getLength(), true);
 
         } catch (Exception e)
         {
