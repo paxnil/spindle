@@ -22,10 +22,10 @@
 </h1>
 <h1><br>
 </h1>
-<h1>  Spindle 1.1alpha Overview</h1>
+<h1> Spindle 1.1.0 Overview</h1>
 <h2>Table of Contents</h2>
 <ol>
-  <li><a href="#1">Why there is a Spindle 1.1alpha Overview?</a></li>
+  <li><a href="#1">Why there is a Spindle 1.1.0 Overview?</a></li>
   <li><a href="#2">What has changed in Tapestry 2.2 that affects Spindle.</a></li>
   <li><a href="#3">How Spindle has changed to support Tapestry 2.2</a></li>
   <ul>
@@ -33,7 +33,7 @@
     <li><a href="#restrict">Restrictions</a> (and reasons for the restrictions)</li>
     <li><a href="#how">How one can thrive under these restrictions</a></li>
   </ul>
-  <li><a href="#world">Bringing existing Projects into the new Spindle 1.1alpha
+  <li><a href="#world">Bringing existing Projects into the new Spindle 1.1.0
  World</a></li>
   <ul>
     <li><a href="#convert">Converting Projects into Tapestry Projects</a></li>
@@ -41,17 +41,17 @@
     </li>
   </ul>
 </ol>
-<h2><a name="1"></a>Why is there a Spindle 1.1alpha Overview</h2>
+<h2><a name="1"></a>Why is there a Spindle 1.1.0 Overview</h2>
           There have been changes to Tapestry as it evolved from 2.1 to 2.2.
   Namespaces    and Libraries, Extensions &nbsp;among them. Supporting these
   changes in  a  way that keeps Spindle useful is not a trivial exercise.
 It  involves fundamental    changes to the way that users interact with Tapestry
   using Spindle. <br>
 <br>
-          1.1alpha is the first stab at evolving Spindle to support Tapestry
+          1.1.0 is the first stab at evolving Spindle to support Tapestry
   2.2   Being  alpha, we don't advertise (and we hope you don't expect) that
   it will  be perfect. In fact we expect it to have many problems from a
-useability    standpoint. Spindle 1.1alpha is designed to elicit comment,
+useability    standpoint. Spindle 1.1.0 is designed to elicit comment,
 we'll explain    the challenges and include in the release what we think
 are the solutions.    <br>
 <br>
@@ -114,9 +114,9 @@ any  page or component is a member of in order to be able to resolve Namespaces.
  Tapestry itself does not mandate that components exist in only one application 
  or library. There is also no formal declaration of membership in an application
   or library in the specifications for pages and components. Thus, <i>Spindle
-  cannot resolve Namespaces as it was built before 1.1alpha1</i>.<br>
+  cannot resolve Namespaces as it was built before 1.1.0</i>.<br>
 <br>
-    The next section describes how Spindle 1.1alpha adresses Namespaces.<br>
+    The next section describes how Spindle 1.1.0 adresses Namespaces.<br>
 <br>
 <h2><a name="3"></a>How Spindle has changed to support Tapestry 2.2</h2>
     When editing a Tapestry specification, each editor or Spindle feature 
@@ -126,7 +126,7 @@ or Page)  is defined.<br>
 <br>
     As has been previously stated, the Tapestry specifications do not give
  Pages  and Components the ability to declare membership in an Application
- or Library.  Spindle 1.1alpha addresses this problem by introducing the
+ or Library.  Spindle 1.1.0 addresses this problem by introducing the
 concept  of a Tapestry  Project. A Tapestry project is a 'flavour' of Eclipse's
 Java  Project that  is designed to allow Spindle to resolve Namespaces.<br>
 <br>
@@ -145,7 +145,7 @@ functionality  is available to users. <br>
  Namespaces can always refer to the Project to resolve them. Some restrictions
  apply to Tapestry Projects (see below) . <br>
 <br>
-    The result is that Spindle 1.1alpha requires that Applications and Libraries
+    The result is that Spindle 1.1.0 requires that Applications and Libraries
   exist in these projects. Effort has been made to disable all Spindle functionality
   for Tapestry files that exists outside of these new Project flavours. Otherwise
   it will break in numerous and interesting ways. <br>
@@ -212,14 +212,14 @@ play.<br>
  Project they reside in, one should separate those that were shared before
  into thier own Library. Kinda what libraries are designed for anyways!<br>
 <br>
-<h2><a name="world"></a>Bringing existing Projects into the new Spindle 1.1alpha
+<h2><a name="world"></a>Bringing existing Projects into the new Spindle 1.1.0
  World.</h2>
-<b>S<i>imply installing Spindle 1.1alpha is not sufficent if one already
+<b>S<i>imply installing Spindle 1.1.0 is not sufficent if one already
 has Java Projects containing Tapestry stuff</i></b>. Spindle will ignore
 Java Projects and all Spindle functionality including the editors will not
 work unless your Tapestry stuff is found in a Tapestry Project. <br>
 <br>
-  Spindle 1.1alpha includes two services to help you turn you existing Projects
+  Spindle 1.1.0 includes two services to help you turn you existing Projects
  into Tapestry Projects and migrate them to Tapestry 2.2 (if necessary).<br>
 <br>
 <h3><a name="convert"></a>Converting Projects into Tapestry Projects</h3>
@@ -259,7 +259,7 @@ and then convert it.</b><br>
 use  the new DTD. <b>Its is recommended that users migrate the specifications
 in thier projects to the new DTD for Tapestry 2.2</b><br>
 <br>
-  Spindle1.1alpha makes this easy by using the Migration Tool.<br>
+  Spindle1.1.0 makes this easy by using the Migration Tool.<br>
 <br>
   There are some preconditions that need to be meed before the Migration
 Tool  will work:<br>
