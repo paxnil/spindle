@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -63,6 +64,7 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.ui.util.Revealer;
 
 /**
  * Property Page that is added to all Java Projects.
@@ -140,8 +142,8 @@ public class ProjectPropertyPage extends PropertyPage
             {
                 IJavaProject jproject = getJavaProject();
                 IProject project = (IProject) jproject.getAdapter(IProject.class);
-                Path selected = (Path) selection;                              
-                
+                Path selected = (Path) selection;
+
                 if (!project.getFolder(selected).exists())
                 {
                     return UIPlugin.getString("property-page-wrong-project");
@@ -161,47 +163,47 @@ public class ProjectPropertyPage extends PropertyPage
             }
         }
     }
-    
-    class DialogContextValidator extends Validator
-        {
-            public String isValidString(String value)
-            {
-                return isValid(new Path(value));
-            }
 
-            public String isValid(Object selection)
+    class DialogContextValidator extends Validator
+    {
+        public String isValidString(String value)
+        {
+            return isValid(new Path(value));
+        }
+
+        public String isValid(Object selection)
+        {
+            try
             {
-                try
+                IPath selected = (IPath) selection;
+                IWorkspaceRoot root = UIPlugin.getWorkspace().getRoot();
+
+                IProject selectedProject = root.getProject(selected.segment(0));
+
+                IJavaProject jproject = getJavaProject();
+                IProject project = (IProject) jproject.getAdapter(IProject.class);
+
+                if (!project.equals(selectedProject))
                 {
-                    IPath selected = (IPath) selection;                              
-                    IWorkspaceRoot root = UIPlugin.getWorkspace().getRoot();
-                                        
-                    IProject selectedProject = root.getProject(selected.segment(0));
-                    
-                    IJavaProject jproject = getJavaProject();
-                    IProject project = (IProject) jproject.getAdapter(IProject.class);
-                
-                    if (!project.equals(selectedProject))
-                    {
-                        return UIPlugin.getString("property-page-wrong-project");
-                    }
-                    
-                    selected = (IPath)selected.removeFirstSegments(0);
-                    if (isOnOutputPath(jproject, selected))
-                    {
-                        return UIPlugin.getString("property-page-output-folder");
-                    }
-                    if (isOnSourcePath(jproject, selected))
-                    {
-                        return UIPlugin.getString("property-page-no-source-path");
-                    }
-                    return null;
-                } catch (CoreException e)
-                {
-                    return "error occured!";
+                    return UIPlugin.getString("property-page-wrong-project");
                 }
+
+                selected = (IPath) selected.removeFirstSegments(0);
+                if (isOnOutputPath(jproject, selected))
+                {
+                    return UIPlugin.getString("property-page-output-folder");
+                }
+                if (isOnSourcePath(jproject, selected))
+                {
+                    return UIPlugin.getString("property-page-no-source-path");
+                }
+                return null;
+            } catch (CoreException e)
+            {
+                return "error occured!";
             }
         }
+    }
 
     private static final String PROJECT_TYPE_PROPERTY = TapestryCore.PLUGIN_ID + ".project-type";
     private static final String CONTEXT_ROOT_PROPERTY = TapestryCore.PLUGIN_ID + ".context-root";
@@ -265,17 +267,15 @@ public class ProjectPropertyPage extends PropertyPage
             TapestryCore.log(ex.getMessage());
         }
         fProjectTypeCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
-        
-// commented out until a real library build can occur
-        
-//        fProjectTypeCombo.setItems(
-//            new String[] {
-//                UIPlugin.getString("property-page-project-type-application"),
-//                UIPlugin.getString("property-page-project-type-library")});
-        fProjectTypeCombo.setItems(
-            new String[] {
-                UIPlugin.getString("property-page-project-type-application")});
-                
+
+        // commented out until a real library build can occur
+
+        //        fProjectTypeCombo.setItems(
+        //            new String[] {
+        //                UIPlugin.getString("property-page-project-type-application"),
+        //                UIPlugin.getString("property-page-project-type-library")});
+        fProjectTypeCombo.setItems(new String[] { UIPlugin.getString("property-page-project-type-application")});
+
         fProjectTypeCombo.select(getProjectType());
         fProjectTypeCombo.setEnabled(fIsTapestryProjectCheck.getSelection());
         fProjectTypeCombo.addSelectionListener(new SelectionListener()
@@ -452,7 +452,7 @@ public class ProjectPropertyPage extends PropertyPage
 
         if (jproject == null)
         {
-            setErrorMessage(UIPlugin.getString("property-page-no-java-project")); 
+            setErrorMessage(UIPlugin.getString("property-page-no-java-project"));
             disableAll();
             return true;
         }
@@ -464,7 +464,7 @@ public class ProjectPropertyPage extends PropertyPage
             // old spindle and new spindle can't co-exist!
             if (project.hasNature("com.iw.plugins.spindle.project.TapestryProject"))
             {
-                setErrorMessage(UIPlugin.getString("property-page-conflicts-with-old-spindle"));                
+                setErrorMessage(UIPlugin.getString("property-page-conflicts-with-old-spindle"));
                 disableAll();
                 return true;
             }
@@ -756,16 +756,19 @@ public class ProjectPropertyPage extends PropertyPage
         IPath path = new Path(value);
         IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
         IFolder folder = (IFolder) root.getFolder(path);
-        if (!folder.exists())
+        try
         {
-            try
+            if (!folder.exists())
             {
+
                 folder.create(false, true, null);
-            } catch (CoreException e)
-            {
-                TapestryCore.log(e);
-                System.err.println(e.getStatus().getMessage());
+
             }
+            Revealer.selectAndReveal(new StructuredSelection(folder), UIPlugin.getDefault().getActiveWorkbenchWindow());
+        } catch (CoreException e)
+        {
+            TapestryCore.log(e);
+            System.err.println(e.getStatus().getMessage());
         }
     }
 
