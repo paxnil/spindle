@@ -185,7 +185,19 @@ public class ClasspathRootLocation extends AbstractRootLocation
             Object[] nonJavaResources = null;
             try
             {
-                nonJavaResources = fragments[i].getNonJavaResources();
+                IPackageFragmentRoot root = (IPackageFragmentRoot) fragments[i].getParent();
+                if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {  
+                    IFolder folder = (IFolder)fragments[i].getUnderlyingResource();
+                    try
+                    {
+                        nonJavaResources = folder.members(); 
+                    } catch (CoreException e1)
+                    {
+                        // do nothing
+                    }
+                } else {
+                    nonJavaResources = fragments[i].getNonJavaResources();
+                }
             } catch (JavaModelException e)
             {
                 TapestryCore.log(e);

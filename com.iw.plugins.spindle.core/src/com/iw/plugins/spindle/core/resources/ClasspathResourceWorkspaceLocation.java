@@ -63,7 +63,16 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
 
     public boolean exists()
     {
-        return getStorage() != null;
+        IStorage storage = getStorage();
+        if (storage !=null) {
+            if (storage instanceof IResource) {
+                IResource resource = (IResource)storage;
+                return resource.exists();
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 
     /* (non-Javadoc)

@@ -69,10 +69,15 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
 
         IStorage storage = getStorage();
 
-        if (storage == null && TapestryCore.isNull(getName()))
+        if (storage != null)
+        {
+            return ((IResource)storage).exists();
+        } else if (TapestryCore.isNull(getName()))
+        {
             return true;
-
-        return storage != null;
+        }   
+        
+        return false;     
     }
 
     private IContainer getContainer()
@@ -135,15 +140,15 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
         throw new RuntimeException("not implemented");
     }
 
-//    public int hashCode()
-//    {
-//        HashCodeBuilder builder = new HashCodeBuilder(5589, 1117);
-//
-//        builder.append(getPath());
-//        builder.append(fRoot);
-//
-//        return builder.toHashCode();
-//    }
+    //    public int hashCode()
+    //    {
+    //        HashCodeBuilder builder = new HashCodeBuilder(5589, 1117);
+    //
+    //        builder.append(getPath());
+    //        builder.append(fRoot);
+    //
+    //        return builder.toHashCode();
+    //    }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)
