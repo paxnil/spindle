@@ -62,18 +62,17 @@ import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
-import com.iw.plugins.spindle.wizards.factories.ComponentFactory;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.project.ITapestryProject;
+import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.util.Utils;
-import com.iw.plugins.spindle.wizards.fields.ChooseAutoAddApplicationField;
+import com.iw.plugins.spindle.wizards.factories.ComponentFactory;
 import com.iw.plugins.spindle.wizards.fields.ComponentNameField;
 import com.iw.plugins.spindle.wizards.fields.ContainerDialogField;
 import com.iw.plugins.spindle.wizards.fields.PackageDialogField;
@@ -177,8 +176,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
     fAutoAddField.init(
       fContainerDialogField,
       fComponentNameDialog,
-      getWizard().getClass() == NewTapComponentWizard.class,
-      context);
+      getWizard().getClass() == NewTapComponentWizard.class);
   }
 
   /**
@@ -334,24 +332,33 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
         targetEditor.showPage(SpindleMultipageEditor.SOURCE_PAGE);
       }
 
-      private void doAddInWorkspace(IProgressMonitor monitor) {
-//        String consumer = "WizardAutoAddToAppInWorkspace";
-//        TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager();
-//        mgr.connect(useSelectedModel.getUnderlyingStorage(), consumer, true);
-//        TapestryLibraryModel useModel =
-//          (TapestryLibraryModel) mgr.getEditableModel(
-//            useSelectedModel.getUnderlyingStorage(),
-//            consumer);
-//
-//        ILibrarySpecification spec = (ILibrarySpecification) useModel.getSpecification();
-//
-//        if (componentAlreadyExists(spec)) {
-//          return;
-//        }
-//        performAddToModel(spec);
-//        Utils.saveModel(useModel, monitor);
-//        TapestryPlugin.openTapestryEditor(useModel.getUnderlyingStorage());
-//        mgr.disconnect(useModel.getUnderlyingStorage(), consumer);
+      private void doAddInWorkspace(IProgressMonitor monitor) throws InterruptedException {
+        String consumer = "WizardAutoAddToAppInWorkspace";
+
+        try {
+          ITapestryProject tproject =
+            TapestryPlugin.getDefault().getTapestryProjectFor(useSelectedModel);
+
+          TapestryProjectModelManager mgr = tproject.getModelManager();
+          mgr.connect(useSelectedModel.getUnderlyingStorage(), consumer, true);
+          TapestryLibraryModel useModel =
+            (TapestryLibraryModel) mgr.getEditableModel(
+              useSelectedModel.getUnderlyingStorage(),
+              consumer);
+
+          IPluginLibrarySpecification spec = (IPluginLibrarySpecification) useModel.getSpecification();
+
+          if (componentAlreadyExists(spec)) {
+            return;
+          }
+          performAddToModel(spec);
+          Utils.saveModel(useModel, monitor);
+          TapestryPlugin.openTapestryEditor(useModel.getUnderlyingStorage());
+          mgr.disconnect(useModel.getUnderlyingStorage(), consumer);
+        } catch (CoreException e) {
+
+          throw new InterruptedException("AutoAdd failed");
+        }
       }
 
       private boolean componentAlreadyExists(ILibrarySpecification spec) {
@@ -410,15 +417,13 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
   };
 
   public boolean performFinish() {
-    IPreferenceStore pstore = TapestryPlugin.getDefault().getPreferenceStore();
     boolean autoAdd = true;
     if (autoAdd) {
       TapestryLibraryModel model = fAutoAddField.getContainerModel();
       IPackageFragment spackage = fAutoAddField.getSelectedPackage();
-      if (model != null) {
+      if (model != null && spackage != null) {
         String packageName = "." + spackage.getElementName() + ".";
         packageName = packageName.replace('.', '/');
-        pstore.setValue(P_ADD_TO_APPLICATION, packageName + model.getUnderlyingStorage().getName());
       }
     }
     return true;

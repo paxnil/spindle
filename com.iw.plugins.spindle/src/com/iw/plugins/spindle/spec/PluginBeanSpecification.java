@@ -256,7 +256,7 @@ public class PluginBeanSpecification
         writer,
         indent,
         "<set-string-property name=\"" + initializer.getPropertyName());
-      writer.print("\" key=\"");
+      writer.print("\" key='");
       writer.print(((PluginStringBeanInitializer) initializer).getKey());
 
     } else {
@@ -265,7 +265,7 @@ public class PluginBeanSpecification
         writer,
         indent,
         "<set-property name=\"" + initializer.getPropertyName());
-      writer.print("\" expression=\"");
+      writer.print("\" expression='");
       
       if (initializer instanceof PluginPropertyBeanInitializer) {
       	
@@ -284,7 +284,7 @@ public class PluginBeanSpecification
 
         if ("String".equals(svalue.type)) {
 
-          OGNL = "'" + OGNL + "'";
+          OGNL = '"' + OGNL + '"';
         }
 
         // convert to OGNL
@@ -306,7 +306,7 @@ public class PluginBeanSpecification
         writer.print(OGNL);
       }
     }
-    writer.println("\"/>");
+    writer.println("'/>");
   }
 
   private StaticTypeValue findStaticType(Object value) {

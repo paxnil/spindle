@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Composite;
@@ -51,6 +52,7 @@ import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
+import com.iw.plugins.spindle.ui.dialogfields.StringField;
 import com.iw.plugins.spindle.ui.dialogfields.UneditableStringButtonField;
 import com.iw.plugins.spindle.ui.dialogfields.UneditableStringField;
 import com.iw.plugins.spindle.util.SpindleStatus;
@@ -59,7 +61,7 @@ import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 
-public class TapestryContainerDialogField extends UneditableStringButtonField {
+public class TapestryContainerDialogField extends StringField {
 
   private String name;
 
@@ -72,6 +74,7 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
   private IPackageFragment selectedPackage;
 
   private ITapestryProject tproject;
+  private TapestryLookup lookup;
 
   public TapestryContainerDialogField(String name, int labelWidth) {
     super(MessageUtil.getString(name + ".label"), labelWidth);
@@ -85,38 +88,32 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
   public void init(
     ContainerDialogField container,
     ComponentNameField nameField,
-    boolean isComponentWizard,
-    IRunnableContext context) {
+    boolean isComponentWizard) {
 
-    super.init(context);
     this.container = container;
     this.nameField = nameField;
     nameField.addListener(this);
     this.isComponentWizard = isComponentWizard;
 
-    setButtonLabel(MessageUtil.getString(name + ".button"));
-    setTextValue("");
+    TapestryLibraryModel projectModel = null;
 
     try {
       tproject =
         TapestryPlugin.getDefault().getTapestryProjectFor(
           container.getPackageFragmentRoot().getJavaProject());
 
-      checkPreviouslySelectedApplication(tproject);
+      lookup = tproject.getLookup();
+
+      projectModel = (TapestryLibraryModel) tproject.getProjectModel();
+
     } catch (CoreException e) {
-    }
-
-  }
-
-  public void dialogFieldButtonPressed(DialogField field) {
-
-    if (field == this) {
-
-      TapestryLibraryModel model = chooseTapestryContainer();
-
-      setContainerModel(model);
 
     }
+
+    setContainerModel(projectModel);
+
+    ((Text) getTextControl(null)).setEditable(false);
+
   }
 
   public void dialogFieldChanged(DialogField field) {
@@ -137,7 +134,6 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
   public IStatus containerChanged() {
 
     SpindleStatus newStatus = new SpindleStatus();
-    checkButtonEnabled();
     String libraryName = getTextValue();
 
     if (currentModel == null) {
@@ -184,23 +180,30 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
 
   }
 
-  private void checkButtonEnabled() {
-    if (container != null) {
-
-      enableButton((container.getPackageFragmentRoot() != null) && isEnabled());
-
-    }
-  }
-
   public void setContainerModel(TapestryLibraryModel model) {
 
     currentModel = model;
-    String str = "";
-    if (model != null) {
-      str =
-        currentModel.getUnderlyingStorage().getName()
-          + " - "
-          + (selectedPackage == null ? "(default package)" : "" + selectedPackage.getElementName());
+    String str = "auto add not possible";
+
+    selectedPackage = null;
+    try {
+
+      if (model != null) {
+
+        selectedPackage = lookup.findPackageFragment(model.getUnderlyingStorage());
+        if (model != null) {
+          str = currentModel.getUnderlyingStorage().getName() + " - ";
+          if (selectedPackage != null) {
+            str
+              += ("".equals(selectedPackage.getElementName().trim())
+                ? "(default package)"
+                : "" + selectedPackage.getElementName());
+          }
+        }
+
+      }
+
+    } catch (JavaModelException e) {
     }
     setTextValue(str);
     fireDialogChanged(this);
@@ -215,143 +218,6 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
 
   public IPackageFragment getSelectedPackage() {
     return selectedPackage;
-  }
-
-  private TapestryLibraryModel chooseTapestryContainer() {
-
-    IPackageFragmentRoot froot = container.getPackageFragmentRoot();
-    ChooseWorkspaceModelDialog dialog =
-      ChooseWorkspaceModelDialog.createApplicationAndLibraryModelDialog(
-        getShell(),
-        froot.getJavaProject(),
-        "Choose AutoAdd App or Library",
-        "Choose an Application or Library to add to");
-
-    dialog.setIgnoreReadOnly(true);
-
-    if (dialog.open() == dialog.OK) {
-
-      selectedPackage = dialog.getResultPackage();
-      return (TapestryLibraryModel) dialog.getResultModel();
-
-    }
-
-    return currentModel;
-  }
-
-  /**
-   * @see DialogField#setEnabled(boolean)
-   */
-  public void setEnabled(boolean flag) {
-    super.setEnabled(flag);
-    checkButtonEnabled();
-  }
-
-  private void checkPreviouslySelectedApplication(ITapestryProject tproject) {
-
-    IPreferenceStore pstore = TapestryPlugin.getDefault().getPreferenceStore();
-    String previouslySelected = pstore.getString(NewTapComponentWizardPage.P_ADD_TO_APPLICATION);
-
-    if (previouslySelected != null && !"".equals(previouslySelected.trim())) {
-
-      Path path = new Path(previouslySelected);
-
-      if (path.isValidPath(previouslySelected)) {
-
-        try {
-          TapestryLookup lookup = tproject.getLookup();
-          FinderRequest request = new FinderRequest();
-
-          lookup.findAll(
-            previouslySelected,
-            false,
-            TapestryLookup.ACCEPT_APPLICATIONS
-              | TapestryLookup.ACCEPT_LIBRARIES
-              | TapestryLookup.FULL_TAPESTRY_PATH,
-            request);
-
-          IStorage[] found = request.getStorageResults();
-          if (found == null || found.length == 0) {
-            return;
-          }
-          TapestryLibraryModel foundModel = null;
-
-          try {
-            TapestryProjectModelManager mgr = tproject.getModelManager();
-            foundModel = (TapestryLibraryModel) mgr.getReadOnlyModel(found[0]);
-
-          } catch (CoreException e) {
-          }
-          if (foundModel == null) {
-            selectedPackage = null;
-          } else {
-            selectedPackage = request.getPackageResults()[0];
-            setContainerModel(foundModel);
-          }
-
-        } catch (CoreException e) {
-          e.printStackTrace();
-          TapestryPlugin.getDefault().logException(e);
-        }
-      }
-    }
-  }
-
-  protected class FinderRequest implements ILookupRequestor {
-
-    ArrayList storages;
-    ArrayList packages;
-
-    public boolean isCancelled() {
-      return false;
-    }
-
-    public boolean accept(IStorage storage, IPackageFragment fragment) {
-      //filter out anything that came from a jar file
-      if (storage.getAdapter(IResource.class) == null) {
-        return false;
-      }
-      if (storages == null) {
-        storages = new ArrayList();
-        packages = new ArrayList();
-      }
-      storages.add(storage);
-      packages.add(fragment);
-      return true;
-    }
-
-    public IStorage[] getStorageResults() {
-      if (storages == null) {
-        return new IStorage[0];
-      }
-      return (IStorage[]) storages.toArray(new IStorage[0]);
-
-    }
-
-    public IPackageFragment[] getPackageResults() {
-      if (packages == null) {
-        return new IPackageFragment[0];
-      }
-      return (IPackageFragment[]) packages.toArray(new IPackageFragment[packages.size()]);
-    }
-
-    public ArrayList getPackageList() {
-      if (packages == null) {
-        return new ArrayList();
-      }
-      return packages;
-    }
-
-    public ArrayList getModelResults() {
-      try {
-
-        return tproject.getModelManager().getModelListFor(storages);
-        
-      } catch (CoreException e) {
-        return new ArrayList();
-
-      }
-    }
   }
 
 }

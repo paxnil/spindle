@@ -28,6 +28,9 @@ package com.iw.plugins.spindle.wizards;
 
 import org.eclipse.jface.wizard.Wizard;
 
+import com.iw.plugins.spindle.wizards.OpenTapestryWizard;
+import com.iw.plugins.spindle.wizards.project.application.*;
+
 /**
  * @version 	1.0
  * @author	GWL
@@ -44,7 +47,7 @@ public class OpenTapestryApplicationWizard extends OpenTapestryWizard {
   }
 
   protected Wizard createWizard() {    
-    return new NewTapAppWizard();
+    return new NewApplicationProjectWizard();
   }
 
   

@@ -120,7 +120,10 @@ public class PluginBindingSpecification
 
       if (isDTD13OrBetter) {
 
-        writer.print("\" expression=\"");
+        writer.print("\" expression='");
+        writer.print(getValue());
+        writer.println("'/>");
+        return;
 
       } else {
 

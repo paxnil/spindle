@@ -8,11 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
+
 import net.sf.tapestry.spec.ExtensionSpecification;
 import net.sf.tapestry.spec.ILibrarySpecification;
 
+import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
 
 /**
  * @author gwl
@@ -67,12 +71,27 @@ public class LibraryApplicationHelper {
     return false;
   }
 
+  private TapestryLibraryModel getDefaultLibrary() {
+    try {
+    	
+      IIdentifiable spec = (IIdentifiable) parent;
+      TapestryLibraryModel model = (TapestryLibraryModel) spec.getParent();
+      ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(model);
+
+      return project.getDefaultLibraryModel();
+      
+    } catch (CoreException e) {
+    }
+    return null;
+
+  }
+
   /**
    * Method getDefaultServiceMap.
    */
   public List getDefaultServiceNames() {
 
-    TapestryLibraryModel defaultLib = TapestryProjectModelManager.getDefaultLibraryModel();
+    TapestryLibraryModel defaultLib = getDefaultLibrary();
 
     if (defaultLib != null) {
 
@@ -129,7 +148,7 @@ public class LibraryApplicationHelper {
   public void setPageSpecificationPath(Map pages, String name, String spec) {
 
     if (pages != null) {
-    	
+
       pages.put(name, spec);
 
       propertySupport.firePropertyChange("pageMap", null, pages);
@@ -168,7 +187,8 @@ public class LibraryApplicationHelper {
 
   private String findKeyInDefaultPageMap(String specificationPath) {
 
-    ILibrarySpecification defaultLib = TapestryProjectModelManager.getDefaultLibraryModel().getSpecification();
+    ILibrarySpecification defaultLib =
+      getDefaultLibrary().getSpecification();
 
     if (defaultLib != null) {
 
@@ -205,7 +225,8 @@ public class LibraryApplicationHelper {
   }
 
   private String findKeyInDefaultComponentMap(String value) {
-    ILibrarySpecification defaultLib = TapestryProjectModelManager.getDefaultLibraryModel().getSpecification();
+    ILibrarySpecification defaultLib =
+      getDefaultLibrary().getSpecification();
 
     if (defaultLib != null) {
 

@@ -130,6 +130,26 @@ public class ChooseWorkspaceModelDialog
     return result;
 
   }
+  
+  static public ChooseWorkspaceModelDialog createProjectModelDialog(
+    Shell shell,
+    IJavaProject project,
+    String windowTitle,
+    String description) {
+
+    ChooseWorkspaceModelDialog result =
+      new ChooseWorkspaceModelDialog(
+        shell,
+        project,
+        windowTitle,
+        description,
+        TapestryLookup.ACCEPT_LIBRARIES | TapestryLookup.ACCEPT_APPLICATIONS | TapestryLookup.THIS_PROJECT_ONLY);
+
+    result.setTitleImageString("application48.gif");
+
+    return result;
+
+  }
 
   static public ChooseWorkspaceModelDialog createComponentModelDialog(
     Shell shell,

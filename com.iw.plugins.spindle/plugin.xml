@@ -110,10 +110,11 @@
          </description>
       </wizard>
       <wizard
-            name="Tapestry Application"
+            name="Tapestry Application Project"
             icon="./icons/basic/application16.gif"
             category="com.iw.plugins.spindle.new"
-            class="com.iw.plugins.spindle.wizards.NewTapAppWizard"
+            project="true"
+            class="com.iw.plugins.spindle.wizards.project.application.NewApplicationProjectWizard"
             id="com.iw.plugins.spindle.new_app_wizard">
          <description>
             Create a new Tapestry Application
@@ -199,7 +200,7 @@
       </editor>
       <editor
             name="Spindle HTML Editor for Tapestry"
-            default="true"
+            default="false"
             icon="./icons/basic/html16.gif"
             filenames="*.html"
             contributorClass="com.iw.plugins.spindle.html.TapestryHTMLEditorContributor"
@@ -267,15 +268,7 @@
                class="com.iw.plugins.spindle.wizards.OpenTapestryPageWizard"
                toolbarPath="Normal/spindle"
                id="com.iw.spindle.actions.set.OpenTapestryPageWizard">
-         </action>
-         <action
-               label="Migrate All to Tapestry 2.0.4+ DTD"
-               icon="icons/full/migrate16_dark.gif"
-               tooltip="Migrate Tapestry XML files to Tapestry 2.0.4 compatible DTD"
-               class="com.iw.plugins.spindle.ui.migrate.MigrateAllTo204PlusDTD"
-               toolbarPath="Normal/spindle"
-               id="com.iw.spindle.actions.set.MigrateAllTo204PlusDTD">
-         </action>
+         </action>         
       </actionSet>
    </extension>
    <extension
