@@ -4,3 +4,4 @@ tapJar.jardesc
 buildRelease
 core.jar
 core-src.jar
+*.zip

@@ -31,12 +31,10 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.ui.IFileEditorInput;
 
-import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.editors.ProblemAnnotation;
@@ -50,257 +48,272 @@ import com.iw.plugins.spindle.editors.ProblemAnnotationModel;
  * @version $Id: SpecAnnotationModel.java,v 1.2 2003/09/21 19:49:32 glongman
  *          Exp $
  */
-public class SpecAnnotationModel extends ProblemAnnotationModel {
-	private static final int STAGE_INACTIVE = -1;
-	/** accept parser problems* */
-	private static final int STAGE_PARSER = 0;
-	/** accept scanner problems* */
-	private static final int STAGE_SCANNER = 1;
+public class SpecAnnotationModel extends ProblemAnnotationModel
+{
+    private static final int STAGE_INACTIVE = -1;
+    /** accept parser problems* */
+    private static final int STAGE_PARSER = 0;
+    /** accept scanner problems* */
+    private static final int STAGE_SCANNER = 1;
 
-	private int fStage = STAGE_INACTIVE;
-	private List fCollectedParserProblems;
-	private List fGeneratedParserAnnotations;
-	private List fCurrentlyOverlaidParser;
-	private List fPreviouslyOverlaidParser;
+    private int fStage = STAGE_INACTIVE;
+    private List fCollectedParserProblems;
+    private List fGeneratedParserAnnotations;
+    private List fCurrentlyOverlaidParser;
+    private List fPreviouslyOverlaidParser;
 
-	public SpecAnnotationModel(IFileEditorInput input) {
-		super(input);
-	}
+    public SpecAnnotationModel(IFileEditorInput input)
+    {
+        super(input);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.iw.plugins.spindle.editors.ProblemAnnotationModel#startCollectingProblems()
-	 */
-	protected void startCollectingProblems() {
-		super.startCollectingProblems();
-		fCollectedParserProblems = new ArrayList();
-		fGeneratedParserAnnotations = new ArrayList();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.editors.ProblemAnnotationModel#startCollectingProblems()
+     */
+    protected void startCollectingProblems()
+    {
+        super.startCollectingProblems();
+        fCollectedParserProblems = new ArrayList();
+        fGeneratedParserAnnotations = new ArrayList();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.iw.plugins.spindle.editors.ProblemAnnotationModel#stopCollectingProblems()
-	 */
-	protected void stopCollectingProblems() {
-		if (fGeneratedParserAnnotations != null) {
-			removeAnnotations(fGeneratedParserAnnotations, true, true);
-			fGeneratedParserAnnotations.clear();
-		}
-		if (fGeneratedAnnotations != null) {
-			removeAnnotations(fGeneratedAnnotations, true, true);
-			fGeneratedAnnotations.clear();
-		}
-		fCollectedProblems = null;
-		fCollectedParserProblems = null;
-		fGeneratedAnnotations = null;
-		fGeneratedParserAnnotations = null;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.editors.ProblemAnnotationModel#stopCollectingProblems()
+     */
+    protected void stopCollectingProblems()
+    {
+        if (fGeneratedParserAnnotations != null)
+        {
+            removeAnnotations(fGeneratedParserAnnotations, true, true);
+            fGeneratedParserAnnotations.clear();
+        }
+        if (fGeneratedAnnotations != null)
+        {
+            removeAnnotations(fGeneratedAnnotations, true, true);
+            fGeneratedAnnotations.clear();
+        }
+        fCollectedProblems = null;
+        fCollectedParserProblems = null;
+        fGeneratedAnnotations = null;
+        fGeneratedParserAnnotations = null;
+    }
 
-	// Must be a resource
-	public void beginCollecting() {
-		switch (fStage) {
-			case STAGE_INACTIVE :
-				fStage = STAGE_PARSER;
-				Object spec = getSpecification();
-				if (spec != null)
-					setIsActive(true);
-				else
-					setIsActive(false);
-				break;
-			case STAGE_PARSER :
-				fStage = STAGE_SCANNER;
-				break;
-			default :
-				throw new Error("invalid stage");
-		}
-	}
+    // Must be a resource
+    public void beginCollecting()
+    {
+        switch (fStage)
+        {
+            case STAGE_INACTIVE :
+                fStage = STAGE_PARSER;
+                Object spec = getSpecification();
+                if (spec != null)
+                    setIsActive(true);
+                else
+                    setIsActive(false);
+                break;
+            case STAGE_PARSER :
+                fStage = STAGE_SCANNER;
+                break;
+            default :
+                throw new Error("invalid stage");
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(com.iw.plugins.spindle.core.source.IProblem)
-	 */
-	public void addProblem(IProblem problem) {
-		if (!isActive())
-			return;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(com.iw.plugins.spindle.core.source.IProblem)
+     */
+    public void addProblem(IProblem problem)
+    {
+        if (!isActive())
+            return;
 
-		switch (fStage) {
-			case STAGE_PARSER :
-				fCollectedParserProblems.add(problem);
-				break;
+        switch (fStage)
+        {
+            case STAGE_PARSER :
+                fCollectedParserProblems.add(problem);
+                break;
 
-			case STAGE_SCANNER :
-				fCollectedProblems.add(problem);
-				break;
+            case STAGE_SCANNER :
+                fCollectedProblems.add(problem);
+                break;
 
-			default :
-				throw new Error("invalid stage");
-		}
+            default :
+                throw new Error("invalid stage");
+        }
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.iw.plugins.spindle.core.parser.IProblemCollector#endCollecting()
-	 */
-	public void endCollecting() {
-		switch (fStage) {
-			case STAGE_PARSER :
-				if (!fCollectedParserProblems.isEmpty()) {
-					updateAnnotationsParser();
-					fStage = STAGE_INACTIVE;
-				}
-				break;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.parser.IProblemCollector#endCollecting()
+     */
+    public void endCollecting()
+    {
+        switch (fStage)
+        {
+            case STAGE_PARSER :
+                if (!fCollectedParserProblems.isEmpty())
+                {
+                    updateAnnotationsParser();
+                    fStage = STAGE_INACTIVE;
+                }
+                break;
 
-			case STAGE_SCANNER :
-				updateAnnotationsNormal();
-				fStage = STAGE_INACTIVE;
-				break;
-		}
-	}
+            case STAGE_SCANNER :
+                updateAnnotationsNormal();
+                fStage = STAGE_INACTIVE;
+                break;
+        }
+    }
 
-	private void updateAnnotationsParser() {
-		// goal here is to leave non-parser annotation intact
-		// and to handle parser problems as per normal.
-		if (!isActive())
-			return;
+    private void updateAnnotationsParser()
+    {
+        // goal here is to leave non-parser annotation intact
+        // and to handle parser problems as per normal.
+        if (!isActive())
+            return;
 
-		if (fProgressMonitor != null && fProgressMonitor.isCanceled())
-			return;
+        if (fProgressMonitor != null && fProgressMonitor.isCanceled())
+            return;
 
-		boolean isCanceled = false;
-		boolean temporaryParserProblemsChanged = false;
-		fPreviouslyOverlaidParser = fCurrentlyOverlaidParser;
-		fCurrentlyOverlaidParser = new ArrayList();
+        boolean isCanceled = false;
+        boolean temporaryParserProblemsChanged = false;
+        fPreviouslyOverlaidParser = fCurrentlyOverlaidParser;
+        fCurrentlyOverlaidParser = new ArrayList();
 
-		synchronized (fAnnotations) {
-			if (fGeneratedParserAnnotations.size() > 0) {
-				temporaryParserProblemsChanged = true;
-				removeAnnotations(fGeneratedParserAnnotations, false, true);
-				fGeneratedParserAnnotations.clear();
-			}
+        synchronized (fAnnotations)
+        {
+            if (fGeneratedParserAnnotations.size() > 0)
+            {
+                temporaryParserProblemsChanged = true;
+                removeAnnotations(fGeneratedParserAnnotations, false, true);
+                fGeneratedParserAnnotations.clear();
+            }
 
-			if (fCollectedParserProblems != null
-				&& fCollectedParserProblems.size() > 0) {
+            if (fCollectedParserProblems != null && fCollectedParserProblems.size() > 0)
+            {
 
-				Iterator e = fCollectedParserProblems.iterator();
-				while (e.hasNext()) {
+                Iterator e = fCollectedParserProblems.iterator();
+                while (e.hasNext())
+                {
 
-					IProblem problem = (IProblem) e.next();
+                    IProblem problem = (IProblem) e.next();
 
-					if (fProgressMonitor != null
-						&& fProgressMonitor.isCanceled()) {
-						isCanceled = true;
-						break;
-					}
+                    if (fProgressMonitor != null && fProgressMonitor.isCanceled())
+                    {
+                        isCanceled = true;
+                        break;
+                    }
 
-					Position position = createPositionFromProblem(problem);
-					if (position != null) {
+                    Position position = createPositionFromProblem(problem);
+                    if (position != null)
+                    {
 
-						ProblemAnnotation annotation =
-							new ProblemAnnotation(problem);
-						overlayMarkers(position, annotation);
-						fGeneratedParserAnnotations.add(annotation);
-						try {
-							addAnnotation(annotation, position, false);
-						} catch (BadLocationException e1) {
-							UIPlugin.log(e1);
-						}
+                        ProblemAnnotation annotation = new ProblemAnnotation(problem);
+                        overlayMarkers(position, annotation);
+                        fGeneratedParserAnnotations.add(annotation);
+                        addAnnotation(annotation, position, false);
 
-						temporaryParserProblemsChanged = true;
-					}
-				}
+                        temporaryParserProblemsChanged = true;
+                    }
+                }
 
-				fCollectedParserProblems.clear();
-			}
+                fCollectedParserProblems.clear();
+            }
 
-			removeMarkerOverlays(isCanceled);
-			fPreviouslyOverlaid = null;
+            removeMarkerOverlays(isCanceled);
+            fPreviouslyOverlaid = null;
 
-		}
+        }
 
-		if (temporaryParserProblemsChanged)
-			fireModelChanged(new AnnotationModelEvent(this));
+        if (temporaryParserProblemsChanged)
+            fireModelChanged(new AnnotationModelEvent(this));
 
-	}
+    }
 
-	private void updateAnnotationsNormal() {
-		if (!isActive())
-			return;
+    private void updateAnnotationsNormal()
+    {
+        if (!isActive())
+            return;
 
-		if (fProgressMonitor != null && fProgressMonitor.isCanceled())
-			return;
+        if (fProgressMonitor != null && fProgressMonitor.isCanceled())
+            return;
 
-		boolean isCanceled = false;
-		boolean temporaryProblemsChanged = false;
-		fPreviouslyOverlaid = fCurrentlyOverlaid;
-		fCurrentlyOverlaid = new ArrayList();
+        boolean isCanceled = false;
+        boolean temporaryProblemsChanged = false;
+        fPreviouslyOverlaid = fCurrentlyOverlaid;
+        fCurrentlyOverlaid = new ArrayList();
 
-		synchronized (fAnnotations) {
-			fGeneratedAnnotations.addAll(fGeneratedParserAnnotations);
+        synchronized (fAnnotations)
+        {
+            fGeneratedAnnotations.addAll(fGeneratedParserAnnotations);
 
-			if (fGeneratedAnnotations.size() > 0) {
-				temporaryProblemsChanged = true;
-				removeAnnotations(fGeneratedAnnotations, false, true);
-				fGeneratedAnnotations.clear();
-			}
+            if (fGeneratedAnnotations.size() > 0)
+            {
+                temporaryProblemsChanged = true;
+                removeAnnotations(fGeneratedAnnotations, false, true);
+                fGeneratedAnnotations.clear();
+            }
 
-			if (fCollectedProblems != null && fCollectedProblems.size() > 0) {
+            if (fCollectedProblems != null && fCollectedProblems.size() > 0)
+            {
 
-				Iterator e = fCollectedProblems.iterator();
-				while (e.hasNext()) {
+                Iterator e = fCollectedProblems.iterator();
+                while (e.hasNext())
+                {
 
-					IProblem problem = (IProblem) e.next();
+                    IProblem problem = (IProblem) e.next();
 
-					if (fProgressMonitor != null
-						&& fProgressMonitor.isCanceled()) {
-						isCanceled = true;
-						break;
-					}
+                    if (fProgressMonitor != null && fProgressMonitor.isCanceled())
+                    {
+                        isCanceled = true;
+                        break;
+                    }
 
-					Position position = createPositionFromProblem(problem);
-					if (position != null) {
+                    Position position = createPositionFromProblem(problem);
+                    if (position != null)
+                    {
 
-						ProblemAnnotation annotation =
-							new ProblemAnnotation(problem);
-						overlayMarkers(position, annotation);
-						fGeneratedAnnotations.add(annotation);
-						try {
-							addAnnotation(annotation, position, false);
-						} catch (BadLocationException e1) {
-							UIPlugin.log(e1);
-						}
+                        ProblemAnnotation annotation = new ProblemAnnotation(problem);
+                        overlayMarkers(position, annotation);
+                        fGeneratedAnnotations.add(annotation);
+                        addAnnotation(annotation, position, false);
 
-						temporaryProblemsChanged = true;
-					}
-				}
-				fCollectedParserProblems.clear();
-				fCollectedProblems.clear();
-			}
+                        temporaryProblemsChanged = true;
+                    }
+                }
+                fCollectedParserProblems.clear();
+                fCollectedProblems.clear();
+            }
 
-			removeMarkerOverlays(isCanceled);
-			fPreviouslyOverlaid.clear();
-			fPreviouslyOverlaid = null;
-		}
+            removeMarkerOverlays(isCanceled);
+            fPreviouslyOverlaid.clear();
+            fPreviouslyOverlaid = null;
+        }
 
-		if (temporaryProblemsChanged)
-			fireModelChanged(new AnnotationModelEvent(this));
-	}
+        if (temporaryProblemsChanged)
+            fireModelChanged(new AnnotationModelEvent(this));
+    }
 
-	private Object getSpecification() {
-		IFile file = fInput.getFile();
+    private Object getSpecification()
+    {
+        IFile file = fInput.getFile();
 
-		IProject project = file.getProject();
-		TapestryArtifactManager manager =
-			TapestryArtifactManager.getTapestryArtifactManager();
-		Map specs = manager.getSpecMap(project);
-		if (specs != null) {
-			return specs.get(file);
-		}
-		return null;
-	}
+        IProject project = file.getProject();
+        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+        Map specs = manager.getSpecMap(project);
+        if (specs != null)
+        {
+            return specs.get(file);
+        }
+        return null;
+    }
 
 }

@@ -40,7 +40,6 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
-import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -59,76 +58,89 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     protected static class ReverseMap
     {
 
-        static class Entry {
-                  Position fPosition;
-                  Object fValue;
-              };
-            
-              private List fList= new ArrayList(2);
-              private int fAnchor= 0;
-            
-              public ReverseMap() {
-              }
-            
-              public Object get(Position position) {
-                
-                  Entry entry;
-                
-                  // behind anchor
-                  int length= fList.size();
-                  for (int i= fAnchor; i < length; i++) {
-                      entry= (Entry) fList.get(i);
-                      if (entry.fPosition.equals(position)) {
-                          fAnchor= i;
-                          return entry.fValue;
-                      }
-                  }
-                
-                  // before anchor
-                  for (int i= 0; i < fAnchor; i++) {
-                      entry= (Entry) fList.get(i);
-                      if (entry.fPosition.equals(position)) {
-                          fAnchor= i;
-                          return entry.fValue;
-                      }
-                  }
-                
-                  return null;
-              }
-            
-              private int getIndex(Position position) {
-                  Entry entry;
-                  int length= fList.size();
-                  for (int i= 0; i < length; i++) {
-                      entry= (Entry) fList.get(i);
-                      if (entry.fPosition.equals(position))
-                          return i;
-                  }
-                  return -1;
-              }
-            
-              public void put(Position position,  Object value) {
-                  int index= getIndex(position);
-                  if (index == -1) {
-                      Entry entry= new Entry();
-                      entry.fPosition= position;
-                      entry.fValue= value;
-                      fList.add(entry);
-                  } else {
-                      Entry entry= (Entry) fList.get(index);
-                      entry.fValue= value;
-                  }
-              }
-            
-              public void remove(Position position) {
-                  int index= getIndex(position);
-                  if (index > -1)
-                      fList.remove(index);
-              }
-            
-              public void clear() {
-                  fList.clear();
-              }
+        static class Entry
+        {
+            Position fPosition;
+            Object fValue;
+        };
+
+        private List fList = new ArrayList(2);
+        private int fAnchor = 0;
+
+        public ReverseMap()
+        {}
+
+        public Object get(Position position)
+        {
+
+            Entry entry;
+
+            // behind anchor
+            int length = fList.size();
+            for (int i = fAnchor; i < length; i++)
+            {
+                entry = (Entry) fList.get(i);
+                if (entry.fPosition.equals(position))
+                {
+                    fAnchor = i;
+                    return entry.fValue;
+                }
+            }
+
+            // before anchor
+            for (int i = 0; i < fAnchor; i++)
+            {
+                entry = (Entry) fList.get(i);
+                if (entry.fPosition.equals(position))
+                {
+                    fAnchor = i;
+                    return entry.fValue;
+                }
+            }
+
+            return null;
+        }
+
+        private int getIndex(Position position)
+        {
+            Entry entry;
+            int length = fList.size();
+            for (int i = 0; i < length; i++)
+            {
+                entry = (Entry) fList.get(i);
+                if (entry.fPosition.equals(position))
+                    return i;
+            }
+            return -1;
+        }
+
+        public void put(Position position, Object value)
+        {
+            int index = getIndex(position);
+            if (index == -1)
+            {
+                Entry entry = new Entry();
+                entry.fPosition = position;
+                entry.fValue = value;
+                fList.add(entry);
+            } else
+            {
+                Entry entry = (Entry) fList.get(index);
+                entry.fValue = value;
+            }
+        }
+
+        public void remove(Position position)
+        {
+            int index = getIndex(position);
+            if (index > -1)
+                fList.remove(index);
+        }
+
+        public void clear()
+        {
+            fList.clear();
+        }
     };
 
     protected IFileEditorInput fInput;
@@ -154,30 +166,34 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
 
     protected Position createPositionFromProblem(IProblem problem)
     {
-        int start= problem.getCharStart();
-        int end= problem.getCharEnd();
-        
-        if (start > end) {
-            end= start + end;
-            start= end - start;
-            end= end - start;
+        int start = problem.getCharStart();
+        int end = problem.getCharEnd();
+
+        if (start > end)
+        {
+            end = start + end;
+            start = end - start;
+            end = end - start;
         }
-        
-        if (start == -1 && end == -1) {
+
+        if (start == -1 && end == -1)
+        {
             // line number is 1-based
-            int line= problem.getLineNumber();
-            if (line > 0 && fDocument != null) {
-                try {
-                    start= fDocument.getLineOffset(line - 1);
-                    end= start;
-                } catch (BadLocationException x) {
-                }
+            int line = problem.getLineNumber();
+            if (line > 0 && fDocument != null)
+            {
+                try
+                {
+                    start = fDocument.getLineOffset(line - 1);
+                    end = start;
+                } catch (BadLocationException x)
+                {}
             }
         }
-        
+
         if (start > -1 && end > -1)
             return new Position(start, end - start);
-        
+
         return null;
     }
 
@@ -229,11 +245,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
                         ProblemAnnotation annotation = new ProblemAnnotation(problem);
                         overlayMarkers(position, annotation);
                         fGeneratedAnnotations.add(annotation);
-                        try {
-							addAnnotation(annotation, position, false);
-						} catch (BadLocationException e1) {
-							UIPlugin.log(e1);
-						}
+                        addAnnotation(annotation, position, false);
 
                         temporaryProblemsChanged = true;
                     }
@@ -366,7 +378,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     /*
      * @see AnnotationModel#addAnnotation(Annotation, Position, boolean)
      */
-    protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged) throws BadLocationException
+    protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged)
     {
         super.addAnnotation(annotation, position, fireModelChanged);
 
@@ -444,8 +456,6 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
 
     }
 
-    
-
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.parser.IProblemCollector#getProblems()
      */
@@ -453,7 +463,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     {
         if (fCollectedProblems == null)
             return new IProblem[0];
-        return (IProblem [])fCollectedProblems.toArray(new IProblem[fCollectedProblems.size()]);
+        return (IProblem[]) fCollectedProblems.toArray(new IProblem[fCollectedProblems.size()]);
     }
 
 };

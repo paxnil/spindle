@@ -34,9 +34,53 @@ TT {
 }
 </STYLE>
 
+<script language="JavaScript">
+var urlArgs;
+
+function init() {
+  urlArgs = getArgs();
+}
+
+function test() {   
+	if (urlArgs.updateURL) {
+		alert(urlArgs.updateURL);
+	}
+	alert("no args");
+}
+
+function getArgs() {
+	var args= new Object();
+	var query = location.search.substring(1);
+	var pairs = query.split("&");
+	for (var i=0; i<pairs.length;i++) {
+		var pos=pairs[i].indexOf('=');
+		if (pos == -1)
+			continue;
+		var argname = pairs[i].substring(0, pos);
+		var value = pairs[i].substring(pos+1);
+		args[argname] = unescape(value);
+	}
+	return args;
+}
+
+function download(id, version) {  
+   if (urlArgs.updateURL) {
+      var updateURL = urlArgs.updateURL;
+      var callback = updateURL+"?server="
+	  +escape("http://data.intelligentworks.com/")
+	  +"&feature="+escape(id+'_'+version)
+	  +"&backURL="+escape(location);
+      location = callback;
+   } else {
+   		alert("This link only works from within the Eclipse Update Manager and only if  'Preferences->Install/Update->Web Triggered Updates' is enabled");
+   }
+}
+
+</script>
+
 <META content="MSHTML 5.50.4930.1700" name=GENERATOR></HEAD>
 <BODY bgColor=#ffffff leftMargin=0 topMargin=0 marginheight="0" 
-marginwidth="0">
+marginwidth="0" onLoad="javascipt:init()">
 <IMG height=80 alt="Spindle logo" 
 src="headerBkgII.jpg" width=1000> <BR>
 <TABLE cellSpacing=0 cellPadding=2 width="100%" border=0>
@@ -47,6 +91,9 @@ src="headerBkgII.jpg" width=1000> <BR>
         <P>Welcome to the Early Access Update Site for Spindle 3.0. This site contains feature and plug-in 
           versions for Spindle 3.0 development releases, published in the form expected by the Eclipse 
           Update Manager. </P>
+		  	  <p>Install Spindle 3.0.2 <A href="#" onClick="javascript:download('com.iw.features.spindle', '3.0.2')"><strong>now</strong></A>.</p>
+
+		  
         <P><em>THIS IS NOT YET PRODUCTION QUALITY CODE. IT IS MADE AVAILABLE HERE IN THE HOPES THAT YOU 
           WILL TRY IT OUT AND POST BUGS</em>.</P>
         <P><em>IMPORTANT: <strong>These releases of Spindle do not work with any build of Eclipse 3.0. 
@@ -62,4 +109,5 @@ src="headerBkgII.jpg" width=1000> <BR>
       <P>Spindle is an open source project, hosted on the <A 
       href="http://sourceforge.net/projects/spindle">SourceForge</A> and 
       licensed under the <A href="http://www.mozilla.org/MPL/">Mozilla Public 
-      License, Version 1.1</A> . </P></TD></TR></TBODY></TABLE></BODY></HTML>
+      License, Version 1.1</A> . </P>
+	  </TD></TR></TBODY></TABLE></BODY></HTML>

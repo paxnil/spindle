@@ -7,6 +7,9 @@
    <feature url="features/com.iw.features.spindle_3.0.0.alpha1.jar" id="com.iw.features.spindle" version="3.0.0.alpha1">
       <category name="spindle3_0"/>
    </feature>
+   <feature url="features/com.iw.features.spindle_3.0.2.jar" id="com.iw.features.spindle" version="3.0.2">
+      <category name="spindle3_0"/>
+   </feature>
    <category-def name="spindle3_0" label="Spindle 3.0 alphas">
       <description>
          Here are the alpha releases of Spindle 3.0 supporting Tapestry 3.0

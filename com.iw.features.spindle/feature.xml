@@ -2,8 +2,16 @@
 <feature
       id="com.iw.features.spindle"
       label="com.iw.features.spindle"
-      version="3.0.0.alpha1"
-      provider-name="Intelligent Works Inc">
+      version="3.0.2"
+      provider-name="Intelligent Works Inc"
+      image="spindle.gif">
+
+   <description url="http://spindle.sourceforge.net">
+      Spindle 3.0 provides IDE support for Web Applications built with
+Tapestry Web Components (http://jakarat.apache.org/tapestry).
+
+release 3.0.2 fixes a packaging problem in 3.0.0.alpha1
+   </description>
 
    <copyright>
       Copyright 2003 Intelligent Works Incorporated
@@ -40,25 +48,13 @@ All Rights Reserved
    </url>
 
    <requires>
-      <import plugin="org.eclipse.core.resources" version="2.1.0" match="compatible"/>
-      <import plugin="org.eclipse.jdt.core" version="2.1.0" match="compatible"/>
-      <import plugin="org.eclipse.ui" version="2.1.0" match="compatible"/>
+      <import plugin="org.eclipse.core.resources" version="2.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jdt.core" version="2.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui" version="2.1.0" match="greaterOrEqual"/>
       <import plugin="org.apache.xerces" version="4.0.7" match="compatible"/>
-      <import plugin="org.eclipse.jdt.ui" version="2.1.0" match="compatible"/>
-      <import plugin="org.eclipse.search" version="2.1.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.ui" version="2.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.search" version="2.1.0" match="greaterOrEqual"/>
    </requires>
-
-   <plugin
-         id="com.iw.plugins.spindle.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.1"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.1"/>
 
    <plugin
          id="net.sf.solareclipse.ui"
@@ -71,5 +67,17 @@ All Rights Reserved
          download-size="0"
          install-size="0"
          version="0.4.0.spindle-dep"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.2"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.2"/>
 
 </feature>

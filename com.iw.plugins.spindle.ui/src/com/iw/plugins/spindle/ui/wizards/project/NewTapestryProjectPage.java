@@ -268,7 +268,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
             String.valueOf(TapestryProject.APPLICATION_PROJECT_TYPE));
         project.setPersistentProperty(
             new QualifiedName("", ProjectPropertyPage.CONTEXT_ROOT_PROPERTY),
-            getContextFolderName());
+            "/"+getContextFolderName());
 //        project.setPersistentProperty(new QualifiedName("", ProjectPropertyPage.LIBRARY_SPEC_PROPERTY), "");
 
         // now configure/deconfigure the project
@@ -277,7 +277,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         TapestryProject prj = TapestryProject.create(jproject);
 // No longer required, library projects are deprecated
 //        prj.setProjectType(TapestryProject.APPLICATION_PROJECT_TYPE);
-        prj.setWebContext(getContextFolderName());
+        prj.setWebContext("/"+getContextFolderName());
         prj.saveProperties();
 
     }
