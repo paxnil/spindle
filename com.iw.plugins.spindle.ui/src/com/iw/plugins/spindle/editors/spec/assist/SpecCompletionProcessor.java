@@ -27,6 +27,11 @@
 package com.iw.plugins.spindle.editors.spec.assist;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -36,6 +41,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.xmen.internal.ui.text.XMLReconciler;
 
+import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
@@ -43,7 +49,10 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
+import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
+import com.wutka.dtd.DTD;
 
 /**
  * Base class for context assist processors for Tapestry specss
@@ -58,6 +67,63 @@ public abstract class SpecCompletionProcessor extends AbstractContentAssistProce
   public SpecCompletionProcessor(Editor editor)
   {
     super(editor);
+  }
+
+  public static List getAttributeProposals(
+      DTD dtd,
+      IDocument document,
+      int completionOffset,
+      int completionLength,
+      String tagName,
+      List excludeNames,
+      HashSet existingAttributeNames,
+      String prefix,
+      boolean addLeadingSpace)
+  {
+
+    List dtdAttributeNames;
+
+    if (dtd != null && tagName != null)
+    {
+      dtdAttributeNames = DTDProposalGenerator.getAttributes(dtd, tagName);
+    } else
+    {
+      return Collections.EMPTY_LIST;
+    }
+
+    List result = new ArrayList();
+
+    boolean ignorePrefix = prefix == null || prefix.trim().length() == 0;
+
+    for (Iterator iter = dtdAttributeNames.iterator(); iter.hasNext();)
+    {
+      String attrname = ((String) iter.next()).toLowerCase();
+
+      if (existingAttributeNames.contains(attrname))
+        continue;
+
+      boolean match = true;
+      if (!ignorePrefix)
+        match = attrname.startsWith(prefix);
+
+      List requiredAttributes = DTDProposalGenerator.getRequiredAttributes(dtd, tagName);
+
+      if (match && !excludeNames.contains(attrname))
+      {
+        result.add(ProposalFactory.getElementAttributeProposal(
+            document,
+            attrname,
+            completionOffset,
+            completionLength,
+            addLeadingSpace,
+            requiredAttributes.contains(attrname) ? Images
+                .getSharedImage("bullet_pink.gif") : Images
+                .getSharedImage("bullet_web.gif"),
+            null,
+            requiredAttributes.contains(attrname) ? 98 : 99));
+      }
+    }
+    return result;
   }
 
   /*

@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editors.template.assist;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -65,6 +66,9 @@ public class AttributeContentAssistProcessor extends TemplateContentAssistProces
   {
     XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
     XMLNode attribute = tag.getAttributeAt(documentOffset);
+    ITextSelection selection = (ITextSelection) viewer
+        .getSelectionProvider()
+        .getSelection();
 
     int state = attribute.getStateAt(documentOffset);
 
@@ -82,17 +86,25 @@ public class AttributeContentAssistProcessor extends TemplateContentAssistProces
       if (last == '\'' || last == '"')
         valueLocation.y -= 1;
       attributeValue = document.get(valueLocation.x, valueLocation.y);
-      char[] chars = attributeValue.toCharArray();
       int i = 0;
-      for (; i < chars.length; i++)
+      if (attributeValue.trim().length() == 0)
       {
-        if (!Character.isWhitespace(chars[i]))
-          break;
-      }
-      if (i > 0)
+        attributeValue = "";
+      } else
       {
-        valueLocation.x += i;
-        attributeValue = document.get(valueLocation.x, valueLocation.y);
+        char[] chars = attributeValue.toCharArray();
+
+        for (; i < chars.length; i++)
+        {
+          if (!Character.isWhitespace(chars[i]))
+            break;
+        }
+
+        if (i > 0)
+        {
+          valueLocation.x += i;
+          attributeValue = document.get(valueLocation.x, valueLocation.y);
+        }
       }
 
     } catch (BadLocationException e)
@@ -108,33 +120,32 @@ public class AttributeContentAssistProcessor extends TemplateContentAssistProces
 
     // check for misspellings
 
-    String misspell = null;
-    for (int i = 0; i < MISSPELLINGS.length; i++)
-    {
-      if (attributeValue.startsWith(MISSPELLINGS[i]))
-      {
-        misspell = MISSPELLINGS[i];
-        break;
-      }
-    }
-    if (misspell != null)
-    {
-      int delta = documentOffset - valueLocation.x;
+    //    String misspell = null;
+    //    for (int i = 0; i < MISSPELLINGS.length; i++)
+    //    {
+    //      if (attributeValue.startsWith(MISSPELLINGS[i]))
+    //      {
+    //        misspell = MISSPELLINGS[i];
+    //        break;
+    //      }
+    //    }
+    //    if (misspell != null)
+    //    {
+    //      int delta = documentOffset - valueLocation.x;
+    //
+    //      return new ICompletionProposal[]{new CompletionProposal(
+    //          "ognl:",
+    //          valueLocation.x,
+    //          5,
+    //          delta <= 0 ? new Point(0, 0) : new Point(delta, 0),
+    //          Images.getSharedImage("oops.gif"),
+    //          null,
+    //          null,
+    //          null)};
+    //    }
 
-      return new ICompletionProposal[]{new CompletionProposal(
-          "ognl:",
-          valueLocation.x,
-          5,
-          delta <= 0 ? new Point(0, 0) : new Point(delta, 0),
-          Images.getSharedImage("oops.gif"),
-          null,
-          null,
-          null)};
-    }
-
-    return computeStaticProposals(documentOffset, attributeValue, valueLocation);
+    return computeStaticProposals(selection, documentOffset, attributeValue, valueLocation);
   }
-
   /**
    * Compute proposals for converting a Dynamic to a Message or a Static binding
    */
@@ -207,18 +218,22 @@ public class AttributeContentAssistProcessor extends TemplateContentAssistProces
    * binding;
    */
   private ICompletionProposal[] computeStaticProposals(
+      ITextSelection selection,
       int documentOffset,
       String attributeValue,
       Point valueLocation)
   {
     int delta = documentOffset - valueLocation.x;
 
+    int selectionStart = selection.getOffset();
+    int selectionLength = selection.getLength();
+
     ICompletionProposal[] result = new ICompletionProposal[2];
     result[0] = new CompletionProposal(
         "ognl:",
         valueLocation.x,
         0,
-        delta <= 0 ? new Point(5, 0) : new Point(delta + 5, 0),
+        calculateInsertSelection(selection, delta, "ognl:"),
         Images.getSharedImage("bind-dynamic.gif"),
         "Make dynamic binding",
         null,
@@ -227,7 +242,7 @@ public class AttributeContentAssistProcessor extends TemplateContentAssistProces
         "message:",
         valueLocation.x,
         0,
-        delta <= 0 ? new Point(8, 0) : new Point(delta + 8, 0),
+        calculateInsertSelection(selection, delta, "message:"),
         Images.getSharedImage("bind-string.gif"),
         "Make message binding",
         null,
@@ -236,4 +251,19 @@ public class AttributeContentAssistProcessor extends TemplateContentAssistProces
     return result;
   }
 
+  Point calculateInsertSelection(ITextSelection selection, int delta, String insert)
+  {
+    Point result = null;
+    int length = insert.length();
+    if (selection.getLength() == 0)
+    {
+      result = delta <= 0 ? new Point(length, 0) : new Point(delta + length, 0);
+    } else
+    {
+      result = delta <= 0 ? new Point(length, selection.getLength()) : new Point(delta
+          + length, selection.getLength());
+    }
+    return result;
+
+  }
 }

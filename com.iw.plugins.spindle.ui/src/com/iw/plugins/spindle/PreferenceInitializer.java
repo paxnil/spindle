@@ -30,6 +30,7 @@ import net.sf.solareclipse.xml.internal.ui.preferences.XMLSyntaxPreferencePage;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.editors.text.EditorsUI;
 
 import com.iw.plugins.spindle.editors.spec.outline.MultiPageContentOutline;
 import com.iw.plugins.spindle.editors.spec.outline.TapestryOutlinePage;
@@ -61,6 +62,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
   public void initializeDefaultPreferences()
   {
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+    EditorsUI.useAnnotationsPreferencePage(store);
+	EditorsUI.useQuickDiffPreferencePage(store);
     initializeDefaultValues(store);
     XMLSyntaxPreferencePage.initializeDefaultPreferences(store);
     NewTapComponentWizardPage.initializeDefaultPreferences(store);
@@ -88,7 +91,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
     
     store.setDefault(EDITOR_USE_SMART_INDENT, true);
     store.setDefault(TEMPLATE_EDITOR_HTML_SHOW_XHTML, TemplateEditor.XHTML_NONE_LABEL);
-    store.setDefault(AUTO_ACTIVATE_CONTENT_ASSIST, true);
+    store.setDefault(AUTO_ACTIVATE_CONTENT_ASSIST, false);
     
     store.setDefault(FORMATTER_MAX_LINE_LENGTH, 80); 
     store.setDefault(FORMATTER_WRAP_LONG, true);  

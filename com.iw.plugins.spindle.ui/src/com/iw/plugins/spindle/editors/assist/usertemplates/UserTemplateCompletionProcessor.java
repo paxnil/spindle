@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editors.spec.assist.usertemplates;
+package com.iw.plugins.spindle.editors.assist.usertemplates;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
@@ -55,6 +55,7 @@ public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
 {
 
   private final static int PROPOSAL_MODE_NEWFILE = 1;
+  private final static int PROPOSAL_MODE_USER = 2;
 
   private int fProposalMode;
   /**
@@ -196,7 +197,12 @@ public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
             .get()
             .trim()
             .length() == 0))
+    {
       fProposalMode = PROPOSAL_MODE_NEWFILE;
+    } else
+    {
+      fProposalMode = PROPOSAL_MODE_USER;
+    }
   }
 
   /*
@@ -217,6 +223,9 @@ public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
           return null;
         return UserTemplateAccess.getDefault().getContextTypeRegistry().getContextType(
             contextTypeId);
+      case PROPOSAL_MODE_USER :
+        return UserTemplateAccess.getDefault().getContextTypeRegistry().getContextType(
+            UserContextType.USER_CONTEXT_TYPE);
       default :
         return null;
     }
@@ -243,7 +252,7 @@ public class UserTemplateCompletionProcessor extends TemplateCompletionProcessor
       } else if ("page".equals(extension))
       {
         return XMLFileContextType.PAGE_FILE_CONTEXT_TYPE;
-      } else if ("component".equals(extension))
+      } else if ("jwc".equals(extension))
       {
         return XMLFileContextType.COMPONENT_FILE_CONTEXT_TYPE;
       }

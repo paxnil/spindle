@@ -21,7 +21,7 @@
  * 
  * ***** END LICENSE BLOCK *****
  */
-package com.iw.plugins.spindle.editors.spec.assist.usertemplates;
+package com.iw.plugins.spindle.editors.assist.usertemplates;
 import java.io.IOException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -104,6 +104,7 @@ public class UserTemplateAccess
       fRegistry.addContextType(XMLFileContextType.PAGE_FILE_CONTEXT_TYPE);
       fRegistry.addContextType(XMLFileContextType.COMPONENT_FILE_CONTEXT_TYPE);
       fRegistry.addContextType(XMLFileContextType.TEMPLATE_FILE_CONTEXT_TYPE);
+      fRegistry.addContextType(UserContextType.USER_CONTEXT_TYPE);
     }
     return fRegistry;
   }

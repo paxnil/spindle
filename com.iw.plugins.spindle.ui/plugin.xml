@@ -126,6 +126,12 @@
             class="com.iw.plugins.spindle.ui.preferences.SpindleFormatterPreferencePage"
             id="SpindleFormatterPreferences">
       </page>
+      <page
+            name="Templates"
+            category="SpindlePreferences"
+            class="com.iw.plugins.spindle.ui.preferences.TemplatesPreferencePage"
+            id="SpindleTemplatePreferences">
+      </page>
    </extension>
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">
@@ -479,35 +485,40 @@ the new Spindle
          point="org.eclipse.ui.editors.templates">
         
       <contextType
-            name="Tapestry Application File"
-            class="com.iw.plugins.spindle.editors.spec.assist.usertemplates.XMLFileContextType"
+            name="Application"
+            class="com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType"
             id="com.iw.plugins.spindle.ui.templateContextType.applicationFile">
       </contextType>
      
       <contextType
-            name="Tapestry Library File"
-            class="com.iw.plugins.spindle.editors.spec.assist.usertemplates.XMLFileContextType"
+            name="Library"
+            class="com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType"
             id="com.iw.plugins.spindle.ui.templateContextType.libraryFile">
       </contextType>
       
    
       <contextType
-            name="Tapestry Page File"
-            class="com.iw.plugins.spindle.editors.spec.assist.usertemplates.XMLFileContextType"
+            name="Page"
+            class="com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType"
             id="com.iw.plugins.spindle.ui.templateContextType.pageFile">
       </contextType>
         
       
       <contextType
-            name="Tapestry Component File"
-            class="com.iw.plugins.spindle.editors.spec.assist.usertemplates.XMLFileContextType"
+            name="Component"
+            class="com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType"
             id="com.iw.plugins.spindle.ui.templateContextType.componentFile">
       </contextType>
           
       <contextType
-            name="Tapestry Template File"
-            class="com.iw.plugins.spindle.editors.spec.assist.usertemplates.XMLFileContextType"
+            name="Template"
+            class="com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType"
             id="com.iw.plugins.spindle.ui.templateContextType.templateFile">
+      </contextType>
+      <contextType
+            name="User"
+            class="com.iw.plugins.spindle.editors.assist.usertemplates.UserContextType"
+            id="com.iw.plugins.spindle.ui.templateContextType.user">
       </contextType>
        <!--
       <resolver

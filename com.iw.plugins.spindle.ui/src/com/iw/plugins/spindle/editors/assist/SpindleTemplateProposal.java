@@ -63,6 +63,9 @@ public class SpindleTemplateProposal extends TemplateProposal implements Ordered
   {
     if (fContext instanceof AttributeTemplateContext)
       return ((AttributeTemplateContext) fContext).getAttributeName();
+    
+    if (fContext instanceof TagTemplateContext)
+      return ((TagTemplateContext)fContext).getDisplayString();
 
     return super.getDisplayString();
   }

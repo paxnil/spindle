@@ -27,6 +27,8 @@
 package com.iw.plugins.spindle.editors.spec.assist;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -38,21 +40,24 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorInput;
 import org.xmen.internal.ui.text.ITypeConstants;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
-import com.iw.plugins.spindle.editors.spec.assist.usertemplates.UserTemplateCompletionProcessor;
+import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
+import com.iw.plugins.spindle.editors.assist.usertemplates.UserTemplateCompletionProcessor;
+import com.iw.plugins.spindle.editors.template.TemplateEditor;
+import com.iw.plugins.spindle.editors.template.assist.TemplateContentAssistProcessor;
 
 /**
  * Processor for default content type
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: DefaultCompletionProcessor.java,v 1.9.2.2 2004/06/22 12:23:18
- *          glongman Exp $
+ *                     glongman Exp $
  */
 public class DefaultCompletionProcessor extends SpecCompletionProcessor
 {
@@ -68,7 +73,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
-   *      int)
+   *              int)
    */
   protected ICompletionProposal[] doComputeCompletionProposals(
       ITextViewer viewer,
@@ -76,12 +81,12 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
   {
     IDocument document = viewer.getDocument();
     XMLNode node = XMLNode.getArtifactAt(document, documentOffset);
-    
+
     if (node == null || document.get().trim().length() == 0)
       return fUserTemplates.computeCompletionProposals(viewer, documentOffset);
+
     
-    //FIXME Add the ability to inser user nodes (if appropriate)
-    
+
     XMLNode nextNode = node;
     XMLNode parentNode = null;
     // The cursor could be at the very end of the document!
@@ -92,59 +97,113 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
       if (nextNode == null)
         return computeLastPositionProposals(node, viewer, documentOffset);
     }
+    String type = node.getType();
+    if (node == nextNode
+        && (ITypeConstants.TAG.equals(type) || ITypeConstants.EMPTYTAG.equals(type)))
+    {
+      int lastOffset = node.offset + node.length;
+      boolean insertAttribute = false;
+      if (ITypeConstants.TAG.equals(type))
+        insertAttribute = documentOffset == lastOffset - 1;
+      else if (ITypeConstants.EMPTYTAG.equals(type))
+        insertAttribute = documentOffset == lastOffset - 2;
+      if (!insertAttribute)
+        return NoProposals;
+
+      return computeAttributeProposals(document, documentOffset, node);
+    }
     node = nextNode;
     //we know its a text artifact - lets see if the user is trying to insert
     // the root tag!
     parentNode = node.getParent();
     if ("/".equals(parentNode.getType()))
-      return computeRootTagProposal(node, parentNode, documentOffset);
+      return computeRootTagProposal(
+          viewer.getDocument(),
+          documentOffset,
+          node,
+          parentNode);
 
-    List proposals = new ArrayList();
-    List rawProposals = DTDProposalGenerator.findRawNewTagProposals(
-        fDTD,
-        node,
-        documentOffset);
-    if (rawProposals != null && !rawProposals.isEmpty())
+    int offset = documentOffset;
+    int length = 0;
+    String match = null;
+
+    try
     {
-      int offset = documentOffset;
-      int length = 0;
-      String match = null;
-
-      try
+      int lineNumber = document.getLineOfOffset(documentOffset);
+      int lineStart = document.getLineOffset(lineNumber);
+      for (int i = documentOffset - 1; i >= lineStart; i--)
       {
-        int lineNumber = document.getLineOfOffset(documentOffset);
-        int lineStart = document.getLineOffset(lineNumber);
-        for (int i = documentOffset - 1; i >= lineStart; i--)
-        {
-          char c = document.getChar(i);
-          if (Character.isJavaIdentifierPart(c))
-            length++;
-          else
-            break;
-        }
-        if (length > 0)
-        {
-          offset = documentOffset - length;
-          match = document.get(offset, length);
-        }
-      } catch (BadLocationException e)
-      {
-        UIPlugin.log(e);
+        char c = document.getChar(i);
+        if (Character.isJavaIdentifierPart(c))
+          length++;
+        else
+          break;
       }
-
-      for (Iterator iterator = rawProposals.iterator(); iterator.hasNext();)
+      if (length > 0)
       {
-        CompletionProposal p = (CompletionProposal) iterator.next();
-        if (match != null && !p.getDisplayString().startsWith(match))
-          continue;
-        p.setReplacementOffset(offset);
-        p.setReplacementLength(length);
-        proposals.add(p);
+        offset = documentOffset - length;
+        match = document.get(offset, length);
+      }
+    } catch (BadLocationException e)
+    {
+      UIPlugin.log(e);
+    }
 
+    List proposals = DTDProposalGenerator.findRawNewTagProposals(
+        document,
+        offset,
+        length,
+        fDTD,
+        node);
+
+    if (!proposals.isEmpty())
+    {
+
+      for (Iterator iterator = proposals.iterator(); iterator.hasNext();)
+      {
+        ICompletionProposal p = (ICompletionProposal) iterator.next();
+        if (match != null && !p.getDisplayString().startsWith(match))
+          iterator.remove();
       }
     }
 
-    computeAdditionalProposals(viewer, documentOffset, proposals);
+    computeAdditionalProposals(viewer, documentOffset, proposals, true);
+    return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals
+        .size()]);
+  }
+  /**
+   * @param document
+   * @param documentOffset
+   * @param node
+   * @return
+   */
+  private ICompletionProposal[] computeAttributeProposals(
+      IDocument document,
+      int documentOffset,
+      XMLNode node)
+  {
+    String tagName = node.getName();
+    if (tagName == null)
+      return NoProposals;
+
+    List excludeName = new ArrayList();
+    List proposals = new ArrayList();
+    HashSet existingAttributeNames = new HashSet();
+    existingAttributeNames.addAll(node.getAttributesMap().keySet());
+
+    proposals.addAll(SpecCompletionProcessor.getAttributeProposals(
+        fDTD,
+        document,
+        documentOffset,
+        0,
+        tagName,
+        excludeName,
+        existingAttributeNames,
+        null,
+        true));
+
+    if (proposals.isEmpty())
+      return NoProposals;
     return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals
         .size()]);
   }
@@ -152,7 +211,8 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
   private void computeAdditionalProposals(
       ITextViewer viewer,
       int documentOffset,
-      List proposals)
+      List proposals,
+      boolean includeUserTemplates)
   {
     ICompletionProposal endTagProposal = computeEndTagProposal(viewer, documentOffset);
     if (endTagProposal != null)
@@ -160,12 +220,21 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     proposals.add(CommentCompletionProcessor.getDefaultInsertCommentProposal(
         documentOffset,
         0));
+
+    if (includeUserTemplates)
+    {
+      List user = Arrays.asList(fUserTemplates.computeCompletionProposals(
+          viewer,
+          documentOffset));
+      proposals.addAll(0, user);
+    }
   }
 
   protected ICompletionProposal[] computeRootTagProposal(
+      IDocument document,
+      int completionOffset,
       XMLNode currentNode,
-      XMLNode rootNode,
-      int documentOffset)
+      XMLNode rootNode)
   {
     XMLNode realRootNode = null;
     List children = rootNode.getChildren();
@@ -190,27 +259,37 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     if (name.endsWith(".jwc"))
     {
       proposals = DTDProposalGenerator.getNewElementCompletionProposals(
+          document,
+          completionOffset,
+          0,
           fDTD,
           "component-specification");
     } else if (name.endsWith(".page"))
     {
       proposals = DTDProposalGenerator.getNewElementCompletionProposals(
+          document,
+          completionOffset,
+          0,
           fDTD,
           "page-specification");
     } else if (name.endsWith(".application"))
     {
       proposals = DTDProposalGenerator.getNewElementCompletionProposals(
+          document,
+          completionOffset,
+          0,
           fDTD,
           "application");
     } else if (name.endsWith(".library"))
     {
       proposals = DTDProposalGenerator.getNewElementCompletionProposals(
+          document,
+          completionOffset,
+          0,
           fDTD,
           "library-specification");
     }
-    CompletionProposal proposal = (CompletionProposal) proposals.get(0);
-    proposal.setReplacementOffset(documentOffset);
-    proposal.setReplacementLength(0);
+
     if (proposals == null || proposals.isEmpty())
       return NoProposals;
     return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals
@@ -228,7 +307,11 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     XMLNode parent = artifact.getParent();
 
     if (parent.getType().equals("/"))
-      return computeRootTagProposal(artifact, parent, documentOffset);
+      return computeRootTagProposal(
+          viewer.getDocument(),
+          documentOffset,
+          artifact,
+          parent);
 
     if (type == ITypeConstants.TEXT || name == null)
       name = parent.getName();
@@ -236,17 +319,23 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     if (name == null)
       return NoProposals;
 
-    List proposals = DTDProposalGenerator.getRawNewTagProposals(fDTD, name, null);
-    if (proposals != null && !proposals.isEmpty())
-    {
-      for (Iterator iterator = proposals.iterator(); iterator.hasNext();)
-      {
-        CompletionProposal p = (CompletionProposal) iterator.next();
-        p.setReplacementOffset(documentOffset);
-        p.setReplacementLength(0);
-      }
-    }
-    computeAdditionalProposals(viewer, documentOffset, proposals);
+    List proposals = DTDProposalGenerator.getRawNewTagProposals(
+        viewer.getDocument(),
+        documentOffset,
+        0,
+        fDTD,
+        name,
+        null);
+    //    if (proposals != null && !proposals.isEmpty())
+    //    {
+    //      for (Iterator iterator = proposals.iterator(); iterator.hasNext();)
+    //      {
+    //        CompletionProposal p = (CompletionProposal) iterator.next();
+    //        p.setReplacementOffset(documentOffset);
+    //        p.setReplacementLength(0);
+    //      }
+    //    }
+    computeAdditionalProposals(viewer, documentOffset, proposals, false);
     if (proposals.isEmpty())
       return NoSuggestions;
     return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals

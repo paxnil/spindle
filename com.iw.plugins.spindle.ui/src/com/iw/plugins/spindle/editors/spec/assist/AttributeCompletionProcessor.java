@@ -59,10 +59,10 @@ import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.AbstractRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.spec.SpecEditor;
 

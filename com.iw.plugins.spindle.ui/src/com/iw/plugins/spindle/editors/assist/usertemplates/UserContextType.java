@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editors.spec.assist.usertemplates;
+package com.iw.plugins.spindle.editors.assist.usertemplates;
 
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.TemplateContextType;
@@ -31,29 +31,21 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
- * XMLFileContextType context type for creating new xml files.
+ *  UserContextType
  * 
  * @author glongman@gmail.com
  *  
  */
-public class XMLFileContextType extends TemplateContextType
+public class UserContextType extends TemplateContextType
 {
   /** This context's id's */
-  public static final String APPLICATION_FILE_CONTEXT_TYPE = UIPlugin.PLUGIN_ID
-      + ".templateContextType.applicationFile";
-  public static final String LIBRARY_FILE_CONTEXT_TYPE = UIPlugin.PLUGIN_ID
-      + ".templateContextType.libraryFile";
-  public static final String PAGE_FILE_CONTEXT_TYPE = UIPlugin.PLUGIN_ID
-      + ".templateContextType.pageFile";
-  public static final String COMPONENT_FILE_CONTEXT_TYPE = UIPlugin.PLUGIN_ID
-      + ".templateContextType.componentFile";
-  public static final String TEMPLATE_FILE_CONTEXT_TYPE = UIPlugin.PLUGIN_ID
-      + ".templateContextType.templateFile";
+  public static final String USER_CONTEXT_TYPE = UIPlugin.PLUGIN_ID
+      + ".templateContextType.user";
 
   /**
    * Creates a new XML context type.
    */
-  public XMLFileContextType()
+  public UserContextType()
   {
     addGlobalResolvers();
   }

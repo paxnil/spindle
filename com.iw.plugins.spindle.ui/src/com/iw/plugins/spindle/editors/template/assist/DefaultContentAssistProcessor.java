@@ -42,8 +42,8 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
+import com.iw.plugins.spindle.editors.assist.usertemplates.UserTemplateCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;
-import com.iw.plugins.spindle.editors.spec.assist.usertemplates.UserTemplateCompletionProcessor;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
@@ -108,13 +108,14 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
       }
       addLeadingSpace = true;
 
-//    } 
-//    else if (baseState == XMLNode.ATT_VALUE )
-//    {
-//      return new ICompletionProposal[]{new CompletionProposal("'"
-//          + ProposalFactory.DEFAULT_ATTR_VALUE + "'", documentOffset, 0, new Point(
-//          1,
-//          ProposalFactory.DEFAULT_ATTR_VALUE.length()))};
+      //    }
+      //    else if (baseState == XMLNode.ATT_VALUE )
+      //    {
+      //      return new ICompletionProposal[]{new CompletionProposal("'"
+      //          + ProposalFactory.DEFAULT_ATTR_VALUE + "'", documentOffset, 0, new
+      // Point(
+      //          1,
+      //          ProposalFactory.DEFAULT_ATTR_VALUE.length()))};
     } else
     {
       //ensure that we are in a legal position to insert. ie. not inside
@@ -253,8 +254,9 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
       IDocument document,
       int documentOffset,
       boolean addLeadingSpace,
-      
-      String jwcid,String tagName,
+
+      String jwcid,
+      String tagName,
       HashSet existingAttributeNames,
       List proposals)
   {
@@ -262,14 +264,15 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
     List excludeName = new ArrayList();
 
     proposals.addAll(TemplateContentAssistProcessor.getParameterProposals(
-        (TemplateEditor) fEditor,
+        (TemplateEditor) fEditor, 
         document,
         documentOffset,
         0,
         null,
         jwcid,
         existingAttributeNames,
-        excludeName));
+        excludeName,
+        addLeadingSpace));
 
     proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
         fDTD,
@@ -279,7 +282,8 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
         tagName,
         excludeName,
         existingAttributeNames,
-        null));
+        null,
+        addLeadingSpace));
   }
 
   protected void computeAttributeNameReplacements(
@@ -313,7 +317,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
         fragment,
         jwcid,
         existingAttributeNames,
-        usedNames));
+        usedNames, false));
 
     proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
         fDTD,
@@ -323,7 +327,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
         tagName,
         usedNames,
         existingAttributeNames,
-        fragment));
+        fragment, false));
   }
 
   private ICompletionProposal[] computeTextProposals(

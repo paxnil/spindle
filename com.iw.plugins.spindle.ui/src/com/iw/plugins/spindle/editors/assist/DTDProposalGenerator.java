@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors;
+package com.iw.plugins.spindle.editors.assist;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,13 +37,13 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import org.apache.tapestry.util.MultiKey;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.swt.graphics.Image;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.editors.assist.CompletionProposal;
 import com.wutka.dtd.DTD;
 import com.wutka.dtd.DTDAttribute;
 import com.wutka.dtd.DTDComment;
@@ -59,13 +59,46 @@ import com.wutka.dtd.DTDSequence;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: DTDProposalGenerator.java,v 1.2 2003/12/13 14:43:12 glongman
- *          Exp $
+ *                     Exp $
  */
 public class DTDProposalGenerator
 {
 
-  private static final String DEFAULT_NEW_ELEMENT_PROPOSAL = "DEFAULT_NEW_ELEMENT_PROPOSAL";
-  private static final String OPTIONAL_NEW_ELEMENT_PROPOSAL = "OPTIONAL_NEW_ELEMENT_PROPOSAL";
+  static public class ElementInfo
+  {
+    public String elementName;
+    public boolean empty;
+    public String[][] attrvalues;
+    public String comment;
+    public Image image; // not copied!
+    public int order; //not copied!
+    public int totalAttrCount;
+    ElementInfo copy()
+    {
+      ElementInfo result = new ElementInfo();
+      result.elementName = elementName;
+      result.empty = empty;
+      result.attrvalues = attrvalues;
+      result.comment = comment;
+      result.totalAttrCount = totalAttrCount;
+      return result;
+    }
+    public OrderedProposal generate(
+        IDocument document,
+        int completionOffset,
+        int completionLength)
+    {
+      return ProposalFactory.getTagProposal(
+          document,
+          completionOffset,
+          completionLength,
+          this);
+    }
+  }
+
+  private static final String DEFAULT_NEW_ELEMENT_INFO = "DEFAULT_NEW_ELEMENT_INFO";
+  private static final String OPTIONAL_NEW_ELEMENT_INFO = "OPTIONAL_NEW_ELEMENT_INFO";
+
   private static final String ELEMENT_ATTRIBUTES = "ELEMENT_ATTRIBUTES";
   private static final String ELEMENT_REQUIRED_ATTRIBUTES = "ELEMENT_REQUIRED_ATTRIBUTES";
   private static final String ELEMENT_ATTRIBUTE_DEFAULT_VALUE = "ELEMENT_ATTRIBUTE_DEFAULT_VALUE";
@@ -93,7 +126,7 @@ public class DTDProposalGenerator
    * @param dtd the DTD we are basing the lookup on
    * @param elementName the element whose children we are seeking.
    * @return a String containing the child names, or null if the elementName is
-   *         not a valid element in the DTDs
+   *                 not a valid element in the DTDs
    */
   private static String getAllowedElements(DTD dtd, String elementName)
   {
@@ -114,11 +147,6 @@ public class DTDProposalGenerator
     }
 
     return result;
-  }
-
-  public static List getAllElementNames(DTD dtd)
-  {
-    return internalGetAllElementNames(dtd);
   }
 
   private static List internalGetAllElementNames(DTD dtd)
@@ -152,9 +180,9 @@ public class DTDProposalGenerator
    * @param dtd the DTD in use by the document
    * @param parentElement the name of the element that is parent
    * @param lastChild the name of the last child of the parent before the place
-   *          we are interested
+   *                     we are interested
    * @param sort if true place the last child at the front of a sorted list of
-   *          elementNames
+   *                     elementNames
    * @return list of String
    */
   public static List getAllowedChildren(
@@ -263,48 +291,60 @@ public class DTDProposalGenerator
     return result;
   }
 
-  public static List getNewElementCompletionProposals(DTD dtd, String elementName)
+  public static List getNewElementCompletionProposals(
+      IDocument document,
+      int completionOffset,
+      int completionLength,
+      DTD dtd,
+      String elementName)
   {
     if (dtd == null)
       return Collections.EMPTY_LIST;
 
-    return internalGetNewElementCompletionProposals(dtd, elementName);
+    return internalGetNewElementCompletionProposals(
+        document,
+        completionLength,
+        completionLength,
+        dtd,
+        elementName);
   }
 
-  private static List internalGetNewElementCompletionProposals(DTD dtd, String elementName)
+  private static List internalGetNewElementCompletionProposals(
+      IDocument document,
+      int completionOffset,
+      int completionLength,
+      DTD dtd,
+      String elementName)
   {
     Assert.isLegal(dtd != null);
     Assert.isLegal(elementName != null);
 
     String useName = elementName.toLowerCase();
     MultiKey defaultKey = new MultiKey(new Object[]{dtd, useName,
-        DEFAULT_NEW_ELEMENT_PROPOSAL}, false);
-    Object defaultProposal = DTDInfoMap.get(defaultKey);
+        DEFAULT_NEW_ELEMENT_INFO}, false);
+    ElementInfo defaultProposal = (ElementInfo) DTDInfoMap.get(defaultKey);
     if (defaultProposal == null)
     {
-      computeNewElementProposals(dtd, useName);
+      computeNewElementProposalInfos(dtd, useName);
     }
-    defaultProposal = DTDInfoMap.get(defaultKey);
+    defaultProposal = (ElementInfo) DTDInfoMap.get(defaultKey);
     if (defaultProposal == null)
       return Collections.EMPTY_LIST;
 
     ArrayList result = new ArrayList();
-    result.add(defaultProposal);
+    result.add(defaultProposal.generate(document, completionOffset, completionLength));
 
     MultiKey optionalKey = new MultiKey(new Object[]{dtd, useName,
-        OPTIONAL_NEW_ELEMENT_PROPOSAL}, false);
-    Object optionalProposal = DTDInfoMap.get(optionalKey);
+        OPTIONAL_NEW_ELEMENT_INFO}, false);
+    ElementInfo optionalProposal = (ElementInfo) DTDInfoMap.get(optionalKey);
 
     if (optionalProposal != null)
-      result.add(optionalProposal);
+      result.add(optionalProposal.generate(document, completionOffset, completionLength));
 
     return result;
   }
-  /**
-   * @param dtd
-   * @param elementName
-   */
-  private static void computeNewElementProposals(DTD dtd, String elementName)
+
+  private static void computeNewElementProposalInfos(DTD dtd, String elementName)
   {
     Assert.isLegal(dtd != null);
 
@@ -313,124 +353,228 @@ public class DTDProposalGenerator
     if (element == null)
       return;
 
-    String commentString = internalGetElementComment(dtd, elementName);
+    ElementInfo emptyInfo = new ElementInfo();
+    emptyInfo.elementName = elementName;
+    emptyInfo.attrvalues = new String[0][];
+    emptyInfo.empty = true;
+    emptyInfo.comment = internalGetElementComment(dtd, elementName);
 
-    String emptyOption = null;
-    String nonEmptyOption = null;
-    String prelude = "<" + elementName;
+    boolean allowsChildren = element.getContent().getItemType() != DTDItemType.DTD_EMPTY;
+    emptyInfo.totalAttrCount = internalGetAttributes(dtd, elementName).size();
+    boolean hasAttibutes = emptyInfo.totalAttrCount != 0;
 
-    DTDItem content = element.getContent();
-
-    boolean allowsChildren = content.getItemType() != DTDItemType.DTD_EMPTY;
-
-    int offset = -1;
-    CompletionProposal emptyProposal;
-    CompletionProposal nonEmptyProposal = null;
-
-    boolean hasAttibutes = !internalGetAttributes(dtd, elementName).isEmpty();
     if (hasAttibutes)
     {
       List requiredAttributes = internalGetRequiredAttributes(dtd, elementName);
       if (!requiredAttributes.isEmpty())
       {
-        prelude += " ";
+        String[][] attrValues = new String[requiredAttributes.size()][];
+        int i = 0;
         for (Iterator iter = requiredAttributes.iterator(); iter.hasNext();)
         {
           String attrName = (String) iter.next();
-          prelude += attrName + "=\"\"";
-          if (offset == -1)
-            offset = prelude.length() - 1;
-          if (iter.hasNext())
-            prelude += " ";
+          String defaultValue = internalGetDefaultAttributeValue(
+              dtd,
+              elementName,
+              attrName);
+          attrValues[i++] = new String[]{attrName,
+              defaultValue == "" ? null : defaultValue};
         }
+        emptyInfo.attrvalues = attrValues;
       }
     }
 
-    emptyOption = prelude + "/>";
-
-    if (offset == -1 && hasAttibutes)
-    {
-      offset = 1 + elementName.length();
-    } else if (offset == -1)
-    {
-      offset = emptyOption.length();
-    }
-
+    ElementInfo nonEmptyInfo = null;
     if (allowsChildren)
     {
-      nonEmptyOption = prelude + "></" + elementName + ">";
+      nonEmptyInfo = emptyInfo.copy();
+      nonEmptyInfo.empty = false;
     }
 
-    emptyProposal = new CompletionProposal(
-        emptyOption,
-        -1,
-        -1,
-        new Point(offset, 0),
-        null,
-        elementName + " (empty)",
-        null,
-        commentString != null && commentString.length() > 0 ? commentString : emptyOption);
-
-    if (nonEmptyOption != null)
-    {
-      if (!hasAttibutes)
-        offset -= 1;
-
-      nonEmptyProposal = new CompletionProposal(nonEmptyOption, -1, -1, new Point(
-          offset,
-          0), null, elementName, null, commentString != null
-          && commentString.length() > 0 ? commentString : nonEmptyOption);
-    }
-
-    CompletionProposal defaultProposal = emptyProposal;
-    CompletionProposal optionalProposal = nonEmptyProposal;
+    ElementInfo defaultInfo = emptyInfo;
+    ElementInfo optionalInfo = nonEmptyInfo;
 
     if (isTapestryDTD(dtd))
     {
-      if (nonEmptyProposal != null
+      if (nonEmptyInfo != null
           && (elementName.equals("application") || elementName.equals("library")
               || elementName.equals("component-specification")
               || elementName.equals("page-specification")
               || elementName.equals("description") || elementName.equals("extension")))
       {
         // non empty only!
-        defaultProposal = nonEmptyProposal;
-        optionalProposal = null;
-      } else if (nonEmptyProposal != null
+        defaultInfo = nonEmptyInfo;
+        optionalInfo = null;
+      } else if (nonEmptyInfo != null
           && (elementName.equals("component") || elementName.equals("listener-binding")))
       { // non empty first!
-        defaultProposal = nonEmptyProposal;
-        optionalProposal = emptyProposal;
+        defaultInfo = nonEmptyInfo;
+        optionalInfo = emptyInfo;
       }
-      defaultProposal.setImage(Images.getSharedImage("bullet.gif"));
-      if (optionalProposal != null)
-        optionalProposal.setImage(Images.getSharedImage("bullet_d.gif"));
+      defaultInfo.image = Images.getSharedImage("bullet.gif");
+      if (optionalInfo != null)
+        optionalInfo.image = Images.getSharedImage("bullet_d.gif");
 
     } else
     {
       //          This is for the XHTML strict dtd
-      if (nonEmptyProposal != null)
+      if (nonEmptyInfo != null)
       {
-        defaultProposal = nonEmptyProposal;
-        optionalProposal = emptyProposal;
+        defaultInfo = nonEmptyInfo;
+        optionalInfo = emptyInfo;
       }
-      defaultProposal.setYOrder(100);
-      defaultProposal.setImage(Images.getSharedImage("bullet_web.gif"));
-      if (optionalProposal != null)
+      defaultInfo.order = 100;
+      defaultInfo.image = Images.getSharedImage("bullet_web.gif");
+      if (optionalInfo != null)
       {
-        optionalProposal.setYOrder(101);
-        optionalProposal.setImage(Images.getSharedImage("bullet_web.gif"));
+        optionalInfo.order = 101;
+        optionalInfo.image = Images.getSharedImage("bullet_web.gif");
       }
 
     }
 
     MultiKey defaultKey = new MultiKey(new Object[]{dtd, elementName,
-        DEFAULT_NEW_ELEMENT_PROPOSAL}, false);
-    DTDInfoMap.put(defaultKey, defaultProposal);
+        DEFAULT_NEW_ELEMENT_INFO}, false);
+    DTDInfoMap.put(defaultKey, defaultInfo);
     MultiKey optionalKey = new MultiKey(new Object[]{dtd, elementName,
-        OPTIONAL_NEW_ELEMENT_PROPOSAL}, false);
-    DTDInfoMap.put(optionalKey, optionalProposal);
+        OPTIONAL_NEW_ELEMENT_INFO}, false);
+    DTDInfoMap.put(optionalKey, optionalInfo);
   }
+  //  /**
+  //   * @deprecated
+  //   * @param dtd
+  //   * @param elementName
+  //   */
+  //  private static void computeNewElementProposals(DTD dtd, String elementName)
+  //  {
+  //    Assert.isLegal(dtd != null);
+  //
+  //    DTDElement element = (DTDElement) dtd.elements.get(elementName);
+  //
+  //    if (element == null)
+  //      return;
+  //
+  //    String commentString = internalGetElementComment(dtd, elementName);
+  //
+  //    String emptyOption = null;
+  //    String nonEmptyOption = null;
+  //    String prelude = "<" + elementName;
+  //
+  //    DTDItem content = element.getContent();
+  //
+  //    boolean allowsChildren = content.getItemType() != DTDItemType.DTD_EMPTY;
+  //
+  //    int offset = -1;
+  //    CompletionProposal emptyProposal;
+  //    CompletionProposal nonEmptyProposal = null;
+  //
+  //    boolean hasAttibutes = !internalGetAttributes(dtd, elementName).isEmpty();
+  //    if (hasAttibutes)
+  //    {
+  //      List requiredAttributes = internalGetRequiredAttributes(dtd, elementName);
+  //      if (!requiredAttributes.isEmpty())
+  //      {
+  //        prelude += " ";
+  //        for (Iterator iter = requiredAttributes.iterator(); iter.hasNext();)
+  //        {
+  //          String attrName = (String) iter.next();
+  //          prelude += attrName + "=\"\"";
+  //          if (offset == -1)
+  //            offset = prelude.length() - 1;
+  //          if (iter.hasNext())
+  //            prelude += " ";
+  //        }
+  //      }
+  //    }
+  //
+  //    emptyOption = prelude + "/>";
+  //
+  //    if (offset == -1 && hasAttibutes)
+  //    {
+  //      offset = 1 + elementName.length();
+  //    } else if (offset == -1)
+  //    {
+  //      offset = emptyOption.length();
+  //    }
+  //
+  //    if (allowsChildren)
+  //    {
+  //      nonEmptyOption = prelude + "></" + elementName + ">";
+  //    }
+  //
+  //    emptyProposal = new CompletionProposal(
+  //        emptyOption,
+  //        -1,
+  //        -1,
+  //        new Point(offset, 0),
+  //        null,
+  //        elementName + " (empty)",
+  //        null,
+  //        commentString != null && commentString.length() > 0 ? commentString :
+  // emptyOption);
+  //
+  //    if (nonEmptyOption != null)
+  //    {
+  //      if (!hasAttibutes)
+  //        offset -= 1;
+  //
+  //      nonEmptyProposal = new CompletionProposal(nonEmptyOption, -1, -1, new
+  // Point(
+  //          offset,
+  //          0), null, elementName, null, commentString != null
+  //          && commentString.length() > 0 ? commentString : nonEmptyOption);
+  //    }
+  //
+  //    CompletionProposal defaultProposal = emptyProposal;
+  //    CompletionProposal optionalProposal = nonEmptyProposal;
+  //
+  //    if (isTapestryDTD(dtd))
+  //    {
+  //      if (nonEmptyProposal != null
+  //          && (elementName.equals("application") || elementName.equals("library")
+  //              || elementName.equals("component-specification")
+  //              || elementName.equals("page-specification")
+  //              || elementName.equals("description") || elementName.equals("extension")))
+  //      {
+  //        // non empty only!
+  //        defaultProposal = nonEmptyProposal;
+  //        optionalProposal = null;
+  //      } else if (nonEmptyProposal != null
+  //          && (elementName.equals("component") ||
+  // elementName.equals("listener-binding")))
+  //      { // non empty first!
+  //        defaultProposal = nonEmptyProposal;
+  //        optionalProposal = emptyProposal;
+  //      }
+  //      defaultProposal.setImage(Images.getSharedImage("bullet.gif"));
+  //      if (optionalProposal != null)
+  //        optionalProposal.setImage(Images.getSharedImage("bullet_d.gif"));
+  //
+  //    } else
+  //    {
+  //      // This is for the XHTML strict dtd
+  //      if (nonEmptyProposal != null)
+  //      {
+  //        defaultProposal = nonEmptyProposal;
+  //        optionalProposal = emptyProposal;
+  //      }
+  //      defaultProposal.setYOrder(100);
+  //      defaultProposal.setImage(Images.getSharedImage("bullet_web.gif"));
+  //      if (optionalProposal != null)
+  //      {
+  //        optionalProposal.setYOrder(101);
+  //        optionalProposal.setImage(Images.getSharedImage("bullet_web.gif"));
+  //      }
+  //
+  //    }
+  //
+  //    MultiKey defaultKey = new MultiKey(new Object[]{dtd, elementName,
+  //        DEFAULT_NEW_ELEMENT_PROPOSAL}, false);
+  //    DTDInfoMap.put(defaultKey, defaultProposal);
+  //    MultiKey optionalKey = new MultiKey(new Object[]{dtd, elementName,
+  //        OPTIONAL_NEW_ELEMENT_PROPOSAL}, false);
+  //    DTDInfoMap.put(optionalKey, optionalProposal);
+  //  }
 
   public static String getElementComment(DTD dtd, String elementName)
   {
@@ -543,49 +687,6 @@ public class DTDProposalGenerator
       return Collections.EMPTY_LIST;
     return attributes;
   }
-
-  //    public static boolean isElementAllowedInDocument(DTD dtd, String
-  // rootElementName, String elementName)
-  //    {
-  //        Assert.isNotNull(dtd);
-  //        return internalGetAllElementNames(dtd).contains(elementName);
-  //    }
-  //
-  //    private static List internalGetAllElementsByRoot(DTD dtd, String
-  // rootElementName)
-  //    {
-  //        if (dtd == null)
-  //            return Collections.EMPTY_LIST;
-  //
-  //        MultiKey key = new MultiKey(new Object[] { dtd, rootElementName,
-  // ALL_ELEMENTS_BY_ROOT }, false);
-  //        List result = (List) DTDInfoMap.get(key);
-  //         if (result == null)
-  //        {
-  //            HashSet collectedSet = new HashSet();
-  //            result.add(rootElementName);
-  //            collectChildElements(dtd, collectedSet, getAllowedChildren(dtd,
-  // rootElementName, null, false));
-  //            DTDInfoMap.put(key, Collections.unmodifiableList(new
-  // ArrayList(collectedSet)));
-  //            return (List) DTDInfoMap.get(key);
-  //        }
-  //        return result;
-  //
-  //    }
-  //    
-  //    private static void collectChildElements(DTD dtd, HashSet target, List
-  // childNames) {
-  //        for (Iterator iter = childNames.iterator(); iter.hasNext();)
-  //        {
-  //            String childName = (String) iter.next();
-  //            if (target.contains(childName))
-  //                continue;
-  //           target.add(childName);
-  //           collectChildElements(dtd, target, getAllowedChildren(dtd, childName, null,
-  // false));
-  //        }
-  //    }
 
   public static String getTapestryDefaultValue(
       DTD dtd,
@@ -704,7 +805,12 @@ public class DTDProposalGenerator
     return result;
   }
 
-  public static List findRawNewTagProposals(DTD dtd, XMLNode artifact, int documentOffset)
+  public static List findRawNewTagProposals(
+      IDocument document,
+      int completionOffset,
+      int completionLength,
+      DTD dtd,
+      XMLNode artifact)
   {
     if (dtd == null)
       return Collections.EMPTY_LIST;
@@ -718,7 +824,12 @@ public class DTDProposalGenerator
       {
         String rootNode = parent.rootNodeId;
         if (rootNode != null)
-          return internalGetNewElementCompletionProposals(dtd, rootNode);
+          return internalGetNewElementCompletionProposals(
+              document,
+              completionOffset,
+              completionLength,
+              dtd,
+              rootNode);
 
       } else
       {
@@ -734,7 +845,13 @@ public class DTDProposalGenerator
               previousSibling = artifact.getPreviousSiblingTag(parentAllowedContent);
             if (previousSibling != null)
               sibName = previousSibling.getName();
-            return getRawNewTagProposals(dtd, parentName, sibName);
+            return getRawNewTagProposals(
+                document,
+                completionOffset,
+                completionLength,
+                dtd,
+                parentName,
+                sibName);
           }
         }
       }
@@ -743,32 +860,58 @@ public class DTDProposalGenerator
 
   }
 
-  public static List getRawNewTagProposalsSimple(DTD dtd, XMLNode artifact)
+  public static List getRawNewTagProposalsSimple(
+      IDocument document,
+      int completionOffset,
+      int completionLength,
+      DTD dtd,
+      XMLNode artifact)
   {
     if (dtd == null)
       return Collections.EMPTY_LIST;
 
     XMLNode parent = artifact.getParent();
     if (parent == null || parent.getType().equals("/") || parent.getName() == null)
-      return getAllElementProposals(dtd);
+      return getAllElementProposals(document, completionOffset, completionLength, dtd);
 
-    return getRawNewTagProposals(dtd, parent.getName(), null);
+    return getRawNewTagProposals(
+        document,
+        completionLength,
+        completionLength,
+        dtd,
+        parent.getName(),
+        null);
   }
 
-  public static List getRawNewTagProposals(DTD dtd, String parentName, String sibName)
+  public static List getRawNewTagProposals(
+      IDocument document,
+      int completionOffset,
+      int completionLength,
+      DTD dtd,
+      String parentName,
+      String sibName)
   {
     List allowedChildren = getAllowedChildren(dtd, parentName, sibName, false);
     List result = new ArrayList();
     for (Iterator iter = allowedChildren.iterator(); iter.hasNext();)
     {
       String tagName = (String) iter.next();
-      result.addAll(internalGetNewElementCompletionProposals(dtd, tagName));
+      result.addAll(internalGetNewElementCompletionProposals(
+          document,
+          completionOffset,
+          completionLength,
+          dtd,
+          tagName));
 
     }
     return result;
   }
 
-  public static List getAllElementProposals(DTD dtd)
+  private static List getAllElementProposals(
+      IDocument document,
+      int completionOffset,
+      int completionLength,
+      DTD dtd)
   {
     if (dtd == null)
       return Collections.EMPTY_LIST;
@@ -777,7 +920,12 @@ public class DTDProposalGenerator
     for (Iterator iter = allElements.iterator(); iter.hasNext();)
     {
       String elementName = (String) iter.next();
-      result.addAll(internalGetNewElementCompletionProposals(dtd, elementName));
+      result.addAll(internalGetNewElementCompletionProposals(
+          document,
+          completionOffset,
+          completionLength,
+          dtd,
+          elementName));
     }
     return result;
   }

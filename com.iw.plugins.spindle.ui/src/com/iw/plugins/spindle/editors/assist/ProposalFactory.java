@@ -36,6 +36,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator.ElementInfo;
 
 /**
  * ProposalFactory factory methods for common proposals.
@@ -76,8 +77,7 @@ public class ProposalFactory
   public static final String DEFAULT_ATTR_VALUE = "";
 
   /**
-   * @deprecated
-   * @param attributeName
+   * @deprecated @param attributeName
    * @param addLeadingSpace
    * @param replacementOffset
    * @return
@@ -97,8 +97,7 @@ public class ProposalFactory
   }
 
   /**
-   * @deprecated
-   * @param attributeName
+   * @deprecated @param attributeName
    * @param displayName
    * @param defaultValue
    * @param extraInfo
@@ -138,10 +137,33 @@ public class ProposalFactory
       String extraInfo,
       int yOrder)
   {
-    
+
     if (image == null)
       image = Images.getSharedImage("bullet.gif");
-    return new SpindleTemplateProposal(template, context, region, extraInfo, image, yOrder);
+    return new SpindleTemplateProposal(
+        template,
+        context,
+        region,
+        extraInfo,
+        image,
+        yOrder);
+  }
+
+  public static OrderedProposal getTagProposal(
+      IDocument document,
+      int completionOffset,
+      int completionLength,
+      DTDProposalGenerator.ElementInfo info)
+  {
+    TagTemplateContext context = new TagTemplateContext(
+        document,
+        completionOffset,
+        completionLength,
+        info);
+
+    return createTemplateProposal(context.getTemplate(), context, new Region(
+        completionOffset,
+        completionLength), info.image, info.comment, info.order);
   }
 
   public static OrderedProposal getElementAttributeProposal(
@@ -161,16 +183,10 @@ public class ProposalFactory
         completionLength,
         addLeadingSpace);
     context.setAttributeName(attributeName);
-  
-    return createTemplateProposal(
-        context.getTemplate(),
-        context,
-        new Region(completionOffset, completionLength),
-        image,
-        extraInfo,
-        yOrder);
+
+    return createTemplateProposal(context.getTemplate(), context, new Region(
+        completionOffset,
+        completionLength), image, extraInfo, yOrder);
   }
-  
-  
 
 }

@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editors.assist;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
@@ -41,16 +42,16 @@ import com.iw.plugins.spindle.editors.Editor;
 import com.wutka.dtd.DTD;
 
 /**
- * Base class for all content assist processors. 
+ * Base class for all content assist processors.
  *  
  */
 public abstract class AbstractContentAssistProcessor implements IContentAssistProcessor
 {
- 
+
   protected static final ICompletionProposal[] NoSuggestions = new ICompletionProposal[]{
       new AbstractContentAssistProcessor.MessageProposal("no suggestions available"),
       new AbstractContentAssistProcessor.MessageProposal("")};
-  protected static final ICompletionProposal[] NoProposals =NoSuggestions;
+  protected static final ICompletionProposal[] NoProposals = NoSuggestions;
 
   protected static final IContextInformation[] NoInformation = new IContextInformation[0];
 
@@ -60,13 +61,11 @@ public abstract class AbstractContentAssistProcessor implements IContentAssistPr
       .getPreferenceStore();
   protected boolean fDoingContextInformation = false;
   protected DTD fDTD;
-  
-  
 
   public AbstractContentAssistProcessor(Editor editor)
   {
     this.fEditor = editor;
-    
+
   }
 
   protected abstract void init(IDocument document) throws IllegalStateException;
@@ -79,15 +78,17 @@ public abstract class AbstractContentAssistProcessor implements IContentAssistPr
       int documentOffset)
   {
     IDocument document = viewer.getDocument();
-    
+
     //TODO above is wrong as there may be other proposals offered!
 
     try
     {
       init(document);
-      Point p = viewer.getSelectedRange();
-      if (p.y > 0)
-        return NoProposals;
+//      ITextSelection selection = (ITextSelection) viewer.getSelectionProvider().getSelection();
+//      if (selection.getLength() > 0) {
+//        System.out.println(selection.getOffset()+" "+ selection.getLength());
+//      }
+       
 
       return doComputeCompletionProposals(viewer, documentOffset);
 

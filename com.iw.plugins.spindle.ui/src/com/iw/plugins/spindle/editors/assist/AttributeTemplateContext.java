@@ -35,7 +35,7 @@ import org.eclipse.jface.text.templates.TemplateTranslator;
 public class AttributeTemplateContext extends DocumentTemplateContext
 {
 
-  protected static final String DEFAULT_ATT_VALUE = "    ";
+  protected static final String DEFAULT_ATT_VALUE = "value";
 
   static final String ATTR_LEADING_SPACE_PATTERN = " ${attributeName}=\"${value}\"";
   static final String ATTR_NO_LEADING_SPACE_PATTERN = "${attributeName}=\"${value}\"";

@@ -43,10 +43,10 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
+import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.wutka.dtd.DTD;
@@ -57,9 +57,11 @@ import com.wutka.dtd.DTD;
  * 
  * @author glongman@intelligentworks.com
  */
-public abstract class TemplateContentAssistProcessor extends AbstractContentAssistProcessor
+public abstract class TemplateContentAssistProcessor
+    extends
+      AbstractContentAssistProcessor
 {
-  
+
   public static List getWebProposals(
       DTD dtd,
       IDocument document,
@@ -68,11 +70,12 @@ public abstract class TemplateContentAssistProcessor extends AbstractContentAssi
       String tagName,
       List excludeNames,
       HashSet existingAttributeNames,
-      String prefix)
+      String prefix,
+      boolean addLeadingSpace)
   {
-  
+
     List webAttributeNames;
-  
+
     if (dtd != null && tagName != null)
     {
       webAttributeNames = DTDProposalGenerator.getAttributes(dtd, tagName);
@@ -80,22 +83,24 @@ public abstract class TemplateContentAssistProcessor extends AbstractContentAssi
     {
       return Collections.EMPTY_LIST;
     }
-  
+
     List result = new ArrayList();
-  
+
     boolean ignorePrefix = prefix == null || prefix.trim().length() == 0;
-  
+    
+    List requiredAttributes = DTDProposalGenerator.getRequiredAttributes(dtd, tagName);
+
     for (Iterator iter = webAttributeNames.iterator(); iter.hasNext();)
     {
       String attrname = ((String) iter.next()).toLowerCase();
-  
+
       if (existingAttributeNames.contains(attrname))
         continue;
-  
+
       boolean match = true;
       if (!ignorePrefix)
         match = attrname.startsWith(prefix);
-  
+
       if (match && !excludeNames.contains(attrname))
       {
         result.add(ProposalFactory.getElementAttributeProposal(
@@ -103,10 +108,10 @@ public abstract class TemplateContentAssistProcessor extends AbstractContentAssi
             attrname,
             completionOffset,
             completionLength,
-            false,
-            Images.getSharedImage("bullet_web.gif"),
+            addLeadingSpace,
+            requiredAttributes.contains(attrname)? Images.getSharedImage("bullet_pink.gif") : Images.getSharedImage("bullet_web.gif"),
             null,
-            99));
+            requiredAttributes.contains(attrname)? 98: 99));
       }
     }
     return result;
@@ -120,12 +125,13 @@ public abstract class TemplateContentAssistProcessor extends AbstractContentAssi
       String prefix,
       String jwcid,
       HashSet existingAttributeNames,
-      List usedNames)
+      List usedNames,
+      boolean addLeadingSpace)
   {
     ArrayList result = new ArrayList();
     TemplateTapestryAccess helper = new TemplateTapestryAccess(editor);
     helper.setJwcid(jwcid);
-  
+
     UITapestryAccess.Result [] infos = null;
     try
     {
@@ -134,30 +140,30 @@ public abstract class TemplateContentAssistProcessor extends AbstractContentAssi
     {
       return Collections.EMPTY_LIST;
     }
-  
+
     boolean ignorePrefix = prefix == null || prefix.trim().length() == 0;
-  
+
     for (int i = 0; i < infos.length; i++)
     {
       String parameterName = infos[i].name;
-  
+
       if (existingAttributeNames.contains(parameterName))
         continue;
-  
+
       if (!ignorePrefix && !parameterName.toLowerCase().startsWith(prefix))
         continue;
-  
+
       if (usedNames.contains(parameterName))
         continue;
-  
+
       usedNames.add(parameterName);
-  
+
       result.add(ProposalFactory.getElementAttributeProposal(
           document,
           parameterName,
           completionOffset,
           completionLength,
-          false,
+          addLeadingSpace,
           (infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
               .getSharedImage("bullet.gif")),
           infos[i].description,
@@ -213,7 +219,5 @@ public abstract class TemplateContentAssistProcessor extends AbstractContentAssi
 
     return null;
   }
-
-  
 
 }

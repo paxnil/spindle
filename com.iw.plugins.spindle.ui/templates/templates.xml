@@ -112,10 +112,22 @@
 	context="com.iw.plugins.spindle.ui.templateContextType.templateFile" 
 	description="%templateSkel.description" 
 	id="com.iw.plugins.spindle.ui.templates.template1" 
-	name="component"><![CDATA[
+	name="template"><![CDATA[
 <span jwcid="$$content$$">
   ${cursor}
 </span>	]]>
+</template>
+<template 
+	context="com.iw.plugins.spindle.ui.templateContextType.user" 
+	description="%templateUser.description" 
+	id="com.iw.plugins.spindle.ui.templates.user1" 
+	name="comment"><![CDATA[
+<!-- 
+#############################
+#  	${comment_text}
+############################# 
+-->
+${cursor}]]>
 </template>
 
 </templates>

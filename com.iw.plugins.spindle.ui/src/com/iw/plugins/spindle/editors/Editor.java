@@ -50,7 +50,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -77,10 +79,7 @@ import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
  * @author glongman@intelligentworks.com
  *  
  */
-public abstract class Editor extends TextEditor
-    implements
-      IAdaptable,
-      IReconcileWorker
+public abstract class Editor extends TextEditor implements IAdaptable, IReconcileWorker
 {
 
   class PreferenceListener implements IPropertyChangeListener
@@ -132,16 +131,39 @@ public abstract class Editor extends TextEditor
   {
     super();
     setSourceViewerConfiguration(createSourceViewerConfiguration());
-    fPreferenceStore = new PreferenceStoreWrapper(UIPlugin
-        .getDefault()
-        .getPreferenceStore(), XMLPlugin.getDefault().getPreferenceStore());
-
-    setPreferenceStore(fPreferenceStore);
+    //    fPreferenceStore = new PreferenceStoreWrapper(UIPlugin
+    //        .getDefault()
+    //        .getPreferenceStore(), XMLPlugin.getDefault().getPreferenceStore());
+    //
+    //    setPreferenceStore(fPreferenceStore);
     setRangeIndicator(new DefaultRangeIndicator());
     setKeyBindingScopes(new String[]{"com.iw.plugins.spindle.ui.editor.commands"});
+
+  }
+
+  protected void initializeEditor()
+  {
+    super.initializeEditor();
+    IPreferenceStore store = createCombinedPreferenceStore();
     fPreferenceListener = new PreferenceListener();
-    UIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(
-        fPreferenceListener);
+    store.addPropertyChangeListener(fPreferenceListener);
+    setPreferenceStore(store);
+    setCompatibilityMode(false);
+  }
+
+  /**
+   * Creates a combined preference store, this store is read-only.
+   * 
+   * @return the combined preference store
+   * @since 3.0
+   */
+  private IPreferenceStore createCombinedPreferenceStore()
+  {
+    IPreferenceStore store = new PreferenceStoreWrapper(UIPlugin
+        .getDefault()
+        .getPreferenceStore(), XMLPlugin.getDefault().getPreferenceStore());
+    IPreferenceStore generalTextStore = EditorsUI.getPreferenceStore();
+    return new ChainedPreferenceStore(new IPreferenceStore[]{store, generalTextStore});
   }
 
   public void init(IEditorSite site, IEditorInput input) throws PartInitException

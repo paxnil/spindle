@@ -28,10 +28,10 @@ package com.iw.plugins.spindle.editors.spec.assist;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -45,9 +45,9 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 
 /**
@@ -56,7 +56,7 @@ import com.iw.plugins.spindle.editors.assist.ProposalFactory;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: TagCompletionProcessor.java,v 1.11.2.2 2004/06/22 12:23:19
- *          glongman Exp $
+ *                     glongman Exp $
  */
 public class TagCompletionProcessor extends SpecCompletionProcessor
 {
@@ -73,7 +73,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
-   *      int)
+   *              int)
    */
   protected ICompletionProposal[] doComputeCompletionProposals(
       ITextViewer viewer,
@@ -98,13 +98,13 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
       tag = tag.getNextArtifact();
 
     boolean atStart = tag.getType() == ITypeConstants.ENDTAG
-        ? tag.getOffset() + 2 == documentOffset : tag.getOffset() == documentOffset;
+        ? tag.getOffset() + 2 == documentOffset : tag.getOffset() + 1 == documentOffset;
 
     if ((tag.getType() == ITypeConstants.ENDTAG && !atStart))
       return NoSuggestions;
 
     boolean addLeadingSpace = false;
-    List proposals = new ArrayList();
+    List proposals;
 
     if (baseState == XMLNode.TAG)
     {
@@ -112,12 +112,6 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
       {
         String content = tag.getContent();
         int length = tag.getLength();
-        List candidates = DTDProposalGenerator.findRawNewTagProposals(
-            fDTD,
-            tag,
-            documentOffset);
-        if (candidates.isEmpty())
-          return NoSuggestions;
 
         int i = 0;
         if (!atStart)
@@ -132,33 +126,28 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         int replacementLength = i;
 
+        proposals = DTDProposalGenerator.findRawNewTagProposals(
+            document,
+            tag.getOffset(),
+            replacementLength,
+            fDTD,
+            tag);
+        if (proposals.isEmpty())
+          return NoSuggestions;
+
         if (length > 1 && documentOffset > tag.getOffset() + 1)
         {
           String match = tag.getContentTo(documentOffset, true).trim().toLowerCase();
-          for (Iterator iter = candidates.iterator(); iter.hasNext();)
+          for (Iterator iter = proposals.iterator(); iter.hasNext();)
           {
-            CompletionProposal proposal = (CompletionProposal) iter.next();
-            if (proposal.getDisplayString().startsWith(match))
-            {
-              proposal.setReplacementOffset(tag.getOffset());
-              proposal.setReplacementLength(replacementLength);
-              proposals.add(proposal);
-            }
+            ICompletionProposal proposal = (ICompletionProposal) iter.next();
+            if (!proposal.getDisplayString().startsWith(match))
+              iter.remove();
           }
           if (proposals.isEmpty())
-          {
-            return NoSuggestions;
-          }
 
-        } else
-        {
-          for (Iterator iter = candidates.iterator(); iter.hasNext();)
-          {
-            CompletionProposal proposal = (CompletionProposal) iter.next();
-            proposal.setReplacementOffset(tag.getOffset());
-            proposal.setReplacementLength(replacementLength);
-            proposals.add(proposal);
-          }
+            return NoSuggestions;
+
         }
         return (ICompletionProposal[]) proposals
             .toArray(new ICompletionProposal[proposals.size()]);
@@ -188,6 +177,8 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
       addLeadingSpace = baseState == XMLNode.AFTER_ATT_VALUE;
     }
 
+    proposals = new ArrayList();
+
     Map attrmap = tag.getAttributesMap();
 
     // all that's left is to compute attribute proposals...
@@ -203,22 +194,41 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
     {
 
       XMLNode existingAttr = tag.getAttributeAt(documentOffset);
+      HashSet attributes = new HashSet();
+      attributes.addAll(attrmap.keySet());
       if (existingAttr != null)
       {
+
         if (baseState != XMLNode.AFTER_ATT_VALUE && existingAttr != null
             && existingAttr.getOffset() < documentOffset)
         {
-          computeAttributeNameReplacements(documentOffset, existingAttr, tagName, attrmap
-              .keySet(), proposals);
+
+          computeAttributeNameReplacements(
+              document,
+              documentOffset,
+              existingAttr,
+              tagName,
+              attributes,
+              proposals);
         } else
         {
-          computeAttributeProposals(documentOffset, addLeadingSpace, tagName, attrmap
-              .keySet(), proposals);
+          computeAttributeProposals(
+              document,
+              documentOffset,
+              addLeadingSpace,
+              tagName,
+              attributes,
+              proposals);
         }
       } else
       {
-        computeAttributeProposals(documentOffset, addLeadingSpace, tagName, attrmap
-            .keySet(), proposals);
+        computeAttributeProposals(
+            document,
+            documentOffset,
+            addLeadingSpace,
+            tagName,
+            attributes,
+            proposals);
       }
     }
 
@@ -283,114 +293,144 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
    * @param proposals
    */
   private void computeAttributeNameReplacements(
+      IDocument document,
       int documentOffset,
       XMLNode existingAttribute,
       String tagName,
-      Set existingAttributeNames,
+      HashSet existingAttributeNames,
       List proposals)
   {
     String name = existingAttribute.getName();
     String value = existingAttribute.getAttributeValue();
-    //get index of whitespace
-    String matchString = existingAttribute
-        .getContentTo(documentOffset, false)
-        .toLowerCase();
-    if (matchString.length() > name.length())
+
+    if (value != null)
       return;
 
+    existingAttributeNames.remove(name);
+
+    String content = existingAttribute.getContent();
+    int start = 0;
+    for (; Character.isWhitespace(content.charAt(start)); start++);
+    String prefix = content.substring(start, start + name.length()).toLowerCase();
+
+    boolean ignorePrefix = prefix == null || prefix.trim().length() == 0;
+
     int replacementOffset = existingAttribute.getOffset();
-    int replacementLength = name.length();
+    int replacementLength = existingAttribute.getLength();
 
-    int matchLength = matchString.length();
-    if (matchLength == 0 || matchLength > name.length())
-      matchString = null;
-
-    try
-    {
-      List attrs = DTDProposalGenerator.getAttributes(fDTD, tagName);
-
-      if (!attrs.isEmpty())
-      {
-        List requiredAttributes = DTDProposalGenerator.getRequiredAttributes(
-            fDTD,
-            tagName);
-        for (Iterator iter = attrs.iterator(); iter.hasNext();)
-        {
-          String attrName = (String) iter.next();
-          if (existingAttributeNames.contains(attrName)
-              || (matchString != null && !attrName.startsWith(matchString)))
-            continue;
-
-          CompletionProposal proposal;
-          if (value == null)
-          {
-            proposal = new CompletionProposal(
-                attrName + "=\"\"",
-                replacementOffset,
-                replacementLength,
-                new Point(attrName.length(), 0),
-                requiredAttributes.contains(attrName) ? Images
-                    .getSharedImage("bullet_pink.gif") : Images
-                    .getSharedImage("bullet.gif"),
-                null,
-                null,
-                null);
-          } else
-          {
-            proposal = new CompletionProposal(
-                attrName,
-                replacementOffset,
-                replacementLength,
-                new Point(attrName.length(), 0),
-                requiredAttributes.contains(attrName) ? Images
-                    .getSharedImage("bullet_pink.gif") : Images
-                    .getSharedImage("bullet.gif"),
-                null,
-                null,
-                null);
-          }
-
-          proposals.add(proposal);
-        }
-      }
-
-    } catch (IllegalArgumentException e)
-    {
-      //do nothing
-    }
+    proposals.addAll(SpecCompletionProcessor.getAttributeProposals(
+        fDTD,
+        document,
+        replacementOffset,
+        replacementLength,
+        tagName,
+        new ArrayList(),
+        existingAttributeNames,
+        prefix,
+        false));
+    //    int matchLength = matchString.length();
+    //    if (matchLength == 0 || matchLength > name.length())
+    //      matchString = null;
+    //
+    //    try
+    //    {
+    //      List attrs = DTDProposalGenerator.getAttributes(fDTD, tagName);
+    //
+    //      if (!attrs.isEmpty())
+    //      {
+    //        List requiredAttributes = DTDProposalGenerator.getRequiredAttributes(
+    //            fDTD,
+    //            tagName);
+    //        for (Iterator iter = attrs.iterator(); iter.hasNext();)
+    //        {
+    //          String attrName = (String) iter.next();
+    //          if (existingAttributeNames.contains(attrName)
+    //              || (matchString != null && !attrName.startsWith(matchString)))
+    //            continue;
+    //
+    //          CompletionProposal proposal;
+    //          if (value == null)
+    //          {
+    //            proposal = new CompletionProposal(
+    //                attrName + "=\"\"",
+    //                replacementOffset,
+    //                replacementLength,
+    //                new Point(attrName.length(), 0),
+    //                requiredAttributes.contains(attrName) ? Images
+    //                    .getSharedImage("bullet_pink.gif") : Images
+    //                    .getSharedImage("bullet.gif"),
+    //                null,
+    //                null,
+    //                null);
+    //          } else
+    //          {
+    //            proposal = new CompletionProposal(
+    //                attrName,
+    //                replacementOffset,
+    //                replacementLength,
+    //                new Point(attrName.length(), 0),
+    //                requiredAttributes.contains(attrName) ? Images
+    //                    .getSharedImage("bullet_pink.gif") : Images
+    //                    .getSharedImage("bullet.gif"),
+    //                null,
+    //                null,
+    //                null);
+    //          }
+    //
+    //          proposals.add(proposal);
+    //        }
+    //      }
+    //
+    //    } catch (IllegalArgumentException e)
+    //    {
+    //      //do nothing
+    //    }
 
   }
 
   protected void computeAttributeProposals(
+      IDocument document,
       int documentOffset,
       boolean addLeadingSpace,
       String tagName,
-      Set existingAttributeNames,
+      HashSet existingAttributeNames,
       List proposals)
   {
 
-    List attrs = DTDProposalGenerator.getAttributes(fDTD, tagName);
+    proposals.addAll(SpecCompletionProcessor.getAttributeProposals(
+        fDTD,
+        document,
+        documentOffset,
+        0,
+        tagName,
+        new ArrayList(),
+        existingAttributeNames,
+        null,
+        addLeadingSpace));
 
-    if (!attrs.isEmpty())
-    {
-      List requiredAttributes = DTDProposalGenerator.getRequiredAttributes(fDTD, tagName);
-      for (Iterator iter = attrs.iterator(); iter.hasNext();)
-      {
-        String attrname = (String) iter.next();
-        if (!existingAttributeNames.contains(attrname))
-        {
-          CompletionProposal proposal = ProposalFactory.getAttributeProposal(
-              attrname,
-              addLeadingSpace,
-              documentOffset);
-
-          if (requiredAttributes.contains(attrname))
-            proposal.setImage(Images.getSharedImage("bullet_pink.gif"));
-          proposals.add(proposal);
-        }
-
-      }
-    }
+    //    List attrs = DTDProposalGenerator.getAttributes(fDTD, tagName);
+    //
+    //    if (!attrs.isEmpty())
+    //    {
+    //      List requiredAttributes =
+    // DTDProposalGenerator.getRequiredAttributes(fDTD, tagName);
+    //      for (Iterator iter = attrs.iterator(); iter.hasNext();)
+    //      {
+    //        String attrname = (String) iter.next();
+    //        if (!existingAttributeNames.contains(attrname))
+    //        {
+    //          CompletionProposal proposal = ProposalFactory.getAttributeProposal(
+    //              attrname,
+    //              addLeadingSpace,
+    //              documentOffset);
+    //
+    //          if (requiredAttributes.contains(attrname))
+    //            proposal.setImage(Images.getSharedImage("bullet_pink.gif"));
+    //          proposals.add(proposal);
+    //        }
+    //
+    //      }
+    //    }
 
   }
 
@@ -398,7 +438,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
-   *      int)
+   *              int)
    */
   public IContextInformation[] doComputeContextInformation(
       ITextViewer viewer,

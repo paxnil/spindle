@@ -43,9 +43,9 @@ import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
-import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
@@ -54,7 +54,7 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: TagContentAssistProcessor.java,v 1.11.2.2 2004/06/22 12:23:59
- *          glongman Exp $
+ *                     glongman Exp $
  */
 public class TagContentAssistProcessor extends TemplateContentAssistProcessor
 {
@@ -68,7 +68,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.editors.template.assist.AbstractContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
-   *      int)
+   *              int)
    */
   protected ICompletionProposal[] doComputeCompletionProposals(
       ITextViewer viewer,
@@ -92,15 +92,9 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
       boolean canInsertNewTag = tag.getAttributes().isEmpty() && !tag.isTerminated();
       if (fDTD != null && (atStart || canInsertNewTag))
       {
-        List allElementProposals = DTDProposalGenerator.getRawNewTagProposalsSimple(
-            fDTD,
-            tag);
-        if (allElementProposals.isEmpty())
-          return NoSuggestions;
 
         String content = tag.getContent();
         int length = tag.getLength();
-        proposals = new ArrayList();
         int i = 0;
         if (!atStart)
         {
@@ -114,33 +108,27 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
 
         int replacementLength = i;
 
+        proposals = DTDProposalGenerator.getRawNewTagProposalsSimple(
+            viewer.getDocument(),
+            tag.getOffset(),
+            replacementLength,
+            fDTD,
+            tag);
+
+        if (proposals.isEmpty())
+          return NoSuggestions;
+
         if (length > 1 && documentOffset > tag.getOffset() + 1)
         {
           String match = tag.getContentTo(documentOffset, true).trim().toLowerCase();
-          for (Iterator iter = allElementProposals.iterator(); iter.hasNext();)
+          for (Iterator iter = proposals.iterator(); iter.hasNext();)
           {
-            CompletionProposal proposal = (CompletionProposal) iter.next();
-            if (proposal.getDisplayString().startsWith(match))
-            {
-              proposal.setReplacementOffset(tag.getOffset());
-              proposal.setReplacementLength(replacementLength);
-              proposals.add(proposal);
-            }
+            ICompletionProposal proposal = (ICompletionProposal) iter.next();
+            if (!proposal.getDisplayString().startsWith(match))
+              iter.remove();
           }
           if (proposals.isEmpty())
-          {
             return NoSuggestions;
-          }
-
-        } else
-        {
-          for (Iterator iter = allElementProposals.iterator(); iter.hasNext();)
-          {
-            CompletionProposal proposal = (CompletionProposal) iter.next();
-            proposal.setReplacementOffset(tag.getOffset());
-            proposal.setReplacementLength(replacementLength);
-            proposals.add(proposal);
-          }
         }
         Collections.sort(proposals, ProposalFactory.PROPOSAL_COMPARATOR);
         return (ICompletionProposal[]) proposals
@@ -214,7 +202,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
       XMLNode tag,
       String tagName,
       int documentOffset)
-  {   
+  {
     return null;
   }
 
@@ -601,7 +589,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
-   *      int)
+   *              int)
    */
   public IContextInformation[] doComputeContextInformation(
       ITextViewer viewer,

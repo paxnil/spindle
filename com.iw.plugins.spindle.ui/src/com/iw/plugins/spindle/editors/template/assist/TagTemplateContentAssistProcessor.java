@@ -43,9 +43,9 @@ import org.eclipse.swt.graphics.Point;
 import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
-import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
@@ -83,13 +83,14 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
       return NoProposals;
 
     String tagName = tag.getName();
-    if (tag.isTerminated() && (tagName == null || tag.getOffset() + tagName.length() + 1 >= documentOffset))
+    if (tag.isTerminated()
+        && (tagName == null || tag.getOffset() + tagName.length() + 1 >= documentOffset))
       return NoProposals;
 
     if (baseState == XMLNode.IN_TERMINATOR)
       return NoProposals;
 
-    List proposals = new ArrayList();
+    List proposals;
 
     boolean addLeadingSpace = false;
     if (baseState == XMLNode.TAG)
@@ -99,15 +100,10 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
 
       if (fDTD != null && (atStart || canInsertNewTag))
       {
-        List allElementProposals = DTDProposalGenerator.getRawNewTagProposalsSimple(
-            fDTD,
-            tag);
-        if (allElementProposals.isEmpty())
-          return NoSuggestions;
 
         String content = tag.getContent();
         int length = tag.getLength();
-     
+
         int i = 0;
         if (!atStart)
         {
@@ -121,33 +117,28 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
 
         int replacementLength = i;
 
+        proposals = DTDProposalGenerator.getRawNewTagProposalsSimple(
+            viewer.getDocument(),
+            tag.getOffset(),
+            replacementLength,
+            fDTD,
+            tag);
+
+        if (proposals.isEmpty())
+          return NoSuggestions;
+
         if (length > 1 && documentOffset > tag.getOffset() + 1)
         {
           String match = tag.getContentTo(documentOffset, true).trim().toLowerCase();
-          for (Iterator iter = allElementProposals.iterator(); iter.hasNext();)
+          for (Iterator iter = proposals.iterator(); iter.hasNext();)
           {
-            CompletionProposal proposal = (CompletionProposal) iter.next();
-            if (proposal.getDisplayString().startsWith(match))
-            {
-              proposal.setReplacementOffset(tag.getOffset());
-              proposal.setReplacementLength(replacementLength);
-              proposals.add(proposal);
-            }
+            ICompletionProposal proposal = (ICompletionProposal) iter.next();
+            if (!proposal.getDisplayString().startsWith(match))
+              iter.remove();
           }
           if (proposals.isEmpty())
-          {
             return NoSuggestions;
-          }
 
-        } else
-        {
-          for (Iterator iter = allElementProposals.iterator(); iter.hasNext();)
-          {
-            CompletionProposal proposal = (CompletionProposal) iter.next();
-            proposal.setReplacementOffset(tag.getOffset());
-            proposal.setReplacementLength(replacementLength);
-            proposals.add(proposal);
-          }
         }
         Collections.sort(proposals, ProposalFactory.PROPOSAL_COMPARATOR);
         return (ICompletionProposal[]) proposals
@@ -166,6 +157,8 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
 
       addLeadingSpace = baseState == XMLNode.AFTER_ATT_VALUE;
     }
+    
+    proposals = new ArrayList();
 
     Map attrmap = tag.getAttributesMap();
     String jwcid = null;
@@ -272,7 +265,8 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
         tagName,
         Collections.EMPTY_LIST,
         existingAttributeNames,
-        null));
+        null,
+        addLeadingSpace));
 
     return proposals;
 
@@ -348,7 +342,8 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
           prefix,
           jwcid,
           existingAttributeNames,
-          usedNames));
+          usedNames,
+          false));
     }
 
     proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
@@ -359,7 +354,8 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
         tagName,
         usedNames,
         existingAttributeNames,
-        prefix));
+        prefix,
+        false));
 
     return proposals;
   }
@@ -385,7 +381,8 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
         null,
         jwcid,
         existingAttributeNames,
-        usedNames));
+        usedNames,
+        addLeadingSpace));
 
     proposals.addAll(TemplateContentAssistProcessor.getWebProposals(
         fDTD,
@@ -395,7 +392,8 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
         tagName,
         usedNames,
         existingAttributeNames,
-        null));
+        null,
+        addLeadingSpace));
     return proposals;
   }
 
