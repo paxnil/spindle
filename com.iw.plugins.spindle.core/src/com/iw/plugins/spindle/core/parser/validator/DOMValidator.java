@@ -43,6 +43,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.xml.TapestryEntityResolver;
 import com.iw.plugins.spindle.core.scanning.W3CAccess;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
@@ -98,9 +99,11 @@ public class DOMValidator implements IProblemCollector
 
             resourceIdentifier = new XMLResourceIdentifierImpl(publicId, null, null, null);
 
+            String errorMessage = TapestryCore.getString("dom-validator-error-no-DTD", publicId);
+
             XMLInputSource source = TapestryEntityResolver.doResolveEntity(resourceIdentifier);
             if (source == null)
-                throw new Error("unable to obtain DTD for " + publicId);
+                throw new Error(errorMessage);
 
             DTDS.put(publicId, new DTDParser(new InputStreamReader(source.getByteStream()), debug).parse());
 
@@ -112,14 +115,14 @@ public class DOMValidator implements IProblemCollector
 
             source = TapestryEntityResolver.doResolveEntity(resourceIdentifier);
             if (source == null)
-                throw new Error("unable to obtain DTD for " + publicId);
+                throw new Error(errorMessage);
 
             DTDS.put(publicId, new DTDParser(new InputStreamReader(source.getByteStream()), debug).parse());
 
         } catch (IOException e)
         {
             e.printStackTrace();
-            throw new Error(e.getMessage() + " occured when trying to parse tapestry DTDs!");
+            throw new Error(TapestryCore.getString("dom-validator-error-no-DTD-parse", e.getMessage()));
         }
     }
     private Document fXMLDocument;
@@ -168,7 +171,7 @@ public class DOMValidator implements IProblemCollector
         if (fDTD == null)
         {
             reportDocumentError(
-                "Document has no DOCTYPE declaration or no recognizable publicId. " + publicId != null ? publicId : "");
+                TapestryCore.getString("dom-validator-error-no-doctype", publicId != null ? publicId : "found null"));
             return false;
         }
         return true;
@@ -192,7 +195,7 @@ public class DOMValidator implements IProblemCollector
     {
         fIsRunning = false;
         if (!fSeenRootElement)
-            reportDocumentError("root element not seen");
+            reportDocumentError(TapestryCore.getString("dom-validator-error-no-root"));
 
     }
 
@@ -255,14 +258,17 @@ public class DOMValidator implements IProblemCollector
         {
             if (!W3CAccess.isElement(node))
             {
-                reportDocumentError("invalid markup for root node");
+                reportDocumentError(TapestryCore.getString("dom-validator-error-invalid-root"));
                 return false;
             }
 
             fSeenRootElement = true;
             fIsRunning = name.equals(fRootElementName);
             if (!fIsRunning)
-                recordTagNameProblem(name, node, "expected but got!");
+                recordTagNameProblem(
+                    name,
+                    node,
+                    TapestryCore.getString("dom-validator-error-wrong-root-element", fRootElementName, name));
             return fIsRunning;
         }
 
@@ -271,7 +277,7 @@ public class DOMValidator implements IProblemCollector
 
         if (!W3CAccess.isTextNode(node) && !DTDAccess.isDeclaredElement(fDTD, name))
         {
-            recordTagNameProblem(name, node, "element '" + name + " is not declared in the DTD.");
+            recordTagNameProblem(name, node, TapestryCore.getString("dom-validator-undeclared-element", name));
             fNodeInfoMap.put(node, IGNORE);
             return false;
         }
@@ -331,7 +337,10 @@ public class DOMValidator implements IProblemCollector
                         recordAttributeError(
                             node,
                             declaredAttrName,
-                            declaredAttrName + "'s value must be: " + declaredAttribute.type.toString());
+                            TapestryCore.getString(
+                                "dom-validator-invalid-attr-value",
+                                declaredAttrName,
+                                declaredAttribute.type.toString()));
                     }
                 } else if (declaredAttribute.type instanceof String)
                 {
@@ -345,7 +354,7 @@ public class DOMValidator implements IProblemCollector
             {
                 recordErrorOnTagName(
                     node,
-                    "missing required attribute '" + declaredAttrName + "' of element '" + nodeName + "'");
+                    TapestryCore.getString("dom-validator-missing-attr", declaredAttrName, nodeName));
             }
         }
         if (!sourceAttributeNames.isEmpty())
@@ -353,10 +362,7 @@ public class DOMValidator implements IProblemCollector
             for (Iterator iter = sourceAttributeNames.iterator(); iter.hasNext();)
             {
                 String undeclaredName = (String) iter.next();
-                recordAttributeError(
-                    node,
-                    undeclaredName,
-                    "attribute '" + undeclaredName + "' is not allowed for element: '" + nodeName + "'");
+                recordAttributeError(node, undeclaredName, TapestryCore.getString("", undeclaredName, nodeName));
             }
         }
     }
@@ -506,12 +512,13 @@ public class DOMValidator implements IProblemCollector
             {
                 if (allowsText)
                     return;
-                throw new ValidatorException("Text is not allowed as content for element: '" + elementName + ".");
+                throw new ValidatorException(TapestryCore.getString("dom-validator-text-not-allowed", elementName));
             }
             String childName = node.getNodeName();
             if (workingContent == null)
             {
-                throw new ValidatorException("Child '" + childName + " of " + elementName + "is not allowed here.");
+                throw new ValidatorException(
+                    TapestryCore.getString("dom-validator-child-not-allowed", childName, elementName));
             }
             if (contentType == DTDItemType.DTD_SEQUENCE
                 || contentType == DTDItemType.DTD_MIXED
@@ -532,13 +539,11 @@ public class DOMValidator implements IProblemCollector
                             workingContent = null;
                     } else
                     {
-
                         throw new ValidatorException(
-                            "Element '"
-                                + childName
-                                + " is not allowed here. Expected '"
-                                + getAllowedContent()
-                                + "' instead.");
+                            TapestryCore.getString(
+                                "dom-validator-element-not-allowed",
+                                childName,
+                                getAllowedContent()));
                     }
 
                 }
@@ -557,7 +562,8 @@ public class DOMValidator implements IProblemCollector
         private boolean checkContainer(String childName, List items) throws ValidatorException
         {
             if (items.isEmpty())
-                throw new ValidatorException("Child '" + childName + "' of '" + elementName + "' is not allowed here.");
+                throw new ValidatorException(
+                    TapestryCore.getString("dom-validator-child-not-allowed", childName, elementName));
             // does it match the first?
             DTDItem item = (DTDItem) items.get(0);
             DTDItemType type = item.getItemType();
@@ -572,8 +578,9 @@ public class DOMValidator implements IProblemCollector
             { // doesn't match, but there must be at least one
                 if (cardinal == DTDCardinal.ONEMANY)
                 {
+
                     throw new ValidatorException(
-                        "Element '" + childName + " is not allowed here. Expected '" + item.toString() + "' instead.");
+                        TapestryCore.getString("dom-validator-element-not-allowed", childName, item.toString()));
                 } else
                 {
                     boolean found = false;
@@ -598,20 +605,18 @@ public class DOMValidator implements IProblemCollector
                         } else if (cardinal == DTDCardinal.NONE || cardinal == DTDCardinal.ONEMANY)
                         {
                             throw new ValidatorException(
-                                "Element '"
-                                    + childName
-                                    + " is not allowed here. Expected '"
-                                    + item.toString()
-                                    + "' instead.");
+                                TapestryCore.getString(
+                                    "dom-validator-element-not-allowed",
+                                    childName,
+                                    item.toString()));
                         }
                     }
                     if (!found)
                         throw new ValidatorException(
-                            "Element '"
-                                + childName
-                                + " is not allowed here. Expected '"
-                                + getAllowedContent()
-                                + "' instead.");
+                            TapestryCore.getString(
+                                "dom-validator-element-not-allowed",
+                                childName,
+                                getAllowedContent()));
                 }
             }
             return items.isEmpty();
