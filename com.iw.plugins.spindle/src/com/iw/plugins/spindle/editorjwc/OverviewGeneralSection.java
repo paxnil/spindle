@@ -50,6 +50,7 @@ import org.eclipse.pde.core.IModelChangedListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -70,6 +71,7 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.XMLUtil;
+import com.iw.plugins.spindle.ui.ToolTipHandler;
 import com.iw.plugins.spindle.util.HierarchyScope;
 import com.iw.plugins.spindle.util.Utils;
 
@@ -83,6 +85,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
   private FormCheckbox allowBody = null;
   private FormCheckbox allowInformalParameters = null;
   private boolean updateNeeded;
+  private ToolTipHandler tooltipHandler;
   private ChooseSpecClassAction chooseComponentSpecAction = new ChooseSpecClassAction();
   private ChoosePageSpecClassAction choosePageSpecAction = new ChoosePageSpecClassAction();
   private OpenSpecClassAction openSpecClassAction = new OpenSpecClassAction();
@@ -179,6 +182,9 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
    * @see FormSection#createClient(Composite, FormWidgetFactory)
    */
   public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
+  	
+  	tooltipHandler = new ToolTipHandler(parent.getShell());
+  	
     Composite container = factory.createComposite(parent);
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;
@@ -200,6 +206,8 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     labelName = "Specification Class";
     Text text = createText(container, labelName, factory);
     componentClassText = new FormEntry(text);
+    text.setData("TIP_TEXT", "right-click for class options");
+    tooltipHandler.activateHoverHelp(text);
     componentClassText.addFormTextListener(new IFormTextListener() {
       //called on commit	
       public void textValueChanged(FormEntry text) {

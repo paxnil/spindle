@@ -50,6 +50,7 @@ import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -66,6 +67,7 @@ import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.ui.ToolTipHandler;
 import com.iw.plugins.spindle.util.HierarchyScope;
 import com.iw.plugins.spindle.util.Utils;
 
@@ -78,6 +80,7 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
   private ChooseEngineClassAction chooseEngineAction = new ChooseEngineClassAction();
   private OpenEngineClassAction openEngineClassAction = new OpenEngineClassAction();
   private String hierarchyRoot = "net.sf.tapestry.IEngine";
+  private ToolTipHandler tooltipHandler;
 
   public OverviewAppGeneralSection(SpindleFormPage page) {
     super(page);
@@ -125,6 +128,9 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
    * @see FormSection#createClient(Composite, FormWidgetFactory)
    */
   public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
+
+    tooltipHandler = new ToolTipHandler(parent.getShell());
+
     Composite container = factory.createComposite(parent);
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;
@@ -159,6 +165,10 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
 
     labelName = "Engine Class";
     engineClassText = new FormEntry(createText(container, labelName, factory));
+    Control text = engineClassText.getControl();
+    text.setData("TIP_TEXT", "right-click for class options");
+    tooltipHandler.activateHoverHelp(text);
+
     engineClassText.addFormTextListener(new IFormTextListener() {
       public void textValueChanged(FormEntry text) {
         PluginApplicationSpecification appSpec = (PluginApplicationSpecification) model.getSpecification();
@@ -326,9 +336,9 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
           hrootElement = Utils.findType(jproject, hierarchyRoot);
         }
         if (hrootElement != null) {
-//          result = SearchEngine.createHierarchyScope(hrootElement);
-// note, this is a kludge to work around bug 
-//[ 621849 ] Class selection dlg searches workspace
+          //          result = SearchEngine.createHierarchyScope(hrootElement);
+          // note, this is a kludge to work around bug 
+          //[ 621849 ] Class selection dlg searches workspace
           result = new HierarchyScope(hrootElement, jproject);
 
         }
