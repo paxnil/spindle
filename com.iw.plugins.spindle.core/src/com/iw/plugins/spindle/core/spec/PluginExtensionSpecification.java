@@ -26,6 +26,7 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,7 +44,6 @@ import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.util.PropertyFiringList;
 
 /**
  *  Tapestry Extensions for Spindle
@@ -82,7 +82,6 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
     public void setClassName(String className)
     {
         this.fClassName = className;
-        firePropertyChange("className", null, className);
     }
 
     /* (non-Javadoc)
@@ -101,9 +100,10 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
     public void addConfiguration(PluginExtensionConfiguration configuration)
     {
         if (fRawConfigurations == null)
-            fRawConfigurations = new PropertyFiringList(this, "configuration");
+            fRawConfigurations = new ArrayList();
 
         fRawConfigurations.add(configuration);
+        configuration.setParent(this);
 
         beginInternalCall("calling Tapestry addConfiguration");
         try
@@ -114,12 +114,6 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
 
             endInternalCall();
         }
-    }
-
-    public void removeConfiguration(PluginExtensionConfiguration config)
-    {
-        remove(fRawConfigurations, config);
-        remove(fConfiguration, config);
     }
 
     /* (non-Javadoc)
@@ -179,9 +173,7 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
      */
     public void setImmediate(boolean immediate)
     {
-        boolean old = fImmediate;
         fImmediate = immediate;
-        firePropertyChange("immediate", old, immediate);
     }
 
     /**

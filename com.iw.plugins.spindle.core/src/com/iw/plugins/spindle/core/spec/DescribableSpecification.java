@@ -62,10 +62,8 @@ public class DescribableSpecification extends BaseSpecification implements IPlug
 
     public void setDescription(String description)
     {
-        String old = fDescription;
         fDescription = description;
-        firePropertyChange("description", old, fDescription);
-    }
+     }
 
     public void addDescriptionDeclaration(PluginDescriptionDeclaration decl)
     {

@@ -26,7 +26,16 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IPropertySpecification;
+
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.scanning.SpecificationScanner;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Spindle aware concrete implementation of IPropertySpecification
@@ -84,9 +93,7 @@ public class PluginPropertySpecification extends DescribableSpecification implem
      */
     public void setInitialValue(String initialValue)
     {
-        String old = fInitialValue;
         fInitialValue = initialValue;
-        firePropertyChange("initialValue", old, fInitialValue);
     }
 
     /* (non-Javadoc)
@@ -94,9 +101,7 @@ public class PluginPropertySpecification extends DescribableSpecification implem
      */
     public void setName(String name)
     {
-        String old = fName;
         fName = name;
-        firePropertyChange("name", old, fName);
     }
 
     /* (non-Javadoc)
@@ -104,9 +109,7 @@ public class PluginPropertySpecification extends DescribableSpecification implem
      */
     public void setPersistent(boolean persistant)
     {
-        boolean old = fPersistent;
         fPersistent = persistant;
-        firePropertyChange("persistant", old, fPersistent);
     }
 
     /* (non-Javadoc)
@@ -114,11 +117,51 @@ public class PluginPropertySpecification extends DescribableSpecification implem
      */
     public void setType(String type)
     {
-        String old = fType;
         fType = type;
-        firePropertyChange("type", old, fType);
     }
 
-  
+    public void validate(Object parent, IScannerValidator validator)
+    {
+
+        IComponentSpecification component = (IComponentSpecification) parent;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        if ("java.lang.Object".equals(fType))
+            return;
+
+        try
+        {
+            if (!SpecificationScanner.TYPE_LIST.contains(fType))
+            {
+                if (fType.endsWith("[]"))
+                {
+                    String fixedType = fType.substring(0, fType.length() - 2);
+                    while (fixedType.endsWith("[]"))
+                    {
+                        fixedType = fixedType.substring(0, fixedType.length() - 2);
+                    }
+                    validator.validateTypeName(
+                        (IResourceWorkspaceLocation) component.getSpecificationLocation(),
+                        fixedType,
+                        IProblem.ERROR,
+                        sourceInfo.getAttributeSourceLocation("type"));
+
+                } else
+                {
+
+                    validator.validateTypeName(
+                        (IResourceWorkspaceLocation) component.getSpecificationLocation(),
+                        fType,
+                        IProblem.ERROR,
+                        sourceInfo.getAttributeSourceLocation("type"));
+                }
+            }
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+    }
 
 }

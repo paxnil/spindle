@@ -27,7 +27,18 @@
 package com.iw.plugins.spindle.core.spec;
 
 import org.apache.tapestry.spec.Direction;
+import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
+
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.scanning.SpecificationScanner;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
  *  Spindle aware concrete implementation of ILibrarySpecification
@@ -40,14 +51,12 @@ public class PluginParameterSpecification extends DescribableSpecification imple
     private boolean fRequired = false;
     private String fType;
 
-
     /** @since 2.0.3 **/
     private String fPropertyName;
 
     private Direction fDirection = Direction.CUSTOM;
-    
-    private String fDefaultValue;
 
+    private String fDefaultValue;
 
     public PluginParameterSpecification()
     {
@@ -75,9 +84,7 @@ public class PluginParameterSpecification extends DescribableSpecification imple
      */
     public void setRequired(boolean value)
     {
-        boolean old = fRequired;
         fRequired = value;
-        firePropertyChange("required", old, fRequired);
     }
 
     /* (non-Javadoc)
@@ -85,21 +92,15 @@ public class PluginParameterSpecification extends DescribableSpecification imple
      */
     public void setType(String value)
     {
-        String old = fType;
         fType = value;
-        firePropertyChange("type", old, fType);
     }
-
-   
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IParameterSpecification#setPropertyName(java.lang.String)
      */
     public void setPropertyName(String propertyName)
     {
-        String old = fPropertyName;
         fPropertyName = propertyName;
-        firePropertyChange("propertyName", old, fPropertyName);
     }
 
     /* (non-Javadoc)
@@ -123,9 +124,7 @@ public class PluginParameterSpecification extends DescribableSpecification imple
      */
     public void setDirection(Direction direction)
     {
-        Direction old = fDirection;
         fDirection = direction;
-        firePropertyChange("direction", old, fDirection);
     }
 
     /**
@@ -141,11 +140,64 @@ public class PluginParameterSpecification extends DescribableSpecification imple
      */
     public void setDefaultValue(String defaultValue)
     {
-        String old = fDefaultValue;
         fDefaultValue = defaultValue;
-        firePropertyChange("defaultValue", old, fDefaultValue);
     }
 
-  
+    public void validate(Object parent, IScannerValidator validator)
+    {
+
+        IComponentSpecification component = (IComponentSpecification) parent;
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        if (!"java.lang.Object".equals(fType))
+        {
+
+            String typeAttr = "type";
+            int DTDVersion = XMLUtil.getDTDVersion(component.getPublicId());
+            switch (DTDVersion)
+            {
+                case XMLUtil.DTD_1_3 :
+                    typeAttr = "java-type";
+                    break;
+
+                case XMLUtil.DTD_3_0 :
+
+                    break;
+            }
+
+            if (!SpecificationScanner.TYPE_LIST.contains(fType))
+            {
+                try
+                {
+                    validateTypeSpecial(
+                        validator,
+                        (IResourceWorkspaceLocation) component.getSpecificationLocation(),
+                        fType,
+                        IProblem.ERROR,
+                        sourceInfo.getAttributeSourceLocation(typeAttr));
+                } catch (ScannerException e)
+                {
+                    TapestryCore.log(e);
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private boolean validateTypeSpecial(
+        IScannerValidator validator,
+        IResourceWorkspaceLocation dependant,
+        String typeName,
+        int severity,
+        ISourceLocation location)
+        throws ScannerException
+    {
+        String useName = typeName;
+        if (useName.indexOf(".") < 0)
+            useName = "java.lang." + useName;
+
+        return validator.validateTypeName(dependant, useName, severity, location);
+
+    }
 
 }

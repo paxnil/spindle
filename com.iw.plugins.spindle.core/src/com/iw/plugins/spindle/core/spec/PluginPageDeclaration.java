@@ -44,20 +44,19 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  */
 public class PluginPageDeclaration extends BaseSpecification
 {
-    String fName;
     String fResourcePath;
 
     public PluginPageDeclaration(String name, String resourcePath, ILocation location)
     {
         super(BaseSpecification.PAGE_DECLARATION);
-        fName = name;
+        setIdentifier(name);
         fResourcePath = resourcePath;
         setLocation(location);
     }
 
     public String getName()
     {
-        return fName;
+        return getIdentifier();
     }
 
     public String getResourcePath()
@@ -65,13 +64,6 @@ public class PluginPageDeclaration extends BaseSpecification
         return fResourcePath;
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.IIdentifiable#getIdentifier()
-     */
-    public String getIdentifier()
-    {
-        return getName();
-    }
 
     public String toString()
     {
@@ -93,7 +85,7 @@ public class PluginPageDeclaration extends BaseSpecification
         try
         {
             validator.validatePattern(
-                fName,
+                getName(),
                 SpecificationParser.PAGE_NAME_PATTERN,
                 "SpecificationParser.invalid-page-name",
                 IProblem.ERROR,

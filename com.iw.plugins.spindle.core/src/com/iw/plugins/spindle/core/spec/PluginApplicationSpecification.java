@@ -64,9 +64,7 @@ public class PluginApplicationSpecification extends PluginLibrarySpecification i
      */
     public void setEngineClassName(String value)
     {
-        String old = fEngineClassName;
         this.fEngineClassName = value;
-        firePropertyChange("engineClassName", old, value);
     }
 
     /* (non-Javadoc)
@@ -82,10 +80,8 @@ public class PluginApplicationSpecification extends PluginLibrarySpecification i
      */
     public void setName(String name)
     {
-        String old = this.fName;
         this.fName = name;
-        firePropertyChange("name", old, name);
-    }
+     }
 
     public void validateSelf(IScannerValidator validator)
     {

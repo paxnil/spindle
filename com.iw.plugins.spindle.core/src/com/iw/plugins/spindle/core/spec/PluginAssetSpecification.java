@@ -26,8 +26,6 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.engine.ITemplateSource;
-import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.AssetType;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -35,7 +33,6 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
-import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
@@ -87,8 +84,7 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
     public void setPath(String path)
     {
         this.fPath = path;
-        firePropertyChange("path", null, path);
-    }
+     }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IAssetSpecification#setType(org.apache.tapestry.spec.AssetType)
@@ -96,7 +92,6 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
     public void setType(AssetType type)
     {
         this.fAssetType = type;
-        firePropertyChange("type", null, fPath);
     }
 
     public void validate(Object parent, IScannerValidator validator)
@@ -105,30 +100,9 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
         IComponentSpecification component = (IComponentSpecification) parent;
 
         ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-        String name = getIdentifier();
-
+        
         try
-        {
-            if (component.getAsset(name) != this)
-            {
-                validator.addProblem(
-                    IProblem.ERROR,
-                    sourceInfo.getAttributeSourceLocation("name"),
-                    TapestryCore.getTapestryString(
-                        "ComponentSpecification.duplicate-asset",
-                        component.getSpecificationLocation().getName(),
-                        name));
-            }
-
-            if (!name.equals(ITemplateSource.TEMPLATE_ASSET_NAME))
-                validator.validatePattern(
-                    name,
-                    SpecificationParser.ASSET_NAME_PATTERN,
-                    "SpecificationParser.invalid-asset-name",
-                    IProblem.ERROR,
-                    sourceInfo.getAttributeSourceLocation("name"));
-
+        {           
             validator.validateAsset(component, this, sourceInfo);
 
         } catch (ScannerException e)

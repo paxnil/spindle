@@ -286,7 +286,7 @@ public class PluginExtensionConfiguration extends DescribableSpecification
             if (fDeclaredType != null)
             {
                 SpecificationScanner.IConverter converter =
-                    (SpecificationScanner.IConverter) SpecificationScanner.conversionMap.get(fDeclaredType);
+                    (SpecificationScanner.IConverter) SpecificationScanner.TYPE_CONVERSION_MAP.get(fDeclaredType);
                 Object objectValue = null;
 
                 if (converter == null)

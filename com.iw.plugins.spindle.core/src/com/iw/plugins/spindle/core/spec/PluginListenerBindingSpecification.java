@@ -67,9 +67,7 @@ public class PluginListenerBindingSpecification
      */
     public void setLanguage(String language)
     {
-        String old = fLanguage;
         fLanguage = language;
-        firePropertyChange("language", old, this.fLanguage);
     }
 
     public void setScript(String value)

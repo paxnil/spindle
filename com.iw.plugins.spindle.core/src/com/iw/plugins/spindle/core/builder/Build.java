@@ -224,6 +224,9 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
             }
         }
+        //TODO remove
+        System.out.println("template count:"+fTemplateMap.keySet().size());
+        System.out.println("specification count"+fSpecificationMap.keySet().size());
         saveState();
     }
 

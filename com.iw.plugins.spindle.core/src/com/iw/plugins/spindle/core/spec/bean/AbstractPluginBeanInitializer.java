@@ -28,14 +28,7 @@ package com.iw.plugins.spindle.core.spec.bean;
 
 import org.apache.tapestry.IBeanProvider;
 import org.apache.tapestry.bean.IBeanInitializer;
-import org.apache.tapestry.parse.SpecificationParser;
-import org.apache.tapestry.spec.IBeanSpecification;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.scanning.IScannerValidator;
-import com.iw.plugins.spindle.core.scanning.ScannerException;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 
 /**
@@ -69,8 +62,9 @@ public class AbstractPluginBeanInitializer extends BaseSpecification implements 
     {
         return getIdentifier();
     }
-    
-    public void setPropertyName(String name) {
+
+    public void setPropertyName(String name)
+    {
         setIdentifier(name);
     }
 
@@ -81,42 +75,7 @@ public class AbstractPluginBeanInitializer extends BaseSpecification implements 
 
     public void setValue(String value)
     {
-        String old = fValue;
         fValue = value;
-        firePropertyChange("value", old, fValue);
-    }
-
-    /**
-     *  Validates the propertyName attribute only. Subclasses may do more.
-     * 
-     * @param parent usually an IComponentSpecification
-     * @param validator the validator to use
-     * @throws ScannerException
-     */
-    public void validate(Object parent, IScannerValidator validator) throws ScannerException
-    {
-        IBeanSpecification bean = (IBeanSpecification) parent;
-
-        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-        String name = getPropertyName();
-
-        if (name == null || name.trim().length() == 0)
-        {
-            validator.addProblem(
-                IProblem.ERROR,
-                sourceInfo.getAttributeSourceLocation("name"),
-                TapestryCore.getTapestryString("SpecificationParser.invalid-property-name", "not specified"));
-        } else
-        {
-            validator.validatePattern(
-                name,
-                SpecificationParser.PROPERTY_NAME_PATTERN,
-                "SpecificationParser.invalid-property-name",
-                IProblem.ERROR,
-                sourceInfo.getAttributeSourceLocation("name"));
-        }
-
     }
 
 }

@@ -3,7 +3,6 @@ package com.wutka.dtd;
 import java.util.*;
 import java.io.*;
 
-import com.iw.plugins.spindle.core.util.OrderPreservingMap;
 
 /** Represents an element defined with the ELEMENT DTD tag
  *

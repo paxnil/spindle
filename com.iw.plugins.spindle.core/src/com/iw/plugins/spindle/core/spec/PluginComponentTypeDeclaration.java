@@ -45,33 +45,24 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 public class PluginComponentTypeDeclaration extends DescribableSpecification
 {
 
-    String fId;
     String fResourcePath;
 
     public PluginComponentTypeDeclaration(String id, String resourcePath, ILocation location)
     {
         super(BaseSpecification.COMPONENT_TYPE_DECLARATION);
-        fId = id;
+        setIdentifier(id);
         fResourcePath = resourcePath;
         setLocation(location);
     }
 
     public String getId()
     {
-        return fId;
+        return getIdentifier();
     }
 
     public String getResourcePath()
     {
         return fResourcePath;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.IIdentifiable#getIdentifier()
-     */
-    public String getIdentifier()
-    {
-        return getId();
     }
 
     /**
@@ -89,7 +80,7 @@ public class PluginComponentTypeDeclaration extends DescribableSpecification
         try
         {
             validator.validatePattern(
-                fId,
+                getId(),
                 SpecificationParser.COMPONENT_ALIAS_PATTERN,
                 "SpecificationParser.invalid-component-type",
                 IProblem.ERROR,

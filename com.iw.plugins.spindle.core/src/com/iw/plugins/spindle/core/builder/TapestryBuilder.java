@@ -43,6 +43,7 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
@@ -82,7 +83,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     public static final String APP_SPEC_PATH_PARAM = "org.apache.tapestry.application-specification";
     public static final String ENGINE_CLASS_PARAM = "org.apache.tapestry.engine-class";
 
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
 
     //TODO this is really ugly, but I need this fast.
     public static List fDeferredActions = new ArrayList();
@@ -173,6 +174,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         } catch (NullPointerException e)
         {
             TapestryCore.log(e);
+            throw e;
+        } catch (OperationCanceledException e) {
             throw e;
         } catch (RuntimeException e)
         {

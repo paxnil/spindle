@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,10 +45,12 @@ import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.spec.IPropertySpecification;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.util.IIdentifiableMap;
-import com.iw.plugins.spindle.core.util.PropertyFiringList;
-import com.iw.plugins.spindle.core.util.PropertyFiringSet;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Spindle aware concrete implementation of IComponentSpecification
@@ -65,6 +68,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      **/
 
     protected Map fComponents;
+    private List fComponentObjects;
 
     /**
      *  Keyed on asset name, value is {@link IAssetSpecification}.
@@ -81,6 +85,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      **/
 
     protected Map fParameters;
+    protected List fParameterObjects;
 
     /**
      *  Defines all helper beans.  Keyed on name, value is {@link IBeanSpecification}.
@@ -150,6 +155,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      **/
 
     private Map fPropertySpecifications;
+    private List fPropertySpecificationObjects;
 
     /**
      * The Namespace this component belongs to
@@ -216,22 +222,18 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     public void addComponent(String id, IContainedComponent component)
     {
         if (fComponents == null)
-            fComponents = new IIdentifiableMap(this, "components");
+        {
+            fComponents = new HashMap();
+            fComponentObjects = new ArrayList();
+        }
 
-        fComponents.put(id, component);
-    }
+        PluginContainedComponent pluginContained = (PluginContainedComponent) component;
+        pluginContained.setParent(this);
+        pluginContained.setIdentifier(id);
+        fComponentObjects.add(pluginContained);
 
-    public void removeComponent(String type)
-    {
-        remove(fComponents, type);
-    }
-
-    public void setComponent(String id, IContainedComponent component)
-    {
-        if (fComponents == null)
-            fComponents = new IIdentifiableMap(this, "components");
-
-        fComponents.put(id, component);
+        if (!fComponents.containsKey(id))
+            fComponents.put(id, component);
     }
 
     /* (non-Javadoc)
@@ -240,9 +242,19 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     public void addParameter(String name, IParameterSpecification spec)
     {
         if (fParameters == null)
-            fParameters = new IIdentifiableMap(this, "parameters");
+        {
+            fParameters = new HashMap();
+            fParameterObjects = new ArrayList();
+        }
 
-        fParameters.put(name, spec);
+        PluginParameterSpecification pluginParm = (PluginParameterSpecification) spec;
+        pluginParm.setParent(this);
+        pluginParm.setIdentifier(name);
+
+        fParameterObjects.add(name);
+
+        if (!fParameters.containsKey(name))
+            fParameters.put(name, spec);
     }
 
     public Map getParameterMap()
@@ -330,9 +342,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void setAllowBody(boolean value)
     {
-        boolean old = fAllowBody;
         fAllowBody = value;
-        firePropertyChange("allowBody", old, fAllowBody);
     }
 
     /* (non-Javadoc)
@@ -340,9 +350,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void setAllowInformalParameters(boolean value)
     {
-        boolean old = fAllowInformalParameters;
         fAllowInformalParameters = value;
-        firePropertyChange("allowInformalParameters", old, fAllowInformalParameters);
     }
 
     /* (non-Javadoc)
@@ -350,9 +358,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void setComponentClassName(String value)
     {
-        String old = fComponentClassName;
         fComponentClassName = value;
-        firePropertyChange("componentClassName", old, fComponentClassName);
     }
 
     /* (non-Javadoc)
@@ -397,7 +403,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     public void addReservedParameterName(String value)
     {
         if (fReservedParameterNames == null)
-            fReservedParameterNames = new PropertyFiringSet(this, "reservedParameters");
+            fReservedParameterNames = new HashSet();
 
         fReservedParameterNames.add(value);
     }
@@ -428,14 +434,6 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
         return false;
     }
 
-    public boolean removeReservedParameterName(String value)
-    {
-        if (fReservedParameterNames != null)
-            return remove(fReservedParameterNames, value);
-
-        return false;
-    }
-
     public Set getReservedParameterNames()
     {
         if (fReservedParameterNames == null)
@@ -457,9 +455,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void setPublicId(String publicId)
     {
-        String old = fPublicId;
         fPublicId = publicId;
-        firePropertyChange("publicId", old, this.fPublicId);
     }
 
     /* (non-Javadoc)
@@ -486,26 +482,21 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     public void addPropertySpecification(IPropertySpecification spec)
     {
         if (fPropertySpecifications == null)
-            fPropertySpecifications = new IIdentifiableMap(this, "tapestryProperties");
+        {
+            fPropertySpecifications = new HashMap();
+            fPropertySpecificationObjects = new ArrayList();
+        }
+
+        PluginPropertySpecification pluginSpec = (PluginPropertySpecification) spec;
+
+        pluginSpec.setParent(this);
 
         String name = spec.getName();
 
-        fPropertySpecifications.put(name, spec);
-    }
+        pluginSpec.setIdentifier(name);
 
-    public void removePropertSpecification(String name)
-    {
-        remove(fPropertySpecifications, name);
-    }
-
-    public void setPropertySpecification(IPropertySpecification spec)
-    {
-        if (fPropertySpecifications == null)
-            fPropertySpecifications = new IIdentifiableMap(this, "tapestryProperties");
-
-        String name = spec.getName();
-
-        fPropertySpecifications.put(name, spec);
+        if (!fPropertySpecifications.containsKey(name))
+            fPropertySpecifications.put(name, spec);
     }
 
     /* (non-Javadoc)
@@ -538,7 +529,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     {
         if (fTemplates == null)
         {
-            fTemplates = new PropertyFiringList(this, "templates");
+            fTemplates = new ArrayList();
         }
         fTemplates.add(location);
     }
@@ -567,4 +558,84 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
         fTemplates.addAll(Arrays.asList(locations));
     }
 
+    public void validateSelf(IScannerValidator validator) throws ScannerException
+    {
+
+        if (fPageSpecification && "org.apache.tapestry.html.BasePage".equals(fComponentClassName))
+            return;
+
+        if (!fPageSpecification && "org.apache.tapestry.BaseComponent".equals(fComponentClassName))
+            return;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        validator.validateTypeName(
+            (IResourceWorkspaceLocation) getSpecificationLocation(),
+            fComponentClassName,
+            IProblem.ERROR,
+            sourceInfo.getAttributeSourceLocation("class"));
+    }
+
+    public void validate(IScannerValidator validator)
+    {
+        try
+        {
+            validateSelf(validator);
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+
+        if (fParameterObjects != null)
+        {
+            for (int i = 0; i < fParameterObjects.size(); i++)
+            {
+
+                PluginParameterSpecification element = (PluginParameterSpecification) fComponentObjects.get(i);
+                element.validate(this, validator);
+            }
+        }
+
+        if (fComponentObjects != null)
+        {
+            for (int i = 0; i < fComponentObjects.size(); i++)
+            {
+
+                PluginContainedComponent element = (PluginContainedComponent) fComponentObjects.get(i);
+                element.validate(this, validator);
+            }
+        }
+
+        if (fAssetObjects != null)
+        {
+            for (int i = 0; i < fAssetObjects.size(); i++)
+            {
+
+                PluginAssetSpecification element = (PluginAssetSpecification) fComponentObjects.get(i);
+                element.validate(this, validator);
+            }
+        }
+
+        if (fBeanSpecifications != null)
+        {
+            for (int i = 0; i < fBeanSpecifications.size(); i++)
+            {
+
+                PluginBeanSpecification element = (PluginBeanSpecification) fComponentObjects.get(i);
+                element.validate(this, validator);
+            }
+        }
+
+        if (fPropertySpecificationObjects != null)
+        {
+            for (int i = 0; i < fPropertySpecificationObjects.size(); i++)
+            {
+
+                PluginPropertySpecification element = (PluginPropertySpecification) fComponentObjects.get(i);
+                element.validate(this, validator);
+            }
+        }
+
+    }
 }

@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.core.spec;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,6 @@ import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.util.IIdentifiableMap;
-import com.iw.plugins.spindle.core.util.PropertyFiringMap;
 
 /**
  *  Spindle aware concrete implementation of ILibrarySpecification
@@ -178,7 +177,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     {
         checkInternalCall("PluginLibrarySpecification.addExtensionSpecification may not be called by external client code");
         if (fExtensions == null)
-            fExtensions = new IIdentifiableMap(this, "extensions");
+            fExtensions = new HashMap();
 
         fExtensions.put(name, extension);
     }
@@ -189,6 +188,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
             fExtensionDeclarations = new ArrayList();
 
         fExtensionDeclarations.add(extension);
+        extension.setParent(this);
 
         beginInternalCall("calling Tapestry addExtensionSpecification");
 
@@ -385,7 +385,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     {
         checkInternalCall("not to be called by client code");
         if (fComponents == null)
-            fComponents = new PropertyFiringMap(this, "components");
+            fComponents = new HashMap();
 
         fComponents.put(type, path);
 
@@ -418,7 +418,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     {
         checkInternalCall("not to be called by client code");
         if (fLibraries == null)
-            fLibraries = new PropertyFiringMap(this, "libraries");
+            fLibraries = new HashMap();
 
         fLibraries.put(id, path);
 
@@ -430,6 +430,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
             fLibraryDeclarations = new ArrayList();
 
         fLibraryDeclarations.add(declaration);
+        declaration.setParent(this);
 
         if (!getLibraryIds().contains(declaration.getName()))
         {
@@ -452,7 +453,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     {
         checkInternalCall("not to be called by client code");
         if (fPages == null)
-            fPages = new PropertyFiringMap(this, "pages");
+            fPages = new HashMap();
 
         fPages.put(name, path);
     }
@@ -463,6 +464,8 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
             fPageDeclarations = new ArrayList();
 
         fPageDeclarations.add(declaration);
+        
+        declaration.setParent(this);
 
         if (!getPageNames().contains(declaration.getName()))
         {
@@ -484,7 +487,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     {
         checkInternalCall("not to be called by client code");
         if (fServices == null)
-            fServices = new PropertyFiringMap(this, "services");
+            fServices = new HashMap();
 
         fServices.put(name, className);
     }
@@ -514,9 +517,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void setPublicId(String value)
     {
-        String old = fPublicId;
         fPublicId = value;
-        firePropertyChange("publicId", old, fPublicId);
     }
 
     /* (non-Javadoc)

@@ -154,7 +154,7 @@ public abstract class SpecificationScanner extends AbstractScanner
     {
         public Object convert(String value) throws ScannerException
         {
-            Object result = conversionMap.get(value.toLowerCase());
+            Object result = TYPE_CONVERSION_MAP.get(value.toLowerCase());
 
             if (result == null || !(result instanceof Boolean))
                 throw new ScannerException(
@@ -227,9 +227,9 @@ public abstract class SpecificationScanner extends AbstractScanner
      *  since the keys are unique.
      * 
      **/
-    public static final Map conversionMap = new HashMap();
+    public static final Map TYPE_CONVERSION_MAP = new HashMap();
 
-    protected static final List typeList = new ArrayList();
+    public static final List TYPE_LIST = new ArrayList();
 
     // Identify all the different acceptible values.
     // We continue to sneak by with a single map because
@@ -239,64 +239,64 @@ public abstract class SpecificationScanner extends AbstractScanner
 
     static {
 
-        conversionMap.put("true", Boolean.TRUE);
-        conversionMap.put("t", Boolean.TRUE);
-        conversionMap.put("1", Boolean.TRUE);
-        conversionMap.put("y", Boolean.TRUE);
-        conversionMap.put("yes", Boolean.TRUE);
-        conversionMap.put("on", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("true", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("t", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("1", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("y", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("yes", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("on", Boolean.TRUE);
 
-        conversionMap.put("false", Boolean.FALSE);
-        conversionMap.put("f", Boolean.FALSE);
-        conversionMap.put("0", Boolean.FALSE);
-        conversionMap.put("off", Boolean.FALSE);
-        conversionMap.put("no", Boolean.FALSE);
-        conversionMap.put("n", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("false", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("f", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("0", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("off", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("no", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("n", Boolean.FALSE);
 
-        conversionMap.put("none", BeanLifecycle.NONE);
-        conversionMap.put("request", BeanLifecycle.REQUEST);
-        conversionMap.put("page", BeanLifecycle.PAGE);
-        conversionMap.put("render", BeanLifecycle.RENDER);
+        TYPE_CONVERSION_MAP.put("none", BeanLifecycle.NONE);
+        TYPE_CONVERSION_MAP.put("request", BeanLifecycle.REQUEST);
+        TYPE_CONVERSION_MAP.put("page", BeanLifecycle.PAGE);
+        TYPE_CONVERSION_MAP.put("render", BeanLifecycle.RENDER);
 
-        conversionMap.put("boolean", new BooleanConverter());
-        conversionMap.put("int", new IntConverter());
-        conversionMap.put("double", new DoubleConverter());
-        conversionMap.put("String", new StringConverter());
-        conversionMap.put("long", new LongConverter());
+        TYPE_CONVERSION_MAP.put("boolean", new BooleanConverter());
+        TYPE_CONVERSION_MAP.put("int", new IntConverter());
+        TYPE_CONVERSION_MAP.put("double", new DoubleConverter());
+        TYPE_CONVERSION_MAP.put("String", new StringConverter());
+        TYPE_CONVERSION_MAP.put("long", new LongConverter());
 
-        conversionMap.put("in", Direction.IN);
-        conversionMap.put("form", Direction.FORM);
-        conversionMap.put("custom", Direction.CUSTOM);
+        TYPE_CONVERSION_MAP.put("in", Direction.IN);
+        TYPE_CONVERSION_MAP.put("form", Direction.FORM);
+        TYPE_CONVERSION_MAP.put("custom", Direction.CUSTOM);
 
-        typeList.add("boolean");
-        typeList.add("boolean[]");
+        TYPE_LIST.add("boolean");
+        TYPE_LIST.add("boolean[]");
 
-        typeList.add("short");
-        typeList.add("short[]");
+        TYPE_LIST.add("short");
+        TYPE_LIST.add("short[]");
 
-        typeList.add("int");
-        typeList.add("int[]");
+        TYPE_LIST.add("int");
+        TYPE_LIST.add("int[]");
 
-        typeList.add("long");
-        typeList.add("long[]");
+        TYPE_LIST.add("long");
+        TYPE_LIST.add("long[]");
 
-        typeList.add("float");
-        typeList.add("float[]");
+        TYPE_LIST.add("float");
+        TYPE_LIST.add("float[]");
 
-        typeList.add("double");
-        typeList.add("double[]");
+        TYPE_LIST.add("double");
+        TYPE_LIST.add("double[]");
 
-        typeList.add("char");
-        typeList.add("char[]");
+        TYPE_LIST.add("char");
+        TYPE_LIST.add("char[]");
 
-        typeList.add("byte");
-        typeList.add("byte[]");
+        TYPE_LIST.add("byte");
+        TYPE_LIST.add("byte[]");
 
-        typeList.add("java.lang.Object");
-        typeList.add("java.lang.Object[]");
+        TYPE_LIST.add("java.lang.Object");
+        TYPE_LIST.add("java.lang.Object[]");
 
-        typeList.add("java.lang.String");
-        typeList.add("java.lang.String[]");
+        TYPE_LIST.add("java.lang.String");
+        TYPE_LIST.add("java.lang.String[]");
     }
 
     protected void scanProperty(IPluginPropertyHolder holder, Node node) throws ScannerException
