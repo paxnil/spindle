@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.ui.migrate;
 import java.util.Collection;
 import java.util.Iterator;
 
+import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.spec.BindingType;
 
 import com.iw.plugins.spindle.model.ITapestryModel;
@@ -37,6 +38,7 @@ import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.spec.PluginBindingSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
+import com.iw.plugins.spindle.spec.XMLUtil;
 
 public class MigrateTo204 implements IModelMigrator {
 
@@ -122,9 +124,10 @@ public class MigrateTo204 implements IModelMigrator {
    */
   private void migrateComponentModel(TapestryComponentModel model) {
     PluginComponentSpecification spec = (PluginComponentSpecification) model.getComponentSpecification();
-    String DTD = spec.getDTDVersion();
-    if (DTD == null || "1.1".equals(DTD)) {
-      spec.setDTDVersion("1.2");
+    int DTDVersion = XMLUtil.getDTDVersion(spec.getPublicId());
+    
+    if (DTDVersion < XMLUtil.DTD_1_2) {
+      spec.setPublicId(SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID);
     }
     String newComponentClass = migratePackage(spec.getComponentClassName());
     if (newComponentClass != null) {

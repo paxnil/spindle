@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.factories;
+package com.iw.plugins.spindle.wizards.factories;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -47,13 +47,28 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import com.iw.plugins.spindle.MessageUtil;
 
-public class ApplicationClassFactory {
+/**
+ * @author GWL
+ * @version 
+ *
+ * Copyright 2002, Intelligent Works Incoporated
+ * All Rights Reserved
+ */
+public class ClassFactory {
 
-  static public IType createClass(
+  /**
+   * Constructor for ClassFactory.
+   */
+  public ClassFactory() {
+    super();
+  }
+
+  public IType createClass(
     IPackageFragmentRoot root,
     IPackageFragment pack,
     String classname,
     IType superClass,
+    IType [] interfaces,
     IMethodEvaluator methodEvaluator,
     IProgressMonitor monitor)
     throws CoreException, InterruptedException {
@@ -78,11 +93,11 @@ public class ApplicationClassFactory {
     ICompilationUnit parentCU = pack.getCompilationUnit(classname + ".java");
     imports = getImports(parentCU);
     lineDelimiter = StubUtility.getLineDelimiterUsed(parentCU);
-    String content = createClassBody(classname, superClass, imports, lineDelimiter);
+    String content = createClassBody(classname, superClass, interfaces, imports, lineDelimiter);
     createdType = parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 5));
     // add imports for sclass, so the type can be parsed correctly
     if (imports != null) {
-    	imports.create(true, new SubProgressMonitor(monitor, 1));
+      imports.create(true, new SubProgressMonitor(monitor, 1));
     }
     createAllNewMethods(methodEvaluator, createdType, imports, new SubProgressMonitor(monitor, 1));
 
@@ -95,15 +110,7 @@ public class ApplicationClassFactory {
     return createdType;
   }
 
-  private static void save(IType createdType, String formattedContent, IProgressMonitor monitor)
-    throws JavaModelException {
-    ISourceRange range = createdType.getSourceRange();
-    IBuffer buf = createdType.getCompilationUnit().getBuffer();
-    buf.replace(range.getOffset(), range.getLength(), formattedContent);
-    buf.save(new SubProgressMonitor(monitor, 1), false);
-  }
-
-  private static ImportsStructure getImports(ICompilationUnit parentCU) {
+  private ImportsStructure getImports(ICompilationUnit parentCU) {
     ImportsStructure imports = null;
     String[] prefOrder = ImportOrganizePreferencePage.getImportOrderPreference();
     int threshold = ImportOrganizePreferencePage.getImportNumberThreshold();
@@ -114,7 +121,62 @@ public class ApplicationClassFactory {
     return imports;
   }
 
-  private static void createAllNewMethods(
+  /*
+   * Called from createType to construct the source for this type
+   */
+  private String createClassBody(
+    String classname,
+    IType superclass,
+    IType [] interfaces,
+    IImportsStructure imports,
+    String lineDelimiter) {
+    StringBuffer buf = new StringBuffer();
+
+    buf.append("public class");
+    buf.append(' ');
+    buf.append(classname);
+    writeSuperClass(superclass, buf, imports);
+    writeInterfaces(interfaces, buf, imports);
+    buf.append(" {");
+    buf.append(lineDelimiter);
+    buf.append(lineDelimiter);
+    buf.append('}');
+    buf.append(lineDelimiter);
+    return buf.toString();
+  }
+
+  private void writeSuperClass(IType superclass, StringBuffer buf, IImportsStructure imports) {
+    if (superclass == null) {
+      return;
+    }
+    String typename = superclass.getElementName();
+    if (!"".equals(typename) && !"java.lang.Object".equals(typename)) {
+      buf.append(" extends ");
+      buf.append(Signature.getSimpleName(typename));
+      if (!"java.lang.Object".equals(typename)) {
+        imports.addImport(superclass.getFullyQualifiedName());
+      } else {
+        imports.addImport(typename);
+      }
+    }
+  }
+
+  private void writeInterfaces(IType[] interfaces, StringBuffer buf, IImportsStructure imports) {
+    if (interfaces == null || interfaces.length == 0) {
+      return;
+    }
+    buf.append(" implements ");
+    for (int i = 0; i < interfaces.length; i++) {
+      String iface = interfaces[i].getElementName();
+      buf.append(Signature.getSimpleName(iface));
+      imports.addImport(interfaces[i].getFullyQualifiedName());
+      if (i < interfaces.length - 1) {
+        buf.append(", ");
+      }
+    }
+  }
+  
+  private void createAllNewMethods(
     IMethodEvaluator methodEvaluator,
     IType createdType,
     ImportsStructure imports,
@@ -133,7 +195,7 @@ public class ApplicationClassFactory {
     }
   }
 
-  private static IMethod[] createMethods(String[] methods, IType createdType, ImportsStructure imports)
+  private IMethod[] createMethods(String[] methods, IType createdType, ImportsStructure imports)
     throws CoreException, JavaModelException {
 
     IMethod[] newMethods = new IMethod[methods.length];
@@ -146,8 +208,8 @@ public class ApplicationClassFactory {
     }
     return newMethods;
   }
-
- private static String[] getInheritedMethods(IType createdType, ImportsStructure imports, IProgressMonitor monitor)
+  
+  private static String[] getInheritedMethods(IType createdType, ImportsStructure imports, IProgressMonitor monitor)
     throws JavaModelException {
 
     ITypeHierarchy hierarchy = createdType.newSupertypeHierarchy(monitor);
@@ -155,42 +217,14 @@ public class ApplicationClassFactory {
     return StubUtility.evalUnimplementedMethods(createdType, hierarchy, false, settings, null, imports);
   }
   
-  /*
-   * Called from createType to construct the source for this type
-   */
-  private static String createClassBody(
-    String classname,
-    IType superclass,
-    IImportsStructure imports,
-    String lineDelimiter) {
-    StringBuffer buf = new StringBuffer();
-
-    buf.append("public class");
-    buf.append(' ');
-    buf.append(classname);
-    writeSuperClass(superclass, buf, imports);
-    buf.append(" {");
-    buf.append(lineDelimiter);
-    buf.append(lineDelimiter);
-    buf.append('}');
-    buf.append(lineDelimiter);
-    return buf.toString();
+  private void save(IType createdType, String formattedContent, IProgressMonitor monitor)
+    throws JavaModelException {
+    ISourceRange range = createdType.getSourceRange();
+    IBuffer buf = createdType.getCompilationUnit().getBuffer();
+    buf.replace(range.getOffset(), range.getLength(), formattedContent);
+    buf.save(new SubProgressMonitor(monitor, 1), false);
   }
 
-  static private void writeSuperClass(IType superclass, StringBuffer buf, IImportsStructure imports) {
-    if (superclass == null) {
-      return;
-    }
-    String typename = superclass.getElementName();
-    if (!"".equals(typename) && !"java.lang.Object".equals(typename)) {
-      buf.append(" extends ");
-      buf.append(Signature.getSimpleName(typename));
-      if (!"java.lang.Object".equals(typename)) {
-        imports.addImport(superclass.getFullyQualifiedName());
-      } else {
-        imports.addImport(typename);
-      }
-    }
-  }
+
 
 }

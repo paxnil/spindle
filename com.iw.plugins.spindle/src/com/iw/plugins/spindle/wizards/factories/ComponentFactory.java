@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.factories;
+package com.iw.plugins.spindle.wizards.factories;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -42,26 +42,22 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 
-public class ApplicationFactory {
+public class ComponentFactory {
 
-  static private final String APP_NAME = "APP_NAME";
-  static private final String ENGINE_CLASS = "ENGINE_CLASS";
-  static private final String PAGE_PATH = "PAGE_PATH";
-
-  private ApplicationFactory() {
+  private ComponentFactory() {
   }
 
-  static public IFile createApplication(
+  public static IFile createComponent(
     IPackageFragmentRoot root,
     IPackageFragment pack,
-    String appname,
-    IType engineClass,
+    String componentName,
+    IType specClass,
     IProgressMonitor monitor)
     throws CoreException, InterruptedException {
 
-    monitor.beginTask(MessageUtil.getFormattedString("ApplicationFactory.operationdesc", appname), 10);
+    monitor.beginTask(MessageUtil.getFormattedString("ApplicationFactory.operationdesc", componentName), 10);
     if (pack == null) {
       pack = root.getPackageFragment("");
     }
@@ -72,37 +68,28 @@ public class ApplicationFactory {
     }
     monitor.worked(1);
     IContainer folder = (IContainer) pack.getUnderlyingResource();
-    IFile file = folder.getFile(new Path(appname + ".application"));
+    IFile file = folder.getFile(new Path(componentName + ".jwc"));
 
-    String qualifiedEngineClassname = engineClass.getFullyQualifiedName();
+    String qualifiedSpecClassname = specClass.getFullyQualifiedName();
     InputStream contents =
-      new ByteArrayInputStream(getApplicationContent(appname, qualifiedEngineClassname, pack.getElementName()).getBytes());
+      new ByteArrayInputStream(
+        getComponentContent(qualifiedSpecClassname).getBytes());
     file.create(contents, false, new SubProgressMonitor(monitor, 1));
     monitor.worked(1);
     monitor.done();
     return file;
   }
-
-  static private String getApplicationContent(String appname, String qualifiedEngineClassname, String packageFragment)
-    throws CoreException, InterruptedException {
-
-    PluginApplicationSpecification appSpec = new PluginApplicationSpecification();
-    appSpec.setPublicId(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID);
-    appSpec.setName(appname);
-    appSpec.setEngineClassName(qualifiedEngineClassname);
-    String path = "/" + packageFragment.replace('.', '/') + "/Home.jwc";
-    appSpec.setPageSpecificationPath("Home", path);
-    StringWriter swriter = new StringWriter();
-    PrintWriter pwriter = new PrintWriter(swriter);
-    appSpec.write(pwriter);
-    return swriter.toString();
-    /*   
-       StringReplacer replacer = new StringReplacer(MessageUtil.getResourceFile("Templates.application"));
-       replacer.replace(APP_NAME, appname);
-       replacer.replace(ENGINE_CLASS, qualifiedEngineClassname);
-       replacer.replace(PAGE_PATH, path);
-       return replacer.toString();
-       */
+  
+  static private String getComponentContent(String qualifiedSpecClassname) {
+  	PluginComponentSpecification newSpec = new PluginComponentSpecification();
+  	newSpec.setPublicId(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID);
+  	newSpec.setAllowBody(true);
+  	newSpec.setAllowInformalParameters(true);
+  	newSpec.setComponentClassName(qualifiedSpecClassname);
+  	StringWriter swriter = new StringWriter();
+  	PrintWriter pwriter = new PrintWriter(swriter);
+  	newSpec.write(pwriter);
+  	return swriter.toString();
   }
-
 }
+

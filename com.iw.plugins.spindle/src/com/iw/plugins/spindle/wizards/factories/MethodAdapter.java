@@ -23,27 +23,40 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.model;
+package com.iw.plugins.spindle.wizards.factories;
 
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 
-import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.pde.core.IEditable;
-import org.eclipse.pde.core.IModel;
+public class MethodAdapter implements IMethodEvaluator {
 
-public interface ITapestryModel extends IModel, IEditable {
+  static private String[] empty = new String[0];
+  /**
+   * Constructor for MethodAdapter
+   */
+  public MethodAdapter() {
+    super();
+  }
 
-  public IStorage getUnderlyingStorage();
-  
-  public void reload() throws CoreException; 
-  
-//  /** @deprecated */
-//  public String getDTDVersion();
-  
-  public String getPublicId();
-  
-  public String toXML();
-  
-  public void setEditable(boolean flag);
+  /**
+   * @see IMethodEvaluator#methodsToCreate()
+   */
+  public String[] methodsToCreate() {
+    return empty;
+  }
+
+  /**
+   * @see IMethodEvaluator#createdMethods(IType, IMethod[])
+   */
+  public void createdMethods(IType type, IMethod[] newMethods) {
+    // do nothing
+  }
+
+  /**
+   * @see IMethodEvaluator#newInheritedMethods(IType, IMethod[])
+   */
+  public void newInheritedMethods(IType type, IMethod[] newMethods) {
+    //do nothing
+  }
 
 }

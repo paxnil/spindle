@@ -23,40 +23,16 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.factories;
+package com.iw.plugins.spindle.wizards.factories;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 
-public class MethodAdapter implements IMethodEvaluator {
+public interface IMethodEvaluator {
 
-  static private String[] empty = new String[0];
-  /**
-   * Constructor for MethodAdapter
-   */
-  public MethodAdapter() {
-    super();
-  }
+  String[] methodsToCreate();
 
-  /**
-   * @see IMethodEvaluator#methodsToCreate()
-   */
-  public String[] methodsToCreate() {
-    return empty;
-  }
+  void createdMethods(IType type, IMethod[] newMethods);
 
-  /**
-   * @see IMethodEvaluator#createdMethods(IType, IMethod[])
-   */
-  public void createdMethods(IType type, IMethod[] newMethods) {
-    // do nothing
-  }
-
-  /**
-   * @see IMethodEvaluator#newInheritedMethods(IType, IMethod[])
-   */
-  public void newInheritedMethods(IType type, IMethod[] newMethods) {
-    //do nothing
-  }
-
+  void newInheritedMethods(IType type, IMethod[] newMethods);
 }

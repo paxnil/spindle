@@ -60,7 +60,7 @@ import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
-import com.iw.plugins.spindle.factories.ComponentFactory;
+import com.iw.plugins.spindle.wizards.factories.ComponentFactory;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.manager.TapestryModelManager;
@@ -94,14 +94,14 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
   String AUTO_ADD;
   String GENERATE_HTML;
 
-  private ContainerDialogField fContainerDialogField;
-  private PackageDialogField fPackageDialogField;
-  private ComponentNameField fComponentNameDialog;
-  private CheckBoxField fAutoAddLabel;
-  private ChooseAutoAddApplicationField fAutoAddField;
-  private CheckBoxField fGenerateHTML;
-  private DialogField fNextLabel;
-  private IFile component = null;
+  protected ContainerDialogField fContainerDialogField;
+  protected PackageDialogField fPackageDialogField;
+  protected ComponentNameField fComponentNameDialog;
+  protected CheckBoxField fAutoAddLabel;
+  protected ChooseAutoAddApplicationField fAutoAddField;
+  protected CheckBoxField fGenerateHTML;
+  protected DialogField fNextLabel;
+  protected IFile component = null;
 
   public static void initializeDefaults(IPreferenceStore pstore) {
     pstore.setDefault(P_ADD_TO_APPLICATION, "");

@@ -178,17 +178,6 @@ public class TapestryLibraryModel extends BaseTapestryModel implements PropertyC
   }
 
   /**
-   * @see com.iw.plugins.spindle.model.ITapestryModel#getDTDVersion()
-   */
-  public String getDTDVersion() {
-    ILibrarySpecification spec = getSpecification();
-    if (spec != null) {
-      return spec.getDTDVersion();
-    }
-    return null;
-  }
-
-  /**
    * @see com.iw.plugins.spindle.model.BaseTapestryModel#resolveReferences(boolean)
    */
   public ReferenceInfo resolveReferences(boolean reverse) {

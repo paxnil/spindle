@@ -45,6 +45,7 @@ import com.iw.plugins.spindle.spec.PluginBindingSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.spec.PluginParameterSpecification;
+import com.iw.plugins.spindle.spec.XMLUtil;
 import com.iw.plugins.spindle.ui.ComponentAliasParameterViewer;
 import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
@@ -112,9 +113,9 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
         cmodel = ModelUtils.findComponent(selectedType, getModel());
 
         if (cmodel != null) {
-          dialog = new ChooseBindingTypeDialog(shell, cmodel, existingBindingParms, isDTD12);
+          dialog = new ChooseBindingTypeDialog(shell, cmodel, existingBindingParms, DTDVersion >= XMLUtil.DTD_1_2);
         } else {
-          dialog = new ChooseBindingTypeDialog(shell, isDTD12);
+          dialog = new ChooseBindingTypeDialog(shell, DTDVersion >= XMLUtil.DTD_1_2);
         }
 
       } else {
@@ -125,7 +126,7 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
     } else {
 
       dialog =
-        new ChooseBindingTypeDialog(shell, precomputedAliasInfo, existingBindingParms, isDTD12);
+        new ChooseBindingTypeDialog(shell, precomputedAliasInfo, existingBindingParms, DTDVersion >= XMLUtil.DTD_1_2);
     }
 
     return dialog;

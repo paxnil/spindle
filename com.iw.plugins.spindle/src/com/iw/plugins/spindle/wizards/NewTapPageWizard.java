@@ -46,16 +46,13 @@ public class NewTapPageWizard extends NewTapComponentWizard {
     if (workspace == null) {
       throw new IllegalArgumentException();
     }
-    fPage1 = new NewTapComponentWizardPage(workspace.getRoot(), "FirstPageWizardPage");
+    fPage1 = new NewTapPageWizardPage(workspace.getRoot(), "FirstPageWizardPage");
     addPage(fPage1);
-    fPage2 = new NewTapComponentWizardClassPage(workspace.getRoot(), "SecondPageWizardPage", fPage1);
+    fPage2 = new NewTapPageWizardClassPage(workspace.getRoot(), "SecondPageWizardPage", fPage1);
     addPage(fPage2);
   }
 
- 
-  /**
-             * @see IWizard#createPageControls(Composite)
-             */
+
   public void createPageControls(Composite pageContainer) {
     super.createPageControls(pageContainer);
     setWindowTitle(MessageUtil.getString("NewTapPageWizard.windowtitle"));

@@ -70,6 +70,7 @@ import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.spec.IIdentifiable;
+import com.iw.plugins.spindle.spec.XMLUtil;
 import com.iw.plugins.spindle.ui.EmptySelection;
 import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
@@ -102,7 +103,7 @@ public abstract class AbstractPropertySheetEditorSection
   protected boolean hasFocus;
   private Composite container;
 
-  protected boolean isDTD12;
+  protected int DTDVersion;
 
   protected List holderArray = new ArrayList();
 
@@ -190,8 +191,7 @@ public abstract class AbstractPropertySheetEditorSection
       update();
     }
 
-    String DTDVersion = model.getDTDVersion();
-    isDTD12 = DTDVersion != null && DTDVersion.equals("1.2");
+    DTDVersion = XMLUtil.getDTDVersion(model.getPublicId());
 
     if (useToolTips) {
       TreeViewerWithToolTips viewer = (TreeViewerWithToolTips) treeViewer;

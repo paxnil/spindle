@@ -23,16 +23,32 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.factories;
+package com.iw.plugins.spindle.wizards;
 
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
-public interface IMethodEvaluator {
+import com.iw.plugins.spindle.wizards.factories.PageFactory;
 
-  String[] methodsToCreate();
 
-  void createdMethods(IType type, IMethod[] newMethods);
 
-  void newInheritedMethods(IType type, IMethod[] newMethods);
+public class NewTapPageWizardPage extends NewTapComponentWizardPage {
+
+  public NewTapPageWizardPage(IWorkspaceRoot root, String pageName) {
+    super(root, pageName);
+  }
+
+  public void createComponentResource(IProgressMonitor monitor, IType specClass)
+    throws InterruptedException, CoreException {
+
+    IPackageFragmentRoot root = fContainerDialogField.getPackageFragmentRoot();
+    IPackageFragment pack = fPackageDialogField.getPackageFragment();
+    String compname = fComponentNameDialog.getTextValue();
+    component = PageFactory.createPage(root, pack, compname, specClass, monitor);
+  }
+
 }

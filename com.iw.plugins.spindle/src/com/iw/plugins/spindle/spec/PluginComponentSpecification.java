@@ -269,14 +269,23 @@ public class PluginComponentSpecification
 
     writer.print("<" + tagname + " class=\"");
     writer.print(getComponentClassName());
-    writer.print("\" allow-body=\"");
-    writer.print((getAllowBody() ? "yes" : "no"));
-    writer.print("\" allow-informal-parameters=\"");
-    writer.print((getAllowInformalParameters() ? "yes" : "no"));
-    writer.println("\" >");
+    writer.print("\"");
+
+    if (!isPageSpecification()) {
+
+      writer.print(" allow-body=\"");
+      writer.print((getAllowBody() ? "yes" : "no"));
+      writer.print("\" allow-informal-parameters=\"");
+      writer.print((getAllowInformalParameters() ? "yes" : "no"));
+      writer.print("\"");
+
+    }
+    writer.println(">");
   }
 
   public void write(PrintWriter writer) {
+
+    boolean isPage = isPageSpecification();
 
     String publicId = getPublicId();
 
@@ -416,6 +425,10 @@ public class PluginComponentSpecification
     int indent,
     String publicId) {
 
+    if (containedComponents == null || containedComponents.isEmpty()) {
+      return;
+    }
+
     ArrayList keysList = new ArrayList(containedComponents.keySet());
     HashMap nonCopyOfs = new HashMap();
     HashMap copyOfMap = new HashMap();
@@ -508,7 +521,7 @@ public class PluginComponentSpecification
 
             writer.println();
             String copyOfName = (String) leftoverIter.next();
-            currentComponent = (PluginContainedComponent) getComponent(copyOfName); 
+            currentComponent = (PluginContainedComponent) getComponent(copyOfName);
             currentComponent.write(copyOfName, writer, indent, publicId);
           }
         }
@@ -533,14 +546,14 @@ public class PluginComponentSpecification
     }
     return swriter.toString();
   }
-  
+
   public void setPublicId(String publicId) {
-  	
-  	super.setPublicId(publicId);
+
+    super.setPublicId(publicId);
     propertySupport.firePropertyChange("dtd", null, publicId);
-    
+
   }
- 
+
   /**
    * @see net.sf.tapestry.spec.ComponentSpecification#addAsset(String, AssetSpecification)
    */

@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Display;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.spec.XMLUtil;
 
 /**
  * @author administrator
@@ -64,14 +65,23 @@ public class DTDLableDecorator
       } catch (CoreException e) {
       }
       if (!model.isLoaded()) {
-        return "undetermined";
+        return "undetermined - could not load model";
       }
     }
-    String DTDversion = model.getDTDVersion();
-    if (DTDversion == null) {
-      return "?";
+    
+    int DTDVersion = XMLUtil.getDTDVersion(model.getPublicId());
+    
+    switch (DTDVersion) {
+    	
+    	case XMLUtil.DTD_1_1: return "1.1";
+    	
+    	case XMLUtil.DTD_1_2: return "1.2";
+    	
+    	case XMLUtil.DTD_1_3: return "1.3";
+
+		default : return "?";
     }
-    return DTDversion;
+
   } /**
        * @see org.eclipse.jface.viewers.ILabelDecorator#decorateImage(Image, Object)
        * we return null here as we are not decorating images (yet)

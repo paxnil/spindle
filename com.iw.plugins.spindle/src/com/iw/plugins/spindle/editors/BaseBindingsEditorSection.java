@@ -54,6 +54,7 @@ import com.iw.plugins.spindle.editorjwc.components.ChooseBindingTypeDialog;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.spec.IBindingHolder;
 import com.iw.plugins.spindle.spec.PluginBindingSpecification;
+import com.iw.plugins.spindle.spec.XMLUtil;
 import com.iw.plugins.spindle.ui.EmptySelection;
 
 public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSection {
@@ -73,7 +74,6 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
 
   private HashMap precomputedAliasInfo = new HashMap();
 
-  protected boolean isDTD12;
 
   /**
    * Constructor for ParameterEditorSection
@@ -95,16 +95,16 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
   public void initialize(Object object) {
     super.initialize(object);
     BaseTapestryModel model = (BaseTapestryModel) object;
-    String DTDVersion = model.getDTDVersion();
-    isDTD12 = DTDVersion != null && DTDVersion.equals("1.2");
     if (!model.isEditable()) {
+    	
       newInheritedAction.setEnabled(false);
       newBindingAction.setEnabled(false);
       newFieldAction.setEnabled(false);
       newStaticAction.setEnabled(false);
       newStringAction.setEnabled(false);
     }
-    if (!isDTD12) {
+    if (DTDVersion < XMLUtil.DTD_1_2) {
+    	
       newStringAction.setEnabled(false);
     }
   }
@@ -172,7 +172,7 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
   
   protected ChooseBindingTypeDialog getDialog() {  	
   	
-  	return new ChooseBindingTypeDialog(newButton.getShell(), isDTD12);
+  	return new ChooseBindingTypeDialog(newButton.getShell(), DTDVersion >= XMLUtil.DTD_1_2);
  
   }
 
@@ -246,7 +246,7 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
       if (type == BindingType.STATIC) {
         return staticBindingImage;
       }
-      if (isDTD12 && type == BindingType.STRING) {
+      if (DTDVersion >= XMLUtil.DTD_1_2 && type == BindingType.STRING) {
         return stringBindingImage;
       }
       return null;
@@ -346,7 +346,7 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
         newInheritedAction.run();
       } else if (type == BindingType.STATIC) {
         newStaticAction.run();
-      } else if (isDTD12 && type == BindingType.STRING) {
+      } else if (DTDVersion >= XMLUtil.DTD_1_2 && type == BindingType.STRING) {
         newStringAction.run();
       }
     }
@@ -359,7 +359,7 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
         newInheritedAction.run(parameterName);
       } else if (type == BindingType.STATIC) {
         newStaticAction.run(parameterName);
-      } else if (isDTD12 && type == BindingType.STRING) {
+      } else if (DTDVersion >= XMLUtil.DTD_1_2 && type == BindingType.STRING) {
         newStringAction.run(parameterName);
       }
     }

@@ -39,6 +39,7 @@ import com.iw.plugins.spindle.editors.SpindleForm;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
+import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 
 public class OverviewFormPage extends SpindleFormPage {
 
@@ -81,6 +82,13 @@ public class OverviewFormPage extends SpindleFormPage {
     }
 
     protected void createFormClient(Composite parent) {
+
+      TapestryComponentModel model = (TapestryComponentModel) getPage().getModel();
+      PluginComponentSpecification componentSpec =
+        (PluginComponentSpecification) model.getComponentSpecification();
+
+      boolean isPage = componentSpec.isPageSpecification();
+
       GridLayout layout = new GridLayout();
       layout.numColumns = 2;
       layout.marginWidth = 10;
@@ -118,10 +126,13 @@ public class OverviewFormPage extends SpindleFormPage {
       gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
       control.setLayoutData(gd);
 
-      parameterSection = new ParameterEditorSection((SpindleFormPage) page);
-      control = parameterSection.createControl(leftColumn, getFactory());
-      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-      control.setLayoutData(gd);
+      if (!isPage) {
+
+        parameterSection = new ParameterEditorSection((SpindleFormPage) page);
+        control = parameterSection.createControl(leftColumn, getFactory());
+        gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+        control.setLayoutData(gd);
+      }
 
       propertySection = new PropertyEditableSection((SpindleFormPage) page);
       control = propertySection.createControl(leftColumn, getFactory());
@@ -133,10 +144,13 @@ public class OverviewFormPage extends SpindleFormPage {
       gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
       control.setLayoutData(gd);
 
-      reservedSection = new ReservedParametersSection((SpindleFormPage) page);
-      control = reservedSection.createControl(rightColumn, getFactory());
-      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-      control.setLayoutData(gd);
+      if (!isPage) {
+
+        reservedSection = new ReservedParametersSection((SpindleFormPage) page);
+        control = reservedSection.createControl(rightColumn, getFactory());
+        gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+        control.setLayoutData(gd);
+      }
 
       beanSection = new OverviewBeanSection((SpindleFormPage) page);
       control = beanSection.createControl(rightColumn, getFactory());
@@ -150,9 +164,13 @@ public class OverviewFormPage extends SpindleFormPage {
 
       //    registerSection(alertSection);
       registerSection(generalSection);
-      registerSection(parameterSection);
       registerSection(propertySection);
-      registerSection(reservedSection);
+
+      if (!isPage) {
+
+        registerSection(parameterSection);
+        registerSection(reservedSection);
+      }
       registerSection(beanSection);
       registerSection(componentsSection);
       registerSection(assetSection);

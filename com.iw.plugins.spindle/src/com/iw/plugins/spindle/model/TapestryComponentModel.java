@@ -73,9 +73,9 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
    * @see AbstractModel#load()
    */
   public void load(final InputStream source) throws CoreException {
-  	
-  	final TapestryComponentModel thisModel = this;
-  	
+
+    final TapestryComponentModel thisModel = this;
+
     TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) {
 
@@ -87,14 +87,30 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
         }
         try {
           IStorage element = getUnderlyingStorage();
+
+          String extension = element.getFullPath().getFileExtension();
+
           SpecificationParser parser =
-            (SpecificationParser) TapestryPlugin.getTapestryModelManager().getParserFor(
-              "jwc");
-          componentSpec =
-            (PluginComponentSpecification) TapestryPlugin.getParser().parseComponentSpecification(
-              source,
-              element.getName());
-          componentSpec.setIdentifier(element.getName()); 
+            (SpecificationParser) TapestryPlugin.getTapestryModelManager().getParserFor(extension);
+
+          if (extension.equals("jwc")) {
+
+            componentSpec =
+              (PluginComponentSpecification) TapestryPlugin
+                .getParser()
+                .parseComponentSpecification(
+                source,
+                element.getName());
+
+          } else if (extension.equals("page")) {
+
+            componentSpec =
+              (PluginComponentSpecification) TapestryPlugin.getParser().parsePageSpecification(
+                source,
+                element.getName());
+
+          }
+          componentSpec.setIdentifier(element.getName());
           componentSpec.setParent(thisModel);
           componentSpec.addPropertyChangeListener(TapestryComponentModel.this);
           loaded = true;
@@ -285,25 +301,15 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
     }
   }
 
-  /**
-  * @see com.iw.plugins.spindle.model.ITapestryModel#getDTDVersion()
-  */
-  public String getDTDVersion() {
-    PluginComponentSpecification spec = getComponentSpecification();
-    if (spec != null) {
-      return spec.getDTDVersion();
-    }
-    return null;
-  }
-
+ 
   /**
    * @see com.iw.plugins.spindle.model.ITapestryModel#getPublicId()
    */
   public String getPublicId() {
-  	if (componentSpec != null) {
-  		return componentSpec.getPublicId();
-  	}
-  	return "";
+    if (componentSpec != null) {
+      return componentSpec.getPublicId();
+    }
+    return "";
   }
 
 }

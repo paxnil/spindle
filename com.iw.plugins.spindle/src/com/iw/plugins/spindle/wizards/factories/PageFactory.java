@@ -23,8 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-
-package com.iw.plugins.spindle.factories;
+package com.iw.plugins.spindle.wizards.factories;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -40,39 +39,26 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.model.TapestryLibraryModel;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
+import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 
-/**
- * @author gwl
- * @version $Id$
- *
- * Copyright 2002, Intelligent Work Inc.
- * All Rights Reserved.
- */
-public class LibraryFactory {
+public class PageFactory {
 
+  private PageFactory() {
+  }
 
-  /**
-   * Method createLibrary.
-   * @param root
-   * @param pack
-   * @param appname
-   * @param monitor
-   * @return IFile
-   */
-  public static IFile createLibrary(
+  public static IFile createPage(
     IPackageFragmentRoot root,
     IPackageFragment pack,
-    String libraryName,
+    String componentName,
+    IType specClass,
     IProgressMonitor monitor)
     throws CoreException, InterruptedException {
 
     monitor.beginTask(
-      MessageUtil.getFormattedString("ApplicationFactory.operationdesc", libraryName),
+      MessageUtil.getFormattedString("ApplicationFactory.operationdesc", componentName),
       10);
     if (pack == null) {
       pack = root.getPackageFragment("");
@@ -84,23 +70,28 @@ public class LibraryFactory {
     }
     monitor.worked(1);
     IContainer folder = (IContainer) pack.getUnderlyingResource();
-    IFile file = folder.getFile(new Path(libraryName + ".library"));
+    IFile file = folder.getFile(new Path(componentName + ".page"));
 
-    InputStream contents = new ByteArrayInputStream(getLibraryContent().getBytes());
+    String qualifiedSpecClassname = specClass.getFullyQualifiedName();
+    InputStream contents =
+      new ByteArrayInputStream(getComponentContent(qualifiedSpecClassname).getBytes());
     file.create(contents, false, new SubProgressMonitor(monitor, 1));
     monitor.worked(1);
     monitor.done();
     return file;
   }
 
-  static private String getLibraryContent() throws CoreException, InterruptedException {
-
-    PluginLibrarySpecification librarySpec = new PluginLibrarySpecification();
-    librarySpec.setPublicId(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID);
+  static private String getComponentContent(String qualifiedSpecClassname) {
+    PluginComponentSpecification newSpec = new PluginComponentSpecification() {
+      public boolean isPageSpecification() {
+        return true;
+      }
+    };
+    newSpec.setPublicId(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID);
+    newSpec.setComponentClassName(qualifiedSpecClassname);
     StringWriter swriter = new StringWriter();
     PrintWriter pwriter = new PrintWriter(swriter);
-    librarySpec.write(pwriter);
+    newSpec.write(pwriter);
     return swriter.toString();
   }
-
 }

@@ -49,7 +49,7 @@ import org.eclipse.swt.widgets.Control;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
-import com.iw.plugins.spindle.factories.LibraryFactory;
+import com.iw.plugins.spindle.wizards.factories.LibraryFactory;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.util.Utils;
