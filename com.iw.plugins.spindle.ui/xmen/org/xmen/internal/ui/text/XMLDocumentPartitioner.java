@@ -7,7 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     glongman@intelligentworks.com
+ *     glongman@intelligentworks.com - heavily modified for Spindle
  *******************************************************************************/
 package org.xmen.internal.ui.text;
 
