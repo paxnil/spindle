@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
+import com.iw.plugins.spindle.editors.spec.outline.TapestryOutlinePage;
 
 /**
  * TODO Add Type comment
