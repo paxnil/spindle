@@ -393,7 +393,7 @@ public class ProposalFactory
       boolean addLeadingSpace)
   {
 
-    if (dtd != null || tagName != null)
+    if (dtd == null || tagName == null)
       return Collections.EMPTY_LIST;
 
     List allInfos = getNewAttributeProposalInfos(dtd, tagName);
