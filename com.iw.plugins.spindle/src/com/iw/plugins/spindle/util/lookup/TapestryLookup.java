@@ -45,28 +45,8 @@ import com.iw.plugins.spindle.util.JarEntryFileFaker;
 
 // does not stay up to date as time goes on!
 
-public class TapestryLookup {
+public class TapestryLookup implements ILookupAcceptor {
 
-  /**
-  * Accept flag for specifying components.
-  */
-  public static final int ACCEPT_COMPONENTS = 0x00000001;
-  /**
-   * Accept flag for specifying application.
-   */
-  public static final int ACCEPT_APPLICATIONS = 0x00000002;
-  /**
-   *  Accept flag for specifying the search name includes Tapestry path!
-   */
-  public static final int FULL_TAPESTRY_PATH = 0x00000004;
-  /**
-   *  Accept flag for specifying HTML files
-   */
-  public static final int ACCEPT_HTML = 0x00000008;
-  /**
-   * Accept flag for writeable (non read only) files;
-   */
-  public static final int WRITEABLE = 0x00000010;
 
   protected IPackageFragmentRoot[] fPackageFragmentRoots = null;
 
@@ -426,7 +406,7 @@ public class TapestryLookup {
     return LHS.equals(RHS);
   }
 
-  protected boolean acceptAsTapestry(IStorage s, int acceptFlags) {
+  public boolean acceptAsTapestry(IStorage s, int acceptFlags) {
     return acceptor.acceptAsTapestry(s, acceptFlags);
   }
 

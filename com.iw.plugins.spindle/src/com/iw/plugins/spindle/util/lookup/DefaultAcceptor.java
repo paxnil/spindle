@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
- package com.iw.plugins.spindle.util.lookup;
+package com.iw.plugins.spindle.util.lookup;
 
 import org.eclipse.core.resources.IStorage;
 
@@ -33,45 +33,30 @@ import org.eclipse.core.resources.IStorage;
  *
  */
 public class DefaultAcceptor implements ILookupAcceptor {
- /**
-  * Accept flag for specifying components.
-  */
-  public static final int ACCEPT_COMPONENTS = 0x00000001;
-  /**
-   * Accept flag for specifying application.
-   */
-  public static final int ACCEPT_APPLICATIONS = 0x00000002;
-  /**
-   *  Accept flag for specifying the search name includes Tapestry path!
-   */
-  public static final int FULL_TAPESTRY_PATH = 0x00000004;
-  /**
-   *  Accept flag for specifying HTML files
-   */
-  public static final int ACCEPT_HTML = 0x00000008;
-  /**
-   * Accept flag for writeable (non read only) files;
-   */
-  public static final int WRITEABLE = 0x00000010;
-  
+
   /**
    * @see com.iw.plugins.spindle.util.lookup.ILookupAcceptor#acceptAsTapestry(IStorage, int)
    */
   public boolean acceptAsTapestry(IStorage s, int acceptFlags) {
+
+    return defaultAcceptAsTapestry(s, acceptFlags);
+  }
+
+  protected final boolean defaultAcceptAsTapestry(IStorage s, int acceptFlags) {
     String extension = s.getFullPath().getFileExtension();
-    int w = acceptFlags & WRITEABLE;
-    int j = acceptFlags & ACCEPT_COMPONENTS;
-    if ((acceptFlags & WRITEABLE | acceptFlags & TapestryLookup.WRITEABLE) != 0 && s.isReadOnly()) {
+    //    int w = acceptFlags & WRITEABLE;
+    //    int j = acceptFlags & ACCEPT_COMPONENTS;
+    if ((acceptFlags & WRITEABLE) != 0 && s.isReadOnly()) {
       return false;
     }
     if ("jwc".equals(extension)) {
-      return (acceptFlags & ACCEPT_COMPONENTS | acceptFlags & TapestryLookup.ACCEPT_COMPONENTS) != 0;
+      return (acceptFlags & ACCEPT_COMPONENTS) != 0;
     }
     if ("application".equals(extension)) {
-      return (acceptFlags & ACCEPT_APPLICATIONS | acceptFlags & TapestryLookup.ACCEPT_APPLICATIONS) != 0;
+      return (acceptFlags & ACCEPT_APPLICATIONS) != 0;
     }
     if ("html".equals(extension)) {
-      return (acceptFlags & ACCEPT_HTML | acceptFlags & TapestryLookup.ACCEPT_HTML) != 0;
+      return (acceptFlags & ACCEPT_HTML) != 0;
     }
     return false;
   }

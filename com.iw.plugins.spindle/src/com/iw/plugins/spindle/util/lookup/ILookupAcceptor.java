@@ -33,6 +33,27 @@ import org.eclipse.core.resources.IStorage;
  */
 public interface ILookupAcceptor {
 
+  /**
+  * Accept flag for specifying components.
+  */
+  public int ACCEPT_COMPONENTS = 0x00000001;
+  /**
+   * Accept flag for specifying application.
+   */
+  public int ACCEPT_APPLICATIONS = 0x00000002;
+  /**
+   *  Accept flag for specifying the search name includes Tapestry path!
+   */
+  public int FULL_TAPESTRY_PATH = 0x00000004;
+  /**
+   *  Accept flag for specifying HTML files
+   */
+  public int ACCEPT_HTML = 0x00000008;
+  /**
+   * Accept flag for writeable (non read only) files;
+   */
+  public int WRITEABLE = 0x00000010;
+
   public boolean acceptAsTapestry(IStorage s, int acceptFlags);
 
 }
