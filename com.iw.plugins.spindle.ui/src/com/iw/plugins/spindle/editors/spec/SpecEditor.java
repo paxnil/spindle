@@ -170,6 +170,12 @@ public class SpecEditor extends Editor
   public void createPartControl(Composite parent)
   {
     super.createPartControl(parent);
+    
+    IStorage storage = getStorage();
+    IProject project = TapestryCore.getDefault().getProjectFor(storage);
+    TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+    Map specs = manager.getSpecMap(project);
+    
     Control[] children = parent.getChildren();
     fControl = children[children.length - 1];
 
