@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBeanSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -140,9 +141,9 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      **/
 
     private Map propertySpecifications;
-    /**
-     * @param type
-     */
+    
+    private INamespace namespace;
+    
     public PluginComponentSpecification()
     {
         super(BasePropertyHolder.COMPONENT_SPEC);
@@ -488,6 +489,18 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     public IPropertySpecification getPropertySpecification(String name)
     {       
         return (IPropertySpecification)get(propertySpecifications, name);
+    }
+
+    
+    public INamespace getNamespace()
+    {
+        return namespace;
+    }
+
+    
+    public void setNamespace(INamespace namespace)
+    {
+        this.namespace = namespace;
     }
 
 }

@@ -24,41 +24,28 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.builder;
+package com.iw.plugins.spindle.core.namespace;
 
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.scanning.BaseValidator;
+import org.apache.tapestry.INamespace;
+import org.apache.tapestry.spec.IComponentSpecification;
 
 /**
- *  A validator that knows about the project
- *  <p>
- *  i.e. it can resolve type names in the project buildpath
+ *  Extends org.apache.tapestry.INamespace to allow
+ *  for the de-installation of pages and components.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class BuilderValidator extends BaseValidator
+public interface ICoreNamespace extends INamespace
 {
-    Build build;
-    ICoreNamespace namespace;
-
-    public BuilderValidator(Build build)
-    {
-        super();
-        this.build = build;
-    }
+    public void setParentNamespace(ICoreNamespace parent);
     
-    public BuilderValidator(Build build, ICoreNamespace namespace) {
-        this(build);
-        this.namespace = namespace;
-    }
+    public IComponentSpecification deinstallPageSpecification(String pageName);
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.scanning.BaseValidator#findType(java.lang.String)
-     */
-    protected Object findType(String fullyQualifiedName)
-    {
-        return build.tapestryBuilder.getType(fullyQualifiedName);
-    }
+    public IComponentSpecification deinstallComponentSpecification(String type);
+    
+    public void installChildNamespace(INamespace child);
+    
+    public INamespace deinstallChildNamespace(String id);
 
 }
