@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src/"/>
 	<classpathentry kind="src" path="dtdparser/"/>
-	<classpathentry exported="true" kind="lib" path="lib/tapestry-3.0.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tapestry-contrib-3.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tapestry-3.0.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tapestry-contrib-3.0.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ext/bsf-2.3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ext/commons-beanutils-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ext/commons-codec-1.2.jar"/>
