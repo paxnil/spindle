@@ -916,6 +916,16 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
     // XMLComponent methods
     //
 
+    public Boolean getFeatureDefault(String featureId)
+    {
+        return null;
+    }
+
+    public Object getPropertyDefault(String propertyId)
+    {
+        return null;
+    }
+
     /**
      * Resets the component. The component can query the component manager
      * about any features and properties that affect the operation of the

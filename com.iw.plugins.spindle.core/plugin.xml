@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
-   version="0.0.50"
+   version="0.0.52"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.core.TapestryCore">
 
@@ -61,6 +61,30 @@
       <import plugin="org.apache.xerces" export="true"/>
       <import plugin="org.eclipse.jface.text"/>
    </requires>
+
+   <extension
+         point="org.eclipse.team.core.fileTypes">
+      <fileTypes
+            type="text"
+            extension="jwc">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="page">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="library">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="application">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="xml">
+      </fileTypes>
+   </extension>
 
 
    <extension

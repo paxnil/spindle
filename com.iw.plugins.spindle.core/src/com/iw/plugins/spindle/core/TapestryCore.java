@@ -627,21 +627,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
     {
         if (storage == null)
             return null;
-        IProject project = getProjectFor(storage);
-        if (project == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            if (project.hasNature(TapestryCore.NATURE_ID))
-                return (TapestryProject) project.getNature(TapestryCore.NATURE_ID);
-        } catch (CoreException e)
-        {
-            log(e);
-        }
-        return null;
+        return getTapestryProjectFor(getProjectFor(storage));
     }
 
     /**
@@ -653,7 +639,12 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         if (file == null)
             return null;
 
-        IProject project = getProjectFor(file);
+        return getTapestryProjectFor(getProjectFor(file));
+
+    }
+
+    public TapestryProject getTapestryProjectFor(IProject project)
+    {
         if (project == null)
             return null;
 
