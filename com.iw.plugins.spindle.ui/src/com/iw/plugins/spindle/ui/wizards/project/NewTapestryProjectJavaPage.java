@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.ClassPathDetector;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -223,6 +224,8 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
         }
 
         entries = checkEntries(entries);
+		
+		BuildPathsBlock.addJavaNature(fCurrProject, monitor);
 
         init(JavaCore.create(fCurrProject), outputLocation, entries, false);
       }
