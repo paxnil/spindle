@@ -26,8 +26,11 @@
 
 package tests.util;
 
+import java.util.Set;
+
 import junit.framework.TestCase;
 
+import com.iw.plugins.spindle.core.util.OrderPreservingSet;
 
 /**
  *  TODO Needs to be complete!
@@ -38,6 +41,8 @@ import junit.framework.TestCase;
 public class OrderPreservingSetTests extends TestCase
 {
 
+    String[] defaultValues = { "beagle", "calico", "field", "domestic", "chilean" };
+
     /**
      * Constructor for OrderPreservingSetTests.
      * @param arg0
@@ -47,9 +52,93 @@ public class OrderPreservingSetTests extends TestCase
         super(arg0);
     }
 
-    public void test()
+    /**
+     * bgarson - May 6th 2003
+     */
+    private Set createDefaultSet()
     {
-        //TODO makeup tests!
+        return createSet(defaultValues);
+    }
+
+    private Set createSet(String[] values)
+    {
+        OrderPreservingSet result = new OrderPreservingSet();
+        for (int i = 0; i < values.length; i++)
+        {
+            result.add(values[i]);
+        }
+        return result;
+    }
+
+    //tests addAll, contains and containsAll
+    public void testAddall()
+    {
+        Set set1 = createDefaultSet();
+        Set set2 = new OrderPreservingSet();
+        set2.addAll(set1);
+        set2.containsAll(set1);
+        set2.contains("beagle");
+    }
+
+    public void testIsEmpty()
+    {
+        Set set1 = createDefaultSet();
+        if (set1.isEmpty())
+        {
+            fail("set is not empty!!");
+        }
+        set1.clear();
+        if (!set1.isEmpty())
+        {
+            fail("set is empty!");
+        }
+        set1.add("hello");
+        if (set1.isEmpty())
+        {
+            fail("set is not empty!");
+        }
+    }
+
+    public void testRemoveAll()
+    {
+        Set set1 = createDefaultSet();
+        Set set2 = new OrderPreservingSet();
+        Set set3 = new OrderPreservingSet();
+        String[] values = { "table", "chair", "door", "house" };
+        for (int i = 0; i < values.length; i++)
+        {
+            set3.add(values[i]);
+        }
+        set2.addAll(set1);
+        set2.addAll(set3);
+        set2.removeAll(set1);
+        if (set2.containsAll(set1))
+        {
+            fail("set1 was removed!");
+        }
+        int oldsize = set2.size();
+        set2.remove("door");
+        assertEquals("Remove & Size not functioning properly", set2.size(), oldsize - 1);
+
+    }
+
+    public void testRetainAll()
+    {
+        String[] values = { "table", "chair", "door", "house" };
+        String[] valhaf = { "chair", "door" };
+        Set set1 = createSet(values);
+        Set set2 = createSet(valhaf);
+        set1.retainAll(set2);
+        assertEquals("they should be equal", set1.size() , set2.size());
+        assertTrue("should contain", set2.containsAll(set1));
+
+    }
+
+    public void testtoArray(){
+        Set set1 = createDefaultSet();
+        Object x = set1.toArray();
+        set1.add(x);
+        assertTrue("toArray() didn't work",set1.contains(x));
     }
 
     public static void main(String[] args)
