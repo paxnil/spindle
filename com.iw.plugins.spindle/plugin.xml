@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle"
    name="Spindle, an Eclipse Plugin for Tapestry (tapestry.sourceforge.net)"
-   version="1.1.4"
+   version="1.1.5"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.TapestryPlugin">
 
@@ -32,8 +32,7 @@
          <export name="*"/>
       </library>
    </runtime>
-   <requires>
-      <import plugin="org.apache.xerces"/>
+   <requires>   
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
@@ -107,9 +106,9 @@
       <wizard
             name="Tapestry Library Project"
             icon="./icons/basic/library16.gif"
+            project="true"
             category="com.iw.plugins.spindle.new"
             class="com.iw.plugins.spindle.wizards.project.NewLibraryProjectWizard"
-            project="true"
             id="com.iw.plugins.spindle.new_library_wizard">
          <description>
             Create a new Tapestry Library Project
@@ -119,8 +118,8 @@
             name="Tapestry Application Project"
             icon="./icons/basic/application16.gif"
             category="com.iw.plugins.spindle.new"
-            class="com.iw.plugins.spindle.wizards.project.NewApplicationProjectWizard"
             project="true"
+            class="com.iw.plugins.spindle.wizards.project.NewApplicationProjectWizard"
             id="com.iw.plugins.spindle.new_app_wizard">
          <description>
             Create a new Tapestry Application Project
@@ -147,7 +146,7 @@
          </description>
       </wizard>
    </extension>
-<!--
+   <!--
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
@@ -162,7 +161,7 @@
          </description>
       </decorator>
    </extension>
-   -->
+   -->   
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
@@ -249,12 +248,8 @@
       <super
             type="org.eclipse.core.resources.textmarker">
       </super>
-      <attribute
-            name="invalidString">
-      </attribute>
-      <attribute
-            name="pattern">
-      </attribute>
+      <attribute name="invalidString"/>
+      <attribute name="pattern"/>
       <persistent
             value="false">
       </persistent>
@@ -296,7 +291,7 @@
                class="com.iw.plugins.spindle.wizards.OpenTapestryPageWizard"
                toolbarPath="Normal/spindle"
                id="com.iw.spindle.actions.set.OpenTapestryPageWizard">
-         </action>
+         </action>         
       </actionSet>
    </extension>
    <extension
@@ -334,6 +329,7 @@
                enablesFor="1"
                id="com.iw.plugins.spindle.project.popupMenus.project.JumpToTapestryProjectAction">
          </action>
+
       </objectContribution>
       <objectContribution
             objectClass="org.eclipse.core.resources.IFile"
@@ -381,7 +377,7 @@
                menubarPath="com.iw.plugins.spindle.popupMenus.convert/group1"
                enablesFor="1"
                id="com.iw.plugins.spindle.popupMenus.convert.ConvertToTapestryPage">
-         </action>
+         </action>         
       </objectContribution>
    </extension>
    <extension
@@ -402,14 +398,14 @@
             file-extension="library"
             class="com.iw.plugins.spindle.model.manager.LibraryManagerDelegate">
       </manager>
-   </extension>
-   <extension
+   </extension>   
+    <extension
          point="org.eclipse.ui.markerUpdaters">
       <updater
             class="com.iw.plugins.spindle.editors.BadStringMarkerUpdater"
             id="com.iw.plugins.spindle.editors.BadStringMarkerUpdater">
       </updater>
-   </extension>
+   </extension>    
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
@@ -424,5 +420,4 @@
             id="TooltipPreferencePage">
       </page>
    </extension>
-
 </plugin>

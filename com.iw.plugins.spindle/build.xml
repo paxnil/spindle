@@ -8,10 +8,10 @@
   <property name="site-home" value="${buildRelease}/site"/>
 
   
-  <property name="version" value="1.1.4"/>
+  <property name="version" value="1.1.5"/>
   <property name="size" value="3277"/>
-  <property name="tap_version" value="2.2, 2.3 beta1"/>
-  <property name="eclipse_version" value="R2.0, 2.0.1, 2.0.2 (SDK)"/>
+  <property name="tap_version" value="2.2, 2.3"/>
+  <property name="eclipse_version" value="R2.1 (SDK)"/>
    
   <target name="build-plugin-xml">
   	<delete file="${basedir}/plugin.xml"/>
