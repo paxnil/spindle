@@ -27,6 +27,7 @@
 package com.iw.plugins.spindle.core.spec;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -381,11 +382,17 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public boolean isReservedParameterName(String value)
     {
-        return reservedParameterNames.contains(value);
+        if (reservedParameterNames != null) {
+            return reservedParameterNames.contains(value);
+        }
+        return false;
     }
     
     public boolean removeReservedParameterName(String value) {
-        return remove(reservedParameterNames, value);
+        if (reservedParameterNames != null) {
+            return remove(reservedParameterNames, value);
+        }
+        return false;
     }
 
     /* (non-Javadoc)
@@ -504,7 +511,8 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     }
     
     public List getTemplateLocations() {
-        return null;
+        //TODO implement getTemplateLocations()
+        return Collections.EMPTY_LIST;
     }
 
 }

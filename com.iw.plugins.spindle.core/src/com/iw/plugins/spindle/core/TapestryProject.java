@@ -268,6 +268,9 @@ public class TapestryProject implements IProjectNature
     private int readIntProperty(String key)
     {
         String result = readProperty(key);
+        if (result == null || result.trim().length() == 0) {
+            return 0;
+        }
         if (result != null)
         {
             return new Integer(result).intValue();

@@ -42,7 +42,7 @@ import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.runtime.Path;
 
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.namespace.NamspaceResourceLookup;
+import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
@@ -73,7 +73,7 @@ public class NamespaceResolver
     // a stack of the components being resolved
     // its an error for a component to be in the stack more than 
     // once!
-    private Stack componentStack;
+    private Stack componentStack = new Stack();
 
     private boolean working;
     private boolean resolvingFramework;
@@ -199,23 +199,45 @@ public class NamespaceResolver
         {
             throw new RuntimeException("can't call resolve while resolving!");
         }
-        working = true;
-        resultNamespace = build.createNamespace(namespaceId, specLocation);
-        resultNamespace.getComponentLookup(frameworkNamespace);
-        resultNamespace.getPageLookup(frameworkNamespace);
-        if (applicationNameFromWebXML != null)
+
+        try
         {
-            resultNamespace.setAppNameFromWebXML(applicationNameFromWebXML);
-        }
-        if (resultNamespace != null)
+            working = true;
+            componentStack.clear();
+            resultNamespace = build.createNamespace(namespaceId, specLocation);
+            if (resultNamespace != null)
+            {
+                resultNamespace.getComponentLookup(frameworkNamespace);
+                resultNamespace.getPageLookup(frameworkNamespace);
+                if (applicationNameFromWebXML != null)
+                {
+                    resultNamespace.setAppNameFromWebXML(applicationNameFromWebXML);
+                }
+
+                NamespaceResourceLookup lookup = new NamespaceResourceLookup();
+                if (resultNamespace.isApplicationNamespace())
+                {
+                    lookup.configure(
+                        (PluginApplicationSpecification) resultNamespace.getSpecification(),
+                        build.tapestryBuilder.contextRoot,
+                        applicationNameFromWebXML);
+                } else
+                {
+                    lookup.configure((PluginLibrarySpecification) resultNamespace.getSpecification());
+                }
+                
+                resultNamespace.setResourceLookup(lookup);
+                temporaryNamespace = new TemporaryNamespace();
+                resolveChildNamespaces();
+                resolveComponents();
+                List definitelyNotSpeclessPages = getAllComponentTemplates();
+                resolvePages(definitelyNotSpeclessPages);
+            }
+        } finally
         {
-            temporaryNamespace = new TemporaryNamespace();
-            resolveChildNamespaces();
-            resolveComponents();
-            List definitelyNotSpeclessPages = getAllComponentTemplates();
-            resolvePages(definitelyNotSpeclessPages);
+            working = false;
         }
-        working = false;
+
     }
 
     private List getAllComponentTemplates()
@@ -301,31 +323,18 @@ public class NamespaceResolver
         }
         componentStack.push(location);
         result = build.resolveIComponentSpecification(temporaryNamespace, location);
-        resultNamespace.installComponentSpecification(name, result);
-        ((PluginComponentSpecification) result).setNamespace(resultNamespace);
+        if (result != null)
+        {
+            resultNamespace.installComponentSpecification(name, result);
+            ((PluginComponentSpecification) result).setNamespace(resultNamespace);
+        }
         componentStack.pop();
         return result;
     }
 
-    /**
-     * @return
-     */
     private Map getAllJWCFilesForNamespace()
     {
         IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) resultNamespace.getSpecificationLocation();
-
-        NamspaceResourceLookup lookup = new NamspaceResourceLookup();
-        if (resultNamespace.isApplicationNamespace())
-        {
-            lookup.configure(
-                (PluginApplicationSpecification) resultNamespace.getSpecification(),
-                applicationNameFromWebXML);
-        } else
-        {
-            lookup.configure((PluginLibrarySpecification) resultNamespace.getSpecification());
-        }
-
-        List jwcs = new ArrayList(Arrays.asList(lookup.find("*", false, lookup.ACCEPT_JWC)));
 
         Map result = new HashMap();
         ILibrarySpecification spec = resultNamespace.getSpecification();
@@ -335,17 +344,11 @@ public class NamespaceResolver
         {
             String type = (String) iter.next();
             IResourceLocation specLoc = location.getRelativeLocation(spec.getComponentSpecificationPath(type));
-            if (jwcs.contains(specLoc))
-            {
-                if (!result.containsKey(type))
-                {
-                    result.put(type, specLoc);
-                }
-                //otherwise ignore the duplicate definition - the scanners will catch it!
-            }
+            result.put(type, specLoc);
         }
-
-        jwcs.removeAll(result.entrySet());
+        
+        NamespaceResourceLookup lookup = resultNamespace.getResourceLookup();
+        List jwcs = new ArrayList(Arrays.asList(lookup.find("*", false, lookup.ACCEPT_JWC)));
 
         // remaining typed by thier filename
         for (Iterator iter = jwcs.iterator(); iter.hasNext();)
@@ -357,7 +360,7 @@ public class NamespaceResolver
                 result.put(type, element);
             } else
             {
-                //this is a problem a component is being hidden by one defined in the spec, or some place else
+                //this is a problem. a component is being hidden by one defined in the spec, or some place else
                 //in the lookup path.
                 //TODO handle this error! - need to mark the resource if we can
                 throw new Error("fix me!");
@@ -623,6 +626,22 @@ public class NamespaceResolver
         public void setAppNameFromWebXML(String name)
         {
             resultNamespace.setAppNameFromWebXML(name);
+        }
+
+        /* (non-Javadoc)
+         * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#setResourceLookup(com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup)
+         */
+        public void setResourceLookup(NamespaceResourceLookup lookup)
+        {
+            resultNamespace.setResourceLookup(lookup);
+        }
+
+        /* (non-Javadoc)
+         * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#getResourceLookup()
+         */
+        public NamespaceResourceLookup getResourceLookup()
+        {
+            return resultNamespace.getResourceLookup();
         }
 
     }

@@ -57,13 +57,15 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
  */
 public class ComponentScanner extends SpecificationScanner
 {
+    boolean isPageSpec;
 
     /* Don't need to throw an exception or add a problem here, the Parser will already have caught this
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(
      */
     protected Object beforeScan(Node rootNode) throws ScannerException
     {
-        if (!isElement(rootNode, "component-specification"))
+        isPageSpec = isElement(rootNode, "page-specification");
+        if (!(isPageSpec || isElement(rootNode, "component-specification")))
         {
             return null;
         }
@@ -77,15 +79,15 @@ public class ComponentScanner extends SpecificationScanner
     {
         IComponentSpecification specification = (IComponentSpecification) resultObject;
 
-        specification.setPublicId(parser.getPublicId());
-        //  TODO handle...   specification.setSpecificationLocation(getResourceLocation());
+        specification.setPublicId(parser.getPublicId());        
+        specification.setSpecificationLocation(location);
 
         // Only components specify these two attributes.
 
         specification.setAllowBody(getBooleanAttribute(rootNode, "allow-body"));
         specification.setAllowInformalParameters(getBooleanAttribute(rootNode, "allow-informal-parameters"));
 
-        scanComponentSpecification(rootNode, specification, true);
+        scanComponentSpecification(rootNode, specification, isPageSpec);
     }
 
     protected void scanAsset(IComponentSpecification specification, Node node, AssetType type, String attributeName)

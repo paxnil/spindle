@@ -29,6 +29,7 @@ package com.iw.plugins.spindle.core.namespace;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -50,8 +51,19 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class NamspaceResourceLookup
+public class NamespaceResourceLookup
 {
+    public static String[] i10n;
+
+    static {
+        Locale[] available = Locale.getAvailableLocales();
+        i10n = new String[available.length];
+        for (int i = 0; i < available.length; i++)
+        {
+            i10n[i] = available[i].toString();
+        }
+    }
+    
     /**
     * Accept flag for specifying .jwc files.
     */
@@ -71,16 +83,19 @@ public class NamspaceResourceLookup
         locations.add(specification.getSpecificationLocation());
     }
 
-    public void configure(PluginApplicationSpecification specification, String servletName)
+    public void configure(
+        PluginApplicationSpecification specification,
+        IResourceWorkspaceLocation contextRoot,
+        String servletName)
     {
         locations = new ArrayList();
         IResourceWorkspaceLocation base = (IResourceWorkspaceLocation) specification.getSpecificationLocation();
-        if (!base.isOnClasspath())
+        if (base.isOnClasspath())
         {
             locations.add(base);
+            locations.add(contextRoot);
         } else
         {
-            IResourceWorkspaceLocation contextRoot = (IResourceWorkspaceLocation) base.getRelativeLocation("/");
             locations.add(base);
             if (servletName != null)
             {
@@ -89,7 +104,6 @@ public class NamspaceResourceLookup
             locations.add(contextRoot.getRelativeLocation("/WEB_INF/"));
             locations.add(contextRoot);
         }
-
     }
 
     public IResourceWorkspaceLocation[] find(String name, boolean exactMatch, int acceptFlags)

@@ -235,6 +235,7 @@ public abstract class Build implements IBuild
                         ((IResourceWorkspaceLocation) location).getStorage(),
                         scanner.getProblems());
                 }
+                return result;
             }
         } catch (IOException e)
         {
@@ -340,7 +341,7 @@ public abstract class Build implements IBuild
         IResourceWorkspaceLocation location)
     {
         IComponentSpecification result = null;
-        if (location == null)
+        if (location != null)
             if (location.exists())
             {
                 try

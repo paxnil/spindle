@@ -109,6 +109,9 @@ public class Files
 
     public static String readPropertyInXMLFile(IFile file, String property) throws IOException
     {
+        if (!file.exists()) {
+            return null;
+        }
         String content = readTextFile(file);
         int startTagIdx = content.indexOf("<" + property + ">");
         if (startTagIdx < 0)

@@ -63,10 +63,12 @@ public class CoreNamespace implements ICoreNamespace
 
     private ComponentLookup componentLookup;
     private PageLookup pageLookup;
-    
+
     private String appNameFromWebXML;
 
     private Map pages = new HashMap();
+
+    private NamespaceResourceLookup lookup;
 
     /**
      *  Map of {@link ComponentSpecification} keyed on
@@ -91,7 +93,7 @@ public class CoreNamespace implements ICoreNamespace
         applicationNamespace = (id == null && specification instanceof IApplicationSpecification);
         frameworkNamespace = FRAMEWORK_NAMESPACE.equals(id);
     }
-    
+
     /* (non-Javadoc)
      * @see org.apache.tapestry.INamespace#getId()
      */
@@ -419,10 +421,25 @@ public class CoreNamespace implements ICoreNamespace
         return pageLookup;
     }
 
-    
     public void setAppNameFromWebXML(String name)
     {
         appNameFromWebXML = name;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#setResourceLookup(com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup)
+     */
+    public void setResourceLookup(NamespaceResourceLookup lookup)
+    {
+        this.lookup = lookup;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#getResourceLookup()
+     */
+    public NamespaceResourceLookup getResourceLookup()
+    {
+        return lookup;
     }
 
 }

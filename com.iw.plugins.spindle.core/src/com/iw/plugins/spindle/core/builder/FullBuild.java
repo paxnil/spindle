@@ -84,14 +84,14 @@ public class FullBuild extends Build
             Markers.removeProblemsForProject(tapestryBuilder.currentProject);
 
             findDeclaredApplications();
-            if (knownValidServlets == null || knownValidServlets.isEmpty())
-            {
-                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_NO_SERVLETS));
-            }
-            if (knownValidServlets.size() > 1)
-            {
-                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_ONE_SERVLET_ONLY));
-            }
+//            if (knownValidServlets == null || knownValidServlets.isEmpty())
+//            {
+//                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_NO_SERVLETS));
+//            }
+//            if (knownValidServlets.size() > 1)
+//            {
+//                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_ONE_SERVLET_ONLY));
+//            }
             //            goofTest();
             notifier.updateProgressDelta(0.1f);
 
@@ -99,6 +99,9 @@ public class FullBuild extends Build
             buildQueue = new BuilderQueue();
 
             buildQueue.addAll(findAllTapestryArtifacts());
+            
+            namespaceTest();
+            
             notifier.updateProgressDelta(0.15f);
             if (buildQueue.hasWaiting())
             {
@@ -116,6 +119,15 @@ public class FullBuild extends Build
         {
             TapestryCore.log(e);
         }
+    }
+
+    /**
+     * 
+     */
+    private void namespaceTest()
+    {
+        NamespaceResolver resolver = new NamespaceResolver(this);
+        resolver.resolveFrameworkNamespace();        
     }
 
     /**

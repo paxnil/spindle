@@ -55,6 +55,11 @@ public interface ICoreNamespace extends INamespace
 
     public PageLookup getPageLookup(ICoreNamespace framework);
 
+    /** set only if this is the application namespace**/
     public void setAppNameFromWebXML(String name);
+    
+    public void setResourceLookup(NamespaceResourceLookup lookup);
+    
+    public NamespaceResourceLookup getResourceLookup();
 
 }
