@@ -1,0 +1,151 @@
+----------
+1. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\actions\JumpToApplicationSpecAction.java (at line 80)
+	UIPlugin.getDefault().openTapestryEditor(storage);
+	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The static method openTapestryEditor(IStorage) from the type UIPlugin should be accessed in a static way
+----------
+----------
+2. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\spec\assist\AttributeCompletionProcessor.java (at line 280)
+	UITapestryAccess.Result info = fAssistHelper.createComponentInformationResult(value, value, resolved);
+	                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The static method createComponentInformationResult(String, String, IComponentSpecification) from the type UITapestryAccess should be accessed in a static way
+----------
+----------
+3. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\spec\assist\AttributeCompletionProcessor.java (at line 303)
+	fAssistHelper.createParameterResult(value, parameter, containedComponent.getPublicId());
+	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The static method createParameterResult(String, IParameterSpecification, String) from the type UITapestryAccess should be accessed in a static way
+----------
+----------
+4. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\spec\assist\AttributeCompletionProcessor.java (at line 628)
+	if (dialog.open() == dialog.OK)
+	                     ^^^^^^^^^
+The static field Window.OK should be accessed in a static way
+----------
+----------
+5. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\spec\SpecEditorContributor.java (at line 36)
+	new RetargetTextEditorAction(UIPlugin.getDefault().getResourceBundle(), "ContentAssistProposal.");
+	                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The static method getResourceBundle() from the type UIPlugin should be accessed in a static way
+----------
+----------
+6. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\template\assist\JWCIDContentAssistProcessor.java (at line 35)
+	import org.eclipse.core.resources.IProject;
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The import org.eclipse.core.resources.IProject is never used
+----------
+----------
+7. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\template\assist\JWCIDContentAssistProcessor.java (at line 36)
+	import org.eclipse.core.resources.IStorage;
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The import org.eclipse.core.resources.IStorage is never used
+----------
+----------
+8. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\template\assist\JWCIDContentAssistProcessor.java (at line 47)
+	import com.iw.plugins.spindle.core.TapestryCore;
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The import com.iw.plugins.spindle.core.TapestryCore is never used
+----------
+----------
+9. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\template\assist\JWCIDContentAssistProcessor.java (at line 48)
+	import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The import com.iw.plugins.spindle.core.builder.TapestryArtifactManager is never used
+----------
+----------
+10. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\template\assist\JWCIDContentAssistProcessor.java (at line 49)
+	import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The import com.iw.plugins.spindle.core.namespace.ICoreNamespace is never used
+----------
+----------
+11. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\template\assist\TagContentAssistProcessor.java (at line 36)
+	import org.eclipse.core.resources.IProject;
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The import org.eclipse.core.resources.IProject is never used
+----------
+----------
+12. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\template\assist\TagContentAssistProcessor.java (at line 37)
+	import org.eclipse.core.resources.IStorage;
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The import org.eclipse.core.resources.IStorage is never used
+----------
+----------
+13. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\template\assist\TagContentAssistProcessor.java (at line 45)
+	import com.iw.plugins.spindle.core.TapestryCore;
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The import com.iw.plugins.spindle.core.TapestryCore is never used
+----------
+----------
+14. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\template\assist\TagContentAssistProcessor.java (at line 46)
+	import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The import com.iw.plugins.spindle.core.builder.TapestryArtifactManager is never used
+----------
+----------
+15. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\template\assist\TagContentAssistProcessor.java (at line 47)
+	import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The import com.iw.plugins.spindle.core.namespace.ICoreNamespace is never used
+----------
+----------
+16. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\editors\template\TemplateEditorContributor.java (at line 25)
+	UIPlugin.getDefault().getResourceBundle(),
+	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The static method getResourceBundle() from the type UIPlugin should be accessed in a static way
+----------
+----------
+17. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\ui\decorators\ContextRootDecorator.java (at line 70)
+	if (tproject != null && tproject.getProjectType() == tproject.APPLICATION_PROJECT_TYPE)
+	                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The static field TapestryProject.APPLICATION_PROJECT_TYPE should be accessed in a static way
+----------
+----------
+18. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\ui\properties\SearchForLibraryWidget.java (at line 281)
+	if (root.getKind() == root.K_BINARY || !fragment.getJavaProject().equals(jproject))
+	                      ^^^^^^^^^^^^^
+The static field IPackageFragmentRoot.K_BINARY should be accessed in a static way
+----------
+----------
+19. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\ui\wizards\fields\ContainerDialogField.java (at line 245)
+	if (dialog.open() == dialog.OK)
+	                     ^^^^^^^^^
+The static field Window.OK should be accessed in a static way
+----------
+----------
+20. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\ui\wizards\fields\InterfaceChooser.java (at line 151)
+	if (dialog.open() == dialog.OK)
+	                     ^^^^^^^^^
+The static field Window.OK should be accessed in a static way
+----------
+----------
+21. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\ui\wizards\fields\PackageDialogField.java (at line 185)
+	if (dialog.open() == dialog.OK) {
+	                     ^^^^^^^^^
+The static field Window.OK should be accessed in a static way
+----------
+----------
+22. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\ui\wizards\fields\RawTypeDialogField.java (at line 224)
+	if (dialog.open() == dialog.OK)
+	                     ^^^^^^^^^
+The static field Window.OK should be accessed in a static way
+----------
+----------
+23. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\ui\wizards\fields\RawTypeDialogFieldBroke.java (at line 183)
+	if (dialog.open() == dialog.OK)
+	                     ^^^^^^^^^
+The static field Window.OK should be accessed in a static way
+----------
+----------
+24. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\ui\wizards\fields\TapestryProjectDialogField.java (at line 214)
+	if (dialog.open() == dialog.OK)
+	                     ^^^^^^^^^
+The static field Window.OK should be accessed in a static way
+----------
+----------
+25. WARNING in X:\eclipse\core\workspace\com.iw.plugins.spindle.ui\src\com\iw\plugins\spindle\ui\wizards\fields\TypeDialogField.java (at line 212)
+	if (dialog.open() == dialog.OK)
+	                     ^^^^^^^^^
+The static field Window.OK should be accessed in a static way
+----------
+25 problems (25 warnings)

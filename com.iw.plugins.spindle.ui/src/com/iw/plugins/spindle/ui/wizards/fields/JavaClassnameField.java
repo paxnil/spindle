@@ -101,6 +101,7 @@ public class JavaClassnameField extends AbstractNameField
                 if (file.exists())
                 {
                     status.setError(UIPlugin.getString(fName + ".error.ClassAlreadyExists", appname));
+                    return status;
                 }
             } catch (JavaModelException e)
             {

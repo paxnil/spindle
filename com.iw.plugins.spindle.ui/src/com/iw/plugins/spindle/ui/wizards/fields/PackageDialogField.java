@@ -40,173 +40,221 @@ import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonDefaultField;
 
-public class PackageDialogField extends StringButtonDefaultField {
+public class PackageDialogField extends StringButtonDefaultField
+{
 
-  private String name;
-  private ContainerDialogField container;
-  private IPackageFragment currentPackage;
+    private String name;
+    private ContainerDialogField container;
+    private IPackageFragment currentPackage;
+    private boolean fSourcePackagesOnly = false;
 
-  /**
-   * Constructor for PackageDialogField.
-   * @param label
-   * @param defaultLabel
-   */
-  public PackageDialogField(String name, int labelWidth) {
-    super(UIPlugin.getString(name + ".label"), labelWidth);
-    this.name = name;
+    /**
+     * Constructor for PackageDialogField.
+     * @param label
+     * @param defaultLabel
+     */
+    public PackageDialogField(String name, int labelWidth)
+    {
+        super(UIPlugin.getString(name + ".label"), labelWidth);
+        this.name = name;
 
-  }
-
-  /**
-   * Constructor for PackageDialogField.
-   * @param label
-   * @param defaultLabel
-   * @param labelWidth
-   */
-
-  /**
-   * Constructor for PackageDialogField
-   */
-  public PackageDialogField(String name) {
-    this(name, -1);
-
-  }
-
-  public void init(ContainerDialogField container, IRunnableContext context) {
-    super.init(context);
-    this.container = container;
-    container.addListener(this);
-    setButtonLabel(UIPlugin.getString(name + ".button"));
-    setTextValue("");
-  }
-
-  public ContainerDialogField getContainer() {
-    return container;
-  }
-
-  /**
-  * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
-  */
-  public void dialogFieldButtonPressed(DialogField field) {
-    if (field == this) {
-      IPackageFragment pack = choosePackage();
-      if (pack != null) {
-        setPackageFragment(pack);
-      }
-    }
-  }
-
-  public void dialogFieldChanged(DialogField field) {
-    if (field == this || field == container) {
-      setStatus(packageChanged());
     }
 
-  }
-
-  public IStatus packageChanged() {
-    SpindleStatus status = new SpindleStatus();
-    checkButtonEnabled();
-    String packName = getTextValue();
-    if (!"".equals(packName)) {
-      IStatus val = JavaConventions.validatePackageName(packName);
-      if (val.getSeverity() == IStatus.ERROR) {
-        status.setError(UIPlugin.getString(name + ".error.InvalidPackageName", val.getMessage()));
-        return status;
-      } else if (val.getSeverity() == IStatus.WARNING) {
-        status.setWarning(UIPlugin.getString(name + ".warning.DiscouragedPackageName", val.getMessage()));
-        // continue
-      }
-    } else {
-    	
-    	status.setError("Using the default package is not allowed. Choose (or enter) a package");
-    	return status;
+    public void setAcceptSourcePackagesOnly(boolean flag)
+    {
+        fSourcePackagesOnly = flag;
     }
 
-    IPackageFragmentRoot root;
-    if (container == null) {
-      root = null;
-    } else {
-      root = container.getPackageFragmentRoot();
+    /**
+     * Constructor for PackageDialogField.
+     * @param label
+     * @param defaultLabel
+     * @param labelWidth
+     */
+
+    /**
+     * Constructor for PackageDialogField
+     */
+    public PackageDialogField(String name)
+    {
+        this(name, -1);
+
     }
-    if (root != null) {
-      IPackageFragment pack = root.getPackageFragment(packName);
-      try {
-        IPath rootPath = root.getPath();
-        IPath outputPath = root.getJavaProject().getOutputLocation();
-        if (rootPath.isPrefixOf(outputPath) && !rootPath.equals(outputPath)) {
-          // if the bin folder is inside of our root, dont allow to name a package
-          // like the bin folder
-          IPath packagePath = pack.getUnderlyingResource().getFullPath();
-          if (outputPath.isPrefixOf(packagePath)) {
-            status.setError(UIPlugin.getString(name + ".error.ClashOutputLocation"));
-            return status;
-          }
+
+    public void init(ContainerDialogField container, IRunnableContext context)
+    {
+        super.init(context);
+        this.container = container;
+        container.addListener(this);
+        setButtonLabel(UIPlugin.getString(name + ".button"));
+        setTextValue("");
+    }
+
+    public ContainerDialogField getContainer()
+    {
+        return container;
+    }
+
+    /**
+    * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
+    */
+    public void dialogFieldButtonPressed(DialogField field)
+    {
+        if (field == this)
+        {
+            IPackageFragment pack = choosePackage();
+            if (pack != null)
+            {
+                setPackageFragment(pack);
+            }
         }
-      } catch (JavaModelException e) {
-        UIPlugin.log(e);
-        // let pass			
-      }
-
-      currentPackage = pack;
-    } else {
-      status.setError("");
     }
-    return status;
-  }
 
-  private void checkButtonEnabled() {
-    if (container != null) {
-      enableButton((container.getPackageFragmentRoot() != null) && isEnabled());
+    public void dialogFieldChanged(DialogField field)
+    {
+        if (field == this || field == container)
+        {
+            setStatus(packageChanged());
+        }
+
     }
-  }
 
-  public void setPackageFragment(IPackageFragment fragment) {
-    IPackageFragment old = currentPackage;
-    currentPackage = fragment;
-    String str = (fragment == null) ? "" : fragment.getElementName();
-    setTextValue(str);
-    updatePackageStatusLabel();
-    fireDialogChanged(this);
-  }
+    public IStatus packageChanged()
+    {
+        SpindleStatus status = new SpindleStatus();
+        checkButtonEnabled();
+        String packName = getTextValue();
+        if (!"".equals(packName))
+        {
+            IStatus val = JavaConventions.validatePackageName(packName);
+            if (val.getSeverity() == IStatus.ERROR)
+            {
+                status.setError(UIPlugin.getString(name + ".error.InvalidPackageName", val.getMessage()));
+                return status;
+            } else if (val.getSeverity() == IStatus.WARNING)
+            {
+                status.setWarning(UIPlugin.getString(name + ".warning.DiscouragedPackageName", val.getMessage()));
+                // continue
+            }
+        } else
+        {
 
-  public IPackageFragment getPackageFragment() {
-    return currentPackage;
-  }
+            status.setError("Using the default package is not allowed. Choose (or enter) a package");
+            return status;
+        }
 
-  private IPackageFragment choosePackage() {
-    IPackageFragmentRoot froot = container.getPackageFragmentRoot();
-    try {
-      SelectionDialog dialog = JavaUI.createPackageDialog(getShell(), froot, "");
-      dialog.setTitle(UIPlugin.getString(name + ".ChoosePackageDialog.title"));
-      dialog.setMessage(UIPlugin.getString(name + ".ChoosePackageDialog.description"));
-      if (currentPackage != null) {
-        dialog.setInitialSelections(new Object[] { currentPackage });
-      }
-      if (dialog.open() == dialog.OK) {
-        return (IPackageFragment) dialog.getResult()[0];
-      }
-    } catch (JavaModelException e) {
-      UIPlugin.log(e);
+        IPackageFragmentRoot root;
+        if (container == null)
+        {
+            root = null;
+        } else
+        {
+            root = container.getPackageFragmentRoot();
+        }
+        if (root != null)
+        {
+            IPackageFragment pack = root.getPackageFragment(packName);
+            try
+            {
+                if (fSourcePackagesOnly && root.getKind() == IPackageFragmentRoot.K_BINARY)
+                {
+                    status.setError(UIPlugin.getString(name + "error.PackageMustBeSource"));
+                    return status;
+                }
+
+                IPath rootPath = root.getPath();
+                IPath outputPath = root.getJavaProject().getOutputLocation();
+                if (rootPath.isPrefixOf(outputPath) && !rootPath.equals(outputPath))
+                {
+                    // if the bin folder is inside of our root, dont allow to name a package
+                    // like the bin folder
+                    IPath packagePath = pack.getUnderlyingResource().getFullPath();
+                    if (outputPath.isPrefixOf(packagePath))
+                    {
+                        status.setError(UIPlugin.getString(name + ".error.ClashOutputLocation"));
+                        return status;
+                    }
+                }
+            } catch (JavaModelException e)
+            {
+                UIPlugin.log(e);
+                // let pass			
+            }
+
+            currentPackage = pack;
+        } else
+        {
+            status.setError("");
+        }
+        return status;
     }
-    return null;
-  }
 
-  private void updatePackageStatusLabel() {
-    String packName = getTextValue();
-
-    if (packName == null || "".equals(packName)) {
-      setDefaultLabelText(UIPlugin.getString(name + ".default"));
-    } else {
-      setDefaultLabelText(" ");
+    private void checkButtonEnabled()
+    {
+        if (container != null)
+        {
+            enableButton((container.getPackageFragmentRoot() != null) && isEnabled());
+        }
     }
-  }
 
-  /**
-   * @see DialogField#setEnabled(boolean)
-   */
-  public void setEnabled(boolean flag) {
-    super.setEnabled(flag);
-    checkButtonEnabled();
-  }
+    public void setPackageFragment(IPackageFragment fragment)
+    {
+        IPackageFragment old = currentPackage;
+        currentPackage = fragment;
+        String str = (fragment == null) ? "" : fragment.getElementName();
+        setTextValue(str);
+        updatePackageStatusLabel();
+        fireDialogChanged(this);
+    }
+
+    public IPackageFragment getPackageFragment()
+    {
+        return currentPackage;
+    }
+
+    private IPackageFragment choosePackage()
+    {
+        IPackageFragmentRoot froot = container.getPackageFragmentRoot();
+        try
+        {
+            SelectionDialog dialog = JavaUI.createPackageDialog(getShell(), froot, "");
+            dialog.setTitle(UIPlugin.getString(name + ".ChoosePackageDialog.title"));
+            dialog.setMessage(UIPlugin.getString(name + ".ChoosePackageDialog.description"));
+            if (currentPackage != null)
+            {
+                dialog.setInitialSelections(new Object[] { currentPackage });
+            }
+            if (dialog.open() == dialog.OK)
+            {
+                return (IPackageFragment) dialog.getResult()[0];
+            }
+        } catch (JavaModelException e)
+        {
+            UIPlugin.log(e);
+        }
+        return null;
+    }
+
+    private void updatePackageStatusLabel()
+    {
+        String packName = getTextValue();
+
+        if (packName == null || "".equals(packName))
+        {
+            setDefaultLabelText(UIPlugin.getString(name + ".default"));
+        } else
+        {
+            setDefaultLabelText(" ");
+        }
+    }
+
+    /**
+     * @see DialogField#setEnabled(boolean)
+     */
+    public void setEnabled(boolean flag)
+    {
+        super.setEnabled(flag);
+        checkButtonEnabled();
+    }
 
 }

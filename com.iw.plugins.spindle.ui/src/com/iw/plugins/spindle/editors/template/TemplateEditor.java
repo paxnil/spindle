@@ -37,6 +37,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
@@ -103,7 +104,8 @@ public class TemplateEditor extends Editor
     {
         super.createActions();
 
-        IAction action = new SaveHTMLTemplateAction("Save this file as the template used by Tapestry Wizards"); //TODO I10N
+        IAction action = new SaveHTMLTemplateAction("Save this file as the template used by Tapestry Wizards");
+        //TODO I10N
         action.setActionDefinitionId(SAVE_HTML_TEMPLATE);
         setAction(SAVE_HTML_TEMPLATE, action);
         action = new RevertTemplateAction("Revert the saved template to the default value"); //TODO I10N
@@ -119,14 +121,13 @@ public class TemplateEditor extends Editor
         action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
         markAsStateDependentAction(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, true);
         setAction("ContentAssistProposal", action);
-        
+
         OpenDeclarationAction openDeclaration = new OpenDeclarationAction();
         openDeclaration.setActiveEditor(this);
         setAction(OpenDeclarationAction.ACTION_ID, openDeclaration);
         ShowInPackageExplorerAction showInPackage = new ShowInPackageExplorerAction();
         showInPackage.setActiveEditor(this);
         setAction(ShowInPackageExplorerAction.ACTION_ID, showInPackage);
-
 
     }
 
@@ -139,13 +140,20 @@ public class TemplateEditor extends Editor
             addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
             addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
         }
-//        menu.insertBefore(ITextEditorActionConstants.GROUP_SAVE, new GroupMarker(HTML_GROUP));
-//        MenuManager templateMenu = new MenuManager("Template");
-//        templateMenu.add(getAction(SAVE_HTML_TEMPLATE));
-//        templateMenu.add(getAction(REVERT_HTML_TEMPLATE));
-//        menu.appendToGroup(HTML_GROUP, templateMenu);
-//        addAction(menu, HTML_GROUP, SAVE_HTML_TEMPLATE);
-//        addAction(menu, HTML_GROUP, REVERT_HTML_TEMPLATE);
+        IMenuManager moreNav = new MenuManager("Jump");
+        for (int i = 0; i < fJumpActions.length; i++)
+        {
+            fJumpActions[i].editorContextMenuAboutToShow(moreNav);
+        }
+        menu.appendToGroup(NAV_GROUP, moreNav);
+
+        //        menu.insertBefore(ITextEditorActionConstants.GROUP_SAVE, new GroupMarker(HTML_GROUP));
+        //        MenuManager templateMenu = new MenuManager("Template");
+        //        templateMenu.add(getAction(SAVE_HTML_TEMPLATE));
+        //        templateMenu.add(getAction(REVERT_HTML_TEMPLATE));
+        //        menu.appendToGroup(HTML_GROUP, templateMenu);
+        //        addAction(menu, HTML_GROUP, SAVE_HTML_TEMPLATE);
+        //        addAction(menu, HTML_GROUP, REVERT_HTML_TEMPLATE);
     }
 
     /* (non-Javadoc)
@@ -267,8 +275,9 @@ public class TemplateEditor extends Editor
             if (MessageDialog
                 .openConfirm(
                     getEditorSite().getShell(),
-                    "Confirm revert to Default", //TODO I10N
-                    "All new components or pages created with the wizard will use the default template.\n\nProceed?"))
+                    "Confirm revert to Default",
+                //TODO I10N
+            "All new components or pages created with the wizard will use the default template.\n\nProceed?"))
             {
                 IEditorInput input = getEditorInput();
                 IPreferenceStore pstore = getPreferenceStore();

@@ -185,6 +185,8 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
 
     protected IPreferenceStore fPreferenceStore;
 
+    protected BaseEditorAction[] fJumpActions;
+
     public Editor()
     {
         super();
@@ -237,6 +239,10 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
         jumpToTemplate.setActionDefinitionId(JUMP_TEMPLATE_ACTION_ID);
         setAction(JUMP_TEMPLATE_ACTION_ID, jumpToTemplate);
 
+        fJumpActions = new BaseEditorAction[3];
+        fJumpActions[0] = jumpToJava;
+        fJumpActions[1] = jumpToSpec;
+        fJumpActions[2] = jumpToTemplate;
     }
 
     public void createPartControl(Composite parent)

@@ -26,8 +26,12 @@
 
 package com.iw.plugins.spindle.editors.actions;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
+
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
+import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
@@ -38,7 +42,7 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
  */
 public class JumpToSpecAction extends BaseJumpAction
 {
-    
+
     public JumpToSpecAction()
     {
         super();
@@ -49,14 +53,52 @@ public class JumpToSpecAction extends BaseJumpAction
      */
     protected void doRun()
     {
+        IResourceWorkspaceLocation location = getSpecLocation();
+        reveal(location);
+    }
+
+    protected IResourceWorkspaceLocation getSpecLocation()
+    {
         if (!(fEditor instanceof TemplateEditor))
-            return;
+            return null;
 
         BaseSpecLocatable spec = (BaseSpecLocatable) fEditor.getSpecification();
-        if (spec == null)
-            return;
+        if (spec != null)
+            return (IResourceWorkspaceLocation) spec.getSpecificationLocation();
 
-        reveal((IResourceWorkspaceLocation) spec.getSpecificationLocation());
+        return null;
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+     */
+    public void editorContextMenuAboutToShow(IMenuManager menu)
+    {
+        IResourceWorkspaceLocation location = getSpecLocation();
+        if (location != null)
+        {
+            Action action = new MenuOpenSpecAction(location);
+            menu.add(action);
+            action.setEnabled(location.exists());
+        }
+    }
+
+    class MenuOpenSpecAction extends Action
+    {
+        IResourceWorkspaceLocation location;
+
+        public MenuOpenSpecAction(IResourceWorkspaceLocation location)
+        {
+            Assert.isNotNull(location);
+            this.location = location;
+            setText(location.getName());
+        }
+
+        public void run()
+        {
+            reveal(location);
+        }
     }
 
 }

@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -394,7 +395,6 @@ public class SpecEditor extends Editor implements IMultiPage
      * return the Tapestry specification object obtained during the last build 
      * note this method may trigger a build!
      */
-    
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
@@ -778,6 +778,12 @@ public class SpecEditor extends Editor implements IMultiPage
             addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
             addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
         }
+        MenuManager moreNav = new MenuManager("Jump");
+        for (int i = 0; i < fJumpActions.length; i++)
+        {
+            fJumpActions[i].editorContextMenuAboutToShow(moreNav);
+        }
+        menu.appendToGroup(NAV_GROUP, moreNav);
     }
 
     /* (non-Javadoc)

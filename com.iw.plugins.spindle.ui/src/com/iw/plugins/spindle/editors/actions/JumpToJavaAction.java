@@ -32,9 +32,12 @@ import java.util.Map;
 
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.text.BadLocationException;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
@@ -47,9 +50,7 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
  */
 public class JumpToJavaAction extends BaseJumpAction
 {
-    /**
-     * 
-     */
+
     public JumpToJavaAction()
     {
         super();
@@ -60,76 +61,113 @@ public class JumpToJavaAction extends BaseJumpAction
      */
     protected void doRun()
     {
+        IType javaType = findType();
+        if (javaType == null)
+            return;
+        reveal(javaType);
+    }
+
+    protected IType findType()
+    {
+        IType javaType;
         if (fEditor instanceof TemplateEditor)
         {
-            IComponentSpecification componentSpec = (IComponentSpecification) fEditor.getSpecification();
-            if (componentSpec != null)
-            {
-                String typeName = componentSpec.getComponentClassName();
-                IType type = resolveType(typeName);
-                if (type == null)
-                    return;
-                reveal(type);
-            }
+            javaType = getTypeFromTemplate();
         } else
         {
+            javaType = getTypeFromSpec();
+        }
+        return javaType;
+    }
+
+    private IType getTypeFromTemplate()
+    {
+        IComponentSpecification componentSpec = (IComponentSpecification) fEditor.getSpecification();
+        if (componentSpec != null)
+        {
+            String typeName = componentSpec.getComponentClassName();
+            return resolveType(typeName);
+
+        }
+        return null;
+    }
+
+    private IType getTypeFromSpec()
+    {
+        try
+        {
             attachPartitioner();
-            try
+            DocumentArtifact root = DocumentArtifact.createTree(getDocument(), -1);
+            List children = root.getChildren();
+            for (Iterator iter = children.iterator(); iter.hasNext();)
             {
-                DocumentArtifact root = DocumentArtifact.createTree(getDocument(), -1);
-                List children = root.getChildren();
-                for (Iterator iter = children.iterator(); iter.hasNext();)
+                DocumentArtifact child = (DocumentArtifact) iter.next();
+                String type = child.getType();
+                if (type == DocumentArtifactPartitioner.TAG || type == DocumentArtifactPartitioner.EMPTYTAG)
                 {
-                    DocumentArtifact child = (DocumentArtifact) iter.next();
-                    String type = child.getType();
-                    if (type == DocumentArtifactPartitioner.TAG || type == DocumentArtifactPartitioner.EMPTYTAG)
+                    String name = child.getName();
+                    if (name == null)
+                        return null;
+                    name = name.toLowerCase();
+                    Map attrMap;
+                    if (name.equals("component-specification") || name.equals("page-specification"))
                     {
-                        String name = child.getName();
-                        if (name == null)
-                            return;
-                        name = name.toLowerCase();
-                        Map attrMap;
-                        if (name.equals("component-specification") || name.equals("page-specification"))
+                        attrMap = child.getAttributesMap();
+                        DocumentArtifact attribute = (DocumentArtifact) attrMap.get("class");
+                        if (attribute != null)
                         {
-                            attrMap = child.getAttributesMap();
-                            DocumentArtifact attribute = (DocumentArtifact) attrMap.get("class");
-                            if (attribute == null)
-                                return;
                             String attrValue = attribute.getAttributeValue();
-                            if (attrValue == null)
-                                return;
-
-                            IType resolvedType = resolveType(attrValue);
-
-                            if (resolvedType == null)
-                                return;
-
-                            reveal(resolvedType);
-
-                        } else if (name.equals("application"))
-                        {
-                            attrMap = child.getAttributesMap();
-                            DocumentArtifact attribute = (DocumentArtifact) attrMap.get("engine-class");
-                            if (attribute == null)
-                                return;
-                            String attrValue = attribute.getAttributeValue();
-                            if (attrValue == null)
-                                return;
-
-                            IType resolvedType = resolveType(attrValue);
-
-                            if (resolvedType == null)
-                                return;
-
-                            reveal(resolvedType);
+                            if (attrValue != null)
+                                return resolveType(attrValue);
                         }
-                        return;
+
+                    } else if (name.equals("application"))
+                    {
+                        attrMap = child.getAttributesMap();
+                        DocumentArtifact attribute = (DocumentArtifact) attrMap.get("engine-class");
+                        if (attribute != null)
+                        {
+                            String attrValue = attribute.getAttributeValue();
+                            if (attrValue != null)
+                                return resolveType(attrValue);
+                        }
                     }
                 }
-            } catch (BadLocationException e)
-            {
-                UIPlugin.log(e);
             }
+        } catch (BadLocationException e)
+        {
+            UIPlugin.log(e);
+        } finally
+        {
+            detachPartitioner();
+        }
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+     */
+    public  void editorContextMenuAboutToShow(IMenuManager menu)
+    {
+        IType javaType = findType();
+        if (javaType != null)
+            menu.add(new MenuOpenTypeAction(javaType));
+    }
+
+    class MenuOpenTypeAction extends Action
+    {
+        IType type;
+
+        public MenuOpenTypeAction(IType type)
+        {
+            Assert.isNotNull(type);
+            this.type = type;
+            setText(type.getFullyQualifiedName());
+        }
+
+        public void run()
+        {
+            reveal(type);
         }
     }
 

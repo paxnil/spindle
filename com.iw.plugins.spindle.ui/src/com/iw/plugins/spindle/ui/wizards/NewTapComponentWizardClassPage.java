@@ -147,6 +147,7 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage
         fChooseContainer.addListener(listener);
 
         fPackageDialogField = new PackageDialogField(PACKAGE, LABEL_WIDTH);
+        fPackageDialogField.setAcceptSourcePackagesOnly(true);
         connect(fPackageDialogField);
         fPackageDialogField.addListener(listener);
 

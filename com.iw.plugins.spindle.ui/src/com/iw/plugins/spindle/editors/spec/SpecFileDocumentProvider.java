@@ -88,7 +88,7 @@ public class SpecFileDocumentProvider extends TemplateFileDocumentProvider
             {
                 if (e.getStatus() instanceof SpindleStatus)
                 {
-                    document.set(getSkeletonSpecification(file.getFileExtension()));
+                  document.set(getSkeletonSpecification(file.getFileExtension()));
                 } else
                 {
                     throw e;

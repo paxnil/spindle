@@ -28,12 +28,15 @@ package com.iw.plugins.spindle.core.builder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.INamespace;
+import org.apache.tapestry.spec.IApplicationSpecification;
+import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
@@ -46,6 +49,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
+import com.iw.plugins.spindle.core.spec.BaseSpecification;
+import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.Markers;
 
 /**
@@ -273,6 +278,45 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         if (state != null)
             return state.fFrameworkNamespace;
         return null;
+    }
+
+    /**
+     *  This will not build the project if its not built
+     * @param fProject
+     * @param string
+     * @return the Specification objects that refer to the type.
+     */
+    public List findTypeRefences(IProject project, String fullyQualifiedTypeName)
+    {
+        Assert.isNotNull(project);
+        if (fullyQualifiedTypeName == null || fullyQualifiedTypeName.trim().length() == 0)
+            return Collections.EMPTY_LIST;
+        State buildState = (State) getLastBuildState(project, false);
+        if (buildState == null)
+            return Collections.EMPTY_LIST;
+        List result = new ArrayList();
+        for (Iterator iter = buildState.fSpecificationMap.keySet().iterator(); iter.hasNext();)
+        {
+            Object key = iter.next();
+            BaseSpecification spec = (BaseSpecification) buildState.fSpecificationMap.get(key);
+            switch (spec.getSpecificationType())
+            {
+                case BaseSpecification.APPLICATION_SPEC :
+                    String engineSpec = ((IApplicationSpecification) spec).getEngineClassName();
+                    if (engineSpec != null && engineSpec.equals(fullyQualifiedTypeName))
+                        result.add(spec);
+                    break;
+                case BaseSpecification.COMPONENT_SPEC :
+                    String componentSpec = ((IComponentSpecification) spec).getComponentClassName();
+                    if (componentSpec != null && componentSpec.equals(fullyQualifiedTypeName))
+                        result.add(spec);
+                    break;
+
+                default :
+                    break;
+            }
+        }
+        return result;
     }
 
 }

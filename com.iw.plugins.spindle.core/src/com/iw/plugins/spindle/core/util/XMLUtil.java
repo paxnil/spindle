@@ -824,9 +824,12 @@ public class XMLUtil
 
         writer.println();
 
-        writer.print("<application name=\"");
-        writer.print(application.getName());
-        writer.print("\" engine-class=\"");
+        writer.print("<application");
+        if (application.getName() !=null) {           writer.print( " name=\"");
+           writer.print(application.getName());
+           writer.print("\"");
+        }
+        writer.print(" engine-class=\"");
         writer.print(application.getEngineClassName());
         writer.println("\" >");
 

@@ -26,12 +26,10 @@
 
 package com.iw.plugins.spindle.editors.actions;
 
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
@@ -91,17 +89,22 @@ public abstract class BaseJumpAction extends BaseEditorAction
             UIPlugin.log(e);
         } finally
         {
-            try
-            {
-                if (fPartitioner != null)
-                    fPartitioner.disconnect();
-            } catch (RuntimeException e1)
-            {
-               UIPlugin.log(e1);
-            } finally {
-                fPartitioner = null;
-                fDocument = null;
-            }
+            detachPartitioner();
+        }
+    }
+
+    protected void detachPartitioner()
+    {
+        try
+        {
+            if (fPartitioner != null)
+                fPartitioner.disconnect();
+        } catch (RuntimeException e1)
+        {
+           UIPlugin.log(e1);
+        } finally {
+            fPartitioner = null;
+            fDocument = null;
         }
     }
 
@@ -120,21 +123,6 @@ public abstract class BaseJumpAction extends BaseEditorAction
     {
         Assert.isTrue(fDocument != null);
         return fDocument;
-    }
-    /**
-        * @param location
-        */
-    protected void reveal(IResourceWorkspaceLocation location)
-    {
-        if (location == null || !location.exists())
-            return;
-        reveal(location.getStorage());
-    }
-
-    protected void reveal(IStorage storage)
-    {
-        if (storage != null)
-            UIPlugin.openTapestryEditor((IStorage) storage);
     }
 
 }

@@ -26,6 +26,21 @@
 
 package com.iw.plugins.spindle.editors.actions;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.tapestry.spec.ILibrarySpecification;
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.swt.graphics.Image;
+
+import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
  * Jump from spec/template editors to associated java files
@@ -33,7 +48,7 @@ package com.iw.plugins.spindle.editors.actions;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class JumpToTemplateAction extends BaseEditorAction
+public class JumpToTemplateAction extends BaseJumpAction
 {
     /**
      * 
@@ -44,11 +59,113 @@ public class JumpToTemplateAction extends BaseEditorAction
     }
 
     /* (non-Javadoc)
-     * @see org.eclipse.jface.action.IAction#run()
+     * @see com.iw.plugins.spindle.editors.actions.BaseJumpAction#doRun()
      */
-    public void run()
+    protected void doRun()
     {
-        System.out.println("template");
+        PluginComponentSpecification component = getEditorSpecification();
+        if (component != null)
+        {
+            List possibles = getTemplateLocations(component);
+            if (possibles == null || possibles.isEmpty())
+                return;
+            if (possibles.size() > 1)
+            {
+                new ChooseTemplateLocationPopup(possibles, true).run();
+            } else
+            {
+                reveal((IResourceWorkspaceLocation) possibles.get(0));
+            }
+        }
+    }
+
+    /**
+     * @return
+     */
+    private PluginComponentSpecification getEditorSpecification()
+    {
+        Object spec = fEditor.getSpecification();
+        if (spec instanceof ILibrarySpecification)
+            return null;
+
+        return (PluginComponentSpecification) spec;
+    }
+
+    private List getTemplateLocations(PluginComponentSpecification spec)
+    {
+        List locations = spec.getTemplateLocations();
+
+        if (locations.isEmpty() || !(fEditor instanceof TemplateEditor))
+            return locations;
+
+        IStorage currentStorage = fEditor.getStorage();
+        List finalResult = new ArrayList();
+        for (Iterator iter = locations.iterator(); iter.hasNext();)
+        {
+            IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
+            IStorage storage = element.getStorage();
+            if (storage == null || storage.equals(currentStorage))
+                continue;
+            finalResult.add(element);
+        }
+        return finalResult;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+     */
+    public void editorContextMenuAboutToShow(IMenuManager menu)
+    {
+        PluginComponentSpecification component = getEditorSpecification();
+        if (component != null)
+        {
+            List possibles = getTemplateLocations(component);
+            for (Iterator iter = possibles.iterator(); iter.hasNext();)
+            {
+                IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
+                Action openAction = new MenuOpenTemplateAction(element);
+                openAction.setEnabled(element.exists());
+                menu.add(openAction);
+            }
+        }
+
+    }
+
+    class MenuOpenTemplateAction extends Action
+    {
+        IResourceWorkspaceLocation location;
+
+        public MenuOpenTemplateAction(IResourceWorkspaceLocation location)
+        {
+            Assert.isNotNull(location);
+            this.location = location;
+            setText(location.getName());
+        }
+
+        public void run()
+        {
+            reveal(location);
+        }
+    }
+
+    class ChooseTemplateLocationPopup extends ChooseLocationPopup
+    {
+        /**
+         * @param templateLocations
+         * @param forward
+         */
+        public ChooseTemplateLocationPopup(List templateLocations, boolean forward)
+        {
+            super(templateLocations, forward);
+        }
+
+        /* (non-Javadoc)
+        * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
+        */
+        protected Image getImage(IResourceWorkspaceLocation location)
+        {
+            return Images.getSharedImage("html16.gif");
+            }
 
     }
 

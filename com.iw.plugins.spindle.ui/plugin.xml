@@ -258,23 +258,56 @@
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <keyBinding
-            string="Ctrl+F12"
+            string="F8"
             scope="com.iw.plugins.spindle.ui.editor.commands"
             command="com.iw.plugins.spindle.ui.editor.commands.jump.java"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <keyBinding
-            string="Ctrl+F11"
+            string="F7"
             scope="com.iw.plugins.spindle.ui.editor.commands"
             command="com.iw.plugins.spindle.ui.editor.commands.jump.spec"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <keyBinding
-            string="Ctrl+F10"
+            string="F6"
             scope="com.iw.plugins.spindle.ui.editor.commands"
             command="com.iw.plugins.spindle.ui.editor.commands.jump.template"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
+      <keyBinding
+            string="F7"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="com.iw.plugins.spindle.ui.editor.commands.jump.spec"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            string="F6"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="com.iw.plugins.spindle.ui.editor.commands.jump.template"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editorActions">
+      <editorContribution
+            targetID="org.eclipse.jdt.ui.CompilationUnitEditor"
+            id="com.iw.plugins.spindle.ui.cu.editor.jump">
+         <action
+               definitionId="com.iw.plugins.spindle.ui.editor.commands.jump.spec"
+               label="Jump to spec for CU editors"
+               class="com.iw.plugins.spindle.editors.actions.CUEditorJumpToSpecDelegate"
+               enablesFor="*"
+               id="com.iw.plugins.spindle.editors.cu.jump.spec">
+         </action>
+         <action
+               definitionId="com.iw.plugins.spindle.ui.editor.commands.jump.template"
+               label="Jump to template for CU editors"
+               class="com.iw.plugins.spindle.editors.actions.CUEditorJumpToTemplateDelegate"
+               enablesFor="*"
+               id="com.iw.plugins.spindle.editors.cu.jump.template">
+         </action>
+      </editorContribution>
    </extension>
 
 </plugin>

@@ -245,12 +245,15 @@ public class UIPlugin extends AbstractUIPlugin
         try
         {
 
-            if (editorId == null && storage instanceof IFile)
+            if (editorId == null)
             {
-                UIPlugin.getDefault().getActivePage().openEditor((IFile) storage);
-            } else
-            {
-                editorId = (String) EDITOR_ID_LOOKUP.get("html");
+                if (storage instanceof IFile)
+                {
+                    UIPlugin.getDefault().getActivePage().openEditor((IFile) storage);
+                } else
+                {
+                    editorId = (String) EDITOR_ID_LOOKUP.get("html");
+                }
             }
 
             IEditorInput input = null;
