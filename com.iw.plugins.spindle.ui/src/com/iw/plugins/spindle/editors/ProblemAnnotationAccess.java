@@ -35,14 +35,14 @@ import org.eclipse.jface.text.source.IAnnotationAccess;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class AnnotationAccess implements IAnnotationAccess {
+public class ProblemAnnotationAccess implements IAnnotationAccess {
 
     /*
      * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
      */
     public Object getType(Annotation annotation) {
-        if (annotation instanceof IAnnotation) {
-            IAnnotation tapAnnotation= (IAnnotation) annotation;
+        if (annotation instanceof IProblemAnnotation) {
+            IProblemAnnotation tapAnnotation= (IProblemAnnotation) annotation;
             if (tapAnnotation.isRelevant())
                 return tapAnnotation.getAnnotationType();
         }
@@ -60,8 +60,8 @@ public class AnnotationAccess implements IAnnotationAccess {
      * @see org.eclipse.jface.text.source.IAnnotationAccess#isTemporary(org.eclipse.jface.text.source.Annotation)
      */
     public boolean isTemporary(Annotation annotation) {
-        if (annotation instanceof IAnnotation) {
-            IAnnotation tapAnnotation= (IAnnotation) annotation;
+        if (annotation instanceof IProblemAnnotation) {
+            IProblemAnnotation tapAnnotation= (IProblemAnnotation) annotation;
             if (tapAnnotation.isRelevant())
                 return tapAnnotation.isTemporary();
         }

@@ -16,6 +16,8 @@
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.search"/>
+      <import plugin="net.sf.solareclipse.ui"/>
+      <import plugin="net.sf.solareclipse.xml.ui"/>      
    </requires>
 
 
@@ -104,11 +106,11 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            name="Tapestry template editor"
+            name="Tapestry Template editor"
             default="false"
             icon="./icons/basic/html16.gif"
-            filenames="*.html"
-            contributorClass="com.iw.plugins.spindle.editors.template.TemplateEditorContributor"
+            extensions="htm,html"
+            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
             class="com.iw.plugins.spindle.editors.template.TemplateEditor"
             id="com.iw.plugins.spindle.editors.template">
       </editor>

@@ -29,9 +29,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
@@ -45,7 +45,7 @@ import com.iw.plugins.spindle.UIPlugin;
  * To change this generated comment edit the template variable "typecomment":
  * Window>Preferences>Java>Templates.
  */
-public class ColorManager implements ISpindleColorManager, IColorConstants, ISharedTextColors {
+public class ColorManager implements IColorManager, IColorConstants {
 
   private static Map fColorTable = new HashMap(10);
   private static int counter = 0;
@@ -63,13 +63,6 @@ public class ColorManager implements ISpindleColorManager, IColorConstants, ISha
     PreferenceConverter.setDefault(store, P_DEFAULT, DEFAULT);
     PreferenceConverter.setDefault(store, P_TAG, TAG);
   }
-
-  //	RGB JWCID 			= new RGB(187, 0, 94);
-  //	RGB XML_COMMENT 	= new RGB(128, 0, 0);
-  //	RGB PROC_INSTR 		= new RGB(128, 128, 128);
-  //	RGB STRING 			= new RGB(0, 128, 0);
-  //	RGB DEFAULT 		= new RGB(0, 0, 0);
-  //	RGB TAG 			= new RGB(0, 0, 128);
 
   private void initialize() {
     IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
@@ -106,11 +99,32 @@ public class ColorManager implements ISpindleColorManager, IColorConstants, ISha
     return color;
   }
 
-  /**
-   * @see org.eclipse.jdt.ui.text.IColorManager#getColor(RGB)
-   */
-  public Color getColor(RGB arg0) {
-    return null;
+  public Color getColor(RGB rgb) {
+    Color result = (Color) fColorTable.get(rgb);
+    if (result == null) {
+        bindColor(rgb, rgb);
+        result = (Color) fColorTable.get(rgb);
+    }
+    return result;
+        
+  }
+  
+  public void bindColor( Object key, RGB rgb ) {
+      Object value = fColorTable.get( key );
+      if ( value != null ) {
+          throw new UnsupportedOperationException();
+      }
+
+      Color color = new Color( Display.getCurrent(), rgb );
+
+      fColorTable.put( key, color );
+  }
+
+  public void unbindColor( String key ) {
+      Color color = (Color) fColorTable.remove( key );
+      if ( color != null ) {
+          color.dispose();
+      }
   }
 
 }

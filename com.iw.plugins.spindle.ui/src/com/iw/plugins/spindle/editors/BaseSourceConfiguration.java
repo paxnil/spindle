@@ -26,24 +26,20 @@
 package com.iw.plugins.spindle.editors;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
-import com.iw.plugins.spindle.ui.text.IColorConstants;
-import com.iw.plugins.spindle.ui.text.ISpindleColorManager;
-
-public abstract class BaseSourceConfiguration extends SourceViewerConfiguration implements IColorConstants
+public abstract class BaseSourceConfiguration extends SourceViewerConfiguration 
 {
 
-    private ISpindleColorManager fColorManager;
-    private ITextEditor fTextEditor;
+    private AbstractTextEditor fTextEditor;
 
-    public BaseSourceConfiguration(ISpindleColorManager colorManager, ITextEditor editor)
+    public BaseSourceConfiguration(AbstractTextEditor editor)
     {
-        fColorManager = colorManager;
         fTextEditor = editor;
     }
 
@@ -52,18 +48,14 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration 
      */
     public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer)
     {
-        return new AnnotationHover();
+        return new ProblemAnnotationHover();
     }
 
-    protected ITextEditor getEditor()
+    protected AbstractTextEditor getEditor()
     {
         return fTextEditor;
     }
     
-    protected ISpindleColorManager getColorManager() {
-        return fColorManager;
-    }
-
     public IReconciler getReconciler(ISourceViewer sourceViewer)
     {
         if (getEditor() != null && getEditor().isEditable())
@@ -75,6 +67,14 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration 
             return reconciler;
         }
         return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTextHover(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
+     */
+    public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType)
+    {
+        return new ProblemAnnotationTextHover((Editor)getEditor());
     }
 
 }

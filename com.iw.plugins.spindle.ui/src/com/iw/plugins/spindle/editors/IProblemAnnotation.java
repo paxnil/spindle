@@ -20,9 +20,9 @@ import org.eclipse.swt.widgets.Display;
  * and problems.
  * 
  */
-public interface IAnnotation {
+public interface IProblemAnnotation {
 	
-	AnnotationType getAnnotationType();
+	ProblemAnnotationType getAnnotationType();
 	
 	boolean isTemporary();
 	
@@ -70,7 +70,7 @@ public interface IAnnotation {
 	 *  
 	 * @param annotation	the problem annoation
 	 */
-	void addOverlaid(IAnnotation annotation);
+	void addOverlaid(IProblemAnnotation annotation);
 	
 	/**
 	 * Removes the given annotation from the list of
@@ -78,7 +78,7 @@ public interface IAnnotation {
 	 *  
 	 * @param annotation	the problem annoation
 	 */
-	void removeOverlaid(IAnnotation annotation);
+	void removeOverlaid(IProblemAnnotation annotation);
 	
 	/**
 	 * Tells whether this annotation is a problem

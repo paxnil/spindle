@@ -45,14 +45,14 @@ import com.iw.plugins.spindle.core.parser.IProblem;
 /**
  * Annotation representating an <code>IProblem</code>.
  */
-public class ProblemAnnotation extends Annotation implements IAnnotation
+public class ProblemAnnotation extends Annotation implements IProblemAnnotation
 {
 
     private List fOverlaids;
     private IProblem fProblem;
     private Image fImage;
     private boolean fQuickFixImagesInitialized = false;
-    private AnnotationType fType;
+    private ProblemAnnotationType fType;
 
     public ProblemAnnotation(IProblem problem)
     {
@@ -61,9 +61,9 @@ public class ProblemAnnotation extends Annotation implements IAnnotation
         setLayer(MarkerAnnotation.PROBLEM_LAYER + 1);
 
         if (fProblem.getSeverity() == IMarker.SEVERITY_WARNING)
-            fType = AnnotationType.WARNING;
+            fType = ProblemAnnotationType.WARNING;
         else
-            fType = AnnotationType.ERROR;
+            fType = ProblemAnnotationType.ERROR;
     }
 
     private void initializeImages()
@@ -131,7 +131,7 @@ public class ProblemAnnotation extends Annotation implements IAnnotation
 
     public boolean isProblem()
     {
-        return fType == AnnotationType.WARNING || fType == AnnotationType.ERROR;
+        return fType == ProblemAnnotationType.WARNING || fType == ProblemAnnotationType.ERROR;
     }
 
     public boolean isRelevant()
@@ -144,14 +144,14 @@ public class ProblemAnnotation extends Annotation implements IAnnotation
         return false;
     }
 
-    public void addOverlaid(IAnnotation annotation)
+    public void addOverlaid(IProblemAnnotation annotation)
     {
         if (fOverlaids == null)
             fOverlaids = new ArrayList(1);
         fOverlaids.add(annotation);
     }
 
-    public void removeOverlaid(IAnnotation annotation)
+    public void removeOverlaid(IProblemAnnotation annotation)
     {
         if (fOverlaids != null)
         {
@@ -168,7 +168,7 @@ public class ProblemAnnotation extends Annotation implements IAnnotation
         return null;
     }
 
-    public AnnotationType getAnnotationType()
+    public ProblemAnnotationType getAnnotationType()
     {
         return fType;
     }

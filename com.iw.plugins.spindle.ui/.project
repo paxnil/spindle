@@ -4,6 +4,8 @@
 	<comment></comment>
 	<projects>
 		<project>com.iw.plugins.spindle.core</project>
+		<project>net.sf.solareclipse.ui</project>
+		<project>net.sf.solareclipse.xml.ui</project>
 		<project>org.eclipse.core.boot</project>
 		<project>org.eclipse.core.resources</project>
 		<project>org.eclipse.core.runtime</project>

@@ -31,25 +31,37 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import net.sf.solareclipse.xml.internal.ui.preferences.XMLSyntaxPreferencePage;
+import net.sf.solareclipse.xml.ui.XMLPlugin;
+
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.editors.SharedTextColors;
+import com.iw.plugins.spindle.editors.template.TemplateTextTools;
+import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 import com.iw.plugins.spindle.ui.util.Revealer;
 
 /**
@@ -57,8 +69,8 @@ import com.iw.plugins.spindle.ui.util.Revealer;
  */
 public class UIPlugin extends AbstractUIPlugin
 {
-    public static final String PLUGIN_ID="com.iw.plugins.spindle.ui";
-    
+    public static final String PLUGIN_ID = "com.iw.plugins.spindle.ui";
+
     private static ResourceBundle UIStrings;
 
     public static String getString(String key)
@@ -159,6 +171,15 @@ public class UIPlugin extends AbstractUIPlugin
         }
         return null;
     }
+
+    private TemplateTextTools fTemplatelTextTools;
+
+    /** 
+     * these are shared colors not specific to any one editor
+     * used mostly for the Annotations. 
+     */
+    private ISharedTextColors fSharedTextColors;
+    
     /**
      * The constructor.
      */
@@ -240,6 +261,23 @@ public class UIPlugin extends AbstractUIPlugin
         return getDescriptor().getUniqueIdentifier();
     }
 
+    public IProject getProjectFor(IEditorInput input)
+    {
+        if (input instanceof IFileEditorInput)
+            return ((IFileEditorInput) input).getFile().getProject();
+        if (input instanceof IStorageEditorInput)
+        {
+            try
+            {
+                return TapestryCore.getDefault().getProjectFor(((IStorageEditorInput) input).getStorage());
+            } catch (CoreException e)
+            {
+                log(e);
+            }
+        }
+        return null;
+    }
+
     public Shell getActiveWorkbenchShell()
     {
         IWorkbenchWindow window = getActiveWorkbenchWindow();
@@ -263,9 +301,32 @@ public class UIPlugin extends AbstractUIPlugin
      * @see org.eclipse.ui.plugin.AbstractUIPlugin#initializeDefaultPreferences(org.eclipse.jface.preference.IPreferenceStore)
      */
     protected void initializeDefaultPreferences(IPreferenceStore store)
-    {        
+    {
         super.initializeDefaultPreferences(store);
         PreferenceConstants.initializeDefaultValues(store);
+        XMLSyntaxPreferencePage.initDefaults(store);
+    }
+
+    /**
+     * Returns instance of text tools for XML.
+     */
+    public TemplateTextTools getTemplateTextTools()
+    {
+        if (fTemplatelTextTools == null)
+        {
+            IPreferenceStore wrapped =
+                new PreferenceStoreWrapper(getPreferenceStore(), XMLPlugin.getDefault().getPreferenceStore());
+            fTemplatelTextTools = new TemplateTextTools(wrapped);
+        }
+
+        return fTemplatelTextTools;
+    }
+
+    public ISharedTextColors getSharedTextColors()
+    {
+        if (fSharedTextColors == null)
+            fSharedTextColors = new SharedTextColors();
+        return fSharedTextColors;
     }
 
 }

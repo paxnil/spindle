@@ -34,7 +34,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.IFileEditorInput;
 
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
-import com.iw.plugins.spindle.editors.AnnotationModel;
+import com.iw.plugins.spindle.editors.ProblemAnnotationModel;
 
 /**
  *  Model for Template annotations
@@ -42,7 +42,7 @@ import com.iw.plugins.spindle.editors.AnnotationModel;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class TemplateAnnotationModel extends AnnotationModel
+public class TemplateAnnotationModel extends ProblemAnnotationModel
 {
 
     public TemplateAnnotationModel(IFileEditorInput input)

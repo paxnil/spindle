@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.text;
 
+
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
@@ -45,7 +46,7 @@ public class DefaultScanner extends RuleBasedScanner {
 	 * Constructor for DefaultScanner.
 	 * @param manager
 	 */
-	public DefaultScanner(ISpindleColorManager manager) {
+	public DefaultScanner(IColorManager manager) {
 		
 		IToken procInstr =
 			new Token(new TextAttribute(manager.getColor(IColorConstants.P_PROC_INSTR)));

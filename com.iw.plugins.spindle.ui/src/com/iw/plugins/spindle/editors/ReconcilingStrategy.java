@@ -33,20 +33,20 @@ import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.iw.plugins.spindle.core.parser.IProblemCollector;
 
 public class ReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension
 {
 
-    private ITextEditor fEditor;
+    private AbstractTextEditor fEditor;
 
     private IDocumentProvider fDocumentProvider;
     private IProgressMonitor fProgressMonitor;
 
-    public ReconcilingStrategy(ITextEditor editor)
+    public ReconcilingStrategy(AbstractTextEditor editor)
     {
         fEditor = editor;
         fDocumentProvider = editor.getDocumentProvider();
@@ -62,18 +62,24 @@ public class ReconcilingStrategy implements IReconcilingStrategy, IReconcilingSt
 
     private void reconcile()
     {
-        IReconcilingEditor editor = (IReconcilingEditor) fEditor;
+        if (!(fEditor instanceof ISelfReconcilingEditor))
+            return;
+            
+        ISelfReconcilingEditor selfReconciler = (ISelfReconcilingEditor) fEditor;
+
+        if (!selfReconciler.isReadyToReconcile())
+            return;
         try
         {
             IProblemCollector collector = getProblemCollector();
-            
+
             if (collector == null)
                 return;
 
             // reconcile
-            synchronized (editor)
+            synchronized (selfReconciler)
             {
-                editor.reconcile(collector, fProgressMonitor);
+                selfReconciler.reconcile(collector, fProgressMonitor);
             }
 
         } catch (Exception x)
@@ -117,7 +123,7 @@ public class ReconcilingStrategy implements IReconcilingStrategy, IReconcilingSt
      */
     public void initialReconcile()
     {
-        reconcile();
+        //Do nothing
     }
 
 }

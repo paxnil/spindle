@@ -26,17 +26,28 @@
 
 package com.iw.plugins.spindle.editors;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
+import org.apache.commons.lang.enum.Enum;
 
 /**
- *  Called by Reconcilers on editors that perform thier own.
+ *  Different annotation types for things shown in the editors.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface IReconcilingEditor
+public class ProblemAnnotationType extends Enum
 {
-    public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor);
+    public static final ProblemAnnotationType ALL= new ProblemAnnotationType("ALL");
+    public static final ProblemAnnotationType UNKNOWN= new ProblemAnnotationType("UNKNOWN");
+    public static final ProblemAnnotationType BOOKMARK= new ProblemAnnotationType("BOOKMARK");
+    public static final ProblemAnnotationType TASK= new ProblemAnnotationType("TASK");
+    public static final ProblemAnnotationType ERROR= new ProblemAnnotationType("ERROR");
+    public static final ProblemAnnotationType WARNING= new ProblemAnnotationType("WARNING");
+    public static final ProblemAnnotationType SEARCH= new ProblemAnnotationType("SEARCH");
+
+    
+    public ProblemAnnotationType(String name)
+    {
+        super(name);
+    }
+
 }

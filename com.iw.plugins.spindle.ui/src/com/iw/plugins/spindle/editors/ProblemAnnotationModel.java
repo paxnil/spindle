@@ -32,8 +32,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitAnnotationModelEvent;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
@@ -47,7 +46,7 @@ import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.IProblemCollector;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
 
-public abstract class AnnotationModel extends ResourceMarkerAnnotationModel implements IProblemCollector
+public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemCollector
 {
 
     /**
@@ -81,7 +80,7 @@ public abstract class AnnotationModel extends ResourceMarkerAnnotationModel impl
             for (int i = anchor; i < length; i++)
             {
                 entry = (Entry) list.get(i);
-                if (entry.fPosition.equals(position))
+                if (match(entry.fPosition,position))
                 {
                     anchor = i;
                     return entry.fValue;
@@ -92,7 +91,7 @@ public abstract class AnnotationModel extends ResourceMarkerAnnotationModel impl
             for (int i = 0; i < anchor; i++)
             {
                 entry = (Entry) list.get(i);
-                if (entry.fPosition.equals(position))
+                if (match(entry.fPosition,position))
                 {
                     anchor = i;
                     return entry.fValue;
@@ -100,6 +99,18 @@ public abstract class AnnotationModel extends ResourceMarkerAnnotationModel impl
             }
 
             return null;
+        }
+        
+        //ugly kludge - lengths can differ by at most 1.
+        private boolean match(Position one, Position two) {
+            return one.offset == two.offset;
+//            if (one.equals(two))
+//                return true;
+//                
+//            if (one.offset != two.offset)
+//                return false;
+//                
+//            return Math.abs(one.length - two.length) <= 1;
         }
 
         private int getIndex(Position position)
@@ -154,7 +165,7 @@ public abstract class AnnotationModel extends ResourceMarkerAnnotationModel impl
     private List fPreviouslyOverlaid = null;
     private List fCurrentlyOverlaid = new ArrayList();
 
-    public AnnotationModel(IFileEditorInput input)
+    public ProblemAnnotationModel(IFileEditorInput input)
     {
         super(input.getFile());
         fInput = input;
@@ -162,20 +173,36 @@ public abstract class AnnotationModel extends ResourceMarkerAnnotationModel impl
 
     protected MarkerAnnotation createMarkerAnnotation(IMarker marker)
     {
-        return new TapestryMarkerAnnotation(marker);
+        return new ProblemMarkerAnnotation(marker);
     }
 
     protected Position createPositionFromProblem(IProblem problem)
     {
-        int start = problem.getCharStart();
-        if (start < 0)
-            return null;
-
-        int length = problem.getCharEnd() - problem.getCharStart();
-        if (length < 0)
-            return null;
-
-        return new Position(start, length);
+        int start= problem.getCharStart();
+        int end= problem.getCharEnd();
+        
+        if (start > end) {
+            end= start + end;
+            start= end - start;
+            end= end - start;
+        }
+        
+        if (start == -1 && end == -1) {
+            // marker line number is 1-based
+            int line= problem.getLineNumber();
+            if (line > 0 && fDocument != null) {
+                try {
+                    start= fDocument.getLineOffset(line - 1);
+                    end= start;
+                } catch (BadLocationException x) {
+                }
+            }
+        }
+        
+        if (start > -1 && end > -1)
+            return new Position(start, end - start);
+        
+        return null;
     }
 
     /*
@@ -241,7 +268,7 @@ public abstract class AnnotationModel extends ResourceMarkerAnnotationModel impl
         }
 
         if (temporaryProblemsChanged)
-            fireModelChanged(new CompilationUnitAnnotationModelEvent(this, getResource(), false));
+            fireModelChanged(new AnnotationModelEvent(this));
     }
 
     private void removeMarkerOverlays(boolean isCanceled)
@@ -254,7 +281,7 @@ public abstract class AnnotationModel extends ResourceMarkerAnnotationModel impl
             Iterator e = fPreviouslyOverlaid.iterator();
             while (e.hasNext())
             {
-                JavaMarkerAnnotation annotation = (JavaMarkerAnnotation) e.next();
+                ProblemMarkerAnnotation annotation = (ProblemMarkerAnnotation) e.next();
                 annotation.setOverlay(null);
             }
         }
@@ -266,9 +293,9 @@ public abstract class AnnotationModel extends ResourceMarkerAnnotationModel impl
      */
     private void setOverlay(Object value, ProblemAnnotation problemAnnotation)
     {
-        if (value instanceof ProblemAnnotation)
+        if (value instanceof ProblemMarkerAnnotation)
         {
-            TapestryMarkerAnnotation annotation = (TapestryMarkerAnnotation) value;
+            ProblemMarkerAnnotation annotation = (ProblemMarkerAnnotation) value;
             if (annotation.isProblem())
             {
                 annotation.setOverlay(problemAnnotation);

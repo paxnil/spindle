@@ -25,7 +25,7 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
 
-public class TapestryMarkerAnnotation extends MarkerAnnotation implements IAnnotation
+public class ProblemMarkerAnnotation extends MarkerAnnotation implements IProblemAnnotation
 {
 
     private static final int NO_IMAGE = 0;
@@ -39,13 +39,13 @@ public class TapestryMarkerAnnotation extends MarkerAnnotation implements IAnnot
     //    private static Image fgQuickFixErrorImage;
     private static ImageRegistry fGrayMarkersImageRegistry;
 
-    private IAnnotation fOverlay;
+    private IProblemAnnotation fOverlay;
     private boolean fNotRelevant = false;
-    private AnnotationType fType;
+    private ProblemAnnotationType fType;
     private int fImageType;
     private boolean fQuickFixIconEnabled;
 
-    public TapestryMarkerAnnotation(IMarker marker)
+    public ProblemMarkerAnnotation(IMarker marker)
     {
         super(marker);
     }
@@ -64,7 +64,7 @@ public class TapestryMarkerAnnotation extends MarkerAnnotation implements IAnnot
         fImageType = NO_IMAGE;
         IMarker marker = getMarker();
 
-        fType = AnnotationType.UNKNOWN;
+        fType = ProblemAnnotationType.UNKNOWN;
         if (marker.exists())
         {
             try
@@ -76,18 +76,18 @@ public class TapestryMarkerAnnotation extends MarkerAnnotation implements IAnnot
                     switch (severity)
                     {
                         case IMarker.SEVERITY_ERROR :
-                            fType = AnnotationType.ERROR;
+                            fType = ProblemAnnotationType.ERROR;
                             break;
                         case IMarker.SEVERITY_WARNING :
-                            fType = AnnotationType.WARNING;
+                            fType = ProblemAnnotationType.WARNING;
                             break;
                     }
                 } else if (marker.isSubtypeOf(IMarker.TASK))
-                    fType = AnnotationType.TASK;
+                    fType = ProblemAnnotationType.TASK;
                 else if (marker.isSubtypeOf(SearchUI.SEARCH_MARKER))
-                    fType = AnnotationType.SEARCH;
+                    fType = ProblemAnnotationType.SEARCH;
                 else if (marker.isSubtypeOf(IMarker.BOOKMARK))
-                    fType = AnnotationType.BOOKMARK;
+                    fType = ProblemAnnotationType.BOOKMARK;
 
             } catch (CoreException e)
             {
@@ -124,7 +124,7 @@ public class TapestryMarkerAnnotation extends MarkerAnnotation implements IAnnot
 
     public boolean isProblem()
     {
-        return fType == AnnotationType.WARNING || fType == AnnotationType.ERROR;
+        return fType == ProblemAnnotationType.WARNING || fType == ProblemAnnotationType.ERROR;
     }
 
     public boolean isRelevant()
@@ -133,11 +133,11 @@ public class TapestryMarkerAnnotation extends MarkerAnnotation implements IAnnot
     }
 
     /**
-     * Overlays this annotation with the given javaAnnotation.
+     * Overlays this annotation with the given annotation.
      * 
      * @param annotation that is overlaid by this annotation
      */
-    public void setOverlay(IAnnotation annotation)
+    public void setOverlay(IProblemAnnotation annotation)
     {
         if (fOverlay != null)
             fOverlay.removeOverlaid(this);
@@ -228,12 +228,12 @@ public class TapestryMarkerAnnotation extends MarkerAnnotation implements IAnnot
         return fGrayMarkersImageRegistry;
     }
 
-    public void addOverlaid(IAnnotation annotation)
+    public void addOverlaid(IProblemAnnotation annotation)
     {
         // not supported
     }
 
-    public void removeOverlaid(IAnnotation annotation)
+    public void removeOverlaid(IProblemAnnotation annotation)
     {
         // not supported
     }
@@ -244,7 +244,7 @@ public class TapestryMarkerAnnotation extends MarkerAnnotation implements IAnnot
         return null;
     }
 
-    public AnnotationType getAnnotationType()
+    public ProblemAnnotationType getAnnotationType()
     {
         return fType;
     }

@@ -21,54 +21,34 @@
  * Contributor(s):
  * 
  *  glongman@intelligentworks.com
+ *  phraktle@imapmail.org
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.template;
 
-import java.io.File;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
+import net.sf.solareclipse.xml.ui.XMLPlugin;
+
+import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.rules.RuleBasedPartitioner;
-import org.eclipse.jface.text.source.IAnnotationAccess;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.OverviewRuler;
-import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
-import org.eclipse.ui.editors.text.StorageDocumentProvider;
-import org.eclipse.ui.editors.text.TextEditor;
-import org.eclipse.ui.texteditor.DefaultRangeIndicator;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.iw.plugins.spindle.PreferenceConstants;
@@ -81,409 +61,35 @@ import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.scanning.TemplateScanner;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.editors.AnnotationAccess;
-import com.iw.plugins.spindle.editors.AnnotationType;
-import com.iw.plugins.spindle.editors.IReconcilingEditor;
-import com.iw.plugins.spindle.ui.text.ColorManager;
-import com.iw.plugins.spindle.ui.text.ISpindleColorManager;
-import com.iw.plugins.spindle.ui.util.ToolTipHandler;
+import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 
-public class TemplateEditor extends TextEditor implements IAdaptable, IReconcilingEditor
+/**
+ * HTML Editor.
+ * 
+ * @author Igor Malinin
+ */
+public class TemplateEditor extends Editor
 {
-    /** Preference key for highlighting current line */
-    protected final static String CURRENT_LINE= PreferenceConstants.EDITOR_CURRENT_LINE;
-    /** Preference key for highlight color of current line */
-    protected final static String CURRENT_LINE_COLOR= PreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
-    /** Preference key for showing print marging ruler */
-    protected final static String PRINT_MARGIN= PreferenceConstants.EDITOR_PRINT_MARGIN;
-    /** Preference key for print margin ruler color */
-    protected final static String PRINT_MARGIN_COLOR= PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR;
-    /** Preference key for print margin ruler column */
-    protected final static String PRINT_MARGIN_COLUMN= PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN;
-    /** Preference key for error indication */
-    protected final static String ERROR_INDICATION= PreferenceConstants.EDITOR_PROBLEM_INDICATION;
-    /** Preference key for error color */
-    protected final static String ERROR_INDICATION_COLOR= PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR;
-    /** Preference key for warning indication */
-    protected final static String WARNING_INDICATION= PreferenceConstants.EDITOR_WARNING_INDICATION;
-    /** Preference key for warning color */
-    protected final static String WARNING_INDICATION_COLOR= PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR;
-    /** Preference key for task indication */
-    protected final static String TASK_INDICATION= PreferenceConstants.EDITOR_TASK_INDICATION;
-    /** Preference key for task color */
-    protected final static String TASK_INDICATION_COLOR= PreferenceConstants.EDITOR_TASK_INDICATION_COLOR;
-    /** Preference key for bookmark indication */
-    protected final static String BOOKMARK_INDICATION= PreferenceConstants.EDITOR_BOOKMARK_INDICATION;
-    /** Preference key for bookmark color */
-    protected final static String BOOKMARK_INDICATION_COLOR= PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR;
-    /** Preference key for search result indication */
-    protected final static String SEARCH_RESULT_INDICATION= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION;
-    /** Preference key for search result color */
-    protected final static String SEARCH_RESULT_INDICATION_COLOR= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR;
-    /** Preference key for unknown annotation indication */
-    protected final static String UNKNOWN_INDICATION= PreferenceConstants.EDITOR_UNKNOWN_INDICATION;
-    /** Preference key for unknown annotation color */
-    protected final static String UNKNOWN_INDICATION_COLOR= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR;
-    /** Preference key for error indication in overview ruler */
-    protected final static String ERROR_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER;
-    /** Preference key for warning indication in overview ruler */
-    protected final static String WARNING_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER;
-    /** Preference key for task indication in overview ruler */
-    protected final static String TASK_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER;
-    /** Preference key for bookmark indication in overview ruler */
-    protected final static String BOOKMARK_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER;
-    /** Preference key for search result indication in overview ruler */
-    protected final static String SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER;
-    /** Preference key for unknown annotation indication in overview ruler */
-    protected final static String UNKNOWN_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
+    static public final String SAVE_HTML_TEMPLATE = "com.iw.plugins.spindle.html.saveTemplateAction";
+    static public final String REVERT_HTML_TEMPLATE = "com.iw.plugins.spindle.html.revertTemplateAction";
 
+    private TemplateScanner fScanner = new TemplateScanner();
+    private IScannerValidator fValidator = new BaseValidator();
 
-    /** The annotation access */
-    protected IAnnotationAccess fAnnotationAccess = new AnnotationAccess();
-
-    private ISpindleColorManager colorManager = new ColorManager();
-    private TemplateContentOutlinePage outline = null;
-    private Shell shell;
-    private IEditorInput input;
-    private StyledText stext;
-    private DebugToolTipHandler handler;
-
-    private TemplateScanner scanner = new TemplateScanner();
-    private IScannerValidator validator = new BaseValidator();
-
-    private boolean duringInit = false;
-
-    /**
-     * Constructor for TapestryHTMLEdiitor
-     */
     public TemplateEditor()
     {
         super();
-        setSourceViewerConfiguration(new TemplateSourceConfiguration(colorManager, this));
-        setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
-        setRangeIndicator(new DefaultRangeIndicator());
-
+        setPreferenceStore(
+            new PreferenceStoreWrapper(
+                UIPlugin.getDefault().getPreferenceStore(),
+                XMLPlugin.getDefault().getPreferenceStore()));
     }
 
-    public void init(IEditorSite site, IEditorInput input) throws PartInitException
+    protected boolean affectsTextPresentation(PropertyChangeEvent event)
     {
-        duringInit = true;
-        setDocumentProvider(createDocumentProvider(input));
-        super.init(site, input);
-        duringInit = false;
+        return UIPlugin.getDefault().getTemplateTextTools().affectsBehavior(event);
     }
-
-    public void createPartControl(Composite parent)
-    {
-        super.createPartControl(parent);
-        shell = parent.getShell();
-        stext = (StyledText) getSourceViewer().getTextWidget();
-        handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
-        handler.activateHoverHelp(stext);
-        fSourceViewerDecorationSupport.install(getPreferenceStore());
-    }
-
-    protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles)
-    {
-
-        fOverviewRuler = new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, colorManager);
-        fOverviewRuler.addHeaderAnnotationType(AnnotationType.WARNING);
-        fOverviewRuler.addHeaderAnnotationType(AnnotationType.ERROR);
-
-        ISourceViewer viewer =
-            new SourceViewer(parent, verticalRuler, fOverviewRuler, true, styles);
-
-        fSourceViewerDecorationSupport =
-            new SourceViewerDecorationSupport(viewer, fOverviewRuler, fAnnotationAccess, colorManager);
-
-        configureSourceViewerDecorationSupport();
-
-        return viewer;
-    }
-
-    protected void configureSourceViewerDecorationSupport()
-    {
-
-        fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(
-            AnnotationType.UNKNOWN,
-            UNKNOWN_INDICATION_COLOR,
-            UNKNOWN_INDICATION,
-            UNKNOWN_INDICATION_IN_OVERVIEW_RULER,
-            0);
-        fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(
-            AnnotationType.BOOKMARK,
-            BOOKMARK_INDICATION_COLOR,
-            BOOKMARK_INDICATION,
-            BOOKMARK_INDICATION_IN_OVERVIEW_RULER,
-            1);
-        fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(
-            AnnotationType.TASK,
-            TASK_INDICATION_COLOR,
-            TASK_INDICATION,
-            TASK_INDICATION_IN_OVERVIEW_RULER,
-            2);
-        fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(
-            AnnotationType.SEARCH,
-            SEARCH_RESULT_INDICATION_COLOR,
-            SEARCH_RESULT_INDICATION,
-            SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER,
-            3);
-        fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(
-            AnnotationType.WARNING,
-            WARNING_INDICATION_COLOR,
-            WARNING_INDICATION,
-            WARNING_INDICATION_IN_OVERVIEW_RULER,
-            4);
-        fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(
-            AnnotationType.ERROR,
-            ERROR_INDICATION_COLOR,
-            ERROR_INDICATION,
-            ERROR_INDICATION_IN_OVERVIEW_RULER,
-            5);
-
-        fSourceViewerDecorationSupport.setCursorLinePainterPreferenceKeys(CURRENT_LINE, CURRENT_LINE_COLOR);
-        fSourceViewerDecorationSupport.setMarginPainterPreferenceKeys(
-            PRINT_MARGIN,
-            PRINT_MARGIN_COLOR,
-            PRINT_MARGIN_COLUMN);
-
-        fSourceViewerDecorationSupport.setSymbolicFontName(getFontPropertyPreferenceKey());
-    }
-
-    protected void doSetInput(IEditorInput input) throws CoreException
-    {
-        super.doSetInput(input);
-        this.input = input;
-        outline = createContentOutlinePage(input);
-    }
-
-    public Object getAdapter(Class clazz)
-    {
-        Object result = super.getAdapter(clazz);
-        if (result == null && IContentOutlinePage.class.equals(clazz))
-        {
-            result = outline;
-        }
-        return result;
-    }
-
-    public void openTo(String jwcid)
-    {
-        selectAndReveal(0, 0);
-        ITypedRegion[] partitions = null;
-        IDocument document = getDocumentProvider().getDocument(getEditorInput());
-        if (document == null)
-            return;
-
-        try
-        {
-            partitions = document.computePartitioning(0, document.getLength() - 1);
-            for (int i = 0; i < partitions.length; i++)
-            {
-                String type = partitions[i].getType();
-
-                if (type.equals(TemplatePartitionScanner.JWC_TAG) || type.equals(TemplatePartitionScanner.JWCID_TAG))
-                {
-                    String found = getJWCID(document, partitions[i]);
-                    if (found != null && jwcid.equals(found))
-                    {
-                        Position position = findJWCID(document, partitions[i]);
-                        selectAndReveal(position.getOffset(), position.getLength());
-                    }
-                }
-            }
-        } catch (BadLocationException e)
-        {}
-    }
-
-    private String getJWCID(IDocument document, ITypedRegion region)
-    {
-        try
-        {
-            Position p = findJWCID(document, region);
-            if (p == null)
-            {
-                return null;
-            }
-            return document.get(p.getOffset(), p.getLength());
-        } catch (BadLocationException blex)
-        {
-            return null;
-        }
-    }
-
-    private Position findJWCID(IDocument document, ITypedRegion region)
-    {
-        if (region == null)
-        {
-            return null;
-        }
-        Position result = new Position(region.getOffset(), region.getLength());
-        String type = region.getType();
-        String start = null;
-        if (TemplatePartitionScanner.JWCID_TAG.equals(type))
-        {
-            start = "jwcid=\"";
-        } else if (TemplatePartitionScanner.JWC_TAG.equals(type))
-        {
-            start = "id=\"";
-        }
-        if (start != null)
-        {
-
-            try
-            {
-                String tag = document.get(region.getOffset(), region.getLength());
-                int startIndex = tag.indexOf(start);
-                if (startIndex >= 0)
-                {
-                    startIndex += start.length();
-                    tag = tag.substring(startIndex);
-                    int end = tag.indexOf("\"");
-                    if (end >= 0)
-                    {
-                        result = new Position(region.getOffset() + startIndex, tag.substring(0, end).length());
-                    }
-                } else
-                {
-                    return null;
-                }
-            } catch (BadLocationException blex)
-            {}
-        }
-        return result;
-    }
-
-    public void dispose()
-    {
-        colorManager.dispose();
-        super.dispose();
-    }
-
-    public TemplateContentOutlinePage createContentOutlinePage(IEditorInput input)
-    {
-        TemplateContentOutlinePage result = new TemplateContentOutlinePage(this);
-        IDocument document = getDocumentProvider().getDocument(input);
-        result.setDocument(document);
-
-        result.addSelectionChangedListener(new OutlineSelectionListener());
-        IFile documentFile = (IFile) input.getAdapter(IFile.class);
-        if (documentFile != null)
-        {
-            result.setDocumentFile(documentFile);
-        }
-        return result;
-    }
-
-    protected IDocumentPartitioner createDocumentPartitioner()
-    {
-        RuleBasedPartitioner partitioner =
-            new RuleBasedPartitioner(
-                new TemplatePartitionScanner(),
-                new String[] {
-                    TemplatePartitionScanner.JWC_TAG,
-                    TemplatePartitionScanner.JWCID_TAG,
-                    TemplatePartitionScanner.HTML_TAG,
-                    TemplatePartitionScanner.HTML_COMMENT });
-        return partitioner;
-    }
-    protected IDocumentProvider createDocumentProvider(IEditorInput input)
-    {
-        IDocumentProvider documentProvider = null;
-
-        if (input instanceof JarEntryEditorInput)
-        {
-
-            documentProvider = new HTMLStorageDocumentProvider();
-
-        } else
-        {
-
-            Object element = input.getAdapter(IResource.class);
-
-            if (element instanceof IFile)
-            {
-
-                documentProvider = new HTMLFileDocumentProvider();
-
-            } else if (element instanceof File)
-            {
-
-                //        documentProvider = new SystemFileDocumentProvider(createDocumentPartitioner(), "UTF8");
-            }
-        }
-        return documentProvider;
-
-    }
-
-    class HTMLFileDocumentProvider extends FileDocumentProvider
-    {
-        public IDocument createDocument(Object element) throws CoreException
-        {
-            IDocument document = super.createDocument(element);
-            if (document != null)
-            {
-                IDocumentPartitioner partitioner = createDocumentPartitioner();
-                if (partitioner != null)
-                {
-                    partitioner.connect(document);
-                    document.setDocumentPartitioner(partitioner);
-                }
-            }
-            return document;
-        }
-
-        protected IAnnotationModel createAnnotationModel(Object element) throws CoreException
-        {
-            if (element instanceof IFileEditorInput)
-            {
-                return new TemplateAnnotationModel((IFileEditorInput) element);
-            }
-
-            return super.createAnnotationModel(element);
-        }
-    }
-
-    class HTMLStorageDocumentProvider extends StorageDocumentProvider
-    {
-        protected IDocument createDocument(Object element) throws CoreException
-        {
-            IDocument document = super.createDocument(element);
-            if (document != null)
-            {
-                IDocumentPartitioner partitioner = createDocumentPartitioner();
-                if (partitioner != null)
-                {
-                    partitioner.connect(document);
-                    document.setDocumentPartitioner(partitioner);
-                }
-            }
-            return document;
-        }
-
-        protected IAnnotationModel createAnnotationModel(Object element) throws CoreException
-        {
-            if (element instanceof IFileEditorInput)
-            {
-                return new TemplateAnnotationModel((IFileEditorInput) element);
-            }
-
-            return super.createAnnotationModel(element);
-        }
-    }
-
-    protected class OutlineSelectionListener implements ISelectionChangedListener
-    {
-        public void selectionChanged(SelectionChangedEvent event)
-        {
-            IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-            Position position = (Position) selection.getFirstElement();
-            selectAndReveal(position.getOffset(), position.getLength());
-        }
-    }
-
-    static public final String SAVE_HTML_TEMPLATE = "com.iw.plugins.spindle.html.saveTemplateAction";
-    static public final String REVERT_HTML_TEMPLATE = "com.iw.plugins.spindle.html.revertTemplateAction";
 
     /**
      * @see org.eclipse.ui.texteditor.AbstractTextEditor#createActions()
@@ -501,14 +107,105 @@ public class TemplateEditor extends TextEditor implements IAdaptable, IReconcili
 
     }
 
-    /**
-     * @see org.eclipse.ui.texteditor.AbstractTextEditor#editorContextMenuAboutToShow(IMenuManager)
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.Editor#createContentOutlinePage(org.eclipse.ui.IEditorInput)
      */
-    protected void editorContextMenuAboutToShow(IMenuManager menu)
+    public IContentOutlinePage createContentOutlinePage(IEditorInput input)
     {
-        super.editorContextMenuAboutToShow(menu);
-        addAction(menu, SAVE_HTML_TEMPLATE);
-        addAction(menu, REVERT_HTML_TEMPLATE);
+        TemplateContentOutlinePage result = new TemplateContentOutlinePage(this);
+        IDocument document = getDocumentProvider().getDocument(input);
+        result.setDocument(document);
+
+        result.addSelectionChangedListener(new OutlineSelectionListener());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.Editor#createDocumentProvider(org.eclipse.ui.IEditorInput)
+     */
+    protected IDocumentProvider createDocumentProvider(IEditorInput input)
+    {
+        return new TemplateFileDocumentProvider();
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.Editor#createSourceViewerConfiguration()
+     */
+    protected SourceViewerConfiguration createSourceViewerConfiguration()
+    {
+        return new TemplateConfiguration(UIPlugin.getDefault().getTemplateTextTools(), this);
+    }
+
+    public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor)
+    {
+        boolean didReconcile = false;        
+        if ((getEditorInput() instanceof IFileEditorInput))
+        {
+            PluginComponentSpecification component = (PluginComponentSpecification) getComponent();
+
+            if (component != null)
+            {
+                didReconcile = true;
+                fScanner.setExternalProblemCollector(collector);
+                fScanner.setPerformDeferredValidations(false);
+                fScanner.setFactory(TapestryCore.getSpecificationFactory());
+                fValidator.setProblemCollector(fScanner);
+                try
+                {
+                    fScanner.scanTemplate(component, getDocumentProvider().getDocument(getEditorInput()).get(), fValidator);
+                } catch (ScannerException e)
+                {
+                    UIPlugin.log(e);
+                }
+            }
+
+        }
+        if (!didReconcile)
+        {
+            collector.beginCollecting();
+            collector.endCollecting();
+        }
+    }
+
+    IComponentSpecification getComponent()
+    {
+        try
+        {
+            IEditorInput input = getEditorInput();
+            IStorage storage = ((IStorageEditorInput) input).getStorage();
+            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+            TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+            Map templates = manager.getTemplateMap(project);
+            if (templates != null)
+                return (IComponentSpecification) templates.get(storage);
+
+        } catch (CoreException e)
+        {
+            UIPlugin.log(e);
+        }
+        return null;
+    }
+
+    public class RevertTemplateAction extends Action
+    {
+        public RevertTemplateAction(String text)
+        {
+            super(text);
+        }
+
+        public void run()
+        {
+            if (MessageDialog
+                .openConfirm(
+                    getEditorSite().getShell(),
+                    "Confirm revert to Default",
+                    "All new components/pages created with the wizard will use the default template.\n\nProceed?"))
+            {
+                IEditorInput input = getEditorInput();
+                IPreferenceStore pstore = getPreferenceStore();
+                pstore.setValue(PreferenceConstants.P_HTML_TO_GENERATE, null);
+            }
+        }
     }
 
     public class SaveHTMLTemplateAction extends Action
@@ -548,117 +245,14 @@ public class TemplateEditor extends TextEditor implements IAdaptable, IReconcili
 
     }
 
-    public class RevertTemplateAction extends Action
+    protected class OutlineSelectionListener implements ISelectionChangedListener
     {
-        public RevertTemplateAction(String text)
+        public void selectionChanged(SelectionChangedEvent event)
         {
-            super(text);
-        }
-
-        public void run()
-        {
-            if (MessageDialog
-                .openConfirm(
-                    getEditorSite().getShell(),
-                    "Confirm revert to Default",
-                    "All new components/pages created with the wizard will use the default template.\n\nProceed?"))
-            {
-                IEditorInput input = getEditorInput();
-                IPreferenceStore pstore = getPreferenceStore();
-                pstore.setValue(PreferenceConstants.P_HTML_TO_GENERATE, null);
-            }
+            IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+            Position position = (Position) selection.getFirstElement();
+            selectAndReveal(position.getOffset(), position.getLength());
         }
     }
 
-    /**
-     * @param collector
-     * @param fProgressMonitor
-     */
-    public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor)
-    {
-        boolean didReconcile = false;
-        IEditorInput input = getEditorInput();
-        if ((input instanceof IFileEditorInput))
-        {
-            IFile file = ((IFileEditorInput) input).getFile();
-
-            IProject project = file.getProject();
-            TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-            Map templates = manager.getTemplateMap(project);
-            if (templates != null)
-            {
-                PluginComponentSpecification component = (PluginComponentSpecification) templates.get(file);
-                if (component != null)
-                {
-                    didReconcile = true;
-                    scanner.setExternalProblemCollector(collector);
-                    scanner.setPerformDeferredValidations(false);
-                    validator.setProblemCollector(scanner);
-                    try
-                    {
-                        scanner.scanTemplate(component, getDocumentProvider().getDocument(input).get(), validator);
-                    } catch (ScannerException e)
-                    {
-                        UIPlugin.log(e);
-                    }
-                }
-            }
-        }
-        if (!didReconcile)
-        {
-            collector.beginCollecting();
-            collector.endCollecting();
-        }
-    }
-
-    public class DebugToolTipHandler extends ToolTipHandler
-    {
-
-        IDocument document;
-
-        /**
-         * Constructor for DebugToolTipHandler.
-         * @param parent
-         */
-        public DebugToolTipHandler(Shell parent, IDocument document)
-        {
-            super(parent);
-            this.document = document;
-        }
-
-        /**
-         * @see ToolTipHandler#getToolTipHelp(Object)
-         */
-        protected Object getToolTipHelp(Object object)
-        {
-            return null;
-        }
-
-        /**
-         * @see ToolTipHandler#getToolTipImage(Object)
-         */
-        protected Image getToolTipImage(Object object)
-        {
-            return null;
-        }
-
-        /**
-         * @see ToolTipHandler#getToolTipText(Object)
-         */
-        protected String getToolTipText(Object object, Point widgetPosition)
-        {
-            StyledText widget = (StyledText) object;
-            int currentOffset = widget.getOffsetAtLocation(widgetPosition);
-            ITypedRegion region;
-            try
-            {
-                region = document.getPartition(currentOffset);
-            } catch (BadLocationException e)
-            {
-                return "bad location";
-            }
-            return region.getType();
-        }
-
-    }
 }

@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.text;
 
+
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
@@ -37,7 +38,7 @@ import org.eclipse.swt.graphics.Color;
 public class JWCIDTagScanner extends RuleBasedScanner {
 
 
-  public JWCIDTagScanner(ISpindleColorManager manager) {
+  public JWCIDTagScanner(IColorManager manager) {
   	Color color = manager.getColor(IColorConstants.P_JWCID);
     IToken jwcid = new Token(new TextAttribute(manager.getColor(IColorConstants.P_JWCID)));
     IToken string = new Token(new TextAttribute(manager.getColor(IColorConstants.P_STRING)));

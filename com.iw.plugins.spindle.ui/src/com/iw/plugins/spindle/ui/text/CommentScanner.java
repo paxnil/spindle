@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.text;
 
+
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.MultiLineRule;
@@ -43,7 +44,7 @@ public class CommentScanner extends RuleBasedScanner {
 	 * Constructor for CommentScanner.
 	 * @param manager
 	 */
-	public CommentScanner(ISpindleColorManager manager) {
+	public CommentScanner(IColorManager manager) {
 		IToken comment =
 			new Token(manager.getColor(IColorConstants.P_XML_COMMENT));
 

@@ -26,11 +26,13 @@
 
 package com.iw.plugins.spindle;
 
+import net.sf.solareclipse.ui.preferences.ITextStylePreferences;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.swt.graphics.RGB;
 
-import com.iw.plugins.spindle.ui.text.ColorManager;
+import com.iw.plugins.spindle.editors.template.ITemplateSyntaxConstants;
 
 /**
  *  Preference constants used by Spindle
@@ -40,6 +42,8 @@ import com.iw.plugins.spindle.ui.text.ColorManager;
  */
 public class PreferenceConstants
 {
+
+    public static String EDITOR_OVERVIEW_RULER = UIPlugin.PLUGIN_ID + ".EDITOR_OVERVIEW_RULER";
 
     public static final String EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER =
         UIPlugin.PLUGIN_ID + ".EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER";
@@ -104,6 +108,8 @@ public class PreferenceConstants
     public static void initializeDefaultValues(IPreferenceStore store)
     {
 
+        store.setDefault(EDITOR_OVERVIEW_RULER, true);
+
         store.setDefault(PreferenceConstants.EDITOR_CURRENT_LINE, true);
         PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_CURRENT_LINE_COLOR, new RGB(225, 235, 224));
 
@@ -148,7 +154,15 @@ public class PreferenceConstants
         store.setDefault(PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER, false);
 
         store.setDefault(PreferenceConstants.P_HTML_TO_GENERATE, UIPlugin.getString("TAPESTRY.genHTMLSource"));
-        ColorManager.initializeDefaults(store);
 
+        setDefault(store, ITemplateSyntaxConstants.TAPESTRY_ATT_NAME, "0,64,128", ITextStylePreferences.STYLE_NORMAL);
+        setDefault(store, ITemplateSyntaxConstants.TAPESTRY_ATT_VALUE, "0,64,128", ITextStylePreferences.STYLE_BOLD);
+        
+    }
+
+    private static void setDefault(IPreferenceStore store, String constant, String color, String style)
+    {
+        store.setDefault(constant + ITextStylePreferences.SUFFIX_FOREGROUND, color);
+        store.setDefault(constant + ITextStylePreferences.SUFFIX_STYLE, style);
     }
 }

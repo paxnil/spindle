@@ -131,7 +131,7 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
     private Revealer()
     {
         UIPlugin.getDefault().getWorkbench().addWindowListener(this);
-        register(UIPlugin.getDefault().getActiveWorkbenchWindow());
+//        register(UIPlugin.getDefault().getActiveWorkbenchWindow());
     }
 
     private void register(IWorkbenchWindow window)

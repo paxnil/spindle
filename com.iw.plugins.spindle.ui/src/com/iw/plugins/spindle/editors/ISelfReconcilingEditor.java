@@ -23,23 +23,22 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.ui.text;
 
-import org.eclipse.jdt.ui.text.IColorManager;
+package com.iw.plugins.spindle.editors;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 
-
+import com.iw.plugins.spindle.core.parser.IProblemCollector;
 
 /**
- * @author administrator
- *
- * To change this generated comment edit the template variable "typecomment":
- * Window>Preferences>Java>Templates.
+ *  Called by Reconcilers on editors that perform thier own.
+ * 
+ * @author glongman@intelligentworks.com
+ * @version $Id$
  */
-public interface ISpindleColorManager extends IColorManager {
-	/*
-	void dispose();
-	Color getColor(RGB rgb);
-	*/
-
+public interface ISelfReconcilingEditor
+{
+    public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor);
+    
+    public boolean isReadyToReconcile();
 }

@@ -23,17 +23,19 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editors.template;
 
-import org.eclipse.ui.editors.text.TextEditorActionContributor;
+package com.iw.plugins.spindle.ui.text;
 
-public class TemplateEditorContributor extends TextEditorActionContributor {
+import org.eclipse.jface.text.source.ISharedTextColors;
+import org.eclipse.swt.graphics.Color;
 
-  /**
-   * Constructor for TapestryMultipageEditorContributor
-   */
-  public TemplateEditorContributor() {
-    super();
-  }
-
+/**
+ *  Extension to ISharedTextColors that allows a color to be found by a String key
+ * 
+ * @author glongman@intelligentworks.com
+ * @version $Id$
+ */
+public interface IColorManager extends ISharedTextColors
+{
+    public Color getColor(String key);
 }

@@ -10,5 +10,7 @@
     <classpathentry kind="src" path="/org.eclipse.core.runtime"/>
     <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
     <classpathentry kind="src" path="/org.eclipse.search"/>
+    <classpathentry kind="src" path="/net.sf.solareclipse.xml.ui"/>
+    <classpathentry kind="src" path="/net.sf.solareclipse.ui"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>

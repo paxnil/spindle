@@ -47,7 +47,7 @@ public class TagAttributeScanner extends RuleBasedScanner {
 	 * Constructor for TagScanner.
 	 * @param manager
 	 */
-	public TagAttributeScanner(ISpindleColorManager manager) {
+	public TagAttributeScanner(IColorManager manager) {
 		IToken string =
 			new Token(new TextAttribute(manager.getColor(IColorConstants.P_STRING)));
 		

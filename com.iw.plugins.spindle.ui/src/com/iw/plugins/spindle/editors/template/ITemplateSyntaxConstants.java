@@ -24,30 +24,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors;
+package com.iw.plugins.spindle.editors.template;
 
-import org.apache.commons.lang.enum.Enum;
+import net.sf.solareclipse.xml.ui.text.IXMLSyntaxConstants;
 
 /**
- *  Different annotation types for things shown in the editors.
+ *  Extend xml syntax constants to include jwcid attibute name
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class AnnotationType extends Enum
+public interface ITemplateSyntaxConstants extends IXMLSyntaxConstants
 {
-    public static final AnnotationType ALL= new AnnotationType("ALL");
-    public static final AnnotationType UNKNOWN= new AnnotationType("UNKNOWN");
-    public static final AnnotationType BOOKMARK= new AnnotationType("BOOKMARK");
-    public static final AnnotationType TASK= new AnnotationType("TASK");
-    public static final AnnotationType ERROR= new AnnotationType("ERROR");
-    public static final AnnotationType WARNING= new AnnotationType("WARNING");
-    public static final AnnotationType SEARCH= new AnnotationType("SEARCH");
 
-    
-    public AnnotationType(String name)
-    {
-        super(name);
-    }
+    String TAPESTRY_ATT_NAME="jwcid_attribute";
+    String TAPESTRY_ATT_VALUE="jwcid_attribute_value";
 
 }

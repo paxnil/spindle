@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.editors.template;
 
 import java.util.ArrayList;
 
-import org.eclipse.core.resources.IFile;
+import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -58,13 +58,14 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.ui.util.ImplicitIdMatcher;
 import com.iw.plugins.spindle.ui.util.StringSorter;
 
 /**
- * @author gwl
+ * @author glongman@intelligentworks.com
  * @version $Id$
  *
- * Copyright 2002, Intelligent Works Inc.
+ * Copyright 2003, Intelligent Works Inc.
  * All Rights Reserved.
  */
 public class TemplateContentOutlinePage
@@ -72,33 +73,27 @@ public class TemplateContentOutlinePage
     implements IDocumentPartitioningListener, IDocumentListener
 {
 
-    IDocument document;
-    IFile documentFile = null;
-    TemplateEditor editor;
+    IDocument fDocument;
+    TemplateEditor fEditor;
     ContentProvider contentProvider = new ContentProvider();
+    ImplicitIdMatcher fMatcher = new ImplicitIdMatcher();
 
-    /**
-     * Constructor for HTMLOutlinePage
-     */
     protected TemplateContentOutlinePage(TemplateEditor editor)
     {
         super();
-        this.editor = editor;
-
+        this.fEditor = editor;
     }
 
     public void setDocument(IDocument document)
     {
-        this.document = document;
+        this.fDocument = document;
         document.addDocumentPartitioningListener(this);
         document.addDocumentListener(this);
     }
 
-    public void setDocumentFile(IFile file)
-    {
-        documentFile = file;
-    }
-
+    /* (non-Javadoc)
+     * @see org.eclipse.ui.part.IPage#createControl(org.eclipse.swt.widgets.Composite)
+     */
     public void createControl(Composite parent)
     {
         super.createControl(parent);
@@ -134,31 +129,36 @@ public class TemplateContentOutlinePage
         }
     }
 
-    /**
-     * @see IDocumentPartitioningListener#documentPartitioningChanged(IDocument)
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.text.IDocumentPartitioningListener#documentPartitioningChanged(org.eclipse.jface.text.IDocument)
      */
     public void documentPartitioningChanged(IDocument document)
     {
         if (getTreeViewer() != null)
-        {
             getTreeViewer().setInput(new Long(System.currentTimeMillis()));
-        }
     }
 
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+     */
     public void selectionChanged(SelectionChangedEvent event)
     {
         IStructuredSelection selection = (IStructuredSelection) event.getSelection();
         if (selection.size() == 1)
         {
-            ITypedRegion region = (ITypedRegion) selection.getFirstElement();
-            fireSelectionChanged(new StructuredSelection(new Object[] { findJWCID(region)}));
+            try
+            {
+                ITypedRegion region = (ITypedRegion) selection.getFirstElement();
+                fireSelectionChanged(new StructuredSelection(new Object[] { findJWCID(region)}));
+            } catch (BadLocationException e)
+            {
+                //swallow it
+            }
         }
     }
 
     private void fillContextMenu(IMenuManager manager)
-    {
-
-    }
+    {}
 
     private String getJWCID(ITypedRegion region)
     {
@@ -169,61 +169,42 @@ public class TemplateContentOutlinePage
             {
                 return null;
             }
-            return document.get(p.getOffset(), p.getLength());
+            return fDocument.get(p.getOffset(), p.getLength());
         } catch (BadLocationException blex)
         {
             return "error";
         }
     }
 
-    private Position findJWCID(ITypedRegion region)
+    private Position findJWCID(ITypedRegion region) throws BadLocationException
     {
         if (region == null)
-        {
             return null;
-        }
-        Position result = new Position(region.getOffset(), region.getLength());
-        String type = region.getType();
-        String start = null;
-        if (TemplatePartitionScanner.JWCID_TAG.equals(type))
-        {
-            start = "jwcid=\"";
-        } else if (TemplatePartitionScanner.JWC_TAG.equals(type))
-        {
-            start = "id=\"";
-        }
-        if (start != null)
-        {
 
-            try
-            {
-                String tag = document.get(region.getOffset(), region.getLength());
-                int startIndex = tag.indexOf(start);
-                if (startIndex >= 0)
-                {
-                    startIndex += start.length();
-                    tag = tag.substring(startIndex);
-                    int end = tag.indexOf("\"");
-                    if (end >= 0)
-                    {
-                        result = new Position(region.getOffset() + startIndex, tag.substring(0, end).length());
-                    }
-                } else
-                {
-                    return null;
-                }
-            } catch (BadLocationException blex)
-            {}
-        }
-        return result;
+        if (!region.getType().equals(TemplatePartitionScanner.TAPESTRY_JWCID_ATTRIBUTE))
+            return null;
+
+        int start = region.getOffset() + 1;
+        int length = region.getLength() - 1;
+        String value = fDocument.get(start, length);
+        if (value.endsWith("\"") || value.endsWith("'"))
+            length -= 1;
+
+        return new Position(start, length);
     }
 
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
+     */
     /**
      * @see IDocumentListener#documentAboutToBeChanged(DocumentEvent)
      */
     public void documentAboutToBeChanged(DocumentEvent arg0)
     {}
 
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
+     */
     /**
      * @see IDocumentListener#documentChanged(DocumentEvent)
      */
@@ -241,97 +222,66 @@ public class TemplateContentOutlinePage
 
         ArrayList contents = null;
 
-        /**
-         * Constructor for ContentProvider
-         */
-        public ContentProvider()
-        {
-            super();
-        }
-
-        /**
-        * @see ITreeContentProvider#getChildren(Object)
-        */
         public Object[] getChildren(Object element)
         {
             return null;
         }
 
-        /**
-         * @see ITreeContentProvider#getParent(Object)
-         */
         public Object getParent(Object element)
         {
             return null;
         }
 
-        /**
-         * @see ITreeContentProvider#hasChildren(Object)
-         */
         public boolean hasChildren(Object element)
         {
             return false;
         }
 
-        /**
-         * @see IStructuredContentProvider#getElements(Object)
-         */
         public Object[] getElements(Object ignored)
         {
-
             getTreeViewer().setSelection(StructuredSelection.EMPTY);
             if (contents == null)
-            {
                 contents = new ArrayList();
-            }
+
             ArrayList oldContents = (ArrayList) contents.clone();
+            //TODO why the heck am I keeping the old contents?
             ArrayList addedList = new ArrayList();
             contents.clear();
-            if (document != null)
+            if (fDocument != null)
             {
-
                 ITypedRegion[] partitions = null;
                 try
                 {
-                    partitions = document.computePartitioning(0, document.getLength() - 1);
+                    partitions = fDocument.computePartitioning(0, fDocument.getLength() - 1);
                 } catch (BadLocationException ex)
                 {
                     return new Object[] { "error occured scanning source" };
                 }
                 for (int i = 0; i < partitions.length; i++)
                 {
-                    String type = partitions[i].getType();
-                    if (type.equals(TemplatePartitionScanner.JWC_TAG)
-                        || type.equals(TemplatePartitionScanner.JWCID_TAG))
+                    oldContents.remove(partitions[i]);
+                    try
                     {
                         if (findJWCID(partitions[i]) != null)
                         {
-
                             if (!oldContents.contains(partitions[i]))
-                            {
                                 addedList.add(partitions[i]);
-                            } else
-                            {
-                                oldContents.remove(partitions[i]);
-                            }
 
                             contents.add(partitions[i]);
                         }
+                    } catch (BadLocationException e)
+                    {
+                        //swallow it
                     }
+
                 }
             }
             return contents.toArray();
         }
 
-        /**
-         * @see IContentProvider#dispose()
-         */
         public void dispose()
         {}
 
-        /**
-         * @see IContentProvider#inputChanged(Viewer, Object, Object)
-         */
         public void inputChanged(Viewer arg0, Object oldSource, Object newSource)
         {}
 
@@ -341,20 +291,12 @@ public class TemplateContentOutlinePage
     {
         Image notCreatedImage = Images.getSharedImage("property16.gif");
         Image jwcImage = Images.getSharedImage("component16.gif");
-        /**
-         * Constructor for LabelProvider
-         */
-        public LabelProvider()
-        {
-            super();
-        }
 
         /**
         * @see ILabelProvider#getImage(Object)
         */
         public Image getImage(Object element)
         {
-
             String jwcid = null;
 
             try
@@ -363,13 +305,25 @@ public class TemplateContentOutlinePage
             } catch (Exception e)
             {}
 
-            //      if (jwcid != null && editor.alreadyHasJWCID(jwcid, Utils.findRelatedComponent(documentFile))) {
-            //
-            //        return jwcImage;
-            //
-            //      }
+            if (jwcid != null)
+            {
+                IComponentSpecification component = fEditor.getComponent();
 
+                if (component != null)
+                {
+                    if (component.getComponent(jwcid) != null || isImplicitComponent(jwcid))
+                    {
+                        return jwcImage;
+
+                    }
+                }
+            }
             return notCreatedImage;
+        }
+
+        private boolean isImplicitComponent(String jwcid)
+        {
+            return fMatcher.isMatch(jwcid) && fMatcher.getSimpleType() != null;
         }
 
         /**
@@ -378,13 +332,11 @@ public class TemplateContentOutlinePage
         public String getText(Object element)
         {
             if (element instanceof String)
-            {
                 return (String) element;
-            }
+
             if (element instanceof ITypedRegion)
-            {
                 return getJWCID((ITypedRegion) element);
-            }
+
             return null;
         }
 
@@ -438,7 +390,6 @@ public class TemplateContentOutlinePage
 
         private String stripDollars(String string)
         {
-
             string = string.trim();
 
             if (string.indexOf("$") >= 0)
