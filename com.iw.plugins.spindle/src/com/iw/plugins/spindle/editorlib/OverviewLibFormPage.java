@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorlib;
 
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -42,6 +43,8 @@ import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 
 public class OverviewLibFormPage extends SpindleFormPage {
+	
+  OverviewForm form;
 
   public OverviewLibFormPage(SpindleMultipageEditor editor, String title) {
     super(editor, title);
@@ -51,7 +54,8 @@ public class OverviewLibFormPage extends SpindleFormPage {
    * @see PDEFormPage#createForm()
    */
   protected AbstractSectionForm createForm() {
-    return new OverviewForm(this);
+  	form = new OverviewForm(this);
+    return form;
   }
 
   /**
@@ -182,6 +186,13 @@ public class OverviewLibFormPage extends SpindleFormPage {
       }
     }
 
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.editors.SpindleFormPage#fillContextMenu(IMenuManager)
+   */
+  public void fillContextMenu(IMenuManager mng) {
+  	form.fillContextMenu(mng);
   }
 
 }

@@ -109,12 +109,11 @@ public class ComponentAliasSection
           IPluginLibrarySpecification spec = (IPluginLibrarySpecification) aliasHolder.getParent();
           String tapestryPath = spec.getComponentSpecificationPath(alias);
           if (tapestryPath != null) {
-
-            openComponentAction.configure(lookup, tapestryPath);
+          	
+            MenuManager jumpMenu = new MenuManager("Jump To...");
+            openComponentAction.configure(lookup, tapestryPath, jumpMenu);
 
             if (openComponentAction.isEnabled()) {
-              MenuManager jumpMenu = new MenuManager("Jump To...");
-              jumpMenu.add(openComponentAction);
               manager.add(jumpMenu);
               manager.add(new Separator());
             }

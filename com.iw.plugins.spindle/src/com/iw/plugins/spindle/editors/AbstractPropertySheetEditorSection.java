@@ -121,7 +121,7 @@ public abstract class AbstractPropertySheetEditorSection
   public AbstractPropertySheetEditorSection(SpindleFormPage page) {
     super(page);
     pAction = new PropertiesAction(page.getEditor());
-    pAction.setText("Edit");
+    pAction.setText("Inspect");
     pAction.setToolTipText("Edit the selected");
   }
 

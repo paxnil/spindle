@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorlib.components;
 
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -42,7 +43,7 @@ import com.iw.plugins.spindle.util.IStimulatable;
 
 public class ComponentsFormPage extends SpindleFormPage {
 
-  IStimulatable form;
+  ComponentsForm form;
   /**
    * Constructor for TapestryAppComponentsFormPage
    */
@@ -54,9 +55,8 @@ public class ComponentsFormPage extends SpindleFormPage {
    * @see PDEFormPage#createForm()
    */
   protected AbstractSectionForm createForm() {
-    ComponentsForm cform = new ComponentsForm(this);
-    form = (IStimulatable) cform;
-    return cform;
+    form = new ComponentsForm(this);
+    return form;
   }
 
   /**
@@ -145,6 +145,20 @@ public class ComponentsFormPage extends SpindleFormPage {
       manager.linkSections(aliasSection, summarySection);
     }
 
+    /**
+     * @see com.iw.plugins.spindle.editors.SpindleForm#fillContextMenu(IMenuManager)
+     */
+    public void fillContextMenu(IMenuManager mng) {
+      aliasSection.fillContextMenu(mng);
+    }
+
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.editors.SpindleFormPage#fillContextMenu(IMenuManager)
+   */
+  public void fillContextMenu(IMenuManager mng) {
+  	form.fillContextMenu(mng);
   }
 
 }

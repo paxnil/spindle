@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorjwc.beans;
 
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -165,5 +166,19 @@ public class BeansFormPage extends SpindleFormPage {
       }
     }
 
+    /**
+     * @see com.iw.plugins.spindle.editors.SpindleForm#fillContextMenu(IMenuManager)
+     */
+    public void fillContextMenu(IMenuManager mng) {
+      selectionSection.fillContextMenu(mng);
+    }
+
   }
+  /**
+   * @see com.iw.plugins.spindle.editors.SpindleFormPage#fillContextMenu(IMenuManager)
+   */
+  public void fillContextMenu(IMenuManager mng) {
+  	form.fillContextMenu(mng);
+  }
+
 }

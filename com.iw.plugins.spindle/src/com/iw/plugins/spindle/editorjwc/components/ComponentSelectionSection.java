@@ -26,7 +26,6 @@
 package com.iw.plugins.spindle.editorjwc.components;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -44,7 +43,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -64,16 +62,19 @@ import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.editorlib.LibraryMultipageEditor;
 import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.html.TapestryHTMLEditor;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
+import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.ui.ChooseFromNamespaceDialog;
@@ -81,7 +82,7 @@ import com.iw.plugins.spindle.ui.ComponentAliasViewer;
 import com.iw.plugins.spindle.ui.CopyToClipboardAction;
 import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
-import com.iw.plugins.spindle.ui.OpenAliasDefinition;
+import com.iw.plugins.spindle.ui.OpenClassAction;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
@@ -101,7 +102,8 @@ public class ComponentSelectionSection
   private Action deleteComponentAction = new DeleteComponentAction();
   private Action copyAction = new CopyComponentAction();
   private Action copyToAction = new CopyToAction();
-  private OpenAliasDefinition openAction = new OpenAliasDefinition();
+  private OpenAliasDefinition jumpToLibrary = new OpenAliasDefinition();
+  private OpenAliasDefinition jumpToComponent = new OpenAliasComponent();
 
   private ContainedComponentLabelProvider labelProvider = new ContainedComponentLabelProvider();
 
@@ -222,45 +224,64 @@ public class ComponentSelectionSection
           manager.add(new Separator());
           manager.add(copyAction);
           //          manager.add(copyToAction);
-          MenuManager submenu = new MenuManager("Copy To Clipboard");
-          Display d = getViewer().getControl().getDisplay();
-          submenu.add(new CopyToClipboardAction(d, "jwcid=\"$value$\"", "value", component.getIdentifier()));
-          submenu.add(new CopyToClipboardAction(d, "<span jwcid=\"$value$\"></span>", "value", component.getIdentifier()));
-          manager.add(submenu);
         }
+        manager.add(new Separator());
+        MenuManager submenu = new MenuManager("Copy To Clipboard");
+        Display d = getViewer().getControl().getDisplay();
+        submenu.add(new CopyToClipboardAction(d, "jwcid=\"$value$\"", "value", component.getIdentifier()));
+        submenu.add(new CopyToClipboardAction(d, "<span jwcid=\"$value$\"></span>", "value", component.getIdentifier()));
+        manager.add(submenu);
       }
     }
+
+    jumpToLibrary.setEnabled(false);
+    jumpToComponent.setEnabled(false);
     try {
 
       String alias = component.getType();
 
       ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(getModel());
-      openAction.configure(project, alias);
+      jumpToLibrary.configure(project, alias);
+      jumpToComponent.configure(project, alias);
 
     } catch (CoreException e) {
 
     }
     List templates = new ArrayList();
-    IStorage storage = (IStorage) getModel().getUnderlyingStorage();
 
-    if (storage instanceof IFile) {
+    if (jumpToComponent.isEnabled()) {
 
-      templates = Utils.findTemplatesFor((IFile) storage);
+      IStorage storage = jumpToComponent.getOpenStorage();
 
+      if (storage != null && storage instanceof IFile) {
+
+        templates = Utils.findTemplatesFor((IFile) storage);
+
+      }
     }
-    if (!templates.isEmpty() || openAction.isEnabled()) {
+    if (!templates.isEmpty() || jumpToLibrary.isEnabled() || jumpToComponent.isEnabled()) {
 
       MenuManager jumpMenu = new MenuManager("Jump to..");
 
-      if (openAction.isEnabled()) {
+      if (jumpToLibrary.isEnabled()) {
 
-        jumpMenu.add(openAction);
+        jumpMenu.add(jumpToLibrary);
+
+      }
+
+      if (jumpToComponent.isEnabled()) {
+
+        jumpMenu.add(jumpToComponent);
+        OpenClassAction openClass = new OpenClassAction(jumpToComponent.getOpenStorage());
+        if (openClass.isEnabled()) {
+        	jumpMenu.add(openClass);
+        }
 
       }
 
       Iterator iter = templates.iterator();
 
-      if (iter.hasNext() && openAction.isEnabled()) {
+      if (iter.hasNext() && (jumpToLibrary.isEnabled() || jumpToComponent.isEnabled())) {
 
         jumpMenu.add(new Separator());
 
@@ -755,7 +776,7 @@ public class ComponentSelectionSection
       super();
       this.target = target;
       this.jwcid = jwcid;
-      setText(target.getName());
+      setText(target.getFullPath().toString());
     }
 
     public void run() {
@@ -785,6 +806,211 @@ public class ComponentSelectionSection
       if (editor != null && editor instanceof TapestryHTMLEditor) {
 
         ((TapestryHTMLEditor) editor).openTo(jwcid);
+
+      }
+
+    }
+
+  }
+
+  class OpenAliasDefinition extends Action {
+
+    private TapestryProjectModelManager manager;
+    protected TapestryLookup lookup;
+    protected String useAlias;
+    protected TapestryLibraryModel found;
+    protected IStorage open;
+
+    /**
+     * Constructor for OpenTapestryPath.
+     * @param text
+     */
+    public OpenAliasDefinition() {
+      super();
+
+    }
+
+    public IStorage getOpenStorage() {
+
+      return open;
+
+    }
+
+    public void configure(ITapestryProject project, String alias) {
+
+      setEnabled(false);
+
+      open = null;
+
+      TapestryLibraryModel lib = null;
+      try {
+        lib = (TapestryLibraryModel) project.getProjectModel();
+        lookup = project.getLookup();
+      } catch (CoreException e) {
+
+        return;
+      }
+
+      TapestryLibraryModel framework = null;
+      try {
+        manager = project.getModelManager();
+
+        framework = (TapestryLibraryModel) manager.getDefaultLibrary();
+      } catch (CoreException e) {
+      }
+
+      String tapestryPath = null;
+
+      found = findLibrary(lib, alias, framework);
+
+      if (found != null) {
+
+        open = found.getUnderlyingStorage();
+
+        setEnabled(true);
+
+        setText(open.getFullPath().toString());
+
+      }
+
+    }
+
+    /**
+     * Method findAliasPath.
+     * @param libSpec
+     * @param aliasOrPageName
+     * @param framework
+     * @return String
+     */
+    private TapestryLibraryModel findLibrary(TapestryLibraryModel projectLib, String alias, TapestryLibraryModel framework) {
+
+      String foundPath = null;
+
+      IPluginLibrarySpecification libSpec = projectLib.getSpecification();
+
+      int ns_sep = alias.indexOf(":");
+      if (ns_sep < 0) {
+
+        useAlias = alias;
+
+        if (libSpec.getComponentAliases().contains(useAlias)) {
+
+          return projectLib;
+
+        } else if (framework != null) {
+
+          IPluginLibrarySpecification frameworkSpec = framework.getSpecification();
+
+          if (frameworkSpec.getComponentAliases().contains(useAlias)) {
+
+            return framework;
+
+          }
+        }
+
+      } else if (manager != null) {
+
+        String libraryName = alias.substring(0, ns_sep);
+        useAlias = alias.substring(ns_sep + 1);
+        String libraryPath = libSpec.getLibrarySpecificationPath(libraryName);
+        if (libraryPath != null) {
+
+          IStorage[] lib = lookup.findByTapestryPath(libraryPath, lookup.ACCEPT_LIBRARIES | lookup.FULL_TAPESTRY_PATH);
+          if (lib.length > 0) {
+
+            TapestryLibraryModel importedLib = (TapestryLibraryModel) manager.getReadOnlyModel(lib[0]);
+            if (importedLib != null && importedLib.isLoaded()) {
+
+              IPluginLibrarySpecification importedSpec = importedLib.getSpecification();
+              if (importedSpec.getComponentAliases().contains(useAlias)) {
+
+                return importedLib;
+              }
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    public void run() {
+
+      if (open != null) {
+
+        showEditor();
+
+        IEditorPart editor = Utils.getEditorFor(open);
+        if (editor != null && editor instanceof LibraryMultipageEditor) {
+
+          LibraryMultipageEditor libEditor = (LibraryMultipageEditor) editor;
+          if (((ITapestryModel) libEditor.getModel()).isLoaded()) {
+
+            ComponentsFormPage page = (ComponentsFormPage) libEditor.getPage(libEditor.COMPONENTS);
+            libEditor.showPage(page);
+            page.openTo(useAlias);
+          }
+        }
+      }
+    }
+
+    protected void showEditor() {
+      IEditorPart editor = Utils.getEditorFor(open);
+      if (editor != null) {
+
+        TapestryPlugin.getDefault().getActivePage().bringToTop(editor);
+      } else {
+
+        TapestryPlugin.getDefault().openTapestryEditor(open);
+      }
+    }
+
+  }
+
+  public class OpenAliasComponent extends OpenAliasDefinition {
+
+    public OpenAliasComponent() {
+      super();
+    }
+
+    public void configure(ITapestryProject project, String alias) {
+
+      super.configure(project, alias);
+
+      open = null;
+
+      if (isEnabled()) {
+
+        IPluginLibrarySpecification libSpec = found.getSpecification();
+        String tapestryPath = libSpec.getComponentSpecificationPath(useAlias);
+
+        if (tapestryPath != null) {
+
+          IStorage[] lookupResult = lookup.findComponent(tapestryPath);
+
+          if (lookupResult != null && lookupResult.length > 0) {
+
+            open = lookupResult[0];
+
+          }
+
+        }
+
+        if (open != null) {
+
+          setEnabled(true);
+          setText(open.getFullPath().toString());
+
+        }
+
+      }
+
+    }
+
+    public void run() {
+
+      if (open != null) {
+
+        showEditor();
 
       }
 

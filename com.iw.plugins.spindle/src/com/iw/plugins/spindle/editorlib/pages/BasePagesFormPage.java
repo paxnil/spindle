@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorlib.pages;
 
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -42,7 +43,7 @@ import com.iw.plugins.spindle.util.IStimulatable;
 
 public abstract class BasePagesFormPage extends SpindleFormPage {
 
-  private IStimulatable form;
+  private PagesForm form;
 
   public BasePagesFormPage(SpindleMultipageEditor editor, String title) {
     super(editor, title);
@@ -52,9 +53,8 @@ public abstract class BasePagesFormPage extends SpindleFormPage {
    * @see PDEFormPage#createForm()
    */
   protected AbstractSectionForm createForm() {
-    PagesForm pform = new PagesForm(this);
-    form = (IStimulatable) pform;
-    return pform;
+    form = new PagesForm(this);
+    return form;
   }
 
   /**
@@ -145,6 +145,20 @@ public abstract class BasePagesFormPage extends SpindleFormPage {
 
     }
 
+    /**
+     * @see com.iw.plugins.spindle.editors.SpindleForm#fillContextMenu(IMenuManager)
+     */
+    public void fillContextMenu(IMenuManager mng) {
+      pageSection.fillContextMenu(mng);
+    }
+
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.editors.SpindleFormPage#fillContextMenu(IMenuManager)
+   */
+  public void fillContextMenu(IMenuManager mng) {
+  	form.fillContextMenu(mng);
   }
 
 }

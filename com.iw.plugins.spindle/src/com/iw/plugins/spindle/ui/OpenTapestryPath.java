@@ -1,8 +1,12 @@
 package com.iw.plugins.spindle.ui;
 
+import java.util.Iterator;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.IEditorPart;
 
 import com.iw.plugins.spindle.TapestryPlugin;
@@ -19,8 +23,7 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 public class OpenTapestryPath extends Action {
 
   int acceptFlags;
-  String tapestryPath;
-  IStorage[] found;
+  IStorage toBeOpened;
 
   /**
    * Constructor for OpenTapestryPath.
@@ -31,19 +34,45 @@ public class OpenTapestryPath extends Action {
     this.acceptFlags = acceptFlags;
   }
 
-  public void configure(TapestryLookup lookup, String tapestryPath) { 
-    this.tapestryPath = tapestryPath;
-    found = lookup.findByTapestryPath(tapestryPath, acceptFlags);
+  public void configure(TapestryLookup lookup, String tapestryPath, IMenuManager manager) {
+
+    IStorage[] found = lookup.findByTapestryPath(tapestryPath, acceptFlags);
     setEnabled(found != null && found.length > 0);
     if (isEnabled()) {
-      setText(found[0].getName());
+      toBeOpened = found[0];
+      setText(toBeOpened.getFullPath().toString());
+
+      manager.add(new Separator());
+      manager.add(this);
+
+      if (toBeOpened instanceof IFile) {
+        for (Iterator iter = Utils.findTemplatesFor((IFile) toBeOpened).iterator(); iter.hasNext();) {
+          IStorage element = (IStorage) iter.next();
+          manager.add(new OpenTemplateAction(element));
+
+        }
+      }
+
+      Action openJava = new OpenClassAction(toBeOpened);
+
+      if (openJava.isEnabled()) {
+
+        manager.add(openJava);
+      }
+
     }
 
   }
 
   public void run() {
 
-    IEditorPart editor = Utils.getEditorFor(found[0]);
+    openEditor(toBeOpened);
+
+  }
+
+  protected void openEditor(IStorage storage) {
+
+    IEditorPart editor = Utils.getEditorFor(storage);
 
     if (editor != null) {
 
@@ -51,10 +80,28 @@ public class OpenTapestryPath extends Action {
 
     } else {
 
-      TapestryPlugin.getDefault().openTapestryEditor(found[0]);
+      TapestryPlugin.getDefault().openTapestryEditor(storage);
 
     }
 
   }
+
+  class OpenTemplateAction extends Action {
+
+    IStorage templateStorage;
+
+    public OpenTemplateAction(IStorage template) {
+      templateStorage = template;
+      setText(templateStorage.getFullPath().toString());
+    }
+
+    public void run() {
+
+      openEditor(templateStorage);
+
+    }
+  }
+
+  
 
 }

@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors;
 
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.pde.internal.ui.editor.PDEFormPage;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
@@ -46,6 +47,14 @@ public abstract class SpindleFormPage extends PDEFormPage {
     	   
     }
   }
+  
+  
+  /**
+   * Somebody (usually the outline) is asking this page to contribute
+   * some actions to a pop-up menu
+   * * @param mng the menu to fill
+   */
+  public abstract void fillContextMenu(IMenuManager mng);
 
 
   public void update() {
@@ -75,5 +84,7 @@ public abstract class SpindleFormPage extends PDEFormPage {
     return new SpindlePropertySheet();
     
   }
+
+
 
 }

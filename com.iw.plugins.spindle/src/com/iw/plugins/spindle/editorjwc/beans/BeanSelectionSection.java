@@ -29,8 +29,13 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -41,6 +46,7 @@ import org.eclipse.pde.core.IModelChangedListener;
 import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
@@ -49,6 +55,8 @@ import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginBeanSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.ui.EmptySelection;
+import com.iw.plugins.spindle.ui.OpenClassAction;
+import com.iw.plugins.spindle.util.Utils;
 
 public class BeanSelectionSection
   extends AbstractPropertySheetEditorSection
@@ -91,6 +99,24 @@ public class BeanSelectionSection
       manager.add(deleteBeanAction);
 
     }
+
+    try {
+      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage());
+      if (jproject != null) {
+        IType beanClass = Utils.findType(jproject, bean.getClassName());
+        if (beanClass != null) {
+
+          manager.add(new Separator());
+          MenuManager jumpMenu = new MenuManager("Jump to..");
+          jumpMenu.add(new OpenClassAction(beanClass));
+          manager.add(jumpMenu);
+
+        }
+      }
+    } catch (JavaModelException e) {
+    } catch (CoreException e) {
+    }
+
     manager.add(new Separator());
     pAction.setEnabled(((IModel) getFormPage().getModel()).isEditable());
     manager.add(pAction);
@@ -98,8 +124,7 @@ public class BeanSelectionSection
 
   public void update(BaseTapestryModel model) {
     holderArray.removeAll(holderArray);
-    PluginComponentSpecification spec =
-      ((TapestryComponentModel) model).getComponentSpecification();
+    PluginComponentSpecification spec = ((TapestryComponentModel) model).getComponentSpecification();
     Set ids = new TreeSet(spec.getBeanNames());
     if (ids.isEmpty()) {
       setInput(holderArray);
@@ -159,8 +184,7 @@ public class BeanSelectionSection
       TapestryComponentModel model = (TapestryComponentModel) getFormPage().getModel();
       PluginComponentSpecification cspec = model.getComponentSpecification();
 
-      NewBeanDialog dialog =
-        new NewBeanDialog(newButton.getShell(), getModel(), cspec.getBeanNames());
+      NewBeanDialog dialog = new NewBeanDialog(newButton.getShell(), getModel(), cspec.getBeanNames());
       dialog.create();
 
       if (dialog.open() == dialog.OK) {

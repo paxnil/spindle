@@ -24,6 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -101,6 +102,12 @@ public class DocumentationFormPage extends SpindleFormPage {
         ((Composite)getControl()).layout(true);
       }
     }
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.editors.SpindleFormPage#fillContextMenu(IMenuManager)
+   */
+  public void fillContextMenu(IMenuManager mng) {
   }
 
 }

@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorlib.extensions;
 
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -43,7 +44,7 @@ import com.iw.plugins.spindle.util.IStimulatable;
 
 public class ExtensionsFormPage extends SpindleFormPage {
 	
-  IStimulatable form;
+  ExtensionsForm form;
 
   public ExtensionsFormPage(SpindleMultipageEditor editor, String title) {
     super(editor, title);
@@ -54,9 +55,8 @@ public class ExtensionsFormPage extends SpindleFormPage {
    */
   protected AbstractSectionForm createForm() {
   	
-  	ExtensionsForm eForm = new ExtensionsForm(this);
-  	form = (IStimulatable)eForm;
-    return eForm;
+  	form = new ExtensionsForm(this);
+    return form;
   }
 
  
@@ -153,6 +153,13 @@ public class ExtensionsFormPage extends SpindleFormPage {
       }
     }
 
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.editors.SpindleFormPage#fillContextMenu(IMenuManager)
+   */
+  public void fillContextMenu(IMenuManager mng) {
+  	form.fillContextMenu(mng);
   }
 
 }

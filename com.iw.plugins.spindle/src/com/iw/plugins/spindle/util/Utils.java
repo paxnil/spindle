@@ -75,6 +75,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
@@ -186,8 +187,7 @@ public class Utils {
           if (editor instanceof SpindleMultipageEditor) {
 
             SpindleMultipageEditor spindleEditor = ((SpindleMultipageEditor) editor);
-            IStorage editorStorage =
-              ((ITapestryModel) spindleEditor.getModel()).getUnderlyingStorage();
+            IStorage editorStorage = ((ITapestryModel) spindleEditor.getModel()).getUnderlyingStorage();
 
             if (editorStorage == null) {
               continue;
@@ -231,10 +231,8 @@ public class Utils {
       }
     }
     return null;
-        
+
   }
-	 
-  
 
   //  public static List getApplicationsWithAlias(String alias) {
   //    ArrayList result = new ArrayList();
@@ -265,8 +263,7 @@ public class Utils {
     TapestryComponentModel target)
     throws Exception {
     String useName = sourceName;
-    PluginComponentSpecification targetSpec =
-      (PluginComponentSpecification) target.getComponentSpecification();
+    PluginComponentSpecification targetSpec = (PluginComponentSpecification) target.getComponentSpecification();
     if (targetSpec.getComponent(sourceName + 1) != null) {
       int counter = 2;
       while (targetSpec.getComponent(sourceName + counter) != null) {
@@ -281,10 +278,7 @@ public class Utils {
     target.setOutOfSynch(true);
   }
 
-  public static void createContainedComponentIn(
-    String jwcid,
-    String containedComponentPath,
-    TapestryComponentModel target) {
+  public static void createContainedComponentIn(String jwcid, String containedComponentPath, TapestryComponentModel target) {
     PluginComponentSpecification spec = target.getComponentSpecification();
     if (spec.getComponent(jwcid) == null) {
       PluginContainedComponent contained = new PluginContainedComponent();
@@ -317,8 +311,7 @@ public class Utils {
   /**
    * Returns true if the element is on the build path of the given project
    */
-  public static boolean isOnBuildPath(IJavaProject jproject, IJavaElement element)
-    throws JavaModelException {
+  public static boolean isOnBuildPath(IJavaProject jproject, IJavaElement element) throws JavaModelException {
     IPath rootPath;
     if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
       rootPath = ((IJavaProject) element).getProject().getFullPath();
@@ -339,8 +332,7 @@ public class Utils {
    * @return The type found, or null if not existing
    * The method only finds top level types and its inner types. Waiting for a Java Core solution
    */
-  public static IType findType(IJavaProject jproject, String fullyQualifiedName)
-    throws JavaModelException {
+  public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
     String pathStr = fullyQualifiedName.replace('.', '/') + ".java"; //$NON-NLS-1$
     IJavaElement jelement = jproject.findElement(new Path(pathStr));
     if (jelement == null) {
@@ -372,8 +364,7 @@ public class Utils {
    * @return the type found, or null if not existing
    * The method only finds top level types and its inner types. Waiting for a Java Core solution
    */
-  public static IType findType(IJavaProject jproject, String pack, String typeQualifiedName)
-    throws JavaModelException {
+  public static IType findType(IJavaProject jproject, String pack, String typeQualifiedName) throws JavaModelException {
     // should be supplied from java core
     int dot = typeQualifiedName.indexOf('.');
     if (dot == -1) {
@@ -407,8 +398,7 @@ public class Utils {
    * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
    * @return the type found, or null if not existing
    */
-  public static IType findTypeInCompilationUnit(ICompilationUnit cu, String typeQualifiedName)
-    throws JavaModelException {
+  public static IType findTypeInCompilationUnit(ICompilationUnit cu, String typeQualifiedName) throws JavaModelException {
     IType[] types = cu.getAllTypes();
     for (int i = 0; i < types.length; i++) {
       String currName = getTypeQualifiedName(types[i]);
@@ -464,8 +454,7 @@ public class Utils {
    * @param member The member to test the visibility for
    * @param pack The package in focus
    */
-  public static boolean isVisible(IMember member, IPackageFragment pack)
-    throws JavaModelException {
+  public static boolean isVisible(IMember member, IPackageFragment pack) throws JavaModelException {
     int otherflags = member.getFlags();
 
     if (Flags.isPublic(otherflags) || Flags.isProtected(otherflags)) {
@@ -474,15 +463,11 @@ public class Utils {
       return false;
     }
 
-    IPackageFragment otherpack =
-      (IPackageFragment) findElementOfKind(member, IJavaElement.PACKAGE_FRAGMENT);
+    IPackageFragment otherpack = (IPackageFragment) findElementOfKind(member, IJavaElement.PACKAGE_FRAGMENT);
     return (pack != null && pack.equals(otherpack));
   }
 
-  public static String codeFormat(
-    String sourceString,
-    int initialIndentationLevel,
-    String lineDelim) {
+  public static String codeFormat(String sourceString, int initialIndentationLevel, String lineDelim) {
     ICodeFormatter formatter = ToolFactory.createDefaultCodeFormatter(null);
     return formatter.format(sourceString, initialIndentationLevel, null, lineDelim) + lineDelim;
   }
@@ -501,8 +486,7 @@ public class Utils {
     return match;
   }
 
-  public static boolean implementsInterface(IType candidate, String interfaceName)
-    throws JavaModelException {
+  public static boolean implementsInterface(IType candidate, String interfaceName) throws JavaModelException {
     boolean match = false;
     String[] superInterfaces = candidate.getSuperInterfaceNames();
     if (superInterfaces != null && superInterfaces.length > 0) {
@@ -555,7 +539,7 @@ public class Utils {
 
     } catch (IOException e) {
 
-      throw new CoreException(new SpindleStatus(e)); 
+      throw new CoreException(new SpindleStatus(e));
 
     } finally {
 
@@ -568,8 +552,7 @@ public class Utils {
     }
   }
 
-  public static byte[] getInputStreamAsByteArray(InputStream stream, int length)
-    throws IOException {
+  public static byte[] getInputStreamAsByteArray(InputStream stream, int length) throws IOException {
     byte[] contents;
     if (length == -1) {
       contents = new byte[0];
@@ -580,12 +563,7 @@ public class Utils {
 
         // resize contents if needed
         if (contentsLength + available > contents.length) {
-          System.arraycopy(
-            contents,
-            0,
-            contents = new byte[contentsLength + available],
-            0,
-            contentsLength);
+          System.arraycopy(contents, 0, contents = new byte[contentsLength + available], 0, contentsLength);
         }
 
         // read as many bytes as possible
@@ -615,7 +593,7 @@ public class Utils {
 
     return contents;
   }
-  
+
   // find any templates for the supplied file
   public static List findTemplatesFor(IFile movedFrom) {
 
@@ -633,13 +611,11 @@ public class Utils {
 
         if ("html".equals(extension) || "htm".equals(extension)) {
 
-          IResource member = parent.findMember(memberPath.lastSegment());          
+          IResource member = parent.findMember(memberPath.lastSegment());
 
           String memberName = memberPath.removeFileExtension().lastSegment();
 
-          if (member != null
-            && member instanceof IFile
-            && templateMatchLocalization(fileName, memberName)) {
+          if (member != null && member instanceof IFile && templateMatchLocalization(fileName, memberName)) {
 
             templates.add(member);
 
@@ -647,12 +623,10 @@ public class Utils {
 
         }
 
-       
-
       }
     } catch (CoreException e) {
     }
-    
+
     return templates;
   }
 
@@ -699,15 +673,72 @@ public class Utils {
 
     return false;
   }
-  
-  private static List languageCodes = null;
 
+  private static List languageCodes = null;
 
   private static void buildLanguageCodes() {
 
     languageCodes = Arrays.asList(Locale.getISOLanguages());
 
   }
- 
+
+  /**
+   * Method findComponentClass.
+   * @param jwcOrPageStorage
+   * @return IType
+   */
+  public static IType findComponentClass(IStorage jwcOrPageStorage) {
+
+    String fileName = jwcOrPageStorage.getFullPath().lastSegment();
+
+    if (!fileName.endsWith(".jwc") && !fileName.endsWith(".page")) {
+
+      return null;
+    }
+
+    IEditorPart part = getEditorFor(jwcOrPageStorage);
+
+    TapestryComponentModel model = null;
+
+    if (part != null) {
+
+      if (part.isDirty()) {
+
+        RequiredSaveEditorAction action = new RequiredSaveEditorAction(part);
+
+        if (!action.save()) {
+
+          return null;
+        }
+      }
+
+      if (part instanceof SpindleMultipageEditor) {
+        model = (TapestryComponentModel) ((SpindleMultipageEditor) part).getModel();
+      }
+
+    }
+    try {
+
+      if (model == null || !model.isLoaded()) {
+
+        TapestryProjectModelManager manager = TapestryPlugin.getTapestryModelManager(jwcOrPageStorage);
+
+        model = (TapestryComponentModel) manager.getReadOnlyModel(jwcOrPageStorage);
+
+      }
+
+      if (model != null && model.isLoaded()) {
+
+        IJavaProject project = TapestryPlugin.getDefault().getJavaProjectFor(jwcOrPageStorage);
+
+        return Utils.findType(project, model.getComponentSpecification().getComponentClassName());
+      }
+
+    } catch (CoreException e) {
+    }
+
+    return null;
+
+  }
 
 }
