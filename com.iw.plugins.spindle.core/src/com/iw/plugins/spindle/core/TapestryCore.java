@@ -187,7 +187,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         log.log(status);
     }
 
-    static public void log(Exception ex)
+    static public void log(Throwable ex)
     {
         TapestryCore core = getDefault();
         if (core == null)
