@@ -43,9 +43,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.ClassPathDetector;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -67,15 +65,16 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
 {
 
     static private IClasspathEntry TAPESTRY_FRAMEWORK =
-        new ClasspathEntry(
-            IPackageFragmentRoot.K_BINARY,
-            ClasspathEntry.CPE_CONTAINER,
-            new Path(TapestryCore.CORE_CONTAINER),
-            new Path[] {},
-            null,
-            null,
-            null,
-            false);
+       JavaCore.newContainerEntry(new Path(TapestryCore.CORE_CONTAINER), false);
+//    IClasspathEntry poo = new ClasspathEntry(
+//            IPackageFragmentRoot.K_BINARY,
+//            ClasspathEntry.CPE_CONTAINER,
+//            new Path(TapestryCore.CORE_CONTAINER),
+//            new Path[] {},
+//            null,
+//            null,
+//            null,
+//            false);
 
     private WizardNewProjectCreationPage fMainPage;
 
@@ -276,15 +275,16 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
     private IClasspathEntry createSrcClasspathEntry()
     {
 
-        return new ClasspathEntry(
-            IPackageFragmentRoot.K_SOURCE,
-            ClasspathEntry.CPE_SOURCE,
-            new Path("/" + fCurrProject.getName() + "/src"),
-            new Path[] {},
-            null,
-            null,
-            null,
-            false);
+        return JavaCore.newSourceEntry(new Path("/" + fCurrProject.getName() + "/src"));
+//        return new ClasspathEntry(
+//            IPackageFragmentRoot.K_SOURCE,
+//            ClasspathEntry.CPE_SOURCE,
+//            new Path("/" + fCurrProject.getName() + "/src"),
+//            new Path[] {},
+//            null,
+//            null,
+//            null,
+//            false);
     }
 
     private void createSrcFolder()
