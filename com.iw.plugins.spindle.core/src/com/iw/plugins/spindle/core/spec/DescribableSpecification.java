@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Specification types that can have description tags
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: DescribableSpecification.java,v 1.2 2004/05/17 02:31:49
  *          glongman Exp $
  */

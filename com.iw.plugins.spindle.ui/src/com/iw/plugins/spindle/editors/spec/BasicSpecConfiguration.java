@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
+ * Geoffrey Longman.
  * Portions created by the Initial Developer are Copyright (C) 2004
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.spec;
@@ -42,7 +42,7 @@ import com.iw.plugins.spindle.editors.Editor;
  * BasicSpecConfiguration basic configuration for XML (syntax coloring only)
  * Subclasses extend to add neat things like formatting etc.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * 
  */
 public class BasicSpecConfiguration extends BaseSourceConfiguration

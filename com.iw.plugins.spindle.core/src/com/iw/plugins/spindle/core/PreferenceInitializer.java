@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
+ * Geoffrey Longman.
  * Portions created by the Initial Developer are Copyright (C) 2004
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.core;
@@ -31,7 +31,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 /**
  * Preference Initializer for the Spindle Core
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: PreferenceInitializer.java,v 1.1 2004/06/05 04:16:31 glongman
  *          Exp $
  */

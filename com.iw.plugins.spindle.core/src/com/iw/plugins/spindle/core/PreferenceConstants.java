@@ -15,19 +15,19 @@ package com.iw.plugins.spindle.core;
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
+ * Geoffrey Longman.
  * Portions created by the Initial Developer are Copyright (C) 2004
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 /**
  * Preference contstants for the Core plugin.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * 
  */
 public interface PreferenceConstants

@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -43,7 +43,7 @@ import com.wutka.dtd.DTD;
 /**
  * Base class for spec actions that need the xml partitioning.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  *  
  */
 public abstract class BaseSpecAction extends BaseEditorAction

@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 /**
  * A resizable wizard dialog
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: ResizableWizardDialog.java,v 1.1 2003/12/13 14:43:11 glongman
  *          Exp $
  */

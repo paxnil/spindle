@@ -16,7 +16,7 @@ import com.iw.plugins.spindle.core.util.Files;
  *  To Be Removed. Some simple tests used to figure out
  *  how the TemplateParser works.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id$
  */
 public class TestTemplateParserSimple extends TestCase

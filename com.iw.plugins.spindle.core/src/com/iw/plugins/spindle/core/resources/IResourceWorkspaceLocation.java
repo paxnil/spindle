@@ -15,13 +15,13 @@ package com.iw.plugins.spindle.core.resources;
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -39,7 +39,7 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
  * <code>org.apache.tapestry.IResourceLocation<code> to record additional
  * bits of information describing a Tapestry artifact found in the workspace.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * 
  * @see org.apache.tapestry.IResourceLocation
  */

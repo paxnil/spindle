@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
+ * Geoffrey Longman.
  * Portions created by the Initial Developer are Copyright (C) 2004
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.formatter;
@@ -40,7 +40,7 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * Depending on preference settings, start tags are collapsed to one line.
  * (leaving them in a state where slave formatters can do thier work!).
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: DoctypeEditFormatWorker.java,v 1.1.2.1 2004/07/13 21:50:10
  *                     glongman Exp $
  */

@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -35,7 +35,7 @@ import org.w3c.dom.Node;
  *  
  *  This is a Multirun Test. One run each for DOM and PULL parser!
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id$
  */
 public class BasicParserMRTest extends MRBaseParserTest

@@ -15,12 +15,12 @@
  *
  * The Initial Developer of the Original Code is
  * Christian Sell <christian.sell@netcologne.de>.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  *  christian.sell@netcologne.de
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  * 
  * ***** END LICENSE BLOCK ***** */
 

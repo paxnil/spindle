@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -61,12 +61,12 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
 /**
  * Open an interesting thing, if possible.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  */
 public class OpenDeclarationAction extends BaseSpecAction
 {
 
-  public static final String ACTION_ID = UIPlugin.PLUGIN_ID + ".spec.openDeclaration";
+  public static final String ACTION_ID = UIPlugin.PLUGIN_ID + ".editor.commands.navigate.openDeclaration";
 
   private Map fHandlers;
 

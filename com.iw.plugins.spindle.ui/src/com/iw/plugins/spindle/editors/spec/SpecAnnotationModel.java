@@ -17,7 +17,7 @@
  * 
  * Contributor(s):
  * 
- * glongman@intelligentworks.com
+ * glongman@gmail.com
  * 
  * ***** END LICENSE BLOCK *****
  */
@@ -46,7 +46,7 @@ import com.iw.plugins.spindle.editors.ProblemAnnotationModel;
  * Model for Spec annotations - of course only files and not jar entries will
  * have an annotation model.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * 
  */
 public class SpecAnnotationModel extends ProblemAnnotationModel

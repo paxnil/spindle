@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -60,7 +60,7 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
  * This is because some validations here involve pages and pages are not
  * resolved by the builder until after all of the components are.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: FrameworkComponentValidator.java,v 1.10 2004/05/28 15:23:47
  *          glongman Exp $
  */

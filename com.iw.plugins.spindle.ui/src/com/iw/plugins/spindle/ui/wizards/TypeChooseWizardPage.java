@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
+ * Geoffrey Longman.
  * Portions created by the Initial Developer are Copyright (C) 2004
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.wizards;
@@ -80,7 +80,7 @@ import com.iw.plugins.spindle.ui.wizards.fields.TapestryProjectDialogField;
  * TypeChooseWizardPage wizard page for choosing or creating new Tapestry
  * component classes!
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: TypeChooseWizardPage.java,v 1.2 2004/06/10 15:50:47 glongman
  *                     Exp $
  */

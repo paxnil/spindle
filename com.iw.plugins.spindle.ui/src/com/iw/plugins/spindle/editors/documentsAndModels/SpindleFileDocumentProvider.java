@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
+ * Geoffrey Longman.
  * Portions created by the Initial Developer are Copyright (C) 2004
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.documentsAndModels;
@@ -34,7 +34,7 @@ import org.xmen.internal.ui.text.XMLReconciler;
 /**
  * Document provider for xml files that have a model
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: FileDocumentModelProvider.java,v 1.1.2.1 2004/06/22 12:13:52
  *                     glongman Exp $
  */

@@ -29,7 +29,7 @@ import com.iw.plugins.spindle.core.util.Assert;
 /**
  * An XML parser that builds a psuedo DOM tree in a pull fashion
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * 
  */
 public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHandler

@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
+ * Geoffrey Longman.
  * Portions created by the Initial Developer are Copyright (C) 2002
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -48,7 +48,7 @@ import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 /**
  * Base class for actions that need to use the workbench selection
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: AbstractTapestryResourceAction.java,v 1.1 2003/10/29 12:33:56
  *          glongman Exp $
  */

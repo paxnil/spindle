@@ -7,7 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     glongman@intelligentworks.com - heavily modified for Spindle
+ *     glongman@gmail.com - heavily modified for Spindle
  *******************************************************************************/
 package org.xmen.internal.ui.text;
 
@@ -40,7 +40,7 @@ import com.iw.plugins.spindle.core.util.Assert;
 /**
  * XMLDocumentPartitioner modded version to create node positions
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: XMLDocumentPartitioner.java,v 1.2.2.2 2004/06/22 12:25:19
  *                     glongman Exp $
  */

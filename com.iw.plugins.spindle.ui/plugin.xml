@@ -376,6 +376,18 @@ the new Spindle
             category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.format">
       </command>
+       <command
+            name="Open Declaration"
+            description=""
+            category="org.eclipse.ui.category.textEditor"
+            id="com.iw.plugins.spindle.ui.editor.commands.navigate.openDeclaration">
+      </command>
+      <keyBinding
+            string="F3"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.navigate.openDeclaration"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
       <command
             name="Next Attribute"
             description="Move right/down to the next attribute"
@@ -506,6 +518,29 @@ the new Spindle
    </extension>
    <extension
          point="org.eclipse.ui.editorActions">
+         <!--
+      <editorContribution
+            targetID="com.iw.plugins.spindle.ui.editors.spec"
+            id="com.iw.plugins.spindle.ui.spec.editor.actions">
+         <action
+               enablesFor="*"
+               label="Open Declaration"
+               class="com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction"
+               definitionId="com.iw.plugins.spindle.ui.editor.commands.navigate.openDeclaration"
+               menubarPath="navigation"
+               id="com.iw.plugins.spindle.editors.spec.open.declaration">
+         </action>
+         
+         <action
+               definitionId="com.iw.plugins.spindle.ui.editor.commands.jump.template"
+               label="Jump to template for CU editors"
+               class="com.iw.plugins.spindle.editors.actions.CUEditorJumpToTemplateDelegate"
+               enablesFor="*"
+               id="com.iw.plugins.spindle.editors.cu.jump.template">
+         </action>
+         
+      </editorContribution>
+      -->
       <editorContribution
             targetID="org.eclipse.jdt.ui.CompilationUnitEditor"
             id="com.iw.plugins.spindle.ui.cu.editor.jump">

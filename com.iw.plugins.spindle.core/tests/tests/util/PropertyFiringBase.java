@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -37,7 +37,7 @@ import junit.framework.TestCase;
  *  Constructor is protected as this is a base class and should not
  *  be invoked by Junit.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id$
  */
 public abstract class PropertyFiringBase extends TestCase
@@ -60,7 +60,7 @@ public abstract class PropertyFiringBase extends TestCase
      * 
      *  Users can subclass this to add more checks!
      * 
-     * @author glongman@intelligentworks.com
+     * @author glongman@gmail.com
      */
     protected class TestListener implements PropertyChangeListener
     {
@@ -103,7 +103,7 @@ public abstract class PropertyFiringBase extends TestCase
      *  Only useful for one shot as the expected values are set in the
      *  constructor and cannot be changed.
      * 
-     * @author glongman@intelligentworks.com
+     * @author glongman@gmail.com
      * @version $Id$
      */
     protected class OneShotListener extends TestListener

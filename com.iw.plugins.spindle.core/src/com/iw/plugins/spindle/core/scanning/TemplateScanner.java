@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -76,7 +76,7 @@ import com.iw.plugins.spindle.core.util.Files;
  * It is assumed that the component we are scanning templates on behalf of has
  * its namepsace already.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * 
  */
 public class TemplateScanner extends AbstractScanner

@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -58,7 +58,7 @@ import com.iw.plugins.spindle.editors.documentsAndModels.SpindleFileDocumentProv
  * Users should not instantiate. Rather call
  * UIPlugin.getDefault().getSpecFileDocumentProvider()
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: SpecFileDocumentProvider.java,v 1.6 2003/12/13 14:43:12
  *          glongman Exp $
  */

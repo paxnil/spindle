@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -37,7 +37,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
+import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
@@ -57,6 +61,7 @@ import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
@@ -79,7 +84,7 @@ import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 /**
  * Abstract base class for Editors.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  *  
  */
 public abstract class Editor extends TextEditor implements IAdaptable, IReconcileWorker
@@ -105,8 +110,9 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
   }
 
   /** contect menu groups for additions */
-  protected final static String NAV_GROUP = UIPlugin.PLUGIN_ID + ".navigationGroup";
-  protected final static String SOURCE_GROUP = UIPlugin.PLUGIN_ID + ".sourceGroup";
+  protected final static String NAV_GROUP = "navigation";
+  protected final static String SHOW_GROUP = "show";
+  protected final static String SOURCE_GROUP = "source";
 
   /** jump action ids */
   protected final static String JUMP_JAVA_ACTION_ID = UIPlugin.PLUGIN_ID
@@ -205,7 +211,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     markAsSelectionDependentAction("Format", true);
 
     JumpToNextAttributeAction jumpNavNext = new JumpToNextAttributeAction(true);
-    jumpNavNext.setActiveEditor(this);
+    jumpNavNext.setActiveEditor(null, this);
     jumpNavNext
         .setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeRight");
     setAction(
@@ -213,7 +219,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         jumpNavNext);
 
     JumpToNextAttributeAction jumpNavPrevious = new JumpToNextAttributeAction(false);
-    jumpNavPrevious.setActiveEditor(this);
+    jumpNavPrevious.setActiveEditor(null, this);
     jumpNavPrevious
         .setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft");
     setAction(
@@ -221,7 +227,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         jumpNavPrevious);
 
     JumpToNextTagAction jumpNextTag = new JumpToNextTagAction(true);
-    jumpNextTag.setActiveEditor(this);
+    jumpNextTag.setActiveEditor(null, this);
     jumpNextTag
         .setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeDown");
     setAction(
@@ -229,7 +235,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         jumpNextTag);
 
     JumpToNextTagAction jumpPreviousTag = new JumpToNextTagAction(false);
-    jumpPreviousTag.setActiveEditor(this);
+    jumpPreviousTag.setActiveEditor(null, this);
     jumpPreviousTag
         .setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp");
     setAction(
@@ -237,17 +243,17 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
         jumpPreviousTag);
 
     BaseEditorAction jumpToJava = new JumpToJavaAction();
-    jumpToJava.setActiveEditor(this);
+    jumpToJava.setActiveEditor(null, this);
     jumpToJava.setActionDefinitionId(JUMP_JAVA_ACTION_ID);
     setAction(JUMP_JAVA_ACTION_ID, jumpToJava);
 
     BaseEditorAction jumpToSpec = new JumpToSpecAction();
-    jumpToSpec.setActiveEditor(this);
+    jumpToSpec.setActiveEditor(null, this);
     jumpToSpec.setActionDefinitionId(JUMP_SPEC_ACTION_ID);
     setAction(JUMP_SPEC_ACTION_ID, jumpToSpec);
 
     BaseEditorAction jumpToTemplate = new JumpToTemplateAction();
-    jumpToTemplate.setActiveEditor(this);
+    jumpToTemplate.setActiveEditor(null, this);
     jumpToTemplate.setActionDefinitionId(JUMP_TEMPLATE_ACTION_ID);
     setAction(JUMP_TEMPLATE_ACTION_ID, jumpToTemplate);
 
@@ -263,7 +269,19 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     fSourceViewerDecorationSupport.install(getPreferenceStore());
     fReadyToReconcile = true;
   }
+  
+  
 
+    /* (non-Javadoc)
+     * @see org.eclipse.ui.texteditor.AbstractTextEditor#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+     */
+    protected void editorContextMenuAboutToShow(IMenuManager menu)
+    {        
+        super.editorContextMenuAboutToShow(menu);
+        menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, new Separator(NAV_GROUP));	
+		menu.insertAfter(NAV_GROUP, new GroupMarker(SHOW_GROUP));
+		menu.insertAfter(ITextEditorActionConstants.GROUP_COPY, new Separator(SOURCE_GROUP));
+    }
   protected void doSetInput(IEditorInput input) throws CoreException
   {
     super.doSetInput(input);

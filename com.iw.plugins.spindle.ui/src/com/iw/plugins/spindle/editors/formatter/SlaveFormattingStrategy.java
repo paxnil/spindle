@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
+ * Geoffrey Longman.
  * Portions created by the Initial Developer are Copyright (C) 2004
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.formatter;
@@ -44,7 +44,7 @@ import com.iw.plugins.spindle.UIPlugin;
  * SlaveFormattingStrategy formatting xml start tags only Will do nothing if
  * fPrefs aren't set to wrap long lines.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: MasterFormattingStrategy.java,v 1.1.2.1 2004/07/11 04:33:42
  *                     glongman Exp $
  */

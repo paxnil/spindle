@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -58,7 +58,7 @@ import com.iw.plugins.spindle.ui.widgets.TwoListSearchWidget;
  * A subclass of TwoListSearchWidget used for picking a library in the source
  * path of a Java Project
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: SearchForLibraryWidget.java,v 1.2 2003/08/25 21:22:23 glongman
  *          Exp $
  * 

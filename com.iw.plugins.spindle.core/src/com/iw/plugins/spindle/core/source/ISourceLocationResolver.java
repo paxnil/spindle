@@ -15,13 +15,13 @@ package com.iw.plugins.spindle.core.source;
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -29,7 +29,7 @@ package com.iw.plugins.spindle.core.source;
  * Interface used to convert Parser supplied line/column number into Document
  * based character offsets
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  */
 
 public interface ISourceLocationResolver

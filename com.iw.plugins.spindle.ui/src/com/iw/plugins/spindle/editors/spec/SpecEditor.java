@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -121,7 +121,7 @@ import com.iw.plugins.spindle.editors.spec.outline.MultiPageContentOutline;
 /**
  * Editor for Tapestry Spec files
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  *  
  */
 public class SpecEditor extends Editor
@@ -495,10 +495,11 @@ public class SpecEditor extends Editor
     setAction("com.iw.plugins.spindle.ui.editor.xml.open.structure", action);
 
     OpenDeclarationAction openDeclaration = new OpenDeclarationAction();
-    openDeclaration.setActiveEditor(this);
-    setAction(OpenDeclarationAction.ACTION_ID, openDeclaration);
+    openDeclaration.setActionDefinitionId(OpenDeclarationAction.ACTION_ID);
+    openDeclaration.setActiveEditor(null, this);
+    setAction(openDeclaration.getActionDefinitionId(), openDeclaration);
     ShowInPackageExplorerAction showInPackage = new ShowInPackageExplorerAction();
-    showInPackage.setActiveEditor(this);
+    showInPackage.setActiveEditor(null, this);
     setAction(ShowInPackageExplorerAction.ACTION_ID, showInPackage);
   }
 
@@ -1001,8 +1002,7 @@ public class SpecEditor extends Editor
    */
   protected void editorContextMenuAboutToShow(IMenuManager menu)
   {
-    super.editorContextMenuAboutToShow(menu);
-    menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
+    super.editorContextMenuAboutToShow(menu);    
     if (!(getStorage() instanceof JarEntryFile))
     {
       addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
@@ -1015,8 +1015,7 @@ public class SpecEditor extends Editor
     }
     if (!moreNav.isEmpty())
       menu.appendToGroup(NAV_GROUP, moreNav);
-    menu
-        .insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
+    
 
     MenuManager sourceMenu = new MenuManager("Source");
     sourceMenu.add(getAction("Format"));

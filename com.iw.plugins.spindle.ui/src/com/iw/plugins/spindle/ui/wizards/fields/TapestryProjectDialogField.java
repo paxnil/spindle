@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.wizards.fields;
@@ -61,7 +61,7 @@ import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
  * 
  * A dialog that allows a user to choose a Tapestry project from the workspace.
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * @version $Id: TapestryProjectDialogField.java,v 1.3 2003/11/06 22:06:39
  *                     glongman Exp $
  */

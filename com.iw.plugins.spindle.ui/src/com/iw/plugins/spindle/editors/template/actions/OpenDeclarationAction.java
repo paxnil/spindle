@@ -14,13 +14,13 @@
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
  *
  * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Geoffrey Longman.
+ * Portions created by the Initial Developer are Copyright (C) 2001-2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -55,218 +55,220 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
 /**
  * Open an interesting thing, if possible.
  * 
- * @author glongman@intelligentworks.com
- * @version $Id: OpenDeclarationAction.java,v 1.4.2.2 2004/06/22 12:23:46
- *                     glongman Exp $
+ * @author glongman@gmail.com
+ * @version $Id$
  */
 public class OpenDeclarationAction extends BaseTemplateAction
 {
-  public static final String ACTION_ID = UIPlugin.PLUGIN_ID + ".template.openDeclaration";
+    public static final String ACTION_ID = UIPlugin.PLUGIN_ID
+            + ".editor.commands.navigate.openDeclaration";
 
-  private TemplateTapestryAccess fAccess;
+    private TemplateTapestryAccess fAccess;
 
-  public OpenDeclarationAction()
-  {
-    super();
-    setText(UIPlugin.getString(ACTION_ID));
-    setId(ACTION_ID);
-  }
-
-  protected void doRun()
-  {
-
-    INamespace namespace = fEditor.getNamespace();
-    if (namespace == null)
+    public OpenDeclarationAction()
     {
-      MessageDialog.openError(
-          UIPlugin.getDefault().getActiveWorkbenchShell(),
-          "Operation Aborted",
-          "This file can not be seen by the Tapestry builder");
-      return;
+        super();
+        setText(UIPlugin.getString(ACTION_ID));
+        setId(ACTION_ID);
     }
 
-    XMLNode artifact = XMLNode.getArtifactAt(fDocument, fDocumentOffset);
-    if (artifact == null)
-      return;
-    String type = artifact.getType();
-    if (type == ITypeConstants.TEXT || type == ITypeConstants.COMMENT
-        || type == ITypeConstants.PI || type == ITypeConstants.DECL
-        || type == ITypeConstants.ENDTAG)
+    protected void doRun()
     {
-      return;
-    }
 
-    XMLNode attrAtOffset = artifact.getAttributeAt(fDocumentOffset);
-    if (attrAtOffset == null)
-      return;
-
-    Map attrs = artifact.getAttributesMap();
-
-    XMLNode jwcidAttribute = (XMLNode) attrs.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
-
-    if (jwcidAttribute == null)
-      return;
-
-    IComponentSpecification componentSpec = resolveComponentSpec(jwcidAttribute
-        .getAttributeValue());
-
-    if (componentSpec == null)
-      return;
-
-    if (attrAtOffset.equals(jwcidAttribute))
-    {
-      handleComponentLookup(componentSpec);
-    } else
-    {
-      handleBinding(componentSpec, attrAtOffset.getName());
-    }
-  }
-
-  /**
-   * @param componentSpec
-   */
-  private void handleComponentLookup(IComponentSpecification componentSpec)
-  {
-    IResourceWorkspaceLocation location = null;
-    IContainedComponent contained = fAccess.getContainedComponent();
-    if (contained != null)
-    {
-      String simpleId = fAccess.getSimpleId();
-      location = (IResourceWorkspaceLocation) fAccess
-          .getBaseSpecification()
-          .getSpecificationLocation();
-      if (location != null && location.getStorage() != null)
-        foundResult(location.getStorage(), simpleId, contained);
-    } else
-    {
-      location = (IResourceWorkspaceLocation) componentSpec.getSpecificationLocation();
-      if (location == null || location.getStorage() == null)
-        return;
-
-      foundResult(location.getStorage(), null, null);
-    }
-
-  }
-
-  /**
-   * @param componentSpec
-   * @param string
-   */
-  private void handleBinding(IComponentSpecification componentSpec, String parameterName)
-  {
-    IParameterSpecification parameterSpec = (IParameterSpecification) componentSpec
-        .getParameter(parameterName);
-    if (parameterSpec != null)
-    {
-      IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) componentSpec
-          .getSpecificationLocation();
-      if (location == null || location.getStorage() == null)
-        return;
-
-      foundResult(location.getStorage(), parameterName, parameterSpec);
-    }
-
-  }
-
-  /**
-   * @param string
-   * @return
-   */
-  private IComponentSpecification resolveComponentSpec(String jwcid)
-  {
-    if (jwcid == null)
-      return null;
-
-    try
-    {
-      fAccess = new TemplateTapestryAccess(fEditor);
-      fAccess.setJwcid(jwcid);
-      return fAccess.getResolvedComponent();
-    } catch (IllegalArgumentException e)
-    {
-      // do nothing
-    }
-    return null;
-  }
-
-  protected void foundResult(Object result, String key, Object moreInfo)
-  {
-    if (result instanceof IType)
-    {
-      try
-      {
-        JavaUI.openInEditor((IType) result);
-      } catch (PartInitException e)
-      {
-        UIPlugin.log(e);
-      } catch (JavaModelException e)
-      {
-        UIPlugin.log(e);
-      }
-    } else if (result instanceof IStorage)
-    {
-      UIPlugin.openTapestryEditor((IStorage) result);
-      IEditorPart editor = UIUtils.getEditorFor((IStorage) result);
-      if (editor != null && (editor instanceof AbstractTextEditor) || moreInfo != null)
-      {
-        if (moreInfo instanceof IParameterSpecification && key != null)
+        INamespace namespace = fEditor.getNamespace();
+        if (namespace == null)
         {
-          reveal((AbstractTextEditor) editor, "parameter", "name", key);
-        } else if (moreInfo instanceof IContainedComponent && key != null)
-        {
-          reveal((AbstractTextEditor) editor, "component", "id", key);
+            MessageDialog.openError(
+                    UIPlugin.getDefault().getActiveWorkbenchShell(),
+                    "Operation Aborted",
+                    "This file can not be seen by the Tapestry builder");
+            return;
         }
 
-      }
-    }
-  }
-
-  private void reveal(
-      AbstractTextEditor editor,
-      String elementName,
-      String attrName,
-      String attrValue)
-  {
-    IDocument document = editor
-        .getDocumentProvider()
-        .getDocument(editor.getEditorInput());
-
-    try
-    {
-      XMLNode reveal = null;
-      Position[] pos = null;
-      pos = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
-      for (int i = 0; i < pos.length; i++)
-      {
-        XMLNode artifact = (XMLNode) pos[i];
-        if (artifact.getType() == ITypeConstants.ENDTAG)
-          continue;
-        String name = artifact.getName();
-        if (name == null)
-          continue;
-
-        if (!elementName.equals(name.toLowerCase()))
-          continue;
-
-        Map attributesMap = artifact.getAttributesMap();
-        XMLNode attribute = (XMLNode) attributesMap.get(attrName);
-        if (attribute == null)
-          continue;
-
-        String value = attribute.getAttributeValue();
-        if (value != null && value.equals(attrValue))
+        XMLNode artifact = XMLNode.getArtifactAt(fDocument, fDocumentOffset);
+        if (artifact == null)
+            return;
+        String type = artifact.getType();
+        if (type == ITypeConstants.TEXT || type == ITypeConstants.COMMENT
+                || type == ITypeConstants.PI || type == ITypeConstants.DECL
+                || type == ITypeConstants.ENDTAG)
         {
-          reveal = artifact;
-          break;
+            return;
         }
-      }
-      if (reveal != null)
-        editor.setHighlightRange(reveal.getOffset(), reveal.getLength(), true);
 
-    } catch (Exception e)
-    {
-      UIPlugin.log(e);
+        XMLNode attrAtOffset = artifact.getAttributeAt(fDocumentOffset);
+        if (attrAtOffset == null)
+            return;
+
+        Map attrs = artifact.getAttributesMap();
+
+        XMLNode jwcidAttribute = (XMLNode) attrs.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
+
+        if (jwcidAttribute == null)
+            return;
+
+        IComponentSpecification componentSpec = resolveComponentSpec(jwcidAttribute
+                .getAttributeValue());
+
+        if (componentSpec == null)
+            return;
+
+        if (attrAtOffset.equals(jwcidAttribute))
+        {
+            handleComponentLookup(componentSpec);
+        }
+        else
+        {
+            handleBinding(componentSpec, attrAtOffset.getName());
+        }
     }
-  }
+
+    /**
+     * @param componentSpec
+     */
+    private void handleComponentLookup(IComponentSpecification componentSpec)
+    {
+        IResourceWorkspaceLocation location = null;
+        IContainedComponent contained = fAccess.getContainedComponent();
+        if (contained != null)
+        {
+            String simpleId = fAccess.getSimpleId();
+            location = (IResourceWorkspaceLocation) fAccess.getBaseSpecification()
+                    .getSpecificationLocation();
+            if (location != null && location.getStorage() != null)
+                foundResult(location.getStorage(), simpleId, contained);
+        }
+        else
+        {
+            location = (IResourceWorkspaceLocation) componentSpec.getSpecificationLocation();
+            if (location == null || location.getStorage() == null)
+                return;
+
+            foundResult(location.getStorage(), null, null);
+        }
+
+    }
+
+    /**
+     * @param componentSpec
+     * @param string
+     */
+    private void handleBinding(IComponentSpecification componentSpec, String parameterName)
+    {
+        IParameterSpecification parameterSpec = (IParameterSpecification) componentSpec
+                .getParameter(parameterName);
+        if (parameterSpec != null)
+        {
+            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) componentSpec
+                    .getSpecificationLocation();
+            if (location == null || location.getStorage() == null)
+                return;
+
+            foundResult(location.getStorage(), parameterName, parameterSpec);
+        }
+
+    }
+
+    /**
+     * @param string
+     * @return
+     */
+    private IComponentSpecification resolveComponentSpec(String jwcid)
+    {
+        if (jwcid == null)
+            return null;
+
+        try
+        {
+            fAccess = new TemplateTapestryAccess(fEditor);
+            fAccess.setJwcid(jwcid);
+            return fAccess.getResolvedComponent();
+        }
+        catch (IllegalArgumentException e)
+        {
+            // do nothing
+        }
+        return null;
+    }
+
+    protected void foundResult(Object result, String key, Object moreInfo)
+    {
+        if (result instanceof IType)
+        {
+            try
+            {
+                JavaUI.openInEditor((IType) result);
+            }
+            catch (PartInitException e)
+            {
+                UIPlugin.log(e);
+            }
+            catch (JavaModelException e)
+            {
+                UIPlugin.log(e);
+            }
+        }
+        else if (result instanceof IStorage)
+        {
+            UIPlugin.openTapestryEditor((IStorage) result);
+            IEditorPart editor = UIUtils.getEditorFor((IStorage) result);
+            if (editor != null && (editor instanceof AbstractTextEditor) || moreInfo != null)
+            {
+                if (moreInfo instanceof IParameterSpecification && key != null)
+                {
+                    reveal((AbstractTextEditor) editor, "parameter", "name", key);
+                }
+                else if (moreInfo instanceof IContainedComponent && key != null)
+                {
+                    reveal((AbstractTextEditor) editor, "component", "id", key);
+                }
+
+            }
+        }
+    }
+
+    private void reveal(AbstractTextEditor editor, String elementName, String attrName,
+            String attrValue)
+    {
+        IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
+
+        try
+        {
+            XMLNode reveal = null;
+            Position[] pos = null;
+            pos = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
+            for (int i = 0; i < pos.length; i++)
+            {
+                XMLNode artifact = (XMLNode) pos[i];
+                if (artifact.getType() == ITypeConstants.ENDTAG)
+                    continue;
+                String name = artifact.getName();
+                if (name == null)
+                    continue;
+
+                if (!elementName.equals(name.toLowerCase()))
+                    continue;
+
+                Map attributesMap = artifact.getAttributesMap();
+                XMLNode attribute = (XMLNode) attributesMap.get(attrName);
+                if (attribute == null)
+                    continue;
+
+                String value = attribute.getAttributeValue();
+                if (value != null && value.equals(attrValue))
+                {
+                    reveal = artifact;
+                    break;
+                }
+            }
+            if (reveal != null)
+                editor.setHighlightRange(reveal.getOffset(), reveal.getLength(), true);
+
+        }
+        catch (Exception e)
+        {
+            UIPlugin.log(e);
+        }
+    }
 
 }
