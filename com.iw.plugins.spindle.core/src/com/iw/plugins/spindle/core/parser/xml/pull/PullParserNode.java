@@ -40,7 +40,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.iw.plugins.spindle.core.builder.TapestryBuilder;
-import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**

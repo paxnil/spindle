@@ -198,4 +198,12 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         fProjectBuildStates.clear();
     }
 
+    public Map getSpecMap(IProject project)
+    {
+        State state = (State) getLastBuildState(project);
+        if (state != null)
+            return state.getSpecificationMap();
+        return null;
+    }
+
 }

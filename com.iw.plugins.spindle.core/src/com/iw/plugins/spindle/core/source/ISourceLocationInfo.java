@@ -24,7 +24,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.parser;
+package com.iw.plugins.spindle.core.source;
+
+import java.util.Set;
 
 import org.apache.tapestry.ILocation;
 import org.apache.tapestry.IResourceLocation;
@@ -44,12 +46,11 @@ public interface ISourceLocationInfo extends ILocation
     public abstract ISourceLocation getSourceLocation();
     /** return a location for all wrapped by the element**/
     public abstract ISourceLocation getContentSourceLocation();
+    public abstract ISourceLocation getTagNameLocation();
     public abstract ISourceLocation getStartTagSourceLocation();
     public abstract ISourceLocation getEndTagSourceLocation();
     public abstract ISourceLocation getAttributeSourceLocation(String rawname);
-    public abstract int getStartTagStartLine();
-    public abstract int getStartTagEndLine();
-    public abstract int getEndTagStartLine();
-    public abstract int getEndTagEndLine();
+    /** return a new set containing the names **/
+    public Set getAttributeNames();
     public abstract void setResourceLocation(IResourceLocation location);
 }

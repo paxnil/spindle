@@ -47,8 +47,17 @@ import com.iw.plugins.spindle.core.TapestryCore;
 public class TapestryEntityResolver implements XMLEntityResolver
 {
 
-    static private Map TapestryEntities = new HashMap();
-    static private Map ServletEntities = new HashMap();
+    static {
+        TapestryEntities = new HashMap();
+        registerTapestryDTD(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID, "Tapestry_1_3.dtd");
+        registerTapestryDTD(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, "Tapestry_3_0.dtd");
+        ServletEntities = new HashMap();
+        registerServletDTD(TapestryCore.SERVLET_2_2_PUBLIC_ID, "web-app_2_2.dtd");
+        registerServletDTD(TapestryCore.SERVLET_2_3_PUBLIC_ID, "web-app_2_3.dtd");
+    }
+
+    static private Map TapestryEntities;
+    static private Map ServletEntities;
 
     static public void registerTapestryDTD(String publicId, String entityPath)
     {
@@ -60,10 +69,8 @@ public class TapestryEntityResolver implements XMLEntityResolver
         ServletEntities.put(publicId, entityPath);
     }
 
-    /**
-     * @see org.apache.xerces.xni.parser.XMLEntityResolver#resolveEntity(XMLResourceIdentifier)
-     */
-    public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException
+    static public XMLInputSource doResolveEntity(XMLResourceIdentifier resourceIdentifier)
+        throws XNIException, IOException
     {
         XMLInputSource result = getTapestryInputSource(resourceIdentifier);
 
@@ -73,36 +80,41 @@ public class TapestryEntityResolver implements XMLEntityResolver
         return result;
     }
 
-    private XMLInputSource getTapestryInputSource(XMLResourceIdentifier resourceIdentifier)
-        throws XNIException, IOException
+    static private InputStream getTapestryDTDInputStream(String publicId)
     {
-
-        String publicId = resourceIdentifier.getPublicId();
         String entityPath = (String) TapestryEntities.get(publicId);
-
         if (entityPath != null)
-        {
-            InputStream stream = SpecificationParser.class.getResourceAsStream(entityPath);
-            return getInputSource(resourceIdentifier, stream);
-        }
+            return SpecificationParser.class.getResourceAsStream(entityPath);
         return null;
     }
 
-    private XMLInputSource getServletInputSource(XMLResourceIdentifier resourceIdentifier)
+    static private InputStream getServletDTDInputStream(String publicId)
+    {
+        String entityPath = (String) ServletEntities.get(publicId);
+        if (entityPath != null)
+            return TapestryCore.class.getResourceAsStream(entityPath);
+        return null;
+    }
+
+    private static XMLInputSource getTapestryInputSource(XMLResourceIdentifier resourceIdentifier)
         throws XNIException, IOException
     {
-        String publicId = resourceIdentifier.getPublicId();
-        String entityPath = (String) ServletEntities.get(publicId);
-
-        if (entityPath != null)
-        {
-            InputStream stream = TapestryCore.class.getResourceAsStream(entityPath);
-            return getInputSource(resourceIdentifier, stream);
-        }
-        return null;
+        InputStream stream = getTapestryDTDInputStream(resourceIdentifier.getPublicId());
+        if (stream == null)
+            return null;
+        return getInputSource(resourceIdentifier, stream);
     }
 
-    private XMLInputSource getInputSource(XMLResourceIdentifier resourceIdentifier, InputStream stream)
+    private static XMLInputSource getServletInputSource(XMLResourceIdentifier resourceIdentifier)
+        throws XNIException, IOException
+    {
+        InputStream stream = getServletDTDInputStream(resourceIdentifier.getPublicId());
+        if (stream == null)
+            return null;
+        return getInputSource(resourceIdentifier, stream);
+    }
+
+    private static XMLInputSource getInputSource(XMLResourceIdentifier resourceIdentifier, InputStream stream)
     {
         return new XMLInputSource(
             resourceIdentifier.getPublicId(),
@@ -111,4 +123,18 @@ public class TapestryEntityResolver implements XMLEntityResolver
             stream,
             (String) null);
     }
+
+    public TapestryEntityResolver()
+    {
+        super();
+    }
+
+    /**
+     * @see org.apache.xerces.xni.parser.XMLEntityResolver#resolveEntity(XMLResourceIdentifier)
+     */
+    public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException
+    {
+        return doResolveEntity(resourceIdentifier);
+    }
+
 }

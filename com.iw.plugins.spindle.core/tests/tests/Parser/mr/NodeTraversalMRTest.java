@@ -28,7 +28,7 @@ package tests.Parser.mr;
 
 import org.w3c.dom.Node;
 
-import com.iw.plugins.spindle.core.scanning.NodeAccess;
+import com.iw.plugins.spindle.core.scanning.W3CAccess;
 
 /**
  *  Basic Sanity Test for Node Traveral.
@@ -92,27 +92,27 @@ public class NodeTraversalMRTest extends MRBaseParserTest
             String content = getXMLSourceAsString("/testdata/NodeTraversalData.xml");
             Node rootNode = parseToRootNode(content, 0);
             basicCheckProblems(parser.getProblems(), 0);
-            m_assertTrue(NodeAccess.isElement(rootNode, "animals"));
+            m_assertTrue(W3CAccess.isElement(rootNode, "animals"));
 
             Node node = rootNode.getFirstChild();
             m_assertNotNull(node);
-            m_assertTrue(NodeAccess.isElement(node, "moose"));
+            m_assertTrue(W3CAccess.isElement(node, "moose"));
 
             node = node.getNextSibling();
             m_assertNotNull(node);
-            m_assertTrue(NodeAccess.isElement(node, "moose"));
+            m_assertTrue(W3CAccess.isElement(node, "moose"));
 
             node = node.getNextSibling();
             m_assertNotNull(node);
-            m_assertTrue(NodeAccess.isElement(node, "canine"));
+            m_assertTrue(W3CAccess.isElement(node, "canine"));
 
             node = node.getNextSibling();
             m_assertNotNull(node);
-            m_assertTrue(NodeAccess.isElement(node, "feline"));
+            m_assertTrue(W3CAccess.isElement(node, "feline"));
 
             node = node.getNextSibling();
             m_assertNotNull(node);
-            m_assertTrue(NodeAccess.isElement(node, "rodent"));
+            m_assertTrue(W3CAccess.isElement(node, "rodent"));
 
             node = node.getNextSibling();
             m_assertNull(node);
@@ -133,28 +133,28 @@ public class NodeTraversalMRTest extends MRBaseParserTest
             m_assertNotNull(rootNode);
 
             Node moose1 = rootNode.getFirstChild();
-            assertNull(NodeAccess.getAttribute(moose1, "one"));
-            assertNull(NodeAccess.getAttribute(moose1, "two"));
-            assertNull(NodeAccess.getAttribute(moose1, "three"));
+            assertNull(W3CAccess.getAttribute(moose1, "one"));
+            assertNull(W3CAccess.getAttribute(moose1, "two"));
+            assertNull(W3CAccess.getAttribute(moose1, "three"));
 
             Node moose2 = moose1.getNextSibling();
-            assertEquals("AAAA", NodeAccess.getAttribute(moose2, "one"));
-            assertEquals("BBBB", NodeAccess.getAttribute(moose2, "two"));
-            assertEquals("CCCC", NodeAccess.getAttribute(moose2, "three"));
+            assertEquals("AAAA", W3CAccess.getAttribute(moose2, "one"));
+            assertEquals("BBBB", W3CAccess.getAttribute(moose2, "two"));
+            assertEquals("CCCC", W3CAccess.getAttribute(moose2, "three"));
 
-            assertNull(NodeAccess.getAttribute(moose1, "one"));
-            assertNull(NodeAccess.getAttribute(moose1, "two"));
-            assertNull(NodeAccess.getAttribute(moose1, "three"));
+            assertNull(W3CAccess.getAttribute(moose1, "one"));
+            assertNull(W3CAccess.getAttribute(moose1, "two"));
+            assertNull(W3CAccess.getAttribute(moose1, "three"));
 
             Node other = moose2.getNextSibling();
 
-            assertNull(NodeAccess.getAttribute(moose1, "one"));
-            assertNull(NodeAccess.getAttribute(moose1, "two"));
-            assertNull(NodeAccess.getAttribute(moose1, "three"));
+            assertNull(W3CAccess.getAttribute(moose1, "one"));
+            assertNull(W3CAccess.getAttribute(moose1, "two"));
+            assertNull(W3CAccess.getAttribute(moose1, "three"));
 
-            assertEquals("AAAA", NodeAccess.getAttribute(moose2, "one"));
-            assertEquals("BBBB", NodeAccess.getAttribute(moose2, "two"));
-            assertEquals("CCCC", NodeAccess.getAttribute(moose2, "three"));
+            assertEquals("AAAA", W3CAccess.getAttribute(moose2, "one"));
+            assertEquals("BBBB", W3CAccess.getAttribute(moose2, "two"));
+            assertEquals("CCCC", W3CAccess.getAttribute(moose2, "three"));
 
         } catch (RuntimeException e)
         {
@@ -178,8 +178,8 @@ public class NodeTraversalMRTest extends MRBaseParserTest
         Node moose2 = moose1.getNextSibling();
         try
         {
-            assertEquals("Bullwinkle", NodeAccess.getValue(moose1));
-            assertNull(NodeAccess.getValue(moose2));
+            assertEquals("Bullwinkle", W3CAccess.getValue(moose1));
+            assertNull(W3CAccess.getValue(moose2));
         } catch (RuntimeException e)
         {
             // Should never happen in either case

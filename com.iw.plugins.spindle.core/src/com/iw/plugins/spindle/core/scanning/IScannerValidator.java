@@ -31,9 +31,9 @@ import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
-import com.iw.plugins.spindle.core.parser.ISourceLocation;
-import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.source.IProblemCollector;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Validators used by Scanners to find problems in the Tapestry artifacts they process

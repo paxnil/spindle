@@ -58,9 +58,9 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
 import com.iw.plugins.spindle.core.resources.ClasspathSearch;
+import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
 
 /**
@@ -416,7 +416,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         // Eclipse runtime
 
         if (getDefault() == null)
-            return false;
+            return true;
 
         return getDefault().getPreferenceStore().getBoolean(CACHE_GRAMMAR_PREFERENCE);
     }
@@ -510,7 +510,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         return null;
     }
 
-    public IJavaProject getJavaProjectFor(Object obj) throws CoreException
+    public IJavaProject getJavaProjectFor(Object obj)
     {
         IProject project = null;
         if (obj instanceof IProject)
@@ -528,11 +528,38 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
             return null;
         }
 
-        if (!project.hasNature(JavaCore.NATURE_ID))
+        try
+        {
+            if (project.hasNature(JavaCore.NATURE_ID))
+                return (IJavaProject) JavaCore.create(project);
+        } catch (CoreException e)
+        {
+            log(e);
+        }
+        return null;
+    }
+
+    /**
+     * @param file
+     * @return
+     */
+    public TapestryProject getTapestryProjectFor(IStorage storage)
+    {
+        IProject project = getProjectFor(storage);
+        if (project == null)
         {
             return null;
         }
-        return JavaCore.create(project);
-     }
+
+        try
+        {
+            if (project.hasNature(TapestryCore.NATURE_ID))
+                return (TapestryProject) project.getNature(TapestryCore.NATURE_ID);
+        } catch (CoreException e)
+        {
+            log(e);
+        }
+        return null;
+    }
 
 }

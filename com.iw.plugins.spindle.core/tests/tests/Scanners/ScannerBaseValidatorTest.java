@@ -37,13 +37,13 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.SpecFactory;
 
-import com.iw.plugins.spindle.core.parser.DefaultProblem;
-import com.iw.plugins.spindle.core.parser.IProblem;
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
-import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.scanning.BaseValidator;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.DefaultProblem;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.IProblemCollector;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
 
 /**
@@ -614,12 +614,6 @@ public class ScannerBaseValidatorTest extends TestCase
                     location.getLineNumber(),
                     location.getCharStart(),
                     location.getCharEnd()));
-
-        }
-
-        public void addSourceProblem(int severity, ISourceLocation location, String message)
-        {
-            addProblem(severity, location, message);
 
         }
 

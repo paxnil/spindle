@@ -23,7 +23,7 @@ import org.apache.xerces.xni.parser.XMLParserConfiguration;
 import org.apache.xerces.xni.parser.XMLPullParserConfiguration;
 import org.w3c.dom.Node;
 
-import com.iw.plugins.spindle.core.parser.ISourceLocationResolver;
+import com.iw.plugins.spindle.core.source.ISourceLocationResolver;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**

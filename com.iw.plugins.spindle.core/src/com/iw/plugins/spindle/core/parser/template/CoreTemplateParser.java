@@ -40,10 +40,10 @@ import org.apache.tapestry.parse.TemplateParseException;
 import org.apache.tapestry.parse.TemplateParser;
 import org.apache.tapestry.parse.TemplateToken;
 
-import com.iw.plugins.spindle.core.parser.IProblem;
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
-import com.iw.plugins.spindle.core.parser.ISourceLocation;
-import com.iw.plugins.spindle.core.parser.SourceLocation;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.IProblemCollector;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.core.source.SourceLocation;
 
 /**
  *  Subclass of the Tapestry template parser, tweaked for Spindle.

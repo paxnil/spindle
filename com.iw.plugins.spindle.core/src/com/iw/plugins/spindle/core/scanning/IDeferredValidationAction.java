@@ -26,7 +26,7 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
+import com.iw.plugins.spindle.core.source.IProblemCollector;
 
 /**
  *  A validation that can be executed later

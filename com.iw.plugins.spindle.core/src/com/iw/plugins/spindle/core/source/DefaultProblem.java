@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.parser;
+package com.iw.plugins.spindle.core.source;
 
 import org.eclipse.core.resources.IMarker;
 

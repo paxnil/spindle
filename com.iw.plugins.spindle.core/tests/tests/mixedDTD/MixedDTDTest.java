@@ -32,8 +32,8 @@ import java.io.PrintStream;
 
 import junit.framework.TestCase;
 
-import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.source.IProblem;
 
 /**
  *  Tests for xml files that use internal and external DTD stuff simultaneously
@@ -59,6 +59,8 @@ public class MixedDTDTest extends TestCase
     protected void setUp() throws Exception
     {
         fParser = new Parser(false);
+        fParser.setDoValidation(true);
+
         super.setUp();
     }
 

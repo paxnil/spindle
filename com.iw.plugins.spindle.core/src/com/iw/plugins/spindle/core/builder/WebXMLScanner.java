@@ -36,14 +36,15 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.IProblem;
-import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.AbstractScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
 
 /**
  * A Processor class used by FullBuild that extracts Tapestry information from the file web.xml
@@ -71,7 +72,7 @@ public class WebXMLScanner extends AbstractScanner
 
     public ServletInfo[] scanServletInformation(Object source) throws ScannerException
     {
-        Node webxml = (Node) source;
+        Node webxml = ((Document) source).getDocumentElement();
         List result = (List) scan(webxml, null);
         return (ServletInfo[]) result.toArray(new ServletInfo[result.size()]);
     }

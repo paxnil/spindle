@@ -48,11 +48,11 @@ import org.apache.tapestry.spec.IContainedComponent;
 import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.IProblem;
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
-import com.iw.plugins.spindle.core.parser.ISourceLocation;
-import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.IProblemCollector;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  TODO Add Type comment

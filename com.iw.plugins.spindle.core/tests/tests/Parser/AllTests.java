@@ -44,6 +44,7 @@ public class AllTests
          TestSuite suite = new TestSuite("Test for tests.Parser");
          //$JUnit-BEGIN$
          suite.addTest(new TestSuite(BasicParserDOMTest.class));
+         suite.addTest(new TestSuite(BasicValidatorTest.class));
          suite.addTest(AllTestsMR.suite());   
          //$JUnit-END$
          return suite;

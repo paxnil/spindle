@@ -45,11 +45,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.IProblem;
-import com.iw.plugins.spindle.core.parser.ISourceLocation;
-import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.bean.PluginExpressionBeanInitializer;
 import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
@@ -71,14 +71,14 @@ public class ComponentScanner extends SpecificationScanner
      */
     protected Object beforeScan(Object source) throws ScannerException
     {
-        isNode(source);
-        Node rootNode = (Node) source;
-        fIsPageSpec = isElement(rootNode, "page-specification");
-        fSeenTemplateAsset = false;
-        if (!(fIsPageSpec || isElement(rootNode, "component-specification")))
-        {
+        if (super.beforeScan(source) == null)
             return null;
-        }
+        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fResourceLocation;
+        String extension = location.getStorage().getFullPath().getFileExtension();
+        if (!extension.equals("jwc") && !extension.equals("page"))
+            return null;
+        fIsPageSpec = extension.equals("page");
+        fSeenTemplateAsset = false;
         return fSpecificationFactory.createComponentSpecification();
     }
 
@@ -87,7 +87,7 @@ public class ComponentScanner extends SpecificationScanner
      */
     protected void doScan(Object source, Object resultObject) throws ScannerException
     {
-        Node rootNode = (Node) source;
+        super.doScan(source, resultObject);
         IComponentSpecification specification = (IComponentSpecification) resultObject;
 
         specification.setPublicId(fPublicId);
@@ -97,13 +97,13 @@ public class ComponentScanner extends SpecificationScanner
 
         // Only components specify these two attributes.
 
-        specification.setAllowBody(getBooleanAttribute(rootNode, "allow-body"));
-        specification.setAllowInformalParameters(getBooleanAttribute(rootNode, "allow-informal-parameters"));
+        specification.setAllowBody(getBooleanAttribute(fRootNode, "allow-body"));
+        specification.setAllowInformalParameters(getBooleanAttribute(fRootNode, "allow-informal-parameters"));
 
-        scanComponentSpecification(rootNode, specification, fIsPageSpec);
+        scanComponentSpecification(fRootNode, specification, fIsPageSpec);
         scanForTemplates(specification);
     }
-    
+
     public void setNamespace(INamespace namespace)
     {
         fNamespace = namespace;
@@ -259,9 +259,11 @@ public class ComponentScanner extends SpecificationScanner
 
         } catch (ScannerException e)
         {
-            if (type == BindingType.STATIC) {
+            if (type == BindingType.STATIC)
+            {
                 addProblem(IProblem.WARNING, getNodeStartSourceLocation(node), e.getMessage());
-            } else {
+            } else
+            {
                 addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());
             }
             value = getNextDummyString();
@@ -456,7 +458,31 @@ public class ComponentScanner extends SpecificationScanner
     protected void scanComponentSpecification(Node rootNode, IComponentSpecification specification, boolean isPage)
         throws ScannerException
     {
-
+        String rootName = rootNode.getNodeName();
+        if (isPage)
+        {
+            if (!rootName.equals("page-specification"))
+            {
+                addProblem(
+                    IProblem.ERROR,
+                    getBestGuessSourceLocation(rootNode, false),
+                    TapestryCore.getTapestryString(
+                        "AbstractDocumentParser.incorrect-document-type",
+                        "page-specification",
+                        rootName));
+                return;
+            }
+        } else if (!rootName.equals("component-specification"))
+        {
+            addProblem(
+                IProblem.ERROR,
+                getBestGuessSourceLocation(rootNode, false),
+                TapestryCore.getTapestryString(
+                    "AbstractDocumentParser.incorrect-document-type",
+                    "component-specification",
+                    rootName));
+            return;
+        }
         String componentClassname = getAttribute(rootNode, "class");
 
         if (componentClassname == null)
@@ -480,9 +506,11 @@ public class ComponentScanner extends SpecificationScanner
         {
             if (isElement(node, "parameter"))
             {
-                try {
+                try
+                {
                     scanParameter(specification, node);
-                } catch (Exception e) {
+                } catch (Exception e)
+                {
                     e.printStackTrace();
                 }
                 continue;
@@ -552,7 +580,7 @@ public class ComponentScanner extends SpecificationScanner
                 scanPropertySpecification(specification, node);
                 continue;
             }
-        }        
+        }
     }
 
     protected void scanListenerBinding(IContainedComponent component, Node node) throws ScannerException
@@ -708,7 +736,7 @@ public class ComponentScanner extends SpecificationScanner
             String type = null;
 
             type = getAttribute(node, "type");
-            
+
             if (type == null || type.trim().length() == 0)
                 type = "java.lang.Object";
 
@@ -837,7 +865,7 @@ public class ComponentScanner extends SpecificationScanner
 
         spec.addInitializer(iz);
     }
-    
+
     private TemplateFinder fTemplateFinder = new TemplateFinder();
 
     /**
@@ -845,9 +873,9 @@ public class ComponentScanner extends SpecificationScanner
      */
     public void scanForTemplates(IComponentSpecification specification)
     {
-        
+
         IResourceWorkspaceLocation[] locations = new IResourceWorkspaceLocation[0];
-//        TemplateFinder finder = new TemplateFinder();
+        //        TemplateFinder finder = new TemplateFinder();
         try
         {
             locations = fTemplateFinder.getTemplates(specification, this);

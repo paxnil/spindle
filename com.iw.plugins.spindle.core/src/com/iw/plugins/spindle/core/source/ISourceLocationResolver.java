@@ -1,4 +1,4 @@
-package com.iw.plugins.spindle.core.parser;
+package com.iw.plugins.spindle.core.source;
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -25,12 +25,21 @@ package com.iw.plugins.spindle.core.parser;
  *
  * ***** END LICENSE BLOCK ***** */
 
-public interface ISourceLocation
+/**
+ * Interface used to convert Parser supplied line/column number into Document
+ * based character offsets
+ *
+ * @version $Id$
+ * @author glongman@intelligentworks.com
+ */
+
+public interface ISourceLocationResolver
 {
 
-    public int getLineNumber();
-    public int getCharStart();
-    public int getCharEnd();
-    public boolean contains(int cursorPosition);
-    public ISourceLocation getLocationOffset(int cursorPosition);
+    public int getLineOffset(int parserReportedLineNumber);
+
+    public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn);
+    
+    public ISourceLocation getTagNameLocation(String elementName, ISourceLocation elementStartLocation);
+
 }

@@ -1,4 +1,4 @@
-package com.iw.plugins.spindle.core.parser;
+package com.iw.plugins.spindle.core.source;
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *

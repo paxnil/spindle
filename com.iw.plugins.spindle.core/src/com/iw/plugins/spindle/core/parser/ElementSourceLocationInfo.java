@@ -26,50 +26,70 @@ package com.iw.plugins.spindle.core.parser;
  * ***** END LICENSE BLOCK ***** */
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.tapestry.IResourceLocation;
 
 import com.iw.plugins.spindle.core.parser.xml.event.ElementXMLEventInfo;
 import com.iw.plugins.spindle.core.parser.xml.event.SimpleXMLEventInfo;
 import com.iw.plugins.spindle.core.parser.xml.event.XMLEnityEventInfo;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.source.ISourceLocationResolver;
+import com.iw.plugins.spindle.core.source.SourceLocation;
 
-public class ElementSourceLocationInfo implements  ISourceLocationInfo
+public class ElementSourceLocationInfo implements ISourceLocationInfo
 {
 
     private static final int LINE = 0;
     private static final int CHAR_START = 1;
     private static final int CHAR_END = 2;
 
+    private boolean fIsEmpty;
+
     private int fSourceStartLine = 0;
     private int fSourceCharStart = 0;
     private int fSourceCharEnd = 0;
     private int fSourceEndLine = 0;
+
+    private ISourceLocation fSourceLocation;
 
     private int fStartTagStartLine = 0;
     private int fStartTagCharStart = 0;
     private int fStartTagCharEnd = 0;
     private int fStartTagEndLine = 0;
 
+    private ISourceLocation fStartTagLocation;
+    private ISourceLocation fTagNameLocation;
+
     private int fEndTagStartLine = 0;
     private int fEndTagCharStart = 0;
     private int fEndTagCharEnd = 0;
     private int fEndTagEndLine = 0;
 
+    private ISourceLocation fEndTagLocation;
+
     private int fContentsStartLine = 0;
     private int fContentsCharStart = 0;
     private int fContentsCharEnd = 0;
-    
+
+    private ISourceLocation fContentsLocation;
+
     private int fLocationColumnNumber;
     private int fLocationLineNumber;
     private IResourceLocation fResourceLocation;
 
     private Map attributes;
 
-    public ElementSourceLocationInfo(ElementXMLEventInfo eventInfo, ISourceLocationResolver resolver)
+    public ElementSourceLocationInfo(
+        String elementName,
+        ElementXMLEventInfo eventInfo,
+        ISourceLocationResolver resolver)
     {
-        init(eventInfo, resolver);
+        init(elementName, eventInfo, resolver);
     }
 
     public boolean hasAttributes()
@@ -79,13 +99,15 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
 
     public boolean isEmptyTag()
     {
-        return fContentsStartLine < 1;
+        return fIsEmpty;
     }
 
     /** return a location for the element - includes all wrapped by it**/
     public ISourceLocation getSourceLocation()
     {
-        return new SourceLocation(fSourceStartLine, fSourceCharStart, fSourceCharEnd);
+        if (fSourceLocation == null)
+            fSourceLocation = new SourceLocation(fSourceStartLine, fSourceCharStart, fSourceCharEnd);
+        return fSourceLocation;
     }
 
     /** return a location for all wrapped by the element**/
@@ -101,21 +123,30 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
     */
     public ISourceLocation getContentSourceLocation()
     {
-        if (!isEmptyTag())
+        if (!isEmptyTag() && fContentsLocation == null)
         {
-            return new SourceLocation(fContentsStartLine, fContentsCharStart, fContentsCharEnd);
+            fContentsLocation = new SourceLocation(fContentsStartLine, fContentsCharStart, fContentsCharEnd);
         }
-        return null;
+        return fContentsLocation;
     }
 
     public ISourceLocation getStartTagSourceLocation()
     {
-        return new SourceLocation(fStartTagStartLine, fStartTagCharStart, fStartTagCharEnd);
+        if (fStartTagLocation == null)
+            fStartTagLocation = new SourceLocation(fStartTagStartLine, fStartTagCharStart, fStartTagCharEnd);
+        return fStartTagLocation;
+    }
+
+    public ISourceLocation getTagNameLocation()
+    {
+        return fTagNameLocation;
     }
 
     public ISourceLocation getEndTagSourceLocation()
     {
-        return new SourceLocation(fEndTagStartLine, fEndTagCharStart, fEndTagCharEnd);
+        if (fEndTagLocation == null)
+            fEndTagLocation = new SourceLocation(fEndTagStartLine, fEndTagCharStart, fEndTagCharEnd);
+        return fEndTagLocation;
     }
 
     public ISourceLocation getAttributeSourceLocation(String rawname)
@@ -131,24 +162,12 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
         return null;
     }
 
-    public int getStartTagStartLine()
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.source.ISourceLocationInfo#getAttributeNames()
+     */
+    public Set getAttributeNames()
     {
-        return fStartTagStartLine;
-    }
-
-    public int getStartTagEndLine()
-    {
-        return fStartTagEndLine;
-    }
-
-    public int getEndTagStartLine()
-    {
-        return fEndTagStartLine;
-    }
-
-    public int getEndTagEndLine()
-    {
-        return fEndTagEndLine;
+       return new HashSet(getAttributes().keySet());
     }
 
     private Map getAttributes()
@@ -160,16 +179,16 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
         return attributes;
     }
 
-    private void init(ElementXMLEventInfo eventInfo, ISourceLocationResolver resolver)
+    private void init(String elementName, ElementXMLEventInfo eventInfo, ISourceLocationResolver resolver)
     {
 
         XMLEnityEventInfo startTag = eventInfo.getStartTagLocation();
         XMLEnityEventInfo endTag = eventInfo.getEndTagLocation();
-        
-        boolean isEmpty = endTag == null;
+
+        fIsEmpty = endTag == null;
 
         fLocationLineNumber = startTag.getBeginLineNumber();
-        
+
         fLocationColumnNumber = startTag.getBeginColumnNumber();
         int column = resolver.getColumnOffset(fLocationLineNumber, fLocationColumnNumber);
 
@@ -182,7 +201,7 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
         fStartTagEndLine = line;
         fStartTagCharEnd = column;
 
-        if (endTag == null)
+        if (fIsEmpty)
         {
 
             fContentsStartLine = fContentsCharStart = fContentsCharEnd = -1;
@@ -226,17 +245,20 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
                 column = info.getBeginColumnNumber();
                 data[LINE] = line;
                 data[CHAR_START] = resolver.getColumnOffset(line, column);
-                line = info.getEndLineNumber(); 
+                line = info.getEndLineNumber();
                 column = info.getEndColumnNumber();
                 data[CHAR_END] = resolver.getColumnOffset(line, column);
                 getAttributes().put(rawname, data);
             }
         }
+        fTagNameLocation = resolver.getTagNameLocation(elementName, getStartTagSourceLocation());
     }
 
     public String toString()
     {
         StringBuffer buffer = new StringBuffer("ElementLocation[\n");
+        buffer.append("Name: ");
+        buffer.append(getTagNameLocation());
         buffer.append("Start Tag: ");
         buffer.append(getStartTagSourceLocation());
         buffer.append("\n");
@@ -271,13 +293,13 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
         buffer.append("]");
         return buffer.toString();
     }
-    
+
     /*
      * 
      * ILocation methods
      * 
      */
-     
+
     /* (non-Javadoc)
      * @see org.apache.tapestry.ILocation#getColumnNumber()
      */
@@ -301,11 +323,10 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
     {
         return fResourceLocation;
     }
-    
-    public void setResourceLocation(IResourceLocation location) {
+
+    public void setResourceLocation(IResourceLocation location)
+    {
         this.fResourceLocation = location;
     }
-    
-    
 
 }

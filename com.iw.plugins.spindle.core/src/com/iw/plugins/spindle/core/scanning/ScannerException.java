@@ -26,7 +26,7 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
-import com.iw.plugins.spindle.core.parser.ISourceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
 
 /**
  *  Exception type thrown by Processors

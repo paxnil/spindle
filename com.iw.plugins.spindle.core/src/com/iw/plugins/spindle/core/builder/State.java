@@ -62,27 +62,29 @@ public class State
     int fBuildNumber;
     Map fBinaryNamespaces = new HashMap();
     IClasspathEntry[] fLastKnownClasspath;
-    
+
     // following are used to determine if an incremental Tapestry build is required at all.
-    
+
     // list of IResources to java types in the project
     List fJavaDependencies;
-    
+
     // list of fullyQualified names of types not found during a build
     List fMissingJavaTypes;
-    
-    // map templates to components
+
+    // map template storages to components
     Map fTemplateMap;
-    
-//  list of known template extensions
-     List fSeenTemplateExtensions;
-     
+
+    // map spec storages to specification objects
+    Map fSpecificationMap;
+
+    //  list of known template extensions
+    List fSeenTemplateExtensions;
+
     // the results of parsing web.xml
     ServletInfo fApplicationServlet;
-    
+
     // the main namespace result of the last build.
     ICoreNamespace fPrimaryNamespace;
-
 
     /**
      * Constructor for State.
@@ -113,7 +115,7 @@ public class State
         fContextRoot = lastState.fContextRoot;
         fLibraryLocation = lastState.fLibraryLocation;
         fBuildNumber = lastState.fBuildNumber + 1;
-        fBinaryNamespaces.clear();       
+        fBinaryNamespaces.clear();
         fLastKnownClasspath = new IClasspathEntry[lastState.fLastKnownClasspath.length];
         System.arraycopy(
             lastState.fLastKnownClasspath,
@@ -137,6 +139,11 @@ public class State
     public Map getTemplateMap()
     {
         return fTemplateMap;
+    }
+
+    public Map getSpecificationMap()
+    {
+        return fSpecificationMap;
     }
 
 }

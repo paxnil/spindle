@@ -25,7 +25,7 @@ package com.iw.plugins.spindle.core.parser.template;
  *
  * ***** END LICENSE BLOCK ***** */
 
-import com.iw.plugins.spindle.core.parser.SourceLocation;
+import com.iw.plugins.spindle.core.source.SourceLocation;
 
 public class TagEventHandler
 {

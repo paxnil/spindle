@@ -34,9 +34,9 @@ import org.w3c.dom.Node;
 
 import tests.multirun.MultipleRunTestCase;
 
-import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.parser.ParserRuntimeException;
+import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.util.Files;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 
@@ -104,6 +104,7 @@ public class MRBaseParserTest extends MultipleRunTestCase
         {
             throw new IllegalStateException("unrecognized run id = " + runIdentifier);
         }
+        parser.setDoValidation(true);
     }
 
     // use when a test wants to simply scan all the document

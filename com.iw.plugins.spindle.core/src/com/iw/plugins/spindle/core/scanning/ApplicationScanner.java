@@ -30,7 +30,8 @@ import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.w3c.dom.Node;
 
-import com.iw.plugins.spindle.core.parser.IProblem;
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.source.IProblem;
 
 /**
  *  Scanner that turns a node tree into a IApplicationSpecification
@@ -46,9 +47,12 @@ public class ApplicationScanner extends LibraryScanner
      */
     protected Object beforeScan(Object source) throws ScannerException
     {
-        isNode(source);
-        Node rootNode = (Node)source;
-        if (!isElement(rootNode, "application"))
+        return super.beforeScan(source);
+    }
+
+    protected Object createResult()
+    {
+        if (!isElement(fRootNode, "application"))
         {
             return null;
         }
@@ -58,10 +62,25 @@ public class ApplicationScanner extends LibraryScanner
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(org.w3c.dom.Node)
      */
-    protected void doScan(Node rootNode, Object resultObject) throws ScannerException
+    protected void doScan(Object source, Object resultObject) throws ScannerException
     {
+        validate(source);
         IApplicationSpecification specification = (IApplicationSpecification) resultObject;
-        scanApplicationSpecification(rootNode, specification, null);
+        specification.setPublicId(fPublicId);
+        specification.setSpecificationLocation(fResourceLocation);
+        String rootName = fRootNode.getNodeName();
+        if (!rootName.equals("application"))
+        {
+            addProblem(
+                IProblem.ERROR,
+                getBestGuessSourceLocation(fRootNode, false),
+                TapestryCore.getTapestryString(
+                    "AbstractDocumentParser.incorrect-document-type",
+                    "application",
+                    rootName));
+            return;
+        }
+        scanApplicationSpecification(fRootNode, specification, null);
     }
 
     protected IApplicationSpecification scanApplicationSpecification(

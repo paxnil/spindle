@@ -380,7 +380,7 @@ public class TapestryProject implements IProjectNature
         return fWebContextFolder;
     }
 
-    public IResourceWorkspaceLocation getWebContextLocation()
+    public ContextRootLocation getWebContextLocation()
     {
         IFolder folder = getWebContextFolder();
         if (folder == null || !folder.exists())

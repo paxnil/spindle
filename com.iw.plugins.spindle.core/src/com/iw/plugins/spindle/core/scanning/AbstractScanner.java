@@ -37,12 +37,12 @@ import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.DefaultProblem;
-import com.iw.plugins.spindle.core.parser.IProblem;
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
-import com.iw.plugins.spindle.core.parser.ISourceLocation;
-import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.parser.ParserRuntimeException;
+import com.iw.plugins.spindle.core.source.DefaultProblem;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.IProblemCollector;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
@@ -140,18 +140,6 @@ public abstract class AbstractScanner implements IProblemCollector
         }
     }
 
-    public void addSourceProblem(int severity, ISourceLocation location, String message)
-    {
-        addProblem(
-            new DefaultProblem(
-                ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER,
-                severity,
-                message,
-                location.getLineNumber(),
-                location.getCharStart(),
-                location.getCharEnd()));
-    }
-
     public void addProblem(int severity, ISourceLocation location, String message)
     {
         addProblem(
@@ -182,12 +170,12 @@ public abstract class AbstractScanner implements IProblemCollector
 
     public boolean isElement(Node node, String elementName)
     {
-        return NodeAccess.isElement(node, elementName);
+        return W3CAccess.isElement(node, elementName);
     }
 
     public String getValue(Node node)
     {
-        return NodeAccess.getValue(node);
+        return W3CAccess.getValue(node);
     }
 
     protected boolean isDummyString(String value)
@@ -205,12 +193,12 @@ public abstract class AbstractScanner implements IProblemCollector
 
     protected boolean getBooleanAttribute(Node node, String attributeName)
     {
-        return NodeAccess.getBooleanAttribute(node, attributeName);
+        return W3CAccess.getBooleanAttribute(node, attributeName);
     }
 
     protected String getAttribute(Node node, String attributeName, boolean returnDummyIfNull)
     {
-        String result = NodeAccess.getAttribute(node, attributeName);
+        String result = W3CAccess.getAttribute(node, attributeName);
         if (TapestryCore.isNull(result) && returnDummyIfNull)
             result = getNextDummyString();
 
@@ -219,7 +207,7 @@ public abstract class AbstractScanner implements IProblemCollector
 
     protected String getAttribute(Node node, String attributeName, boolean returnDummyIfNull, boolean warnIfNull)
     {
-        String result = NodeAccess.getAttribute(node, attributeName);
+        String result = W3CAccess.getAttribute(node, attributeName);
         if (TapestryCore.isNull(result) && returnDummyIfNull)
         {
             result = getNextDummyString();
@@ -235,7 +223,7 @@ public abstract class AbstractScanner implements IProblemCollector
 
     protected ISourceLocationInfo getSourceLocationInfo(Node node)
     {
-        return NodeAccess.getSourceLocationInfo(node);
+        return W3CAccess.getSourceLocationInfo(node);
     }
 
     protected ISourceLocation getBestGuessSourceLocation(Node node, boolean forNodeContent)
@@ -251,11 +239,11 @@ public abstract class AbstractScanner implements IProblemCollector
                     return info.getContentSourceLocation();
                 } else
                 {
-                    return info.getStartTagSourceLocation();
+                    return info.getTagNameLocation();
                 }
             } else
             {
-                return info.getStartTagSourceLocation();
+                return info.getTagNameLocation();
             }
         }
         return null;
@@ -266,7 +254,7 @@ public abstract class AbstractScanner implements IProblemCollector
         ISourceLocationInfo info = getSourceLocationInfo(node);
         ISourceLocation result = null;
         if (info != null)
-            result = info.getStartTagSourceLocation();
+            result = info.getTagNameLocation();
 
         return result;
     }
@@ -280,7 +268,7 @@ public abstract class AbstractScanner implements IProblemCollector
             result = info.getEndTagSourceLocation();
             if (result == null)
             {
-                result = info.getStartTagSourceLocation();
+                result = info.getTagNameLocation();
             }
         }
         return result;
@@ -295,7 +283,7 @@ public abstract class AbstractScanner implements IProblemCollector
             result = info.getAttributeSourceLocation(rawname);
             if (result == null)
             {
-                result = info.getStartTagSourceLocation();
+                result = info.getTagNameLocation();
             }
         }
         return result;

@@ -34,8 +34,8 @@ import org.apache.tapestry.spec.ILibrarySpecification;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.IProblem;
-import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Scanner that turns a node tree into a ILibrarySpecification
@@ -51,9 +51,15 @@ public class LibraryScanner extends SpecificationScanner
      */
     protected Object beforeScan(Object source) throws ScannerException
     {
-        isNode(source);
-        Node rootNode = (Node) source;
-        if (!isElement(rootNode, "library-specification"))
+        if (super.beforeScan(source) == null)
+            return null;
+
+        return createResult();
+    }
+
+    protected Object createResult()
+    {
+        if (!isElement(fRootNode, "library-specification"))
         {
             return null;
         }
@@ -65,9 +71,23 @@ public class LibraryScanner extends SpecificationScanner
      */
     protected void doScan(Object source, Object resultObject) throws ScannerException
     {
-        Node rootNode = (Node) source;
+        validate(source);
         ILibrarySpecification specification = (ILibrarySpecification) resultObject;
-        scanLibrarySpecification(rootNode, specification, null);
+        specification.setPublicId(fPublicId);
+        specification.setSpecificationLocation(fResourceLocation);
+        String rootName = fRootNode.getNodeName();
+        if (!rootName.equals("library-specification"))
+        {
+            addProblem(
+                IProblem.ERROR,
+                getBestGuessSourceLocation(fRootNode, false),
+                TapestryCore.getTapestryString(
+                    "AbstractDocumentParser.incorrect-document-type",
+                    "library-specification",
+                    rootName));
+            return;
+        }
+        scanLibrarySpecification(fRootNode, specification, null);
     }
 
     protected void scanLibrarySpecification(
@@ -76,9 +96,7 @@ public class LibraryScanner extends SpecificationScanner
         IResourceResolver resolver)
         throws ScannerException
     {
-        specification.setPublicId(fPublicId);
-        specification.setSpecificationLocation(fResourceLocation);
-        //   TODO figure out ResourceResolver
+        //   not needed by Spindle
         //        specification.setResourceResolver(resolver);
 
         for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())

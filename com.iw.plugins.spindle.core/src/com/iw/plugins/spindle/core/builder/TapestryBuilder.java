@@ -545,7 +545,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             TapestryCore.log(e);
             throw new BuilderException("could not obtain the Tapestry Project!");
         }
-        fContextRoot = new ContextRootLocation(fTapestryProject.getWebContextFolder());
+        fContextRoot = fTapestryProject.getWebContextLocation();
 
         try
         {

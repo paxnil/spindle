@@ -54,7 +54,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
@@ -72,7 +72,9 @@ import com.iw.plugins.spindle.core.scanning.IScannerValidatorListener;
 import com.iw.plugins.spindle.core.scanning.LibraryScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.scanning.TemplateScanner;
+import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.Markers;
 /**
  * Abstract base class for full and incremental builds
@@ -120,7 +122,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         {
             super();
         }
-    }      
+    }
 
     protected ICoreNamespace fApplicationNamespace;
     protected BuilderQueue fBuildQueue;
@@ -140,12 +142,12 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
     protected Map fProcessedLocations;
     protected List fSeenTemplateExtensions;
     protected Map fTemplateMap;
+    protected Map fSpecificationMap;
     protected TapestryBuilder fTapestryBuilder;
     protected BuilderValidator fValidator;
     protected IResourceDelta fProjectDelta = null;
-    
-    protected IType fTapestryServletType;
 
+    protected IType fTapestryServletType;
 
     public Build(TapestryBuilder builder)
     {
@@ -158,13 +160,12 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fNotifier = builder.fNotifier;
         fJavaProject = builder.fJavaProject;
         //        fParser = BUILD_PARSER;
-        fValidator = new BuilderValidator(this);
-        fValidator.addListener(this);
         fFoundTypes = new ArrayList();
         fMissingTypes = new ArrayList();
         fProcessedLocations = new HashMap();
         fSeenTemplateExtensions = new ArrayList();
         fTemplateMap = new HashMap();
+        fSpecificationMap = new HashMap();
         TapestryArtifactManager.getTapestryArtifactManager().addTemplateFinderListener(this);
     }
 
@@ -176,9 +177,13 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
     public void build() throws BuilderException, CoreException
     {
+        fValidator = new BuilderValidator(this, true);
+        fValidator.addListener(this);
+
         Parser parser = new Parser(false);
 
-        preBuild(parser);
+
+        preBuild();
 
         fNotifier.updateProgressDelta(0.1f);
 
@@ -239,6 +244,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      */
     public void cleanUp()
     {
+        TapestryArtifactManager.getTapestryArtifactManager().removeTemplateFinderListener(this);
         fLastState = null;
         fFoundTypes = null;
         fMissingTypes = null;
@@ -250,10 +256,14 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fBuildQueue = null;
         fNotifier = null;
         fTapestryBuilder = null;
-        fValidator = new BuilderValidator(this);
-        fValidator.removeListener(this);
+        if (fValidator != null)
+        {
+            fValidator.removeListener(this);
+            fValidator = null;
+        }
         fProcessedLocations = null;
-        TapestryArtifactManager.getTapestryArtifactManager().removeTemplateFinderListener(this);
+        fTemplateMap = null;
+        fSpecificationMap = null;
     }
 
     protected ICoreNamespace createNamespace(Parser parser, String id, IResourceWorkspaceLocation location)
@@ -465,27 +475,33 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      */
     protected IApplicationSpecification parseApplication(Parser parser, IResourceLocation location)
     {
+        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
+        IApplicationSpecification result = null;
         try
         {
-            Node node = parseToNode(parser, location);
+            Document document = parseToDocument(parser, useLocation);
             //            Node node = parseToNode(location);
-            if (node != null)
+            if (document != null)
             {
                 ApplicationScanner scanner = new ApplicationScanner();
-                scanner.setResourceLocation(location);
+                scanner.setResourceLocation(useLocation);
                 scanner.setFactory(TapestryCore.getSpecificationFactory());
-                scanner.setPublicId(parser.getPublicId());
-                //                scanner.setPublicId(fParser.getPublicId());
 
-                IApplicationSpecification result = (IApplicationSpecification) scanner.scan(node, fValidator);
-
-                Markers.recordProblems((IResourceWorkspaceLocation) location, scanner.getProblems());
+                result = (IApplicationSpecification) scanner.scan(document, fValidator);
+                Markers.recordProblems(useLocation, scanner.getProblems());
 
                 return result;
+            } else
+            {
+                PluginApplicationSpecification dummy = new PluginApplicationSpecification();
+                dummy.setSpecificationLocation(location);
+                result = dummy;
             }
+            fSpecificationMap.put(useLocation.getStorage(), result); 
+
         } catch (IOException e)
         {
-             TapestryCore.log(e);
+            TapestryCore.log(e);
         } catch (CoreException e)
         {
             //TODO remove
@@ -497,7 +513,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             e.printStackTrace();
             TapestryCore.log(e);
         }
-        return null;
+        return result;
     }
 
     /**
@@ -509,28 +525,32 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      */
     protected ILibrarySpecification parseLibrary(Parser parser, IResourceLocation location)
     {
-        if (fProcessedLocations.containsKey(location))
-            return (ILibrarySpecification) fProcessedLocations.get(location);
+        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
+        ILibrarySpecification result = null;
+        if (fProcessedLocations.containsKey(useLocation))
+            return (ILibrarySpecification) fProcessedLocations.get(useLocation);
 
         try
         {
-            Node node = parseToNode(parser, location);
+            Document document = parseToDocument(parser, location);
             //            Node node = parseToNode(location);
-            if (node != null)
+            if (document != null)
             {
                 LibraryScanner scanner = new LibraryScanner();
-                scanner.setResourceLocation(location);
+                scanner.setResourceLocation(useLocation);
                 scanner.setFactory(TapestryCore.getSpecificationFactory());
-                //                scanner.setPublicId(fParser.getPublicId());
-                scanner.setPublicId(parser.getPublicId());
-                ILibrarySpecification result = (ILibrarySpecification) scanner.scan(node, fValidator);
-                if (result != null)
-                    fProcessedLocations.put(location, result);
+                result = (ILibrarySpecification) scanner.scan(document, fValidator);
+                fSpecificationMap.put(useLocation.getStorage(), result);
 
-                Markers.recordProblems((IResourceWorkspaceLocation) location, scanner.getProblems());
+                Markers.recordProblems(useLocation, scanner.getProblems());
 
-                return result;
+            } else
+            {
+                PluginLibrarySpecification dummy = new PluginLibrarySpecification();
+                dummy.setSpecificationLocation(location);
+                result = dummy;
             }
+            fSpecificationMap.put(useLocation.getStorage(), result);
         } catch (IOException e)
         {
             //TODO remove
@@ -547,7 +567,10 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             e.printStackTrace();
             TapestryCore.log(e);
         }
-        return null;
+        if (result != null)
+            fProcessedLocations.put(useLocation, result);
+
+        return result;
     }
 
     /**
@@ -567,7 +590,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
             if (fProcessedLocations.containsKey(location))
                 continue;
-                
+
             IStorage storage = location.getStorage();
             if (storage != null)
                 fTemplateMap.put(storage, spec);
@@ -601,7 +624,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      * If the entity referred to by the location is really a resource in the workspace, the problems are
      * recorded as resource markers. Otherwise, the problem is logged. 
      */
-    protected Node parseToNode(Parser parser, IResourceLocation location) throws IOException, CoreException
+    protected Document parseToDocument(Parser parser, IResourceLocation location) throws IOException, CoreException
     {
         IResourceWorkspaceLocation use_loc = (IResourceWorkspaceLocation) location;
         IStorage storage = use_loc.getStorage();
@@ -621,9 +644,9 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      * If the IStorage is really a resource in the workspace, the problems are
      * recorded as resource markers. Otherwise, the problem is logged. 
      */
-    protected Node parseToNode(Parser parser, IStorage storage) throws IOException, CoreException
+    protected Document parseToNode(Parser parser, IStorage storage) throws IOException, CoreException
     {
-        Node result = null;
+        Document result = null;
         try
         {
             //            result = fParser.parse(storage);
@@ -656,7 +679,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      * Perform any work that needs to be done before the build proper can begin.
      * For example the application builder parses web.xml here.
      */
-    protected abstract void preBuild(Parser parser) throws CoreException;
+    protected abstract void preBuild() throws CoreException;
 
     /**
      * Resolve the Tapestry Framework namespace here.
@@ -682,22 +705,23 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             {
                 try
                 {
-                    Node node = parseToNode(parser, location);
+                    Document document = parseToDocument(parser, location);
 
                     fComponentScanner.setResourceLocation(location);
                     fComponentScanner.setNamespace(namespace);
-                    fComponentScanner.setPublicId(parser.getPublicId());
                     fComponentScanner.setFactory(TapestryCore.getSpecificationFactory());
-                    if (node != null)
+                    if (document != null)
                     {
+                        IScannerValidator useValidator = new BuilderValidator(this, true);
+                        useValidator.addListener(this);
                         try
                         {
-                            IScannerValidator useValidator = new BuilderValidator(this, namespace);
-                            useValidator.addListener(this);
-                            result = (IComponentSpecification) fComponentScanner.scan(node, useValidator);
+                            result = (IComponentSpecification) fComponentScanner.scan(document, useValidator);
                         } catch (Exception e1)
                         {
-                            e1.printStackTrace();
+                            TapestryCore.log(e1);
+                        } finally {
+                            useValidator.removeListener(this);
                         }
                     } else
                     {
@@ -707,6 +731,8 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                         fComponentScanner.scanForTemplates(dummy);
                         result = dummy;
                     }
+
+                    fSpecificationMap.put(location.getStorage(), result);
 
                     Markers.recordProblems(location, fComponentScanner.getProblems());
 
@@ -723,9 +749,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                         fBuildQueue.finished(location);
                         fNotifier.processed(location);
                     }
-
                 }
-
             }
         if (result != null)
             fProcessedLocations.put(location, result);

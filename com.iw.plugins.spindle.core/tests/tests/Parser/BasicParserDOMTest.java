@@ -30,10 +30,12 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.scanning.W3CAccess;
+import com.iw.plugins.spindle.core.source.IProblem;
 
 /**
  *  Basic Sanity Test for Parser
@@ -81,23 +83,27 @@ public class BasicParserDOMTest extends TestCase
     {
 
         Parser parser = new Parser(false);
+        parser.setDoValidation(true);
+
         final String VALID = PROLOG + "<dog test='poo'>Hello, world!</dog>\n";
-        Node node = null;
+        Document document = null;
         try
         {
-            node = parser.parse(VALID);
+            document = parser.parse(VALID);
         } catch (IOException e)
         {
             fail("IOException: " + e.getMessage());
         }
-        assertNotNull(node);
+        assertNotNull(document);
         assertTrue(parser.getProblems().length == 0);
-        assertNull(parser.getPublicId());
+        assertNull(W3CAccess.getPublicId(document));
     }
 
     public void testINVALID()
     {
         Parser parser = new Parser(false);
+        parser.setDoValidation(true);
+
         final String INVALID = PROLOG + "<dog invalid='poo'>Hello, world!</dog>\n";
         Node node = null;
         try
@@ -117,6 +123,7 @@ public class BasicParserDOMTest extends TestCase
     public void testMalformedProlog()
     {
         Parser parser = new Parser(false);
+        parser.setDoValidation(true);
         final String MALFORMED = MALFORMED_PROLOG + "<dog invalid='poo'>Hello, world!</dog>\n";
         Node node = null;
         try
@@ -136,6 +143,7 @@ public class BasicParserDOMTest extends TestCase
     public void testMalformedContent()
     {
         Parser parser = new Parser(false);
+        parser.setDoValidation(true);
         final String MALFORMED = PROLOG + "<dog test='poo'>Hello, world!<dog>\n";
         Node node = null;
         try
@@ -157,19 +165,19 @@ public class BasicParserDOMTest extends TestCase
         Parser parser = new Parser(false);
         parser.setDoValidation(false);
         final String content = "<private-asset name='poo' path='moo'/>";
-        Node node = null;
+        Document document = null;
         try
         {
-            node = parser.parse(content);
+            document = parser.parse(content);
         } catch (IOException e)
         {
             fail("IOException: " + e.getMessage());
         }
         IProblem[] problems = parser.getProblems();
         printProblems(problems);
-        assertNotNull(node);
+        assertNotNull(document);
         assertTrue(problems.length == 0);
-        assertNull(parser.getPublicId());
+        assertNull(W3CAccess.getPublicId(document));
 
     }
 

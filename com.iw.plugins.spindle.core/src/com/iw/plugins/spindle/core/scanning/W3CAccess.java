@@ -29,12 +29,14 @@ package com.iw.plugins.spindle.core.scanning;
 import java.util.Map;
 
 import org.apache.xerces.dom.DocumentImpl;
+import org.w3c.dom.Document;
+import org.w3c.dom.DocumentType;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.parser.xml.pull.PullParserNode;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Static Helper methods for accessing data in DOM nodes
@@ -44,7 +46,7 @@ import com.iw.plugins.spindle.core.parser.xml.pull.PullParserNode;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class NodeAccess
+public class W3CAccess
 {
 
     public static String getAttribute(Node node, String attributeName)
@@ -75,7 +77,7 @@ public class NodeAccess
     public static boolean getBooleanAttribute(Node node, String attributeName)
     {
         String attributeValue = getAttribute(node, attributeName);
-        
+
         return "yes".equals(attributeValue);
     }
 
@@ -93,6 +95,16 @@ public class NodeAccess
             return null;
 
         return result;
+    }
+
+    public static boolean isComment(Node node)
+    {
+        return node.getNodeType() == Node.COMMENT_NODE;
+    }
+
+    public static boolean isElement(Node node)
+    {
+        return node.getNodeType() == Node.ELEMENT_NODE;
     }
 
     public static boolean isElement(Node node, String elementName)
@@ -118,6 +130,32 @@ public class NodeAccess
             result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.PLUGIN_ID);
         }
         return result;
+    }
+
+    public static boolean isTextNode(Node child)
+    {
+        short type = child.getNodeType();
+        return type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE;
+    }
+
+    /**
+     * @param document
+     * @return
+     */
+    public static String getPublicId(Document document)
+    {
+        DocumentType type = document.getDoctype();
+        if (type == null)
+            return null;
+        return type.getPublicId();
+    }
+
+    public static String getDeclaredRootElement(Document document)
+    {
+        DocumentType type = document.getDoctype();
+        if (type == null)
+            return null;
+        return type.getName();
     }
 
 }

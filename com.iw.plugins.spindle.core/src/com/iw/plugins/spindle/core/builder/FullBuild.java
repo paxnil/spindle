@@ -33,7 +33,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.runtime.CoreException;
-import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
@@ -73,9 +73,9 @@ public class FullBuild extends Build
      * @param parser
      * @throws CoreException
      */
-    protected void preBuild(Parser parser) throws CoreException
+    protected void preBuild() throws CoreException
     {
-        findDeclaredApplication(parser);
+        findDeclaredApplication();
     }
 
     /**
@@ -106,6 +106,7 @@ public class FullBuild extends Build
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
         newState.fTemplateMap = fTemplateMap;
+        newState.fSpecificationMap = fSpecificationMap;
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
         newState.fApplicationServlet = fApplicationServlet;
         newState.fPrimaryNamespace = fApplicationNamespace;
@@ -145,22 +146,30 @@ public class FullBuild extends Build
         super.cleanUp();
     }
 
-    protected void findDeclaredApplication(Parser parser) throws CoreException
+    protected void findDeclaredApplication() throws CoreException
     {
+        Parser servletParser = new Parser();
+        servletParser.setDoValidation(true);
+        // uses a validating parser here.
+        // Parser does not validate by default.
+        // Scanners use the Spindle validator.
+        
         IResourceWorkspaceLocation webXML =
             (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot.getRelativeLocation("WEB-INF/web.xml");
         //        IFile webXML = tapestryBuilder.contextRoot.getFile("WEB-INF/web.xml");
         if (webXML.exists())
         {
-            Node wxmlElement = null;
+            Document wxmlElement = null;
             try
             {
                 fTapestryBuilder.fNotifier.subTask(
                     TapestryCore.getString(TapestryBuilder.STRING_KEY + "scanning", webXML.toString()));
-                wxmlElement = parseToNode(parser, webXML);
+                wxmlElement = parseToDocument(servletParser, webXML);
             } catch (IOException e1)
             {
                 TapestryCore.log(e1);
+            } finally {
+                servletParser = null;
             }
             if (wxmlElement == null)
                 throw new BuilderException("Tapestry Build failed: could not parse web.xml");

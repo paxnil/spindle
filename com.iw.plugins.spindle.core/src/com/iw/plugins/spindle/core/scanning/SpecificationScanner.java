@@ -36,14 +36,19 @@ import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.Direction;
 import org.apache.tapestry.spec.SpecFactory;
 import org.apache.tapestry.util.IPropertyHolder;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.IProblem;
+import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
+import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
- *  Scanner for building Tapestry Specs
+ *  Scanner for building Tapestry Specs - this is the base class
+ *  for Component, Library, and Application scanners.
+ * 
+ *  This class handles some setup and validates the document by default.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -53,6 +58,42 @@ public abstract class SpecificationScanner extends AbstractScanner
 
     protected IResourceLocation fResourceLocation;
     protected String fPublicId;
+    protected Node fRootNode;
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#beforeScan(java.lang.Object)
+     */
+    protected Object beforeScan(Object source) throws ScannerException
+    {
+        if (!isDocument(source))
+            return null;
+
+        Document document = (Document) source;
+        fPublicId = W3CAccess.getPublicId(document);
+        if (fPublicId == null)
+            return null;
+        fRootNode = document.getDocumentElement();
+        return document;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(java.lang.Object, java.lang.Object)
+     */
+    protected void doScan(Object source, Object resultObject) throws ScannerException
+    {
+        validate(source);
+    }
+    
+    protected void validate(Object source)
+    {
+        DOMValidator validator = new DOMValidator();
+        validator.validate((Document) source);
+        IProblem[] validationProblems = validator.getProblems();
+        for (int i = 0; i < validationProblems.length; i++)
+        {
+            addProblem(validationProblems[i]);
+        }
+    }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#afterScan(java.lang.Object)
@@ -67,8 +108,9 @@ public abstract class SpecificationScanner extends AbstractScanner
     {
         this.fResourceLocation = location;
     }
-    
-    public void setPublicId(String publicId) {
+
+    protected void setPublicId(String publicId)
+    {
         fPublicId = publicId;
     }
 
@@ -346,9 +388,9 @@ public abstract class SpecificationScanner extends AbstractScanner
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#beforeScan(java.lang.Object)
      */
-    protected boolean isNode(Object source) throws ScannerException
+    protected boolean isDocument(Object source) throws ScannerException
     {
-        Assert.isLegal(source instanceof Node);
+        Assert.isLegal(source instanceof Document);
         return true;
     }
 
@@ -356,7 +398,6 @@ public abstract class SpecificationScanner extends AbstractScanner
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#cleanup()
      */
     protected void cleanup()
-    {       
-    }
+    {}
 
 }

@@ -44,12 +44,12 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.parser.IProblem;
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
-import com.iw.plugins.spindle.core.parser.ISourceLocation;
-import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.IProblemCollector;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 
 /**
@@ -230,7 +230,7 @@ public class TemplateFinder implements IResourceLocationAcceptor
         {
             addProblem(
                 IProblem.WARNING,
-                ((ISourceLocationInfo) templateAsset.getLocation()).getStartTagSourceLocation(),
+                ((ISourceLocationInfo) templateAsset.getLocation()).getTagNameLocation(),
                 "Spindle can't resolve templates from external assets");
             return;
         }
@@ -240,7 +240,7 @@ public class TemplateFinder implements IResourceLocationAcceptor
             {
                 addProblem(
                     IProblem.WARNING,
-                    ((ISourceLocationInfo) templateAsset.getLocation()).getStartTagSourceLocation(),
+                    ((ISourceLocationInfo) templateAsset.getLocation()).getTagNameLocation(),
                     "Spindle can't resolve templates from context assets in Library projects");
                 return;
             }

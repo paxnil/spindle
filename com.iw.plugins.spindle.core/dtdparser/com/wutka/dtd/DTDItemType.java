@@ -1,4 +1,3 @@
-package com.iw.plugins.spindle.core.parser;
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -25,19 +24,29 @@ package com.iw.plugins.spindle.core.parser;
  *
  * ***** END LICENSE BLOCK ***** */
 
+package com.wutka.dtd;
+
+import org.apache.commons.lang.enum.Enum;
+
 /**
- * Interface used to convert Parser supplied line/column number into Document
- * based character offsets
- *
- * @version $Id$
+ *  An easy way to determine the type of a DTDContainer
+ * 
  * @author glongman@intelligentworks.com
+ * @version $Id$
  */
-
-public interface ISourceLocationResolver
-{
-
-    public int getLineOffset(int parserReportedLineNumber);
-
-    public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn);
+public class DTDItemType extends Enum
+{    
+    public static final DTDItemType DTD_NAME = new DTDItemType("DTD_NAME");
+    public static final DTDItemType DTD_EMPTY = new DTDItemType("DTD_EMPTY");
+    public static final DTDItemType DTD_PCDATA = new DTDItemType("DTD_PCDATA");
+    public static final DTDItemType DTD_ANY = new DTDItemType("DTD_ANY");
+    public static final DTDItemType DTD_CHOICE = new DTDItemType("DTD_CHOICE");
+    public static final DTDItemType DTD_MIXED = new DTDItemType("DTD_MIXED");
+    public static final DTDItemType DTD_SEQUENCE = new DTDItemType("DTD_SEQUENCE");
+    
+    public DTDItemType(String name)
+    {
+        super(name);
+    }
 
 }

@@ -80,6 +80,7 @@ public class IncrementalLibraryBuild extends LibraryBuild implements IIncrementa
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
         newState.fTemplateMap = fTemplateMap;
+        newState.fSpecificationMap = fSpecificationMap;
         saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
             fTapestryBuilder.fCurrentProject,

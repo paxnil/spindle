@@ -33,21 +33,13 @@ import org.apache.xerces.xni.parser.XMLParserConfiguration;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.ElementSourceLocationInfo;
-import com.iw.plugins.spindle.core.parser.ISourceLocationResolver;
 import com.iw.plugins.spindle.core.parser.xml.event.ElementXMLEventInfo;
+import com.iw.plugins.spindle.core.source.ISourceLocationResolver;
 
 public class TapestryDOMParser extends DOMParser
 {
 
     ISourceLocationResolver fResolver;
-
-    /**
-     * Constructor for MyDOMParser.
-     */
-    public TapestryDOMParser()
-    {
-        super();
-    }
 
     /**
      * Constructor for MyDOMParser.
@@ -73,7 +65,7 @@ public class TapestryDOMParser extends DOMParser
         {
             if (fResolver != null)
             {
-                ElementSourceLocationInfo resolvedInfo = new ElementSourceLocationInfo(eventInfo, fResolver);
+                ElementSourceLocationInfo resolvedInfo = new ElementSourceLocationInfo(element.rawname, eventInfo, fResolver);
                 fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID, resolvedInfo, null);
             } else
             {

@@ -237,6 +237,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
         newState.fTemplateMap = fTemplateMap;
+        newState.fSpecificationMap = fSpecificationMap;
         newState.fPrimaryNamespace = fApplicationNamespace;
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
 

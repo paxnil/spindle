@@ -50,16 +50,16 @@ import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
 import com.iw.plugins.spindle.core.namespace.PageSpecificationResolver;
-import com.iw.plugins.spindle.core.parser.DefaultProblem;
-import com.iw.plugins.spindle.core.parser.IProblem;
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
-import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.TapestryResourceLocationAcceptor;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;
+import com.iw.plugins.spindle.core.source.DefaultProblem;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.IProblemCollector;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
@@ -320,7 +320,7 @@ public class NamespaceResolver
 
             //set a special component resolver that will prompt recusive component/page resolution                
             fResultNamespace.setComponentResolver(new BuilderComponentResolver(fFrameworkNamespace));
-            
+
             //no special page resolver needed
             fResultNamespace.setPageResolver(new PageSpecificationResolver(fFrameworkNamespace, fResultNamespace));
 
@@ -813,11 +813,6 @@ public class NamespaceResolver
             problems.clear();
         }
 
-        public void addSourceProblem(int severity, ISourceLocation location, String message)
-        {
-            addProblem(ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER, severity, location, message);
-        }
-
         public void addProblem(int severity, ISourceLocation location, String message)
         {
             addProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity, location, message);
@@ -844,13 +839,14 @@ public class NamespaceResolver
         {
             return (IProblem[]) problems.toArray(new IProblem[problems.size()]);
         }
-        
-        public void beginCollecting() {
+
+        public void beginCollecting()
+        {
             reset();
         }
-        
-        public void endCollecting() {            
-        }
+
+        public void endCollecting()
+        {}
 
     }
 

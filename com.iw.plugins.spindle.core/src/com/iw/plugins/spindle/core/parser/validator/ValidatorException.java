@@ -24,28 +24,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.parser;
+package com.iw.plugins.spindle.core.parser.validator;
 
 /**
- *  Interface for collecting the problems found by Spindle parsers
- *  and Scanners.
+ *  Exceptions thrown while validating a DOM tree
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface IProblemCollector
+public class ValidatorException extends Exception
 {
-
-  public void addProblem(IProblem problem);
-  
-  public void addSourceProblem(int severity, ISourceLocation location, String message);
-  
-  public void addProblem(int severity, ISourceLocation location, String message);
-  
-  public IProblem[] getProblems();
-  
-  public void beginCollecting();
-  
-  public void endCollecting();
-  
+    public ValidatorException(String s)
+    {
+        super(s);
+    }
 }
