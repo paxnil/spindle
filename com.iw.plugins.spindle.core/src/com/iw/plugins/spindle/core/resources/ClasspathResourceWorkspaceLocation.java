@@ -51,8 +51,6 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
  * classpath.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: ClasspathResourceWorkspaceLocation.java,v 1.12 2004/05/17
- *          02:31:49 glongman Exp $
  */
 public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspaceLocation
 {

@@ -103,7 +103,7 @@ public class SpecificationValidator extends BaseValidator
    * 
    * @see com.iw.plugins.spindle.core.scanning.BaseValidator#findType(java.lang.String)
    */
-  public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
+  public IType  findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
   {
     IType result = null;
     try

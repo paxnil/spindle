@@ -29,6 +29,7 @@ package com.iw.plugins.spindle.core.spec;
 import org.apache.tapestry.spec.Direction;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
+import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -200,7 +201,7 @@ public class PluginParameterSpecification extends DescribableSpecification
     }
   }
 
-  private boolean validateTypeSpecial(
+  private IType validateTypeSpecial(
       IScannerValidator validator,
       IResourceWorkspaceLocation dependant,
       String typeName,

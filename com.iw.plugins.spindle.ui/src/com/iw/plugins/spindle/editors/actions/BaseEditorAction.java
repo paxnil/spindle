@@ -171,10 +171,7 @@ public abstract class BaseEditorAction extends Action
     }
     return null;
   }
-
-  /**
-   * @param resolvedType
-   */
+  
   protected void reveal(IType resolvedType)
   {
     try

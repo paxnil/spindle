@@ -120,6 +120,7 @@ public abstract class BaseSpecification
   private Object fParent;
   protected ILocation fILocation;
   private boolean fDirty;
+  private boolean fPlaceholderMarker; //a place holder spec.
 
   private int fSpecificationType = -1;
 
@@ -127,6 +128,14 @@ public abstract class BaseSpecification
   {
     super();
     fSpecificationType = type;
+  }
+  
+  public void makePlaceHolder()  {
+    fPlaceholderMarker = true;
+  }
+  
+  public boolean isPlaceholder() {
+    return fPlaceholderMarker;
   }
 
   protected Object get(Map map, Object key)

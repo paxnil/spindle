@@ -281,7 +281,7 @@ public class UIPlugin extends AbstractUIPlugin
       {
         if (storage instanceof IFile)
         {
-          IDE.openEditor(UIPlugin.getDefault().getActivePage(), ((IFile) storage));
+          return IDE.openEditor(UIPlugin.getDefault().getActivePage(), ((IFile) storage));
         } else
         {
           editorId = (String) EDITOR_ID_LOOKUP.get("html");

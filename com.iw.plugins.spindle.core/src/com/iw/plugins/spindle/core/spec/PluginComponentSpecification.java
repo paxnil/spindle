@@ -45,8 +45,11 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.spec.IPropertySpecification;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.extensions.ComponentTypeResourceResolvers;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
@@ -57,7 +60,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * Spindle aware concrete implementation of IComponentSpecification
  * 
  * @author glongman@intelligentworks.com
-
+ *  
  */
 public class PluginComponentSpecification extends BaseSpecLocatable
     implements
@@ -200,7 +203,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable
    * (non-Javadoc)
    * 
    * @see org.apache.tapestry.spec.IComponentSpecification#addAsset(java.lang.String,
-   *      org.apache.tapestry.spec.IAssetSpecification)
+   *              org.apache.tapestry.spec.IAssetSpecification)
    */
   public void addAsset(String name, IAssetSpecification asset)
   {
@@ -229,7 +232,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable
    * (non-Javadoc)
    * 
    * @see org.apache.tapestry.spec.IComponentSpecification#addComponent(java.lang.String,
-   *      org.apache.tapestry.spec.IContainedComponent)
+   *              org.apache.tapestry.spec.IContainedComponent)
    */
   public void addComponent(String id, IContainedComponent component)
   {
@@ -252,7 +255,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable
    * (non-Javadoc)
    * 
    * @see org.apache.tapestry.spec.IComponentSpecification#addParameter(java.lang.String,
-   *      org.apache.tapestry.spec.IParameterSpecification)
+   *              org.apache.tapestry.spec.IParameterSpecification)
    */
   public void addParameter(String name, IParameterSpecification spec)
   {
@@ -426,7 +429,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable
    * (non-Javadoc)
    * 
    * @see org.apache.tapestry.spec.IComponentSpecification#addBeanSpecification(java.lang.String,
-   *      org.apache.tapestry.spec.IBeanSpecification)
+   *              org.apache.tapestry.spec.IBeanSpecification)
    */
   public void addBeanSpecification(String name, IBeanSpecification specification)
   {
@@ -647,6 +650,8 @@ public class PluginComponentSpecification extends BaseSpecLocatable
   public void validateSelf(IScannerValidator validator) throws ScannerException
   {
 
+    ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
     if (fPageSpecification
         && "org.apache.tapestry.html.BasePage".equals(fComponentClassName))
       return;
@@ -655,17 +660,32 @@ public class PluginComponentSpecification extends BaseSpecLocatable
         && "org.apache.tapestry.BaseComponent".equals(fComponentClassName))
       return;
 
-    ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-    validator.validateTypeName(
+    IType type = validator.validateTypeName(
         (IResourceWorkspaceLocation) getSpecificationLocation(),
         fComponentClassName,
         IProblem.ERROR,
         sourceInfo.getAttributeSourceLocation("class"));
-  }
 
+    if (type != null)
+    {
+      ComponentTypeResourceResolvers contributedResolvers = new ComponentTypeResourceResolvers();
+      if (contributedResolvers.canResolve(type))
+      {
+        IStatus status = contributedResolvers.doResolve((IResourceWorkspaceLocation) this
+            .getSpecificationLocation(), this);
+        if (!status.isOK())
+          validator.addProblem(
+              status,
+              sourceInfo.getAttributeSourceLocation("class"),
+              false);
+
+      }
+    }
+  }
   public void validate(IScannerValidator validator)
   {
+    if (isPlaceholder())
+      return; // there is no validatable stuff here!
     try
     {
       validateSelf(validator);

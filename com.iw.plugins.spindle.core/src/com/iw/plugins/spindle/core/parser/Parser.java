@@ -38,6 +38,7 @@ import org.apache.xerces.xni.parser.XMLParseException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
@@ -457,6 +458,17 @@ public class Parser
         ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
         severity,
         message,
+        location.getLineNumber(),
+        location.getCharStart(),
+        location.getCharEnd(),
+        isTemporary));
+  }
+
+  public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
+  {
+    addProblem(new DefaultProblem(
+        ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+        status,
         location.getLineNumber(),
         location.getCharStart(),
         location.getCharEnd(),

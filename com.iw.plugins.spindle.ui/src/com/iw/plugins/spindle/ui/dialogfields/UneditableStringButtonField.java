@@ -42,7 +42,6 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * @author GWL
- * @version 
  * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
 public class UneditableStringButtonField extends UneditableStringField

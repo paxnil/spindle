@@ -30,6 +30,8 @@ import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
@@ -41,7 +43,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * process
  * 
  * @author glongman@intelligentworks.com
- * 
+ *  
  */
 public interface IScannerValidator
 {
@@ -75,7 +77,7 @@ public interface IScannerValidator
    * @param sourceLocation the source location information for the asset tag
    * @return true iff the asset being validated is completely valid.
    * @throws ScannerException optional, called if the validator method cannot
-   *           properly report a problem.
+   *                     properly report a problem.
    */
   public boolean validateAsset(
       IComponentSpecification specification,
@@ -89,11 +91,11 @@ public interface IScannerValidator
    * @param specification the Component owning the contained component
    * @param component the ConatinedComponent to be validated
    * @param node the DOM node that contains the declaration of the
-   *          ContainedComponent
+   *                     ContainedComponent
    * @return true iff the ConatinedComponent being validated is completely
-   *         valid.
+   *                 valid.
    * @throws ScannerException optional, called if the validator method cannot
-   *           properly report a problem.
+   *                     properly report a problem.
    */
   public boolean validateContainedComponent(
       IComponentSpecification specification,
@@ -109,7 +111,7 @@ public interface IScannerValidator
    * @param severity the severity of the problem to reported, if one.
    * @return true iff the expression being validated is completely valid.
    * @throws ScannerException optional, called if the validator method cannot
-   *           properly report a problem.
+   *                     properly report a problem.
    */
   public boolean validateExpression(String expression, int severity) throws ScannerException;
 
@@ -121,10 +123,10 @@ public interface IScannerValidator
    * @param expression the OGNL expression
    * @param severity the severity of the problem to reported, if one.
    * @param location the source location information to be used in problem
-   *          reporting
+   *                     reporting
    * @return true iff the expression being validated is completely valid.
    * @throws ScannerException optional, called if the validator method cannot
-   *           properly report a problem.
+   *                     properly report a problem.
    */
   public boolean validateExpression(
       String expression,
@@ -139,11 +141,11 @@ public interface IScannerValidator
    * @param value the value to check
    * @param pattern the perl pattern
    * @param errorKey the key to use to find the error message via
-   *          TapestryCore.getTapestryString()
+   *                     TapestryCore.getTapestryString()
    * @param severity the severity to use when reporting problems
    * @return true iff the value matches the pattern
    * @throws ScannerException optional, called if the validator method cannot
-   *           properly report a problem.
+   *                     properly report a problem.
    */
   public boolean validatePattern(
       String value,
@@ -158,13 +160,13 @@ public interface IScannerValidator
    * @param value the value to check
    * @param pattern the perl pattern
    * @param errorKey the key to use to find the error message via
-   *          TapestryCore.getTapestryString()
+   *                     TapestryCore.getTapestryString()
    * @param severity the severity to use when reporting problems
    * @param location the source location information to be used in problem
-   *          reporting
+   *                     reporting
    * @return true iff the value matches the pattern
    * @throws ScannerException optional, called if the validator method cannot
-   *           properly report a problem.
+   *                     properly report a problem.
    */
   public boolean validatePattern(
       String value,
@@ -181,12 +183,12 @@ public interface IScannerValidator
    * @param location the root location to evaluate the path against
    * @param relativePath the path to evaluate relative to the root
    * @param errorKey the key to use to find the error message via
-   *          TapestryCore.getTapestryString()
+   *                     TapestryCore.getTapestryString()
    * @param source the source location information to be used in problem
-   *          reporting
+   *                     reporting
    * @return true iff the resource exists
    * @throws ScannerException optional, called if the validator method cannot
-   *           properly report a problem.
+   *                     properly report a problem.
    */
   public boolean validateResourceLocation(
       IResourceLocation location,
@@ -206,12 +208,12 @@ public interface IScannerValidator
    * @param the location of the spec containing the library decl
    * @param path the path to evaluate relative to the classpath root
    * @param errorKey the key to use to find the error message via
-   *          TapestryCore.getTapestryString()
+   *                     TapestryCore.getTapestryString()
    * @param sourcethe source location information to be used in problem
-   *          reporting
+   *                     reporting
    * @return true iff the resource exists
    * @throws ScannerException optional, called if the validator method cannot
-   *           properly report a problem.
+   *                     properly report a problem.
    */
   public boolean validateLibraryResourceLocation(
       IResourceLocation specLocation,
@@ -227,9 +229,9 @@ public interface IScannerValidator
    * @param severity the severity to use when reporting problems
    * @return true iff the type exists in the project
    * @throws ScannerException optional, called if the validator method cannot
-   *           properly report a problem.
+   *                     properly report a problem.
    */
-  public boolean validateTypeName(
+  public IType validateTypeName(
       IResourceWorkspaceLocation dependant,
       String fullyQualifiedType,
       int severity) throws ScannerException;
@@ -241,18 +243,18 @@ public interface IScannerValidator
    * @param fullyQualifiedType
    * @param severity the severity to use when reporting problems
    * @param location the source location information to be used in problem
-   *          reporting
-   * @return true iff the type exists in the project
+   *                     reporting
+   * @return the IType instance or null if the type does not exist.
    * @throws ScannerException optional, called if the validator method cannot
-   *           properly report a problem.
+   *                     properly report a problem.
    */
-  public boolean validateTypeName(
+  public IType validateTypeName(
       IResourceWorkspaceLocation dependant,
       String fullyQualifiedType,
       int severity,
       ISourceLocation location) throws ScannerException;
 
-  public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName);
+  public IType findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName);
 
   public void addListener(IScannerValidatorListener listener);
 
@@ -271,5 +273,9 @@ public interface IScannerValidator
       ISourceLocation sourceLocation,
       String message,
       boolean isTemporary) throws ScannerException;
+
+  public void addProblem(IStatus status, ISourceLocation sourceLocation,
+
+  boolean isTemporary) throws ScannerException;
 
 }

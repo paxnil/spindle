@@ -33,6 +33,8 @@ import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.IType;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
@@ -165,6 +167,17 @@ public abstract class AbstractScanner implements IProblemCollector
         ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
         severity,
         message,
+        location.getLineNumber(),
+        location.getCharStart(),
+        location.getCharEnd(),
+        isTemporary));
+  }
+
+  public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
+  {
+    addProblem(new DefaultProblem(
+        ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+        status,
         location.getLineNumber(),
         location.getCharStart(),
         location.getCharEnd(),
@@ -357,7 +370,7 @@ public abstract class AbstractScanner implements IProblemCollector
     return fValidator.validateExpression(expression, severity, location);
   }
 
-  protected boolean validateTypeName(
+  protected IType validateTypeName(
       IResourceWorkspaceLocation dependant,
       String fullyQualifiedType,
       int severity) throws ScannerException
@@ -365,7 +378,7 @@ public abstract class AbstractScanner implements IProblemCollector
     return fValidator.validateTypeName(dependant, fullyQualifiedType, severity);
   }
 
-  protected boolean validateTypeName(
+  protected IType validateTypeName(
       IResourceWorkspaceLocation dependant,
       String fullyQualifiedType,
       int severity,

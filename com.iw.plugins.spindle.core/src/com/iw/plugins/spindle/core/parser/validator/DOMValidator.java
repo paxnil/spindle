@@ -39,6 +39,7 @@ import java.util.Set;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.xerces.util.XMLResourceIdentifierImpl;
 import org.apache.xerces.xni.parser.XMLInputSource;
+import org.eclipse.core.runtime.IStatus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -76,7 +77,7 @@ import com.wutka.dtd.DTDParser;
  * Assumes documents provided to it are well-formed!
  * 
  * @author glongman@intelligentworks.com
- * 
+ *  
  */
 public class DOMValidator implements IProblemCollector
 {
@@ -625,7 +626,7 @@ public class DOMValidator implements IProblemCollector
      * @param childName
      * @param items
      * @return true iff the container is completely satisfied and should be
-     *         removed from consideration.
+     *                 removed from consideration.
      */
     private boolean checkContainer(String childName, List items) throws ValidatorException
     {
@@ -736,7 +737,7 @@ public class DOMValidator implements IProblemCollector
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(int,
-   *      com.iw.plugins.spindle.core.source.ISourceLocation, java.lang.String)
+   *              com.iw.plugins.spindle.core.source.ISourceLocation, java.lang.String)
    */
   public void addProblem(
       int severity,
@@ -748,6 +749,17 @@ public class DOMValidator implements IProblemCollector
         ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
         severity,
         message,
+        location.getLineNumber(),
+        location.getCharStart(),
+        location.getCharEnd(),
+        isTemporary));
+  }
+
+  public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
+  {
+    addProblem(new DefaultProblem(
+        ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+        status,
         location.getLineNumber(),
         location.getCharStart(),
         location.getCharEnd(),

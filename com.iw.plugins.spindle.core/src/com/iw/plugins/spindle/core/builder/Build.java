@@ -419,6 +419,7 @@ public abstract class Build
       } else
       {
         PluginApplicationSpecification dummy = new PluginApplicationSpecification();
+        dummy.makePlaceHolder();
         dummy.setSpecificationLocation(location);
         result = dummy;
       }
@@ -520,6 +521,7 @@ public abstract class Build
       {
         PluginLibrarySpecification dummy = new PluginLibrarySpecification();
         dummy.setSpecificationLocation(location);
+        dummy.makePlaceHolder();
         result = dummy;
       }
       rememberSpecification(storage, (BaseSpecification) result);
@@ -758,14 +760,15 @@ public abstract class Build
 
           rememberSpecification(storage, result);
         } 
-//        else
-//        {
-//          PluginComponentSpecification dummy = new PluginComponentSpecification();
-//          dummy.setSpecificationLocation(location);
-//          dummy.setNamespace(namespace);
-//          dummy.setTemplateLocations(TapestryBuilder.scanForTemplates(dummy, null));
-//          result = dummy;
-//        }
+        else
+        {
+          PluginComponentSpecification dummy = new PluginComponentSpecification();
+          dummy.makePlaceHolder();
+          dummy.setSpecificationLocation(location);
+          dummy.setNamespace(namespace);
+          dummy.setTemplateLocations(TapestryBuilder.scanForTemplates(dummy, null));
+          result = dummy;
+        }
 
         
 

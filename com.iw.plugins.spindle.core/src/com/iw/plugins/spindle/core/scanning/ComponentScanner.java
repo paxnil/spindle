@@ -37,6 +37,7 @@ import org.apache.tapestry.spec.IBeanSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IListenerBindingSpecification;
+import org.eclipse.jdt.core.IType;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -966,7 +967,7 @@ public class ComponentScanner extends SpecificationScanner
     }
   }
 
-  public boolean validateTypeSpecial(
+  public IType validateTypeSpecial(
       IResourceWorkspaceLocation dependant,
       String typeName,
       int severity,

@@ -94,7 +94,7 @@ public class PluginApplicationSpecification extends PluginLibrarySpecification
     this.fName = name;
   }
 
-  public void validateSelf(IScannerValidator validator)
+  public void validateSelf(IScannerValidator validator) 
   {
     ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
 

@@ -27,12 +27,15 @@
 package com.iw.plugins.spindle.core.source;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.IStatus;
+
+import com.iw.plugins.spindle.core.util.Assert;
 
 /**
  * Default impl of IProblem
  * 
  * @author glongman@intelligentworks.com
- * 
+ *  
  */
 public class DefaultProblem implements IProblem
 {
@@ -51,9 +54,36 @@ public class DefaultProblem implements IProblem
 
   private boolean fTemporary;
 
-  /**
-   *  
-   */
+  static private int statusToMarkerServerity(IStatus status)
+  {
+    switch (status.getSeverity())
+    {
+      case IStatus.ERROR :
+        return ERROR;
+      case IStatus.WARNING :
+        return WARNING;
+      case IStatus.INFO :
+        return INFO;
+    }
+    Assert.isLegal(
+        false,
+        "only statii with severity: ERROR, WARNING, && INFO can be problems!");
+    return ERROR;
+  }
+
+  public DefaultProblem(String type, IStatus status, int lineNumber, int charStart,
+      int charEnd, boolean isTemporary)
+  {
+    this(
+        type,
+        statusToMarkerServerity(status),
+        status.getMessage(),
+        lineNumber,
+        charStart,
+        charEnd,
+        isTemporary);
+  }
+
   public DefaultProblem(String type, int severity, String message, int lineNumber,
       int charStart, int charEnd, boolean isTemporary)
   {

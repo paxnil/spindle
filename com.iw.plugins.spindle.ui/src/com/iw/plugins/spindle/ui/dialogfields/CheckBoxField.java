@@ -38,7 +38,6 @@ import org.eclipse.swt.widgets.Label;
 
 /**
  * @author GWL
- * @version 
  * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
 public class CheckBoxField extends DialogField

@@ -64,6 +64,8 @@
       <import plugin="org.eclipse.jface.text"/> 
       <import plugin="org.eclipse.core.runtime" export="true"/>
    </requires>
+   <extension-point id="componentTypeResolver" name="Component Type Resolvers" schema="schema/componentTypeResolver.exsd"/>
+   <extension-point id="incrementalBuildVeto" name="Option to veto an incremental build" schema="schema/incrementalBuildVeto.exsd"/>
 
    <extension
          point="org.eclipse.team.core.fileTypes">

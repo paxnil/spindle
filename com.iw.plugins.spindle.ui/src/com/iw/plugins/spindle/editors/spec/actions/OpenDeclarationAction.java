@@ -30,9 +30,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.tapestry.parse.SpecificationParser;
+import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -47,6 +49,7 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.extensions.ComponentTypeResourceResolvers;
 import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -380,10 +383,17 @@ public class OpenDeclarationAction extends BaseSpecAction
       return;
 
     foundResult(location.getStorage(), parameterName, parameterSpec);
-
   }
 
   private void handleTypeLookup(XMLNode artifact, String attrName)
+  {
+    handleTypeLookup(artifact, attrName, false);
+  }
+
+  private void handleTypeLookup(
+      XMLNode artifact,
+      String attrName,
+      boolean useComponentResolver)
   {
     XMLNode attribute = getAttribute(artifact, fDocumentOffset, attrName);
     if (attribute == null)
@@ -400,7 +410,26 @@ public class OpenDeclarationAction extends BaseSpecAction
     if (type == null)
       throw new IllegalArgumentException("could resolve the type '" + typeName + "'");
 
-    foundResult(type, null, null);
+    if (useComponentResolver)
+    {
+      ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
+
+      if (resolver.canResolve(type))
+      {
+        IStatus resolveStatus = resolver.doResolve(
+            fEditor.getLocation(),
+            (IComponentSpecification) fEditor.getSpecification());
+        if (!resolveStatus.isOK())
+          throw new IllegalArgumentException(resolveStatus.getMessage());
+        foundResult(resolver.getStorage(), null, null);
+      } else
+      {
+        foundResult(type, null, null);
+      }
+    } else
+    {
+      foundResult(type, null, null);
+    }
 
   }
 
@@ -470,8 +499,8 @@ public class OpenDeclarationAction extends BaseSpecAction
     fHandlers = new HashMap();
     fHandlers.put("application", new TypeHandler("engine-class"));
     fHandlers.put("bean", new TypeHandler("class"));
-    fHandlers.put("component-specification", new TypeHandler("class"));
-    fHandlers.put("page-specification", new TypeHandler("class"));
+    fHandlers.put("component-specification", new TypeHandler("class", true));
+    fHandlers.put("page-specification", new TypeHandler("class", true));
     fHandlers.put("extension", new TypeHandler("class"));
     fHandlers.put("service", new TypeHandler("class"));
     fHandlers.put("property-specification", new TypeHandler("type"));
@@ -562,7 +591,7 @@ public class OpenDeclarationAction extends BaseSpecAction
       if (needsNamespace && fEditor.getNamespace() == null)
         throw new IllegalArgumentException(
             "This file is not well formed or can not be seen by the Tapestry builder");
-      
+
       doHandle(node);
     }
     protected abstract void doHandle(XMLNode artifact) throws IllegalArgumentException,
@@ -581,14 +610,23 @@ public class OpenDeclarationAction extends BaseSpecAction
 
   class TypeHandler extends AttributeHandler
   {
+
+    private boolean useComponentResolver;
+
     public TypeHandler(String attrName)
     {
+      this(attrName, false);
+    }
+
+    public TypeHandler(String attrName, boolean useComponentResolver)
+    {
       super(false, attrName);
+      this.useComponentResolver = useComponentResolver;
     }
     protected void doHandle(XMLNode artifact) throws IllegalArgumentException,
         CoreException
     {
-      handleTypeLookup(artifact, attrName);
+      handleTypeLookup(artifact, attrName, useComponentResolver);
     }
   }
 

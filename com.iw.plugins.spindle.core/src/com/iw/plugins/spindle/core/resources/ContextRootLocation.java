@@ -190,7 +190,7 @@ public class ContextRootLocation extends AbstractRootLocation
 
   public String toString()
   {
-    return "Context (" + fRootFolder.getFullPath() + "/)  ";
+    return "Context: " + fRootFolder.getFullPath() + "/ ";
   }
 
   String toHashString()

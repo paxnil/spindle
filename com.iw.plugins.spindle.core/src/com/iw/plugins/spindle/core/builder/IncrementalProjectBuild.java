@@ -39,6 +39,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -62,7 +63,7 @@ import com.iw.plugins.spindle.core.util.Markers;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: IncrementalProjectBuild.java,v 1.2 2004/05/17 02:31:48 glongman
- *          Exp $
+ *                     Exp $
  */
 public class IncrementalProjectBuild extends IncrementalApplicationBuild
 {
@@ -94,7 +95,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
     if (storage instanceof IFile)
     {
       file = (IFile) storage;
-      if (result == null || fileChanged(file))
+      if (result == null || result.isPlaceholder() || fileChanged(file))
       {
         Markers.removeProblemsFor(file);
         return super.resolveApplication(parser, storage, location, encoding);
@@ -152,7 +153,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.core.builder.Build#parseLibrary(com.iw.plugins.spindle.core.parser.Parser,
-   *      org.apache.tapestry.IResourceLocation, java.lang.String)
+   *              org.apache.tapestry.IResourceLocation, java.lang.String)
    */
   protected ILibrarySpecification resolveLibrarySpecification(
       Parser parser,
@@ -180,7 +181,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
     if (storage instanceof IFile)
     {
       file = (IFile) storage;
-      if (result == null || fileChanged(file))
+      if (result == null || result.isPlaceholder() || fileChanged(file))
       {
         Markers.removeProblemsFor(file);
         return super.resolveLibrarySpecification(parser, storage, location, encoding);
@@ -230,9 +231,9 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.core.builder.Build#resolveIComponentSpecification(com.iw.plugins.spindle.core.parser.Parser,
-   *      com.iw.plugins.spindle.core.namespace.ICoreNamespace,
-   *      com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation,
-   *      java.lang.String)
+   *              com.iw.plugins.spindle.core.namespace.ICoreNamespace,
+   *              com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation,
+   *              java.lang.String)
    */
   protected IComponentSpecification resolveIComponentSpecification(
       Parser parser,
@@ -259,7 +260,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
     if (storage instanceof IFile)
     {
       file = (IFile) storage;
-      if (result == null || fileChanged(file))
+      if (result == null || result.isPlaceholder() || fileChanged(file))
       {
         Markers.removeProblemsFor(file);
         return super.resolveIComponentSpecification(
@@ -410,8 +411,8 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      * (non-Javadoc)
      * 
      * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(int,
-     *      com.iw.plugins.spindle.core.source.ISourceLocation,
-     *      java.lang.String, boolean)
+     *              com.iw.plugins.spindle.core.source.ISourceLocation,
+     *              java.lang.String, boolean)
      */
     public void addProblem(
         int severity,
@@ -431,6 +432,19 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
 
     }
 
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(org.eclipse.core.runtime.IStatus, com.iw.plugins.spindle.core.source.ISourceLocation, boolean)
+     */
+    public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
+    {
+      addProblem(new DefaultProblem(
+          ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+          status,
+          location.getLineNumber(),
+          location.getCharStart(),
+          location.getCharEnd(),
+          isTemporary));
+    }
     /*
      * (non-Javadoc)
      * 
@@ -477,7 +491,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.core.builder.Build#recordBuildMiss(int,
-   *      org.eclipse.core.resources.IResource)
+   *              org.eclipse.core.resources.IResource)
    */
   protected void recordBuildMiss(int missPriority, IResource resource)
   {

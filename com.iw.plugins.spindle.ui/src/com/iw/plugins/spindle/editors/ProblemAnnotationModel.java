@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
@@ -452,7 +453,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.core.parser.IProblemCollector#addProblem(int,
-   *      com.iw.plugins.spindle.core.parser.ISourceLocation, java.lang.String)
+   *              com.iw.plugins.spindle.core.parser.ISourceLocation, java.lang.String)
    */
   public void addProblem(
       int severity,
@@ -464,6 +465,23 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
         ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
         severity,
         message,
+        location.getLineNumber(),
+        location.getCharStart(),
+        location.getCharEnd(),
+        isTemporary));
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(org.eclipse.core.runtime.IStatus,
+   *              com.iw.plugins.spindle.core.source.ISourceLocation, boolean)
+   */
+  public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
+  {
+    addProblem(new DefaultProblem(
+        ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+        status,
         location.getLineNumber(),
         location.getCharStart(),
         location.getCharEnd(),

@@ -57,8 +57,6 @@ import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
  * Used for the root of the Classpath
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: ClasspathRootLocation.java,v 1.13 2004/05/17 02:31:49 glongman
- *          Exp $
  */
 public class ClasspathRootLocation extends AbstractRootLocation
 {

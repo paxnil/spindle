@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.extensions.IncrementalBuildVetoController;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -254,6 +255,11 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
         System.out.println("inc build abort - no context root found in TapestryBuilder!");
       return false;
     }
+    
+    IncrementalBuildVetoController vetoController = new IncrementalBuildVetoController();
+    
+    if (vetoController.vetoIncrementalBuild(fProjectDelta))
+      return false;
 
     return true;
   }

@@ -45,6 +45,7 @@ import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -60,7 +61,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * 
+ *  
  */
 public class BaseValidator implements IScannerValidator
 {
@@ -186,8 +187,9 @@ public class BaseValidator implements IScannerValidator
     for (Iterator iter = fListeners.iterator(); iter.hasNext();)
     {
       IScannerValidatorListener listener = (IScannerValidatorListener) iter.next();
-      listener.typeChecked(fullyQualifiedName, result); //TODO remove
-                                                        // eventually
+      listener.typeChecked(fullyQualifiedName, result); //TODO
+      // remove
+      // eventually
     }
 
     IDependencyListener depListener = Build.getDependencyListener();
@@ -218,14 +220,14 @@ public class BaseValidator implements IScannerValidator
   }
 
   /**
-   * Base Implementation always passes!
+   * Base Implementation always fails!
    * 
    * @param fullyQualifiedName
    * @return
    */
-  public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
+  public IType findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
   {
-    return this;
+    return null;
   }
 
   /*
@@ -262,8 +264,8 @@ public class BaseValidator implements IScannerValidator
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateAsset(org.apache.tapestry.spec.IComponentSpecification,
-   *      org.apache.tapestry.IAsset,
-   *      com.iw.plugins.spindle.core.parser.ISourceLocationInfo)
+   *              org.apache.tapestry.IAsset,
+   *              com.iw.plugins.spindle.core.parser.ISourceLocationInfo)
    */
   public boolean validateAsset(
       IComponentSpecification specification,
@@ -277,7 +279,7 @@ public class BaseValidator implements IScannerValidator
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateContainedComponent(org.apache.tapestry.spec.IComponentSpecification,
-   *      org.apache.tapestry.spec.IContainedComponent)
+   *              org.apache.tapestry.spec.IContainedComponent)
    */
   public boolean validateContainedComponent(
       IComponentSpecification specification,
@@ -324,6 +326,18 @@ public class BaseValidator implements IScannerValidator
     {
       fProblemCollector.addProblem(severity, (location == null
           ? DefaultSourceLocation : location), message, isTemporary);
+    }
+  }
+
+  public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary) throws ScannerException
+  {
+    if (fProblemCollector == null)
+    {
+      throw new ScannerException(status.getMessage(), isTemporary);
+    } else
+    {
+      fProblemCollector.addProblem(status, (location == null
+          ? DefaultSourceLocation : location), isTemporary);
     }
   }
 
@@ -387,7 +401,7 @@ public class BaseValidator implements IScannerValidator
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(java.lang.String,
-   *      java.lang.String, com.iw.plugins.spindle.core.parser.ISourceLocation)
+   *              java.lang.String, com.iw.plugins.spindle.core.parser.ISourceLocation)
    */
   public boolean validateLibraryResourceLocation(
       IResourceLocation specLocation,
@@ -411,7 +425,7 @@ public class BaseValidator implements IScannerValidator
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(org.apache.tapestry.IResourceLocation,
-   *      java.lang.String)
+   *              java.lang.String)
    */
   public boolean validateResourceLocation(
       IResourceLocation location,
@@ -442,7 +456,7 @@ public class BaseValidator implements IScannerValidator
     return relative.getStorage() != null;
   }
 
-  public boolean validateTypeName(
+  public IType validateTypeName(
       IResourceWorkspaceLocation dependant,
       String fullyQualifiedType,
       int severity) throws ScannerException
@@ -458,22 +472,30 @@ public class BaseValidator implements IScannerValidator
    * 
    * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
    */
-  public boolean validateTypeName(
+  public IType validateTypeName(
       IResourceWorkspaceLocation dependant,
       String fullyQualifiedType,
       int severity,
       ISourceLocation location) throws ScannerException
   {
 
-    Object type = findType(dependant, fullyQualifiedType);
+    if (fullyQualifiedType == null)
+    {
+      addProblem(severity, location, TapestryCore.getTapestryString(
+          "unable-to-resolve-class",
+          "null value"), true);
+      return null;
+    }
+
+    IType type = findType(dependant, fullyQualifiedType);
     if (type == null)
     {
       addProblem(severity, location, TapestryCore.getTapestryString(
           "unable-to-resolve-class",
           fullyQualifiedType), true);
-      return false;
+      return null;
     }
-    return true;
+    return type;
   }
 
 }

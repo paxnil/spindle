@@ -32,7 +32,6 @@ import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
  * @author GWL
- * @version 
  * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
 public class SpindleStatus implements IStatus
