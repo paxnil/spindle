@@ -95,7 +95,7 @@ public class PluginExpressionBeanInitializer extends ExpressionBeanInitializer i
 
   public String toString() {
     String result = "property = \"" + getPropertyName();
-    String value = _expression;
+    String value = _expression; 
     
     if (value == null) {
     	
@@ -120,8 +120,8 @@ public class PluginExpressionBeanInitializer extends ExpressionBeanInitializer i
       } else if (bean.alreadyHasInitializer(newName)) {
 
         newName = "Copy of " + newName;
-        PluginPropertyBeanInitializer copy =
-          new PluginPropertyBeanInitializer(newName, _expression);
+        PluginExpressionBeanInitializer copy =
+          new PluginExpressionBeanInitializer(newName, _expression);
         bean.addInitializer(copy);
       }
 

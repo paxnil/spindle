@@ -32,6 +32,7 @@ import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Iterator;
 
+import net.sf.tapestry.bean.ExpressionBeanInitializer;
 import net.sf.tapestry.bean.IBeanInitializer;
 import net.sf.tapestry.bean.StaticBeanInitializer;
 import net.sf.tapestry.bean.StringBeanInitializer;
@@ -44,7 +45,6 @@ import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import com.iw.plugins.spindle.spec.bean.PluginExpressionBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginFieldBeanInitializer;
-import com.iw.plugins.spindle.spec.bean.PluginPropertyBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginStaticBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginStringBeanInitializer;
 import com.iw.plugins.spindle.ui.descriptors.ComboBoxPropertyDescriptor;
@@ -217,13 +217,13 @@ public class PluginBeanSpecification
     Indenter.printIndented(writer, indent, "<set-property name=\"" + initializer.getPropertyName());
     writer.println("\">");
 
-    if (initializer instanceof PluginPropertyBeanInitializer) {
+    if (initializer instanceof PluginExpressionBeanInitializer) {
 
       Indenter.printIndented(
         writer,
         indent + 1,
         "<property-value property-path=\""
-          + buildPropertyPath((PluginPropertyBeanInitializer) initializer));
+          + ((PluginExpressionBeanInitializer) initializer).getExpression());
       writer.println("\"/>");
 
     } else if (initializer instanceof StaticBeanInitializer) {
@@ -266,11 +266,12 @@ public class PluginBeanSpecification
         "<set-property name=\"" + initializer.getPropertyName());
       writer.print("\" expression='");
       
-      if (initializer instanceof PluginPropertyBeanInitializer) {
-      	
-        writer.print(((PluginPropertyBeanInitializer) initializer).getPropertyPath());
-
-      } else if (initializer instanceof PluginExpressionBeanInitializer) {
+//      if (initializer instanceof PluginPropertyBeanInitializer) {
+//      	
+//        writer.print(((PluginPropertyBeanInitializer) initializer).getPropertyPath());
+//
+//      } else 
+      if (initializer instanceof PluginExpressionBeanInitializer) {
 
         writer.print(((PluginExpressionBeanInitializer) initializer).getExpression());
 
@@ -334,20 +335,7 @@ public class PluginBeanSpecification
     return null;
   }
 
-  private String buildPropertyPath(PluginPropertyBeanInitializer initializer) {
-
-    return initializer.getPropertyPath();
-    //    String[] path = initializer.getPropertyPath();
-    //    StringBuffer result = new StringBuffer();
-    //    for (int i = 0; i < path.length; i++) {
-    //      result.append(path[i]);
-    //      if (i < path.length - 1) {
-    //        result.append(".");
-    //      }
-    //    }
-    //    return result.toString();
-
-  }
+ 
 
   class StaticTypeValue {
     String type;
@@ -369,9 +357,9 @@ public class PluginBeanSpecification
 
         result.addInitializer(((PluginFieldBeanInitializer) initer).deepCopy());
 
-      } else if (initer.getClass() == PluginPropertyBeanInitializer.class) {
+      } else if (initer.getClass() == PluginExpressionBeanInitializer.class) {
 
-        result.addInitializer(((PluginPropertyBeanInitializer) initer).deepCopy());
+        result.addInitializer(((PluginExpressionBeanInitializer) initer).deepCopy());
       }
 
     }

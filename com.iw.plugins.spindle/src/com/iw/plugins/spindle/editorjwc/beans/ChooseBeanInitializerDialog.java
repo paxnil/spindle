@@ -109,7 +109,7 @@ public class ChooseBeanInitializerDialog extends ChooseFromListDialog {
 
     if (DTDVersion < XMLUtil.DTD_1_3) {
       return new Object[] {
-        PropertyBeanInitializer.class,
+        ExpressionBeanInitializer.class,
         StaticBeanInitializer.class,
         FieldBeanInitializer.class };
     }

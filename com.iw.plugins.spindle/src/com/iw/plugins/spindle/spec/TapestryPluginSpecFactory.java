@@ -42,7 +42,6 @@ import net.sf.tapestry.spec.SpecFactory;
 
 import com.iw.plugins.spindle.spec.bean.PluginExpressionBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginFieldBeanInitializer;
-import com.iw.plugins.spindle.spec.bean.PluginPropertyBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginStaticBeanInitializer;
 
 public class TapestryPluginSpecFactory extends SpecFactory {
@@ -80,11 +79,6 @@ public class TapestryPluginSpecFactory extends SpecFactory {
 
   public ParameterSpecification createParameterSpecification() {
     return new PluginParameterSpecification();
-  }
-
-  /** @deprecated **/
-  public IBeanInitializer createPropertyBeanInitializer(String propertyName, String propertyPath) {
-    return new PluginPropertyBeanInitializer(propertyName, propertyPath);
   }
 
   public IBeanInitializer createStaticBeanInitializer(String propertyName, Object staticValue) {

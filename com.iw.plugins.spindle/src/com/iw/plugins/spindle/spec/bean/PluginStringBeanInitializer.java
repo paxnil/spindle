@@ -65,8 +65,8 @@ public class PluginStringBeanInitializer
     propertySupport = new PropertyChangeSupport(this);
   }
 
-  public PluginPropertyBeanInitializer deepCopy() {
-    return new PluginPropertyBeanInitializer(getPropertyName(), getKey());
+  public PluginStringBeanInitializer deepCopy() {
+    return new PluginStringBeanInitializer(getPropertyName(), getKey());
   }
 
   public String getKey() {
