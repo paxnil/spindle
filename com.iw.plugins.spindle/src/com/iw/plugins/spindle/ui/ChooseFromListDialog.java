@@ -35,9 +35,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.IDialogFieldChangedListener;
-import com.iw.plugins.spindle.dialogfields.RadioDialogField;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
+import com.iw.plugins.spindle.ui.dialogfields.RadioDialogField;
 
 public class ChooseFromListDialog extends Dialog implements IDialogFieldChangedListener {
 

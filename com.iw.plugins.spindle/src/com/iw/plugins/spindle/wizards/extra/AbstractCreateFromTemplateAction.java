@@ -5,7 +5,6 @@ import java.util.Iterator;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -16,7 +15,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.wizards.NewTapestryElementWizard;
 
 /**

@@ -26,12 +26,18 @@
 package com.iw.plugins.spindle.editors;
 
 import org.eclipse.pde.internal.ui.editor.PDEFormSection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
+import org.eclipse.update.ui.forms.internal.ScrollableSectionForm;
 
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 
 public abstract class SpindleFormSection extends PDEFormSection {
+	
+  private Composite container;
 
   /**
    * Constructor for TapestryFormSection
@@ -43,11 +49,49 @@ public abstract class SpindleFormSection extends PDEFormSection {
   /**
    * @see FormSection#createClient(Composite, FormWidgetFactory)
    */ 
-  public abstract Composite createClient(Composite arg0, FormWidgetFactory arg1);
+  public Composite createClient(Composite parent, FormWidgetFactory factory) {
+  	container = createClientContainer(parent, factory);
+  	return container;
+  }
+  
+  public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
+  	throw new Error("implement in subclasses!");
+  }
   
   public boolean canUpdate() {
   	return ((BaseTapestryModel)getFormPage().getModel()).isLoaded();
   }
+
+  public void layout() {
+  	
+  	if (container == null) {
+  		
+  		return;
+  	}
+  	
+  	SpindleFormPage page = (SpindleFormPage)getFormPage();
+  	Control pageControl = page.getControl();
+  	
+  	Point pageSize = pageControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+  	
+  	ScrollableSectionForm form = (ScrollableSectionForm)getFormPage().getForm();
+  	Control formControl = form.getControl();
+
+  	
+    container.getParent().pack(true);
+    container.getParent().getParent().layout(true);
+    
+  	Point newSize = formControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+  	
+  	if (newSize.y >= pageSize.y) {
+  		
+  		form.updateScrollBars();
+  	}
+  	
+
+  }
+
+
 
 }
 

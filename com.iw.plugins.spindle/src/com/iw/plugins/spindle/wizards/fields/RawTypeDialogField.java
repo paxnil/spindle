@@ -36,15 +36,14 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.StringButtonField;
-import com.iw.plugins.spindle.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 import com.iw.plugins.spindle.util.Utils;
 
 public class RawTypeDialogField extends StringButtonField {

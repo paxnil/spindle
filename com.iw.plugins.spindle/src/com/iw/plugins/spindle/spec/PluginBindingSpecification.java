@@ -27,19 +27,58 @@ package com.iw.plugins.spindle.spec;
 
 import java.io.PrintWriter;
 
-import com.iw.plugins.spindle.util.Indenter;
 import net.sf.tapestry.spec.BindingSpecification;
 import net.sf.tapestry.spec.BindingType;
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
-public class PluginBindingSpecification extends BindingSpecification {
+import com.iw.plugins.spindle.ui.descriptors.FieldPropertyDescriptor;
+import com.iw.plugins.spindle.util.Indenter;
 
+public class PluginBindingSpecification
+  extends BindingSpecification
+  implements IIdentifiable, IPropertySource {
+
+  private String identifier;
+  private IBindingHolder parent;
 
   /**
    * Constructor for PluginBindingSpecification
    */
   public PluginBindingSpecification(BindingType type, String value) {
     super(type, value);
-  }   
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.spec.IPluginChildSpecification#getIdentifier()
+   */
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.spec.IPluginChildSpecification#getParent()
+   */
+  public Object getParent() {
+    return parent;
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.spec.IPluginChildSpecification#setIdentifier()
+   */
+  public void setIdentifier(String id) {
+
+    identifier = id;
+
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.spec.IPluginChildSpecification#setParent(Object)
+   */
+  public void setParent(Object parent) {
+    this.parent = (IBindingHolder) parent;
+  }
 
   public void write(String name, PrintWriter writer, int indent, boolean isDTD12) {
     Indenter.printIndented(writer, indent, "<");
@@ -65,6 +104,137 @@ public class PluginBindingSpecification extends BindingSpecification {
     }
     writer.print(getValue());
     writer.println("\"/>");
+  }
+
+  private IPropertyDescriptor[] bindingDescriptors =
+    {
+      new TextPropertyDescriptor("name", "Name"),
+      new TextPropertyDescriptor("value", "Property Path")};
+
+  private IPropertyDescriptor[] staticDescriptors =
+    { new TextPropertyDescriptor("name", "Name"), new TextPropertyDescriptor("value", "Value")};
+
+  private IPropertyDescriptor[] inheritDescriptors =
+    {
+      new TextPropertyDescriptor("name", "Name"),
+      new TextPropertyDescriptor("value", "Parameter Name")};
+
+  private IPropertyDescriptor[] fieldDescriptors =
+    { new FieldPropertyDescriptor("value", "Field Name")};
+
+  private IPropertyDescriptor[] stringDescriptiors =
+    { new TextPropertyDescriptor("name", "Name"), new TextPropertyDescriptor("value", "Key")};
+
+  /**
+   * @see org.eclipse.ui.views.properties.IPropertySource#getEditableValue()
+   */
+  public Object getEditableValue() {
+    return identifier;
+  }
+
+  /**
+   * @see org.eclipse.ui.views.properties.IPropertySource#getPropertyDescriptors()
+   */
+  public IPropertyDescriptor[] getPropertyDescriptors() {
+    BindingType type = getType();
+
+    if (type == BindingType.INHERITED) {
+      return inheritDescriptors;
+    }
+    if (type == BindingType.STATIC) {
+      return staticDescriptors;
+    }
+    if (type == BindingType.DYNAMIC) {
+      return bindingDescriptors;
+    }
+    if (type == BindingType.FIELD) {
+      return fieldDescriptors;
+    }
+    if (type == BindingType.STRING) {
+      return stringDescriptiors;
+    }
+    return null;
+  }
+  /**
+   * @see org.eclipse.ui.views.properties.IPropertySource#getPropertyValue(Object)
+   */
+  public Object getPropertyValue(Object key) {
+
+    if ("name".equals(key)) {
+
+      return identifier;
+
+    } else if ("value".equals(key)) {
+
+      return getValue();
+    }
+
+    return "ignore this";
+  }
+
+  /**
+   * @see org.eclipse.ui.views.properties.IPropertySource#isPropertySet(Object)
+   */
+  public boolean isPropertySet(Object key) {
+    if ("name".equals(key)) {
+
+      return identifier != null;
+
+    } else if ("value".equals(key)) {
+
+      return getValue() != null;
+
+    } else {
+
+      return true;
+    }
+  }
+
+  /**
+   * @see org.eclipse.ui.views.properties.IPropertySource#resetPropertyValue(Object)
+   */
+  public void resetPropertyValue(Object key) {
+    if ("path".equals(key)) {
+
+      setValue("fill in value");
+    }
+  }
+  /**
+   * @see org.eclipse.ui.views.properties.IPropertySource#setPropertyValue(Object, Object)
+   */
+  public void setPropertyValue(Object key, Object value) {
+  	 if ("name".equals(key)) {
+  	 	
+        String oldName = identifier;        
+        String newName = (String) value;
+        
+        if ("".equals(newName.trim())) {
+        	
+          newName = oldName;
+          
+        } else if (parent.getBinding(newName) != null) {
+        	
+          newName = "Copy of " + newName;
+          
+        }
+        
+        identifier = newName;
+        parent.removeBinding(oldName);
+        parent.setBinding(identifier, this);
+        
+      } else if ("value".equals(key)) {
+      	
+        setValue((String) value);
+        parent.setBinding(identifier, this);
+      }
+  }
+
+  /**
+   * Method deepCopy.
+   * @return PluginBindingSpecification
+   */
+  public PluginBindingSpecification deepCopy() {
+  	return new PluginBindingSpecification(getType(), getValue());
   }
 
 }

@@ -69,7 +69,7 @@ public class OverviewComponentsSection extends BasicLinksSection {
     super.update(removePrevious);
   }
 
-  protected SpindleFormPage getMorePage() {
+  protected SpindleFormPage getGotoPage() {
     return (SpindleFormPage)getFormPage().getEditor().getPage(JWCMultipageEditor.COMPONENTS);
   }
 
@@ -84,7 +84,7 @@ public class OverviewComponentsSection extends BasicLinksSection {
 
   protected class ComponentsHyperLinkAdapter extends HyperLinkAdapter {
     public void linkActivated(Control parent) {
-      final SpindleFormPage targetPage = getMorePage();
+      final SpindleFormPage targetPage = getGotoPage();
       if (targetPage == null) {
         return;
       }

@@ -208,7 +208,7 @@ public class Utils {
   // this could use some refactoring for sure!
   public static void copyContainedComponentTo(
     String sourceName,
-    PluginContainedComponent sourceComponent,
+    PluginContainedComponent componentClone,
     TapestryComponentModel target)
     throws Exception {
     String useName = sourceName;
@@ -223,19 +223,8 @@ public class Utils {
     } else {
       sourceName = sourceName + 1;
     }
-    PluginContainedComponent resultComponent = new PluginContainedComponent();
-    resultComponent.setType(sourceComponent.getType());
-    resultComponent.setCopyOf(sourceComponent.getCopyOf());
-    Iterator iter1 = sourceComponent.getBindingNames().iterator();
-    while (iter1.hasNext()) {
-      String parameter = (String) iter1.next();
-      PluginBindingSpecification binding =
-        (PluginBindingSpecification) sourceComponent.getBinding(parameter);
-      PluginBindingSpecification bindingCopy =
-        new PluginBindingSpecification(binding.getType(), binding.getValue());
-      resultComponent.setBinding(parameter, bindingCopy);
-    }
-    targetSpec.addComponent(useName, resultComponent);
+    
+    targetSpec.addComponent(useName, componentClone);
     target.setOutOfSynch(true);
   }
 

@@ -25,32 +25,26 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.model;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.sf.tapestry.parse.SpecificationParser;
+import net.sf.tapestry.spec.PageSpecification;
+import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.util.SourceWriter;
-
-import net.sf.tapestry.parse.SpecificationParser;
-import net.sf.tapestry.spec.PageSpecification;
-import net.sf.tapestry.util.xml.DocumentParseException;
 
 public class TapestryApplicationModel extends BaseTapestryModel implements PropertyChangeListener {
 
@@ -71,32 +65,47 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
   }
 
   public void load(final InputStream source) throws CoreException {
-      TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
-        public void run(IProgressMonitor monitor) { 
+  	final TapestryApplicationModel thisModel = this;
+    TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
+      public void run(IProgressMonitor monitor) {
 
-          removeAllProblemMarkers();
-          if (applicationSpec != null) {
-            applicationSpec.removePropertyChangeListener(TapestryApplicationModel.this);
-          }
-          try {
-          	SpecificationParser parser = (SpecificationParser)TapestryPlugin.getTapestryModelManager().getParserFor("application");
-            applicationSpec =
-              (PluginApplicationSpecification) parser.parseApplicationSpecification(
-                source,
-                getUnderlyingStorage().getName());
-            applicationSpec.addPropertyChangeListener(TapestryApplicationModel.this);
-            loaded = true;
-            editable = !(getUnderlyingStorage().isReadOnly());
-            dirty = false;
-            fireModelObjectChanged(applicationSpec, "applicationSpec");
-          } catch (DocumentParseException dpex) {
-            addProblemMarker(dpex.getMessage(), dpex.getLineNumber(), dpex.getColumn(), IMarker.SEVERITY_ERROR);
-            loaded = false;
+        removeAllProblemMarkers();
+        if (applicationSpec != null) {
 
-          }
+          applicationSpec.removePropertyChangeListener(TapestryApplicationModel.this);
+          applicationSpec.setParent(null);
         }
-      }, null);
-  
+        try {
+
+          SpecificationParser parser =
+            (SpecificationParser) TapestryPlugin.getTapestryModelManager().getParserFor(
+              "application");
+          applicationSpec =
+            (PluginApplicationSpecification) parser.parseApplicationSpecification(
+              source,
+              getUnderlyingStorage().getName());
+          applicationSpec.addPropertyChangeListener(TapestryApplicationModel.this);
+          loaded = true;
+          editable = !(getUnderlyingStorage().isReadOnly());
+          dirty = false;
+
+          applicationSpec.setIdentifier(getUnderlyingStorage().getName());
+          applicationSpec.setParent(thisModel);
+          fireModelObjectChanged(applicationSpec, "applicationSpec");
+
+        } catch (DocumentParseException dpex) {
+
+          addProblemMarker(
+            dpex.getMessage(),
+            dpex.getLineNumber(),
+            dpex.getColumn(),
+            IMarker.SEVERITY_ERROR);
+          loaded = false;
+
+        }
+      }
+    }, null);
+
   }
 
   /**
@@ -111,6 +120,7 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
 
   public void setDescription(String description) {
     PluginApplicationSpecification spec = getApplicationSpec();
+
     if (spec != null) {
       spec.setDescription(description);
       fireModelObjectChanged(this, "description");
@@ -124,147 +134,147 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
     }
     return "";
   }
-  
+
   public ReferenceInfo resolveReferences(boolean reverse) {
-  	return null;
+    return null;
   }
 
-//  public ReferenceInfo resolveReferences(boolean reverse) {
-//    try {
-//      if (!loaded) {
-//        load();
-//      }
-//    } catch (CoreException e) {
-//      return new ReferenceInfo(new ArrayList(), new ArrayList(), reverse);
-//    }
-//    if (!reverse) {
-//
-//      // find all components that are pages or that use my aliases!
-//
-//      ArrayList pagesAndComponents = new ArrayList();
-//      PluginApplicationSpecification spec = getApplicationSpec();
-//      Iterator iter = spec.getPageNames().iterator();
-//      while (iter.hasNext()) {
-//        String name = (String) iter.next();
-//        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
-//        PageSpecification pageSpec = spec.getPageSpecification(name);
-//        holder.name = pageSpec.getSpecificationPath();
-//        holder.description = "[page name =" + name + "] " + holder.name;
-//        pagesAndComponents.add(holder);
-//      }
-//      iter = spec.getComponentMapAliases().iterator();
-//      while (iter.hasNext()) {
-//        String alias = (String) iter.next();
-//        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
-//        holder.name = spec.getComponentAlias(alias);
-//        holder.description = "[component providing alias=" + alias + "] " + holder.name;
-//        pagesAndComponents.add(holder);
-//      }
-//      return resolveForwardReferences(pagesAndComponents);
-//    } else {
-//
-//      // find all components that provide my aliases!
-//      return resolveReverseReferences();
-//    }
-//  }
+  //  public ReferenceInfo resolveReferences(boolean reverse) {
+  //    try {
+  //      if (!loaded) {
+  //        load();
+  //      }
+  //    } catch (CoreException e) {
+  //      return new ReferenceInfo(new ArrayList(), new ArrayList(), reverse);
+  //    }
+  //    if (!reverse) {
+  //
+  //      // find all components that are pages or that use my aliases!
+  //
+  //      ArrayList pagesAndComponents = new ArrayList();
+  //      PluginApplicationSpecification spec = getApplicationSpec();
+  //      Iterator iter = spec.getPageNames().iterator();
+  //      while (iter.hasNext()) {
+  //        String name = (String) iter.next();
+  //        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
+  //        PageSpecification pageSpec = spec.getPageSpecification(name);
+  //        holder.name = pageSpec.getSpecificationPath();
+  //        holder.description = "[page name =" + name + "] " + holder.name;
+  //        pagesAndComponents.add(holder);
+  //      }
+  //      iter = spec.getComponentMapAliases().iterator();
+  //      while (iter.hasNext()) {
+  //        String alias = (String) iter.next();
+  //        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
+  //        holder.name = spec.getComponentAlias(alias);
+  //        holder.description = "[component providing alias=" + alias + "] " + holder.name;
+  //        pagesAndComponents.add(holder);
+  //      }
+  //      return resolveForwardReferences(pagesAndComponents);
+  //    } else {
+  //
+  //      // find all components that provide my aliases!
+  //      return resolveReverseReferences();
+  //    }
+  //  }
 
-//  private ReferenceInfo resolveForwardReferences(List pagesAndComponents) {
-//    ArrayList resolved = new ArrayList();
-//    ArrayList unresolved = new ArrayList();
-//    Iterator iter = pagesAndComponents.iterator();
-//    while (iter.hasNext()) {
-//      ReferenceInfo.ReferenceHolder holder = (ReferenceInfo.ReferenceHolder) iter.next();
-//      IStorage[] resolvedArray =
-//        TapestryPlugin.getDefault().resolveTapestryComponent(getUnderlyingStorage(), holder.name);
-//      if (resolvedArray.length > 0) {
-//        holder.model = (BaseTapestryModel) TapestryPlugin.getTapestryModelManager().getModel(resolvedArray[0]);
-//        resolved.add(holder);
-//      } else {
-//        unresolved.add(holder);
-//      }
-//    }
-//    return new ReferenceInfo(resolved, unresolved, false);
-//  }
+  //  private ReferenceInfo resolveForwardReferences(List pagesAndComponents) {
+  //    ArrayList resolved = new ArrayList();
+  //    ArrayList unresolved = new ArrayList();
+  //    Iterator iter = pagesAndComponents.iterator();
+  //    while (iter.hasNext()) {
+  //      ReferenceInfo.ReferenceHolder holder = (ReferenceInfo.ReferenceHolder) iter.next();
+  //      IStorage[] resolvedArray =
+  //        TapestryPlugin.getDefault().resolveTapestryComponent(getUnderlyingStorage(), holder.name);
+  //      if (resolvedArray.length > 0) {
+  //        holder.model = (BaseTapestryModel) TapestryPlugin.getTapestryModelManager().getModel(resolvedArray[0]);
+  //        resolved.add(holder);
+  //      } else {
+  //        unresolved.add(holder);
+  //      }
+  //    }
+  //    return new ReferenceInfo(resolved, unresolved, false);
+  //  }
 
-//  private ReferenceInfo resolveReverseReferences() {
-//    ArrayList resolved = new ArrayList();
-//    Set aliases = getApplicationSpec().getComponentMapAliases();
-//    Iterator allComponents = ModelUtils.getComponentModels();
-//    if (!allComponents.hasNext() || aliases.isEmpty()) {
-//      return new ReferenceInfo(resolved, new ArrayList(), true);
-//    }
-//    while (allComponents.hasNext()) {
-//      TapestryComponentModel model = (TapestryComponentModel) allComponents.next();
-//      PluginComponentSpecification componentSpec = model.getComponentSpecification();
-//      ArrayList found = new ArrayList();
-//      Iterator toCheck = aliases.iterator();
-//      while (toCheck.hasNext()) {
-//        String alias = (String) toCheck.next();
-//        if (componentSpec != null && componentSpec.usesAlias(alias)) {
-//          found.add(alias);
-//        }
-//      }
-//      if (found.isEmpty()) {
-//        continue;
-//      }
-//      ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
-//      holder.description = " [uses alias(es)=";
-//      Iterator foundAliases = found.iterator();
-//      while (foundAliases.hasNext()) {
-//        holder.description += (String) foundAliases.next();
-//        if (foundAliases.hasNext()) {
-//          holder.description += ", ";
-//        }
-//      }
-//      holder.description += "]";
-//      IStorage storage = model.getUnderlyingStorage();
-//      if (storage instanceof JarEntryFile) {
-//        holder.name = ((JarEntryFile) storage).toString();
-//      } else {
-//        holder.name = model.getSpecificationLocation();
-//      }
-//      holder.description = holder.name + holder.description;
-//      holder.model = model;
-//      resolved.add(holder);
-//    }
-    /*
-    Iterator aliases = getApplicationSpec().getComponentMapAliases().iterator();
-    List allComponents = TapestryPlugin.getTapestryModelManager().getAllComponents(getUnderlyingStorage());
-    if (allComponents.isEmpty()) {
-      return new ReferenceInfo(unresolvedAliases, resolvedAliases, true);
-    }
-    while (aliases.hasNext()) {
-      String alias = (String) aliases.next();
-      String desc = "[uses alias=" + alias + "] ";
-      ArrayList found = new ArrayList();
-      Iterator foundComponents = allComponents.iterator();
-      while (foundComponents.hasNext()) {
-        TapestryComponentModel component = (TapestryComponentModel) foundComponents.next();
-        if (!component.getComponentSpecification().usesAlias(alias)) {
-          continue;
-        }
-        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
-        IStorage storage = component.getUnderlyingStorage();
-        if (storage instanceof JarEntryFile) {
-          holder.name = ((JarEntryFile) storage).toString();
-        } else {
-          holder.name = component.getSpecificationLocation();
-        }
-        holder.description = desc + holder.name;
-        holder.model = component;
-        found.add(holder);
-    
+  //  private ReferenceInfo resolveReverseReferences() {
+  //    ArrayList resolved = new ArrayList();
+  //    Set aliases = getApplicationSpec().getComponentMapAliases();
+  //    Iterator allComponents = ModelUtils.getComponentModels();
+  //    if (!allComponents.hasNext() || aliases.isEmpty()) {
+  //      return new ReferenceInfo(resolved, new ArrayList(), true);
+  //    }
+  //    while (allComponents.hasNext()) {
+  //      TapestryComponentModel model = (TapestryComponentModel) allComponents.next();
+  //      PluginComponentSpecification componentSpec = model.getComponentSpecification();
+  //      ArrayList found = new ArrayList();
+  //      Iterator toCheck = aliases.iterator();
+  //      while (toCheck.hasNext()) {
+  //        String alias = (String) toCheck.next();
+  //        if (componentSpec != null && componentSpec.usesAlias(alias)) {
+  //          found.add(alias);
+  //        }
+  //      }
+  //      if (found.isEmpty()) {
+  //        continue;
+  //      }
+  //      ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
+  //      holder.description = " [uses alias(es)=";
+  //      Iterator foundAliases = found.iterator();
+  //      while (foundAliases.hasNext()) {
+  //        holder.description += (String) foundAliases.next();
+  //        if (foundAliases.hasNext()) {
+  //          holder.description += ", ";
+  //        }
+  //      }
+  //      holder.description += "]";
+  //      IStorage storage = model.getUnderlyingStorage();
+  //      if (storage instanceof JarEntryFile) {
+  //        holder.name = ((JarEntryFile) storage).toString();
+  //      } else {
+  //        holder.name = model.getSpecificationLocation();
+  //      }
+  //      holder.description = holder.name + holder.description;
+  //      holder.model = model;
+  //      resolved.add(holder);
+  //    }
+  /*
+  Iterator aliases = getApplicationSpec().getComponentMapAliases().iterator();
+  List allComponents = TapestryPlugin.getTapestryModelManager().getAllComponents(getUnderlyingStorage());
+  if (allComponents.isEmpty()) {
+    return new ReferenceInfo(unresolvedAliases, resolvedAliases, true);
+  }
+  while (aliases.hasNext()) {
+    String alias = (String) aliases.next();
+    String desc = "[uses alias=" + alias + "] ";
+    ArrayList found = new ArrayList();
+    Iterator foundComponents = allComponents.iterator();
+    while (foundComponents.hasNext()) {
+      TapestryComponentModel component = (TapestryComponentModel) foundComponents.next();
+      if (!component.getComponentSpecification().usesAlias(alias)) {
+        continue;
       }
-      if (found.isEmpty()) {
-        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
-        holder.description = "[no components found using alias=" + alias + "]";
-        unresolvedAliases.add(holder);       
+      ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
+      IStorage storage = component.getUnderlyingStorage();
+      if (storage instanceof JarEntryFile) {
+        holder.name = ((JarEntryFile) storage).toString();
       } else {
-      	resolvedAliases.addAll(found);
+        holder.name = component.getSpecificationLocation();
       }
-    }*/
-//    return new ReferenceInfo(resolved, new ArrayList(), true);
-//  }
+      holder.description = desc + holder.name;
+      holder.model = component;
+      found.add(holder);
+  
+    }
+    if (found.isEmpty()) {
+      ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
+      holder.description = "[no components found using alias=" + alias + "]";
+      unresolvedAliases.add(holder);       
+    } else {
+    	resolvedAliases.addAll(found);
+    }
+  }*/
+  //    return new ReferenceInfo(resolved, new ArrayList(), true);
+  //  }
 
   public boolean containsReference(String name) {
     PluginApplicationSpecification spec = getApplicationSpec();
@@ -306,10 +316,10 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
    * @see com.iw.plugins.spindle.model.ITapestryModel#getDTDVersion()
    */
   public String getDTDVersion() {
-  	PluginApplicationSpecification spec = getApplicationSpec();
-  	if (spec != null) {
-  		return spec.getDTDVersion();
-  	}
+    PluginApplicationSpecification spec = getApplicationSpec();
+    if (spec != null) {
+      return spec.getDTDVersion();
+    }
     return null;
   }
 

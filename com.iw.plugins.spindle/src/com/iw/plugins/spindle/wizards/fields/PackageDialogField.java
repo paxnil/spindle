@@ -37,9 +37,9 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.StringButtonDefaultField;
-import com.iw.plugins.spindle.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.ui.dialogfields.StringButtonDefaultField;
 
 public class PackageDialogField extends StringButtonDefaultField {
 

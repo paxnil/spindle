@@ -30,8 +30,8 @@ import java.beans.PropertyChangeSupport;
 import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.StringField;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.StringField;
 
 public abstract class AbstractNameField extends StringField {
 

@@ -26,14 +26,10 @@
 package com.iw.plugins.spindle.model.manager;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.pde.core.IModel;
 
 import com.iw.plugins.spindle.model.BaseTapestryModel;

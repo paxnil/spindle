@@ -43,7 +43,6 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
-import com.iw.plugins.spindle.util.JarEntryFileFaker;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 /**

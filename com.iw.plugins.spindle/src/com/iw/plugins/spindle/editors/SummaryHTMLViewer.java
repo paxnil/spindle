@@ -35,8 +35,8 @@ import org.eclipse.jface.text.rules.RuleBasedPartitioner;
 import org.eclipse.pde.internal.ui.editor.text.PDEPartitionScanner;
 import org.eclipse.swt.widgets.Composite;
 
-import com.iw.plugins.spindle.html.TapestryPartitionScanner;
-import com.iw.plugins.spindle.html.TapestrySourceConfiguration;
+import com.iw.plugins.spindle.html.TapestryHTMLPartitionScanner;
+import com.iw.plugins.spindle.html.TapestryHTMLSourceConfiguration;
 import com.iw.plugins.spindle.ui.text.ColorManager;
 
 public class SummaryHTMLViewer extends SummarySourceViewer {
@@ -46,12 +46,12 @@ public class SummaryHTMLViewer extends SummarySourceViewer {
    */
   public SummaryHTMLViewer(Composite parent) {
     super(parent);
-    configure(new TapestrySourceConfiguration(new ColorManager()));
+    configure(new TapestryHTMLSourceConfiguration(new ColorManager()));
     ITextHover hover = new Hover();
-    setTextHover(hover, TapestryPartitionScanner.HTML_COMMENT);
-    setTextHover(hover, TapestryPartitionScanner.HTML_TAG);
-    setTextHover(hover, TapestryPartitionScanner.JWC_TAG);
-    setTextHover(hover, TapestryPartitionScanner.JWCID_TAG);
+    setTextHover(hover, TapestryHTMLPartitionScanner.HTML_COMMENT);
+    setTextHover(hover, TapestryHTMLPartitionScanner.HTML_TAG);
+    setTextHover(hover, TapestryHTMLPartitionScanner.JWC_TAG);
+    setTextHover(hover, TapestryHTMLPartitionScanner.JWCID_TAG);
     setTextHover(hover, PDEPartitionScanner.XML_COMMENT);
     setTextHover(hover, PDEPartitionScanner.XML_DEFAULT);
     setTextHover(hover, PDEPartitionScanner.XML_TAG);
@@ -61,12 +61,12 @@ public class SummaryHTMLViewer extends SummarySourceViewer {
   protected IDocumentPartitioner createDocumentPartitioner() {
     RuleBasedPartitioner partitioner =
       new RuleBasedPartitioner(
-        new TapestryPartitionScanner(),
+        new TapestryHTMLPartitionScanner(),
         new String[] {
-          TapestryPartitionScanner.JWC_TAG,
-          TapestryPartitionScanner.JWCID_TAG,
-          TapestryPartitionScanner.HTML_TAG, 
-          TapestryPartitionScanner.HTML_COMMENT });
+          TapestryHTMLPartitionScanner.JWC_TAG,
+          TapestryHTMLPartitionScanner.JWCID_TAG,
+          TapestryHTMLPartitionScanner.HTML_TAG, 
+          TapestryHTMLPartitionScanner.HTML_COMMENT });
     return partitioner;
   }
 

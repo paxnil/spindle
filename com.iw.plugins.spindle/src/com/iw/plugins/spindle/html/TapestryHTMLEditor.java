@@ -32,9 +32,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UTFDataFormatException;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
+import net.sf.tapestry.parse.ITemplateParserDelegate;
+import net.sf.tapestry.parse.TemplateParseException;
+import net.sf.tapestry.parse.TemplateParser;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -51,7 +55,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
@@ -64,7 +67,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.pde.core.IModel;
 import org.eclipse.pde.internal.core.IModelProviderEvent;
 import org.eclipse.pde.internal.core.IModelProviderListener;
-import org.eclipse.pde.internal.core.ModelProviderEvent;
 import org.eclipse.pde.internal.ui.editor.SystemFileDocumentProvider;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyledText;
@@ -82,6 +84,7 @@ import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.StorageDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
@@ -94,13 +97,10 @@ import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.ui.ToolTipHandler;
-import com.iw.plugins.spindle.ui.text.*;
+import com.iw.plugins.spindle.ui.text.ColorManager;
+import com.iw.plugins.spindle.ui.text.ISpindleColorManager;
 import com.iw.plugins.spindle.util.Utils;
-
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
-import net.sf.tapestry.parse.ITemplateParserDelegate;
-import net.sf.tapestry.parse.TemplateParseException;
-import net.sf.tapestry.parse.TemplateParser;
 
 public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModelProviderListener {
 
@@ -118,7 +118,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
    */
   public TapestryHTMLEditor() {
     super();
-    setSourceViewerConfiguration(new TapestrySourceConfiguration(colorManager));
+    setSourceViewerConfiguration(new TapestryHTMLSourceConfiguration(colorManager));
   }
 
   public void init(IEditorSite site, IEditorInput input) throws PartInitException {
@@ -139,8 +139,8 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     //text.setKeyBinding(131072, ST.CUT);
     text.setKeyBinding(131072, ST.COPY);
     // for debugging the partitioning only		
-    //		handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
-    //		handler.activateHoverHelp(text);
+//    		handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
+//    		handler.activateHoverHelp(text);
   }
 
   protected void doSetInput(IEditorInput input) throws CoreException {
@@ -201,7 +201,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
         public void run(IProgressMonitor monitor) {
           IEditorInput input = getEditorInput();
           if (input instanceof IStorageEditorInput) {
-          	return;
+            return;
           }
           IFile file = (IFile) input.getAdapter(IFile.class);
           removeAllProblemMarkers(file);
@@ -236,19 +236,17 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     IStorage storage = (IStorage) getEditorInput().getAdapter(IStorage.class);
     if (storage instanceof IResource) {
       try {
-        IMarker marker =
-          ((IResource) storage).createMarker("com.iw.plugins.spindle.tapestryproblem");
-        marker.setAttribute(IMarker.MESSAGE, message);
-        marker.setAttribute(IMarker.SEVERITY, severity);
-        marker.setAttribute(IMarker.LINE_NUMBER, new Integer(line));
-        marker.setAttribute(IMarker.CHAR_START, -1);
-        marker.setAttribute(IMarker.CHAR_END, -1);
-        //IDocument document = getDocumentProvider().getDocument(getEditorInput());
-        //ResourceMarkerAnnotationModel annotater = (ResourceMarkerAnnotationModel)getDocumentProvider().getAnnotationModel(getEditorInput());
-        //annotater.updateMarkers(document);
-
+        Map map = new HashMap();
+        map.put(IMarker.MESSAGE, message);
+        map.put(IMarker.SEVERITY, new Integer(severity));
+        map.put(IMarker.LINE_NUMBER, new Integer(line));
+        map.put(IMarker.CHAR_START, new Integer(column));
+        map.put(IMarker.CHAR_END, new Integer(column + 1));
+        MarkerUtilities.createMarker(
+          (IResource) storage,
+          map,
+          "com.iw.plugins.spindle.tapestryproblem");
       } catch (CoreException corex) {
-        corex.printStackTrace();
       }
     }
 
@@ -280,12 +278,12 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
   protected IDocumentPartitioner createDocumentPartitioner() {
     RuleBasedPartitioner partitioner =
       new RuleBasedPartitioner(
-        new TapestryPartitionScanner(),
+        new TapestryHTMLPartitionScanner(),
         new String[] {
-          TapestryPartitionScanner.JWC_TAG,
-          TapestryPartitionScanner.JWCID_TAG,
-          TapestryPartitionScanner.HTML_TAG,
-          TapestryPartitionScanner.HTML_COMMENT });
+          TapestryHTMLPartitionScanner.JWC_TAG,
+          TapestryHTMLPartitionScanner.JWCID_TAG,
+          TapestryHTMLPartitionScanner.HTML_TAG,
+          TapestryHTMLPartitionScanner.HTML_COMMENT });
     return partitioner;
   }
   protected IDocumentProvider createDocumentProvider(IEditorInput input) {
@@ -294,25 +292,23 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     if (input instanceof JarEntryEditorInput) {
 
       documentProvider = new HTMLStorageDocumentProvider();
-      
+
     } else {
 
       Object element = input.getAdapter(IResource.class);
-      
+
       if (element instanceof IFile) {
-      	
+
         documentProvider = new UTF8FileDocumentProvider();
-        
+
       } else if (element instanceof File) {
-      	
+
         documentProvider = new SystemFileDocumentProvider(createDocumentPartitioner(), "UTF8");
       }
     }
     return documentProvider;
 
   }
-  
-  
 
   class UTF8FileDocumentProvider extends FileDocumentProvider {
     public IDocument createDocument(Object element) throws CoreException {
@@ -406,14 +402,14 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
       }
     }
   }
-  
+
   class HTMLStorageDocumentProvider extends StorageDocumentProvider {
-  	
-      /**
-     * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createDocument(Object)
-     */
+
+    /**
+    * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createDocument(Object)
+    */
     protected IDocument createDocument(Object element) throws CoreException {
-	  IDocument document = super.createDocument(element);
+      IDocument document = super.createDocument(element);
       if (document != null) {
         IDocumentPartitioner partitioner = createDocumentPartitioner();
         if (partitioner != null) {
@@ -424,7 +420,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
       return document;
     }
 
-}
+  }
 
   protected class OutlineSelectionListener implements ISelectionChangedListener {
     /**

@@ -35,10 +35,8 @@ public class DocumentationCellEditor extends EditableDialogCellEditor {
   private String title;
   private String message;
 
-  /**
-   * Constructor for TypeDialogCellEditor
-   */
-  protected DocumentationCellEditor(Composite parent, String dialogTitle, String dialogMessage) {
+ 
+  public DocumentationCellEditor(Composite parent, String dialogTitle, String dialogMessage) {
     super(parent);
     this.title = dialogTitle == null ? "Documentation" : dialogTitle;
     this.message = dialogMessage == null ? "Add some documentation" : dialogMessage;

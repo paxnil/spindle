@@ -33,7 +33,6 @@ import java.util.TreeSet;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.pde.internal.ui.editor.FormOutlinePage;
 import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
-import org.eclipse.pde.internal.ui.editor.FormOutlinePage.BasicLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.model.BaseTapestryModel;

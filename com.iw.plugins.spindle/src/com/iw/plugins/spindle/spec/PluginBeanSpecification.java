@@ -28,24 +28,34 @@ package com.iw.plugins.spindle.spec;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.*;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 
-import com.iw.plugins.spindle.bean.PluginFieldBeanInitializer;
-import com.iw.plugins.spindle.bean.PluginPropertyBeanInitializer;
-import com.iw.plugins.spindle.bean.PluginStaticBeanInitializer;
-import com.iw.plugins.spindle.util.Indenter;
 import net.sf.tapestry.bean.IBeanInitializer;
 import net.sf.tapestry.bean.PropertyBeanInitializer;
 import net.sf.tapestry.bean.StaticBeanInitializer;
 import net.sf.tapestry.spec.BeanLifecycle;
 import net.sf.tapestry.spec.BeanSpecification;
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
-public class PluginBeanSpecification extends BeanSpecification implements PropertyChangeListener {
+import com.iw.plugins.spindle.spec.bean.PluginFieldBeanInitializer;
+import com.iw.plugins.spindle.spec.bean.PluginPropertyBeanInitializer;
+import com.iw.plugins.spindle.spec.bean.PluginStaticBeanInitializer;
+import com.iw.plugins.spindle.ui.descriptors.ComboBoxPropertyDescriptor;
+import com.iw.plugins.spindle.ui.descriptors.TypeDialogPropertyDescriptor;
+import com.iw.plugins.spindle.util.Indenter;
+
+public class PluginBeanSpecification
+  extends BeanSpecification
+  implements PropertyChangeListener, IIdentifiable, IPropertySource {
 
   PropertyChangeSupport propertySupport;
+
+  private String identifier;
+  private PluginComponentSpecification parent;
   /**
    * Constructor for PluginBeanSpecification
    */
@@ -54,11 +64,34 @@ public class PluginBeanSpecification extends BeanSpecification implements Proper
     propertySupport = new PropertyChangeSupport(this);
   }
 
+  public boolean alreadyHasInitializer(String propertyName) {
+
+    Collection initializers = getInitializers();
+
+    if (initializers != null) {
+
+      for (Iterator iter = initializers.iterator(); iter.hasNext();) {
+
+        IBeanInitializer initer = (IBeanInitializer) iter.next();
+
+        if (initer.getPropertyName().equals(propertyName)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   public void addInitializer(IBeanInitializer initer) {
     super.addInitializer(initer);
     if (initer instanceof IPropertyChangeProvider) {
+
       ((IPropertyChangeProvider) initer).addPropertyChangeListener(this);
     }
+
+    IIdentifiable identifiable = (IIdentifiable) initer;
+    identifiable.setParent(this);
+
     propertySupport.firePropertyChange("beanInitializers", null, initializers);
   }
 
@@ -148,11 +181,10 @@ public class PluginBeanSpecification extends BeanSpecification implements Proper
       Indenter.printlnIndented(writer, indent + 2, StaticTypeValue.value);
       Indenter.printlnIndented(writer, indent + 1, "</static-value>");
     } else if (initializer instanceof PluginFieldBeanInitializer) {
-    	Indenter.printIndented(
+      Indenter.printIndented(
         writer,
         indent + 1,
-        "<field-value field-name=\""
-          + ((PluginFieldBeanInitializer) initializer).getFieldName());
+        "<field-value field-name=\"" + ((PluginFieldBeanInitializer) initializer).getFieldName());
       writer.println("\"/>");
     }
     Indenter.printlnIndented(writer, indent, "</set-property>");
@@ -201,4 +233,158 @@ public class PluginBeanSpecification extends BeanSpecification implements Proper
     String type;
     String value;
   }
+
+  public PluginBeanSpecification deepCopy() {
+    PluginBeanSpecification result = new PluginBeanSpecification(getClassName(), getLifecycle());
+
+    for (Iterator iter = getInitializers().iterator(); iter.hasNext();) {
+
+      Object initer = iter.next();
+
+      if (initer.getClass() == PluginStaticBeanInitializer.class) {
+
+        result.addInitializer(((PluginStaticBeanInitializer) initer).deepCopy());
+
+      } else if (initer.getClass() == PluginFieldBeanInitializer.class) {
+
+        result.addInitializer(((PluginFieldBeanInitializer) initer).deepCopy());
+
+      } else if (initer.getClass() == PluginPropertyBeanInitializer.class) {
+
+        result.addInitializer(((PluginPropertyBeanInitializer) initer).deepCopy());
+      }
+
+    }
+    return result;
+  }
+
+  /**
+   * Returns the identifier.
+   * @return String
+   */
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  /**
+   * Returns the parent.
+   * @return PluginComponentSpecification
+   */
+  public Object getParent() {
+    return parent;
+  }
+
+  /**
+   * Sets the identifier.
+   * @param identifier The identifier to set
+   */
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
+
+  /**
+   * Sets the parent.
+   * @param parent The parent to set
+   */
+  public void setParent(Object parent) {
+    this.parent = (PluginComponentSpecification) parent;
+  }
+
+  private BeanLifecycle[] lifecycles =
+    { BeanLifecycle.NONE, BeanLifecycle.PAGE, BeanLifecycle.REQUEST };
+
+  private String[] lifecycleLabels = { "None", "Page", "Request" };
+
+  private IPropertyDescriptor[] descriptors =
+    {
+      new TextPropertyDescriptor("name", "Name"),
+      new TypeDialogPropertyDescriptor("class", "Class"),
+      new ComboBoxPropertyDescriptor("lifecycle", "Lifecycle", lifecycleLabels, false)};
+
+  public void resetPropertyValue(Object key) {
+  }
+
+  public void setPropertyValue(Object key, Object value) {
+
+    PluginComponentSpecification parentSpec = (PluginComponentSpecification) parent;
+
+    if ("name".equals(key)) {
+
+      String oldName = this.identifier;
+      String newName = (String) value;
+
+      if ("".equals(newName.trim())) {
+
+        newName = oldName;
+
+      } else if (parentSpec.getBeanNames().contains(newName)) {
+
+        newName = newName + "Copy";
+        parentSpec.addBeanSpecification(newName, deepCopy());
+        return;
+      }
+      this.identifier = newName;
+      parentSpec.removeComponent(oldName);
+
+    } else if ("class".equals(key)) {
+
+      setClassName((String) value);
+
+    } else if ("lifecycle".equals(key)) {
+
+      int chosenIndex = ((Integer) value).intValue();
+      setLifecycle(lifecycles[chosenIndex]);
+    }
+
+    parentSpec.setBeanSpecification(this.identifier, this);
+
+  }
+
+  public boolean isPropertySet(Object key) {
+    if ("name".equals(key)) {
+
+      return true;
+
+    } else if ("class".equals(key)) {
+
+      return getClassName() != null;
+
+    }
+    return true;
+
+  }
+
+  public Object getPropertyValue(Object key) {
+    if ("name".equals(key)) {
+
+      return this.identifier;
+
+    } else if ("class".equals(key)) {
+
+      return getClassName();
+
+    } else if ("lifecycle".equals(key)) {
+
+      BeanLifecycle current = getLifecycle();
+
+      for (int i = 0; i < lifecycles.length; i++) {
+
+        if (lifecycles[i] == current) {
+
+          return new Integer(i);
+        }
+      }
+    }
+    return null;
+
+  }
+
+  public IPropertyDescriptor[] getPropertyDescriptors() {
+    return descriptors;
+  }
+
+  public Object getEditableValue() {
+    return identifier;
+  }
+
 }

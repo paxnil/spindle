@@ -25,14 +25,12 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.model.manager;
 
-import net.sf.tapestry.parse.SpecificationParser;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.spec.TapestryPluginFactory;
 
 /**
  * @author gwl

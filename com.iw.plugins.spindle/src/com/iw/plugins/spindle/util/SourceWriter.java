@@ -25,8 +25,9 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.util;
 
-import java.io.*;
-import java.security.AccessController;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 /** 
  * a subclass of PrintWriter that overrides the <code>println()</code>
  * method so I can control the line delimiter

@@ -51,7 +51,6 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.pde.core.IEditable;
 import org.eclipse.pde.core.IModel;
-import org.eclipse.pde.internal.core.IModelProvider;
 import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.pde.internal.ui.editor.PDEEditorContributor;
 import org.eclipse.pde.internal.ui.editor.PDEMultiPageXMLEditor;
@@ -192,10 +191,10 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
       } catch (InvocationTargetException x) {
         TapestryPlugin.getDefault().logException(x);
       }
-//      try {
-//        ((BaseTapestryModel) model).reload();
-//      } catch (Exception e) {
-//      }
+      try {
+        ((BaseTapestryModel) model).reload();
+      } catch (Exception e) {
+      }
       dirty = false;
     }
   }

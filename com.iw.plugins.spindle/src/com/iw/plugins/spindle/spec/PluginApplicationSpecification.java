@@ -25,33 +25,37 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.spec;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.*;
-import java.util.*;
-
-import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.util.Indenter;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.spec.ApplicationSpecification;
 import net.sf.tapestry.spec.PageSpecification;
 
-public class PluginApplicationSpecification extends ApplicationSpecification implements ITapestrySpecification {
+import com.iw.plugins.spindle.MessageUtil;
+import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.util.Indenter;
+
+public class PluginApplicationSpecification
+  extends ApplicationSpecification
+  implements IIdentifiable, PropertyChangeListener {
 
   private PropertyChangeSupport propertySupport;
 
-  //----- ITapestrySpecification --------
-
-  public String getDisplayName() {
-    return getName();
-  }
-
-  public String getInfo() {
-    return "";
-  }
-
-  //----- ITapestrySpecification --------
+  private String identifier;
+  private TapestryApplicationModel parent;
 
   public PluginApplicationSpecification() {
     propertySupport = new PropertyChangeSupport(this);
@@ -92,7 +96,9 @@ public class PluginApplicationSpecification extends ApplicationSpecification imp
 
   public boolean canRevertService(String name) {
     String useName = name.toLowerCase();
-    if (serviceMap != null && serviceMap.containsKey(useName) && getDefaultServiceMap().containsKey(useName)) {
+    if (serviceMap != null
+      && serviceMap.containsKey(useName)
+      && getDefaultServiceMap().containsKey(useName)) {
       return true;
     }
     return false;
@@ -151,12 +157,17 @@ public class PluginApplicationSpecification extends ApplicationSpecification imp
     return pageMap.keySet();
   }
 
-  public void setPageSpecification(String name, PluginPageSpecification spec) {
+  public void setPageSpecification(String name, PageSpecification spec) {
     if (pageMap == null) {
       super.setPageSpecification(name, spec);
     } else {
       pageMap.put(name, spec);
     }
+
+    PluginPageSpecification pageSpec = (PluginPageSpecification) spec;
+    pageSpec.setIdentifier(name);
+    pageSpec.setParent(this);
+    pageSpec.addPropertyChangeListener(this);
     propertySupport.firePropertyChange("pageMap", null, pageMap);
   }
 
@@ -332,7 +343,8 @@ public class PluginApplicationSpecification extends ApplicationSpecification imp
   }
 
   static public void writeMultiLine(PrintWriter writer, String message) {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(message.getBytes())));
+    BufferedReader reader =
+      new BufferedReader(new InputStreamReader(new ByteArrayInputStream(message.getBytes())));
     try {
       String line = reader.readLine();
       while (line != null) {
@@ -360,6 +372,43 @@ public class PluginApplicationSpecification extends ApplicationSpecification imp
   public void setDTDVersion(String dtdVersion) {
     super.setDTDVersion(dtdVersion);
     propertySupport.firePropertyChange("dtd", null, dtdVersion);
+  }
+
+  /**
+   * Returns the identifier.
+   * @return String
+   */
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  /**
+   * Returns the parent.
+   * @return TapestryApplicationModel
+   */
+  public Object getParent() {
+    return parent;
+  }
+
+  /**
+   * Sets the identifier.
+   * @param identifier The identifier to set
+   */
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
+
+  /**
+   * Sets the parent.
+   * @param parent The parent to set
+   */
+  public void setParent(Object parent) {
+    this.parent = (TapestryApplicationModel) parent;
+  }
+
+  
+  public void propertyChange(PropertyChangeEvent event) {
+    propertySupport.firePropertyChange(event);
   }
 
 }

@@ -27,9 +27,6 @@ package com.iw.plugins.spindle.wizards.fields;
 
 import java.util.Iterator;
 
-import com.iw.plugins.spindle.dialogfields.IDialogFieldChangedListener;
-
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -46,6 +43,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
+
 /**
  * @author GWL
  * @version 
@@ -53,7 +53,7 @@ import org.eclipse.swt.widgets.List;
  * Copyright 2002, Intelligent Works Incoporated
  * All Rights Reserved
  */
-public class ListChooser extends com.iw.plugins.spindle.dialogfields.DialogField {
+public class ListChooser extends DialogField {
 
   private List list;
   private Button addButton;

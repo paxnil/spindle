@@ -25,14 +25,8 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-
-import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.ui.ChooseComponentDialog;
-import com.iw.plugins.spindle.model.ITapestryModel;
 
 public class ChooseApplicationPageDialogCellEditor extends EditableDialogCellEditor {
 
@@ -42,7 +36,7 @@ public class ChooseApplicationPageDialogCellEditor extends EditableDialogCellEdi
   /**
    * Constructor for TypeDialogCellEditor
    */
-  protected ChooseApplicationPageDialogCellEditor(Composite parent, String title, String message) {
+  public ChooseApplicationPageDialogCellEditor(Composite parent, String title, String message) {
     super(parent);
     if (title != null) {
       this.title = title;

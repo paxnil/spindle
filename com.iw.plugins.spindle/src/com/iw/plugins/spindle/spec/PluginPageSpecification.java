@@ -29,25 +29,32 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.PrintWriter;
 
-import com.iw.plugins.spindle.util.Indenter;
 import net.sf.tapestry.spec.PageSpecification;
+import org.eclipse.core.internal.plugins.IModel;
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
-public class PluginPageSpecification extends PageSpecification {
+import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
+import com.iw.plugins.spindle.ui.descriptors.INeedsModelInitialization;
+import com.iw.plugins.spindle.util.Indenter;
+
+public class PluginPageSpecification
+  extends PageSpecification
+  implements IIdentifiable, IPropertySource {
+  	
   private PropertyChangeSupport propertySupport;
 
-  /**
-   * Constructor for PluginPageSpecification
-   */
-  public PluginPageSpecification() {
-    super();
-    propertySupport = new PropertyChangeSupport(this);
-  }
+  private String identifier;
+  private PluginApplicationSpecification parent;
+
 
   /**
    * Constructor for PluginPageSpecification
    */
   public PluginPageSpecification(String specificationPath) {
     super(specificationPath);
+    propertySupport = new PropertyChangeSupport(this);
   }
 
   public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -64,6 +71,122 @@ public class PluginPageSpecification extends PageSpecification {
     writer.print("\" specification-path=\"");
     writer.print(getSpecificationPath());
     writer.println("\"/>");
+  }
+
+  /**
+   * Returns the parent.
+   * @return PluginApplicationSpecification
+   */
+  public Object getParent() {
+    return parent;
+  }
+
+  /**
+   * Sets the parent.
+   * @param parent The parent to set
+   */
+  public void setParent(Object parent) {
+    this.parent = (PluginApplicationSpecification) parent;
+  }
+
+  /**
+   * Returns the identifier.
+   * @return String
+   */
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  /**
+   * Sets the identifier.
+   * @param identifier The identifier to set
+   */
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
+
+  private IPropertyDescriptor[] descriptors =
+    {
+      new TextPropertyDescriptor("name", "Name"),
+      new ComponentTypeDialogPropertyDescriptor("spec", "Spec", null, null)};
+
+  public void resetPropertyValue(Object key) {
+  }
+
+  public IPropertySource getPropertySource(Object key) {
+    return this;
+  }
+
+  public void setPropertyValue(Object key, Object value) {
+    if ("name".equals(key)) {
+
+      String oldName = this.identifier;
+      String specPath = parent.getPageSpecification(oldName).getSpecificationPath();
+      String newName = (String) value;
+
+      if ("".equals(newName.trim())) {
+
+        newName = oldName;
+
+      } else if (parent.getPageSpecification(newName) != null) {
+
+        newName = "Copy of " + newName;
+        parent.setPageSpecification(newName, new PluginPageSpecification(specPath));
+        return;
+      }
+      this.identifier = newName;
+      parent.removePageSpecification(oldName);
+      parent.setPageSpecification(this.identifier, this);
+
+    } else if ("spec".equals(key)) {
+
+      setSpecificationPath((String) value);
+    }
+  }
+
+  public boolean isPropertySet(Object key) {
+    if ("name".equals(key)) {
+
+      return identifier != null;
+
+    } else if ("spec".equals(key)) {
+
+      return getSpecificationPath() != null;
+
+    }
+    return true;
+
+  }
+
+  public Object getPropertyValue(Object key) {
+    if ("name".equals(key)) {
+    	
+      return identifier;
+      
+    } else if ("spec".equals(key)) {
+    	
+      return getSpecificationPath();
+    }
+    return null;
+  }
+
+  public IPropertyDescriptor[] getPropertyDescriptors() {
+
+    return descriptors;
+  }
+
+  public Object getEditableValue() {
+    return identifier;
+  }
+
+  
+
+  /**
+   * @see net.sf.tapestry.spec.PageSpecification#setSpecificationPath(String)
+   */
+  public void setSpecificationPath(String value) {
+    super.setSpecificationPath(value);
+    propertySupport.firePropertyChange("pageMap", null, value);
   }
 
 }

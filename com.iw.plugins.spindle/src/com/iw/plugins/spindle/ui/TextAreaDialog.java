@@ -35,8 +35,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.iw.plugins.spindle.ui.AbstractDialog;
-
 public class TextAreaDialog extends AbstractDialog {
 
   private boolean editing;

@@ -30,6 +30,8 @@ import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.ui.IEditorInput;
 
 import com.iw.plugins.spindle.MessageUtil;
+import com.iw.plugins.spindle.editorjwc.beans.*;
+import com.iw.plugins.spindle.editorjwc.components.*;
 import com.iw.plugins.spindle.editors.DocumentationFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.editors.XMLEditorPage;

@@ -28,7 +28,6 @@ package com.iw.plugins.spindle.ui.migrate;
 import java.util.Collection;
 import java.util.Iterator;
 
-import net.sf.tapestry.IBinding;
 import net.sf.tapestry.spec.BindingType;
 
 import com.iw.plugins.spindle.model.ITapestryModel;

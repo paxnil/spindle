@@ -166,7 +166,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
   /**
    * @see FormSection#createClient(Composite, FormWidgetFactory)
    */
-  public Composite createClient(Composite parent, FormWidgetFactory factory) {
+  public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
     Composite container = factory.createComposite(parent);
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;

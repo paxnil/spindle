@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -44,9 +43,9 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.DialogFieldStatus;
-import com.iw.plugins.spindle.dialogfields.StringButtonField;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 import com.iw.plugins.spindle.util.Utils;
 
 public class TypeDialogField extends StringButtonField {

@@ -25,11 +25,23 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.spec;
 
-import com.iw.plugins.spindle.bean.PluginFieldBeanInitializer;
-import com.iw.plugins.spindle.bean.PluginPropertyBeanInitializer;
-import com.iw.plugins.spindle.bean.PluginStaticBeanInitializer;
 import net.sf.tapestry.bean.IBeanInitializer;
-import net.sf.tapestry.spec.*;
+import net.sf.tapestry.spec.ApplicationSpecification;
+import net.sf.tapestry.spec.AssetSpecification;
+import net.sf.tapestry.spec.AssetType;
+import net.sf.tapestry.spec.BeanLifecycle;
+import net.sf.tapestry.spec.BeanSpecification;
+import net.sf.tapestry.spec.BindingSpecification;
+import net.sf.tapestry.spec.BindingType;
+import net.sf.tapestry.spec.ComponentSpecification;
+import net.sf.tapestry.spec.ContainedComponent;
+import net.sf.tapestry.spec.PageSpecification;
+import net.sf.tapestry.spec.ParameterSpecification;
+import net.sf.tapestry.spec.SpecFactory;
+
+import com.iw.plugins.spindle.spec.bean.PluginFieldBeanInitializer;
+import com.iw.plugins.spindle.spec.bean.PluginPropertyBeanInitializer;
+import com.iw.plugins.spindle.spec.bean.PluginStaticBeanInitializer;
 
 public class TapestryPluginFactory extends SpecFactory {
 
@@ -65,7 +77,7 @@ public class TapestryPluginFactory extends SpecFactory {
   }
 
   public PageSpecification createPageSpecification() {
-    return new PluginPageSpecification();
+    return new PluginPageSpecification("");
   }
 
   public PageSpecification createPageSpecification(String specificationPath) {

@@ -26,12 +26,9 @@
 package com.iw.plugins.spindle.html;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -44,8 +41,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -58,7 +53,6 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -73,7 +67,6 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
-
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.manager.TapestryModelManager;
@@ -252,9 +245,9 @@ public class HTMLContentOutlinePage
     Position result = new Position(region.getOffset(), region.getLength());
     String type = region.getType();
     String start = null;
-    if (TapestryPartitionScanner.JWCID_TAG.equals(type)) {
+    if (TapestryHTMLPartitionScanner.JWCID_TAG.equals(type)) {
       start = "jwcid=\"";
-    } else if (TapestryPartitionScanner.JWC_TAG.equals(type)) {
+    } else if (TapestryHTMLPartitionScanner.JWC_TAG.equals(type)) {
       start = "id=\"";
     }
     if (start != null) {
@@ -348,8 +341,8 @@ public class HTMLContentOutlinePage
         }
         for (int i = 0; i < partitions.length; i++) {
           String type = partitions[i].getType();
-          if (type.equals(TapestryPartitionScanner.JWC_TAG)
-            || type.equals(TapestryPartitionScanner.JWCID_TAG)) {
+          if (type.equals(TapestryHTMLPartitionScanner.JWC_TAG)
+            || type.equals(TapestryHTMLPartitionScanner.JWCID_TAG)) {
             if (findJWCID(partitions[i]) != null) {
 
               if (!oldContents.contains(partitions[i])) {

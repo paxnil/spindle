@@ -20,7 +20,7 @@
  *
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
+ *  glongman@intelligentworks.com 
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.spec;
@@ -39,43 +39,28 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.sf.tapestry.parse.SpecificationParser;
+import net.sf.tapestry.spec.AssetSpecification;
 import net.sf.tapestry.spec.BeanSpecification;
 import net.sf.tapestry.spec.ComponentSpecification;
 import net.sf.tapestry.spec.ContainedComponent;
+import net.sf.tapestry.spec.ParameterSpecification;
 
 import com.iw.plugins.spindle.MessageUtil;
+import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.util.Indenter;
 import com.iw.plugins.spindle.util.SourceWriter;
 
 public class PluginComponentSpecification
   extends ComponentSpecification
-  implements ITapestrySpecification, PropertyChangeListener {
+  implements IIdentifiable, PropertyChangeListener, IParameterHolder {
 
-  private String name;
+  private String identifier;
+  private TapestryComponentModel parent;
+  
   private PropertyChangeSupport propertySupport;
 
   public PluginComponentSpecification() {
     propertySupport = new PropertyChangeSupport(this);
-  }
-
-  //----- ITapestrySpecification --------
-
-  public String getDisplayName() {
-    return getName();
-  }
-
-  public String getInfo() {
-    return getSpecificationResourcePath();
-  }
-
-  //----- ITapestrySpecification --------
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getName() {
-    return name;
   }
 
   public Set getReservedParameters() {
@@ -124,13 +109,19 @@ public class PluginComponentSpecification
       addAsset(name, spec);
     } else {
       assets.put(name, spec);
+      spec.setIdentifier(name);
+      spec.setParent(this);
     }
     propertySupport.firePropertyChange("assets", null, assets);
   }
 
   public void addBeanSpecification(String name, BeanSpecification spec) {
     super.addBeanSpecification(name, spec);
-    ((PluginBeanSpecification) spec).addPropertyChangeListener(this);
+    
+    PluginBeanSpecification pluginSpec = (PluginBeanSpecification)spec;
+    pluginSpec.setIdentifier(name);
+    pluginSpec.setParent(this);
+    pluginSpec.addPropertyChangeListener(this);
     propertySupport.firePropertyChange("beans", null, beans);
   }
 
@@ -148,8 +139,11 @@ public class PluginComponentSpecification
       PluginBeanSpecification old = (PluginBeanSpecification) beans.get(name);
       if (old != null) {
         old.removePropertyChangeListener(this);
+        old.setParent(null);
       }
       beans.put(name, spec);
+      spec.setIdentifier(name);
+      spec.setParent(this);
       spec.addPropertyChangeListener(this);
     }
     propertySupport.firePropertyChange("beans", null, beans);
@@ -157,21 +151,27 @@ public class PluginComponentSpecification
 
   public void addComponent(String name, ContainedComponent component) {
     super.addComponent(name, component);
-    ((PluginContainedComponent) component).addPropertyChangeListener(this);
+    PluginContainedComponent pcomponent = (PluginContainedComponent)component;
+    
+    pcomponent.addPropertyChangeListener(this);
+    pcomponent.setIdentifier(name);
+    pcomponent.setParent(this);
     propertySupport.firePropertyChange("components", null, components);
   }
 
   public void setComponent(String name, PluginContainedComponent component) {
     if (components == null) {
       addComponent(name, component);
-      component.addPropertyChangeListener(this);
     } else {
       PluginContainedComponent old = (PluginContainedComponent) components.get(name);
       if (old != null) {
         old.removePropertyChangeListener(this);
+        old.setParent(null);
       }
 
       components.put(name, component);
+      component.setIdentifier(name);
+      component.setParent(this);
       component.addPropertyChangeListener(this);
 
       propertySupport.firePropertyChange("components", null, components);
@@ -201,6 +201,8 @@ public class PluginComponentSpecification
       addParameter(name, spec);
     } else {
       parameters.put(name, spec);
+      spec.setIdentifier(name);
+      spec.setParent(this);
     }
     propertySupport.firePropertyChange("parameters", null, spec);
   }
@@ -239,9 +241,6 @@ public class PluginComponentSpecification
 
   public void propertyChange(PropertyChangeEvent event) {
     propertySupport.firePropertyChange(event);
-    StringWriter writer = new StringWriter();
-    
- 
   }
   
   public void write(PrintWriter writer) {
@@ -438,6 +437,61 @@ public class PluginComponentSpecification
   public void setDTDVersion(String dtdVersion) {
     super.setDTDVersion(dtdVersion);
     propertySupport.firePropertyChange("dtd", null, dtdVersion);
+  }
+
+  /**
+   * @see net.sf.tapestry.spec.ComponentSpecification#addAsset(String, AssetSpecification)
+   */
+  public void addAsset(String name, AssetSpecification asset) {
+    super.addAsset(name, asset);
+    
+    PluginAssetSpecification pluginAsset = (PluginAssetSpecification)asset;
+    pluginAsset.setIdentifier(name);
+    pluginAsset.setParent(this);
+ 
+  }
+
+  /**
+   * @see net.sf.tapestry.spec.ComponentSpecification#addParameter(String, ParameterSpecification)
+   */
+  public void addParameter(String name, ParameterSpecification spec) {
+    super.addParameter(name, spec);
+    PluginParameterSpecification pluginParam = (PluginParameterSpecification)spec;
+    pluginParam.setIdentifier(name);
+    pluginParam.setParent(this);
+    propertySupport.firePropertyChange("parameters", null, parameters);
+  }
+
+  /**
+   * Returns the identifier.
+   * @return String
+   */
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  /**
+   * Returns the parent.
+   * @return TapestryComponentModel
+   */
+  public Object getParent() {
+    return parent;
+  }
+
+  /**
+   * Sets the identifier.
+   * @param identifier The identifier to set
+   */
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
+
+  /**
+   * Sets the parent.
+   * @param parent The parent to set
+   */
+  public void setParent(Object parent) {
+    this.parent = (TapestryComponentModel)parent;
   }
 
 }

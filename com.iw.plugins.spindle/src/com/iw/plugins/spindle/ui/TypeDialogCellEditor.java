@@ -52,12 +52,12 @@ public class TypeDialogCellEditor extends EditableDialogCellEditor {
   /**
    * Constructor for TypeDialogCellEditor
    */
-  protected TypeDialogCellEditor(Composite parent, IPackageFragmentRoot root) {
+  public TypeDialogCellEditor(Composite parent, IPackageFragmentRoot root) {
     super(parent);
     this.root = root;
   }
 
-  protected TypeDialogCellEditor(Composite parent, IPackageFragmentRoot root, String hierarchyRoot) {
+  public TypeDialogCellEditor(Composite parent, IPackageFragmentRoot root, String hierarchyRoot) {
     this(parent, root);
     this.hierarchyRoot = hierarchyRoot;
   }

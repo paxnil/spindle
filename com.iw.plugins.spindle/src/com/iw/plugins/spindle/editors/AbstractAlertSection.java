@@ -92,7 +92,7 @@ public abstract class AbstractAlertSection extends SpindleFormSection implements
   /**
    * @see FormSection#createClient(Composite, FormWidgetFactory)
    */
-  public Composite createClient(Composite parent, FormWidgetFactory factory) {
+  public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;
     layout.horizontalSpacing = 0;

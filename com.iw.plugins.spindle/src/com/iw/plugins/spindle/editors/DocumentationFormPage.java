@@ -29,7 +29,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.update.ui.forms.internal.AbstractSectionForm;
 
 public class DocumentationFormPage extends SpindleFormPage {
@@ -50,10 +49,6 @@ public class DocumentationFormPage extends SpindleFormPage {
    */
   public IContentOutlinePage createContentOutlinePage() {
     return null;
-  }
-
-  public IPropertySheetPage createPropertySheetPage() {
-    return new SpindlePropertySheet();
   }
 
   protected class DocumentationForm extends SpindleForm {

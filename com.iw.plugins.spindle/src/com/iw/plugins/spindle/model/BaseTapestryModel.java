@@ -26,25 +26,21 @@
 package com.iw.plugins.spindle.model;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
-import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.pde.core.IEditable;
 import org.eclipse.pde.core.ModelChangedEvent;
-
-import com.iw.plugins.spindle.TapestryPlugin;
+import org.eclipse.ui.texteditor.MarkerUtilities;
 
 public abstract class BaseTapestryModel extends AbstractModel implements IEditable {
 
@@ -97,7 +93,6 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
     return storageResource;
   }
 
-
   public void setOutOfSynch(boolean flag) {
     outOfSynch = flag;
   }
@@ -138,7 +133,7 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
         marker.setAttribute(IMarker.LINE_NUMBER, new Integer(line));
         marker.setAttribute(IMarker.CHAR_START, column);
         marker.setAttribute(IMarker.CHAR_END, column + 1);
-      } catch (CoreException corex) {
+     } catch (CoreException corex) {
       }
     }
 
@@ -158,7 +153,7 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
         contents = storageResource.getContents();
         load(contents);
         setTimeStamp(Long.MAX_VALUE);
-      }            
+      }
     }
   }
 
@@ -214,9 +209,5 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
     writer.flush();
     return swriter.toString();
   }
-
-
-
-
 
 }

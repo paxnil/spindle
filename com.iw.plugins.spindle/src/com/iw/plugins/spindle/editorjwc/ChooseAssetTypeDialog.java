@@ -25,10 +25,10 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorjwc;
 
+import net.sf.tapestry.spec.AssetType;
 import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.ui.ChooseFromListDialog;
-import net.sf.tapestry.spec.AssetType;
 
 public class ChooseAssetTypeDialog extends ChooseFromListDialog {
 

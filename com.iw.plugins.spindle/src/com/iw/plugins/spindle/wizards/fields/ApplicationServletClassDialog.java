@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.wizards.fields;
+package com.iw.plugins.spindle.wizards.fields; 
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableContext;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 
 public class ApplicationServletClassDialog extends SuperClassDialogField {
 

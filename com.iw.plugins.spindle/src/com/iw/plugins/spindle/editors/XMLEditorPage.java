@@ -38,7 +38,7 @@ public class XMLEditorPage extends TapestrySourcePage {
 
   public XMLEditorPage(SpindleMultipageEditor editor) {
     super(editor);
-    setSourceViewerConfiguration(new XMLConfiguration(colorManager));
+    setSourceViewerConfiguration(new SpindleXMLConfiguration(colorManager));
   }
 
   public IContentOutlinePage createContentOutlinePage() {

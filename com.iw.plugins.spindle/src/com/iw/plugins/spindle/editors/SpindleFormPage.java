@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.editors;
 
 import org.eclipse.pde.internal.ui.editor.PDEFormPage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.update.ui.forms.internal.AbstractSectionForm;
 import org.eclipse.update.ui.forms.internal.IFormPage;
 
@@ -40,37 +41,47 @@ public class SpindleFormPage extends PDEFormPage {
   public SpindleFormPage(SpindleMultipageEditor arg0, String arg1) {
     super(arg0, arg1);
   }
- 
- /** must override
-   * @see PDEFormPage#createForm()
-   */
+
+  /** must override
+    * @see PDEFormPage#createForm()
+    */
   protected AbstractSectionForm createForm() {
-  	return null;
+    return null;
   }
-  
- /** 
-   * @see PDEFormPage#createContentOutlinePage()
-   */
+
+  /** 
+    * @see PDEFormPage#createContentOutlinePage()
+    */
   public IContentOutlinePage createContentOutlinePage() {
     return null;
-  }  
+  }
 
   public void update() {
-  	if (((BaseTapestryModel)getEditor().getModel()).isLoaded()) {
-  		super.update();
-  	}
-  } 
-  
+    if (((BaseTapestryModel) getEditor().getModel()).isLoaded()) {
+      super.update();
+    }
+  }
+
   /**
    * @see PDEFormPage#becomesInvisible(IFormPage)
    */
   public boolean becomesInvisible(IFormPage arg0) {
-  	super.becomesInvisible(arg0);
-  	((SpindleMultipageEditor)getEditor()).resynchDocument(false);
-  	BaseTapestryModel model = (BaseTapestryModel)getModel();
-   	model.setDirty(false);
-  	return true;
+    super.becomesInvisible(arg0);
+    
+    ((SpindleMultipageEditor) getEditor()).resynchDocument(false);
+    BaseTapestryModel model = (BaseTapestryModel) getModel();
+    model.setDirty(false);
+    
+    return true;
+  }
+
+  /**
+   * @see org.eclipse.pde.internal.ui.editor.PDEFormPage#createPropertySheetPage()
+   */
+  public IPropertySheetPage createPropertySheetPage() {
+  	
+    return new SpindlePropertySheet();
+    
   }
 
 }
-

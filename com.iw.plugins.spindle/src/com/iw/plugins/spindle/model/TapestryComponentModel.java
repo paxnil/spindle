@@ -25,14 +25,11 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.model;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -46,7 +43,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
@@ -77,24 +73,29 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
    * @see AbstractModel#load()
    */
   public void load(final InputStream source) throws CoreException {
+  	
+  	final TapestryComponentModel thisModel = this;
+  	
     TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) {
 
         removeAllProblemMarkers();
         if (componentSpec != null) {
           componentSpec.removePropertyChangeListener(TapestryComponentModel.this);
+          componentSpec.setParent(null);
           componentSpec = null;
         }
         try {
           IStorage element = getUnderlyingStorage();
           SpecificationParser parser =
             (SpecificationParser) TapestryPlugin.getTapestryModelManager().getParserFor(
-              "application");
+              "jwc");
           componentSpec =
             (PluginComponentSpecification) TapestryPlugin.getParser().parseComponentSpecification(
               source,
               element.getName());
-          componentSpec.setName(element.getName());
+          componentSpec.setIdentifier(element.getName()); 
+          componentSpec.setParent(thisModel);
           componentSpec.addPropertyChangeListener(TapestryComponentModel.this);
           loaded = true;
           editable = !element.isReadOnly();

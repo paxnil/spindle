@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableContext;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.util.Utils;
 
 public class SpecClassDialogField extends TypeDialogField {

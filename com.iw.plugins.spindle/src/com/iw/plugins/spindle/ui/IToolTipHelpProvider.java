@@ -25,7 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui;
 
-import org.eclipse.swt.widgets.Widget;
+
 
 public interface IToolTipHelpProvider {
   /**   

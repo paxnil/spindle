@@ -26,10 +26,8 @@
 package com.iw.plugins.spindle.model.manager;
 
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.pde.core.IModel;
 
 import com.iw.plugins.spindle.model.BaseTapestryModel;

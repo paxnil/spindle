@@ -25,17 +25,11 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorapp;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
-import org.eclipse.pde.internal.ui.elements.DefaultContentProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -45,25 +39,23 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.ui.TypeDialogPropertyDescriptor;
-import com.iw.plugins.spindle.util.JavaListSelectionProvider;
+import com.iw.plugins.spindle.ui.descriptors.TypeDialogPropertyDescriptor;
 
 public class ApplicationServicesSection
   extends AbstractPropertySheetEditorSection
   implements IModelChangedListener {
-
-  private ArrayList serviceHolders = new ArrayList();
 
   private Button revertButton;
   private Action revertAction;
@@ -73,7 +65,6 @@ public class ApplicationServicesSection
    */
   public ApplicationServicesSection(SpindleFormPage page) {
     super(page);
-    setContentProvider(new ServiceContentProvider());
     setLabelProvider(new ServiceLabelProvider());
     setNewAction(new NewServiceAction());
     setDeleteAction(new DeleteServiceAction());
@@ -115,104 +106,23 @@ public class ApplicationServicesSection
       (PluginApplicationSpecification) ((TapestryApplicationModel) model).getApplicationSpec();
 
     Iterator iter = spec.getServiceNames().iterator();
-    serviceHolders.removeAll(serviceHolders);
+    holderArray.removeAll(holderArray);
     while (iter.hasNext()) {
       String name = (String) iter.next();
       ServiceHolder holder = new ServiceHolder(name, spec.getServiceClassName(name));
-      serviceHolders.add(holder);
+      holderArray.add(holder);
     }
-    setInput(serviceHolders);
-    //selectFirst();
+    setInput(holderArray);
   }
 
-  protected void setSelection(String name) {
-    if (name != null) {
-      Object[] items = ((ITreeContentProvider) getContentProvider()).getElements(null);
-      final ArrayList list = new ArrayList();
-      for (int i = 0; i < items.length; i++) {
-        if (((ServiceHolder) items[i]).name.equals(name)) {
-          list.add(items[i]);
-        }
-      }
-      if (list.isEmpty()) {
-        return;
-      }
-      setSelection(new JavaListSelectionProvider(list));
-    }
-  }
-
-  protected String findPrevious(String name) {
-    if (name != null) {
-      Object[] items = ((ITreeContentProvider) getContentProvider()).getElements(null);
-      final ArrayList list = new ArrayList();
-      for (int i = 0; i < items.length; i++) {
-        if (((ServiceHolder) items[i]).name.equals(name) && i >= 1) {
-          return ((ServiceHolder) items[i - 1]).name;
-        }
-      }
-    }
-    return null;
-  }
-
-  protected boolean alreadyHasName(String name) {
-    Object[] items = ((ITreeContentProvider) getContentProvider()).getElements(null);
-    if (items != null && items.length >= 1) {
-      for (int i = 0; i < items.length; i++) {
-        ServiceHolder holder = (ServiceHolder) items[i];
-        if (holder.name.equals(name)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  public class ServiceLabelProvider extends LabelProvider implements ITableLabelProvider {
+  public class ServiceLabelProvider extends AbstractIdentifiableLabelProvider {
 
     private Image image = TapestryImages.getSharedImage("property16.gif");
-
-    public String getText(Object object) {
-      ServiceHolder holder = (ServiceHolder) object;
-      return (holder.name + " = " + holder.classname);
-    }
-
-    public void dispose() {
-      // shared images are disposed by the Plugin
-    }
-
-    public String getColumnText(Object object, int column) {
-      if (column != 1) {
-        return "";
-      }
-      return getText(object);
-
-    }
 
     public Image getImage(Object object) {
       return image;
     }
 
-    public Image getColumnImage(Object object, int column) {
-      if (column != 1) {
-        return null;
-      }
-      return getImage(object);
-    }
-  }
-
-  class ServiceContentProvider extends DefaultContentProvider implements ITreeContentProvider {
-    public Object[] getElements(Object object) {
-      return serviceHolders.toArray();
-    }
-    public Object[] getChildren(Object parent) {
-      return new Object[0];
-    }
-    public Object getParent(Object child) {
-      return null;
-    }
-    public boolean hasChildren(Object parent) {
-      return false;
-    }
   }
 
   class DeleteServiceAction extends Action {
@@ -235,10 +145,9 @@ public class ApplicationServicesSection
       updateSelection = true;
       ServiceHolder holder = (ServiceHolder) getSelected();
       if (holder != null) {
-        TapestryApplicationModel model = (TapestryApplicationModel) getModel();
-        PluginApplicationSpecification spec = (PluginApplicationSpecification) model.getApplicationSpec();
-        String prev = findPrevious(holder.name);
-        spec.removeService(holder.name);
+        PluginApplicationSpecification spec = (PluginApplicationSpecification) holder.getParent();
+        String prev = findPrevious(holder.identifier);
+        spec.removeService(holder.identifier);
         forceDirty();
         update();
         if (prev != null) {
@@ -271,7 +180,8 @@ public class ApplicationServicesSection
     public void run() {
       updateSelection = true;
       TapestryApplicationModel model = (TapestryApplicationModel) getModel();
-      PluginApplicationSpecification spec = (PluginApplicationSpecification) model.getApplicationSpec();
+      PluginApplicationSpecification spec =
+        (PluginApplicationSpecification) model.getApplicationSpec();
       String useSeviceName = "service";
       if (spec.getServiceClassName(useSeviceName + 1) != null) {
         int counter = 2;
@@ -291,70 +201,89 @@ public class ApplicationServicesSection
 
   }
 
-  protected class ServiceHolder implements IAdaptable, IPropertySource, IPropertySourceProvider {
+  protected class ServiceHolder implements IPropertySource, IIdentifiable {
 
-    public String name;
-    public String classname;
+    private String identifier;
+    private String classname;
 
     /**
      * Constructor for PropertyHolder
      */
-    public ServiceHolder(String name, String classname) {
+    public ServiceHolder(String identifier, String classname) {
       super();
-      this.name = name;
+      this.identifier = identifier;
       this.classname = classname;
+    }
+
+    /**
+     * @see com.iw.plugins.spindle.spec.IIdentifiable#getIdentifier()
+     */
+    public String getIdentifier() {
+      return identifier;
+    }
+
+    /**
+     * @see com.iw.plugins.spindle.spec.IIdentifiable#getParent()
+     */
+    public Object getParent() {
+      TapestryApplicationModel model = (TapestryApplicationModel) getFormPage().getModel();
+
+      return (PluginApplicationSpecification) model.getApplicationSpec();
+    }
+
+    /**
+     * @see com.iw.plugins.spindle.spec.IIdentifiable#setIdentifier(String)
+     */
+    public void setIdentifier(String id) {
+      identifier = id;
+    }
+
+    /**
+     * @see com.iw.plugins.spindle.spec.IIdentifiable#setParent(Object)
+     */
+    public void setParent(Object parent) {
     }
 
     public void resetPropertyValue(Object key) {
       if ("Name".equals(key)) {
-        name = null;
+        identifier = null;
       }
-    }
-
-    public IPropertySource getPropertySource(Object key) {
-      return this;
     }
 
     public void setPropertyValue(Object key, Object value) {
       if (!isModelEditable()) {
         updateNeeded = true;
         update();
-        setSelection(this.name);
+        setSelection(this.identifier);
         return;
       }
 
-      TapestryApplicationModel model = (TapestryApplicationModel) getFormPage().getModel();
-      PluginApplicationSpecification spec = (PluginApplicationSpecification) model.getApplicationSpec();
+      PluginApplicationSpecification spec = (PluginApplicationSpecification) getParent();
       if ("name".equals(key)) {
-        String oldName = this.name;
+        String oldName = this.identifier;
         String newName = ((String) value).toLowerCase();
         if ("".equals(newName.trim())) {
 
           newName = oldName;
-        } else if (alreadyHasName(newName) && !spec.isDefaultService(newName)) {
+        } else if (spec.getServiceClassName(newName) != null && !spec.isDefaultService(newName)) {
 
           newName = "copyof" + newName;
         }
-        this.name = newName;
+        this.identifier = newName;
         spec.removeService(oldName);
-        spec.setService(this.name, this.classname);
-        forceDirty();
-        update();
-        setSelection(this.name);
+        spec.setService(this.identifier, this.classname);
 
       } else if ("class".equals(key)) {
         this.classname = (String) value;
-        spec.setService(this.name, this.classname);
-        forceDirty();
-        update();
-        setSelection(this.name);
+        spec.setService(this.identifier, this.classname);
+
       }
 
     }
 
     public boolean isPropertySet(Object key) {
       if ("name".equals(key)) {
-        return name != null;
+        return identifier != null;
       } else if ("class".equals(key)) {
         return classname != null;
       }
@@ -363,7 +292,7 @@ public class ApplicationServicesSection
 
     public Object getPropertyValue(Object key) {
       if ("name".equals(key)) {
-        return name;
+        return identifier;
       } else if ("class".equals(key)) {
         return classname;
       }
@@ -372,19 +301,12 @@ public class ApplicationServicesSection
     public IPropertyDescriptor[] getPropertyDescriptors() {
       return new IPropertyDescriptor[] {
         new TextPropertyDescriptor("name", "Name"),
-        new TypeDialogPropertyDescriptor("class", "Class", getModel(), "net.sf.tapestry.IEngineService"),
+        new TypeDialogPropertyDescriptor("class", "Class", "net.sf.tapestry.IEngineService"),
         };
     }
 
     public Object getEditableValue() {
-      return classname;
-    }
-
-    public Object getAdapter(Class clazz) {
-      if (clazz == IPropertySource.class) {
-        return (IPropertySource) this;
-      }
-      return null;
+      return identifier;
     }
 
   }
@@ -400,10 +322,12 @@ public class ApplicationServicesSection
     PluginApplicationSpecification spec = model.getApplicationSpec();
     newButton.setEnabled(isEditable);
     if (deleteButton != null) {
-      deleteButton.setEnabled(isEditable && selected != null && spec.canDeleteService(holder.name));
+      deleteButton.setEnabled(
+        isEditable && selected != null && spec.canDeleteService(holder.identifier));
     }
     editButton.setEnabled(isEditable && holder != null);
-    revertButton.setEnabled(isEditable && holder != null && spec.canRevertService(holder.name));
+    revertButton.setEnabled(
+      isEditable && holder != null && spec.canRevertService(holder.identifier));
   }
 
 }

@@ -57,12 +57,11 @@ import org.eclipse.swt.widgets.Control;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
-import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.dialogfields.CheckBoxField;
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.factories.ApplicationClassFactory;
 import com.iw.plugins.spindle.factories.ApplicationFactory;
+import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.wizards.fields.ApplicationNameField;
 import com.iw.plugins.spindle.wizards.fields.ApplicationServletClassDialog;

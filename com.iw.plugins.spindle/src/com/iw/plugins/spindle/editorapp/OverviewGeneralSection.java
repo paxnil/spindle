@@ -26,16 +26,12 @@
 package com.iw.plugins.spindle.editorapp;
 
 import net.sf.tapestry.parse.SpecificationParser;
-
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
@@ -53,12 +49,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.update.ui.forms.internal.FormEntry;
 import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 import org.eclipse.update.ui.forms.internal.IFormTextListener;
-import sun.security.action.GetPropertyAction;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
@@ -132,7 +126,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
   /**
    * @see FormSection#createClient(Composite, FormWidgetFactory)
    */
-  public Composite createClient(Composite parent, FormWidgetFactory factory) {
+  public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
     Composite container = factory.createComposite(parent);
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;

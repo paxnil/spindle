@@ -29,12 +29,10 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import org.eclipse.pde.core.IModelChangedEvent;
-import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
 
 import com.iw.plugins.spindle.TapestryImages;
-import com.iw.plugins.spindle.editorapp.OverviewComponentRefSection.PagesHyperLinkAdapter;
 import com.iw.plugins.spindle.editors.BasicLinksSection;
 import com.iw.plugins.spindle.editors.HyperLinkAdapter;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
@@ -54,7 +52,7 @@ public class OverviewPageSection extends BasicLinksSection {
 
 	}
 
-	protected SpindleFormPage getMorePage() {
+	protected SpindleFormPage getGotoPage() {
 		return (SpindleFormPage)getFormPage().getEditor().getPage(APPMultipageEditor.PAGES);
 	}
 
@@ -87,7 +85,7 @@ public class OverviewPageSection extends BasicLinksSection {
 
 	protected class PagesHyperLinkAdapter extends HyperLinkAdapter {
 		public void linkActivated(Control parent) {
-			final SpindleFormPage targetPage = getMorePage();
+			final SpindleFormPage targetPage = getGotoPage();
 			if (targetPage == null) {
 				return;
 			}

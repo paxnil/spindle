@@ -31,7 +31,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.ui.ChooseComponentDialog;
 import com.iw.plugins.spindle.model.ITapestryModel;
 
 public class ComponentTypeDialogCellEditor extends EditableDialogCellEditor {
@@ -44,7 +43,7 @@ public class ComponentTypeDialogCellEditor extends EditableDialogCellEditor {
   /**
    * Constructor for TypeDialogCellEditor
    */
-  protected ComponentTypeDialogCellEditor(Composite parent, ITapestryModel model, String title, String message) {
+  public ComponentTypeDialogCellEditor(Composite parent, ITapestryModel model, String title, String message) {
     super(parent);
     this.model = model;
     if (title != null) {
