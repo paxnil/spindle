@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<toc
+	link_to="roottoc.xml#concepts" 
+	label="requiredButIgnored">			
+	<topic label="Spindle Builder" href="docs/spindle_builder.html"></topic>
+	<topic label="Tapestry Framework Library" href="docs/tapestry_frmwk_lib.html"></topic>	
+	<topic label="Spindle Editors" href="docs/editors.html">
+		<topic label="Tapestry Template Editor" href="docs/template_editor.html"></topic>
+		<topic label="Specification Editor" href="docs/spec_editor.html"></topic>
+	</topic>
+	<topic label="Code Templates">
+	 <topic label="Kinds of Templates" href="docs/template_kinds.html"></topic>
+	<topic label="Template Variables" href="docs/template_vars.html"></topic>
+		<topic label="Pseudo Variables" href="docs/template_pvars.html"></topic>
+	</topic>			
+	<anchor id="extraConcepts" />			
+</toc>
+	

@@ -8,7 +8,8 @@
       <documentation>
          &lt;p&gt;Plugins can contribute implemtations of IProjectMetaLocator keyed on a nature id. Thus, projects that have a nature can provide web project meta information.
 &lt;/p&gt;&lt;p&gt; Spindle will defer writing its own metadata file (.tapestryplugin) if it finds a contribution that supplies the information it needs. This is to avoid duplication of information and to avoid the possiblity of metadatum files getting out of sync.&lt;/p&gt;
-&lt;p&gt;Note that the first contribution that supplies a valid result wins&lt;/p&gt;
+&lt;p&gt;The first contribution that supplies a valid result wins.&lt;/p&gt;
+&lt;p&gt;&lt;i&gt;Note: that using this extension point may result in your plugin being loaded unexpectedly. Spindle will defer instantiating locators until it absolutely needs to but when it does, contributing plugins will be loaded.&lt;/i&gt;&lt;/p&gt;
       </documentation>
    </annotation>
 

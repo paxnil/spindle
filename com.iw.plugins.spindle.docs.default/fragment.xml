@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<fragment
+   id="com.iw.plugins.spindle.docs.default"
+   name="Default Docs Fragment"
+   version="0.1.0 "
+   provider-name="Geoffrey Longman"
+   plugin-id="com.iw.plugins.spindle.docs"
+   plugin-version="0.1.1"
+   match="greaterOrEqual">
+   
+   <extension point="org.eclipse.help.toc">      
+      <toc file="roottoc.xml" primary="true"/>      
+	  <toc file="defaultquickstarttoc.xml"/>
+	  <toc file="defaultconceptstoc.xml"/>
+	  <toc file="defaulttaskstoc.xml"/>
+	  <toc file="defaultcreditstoc.xml"/> 
+	  <toc file="extraconceptstoc.xml"/>
+   </extension>
+</fragment>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<toc
+	link_to="roottoc.xml#credits" 
+	label="requiredButIgnored">
+	<topic label="Credits" href="docs/credits.html"></topic>
+	<anchor id="creditsAnchor" />
+	<topic label="Software Versions" href="docs/versions.html"></topic>
+	<topic label="Resources" href="docs/resources.html"></topic>
+	<anchor id="resourcesAnchor" />
+</toc>
+	

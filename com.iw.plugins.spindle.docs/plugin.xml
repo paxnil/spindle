@@ -12,10 +12,12 @@
       <import plugin="org.eclipse.help"/>
    </requires>
 
-
-   <extension point="org.eclipse.help.toc">
-      <toc file="toc.xml" primary="true" extradir="docs">
-      </toc>
-   </extension>
+   <!-- 
+   	extensions to "org.eclipse.help.toc" are made in
+   	fragments to allow for customized content.
+   	
+   	see fragment com.iw.plugins.spindle.doc.default
+   	for an example customized for the default SF install
+   -->    
 
 </plugin>

@@ -23,7 +23,7 @@
  *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.core;
+package com.iw.plugins.spindle.core.metadata;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -40,27 +40,16 @@ public interface IProjectMetadataLocator
      * Locate and return the IFolder that contains the web context root of the project. The folder
      * must exist, be non null, and may not be the project itself. return values that violate the
      * above constraints will be ignored.
-     * 
-     * @param project
-     *            the IProject of interest
      * @param natureId
      *            the project nature id registered in the extension
+     * @param project
+     *            the IProject of interest
+     * 
      * @return an IFolder defining the web context root (location of web.xml) or null if no such
      *         metadata can be found.
      * @throws CoreException
      */
-    public IFolder getWebContextRootFolder(IProject project, String natureId) throws CoreException;
+    public IFolder getWebContextRootFolder(String natureId, IProject project) throws CoreException;
 
-    /**
-     * Tells Spindle if it should validate the web.xml file in a project. Choose wisely here;
-     * Spindle can not validate web.xml files containing schema declarations (Servlet Spec 2.4+).
-     * 
-     * @param project
-     *            the IProject of interest
-     * @param natureId
-     *            the project nature id registered in the extension
-     * @return true iff Spindle should validate the web.xml file found in the context root folder.
-     * @throws CoreException
-     */
-    public boolean shouldValidateWebXML(IProject project, String natureId) throws CoreException;
+    
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<toc
+	link_to="roottoc.xml#tasks" 
+	label="requiredButIgnored">		
+	<topic label="Work with Tapestry Framework Library" href="docs/tapestry_frmwk_lib_wrk.html"></topic>		
+	<topic label="Creating Pages and Components" href="docs/component_wizard.html"></topic>			
+	<topic label="Adding Images and Other Assets" href="docs/addingassets.html"></topic>
+	<topic label="Configuring Spindle" href="docs/preferences.html"></topic>	
+	<anchor id="extraTasks" />		
+</toc>
+	

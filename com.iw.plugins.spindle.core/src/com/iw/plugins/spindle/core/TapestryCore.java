@@ -31,10 +31,8 @@ import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -46,13 +44,8 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
@@ -67,8 +60,10 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
 
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
 import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
 import com.iw.plugins.spindle.core.resources.ClasspathSearch;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -121,7 +116,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
 
     private static List CoreListeners;
 
-    private static Map MetadataLocators;
+    private ProjectExternalMetadataLocator externalMetadataLocator;
 
     /**
      * The constructor.
@@ -136,6 +131,21 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         catch (MissingResourceException x)
         {
             SpindleCoreStrings = null;
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+     */
+    public void stop(BundleContext context) throws Exception
+    {
+        super.stop(context);
+        if (externalMetadataLocator != null)
+        {
+            externalMetadataLocator.destroy();
+            externalMetadataLocator = null;
         }
     }
 
@@ -434,53 +444,6 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         { arg1, arg2, arg3 });
     }
 
-    public static Map getMetadataLocators()
-    { //FIXME need to be able to detect new contributions from plugin installs that do not require
-        // restart. should also look for deactivated ones.
-        if (MetadataLocators == null)
-        {
-            MetadataLocators = new HashMap();
-            IExtensionRegistry registry = Platform.getExtensionRegistry();
-            IExtensionPoint point = registry.getExtensionPoint(PLUGIN_ID
-                    + ".projectMetaDataLocator");
-            if (point != null)
-            {
-                Map lookup = new HashMap();
-                IExtension[] extensions = point.getExtensions();
-                for (int i = 0; i < extensions.length; i++)
-                {
-                    IConfigurationElement[] configs = extensions[i].getConfigurationElements();
-                    for (int j = 0; j < configs.length; j++)
-                    {
-                        String natureId = configs[i].getAttribute("natureId");
-                        if (lookup.containsKey(natureId))
-                        {
-                            log("Ignoring IProjectMetadataLocator contribution from '"
-                                    + extensions[i].getNamespace()+"/"+configs[i].getAttribute("id") + "/" + natureId
-                                    + ".\n A locator was already found for this natureId here: "
-                                    + lookup.get(natureId));
-                        }
-                        else
-                        {
-                            try
-                            {
-                                IProjectMetadataLocator locator = (IProjectMetadataLocator) configs[i]
-                                        .createExecutableExtension("locator");
-                                lookup.put(natureId, extensions[i].getNamespace()+"/"+configs[i].getAttribute("id"));
-                                MetadataLocators.put(natureId, locator);
-                            }
-                            catch (CoreException e)
-                            {
-                                log(e);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return MetadataLocators;
-    }
-
     public static boolean isNull(String value)
     {
         if (value == null)
@@ -750,6 +713,14 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
             return null;
 
         return jproject.getProject();
+    }
+
+    public ProjectExternalMetadataLocator getExternalMetadataLocator()
+    {
+        if (externalMetadataLocator == null)
+            externalMetadataLocator = new ProjectExternalMetadataLocator();
+
+        return externalMetadataLocator;
     }
 
 }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<toc
+	link_to="roottoc.xml#quickstart" label="Quick Start">
+	<topic label="Overview" href="docs/quickstart.html"></topic>	
+	<topic label="Installing Spindle" href="docs/installing.html"></topic>
+	<topic label="Installing Jetty" href="docs/installing_jetty.html"></topic>
+	<topic label="Installing Jetty Launcher" href="docs/installing_jettylauncher.html"></topic>
+	<topic label="Creating a Project" href="docs/create.html"></topic>
+	<topic label="Running a Project" href="docs/running.html"></topic>
+	<topic label="Running a Project with Jetty" href="docs/running_jetty.html"></topic>		
+</toc>
+	
