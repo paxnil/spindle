@@ -40,6 +40,9 @@ public interface ISourceLocationResolver
 
     public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn);
     
+    public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn, char expected);
+   
     public ISourceLocation getTagNameLocation(String elementName, ISourceLocation elementStartLocation);
 
+ 
 }

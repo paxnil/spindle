@@ -297,6 +297,11 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
 
     public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn)
     {
+        return getColumnOffset(parserReportedLineNumber, parserReportedColumn, (char) 0);
+    }
+
+    public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn, char expected)
+    {
         int result = getLineOffset(parserReportedLineNumber);
         int lineCount = fEclipseDocument.getNumberOfLines();
         int totalLength = fEclipseDocument.getLength();
@@ -309,8 +314,30 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             {
                 try
                 {
-                    int lastCharOnLine = result + fEclipseDocument.getLineLength(parserReportedLineNumber - 1) - 1;
+                    int lastCharOnLine = result + fEclipseDocument.getLineLength(parserReportedLineNumber - 1);
                     result = Math.min(lastCharOnLine, result + parserReportedColumn - 1);
+                    result = Math.min(result, totalLength - 1);
+                    char c;
+                    while (true)
+                    {
+                        c = fEclipseDocument.getChar(result);
+                        if (c == '\r' || c == '\n')
+                        {
+                            result--;
+                        } else
+                        {
+                            break;
+                        }
+                    }
+                    if (expected > 0 && c != expected)
+                    {
+                        while (true)
+                        {
+                            c = fEclipseDocument.getChar(--result);
+                            if (c == expected)
+                                break;
+                        }
+                    }
                 } catch (BadLocationException e)
                 {
                     TapestryCore.log(e);
@@ -320,7 +347,6 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
         return result;
     }
-        
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.source.ISourceLocationResolver#getTagNameLocation(com.iw.plugins.spindle.core.source.ISourceLocation)

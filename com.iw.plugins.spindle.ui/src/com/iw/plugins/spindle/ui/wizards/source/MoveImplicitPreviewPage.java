@@ -314,4 +314,19 @@ public class MoveImplicitPreviewPage extends WizardPage
             return true;
         }
     }
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+     */
+    public void setVisible(boolean visible)
+    {
+        super.setVisible(visible);
+        if (visible)
+        {
+            fWizard.performModifications();
+            refresh();
+        } else {
+            fWizard.clearModifications();
+        }
+    }
+
 }

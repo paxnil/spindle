@@ -218,6 +218,8 @@ public class MoveImplicitAttributesPage extends WizardPage
         {
             setMessage(toMoveStatus.getMessage(), toMoveStatus.getSeverity());
             fCurrentStatus = toMoveStatus;
+        } else {
+            fCurrentStatus = idStatus;
         }
         setPageComplete(!fCurrentStatus.isError());
     }

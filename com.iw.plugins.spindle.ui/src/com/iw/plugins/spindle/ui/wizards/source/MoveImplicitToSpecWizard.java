@@ -46,7 +46,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
@@ -200,10 +199,8 @@ public class MoveImplicitToSpecWizard extends Wizard
                 UIPlugin.log(e);
             }
         }
-        fModifiedSpecDocument = new Document();
-
+ 
         fOriginalTemplateDocument = fTemplateEditor.getDocumentProvider().getDocument(fTemplateEditor.getEditorInput());
-        fModifiedTemplateDocument = new Document();
     }
 
     /* (non-Javadoc)
@@ -264,25 +261,36 @@ public class MoveImplicitToSpecWizard extends Wizard
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.wizard.IWizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
-     */
-    public IWizardPage getNextPage(IWizardPage page)
-    {
-        IWizardPage nextPage = super.getNextPage(page);
-        if (nextPage != null && nextPage == fPreviewPage)
-        {
-            performModifications();
-            fPreviewPage.refresh();
-        }
-        return nextPage;
-    }
+//    /* (non-Javadoc)
+//     * @see org.eclipse.jface.wizard.IWizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
+//     */
+//    public IWizardPage getNextPage(IWizardPage page)
+//    {
+//        IWizardPage nextPage = super.getNextPage(page);
+//        if (nextPage != null && nextPage == fPreviewPage)
+//        {
+//            performModifications();
+//            fPreviewPage.refresh();
+//        }
+//        return nextPage;
+//    }
+
+   /**
+    * called when moving from the preview back to the first page.
+    * clean up any mods.
+    */
+   public void clearModifications() {
+       fModifiedSpecDocument = null;
+       fSpecCommand = null;
+       fModifiedTemplateDocument = null;
+       fTemplateCommand = null;
+   }
 
     /**
      *  called when moving from the first page to the preview page.
      *  Generates the modified documents for preview.
      */
-    private void performModifications()
+    void performModifications()
     {
         String id = fMovePage.getTemplateComponentId().trim();
         List moving = fMovePage.getAttributesThatMove();
@@ -321,6 +329,8 @@ public class MoveImplicitToSpecWizard extends Wizard
 
     private void doFinish(IProgressMonitor monitor)
     {
+        if (fModifiedSpecDocument == null) 
+            performModifications();
         try
         {
             fSpecCommand.execute(fOriginalSpecDocument);
@@ -423,7 +433,7 @@ public class MoveImplicitToSpecWizard extends Wizard
         boolean emptyTag = sourceInfo.isEmptyTag();
         int initialIndent = 0;
         ISourceLocation startLocation = sourceInfo.getStartTagSourceLocation();
-        result.offset = startLocation.getCharEnd();
+        result.offset = startLocation.getCharEnd()+1;
         result.length = 0;
 
         if (found != fRelatedSpec)
@@ -433,7 +443,7 @@ public class MoveImplicitToSpecWizard extends Wizard
             if (!emptyTag)
             {
                 ISourceLocation endLocation = sourceInfo.getEndTagSourceLocation();
-                result.offset = endLocation.getCharEnd();
+                result.offset = endLocation.getCharEnd()+1;
             }
 
         } else
@@ -447,7 +457,7 @@ public class MoveImplicitToSpecWizard extends Wizard
                 result.length = fOriginalSpecDocument.getLength() - result.offset;
                 PluginComponentSpecification rewriteSpec = new PluginComponentSpecification(fRelatedSpec);
                 rewriteSpec.addComponent(componentId, newContainedComponent);
-                result.text = computeComponentSpecString(rewriteSpec);
+                result.text = rewiteRootTag(rewriteSpec);
             } else
             {
                 //no rewrite, we just need to insert.
@@ -465,16 +475,18 @@ public class MoveImplicitToSpecWizard extends Wizard
     {
         StringWriter swriter = new StringWriter();
         String lineDelimiter = getLineDelimiter(fOriginalSpecDocument);
+        swriter.write(lineDelimiter);
+        swriter.write(lineDelimiter);
         XMLUtil.writeContainedComponent(
             newComponent,
             id,
             new IndentingWriter(swriter, true, fUseTabIndent, fTabSpaces, initialIndent, lineDelimiter),
             indent,
-            fRelatedSpec.getPublicId());
+            fRelatedSpec.getPublicId(), false);
         return swriter.toString();
     }
 
-    private String computeComponentSpecString(PluginComponentSpecification rewriteComponent)
+    private String rewiteRootTag(PluginComponentSpecification rewriteComponent)
     {
         StringWriter swriter = new StringWriter();
         String lineDelimiter = getLineDelimiter(fOriginalSpecDocument);

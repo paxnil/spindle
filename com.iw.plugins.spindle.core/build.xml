@@ -11,7 +11,7 @@
 
 	<target name="init" depends="properties">
 		<property name="plugin" value="com.iw.plugins.spindle.core"/>
-		<property name="version.suffix" value="_0.0.32"/>
+		<property name="version.suffix" value="_0.0.33"/>
 		<property name="full.name" value="${plugin}${version.suffix}"/>
 		<property name="temp.folder" value="${basedir}/temp.folder"/>
 		<property name="plugin.destination" value="${basedir}"/>

@@ -225,7 +225,7 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
         fStartTagCharStart = fSourceCharStart = column;
 
         int line = startTag.getEndLineNumber();
-        column = resolver.getColumnOffset(line, startTag.getEndColumnNumber());
+        column = resolver.getColumnOffset(line, startTag.getEndColumnNumber(), '>');
 
         fStartTagEndLine = line;
         fStartTagCharEnd = column;
@@ -253,7 +253,7 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
             fEndTagCharStart = column;
 
             line = endTag.getEndLineNumber();
-            column = resolver.getColumnOffset(line, endTag.getEndColumnNumber());
+            column = resolver.getColumnOffset(line, endTag.getEndColumnNumber(), '>');
 
             fEndTagEndLine = line;
             fEndTagCharEnd = column;

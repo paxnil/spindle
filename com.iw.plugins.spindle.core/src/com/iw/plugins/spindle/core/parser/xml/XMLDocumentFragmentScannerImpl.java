@@ -761,7 +761,7 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner implements XMLDoc
             int c = fEntityScanner.peekChar();
             if (c == '>')
             {
-                fEventHandler.startTagEnd(fEntityManager.fCurrentEntity.lineNumber, fEntityManager.fCurrentEntity.columnNumber + 1);
+                fEventHandler.startTagEnd(fEntityManager.fCurrentEntity.lineNumber, fEntityManager.fCurrentEntity.columnNumber);
 
                 //                System.out.println("Ends non-empty at line: " + fEndLineNumber + " column: " + fEndColumnNumber);
 
@@ -1075,7 +1075,7 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner implements XMLDoc
         }
         fMarkupDepth--;
 
-        fEventHandler.endTagEnd(fEntityManager.fCurrentEntity.lineNumber, fEntityManager.fCurrentEntity.columnNumber + 1);
+        fEventHandler.endTagEnd(fEntityManager.fCurrentEntity.lineNumber, fEntityManager.fCurrentEntity.columnNumber - 1);
 
         //        System.out.println(" and ends at at line: " + fEndLineNumber + " column: " + (fEndColumnNumber));
 
