@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import net.sf.solareclipse.xml.internal.ui.preferences.XMLSyntaxPreferencePage;
 import net.sf.solareclipse.xml.ui.XMLPlugin;
 import net.sf.solareclipse.xml.ui.text.XMLTextTools;
 
@@ -46,7 +45,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.PluginVersionIdentifier;
 import org.eclipse.core.runtime.Status;
@@ -78,16 +76,13 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.SharedTextColors;
-import com.iw.plugins.spindle.editors.spec.MultiPageContentOutline;
 import com.iw.plugins.spindle.editors.spec.SpecFileDocumentProvider;
 import com.iw.plugins.spindle.editors.spec.SpecStorageDocumentProvider;
-import com.iw.plugins.spindle.editors.spec.TapestryOutlinePage;
 import com.iw.plugins.spindle.editors.template.TemplateFileDocumentProvider;
 import com.iw.plugins.spindle.editors.template.TemplateStorageDocumentProvider;
 import com.iw.plugins.spindle.editors.template.TemplateTextTools;
 import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 import com.iw.plugins.spindle.ui.util.Revealer;
-import com.iw.plugins.spindle.ui.wizards.NewTapComponentWizardPage;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -181,8 +176,20 @@ public class UIPlugin extends AbstractUIPlugin
   static public void log(String msg)
   {
     ILog log = getDefault().getLog();
-    Status status = new Status(IStatus.ERROR, getDefault().getDescriptor().getUniqueIdentifier(), IStatus.ERROR, msg + "\n", null);
+    Status status = new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, msg + "\n", null);
     log.log(status);
+  }
+  
+  static public void warn(Throwable e) {
+    StringBuffer buffer = new StringBuffer("Warning:");
+    buffer.append(e.getClass().getName());
+    buffer.append('\n');
+    buffer.append(e.getStackTrace()[0].toString());
+    log(buffer.toString());
+  }
+  
+  static public void warn(String message) {
+    log("Warning:"+message);
   }
 
   static public void log(Throwable ex)
@@ -192,7 +199,7 @@ public class UIPlugin extends AbstractUIPlugin
     ex.printStackTrace(new PrintWriter(stringWriter));
     String msg = stringWriter.getBuffer().toString();
 
-    Status status = new Status(IStatus.ERROR, getDefault().getDescriptor().getUniqueIdentifier(), IStatus.ERROR, msg, null);
+    Status status = new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, msg, null);
     log.log(status);
   }
 
@@ -422,7 +429,7 @@ public class UIPlugin extends AbstractUIPlugin
 
   public String getPluginId()
   {
-    return getDescriptor().getUniqueIdentifier();
+    return PLUGIN_ID;
   }
 
   public IProject getProjectFor(IEditorInput input)
@@ -461,21 +468,7 @@ public class UIPlugin extends AbstractUIPlugin
     }
     return null;
   }
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.ui.plugin.AbstractUIPlugin#initializeDefaultPreferences(org.eclipse.jface.preference.IPreferenceStore)
-   */
-  protected void initializeDefaultPreferences(IPreferenceStore store)
-  {
-    super.initializeDefaultPreferences(store);
-    PreferenceConstants.initializeDefaultValues(store);
-    XMLSyntaxPreferencePage.initDefaults(store);
-    NewTapComponentWizardPage.initializeDefaults(store);
-    MultiPageContentOutline.initializeDefaultPrefrences();
-    TapestryOutlinePage.initializePluginDefaults();
-  }
-
+  
   /**
    * Returns instance of text tools for Templates.
    */
