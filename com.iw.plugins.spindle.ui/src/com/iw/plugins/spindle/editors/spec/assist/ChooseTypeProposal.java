@@ -33,11 +33,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.core.search.JavaSearchScope;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -45,6 +43,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.Images;
@@ -132,8 +131,9 @@ public class ChooseTypeProposal implements ICompletionProposal
 
       IJavaSearchScope scope = createSearchScope(fJavaProject, fHierarchyRoot);
 
-      SelectionDialog dialog = JavaUI.createTypeDialog(shell, new ProgressMonitorDialog(
-          shell), scope, (fIncludeInterfaces
+      SelectionDialog dialog = JavaUI.createTypeDialog(shell, PlatformUI
+          .getWorkbench()
+          .getProgressService(), scope, (fIncludeInterfaces
           ? IJavaElementSearchConstants.CONSIDER_TYPES
           : IJavaElementSearchConstants.CONSIDER_CLASSES), false);
 
@@ -217,7 +217,8 @@ public class ChooseTypeProposal implements ICompletionProposal
    */
   public String getDisplayString()
   {
-    return "Choose Type Dialog" + (fHierarchyRoot != null ? " implements ("+fHierarchyRoot+")": "");
+    return "Choose Type Dialog"
+        + (fHierarchyRoot != null ? " implements (" + fHierarchyRoot + ")" : "");
   }
 
   /*

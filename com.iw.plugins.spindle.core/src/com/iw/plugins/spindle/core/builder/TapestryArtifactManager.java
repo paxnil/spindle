@@ -42,10 +42,10 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
@@ -171,21 +171,25 @@ public class TapestryArtifactManager implements ITemplateFinderListener
 
         };
 
-        if (context == null)
+        if (context == null && Display.getCurrent() != null)
         {
-            Shell shell = TapestryCore.getDefault().getActiveWorkbenchShell();
-            if (shell != null && shell.getVisible())
-            {
+//            Shell shell = TapestryCore.getDefault().getActiveWorkbenchShell();
+//            if (shell != null && shell.getVisible())
+           
+//            {
                 try
                 {
-                    context = new ProgressMonitorDialog(shell);
+                      PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);
+//                    context = new ProgressMonitorDialog(shell);
 
                 } catch (Exception e)
                 {
                     TapestryCore.log(e);
                 }
+                return;
             }
-        }
+            
+//        }
 
         if (context != null)
         {

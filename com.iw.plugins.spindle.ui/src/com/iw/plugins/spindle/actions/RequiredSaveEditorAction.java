@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -40,6 +39,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -90,7 +90,8 @@ public class RequiredSaveEditorAction
 
         try
         {
-            new ProgressMonitorDialog(getShell()).run(false, false, createRunnable(Arrays.asList(unsavedEditors)));
+            PlatformUI.getWorkbench().getProgressService().run(false, false, createRunnable(Arrays.asList(unsavedEditors)));
+//            new ProgressMonitorDialog(getShell()).run(false, false, );
         } catch (InvocationTargetException e)
         {
             UIPlugin.log(e);

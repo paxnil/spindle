@@ -232,6 +232,7 @@ public class MoveImplicitToSpecWizard extends Wizard
         } catch (InvocationTargetException e)
         {
             UIPlugin.log(e);
+            UIPlugin.log(e.getCause());
         } catch (InterruptedException e)
         {
             UIPlugin.log(e);
