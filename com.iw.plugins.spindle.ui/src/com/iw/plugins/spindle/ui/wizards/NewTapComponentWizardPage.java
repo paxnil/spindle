@@ -98,7 +98,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     protected IFile fComponentFile = null;
     protected IFile fGeneratedHTMLFile = null;
 
-    public static void initializeDefaults(IPreferenceStore pstore)
+    public static void initializeDefaultPreferences(IPreferenceStore pstore)
     {
         pstore.setDefault(P_GENERATE_HTML, true);
         pstore.setDefault(
