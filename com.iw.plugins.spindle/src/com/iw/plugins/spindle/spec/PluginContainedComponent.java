@@ -33,17 +33,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import javax.xml.transform.Result;
-
 import net.sf.tapestry.spec.BindingSpecification;
 import net.sf.tapestry.spec.ContainedComponent;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
-import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
-import com.iw.plugins.spindle.ui.descriptors.INeedsModelInitialization;
 import com.iw.plugins.spindle.util.Indenter;
 
 public class PluginContainedComponent

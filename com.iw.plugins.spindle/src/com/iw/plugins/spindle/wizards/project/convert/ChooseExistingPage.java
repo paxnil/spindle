@@ -27,27 +27,18 @@ package com.iw.plugins.spindle.wizards.project.convert;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelWidget;
-import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
-import com.iw.plugins.spindle.wizards.TapestryWizardPage;
 
 /**
  * @author gwl

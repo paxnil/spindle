@@ -29,7 +29,6 @@ import net.sf.tapestry.spec.ILibrarySpecification;
 
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
-import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 
 /**
  * @author gwl

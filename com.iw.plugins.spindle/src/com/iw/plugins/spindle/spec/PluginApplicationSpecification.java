@@ -28,32 +28,18 @@ package com.iw.plugins.spindle.spec;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
-import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.spec.ApplicationSpecification;
 import net.sf.tapestry.spec.ExtensionSpecification;
 import net.sf.tapestry.spec.IApplicationSpecification;
-import net.sf.tapestry.spec.ILibrarySpecification;
 import net.sf.tapestry.util.IPropertyHolder;
 
-import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
-import com.iw.plugins.spindle.model.TapestryLibraryModel;
-import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
-import com.iw.plugins.spindle.util.Indenter;
 
 public class PluginApplicationSpecification
   extends ApplicationSpecification

@@ -40,10 +40,6 @@ import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.util.IPropertyHolder;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
-import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.util.Indenter;
 
 /**

@@ -100,13 +100,14 @@
             id="com.iw.plugins.spindle.new">
       </category>
       <wizard
-            name="Tapestry Library"
+            name="Tapestry Library Project"
             icon="./icons/basic/library16.gif"
+            project="true"
             category="com.iw.plugins.spindle.new"
-            class="com.iw.plugins.spindle.wizards.NewTapLibraryWizard"
+            class="com.iw.plugins.spindle.wizards.project.NewLibraryProjectWizard"
             id="com.iw.plugins.spindle.new_library_wizard">
          <description>
-            Create a new Tapestry Library
+            Create a new Tapestry Library Project
          </description>
       </wizard>
       <wizard
@@ -114,10 +115,10 @@
             icon="./icons/basic/application16.gif"
             category="com.iw.plugins.spindle.new"
             project="true"
-            class="com.iw.plugins.spindle.wizards.project.application.NewApplicationProjectWizard"
+            class="com.iw.plugins.spindle.wizards.project.NewApplicationProjectWizard"
             id="com.iw.plugins.spindle.new_app_wizard">
          <description>
-            Create a new Tapestry Application
+            Create a new Tapestry Application Project
          </description>
       </wizard>
       <wizard
@@ -238,20 +239,20 @@
             visible="false"
             id="com.iw.spindle.actions.set">
          <action
-               label="New Tapestry Library"
+               label="New Tapestry Library Project"
                icon="icons/full/library16_dark.gif"
-               tooltip="Create a new Tapestry Library"
-               class="com.iw.plugins.spindle.wizards.OpenTapestryLibraryWizard"
+               tooltip="Create a new Tapestry Library Project"
+               class="com.iw.plugins.spindle.wizards.project.OpenLibraryProjectWizard"
                toolbarPath="Normal/spindle"
-               id="com.iw.spindle.actions.set.OpenTapestryLibraryWizard">
+               id="com.iw.spindle.actions.set.open-lib-proj-wiz">
          </action>
          <action
-               label="New Tapestry Application"
+               label="New Tapestry Application Project"
                icon="icons/full/application16_dark.gif"
-               tooltip="Create a new Tapestry Application"
-               class="com.iw.plugins.spindle.wizards.OpenTapestryApplicationWizard"
+               tooltip="Create a new Tapestry Application Project"
+               class="com.iw.plugins.spindle.wizards.project.OpenApplicationProjectWizard"
                toolbarPath="Normal/spindle"
-               id="com.iw.spindle.actions.set.OpenTapestryApplicationWizard">
+               id="com.iw.spindle.actions.set.open-app-proj-wiz">
          </action>
          <action
                label="New Tapestry Component"
@@ -348,12 +349,4 @@
             class="com.iw.plugins.spindle.model.manager.LibraryManagerDelegate">
       </manager>
    </extension>
-   <extension
-         id="MoveDeleteHook"
-         point="org.eclipse.core.resources.moveDeleteHook">
-      <moveDeleteHook
-            class="com.iw.plugins.spindle.change.MoveDeleteManager">
-      </moveDeleteHook>
-   </extension>
-
 </plugin>

@@ -34,18 +34,9 @@ import org.eclipse.update.ui.forms.internal.AbstractSectionForm;
 import org.eclipse.update.ui.forms.internal.SectionChangeManager;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.TapestryImages;
-import com.iw.plugins.spindle.editorlib.EditLibrariesSection;
 import com.iw.plugins.spindle.editorlib.LibraryContentOutlinePage;
-import com.iw.plugins.spindle.editorlib.LibraryServicesSection;
-import com.iw.plugins.spindle.editorlib.OverviewAlertSection;
-import com.iw.plugins.spindle.editorlib.OverviewComponentRefSection;
-import com.iw.plugins.spindle.editorlib.OverviewLibGeneralSection;
-import com.iw.plugins.spindle.editorlib.OverviewPageSection;
-import com.iw.plugins.spindle.editors.PropertyEditableSection;
 import com.iw.plugins.spindle.editors.SpindleForm;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
-import com.iw.plugins.spindle.editors.SpindleFormSection;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.util.IStimulatable;

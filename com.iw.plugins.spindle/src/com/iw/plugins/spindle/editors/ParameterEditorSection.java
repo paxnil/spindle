@@ -29,15 +29,12 @@ import java.util.Iterator;
 
 import net.sf.tapestry.spec.Direction;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IParameterHolder;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginParameterSpecification;

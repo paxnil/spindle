@@ -32,8 +32,6 @@ import java.util.ArrayList;
 import net.sf.tapestry.spec.ComponentSpecification;
 import net.sf.tapestry.spec.Direction;
 import net.sf.tapestry.spec.ParameterSpecification;
-
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;

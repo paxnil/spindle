@@ -26,10 +26,7 @@
 package com.iw.plugins.spindle.spec;
 
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.Set;
-
-import org.eclipse.ui.views.properties.IPropertySource;
 
 import net.sf.tapestry.spec.ExtensionSpecification;
 import net.sf.tapestry.spec.ILibrarySpecification;

@@ -31,19 +31,14 @@ import java.beans.PropertyChangeSupport;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import net.sf.tapestry.spec.ExtensionSpecification;
-import net.sf.tapestry.spec.ILibrarySpecification;
 import net.sf.tapestry.spec.LibrarySpecification;
 import net.sf.tapestry.util.IPropertyHolder;
 
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
-import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 
 public class PluginLibrarySpecification
   extends LibrarySpecification

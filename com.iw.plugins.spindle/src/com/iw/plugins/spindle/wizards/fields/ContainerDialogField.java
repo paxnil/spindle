@@ -156,14 +156,15 @@ public class ContainerDialogField extends StringButtonField {
 
   private IPackageFragmentRoot chooseSourceContainer(IJavaElement initElement) {
   	
-
+    final IJavaProject thisProject = initElement.getJavaProject();
     Class[] acceptedClasses = new Class[] { IPackageFragmentRoot.class, IJavaProject.class };
     ISelectionStatusValidator validator = new TypedElementSelectionValidator(acceptedClasses, false) {
       public boolean isSelectedValid(Object element) {
         try {
-          if (element instanceof IJavaProject) {
+          if (element instanceof IJavaProject && thisProject.equals((IJavaProject)element)) {
+          	
             IJavaProject jproject = (IJavaProject) element;
-            IPath path = jproject.getProject().getFullPath();
+            IPath path = jproject.getProject().getFullPath(); 
             return (jproject.findPackageFragmentRoot(path) != null);
           } else if (element instanceof IPackageFragmentRoot) {
             return (((IPackageFragmentRoot) element).getKind() == IPackageFragmentRoot.K_SOURCE);
@@ -179,6 +180,12 @@ public class ContainerDialogField extends StringButtonField {
     acceptedClasses = new Class[] { IJavaModel.class, IPackageFragmentRoot.class, IJavaProject.class };
     ViewerFilter filter = new TypedViewerFilter(acceptedClasses) {
       public boolean select(Viewer viewer, Object parent, Object element) {
+      	
+      	if (element instanceof IJavaProject) {
+      		
+      		return thisProject.equals((IJavaProject)element);
+      		
+      	}
         if (element instanceof IPackageFragmentRoot) {
           try {
             return (((IPackageFragmentRoot) element).getKind() == IPackageFragmentRoot.K_SOURCE);

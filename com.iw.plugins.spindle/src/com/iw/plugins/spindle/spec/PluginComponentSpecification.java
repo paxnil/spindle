@@ -48,7 +48,6 @@ import net.sf.tapestry.spec.ContainedComponent;
 import net.sf.tapestry.spec.ParameterSpecification;
 import net.sf.tapestry.util.IPropertyHolder;
 
-import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.util.Indenter;
 import com.iw.plugins.spindle.util.SourceWriter;

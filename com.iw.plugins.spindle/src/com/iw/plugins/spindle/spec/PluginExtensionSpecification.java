@@ -33,16 +33,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.sf.tapestry.spec.ExtensionSpecification;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import com.iw.plugins.spindle.ui.CheckboxPropertyDescriptor;
 import com.iw.plugins.spindle.ui.descriptors.TypeDialogPropertyDescriptor;
-import com.iw.plugins.spindle.util.Indenter;
-
-import net.sf.tapestry.IResourceResolver;
-import net.sf.tapestry.spec.ExtensionSpecification;
 
 /**
  * @author gwl

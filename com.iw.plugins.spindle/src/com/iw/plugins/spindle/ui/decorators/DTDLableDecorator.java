@@ -19,7 +19,6 @@ import org.eclipse.swt.widgets.Display;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
-import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.project.TapestryProject;
 import com.iw.plugins.spindle.spec.XMLUtil;
 

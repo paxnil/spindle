@@ -25,7 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.util.lookup;
 
-import org.eclipse.core.resources.IStorage;
+
 
 public interface INamespaceLookupRequestor {
 

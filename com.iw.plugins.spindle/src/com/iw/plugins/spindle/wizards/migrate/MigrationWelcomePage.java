@@ -28,32 +28,18 @@ package com.iw.plugins.spindle.wizards.migrate;
 import java.io.IOException;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.update.ui.forms.internal.engine.FormEngine;
 
 import com.iw.plugins.spindle.TapestryImages;
-import com.iw.plugins.spindle.ui.dialogfields.DialogField;
-import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
-import com.iw.plugins.spindle.ui.dialogfields.RadioDialogField;
 import com.iw.plugins.spindle.ui.migrate.MigrationContext;
-import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
-import com.iw.plugins.spindle.util.lookup.TapestryLookup;
-import com.iw.plugins.spindle.wizards.TapestryWizardPage;
 
 /**
  * @author gwl

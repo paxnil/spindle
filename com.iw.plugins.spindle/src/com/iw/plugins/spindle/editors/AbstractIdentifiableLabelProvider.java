@@ -5,7 +5,6 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-
 import com.iw.plugins.spindle.spec.IIdentifiable;
 
 /**

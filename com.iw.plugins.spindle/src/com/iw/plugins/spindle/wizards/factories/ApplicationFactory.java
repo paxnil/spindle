@@ -61,7 +61,22 @@ public class ApplicationFactory {
     IProgressMonitor monitor)
     throws CoreException, InterruptedException {
 
-    monitor.beginTask(MessageUtil.getFormattedString("ApplicationFactory.operationdesc", appname), 10);
+    String qualifiedEngineClassname = engineClass.getFullyQualifiedName();
+    return createApplication(root, pack, appname, qualifiedEngineClassname, monitor);
+
+  }
+
+  static public IFile createApplication(
+    IPackageFragmentRoot root,
+    IPackageFragment pack,
+    String appname,
+    String qualifiedEngineClassname,
+    IProgressMonitor monitor)
+    throws CoreException, InterruptedException {
+
+    monitor.beginTask(
+      MessageUtil.getFormattedString("ApplicationFactory.operationdesc", appname),
+      10);
     if (pack == null) {
       pack = root.getPackageFragment("");
     }
@@ -74,16 +89,19 @@ public class ApplicationFactory {
     IContainer folder = (IContainer) pack.getUnderlyingResource();
     IFile file = folder.getFile(new Path(appname + ".application"));
 
-    String qualifiedEngineClassname = engineClass.getFullyQualifiedName();
     InputStream contents =
-      new ByteArrayInputStream(getApplicationContent(appname, qualifiedEngineClassname, pack.getElementName()).getBytes());
+      new ByteArrayInputStream(
+        getApplicationContent(appname, qualifiedEngineClassname, pack.getElementName()).getBytes());
     file.create(contents, false, new SubProgressMonitor(monitor, 1));
     monitor.worked(1);
     monitor.done();
     return file;
   }
 
-  static private String getApplicationContent(String appname, String qualifiedEngineClassname, String packageFragment)
+  static private String getApplicationContent(
+    String appname,
+    String qualifiedEngineClassname,
+    String packageFragment)
     throws CoreException, InterruptedException {
 
     PluginApplicationSpecification appSpec = new PluginApplicationSpecification();

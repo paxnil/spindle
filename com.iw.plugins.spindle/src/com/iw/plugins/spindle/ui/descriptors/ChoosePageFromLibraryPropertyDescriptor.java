@@ -37,7 +37,6 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.EditableDialogCellEditor;
-import com.iw.plugins.spindle.util.SpindleStatus;
 
 public class ChoosePageFromLibraryPropertyDescriptor extends PropertyDescriptor implements INeedsModelInitialization {
 

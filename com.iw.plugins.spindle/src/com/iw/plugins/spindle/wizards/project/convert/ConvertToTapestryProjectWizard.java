@@ -38,8 +38,6 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.project.ITapestryProject;
-import com.iw.plugins.spindle.wizards.NewTapAppWizardPage;
-import com.iw.plugins.spindle.wizards.NewTapLibraryWizardPage;
 import com.iw.plugins.spindle.wizards.NewTapestryElementWizard;
 import com.iw.plugins.spindle.wizards.TapestryWizardPage;
 
@@ -59,8 +57,8 @@ public class ConvertToTapestryProjectWizard extends NewTapestryElementWizard {
 
   private ConversionWelcomePage welcomePage;
   private ChooseExistingPage chooseExistingPage;
-  private NewTapAppWizardPage newApplicationPage;
-  private NewTapLibraryWizardPage newLibraryPage;
+  private CreateApplicationWizardPage newApplicationPage;
+  private CreateLibraryWizardPage newLibraryPage;
 
   private QuestionPage questionPage;
 
@@ -87,8 +85,8 @@ public class ConvertToTapestryProjectWizard extends NewTapestryElementWizard {
     if (workspace == null) {
       throw new IllegalArgumentException();
     }
-    newApplicationPage = new NewTapAppWizardPage(workspace.getRoot());
-    newLibraryPage = new NewTapLibraryWizardPage(workspace.getRoot());
+    newApplicationPage = new CreateApplicationWizardPage(workspace.getRoot());
+    newLibraryPage = new CreateLibraryWizardPage(workspace.getRoot());
     questionPage = new QuestionPage("Migrate Now?");
 
     addPage(welcomePage);
