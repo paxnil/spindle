@@ -55,9 +55,9 @@ public class JumpToSpecAction extends BaseJumpAction
     protected void doRun()
     {
         IResourceWorkspaceLocation location = getSpecLocation();
-        if (location == null )
+        if (location == null && fEditor instanceof TemplateEditor)
         {
-            
+
             MessageDialog.openInformation(
                 fEditor.getEditorSite().getShell(),
                 "Operation Aborted",

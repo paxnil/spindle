@@ -178,6 +178,10 @@
       </editor>
    </extension>
 <!--
+
+This is from the old Spindle. Have not decided if I will port them to
+the new Spindle
+
       <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
@@ -259,16 +263,19 @@
             id="com.iw.plugins.spindle.ui.editor.commands">
       </scope>
 <!-- define a format command that we will associate with the key binding Ctrl-Shift-F -->
+   
+      		
       <command
             name="Format"
             description="Format this file"
-            category="source"
+            category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.format">
       </command>
+     
       <command
             name="Next Attribute"
             description="Move right/down to the next attribute"
-            category="navigate"
+            category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeRight">
       </command>
       <keyBinding
@@ -277,11 +284,10 @@
             command="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeRight"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
-
       <command
             name="Previous Attribute"
             description="Move left/up to the next attribute"
-            category="navigate"
+            category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft">
       </command>
       <keyBinding
@@ -290,11 +296,10 @@
             command="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
-
       <command
             name="Next Tag"
             description="Move down to the first attribute of the next tag"
-            category="navigate"
+            category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeDown">
       </command>
       <keyBinding
@@ -303,11 +308,10 @@
             command="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeDown"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
-
       <command
             name="Previous Tag"
             description="Move down to the first attribute of the previous tag"
-            category="navigate"
+            category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp">
       </command>
       <keyBinding
@@ -316,11 +320,10 @@
             command="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
-
       <command
             name="Jump to Java"
             description="Jump to the java source (if possible)"
-            category="jump"
+            category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.jump.java">
       </command>
       <keyBinding
@@ -332,7 +335,7 @@
       <command
             name="Jump to Specification"
             description="Jump to the specification file (if possible)"
-            category="jump"
+            category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.jump.spec">
       </command>
       <keyBinding
@@ -350,7 +353,7 @@
       <command
             name="Jump to Template"
             description="Jump to the template file (if possible)"
-            category="jump"
+            category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.jump.template">
       </command>
       <keyBinding
@@ -368,7 +371,7 @@
       <command
             name="Show Outline"
             description="Show an outline of the XML (if possible)"
-            category="source"
+            category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.xml.show.outline">
       </command>
       <keyBinding
@@ -380,7 +383,7 @@
       <command
             name="Open Structure"
             description="Open the structure of a Tapestry spec (if possible)"
-            category="source"
+            category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.xml.open.structure">
       </command>
       <keyBinding

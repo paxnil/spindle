@@ -32,14 +32,15 @@ import java.util.List;
 
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IStorageEditorInput;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
@@ -65,8 +66,12 @@ public class JumpToTemplateAction extends BaseJumpAction
      */
     protected void doRun()
     {
-        PluginComponentSpecification component = getEditorSpecification();
-        if (component == null && fEditor.getEditorInput() instanceof IStorageEditorInput)
+        BaseSpecification spec = getEditorSpecification();
+
+        if (spec instanceof ILibrarySpecification)
+            return;
+
+        if (fEditor.getEditorInput() instanceof JarEntryEditorInput)
         {
             MessageDialog.openInformation(
                 fEditor.getEditorSite().getShell(),
@@ -75,7 +80,7 @@ public class JumpToTemplateAction extends BaseJumpAction
             return;
         }
 
-        List possibles = getTemplateLocations(component);
+        List possibles = getTemplateLocations((PluginComponentSpecification) spec);
         if (possibles == null || possibles.isEmpty())
             return;
         if (possibles.size() > 1)
@@ -91,14 +96,9 @@ public class JumpToTemplateAction extends BaseJumpAction
     /**
      * @return
      */
-    private PluginComponentSpecification getEditorSpecification()
+    private BaseSpecification getEditorSpecification()
     {
-        Object spec = fEditor.getSpecification();
-
-        if (spec instanceof ILibrarySpecification)
-            return null;
-
-        return (PluginComponentSpecification) spec;
+        return (BaseSpecification) fEditor.getSpecification();
     }
 
     private List getTemplateLocations(PluginComponentSpecification spec)
@@ -126,10 +126,10 @@ public class JumpToTemplateAction extends BaseJumpAction
      */
     public void editorContextMenuAboutToShow(IMenuManager menu)
     {
-        PluginComponentSpecification component = getEditorSpecification();
-        if (component != null)
+        BaseSpecification spec = getEditorSpecification();
+        if (spec != null && spec instanceof PluginComponentSpecification)
         {
-            List possibles = getTemplateLocations(component);
+            List possibles = getTemplateLocations((PluginComponentSpecification) spec);
             for (Iterator iter = possibles.iterator(); iter.hasNext();)
             {
                 IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();

@@ -370,8 +370,7 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
             fPositions = positions;
             fLineInfos = new ArrayList();
 
-            fPartitioner =
-                new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+            fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
             fPartitioner.connect(fDocument);
             fRoot = XMLNode.createTree(fDocument, -1); //TODO may not need this!
             computeTypedPositions();
@@ -381,6 +380,10 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
         {
             UIPlugin.log(e); //shouldnt happen
             return null;
+        } catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+            throw e;
         } finally
         {
             fDocument = null; //release to GC
@@ -390,7 +393,8 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
             fDocumentPositions = null;
             try
             {
-                fPartitioner.disconnect();
+                if (fPartitioner != null)
+                    fPartitioner.disconnect();
             } catch (RuntimeException e)
             {
                 UIPlugin.log(e);
@@ -468,14 +472,16 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
                 formatDefault(tposition, buffer);
             } else if (type == XMLDocumentPartitioner.DECL)
             {
-                XMLNode artifact = (XMLNode)tposition;
+                XMLNode artifact = (XMLNode) tposition;
                 String content = artifact.getContent();
-                if (content.indexOf("DOCTYPE") >=0) {
+                if (content.indexOf("DOCTYPE") >= 0)
+                {
                     formatStartTag(tposition, buffer);
-                } else {
+                } else
+                {
                     formatCDATA(tposition, buffer);
                 }
-                   
+
             } else if (type == XMLDocumentPartitioner.COMMENT)
             {
                 formatDefault(tposition, buffer);
@@ -508,7 +514,7 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
         while (lineWalker.hasMoreLines())
         {
             LineInfo info = lineWalker.nextLine();
-            
+
             if (info.isEmpty())
             {
                 info.setWriteOffset(writeEmpty(buffer));
@@ -526,7 +532,7 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
                 } else if (fPreserveNewline && !alreadyKept)
                 {
                     writeLine("", fInitialIndent, fIndentLevel, buffer);
-//                    buffer.append(fLineDelimiter);
+                    //                    buffer.append(fLineDelimiter);
                     alreadyKept = true;
                 }
             }
