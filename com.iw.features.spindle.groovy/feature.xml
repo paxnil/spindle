@@ -45,7 +45,7 @@ All Rights Reserved
    </license>
 
    <url>
-      <update label="Spindle Updates" url="http://spindle.sourceforge.net/updates"/>
+      <update label="Spindle Updates" url="http://spindle.sourceforge.net/unstable"/>
    </url>
 
    <requires>
