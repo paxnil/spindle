@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.iw.features.spindle"
-      label="Spindle 3, an Eclipse Plugin for Tapestry"
-      version="3.1.15"
+      id="com.iw.features.spindle.groovy"
+      label="Spindle 3, an Eclipse Plugin for Tapestry incl Groovestry Support"
+      version="3.1.19"
       provider-name="Geoffrey Longman"
       image="spindle.gif">
 
    <description url="http://spindle.sourceforge.net">
       Spindle 3 provides IDE support for Web Applications built with
 Tapestry Web Components (http://jakarta.apache.org/tapestry).
+This version of the Spindle feature includes Groovestry support
    </description>
 
    <copyright>
@@ -69,6 +70,45 @@ All Rights Reserved
          version="4.0.13"/>
 
    <plugin
+         id="com.iw.plugins.spindle.core"
+         download-size="0"
+         install-size="0"
+         version="0.1.19 "/>
+
+   <plugin
+         id="com.iw.plugins.spindle.core.groovy"
+         download-size="0"
+         install-size="0"
+         version="1.0.1"
+         fragment="true"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.docs"
+         download-size="0"
+         install-size="0"
+         version="0.1.19"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.docs.default"
+         download-size="0"
+         install-size="0"
+         version="0.1.19 "
+         fragment="true"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.ui"
+         download-size="0"
+         install-size="0"
+         version="0.1.19"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.ui.contrib"
+         download-size="0"
+         install-size="0"
+         version="0.1.19"
+         fragment="true"/>
+
+   <plugin
          id="net.sf.solareclipse.ui"
          download-size="0"
          install-size="0"
@@ -79,23 +119,5 @@ All Rights Reserved
          download-size="0"
          install-size="0"
          version="0.4.0.spindle-dep-6"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.core"
-         download-size="0"
-         install-size="0"
-         version="0.1.14"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.ui"
-         download-size="0"
-         install-size="0"
-         version="0.1.14"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.docs"
-         download-size="0"
-         install-size="0"
-         version="0.1.1"/>
 
 </feature>

@@ -32,18 +32,8 @@
 
    <extension
          point="org.eclipse.ui.propertyPages">
-         <!-- TODO remove
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
-            name="Tapestry"
-            class="com.iw.plugins.spindle.ui.properties.ProjectPropertyPage"
-            id="CorePropertyPage">         
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-      </page>
+         <!-- 
+         The project property page has moved into the contrib fragment
       -->
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -156,17 +146,7 @@
             id="com.iw.plugins.spindle.ui.new">
       </category>
       <!--
-      <wizard
-            name="Tapestry Web Project"
-            icon="./icons/full/application16.gif"
-            category="com.iw.plugins.spindle.ui.new"
-            class="com.iw.plugins.spindle.ui.wizards.project.NewTapestryProjectWizard"
-            project="true"
-            id="com.iw.plugins.spindle.ui.new_project_wizard">
-         <description>
-            Create a new Tapestry Web Project
-         </description>
-      </wizard>
+        The New Project Wizard has been moved into the contrib fragment      
       -->
       <wizard
             name="Tapestry Component"

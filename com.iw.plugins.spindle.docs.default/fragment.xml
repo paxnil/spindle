@@ -3,7 +3,7 @@
 <fragment
    id="com.iw.plugins.spindle.docs.default"
    name="Default Docs Fragment"
-   version="0.1.0 "
+   version="0.1.19 "
    provider-name="Geoffrey Longman"
    plugin-id="com.iw.plugins.spindle.docs"
    plugin-version="0.1.1"
