@@ -60,11 +60,10 @@ import com.wutka.dtd.DTD;
 public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 {
 
-    protected static List getRawNewTagProposals(DTD dtd, DocumentArtifact artifact, int documentOffset)
+    protected static List findRawNewTagProposals(DTD dtd, DocumentArtifact artifact, int documentOffset)
     {
         DocumentArtifact parent = artifact.getParent();
         DocumentArtifact previousSibling = null;
-
 
         if (parent != null && !parent.getType().equals("/"))
         {
@@ -80,20 +79,25 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
                         previousSibling = artifact.getPreviousSiblingTag(parentAllowedContent);
                     if (previousSibling != null)
                         sibName = previousSibling.getName();
-                    List allowedChildren = SpecAssistHelper.getAllowedChildren(dtd, parentName, sibName, false);
-                    List result = new ArrayList();
-                    for (Iterator iter = allowedChildren.iterator(); iter.hasNext();)
-                    {
-                        String tagName = (String) iter.next();
-                        result.addAll(SpecAssistHelper.getNewElementCompletionProposals(dtd, tagName));
-
-                    }
-                    return result;
+                    return getRawNewTagProposals(dtd, parentName, sibName);
                 }
             }
         }
         return Collections.EMPTY_LIST;
 
+    }
+
+    protected static List getRawNewTagProposals(DTD dtd, String parentName, String sibName)
+    {
+        List allowedChildren = SpecAssistHelper.getAllowedChildren(dtd, parentName, sibName, false);
+        List result = new ArrayList();
+        for (Iterator iter = allowedChildren.iterator(); iter.hasNext();)
+        {
+            String tagName = (String) iter.next();
+            result.addAll(SpecAssistHelper.getNewElementCompletionProposals(dtd, tagName));
+
+        }
+        return result;
     }
 
     protected String fDeclaredRootElementName;

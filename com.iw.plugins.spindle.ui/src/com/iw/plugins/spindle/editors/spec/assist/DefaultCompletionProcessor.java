@@ -36,6 +36,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
+import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  *  Processor for default content type
@@ -60,12 +61,13 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
         if (artifact.getOffset() + artifact.getLength() == documentOffset)
             artifact = artifact.getNextArtifact();
 
-        artifact = artifact.getNextArtifact();
+		DocumentArtifact nextArtifact = artifact.getNextArtifact();
+        if (nextArtifact.getType() != DocumentArtifactPartitioner.ENDTAG)
+        	artifact = nextArtifact;
 
         List proposals = new ArrayList();
-        proposals.add(SpecAssistHelper.getDefaultInsertCommentProposal(documentOffset, 0));
 
-        List rawProposals = getRawNewTagProposals(fDTD, artifact, documentOffset);
+        List rawProposals = findRawNewTagProposals(fDTD, artifact, documentOffset);
         if (rawProposals != null && !rawProposals.isEmpty())
         {
             for (Iterator iterator = rawProposals.iterator(); iterator.hasNext();)
@@ -76,6 +78,8 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
                 proposals.add(p);
             }
         }
+		proposals.add(SpecAssistHelper.getDefaultInsertCommentProposal(documentOffset, 0));
+
         return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
     }
 }

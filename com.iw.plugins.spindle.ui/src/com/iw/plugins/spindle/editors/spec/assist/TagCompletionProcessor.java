@@ -77,7 +77,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         int baseState = tag.getStateAt(documentOffset);
         String tagName = tag.getName();
-        if (tag.getType() == DocumentArtifactPartitioner.ENDTAG || baseState == DocumentArtifact.IN_TERMINATOR)
+        if ((tag.getType() == DocumentArtifactPartitioner.ENDTAG && !atStart) || baseState == DocumentArtifact.IN_TERMINATOR)
             return NoSuggestions;
 
         boolean addLeadingSpace = false;
@@ -85,12 +85,36 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         if (baseState == DocumentArtifact.TAG)
         {
+            if (atStart && tag.getType() == DocumentArtifactPartitioner.ENDTAG)
+            {
+            	DocumentArtifact parentTag = tag.getCorrespondingNode();
+            	String parentName = parentTag.getName();
+				if (parentTag == null || parentName == null)
+					return NoSuggestions;
+				DocumentArtifact prevSib = parentTag.findLastChild();
+            	String sibName = null;
+            	if (prevSib != null)
+            		sibName = prevSib.getName();
+            		                        		
+                List candidates = getRawNewTagProposals(fDTD, parentName, sibName);
+                if (candidates.isEmpty())
+                    return NoSuggestions;
 
-            if (atStart || (tag.getAttributes().isEmpty() && !tag.isTerminated()))
+                for (Iterator iter = candidates.iterator(); iter.hasNext();)
+                {
+                    CompletionProposal proposal = (CompletionProposal) iter.next();
+                    proposal.setReplacementOffset(tag.getOffset());
+                    proposal.setReplacementLength(0);
+                    proposals.add(proposal);
+                }
+                proposals.add(SpecAssistHelper.getDefaultInsertCommentProposal(documentOffset, 0));
+				return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+
+            } else if (atStart || (tag.getAttributes().isEmpty() && !tag.isTerminated()))
             {
                 String content = tag.getContent();
                 int length = tag.getLength();
-                List candidates = getRawNewTagProposals(fDTD, tag, documentOffset);
+                List candidates = findRawNewTagProposals(fDTD, tag, documentOffset);
                 if (candidates.isEmpty())
                     return NoSuggestions;
 
@@ -107,9 +131,9 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
                 int replacementLength = i;
 
-                if (length > 1 && documentOffset > tag.getOffset())
+                if (length > 1 && documentOffset > tag.getOffset() + 1)
                 {
-                    String match = tag.getContentTo(documentOffset, true).trim();
+                    String match = tag.getContentTo(documentOffset, true).trim().toLowerCase();
                     for (Iterator iter = candidates.iterator(); iter.hasNext();)
                     {
                         CompletionProposal proposal = (CompletionProposal) iter.next();
@@ -119,6 +143,11 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
                             proposal.setReplacementLength(replacementLength);
                             proposals.add(proposal);
                         }
+                        if (proposals.isEmpty())
+                        {
+                            return NoSuggestions;
+                        }
+
                     }
                 } else
                 {
@@ -155,9 +184,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         Map attrmap = tag.getAttributesMap();
 
         DocumentArtifact existingAttr = tag.getAttributeAt(documentOffset);
-        if (baseState != DocumentArtifact.AFTER_ATT_VALUE
-            && existingAttr != null
-            && existingAttr.getOffset() < documentOffset)
+        if (baseState != DocumentArtifact.AFTER_ATT_VALUE && existingAttr != null && existingAttr.getOffset() < documentOffset)
         {
             computeAttributeNameReplacements(documentOffset, existingAttr, tagName, attrmap.keySet(), proposals);
         } else
@@ -247,8 +274,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         if (documentOffset - tag.getOffset() <= name.length() + 1)
         {
             String comment = SpecAssistHelper.getElementComment(fDTD, name);
-            return new IContextInformation[] {
-                 new ContextInformation(name, comment.length() == 0 ? "No Information" : comment)};
+            return new IContextInformation[] { new ContextInformation(name, comment.length() == 0 ? "No Information" : comment)};
         }
 
         return NoInformation;
