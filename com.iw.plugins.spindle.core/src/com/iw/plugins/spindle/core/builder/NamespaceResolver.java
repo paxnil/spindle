@@ -285,7 +285,7 @@ public class NamespaceResolver
         fResolvingFramework = false;
         fWorking = false;
         fJwcFiles = null;
-        fProblemCollector.reset();
+        fProblemCollector.beginCollecting();
     }
 
     protected void doResolve()
@@ -808,7 +808,7 @@ public class NamespaceResolver
     {
         private List problems = new ArrayList();
 
-        public void reset()
+        private void reset()
         {
             problems.clear();
         }
@@ -843,6 +843,13 @@ public class NamespaceResolver
         public IProblem[] getProblems()
         {
             return (IProblem[]) problems.toArray(new IProblem[problems.size()]);
+        }
+        
+        public void beginCollecting() {
+            reset();
+        }
+        
+        public void endCollecting() {            
         }
 
     }

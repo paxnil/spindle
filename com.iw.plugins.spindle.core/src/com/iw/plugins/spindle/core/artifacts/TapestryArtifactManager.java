@@ -26,6 +26,7 @@
 
 package com.iw.plugins.spindle.core.artifacts;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,9 +34,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchWindow;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.State;
 import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
+import com.iw.plugins.spindle.core.util.Markers;
 
 /**
  * The <code>TapestryArtifactManager</code> manages all the Tapestry Artifacts in the workspace.
@@ -83,7 +93,59 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         if (!TapestryCore.hasTapestryNature(project))
             return null;
 
-        return fProjectBuildStates.get(project);
+        Object state = fProjectBuildStates.get(project);
+        if (state == null)
+        {
+            try
+            {
+                buildStateIfRequired(project);
+                state = fProjectBuildStates.get(project);
+            } catch (CoreException e)
+            {
+                TapestryCore.log(e);
+            }
+        }
+        return state;
+    }
+
+    /**
+     * 
+     */
+    private void buildStateIfRequired(final IProject project) throws CoreException
+    {
+        // don't bother building if the last one was busted beyond saving!
+        if (Markers.getBrokenBuildProblemsFor(project).length > 0)
+            return;
+
+        Shell shell = TapestryCore.getDefault().getActiveWorkbenchShell();
+        if (shell != null && shell.getVisible())
+        {
+            try
+            {
+                IWorkbenchWindow window = TapestryCore.getDefault().getActiveWorkbenchWindow();
+                window.run(false, false, new IRunnableWithProgress()
+                {
+                    public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+                    {
+                        try
+                        {
+                            project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+                        } catch (CoreException e)
+                        {
+                            TapestryCore.log(e);
+                        }
+                    }
+
+                });
+
+            } catch (Exception e)
+            {
+                TapestryCore.log(e);
+            }
+        } else
+        {
+            project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+        }
     }
 
     /* (non-Javadoc)
@@ -122,8 +184,17 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         }
 
     }
-    
-    public void invalidateBuildStates() {
+
+    public Map getTemplateMap(IProject project)
+    {
+        State state = (State) getLastBuildState(project);
+        if (state != null)
+            return state.getTemplateMap();
+        return null;
+    }
+
+    public void invalidateBuildStates()
+    {
         fProjectBuildStates.clear();
     }
 

@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2002
+ * Portions created by the Initial Developer are Copyright (C) 2003
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):

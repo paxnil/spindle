@@ -15,6 +15,7 @@
       <import plugin="com.iw.plugins.spindle.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.search"/>
    </requires>
 
 
@@ -92,13 +93,25 @@
             name="Tapestry Web Project"
             icon="./icons/basic/application16.gif"
             category="com.iw.plugins.spindle.ui.new"
-            project="true"
             class="com.iw.plugins.spindle.ui.wizards.project.NewTapestryProjectWizard"
+            project="true"
             id="com.iw.plugins.spindle.ui.new_project_wizard">
          <description>
             Create a new Tapestry Web Project
          </description>
       </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="Tapestry template editor"
+            default="false"
+            icon="./icons/basic/html16.gif"
+            filenames="*.html"
+            contributorClass="com.iw.plugins.spindle.editors.template.TemplateEditorContributor"
+            class="com.iw.plugins.spindle.editors.template.TemplateEditor"
+            id="com.iw.plugins.spindle.editors.template">
+      </editor>
    </extension>
 
 </plugin>

@@ -211,6 +211,20 @@ public class Markers
 
     }
 
+    public static IMarker[] getBrokenBuildProblemsFor(IProject project)
+    {
+        try
+        {
+            if (project != null && project.exists())
+            {
+
+                return project.findMarkers(Markers.TAPESTRY_BUILBROKEN_TAG, true, IResource.DEPTH_ZERO);
+            }
+        } catch (CoreException e)
+        {} // assume there were no problems
+        return new IMarker[0];
+    }
+
     public static IMarker[] getProblemsFor(IResource resource)
     {
         try

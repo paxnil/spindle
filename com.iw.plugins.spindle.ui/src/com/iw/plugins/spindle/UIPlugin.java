@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2002
+ * Portions created by the Initial Developer are Copyright (C) 2003
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -57,8 +57,7 @@ import com.iw.plugins.spindle.ui.util.Revealer;
  */
 public class UIPlugin extends AbstractUIPlugin
 {
-    
-    public static final String P_HTML_TO_GENERATE = "com.iw.plugins.spindle.ui.defaulthtml";
+    public static final String PLUGIN_ID="com.iw.plugins.spindle.ui";
     
     private static ResourceBundle UIStrings;
 
@@ -266,7 +265,7 @@ public class UIPlugin extends AbstractUIPlugin
     protected void initializeDefaultPreferences(IPreferenceStore store)
     {        
         super.initializeDefaultPreferences(store);
-        store.setDefault(P_HTML_TO_GENERATE, getString("TAPESTRY.genHTMLSource"));
+        PreferenceConstants.initializeDefaultValues(store);
     }
 
 }

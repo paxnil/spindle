@@ -139,7 +139,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
     protected NamespaceResolver fNSResolver;
     protected Map fProcessedLocations;
     protected List fSeenTemplateExtensions;
-    //    protected Parser fParser;
+    protected Map fTemplateMap;
     protected TapestryBuilder fTapestryBuilder;
     protected BuilderValidator fValidator;
     protected IResourceDelta fProjectDelta = null;
@@ -164,6 +164,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fMissingTypes = new ArrayList();
         fProcessedLocations = new HashMap();
         fSeenTemplateExtensions = new ArrayList();
+        fTemplateMap = new HashMap();
         TapestryArtifactManager.getTapestryArtifactManager().addTemplateFinderListener(this);
     }
 
@@ -239,10 +240,10 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
     public void cleanUp()
     {
         fLastState = null;
-        fFoundTypes.clear();
-        fMissingTypes.clear();
-        fProcessedLocations.clear();
-        fSeenTemplateExtensions.clear();
+        fFoundTypes = null;
+        fMissingTypes = null;
+        fProcessedLocations = null;
+        fSeenTemplateExtensions = null;
         fApplicationNamespace = null;
         fFrameworkNamespace = null;
         fComponentScanner = null;
@@ -251,7 +252,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fTapestryBuilder = null;
         fValidator = new BuilderValidator(this);
         fValidator.removeListener(this);
-        fProcessedLocations.clear();
+        fProcessedLocations = null;
         TapestryArtifactManager.getTapestryArtifactManager().removeTemplateFinderListener(this);
     }
 
@@ -484,9 +485,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             }
         } catch (IOException e)
         {
-            //TODO remove
-            e.printStackTrace();
-            TapestryCore.log(e);
+             TapestryCore.log(e);
         } catch (CoreException e)
         {
             //TODO remove
@@ -568,6 +567,10 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
             if (fProcessedLocations.containsKey(location))
                 continue;
+                
+            IStorage storage = location.getStorage();
+            if (storage != null)
+                fTemplateMap.put(storage, spec);
             try
             {
                 scanner.scanTemplate(spec, location, fValidator);

@@ -48,6 +48,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
@@ -108,6 +111,22 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
             SpindleCoreStrings = null;
         }
     }
+    
+    public Shell getActiveWorkbenchShell() {
+       IWorkbenchWindow window = getActiveWorkbenchWindow();
+       if (window != null) {
+         return window.getShell();
+       }
+       return null;
+     }
+
+     public IWorkbenchWindow getActiveWorkbenchWindow() {
+       IWorkbench workbench = getWorkbench();
+       if (workbench != null) {
+         return workbench.getActiveWorkbenchWindow();
+       }
+       return null;
+     }
 
     /**
      * Returns the shared instance.

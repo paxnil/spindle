@@ -61,6 +61,7 @@ import com.iw.plugins.spindle.core.util.Assert;
 public abstract class AbstractScanner implements IProblemCollector
 {
 
+    protected IProblemCollector fExternalProblemCollector;
     protected List fProblems = new ArrayList();
     protected IScannerValidator fValidator;
 
@@ -68,33 +69,39 @@ public abstract class AbstractScanner implements IProblemCollector
     {
         Assert.isNotNull(source);
         Object resultObject = null;
-        fProblems.clear();
-        if (validator == null)
-        {
-            this.fValidator = new BaseValidator();
-        } else
-        {
-            this.fValidator = validator;
-        }
-        this.fValidator.setProblemCollector(this);
-        resultObject = beforeScan(source);
-        if (resultObject == null)
-            return null;
-
+        beginCollecting();
         try
         {
-            doScan(source, resultObject);
 
-        } catch (ParserRuntimeException e)
+            if (validator == null)
+            {
+                this.fValidator = new BaseValidator();
+            } else
+            {
+                this.fValidator = validator;
+            }
+            this.fValidator.setProblemCollector(this);
+            resultObject = beforeScan(source);
+            if (resultObject == null)
+                return null;
+
+            try
+            {
+                doScan(source, resultObject);
+
+            } catch (ParserRuntimeException e)
+            {
+                // do nothing - return what we have so far
+                // this could only happen when pull parsing!
+                e.printStackTrace();
+            }
+            return afterScan(resultObject);
+        } finally
         {
-            // do nothing - return what we have so far
-            // this could only happen when pull parsing!
-            e.printStackTrace();
+            cleanup();
+            endCollecting();
         }
 
-        cleanup();
-
-        return afterScan(resultObject);
     }
 
     protected abstract void doScan(Object source, Object resultObject) throws ScannerException;
@@ -108,10 +115,29 @@ public abstract class AbstractScanner implements IProblemCollector
         return scanResults;
     }
 
+    public void beginCollecting()
+    {
+        if (fExternalProblemCollector != null)
+            fExternalProblemCollector.beginCollecting();
+
+        fProblems.clear();
+    }
+
+    public void endCollecting()
+    {
+        if (fExternalProblemCollector != null)
+            fExternalProblemCollector.endCollecting();
+    }
+
     public void addProblem(IProblem problem)
     {
-
-        fProblems.add(problem);
+        if (fExternalProblemCollector != null)
+        {
+            fExternalProblemCollector.addProblem(problem);
+        } else
+        {
+            fProblems.add(problem);
+        }
     }
 
     public void addSourceProblem(int severity, ISourceLocation location, String message)
@@ -149,6 +175,8 @@ public abstract class AbstractScanner implements IProblemCollector
 
     public IProblem[] getProblems()
     {
+        if (fExternalProblemCollector != null)
+            return fExternalProblemCollector.getProblems();
         return (IProblem[]) fProblems.toArray(new IProblem[fProblems.size()]);
     }
 
@@ -369,6 +397,22 @@ public abstract class AbstractScanner implements IProblemCollector
     protected String getDummyStringPrefix()
     {
         return fValidator.getDummyStringPrefix();
+    }
+
+    /**
+     * @return
+     */
+    public IProblemCollector getExternalProblemCollector()
+    {
+        return fExternalProblemCollector;
+    }
+
+    /**
+     * @param collector
+     */
+    public void setExternalProblemCollector(IProblemCollector collector)
+    {
+        fExternalProblemCollector = collector;
     }
 
 }

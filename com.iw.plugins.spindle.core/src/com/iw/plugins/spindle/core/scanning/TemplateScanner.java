@@ -98,6 +98,8 @@ public class TemplateScanner extends AbstractScanner
     private List fSeenIds = new ArrayList();
     private SpecFactory fSpecificationFactory;
     private IResourceWorkspaceLocation fTemplateLocation;
+    private String fContents;
+    private boolean fPerformDeferredValidations = true;
 
     public void scanTemplate(
         PluginComponentSpecification spec,
@@ -107,7 +109,7 @@ public class TemplateScanner extends AbstractScanner
     {
         Assert.isNotNull(spec);
         Assert.isNotNull(spec.getNamespace());
-        fTemplateLocation = (IResourceWorkspaceLocation)templateLocation;
+        fTemplateLocation = (IResourceWorkspaceLocation) templateLocation;
         fComponentSpec = spec;
         fNamespace = (ICoreNamespace) spec.getNamespace();
         fParser = new CoreTemplateParser();
@@ -118,23 +120,46 @@ public class TemplateScanner extends AbstractScanner
 
     }
 
+    public void scanTemplate(PluginComponentSpecification spec, String contents, IScannerValidator validator)
+        throws ScannerException
+    {
+        Assert.isNotNull(spec);
+        Assert.isNotNull(spec.getNamespace());
+        fContents = contents;
+        fComponentSpec = spec;
+        fNamespace = (ICoreNamespace) spec.getNamespace();
+        fParser = new CoreTemplateParser();
+        fParser.setProblemCollector(this);
+        fSeenIds.clear();
+
+        scan(contents, validator);
+
+    }
+
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(java.lang.Object, java.lang.Object)
      */
     protected void doScan(Object source, Object resultObject) throws ScannerException
     {
-        
+
         char[] data = null;
-        try
+        if (fContents != null)
         {
-            InputStream in = fTemplateLocation.getContents();
-            data = Files.readFileToString(in, null).toCharArray();
-        } catch (CoreException e)
+            data = fContents.toCharArray();
+        } else
         {
-            TapestryCore.log(e);
-        } catch (IOException e)
-        {
-            TapestryCore.log(e);
+
+            try
+            {
+                InputStream in = fTemplateLocation.getContents();
+                data = Files.readFileToString(in, null).toCharArray();
+            } catch (CoreException e)
+            {
+                TapestryCore.log(e);
+            } catch (IOException e)
+            {
+                TapestryCore.log(e);
+            }
         }
         if (data == null)
             throw new ScannerException("null data!");
@@ -271,8 +296,8 @@ public class TemplateScanner extends AbstractScanner
 
         }
 
-        
-        FrameworkComponentValidator.validate(
+        if (fPerformDeferredValidations)
+            FrameworkComponentValidator.validate(
                 fTemplateLocation,
                 fComponentSpec.getNamespace(),
                 token.getComponentType(),
@@ -881,6 +906,22 @@ public class TemplateScanner extends AbstractScanner
     {
         // do nothing
 
+    }
+
+    /**
+     * @return
+     */
+    public boolean getPerformDeferredValidations()
+    {
+        return fPerformDeferredValidations;
+    }
+
+    /**
+     * @param b
+     */
+    public void setPerformDeferredValidations(boolean b)
+    {
+        fPerformDeferredValidations = b;
     }
 
 }

@@ -71,9 +71,12 @@ public class State
     // list of fullyQualified names of types not found during a build
     List fMissingJavaTypes;
     
-    // list of known template extensions
-    List fSeenTemplateExtensions;
+    // map templates to components
+    Map fTemplateMap;
     
+//  list of known template extensions
+     List fSeenTemplateExtensions;
+     
     // the results of parsing web.xml
     ServletInfo fApplicationServlet;
     
@@ -129,6 +132,11 @@ public class State
     static State read(DataInputStream in) throws IOException
     {
         return null;
+    }
+
+    public Map getTemplateMap()
+    {
+        return fTemplateMap;
     }
 
 }

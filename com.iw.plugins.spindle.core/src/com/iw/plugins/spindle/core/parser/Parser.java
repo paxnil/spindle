@@ -94,7 +94,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         TapestryEntityResolver.registerTapestryDTD(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, "Tapestry_3_0.dtd");
         TapestryEntityResolver.registerServletDTD(TapestryCore.SERVLET_2_2_PUBLIC_ID, "web-app_2_2.dtd");
         TapestryEntityResolver.registerServletDTD(TapestryCore.SERVLET_2_2_PUBLIC_ID, "web-app_2_3.dtd");
-        
+
     }
 
     public boolean isDoValidation()
@@ -201,15 +201,21 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     public Node parse(String content) throws IOException
     {
         fXmlDocument = null;
-        fCollectedProblems.clear();
-        getEclipseDocument(content);
-        fHasFatalErrors = false;
-        if (fUsePullParser)
+        beginCollecting();
+        try
         {
-            return pullParse(content);
-        } else
+            getEclipseDocument(content);
+            fHasFatalErrors = false;
+            if (fUsePullParser)
+            {
+                return pullParse(content);
+            } else
+            {
+                return domParse(content);
+            }
+        } finally
         {
-            return domParse(content);
+            endCollecting();
         }
     }
 
@@ -318,6 +324,14 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         return result;
     }
 
+    public void beginCollecting()
+    {
+        fCollectedProblems.clear();
+    }
+
+    public void endCollecting()
+    {}
+
     public void addProblem(IProblem problem)
     {
         if (!fCollectedProblems.contains(problem))
@@ -326,7 +340,8 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
     }
 
-    public void addSourceProblem(int severity, ISourceLocation location, String message) {
+    public void addSourceProblem(int severity, ISourceLocation location, String message)
+    {
         addProblem(
             new DefaultProblem(
                 ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER,
@@ -336,7 +351,6 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
                 location.getCharStart(),
                 location.getCharEnd()));
     }
-
 
     public void addProblem(int severity, ISourceLocation location, String message)
     {

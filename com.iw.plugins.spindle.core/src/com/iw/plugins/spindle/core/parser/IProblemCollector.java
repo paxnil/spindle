@@ -44,4 +44,8 @@ public interface IProblemCollector
   
   public IProblem[] getProblems();
   
+  public void beginCollecting();
+  
+  public void endCollecting();
+  
 }

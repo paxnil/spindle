@@ -61,6 +61,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
@@ -383,7 +384,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     private void configureHomeTemplate(IFolder contextFolder, IProgressMonitor monitor) throws CoreException
     {
         IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
-        String source = pstore.getString(UIPlugin.P_HTML_TO_GENERATE);
+        String source = pstore.getString(PreferenceConstants.P_HTML_TO_GENERATE);
         IFile pageFile = contextFolder.getFile("Home.html");
         fReveal.add(pageFile);
         InputStream contents = new ByteArrayInputStream(source.getBytes());

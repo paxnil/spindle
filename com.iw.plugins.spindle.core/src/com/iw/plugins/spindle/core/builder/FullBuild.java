@@ -105,6 +105,7 @@ public class FullBuild extends Build
         newState.fLastKnownClasspath = fTapestryBuilder.fClasspath;
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
+        newState.fTemplateMap = fTemplateMap;
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
         newState.fApplicationServlet = fApplicationServlet;
         newState.fPrimaryNamespace = fApplicationNamespace;
