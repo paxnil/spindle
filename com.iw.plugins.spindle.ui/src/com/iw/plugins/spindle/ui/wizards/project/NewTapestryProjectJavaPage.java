@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.ui.wizards.ClassPathDetector;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
@@ -142,7 +143,21 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
 
         try
         {
-            getContainer().run(false, true, op);
+            IRunnableContext context = (IRunnableContext) getContainer();
+            if (context == null)
+            {
+                if (getWizard() == null)
+                {
+                    UIPlugin.log("creating : wizard is null: bug [ 843021 ] Is this what 3 Beta is supposed to do");
+                } else
+                {
+                    UIPlugin.log(
+                        "creating : container not set in wizard: bug [ 843021 ] Is this what 3 Beta is supposed to do");
+                }
+                context = (IRunnableContext) UIPlugin.getDefault().getActivePage();
+            }
+            context.run(false, true, op);
+
         } catch (InvocationTargetException e)
         {
             String title = NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.error.title"); //$NON-NLS-1$
@@ -216,7 +231,10 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
         if (entries == null)
         {
             createSrcFolder();
-            return new IClasspathEntry[] { createSrcClasspathEntry(), TAPESTRY_FRAMEWORK, JavaRuntime.getDefaultJREContainerEntry()};
+            return new IClasspathEntry[] {
+                createSrcClasspathEntry(),
+                TAPESTRY_FRAMEWORK,
+                JavaRuntime.getDefaultJREContainerEntry()};
 
         }
 
@@ -248,7 +266,7 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
 
         if (!hasTapestryEntry)
             allEntries.add(TAPESTRY_FRAMEWORK);
-            
+
         if (!hasDefaultJREEntry)
             allEntries.add(JavaRuntime.getDefaultJREContainerEntry());
 
@@ -361,7 +379,20 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
 
         try
         {
-            getContainer().run(false, true, op);
+            IRunnableContext context = (IRunnableContext) getContainer();
+            if (context == null)
+            {
+                if (getWizard() == null)
+                {
+                    UIPlugin.log("removing : wizard is null: bug [ 843021 ] Is this what 3 Beta is supposed to do");
+                } else
+                {
+                    UIPlugin.log(
+                        "removing : container not set in wizard: bug [ 843021 ] Is this what 3 Beta is supposed to do");
+                }
+                context = (IRunnableContext) UIPlugin.getDefault().getActivePage();
+            }
+            context.run(false, true, op);
         } catch (InvocationTargetException e)
         {
             String title = NewWizardMessages.getString("NewProjectCreationWizardPage.op_error.title"); //$NON-NLS-1$
@@ -419,17 +450,6 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
                         UIPlugin.getString("new-project-wizard-must-have-src-folder"),
                         null);
             }
-
-            //            else if (!hasTapestryFramework)
-            //            {
-            //                tapStatus =
-            //                    new Status(
-            //                        IStatus.ERROR,
-            //                        TapestryCore.PLUGIN_ID,
-            //                        0,
-            //                        UIPlugin.getString("new-project-wizard-should-have-tapestry-folder"),
-            //                        null);
-            //            }
 
             if (tapStatus != null)
                 super.updateStatus(tapStatus);

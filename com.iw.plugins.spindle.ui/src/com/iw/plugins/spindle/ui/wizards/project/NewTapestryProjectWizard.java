@@ -69,9 +69,13 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
         addPage(fMainPage);
 
         fJavaPage = new NewTapestryProjectJavaPage(fMainPage);
-        fJavaPage.setImageDescriptor(descriptor);
-
+        fJavaPage.setImageDescriptor(descriptor);        
         addPage(fJavaPage);
+        // bug [ 843021 ] Is this what 3 Beta is supposed to do
+        // for some reason sometimes the page's wizard is not set
+        //
+        // should have been set by addPagr()
+        fJavaPage.setWizard(this);
     }
 
     /**
