@@ -23,7 +23,12 @@ import org.apache.xerces.xni.parser.XMLParserConfiguration;
 import org.apache.xerces.xni.parser.XMLPullParserConfiguration;
 import org.w3c.dom.Document;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.parser.ElementSourceLocationInfo;
+import com.iw.plugins.spindle.core.parser.ISourceLocationResolver;
 import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.parser.xml.TapestryParserConfiguration;
+import com.iw.plugins.spindle.core.parser.xml.event.ElementXMLEventInfo;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
@@ -84,6 +89,8 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     private boolean rootElementSeen;
     private boolean documentIsDone;
     private DocumentImpl theDocument;
+    ISourceLocationResolver resolver;
+    PullParserNode currentNode;
 
     /**
      * @param config
@@ -186,12 +193,29 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     /* (non-Javadoc)
      * @see org.apache.xerces.xni.XMLDocumentHandler#endElement(org.apache.xerces.xni.QName, org.apache.xerces.xni.Augmentations)
      */
+
+    public void setSourceResolver(ISourceLocationResolver resolver)
+    {
+        this.resolver = resolver;
+    }
+    
     public void endElement(QName element, Augmentations augs) throws XNIException
     {
-        // TODO Auto-generated method stub
 
-        // find the last one, finish him up, pop off the stack
+//        ElementXMLEventInfo eventInfo = (ElementXMLEventInfo) augs.getItem(TapestryParserConfiguration.AUGMENTATIONS);
+//        if (eventInfo != null && theDocument != null)
+//        {
+//            if (resolver != null)
+//            {
+//                ElementSourceLocationInfo resolvedInfo = new ElementSourceLocationInfo(eventInfo, resolver);
+//                theDocument.setUserData(currentNode, TapestryCore.PLUGIN_ID, resolvedInfo, null);
+//            } else
+//            {
+//                theDocument.setUserData(currentNode, TapestryCore.PLUGIN_ID, eventInfo, null);
+//            }
+//        }
         super.endElement(element, augs);
+        parseStack.pop();
         System.out.println("endElement: " + element.rawname);
     }
 
@@ -211,11 +235,10 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     public void startElement(QName element, XMLAttributes attributes, Augmentations augs) throws XNIException
     {
         super.startElement(element, attributes, augs);
-        if(!dtdIsDone)
-        {}
-        else if (!rootElementSeen)
+        if (!dtdIsDone)
+        {} else if (!rootElementSeen)
         {
-            
+
             rootElementSeen = true;
             PullParserNode rootNode = new PullParserNode(this);
             parseStack.push(rootNode);

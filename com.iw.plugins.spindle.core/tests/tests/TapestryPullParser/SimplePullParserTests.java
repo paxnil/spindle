@@ -78,7 +78,7 @@ public class SimplePullParserTests extends ConfiguredPullParserBase
 
     public void testSimpleValidationSuccess() throws Exception
     {
-        final String VALID = PROLOG_1 + "<dog test='poo'>Hello, world!</dog>\n";
+        final String VALID = PROLOG_1 + "<dog test='poo'>Hello, world!<cat>stupid</cat></dog>\n";
         parseAll(VALID);
 
     }
