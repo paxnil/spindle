@@ -487,7 +487,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
   }
 
   private void checkEnabled(IStatus status) {
-    boolean flag = status.isOK();
+    boolean flag = status.getSeverity() != status.ERROR;
     fContainerDialogField.setEnabled(flag);
     fPackageDialogField.setEnabled(flag);
     fAutoAddField.setEnabled(flag);
@@ -526,7 +526,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
    * @see IWizardPage#canFlipToNextPage()
    */
   public boolean canFlipToNextPage() {
-    return getCurrentStatus().isOK();
+    return getCurrentStatus().getSeverity() != IStatus.ERROR;
 
   }
 

@@ -106,9 +106,10 @@ public abstract class TapestrySourcePage extends PDESourcePage {
 
     try {
 
-      ((ResourceMarkerAnnotationModel) getSourceViewer().getAnnotationModel()).updateMarkers(
-        getDocumentProvider().getDocument(getEditorInput()));
-
+      ResourceMarkerAnnotationModel annotationModel = (ResourceMarkerAnnotationModel) getSourceViewer().getAnnotationModel();
+      if (annotationModel != null) {
+        annotationModel.updateMarkers(getDocumentProvider().getDocument(getEditorInput()));
+      }
     } catch (CoreException e) {
     }
 
