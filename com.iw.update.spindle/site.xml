@@ -4,6 +4,15 @@
    <description url="http://spindle.sourceforge.net/unstable ">
       Eclipse update site for Spindle 3 integration builds. Select builds on this site are promoted to beta status and made available at http://spindle.sourceforge.net/updates.
    </description>
+   <feature url="features/com.iw.features.jettylauncher_1.0.14.jar" id="com.iw.features.jettylauncher" version="1.0.14">
+      <category name="jetty_launcher"/>
+   </feature>
+   <feature url="features/com.iw.features.jettylauncher_profile_1.0.14.jar" id="com.iw.features.jettylauncher_profile" version="1.0.14">
+      <category name="jetty_launcher"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.54.jar" id="com.iw.features.spindle" version="3.0.54">
+      <category name="spindle3_0_latest"/>
+   </feature>
    <feature url="features/com.iw.features.spindle_3.1.0.jar" id="com.iw.features.spindle" version="3.1.0">
       <category name="spindle_3_1_old"/>
    </feature>
@@ -11,29 +20,21 @@
       <category name="spindle_3_1_old"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.1.2.jar" id="com.iw.features.spindle" version="3.1.2">
+      <category name="spindle_3_1_old"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.1.3.jar" id="com.iw.features.spindle" version="3.1.3">
+      <category name="spindle_3_1_old"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.1.4.jar" id="com.iw.features.spindle" version="3.1.4">
+      <category name="spindle_3_1_old"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.1.5.jar" id="com.iw.features.spindle" version="3.1.5">
       <category name="spindle_3_1_latest"/>
-   </feature>
-   <feature url="features/com.iw.features.jettylauncher_1.0.13.jar" id="com.iw.features.jettylauncher" version="1.0.13"/>
-   <feature url="features/com.iw.features.jettylauncher_profile_1.0.13.jar" id="com.iw.features.jettylauncher_profile" version="1.0.13"/>
-   <feature url="features/com.iw.features.spindle_3.0.54.jar" id="com.iw.features.spindle" version="3.0.54">
-      <category name="spindle3_0_latest"/>
-   </feature>
-   <feature url="features/com.iw.features.jettylauncher_1.0.14.jar" id="com.iw.features.jettylauncher" version="1.0.14">
-      <category name="jetty_launcher"/>
-   </feature>
-   <feature url="features/com.iw.features.jettylauncher_profile_1.0.14.jar" id="com.iw.features.jettylauncher_profile" version="1.0.14">
-      <category name="jetty_launcher"/>
-   </feature>
-   <feature url="features/com.iw.features.jettylauncher_1.1.0.jar" id="com.iw.features.jettylauncher" version="1.1.0">
-      <category name="jetty_launcher"/>
-   </feature>
-   <feature url="features/com.iw.features.jettylauncher_profile_1.1.0.jar" id="com.iw.features.jettylauncher_profile" version="1.1.0">
-      <category name="jetty_launcher"/>
    </feature>
    <category-def name="spindle3_0_latest" label="Spindle 3.0 - latest unstable build - Eclipse 2.1.X">
       <description>
          Here are the latest intergration builds of Spindle 3.0 supporting Tapestry 3.0 (Eclipse 2.1.X)
-      </description> 
+      </description>
    </category-def>
    <category-def name="jetty_launcher" label="Jetty Launcher unstable">
       <description>
