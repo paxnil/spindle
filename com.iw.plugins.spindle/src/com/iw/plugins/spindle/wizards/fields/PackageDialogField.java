@@ -117,6 +117,10 @@ public class PackageDialogField extends StringButtonDefaultField {
         status.setWarning(MessageUtil.getFormattedString(name + ".warning.DiscouragedPackageName", val.getMessage()));
         // continue
       }
+    } else {
+    	
+    	status.setError("Using the default package is not allowed. Choose (or enter) a package");
+    	return status;
     }
 
     IPackageFragmentRoot root;
