@@ -36,6 +36,12 @@
       <category name="older_alphas"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.0.11.jar" id="com.iw.features.spindle" version="3.0.11">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.12.jar" id="com.iw.features.spindle" version="3.0.12">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.14.jar" id="com.iw.features.spindle" version="3.0.14">
       <category name="spindle3_0_latest"/>
    </feature>
    <category-def name="spindle3_0_latest" label="Spindle 3 alpha latest">

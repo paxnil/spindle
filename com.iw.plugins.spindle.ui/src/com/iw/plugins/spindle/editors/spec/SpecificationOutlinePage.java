@@ -98,14 +98,23 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             {
                 DocumentArtifact artifact = (DocumentArtifact) obj;
                 String type = artifact.getType();
-                if (type == DocumentArtifactPartitioner.DECL)
-                    return artifact.getName();
 
-                if (type == DocumentArtifactPartitioner.TAG || type == DocumentArtifactPartitioner.EMPTYTAG)
-                    return artifact.getName();
+                if (type == DocumentArtifactPartitioner.TAG
+                    || type == DocumentArtifactPartitioner.EMPTYTAG
+                    || type == DocumentArtifactPartitioner.DECL)
+                {
+                    String name = artifact.getName();
+                    return name == null ? "" : name;
+                }
 
                 if (type == DocumentArtifactPartitioner.ATTR)
-                    return artifact.getName() + " = " + StringUtils.abbreviate(artifact.getAttributeValue(), 50);
+                {
+                    String name = artifact.getName();
+                    String attrvalue = artifact.getAttributeValue();
+                    return (name == null ? "" : name)
+                        + " = "
+                        + StringUtils.abbreviate(attrvalue == null ? "" : attrvalue, 50);
+                }
 
                 if (type == DocumentArtifactPartitioner.COMMENT)
                     return "COMMENT" + StringUtils.abbreviate(artifact.getContent().trim(), 50);
@@ -190,7 +199,8 @@ public class SpecificationOutlinePage extends ContentOutlinePage
 
                     fFireSelection = false;
                     ISelection oldSelection = getSelection();
-                    treeViewer.setInput(artifact);
+                    treeViewer.setInput(fRoot);
+//                    treeViewer.refresh();
                     treeViewer.setSelection(oldSelection);
                 } catch (RuntimeException e)
                 {

@@ -401,9 +401,15 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         try
         {
             content = fDocument.get(getOffset(), getLength());
-            index = content.indexOf("\"");
-            if (index == -1)
-                index = content.indexOf("'");
+            int singleIndex = content.indexOf("\"");
+            int doubleIndex = content.indexOf("'");
+            
+            if (singleIndex >=0 && doubleIndex > 0) {
+            
+                index = Math.min(singleIndex, doubleIndex);
+            } else {
+                index = Math.max(singleIndex, doubleIndex);
+            }                      
 
         } catch (BadLocationException e)
         {
@@ -414,6 +420,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
             return null;
 
         content = content.substring(index).trim();
+        
         return content.substring(1, content.length() - 1);
     }
 
@@ -480,12 +487,14 @@ public class DocumentArtifact extends TypedPosition implements Comparable
 
         String name = getName();
         int initial = name == null ? 0 : name.length();
+
         for (int i = startLength + initial; i < content.length() - endLength; i++)
         {
             char c = content.charAt(i);
             switch (c)
             {
                 case '"' :
+
                     if (state == DOUBLEQUOTE)
                     {
                         attrs.add(
@@ -496,6 +505,9 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                                 fDocument));
                         start = -1;
                         state = TAG;
+                    } else if (state == SINGLEQUOTE)
+                    {
+                        break;
                     } else
                     {
                         state = DOUBLEQUOTE;
@@ -512,6 +524,9 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                                 fDocument));
                         start = -1;
                         state = TAG;
+                    } else if (state == DOUBLEQUOTE)
+                    {
+                        break;
                     } else
                     {
                         state = SINGLEQUOTE;
@@ -626,6 +641,9 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                     if (state == DOUBLEQUOTE)
                     {
                         state = AFTER_ATT_VALUE;
+                    } else if (state == SINGLEQUOTE)
+                    {
+                        break;
                     } else
                     {
                         state = DOUBLEQUOTE;
@@ -635,6 +653,9 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                     if (state == SINGLEQUOTE)
                     {
                         state = AFTER_ATT_VALUE;
+                    } else if (state == DOUBLEQUOTE)
+                    {
+                        break;
                     } else
                     {
                         state = SINGLEQUOTE;
@@ -729,26 +750,26 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                 return Integer.toString(state);
         }
     } /**
-                                                                                                                                                                               * @return
-                                                                                                                                                                               */
+                                                                                                                                                                                              * @return
+                                                                                                                                                                                              */
     public DocumentArtifact getCorrespondingNode()
     {
         return fCorrespondingNode;
     } /**
-                                                                                                                                                                                   * @return
-                                                                                                                                                                                   */
+                                                                                                                                                                                                  * @return
+                                                                                                                                                                                                  */
     public DocumentArtifact getParent()
     {
         return fParent;
     } /**
-                                                                                                                                                                                   * @param artifact
-                                                                                                                                                                                   */
+                                                                                                                                                                                                  * @param artifact
+                                                                                                                                                                                                  */
     public void setCorrespondingNode(DocumentArtifact artifact)
     {
         fCorrespondingNode = artifact;
     } /**
-                                                                                                                                                                                   * @param artifact
-                                                                                                                                                                                   */
+                                                                                                                                                                                                  * @param artifact
+                                                                                                                                                                                                  */
     public void setParent(DocumentArtifact artifact)
     {
         fParent = artifact;
