@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description>
+      Eclipse update site for Spindle 3 beta builds. 
+   </description>
+   <feature url="features/com.iw.features.spindle_@version@.jar" id="com.iw.features.spindle" version="@version@">
+      <category name="spindle3_0_latest"/>
+   </feature>
+   <category-def name="spindle3_0_latest" label="Spindle 3 latest beta build">
+      <description>
+          Spindle Beta builds.
+      </description>
+   </category-def>
+</site>
