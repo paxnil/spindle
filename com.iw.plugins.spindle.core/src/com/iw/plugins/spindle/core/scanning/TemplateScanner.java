@@ -53,11 +53,9 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.spec.SpecFactory;
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.Build;
 import com.iw.plugins.spindle.core.builder.FrameworkComponentValidator;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
