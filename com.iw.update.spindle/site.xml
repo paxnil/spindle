@@ -2,14 +2,14 @@
 <site>
 
    <description>
-      Eclipse update site for Spindle 3.0 alphas
+      Eclipse update site for Spindle 3 alphas
    </description>
    <feature url="features/com.iw.features.spindle_3.0.4.jar" id="com.iw.features.spindle" version="3.0.4">
       <category name="spindle3_0"/>
       <category name="older_alphas"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.0.5.jar" id="com.iw.features.spindle" version="3.0.5">
-      <category name="spindle3_0_latest"/>
+      <category name="older_alphas"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.0.3.jar" id="com.iw.features.spindle" version="3.0.3">
       <category name="older_alphas"/>
@@ -20,9 +20,24 @@
    <feature url="features/com.iw.features.spindle_3.0.0.alpha1.jar" id="com.iw.features.spindle" version="3.0.0.alpha1">
       <category name="older_alphas"/>
    </feature>
-   <category-def name="spindle3_0_latest" label="Spindle 3.0 alpha latest">
+   <feature url="features/com.iw.features.spindle_3.0.6.jar" id="com.iw.features.spindle" version="3.0.6">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.7.jar" id="com.iw.features.spindle" version="3.0.7">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.8.jar" id="com.iw.features.spindle" version="3.0.8">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.9.jar" id="com.iw.features.spindle" version="3.0.9">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.10.jar" id="com.iw.features.spindle" version="3.0.10">
+      <category name="spindle3_0_latest"/>
+   </feature>
+   <category-def name="spindle3_0_latest" label="Spindle 3 alpha latest">
       <description>
-         Here are the lateset alpha releases of Spindle 3.0 supporting Tapestry 3.0
+         Here are the latest alpha releases of Spindle 3 supporting Tapestry 3.0
       </description>
    </category-def>
    <category-def name="older_alphas" label="Older Alpha releases">

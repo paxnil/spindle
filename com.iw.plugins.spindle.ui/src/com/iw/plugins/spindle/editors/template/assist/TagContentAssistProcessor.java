@@ -245,6 +245,8 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
         List proposals)
     {
         String name = existingAttribute.getName();
+        String value = existingAttribute.getAttributeValue();
+        //get index of whitespace
         String fragment = existingAttribute.getContentTo(documentOffset, false);
         if (fragment.length() > name.length())
             return;
@@ -264,18 +266,36 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
             ContentAssistHelper.CAHelperResult[] infos = helper.findParameters(fragment, existingAttributeNames);
             for (int i = 0; i < infos.length; i++)
             {
-                CompletionProposal proposal =
-                    new CompletionProposal(
-                        infos[i].name,
-                        replacementOffset,
-                        replacementLength,
-                        new Point(infos[i].name.length(), 0),
-                        infos[i].required
-                            ? Images.getSharedImage("bullet_pink.gif")
-                            : Images.getSharedImage("bullet.gif"),
-                        null,
-                        null,
-                        infos[i].description);
+                CompletionProposal proposal;
+                if (value == null)
+                {
+                    proposal =
+                        new CompletionProposal(
+                            infos[i].name + "=\"\"",
+                            replacementOffset,
+                            replacementLength,
+                            new Point(infos[i].name.length(), 0),
+                            infos[i].required
+                                ? Images.getSharedImage("bullet_pink.gif")
+                                : Images.getSharedImage("bullet.gif"),
+                            null,
+                            null,
+                            infos[i].description);
+                } else
+                {
+                    proposal =
+                        new CompletionProposal(
+                            infos[i].name,
+                            replacementOffset,
+                            replacementLength,
+                            new Point(infos[i].name.length(), 0),
+                            infos[i].required
+                                ? Images.getSharedImage("bullet_pink.gif")
+                                : Images.getSharedImage("bullet.gif"),
+                            null,
+                            null,
+                            infos[i].description);
+                }
 
                 proposals.add(proposal);
                 existingAttributeNames.add(infos[i].name.toLowerCase());
@@ -286,18 +306,38 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
             infos = helper.findParameters(null, existingAttributeNames);
             for (int i = 0; i < infos.length; i++)
             {
-                CompletionProposal proposal =
-                    new CompletionProposal(
-                        infos[i].name,
-                        replacementOffset,
-                        replacementLength,
-                        new Point(infos[i].name.length(), 0),
-                        infos[i].required
-                            ? Images.getSharedImage("bullet_weird.gif")
-                            : Images.getSharedImage("bullet_d.gif"),
-                        null,
-                        null,
-                        infos[i].description);
+
+                CompletionProposal proposal;
+                if (value == null)
+                {
+                    proposal =
+                        new CompletionProposal(
+                            infos[i].name+"=\"\"",
+                            replacementOffset,
+                            replacementLength,
+                            new Point(infos[i].name.length(), 0),
+                            infos[i].required
+                                ? Images.getSharedImage("bullet_weird.gif")
+                                : Images.getSharedImage("bullet_d.gif"),
+                            null,
+                            null,
+                            infos[i].description);
+                } else
+                {
+
+                    proposal =
+                        new CompletionProposal(
+                            infos[i].name,
+                            replacementOffset,
+                            replacementLength,
+                            new Point(infos[i].name.length(), 0),
+                            infos[i].required
+                                ? Images.getSharedImage("bullet_weird.gif")
+                                : Images.getSharedImage("bullet_d.gif"),
+                            null,
+                            null,
+                            infos[i].description);
+                }
 
                 proposal.setYOrder(1);
                 proposals.add(proposal);

@@ -59,26 +59,26 @@ public class DocumentArtifactRule implements IPredicateRule {
                     if (c == '-') {
                         c = scanner.read();
                         result = COMMENT;
-                        c = scanTo(scanner, "-->", '\0');
+                        c = scanTo(scanner, "-->", '\0', true);
                     } else {
-                        c = scanTo(scanner, ">", '"');
+                        c = scanTo(scanner, ">", '"', true);
                     }
                 } else {
-                    c = scanTo(scanner, ">", '"');
+                    c = scanTo(scanner, ">", '"', true);
                 }
                 break;
             case '?':
                 result = PI;
-                c = scanTo(scanner, "?>", '\0');
+                c = scanTo(scanner, "?>", '\0', true);
                 break;
             case '>':
                 break;
             case '/':
                 result = ENDTAG;
-                c = scanTo(scanner, ">", '"');
+                c = scanTo(scanner, ">", '"', true);
                 break;
             default:            
-                c = scanTo(scanner, ">", '"');
+                c = scanTo(scanner, ">", '"', true);
                 if (c != -1) {
                     scanner.unread();
                     scanner.unread();                
@@ -97,12 +97,17 @@ public class DocumentArtifactRule implements IPredicateRule {
         return result;
     }
     
-    private int scanTo(ICharacterScanner scanner, String end, char escapeChar) {
+    private int scanTo(ICharacterScanner scanner, String end, char escapeChar, boolean isTagScan) {
         int c;
         int i = 0;
         boolean escaped = false;
         do {
             c = scanner.read();
+            if (!escaped && isTagScan && c == '<') {
+                scanner.unread();
+                scanner.unread();
+                return scanner.read();
+            }
             if (escapeChar != '\0' && escapeChar == c) {
                 escaped = !escaped;
                 i = 0;

@@ -365,6 +365,10 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         {
             UIPlugin.log(e);
         }
+        
+        if (index < 0) {
+            return null;
+        }
 
         content = content.substring(index).trim();
 
@@ -379,7 +383,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         {
             DocumentArtifact node = (DocumentArtifact) it.next();
 
-            if (node.getOffset() <= offset && offset <= node.getOffset() + node.getLength() )
+            if (node.getOffset() <= offset && offset <= node.getOffset() + node.getLength())
             {
                 return node;
             }
@@ -446,6 +450,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         for (int i = startLength + getName().length(); i < content.length() - endLength; i++)
         {
             char c = content.charAt(i);
+
             switch (c)
             {
                 //            case '=':
@@ -489,12 +494,55 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                     break;
 
                 default :
-                    if (!Character.isWhitespace(c) && state == TAG)
+                    if (!Character.isWhitespace(c))
                     {
-                        start = i;
-                        state = ATTR;
+                        if (state == TAG)
+                        {
+
+                            start = i;
+                            state = ATTR;
+                        }
+                    } else if (state == ATTR)
+                    {
+                        boolean stop = false;
+                        int j = i + 1;
+                        // lookahead to see if this is an attribute name with no value
+                        for (; j < content.length() - endLength; j++)
+                        {
+                            char lookahead = content.charAt(j);
+                            if (Character.isWhitespace(lookahead))
+                                continue;
+                            switch (lookahead)
+                            {
+                                case '=' :
+                                    break;
+                                case '"' :
+                                    break;
+                                case '\'':
+                                    break;
+                                default :
+                                    stop = true;
+                                    break;
+                            }
+                            if (stop)
+                                break;
+
+                        }
+                        if (stop)
+                        {
+
+                            attrs.add(
+                                new DocumentArtifact(
+                                    getOffset() + start,
+                                    i - start + 1,
+                                    DocumentArtifactPartitioner.ATTR,
+                                    fDocument));
+                            start = -1;
+                            state = TAG;
+                        }
                     }
             }
+
         }
 
         if (start != -1)
@@ -722,7 +770,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         DocumentArtifact candidate = root.getPreviousSibling();
         if (candidate == null)
             return root.fParent;
-        
+
         return candidate;
     }
 }

@@ -112,18 +112,21 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
             if (last == '\'' || last == '"')
                 fValueLocation.y -= 1;
             fAttributeValue = document.get(fValueLocation.x, fValueLocation.y);
-            char[] chars = fAttributeValue.toCharArray();
-            int i = 0;
-            for (; i < chars.length; i++)
+            if (fAttributeValue.length() > 0)
             {
-                if (!Character.isWhitespace(chars[i]))
-                    break;
-            }
-            if (i > 0)
-            {
-                fValueLocation.x += i;
-                fValueLocation.y -= i;
-                fAttributeValue = document.get(fValueLocation.x, fValueLocation.y);
+                char[] chars = fAttributeValue.toCharArray();
+                int i = 0;
+                for (; i < chars.length; i++)
+                {
+                    if (!Character.isWhitespace(chars[i]))
+                        break;
+                }
+                if (i > 0)
+                {
+                    fValueLocation.x += i;
+                    fValueLocation.y -= i;
+                    fAttributeValue = document.get(fValueLocation.x, fValueLocation.y);
+                }
             }
 
         } catch (BadLocationException e)
@@ -299,7 +302,8 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
 
         int oldLength = fAtSign >= 0 ? fAtSign : fValueLocation.y;
         String oldValue = fAttributeValue.substring(0, oldLength);
-
+        
+        if (oldValue.length() > 0)
         existing.add(oldValue);
 
         ContentAssistHelper.CAHelperResult[] found = fAssistHelper.getSimpleIds();
