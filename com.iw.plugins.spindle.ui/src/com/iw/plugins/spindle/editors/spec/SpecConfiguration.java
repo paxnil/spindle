@@ -68,7 +68,7 @@ import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
  */
 public class SpecConfiguration extends BaseSourceConfiguration
 {
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     private XMLTextTools fTextTools;
 

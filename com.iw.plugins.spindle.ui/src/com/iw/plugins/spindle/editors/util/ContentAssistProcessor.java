@@ -52,7 +52,7 @@ import com.iw.plugins.spindle.editors.Editor;
  */
 public abstract class ContentAssistProcessor implements IContentAssistProcessor
 {
-    protected static final RuleBasedPartitionScanner SCANNER;
+    public static final RuleBasedPartitionScanner SCANNER;
     protected static final ICompletionProposal[] NoProposals = new ICompletionProposal[0];
     protected static final ICompletionProposal[] NoSuggestions =
         new ICompletionProposal[] {

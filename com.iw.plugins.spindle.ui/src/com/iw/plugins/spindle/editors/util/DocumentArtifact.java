@@ -114,7 +114,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                     root.fPublicId = node.readPublicId();
                     root.fRootNodeId = node.getRootNodeId();
                 }
-                node.fParent = parent;
+                node.setParent(parent);
             }
 
             if (type == DocumentArtifactPartitioner.TAG)
@@ -122,7 +122,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
 
             if (type == DocumentArtifactPartitioner.ENDTAG)
             {
-                node.fParent = parent.fParent;
+                node.setParent(parent.fParent);
                 node.fCorrespondingNode = parent;
                 parent.fCorrespondingNode = node;
                 parent = parent.fParent;
@@ -136,24 +136,21 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         try
         {
             Position[] pos = doc.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
-
             for (int i = 0; i < pos.length; i++)
             {
                 if (offset >= pos[i].getOffset() && offset <= pos[i].getOffset() + pos[i].getLength())
-                {
                     return (DocumentArtifact) pos[i];
-                }
             }
         } catch (BadPositionCategoryException e)
         {
             //do nothing
         }
-
         return null;
     }
 
     protected IDocument fDocument = null;
     protected DocumentArtifact fParent;
+    private List children = new ArrayList();
     protected DocumentArtifact fCorrespondingNode;
     public String fPublicId; // only available in the root artifact
     public String fRootNodeId; // only available in the root artifact
@@ -385,16 +382,14 @@ public class DocumentArtifact extends TypedPosition implements Comparable
 
         if (Character.isWhitespace(content.charAt(1)))
             return null;
+
         StringTokenizer st = new StringTokenizer(content, "= \t\n\r<>/");
+
         if (st.hasMoreTokens())
-        {
             name = st.nextToken();
-        }
 
         if (name == null)
-        {
             name = "";
-        }
 
         return name;
     }
@@ -408,18 +403,15 @@ public class DocumentArtifact extends TypedPosition implements Comparable
             content = fDocument.get(getOffset(), getLength());
             index = content.indexOf("\"");
             if (index == -1)
-            {
                 index = content.indexOf("'");
-            }
+
         } catch (BadLocationException e)
         {
             UIPlugin.log(e);
         }
 
         if (index < 0)
-        {
             return null;
-        }
 
         content = content.substring(index).trim();
         return content.substring(1, content.length() - 1);
@@ -430,13 +422,10 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         List attrs = getAttributes();
         for (Iterator it = attrs.iterator(); it.hasNext();)
         {
-            DocumentArtifact node = (DocumentArtifact) it.next();
-            if (node.getOffset() <= offset && offset <= node.getOffset() + node.getLength())
-            {
-                return node;
-            }
+            DocumentArtifact artifact = (DocumentArtifact) it.next();
+            if (artifact.getOffset() <= offset && offset <= artifact.getOffset() + artifact.getLength())
+                return artifact;
         }
-
         return null;
     }
 
@@ -495,12 +484,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         {
             char c = content.charAt(i);
             switch (c)
-            { //            case '=':
-                //                if (state == TAG) {
-                //                    state = ATTR_VALUE;
-                //                }
-                //                break;
-                //
+            {
                 case '"' :
                     if (state == DOUBLEQUOTE)
                     {
@@ -538,7 +522,6 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                     {
                         if (state == TAG)
                         {
-
                             start = i;
                             state = ATTR;
                         }
@@ -746,29 +729,87 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                 return Integer.toString(state);
         }
     } /**
-                                                                                                       * @return
-                                                                                                       */
+                                                                                                                                                                               * @return
+                                                                                                                                                                               */
     public DocumentArtifact getCorrespondingNode()
     {
         return fCorrespondingNode;
     } /**
-                                                                                                           * @return
-                                                                                                           */
+                                                                                                                                                                                   * @return
+                                                                                                                                                                                   */
     public DocumentArtifact getParent()
     {
         return fParent;
     } /**
-                                                                                                           * @param artifact
-                                                                                                           */
+                                                                                                                                                                                   * @param artifact
+                                                                                                                                                                                   */
     public void setCorrespondingNode(DocumentArtifact artifact)
     {
         fCorrespondingNode = artifact;
     } /**
-                                                                                                           * @param artifact
-                                                                                                           */
+                                                                                                                                                                                   * @param artifact
+                                                                                                                                                                                   */
     public void setParent(DocumentArtifact artifact)
     {
         fParent = artifact;
+        if (fParent != null && !fParent.getChildren().contains(this))
+            fParent.addChild(this);
+
+    }
+
+    public synchronized void addChild(DocumentArtifact childArtifact)
+    {
+        for (int i = 0; i < children.size(); i++)
+        {
+            if (((DocumentArtifact) children.get(i)).getOffset() > childArtifact.getOffset())
+                children.add(i, childArtifact);
+
+        }
+        if (!children.contains(childArtifact))
+            children.add(childArtifact);
+    }
+
+    public List getChildren()
+    {
+        return children;
+    }
+
+    public Object[] getChildren(Object obj)
+    {
+        if (obj instanceof DocumentArtifact)
+        {
+            List result = new ArrayList();
+
+            DocumentArtifact artifact = (DocumentArtifact) obj;
+            for (Iterator it = artifact.getChildren().iterator(); it.hasNext();)
+            {
+                DocumentArtifact child = (DocumentArtifact) it.next();
+                String childType = child.getType();
+                if (childType == DocumentArtifactPartitioner.ENDTAG
+                    || (childType == DocumentArtifactPartitioner.TEXT && child.containsOnlyWhitespace()))
+                    continue;
+                result.add(child);
+
+            }
+
+            String type = artifact.getType();
+            if (type == DocumentArtifactPartitioner.TAG
+                || type == DocumentArtifactPartitioner.PI
+                || type == DocumentArtifactPartitioner.EMPTYTAG)
+            {
+                result.addAll(0, artifact.getAttributes());
+            } else if (type == DocumentArtifactPartitioner.DECL)
+            {}
+
+            return result.toArray(new DocumentArtifact[0]);
+        }
+
+        return null;
+    }
+
+    public boolean containsOnlyWhitespace()
+    {
+        return getContent().trim().length() == 0;
     }
 
     // Tags only - if you have an end tag - pass its corresponding tag

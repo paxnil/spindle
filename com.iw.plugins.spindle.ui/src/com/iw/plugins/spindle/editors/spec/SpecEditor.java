@@ -38,6 +38,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.IEditorInput;
@@ -71,6 +73,9 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.ReconcileWorker;
+import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
+import com.iw.plugins.spindle.editors.util.DocumentArtifact;
+import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  *  Editor for Tapestry Spec files
@@ -173,7 +178,7 @@ public class SpecEditor extends Editor
      */
     public IContentOutlinePage createContentOutlinePage(IEditorInput input)
     {
-        return null;
+        return new SpecificationOutlinePage(this);
     }
 
     /* (non-Javadoc)
@@ -220,10 +225,44 @@ public class SpecEditor extends Editor
     {
         fReconciledSpec = null;
 
+        reconcileOutline();
+
         if (fReconciler != null)
             fReconciler.reconcile(collector, monitor);
 
         //        (() fOutline.setSpec(fReconciledSpec));
+    }
+
+    DocumentArtifactPartitioner fOutlinePartitioner;
+
+    private void reconcileOutline()
+    {
+        if (fOutlinePartitioner == null)
+            fOutlinePartitioner =
+                new DocumentArtifactPartitioner(ContentAssistProcessor.SCANNER, DocumentArtifactPartitioner.TYPES);
+        try
+        {
+            IDocument document = getDocumentProvider().getDocument(getEditorInput());
+            if (document.getLength() == 0 || document.get().trim().length() == 0)
+            {
+                ((SpecificationOutlinePage) fOutline).setRoot(null);
+            } else
+            {
+
+                fOutlinePartitioner.connect(document);
+                try
+                {
+                    ((SpecificationOutlinePage) fOutline).setRoot(DocumentArtifact.createTree(document, -1));
+                } catch (BadLocationException e)
+                {
+                    // do nothing
+                }
+            }
+
+        } finally
+        {
+            fOutlinePartitioner.disconnect();
+        }
     }
 
     /** 
