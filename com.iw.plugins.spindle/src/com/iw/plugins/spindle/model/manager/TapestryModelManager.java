@@ -152,6 +152,9 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
     if (modelDelegates != null) {
       result = (ITapestryModelManagerDelegate) modelDelegates.get(extension);
     }
+    if (result == null) {
+    	throw new IllegalStateException("extension: "+extension+" does is not registered in Spindle");
+    }
     return result;
   }
 

@@ -50,7 +50,7 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 public class ModelUtils {
 
   public static TapestryComponentModel findComponentWithHTML(IStorage storage) {
-  	List componentModels = TapestryPlugin.getTapestryModelManager().getAllModels(storage, ".jwc");
+  	List componentModels = TapestryPlugin.getTapestryModelManager().getAllModels(storage, "jwc");
     if (componentModels != null && !componentModels.isEmpty()) {
       IPath htmlPath = storage.getFullPath().removeFileExtension();
       IPath jwcPath = new Path(htmlPath.toString() + ".jwc");
@@ -96,7 +96,7 @@ public class ModelUtils {
   
   public static List findComponentsUsingAlias(String alias) {
     ArrayList result = new ArrayList();
-    List componentModels = TapestryPlugin.getTapestryModelManager().getAllModels(null, ".jwc");
+    List componentModels = TapestryPlugin.getTapestryModelManager().getAllModels(null, "jwc");
     Iterator iter = componentModels.iterator();
     while (iter.hasNext()) {
       TapestryComponentModel model = (TapestryComponentModel) iter.next();
@@ -112,11 +112,11 @@ public class ModelUtils {
   }
   
   public static Iterator getComponentModels() {
-  	return TapestryPlugin.getTapestryModelManager().getAllModels(null, ".jwc").iterator();
+  	return TapestryPlugin.getTapestryModelManager().getAllModels(null, "jwc").iterator();
   }
   
   public static Iterator getApplicationModels() {
-  	return TapestryPlugin.getTapestryModelManager().getAllModels(null, ".application").iterator();
+  	return TapestryPlugin.getTapestryModelManager().getAllModels(null, "application").iterator();
   }
   
   
