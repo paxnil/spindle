@@ -26,8 +26,18 @@
 
 package com.iw.plugins.spindle.core.builder;
 
+import org.apache.tapestry.INamespace;
+import org.apache.tapestry.spec.IComponentSpecification;
+import org.apache.tapestry.spec.IContainedComponent;
+
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+import com.iw.plugins.spindle.core.parser.IProblem;
+import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.scanning.BaseValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.util.Assert;
 
 /**
  *  A validator that knows about the project
@@ -40,17 +50,19 @@ import com.iw.plugins.spindle.core.scanning.BaseValidator;
 public class BuilderValidator extends BaseValidator
 {
     Build build;
-    ICoreNamespace namespace;
+    ICoreNamespace framework;
 
     public BuilderValidator(Build build)
     {
         super();
         this.build = build;
     }
-    
-    public BuilderValidator(Build build, ICoreNamespace namespace) {
+
+    public BuilderValidator(Build build, ICoreNamespace framework)
+    {
         this(build);
-        this.namespace = namespace;
+        Assert.isNotNull(framework);
+        this.framework = framework;
     }
 
     /* (non-Javadoc)
@@ -61,4 +73,82 @@ public class BuilderValidator extends BaseValidator
         return build.tapestryBuilder.getType(fullyQualifiedName);
     }
 
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateContainedComponent(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.spec.IContainedComponent, com.iw.plugins.spindle.core.parser.ISourceLocationInfo)
+     */
+    public boolean validateContainedComponent(
+        PluginComponentSpecification specification,
+        IContainedComponent component,
+        ISourceLocationInfo info)
+        throws ScannerException
+    {
+        ICoreNamespace use_namespace = (ICoreNamespace) specification.getNamespace();
+        String type = component.getType();
+        String namespaceId = null;
+        IComponentSpecification containedSpecification;
+
+        if (TapestryCore.isNull(type))
+        {
+            // already caught by the scanner
+            return true;
+        }
+
+        int colonx = type.indexOf(':');
+
+        if (colonx > 0)
+        {
+            type = type.substring(colonx + 1);
+            namespaceId = type.substring(0, colonx);
+        }
+
+        if (TapestryCore.isNull(namespaceId))
+        {
+            containedSpecification = use_namespace.getComponentSpecification(type);
+            if (containedSpecification == null)
+            {
+                if (build != null)
+                {
+                    //check to see if its not built yet
+                    String path = use_namespace.getSpecification().getComponentSpecificationPath(type);
+                    if (!TapestryCore.isNull(path))
+                    {
+                        // build it
+                        containedSpecification = null; //TODO build it
+                    }
+                }
+                // must check again - it might've got built
+                if (containedSpecification != null)
+                {
+                    // look in the framework namespace
+                    use_namespace = framework;
+                    containedSpecification = use_namespace.getComponentSpecification(type);
+                }
+            }
+        } else
+        {
+            ICoreNamespace sub_namespace = (ICoreNamespace) use_namespace.getChildNamespace(namespaceId);
+            if (sub_namespace == null)
+            {
+                reportProblem(
+                    IProblem.ERROR,
+                    info.getAttributeSourceLocation("type"),
+                    "Unable to resolve " + TapestryCore.getTapestryString("Namespace.nested-namespace", namespaceId));
+                return false;
+            }
+            use_namespace = sub_namespace;
+            containedSpecification = use_namespace.getComponentSpecification(type);
+
+        }
+
+        if (containedSpecification == null)
+        {
+            reportProblem(
+                IProblem.ERROR,
+                info.getAttributeSourceLocation("type"),
+                TapestryCore.getTapestryString("Namespace.no-such-component-type", type, use_namespace.getExtendedId()));
+            return false;
+        }
+
+    }
+    return true;
 }

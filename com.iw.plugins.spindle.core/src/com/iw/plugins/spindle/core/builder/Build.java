@@ -63,6 +63,7 @@ public abstract class Build implements IBuild
     protected BuildNotifier notifier;
     protected Parser parser;
     protected TapestryBuilder tapestryBuilder;
+    protected ICoreNamespace framework;
 
     public Build(TapestryBuilder builder)
     {
@@ -127,87 +128,87 @@ public abstract class Build implements IBuild
         return null;
     }
 
-//    protected IStorage findInPackage(IPackageFragment pack, String filename)
-//    {
-//        IPackageFragmentRoot root = (IPackageFragmentRoot) pack.getParent();
-//        try
-//        {
-//            int packageFlavor = root.getKind();
-//            switch (packageFlavor)
-//            {
-//                case IPackageFragmentRoot.K_BINARY :
-//
-//                    return findInBinaryPackage(pack, filename);
-//                case IPackageFragmentRoot.K_SOURCE :
-//                    return findInSourcePackage(pack, filename);
-//            }
-//        } catch (JavaModelException e)
-//        {
-//            TapestryCore.log(e);
-//        }
-//        return null;
-//    }
-//
-//    protected IStorage findInBinaryPackage(IPackageFragment pack, String filename)
-//    {
-//        Object[] jarFiles = null;
-//        try
-//        {
-//            jarFiles = pack.getNonJavaResources();
-//        } catch (JavaModelException npe)
-//        {
-//            return null; // the package is not present
-//        }
-//        int length = jarFiles.length;
-//        for (int i = 0; i < length; i++)
-//        {
-//            JarEntryFile jarFile = null;
-//            try
-//            {
-//                jarFile = (JarEntryFile) jarFiles[i];
-//            } catch (ClassCastException ccex)
-//            { //skip it
-//                continue;
-//            }
-//            if (jarFile.getName().equals(filename))
-//            {
-//                return (IStorage) jarFile;
-//            }
-//        }
-//        return null;
-//    }
-//
-//    protected IStorage findInSourcePackage(IPackageFragment pack, String filename)
-//    {
-//        Object[] files = null;
-//        try
-//        {
-//            files = pack.getNonJavaResources();
-//        } catch (CoreException npe)
-//        {
-//            return null; // the package is not present
-//        }
-//        if (files != null)
-//        {
-//            int length = files.length;
-//            for (int i = 0; i < length; i++)
-//            {
-//                IFile file = null;
-//                try
-//                {
-//                    file = (IFile) files[i];
-//                } catch (ClassCastException ccex)
-//                { // skip it
-//                    continue;
-//                }
-//                if (file.getName().equals(filename))
-//                {
-//                    return (IStorage) file;
-//                }
-//            }
-//        }
-//        return null;
-//    }
+    //    protected IStorage findInPackage(IPackageFragment pack, String filename)
+    //    {
+    //        IPackageFragmentRoot root = (IPackageFragmentRoot) pack.getParent();
+    //        try
+    //        {
+    //            int packageFlavor = root.getKind();
+    //            switch (packageFlavor)
+    //            {
+    //                case IPackageFragmentRoot.K_BINARY :
+    //
+    //                    return findInBinaryPackage(pack, filename);
+    //                case IPackageFragmentRoot.K_SOURCE :
+    //                    return findInSourcePackage(pack, filename);
+    //            }
+    //        } catch (JavaModelException e)
+    //        {
+    //            TapestryCore.log(e);
+    //        }
+    //        return null;
+    //    }
+    //
+    //    protected IStorage findInBinaryPackage(IPackageFragment pack, String filename)
+    //    {
+    //        Object[] jarFiles = null;
+    //        try
+    //        {
+    //            jarFiles = pack.getNonJavaResources();
+    //        } catch (JavaModelException npe)
+    //        {
+    //            return null; // the package is not present
+    //        }
+    //        int length = jarFiles.length;
+    //        for (int i = 0; i < length; i++)
+    //        {
+    //            JarEntryFile jarFile = null;
+    //            try
+    //            {
+    //                jarFile = (JarEntryFile) jarFiles[i];
+    //            } catch (ClassCastException ccex)
+    //            { //skip it
+    //                continue;
+    //            }
+    //            if (jarFile.getName().equals(filename))
+    //            {
+    //                return (IStorage) jarFile;
+    //            }
+    //        }
+    //        return null;
+    //    }
+    //
+    //    protected IStorage findInSourcePackage(IPackageFragment pack, String filename)
+    //    {
+    //        Object[] files = null;
+    //        try
+    //        {
+    //            files = pack.getNonJavaResources();
+    //        } catch (CoreException npe)
+    //        {
+    //            return null; // the package is not present
+    //        }
+    //        if (files != null)
+    //        {
+    //            int length = files.length;
+    //            for (int i = 0; i < length; i++)
+    //            {
+    //                IFile file = null;
+    //                try
+    //                {
+    //                    file = (IFile) files[i];
+    //                } catch (ClassCastException ccex)
+    //                { // skip it
+    //                    continue;
+    //                }
+    //                if (file.getName().equals(filename))
+    //                {
+    //                    return (IStorage) file;
+    //                }
+    //            }
+    //        }
+    //        return null;
+    //    }
 
     protected ILibrarySpecification parseLibrary(IResourceLocation location)
     {
@@ -219,8 +220,7 @@ public abstract class Build implements IBuild
                 LibraryScanner scanner = new LibraryScanner();
                 scanner.setResourceLocation(location);
                 scanner.setFactory(TapestryCore.getSpecificationFactory());
-                ILibrarySpecification result =
-                    (ILibrarySpecification) scanner.scan(BUILD_PARSER, new BuilderValidator(this), node);
+                ILibrarySpecification result = (ILibrarySpecification) scanner.scan(BUILD_PARSER, new BuilderValidator(this), node);
                 IResource res = Utils.toResource(location);
                 if (res != null)
                 {
@@ -310,9 +310,9 @@ public abstract class Build implements IBuild
             {
                 location = null; // find page using any funny rules!
             }
-            
+
             result = resolveIComponentSpecification(namespace, location);
-            
+
             if (result != null)
             {
                 if (result.isPageSpecification())
@@ -344,7 +344,11 @@ public abstract class Build implements IBuild
                         scanner.setFactory(TapestryCore.getSpecificationFactory());
                         try
                         {
-                            result = (IComponentSpecification) scanner.scan(parser, new BuilderValidator(this, namespace), node);
+                            result =
+                                (IComponentSpecification) scanner.scan(
+                                    parser,
+                                    new BuilderValidator(this, namespace, framework),
+                                    node);
                         } catch (ScannerException e1)
                         {
                             e1.printStackTrace();

@@ -61,9 +61,9 @@ public class BaseValidator implements IScannerValidator
 {
 
     static class SLocation implements ISourceLocation
-    {   /* (non-Javadoc)
-         * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
-         */
+    { /* (non-Javadoc)
+                         * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
+                         */
         public int getCharEnd()
         {
             return 1;
@@ -224,18 +224,23 @@ public class BaseValidator implements IScannerValidator
                 Ognl.parseExpression(expression);
             } catch (OgnlException e)
             {
-                if (problemCollector == null)
-                {
-                    throw new ScannerException(e.getMessage());
-                } else
-                {
-                    problemCollector.addProblem(severity, (location == null ? DefaultLocation : location), e.getMessage());
-                    return false;
-                }
-
+                reportProblem(severity, location, e.getMessage());
+                return false;
             }
         }
         return true;
+    }
+
+    protected void reportProblem(int severity, ISourceLocation location, String message) throws ScannerException
+    {
+        if (problemCollector == null)
+        {
+            throw new ScannerException(message);
+        } else
+        {
+            problemCollector.addProblem(severity, (location == null ? DefaultLocation : location), message);
+
+        }
     }
 
     public boolean validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException
@@ -266,16 +271,8 @@ public class BaseValidator implements IScannerValidator
 
             if (!matcher.matches(value, compiled))
             {
-
-                String message = TapestryCore.getTapestryString(errorKey, value);
-                if (problemCollector == null)
-                {
-                    throw new ScannerException(message);
-                } else
-                {
-                    problemCollector.addProblem(severity, location, message);
-                    return false;
-                }
+                reportProblem(severity, location, TapestryCore.getTapestryString(errorKey, value));
+                return false;
             }
         }
         return true;
@@ -296,15 +293,8 @@ public class BaseValidator implements IScannerValidator
 
         if (!relative.exists())
         {
-            String message = TapestryCore.getString(errorKey, relative.toString());
-            if (problemCollector == null)
-            {
-                throw new ScannerException(message);
-            } else
-            {
-                problemCollector.addProblem(IProblem.ERROR, source, message);
-                return false;
-            }
+            reportProblem(IProblem.ERROR, source, TapestryCore.getString(errorKey, relative.toString()));
+            return false;
         }
         return true;
     }
@@ -321,15 +311,8 @@ public class BaseValidator implements IScannerValidator
         Object type = findType(fullyQualifiedType);
         if (type == null)
         {
-            String message = TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType);
-            if (problemCollector == null)
-            {
-                throw new ScannerException(message);
-            } else
-            {
-                problemCollector.addProblem(severity, location, message);
-                return false;
-            }
+            reportProblem(severity, location, TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType));
+            return false;
         }
         return true;
     }
