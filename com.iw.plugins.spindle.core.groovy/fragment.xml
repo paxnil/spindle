@@ -3,7 +3,7 @@
 <fragment
    id="com.iw.plugins.spindle.core.groovy"
    name="Groovy Support Fragment"
-   version="1.0.0"
+   version="1.0.1"
    provider-name="Intellgent Works Incorporated"
    plugin-id="com.iw.plugins.spindle.core"
    plugin-version="0.1.9"
@@ -66,6 +66,13 @@
             extension="groovy"
             name="Groovy File Veto"
             id="com.iw.plugins.spindle.core.groovy.veto"/>
+   </extension>
+   <extension
+         point="com.iw.plugins.spindle.core.beanSpecificationValidators">
+      <validator
+            class="com.iw.plugins.spindle.core.groovy.ScriptBeanValidator"
+            name="Groovestry Script Bean Validator"
+            id="com.iw.plugins.spindle.core.groovy.scriptBean"/>
    </extension>
 
 </fragment>
