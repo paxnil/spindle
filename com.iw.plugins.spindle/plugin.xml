@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle"
    name="Spindle, an Eclipse Plugin for Tapestry (tapestry.sourceforge.net)"
-   version="1.1.1"
+   version="1.1.2"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.TapestryPlugin">
 
