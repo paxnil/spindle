@@ -85,6 +85,7 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
   private NewInheritedBindingAction newInheritedAction = new NewInheritedBindingAction();
   private NewFieldBindingAction newFieldAction = new NewFieldBindingAction();
   private NewStaticBindingAction newStaticAction = new NewStaticBindingAction();
+  private NewStringBindingAction newStringAction = new NewStringBindingAction();
 
   private NewBindingButtonAction newBindingButtonAction = new NewBindingButtonAction();
 
@@ -179,6 +180,7 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
     submenu.add(newBindingAction);
     submenu.add(newFieldAction);
     submenu.add(newStaticAction);
+    submenu.add(newStringAction);
     manager.add(submenu);
     if (object != null) {
       manager.add(new Separator());
@@ -250,6 +252,10 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
 
     private IPropertyDescriptor[] fieldDescriptors =
       { new FieldBindingPropertyDescriptor("value", "Field Name", getModel())};
+      
+    private IPropertyDescriptor[] stringDescriptiors =
+      { new TextPropertyDescriptor("name", "Name"), new TextPropertyDescriptor("value", "Key")};
+    
   
 
   /**
@@ -338,6 +344,9 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
     }
     if (type == BindingType.FIELD) {
       return fieldDescriptors;
+    }
+    if (type == BindingType.STRING) {
+    	return stringDescriptiors;
     }
 
     return null;
@@ -687,6 +696,24 @@ protected abstract class BaseNewBindingAction extends Action {
   }
 
   protected abstract BindingType getType();
+}
+
+class NewStringBindingAction
+  extends BaseNewBindingAction { /**
+     * Constructor for NewPropertyAction
+     */
+  protected NewStringBindingAction() {
+    super();
+    setText("String Binding");
+    defaultBindingName = "string";
+    setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("bind-static.gif")));
+
+  }
+
+  public BindingType getType() {
+    return BindingType.STATIC;
+  }
+
 }
 
 class NewFieldBindingAction

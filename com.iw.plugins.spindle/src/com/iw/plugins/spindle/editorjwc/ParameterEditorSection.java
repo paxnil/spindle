@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editorjwc;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import net.sf.tapestry.spec.Direction;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -50,6 +51,8 @@ import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginParameterSpecification;
 import com.iw.plugins.spindle.ui.CheckboxPropertyDescriptor;
+import com.iw.plugins.spindle.ui.ComboBoxCellEditor;
+import com.iw.plugins.spindle.ui.ComboBoxPropertyDescriptor;
 import com.iw.plugins.spindle.ui.DocumentationPropertyDescriptor;
 import com.iw.plugins.spindle.ui.TypeDialogPropertyDescriptor;
 import com.iw.plugins.spindle.util.JavaListSelectionProvider;
@@ -180,35 +183,42 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
           return;
         } else if (alreadyHasParameter(newName)) {
           newName = "Copy of " + newName;
-        }        
+        }
         this.name = newName;
         componentSpec.removeParameter(oldName);
-        componentSpec.setParameter(this.name, spec);
-        forceDirty();
-        update();
-        setSelection(this.name);
+
+      } else if ("propertyName".equals(key)) {
+        spec.setPropertyName((String) value);
+
       } else if ("type".equals(key)) {
         spec.setType((String) value);
-        componentSpec.setParameter(this.name, spec);
-        forceDirty();
-        update();
-        setSelection(this.name);
+
       } else if ("required".equals(key)) {
         spec.setRequired(((Boolean) value).booleanValue());
-        componentSpec.setParameter(this.name, spec);
-        forceDirty();
-        update();
-        setSelection(this.name);     
+
+      } else if ("direction".equals(name)) {
+        String direction = (String) value;
+        if ("in".equals(direction)) {
+          spec.setDirection(Direction.IN);
+        } else {
+          spec.setDirection(Direction.CUSTOM);
+        }
       } else if ("description".equals(key)) {
         String newValue = (String) key;
         if (!(newValue.trim().equals(spec.getDescription()))) {
           spec.setDescription((String) value);
-          componentSpec.setParameter(this.name, spec);
-          forceDirty();
-          update();
-          setSelection(this.name);
+        } else {
+          return;
         }
       }
+      updateUI(componentSpec);
+    }
+
+    private void updateUI(PluginComponentSpecification componentSpec) {
+      componentSpec.setParameter(this.name, spec);
+      forceDirty();
+      update();
+      setSelection(this.name);
     }
 
     public boolean isPropertySet(Object key) {
@@ -224,6 +234,8 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
     public Object getPropertyValue(Object key) {
       if ("name".equals(key)) {
         return name;
+      } else if ("propertyName".equals(key)) {
+        return spec.getPropertyName();
       } else if ("type".equals(key)) {
         return spec.getType();
       } else if ("required".equals(key)) {
@@ -231,7 +243,15 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
           return Boolean.TRUE;
         } else {
           return Boolean.FALSE;
-        }      
+        }
+      } else if ("direction".equals(key)) {
+        Direction currentDir = spec.getDirection();
+        if (currentDir == Direction.CUSTOM) {
+          return "custom";
+        } else if (currentDir == Direction.IN) {
+          return "in";
+        }
+        return "custom";
       } else if ("description".equals(key)) {
         return spec.getDescription();
       }
@@ -243,9 +263,12 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
       IPropertyDescriptor[] descriptors =
         new IPropertyDescriptor[] {
           new TextPropertyDescriptor("name", "Name"),
+          new TextPropertyDescriptor("propertyName", "Property Name"),
           new TypeDialogPropertyDescriptor("type", "Type", model),
           new CheckboxPropertyDescriptor("required", "Required"),
-          new DocumentationPropertyDescriptor("description", "Description", "Document parameter: " + this.name, null)};
+          new ComboBoxPropertyDescriptor("direction", "Direction", new String[] { "custom", "in" }, false),
+          new DocumentationPropertyDescriptor("description", "Description", "Document parameter: " + this.name, null)
+      };
       return descriptors;
     }
 
@@ -267,8 +290,7 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
     private Image image = TapestryImages.getSharedImage("missing");
     public String getText(Object object) {
       ParameterHolder holder = (ParameterHolder) object;
-      PluginComponentSpecification componentSpec =
-        ((TapestryComponentModel) getModel()).getComponentSpecification();
+      PluginComponentSpecification componentSpec = ((TapestryComponentModel) getModel()).getComponentSpecification();
       String type = holder.spec.getType();
       type = type == null ? "" : type;
       return holder.name
@@ -315,21 +337,20 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
   }
 
   class DeleteParameterAction extends Action { /**
-          * Constructor for NewPropertyAction
-          */
+           * Constructor for NewPropertyAction
+           */
     protected DeleteParameterAction() {
       super();
       setText("Delete");
       setToolTipText("Delete the selected");
     } /**
-                    * @see Action#run()
-                    */
+                       * @see Action#run()
+                       */
     public void run() {
       updateSelection = true;
       ParameterHolder holder = (ParameterHolder) getSelected();
       if (holder != null) {
-        PluginComponentSpecification spec =
-          ((TapestryComponentModel) getFormPage().getModel()).getComponentSpecification();
+        PluginComponentSpecification spec = ((TapestryComponentModel) getFormPage().getModel()).getComponentSpecification();
         String prev = findPrevious(holder.name);
         spec.removeParameter(holder.name);
         forceDirty();
@@ -346,19 +367,18 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
   }
 
   class NewParameterAction extends Action { /**
-          * Constructor for NewPropertyAction
-          */
+           * Constructor for NewPropertyAction
+           */
     protected NewParameterAction() {
       super();
       setText("New");
       setToolTipText("Create a new Parameter");
     } /**
-                    * @see Action#run()
-                    */
+                       * @see Action#run()
+                       */
     public void run() {
       updateSelection = true;
-      PluginComponentSpecification spec =
-        ((TapestryComponentModel) getFormPage().getModel()).getComponentSpecification();
+      PluginComponentSpecification spec = ((TapestryComponentModel) getFormPage().getModel()).getComponentSpecification();
       String useName = "parameter";
       if (spec.getParameter(useName + 1) != null) {
         int counter = 2;

@@ -109,8 +109,8 @@ public class ChooseBindingTypeDialog extends ChooseFromListDialog {
   public ChooseBindingTypeDialog(Shell shell) {
     super(
       shell,
-      new String[] { "Dynamic", "Field", "Inherited", "Static" },
-      new Object[] { BindingType.DYNAMIC, BindingType.FIELD, BindingType.INHERITED, BindingType.STATIC },
+      new String[] { "Dynamic", "Field", "Inherited", "Static", "String" },
+      new Object[] { BindingType.DYNAMIC, BindingType.FIELD, BindingType.INHERITED, BindingType.STATIC, BindingType.STRING },
       "New Binding");
   }
 
