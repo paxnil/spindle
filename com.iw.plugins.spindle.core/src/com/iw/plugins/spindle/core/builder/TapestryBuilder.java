@@ -186,6 +186,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             fNotifier.done();
             fDeferredActions.clear();
             cleanup();
+            TapestryCore.getDefault().buildOccurred();
         }
         IProject[] requiredProjects = getRequiredProjects(true);
         long stop = System.currentTimeMillis();

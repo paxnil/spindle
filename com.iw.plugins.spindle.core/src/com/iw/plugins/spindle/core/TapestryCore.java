@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbench;
@@ -295,6 +296,22 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
     {
         if (CoreListeners != null)
             CoreListeners.remove(listener);
+    }
+
+    /** listeners notified only if there is a current Display! */
+    public static void buildOccurred()
+    {
+        Display d = Display.getCurrent();
+        if (d == null)
+            return;
+
+        d.asyncExec(new Runnable()
+        {
+            public void run()
+            {
+                fireCoreListenerEvent();
+            }
+        });
     }
 
     private static void fireCoreListenerEvent()

@@ -741,7 +741,7 @@ public class NamespaceResolver
      */
     protected IComponentSpecification resolvePageFile(String name, IResourceWorkspaceLocation location)
     {
-        IComponentSpecification result = fResultNamespace.getComponentSpecification(name);
+        IComponentSpecification result = fResultNamespace.getPageSpecification(name);
         if (result != null || location == null)
             return result;
 
