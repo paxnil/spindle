@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<fragment
+   id="com.iw.plugins.spindle.ui.contrib"
+   name="UI Contrib Fragment"
+   version="0.1.0"
+   provider-name="Geoffrey Longman"
+   plugin-id="com.iw.plugins.spindle.ui"
+   plugin-version="0.1.19"
+   match="greaterOrEqual">
+   <requires>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.ui"/>
+   </requires>
+   
+   
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            name="Tapestry Web Project"
+            icon="./icons/full/application16.gif"
+            category="com.iw.plugins.spindle.ui.new"
+            class="com.iw.plugins.spindle.ui.wizards.project.NewTapestryProjectWizard"
+            project="true"
+            id="com.iw.plugins.spindle.ui.new_project_wizard">
+         <description>
+            Create a new Tapestry Web Project
+         </description>
+      </wizard>
+      </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            name="Tapestry"
+            class="com.iw.plugins.spindle.ui.properties.ProjectPropertyPage"
+            id="com.iw.plugins.spindle.ui.contrib.properties.CorePropertyPage">         
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>      
+	</extension>
+	
+	<extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            lightweight="true"
+            location="TOP_RIGHT"
+            adaptable="true"
+            label="Indicator for the context root of Tapestry Projects"
+            state="true"
+            class="com.iw.plugins.spindle.ui.decorators.ContextRootDecorator"
+            id="com.iw.plugins.spindle.ui.contextDecorator">
+         <description>
+            Indicates the path to the project&apos;s context root
+         </description>
+         <enablement>
+            <objectClass
+                  name="org.eclipse.core.resources.IFolder">
+            </objectClass>
+         </enablement>
+      </decorator>
+   </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            lightweight="true"
+            adaptable="true"
+            label="Extra information for Tapestry Projects"
+            state="true"
+            class="com.iw.plugins.spindle.ui.decorators.ProjectInfoDecorator"
+            id="com.iw.plugins.spindle.ui.projectInfoDecorator">
+         <description>
+            Shows the application specification, or the build state of the project
+         </description>
+         <enablement>
+            <objectClass
+                  name="org.eclipse.core.resources.IProject">
+            </objectClass>
+         </enablement>
+      </decorator>
+   </extension>
+</fragment>
