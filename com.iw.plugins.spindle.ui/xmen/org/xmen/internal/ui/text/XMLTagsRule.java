@@ -11,7 +11,10 @@
  *******************************************************************************/
 package org.xmen.internal.ui.text;
 
-import org.eclipse.jface.text.rules.*;
+import org.eclipse.jface.text.rules.ICharacterScanner;
+import org.eclipse.jface.text.rules.IPredicateRule;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.Token;
 
 /**
  * @author jll

@@ -27,7 +27,6 @@ package com.iw.plugins.spindle.editors.documentsAndModels;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.editors.text.StorageDocumentProvider;
 import org.xmen.internal.ui.text.XMLReconciler;
 

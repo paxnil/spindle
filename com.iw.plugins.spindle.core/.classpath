@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/"/>
-	<classpathentry kind="src" path="dtdparser/"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="dtdparser"/>
 	<classpathentry exported="true" kind="lib" path="commons-digester-1.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="commons-logging-1.0.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="commons-beanutils-1.6.1.jar"/>

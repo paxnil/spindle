@@ -35,10 +35,8 @@ import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.formatter.IFormattingStrategy;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 

@@ -10,7 +10,6 @@
  Geoffrey Longman - adapted for Tapestry
 
  Original CVS ID: XMLPartitionScanner.java,v 1.3 2002/08/02 12:27:31 l950637 Exp 
- $Id$
  **********************************************************************/
 package com.iw.plugins.spindle.editors.template;
 

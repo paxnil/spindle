@@ -106,7 +106,6 @@ import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.IReconcileWorker;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
-import com.iw.plugins.spindle.editors.documentsAndModels.SpecDocumentSetupParticipant;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;

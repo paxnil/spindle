@@ -38,7 +38,6 @@ import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.spec.assist.usertemplates.UserTemplateCompletionProcessor;
 import com.wutka.dtd.DTD;
 
 /**

@@ -48,9 +48,6 @@ import org.eclipse.jface.text.formatter.IContentFormatter;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
-import org.eclipse.jface.text.presentation.IPresentationReconciler;
-import org.eclipse.jface.text.presentation.PresentationReconciler;
-import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
@@ -58,7 +55,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
 import com.iw.plugins.spindle.editors.DefaultDoubleClickStrategy;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;

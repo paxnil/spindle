@@ -39,8 +39,8 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.assist.CompletionProposal;
 import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
+import com.iw.plugins.spindle.editors.assist.CompletionProposal;
 
 /**
  * Processor for completing comments

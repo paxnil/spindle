@@ -320,7 +320,7 @@ public class TapestryProject implements IProjectNature
   
   public boolean isValidatingWebXML() {
     String value = this.readProperty(KEY_VALIDATE);
-    if (value == null)
+    if (value == null || "".equals(value))
       return true;
     
     return new Boolean(value).booleanValue();
