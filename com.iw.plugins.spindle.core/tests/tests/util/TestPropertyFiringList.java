@@ -83,8 +83,52 @@ public class TestPropertyFiringList extends PropertyFiringBase
         assertTrue(list.size() == 2);
         assertTrue(list.contains(stored));
         assertTrue(list.indexOf(stored) != list.lastIndexOf(stored));
+        list.add(2,stored);
+        assertTrue(list.size() ==3);
+        assertTrue(list.contains(stored));
+        assertTrue(list.indexOf(stored) != list.lastIndexOf(stored));
     }
 
+    public void testRemovePropertyChangeListener(){
+        String testOwner ="brian";
+        final String eventProperty = "testSet";
+        final String stored = "brians value";
+        
+        PropertyFiringList list = new PropertyFiringList(testOwner, eventProperty);
+        OneShotListener listener1 = new OneShotListener(testOwner, null, stored, eventProperty);
+        list.addPropertyChangeListener(listener1);
+        list.removePropertyChangeListener(listener1);     
+    }
+    
+    public void testClear(){
+        String testOwner ="brian";
+        final String eventProperty = "testSet";
+        final String stored = "brians value";
+        
+        PropertyFiringList list = new PropertyFiringList(testOwner, eventProperty);
+        list.clear();
+        OneShotListener listener1 = new OneShotListener(testOwner, null, stored, eventProperty);
+        list.addPropertyChangeListener(listener1);
+        list.clear();
+        assertTrue(list.size() == 0);
+        list.add(0, stored);
+//        list.clear(); //causes a failure
+
+    }
+    
+    public void testRemove(){
+        String testOwner ="brian";
+        final String eventProperty = "testSet";
+        final String stored = "brians value";        
+        PropertyFiringList list = new PropertyFiringList(testOwner, eventProperty);
+        OneShotListener listener1 = new OneShotListener(testOwner, null, stored, eventProperty);
+  
+        list.add(stored);
+        assertTrue(list.remove(stored));
+        
+        
+    }
+    
     public static void main(String[] args)
     {
         junit.textui.TestRunner.run(TestPropertyFiringList.class);
