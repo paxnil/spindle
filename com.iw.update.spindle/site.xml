@@ -4,22 +4,19 @@
    <description>
       Eclipse update site for Spindle 3 integration builds. Select builds on this site are promoted to beta status and made available at http://spindle.sourceforge.net/updates.
    </description>
-   <feature url="features/com.iw.features.spindle_3.0.40.jar" id="com.iw.features.spindle" version="3.0.40">
-      <category name="older_alphas"/>
-   </feature>
    <feature url="features/com.iw.features.jettylauncher_1.0.9.jar" id="com.iw.features.jettylauncher" version="1.0.9">
       <category name="jetty_launcher"/>
    </feature>
    <feature url="features/com.iw.features.jettylauncher_profile_1.0.9.jar" id="com.iw.features.jettylauncher_profile" version="1.0.9">
       <category name="jetty_launcher"/>
    </feature>
-   <feature url="features/com.iw.features.spindle_3.0.41.jar" id="com.iw.features.spindle" version="3.0.41">
-      <category name="spindle3_0_latest"/>
-   </feature>
    <feature url="features/com.iw.features.spindle_3.0.42.jar" id="com.iw.features.spindle" version="3.0.42">
       <category name="older_alphas"/>
    </feature>
-   <feature url="features/com.iw.features.spindle_3.0.43.jar" id="com.iw.features.spindle" version="3.0.43">
+   <feature url="features/com.iw.features.spindle_3.0.44.jar" id="com.iw.features.spindle" version="3.0.44">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.45.jar" id="com.iw.features.spindle" version="3.0.45">
       <category name="spindle3_0_latest"/>
    </feature>
    <category-def name="spindle3_0_latest" label="Spindle 3 latest integration build">
