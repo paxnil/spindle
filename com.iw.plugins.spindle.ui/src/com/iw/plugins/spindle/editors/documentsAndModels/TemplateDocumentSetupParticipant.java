@@ -38,7 +38,7 @@ import com.iw.plugins.spindle.editors.template.TemplateAnnotationModel;
  * annotations
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class TemplateDocumentSetupParticipant extends BaseDocumentSetupParticipant
 {

@@ -47,7 +47,7 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * BaseDocumentSetupParticipant TODO add something here
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class BaseDocumentSetupParticipant implements IXMLModelProvider
 {
