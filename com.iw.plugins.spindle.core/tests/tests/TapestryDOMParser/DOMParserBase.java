@@ -30,8 +30,8 @@ import junit.framework.TestCase;
 
 import org.apache.xerces.xni.parser.XMLParserConfiguration;
 
-import com.iw.plugins.spindle.core.parser.xml.TapestryParserConfiguration;
 import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParser;
+import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
 
 /**
  *  Base for PullParser tests
@@ -55,7 +55,7 @@ public class DOMParserBase extends TestCase
      */
     protected void setUp() throws Exception
     {
-        parserConfiguration = new TapestryParserConfiguration(TapestryParserConfiguration.GRAMMAR_POOL);
+        parserConfiguration = new TapestryDOMParserConfiguration(TapestryDOMParserConfiguration.GRAMMAR_POOL);
         domParser = new TapestryDOMParser(parserConfiguration);
     }
 

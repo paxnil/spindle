@@ -34,7 +34,6 @@ import org.apache.xerces.xni.parser.XMLParserConfiguration;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.ElementSourceLocationInfo;
 import com.iw.plugins.spindle.core.parser.ISourceLocationResolver;
-import com.iw.plugins.spindle.core.parser.xml.TapestryParserConfiguration;
 import com.iw.plugins.spindle.core.parser.xml.event.ElementXMLEventInfo;
 
 public class TapestryDOMParser extends DOMParser
@@ -69,7 +68,7 @@ public class TapestryDOMParser extends DOMParser
      */
     public void endElement(QName element, Augmentations augs) throws XNIException
     {
-        ElementXMLEventInfo eventInfo = (ElementXMLEventInfo) augs.getItem(TapestryParserConfiguration.AUGMENTATIONS);
+        ElementXMLEventInfo eventInfo = (ElementXMLEventInfo) augs.getItem(TapestryDOMParserConfiguration.AUGMENTATIONS);
         if (eventInfo != null && fDocument != null)
         {
             if (resolver != null)

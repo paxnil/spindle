@@ -9,7 +9,6 @@ package com.iw.plugins.spindle.core.parser.xml.pull;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xerces.parsers.XMLDocumentParser;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.QName;
@@ -21,17 +20,16 @@ import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLParseException;
 import org.apache.xerces.xni.parser.XMLParserConfiguration;
 import org.apache.xerces.xni.parser.XMLPullParserConfiguration;
-import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
-import com.iw.plugins.spindle.core.parser.Parser;
-import com.iw.plugins.spindle.core.parser.xml.TapestryPullParserConfiguration;
+import com.iw.plugins.spindle.core.parser.ISourceLocationResolver;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
- * @author Administrator
- *
- * To change the template for this generated type comment go to
- * Window>Preferences>Java>Code Generation>Code and Comments
+ *  An XML parser that builds a psuedo DOM tree in a pull fashion
+ * 
+ * @author glongman@intelligentworks.com
+ * @version $Id$
  */
 public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHandler
 {
@@ -75,17 +73,26 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         }
     }
 
+    /** need this so that the parser can stop itself **/
     private TapestryPullParserConfiguration configuration;
+
+    /** preserve the current state of the parse **/
     private NodeStack parseStack = new NodeStack();
+
+    private ISourceLocationResolver resolver;
+
+    /* debug flag, set to false when this code goes into production! */
     private boolean debug = true;
+
+    /* various flags*/
     private boolean documentStarted;
     private boolean dtdIsDone = false;
-    private String publicId;
-    private String rootElement;
     private boolean rootElementSeen;
     private boolean documentIsDone;
-    private DocumentImpl theDocument;
-    private PullParserNode lastElement;
+
+    private String publicId;
+    private PullParserNode rootElement;
+    private PullParserNode lastCompletedElement;
 
     /**
      * @param config
@@ -95,35 +102,41 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         super(config);
         Assert.isLegal(config instanceof XMLPullParserConfiguration);
         this.configuration = (TapestryPullParserConfiguration) config;
-        //        currentNode = new PullParserNode(); need the name for the root node maybe not do it here
     }
 
-    /* (non-Javadoc)
-    	 * @see org.apache.xerces.parsers.XMLParser#reset()
-    	 */
+    /* 
+     * reset everything, called just before a parse starts
+     * 
+     * @see org.apache.xerces.parsers.XMLParser#reset()
+     */
     protected void reset() throws XNIException
     {
         super.reset();
         documentStarted = false;
         rootElementSeen = false;
+        rootElement = null;
         documentIsDone = false;
-        theDocument = new DocumentImpl();
     }
 
     private void checkSanity() throws RuntimeException
     {
-        if (!documentStarted || !rootElementSeen || documentIsDone)
-        {
-            throw new RuntimeException("TapestryPullParser is insane!");
-        }
+        // TODO this needs to be revisited 
+        
+//        if (!documentStarted || !rootElementSeen || documentIsDone)
+//        {
+//            throw new RuntimeException("TapestryPullParser is insane!");
+//        }
     }
 
     /**
-     * @param parser
+     * 
+     * I we want to use the location reported by the parser in Eclipse,
+     * we need one of these.
+     * 
      */
-    public void setSourceResolver(Parser parser)
+    public void setSourceResolver(ISourceLocationResolver resolver)
     {
-        // TODO Auto-generated method stub
+        this.resolver = resolver;
     }
 
     /**
@@ -167,7 +180,8 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     /* (non-Javadoc)
      * @see org.apache.xerces.xni.XMLDocumentHandler#doctypeDecl(java.lang.String, java.lang.String, java.lang.String, org.apache.xerces.xni.Augmentations)
      */
-    public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs) throws XNIException
+    public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs)
+        throws XNIException
     {
 
         super.doctypeDecl(rootElement, publicId, systemId, augs);
@@ -191,10 +205,8 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
      */
     public void endDocument(Augmentations augs) throws XNIException
     {
-        // TODO Auto-generated method stub
         super.endDocument(augs);
         documentIsDone = true;
-        theDocument = null;
         System.out.println("endDocument: ");
     }
 
@@ -209,7 +221,10 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         super.endElement(element, augs);
         System.out.println("endElement: " + element.rawname);
         configuration.stopParsing();
-        lastElement = parseStack.pop();
+        lastCompletedElement = parseStack.pop();
+        if (lastCompletedElement != null) {
+            lastCompletedElement.completed();
+        }
     }
 
     /* (non-Javadoc)
@@ -233,7 +248,9 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         {
 
             rootElementSeen = true;
-            parseStack.push(PullParserNode.createElementNode(this, null, element.rawname, attributes));
+            // minor change, we need to save a reference to the root node!
+            rootElement = PullParserNode.createElementNode(this, null, element.rawname, attributes);
+            parseStack.push(rootElement);
         } else
         {
             PullParserNode parent = parseStack.peek();
@@ -244,8 +261,8 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
 
             } else
             {
-                temp.setPreviousSibling(lastElement);
-                lastElement.setNextSibling(temp);
+                temp.setPreviousSibling(lastCompletedElement);
+                lastCompletedElement.setNextSibling(temp);
             }
             parseStack.push(temp);
 
@@ -608,9 +625,10 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     /**
      * @return
      */
-    public Document getTheDocument()
+    public Node getRootNode()
     {
-        return theDocument;
+
+        return rootElement;
     }
 
 }

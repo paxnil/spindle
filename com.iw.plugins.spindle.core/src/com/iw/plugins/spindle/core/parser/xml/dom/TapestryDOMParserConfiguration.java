@@ -1,4 +1,4 @@
-package com.iw.plugins.spindle.core.parser.xml;
+package com.iw.plugins.spindle.core.parser.xml.dom;
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -32,7 +32,14 @@ import org.apache.xerces.xni.grammars.XMLGrammarPool;
 import org.apache.xerces.xni.parser.XMLDTDScanner;
 import org.apache.xerces.xni.parser.XMLDocumentScanner;
 
-public class TapestryParserConfiguration extends StandardParserConfiguration
+import com.iw.plugins.spindle.core.parser.xml.StandardParserConfiguration;
+import com.iw.plugins.spindle.core.parser.xml.TapestryEntityResolver;
+import com.iw.plugins.spindle.core.parser.xml.TapestryXMLDTDValidator;
+import com.iw.plugins.spindle.core.parser.xml.XMLDTDScannerImpl;
+import com.iw.plugins.spindle.core.parser.xml.XMLDocumentScannerImpl;
+import com.iw.plugins.spindle.core.parser.xml.XMLEntityManager;
+
+public class TapestryDOMParserConfiguration extends StandardParserConfiguration
 {
     /** custom Xerces Feature identifier*/
     public static final String AUGMENTATIONS = "http://intelligentworks.com/xml/features/augmentations-location";
@@ -41,14 +48,14 @@ public class TapestryParserConfiguration extends StandardParserConfiguration
     /**
      * Constructor for MyConfiguration.
      */
-    public TapestryParserConfiguration()
+    public TapestryDOMParserConfiguration()
     {
         super();
         addRecognizedFeatures(new String[] { AUGMENTATIONS });
 
     }
 
-    public TapestryParserConfiguration(XMLGrammarPool grammarPool)
+    public TapestryDOMParserConfiguration(XMLGrammarPool grammarPool)
     {
         super(null, grammarPool);
         addRecognizedFeatures(new String[] { AUGMENTATIONS });

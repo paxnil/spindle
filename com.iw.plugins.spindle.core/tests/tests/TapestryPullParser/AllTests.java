@@ -45,7 +45,7 @@ public class AllTests {
     //$JUnit-BEGIN$
     suite.addTest(new TestSuite(TestBasicPullParser.class));
     suite.addTest(new TestSuite(SimplePullParserTests.class));
-    suite.addTest(new TestSuite(UnsupportedNodeMethods.class));
+    suite.addTest(new TestSuite(SinglePullParserTest.class));
     
     //$JUnit-END$
     return suite;

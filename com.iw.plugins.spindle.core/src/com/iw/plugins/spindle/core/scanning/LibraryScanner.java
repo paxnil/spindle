@@ -229,7 +229,7 @@ public class LibraryScanner extends SpecificationScanner
         exSpec.setClassName(className);
         exSpec.setImmediate(immediate);
 
-        ISourceLocationInfo location = parser.getSourceLocationInfo(node);
+        ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResourceLocation(specification.getSpecificationLocation());
         exSpec.setLocation(location);
 

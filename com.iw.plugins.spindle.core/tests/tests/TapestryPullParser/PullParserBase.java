@@ -28,8 +28,8 @@ package tests.TapestryPullParser;
 
 import junit.framework.TestCase;
 
-import com.iw.plugins.spindle.core.parser.xml.TapestryPullParserConfiguration;
 import com.iw.plugins.spindle.core.parser.xml.pull.TapestryPullParser;
+import com.iw.plugins.spindle.core.parser.xml.pull.TapestryPullParserConfiguration;
 
 /**
  *  Base for PullParser tests

@@ -80,6 +80,8 @@ import org.apache.xerces.xni.parser.XMLConfigurationException;
 import org.apache.xerces.xni.parser.XMLDocumentScanner;
 import org.apache.xerces.xni.parser.XMLInputSource;
 
+import com.iw.plugins.spindle.core.parser.xml.dom.*;
+
 /**
  * This class is responsible for scanning the structure and content
  * of document fragments. The scanner acts as the source for the 
@@ -163,7 +165,7 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner implements XMLDoc
     protected static final String NOTIFY_BUILTIN_REFS = Constants.XERCES_FEATURE_PREFIX + Constants.NOTIFY_BUILTIN_REFS_FEATURE;
 
     /** Feature identifier: notify built-in refereces. */
-    protected static final String AUGMENTATIONS = TapestryParserConfiguration.AUGMENTATIONS;
+    protected static final String AUGMENTATIONS = TapestryDOMParserConfiguration.AUGMENTATIONS;
 
     // recognized features and properties
 

@@ -79,7 +79,7 @@ public class ComponentScanner extends SpecificationScanner
     {
         IComponentSpecification specification = (IComponentSpecification) resultObject;
 
-        specification.setPublicId(parser.getPublicId());        
+        specification.setPublicId(parser.getPublicId());
         specification.setSpecificationLocation(location);
 
         // Only components specify these two attributes.
@@ -117,7 +117,7 @@ public class ComponentScanner extends SpecificationScanner
         asset.setType(type);
         asset.setPath(value);
 
-        ISourceLocationInfo location = parser.getSourceLocationInfo(node);
+        ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResourceLocation(specification.getSpecificationLocation());
         asset.setLocation(location);
 
@@ -162,7 +162,7 @@ public class ComponentScanner extends SpecificationScanner
         bspec.setClassName(className);
         bspec.setLifecycle(lifecycle);
 
-        ISourceLocationInfo location = parser.getSourceLocationInfo(node);
+        ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResourceLocation(specification.getSpecificationLocation());
         bspec.setLocation(location);
 
@@ -215,7 +215,7 @@ public class ComponentScanner extends SpecificationScanner
         binding.setType(type);
         binding.setValue(value);
 
-        ISourceLocationInfo location = parser.getSourceLocationInfo(node);
+        ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResourceLocation(component.getLocation().getResourceLocation());
         binding.setLocation(location);
 
@@ -304,7 +304,7 @@ public class ComponentScanner extends SpecificationScanner
                 c.setType(getNextDummyString());
             }
 
-            ISourceLocationInfo location = parser.getSourceLocationInfo(node);
+            ISourceLocationInfo location = getSourceLocationInfo(node);
             location.setResourceLocation(specification.getSpecificationLocation());
             c.setLocation(location);
 
@@ -397,7 +397,9 @@ public class ComponentScanner extends SpecificationScanner
                     addProblem(
                         IProblem.ERROR,
                         getNodeStartSourceLocation(node),
-                        TapestryCore.getTapestryString("SpecificationParser.not-allowed-for-page", "reserved-parameter"));
+                        TapestryCore.getTapestryString(
+                            "SpecificationParser.not-allowed-for-page",
+                            "reserved-parameter"));
                 } else
                 {
                     scanReservedParameter(specification, node);
@@ -455,37 +457,6 @@ public class ComponentScanner extends SpecificationScanner
         }
     }
 
-    /**
-     *   @since 2.2
-     * 
-     **/
-
-    //    protected void scanExpressionValue(IBeanSpecification spec, String propertyName, Node node)
-    //    {
-    //        String expression = getAttribute(node, "expression");
-    //        PluginExpressionBeanInitializer iz =
-    //            (PluginExpressionBeanInitializer) specificationFactory.createExpressionBeanInitializer();
-    //        iz.setPropertyName(propertyName);
-    //        iz.setExpression(expression);
-    //
-    //        ISourceLocationInfo location = parser.getSourceLocationInfo(node);
-    //        location.setResourceLocation(spec.getLocation().getResourceLocation());
-    //        iz.setLocation(location);
-    //
-    //        spec.addInitializer(iz);
-    //    }
-
-    //TODO Not needed ? 
-    //
-    //    private void processFieldValue(BeanSpecification spec, String propertyName, Node node)
-    //    {
-    //        String fieldName = getAttribute(node, "field-name");
-    //        PluginFieldBeanInitializer iz = (PluginFieldBeanInitializer)specificationFactory.createFieldBeanInitializer();
-    //        
-    //
-    //        spec.addInitializer(iz);
-    //    }
-
     protected void scanListenerBinding(IContainedComponent component, Node node) throws ScannerException
     {
         String name = getAttribute(node, "name", true);
@@ -505,7 +476,7 @@ public class ComponentScanner extends SpecificationScanner
         binding.setLanguage(language);
         binding.setValue(script);
 
-        ISourceLocationInfo location = parser.getSourceLocationInfo(node);
+        ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResourceLocation(component.getLocation().getResourceLocation());
         binding.setLocation(location);
 
@@ -516,7 +487,7 @@ public class ComponentScanner extends SpecificationScanner
     {
         IParameterSpecification param = specificationFactory.createParameterSpecification();
 
-        ISourceLocationInfo location = parser.getSourceLocationInfo(node);
+        ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResourceLocation(specification.getSpecificationLocation());
         param.setLocation(location);
 
@@ -639,7 +610,10 @@ public class ComponentScanner extends SpecificationScanner
 
         if (!name.startsWith(getDummyStringPrefix()) && spec.isReservedParameterName(name))
         {
-            addProblem(IProblem.ERROR, getAttributeSourceLocation(node, "name"), "duplicate reserved paramter name: " + name);
+            addProblem(
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "name"),
+                "duplicate reserved paramter name: " + name);
         }
         spec.addReservedParameterName(name);
     }
@@ -687,7 +661,7 @@ public class ComponentScanner extends SpecificationScanner
         iz.setPropertyName(name);
         iz.setExpression(expression);
 
-        ISourceLocationInfo location = parser.getSourceLocationInfo(node);
+        ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResourceLocation(spec.getLocation().getResourceLocation());
         iz.setLocation(location);
 
@@ -706,36 +680,16 @@ public class ComponentScanner extends SpecificationScanner
         String name = getAttribute(node, "name");
         String key = getAttribute(node, "key");
 
-        PluginStringBeanInitializer iz = (PluginStringBeanInitializer) specificationFactory.createStringBeanInitializer();
+        PluginStringBeanInitializer iz =
+            (PluginStringBeanInitializer) specificationFactory.createStringBeanInitializer();
         iz.setPropertyName(name);
         iz.setKey(key);
 
-        ISourceLocationInfo location = parser.getSourceLocationInfo(node);
+        ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResourceLocation(spec.getLocation().getResourceLocation());
         iz.setLocation(location);
 
         spec.addInitializer(iz);
     }
-
-    // TODO not needed?
-
-    //    private void processStaticValue(BeanSpecification spec, String propertyName, Node node)
-    //    {
-    //        String type = getAttribute(node, "type");
-    //        String value = getValue(node);
-    //
-    //        IConverter converter = (IConverter) conversionMap.get(type);
-    //
-    //        if (converter == null)
-    //            throw new ProcessorException(
-    //                Tapestry.getString("SpecificationParser.unknown-static-value-type", type),
-    //                getResourceLocation());
-    //
-    //        Object staticValue = converter.convert(value);
-    //
-    //        IBeanInitializer iz = specificationFactory.createStaticBeanInitializer(propertyName, staticValue);
-    //
-    //        spec.addInitializer(iz);
-    //    }
 
 }

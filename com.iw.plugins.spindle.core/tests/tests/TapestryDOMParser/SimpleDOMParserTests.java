@@ -45,7 +45,7 @@ import org.apache.xerces.xni.parser.XMLParseException;
 import org.xml.sax.SAXException;
 
 import com.iw.plugins.spindle.core.parser.xml.TapestryEntityResolver;
-import com.iw.plugins.spindle.core.parser.xml.TapestryParserConfiguration;
+import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
 
 /**
  *  Simplest pull parser tests
@@ -232,7 +232,7 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
     {
 
         String J2EEPublicId = "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
-        XMLGrammarPoolImpl grammarPool = TapestryParserConfiguration.GRAMMAR_POOL;
+        XMLGrammarPoolImpl grammarPool = TapestryDOMParserConfiguration.GRAMMAR_POOL;
         assertSame(parserConfiguration.getProperty(GRAMMAR_POOL), grammarPool);
         assertNull(grammarPool.getGrammar(J2EEPublicId));
 

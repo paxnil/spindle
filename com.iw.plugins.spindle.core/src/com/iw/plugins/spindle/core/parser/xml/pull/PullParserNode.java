@@ -39,6 +39,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
@@ -149,6 +150,8 @@ public class PullParserNode implements Node
 
     /** Next sibling. */
     protected PullParserNode nextSibling;
+
+    protected ISourceLocationInfo sourceInfo;
 
     protected Map attributes;
 
@@ -485,6 +488,14 @@ public class PullParserNode implements Node
     public boolean hasAttributes()
     {
         return attributes != null;
+    }
+
+    /**
+     * @return
+     */
+    public ISourceLocationInfo getSourceLocationInfo()
+    {
+        return sourceInfo;
     }
 
 }

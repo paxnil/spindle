@@ -33,9 +33,7 @@ import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.Text;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -136,55 +134,18 @@ public abstract class AbstractScanner implements IProblemCollector
 
     public boolean isElement(Node node, String elementName)
     {
-        if (node.getNodeType() != Node.ELEMENT_NODE)
-        {
-            return false;
-        }
-        return node.getNodeName().equals(elementName);
-
+       return NodeAccess.isElement(node, elementName);
     }
 
     public String getValue(Node node)
     {
-        StringBuffer buffer = new StringBuffer();
-        for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
-        {
-            Text text = (Text) child;
-            buffer.append(text.getData());
-        }
-
-        String result = buffer.toString().trim();
-        if (result == null || "".equals(result))
-        {
-            return null;
-        }
-
-        return result;
+        return NodeAccess.getValue(node);
     }
 
-    protected String getAttribute(Node node, String attributeName, boolean returnDummyIfNull)
+    protected boolean isDummyString(String value)
     {
-        String result = null;
-        NamedNodeMap map = node.getAttributes();
-
-        if (map != null)
+        if (value != null)
         {
-            Node attributeNode = map.getNamedItem(attributeName);
-
-            if (attributeNode != null)
-            {
-                result = attributeNode.getNodeValue();
-            }
-        }
-        if (TapestryCore.isNull(result) && returnDummyIfNull)
-        {
-            result = getNextDummyString();
-        }
-        return result;
-    }
-    
-    protected boolean isDummyString(String value) {
-        if (value != null) {
             return value.startsWith(validator.getDummyStringPrefix());
         }
         return false;
@@ -197,14 +158,22 @@ public abstract class AbstractScanner implements IProblemCollector
 
     protected boolean getBooleanAttribute(Node node, String attributeName)
     {
-        String attributeValue = getAttribute(node, attributeName);
+        return NodeAccess.getBooleanAttribute(node, attributeName);
+    }
 
-        return attributeValue.equals("yes");
+    protected String getAttribute(Node node, String attributeName, boolean returnDummyIfNull)
+    {
+        String result = NodeAccess.getAttribute(node, attributeName);
+        if (TapestryCore.isNull(result) && returnDummyIfNull)
+        {
+            result = getNextDummyString();
+        }
+        return result;
     }
 
     protected ISourceLocationInfo getSourceLocationInfo(Node node)
     {
-        return parser.getSourceLocationInfo(node);
+        return NodeAccess.getSourceLocationInfo(node);
     }
 
     protected ISourceLocation getBestGuessSourceLocation(Node node, boolean forNodeContent)
@@ -276,12 +245,18 @@ public abstract class AbstractScanner implements IProblemCollector
         return result;
     }
 
-    protected boolean validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException
+    protected boolean validatePattern(String value, String pattern, String errorKey, int severity)
+        throws ScannerException
     {
         return validator.validatePattern(value, pattern, errorKey, severity);
     }
 
-    protected boolean validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location)
+    protected boolean validatePattern(
+        String value,
+        String pattern,
+        String errorKey,
+        int severity,
+        ISourceLocation location)
         throws ScannerException
     {
         return validator.validatePattern(value, pattern, errorKey, severity, location);
@@ -292,7 +267,8 @@ public abstract class AbstractScanner implements IProblemCollector
         return validator.validateExpression(expression, severity);
     }
 
-    protected boolean validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException
+    protected boolean validateExpression(String expression, int severity, ISourceLocation location)
+        throws ScannerException
     {
         return validator.validateExpression(expression, severity, location);
     }
@@ -305,7 +281,8 @@ public abstract class AbstractScanner implements IProblemCollector
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
      */
-    protected boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
+    protected boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location)
+        throws ScannerException
     {
         return validator.validateTypeName(fullyQualifiedType, severity, location);
     }

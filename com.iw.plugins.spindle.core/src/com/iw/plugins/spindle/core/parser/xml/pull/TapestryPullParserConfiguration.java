@@ -24,12 +24,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.parser.xml;
+package com.iw.plugins.spindle.core.parser.xml.pull;
 
 import java.io.IOException;
 
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.grammars.XMLGrammarPool;
+
+import com.iw.plugins.spindle.core.parser.xml.dom.*;
 
 /**
  *  A configuration used by TapestryPullParser
@@ -37,7 +39,7 @@ import org.apache.xerces.xni.grammars.XMLGrammarPool;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class TapestryPullParserConfiguration extends TapestryParserConfiguration
+public class TapestryPullParserConfiguration extends TapestryDOMParserConfiguration
 {
     private boolean stopParsing = false;
 
@@ -73,6 +75,7 @@ public class TapestryPullParserConfiguration extends TapestryParserConfiguration
 
     public void stopParsing()
     {
+        System.err.println("stopParsing called!");
         stopParsing = true;
     }
 

@@ -35,7 +35,6 @@ import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLParseException;
-import org.apache.xerces.xni.parser.XMLPullParserConfiguration;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
@@ -50,9 +49,10 @@ import org.xml.sax.SAXException;
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.xml.TapestryEntityResolver;
-import com.iw.plugins.spindle.core.parser.xml.TapestryParserConfiguration;
 import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParser;
+import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
 import com.iw.plugins.spindle.core.parser.xml.pull.TapestryPullParser;
+import com.iw.plugins.spindle.core.parser.xml.pull.TapestryPullParserConfiguration;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.Files;
 
@@ -72,8 +72,8 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     private IDocument eclipseDocument;
     private DocumentImpl xmlDocument;
 
-    private XMLPullParserConfiguration pullParseConfiguration;
-    private XMLPullParserConfiguration domParseConfiguration;
+    private TapestryPullParserConfiguration pullParseConfiguration;
+    private TapestryDOMParserConfiguration domParseConfiguration;
     private TapestryDOMParser domParser = null;
     private TapestryPullParser pullParser = null;
     private ArrayList collectedProblems = new ArrayList();
@@ -105,13 +105,13 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
      * Can only be called before the first parse!
      * @param b
      */
-    public void setDoValidation(boolean b)
+    public void setDoValidation(boolean flag)
     {
         if (domParser != null || pullParser != null)
         {
             throw new IllegalStateException("can only set validation flag before the first parse!");
         }
-        doValidation = b;
+        doValidation = flag;
     }
 
     private IDocument getEclipseDocument(String content)
@@ -126,15 +126,17 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
 
     public String getPublicId()
     {
-        if (xmlDocument != null)
+        if (!usePullParser)
         {
             DocumentType type = xmlDocument.getDoctype();
             if (type != null)
             {
                 return type.getPublicId();
             }
+        } else
+        {
+            return pullParser.getPublicId();
         }
-        // TODO handle this in pull parser case!
         return null;
     }
 
@@ -145,11 +147,11 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         {
             if (doValidation)
             {
-                pullParseConfiguration = new TapestryParserConfiguration(TapestryParserConfiguration.GRAMMAR_POOL);
+                pullParseConfiguration = new TapestryPullParserConfiguration(TapestryDOMParserConfiguration.GRAMMAR_POOL);
 
             } else
             {
-                pullParseConfiguration = new TapestryParserConfiguration();
+                pullParseConfiguration = new TapestryPullParserConfiguration();
             }
             pullParser = new TapestryPullParser(pullParseConfiguration);
             pullParser.setSourceResolver(this);
@@ -170,11 +172,11 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         {
             if (doValidation)
             {
-                domParseConfiguration = new TapestryParserConfiguration(TapestryParserConfiguration.GRAMMAR_POOL);
+                domParseConfiguration = new TapestryDOMParserConfiguration(TapestryDOMParserConfiguration.GRAMMAR_POOL);
 
             } else
             {
-                domParseConfiguration = new TapestryParserConfiguration();
+                domParseConfiguration = new TapestryDOMParserConfiguration();
             }
             domParser = new TapestryDOMParser(domParseConfiguration);
             domParseConfiguration.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
@@ -184,7 +186,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             domParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
             domParser.setSourceResolver(this);
             domParseConfiguration.setDocumentHandler(domParser);
-            domParseConfiguration.setErrorHandler(this);           
+            domParseConfiguration.setErrorHandler(this);
         }
     }
 
@@ -217,12 +219,17 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     protected Node pullParse(String content) throws IOException
     {
         Assert.isTrue(usePullParser, "can't pull parse, I'm set to dom parse!");
+        Node result = null;
         StringReader reader = new StringReader(content);
         try
         {
+
             checkPullParser();
-            pullParseConfiguration.parse(false);
-            return (Node) pullParser;
+            pullParseConfiguration.parse();
+            if (!hasFatalErrors)
+            {
+                result = (Node) pullParser.getRootNode();
+            }
 
         } catch (ParserRuntimeException e1)
         {
@@ -232,7 +239,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         {
             //ignore
         }
-        return null;
+        return result;
     }
 
     protected Node domParse(String content) throws IOException
@@ -271,16 +278,6 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     {
         Assert.isTrue(!usePullParser, "can't get the document as we are using pull parsing!");
         return xmlDocument;
-    }
-
-    public ISourceLocationInfo getSourceLocationInfo(Node node)
-    {
-        if (xmlDocument != null)
-        {
-            return (ElementSourceLocationInfo) xmlDocument.getUserData(node, TapestryCore.PLUGIN_ID);
-        }
-        // TODO handle this for Pull Parsing Case!
-        return null;
     }
 
     public int getLineOffset(int parserReportedLineNumber)

@@ -37,6 +37,7 @@ import org.apache.xerces.impl.validation.XMLGrammarPoolImpl;
 import org.apache.xerces.xni.parser.XMLConfigurationException;
 import org.apache.xerces.xni.parser.XMLInputSource;
 import org.apache.xerces.xni.parser.XMLParseException;
+import org.w3c.dom.Node;
 
 /**
  *  Base class for test requiring a preconfigured parser!
@@ -84,14 +85,18 @@ public class ConfiguredPullParserBase extends PullParserBase
     protected void parseAll(Reader reader) throws XMLConfigurationException, IOException, XMLParseException
     {
         pullParseConfiguration.setInputSource(new XMLInputSource(null, "", null, reader, null));
-        while (true)
-        {
-            System.err.println("BUMP!\n");
-            if (!pullParseConfiguration.parse())
-            {
+        System.err.println("Starting!\n");
+        pullParseConfiguration.parse();
+        Node node = pullParser.getRootNode();
+        boolean stop = false;
+        node = node.getFirstChild();
+        while (node != null) {
+            node = node.getNextSibling();
+            if (node == null) {
                 break;
             }
         }
+           
     }
 
 }
