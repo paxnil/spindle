@@ -86,7 +86,6 @@ public class ProblemAnnotation extends Annotation implements IProblemAnnotation
   private IProblem fProblem;
   private Image fImage;
   private boolean fQuickFixImagesInitialized = false;
-  private String fType;
 
   public ProblemAnnotation(IProblem problem)
   {
@@ -98,17 +97,17 @@ public class ProblemAnnotation extends Annotation implements IProblemAnnotation
     switch (severity)
     {
       case IMarker.SEVERITY_INFO :
-        fType = ProblemMarkerAnnotation.INFO_ANNOTATION_TYPE;
+        setType(ProblemMarkerAnnotation.INFO_ANNOTATION_TYPE);
         break;
       case IMarker.SEVERITY_WARNING :
-        fType = ProblemMarkerAnnotation.WARNING_ANNOTATION_TYPE;
+        setType(ProblemMarkerAnnotation.WARNING_ANNOTATION_TYPE);
         break;
       case IMarker.SEVERITY_ERROR :
-        fType = ProblemMarkerAnnotation.ERROR_ANNOTATION_TYPE;
+        setType(ProblemMarkerAnnotation.ERROR_ANNOTATION_TYPE);
         break;
 
       default :
-        fType = ProblemMarkerAnnotation.TASK_ANNOTATION_TYPE;
+        setType(ProblemMarkerAnnotation.TASK_ANNOTATION_TYPE);
         break;
     }
   }

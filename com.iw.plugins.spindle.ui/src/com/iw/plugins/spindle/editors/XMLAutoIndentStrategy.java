@@ -44,239 +44,247 @@ import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
- *  Auto indent strategy sensitive to XML tags
+ * Auto indent strategy sensitive to XML tags
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: XMLAutoIndentStrategy.java,v 1.4 2003/11/21 17:41:23 glongman
+ *          Exp $
  */
 public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
 {
-    private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
-    private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
+  private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
+  private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
 
-    private XMLDocumentPartitioner fPartitioner =
-        new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+  private XMLDocumentPartitioner fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
+      XMLDocumentPartitioner.TYPES);
 
-    private TypedPosition[] fTypedPositions;
-    private IPreferenceStore fPreferences;
-    private int fTabDisplayWidth;
+  private TypedPosition[] fTypedPositions;
+  private IPreferenceStore fPreferences;
+  private int fTabDisplayWidth;
 
-    private DefaultLineTracker fLineTracker = new DefaultLineTracker();
-    ;
-    public XMLAutoIndentStrategy(IPreferenceStore store)
+  private DefaultLineTracker fLineTracker = new DefaultLineTracker();;
+  public XMLAutoIndentStrategy(IPreferenceStore store)
+  {
+    super();
+    fPreferences = store;
+    fTabDisplayWidth = fPreferences.getInt(EDITOR_DISPLAY_TAB_WIDTH);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.IAutoEditStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument,
+   *      org.eclipse.jface.text.DocumentCommand)
+   */
+  public void customizeDocumentCommand(IDocument document, DocumentCommand command)
+  {
+    if (command.length == 0 && command.text != null && containsOnlyDelimiter(document, command.text))
     {
-        super();
-        fPreferences = store;
-        fTabDisplayWidth = fPreferences.getInt(EDITOR_DISPLAY_TAB_WIDTH);
-    }
+      int docLength = document.getLength();
+      if (command.offset == -1 || docLength == 0)
+        return;
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.IAutoEditStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
-     */
-    public void customizeDocumentCommand(IDocument document, DocumentCommand command)
-    {
-        if (command.length == 0 && command.text != null && containsOnlyDelimiter(document, command.text))
+      int offset = (command.offset == docLength ? command.offset - 1 : command.offset);
+
+      try
+      {
+        connect(document);
+        TypedPositionWalker walker = new TypedPositionWalker(fTypedPositions, offset);
+
+        XMLNode artifact = (XMLNode) walker.previous();
+        if (artifact == null)
         {
-            int docLength = document.getLength();
-            if (command.offset == -1 || docLength == 0)
-                return;
+          super.customizeDocumentCommand(document, command);
 
-            int offset = (command.offset == docLength ? command.offset - 1 : command.offset);
-
-            try
-            {
-                connect(document);
-                TypedPositionWalker walker = new TypedPositionWalker(fTypedPositions, offset);
-
-                XMLNode artifact = (XMLNode) walker.previous();
-                if (artifact == null)
-                {
-                    super.customizeDocumentCommand(document, command);
-
-                } else
-                {
-                    String type = artifact.getType();
-                    boolean inside =
-                        offset <= artifact.getOffset() && offset < artifact.getOffset() + artifact.getLength();
-
-                    String newType = null;
-                    if (inside && type != XMLDocumentPartitioner.TEXT)
-                    {
-                        doIndent(command, getIndent(document, artifact.getOffset()), 1);
-
-                    } else if (type == XMLDocumentPartitioner.TEXT)
-                    {
-                        do
-                        {
-                            artifact = (XMLNode) walker.previous();
-
-                        } while (artifact != null && artifact.getType() == XMLDocumentPartitioner.TEXT);
-                    }
-
-                    if (artifact == null)
-                    {
-                        super.customizeDocumentCommand(document, command);
-                    } else
-                    {
-                        type = artifact.getType();
-                        if (type == XMLDocumentPartitioner.TAG)
-                        {
-                            doIndent(command, getIndent(document, artifact.getOffset()), 1);
-                        } else if (type == XMLDocumentPartitioner.ENDTAG)
-                        {
-                            XMLNode corr = artifact.getCorrespondingNode();
-                            if (corr != null)
-                                doIndent(command, getIndent(document, corr.getOffset()), 0);
-                            else
-                                doIndent(command, getIndent(document, artifact.getOffset()), 0);
-                        } else
-                        {
-                            doIndent(command, getIndent(document, artifact.getOffset()), 0);
-                        }
-                    }
-                }
-            } catch (Exception e)
-            {
-                UIPlugin.log(e);
-                super.customizeDocumentCommand(document, command);
-            } finally
-            {
-                disconnect();
-            }
-        }
-    }
-
-    private int getLineCount(IDocument document, XMLNode textNode)
-    {
-
-        fLineTracker.set(textNode.getContent());
-        return fLineTracker.getNumberOfLines();
-    }
-
-    private void doIndent(DocumentCommand command, int initialIndent, int additionalIndent)
-    {
-        boolean useTabs = fPreferences.getBoolean(FORMATTER_USE_TABS_TO_INDENT);
-
-        StringBuffer buf = new StringBuffer(command.text);
-
-        writeColumns(initialIndent, buf, useTabs);
-        writeIndent(additionalIndent, buf, useTabs);
-
-        command.text = buf.toString();
-    }
-
-    /**
-     * Returns whether or not the text ends with one of the given search strings.
-     */
-    private boolean containsOnlyDelimiter(IDocument d, String txt)
-    {
-        String[] delimiters = d.getLegalLineDelimiters();
-        for (int i = 0; i < delimiters.length; i++)
-        {
-            if (txt.equals(delimiters[i]))
-                return true;
-        }
-        return false;
-    }
-
-    private void connect(IDocument d) throws BadLocationException, BadPositionCategoryException
-    {
-        fPartitioner.connect(d);
-        Position[] pos = d.getPositions(fPartitioner.getPositionCategory());
-        Arrays.sort(pos, XMLNode.COMPARATOR);
-        fTypedPositions = new TypedPosition[pos.length];
-        System.arraycopy(pos, 0, fTypedPositions, 0, pos.length);
-        XMLNode.createTree(d, -1);
-    }
-
-    private void disconnect()
-    {
-        try
-        {
-            fPartitioner.disconnect();
-        } catch (Exception e)
-        {
-            UIPlugin.log(e);
-        }
-    }
-
-    /**
-      * Returns the indentation of the line of the given offset.
-      *
-      *@param document the document
-      * @param offset the offset
-      * @return the indentation of the line of the offset
-      */
-    private int getIndent(IDocument document, int offset)
-    {
-
-        try
-        {
-            int start = document.getLineOfOffset(offset);
-            start = document.getLineOffset(start);
-
-            int count = 0;
-            for (int i = start; i < document.getLength(); ++i)
-            {
-                char c = document.getChar(i);
-                if ('\t' == c)
-                    count += fTabDisplayWidth;
-                else if (' ' == c)
-                    count++;
-                else
-                    break;
-            }
-            return count;
-        } catch (BadLocationException x)
-        {
-            return 0;
-        }
-    }
-
-    private int writeColumns(int columnCount, StringBuffer buffer, boolean useTabsToIndent)
-    {
-        if (useTabsToIndent)
-        {
-
-            int tabs = columnCount / fTabDisplayWidth;
-            int spaces = columnCount % fTabDisplayWidth;
-
-            for (int i = 0; i < tabs; i++)
-                buffer.append('\t');
-            for (int i = 0; i < spaces; i++)
-                buffer.append(' ');
-
-            return tabs + spaces;
         } else
         {
-            for (int i = 0; i < columnCount; i++)
-                buffer.append(' ');
+          String type = artifact.getType();
+          boolean inside = offset <= artifact.getOffset() && offset < artifact.getOffset() + artifact.getLength();
 
-            return columnCount;
+          String newType = null;
+          if (inside && type != XMLDocumentPartitioner.TEXT)
+          {
+            doIndent(command, getIndent(document, artifact.getOffset()), 1);
+
+          } else if (type == XMLDocumentPartitioner.TEXT)
+          {
+            do
+            {
+              artifact = (XMLNode) walker.previous();
+
+            } while (artifact != null && artifact.getType() == XMLDocumentPartitioner.TEXT);
+          }
+
+          if (artifact == null)
+          {
+            super.customizeDocumentCommand(document, command);
+          } else
+          {
+            type = artifact.getType();
+            if (type == XMLDocumentPartitioner.TAG)
+            {
+              doIndent(command, getIndent(document, artifact.getOffset()), 1);
+            } else if (type == XMLDocumentPartitioner.ENDTAG)
+            {
+              XMLNode corr = artifact.getCorrespondingNode();
+              if (corr != null)
+                doIndent(command, getIndent(document, corr.getOffset()), 0);
+              else
+                doIndent(command, getIndent(document, artifact.getOffset()), 0);
+            } else
+            {
+              doIndent(command, getIndent(document, artifact.getOffset()), 0);
+            }
+          }
         }
+      } catch (Exception e)
+      {
+        UIPlugin.log(e);
+        super.customizeDocumentCommand(document, command);
+      } finally
+      {
+        disconnect();
+      }
     }
+  }
 
-    /**
-     * write a given number of whitespace columns, using tabs or spaces depending on preference
-     * @param indentCount the number of indents to write
-     * @param buffer the buffer to write to
-     * @return the number of characters inserted into the buffer
-     */
-    private int writeIndent(int indentCount, StringBuffer buffer, boolean useTabsToIndent)
+  private int getLineCount(IDocument document, XMLNode textNode)
+  {
+
+    fLineTracker.set(textNode.getContent());
+    return fLineTracker.getNumberOfLines();
+  }
+
+  private void doIndent(DocumentCommand command, int initialIndent, int additionalIndent)
+  {
+    boolean useTabs = fPreferences.getBoolean(FORMATTER_USE_TABS_TO_INDENT);
+
+    StringBuffer buf = new StringBuffer(command.text);
+
+    writeColumns(initialIndent, buf, useTabs);
+    writeIndent(additionalIndent, buf, useTabs);
+
+    command.text = buf.toString();
+  }
+
+  /**
+   * Returns whether or not the text ends with one of the given search strings.
+   */
+  private boolean containsOnlyDelimiter(IDocument d, String txt)
+  {
+    String[] delimiters = d.getLegalLineDelimiters();
+    for (int i = 0; i < delimiters.length; i++)
     {
-        if (useTabsToIndent)
-        {
-            for (int i = 0; i < indentCount; i++)
-                buffer.append('\t');
-
-            return indentCount;
-        } else
-        {
-            int length = indentCount * fTabDisplayWidth;
-            for (int i = 0; i < length; i++)
-                buffer.append(' ');
-
-            return length;
-        }
+      if (txt.equals(delimiters[i]))
+        return true;
     }
+    return false;
+  }
+
+  private void connect(IDocument d) throws BadLocationException, BadPositionCategoryException
+  {
+    fPartitioner.connect(d);
+    Position[] pos = d.getPositions(fPartitioner.getPositionCategory());
+    Arrays.sort(pos, XMLNode.COMPARATOR);
+    fTypedPositions = new TypedPosition[pos.length];
+    System.arraycopy(pos, 0, fTypedPositions, 0, pos.length);
+    XMLNode.createTree(d, -1);
+  }
+
+  private void disconnect()
+  {
+    try
+    {
+      fPartitioner.disconnect();
+    } catch (Exception e)
+    {
+      UIPlugin.log(e);
+    }
+  }
+
+  /**
+   * Returns the indentation of the line of the given offset.
+   * 
+   * @param document
+   *          the document
+   * @param offset
+   *          the offset
+   * @return the indentation of the line of the offset
+   */
+  private int getIndent(IDocument document, int offset)
+  {
+
+    try
+    {
+      int start = document.getLineOfOffset(offset);
+      start = document.getLineOffset(start);
+
+      int count = 0;
+      for (int i = start; i < document.getLength(); ++i)
+      {
+        char c = document.getChar(i);
+        if ('\t' == c)
+          count += fTabDisplayWidth;
+        else if (' ' == c)
+          count++;
+        else
+          break;
+      }
+      return count;
+    } catch (BadLocationException x)
+    {
+      return 0;
+    }
+  }
+
+  private int writeColumns(int columnCount, StringBuffer buffer, boolean useTabsToIndent)
+  {
+    if (useTabsToIndent)
+    {
+
+      int tabs = columnCount / fTabDisplayWidth;
+      int spaces = columnCount % fTabDisplayWidth;
+
+      for (int i = 0; i < tabs; i++)
+        buffer.append('\t');
+      for (int i = 0; i < spaces; i++)
+        buffer.append(' ');
+
+      return tabs + spaces;
+    } else
+    {
+      for (int i = 0; i < columnCount; i++)
+        buffer.append(' ');
+
+      return columnCount;
+    }
+  }
+
+  /**
+   * write a given number of whitespace columns, using tabs or spaces depending
+   * on preference
+   * 
+   * @param indentCount
+   *          the number of indents to write
+   * @param buffer
+   *          the buffer to write to
+   * @return the number of characters inserted into the buffer
+   */
+  private int writeIndent(int indentCount, StringBuffer buffer, boolean useTabsToIndent)
+  {
+    if (useTabsToIndent)
+    {
+      for (int i = 0; i < indentCount; i++)
+        buffer.append('\t');
+
+      return indentCount;
+    } else
+    {
+      int length = indentCount * fTabDisplayWidth;
+      for (int i = 0; i < length; i++)
+        buffer.append(' ');
+
+      return length;
+    }
+  }
 }

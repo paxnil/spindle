@@ -50,7 +50,7 @@ public class ProblemAnnotationImageProvider implements IAnnotationImageProvider
   {
     if (annotation instanceof IProblemAnnotation)
     {
-      IProblemAnnotation problemAnnotation = (ProblemMarkerAnnotation) annotation;
+      IProblemAnnotation problemAnnotation = (IProblemAnnotation) annotation;
       int imageType = getImageType(problemAnnotation);
       return getImage(problemAnnotation, imageType, Display.getCurrent());
     }
@@ -97,7 +97,7 @@ public class ProblemAnnotationImageProvider implements IAnnotationImageProvider
 
   private Image getImage(IProblemAnnotation annotation, int imageType, Display display)
   {
-    if (fCachedImageType == imageType)
+    if (fCachedImageType == imageType && fCachedImage != null)
       return fCachedImage;
 
     Image image = null;

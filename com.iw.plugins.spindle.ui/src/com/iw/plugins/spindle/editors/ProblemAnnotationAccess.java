@@ -27,7 +27,7 @@
 package com.iw.plugins.spindle.editors;
 
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationAccess;
+import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 
 /**
  *  Used by callers to access info about IAnnotations.
@@ -35,7 +35,7 @@ import org.eclipse.jface.text.source.IAnnotationAccess;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class ProblemAnnotationAccess implements IAnnotationAccess {
+public class ProblemAnnotationAccess extends DefaultMarkerAnnotationAccess {
 
     /*
      * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
@@ -46,7 +46,7 @@ public class ProblemAnnotationAccess implements IAnnotationAccess {
             if (tapAnnotation.isRelevant())
                 return tapAnnotation.getType();
         }
-        return null;
+        return super.getType(annotation);
     }
 
     /*
@@ -65,7 +65,7 @@ public class ProblemAnnotationAccess implements IAnnotationAccess {
             if (tapAnnotation.isRelevant())
                 return tapAnnotation.isTemporary();
         }
-        return false;
+        return super.isTemporary(annotation);
     }
 };
 
