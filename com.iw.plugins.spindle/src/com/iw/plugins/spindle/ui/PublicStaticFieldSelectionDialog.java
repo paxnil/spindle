@@ -87,7 +87,7 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
   public PublicStaticFieldSelectionDialog(Shell shell, IJavaProject project) {
     super(shell);
     this.jproject = project;
-    String windowTitle = "Choose Field Binding Value";
+    String windowTitle = "Choose Field Value";
     String description = "Choose a Type and one of it public static fields";
     updateWindowTitle(windowTitle);
     updateMessage(description);

@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.spec;
 
+import com.iw.plugins.spindle.bean.PluginFieldBeanInitializer;
 import com.iw.plugins.spindle.bean.PluginPropertyBeanInitializer;
 import com.iw.plugins.spindle.bean.PluginStaticBeanInitializer;
 import com.primix.tapestry.bean.IBeanInitializer;
@@ -81,6 +82,13 @@ public class TapestryPluginFactory extends SpecFactory {
 
   public IBeanInitializer createStaticBeanInitializer(String propertyName, Object staticValue) {
     return new PluginStaticBeanInitializer(propertyName, staticValue);
+  }
+
+  /* (non-Javadoc)
+   * @see SpecFactory#createFieldBeanInitializer(String, String)
+   */
+  public IBeanInitializer createFieldBeanInitializer(String propertyName, String fieldName) {
+    return new PluginFieldBeanInitializer(propertyName, fieldName);
   }
 
 }

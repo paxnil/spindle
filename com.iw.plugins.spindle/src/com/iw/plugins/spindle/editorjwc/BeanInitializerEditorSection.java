@@ -66,6 +66,7 @@ import com.iw.plugins.spindle.ui.ComboBoxPropertyDescriptor;
 import com.iw.plugins.spindle.ui.EmptySelection;
 import com.iw.plugins.spindle.ui.FieldPropertyDescriptor;
 import com.iw.plugins.spindle.util.JavaListSelectionProvider;
+import com.primix.tapestry.bean.FieldBeanInitializer;
 import com.primix.tapestry.bean.IBeanInitializer;
 import com.primix.tapestry.bean.PropertyBeanInitializer;
 import com.primix.tapestry.bean.StaticBeanInitializer;
@@ -224,7 +225,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     return null;
   }
 
-  protected abstract class BaseInitializerHolder {
+  protected abstract class BaseInitializerHolder implements IPropertySource{
     public abstract IBeanInitializer getInitializer();
 
     public Object getAdapter(Class clazz) {
