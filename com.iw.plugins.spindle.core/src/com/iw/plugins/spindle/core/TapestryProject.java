@@ -116,7 +116,10 @@ public class TapestryProject implements IProjectNature
     public void deconfigure() throws CoreException
     {
         removeFromBuildSpec(TapestryCore.BUILDER_ID);
+        Markers.removeProblemsForProject(getProject());
     }
+
+ 
 
     public boolean isOnOutputPath(IPath candidate)
     {

@@ -47,9 +47,16 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
     protected AbstractResourceWorkspaceLocation(AbstractRootLocation root, String path)
     {
         this.fRoot = root;
-        Path p = new Path(path);
-        this.fPath = p.removeLastSegments(1).addTrailingSeparator().makeRelative().toString();
-        this.fName = p.lastSegment();
+        Path p = new Path(path);        
+        if (path.endsWith("/")) {
+            fPath = p.removeTrailingSeparator().toString();
+            fName = "";
+            
+        } else {
+            this.fPath = p.removeLastSegments(1).addTrailingSeparator().makeRelative().toString();
+            fName = p.lastSegment();
+        }
+        
     }
 
     public String getName()
@@ -75,7 +82,7 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
             if (name.equals(getName()))
                 return this;
 
-            return fRoot.getRelativeLocation(getPath() + name);
+            return fRoot.getRelativeLocation(getPath() + "/" + name);
         }
         return null;
     }

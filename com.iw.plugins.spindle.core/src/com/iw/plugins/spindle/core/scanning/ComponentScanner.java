@@ -235,7 +235,15 @@ public class ComponentScanner extends SpecificationScanner
     protected void scanBinding(IContainedComponent component, Node node, BindingType type, String attributeName)
         throws ScannerException
     {
-        String name = getAttribute(node, "name", true);
+        String name = getAttribute(node, "name", true, true);
+
+        //        if (name.startsWith(getDummyStringPrefix()))
+        //        {
+        //
+        //            addProblem(IProblem.ERROR, 
+        //            getAttributeSourceLocation(node, "name"), 
+        //            TapestryCore.getTapestryString());
+        //        }
 
         String value = null;
         boolean fromAttribute = false;
@@ -427,9 +435,11 @@ public class ComponentScanner extends SpecificationScanner
                     }
                 }
 
-                validateContainedComponent(specification, c, getSourceLocationInfo(node));
-
                 specification.addComponent(id, c);
+
+                if (c.getCopyOf() == null)
+                    validateContainedComponent(specification, c, getSourceLocationInfo(node));
+
             }
         }
 

@@ -71,7 +71,8 @@ public class ApplicationScanner extends LibraryScanner
 
         specification.setName(getAttribute(rootNode, "name"));
         String engineClass = getAttribute(rootNode, "engine-class");
-        validateTypeName(engineClass, IProblem.ERROR, getAttributeSourceLocation(rootNode, "engine-class"));
+        if (engineClass != null)
+            validateTypeName(engineClass, IProblem.ERROR, getAttributeSourceLocation(rootNode, "engine-class"));
         specification.setEngineClassName(getAttribute(rootNode, "engine-class"));
 
         scanLibrarySpecification(rootNode, specification, resolver);

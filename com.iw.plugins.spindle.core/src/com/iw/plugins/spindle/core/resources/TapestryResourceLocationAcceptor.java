@@ -120,7 +120,7 @@ public class TapestryResourceLocationAcceptor implements IResourceLocationAccept
                 }
             }
         }
-        if (match)
+        if (match && !fResults.contains(location))
             fResults.add(location);
 
         return true;

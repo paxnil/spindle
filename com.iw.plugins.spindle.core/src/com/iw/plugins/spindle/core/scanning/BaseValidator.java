@@ -62,8 +62,8 @@ public class BaseValidator implements IScannerValidator
 
     static class SLocation implements ISourceLocation
     { /* (non-Javadoc)
-                                  * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
-                                  */
+                                     * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
+                                     */
         public int getCharEnd()
         {
             return 1;
@@ -194,9 +194,6 @@ public class BaseValidator implements IScannerValidator
     {
         return true;
     }
-    
-
- 
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateContainedComponent(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.spec.IContainedComponent)
@@ -283,6 +280,14 @@ public class BaseValidator implements IScannerValidator
     }
 
     /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(java.lang.String, java.lang.String, com.iw.plugins.spindle.core.parser.ISourceLocation)
+     */
+    public boolean validateLibraryResourceLocation(String path, String errorKey, ISourceLocation source) throws ScannerException
+    {
+        return true;
+    }
+
+    /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(org.apache.tapestry.IResourceLocation, java.lang.String)
      */
     public boolean validateResourceLocation(
@@ -292,6 +297,8 @@ public class BaseValidator implements IScannerValidator
         ISourceLocation source)
         throws ScannerException
     {
+        if (relativePath.startsWith(getDummyStringPrefix()))
+            return false;
 
         if (!resourceLocationExists(location, relativePath))
         {
@@ -331,4 +338,5 @@ public class BaseValidator implements IScannerValidator
         }
         return true;
     }
+
 }

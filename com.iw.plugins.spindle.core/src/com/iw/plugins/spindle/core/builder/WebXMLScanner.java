@@ -83,7 +83,7 @@ public class WebXMLScanner extends AbstractScanner
 
     protected void checkApplicationLocation(IResourceWorkspaceLocation location) throws ScannerException
     {
-        IPath ws_path = new Path(location.getPath());
+        IPath ws_path = new Path(location.getName());
         String extension = ws_path.getFileExtension();
         if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
             throw new ScannerException(TapestryCore.getString("web-xml-wrong-file-extension", location.toString()));
@@ -144,8 +144,8 @@ public class WebXMLScanner extends AbstractScanner
             TapestryCore.log(e);
             e.printStackTrace();
         }
-//        if (!match)
-//            addProblem(IProblem.ERROR, location, "web-xml-does-not-subclass");
+        //        if (!match)
+        //            addProblem(IProblem.ERROR, location, "web-xml-does-not-subclass");
 
         return match;
     }
@@ -209,7 +209,7 @@ public class WebXMLScanner extends AbstractScanner
     {
         IResourceWorkspaceLocation result = (IResourceWorkspaceLocation) location.getRelativeLocation(name);
 
-        if (result.exists())
+        if (result != null && result.exists())
             return result;
 
         return null;
@@ -349,6 +349,7 @@ public class WebXMLScanner extends AbstractScanner
         if (servletType == null)
             return false;
 
+        IResourceWorkspaceLocation location = null;
         if (!isTapestryServlet(servletType, nodeLocation))
         {
             return false;
@@ -359,7 +360,7 @@ public class WebXMLScanner extends AbstractScanner
             String path = getApplicationPathFromServlet(servletType);
             if (path != null)
             {
-                IResourceWorkspaceLocation location = null;
+
                 try
                 {
                     location = getApplicationLocation(newInfo, path);
@@ -376,9 +377,29 @@ public class WebXMLScanner extends AbstractScanner
 
                     return false;
                 }
-                newInfo.applicationSpecLocation = location;
+                
+            }
+        } else
+        {
+            try
+            {
+                location = getApplicationLocation(newInfo, null);
+                checkApplicationLocation(location);
+            } catch (ScannerException e)
+            {
+                addProblem(
+                    IMarker.SEVERITY_ERROR,
+                    nodeLocation,
+                    TapestryCore.getString(
+                        "web-xml-ignore-invalid-application-path",
+                        servletType.getElementName(),
+                        null));
+
+                return false;
             }
         }
+        
+        newInfo.applicationSpecLocation = location;
         return true;
     }
 

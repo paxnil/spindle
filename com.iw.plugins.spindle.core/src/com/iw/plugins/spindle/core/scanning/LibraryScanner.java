@@ -255,7 +255,10 @@ public class LibraryScanner extends SpecificationScanner
     }
     protected void scanLibrary(ILibrarySpecification specification, Node node) throws ScannerException
     {
-        String id = getAttribute(node, "id", true);
+        String id = getAttribute(node, "id", false);
+
+        if (id == null)
+            return;
 
         validatePattern(
             id,
@@ -272,15 +275,16 @@ public class LibraryScanner extends SpecificationScanner
                     "SpecificationParser.framework-library-id-is-reserved",
                     INamespace.FRAMEWORK_NAMESPACE));
 
-        String specificationPath = getAttribute(node, "specification-path");
+        String specificationPath = getAttribute(node, "specification-path", true);
 
-        validateResourceLocation(
-            specification.getSpecificationLocation(),
-            specificationPath,
-            "scan-library-missing-library",
-            getAttributeSourceLocation(node, "specification-path"));
+        boolean validLibLoc =
+            validateLibraryResourceLocation(                
+                specificationPath,
+                "scan-library-missing-library",
+                getAttributeSourceLocation(node, "specification-path"));
 
-        specification.setLibrarySpecificationPath(id, specificationPath);
+        if (validLibLoc)
+            specification.setLibrarySpecificationPath(id, specificationPath);
 
     }
 

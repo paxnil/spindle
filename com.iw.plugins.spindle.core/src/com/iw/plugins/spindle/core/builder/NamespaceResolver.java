@@ -224,13 +224,14 @@ public class NamespaceResolver
     {
         this.fFrameworkNamespace = framework;
         this.fServlet = servlet;
-        IResourceWorkspaceLocation locationFromServlet = servlet.applicationSpecLocation;
-        if (locationFromServlet != null)
+        fSpecLocation = servlet.applicationSpecLocation;
+        if (fSpecLocation != null)
         {
             fResultNamespace = fBuild.createNamespace(fNamespaceId, fSpecLocation);
         } else
         {
             fResultNamespace = createStandinApplicationNamespace(servlet);
+            fSpecLocation = (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
         }
         if (fResultNamespace != null)
         {
@@ -303,7 +304,7 @@ public class NamespaceResolver
                 }
 
                 fResultNamespace.setResourceLookup(lookup);
-                fResultNamespace.setComponentResolver(new ComponentResolver(fFrameworkNamespace));
+                fResultNamespace.setComponentResolver(new BuilderComponentResolver(fFrameworkNamespace));
                 resolveChildNamespaces();
                 resolveComponents();
                 List definitelyNotSpeclessPages = getAllComponentTemplates();
@@ -364,13 +365,13 @@ public class NamespaceResolver
             for (Iterator iter = ids.iterator(); iter.hasNext();)
             {
                 String libraryId = (String) iter.next();
-                if (fResultNamespace.getChildNamespace(libraryId) == null)
+                if (fResultNamespace.getChildNamespace(libraryId) != null)
                     continue;
 
                 IResourceWorkspaceLocation libLocation =
                     (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot.getRelativeLocation(
                         spec.getLibrarySpecificationPath(libraryId));
-                if (fSpecLocation.exists())
+                if (libLocation.exists())
                 {
                     ICoreNamespace childNamespace =
                         childResolver.resolveLibrary(fFrameworkNamespace, libraryId, libLocation);
@@ -491,17 +492,18 @@ public class NamespaceResolver
         // remaining named by thier filename
         for (int i = 0; i < pages.length; i++)
         {
-            String type = new Path(pages[i].getName()).removeFileExtension().toString();
-            if (!result.containsKey(type))
+            String name = new Path(pages[i].getName()).removeFileExtension().toString();
+            if (!result.containsKey(name))
             {
-                result.put(type, pages[i]);
+                result.put(name, pages[i]);
 
             } else
             {
-                //this is a problem. a component is being hidden by one defined in the spec, or some place else
-                //in the lookup path.
-                //TODO handle this error! - need to mark the resource if we can
-                throw new Error("fix me!");
+                if (!result.get(name).equals(pages[i]))
+                    //this is a problem. a component is being hidden by one defined in the spec, or some place else
+                    //in the lookup path.
+                    //TODO handle this error! - need to mark the resource if we can
+                    throw new Error("fix me!");
             }
         }
         return result;
@@ -646,10 +648,10 @@ public class NamespaceResolver
         return result;
     }
 
-    class ComponentResolver extends ComponentSpecificationResolver
+    class BuilderComponentResolver extends ComponentSpecificationResolver
     {
 
-        public ComponentResolver(INamespace framework)
+        public BuilderComponentResolver(INamespace framework)
         {
             super(framework, fResultNamespace);
         }
@@ -665,7 +667,12 @@ public class NamespaceResolver
             {
                 result = fResultNamespace.getComponentSpecification(type);
                 if (result == null && fJwcFiles.containsKey(type))
+                {
                     result = resolveComponent(type, (IResourceWorkspaceLocation) fJwcFiles.get(type));
+                } else
+                {
+                    result = super.resolve(type);
+                }
 
             } else
             {

@@ -74,4 +74,6 @@ public interface IScannerValidator
 
     public boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException;
 
+    public boolean validateLibraryResourceLocation(String path, String errorKey, ISourceLocation source) throws ScannerException;
+
 }

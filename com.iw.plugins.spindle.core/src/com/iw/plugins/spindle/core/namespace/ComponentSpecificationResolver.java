@@ -26,11 +26,9 @@
 
 package com.iw.plugins.spindle.core.namespace;
 
-import org.apache.tapestry.ApplicationRuntimeException;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.IComponentSpecification;
 
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
@@ -103,24 +101,17 @@ public class ComponentSpecificationResolver
             namespace = fContainerNamespace.getChildNamespace(libraryId);
         else
             namespace = fContainerNamespace;
+            
+        if (namespace == null) 
+            return null;
 
         if (namespace.containsComponentType(type))
         {
             return namespace.getComponentSpecification(type);
         }
 
-        IComponentSpecification lastChance = resolveInFramework(type);
-
-        // If not found after search, check to see if it's in
-        // the framework instead.
-
-        if (lastChance == null)
-        {
-
-            throw new ApplicationRuntimeException(
-                TapestryCore.getTapestryString("Namespace.no-such-component-type", type, namespace.getNamespaceId()));
-        }
-        return lastChance;
+        return resolveInFramework(type);
+       
     }
 
     private IComponentSpecification resolveInFramework(String type)

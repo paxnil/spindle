@@ -168,6 +168,22 @@ public abstract class AbstractScanner implements IProblemCollector
         return result;
     }
 
+    protected String getAttribute(Node node, String attributeName, boolean returnDummyIfNull, boolean warnIfNull)
+    {
+        String result = NodeAccess.getAttribute(node, attributeName);
+        if (TapestryCore.isNull(result) && returnDummyIfNull)
+        {
+            result = getNextDummyString();
+            if (warnIfNull)
+                addProblem(
+                    IProblem.WARNING,
+                    getAttributeSourceLocation(node, attributeName),
+                    "warning, attribute value is null!");
+        }
+
+        return result;
+    }
+
     protected ISourceLocationInfo getSourceLocationInfo(Node node)
     {
         return NodeAccess.getSourceLocationInfo(node);
@@ -280,6 +296,13 @@ public abstract class AbstractScanner implements IProblemCollector
         throws ScannerException
     {
         return fValidator.validateTypeName(fullyQualifiedType, severity, location);
+    }
+
+    protected boolean validateLibraryResourceLocation(String path, String errorKey, ISourceLocation source)
+        throws ScannerException
+    {
+        return fValidator.validateLibraryResourceLocation(path, errorKey, source);
+
     }
 
     protected boolean validateResourceLocation(

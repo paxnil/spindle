@@ -352,7 +352,7 @@ public abstract class Build implements IBuild
                     ComponentScanner scanner = new ComponentScanner();
                     scanner.setResourceLocation(location);
                     scanner.setNamespace(namespace);
-                    scanner.setFactory(TapestryCore.getSpecificationFactory());
+                    scanner.setFactory(TapestryCore.getSpecificationFactory());                    
                     if (node != null)
                     {
                         try

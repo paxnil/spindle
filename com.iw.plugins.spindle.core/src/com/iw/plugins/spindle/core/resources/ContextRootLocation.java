@@ -59,6 +59,9 @@ public class ContextRootLocation extends AbstractRootLocation
      */
     public boolean exists()
     {
+        if (fRootFolder == null)
+            return false;
+            
         return fRootFolder.exists();
     }
 
@@ -100,7 +103,7 @@ public class ContextRootLocation extends AbstractRootLocation
                 return this;
             } else
             {
-                return new ContextResourceWorkspaceLocation(this, new Path(name).makeRelative().toString());
+                return new ContextResourceWorkspaceLocation(this, new Path(name).makeAbsolute().toString());
             }
         }
         return new ContextResourceWorkspaceLocation(this, name);
@@ -135,7 +138,8 @@ public class ContextRootLocation extends AbstractRootLocation
 
     protected IContainer getContainer(ContextResourceWorkspaceLocation location)
     {
-        IFolder folder = fRootFolder.getFolder(location.getPath());
+        IPath p = new Path(location.getPath());
+        IFolder folder = fRootFolder.getFolder(p.removeTrailingSeparator());
         if (folder != null && folder.exists())
             return folder;
 
