@@ -80,6 +80,9 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
 
     public static final String CACHE_GRAMMAR_PREFERENCE = PLUGIN_ID + ".cachinggrammars";
     public static final String CORE_CONTAINER = PLUGIN_ID + ".TAPESTRY_FRAMEWORK";
+    
+    public static final String SERVLET_2_2_PUBLIC_ID="-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
+    public static final String SERVLET_2_3_PUBLIC_ID="-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN";
 
     /**
      * SpecFactory instance used by the Scanners

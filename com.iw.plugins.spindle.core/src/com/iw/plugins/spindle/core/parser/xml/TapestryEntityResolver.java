@@ -36,24 +36,28 @@ import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.apache.xerces.xni.parser.XMLInputSource;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+
 /**
- * @author Administrator
- *
- * To change this generated comment edit the template variable "typecomment":
- * Window>Preferences>Java>Templates.
- * To enable and disable the creation of type comments go to
- * Window>Preferences>Java>Code Generation.
+ *  Entity resolver that pulls DTDs out of the plugin classpath
+ * 
+ * @author glongman@intelligentworks.com
+ * @version $Id$
  */
 public class TapestryEntityResolver implements XMLEntityResolver
 {
 
-    static private Map Entities = new HashMap();
+    static private Map TapestryEntities = new HashMap();
+    static private Map ServletEntities = new HashMap();
 
-    static public void register(String publicId, String entityPath)
+    static public void registerTapestryDTD(String publicId, String entityPath)
     {
+        TapestryEntities.put(publicId, entityPath);
+    }
 
-        Entities.put(publicId, entityPath);
-
+    static public void registerServletDTD(String publicId, String entityPath)
+    {
+        ServletEntities.put(publicId, entityPath);
     }
 
     /**
@@ -61,29 +65,50 @@ public class TapestryEntityResolver implements XMLEntityResolver
      */
     public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException
     {
+        XMLInputSource result = getTapestryInputSource(resourceIdentifier);
+
+        if (result == null)
+            result = getServletInputSource(resourceIdentifier);
+
+        return result;
+    }
+
+    private XMLInputSource getTapestryInputSource(XMLResourceIdentifier resourceIdentifier)
+        throws XNIException, IOException
+    {
+
         String publicId = resourceIdentifier.getPublicId();
-
-        String entityPath = null;
-
-        entityPath = (String) Entities.get(publicId);
+        String entityPath = (String) TapestryEntities.get(publicId);
 
         if (entityPath != null)
         {
             InputStream stream = SpecificationParser.class.getResourceAsStream(entityPath);
-
-            XMLInputSource result =
-                new XMLInputSource(
-                    resourceIdentifier.getPublicId(),
-                    resourceIdentifier.getLiteralSystemId(),
-                    resourceIdentifier.getBaseSystemId(),
-                    stream,
-                    (String) null);
-
-            return result;
-
+            return getInputSource(resourceIdentifier, stream);
         }
-
         return null;
+    }
 
+    private XMLInputSource getServletInputSource(XMLResourceIdentifier resourceIdentifier)
+        throws XNIException, IOException
+    {
+        String publicId = resourceIdentifier.getPublicId();
+        String entityPath = (String) ServletEntities.get(publicId);
+
+        if (entityPath != null)
+        {
+            InputStream stream = TapestryCore.class.getResourceAsStream(entityPath);
+            return getInputSource(resourceIdentifier, stream);
+        }
+        return null;
+    }
+
+    private XMLInputSource getInputSource(XMLResourceIdentifier resourceIdentifier, InputStream stream)
+    {
+        return new XMLInputSource(
+            resourceIdentifier.getPublicId(),
+            resourceIdentifier.getLiteralSystemId(),
+            resourceIdentifier.getBaseSystemId(),
+            stream,
+            (String) null);
     }
 }

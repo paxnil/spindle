@@ -90,8 +90,11 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     public Parser(boolean usePullParser)
     {
         fUsePullParser = usePullParser;
-        TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID, "Tapestry_1_3.dtd");
-        TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, "Tapestry_3_0.dtd");
+        TapestryEntityResolver.registerTapestryDTD(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID, "Tapestry_1_3.dtd");
+        TapestryEntityResolver.registerTapestryDTD(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, "Tapestry_3_0.dtd");
+        TapestryEntityResolver.registerServletDTD(TapestryCore.SERVLET_2_2_PUBLIC_ID, "web-app_2_2.dtd");
+        TapestryEntityResolver.registerServletDTD(TapestryCore.SERVLET_2_2_PUBLIC_ID, "web-app_2_3.dtd");
+        
     }
 
     public boolean isDoValidation()

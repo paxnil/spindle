@@ -61,6 +61,8 @@ public class XMLUtil
     static public final int DTD_1_2 = 2;
     static public final int DTD_1_3 = 3;
     static public final int DTD_3_0 = 4;
+    static public final int DTD_SERVLET_2_2 = 5;
+    static public final int DTD_SERVLET_2_3 = 6;
 
     static public int getDTDVersion(String publicId)
     {
@@ -70,6 +72,12 @@ public class XMLUtil
 
         if (publicId.equals(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID))
             return DTD_3_0;
+
+        if (publicId.equals(TapestryCore.SERVLET_2_2_PUBLIC_ID))
+            return DTD_SERVLET_2_2;
+
+        if (publicId.equals(TapestryCore.SERVLET_2_3_PUBLIC_ID))
+            return DTD_SERVLET_2_3;
 
         return UNKNOWN_DTD;
     }
@@ -86,8 +94,10 @@ public class XMLUtil
 
             case DTD_1_3 :
                 return SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID;
-            case DTD_3_0 :
-                return SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID;
+            case DTD_SERVLET_2_2 :
+                return TapestryCore.SERVLET_2_2_PUBLIC_ID;
+            case DTD_SERVLET_2_3 :
+                return TapestryCore.SERVLET_2_3_PUBLIC_ID;
 
         }
 
@@ -167,6 +177,40 @@ public class XMLUtil
         writeLibraryContents(writer, (PluginLibrarySpecification) application, indent);
 
         writer.println("</application>");
+    }
+
+    public static void writeWebDOTXML(String servletName, String publicId, PrintWriter writer)
+    {
+        XMLUtil.writeXMLHeader(publicId, "web-app", writer);
+
+        writer.println();
+
+        writer.println("<web-app>");
+        Indenter.printlnIndented(writer, 1, "<display-name>" + servletName + "</display-name>");
+        writeServlet(servletName, writer, 1);
+        writeServletMapping(servletName, writer, 1);
+        writer.println("</web-app>");
+
+    }
+
+    public static void writeServlet(String servletName, PrintWriter writer, int indent)
+    {
+        Indenter.printlnIndented(writer, indent, "<servlet>");
+        Indenter.printlnIndented(writer, indent + 1, "<servlet-name>" + servletName + "</servlet-name>");
+        Indenter.printlnIndented(
+            writer,
+            indent + 1,
+            "<servlet-class>org.apache.tapestry.ApplicationServlet</servlet-class>");
+        Indenter.printlnIndented(writer, indent + 1, "<load-on-startup>1</load-on-startup>");
+        Indenter.printlnIndented(writer, indent, "</servlet>");
+    }
+
+    public static void writeServletMapping(String servletName, PrintWriter writer, int indent)
+    {
+        Indenter.printlnIndented(writer, indent, "<servlet-mapping>");
+        Indenter.printlnIndented(writer, indent + 1, "<servlet-name>" + servletName + "</servlet-name>");
+        Indenter.printlnIndented(writer, indent + 1, "<url-pattern>/app</url-pattern>");
+        Indenter.printlnIndented(writer, indent, "</servlet-mapping>");
     }
 
     /**
@@ -446,6 +490,14 @@ public class XMLUtil
 
             case XMLUtil.DTD_3_0 :
                 writer.println("      \"http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd\">");
+                break;
+
+            case XMLUtil.DTD_SERVLET_2_2 :
+                writer.println("      \"http://java.sun.com/j2ee/dtds/web-app_2_2.dtd\">");
+                break;
+
+            case XMLUtil.DTD_SERVLET_2_3 :
+                writer.println("      \"http://java.sun.com/dtd/web-app_2_3.dtd\">");
                 break;
 
             default :
