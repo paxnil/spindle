@@ -34,9 +34,10 @@ import java.io.Reader;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.template.TemplateStorageDocumentProvider;
+import com.iw.plugins.spindle.editors.documentsAndModels.StorageDocumentModelProvider;
 
 /**
  * Document provider for specs that come out of Jar files
@@ -48,8 +49,19 @@ import com.iw.plugins.spindle.editors.template.TemplateStorageDocumentProvider;
  * @version $Id: SpecStorageDocumentProvider.java,v 1.3 2003/11/02 12:45:14
  *          glongman Exp $
  */
-public class SpecStorageDocumentProvider extends TemplateStorageDocumentProvider
+public class SpecStorageDocumentProvider extends StorageDocumentModelProvider
 {
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.documentsAndModels.FileDocumentModelProvider#getSyntaxPartitioner()
+   */
+  protected IDocumentPartitioner getSyntaxPartitioner()
+  {
+    return UIPlugin.getDefault().getXMLTextTools().createXMLPartitioner();
+  }
+
   protected void setDocumentContent(
       IDocument document,
       InputStream contentStream,

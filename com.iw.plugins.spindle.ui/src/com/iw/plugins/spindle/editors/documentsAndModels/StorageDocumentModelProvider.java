@@ -30,15 +30,16 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
+import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.IDocumentPartitionerExtension2;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.StorageDocumentProvider;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.internal.ui.text.XMLReconciler;
 
-import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.template.TemplateTextTools;
+import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
  * StorageDocumentModelProvider documents and models for files in jars
@@ -47,7 +48,7 @@ import com.iw.plugins.spindle.editors.template.TemplateTextTools;
  * @version $Id: StorageDocumentModelProvider.java,v 1.1.2.1 2004/06/22 12:13:52
  *          glongman Exp $
  */
-public class StorageDocumentModelProvider extends StorageDocumentProvider
+public abstract class StorageDocumentModelProvider extends StorageDocumentProvider
     implements
       IXMLModelProvider
 {
@@ -94,12 +95,18 @@ public class StorageDocumentModelProvider extends StorageDocumentProvider
   private Map createParitionerMap()
   {
     Map result = new HashMap();
-    TemplateTextTools tools = UIPlugin.getDefault().getTemplateTextTools();
 
-    DefaultPartitioner syntaxPartitioner = tools.createXMLPartitioner();
-    result.put(syntaxPartitioner.getManagingPositionCategories()[0], syntaxPartitioner);
+    IDocumentPartitioner syntaxPartitioner = getSyntaxPartitioner();
+    if (syntaxPartitioner instanceof IDocumentPartitionerExtension2)
+    {
+      result.put(((IDocumentPartitionerExtension2) syntaxPartitioner)
+          .getManagingPositionCategories()[0], syntaxPartitioner);
+    } else
+    {
+      result.put(IDocumentExtension3.DEFAULT_PARTITIONING, syntaxPartitioner);
+    }
 
-    XMLDocumentPartitioner structureParitioner = tools.createXMLStructurePartitioner();
+    XMLDocumentPartitioner structureParitioner = UIUtils.createXMLStructurePartitioner();
     result.put(
         structureParitioner.getManagingPositionCategories()[0],
         structureParitioner);
@@ -107,6 +114,7 @@ public class StorageDocumentModelProvider extends StorageDocumentProvider
     return result;
   }
 
+  protected abstract IDocumentPartitioner getSyntaxPartitioner();
   /*
    * (non-Javadoc)
    * 

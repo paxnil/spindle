@@ -14,7 +14,6 @@ package org.xmen.internal.ui.text;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
@@ -35,6 +34,8 @@ import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
 import org.xmen.xml.XMLNode;
 
+import com.iw.plugins.spindle.core.util.Assert;
+
 /**
  * XMLDocumentPartitioner modded version to create node positions
  * 
@@ -42,7 +43,7 @@ import org.xmen.xml.XMLNode;
  * @version $Id: XMLDocumentPartitioner.java,v 1.2.2.2 2004/06/22 12:25:19
  *          glongman Exp $
  */
-public class XMLDocumentPartitioner
+public class XMLDocumentPartitioner 
     implements
       IDocumentPartitioner,
       IDocumentPartitionerExtension,
@@ -50,31 +51,36 @@ public class XMLDocumentPartitioner
 {
   public static final String CONTENT_TYPES_CATEGORY = "__spindle_xml_artifacts_category";
 
-  public static RuleBasedPartitionScanner SCANNER;
-
-  static
-  {
-    XMLDocumentPartitioner.SCANNER = new RuleBasedPartitionScanner();
-    XMLDocumentPartitioner.SCANNER
-        .setPredicateRules(new IPredicateRule[]{new XMLTagsRule()});
+  public static RuleBasedPartitionScanner createScanner() {
+    RuleBasedPartitionScanner result = new RuleBasedPartitionScanner();
+    result.setPredicateRules(new IPredicateRule[] { new XMLTagsRule() });
+    return result;
   }
 
   /** The partitioner's scanner */
   protected IPartitionTokenScanner fScanner;
+
   /** The legal content types of this partitioner */
   protected String[] fLegalContentTypes;
+
   /** The partitioner's document */
   protected IDocument fDocument;
+
   /** The document length before a document change occured */
   protected int fPreviousDocumentLength;
+
   /** The position updater used to for the default updating of partitions */
   protected DefaultPositionUpdater fPositionUpdater;
+
   /** The offset at which the first changed partition starts */
   protected int fStartOffset;
+
   /** The offset at which the last changed partition ends */
   protected int fEndOffset;
+
   /** The offset at which a partition has been deleted */
   protected int fDeleteOffset;
+
   /**
    * The position category this partitioner uses to store the document's
    * partitioning information.
@@ -107,7 +113,7 @@ public class XMLDocumentPartitioner
    */
   public String[] getManagingPositionCategories()
   {
-    return new String[]{fPositionCategory};
+    return new String[] { fPositionCategory };
   }
 
   /*
@@ -203,7 +209,7 @@ public class XMLDocumentPartitioner
    * Helper method for tracking the minimal region containg all partition
    * changes. If <code>offset</code> is smaller than the remembered offset,
    * <code>offset</code> will from now on be remembered. If
-   * <code>offset  + length</code> is greater than the remembered end offset,
+   * <code>offset + length</code> is greater than the remembered end offset,
    * it will be remembered from now on.
    * 
    * @param offset the offset
@@ -740,4 +746,5 @@ public class XMLDocumentPartitioner
     }
     return j;
   }
+
 }

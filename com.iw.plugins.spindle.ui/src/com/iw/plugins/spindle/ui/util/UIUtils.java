@@ -26,13 +26,8 @@
 
 package com.iw.plugins.spindle.ui.util;
 
-import java.util.StringTokenizer;
-
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -50,6 +45,8 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.xmen.internal.ui.text.ITypeConstants;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -60,42 +57,16 @@ import com.iw.plugins.spindle.editors.XMLFormattingStrategy;
  * Access to features exposed by the JDT UI plugin
  * 
  * @author glongman@intelligentworks.com
- * 
+ *  
  */
 public class UIUtils
 {
-  public static int getImportNumberThreshold()
-  {
-    IPreferenceStore prefs = JavaPlugin.getDefault().getPreferenceStore();
-    int threshold = prefs.getInt(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
-    if (threshold < 0)
-    {
-      threshold = Integer.MAX_VALUE;
-    }
-    return threshold;
-  }
 
-  public static String[] getImportOrderPreference()
+  public static XMLDocumentPartitioner createXMLStructurePartitioner()
   {
-    IPreferenceStore prefs = JavaPlugin.getDefault().getPreferenceStore();
-    String str = prefs.getString(PreferenceConstants.ORGIMPORTS_IMPORTORDER);
-    if (str != null)
-    {
-      return unpackOrderList(str);
-    }
-    return new String[0];
-  }
-
-  private static String[] unpackOrderList(String str)
-  {
-    StringTokenizer tok = new StringTokenizer(str, ";");
-    int nTokens = tok.countTokens();
-    String[] res = new String[nTokens];
-    for (int i = 0; i < nTokens; i++)
-    {
-      res[i] = tok.nextToken();
-    }
-    return res;
+    return new XMLDocumentPartitioner(
+        XMLDocumentPartitioner.createScanner(),
+        ITypeConstants.TYPES);
   }
 
   public static IEditorPart getEditorFor(IResourceWorkspaceLocation location)
@@ -223,7 +194,7 @@ public class UIUtils
   {
     XMLContentFormatter formatter = new XMLContentFormatter(
         new XMLFormattingStrategy(),
-        new String[]{DefaultPartitioner.CONTENT_TYPES_CATEGORY},
+        new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY },
         UIPlugin.getDefault().getPreferenceStore());
     formatter.format(document, new Region(0, document.getLength()));
   }

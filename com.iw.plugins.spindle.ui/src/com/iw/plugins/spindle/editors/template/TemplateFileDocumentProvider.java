@@ -27,9 +27,11 @@
 package com.iw.plugins.spindle.editors.template;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IFileEditorInput;
 
+import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.documentsAndModels.FileDocumentModelProvider;
 
 /**
@@ -39,6 +41,9 @@ import com.iw.plugins.spindle.editors.documentsAndModels.FileDocumentModelProvid
 public class TemplateFileDocumentProvider extends FileDocumentModelProvider
 {
 
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createAnnotationModel(java.lang.Object)
+   */
   protected IAnnotationModel createAnnotationModel(Object element) throws CoreException
   {
     if (element instanceof IFileEditorInput)
@@ -47,5 +52,15 @@ public class TemplateFileDocumentProvider extends FileDocumentModelProvider
     }
 
     return super.createAnnotationModel(element);
+  }
+  
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.documentsAndModels.StorageDocumentModelProvider#getSyntaxPartitioner()
+   */
+  protected IDocumentPartitioner getSyntaxPartitioner()
+  {
+    return UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
   }
 }

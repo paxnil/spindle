@@ -212,6 +212,8 @@ public class SpecConfiguration extends BaseSourceConfiguration
 
     reconciler.setDamager(dr, XMLPartitionScanner.XML_CDATA);
     reconciler.setRepairer(dr, XMLPartitionScanner.XML_CDATA);
+    
+    reconciler.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
     return reconciler;
   }

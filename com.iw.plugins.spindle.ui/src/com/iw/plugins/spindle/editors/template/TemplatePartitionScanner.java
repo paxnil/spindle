@@ -28,10 +28,10 @@ import org.eclipse.jface.text.rules.Token;
 
 /**
  * 
- * An extension of XMLPartition scanner that picks up jwcid attributes for Tapestry.
+ * An extension of XMLPartition scanner that picks up jwcid attributes for
+ * Tapestry.
  * 
- * @see#getNextTagToken()
- * 
+ * @see#getNextTagToken()  
  */
 public class TemplatePartitionScanner implements IPartitionTokenScanner
 {
@@ -179,7 +179,7 @@ public class TemplatePartitionScanner implements IPartitionTokenScanner
           return getToken(null);
 
         case '<' :
-          if (fLength == 0 || fParsedtd || isInternal())
+          if (fParsedtd || isInternal())
           {
             switch (read())
             {
@@ -630,9 +630,7 @@ public class TemplatePartitionScanner implements IPartitionTokenScanner
       fState = isContinuationPartition(document, offset) ? STATE_TAG : STATE_DEFAULT;
     } else if (contentType == XML_DECL)
     {
-      //            fState = isContinuationPartition(document, offset) ? STATE_DECL :
-      // STATE_DEFAULT;
-      fState = STATE_DEFAULT;
+      fState = isContinuationPartition(document, offset) ? STATE_DECL : STATE_DEFAULT;
     } else if (contentType == DTD_INTERNAL || contentType == DTD_INTERNAL_PI
         || contentType == DTD_INTERNAL_DECL || contentType == DTD_INTERNAL_COMMENT)
     {

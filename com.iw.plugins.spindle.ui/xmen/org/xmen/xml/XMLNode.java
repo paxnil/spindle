@@ -213,12 +213,14 @@ public class XMLNode extends TypedPosition
   {
     for (int i = 0; i < children.size(); i++)
     {
-      if (((XMLNode) children.get(i)).getOffset() > childArtifact.getOffset())
+      if (((XMLNode) children.get(i)).getOffset() > childArtifact.getOffset()) {
         children.add(i, childArtifact);
+        break;
+      }
 
     }
-    //      if (!children.contains(childArtifact))
-    children.add(childArtifact);
+    if (!children.contains(childArtifact))
+      children.add(childArtifact);
   }
 
   public List getChildrenAfter(XMLNode child)

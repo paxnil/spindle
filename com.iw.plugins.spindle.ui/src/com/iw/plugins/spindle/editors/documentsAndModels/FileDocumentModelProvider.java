@@ -30,15 +30,16 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
+import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.IDocumentPartitionerExtension2;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.internal.ui.text.XMLReconciler;
 
-import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.template.TemplateTextTools;
+import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
  * Document provider for xml files that have a model
@@ -47,9 +48,8 @@ import com.iw.plugins.spindle.editors.template.TemplateTextTools;
  * @version $Id: FileDocumentModelProvider.java,v 1.1.2.1 2004/06/22 12:13:52
  *          glongman Exp $
  */
-public class FileDocumentModelProvider extends FileDocumentProvider
-    implements
-      IXMLModelProvider
+public abstract class FileDocumentModelProvider extends FileDocumentProvider implements
+    IXMLModelProvider
 {
   private Map fModelMap = new HashMap();
 
@@ -98,18 +98,26 @@ public class FileDocumentModelProvider extends FileDocumentProvider
   private Map createParitionerMap()
   {
     Map result = new HashMap();
-    TemplateTextTools tools = UIPlugin.getDefault().getTemplateTextTools();
 
-    DefaultPartitioner syntaxPartitioner = tools.createXMLPartitioner();
-    result.put(syntaxPartitioner.getManagingPositionCategories()[0], syntaxPartitioner);
+    IDocumentPartitioner syntaxPartitioner = getSyntaxPartitioner();
+    if (syntaxPartitioner instanceof IDocumentPartitionerExtension2)
+    {
+      result.put(((IDocumentPartitionerExtension2) syntaxPartitioner)
+          .getManagingPositionCategories()[0], syntaxPartitioner);
+    } else
+    {
+      result.put(IDocumentExtension3.DEFAULT_PARTITIONING, syntaxPartitioner);
+    }
 
-    XMLDocumentPartitioner structureParitioner = tools.createXMLStructurePartitioner();
+    XMLDocumentPartitioner structureParitioner = UIUtils.createXMLStructurePartitioner();
     result.put(
         structureParitioner.getManagingPositionCategories()[0],
         structureParitioner);
 
     return result;
   }
+
+  protected abstract IDocumentPartitioner getSyntaxPartitioner();
 
   /*
    * (non-Javadoc)

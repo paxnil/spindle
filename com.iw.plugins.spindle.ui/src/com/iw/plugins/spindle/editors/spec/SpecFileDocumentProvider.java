@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -49,7 +50,7 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.core.util.XMLUtil;
-import com.iw.plugins.spindle.editors.template.TemplateFileDocumentProvider;
+import com.iw.plugins.spindle.editors.documentsAndModels.FileDocumentModelProvider;
 
 /**
  * Document provider for Tapestry Specs that come from workbench files
@@ -61,7 +62,7 @@ import com.iw.plugins.spindle.editors.template.TemplateFileDocumentProvider;
  * @version $Id: SpecFileDocumentProvider.java,v 1.6 2003/12/13 14:43:12
  *          glongman Exp $
  */
-public class SpecFileDocumentProvider extends TemplateFileDocumentProvider
+public class SpecFileDocumentProvider extends FileDocumentModelProvider
 {
   public static String DEFAULT_ENCODING = "UTF-8";
 
@@ -80,7 +81,15 @@ public class SpecFileDocumentProvider extends TemplateFileDocumentProvider
 
     return super.createAnnotationModel(element);
   }
-
+  
+  /* (non-Javadoc)
+   * @see com.iw.plugins.spindle.editors.documentsAndModels.FileDocumentModelProvider#getSyntaxPartitioner()
+   */
+  protected IDocumentPartitioner getSyntaxPartitioner()
+  {    
+    return UIPlugin.getDefault().getXMLTextTools().createXMLPartitioner();
+  }
+  
   protected boolean setDocumentContent(
       IDocument document,
       IEditorInput editorInput,
