@@ -3,7 +3,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.1.4"
+   version="0.1.5"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -41,29 +41,7 @@
                value="org.eclipse.jdt.core.javanature">
          </filter>
       </page>
-   </extension>   
-   <!-- TODO remove no longer required
-   <extension
-         point="org.eclipse.ui.decorators">
-      <decorator
-            lightweight="true"
-            location="TOP_RIGHT"
-            adaptable="true"
-            label="Indicator for Tapestry Projects"
-            state="true"
-            class="com.iw.plugins.spindle.ui.decorators.ProjectDecorator"
-            id="com.iw.plugins.spindle.ui.projectDecorator">
-         <description>
-            Indicates projects that have the Tapestry nature
-         </description>
-         <enablement>
-            <objectClass
-                  name="org.eclipse.core.resources.IProject">
-            </objectClass>
-         </enablement>
-      </decorator>
-   </extension>
-   -->
+   </extension>     
    <extension
          point="org.eclipse.ui.decorators">
       <decorator

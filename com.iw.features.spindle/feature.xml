@@ -2,7 +2,7 @@
 <feature
       id="com.iw.features.spindle"
       label="Spindle 3, an Eclipse Plugin for Tapestry"
-      version="3.1.4"
+      version="3.1.5"
       provider-name="Intelligent Works Inc"
       image="spindle.gif">
 
@@ -12,7 +12,7 @@ Tapestry Web Components (http://jakarta.apache.org/tapestry).
    </description>
 
    <copyright>
-      Copyright 2003 Intelligent Works Incorporated
+      Copyright 2004 Geoff Longman, Don Cuthbertson
 All Rights Reserved
    </copyright>
 
@@ -90,12 +90,12 @@ All Rights Reserved
          id="com.iw.plugins.spindle.core"
          download-size="0"
          install-size="0"
-         version="0.1.4"/>
+         version="0.1.5"/>
 
    <plugin
          id="com.iw.plugins.spindle.ui"
          download-size="0"
          install-size="0"
-         version="0.1.4"/>
+         version="0.1.5"/>
 
 </feature>
