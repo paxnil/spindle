@@ -89,12 +89,13 @@ public abstract class FormatWorker
         info = new LineInfo(textOffset + offset, text.substring(offset, endAttr), 0);
         chunks.add(info);
         offset += info.data.length();
-        totalLength += 1 + attr.length;
+        totalLength += 1 + info.testTrim().length();
       }
 
       //add the remaining (should be the closeing braket/slashbraket).
       info = new LineInfo(textOffset + offset, text.substring(offset, text.length()), 0);
       chunks.add(info);
+      totalLength += info.testTrim().length();
 
       iterator = chunks.listIterator();
     }
@@ -151,6 +152,17 @@ public abstract class FormatWorker
       {
         dataOffset += i;
         data = data.substring(i, data.length());
+      }
+      return data;
+    }
+
+    public String testTrim()
+    {
+      int i = 0;
+      for (; i < data.length() && data.charAt(i) <= ' '; i++);
+      if (i > 0)
+      {
+        return data.substring(i, data.length());
       }
       return data;
     }
@@ -367,27 +379,27 @@ public abstract class FormatWorker
    */
   protected int writeColumns(int columnCount, StringBuffer buffer)
   {
-  
+
     if (fPreferences.useSpacesInsteadOfTabs())
     {
       for (int i = 0; i < columnCount; i++)
         buffer.append(' ');
-  
+
       return columnCount;
     } else
     {
       int tabSpaces = fPreferences.getTabWidth();
       int tabs = columnCount / tabSpaces;
       int spaces = columnCount % tabSpaces;
-  
+
       for (int i = 0; i < tabs; i++)
         buffer.append('\t');
       for (int i = 0; i < spaces; i++)
         buffer.append(' ');
-  
+
       return tabs + spaces;
     }
-  
+
   }
 
   /**
@@ -400,20 +412,20 @@ public abstract class FormatWorker
    */
   protected int writeIndent(int indentCount, StringBuffer buffer)
   {
-  
+
     if (fPreferences.useSpacesInsteadOfTabs())
     {
       int length = indentCount * fPreferences.getTabWidth();
       for (int i = 0; i < length; i++)
         buffer.append(' ');
-  
+
       return length;
     } else
-  
+
     {
       for (int i = 0; i < indentCount; i++)
         buffer.append('\t');
-  
+
       return indentCount;
     }
   }
