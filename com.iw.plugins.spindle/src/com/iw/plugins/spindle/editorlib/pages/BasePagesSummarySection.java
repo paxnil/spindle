@@ -53,6 +53,7 @@ import com.iw.plugins.spindle.editors.SummaryHTMLViewer;
 import com.iw.plugins.spindle.editors.SummarySourceViewer;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public abstract class BasePagesSummarySection
@@ -190,9 +191,15 @@ public abstract class BasePagesSummarySection
   protected abstract ILibrarySpecification getSpec();
 
   public void sectionChanged(FormSection source, int changeType, Object changeObject) {
-    // this can only come from the ComponentAliasSection and it can only be
-    // that an alias was selected! or null if the selection was cleared   
-    selectedPage = (String) changeObject;
+   
+    if (changeObject instanceof IIdentifiable) {
+    	
+      selectedPage = ((IIdentifiable) changeObject).getIdentifier();
+      
+    } else {
+
+      selectedPage = (String) changeObject;
+    }
     updateSummary();
   }
 
@@ -262,13 +269,13 @@ public abstract class BasePagesSummarySection
         resolveFailed(specificationPath);
 
       }
-      
+
       IStorage[] found = lookup.findComponent(specificationPath);
-      
+
       if (found == null || found.length == 0) {
-      	
-      	found = lookup.findPage(specificationPath);
-      	
+
+        found = lookup.findPage(specificationPath);
+
       }
 
       if (found == null || found.length != 1) {
