@@ -88,47 +88,52 @@ public class OrderPreservingMapTests extends TestCase
     * @author bgarson
     * @return
     */
-    
-    
-    public void testValues(){
+
+    public void testValues()
+    {
         Map map = createDefaultMap();
         Map map2 = createDefaultMap();
-        if(!(map.values().containsAll(map2.values())))
+        if (!(map.values().containsAll(map2.values())))
         {
             fail("this should have passed");
         }
-        
+
         //create a new map
         OrderPreservingMap map3 = new OrderPreservingMap();
-        for(int i=0; i < defaultKeys.length ; i++)
+        for (int i = 0; i < defaultKeys.length; i++)
         {
-            map3.put(defaultValues[i], defaultKeys[i]);    
+            // TODO Did you notice that you are putting the values in as keys and the keys in as values?
+            // bad style. You could make new String arrays called map3keys, map3values   
+            // String [] map3Keys = {"a","b", yadda yadda};
+            // String [] map3Values = {"1","2", yadda yadda};       
+            map3.put(defaultValues[i], defaultKeys[i]);
         }
-        
+
         //test to make sure the values aren't the same
-        if((map.values().containsAll(map3.values())))
+        if ((map.values().containsAll(map3.values())))
         {
             fail("this should have failed");
         }
         map.clear();
-        if((map.values().containsAll(map2.values()))){
+        if ((map.values().containsAll(map2.values())))
+        {
             fail("this should have failed");
         }
     }
-    
-    
-    public void testIsEmpty(){
+
+    public void testIsEmpty()
+    {
         OrderPreservingMap mapInOrder = new OrderPreservingMap();
-        if(!mapInOrder.isEmpty())
+        if (!mapInOrder.isEmpty())
         {
             fail("map should have been empty");
         }
-        
-        for (int i=0; i<defaultKeys.length; i++)
+
+        for (int i = 0; i < defaultKeys.length; i++)
         {
-            mapInOrder.put(defaultKeys, defaultValues);   
+            mapInOrder.put(defaultKeys, defaultValues);
         }
-        if(mapInOrder.isEmpty())
+        if (mapInOrder.isEmpty())
         {
             fail("map should have 5 values in it");
         }
@@ -136,22 +141,20 @@ public class OrderPreservingMapTests extends TestCase
         String[] k1 = { "a", "b", "c" };
         String[] v1 = { "A", "B", "C" };
         Map map = createMap(k1, v1);
-        
+
         mapInOrder.putAll(map);
         assertTrue(mapInOrder.size() == 3);
     }
 
     public void testEntrySet()
     {
-       OrderPreservingMap mapresult = new OrderPreservingMap();
-      try
-    {
-         mapresult.entrySet();
-         fail("we expected this to fail but it didn't");
-    } catch (RuntimeException e)
-    {
-
-    }
+        OrderPreservingMap mapresult = new OrderPreservingMap();
+        try
+        {
+            mapresult.entrySet();
+            fail("we expected this to fail but it didn't");
+        } catch (RuntimeException e)
+        {}
     }
 
     private void checkKeyValueOrder(Map map, String[] keys, String[] values)

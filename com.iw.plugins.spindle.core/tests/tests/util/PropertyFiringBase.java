@@ -32,7 +32,10 @@ import java.beans.PropertyChangeListener;
 import junit.framework.TestCase;
 
 /**
- *  TODO Add Type comment
+ *  Base class for OrderPreserving Collection classes
+ * 
+ *  Constructor is protected as this is a base class and should not
+ *  be invoked by Junit.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -48,6 +51,17 @@ public abstract class PropertyFiringBase extends TestCase
         }
     }
 
+
+    /**
+     *  A Listener that sublcasses of PropertyFiringBase can use.
+     * 
+     *  By Default the listener is passed an object that it will verify
+     *  as the source field of any PropertyChangeEvents it recieves.
+     * 
+     *  Users can subclass this to add more checks!
+     * 
+     * @author glongman@intelligentworks.com
+     */
     protected class TestListener implements PropertyChangeListener
     {
         String owner;
@@ -79,6 +93,19 @@ public abstract class PropertyFiringBase extends TestCase
         }
     };
 
+    /**
+     *  A premade Listener that takes as parameters all the values
+     *  it expects to see in any PropertyChangeEvents it recieves.
+     * 
+     *  If the recieved events's values do not match the OneShot's exactly,
+     *  this class will force the test to fail.
+     * 
+     *  Only useful for one shot as the expected values are set in the
+     *  constructor and cannot be changed.
+     * 
+     * @author glongman@intelligentworks.com
+     * @version $Id$
+     */
     protected class OneShotListener extends TestListener
     {
 
