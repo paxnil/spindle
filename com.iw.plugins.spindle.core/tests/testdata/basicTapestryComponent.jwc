@@ -6,10 +6,9 @@
 
 
 <component-specification class="orca.templates.productLine.productLineDetailsEdit" allow-body="yes" allow-informal-parameters="yes">
-
+ <description>$Id$</description>
 
     <component id="ApplyButton" type="Submit"/>
-<!-- test comment -->
     <component id="CancelButton" type="Submit">
         <binding name="listener" expression='listeners.cancel'/>
     </component>
@@ -26,7 +25,7 @@
 
     <component id="hideBorder" type="Any">
         <static-binding name="border">0</static-binding>
-        <static-binding name="element"><![CDATA[   $Id$   ]]><![CDATA[   $Id$   ]]></static-binding>
+        <static-binding name="element">tr</static-binding>
     </component>
 
     <component id="windowContents" type="RenderContent"/>

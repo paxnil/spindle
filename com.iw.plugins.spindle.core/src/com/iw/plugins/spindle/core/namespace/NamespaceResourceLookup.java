@@ -53,16 +53,7 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
  */
 public class NamespaceResourceLookup
 {
-    public static String[] i10n;
-
-    static {
-        Locale[] available = Locale.getAvailableLocales();
-        i10n = new String[available.length];
-        for (int i = 0; i < available.length; i++)
-        {
-            i10n[i] = available[i].toString();
-        }
-    }
+    
     
     /**
     * Accept flag for specifying .jwc files.

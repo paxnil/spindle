@@ -101,7 +101,7 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
         if (obj.getClass().equals(getClass()))
         {
             AbstractResourceWorkspaceLocation other = (AbstractResourceWorkspaceLocation) obj;            
-            return this.root.equals(other.root) && this.path.equals(other.path);            
+            return this.root.equals(other.root) && this.path.equals(other.path) && this.name.equals(other.name);            
         }
 
         return false;

@@ -24,36 +24,29 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+package tests.perl;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- *  RUNS ALL THE TESTS!
+ *  RUNS ALL THE Perl tests
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class CoreTestSuite
+public class AllTests
 {
 
     public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(CoreTestSuite.class);
-    }
+     {}
 
-    public static Test suite()
-    {
-        TestSuite suite = new TestSuite("Test for eveything");
-        //$JUnit-BEGIN$
-        suite.addTest(tests.TapestryPullParser.AllTests.suite());
-        suite.addTest(tests.TapestryDOMParser.AllTests.suite());
-        suite.addTest(tests.util.AllTests.suite());
-        suite.addTest(tests.multirun.AllTests.suite());
-        suite.addTest(tests.Parser.AllTests.suite());
-        suite.addTest(tests.Scanners.AllTests.suite());
-        suite.addTest(tests.perl.AllTests.suite());
-        
-        //$JUnit-END$
-        return suite;
-    }
+     public static Test suite()
+     {
+         TestSuite suite = new TestSuite("Test for tests.Parser");
+         //$JUnit-BEGIN$
+         suite.addTest(new TestSuite(PerlTest.class));
+         //$JUnit-END$
+         return suite;
+     }
 }

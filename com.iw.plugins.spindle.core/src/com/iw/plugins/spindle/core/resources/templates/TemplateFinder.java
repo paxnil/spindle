@@ -28,7 +28,10 @@ package com.iw.plugins.spindle.core.resources.templates;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import org.apache.oro.text.PatternCacheLRU;
+import org.apache.oro.text.perl.Perl5Util;
 import org.apache.tapestry.Tapestry;
 import org.apache.tapestry.engine.ITemplateSource;
 import org.apache.tapestry.spec.AssetType;
@@ -54,12 +57,35 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
  */
 public class TemplateFinder implements IResourceLocationAcceptor
 {
-    List findResults = new ArrayList();
-    String extension;
-    IProblemCollector problemCollector;
-    TapestryProject tproject;
+
+    public static Perl5Util Perl;
+    public static final String PatternPrefix = "/^";
+    public static String PatternSuffix;
+
+    static {
+        Locale[] all = Locale.getAvailableLocales();
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < all.length; i++)
+        {
+            buffer.append("_" + all[i].toString());
+            if (i < all.length - 1)
+            {
+                buffer.append('|');
+            }
+        }
+
+        PatternSuffix = "(" + buffer.toString() + "){0,1}$/i";
+        Perl = new Perl5Util(new PatternCacheLRU(100));
+    }
+
+    private List findResults = new ArrayList();
+    private String extension;
+    private IProblemCollector problemCollector;
+    private TapestryProject tproject;
 
     private String templateBaseName;
+    private String perlExpression;
+
     public IResourceWorkspaceLocation[] getTemplates(
         TapestryProject tproject,
         IComponentSpecification specification,
@@ -119,6 +145,7 @@ public class TemplateFinder implements IResourceLocationAcceptor
     {
         AssetType type = templateAsset.getType();
         String templatePath = templateAsset.getPath();
+        IResourceWorkspaceLocation templateLocation = null;
         if (type == AssetType.EXTERNAL)
         {
             addProblem(
@@ -138,12 +165,12 @@ public class TemplateFinder implements IResourceLocationAcceptor
                 return;
             }
             IResourceWorkspaceLocation contextRoot = (IResourceWorkspaceLocation) tproject.getWebContextLocation();
-            IResourceWorkspaceLocation templateLocation = null;
+
             if (contextRoot != null)
             {
                 templateLocation = (IResourceWorkspaceLocation) contextRoot.getRelativeLocation(templatePath);
             }
-            if (templateLocation != null || !templateLocation.exists())
+            if (templateLocation == null || !templateLocation.exists())
             {
                 addProblem(
                     IProblem.ERROR,
@@ -151,6 +178,22 @@ public class TemplateFinder implements IResourceLocationAcceptor
                     TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
                 return;
             }
+        }
+        if (type == AssetType.PRIVATE)
+        {
+            templateLocation =
+                (IResourceWorkspaceLocation) specification.getSpecificationLocation().getRelativeLocation(templatePath);
+            if (templateLocation == null || !templateLocation.exists())
+            {
+                addProblem(
+                    IProblem.ERROR,
+                    ((ISourceLocationInfo) templateAsset.getLocation()).getAttributeSourceLocation("resource-path"),
+                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
+                return;
+            }
+        }
+        if (templateLocation != null)
+        {
             findResults.add(templateLocation);
         }
     }
@@ -171,7 +214,15 @@ public class TemplateFinder implements IResourceLocationAcceptor
         {
             return;
         }
-        location.lookup(this);
+        // need to ensure the base template exists.
+        // if it does we look for localized versions of it!
+        IResourceWorkspaceLocation baseLocation =
+            (IResourceWorkspaceLocation) location.getRelativeLocation(templateBaseName + "." + extension);
+        if (baseLocation.exists())
+        {
+            perlExpression = PatternPrefix + templateBaseName + PatternSuffix;
+            location.lookup(this);
+        }
     }
 
     private void addProblem(int severity, ISourceLocation location, String message)
@@ -195,20 +246,11 @@ public class TemplateFinder implements IResourceLocationAcceptor
                 foundName = name.substring(0, dotx);
                 foundExtension = name.substring(dotx + 1);
             }
-            if (extension.equals(foundExtension) && match(foundName))
+            if (extension.equals(foundExtension))
             {
-
-                findResults.add(location);
+                if (Perl.match(perlExpression, foundName))
+                    findResults.add(location);
             }
-        }
-        return true;
-    }
-
-    private boolean match(String foundName)
-    {
-        if (foundName.startsWith(templateBaseName))
-        {
-            return false;
         }
         return true;
     }
