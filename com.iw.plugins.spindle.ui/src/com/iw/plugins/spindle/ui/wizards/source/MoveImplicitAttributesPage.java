@@ -67,6 +67,7 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.scanning.BaseValidator;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.spec.PluginBindingSpecification;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.core.util.XMLUtil;
@@ -77,8 +78,6 @@ import com.iw.plugins.spindle.ui.widgets.SectionWidget;
 
 /**
  * @author gwl
- * @version $Id: MoveImplicitAttributesPage.java,v 1.2 2004/01/09 18:41:42
- *          glongman Exp $
  * 
  * Copyright 2003, Intelligent Works Inc. All Rights Reserved.
  */
@@ -185,7 +184,7 @@ public class MoveImplicitAttributesPage extends WizardPage
           newValue,
           SpecificationParser.COMPONENT_ID_PATTERN,
           "SpecificationParser.invalid-component-id",
-          0);
+          0, IProblem.NOT_QUICK_FIXABLE);
     } catch (ScannerException e)
     {
       status.setError(e.getMessage());
