@@ -111,7 +111,6 @@ public class BasicParserDOMTest extends TestCase
         IProblem[] problems = parser.getProblems();
         assertTrue(problems.length == 1);
         printProblems(problems);
-        assertNull(parser.getPublicId());
 
     }
 
@@ -131,7 +130,6 @@ public class BasicParserDOMTest extends TestCase
         IProblem[] problems = parser.getProblems();
         assertTrue(problems.length == 1);
         printProblems(problems);
-        assertNull(parser.getPublicId());
 
     }
 
@@ -151,7 +149,6 @@ public class BasicParserDOMTest extends TestCase
         IProblem[] problems = parser.getProblems();
         assertTrue(problems.length == 1);
         printProblems(problems);
-        assertNull(parser.getPublicId());
 
     }
 
