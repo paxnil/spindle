@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.editorjwc;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.eclipse.core.internal.plugins.IModel;
+import net.sf.tapestry.spec.AssetType;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -53,11 +53,11 @@ import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginAssetSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.util.JavaListSelectionProvider;
-import net.sf.tapestry.spec.AssetType;
 
 public class AssetsEditorSection extends AbstractPropertySheetEditorSection {
 
@@ -222,8 +222,8 @@ public class AssetsEditorSection extends AbstractPropertySheetEditorSection {
         setSelection(this.name);
         return;
       }
-
-      IModel model = (IModel) getFormPage().getModel();
+	  
+      ITapestryModel model = (ITapestryModel) getFormPage().getModel();
       PluginComponentSpecification componentSpec =
         ((TapestryComponentModel) model).getComponentSpecification();
       if ("name".equals(key)) {
