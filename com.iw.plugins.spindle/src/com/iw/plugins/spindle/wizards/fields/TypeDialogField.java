@@ -46,7 +46,6 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 import com.iw.plugins.spindle.util.SpindleStatus;
-import com.iw.plugins.spindle.util.Utils;
 
 public class TypeDialogField extends StringButtonField {
 

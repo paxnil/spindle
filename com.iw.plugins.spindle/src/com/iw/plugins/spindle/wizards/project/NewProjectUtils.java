@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.util.Utils;
 
 /**
  * @author gwl

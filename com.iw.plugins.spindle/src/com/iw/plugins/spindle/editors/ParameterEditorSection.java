@@ -27,7 +27,6 @@ package com.iw.plugins.spindle.editors;
 
 import java.util.Iterator;
 
-import net.sf.tapestry.spec.Direction;
 import org.eclipse.jface.action.Action;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.swt.graphics.Image;

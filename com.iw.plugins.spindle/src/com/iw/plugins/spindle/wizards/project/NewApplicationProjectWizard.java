@@ -26,10 +26,6 @@
 package com.iw.plugins.spindle.wizards.project;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
-import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-
-import com.iw.plugins.spindle.MessageUtil;
 
 public class NewApplicationProjectWizard extends AbstractNewProjectWizard {
 

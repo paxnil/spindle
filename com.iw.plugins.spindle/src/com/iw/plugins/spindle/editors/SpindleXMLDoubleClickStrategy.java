@@ -10,6 +10,7 @@ import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.pde.internal.ui.editor.text.PDEPartitionScanner;
+import sun.security.krb5.internal.i;
 
 /**
  * @author gwl

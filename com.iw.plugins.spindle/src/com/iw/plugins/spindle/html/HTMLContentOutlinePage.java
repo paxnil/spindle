@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -61,7 +60,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -75,7 +73,6 @@ import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editorjwc.JWCMultipageEditor;
 import com.iw.plugins.spindle.editorjwc.components.ComponentsFormPage;
-import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
@@ -213,7 +210,7 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
     TreeViewer viewer = (TreeViewer) getTreeViewer();
     IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 
-    IFile file = findRelatedComponent();
+    IFile file = Utils.findRelatedComponent(documentFile);
 
     IStructuredSelection canCreateSelection = filterSelection(file, selection);
 
@@ -323,31 +320,7 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
 
   }
 
-  private IFile findRelatedComponent() {
-    if (documentFile != null) {
-
-      IContainer parent = documentFile.getParent();
-      String name = documentFile.getFullPath().removeFileExtension().lastSegment();
-
-      String fullName = name + ".jwc";
-      IFile componentResource = (IFile) parent.findMember(fullName);
-
-      if (componentResource == null) {
-
-        fullName = name + ".page";
-        componentResource = (IFile) parent.findMember(fullName);
-
-      }
-
-      if (componentResource != null && componentResource.exists()) {
-
-        return componentResource;
-
-      }
-    }
-    return null;
-  }
-
+  
   private String getJWCID(ITypedRegion region) {
     try {
       Position p = findJWCID(region);
@@ -519,7 +492,7 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
       } catch (Exception e) {
       }
 
-      if (jwcid != null && alreadyHasJWCID(jwcid, findRelatedComponent())) {
+      if (jwcid != null && alreadyHasJWCID(jwcid, Utils.findRelatedComponent(documentFile))) {
 
         return jwcImage;
 
