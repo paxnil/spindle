@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
-   version="0.0.34"
+   version="0.0.36"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.core.TapestryCore">
 
@@ -40,10 +40,10 @@
       <library name="ognl-2.6.3.jar">
          <export name="*"/>
       </library>
-      <library name="tapestry-3.0-beta-3.jar">
+      <library name="tapestry-3.0-beta-4.jar">
          <export name="*"/>
       </library>
-      <library name="tapestry-contrib-3.0-beta-3.jar">
+      <library name="tapestry-contrib-3.0-beta-4.jar">
          <export name="*"/>
       </library>
       <library name="bsf-2.3.0.jar">
@@ -52,13 +52,14 @@
       <library name="dtdparser.jar">
          <export name="*"/>
       </library>
+      <library name="commons-codec-1.2.jar"/>
    </runtime>
    <requires>
       <import plugin="org.eclipse.core.resources" export="true"/>
       <import plugin="org.eclipse.jdt.core" export="true"/>
       <import plugin="org.eclipse.ui" export="true"/>
       <import plugin="org.apache.xerces" export="true"/>
-      <import plugin="org.eclipse.jface.text"/>            
+      <import plugin="org.eclipse.jface.text"/>
    </requires>
 
 

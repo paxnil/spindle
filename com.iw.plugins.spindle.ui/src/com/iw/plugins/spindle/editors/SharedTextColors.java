@@ -1,13 +1,14 @@
 
 package com.iw.plugins.spindle.editors;
 
-import java.util.Iterator;
-import org.eclipse.swt.widgets.Display;
-import java.util.Map;
 import java.util.HashMap;
-import org.eclipse.swt.graphics.Color;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.eclipse.jface.text.source.ISharedTextColors;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 
 
 public class SharedTextColors implements ISharedTextColors {

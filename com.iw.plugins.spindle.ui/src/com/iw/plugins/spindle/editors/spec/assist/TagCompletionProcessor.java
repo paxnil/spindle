@@ -45,8 +45,8 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.DTDProposalGenerator;
+import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 
 /**

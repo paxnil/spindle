@@ -14,6 +14,9 @@ $Id$
 **********************************************************************/
 package com.iw.plugins.spindle.editors.template;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.sf.solareclipse.xml.internal.ui.text.XMLPartitionScanner;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -22,9 +25,6 @@ import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 

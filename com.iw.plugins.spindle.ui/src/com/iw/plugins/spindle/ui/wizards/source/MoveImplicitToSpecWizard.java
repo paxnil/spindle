@@ -199,7 +199,7 @@ public class MoveImplicitToSpecWizard extends Wizard
                 UIPlugin.log(e);
             }
         }
- 
+
         fOriginalTemplateDocument = fTemplateEditor.getDocumentProvider().getDocument(fTemplateEditor.getEditorInput());
     }
 
@@ -261,30 +261,31 @@ public class MoveImplicitToSpecWizard extends Wizard
         return true;
     }
 
-//    /* (non-Javadoc)
-//     * @see org.eclipse.jface.wizard.IWizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
-//     */
-//    public IWizardPage getNextPage(IWizardPage page)
-//    {
-//        IWizardPage nextPage = super.getNextPage(page);
-//        if (nextPage != null && nextPage == fPreviewPage)
-//        {
-//            performModifications();
-//            fPreviewPage.refresh();
-//        }
-//        return nextPage;
-//    }
+    //    /* (non-Javadoc)
+    //     * @see org.eclipse.jface.wizard.IWizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
+    //     */
+    //    public IWizardPage getNextPage(IWizardPage page)
+    //    {
+    //        IWizardPage nextPage = super.getNextPage(page);
+    //        if (nextPage != null && nextPage == fPreviewPage)
+    //        {
+    //            performModifications();
+    //            fPreviewPage.refresh();
+    //        }
+    //        return nextPage;
+    //    }
 
-   /**
-    * called when moving from the preview back to the first page.
-    * clean up any mods.
-    */
-   public void clearModifications() {
-       fModifiedSpecDocument = null;
-       fSpecCommand = null;
-       fModifiedTemplateDocument = null;
-       fTemplateCommand = null;
-   }
+    /**
+     * called when moving from the preview back to the first page.
+     * clean up any mods.
+     */
+    public void clearModifications()
+    {
+        fModifiedSpecDocument = null;
+        fSpecCommand = null;
+        fModifiedTemplateDocument = null;
+        fTemplateCommand = null;
+    }
 
     /**
      *  called when moving from the first page to the preview page.
@@ -329,7 +330,7 @@ public class MoveImplicitToSpecWizard extends Wizard
 
     private void doFinish(IProgressMonitor monitor)
     {
-        if (fModifiedSpecDocument == null) 
+        if (fModifiedSpecDocument == null)
             performModifications();
         try
         {
@@ -433,7 +434,7 @@ public class MoveImplicitToSpecWizard extends Wizard
         boolean emptyTag = sourceInfo.isEmptyTag();
         int initialIndent = 0;
         ISourceLocation startLocation = sourceInfo.getStartTagSourceLocation();
-        result.offset = startLocation.getCharEnd()+1;
+        result.offset = startLocation.getCharEnd() + 1;
         result.length = 0;
 
         if (found != fRelatedSpec)
@@ -443,7 +444,7 @@ public class MoveImplicitToSpecWizard extends Wizard
             if (!emptyTag)
             {
                 ISourceLocation endLocation = sourceInfo.getEndTagSourceLocation();
-                result.offset = endLocation.getCharEnd()+1;
+                result.offset = endLocation.getCharEnd() + 1;
             }
 
         } else
@@ -482,7 +483,8 @@ public class MoveImplicitToSpecWizard extends Wizard
             id,
             new IndentingWriter(swriter, true, fUseTabIndent, fTabSpaces, initialIndent, lineDelimiter),
             indent,
-            fRelatedSpec.getPublicId(), false);
+            fRelatedSpec.getPublicId(),
+            false);
         return swriter.toString();
     }
 
