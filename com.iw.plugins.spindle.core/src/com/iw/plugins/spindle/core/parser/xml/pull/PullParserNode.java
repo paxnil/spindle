@@ -195,11 +195,12 @@ public class PullParserNode implements Node
     {
         if (attributes != null)
         {
-            int length = xmlAttributes.getLength();
-            if (length > 0)
-            {
-                attributes = new HashMap();
-            }
+            throw new RuntimeException("PPN already has attributes!");
+        }
+        int length = xmlAttributes.getLength();
+        if (length > 0)
+        {
+            attributes = new HashMap();
             QName qname = new QName();
             for (int i = 0; i < length; i++)
             {
@@ -208,6 +209,7 @@ public class PullParserNode implements Node
                 attributes.put(qname.rawname, value);
             }
         }
+
     }
 
     /** 
@@ -374,7 +376,7 @@ public class PullParserNode implements Node
                     }
                 }
             }
-        }        
+        }
         return nextSibling;
     }
 

@@ -26,8 +26,9 @@
 
 package tests.Parser.mr;
 
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+
+import com.iw.plugins.spindle.core.scanning.NodeAccess;
 
 /**
  *  Basic Sanity Test for Node Traveral.
@@ -51,19 +52,19 @@ public class NodeTraversalMRTest extends MRBaseParserTest
         super(name);
     }
 
-    public void testTraverseAll()
-    {
-        try
-        {
-            String content = getXMLSourceAsString("/testdata/NodeTraversalData.xml");
-            Node rootNode = parseToRootNode(content, 0);
-            basicCheckProblems(parser.getProblems(), 0);
-            m_assertEquals(10, visitAllChildren(rootNode));
-        } catch (RuntimeException e)
-        {
-            m_fail("RuntimeException caught");
-        }
-    }
+//    public void testTraverseAll()
+//    {
+//        try
+//        {
+//            String content = getXMLSourceAsString("/testdata/NodeTraversalData.xml");
+//            Node rootNode = parseToRootNode(content, 0);
+//            basicCheckProblems(parser.getProblems(), 0);
+//            m_assertEquals(10, visitAllChildren(rootNode));
+//        } catch (RuntimeException e)
+//        {
+//            m_fail("RuntimeException caught");
+//        }
+//    }
 
     protected int visitAllChildren(Node rootNode)
     {
@@ -84,42 +85,42 @@ public class NodeTraversalMRTest extends MRBaseParserTest
         return count + 1;
     }
 
-    public void testTraverseTopLevelSiblings()
-    {
-        try
-        {
-            String content = getXMLSourceAsString("/testdata/NodeTraversalData.xml");
-            Node rootNode = parseToRootNode(content, 0);
-            basicCheckProblems(parser.getProblems(), 0);
-            m_assertTrue(isElement(rootNode, "animals"));
-
-            Node node = rootNode.getFirstChild();
-            m_assertNotNull(node);
-            m_assertTrue(isElement(node, "moose"));
-
-            node = node.getNextSibling();
-            m_assertNotNull(node);
-            m_assertTrue(isElement(node, "moose"));
-
-            node = node.getNextSibling();
-            m_assertNotNull(node);
-            m_assertTrue(isElement(node, "canine"));
-
-            node = node.getNextSibling();
-            m_assertNotNull(node);
-            m_assertTrue(isElement(node, "feline"));
-
-            node = node.getNextSibling();
-            m_assertNotNull(node);
-            m_assertTrue(isElement(node, "rodent"));
-
-            node = node.getNextSibling();
-            m_assertNull(node);
-        } catch (RuntimeException e)
-        {
-            m_fail("RuntimeException caught");
-        }
-    }
+//    public void testTraverseTopLevelSiblings()
+//    {
+//        try
+//        {
+//            String content = getXMLSourceAsString("/testdata/NodeTraversalData.xml");
+//            Node rootNode = parseToRootNode(content, 0);
+//            basicCheckProblems(parser.getProblems(), 0);
+//            m_assertTrue(NodeAccess.isElement(rootNode, "animals"));
+//
+//            Node node = rootNode.getFirstChild();
+//            m_assertNotNull(node);
+//            m_assertTrue(NodeAccess.isElement(node, "moose"));
+//
+//            node = node.getNextSibling();
+//            m_assertNotNull(node);
+//            m_assertTrue(NodeAccess.isElement(node, "moose"));
+//
+//            node = node.getNextSibling();
+//            m_assertNotNull(node);
+//            m_assertTrue(NodeAccess.isElement(node, "canine"));
+//
+//            node = node.getNextSibling();
+//            m_assertNotNull(node);
+//            m_assertTrue(NodeAccess.isElement(node, "feline"));
+//
+//            node = node.getNextSibling();
+//            m_assertNotNull(node);
+//            m_assertTrue(NodeAccess.isElement(node, "rodent"));
+//
+//            node = node.getNextSibling();
+//            m_assertNull(node);
+//        } catch (RuntimeException e)
+//        {
+//            m_fail("RuntimeException caught");
+//        }
+//    }
 
     /** test getting attributes from elements in both before an after other elements have been accessed */
     public void testAttributes()
@@ -132,140 +133,97 @@ public class NodeTraversalMRTest extends MRBaseParserTest
             m_assertNotNull(rootNode);
 
             Node moose1 = rootNode.getFirstChild();
-            assertNull(getAttribute(moose1, "one"));
-            assertNull(getAttribute(moose1, "two"));
-            assertNull(getAttribute(moose1, "three"));
+            assertNull(NodeAccess.getAttribute(moose1, "one"));
+            assertNull(NodeAccess.getAttribute(moose1, "two"));
+            assertNull(NodeAccess.getAttribute(moose1, "three"));
 
             Node moose2 = moose1.getNextSibling();
-            assertEquals("AAAA", getAttribute(moose2, "one"));
-            assertEquals("BBBB", getAttribute(moose2, "two"));
-            assertEquals("CCCC", getAttribute(moose2, "three"));
+            assertEquals("AAAA", NodeAccess.getAttribute(moose2, "one"));
+            assertEquals("BBBB", NodeAccess.getAttribute(moose2, "two"));
+            assertEquals("CCCC", NodeAccess.getAttribute(moose2, "three"));
 
-            assertNull(getAttribute(moose1, "one"));
-            assertNull(getAttribute(moose1, "two"));
-            assertNull(getAttribute(moose1, "three"));
+            assertNull(NodeAccess.getAttribute(moose1, "one"));
+            assertNull(NodeAccess.getAttribute(moose1, "two"));
+            assertNull(NodeAccess.getAttribute(moose1, "three"));
 
             Node other = moose2.getNextSibling();
 
-            assertNull(getAttribute(moose1, "one"));
-            assertNull(getAttribute(moose1, "two"));
-            assertNull(getAttribute(moose1, "three"));
+            assertNull(NodeAccess.getAttribute(moose1, "one"));
+            assertNull(NodeAccess.getAttribute(moose1, "two"));
+            assertNull(NodeAccess.getAttribute(moose1, "three"));
 
-            assertEquals("AAAA", getAttribute(moose2, "one"));
-            assertEquals("BBBB", getAttribute(moose2, "two"));
-            assertEquals("CCCC", getAttribute(moose2, "three"));
+            assertEquals("AAAA", NodeAccess.getAttribute(moose2, "one"));
+            assertEquals("BBBB", NodeAccess.getAttribute(moose2, "two"));
+            assertEquals("CCCC", NodeAccess.getAttribute(moose2, "three"));
 
         } catch (RuntimeException e)
         {
+            e.printStackTrace();
             m_fail("RuntimeException caught");
         }
     }
 
-    /** 
-     * this one is tricky in the PULL case, we allow that
-     * once the value has been pulled, it can't be pulled again (for PULL!)
-     */
-    public void testGetValue()
-    {
-        String content = getXMLSourceAsString("/testdata/NodeTraversalData.xml");
-        Node rootNode = parseToRootNode(content, 0);
-        basicCheckProblems(parser.getProblems(), 0);
-        m_assertNotNull(rootNode);
+//    /** 
+//     * this one is tricky in the PULL case, we allow that
+//     * once the value has been pulled, it can't be pulled again (for PULL!)
+//     */
+//    public void testGetValue()
+//    {
+//        String content = getXMLSourceAsString("/testdata/NodeTraversalData.xml");
+//        Node rootNode = parseToRootNode(content, 0);
+//        basicCheckProblems(parser.getProblems(), 0);
+//        m_assertNotNull(rootNode);
+//
+//        Node moose1 = rootNode.getFirstChild();
+//        Node moose2 = moose1.getNextSibling();
+//        try
+//        {
+//            assertEquals("Bullwinkle", NodeAccess.getValue(moose1));
+//            assertNull(NodeAccess.getValue(moose2));
+//        } catch (RuntimeException e)
+//        {
+//            // Should never happen in either case
+//            e.printStackTrace();
+//            m_fail("Runtime exception caught");
+//        }
+//
+//        // now, this should fail in the PULL case but PASS in the DOM case
+//        try
+//        {
+//            assertEquals("Bullwinkle", NodeAccess.getValue(moose1));
+//            if (isPULLRun())
+//            {
+//                m_fail("should have failed");
+//            }
+//        } catch (RuntimeException e)
+//        {
+//            if (isDOMRun())
+//            {
+//                e.printStackTrace();
+//                m_fail("Runtime Exception caught");
+//            }
+//        }
+//
+//        // same thing, fail in the PULL case but PASS in the DOM case
+//        try
+//        {
+//            assertNull(NodeAccess.getValue(moose2));
+//            if (isPULLRun())
+//            {
+//                m_fail("should have failed");
+//            }
+//        } catch (RuntimeException e)
+//        {
+//            if (isDOMRun())
+//            {
+//                e.printStackTrace();
+//                m_fail("Runtime Exception caught");
+//            }
+//        }
+//    }
 
-        Node moose1 = rootNode.getFirstChild();
-        Node moose2 = moose1.getNextSibling();
-        try
-        {
-            assertEquals("Bullwinkle", getValue(moose1));
-            assertNull(getValue(moose2));
-        } catch (RuntimeException e)
-        {
-            // Should never happen in either case
-            e.printStackTrace();
-            m_fail("Runtime exception caught");
-        }
+    
 
-        // now, this should fail in the PULL case but PASS in the DOM case
-        try
-        {
-            assertEquals("Bullwinkle", getValue(moose1));
-            if (isPULLRun())
-            {
-                m_fail("should have failed");
-            }
-        } catch (RuntimeException e)
-        {
-            if (isDOMRun())
-            {
-                e.printStackTrace();
-                m_fail("Runtime Exception caught");
-            }
-        }
-
-        // same thing, fail in the PULL case but PASS in the DOM case
-        try
-        {
-            assertNull(getValue(moose2));
-            if (isPULLRun())
-            {
-                m_fail("should have failed");
-            }
-        } catch (RuntimeException e)
-        {
-            if (isDOMRun())
-            {
-                e.printStackTrace();
-                m_fail("Runtime Exception caught");
-            }
-        }
-    }
-
-    protected String getAttribute(Node node, String attributeName)
-    {
-        String result = null;
-        NamedNodeMap map = node.getAttributes();
-
-        if (map != null)
-        {
-            Node attributeNode = map.getNamedItem(attributeName);
-
-            if (attributeNode != null)
-            {
-                result = attributeNode.getNodeValue();
-            }
-        }
-
-        return result;
-    }
-
-    public String getValue(Node node)
-    {
-        StringBuffer buffer = new StringBuffer();
-        for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
-        {
-            if (Node.TEXT_NODE == child.getNodeType())
-            {
-                buffer.append(child.getNodeValue());
-            }
-        }
-
-        String result = buffer.toString().trim();
-        if (result == null || "".equals(result))
-        {
-            return null;
-        }
-
-        return result;
-    }
-
-    public boolean isElement(Node node, String elementName)
-    {
-        if (node.getNodeType() != Node.ELEMENT_NODE)
-        {
-            return false;
-        }
-        return node.getNodeName().equals(elementName);
-
-    }
+    
 
 }

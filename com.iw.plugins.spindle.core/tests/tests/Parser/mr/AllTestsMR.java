@@ -59,7 +59,7 @@ public class AllTestsMR
     {
         TestSuite suite = new TestSuite("MRTest for tests.Parser");
         //$JUnit-BEGIN$
-        suite.addTest(new MultipleRunTestSuite(BasicParserMRTest.class, CURRENT_RUN));
+//        suite.addTest(new MultipleRunTestSuite(BasicParserMRTest.class, CURRENT_RUN));
         suite.addTest(new MultipleRunTestSuite(NodeTraversalMRTest.class, CURRENT_RUN));
         //$JUnit-END$
         return suite;

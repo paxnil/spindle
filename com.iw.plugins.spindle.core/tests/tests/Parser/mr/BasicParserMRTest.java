@@ -70,7 +70,7 @@ public class BasicParserMRTest extends MRBaseParserTest
         Node node = null;
         try
         {
-            node = parseToNode(VALID);
+            node = parseAll(VALID);
         } catch (IOException e)
         {
             m_fail("IOException: " + e.getMessage());
@@ -85,7 +85,7 @@ public class BasicParserMRTest extends MRBaseParserTest
         Node node = null;
         try
         {
-            node = parseToNode(INVALID);
+            node = parseAll(INVALID);
         } catch (IOException e)
         {
             m_fail("IOException: " + e.getMessage());
@@ -100,7 +100,7 @@ public class BasicParserMRTest extends MRBaseParserTest
         Node node = null;
         try
         {
-            node = parseToNode(MALFORMED);
+            node = parseAll(MALFORMED);
         } catch (IOException e)
         {
             m_fail("IOException: " + e.getMessage());
@@ -115,7 +115,8 @@ public class BasicParserMRTest extends MRBaseParserTest
         Node node = null;
         try
         {
-            node = parseToNode(MALFORMED);
+            node = parseAll(MALFORMED);
+            
         } catch (IOException e)
         {
             m_fail("IOException: " + e.getMessage());

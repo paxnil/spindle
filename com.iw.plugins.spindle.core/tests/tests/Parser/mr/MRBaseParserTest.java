@@ -36,6 +36,7 @@ import tests.multirun.MultipleRunTestCase;
 
 import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.parser.ParserRuntimeException;
 import com.iw.plugins.spindle.core.util.Files;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 
@@ -108,9 +109,48 @@ public class MRBaseParserTest extends MultipleRunTestCase
     // use when a test wants to simply scan all the document
     // Needed for Pull, appropriate for both PULL & DOM
 
-    protected Node parseToNode(String content) throws IOException
+    protected Node parseAll(String content) throws IOException
     {
-        return parser.parse(content);
+        Node result = parser.parse(content);
+        // recall that dom parses everything.
+        // to get the same results in this test using pull,
+        // we need to traverse all the nodes!
+        if (runIdentifier == PULL)
+        {
+            result = pullAll(result);
+        }
+        return result;
+    }
+
+    protected Node pullAll(Node node)
+    {
+        if (node == null)
+        {
+            return node;
+        }
+        Node result = null;
+        try
+        {
+            Node nextNode = node.getFirstChild();
+            if (nextNode == null)
+            {
+                result = node;
+            } else
+            {
+
+                result = nextNode;
+                while (nextNode != null)
+                {
+                    nextNode = nextNode.getNextSibling();
+                    result = nextNode;
+                }
+            }
+
+        } catch (ParserRuntimeException e)
+        {
+            result = null;
+        }
+        return result;
     }
 
     protected String getDTDPreamble(int DTDVersion, String rootNode)

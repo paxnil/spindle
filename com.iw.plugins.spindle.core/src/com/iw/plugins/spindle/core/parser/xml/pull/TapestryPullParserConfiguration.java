@@ -30,7 +30,9 @@ import java.io.IOException;
 
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.grammars.XMLGrammarPool;
+import org.apache.xerces.xni.parser.XMLParseException;
 
+import com.iw.plugins.spindle.core.parser.ParserRuntimeException;
 import com.iw.plugins.spindle.core.parser.xml.dom.*;
 
 /**
@@ -53,9 +55,15 @@ public class TapestryPullParserConfiguration extends TapestryDOMParserConfigurat
         super(grammarPool);
     }
 
-    public boolean parse() throws XNIException, IOException
+    public boolean parse() throws ParserRuntimeException, IOException
     {
-        return parse(false);
+        try
+        {
+            return parse(false);
+        } catch (XMLParseException e)
+        {
+            throw new ParserRuntimeException(e);
+        }
     }
 
     /* (non-Javadoc)
