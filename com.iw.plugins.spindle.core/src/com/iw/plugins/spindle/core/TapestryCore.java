@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.MissingResourceException;
@@ -50,7 +51,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JarEntryFile;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.widgets.Display;
@@ -72,7 +72,10 @@ import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeListener, PreferenceConstants
+public class TapestryCore extends AbstractUIPlugin
+    implements
+      IPropertyChangeListener,
+      PreferenceConstants
 {
   /**
    * Used by label decorators to listen to Core changes
@@ -110,8 +113,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
     super();
     plugin = this;
     try
-    {
-    } catch (MissingResourceException x)
+    {} catch (MissingResourceException x)
     {
       SpindleCoreStrings = null;
     }
@@ -195,31 +197,41 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
 
   public static void addNatureToProject(IProject project, String natureId) throws CoreException
   {
-    IProject proj = project.getProject(); // Needed if project is a IJavaProject
-    IProjectDescription description = proj.getDescription();
-    String[] prevNatures = description.getNatureIds();
-
-    int natureIndex = -1;
-    for (int i = 0; i < prevNatures.length; i++)
+    IProjectDescription description = project.getDescription();
+    List natures = new ArrayList(Arrays.asList(description.getNatureIds()));
+    if (!natures.contains(natureId))
     {
-      if (prevNatures[i].equals(natureId))
-      {
-        natureIndex = i;
-        i = prevNatures.length;
-      }
+      //changes so that the project overlay icon shows up!
+      natures.add(0, natureId);
+      description.setNatureIds((String[]) natures.toArray(new String[natures.size()]));
+      project.setDescription(description, null);
     }
 
-    // Add nature only if it is not already there
-    if (natureIndex == -1)
-    {
-      String[] newNatures = new String[prevNatures.length + 1];
-      System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
-      newNatures[prevNatures.length] = natureId;
-      description.setNatureIds(newNatures);
-      proj.setDescription(description, null);
-    }
-    fireCoreListenerEvent();
+    //    IProjectDescription description = project.getDescription();
+    //    String[] prevNatures = description.getNatureIds();
+    //
+    //    int natureIndex = -1;
+    //    for (int i = 0; i < prevNatures.length; i++)
+    //    {
+    //      if (prevNatures[i].equals(natureId))
+    //      {
+    //        natureIndex = i;
+    //        i = prevNatures.length;
+    //      }
+    //    }
+    //
+    //    // Add nature only if it is not already there
+    //    if (natureIndex == -1)
+    //    {
+    //      String[] newNatures = new String[prevNatures.length + 1];
+    //      System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
+    //      newNatures[prevNatures.length] = natureId;
+    //      description.setNatureIds(newNatures);
+    //      project.setDescription(description, null);
+    //    }
+    //    fireCoreListenerEvent();
   }
+
 
   public static boolean hasTapestryNature(IProject project)
   {
@@ -235,8 +247,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
 
   public static void removeNatureFromProject(IProject project, String natureId) throws CoreException
   {
-    IProject proj = project.getProject(); // Needed if project is a IJavaProject
-    IProjectDescription description = proj.getDescription();
+    IProjectDescription description = project.getDescription();
     String[] prevNatures = description.getNatureIds();
 
     int natureIndex = -1;
@@ -254,9 +265,14 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
     {
       String[] newNatures = new String[prevNatures.length - 1];
       System.arraycopy(prevNatures, 0, newNatures, 0, natureIndex);
-      System.arraycopy(prevNatures, natureIndex + 1, newNatures, natureIndex, prevNatures.length - (natureIndex + 1));
+      System.arraycopy(
+          prevNatures,
+          natureIndex + 1,
+          newNatures,
+          natureIndex,
+          prevNatures.length - (natureIndex + 1));
       description.setNatureIds(newNatures);
-      proj.setDescription(description, null);
+      project.setDescription(description, null);
     }
     fireCoreListenerEvent();
   }
@@ -309,7 +325,8 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
   public static String getString(String key, Object[] args)
   {
     if (SpindleCoreStrings == null)
-      SpindleCoreStrings = ResourceBundle.getBundle("com.iw.plugins.spindle.core.resources");
+      SpindleCoreStrings = ResourceBundle
+          .getBundle("com.iw.plugins.spindle.core.resources");
     try
     {
       String pattern = SpindleCoreStrings.getString(key);
@@ -622,7 +639,8 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
    */
   private IProject getProjectFor(IClassFile file)
   {
-    IJavaProject jproject = (IJavaProject) file.getParent().getAncestor(IJavaElement.JAVA_PROJECT);
+    IJavaProject jproject = (IJavaProject) file.getParent().getAncestor(
+        IJavaElement.JAVA_PROJECT);
     if (jproject == null)
       return null;
 
