@@ -157,4 +157,14 @@ public class UneditableComboBoxDialogField extends DialogField {
       combo.select(index);
     }
   }
+  /**
+   * @see com.iw.plugins.spindle.dialogfields.DialogField#setEnabled(boolean)
+   */
+  public void setEnabled(boolean flag) {
+    if (combo != null && !combo.isDisposed()) {
+      combo.setEnabled(flag);
+    }
+    super.setEnabled(flag);
+  }
+
 }
