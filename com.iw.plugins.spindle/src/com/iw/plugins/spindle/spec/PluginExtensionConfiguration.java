@@ -46,7 +46,7 @@ import com.iw.plugins.spindle.util.Indenter;
  */
 public class PluginExtensionConfiguration implements IIdentifiable, IPropertySource {
 
-  static final String[] typeNames = { "boolean", "string", "double", "int", "long" };
+  static final String[] typeNames = { "boolean", "String", "double", "int", "long" };
   static final Double trueD = new Double(1.0);
   static final Double falseD = new Double(0.0);
   static final Integer trueI = new Integer(1);
@@ -72,14 +72,14 @@ public class PluginExtensionConfiguration implements IIdentifiable, IPropertySou
   static {
 
     classToString = new HashMap();
-    classToString.put(String.class, "string");
+    classToString.put(String.class, "String");
     classToString.put(Boolean.class, "boolean");
     classToString.put(Integer.class, "int");
     classToString.put(Double.class, "double");
     classToString.put(Long.class, "long");
 
     stringToClass = new HashMap();
-    stringToClass.put("string", String.class);
+    stringToClass.put("String", String.class);
     stringToClass.put("boolean", Boolean.class);
     stringToClass.put("int", Integer.class);
     stringToClass.put("double", Double.class);
