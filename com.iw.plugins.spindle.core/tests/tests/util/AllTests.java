@@ -53,6 +53,7 @@ public class AllTests
         suite.addTest(new TestSuite(TestPropertyFiringList.class));
         suite.addTest(new TestSuite(TestPropertyFiringMap.class));
         suite.addTest(new TestSuite(TestPropertyFiringSet.class));
+        suite.addTest(new TestSuite(PropertyFiringTestInContext.class));
         //$JUnit-END$
         return suite;
     }
