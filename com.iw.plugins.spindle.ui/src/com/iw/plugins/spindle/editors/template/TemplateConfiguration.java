@@ -249,7 +249,6 @@ public class TemplateConfiguration extends BaseSourceConfiguration
         assistant.setContentAssistProcessor(contentAssistForJWCID, TemplatePartitionScanner.TAPESTRY_JWCID_ATTRIBUTE);
         assistant.setContentAssistProcessor(contentAssistForDefault, IDocument.DEFAULT_CONTENT_TYPE);
         assistant.enableAutoActivation(true);
-        assistant.enableAutoInsert(false);
         assistant.setProposalSelectorBackground(
             UIPlugin.getDefault().getSharedTextColors().getColor(new RGB(254, 241, 233)));
         assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));

@@ -272,7 +272,6 @@ public class SpecConfiguration extends BaseSourceConfiguration
         assistant.setContentAssistProcessor(defaultProcessor, IDocument.DEFAULT_CONTENT_TYPE);
         assistant.setContentAssistProcessor(cdataProcessor, XMLPartitionScanner.XML_CDATA);
         assistant.enableAutoActivation(true);
-        assistant.enableAutoInsert(true);
         assistant.setProposalSelectorBackground(
             UIPlugin.getDefault().getSharedTextColors().getColor(new RGB(254, 241, 233)));
         assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
@@ -340,7 +339,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
             {
                 int shellStyle = SWT.RESIZE;
                 int treeStyle = SWT.V_SCROLL | SWT.H_SCROLL;
-                return new AssetChooserInformationControl(parent, shellStyle, treeStyle, (SpecEditor) getEditor());
+                return new ResourceChooserInformationControl(parent, shellStyle, treeStyle, (SpecEditor) getEditor());
             }
         };
     }

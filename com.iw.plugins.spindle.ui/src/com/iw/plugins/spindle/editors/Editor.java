@@ -48,6 +48,8 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
@@ -83,6 +85,21 @@ import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
  */
 public abstract class Editor extends StatusTextEditor implements IAdaptable, IReconcileWorker
 {
+    class PreferenceListener implements IPropertyChangeListener
+    {
+        /* (non-Javadoc)
+        * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+        */
+        public void propertyChange(PropertyChangeEvent event)
+        {
+            IPreferenceStore store = (IPreferenceStore) event.getSource();
+            if (PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST.equals(event.getProperty())
+                && fContentAssistant != null)
+            {
+                fContentAssistant.enableAutoInsert(store.getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST));
+            }
+        }
+    }
 
     /** Preference key for highlighting current line */
     protected final static String CURRENT_LINE = PreferenceConstants.EDITOR_CURRENT_LINE;
@@ -187,11 +204,13 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
 
     protected IContentOutlinePage fOutline = null;
 
-    protected ContentAssistant fContentAssistant = new ContentAssistant();
+    protected ContentAssistant fContentAssistant;
 
     protected IPreferenceStore fPreferenceStore;
 
     protected BaseEditorAction[] fJumpActions;
+
+    private IPropertyChangeListener fPreferenceListener;
 
     public Editor()
     {
@@ -205,6 +224,8 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
         setPreferenceStore(fPreferenceStore);
         setRangeIndicator(new DefaultRangeIndicator());
         setKeyBindingScopes(new String[] { "com.iw.plugins.spindle.ui.editor.commands" });
+        fPreferenceListener = new PreferenceListener();
+        UIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPreferenceListener);
     }
 
     public void init(IEditorSite site, IEditorInput input) throws PartInitException
@@ -428,7 +449,11 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
     public ContentAssistant getContentAssistant()
     {
         if (fContentAssistant == null)
+        {
             fContentAssistant = new ContentAssistant();
+            IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+            fContentAssistant.enableAutoInsert(store.getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST));
+        }
         return fContentAssistant;
     }
 
@@ -474,6 +499,20 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
             caret = offset + styledText.getCaretOffset();
         }
         return caret;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.ui.IWorkbenchPart#dispose()
+     */
+    public void dispose()
+    {
+
+        super.dispose();
+        if (fPreferenceListener != null)
+        {
+            UIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPreferenceListener);
+            fPreferenceListener = null;
+        }
     }
 
 }
