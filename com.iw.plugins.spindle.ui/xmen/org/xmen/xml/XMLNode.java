@@ -116,7 +116,7 @@ public class XMLNode extends TypedPosition
   private IDocument document = null;
   public String publicId; //valid only for the root node
   public String rootNodeId; //valid only for the root
-                                                    // node
+  // node
 
   /**
    * @param offset
@@ -139,6 +139,33 @@ public class XMLNode extends TypedPosition
     added = true;
   }
 
+  public boolean isTagPart()
+  {
+    String type = getType();
+    return ITypeConstants.TAG.equals(type) || ITypeConstants.EMPTYTAG.equals(type)
+        || ITypeConstants.ENDTAG.equals(type);
+  }
+
+  public boolean isTagOrEmptyTag()
+  {
+    String type = getType();
+    return ITypeConstants.TAG.equals(type) || ITypeConstants.EMPTYTAG.equals(type); 
+  }
+
+  public boolean isText()
+  {
+    return ITypeConstants.TEXT.equals(getType());
+  }
+
+  public boolean isPI()
+  {
+    return ITypeConstants.PI.equals(getType());
+  }
+
+  public boolean isDECL()
+  {
+    return ITypeConstants.DECL.equals(getType());
+  }
   /*
    * (non-Javadoc)
    * 
@@ -622,10 +649,10 @@ public class XMLNode extends TypedPosition
 
   public String getAttributeValue()
   {
-     
+
     if (!attributeHasValue())
       return null;
-    
+
     int index = getAttributeValueStart();
 
     if (index < 0)
@@ -647,8 +674,9 @@ public class XMLNode extends TypedPosition
 
     return null;
   }
-  
-  private boolean attributeHasValue() {
+
+  private boolean attributeHasValue()
+  {
     try
     {
       String content = document.get(getOffset(), getLength());
@@ -664,10 +692,9 @@ public class XMLNode extends TypedPosition
   {
     int index = 0;
     try
-    {   
+    {
       String content = document.get(getOffset(), getLength());
-      
-      
+
       int singleIndex = content.indexOf("\"");
       int doubleIndex = content.indexOf("'");
 
@@ -735,9 +762,9 @@ public class XMLNode extends TypedPosition
       endLength = 2;
     } else if (ITypeConstants.DECL.equals(getType()))
     {
-//      if ("!DOCTYPE".equals(getName()))
-//        return getDoctypeAttributes();
-      startLength =1;
+      //      if ("!DOCTYPE".equals(getName()))
+      //        return getDoctypeAttributes();
+      startLength = 1;
       endLength = 1;
     } else if (ITypeConstants.TAG.equals(getType()))
     {
@@ -787,7 +814,8 @@ public class XMLNode extends TypedPosition
           {
             start = i;
             state = DOUBLEQUOTE;
-          } else {
+          } else
+          {
             state = DOUBLEQUOTE;
           }
           break;
@@ -804,11 +832,12 @@ public class XMLNode extends TypedPosition
           } else if (state == DOUBLEQUOTE)
           {
             break;
-          } else  if (state != ATTR)
+          } else if (state != ATTR)
           {
             start = i;
             state = SINGLEQUOTE;
-          } else {
+          } else
+          {
             state = SINGLEQUOTE;
           }
           break;
@@ -877,42 +906,42 @@ public class XMLNode extends TypedPosition
     return attrs;
   }
 
-//  /**
-//   * @return
-//   */
-//  private List getDoctypeAttributes(String content)
-//  {
-//       
-//    ArrayList attrs = new ArrayList();
-//    try
-//    {
-//      content = document.get(getOffset(), getLength());
-//    } catch (BadLocationException e)
-//    {
-//      UIPlugin.log(e);
-//      return attrs;
-//    }
-//    int initial = content.indexOf("!DOCTYPE") + "!DOCTYPE".length() + 1;
-//    int state = TAG;
-//    int start = -1;
-//    for (int i = initial; i < content.length() - 1; i++)
-//    {
-//      char c = content.charAt(i);
-//      switch (c)
-//      {
-//        case '"' :
-//          if (state == DOUBLEQUOTE || state == SINGLEQUOTE) {
-//            attrs.add(new XMLNode(
-//                getOffset() + start,
-//                i - start + 1,
-//                ITypeConstants.ATTR,
-//                document));
-//            start = -1;
-//            state = TAG;
-//          } 
-//    }
-//    return null;
-//  }
+  //  /**
+  //   * @return
+  //   */
+  //  private List getDoctypeAttributes(String content)
+  //  {
+  //       
+  //    ArrayList attrs = new ArrayList();
+  //    try
+  //    {
+  //      content = document.get(getOffset(), getLength());
+  //    } catch (BadLocationException e)
+  //    {
+  //      UIPlugin.log(e);
+  //      return attrs;
+  //    }
+  //    int initial = content.indexOf("!DOCTYPE") + "!DOCTYPE".length() + 1;
+  //    int state = TAG;
+  //    int start = -1;
+  //    for (int i = initial; i < content.length() - 1; i++)
+  //    {
+  //      char c = content.charAt(i);
+  //      switch (c)
+  //      {
+  //        case '"' :
+  //          if (state == DOUBLEQUOTE || state == SINGLEQUOTE) {
+  //            attrs.add(new XMLNode(
+  //                getOffset() + start,
+  //                i - start + 1,
+  //                ITypeConstants.ATTR,
+  //                document));
+  //            start = -1;
+  //            state = TAG;
+  //          }
+  //    }
+  //    return null;
+  //  }
 
   public Map getAttributesMap()
   {
