@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
-   version="0.0.1"
+   version="0.0.2"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.core.TapestryCore">
 
@@ -57,7 +57,7 @@
       <import plugin="org.eclipse.core.resources" export="true" version="2.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.jdt.core" export="true" version="2.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui" export="true" version="2.1.0" match="greaterOrEqual"/>
-      <import plugin="org.apache.xerces" export="true" version="4.0.7" match="compatible"/>
+      <import plugin="org.apache.xerces" export="true" version="4.0.7" match="greaterOrEqual"/>
    </requires>
 
 
