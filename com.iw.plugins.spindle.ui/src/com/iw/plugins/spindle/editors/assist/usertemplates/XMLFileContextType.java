@@ -54,7 +54,7 @@ public class XMLFileContextType extends TemplateContextType
     public PublicId()
     {
       super(NAME, "the DTD public Id");
-      setEvaluationString(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID);
+      setEvaluationString(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID);
     }
   }
 
