@@ -31,7 +31,7 @@ import org.eclipse.jface.text.TypedPosition;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.OrderPreservingMap;
+import com.wutka.dtd.OrderPreservingMap;
 
 /**
  *  Produced by the XMLDocumentPartitioner.

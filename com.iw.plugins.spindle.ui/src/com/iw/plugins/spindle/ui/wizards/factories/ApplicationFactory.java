@@ -44,6 +44,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.core.spec.PluginPageDeclaration;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 
@@ -116,7 +117,7 @@ public class ApplicationFactory
         appSpec.setName(appname);
         appSpec.setEngineClassName(qualifiedEngineClassname);
         String path = "/" + packageFragment.replace('.', '/') + "/pages/Home.page";
-        appSpec.setPageSpecificationPath("Home", path);
+        appSpec.addPageDeclaration(new PluginPageDeclaration("Home", path, null));
         IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
         boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
         int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);

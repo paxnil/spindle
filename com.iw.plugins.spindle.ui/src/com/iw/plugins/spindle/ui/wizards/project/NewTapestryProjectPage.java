@@ -66,6 +66,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.spec.PluginPageDeclaration;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.ui.properties.ProjectPropertyPage;
@@ -353,7 +354,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         spec.setEngineClassName(TapestryCore.getString("TapestryEngine.defaultEngine"));
         spec.setDescription("add a description");
         spec.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
-        spec.setPageSpecificationPath("Home", "Home.page");
+        spec.addPageDeclaration(new PluginPageDeclaration("Home", "Home.page", null));
         IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
         boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
         int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);

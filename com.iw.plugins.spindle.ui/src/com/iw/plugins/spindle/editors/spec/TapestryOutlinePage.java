@@ -288,7 +288,7 @@ public class TapestryOutlinePage extends ContentOutlinePage
                     PluginLibrarySpecification lib = (PluginLibrarySpecification) specification;
                     results.addAll(lib.getDescriptionDeclarations());
                     results.addAll(lib.getPageDeclarations());
-                    results.addAll(lib.getEngineServiceDeclaration());
+                    results.addAll(lib.getEngineServiceDeclarations());
                     results.addAll(lib.getComponentTypeDeclarations());
                     results.addAll(lib.getPropertyDeclarations());
                     results.addAll(lib.getLibraryDeclaration());

@@ -34,8 +34,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.OrderPreservingMap;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.wutka.dtd.OrderPreservingMap;
 
 /**
  * @author GWL
