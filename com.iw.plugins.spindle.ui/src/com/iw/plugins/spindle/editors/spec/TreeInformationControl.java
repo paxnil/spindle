@@ -71,7 +71,6 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.spec.IIdentifiable;
-import com.iw.plugins.spindle.core.util.Assert;
 
 /**
  *  TODO Add Type comment
@@ -79,7 +78,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class OutlineInformationControl
+public abstract class TreeInformationControl
     implements IInformationControl, IInformationControlExtension, IInformationControlExtension2
 {
 
@@ -125,14 +124,14 @@ public abstract class OutlineInformationControl
 
             return hasUnfilteredChild(viewer, element);
         }
-        
-        protected final boolean match(String matchName) {
+
+        protected final boolean match(String matchName)
+        {
             if (fMatcher == null || matchName == null)
                 return true;
-                
+
             return fMatcher.match(matchName);
         }
-        
 
         private ITreeContentProvider getContentProvider(Viewer viewer)
         {
@@ -290,9 +289,9 @@ public abstract class OutlineInformationControl
     private int fMaxHeight = -1;
 
     /** the content provider for the TreeViewer- set by subclass constructor **/
-    private ITreeContentProvider fContentProvider;
+    protected ITreeContentProvider fContentProvider;
     /** the label provider for the TreeViewer - set by subclass constructor **/
-    private ILabelProvider fLabelProvider;
+    protected ILabelProvider fLabelProvider;
     /** the optional sorter for the TreeViewer - set by subclass constructor **/
     private ViewerSorter fSorter;
 
@@ -305,14 +304,9 @@ public abstract class OutlineInformationControl
      * @param parent the parent shell
      * @param style the additional styles for the tree widget
      */
-    public OutlineInformationControl(
-        Shell parent,
-        int style,
-        ITreeContentProvider contentProvider,
-        ViewerSorter sorter,
-        ILabelProvider labelProvider)
+    public TreeInformationControl(Shell parent, int style)
     {
-        this(parent, SWT.RESIZE, style, contentProvider, sorter, labelProvider);
+        this(parent, SWT.RESIZE, style);
     }
 
     /**
@@ -321,13 +315,9 @@ public abstract class OutlineInformationControl
      *
      * @param parent the parent shell
      */
-    public OutlineInformationControl(
-        Shell parent,
-        ITreeContentProvider contentProvider,
-        ViewerSorter sorter,
-        ILabelProvider labelProvider)
+    public TreeInformationControl(Shell parent)
     {
-        this(parent, SWT.NONE, contentProvider, sorter, labelProvider);
+        this(parent, SWT.NONE);
     }
 
     /**
@@ -338,13 +328,7 @@ public abstract class OutlineInformationControl
      * @param shellStyle the additional styles for the shell
      * @param treeStyle the additional styles for the tree widget
      */
-    public OutlineInformationControl(
-        Shell parent,
-        int shellStyle,
-        int treeStyle,
-        ITreeContentProvider contentProvider,
-        ViewerSorter sorter,
-        ILabelProvider labelProvider)
+    public TreeInformationControl(Shell parent, int shellStyle, int treeStyle)
     {
         fShell = new Shell(parent, shellStyle);
         Display display = fShell.getDisplay();
@@ -356,9 +340,6 @@ public abstract class OutlineInformationControl
         fComposite.setLayout(layout);
         fComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        fContentProvider = contentProvider;
-        fSorter = sorter;
-        fLabelProvider = labelProvider;
         createFilterText(fComposite);
         createTreeViewer(fComposite, treeStyle);
 
@@ -368,15 +349,32 @@ public abstract class OutlineInformationControl
         setInfoSystemColor();
         installFilter(createFilter());
     }
-    
-    protected NamePatternFilter createFilter() {
-        return  new NamePatternFilter();
+
+    protected void setLabelProvider(ILabelProvider provider)
+    {
+        fLabelProvider = provider;
+        fTreeViewer.setLabelProvider(fLabelProvider);
+    }
+
+    protected void setContentProvider(ITreeContentProvider provider)
+    {
+        fContentProvider = provider;
+        fTreeViewer.setContentProvider(fContentProvider);
+    }
+
+    protected void setSorter(ViewerSorter sorter)
+    {
+        fSorter = sorter;
+        fTreeViewer.setSorter(fSorter);
+    }
+
+    protected NamePatternFilter createFilter()
+    {
+        return new NamePatternFilter();
     }
 
     private void createTreeViewer(Composite parent, int style)
     {
-        Assert.isNotNull(fContentProvider);
-        Assert.isNotNull(fLabelProvider);
         Tree tree = new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
         GridData data = new GridData(GridData.FILL_BOTH);
         tree.setLayoutData(data);
@@ -392,11 +390,7 @@ public abstract class OutlineInformationControl
             }
         });
 
-        fTreeViewer.setContentProvider(fContentProvider);
-        if (fSorter != null)
-            fTreeViewer.setSorter(fSorter);
         fTreeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
-        fTreeViewer.setLabelProvider(fLabelProvider);
 
         fTreeViewer.getTree().addKeyListener(new KeyListener()
         {
@@ -419,7 +413,7 @@ public abstract class OutlineInformationControl
             }
             public void widgetDefaultSelected(SelectionEvent e)
             {
-                gotoSelectedElement();
+                handleSelectedElement();
             }
         });
     }
@@ -444,7 +438,7 @@ public abstract class OutlineInformationControl
             public void keyPressed(KeyEvent e)
             {
                 if (e.keyCode == 0x0D) // return
-                    gotoSelectedElement();
+                    handleSelectedElement();
                 if (e.keyCode == SWT.ARROW_DOWN)
                     fTreeViewer.getTree().setFocus();
                 if (e.keyCode == SWT.ARROW_UP)
@@ -503,15 +497,17 @@ public abstract class OutlineInformationControl
         });
     }
 
-    private void gotoSelectedElement()
+    protected void handleSelectedElement()
     {
         Object selectedElement = ((IStructuredSelection) fTreeViewer.getSelection()).getFirstElement();
         if (selectedElement != null)
         {
             try
             {
-                dispose();
-                doGotoSelectedElement(selectedElement);
+
+                if (doHandleSelectedElement(selectedElement))
+                    dispose();
+
             } catch (Exception ex)
             {
                 UIPlugin.log(ex);
@@ -519,7 +515,12 @@ public abstract class OutlineInformationControl
         }
     }
 
-    protected abstract void doGotoSelectedElement(Object selected);
+    /**
+     * 
+     * @param selected the object selected by the user
+     * @return true iff the selection is valid and the control should be hidden
+     */
+    protected abstract boolean doHandleSelectedElement(Object selected);
 
     /**
      * Selects the first element in the tree which
@@ -530,9 +531,15 @@ public abstract class OutlineInformationControl
         Tree tree = fTreeViewer.getTree();
         Object element = findElement(tree.getItems());
         if (element != null)
+        {
+            Object parent = fContentProvider.getParent(element);
+            if (parent != null)
+                fTreeViewer.setSelection(new StructuredSelection(), true);
             fTreeViewer.setSelection(new StructuredSelection(element), true);
-        else
+        } else
+        {
             fTreeViewer.setSelection(StructuredSelection.EMPTY);
+        }
     }
 
     private Object findElement(TreeItem[] items)
@@ -571,10 +578,10 @@ public abstract class OutlineInformationControl
      */
     public void setInput(Object information)
     {
-        fFilterText.setText(""); //$NON-NLS-1$
+        fFilterText.setText("*");
+        fFilterText.selectAll();
         if (information == null || information instanceof String)
         {
-            setInput(null);
             return;
         }
         doSetInput(information);

@@ -114,6 +114,9 @@ import com.iw.plugins.spindle.editors.multi.IMultiPage;
 import com.iw.plugins.spindle.editors.multi.MultiPageSpecEditor;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
+import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
+
+
 
 /**
  *  Editor for Tapestry Spec files
@@ -133,6 +136,8 @@ public class SpecEditor extends Editor implements IMultiPage
     private List fReconcileListeners;
     private Control fControl;
 
+    private Object fInformationControlInput;
+
     /** only here if this editor is embedded in a MultiPageSpecEditor */
     private MultiPageSpecEditor fMultiPageEditor;
 
@@ -140,6 +145,31 @@ public class SpecEditor extends Editor implements IMultiPage
     {
         super();
         fOutline = new MultiPageContentOutline(this);
+    }
+
+    public Object getInformationControlInput()
+    {
+        return fInformationControlInput;
+    }
+
+    public void invokeAssetChooser(ChooseResourceProposal proposal)
+    {
+        try
+        {
+            fInformationControlInput = proposal;
+            SpecSourceViewer viewer = (SpecSourceViewer) getSourceViewer();
+
+            if (viewer.canDoOperation(SpecSourceViewer.OPEN_ASSET_CHOOSER))
+                viewer.doOperation(SpecSourceViewer.OPEN_ASSET_CHOOSER);
+
+        } catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+            throw e;
+        } finally
+        {
+            fInformationControlInput = null;
+        }
     }
 
     /* (non-Javadoc)

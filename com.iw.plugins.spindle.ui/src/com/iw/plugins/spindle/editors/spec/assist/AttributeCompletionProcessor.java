@@ -36,6 +36,7 @@ import java.util.Set;
 
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IComponentSpecification;
+import org.apache.tapestry.spec.ILibrarySpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
@@ -65,11 +66,15 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.resources.AbstractRootLocation;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
+import com.iw.plugins.spindle.editors.spec.SpecEditor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 
 /**
@@ -369,6 +374,21 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             }
         }
 
+        if ("context-asset".equals(fTagName) && "path".equals(fAttributeName) && fIsAttributeTerminated)
+            return chooseAssetPath(true);
+
+        if ("private-asset".equals(fTagName) && "resource-path".equals(fAttributeName) && fIsAttributeTerminated)
+            return chooseAssetPath(false);
+
+        if ("page".equals(fTagName) && "specification-path".equals(fAttributeName) && fIsAttributeTerminated)
+            return chooseSpecPath(ChooseResourceProposal.INCLUDE_PAGE_EXTENSION);
+            
+        if ("component-type".equals(fTagName) && "specification-path".equals(fAttributeName) && fIsAttributeTerminated)
+                    return chooseSpecPath(ChooseResourceProposal.INCLUDE_JWC_EXTENSION);
+                    
+        if ("library".equals(fTagName) && "specification-path".equals(fAttributeName) && fIsAttributeTerminated)
+                            return chooseSpecPath(ChooseResourceProposal.INCLUDE_LIBRARY_EXTENSION);
+
         return Collections.EMPTY_LIST;
     }
 
@@ -474,9 +494,29 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
         List result = new ArrayList();
 
+        if (allowedValues.size() == 2)
+        {
+            String exactReplace = null;
+            String first = (String) allowedValues.get(0);
+            String last = (String) allowedValues.get(1);
+
+            if (first.equals(fAttributeValue))
+                exactReplace = last;
+            else if (last.equals(fAttributeValue))
+                exactReplace = first;
+
+            if (exactReplace != null)
+            {
+                CompletionProposal proposal = getProposal(exactReplace);
+                result.add(proposal);
+                return result;
+            }
+        }
+
         for (Iterator iter = allowedValues.iterator(); iter.hasNext();)
         {
             String value = (String) iter.next();
+
             if (fMatchString.length() > 0 && !value.startsWith(fMatchString))
                 continue;
 
@@ -486,6 +526,21 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             proposal.setYOrder(value.equals(fAttributeValue) ? 100 : 99);
             result.add(proposal);
         }
+
+        if (result.isEmpty() && !allowedValues.isEmpty())
+        {
+            for (Iterator iter = allowedValues.iterator(); iter.hasNext();)
+            {
+                String value = (String) iter.next();
+
+                CompletionProposal proposal = getProposal(value);
+                if (value.equals(defaultValue))
+                    proposal.setImage(Images.getSharedImage("bullet_pink.gif"));
+                proposal.setYOrder(value.equals(fAttributeValue) ? 100 : 99);
+                result.add(proposal);
+            }
+        }
+
         return result;
     }
 
@@ -560,7 +615,118 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         return result;
     }
 
-    class ChooseTypeProposal implements ICompletionProposal
+    private List chooseSpecPath(ChooseResourceProposal.Filter filter)
+    {
+
+        TapestryProject tproject = TapestryCore.getDefault().getTapestryProjectFor(fEditor.getStorage());
+
+        if (tproject == null)
+            return Collections.EMPTY_LIST;
+        IResourceWorkspaceLocation location = null;
+        try
+        {
+            location =
+                (IResourceWorkspaceLocation) ((ILibrarySpecification) fEditor.getSpecification())
+                    .getSpecificationLocation();
+        } catch (RuntimeException e)
+        {
+            TapestryCore.log(e);
+        } catch (Exception e)
+        {
+            TapestryCore.log(e);
+        }
+
+        if (location == null)
+            return Collections.EMPTY_LIST;
+
+        AbstractRootLocation root = null;
+        try
+        {
+            root =
+                location.isOnClasspath()
+                    ? (AbstractRootLocation) tproject.getClasspathRoot()
+                    : (AbstractRootLocation) tproject.getWebContextLocation();
+        } catch (CoreException e)
+        {
+            UIPlugin.log(e);
+        }
+
+        if (root == null)
+            return Collections.EMPTY_LIST;
+
+        List result = new ArrayList();
+
+        ChooseResourceProposal proposal =
+            new ChooseResourceProposal(
+                (SpecEditor) fEditor,
+                root,
+                fDocumentOffset,
+                fValueLocation.x,
+                fAttributeValue.length());
+
+        if (root.isOnClasspath())
+        {
+            proposal.setContainerExclusionFilter(proposal.EXCLUDE_PACKAGES);
+            proposal.setFileExclusionFilter(proposal.EXCLUDE_PACKAGE_DOT_HTML);
+        } else
+        {
+            proposal.setContainerExclusionFilter(proposal.EXCLUDE_CVS_FOLDERS);
+        }
+
+        proposal.setExtensionInclusionFilter(filter);
+
+        result.add(proposal);
+        return result;
+    }
+
+    private List chooseAssetPath(boolean isContextPath)
+    {
+        TapestryProject tproject = TapestryCore.getDefault().getTapestryProjectFor(fEditor.getStorage());
+
+        if (tproject == null)
+            return Collections.EMPTY_LIST;
+
+        AbstractRootLocation root = null;
+        try
+        {
+            root =
+                isContextPath
+                    ? (AbstractRootLocation) tproject.getWebContextLocation()
+                    : (AbstractRootLocation) tproject.getClasspathRoot();
+        } catch (CoreException e)
+        {
+            UIPlugin.log(e);
+        }
+
+        if (root == null)
+            return Collections.EMPTY_LIST;
+
+        List result = new ArrayList();
+
+        ChooseResourceProposal proposal =
+            new ChooseResourceProposal(
+                (SpecEditor) fEditor,
+                root,
+                fDocumentOffset,
+                fValueLocation.x,
+                fAttributeValue.length());
+
+        if (root.isOnClasspath())
+        {
+            proposal.setContainerExclusionFilter(proposal.EXCLUDE_PACKAGES);
+            proposal.setFileExclusionFilter(proposal.EXCLUDE_PACKAGE_DOT_HTML);
+        } else
+        {
+            proposal.setContainerExclusionFilter(proposal.EXCLUDE_CVS_FOLDERS);
+        }
+
+        proposal.setExtensionExclusionFilter(proposal.ASSET_EXCLUDE_EXTENSIONS);
+
+        result.add(proposal);
+        return result;
+    }
+
+    public static class ChooseTypeProposal implements ICompletionProposal
     {
 
         protected IJavaProject jproject;
@@ -634,7 +800,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
                         false);
 
                 dialog.setTitle(includeInterfaces ? "Java Type Chooser" : "Java Class Chooser");
-                dialog.setMessage("Choose "+(includeInterfaces ? "Type" : "a Class"));
+                dialog.setMessage("Choose " + (includeInterfaces ? "Type" : "a Class"));
 
                 if (dialog.open() == dialog.OK)
                 {
@@ -699,5 +865,117 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         }
 
     }
+
+    //    public static class ChooseResourceProposal implements ICompletionProposal
+    //    {
+    //
+    //        SpecEditor editor;
+    //        AbstractRootLocation root;
+    //
+    //        String chosenAsset;
+    //
+    //        int documentOffset;
+    //        int replacementOffset;
+    //        int replacementLength;
+    //
+    //        public ChooseResourceProposal(
+    //            SpecEditor specEditor,
+    //            AbstractRootLocation rootObject,
+    //            int documentOffset,
+    //            int replacementOffset,
+    //            int replacementLength)
+    //        {
+    //            Assert.isNotNull(specEditor);
+    //            Assert.isNotNull(rootObject);
+    //            editor = specEditor;
+    //            root = rootObject;
+    //
+    //            this.documentOffset = documentOffset;
+    //            this.replacementOffset = replacementOffset;
+    //            this.replacementLength = replacementLength;
+    //        }
+    //
+    //        public AbstractRootLocation getRootLocation()
+    //        {
+    //            return root;
+    //        }
+    //
+    //        public void setChosenAsset(String chosenAsset)
+    //        {
+    //            this.chosenAsset = chosenAsset;
+    //        }
+    //
+    //        /* (non-Javadoc)
+    //         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
+    //         */
+    //        public void apply(IDocument document)
+    //        {
+    //            if (chosenAsset == null)
+    //            {
+    //                editor.invokeAssetChooser(this);
+    //            } else
+    //            {
+    //                if (chosenAsset.length() == 0)
+    //                {
+    //                    chosenAsset = null;
+    //                    return;
+    //                }
+    //
+    //                try
+    //                {
+    //                    document.replace(replacementOffset, replacementLength, chosenAsset);
+    //                } catch (BadLocationException x)
+    //                {
+    //                    // ignore
+    //                }
+    //
+    //            }
+    //
+    //        }
+    //
+    //        /* (non-Javadoc)
+    //         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+    //         */
+    //        public String getAdditionalProposalInfo()
+    //        {
+    //            return null;
+    //        }
+    //
+    //        /* (non-Javadoc)
+    //         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
+    //         */
+    //        public IContextInformation getContextInformation()
+    //        {
+    //            return null;
+    //        }
+    //
+    //        /* (non-Javadoc)
+    //         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
+    //         */
+    //        public String getDisplayString()
+    //        {
+    //            return "Choose Asset";
+    //        }
+    //
+    //        /* (non-Javadoc)
+    //         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
+    //         */
+    //        public Image getImage()
+    //        {
+    //            return Images.getSharedImage("opentype.gif");
+    //        }
+    //
+    //        /* (non-Javadoc)
+    //         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
+    //         */
+    //        public Point getSelection(IDocument document)
+    //        {
+    //            if (chosenAsset == null)
+    //                return new Point(documentOffset, 0);
+    //
+    //            return new Point(replacementOffset + chosenAsset.length(), 0);
+    //        }
+    //
+    //    }
 
 }

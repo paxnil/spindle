@@ -40,7 +40,7 @@ import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class XMLOutlineInformationControl extends OutlineInformationControl
+public class XMLOutlineInformationControl extends TreeInformationControl
 {
 
     protected static class XMLPatternFilter extends NamePatternFilter
@@ -65,15 +65,17 @@ public class XMLOutlineInformationControl extends OutlineInformationControl
 
     public XMLOutlineInformationControl(Shell parent, int shellStyle, int treeStyle, SpecEditor editor)
     {
-        super(parent, shellStyle, treeStyle, new XMLNodeContentProvider(), null, new XMLNodeLabelProvider());
-        fEditor = editor;        
+        super(parent, shellStyle, treeStyle);
+        setContentProvider(new XMLNodeContentProvider());
+        setLabelProvider(new XMLNodeLabelProvider());
+        fEditor = editor;
     }
-    
+
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#createFilter()
      */
     protected NamePatternFilter createFilter()
-    {        
+    {
         return new XMLPatternFilter();
     }
 
@@ -91,11 +93,15 @@ public class XMLOutlineInformationControl extends OutlineInformationControl
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#doGotoSelectedElement(java.lang.Object)
      */
-    protected void doGotoSelectedElement(Object selected)
+    protected boolean doHandleSelectedElement(Object selected)
     {
-        fEditor.openTo(selected);
+        try
+        {
+            fEditor.openTo(selected);
+        } finally
+        {
+            return true;
+        }
     }
-
-
 
 }

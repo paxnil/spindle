@@ -224,9 +224,9 @@ public class SpecConfiguration extends BaseSourceConfiguration
     public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType)
     {
         if (getEditor() == null)
-           return super.getTextHover(sourceViewer, contentType);
-           
-       if (DEBUG)
+            return super.getTextHover(sourceViewer, contentType);
+
+        if (DEBUG)
         {
             return new ITextHover()
             {
@@ -256,7 +256,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
     {
         if (getEditor() == null)
             return super.getContentAssistant(sourceViewer);
-            
+
         ContentAssistant assistant = getEditor().getContentAssistant();
         ContentAssistProcessor tagProcessor = new TagCompletionProcessor(fEditor);
         ContentAssistProcessor commentProcessor = new CommentCompletionProcessor(fEditor);
@@ -272,7 +272,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
         assistant.setContentAssistProcessor(defaultProcessor, IDocument.DEFAULT_CONTENT_TYPE);
         assistant.setContentAssistProcessor(cdataProcessor, XMLPartitionScanner.XML_CDATA);
         assistant.enableAutoActivation(true);
-        assistant.enableAutoInsert(false);
+        assistant.enableAutoInsert(true);
         assistant.setProposalSelectorBackground(
             UIPlugin.getDefault().getSharedTextColors().getColor(new RGB(254, 241, 233)));
         assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
@@ -298,11 +298,11 @@ public class SpecConfiguration extends BaseSourceConfiguration
             {
                 int shellStyle = SWT.RESIZE;
                 int treeStyle = SWT.V_SCROLL | SWT.H_SCROLL;
-                return new XMLOutlineInformationControl(parent, shellStyle, treeStyle, (SpecEditor)getEditor());
+                return new XMLOutlineInformationControl(parent, shellStyle, treeStyle, (SpecEditor) getEditor());
             }
         };
     }
-    
+
     /**
      * Returns the structure outline presenter control creator. The creator is a factory creating outline
      * presenter controls for the given source viewer. This implementation always returns a creator
@@ -319,7 +319,28 @@ public class SpecConfiguration extends BaseSourceConfiguration
             {
                 int shellStyle = SWT.RESIZE;
                 int treeStyle = SWT.V_SCROLL | SWT.H_SCROLL;
-                return new StructureOutlineInformationControl(parent, shellStyle, treeStyle, (SpecEditor)getEditor());
+                return new StructureOutlineInformationControl(parent, shellStyle, treeStyle, (SpecEditor) getEditor());
+            }
+        };
+    }
+
+    /**
+        * Returns the asset choosercontrol creator. The creator is a factory creating 
+        * presenter controls for the given source viewer. This implementation always returns a creator
+        * for <code>AssetChooserInformationControl</code> instances.
+        * 
+        * @param sourceViewer the source viewer to be configured by this configuration
+        * @return an information control creator
+        */
+    private IInformationControlCreator getAssetChooserControlCreator(ISourceViewer sourceViewer)
+    {
+        return new IInformationControlCreator()
+        {
+            public IInformationControl createInformationControl(Shell parent)
+            {
+                int shellStyle = SWT.RESIZE;
+                int treeStyle = SWT.V_SCROLL | SWT.H_SCROLL;
+                return new AssetChooserInformationControl(parent, shellStyle, treeStyle, (SpecEditor) getEditor());
             }
         };
     }
@@ -335,18 +356,18 @@ public class SpecConfiguration extends BaseSourceConfiguration
     {
         InformationPresenter presenter = new InformationPresenter(getXMLOutlinePresenterControlCreator(sourceViewer));
         presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
-        IInformationProvider provider = new SpecEditor.SpecEditorInformationProvider((SpecEditor)getEditor(), false);
+        IInformationProvider provider = new SpecEditor.SpecEditorInformationProvider((SpecEditor) getEditor(), false);
         presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
         presenter.setInformationProvider(provider, XMLPartitionScanner.XML_TAG);
         presenter.setInformationProvider(provider, XMLPartitionScanner.XML_COMMENT);
-        presenter.setInformationProvider(provider,XMLPartitionScanner.XML_ATTRIBUTE);
+        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_ATTRIBUTE);
         presenter.setInformationProvider(provider, XMLPartitionScanner.XML_DECL);
         presenter.setInformationProvider(provider, XMLPartitionScanner.XML_CDATA);
         presenter.setInformationProvider(provider, XMLPartitionScanner.XML_PI);
-       presenter.setSizeConstraints(40, 20, true, false);
+        presenter.setSizeConstraints(40, 20, true, false);
         return presenter;
     }
-    
+
     /**
      * Returns the outline presenter which will determine and shown
      * information requested for the current cursor position.
@@ -356,22 +377,36 @@ public class SpecConfiguration extends BaseSourceConfiguration
       */
     public IInformationPresenter getStructureOutlinePresenter(ISourceViewer sourceViewer)
     {
-        InformationPresenter presenter = new InformationPresenter(getStructureOutlinePresenterControlCreator(sourceViewer));
+        InformationPresenter presenter =
+            new InformationPresenter(getStructureOutlinePresenterControlCreator(sourceViewer));
         presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
-        IInformationProvider provider = new SpecEditor.SpecEditorInformationProvider((SpecEditor)getEditor(), true);
+        IInformationProvider provider = new SpecEditor.SpecEditorInformationProvider((SpecEditor) getEditor(), true);
         presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
         presenter.setInformationProvider(provider, XMLPartitionScanner.XML_TAG);
         presenter.setInformationProvider(provider, XMLPartitionScanner.XML_COMMENT);
-        presenter.setInformationProvider(provider,XMLPartitionScanner.XML_ATTRIBUTE);
+        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_ATTRIBUTE);
         presenter.setInformationProvider(provider, XMLPartitionScanner.XML_DECL);
         presenter.setInformationProvider(provider, XMLPartitionScanner.XML_CDATA);
         presenter.setInformationProvider(provider, XMLPartitionScanner.XML_PI);
-       presenter.setSizeConstraints(40, 20, true, true);
+        presenter.setSizeConstraints(40, 20, true, true);
         return presenter;
     }
-    
- 
 
-   
+    public IInformationPresenter getAssetChooserPresenter(ISourceViewer sourceViewer)
+    {
+        InformationPresenter presenter =
+            new InformationPresenter(getAssetChooserControlCreator(sourceViewer));
+        presenter.setAnchor(InformationPresenter.ANCHOR_BOTTOM);
+        IInformationProvider provider = new SpecEditor.SpecEditorInformationProvider((SpecEditor) getEditor(), false);
+        presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
+        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_TAG);
+        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_COMMENT);
+        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_ATTRIBUTE);
+        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_DECL);
+        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_CDATA);
+        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_PI);
+        presenter.setSizeConstraints(40, 20, true, true);
+        return presenter;
+    }
 
 }

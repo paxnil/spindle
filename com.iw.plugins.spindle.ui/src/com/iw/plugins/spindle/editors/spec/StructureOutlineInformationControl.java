@@ -37,10 +37,10 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class StructureOutlineInformationControl extends OutlineInformationControl
+public class StructureOutlineInformationControl extends TreeInformationControl
 {
     static private ViewerSorter sorter;
-    
+
     static {
         TapestryOutlinePage.AlphaCategorySorter alphaSort = new TapestryOutlinePage.AlphaCategorySorter();
         alphaSort.setUseCategorySort(true);
@@ -50,8 +50,12 @@ public class StructureOutlineInformationControl extends OutlineInformationContro
 
     public StructureOutlineInformationControl(Shell parent, int shellStyle, int treeStyle, SpecEditor editor)
     {
-        super(parent, shellStyle, treeStyle, new TapestryOutlinePage.ContentProvider(), sorter, new TapestryOutlinePage.BasicLabelProvider());
-        fEditor = editor;        
+        super(parent, shellStyle, treeStyle);
+        setContentProvider(new TapestryOutlinePage.ContentProvider());
+        setLabelProvider(new TapestryOutlinePage.BasicLabelProvider());
+        setSorter(sorter);
+
+        fEditor = editor;
     }
 
     /* (non-Javadoc)
@@ -68,8 +72,14 @@ public class StructureOutlineInformationControl extends OutlineInformationContro
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#doGotoSelectedElement(java.lang.Object)
      */
-    protected void doGotoSelectedElement(Object selected)
+    protected boolean doHandleSelectedElement(Object selected)
     {
-        fEditor.openTo(selected);
+        try
+        {
+            fEditor.openTo(selected);
+        } finally
+        {
+            return true;
+        }
     }
 }

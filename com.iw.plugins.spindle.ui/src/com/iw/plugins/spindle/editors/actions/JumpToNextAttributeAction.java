@@ -215,7 +215,7 @@ public class JumpToNextAttributeAction extends BaseJumpAction implements IDocume
             }
         } else
         {
-            for (int i = count - 1; i > 0; i -= 1)
+            for (int i = count - 1; i >= 0; i -= 1)
             {
                 int end = regions[i].getOffset() + regions[i].getLength();
 

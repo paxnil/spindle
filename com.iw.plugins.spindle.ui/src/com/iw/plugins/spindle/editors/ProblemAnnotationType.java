@@ -26,7 +26,7 @@
 
 package com.iw.plugins.spindle.editors;
 
-import org.apache.commons.lang.enum.Enum;
+import org.apache.commons.lang.enums.Enum;
 
 /**
  *  Different annotation types for things shown in the editors.
