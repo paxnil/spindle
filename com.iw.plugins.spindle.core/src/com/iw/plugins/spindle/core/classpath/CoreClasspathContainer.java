@@ -120,9 +120,13 @@ public class CoreClasspathContainer implements IClasspathContainer
                 {
                     sourceAttachmentPath = getSourceAttachmentPath(installUrl, "tapestry-contrib-src.jar");
                 } else {
+                	try {
                     int index = jarName.lastIndexOf('-');
                     String attachment = jarName.substring(0, index)+"-src.jar";
                     sourceAttachmentPath = getSourceAttachmentPath(installUrl, attachment);
+                	} catch (IOException e) {
+                		//do nothing - src attachment not found!
+                	}
                 }
 
                 if (sourceAttachmentPath != null)

@@ -445,7 +445,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         if (fProjectDelta == null)
             return false;
         fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
-        final List knownTapestryExtensions = Arrays.asList(fTapestryBuilder.KnownExtensions);
+        final List knownTapestryExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
 
         // check for java files that changed, or have been added
         try
@@ -476,7 +476,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
                         String name = path.removeFileExtension().lastSegment();
                         IContainer container = resource.getParent();
-                        IJavaElement element = (IJavaElement) JavaCore.getJavaCore().create((IFolder) container);
+                        IJavaElement element = (IJavaElement) JavaCore.create((IFolder) container);
                         if (element == null)
                             return true;
                         if (element instanceof IPackageFragmentRoot && fLastState.fMissingJavaTypes.contains(name))
