@@ -82,6 +82,11 @@ public class BaseValidator implements IScannerValidator
             return cursorPosition == 0 || cursorPosition == 1;
         }
 
+        public ISourceLocation getLocationOffset(int cursorPosition)
+        {
+            return this;
+        }
+
     }
 
     public static final String DefaultDummyString = "1~dummy<>";

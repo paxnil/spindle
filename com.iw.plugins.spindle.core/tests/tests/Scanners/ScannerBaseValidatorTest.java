@@ -641,8 +641,15 @@ public class ScannerBaseValidatorTest extends TestCase
          */
         public boolean contains(int cursorPosition)
         {
-
             return cursorPosition == 0;
         }
+        /* (non-Javadoc)
+         * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getLocationOffset(int)
+         */
+        public ISourceLocation getLocationOffset(int cursorPosition)
+        {
+            return this;
+        }
+
     }
 }

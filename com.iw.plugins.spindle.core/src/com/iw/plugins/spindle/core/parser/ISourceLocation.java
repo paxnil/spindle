@@ -32,4 +32,5 @@ public interface ISourceLocation
     public int getCharStart();
     public int getCharEnd();
     public boolean contains(int cursorPosition);
+    public ISourceLocation getLocationOffset(int cursorPosition);
 }

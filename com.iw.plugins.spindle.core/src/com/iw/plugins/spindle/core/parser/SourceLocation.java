@@ -107,8 +107,16 @@ public class SourceLocation implements ISourceLocation
      * @see com.iw.plugins.spindle.core.parser.ISourceLocation#contains(int)
      */
     public boolean contains(int cursorPosition)
-    {       
+    {
         return fCharStart <= cursorPosition && fCharEnd >= cursorPosition;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getLocationOffset(int)
+     */
+    public ISourceLocation getLocationOffset(int offset)
+    {
+        return new SourceLocation(fLineNumber, fCharStart + offset >= fCharEnd ? fCharStart : fCharStart + offset, fCharEnd);
     }
 
 }

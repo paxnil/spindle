@@ -203,12 +203,14 @@ public class TemplateScanner extends AbstractScanner
         result.setType(componentType);
 
         Map attributesMap = token.getAttributesMap();
-        for (Iterator iter = attributesMap.keySet().iterator(); iter.hasNext();)
-        {
-            String attrName = (String) iter.next();
-            TemplateAttribute attr = (TemplateAttribute) attributesMap.get(attrName);
-            result.setBinding(attrName, createImplicitBinding(attr));
-        }
+
+        if (attributesMap != null)
+            for (Iterator iter = attributesMap.keySet().iterator(); iter.hasNext();)
+            {
+                String attrName = (String) iter.next();
+                TemplateAttribute attr = (TemplateAttribute) attributesMap.get(attrName);
+                result.setBinding(attrName, createImplicitBinding(attr));
+            }
 
         return result;
 
@@ -239,74 +241,30 @@ public class TemplateScanner extends AbstractScanner
         {
             String name = (String) i.next();
             PluginBindingSpecfication bspec = (PluginBindingSpecfication) contained.getBinding(name);
-            ISourceLocation location = getAttributeLocation(name, token.getAttributesMap());
+            ISourceLocation location = getAttributeLocation(name, token.getEventInfo().getAttributeMap());
 
             BindingType bindingType = bspec.getType();
 
             if (bindingType == BindingType.DYNAMIC)
             {
-                validateImplicitExpressionBinding(bspec, containedSpecification, location);
+                validateImplicitExpressionBinding(
+                    bspec,
+                    containedSpecification,
+                    location.getLocationOffset(TemplateParser.OGNL_EXPRESSION_PREFIX.length()));
                 continue;
             }
 
             if (bindingType == BindingType.STRING)
             {
-                validateImplicitStringBinding(bspec, containedSpecification, location);
+                validateImplicitStringBinding(
+                    bspec,
+                    containedSpecification,
+                    location.getLocationOffset(TemplateParser.LOCALIZATION_KEY_PREFIX.length()));
                 continue;
             }
 
             if (bindingType == BindingType.STATIC)
                 validateImplicitStaticBinding(bspec, containedSpecification, location);
-
-            //            //
-            //            //            ISourceLocationInfo bindingSrcInfo = token.getEventInfo()
-            //            //            ISourceLocation location =
-            //            //                name.startsWith(getDummyStringPrefix())
-            //            //                    ? bindingSrcInfo.getStartTagSourceLocation()
-            //            //                    : bindingSrcInfo.getAttributeSourceLocation("name");
-            //            //
-            //            //            name = name.startsWith(getDummyStringPrefix()) ? "'name not found'" : name;
-            //            //
-            //            //            // If not allowing informal parameters, check that each binding matches
-            //            //            // a formal parameter.
-            //            //
-            //            //            if (formalOnly && !isFormal)
-            //            //            {
-            //            //                reportProblem(
-            //            //                    IProblem.ERROR,
-            //            //                    location,
-            //            //                    TapestryCore.getTapestryString("PageLoader.formal-parameters-only", containedName, name));
-            //            //
-            //            //                continue;
-            //            //            }
-            //            //
-            //            //            // If an informal parameter that conflicts with a reserved name, then
-            //            //            // skip it.
-            //
-            //            if (!isFormal && containedSpecification.isReservedParameterName(name))
-            //            {
-            //
-            //                if (bindingType == BindingType.DYNAMIC)
-            //                {
-            //                    addProblem(
-            //                        IProblem.ERROR,
-            //                        location,
-            //                        TapestryCore.getTapestryString(
-            //                            "BaseComponent.template-expression-for-reserved-parameter",
-            //                            new Object[] {
-            //                                fComponentSpec.getSpecificationLocation().getName(),
-            //                                name,
-            //                                containedSpecification.getSpecificationLocation().getName(),
-            //                                name }));
-            //                } else
-            //                {
-            //                    addProblem(
-            //                        IProblem.WARNING,
-            //                        location,
-            //                        "ignoring binding '" + name + "'. trying to bind to reserved parameter.");
-            //                }
-            //                continue;
-            //            }
 
         }
 
@@ -328,13 +286,13 @@ public class TemplateScanner extends AbstractScanner
 
         boolean isAllowInformalParameters = containedSpecification.getAllowInformalParameters();
 
-        if (isFormal && !isAllowInformalParameters)
+        if (!isFormal && !isAllowInformalParameters)
         {
 
             addProblem(
                 IProblem.ERROR,
                 location,
-                TapestryCore.getString(
+                TapestryCore.getTapestryString(
                     "PageLoader.formal-parameters-only",
                     containedSpecification.getSpecificationLocation().getName(),
                     bspec.getIdentifier()));
@@ -366,12 +324,22 @@ public class TemplateScanner extends AbstractScanner
             String pType = parameter.getType();
             if (pType != null)
             {
-                boolean allowed = "String".equalsIgnoreCase(pType) || "java.lang.String".equals(pType);
+                boolean allowed =
+                    "String".equalsIgnoreCase(pType)
+                        || "java.lang.String".equals(pType)
+                        || "Object".equalsIgnoreCase(pType)
+                        || "java.lang.Object".equals(pType);
                 if (!allowed)
                     addProblem(
                         IProblem.WARNING,
                         location,
-                        "may not be able to assign the value of '" + bspec.getIdentifier() + "' to type '" + pType);
+                        "Parameter '"
+                            + bspec.getIdentifier()
+                            + "' of '"
+                            + containedSpecification.getSpecificationLocation().getName()
+                            + "' expects bindings to be of type '"
+                            + pType
+                            + "'");
                 //TODO internationalize
             }
 
@@ -381,7 +349,7 @@ public class TemplateScanner extends AbstractScanner
                 addProblem(
                     IProblem.ERROR,
                     location,
-                    TapestryCore.getString(
+                    TapestryCore.getTapestryString(
                         "PageLoader.formal-parameters-only",
                         containedSpecification.getSpecificationLocation().getName(),
                         bspec.getIdentifier()));
@@ -454,7 +422,7 @@ public class TemplateScanner extends AbstractScanner
             String name = (String) entry.getKey();
             TemplateAttribute attribute = (TemplateAttribute) entry.getValue();
             AttributeType type = attribute.getType();
-            ISourceLocation location = getAttributeLocation(name, token.getAttributesMap());
+            ISourceLocation location = getAttributeLocation(name, token.getEventInfo().getAttributeMap());
 
             if (type == AttributeType.OGNL_EXPRESSION)
             {

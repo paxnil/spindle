@@ -334,7 +334,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
         if (fBeans == null)
             fBeans = new IIdentifiableMap(this, "beans");
 
-        fParameters.put(name, specification);
+        fBeans.put(name, specification);
     }
 
     public void removeBeanSpecification(String name)

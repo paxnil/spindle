@@ -624,6 +624,7 @@ public class NamespaceResolver
             name = name.substring(0, dotx);
         }
         fResultNamespace.installPageSpecification(name, specification);
+        fBuild.parseTemplates(specification);
     }
 
     /**
@@ -644,6 +645,7 @@ public class NamespaceResolver
         if (result != null)
         {
             fResultNamespace.installPageSpecification(name, result);
+            fBuild.parseTemplates((PluginComponentSpecification) result);
             //((PluginComponentSpecification) result).setNamespace(fResultNamespace);
             //fBuild.parseTemplates((PluginComponentSpecification) result);
         }

@@ -88,7 +88,9 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
     {
         if (fBindings == null)
             fBindings = new PropertyFiringMap(this, "bindings");
-
+        PluginBindingSpecfication pluginSpec = (PluginBindingSpecfication)spec;
+        pluginSpec.setIdentifier(name);
+        pluginSpec.setParent(this);
         fBindings.put(name, spec);
     }
 

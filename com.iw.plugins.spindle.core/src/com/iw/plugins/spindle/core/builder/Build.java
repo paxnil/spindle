@@ -407,6 +407,7 @@ public abstract class Build implements IBuild
     protected void parseTemplates(PluginComponentSpecification spec)
     {
         TemplateScanner scanner = new TemplateScanner();
+        scanner.setFactory(TapestryCore.getSpecificationFactory());
 
         for (Iterator iter = spec.getTemplateLocations().iterator(); iter.hasNext();)
         {
@@ -414,6 +415,7 @@ public abstract class Build implements IBuild
             try
             {
                 scanner.scanTemplate(spec, location, fValidator);
+                
                 IResource res = Utils.toResource(location);
                 if (res != null)
                 {

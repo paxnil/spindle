@@ -92,6 +92,7 @@ public class ComponentScanner extends SpecificationScanner
 
         specification.setPublicId(fPublicId);
         specification.setSpecificationLocation(fResourceLocation);
+        specification.setPageSpecification(fIsPageSpec);
         ((PluginComponentSpecification) specification).setNamespace(fNamespace);
 
         // Only components specify these two attributes.
