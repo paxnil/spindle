@@ -25,31 +25,37 @@ package com.iw.plugins.spindle.core.parser.xml.event;
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 import java.util.HashMap;
 import java.util.Map;
 
 
-public class ElementXMLEventInfo {
+public class ElementXMLEventInfo 
+{
 
-  private Map attributeMap;
-  SimpleXMLEventInfo startTagLocation;
-  SimpleXMLEventInfo endTagLocation;
+    private Map attributeMap;
+    SimpleXMLEventInfo startTagLocation;
+    SimpleXMLEventInfo endTagLocation;
 
-  public Map getAttributeMap() {
-    if (attributeMap == null) {
-      attributeMap = new HashMap();
+    public Map getAttributeMap()
+    {
+        if (attributeMap == null)
+        {
+            attributeMap = new HashMap();
+        }
+        return attributeMap;
     }
-    return attributeMap;
-  }
 
-  public SimpleXMLEventInfo getEndTagLocation() {
-    return endTagLocation;
-  }
+    public SimpleXMLEventInfo getEndTagLocation()
+    {
+        return endTagLocation;
+    }
 
-  public SimpleXMLEventInfo getStartTagLocation() {
-    return startTagLocation;
-  }
+    public SimpleXMLEventInfo getStartTagLocation()
+    {
+        return startTagLocation;
+    }
 
+    
+    
 
 }

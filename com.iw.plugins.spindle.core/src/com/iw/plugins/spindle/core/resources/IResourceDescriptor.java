@@ -66,52 +66,53 @@ import org.eclipse.core.runtime.CoreException;
  * @see net.sf.tapestry.IResourceLocation
  */
 
-public interface IResourceDescriptor extends IResourceLocation {
+public interface IResourceDescriptor extends IResourceLocation
+{
 
-  /** the artifact lives in the source folders of its project **/
-  public static final int CLASSPATH_SRC = 0;
-  /** the artifact lives in a jar file in the build path of its project **/
-  public static final int CLASSPATH_BINARY = 1;
-  /** the artifact lives in designated app root folder **/
-  public static final int APPLICATION_ROOT = 2;
-  /** the artifact lives in designated servlet context root folder **/
-  public static final int CONTEXT_ROOT = 3;
-  /** the artifact lives outside of the above **/
-  public static final int UNKNOWN = Integer.MAX_VALUE;
+    /** the artifact lives in the source folders of its project **/
+    public static final int CLASSPATH_SRC = 0;
+    /** the artifact lives in a jar file in the build path of its project **/
+    public static final int CLASSPATH_BINARY = 1;
+    /** the artifact lives in designated app root folder **/
+    public static final int APPLICATION_ROOT = 2;
+    /** the artifact lives in designated servlet context root folder **/
+    public static final int CONTEXT_ROOT = 3;
+    /** the artifact lives outside of the above **/
+    public static final int UNKNOWN = Integer.MAX_VALUE;
 
-  /**
-   * return the workspace storage associated with this descriptor
-   * <br>
-   * Using IStorage here instead of IResource as some things will come from
-   * Jar files.
-   */
-  public IStorage getStorage();
+    /**
+     * return the workspace storage associated with this descriptor
+     * <br>
+     * Using IStorage here instead of IResource as some things will come from
+     * Jar files.
+     */
+    public IStorage getStorage();
 
-  public boolean isWorkspaceResource();
-  
-  public boolean isOnClasspath();
-  
-  public boolean isUnderContextRoot();
-  
-  public boolean isUnderApplicationRoot();
+    public boolean isWorkspaceResource();
 
-  /**
-   * return the project that contains the artifact
-   */
-  public IProject getProject();
+    public boolean isOnClasspath();
 
-  /**
-   * return the object that owns this one.
-   */
-  public Object getOwner();
+    public boolean isUnderContextRoot();
 
-  /**
-   * Returns an open input stream on the contents of this descriptor.
-   * The caller is responsible for closing the stream when finished.
-   * 
-   *   @exception CoreException if the contents of this storage could 
-   *		not be accessed.   See any refinements for more information.  
-   */
-  public InputStream getContents() throws CoreException;
+    public boolean isUnderApplicationRoot();
+
+    /**
+     * return the project that contains the artifact
+     */
+    public IProject getProject();
+
+    /**
+     * return the object that owns this one.
+     */
+    public Object getOwner();
+
+    /**
+     * Returns an open input stream on the contents of this descriptor.
+     * The caller is responsible for closing the stream when finished.
+     * 
+     *   @exception CoreException if the contents of this storage could 
+     *		not be accessed.   See any refinements for more information.  
+     */
+    public InputStream getContents() throws CoreException;
 
 }

@@ -35,20 +35,28 @@ import org.eclipse.jdt.core.JavaModelException;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public class Utils {
+public class Utils
+{
 
-  public static boolean extendsType(IType candidate, IType baseType) throws JavaModelException {
-    boolean match = false;
-    ITypeHierarchy hierarchy = candidate.newSupertypeHierarchy(null);
-    if (hierarchy.exists()) {
-      IType[] superClasses = hierarchy.getAllSupertypes(candidate);
-      for (int i = 0; i < superClasses.length; i++) {
-        if (superClasses[i].equals(baseType)) {
-          match = true;
+    public static boolean extendsType(IType candidate, IType baseType) throws JavaModelException
+    {
+        Assert.isNotNull(candidate);
+        Assert.isNotNull(baseType);        
+
+        boolean match = false;
+        ITypeHierarchy hierarchy = candidate.newSupertypeHierarchy(null);
+        if (hierarchy.exists())
+        {
+            IType[] superClasses = hierarchy.getAllSupertypes(candidate);
+            for (int i = 0; i < superClasses.length; i++)
+            {
+                if (superClasses[i].equals(baseType))
+                {
+                    match = true;
+                }
+            }
         }
-      }
+        return match;
     }
-    return match;
-  }
 
 }

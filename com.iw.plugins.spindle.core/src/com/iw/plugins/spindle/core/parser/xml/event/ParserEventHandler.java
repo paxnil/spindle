@@ -25,59 +25,74 @@ package com.iw.plugins.spindle.core.parser.xml.event;
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 import java.util.Stack;
 
-public class ParserEventHandler {
+public class ParserEventHandler
+{
 
-  private Stack stack;
-  private SimpleXMLEventInfo currentAttribute;
-  /**
-   * Constructor for LocationHandler.
-   */
-  public ParserEventHandler() {
-    stack = new Stack();
-  }
+    private Stack stack;
+    private SimpleXMLEventInfo currentAttribute;
+    /**
+     * Constructor for LocationHandler.
+     */
+    public ParserEventHandler()
+    {
+        stack = new Stack();
+    }
 
-  public void startTagBegin(int lineNumber, int columnNumber) {
-    ElementXMLEventInfo newInfo = new ElementXMLEventInfo();
-    newInfo.startTagLocation = new SimpleXMLEventInfo();
-    newInfo.startTagLocation.setBeginValues(lineNumber, columnNumber);
-    stack.push(newInfo);
-  }
+    public void startTagBegin(int lineNumber, int columnNumber)
+    {
+        ElementXMLEventInfo newInfo = new ElementXMLEventInfo();
+        newInfo.startTagLocation = new SimpleXMLEventInfo();
+        newInfo.startTagLocation.setBeginValues(lineNumber, columnNumber);
+        stack.push(newInfo);
+    }
 
-  public void startTagEnd(int lineNumber, int columnNumber) {
-  	ElementXMLEventInfo info = (ElementXMLEventInfo)peekCurrent();  	
-    info.startTagLocation.setEndValues(lineNumber, columnNumber);
-  }
+    public void startTagEnd(int lineNumber, int columnNumber)
+    {
+        ElementXMLEventInfo info = (ElementXMLEventInfo) peekCurrent();
+        info.startTagLocation.setEndValues(lineNumber, columnNumber);
+    }
 
-  public void endTagBegin(int lineNumber, int columnNumber) {
-  	ElementXMLEventInfo info = (ElementXMLEventInfo)peekCurrent(); 
-  	info.endTagLocation = new SimpleXMLEventInfo();
-    info.endTagLocation.setBeginValues(lineNumber, columnNumber);
-  }
+    public void endTagBegin(int lineNumber, int columnNumber)
+    {
+        ElementXMLEventInfo info = (ElementXMLEventInfo) peekCurrent();
+        info.endTagLocation = new SimpleXMLEventInfo();
+        info.endTagLocation.setBeginValues(lineNumber, columnNumber);
+    }
 
-  public void endTagEnd(int lineNumber, int columnNumber) {
-  	ElementXMLEventInfo info = (ElementXMLEventInfo)peekCurrent(); 
-    info.endTagLocation.setEndValues(lineNumber, columnNumber);
-  }
+    public void endTagEnd(int lineNumber, int columnNumber)
+    {
+        ElementXMLEventInfo info = (ElementXMLEventInfo) peekCurrent();
+        info.endTagLocation.setEndValues(lineNumber, columnNumber);
+    }
 
-  public void attributeBegin(String rawname, int lineNumber, int columnNumber) {
-    currentAttribute = new SimpleXMLEventInfo();
-    currentAttribute.setBeginValues(lineNumber, columnNumber);
-    peekCurrent().getAttributeMap().put(rawname, currentAttribute);
-  }
+    public void attributeBegin(String rawname, int lineNumber, int columnNumber)
+    {
+        currentAttribute = new SimpleXMLEventInfo();
+        currentAttribute.setBeginValues(lineNumber, columnNumber);
+        peekCurrent().getAttributeMap().put(rawname, currentAttribute);
+    }
 
-  public void attributeEnd(int lineNumber, int columnNumber) {
-    currentAttribute.setEndValues(lineNumber, columnNumber);
-  }
+    public void attributeEnd(int lineNumber, int columnNumber)
+    {
+        if (currentAttribute != null)
+        {
+            currentAttribute.setEndValues(lineNumber, columnNumber);
+        } else
+        {
+            System.err.println("ParserEventHandler.attributeEnd called but current attr is null!");
+        }
+    }
 
-  public ElementXMLEventInfo popCurrent() {
-    return (ElementXMLEventInfo) stack.pop();
-  }
+    public ElementXMLEventInfo popCurrent()
+    {
+        return (ElementXMLEventInfo) stack.pop();
+    }
 
-  private ElementXMLEventInfo peekCurrent() {
-    return (ElementXMLEventInfo) stack.peek();
-  }
+    public ElementXMLEventInfo peekCurrent()
+    {
+        return (ElementXMLEventInfo) stack.peek();
+    }
 
 }

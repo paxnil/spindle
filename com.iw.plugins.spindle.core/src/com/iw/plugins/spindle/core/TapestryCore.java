@@ -33,7 +33,6 @@ import java.util.ResourceBundle;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
@@ -45,176 +44,150 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 /**
  * The main plugin class to be used in the desktop.
  */
-public class TapestryCore extends AbstractUIPlugin {
+public class TapestryCore extends AbstractUIPlugin
+{
 
-  public static final String PLUGIN_ID = "com.iw.plugins.spindle.core";
-  public static final String NATURE_ID = PLUGIN_ID + ".tapestrynature";
-  public static final String BUILDER_ID = PLUGIN_ID + ".tapestrybuilder";
+    public static final String PLUGIN_ID = "com.iw.plugins.spindle.core";
+    public static final String NATURE_ID = PLUGIN_ID + ".tapestrynature";
+    public static final String BUILDER_ID = PLUGIN_ID + ".tapestrybuilder";
 
-  //The shared instance.
-  private static TapestryCore plugin;
-  //Resource bundle.
-  private ResourceBundle resourceBundle;
+    //The shared instance.
+    private static TapestryCore plugin;
+    //Resource bundle.
+    private ResourceBundle resourceBundle;
 
-  /**
-   * The constructor.
-   */
-  public TapestryCore(IPluginDescriptor descriptor) {
-    super(descriptor);
-    plugin = this;
-    try {
-      resourceBundle = ResourceBundle.getBundle("com.iw.plugins.spindle.core.resources");
-    } catch (MissingResourceException x) {
-      resourceBundle = null;
-    }
-  }
+    /**
+     * The constructor.
+     */
+    public TapestryCore(IPluginDescriptor descriptor)
+    {
+        super(descriptor);
+        plugin = this;
+        try
+        {
+            resourceBundle = ResourceBundle.getBundle("com.iw.plugins.spindle.core.resources");
+        } catch (MissingResourceException x)
+        {
+            resourceBundle = null;
+        }
+    } 
 
-  /**
-   * Returns the shared instance.
-   */
-  public static TapestryCore getDefault() {
-    return plugin;
-  }
-
-  /**
-   * Returns the workspace instance.
-   */
-  public static IWorkspace getWorkspace() {
-    return ResourcesPlugin.getWorkspace();
-  }
-
-  /**
-   * Returns the string from the plugin's resource bundle,
-   * or 'key' if not found.
-   */
-  public static String getResourceString(String key) {
-    ResourceBundle bundle = TapestryCore.getDefault().getResourceBundle();
-    try {
-      return bundle.getString(key);
-    } catch (MissingResourceException e) {
-      return key;
-    }
-  }
-
-  /**
-   * Returns the plugin's resource bundle,
-   */
-  public ResourceBundle getResourceBundle() {
-    return resourceBundle;
-  }
-
-  static public void log(String msg) {
-    ILog log = TapestryCore.getDefault().getLog();
-    Status status =
-      new Status(
-        IStatus.ERROR,
-        TapestryCore.getDefault().getDescriptor().getUniqueIdentifier(),
-        IStatus.ERROR,
-        msg + "\n",
-        null);
-    log.log(status);
-  }
-
-  static public void log(Exception ex) {
-    ILog log = TapestryCore.getDefault().getLog();
-    StringWriter stringWriter = new StringWriter();
-    ex.printStackTrace(new PrintWriter(stringWriter));
-    String msg = stringWriter.getBuffer().toString();
-
-    Status status =
-      new Status(
-        IStatus.ERROR,
-        TapestryCore.getDefault().getDescriptor().getUniqueIdentifier(),
-        IStatus.ERROR,
-        msg,
-        null);
-    log.log(status);
-  }
-  public static void addNatureToProject(IProject project, String natureId) throws CoreException {
-    IProject proj = project.getProject(); // Needed if project is a IJavaProject
-    IProjectDescription description = proj.getDescription();
-    String[] prevNatures = description.getNatureIds();
-
-    int natureIndex = -1;
-    for (int i = 0; i < prevNatures.length; i++) {
-      if (prevNatures[i].equals(natureId)) {
-        natureIndex = i;
-        i = prevNatures.length;
-      }
+    /**
+     * Returns the shared instance.
+     */
+    public static TapestryCore getDefault()
+    {
+        return plugin;
     }
 
-    // Add nature only if it is not already there
-    if (natureIndex == -1) {
-      String[] newNatures = new String[prevNatures.length + 1];
-      System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
-      newNatures[prevNatures.length] = natureId;
-      description.setNatureIds(newNatures);
-      proj.setDescription(description, null);
-    }
-  }
-
-  public static void removeNatureFromProject(IProject project, String natureId)
-    throws CoreException {
-    IProject proj = project.getProject(); // Needed if project is a IJavaProject
-    IProjectDescription description = proj.getDescription();
-    String[] prevNatures = description.getNatureIds();
-
-    int natureIndex = -1;
-    for (int i = 0; i < prevNatures.length; i++) {
-      if (prevNatures[i].equals(natureId)) {
-        natureIndex = i;
-        i = prevNatures.length;
-      }
+    /**
+     * Returns the workspace instance.
+     */
+    public static IWorkspace getWorkspace()
+    {
+        return ResourcesPlugin.getWorkspace();
     }
 
-    // Remove nature only if it exists...
-    if (natureIndex != -1) {
-      String[] newNatures = new String[prevNatures.length - 1];
-      System.arraycopy(prevNatures, 0, newNatures, 0, natureIndex);
-      System.arraycopy(
-        prevNatures,
-        natureIndex + 1,
-        newNatures,
-        natureIndex,
-        prevNatures.length - (natureIndex + 1));
-      description.setNatureIds(newNatures);
-      proj.setDescription(description, null);
+    /**
+     * Returns the string from the plugin's resource bundle,
+     * or 'key' if not found.
+     */
+    public static String getResourceString(String key)
+    {
+        ResourceBundle bundle = TapestryCore.getDefault().getResourceBundle();
+        try
+        {
+            return bundle.getString(key);
+        } catch (MissingResourceException e)
+        {
+            return key;
+        }
     }
-  }
 
-  /**
-  * Returns the Tapestry model.
-  * 
-  * @param root the given root
-  * @return the Tapestry model, or <code>null</code> if the root is null
-  */
-  public static ITapestryModel create(IWorkspaceRoot root) {
-    if (root == null) {
-      return null;
+    /**
+     * Returns the plugin's resource bundle,
+     */
+    public ResourceBundle getResourceBundle()
+    {
+        return resourceBundle;
     }
-    return TapestryModelManager.getTapestryModelManager().getTapestryModel();
-  }
 
-  /**
-   * Returns the Tapestry project corresponding to the given project.
-   * <p>
-   * Creating a Tapestry Project has the side effect of creating and opening all of the
-   * project's parents if they are not yet open.
-   * <p>
-   * Note that no check is done at this time on the existence of the tapestry nature of this project.
-   * 
-   * @param project the given project
-   * @return the Java project corresponding to the given project, null if the given project is null
-   */
-  public static ITapestryProject create(IProject project) {
-    if (project == null) {
-      return null;
+    static public void log(String msg)
+    {
+        ILog log = TapestryCore.getDefault().getLog();
+        Status status =
+            new Status(
+                IStatus.ERROR,
+                TapestryCore.getDefault().getDescriptor().getUniqueIdentifier(),
+                IStatus.ERROR,
+                msg + "\n",
+                null);
+        log.log(status);
     }
-    TapestryModel tapestryModel =
-      TapestryModelManager.getTapestryModelManager().getTapestryModel();
-    return tapestryModel.getTapestryProject(project);
-  }
 
- 
+    static public void log(Exception ex)
+    {
+        ILog log = TapestryCore.getDefault().getLog();
+        StringWriter stringWriter = new StringWriter();
+        ex.printStackTrace(new PrintWriter(stringWriter));
+        String msg = stringWriter.getBuffer().toString();
+
+        Status status =
+            new Status(IStatus.ERROR, TapestryCore.getDefault().getDescriptor().getUniqueIdentifier(), IStatus.ERROR, msg, null);
+        log.log(status);
+    }
+    public static void addNatureToProject(IProject project, String natureId) throws CoreException
+    {
+        IProject proj = project.getProject(); // Needed if project is a IJavaProject
+        IProjectDescription description = proj.getDescription();
+        String[] prevNatures = description.getNatureIds();
+
+        int natureIndex = -1;
+        for (int i = 0; i < prevNatures.length; i++)
+        {
+            if (prevNatures[i].equals(natureId))
+            {
+                natureIndex = i;
+                i = prevNatures.length;
+            }
+        }
+
+        // Add nature only if it is not already there
+        if (natureIndex == -1)
+        {
+            String[] newNatures = new String[prevNatures.length + 1];
+            System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
+            newNatures[prevNatures.length] = natureId;
+            description.setNatureIds(newNatures);
+            proj.setDescription(description, null);
+        }
+    }
+
+    public static void removeNatureFromProject(IProject project, String natureId) throws CoreException
+    {
+        IProject proj = project.getProject(); // Needed if project is a IJavaProject
+        IProjectDescription description = proj.getDescription();
+        String[] prevNatures = description.getNatureIds();
+
+        int natureIndex = -1;
+        for (int i = 0; i < prevNatures.length; i++)
+        {
+            if (prevNatures[i].equals(natureId))
+            {
+                natureIndex = i;
+                i = prevNatures.length;
+            }
+        }
+
+        // Remove nature only if it exists...
+        if (natureIndex != -1)
+        {
+            String[] newNatures = new String[prevNatures.length - 1];
+            System.arraycopy(prevNatures, 0, newNatures, 0, natureIndex);
+            System.arraycopy(prevNatures, natureIndex + 1, newNatures, natureIndex, prevNatures.length - (natureIndex + 1));
+            description.setNatureIds(newNatures);
+            proj.setDescription(description, null);
+        }
+    }
 
 }

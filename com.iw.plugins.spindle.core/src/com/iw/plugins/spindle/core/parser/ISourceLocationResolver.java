@@ -33,10 +33,11 @@ package com.iw.plugins.spindle.core.parser;
  * @author glongman@intelligentworks.com
  */
 
-public interface ISourceLocationResolver {  
+public interface ISourceLocationResolver
+{
 
-  public int getLineOffset(int parserReportedLineNumber);
+    public int getLineOffset(int parserReportedLineNumber);
 
-  public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn);
+    public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn);
 
 }

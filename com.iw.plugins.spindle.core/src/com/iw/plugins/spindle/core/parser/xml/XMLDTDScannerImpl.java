@@ -99,9 +99,8 @@ import org.apache.xerces.xni.parser.XMLInputSource;
  *
  * @version $Id$
  */
-public class XMLDTDScannerImpl
-    extends XMLScanner
-    implements XMLDTDScanner, XMLComponent, XMLEntityHandler {
+public class XMLDTDScannerImpl extends XMLScanner implements XMLDTDScanner, XMLComponent, XMLEntityHandler
+{
 
     //
     // Constants
@@ -119,19 +118,12 @@ public class XMLDTDScannerImpl
     protected static final int SCANNER_STATE_MARKUP_DECL = 2;
 
     // recognized features and properties
-    
+
     /** Recognized features. */
-    private static final String[] RECOGNIZED_FEATURES = {
-        VALIDATION,
-        NOTIFY_CHAR_REFS,
-    };
+    private static final String[] RECOGNIZED_FEATURES = { VALIDATION, NOTIFY_CHAR_REFS, };
 
     /** Recognized properties. */
-    private static final String[] RECOGNIZED_PROPERTIES = {
-        SYMBOL_TABLE,
-        ERROR_REPORTER,
-        ENTITY_MANAGER,
-    };
+    private static final String[] RECOGNIZED_PROPERTIES = { SYMBOL_TABLE, ERROR_REPORTER, ENTITY_MANAGER, };
 
     // debugging
 
@@ -184,7 +176,6 @@ public class XMLDTDScannerImpl
     /** Parameter entity stack to check well-formedness. */
     private int[] fPEStack = new int[5];
 
-
     /** Parameter entity stack to report start/end entity calls. */
     private boolean[] fPEReport = new boolean[5];
 
@@ -234,7 +225,8 @@ public class XMLDTDScannerImpl
     //
 
     /** Default constructor. */
-    public XMLDTDScannerImpl() {} // <init>()
+    public XMLDTDScannerImpl()
+    {} // <init>()
 
     //
     // XMLDTDScanner methods
@@ -247,7 +239,8 @@ public class XMLDTDScannerImpl
      *
      * @throws IOException Thrown on i/o error.
      */
-    public void setInputSource(XMLInputSource inputSource) throws IOException {
+    public void setInputSource(XMLInputSource inputSource) throws IOException
+    {
         fEntityManager.setEntityHandler(this);
         fEntityManager.startDTDEntity(inputSource);
     } // setInputSource(XMLInputSource)
@@ -265,28 +258,33 @@ public class XMLDTDScannerImpl
      *
      * @returns True if there is more to scan, false otherwise.
      */
-    public boolean scanDTDExternalSubset(boolean complete) 
-        throws IOException, XNIException {
+    public boolean scanDTDExternalSubset(boolean complete) throws IOException, XNIException
+    {
 
         fEntityManager.setEntityHandler(this);
-        if (fScannerState == SCANNER_STATE_TEXT_DECL) {
+        if (fScannerState == SCANNER_STATE_TEXT_DECL)
+        {
             fSeenExternalDTD = true;
             boolean textDecl = scanTextDecl();
-            if (fScannerState == SCANNER_STATE_END_OF_INPUT) {
+            if (fScannerState == SCANNER_STATE_END_OF_INPUT)
+            {
                 return false;
-            }
-            else {
+            } else
+            {
                 // next state is markup decls regardless of whether there
                 // is a TextDecl or not
                 setScannerState(SCANNER_STATE_MARKUP_DECL);
-                if (textDecl && !complete) {
+                if (textDecl && !complete)
+                {
                     return true;
                 }
             }
         }
         // keep dispatching "events"
-        do {
-            if (!scanDecls(complete)) {
+        do
+        {
+            if (!scanDecls(complete))
+            {
                 return false;
             }
         } while (complete);
@@ -316,15 +314,17 @@ public class XMLDTDScannerImpl
      *
      * @returns True if there is more to scan, false otherwise.
      */
-    public boolean scanDTDInternalSubset(boolean complete, boolean standalone,
-                                         boolean hasExternalSubset)
-        throws IOException, XNIException {
+    public boolean scanDTDInternalSubset(boolean complete, boolean standalone, boolean hasExternalSubset)
+        throws IOException, XNIException
+    {
 
         fEntityManager.setEntityHandler(this);
         fStandalone = standalone;
-        if (fScannerState == SCANNER_STATE_TEXT_DECL) {
+        if (fScannerState == SCANNER_STATE_TEXT_DECL)
+        {
             // call handler
-            if (fDTDHandler != null) {
+            if (fDTDHandler != null)
+            {
                 fDTDHandler.startDTD(fEntityScanner, null);
                 fStartDTDCalled = true;
             }
@@ -332,10 +332,13 @@ public class XMLDTDScannerImpl
             setScannerState(SCANNER_STATE_MARKUP_DECL);
         }
         // keep dispatching "events"
-        do {
-            if (!scanDecls(complete)) {
+        do
+        {
+            if (!scanDecls(complete))
+            {
                 // call handler
-                if (fDTDHandler != null && hasExternalSubset == false) {
+                if (fDTDHandler != null && hasExternalSubset == false)
+                {
                     fDTDHandler.endDTD(null);
                 }
                 // we're done, set starting state for external subset
@@ -358,9 +361,9 @@ public class XMLDTDScannerImpl
      * 
      * @param componentManager 
      */
-    public void reset(XMLComponentManager componentManager)
-        throws XMLConfigurationException {
-        
+    public void reset(XMLComponentManager componentManager) throws XMLConfigurationException
+    {
+
         super.reset(componentManager);
 
         // reset state related data
@@ -384,7 +387,8 @@ public class XMLDTDScannerImpl
      * this component. This method may return null if no features
      * are recognized by this component.
      */
-    public String[] getRecognizedFeatures() {
+    public String[] getRecognizedFeatures()
+    {
         return RECOGNIZED_FEATURES;
     } // getRecognizedFeatures():String[]
 
@@ -393,7 +397,8 @@ public class XMLDTDScannerImpl
      * this component. This method may return null if no properties
      * are recognized by this component.
      */
-    public String[] getRecognizedProperties() {
+    public String[] getRecognizedProperties()
+    {
         return RECOGNIZED_PROPERTIES;
     } // getRecognizedProperties():String[]
 
@@ -406,7 +411,8 @@ public class XMLDTDScannerImpl
      * 
      * @param dtdHandler 
      */
-    public void setDTDHandler(XMLDTDHandler dtdHandler) {
+    public void setDTDHandler(XMLDTDHandler dtdHandler)
+    {
         fDTDHandler = dtdHandler;
     } // setDTDHandler
 
@@ -419,8 +425,8 @@ public class XMLDTDScannerImpl
      * 
      * @param dtdContentModelHandler 
      */
-    public void setDTDContentModelHandler(XMLDTDContentModelHandler
-                                          dtdContentModelHandler) {
+    public void setDTDContentModelHandler(XMLDTDContentModelHandler dtdContentModelHandler)
+    {
         fDTDContentModelHandler = dtdContentModelHandler;
     } // setDTDContentModelHandler
 
@@ -443,30 +449,33 @@ public class XMLDTDScannerImpl
      *
      * @throws XNIException Thrown by handler to signal an error.
      */
-    public void startEntity(String name, 
-                            XMLResourceIdentifier identifier,
-                            String encoding) throws XNIException {
+    public void startEntity(String name, XMLResourceIdentifier identifier, String encoding) throws XNIException
+    {
 
         super.startEntity(name, identifier, encoding);
 
         boolean dtdEntity = name.equals("[dtd]");
-        if (dtdEntity) {
+        if (dtdEntity)
+        {
             // call handler
-            if (fDTDHandler != null && !fStartDTDCalled ) {
+            if (fDTDHandler != null && !fStartDTDCalled)
+            {
                 fDTDHandler.startDTD(fEntityScanner, null);
             }
             fDTDHandler.startExternalSubset(null);
             fExtEntityDepth++;
-        }
-        else if (name.charAt(0) == '%') {
+        } else if (name.charAt(0) == '%')
+        {
             pushPEStack(fMarkUpDepth, fReportEntity);
-            if (fEntityScanner.isExternal()) {
+            if (fEntityScanner.isExternal())
+            {
                 fExtEntityDepth++;
             }
         }
 
         // call handler
-        if (fDTDHandler != null && !dtdEntity && fReportEntity) {
+        if (fDTDHandler != null && !dtdEntity && fReportEntity)
+        {
             fDTDHandler.startParameterEntity(name, identifier, encoding, null);
         }
 
@@ -481,48 +490,57 @@ public class XMLDTDScannerImpl
      *
      * @throws XNIException Thrown by handler to signal an error.
      */
-    public void endEntity(String name) 
-        throws XNIException {
+    public void endEntity(String name) throws XNIException
+    {
 
         super.endEntity(name);
 
         // Handle end of PE
         boolean reportEntity = fReportEntity;
-        if (name.startsWith("%")) {
+        if (name.startsWith("%"))
+        {
             reportEntity = peekReportEntity();
             // check well-formedness of the enity
             int startMarkUpDepth = popPEStack();
-            if (startMarkUpDepth != fMarkUpDepth) {
+            if (startMarkUpDepth != fMarkUpDepth)
+            {
                 reportEntity = false;
-                if (fValidation) {
-                // Proper nesting of parameter entities is a Validity Constraint
-                // and must not be enforced when validation is off
-                // REVISIT: Should this be a fatal error? -Ac
-                fErrorReporter.reportError(XMLMessageFormatter.XML_DOMAIN,
-                                           "ImproperDeclarationNesting",
-                                           new Object[]{ name },
-                                           XMLErrorReporter.SEVERITY_ERROR);
+                if (fValidation)
+                {
+                    // Proper nesting of parameter entities is a Validity Constraint
+                    // and must not be enforced when validation is off
+                    // REVISIT: Should this be a fatal error? -Ac
+                    fErrorReporter.reportError(
+                        XMLMessageFormatter.XML_DOMAIN,
+                        "ImproperDeclarationNesting",
+                        new Object[] { name },
+                        XMLErrorReporter.SEVERITY_ERROR);
                 }
             }
-            if (fEntityScanner.isExternal()) {
+            if (fEntityScanner.isExternal())
+            {
                 fExtEntityDepth--;
             }
         }
 
         // call handler
         boolean dtdEntity = name.equals("[dtd]");
-        if (fDTDHandler != null && !dtdEntity && reportEntity) {
+        if (fDTDHandler != null && !dtdEntity && reportEntity)
+        {
             fDTDHandler.endParameterEntity(name, null);
         }
 
         // end DTD
-        if (dtdEntity) {
-            if (fIncludeSectDepth != 0) {
+        if (dtdEntity)
+        {
+            if (fIncludeSectDepth != 0)
+            {
                 reportFatalError("IncludeSectUnterminated", null);
             }
             fScannerState = SCANNER_STATE_END_OF_INPUT;
             // call handler
-            if (fDTDHandler != null) {
+            if (fDTDHandler != null)
+            {
                 fDTDHandler.endExternalSubset(null);
                 fDTDHandler.endDTD(null);
             }
@@ -538,10 +556,12 @@ public class XMLDTDScannerImpl
      *
      * @param state The new scanner state.
      */
-    protected final void setScannerState(int state) {
+    protected final void setScannerState(int state)
+    {
 
         fScannerState = state;
-        if (DEBUG_SCANNER_STATE) {
+        if (DEBUG_SCANNER_STATE)
+        {
             System.out.print("### setScannerState: ");
             System.out.print(getScannerStateName(state));
             System.out.println();
@@ -554,21 +574,28 @@ public class XMLDTDScannerImpl
     //
 
     /** Returns the scanner state name. */
-    private static String getScannerStateName(int state) {
+    private static String getScannerStateName(int state)
+    {
 
-        if (DEBUG_SCANNER_STATE) {
-            switch (state) {
-                case SCANNER_STATE_END_OF_INPUT: return "SCANNER_STATE_END_OF_INPUT";
-                case SCANNER_STATE_TEXT_DECL: return "SCANNER_STATE_TEXT_DECL";
-                case SCANNER_STATE_MARKUP_DECL: return "SCANNER_STATE_MARKUP_DECL";
+        if (DEBUG_SCANNER_STATE)
+        {
+            switch (state)
+            {
+                case SCANNER_STATE_END_OF_INPUT :
+                    return "SCANNER_STATE_END_OF_INPUT";
+                case SCANNER_STATE_TEXT_DECL :
+                    return "SCANNER_STATE_TEXT_DECL";
+                case SCANNER_STATE_MARKUP_DECL :
+                    return "SCANNER_STATE_MARKUP_DECL";
             }
         }
 
-        return "??? ("+state+')';
+        return "??? (" + state + ')';
 
     } // getScannerStateName(int):String
 
-    protected final boolean scanningInternalSubset() {
+    protected final boolean scanningInternalSubset()
+    {
         return fExtEntityDepth == 0;
     }
 
@@ -578,18 +605,22 @@ public class XMLDTDScannerImpl
      * @param name The name of the parameter entity to start (without the '%')
      * @param literal Whether this is happening within a literal
      */
-    protected void startPE(String name, boolean literal) 
-        throws IOException, XNIException {
+    protected void startPE(String name, boolean literal) throws IOException, XNIException
+    {
         int depth = fPEDepth;
-        if (fValidation && !fEntityManager.isDeclaredEntity("%"+name)) {
-            fErrorReporter.reportError( XMLMessageFormatter.XML_DOMAIN,"EntityNotDeclared", 
-                                        new Object[]{name}, XMLErrorReporter.SEVERITY_ERROR);
+        if (fValidation && !fEntityManager.isDeclaredEntity("%" + name))
+        {
+            fErrorReporter.reportError(
+                XMLMessageFormatter.XML_DOMAIN,
+                "EntityNotDeclared",
+                new Object[] { name },
+                XMLErrorReporter.SEVERITY_ERROR);
         }
-        fEntityManager.startEntity(fSymbolTable.addSymbol("%" + name),
-                                   literal);
+        fEntityManager.startEntity(fSymbolTable.addSymbol("%" + name), literal);
         // if we actually got a new entity and it's external
         // parse text decl if there is any
-        if (depth != fPEDepth && fEntityScanner.isExternal()) {
+        if (depth != fPEDepth && fEntityScanner.isExternal())
+        {
             scanTextDecl();
         }
     }
@@ -606,30 +637,31 @@ public class XMLDTDScannerImpl
      * @throws XNIException Thrown on parse error.
      *
      */
-    protected final boolean scanTextDecl() 
-        throws IOException, XNIException {
+    protected final boolean scanTextDecl() throws IOException, XNIException
+    {
 
         // scan XMLDecl
         boolean textDecl = false;
-        if (fEntityScanner.skipString("<?xml")) {
+        if (fEntityScanner.skipString("<?xml"))
+        {
             fMarkUpDepth++;
             // NOTE: special case where document starts with a PI
             //       whose name starts with "xml" (e.g. "xmlfoo")
-            if (XMLChar.isName(fEntityScanner.peekChar())) {
+            if (XMLChar.isName(fEntityScanner.peekChar()))
+            {
                 fStringBuffer.clear();
                 fStringBuffer.append("xml");
-                while (XMLChar.isName(fEntityScanner.peekChar())) {
-                    fStringBuffer.append((char)fEntityScanner.scanChar());
+                while (XMLChar.isName(fEntityScanner.peekChar()))
+                {
+                    fStringBuffer.append((char) fEntityScanner.scanChar());
                 }
-                String target =
-                    fSymbolTable.addSymbol(fStringBuffer.ch,
-                                           fStringBuffer.offset,
-                                           fStringBuffer.length);
+                String target = fSymbolTable.addSymbol(fStringBuffer.ch, fStringBuffer.offset, fStringBuffer.length);
                 scanPIData(target, fString);
             }
 
             // standard Text declaration
-            else {
+            else
+            {
                 // pseudo-attribute values
                 String version = null;
                 String encoding = null;
@@ -644,14 +676,15 @@ public class XMLDTDScannerImpl
                 fEntityScanner.setEncoding(encoding);
 
                 // call handler
-                if (fDTDHandler != null) {
+                if (fDTDHandler != null)
+                {
                     fDTDHandler.textDecl(version, encoding, null);
                 }
             }
         }
 
         return textDecl;
-    
+
     } // scanTextDecl(boolean):boolean
 
     /**
@@ -662,14 +695,15 @@ public class XMLDTDScannerImpl
      * @param target The PI target
      * @param data The string to fill in with the data
      */
-    protected final void scanPIData(String target, XMLString data) 
-        throws IOException, XNIException {
+    protected final void scanPIData(String target, XMLString data) throws IOException, XNIException
+    {
 
         super.scanPIData(target, data);
         fMarkUpDepth--;
 
         // call handler
-        if (fDTDHandler != null) {
+        if (fDTDHandler != null)
+        {
             fDTDHandler.processingInstruction(target, data, null);
         }
 
@@ -684,14 +718,16 @@ public class XMLDTDScannerImpl
      * <p>
      * <strong>Note:</strong> Called after scanning past '&lt;!--'
      */
-    protected final void scanComment() throws IOException, XNIException {
+    protected final void scanComment() throws IOException, XNIException
+    {
 
         fReportEntity = false;
         scanComment(fStringBuffer);
         fMarkUpDepth--;
 
         // call handler
-        if (fDTDHandler != null) {
+        if (fDTDHandler != null)
+        {
             fDTDHandler.comment(fStringBuffer, null);
         }
         fReportEntity = true;
@@ -708,54 +744,60 @@ public class XMLDTDScannerImpl
      * <p>
      * <strong>Note:</strong> Called after scanning past '&lt;!ELEMENT'
      */
-    protected final void scanElementDecl() throws IOException, XNIException {
+    protected final void scanElementDecl() throws IOException, XNIException
+    {
 
         // spaces
         fReportEntity = false;
-        if (!skipSeparator(true, !scanningInternalSubset())) {
-            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ELEMENT_TYPE_IN_ELEMENTDECL",
-                             null);
+        if (!skipSeparator(true, !scanningInternalSubset()))
+        {
+            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ELEMENT_TYPE_IN_ELEMENTDECL", null);
         }
 
         // element name
         String name = fEntityScanner.scanName();
-        if (name == null) {
-            reportFatalError("MSG_ELEMENT_TYPE_REQUIRED_IN_ELEMENTDECL",
-                             null);
+        if (name == null)
+        {
+            reportFatalError("MSG_ELEMENT_TYPE_REQUIRED_IN_ELEMENTDECL", null);
         }
 
         // spaces
-        if (!skipSeparator(true, !scanningInternalSubset())) {
-            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_CONTENTSPEC_IN_ELEMENTDECL",
-                             new Object[]{name});
+        if (!skipSeparator(true, !scanningInternalSubset()))
+        {
+            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_CONTENTSPEC_IN_ELEMENTDECL", new Object[] { name });
         }
 
         // content model
-        if (fDTDContentModelHandler != null) {
+        if (fDTDContentModelHandler != null)
+        {
             fDTDContentModelHandler.startContentModel(name, null);
         }
         String contentModel = null;
         fReportEntity = true;
-        if (fEntityScanner.skipString("EMPTY")) {
+        if (fEntityScanner.skipString("EMPTY"))
+        {
             contentModel = "EMPTY";
             // call handler
-            if (fDTDContentModelHandler != null) {
+            if (fDTDContentModelHandler != null)
+            {
                 fDTDContentModelHandler.empty(null);
             }
-        }
-        else if (fEntityScanner.skipString("ANY")) {
+        } else if (fEntityScanner.skipString("ANY"))
+        {
             contentModel = "ANY";
             // call handler
-            if (fDTDContentModelHandler != null) {
+            if (fDTDContentModelHandler != null)
+            {
                 fDTDContentModelHandler.any(null);
             }
-        }
-        else {
-            if (!fEntityScanner.skipChar('(')) {
-                reportFatalError("MSG_OPEN_PAREN_OR_ELEMENT_TYPE_REQUIRED_IN_CHILDREN",
-                                 new Object[]{name});
+        } else
+        {
+            if (!fEntityScanner.skipChar('('))
+            {
+                reportFatalError("MSG_OPEN_PAREN_OR_ELEMENT_TYPE_REQUIRED_IN_CHILDREN", new Object[] { name });
             }
-            if (fDTDContentModelHandler != null) {
+            if (fDTDContentModelHandler != null)
+            {
                 fDTDContentModelHandler.startGroup(null);
             }
             fStringBuffer.clear();
@@ -764,31 +806,35 @@ public class XMLDTDScannerImpl
             skipSeparator(false, !scanningInternalSubset());
 
             // Mixed content model
-            if (fEntityScanner.skipString("#PCDATA")) {
+            if (fEntityScanner.skipString("#PCDATA"))
+            {
                 scanMixed(name);
-            }
-            else {              // children content
+            } else
+            { // children content
                 scanChildren(name);
             }
             contentModel = fStringBuffer.toString();
         }
 
         // call handler
-        if (fDTDContentModelHandler != null) {
+        if (fDTDContentModelHandler != null)
+        {
             fDTDContentModelHandler.endContentModel(null);
         }
 
         fReportEntity = false;
         skipSeparator(false, !scanningInternalSubset());
         // end
-        if (!fEntityScanner.skipChar('>')) {
-            reportFatalError("ElementDeclUnterminated", new Object[]{name});
+        if (!fEntityScanner.skipChar('>'))
+        {
+            reportFatalError("ElementDeclUnterminated", new Object[] { name });
         }
         fReportEntity = true;
         fMarkUpDepth--;
-        
+
         // call handler
-        if (fDTDHandler != null) {
+        if (fDTDHandler != null)
+        {
             fDTDHandler.elementDecl(name, contentModel, null);
         }
 
@@ -807,34 +853,37 @@ public class XMLDTDScannerImpl
      *
      * <strong>Note:</strong> Called after scanning past '(#PCDATA'.
      */
-    private final void scanMixed(String elName)
-        throws IOException, XNIException {
+    private final void scanMixed(String elName) throws IOException, XNIException
+    {
 
         String childName = null;
 
         fStringBuffer.append("#PCDATA");
         // call handler
-        if (fDTDContentModelHandler != null) {
+        if (fDTDContentModelHandler != null)
+        {
             fDTDContentModelHandler.pcdata(null);
         }
         skipSeparator(false, !scanningInternalSubset());
-        while (fEntityScanner.skipChar('|')) {
+        while (fEntityScanner.skipChar('|'))
+        {
             fStringBuffer.append('|');
             // call handler
-            if (fDTDContentModelHandler != null) {
-                fDTDContentModelHandler.separator(XMLDTDContentModelHandler.SEPARATOR_CHOICE,
-                                                  null);
+            if (fDTDContentModelHandler != null)
+            {
+                fDTDContentModelHandler.separator(XMLDTDContentModelHandler.SEPARATOR_CHOICE, null);
             }
             skipSeparator(false, !scanningInternalSubset());
 
             childName = fEntityScanner.scanName();
-            if (childName == null) {
-                reportFatalError("MSG_ELEMENT_TYPE_REQUIRED_IN_MIXED_CONTENT",
-                                 new Object[]{elName});
+            if (childName == null)
+            {
+                reportFatalError("MSG_ELEMENT_TYPE_REQUIRED_IN_MIXED_CONTENT", new Object[] { elName });
             }
             fStringBuffer.append(childName);
             // call handler
-            if (fDTDContentModelHandler != null) {
+            if (fDTDContentModelHandler != null)
+            {
                 fDTDContentModelHandler.element(childName, null);
             }
             skipSeparator(false, !scanningInternalSubset());
@@ -843,29 +892,29 @@ public class XMLDTDScannerImpl
         // for ')' and then one for '*') to guarantee that callbacks are
         // properly nested. We do not want to trigger endEntity too early in
         // case we cross the boundary of an entity between the two characters.
-        if (fEntityScanner.skipString(")*")) {
+        if (fEntityScanner.skipString(")*"))
+        {
             fStringBuffer.append(")*");
             // call handler
-            if (fDTDContentModelHandler != null) {
+            if (fDTDContentModelHandler != null)
+            {
                 fDTDContentModelHandler.endGroup(null);
-                fDTDContentModelHandler.occurrence(XMLDTDContentModelHandler.OCCURS_ZERO_OR_MORE,
-                                                   null);
+                fDTDContentModelHandler.occurrence(XMLDTDContentModelHandler.OCCURS_ZERO_OR_MORE, null);
             }
-        }
-        else if (childName != null) {
-            reportFatalError("MixedContentUnterminated",
-                             new Object[]{elName});
-        }
-        else if (fEntityScanner.skipChar(')')){
+        } else if (childName != null)
+        {
+            reportFatalError("MixedContentUnterminated", new Object[] { elName });
+        } else if (fEntityScanner.skipChar(')'))
+        {
             fStringBuffer.append(')');
             // call handler
-            if (fDTDContentModelHandler != null) {
+            if (fDTDContentModelHandler != null)
+            {
                 fDTDContentModelHandler.endGroup(null);
             }
-        }
-        else {
-            reportFatalError("MSG_CLOSE_PAREN_REQUIRED_IN_CHILDREN",
-                             new Object[]{elName});
+        } else
+        {
+            reportFatalError("MSG_CLOSE_PAREN_REQUIRED_IN_CHILDREN", new Object[] { elName });
         }
         fMarkUpDepth--;
         // we are done
@@ -886,19 +935,22 @@ public class XMLDTDScannerImpl
      * <strong>Note:</strong> Called after scanning past the first open
      * paranthesis.
      */
-    private final void scanChildren(String elName)
-        throws IOException, XNIException {
+    private final void scanChildren(String elName) throws IOException, XNIException
+    {
 
         fContentDepth = 0;
         pushContentStack(0);
         int currentOp = 0;
         int c;
-        while (true) {
-            if (fEntityScanner.skipChar('(')) {
+        while (true)
+        {
+            if (fEntityScanner.skipChar('('))
+            {
                 fMarkUpDepth++;
                 fStringBuffer.append('(');
                 // call handler
-                if (fDTDContentModelHandler != null) {
+                if (fDTDContentModelHandler != null)
+                {
                     fDTDContentModelHandler.startGroup(null);
                 }
                 // push current op on stack and reset it
@@ -909,66 +961,72 @@ public class XMLDTDScannerImpl
             }
             skipSeparator(false, !scanningInternalSubset());
             String childName = fEntityScanner.scanName();
-            if (childName == null) {
-                reportFatalError("MSG_OPEN_PAREN_OR_ELEMENT_TYPE_REQUIRED_IN_CHILDREN",
-                                 new Object[]{elName});
+            if (childName == null)
+            {
+                reportFatalError("MSG_OPEN_PAREN_OR_ELEMENT_TYPE_REQUIRED_IN_CHILDREN", new Object[] { elName });
                 return;
             }
             // call handler
-            if (fDTDContentModelHandler != null) {
+            if (fDTDContentModelHandler != null)
+            {
                 fDTDContentModelHandler.element(childName, null);
             }
             fStringBuffer.append(childName);
             c = fEntityScanner.peekChar();
-            if (c == '?' || c == '*' || c == '+') {
+            if (c == '?' || c == '*' || c == '+')
+            {
                 // call handler
-                if (fDTDContentModelHandler != null) {
+                if (fDTDContentModelHandler != null)
+                {
                     short oc;
-                    if (c == '?') {
+                    if (c == '?')
+                    {
                         oc = XMLDTDContentModelHandler.OCCURS_ZERO_OR_ONE;
-                    }
-                    else if (c == '*') {
+                    } else if (c == '*')
+                    {
                         oc = XMLDTDContentModelHandler.OCCURS_ZERO_OR_MORE;
-                    }
-                    else {
+                    } else
+                    {
                         oc = XMLDTDContentModelHandler.OCCURS_ONE_OR_MORE;
                     }
                     fDTDContentModelHandler.occurrence(oc, null);
                 }
                 fEntityScanner.scanChar();
-                fStringBuffer.append((char)c);
+                fStringBuffer.append((char) c);
             }
-            while (true) {
+            while (true)
+            {
                 skipSeparator(false, !scanningInternalSubset());
                 c = fEntityScanner.peekChar();
-                if (c == ',' && currentOp != '|') {
+                if (c == ',' && currentOp != '|')
+                {
                     currentOp = c;
                     // call handler
-                    if (fDTDContentModelHandler != null) {
-                        fDTDContentModelHandler.separator(XMLDTDContentModelHandler.SEPARATOR_SEQUENCE,
-                                                          null);
+                    if (fDTDContentModelHandler != null)
+                    {
+                        fDTDContentModelHandler.separator(XMLDTDContentModelHandler.SEPARATOR_SEQUENCE, null);
                     }
                     fEntityScanner.scanChar();
                     fStringBuffer.append(',');
                     break;
-                }
-                else if (c == '|' && currentOp != ',') {
+                } else if (c == '|' && currentOp != ',')
+                {
                     currentOp = c;
                     // call handler
-                    if (fDTDContentModelHandler != null) {
-                        fDTDContentModelHandler.separator(XMLDTDContentModelHandler.SEPARATOR_CHOICE,
-                                                          null);
+                    if (fDTDContentModelHandler != null)
+                    {
+                        fDTDContentModelHandler.separator(XMLDTDContentModelHandler.SEPARATOR_CHOICE, null);
                     }
                     fEntityScanner.scanChar();
                     fStringBuffer.append('|');
                     break;
-                }
-                else if (c != ')') {
-                    reportFatalError("MSG_CLOSE_PAREN_REQUIRED_IN_CHILDREN",
-                                     new Object[]{elName});
+                } else if (c != ')')
+                {
+                    reportFatalError("MSG_CLOSE_PAREN_REQUIRED_IN_CHILDREN", new Object[] { elName });
                 }
                 // call handler
-                if (fDTDContentModelHandler != null) {
+                if (fDTDContentModelHandler != null)
+                {
                     fDTDContentModelHandler.endGroup(null);
                 }
                 // restore previous op
@@ -979,37 +1037,42 @@ public class XMLDTDScannerImpl
                 // to guarantee that callbacks are properly nested. We do not
                 // want to trigger endEntity too early in case we cross the
                 // boundary of an entity between the two characters.
-                if (fEntityScanner.skipString(")?")) {
+                if (fEntityScanner.skipString(")?"))
+                {
                     fStringBuffer.append(")?");
                     // call handler
-                    if (fDTDContentModelHandler != null) {
+                    if (fDTDContentModelHandler != null)
+                    {
                         oc = XMLDTDContentModelHandler.OCCURS_ZERO_OR_ONE;
                         fDTDContentModelHandler.occurrence(oc, null);
                     }
-                }
-                else if (fEntityScanner.skipString(")+")) {
+                } else if (fEntityScanner.skipString(")+"))
+                {
                     fStringBuffer.append(")+");
                     // call handler
-                    if (fDTDContentModelHandler != null) {
+                    if (fDTDContentModelHandler != null)
+                    {
                         oc = XMLDTDContentModelHandler.OCCURS_ONE_OR_MORE;
                         fDTDContentModelHandler.occurrence(oc, null);
                     }
-                }
-                else if (fEntityScanner.skipString(")*")) {
+                } else if (fEntityScanner.skipString(")*"))
+                {
                     fStringBuffer.append(")*");
                     // call handler
-                    if (fDTDContentModelHandler != null) {
+                    if (fDTDContentModelHandler != null)
+                    {
                         oc = XMLDTDContentModelHandler.OCCURS_ZERO_OR_MORE;
                         fDTDContentModelHandler.occurrence(oc, null);
                     }
-                }
-                else {
+                } else
+                {
                     // no occurrence specified
                     fEntityScanner.scanChar();
                     fStringBuffer.append(')');
                 }
                 fMarkUpDepth--;
-                if (fContentDepth == 0) {
+                if (fContentDepth == 0)
+                {
                     return;
                 }
             }
@@ -1027,99 +1090,102 @@ public class XMLDTDScannerImpl
      * <p>
      * <strong>Note:</strong> Called after scanning past '&lt;!ATTLIST'
      */
-    protected final void scanAttlistDecl() throws IOException, XNIException {
+    protected final void scanAttlistDecl() throws IOException, XNIException
+    {
 
         // spaces
         fReportEntity = false;
-        if (!skipSeparator(true, !scanningInternalSubset())) {
-            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ELEMENT_TYPE_IN_ATTLISTDECL",
-                             null);
+        if (!skipSeparator(true, !scanningInternalSubset()))
+        {
+            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ELEMENT_TYPE_IN_ATTLISTDECL", null);
         }
 
         // element name
         String elName = fEntityScanner.scanName();
-        if (elName == null) {
-            reportFatalError("MSG_ELEMENT_TYPE_REQUIRED_IN_ATTLISTDECL",
-                             null);
+        if (elName == null)
+        {
+            reportFatalError("MSG_ELEMENT_TYPE_REQUIRED_IN_ATTLISTDECL", null);
         }
 
         // call handler
-        if (fDTDHandler != null) {
+        if (fDTDHandler != null)
+        {
             fDTDHandler.startAttlist(elName, null);
         }
 
         // spaces
-        if (!skipSeparator(true, !scanningInternalSubset())) {
+        if (!skipSeparator(true, !scanningInternalSubset()))
+        {
             // no space, is it the end yet?
-            if (fEntityScanner.skipChar('>')) {
+            if (fEntityScanner.skipChar('>'))
+            {
                 // yes, stop here
                 // call handler
-                if (fDTDHandler != null) {
+                if (fDTDHandler != null)
+                {
                     fDTDHandler.endAttlist(null);
                 }
                 fMarkUpDepth--;
                 return;
-            }
-            else {
-                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ATTRIBUTE_NAME_IN_ATTDEF",
-                                 new Object[]{elName});
+            } else
+            {
+                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ATTRIBUTE_NAME_IN_ATTDEF", new Object[] { elName });
             }
         }
 
         // definitions
-        while (!fEntityScanner.skipChar('>')) {
+        while (!fEntityScanner.skipChar('>'))
+        {
             String name = fEntityScanner.scanName();
-            if (name == null) {
-                reportFatalError("AttNameRequiredInAttDef",
-                                 new Object[]{elName}); 
+            if (name == null)
+            {
+                reportFatalError("AttNameRequiredInAttDef", new Object[] { elName });
             }
             // spaces
-            if (!skipSeparator(true, !scanningInternalSubset())) {
-                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ATTTYPE_IN_ATTDEF",
-                                 new Object[]{elName, name});
+            if (!skipSeparator(true, !scanningInternalSubset()))
+            {
+                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ATTTYPE_IN_ATTDEF", new Object[] { elName, name });
             }
             // type
             String type = scanAttType(elName, name);
 
             // spaces
-            if (!skipSeparator(true, !scanningInternalSubset())) {
-                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_DEFAULTDECL_IN_ATTDEF",
-                                 new Object[]{elName, name}); 
+            if (!skipSeparator(true, !scanningInternalSubset()))
+            {
+                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_DEFAULTDECL_IN_ATTDEF", new Object[] { elName, name });
             }
 
             // default decl
-            String defaultType = scanAttDefaultDecl(elName, name,
-                                                    type, 
-                                                    fLiteral, fLiteral2);
+            String defaultType = scanAttDefaultDecl(elName, name, type, fLiteral, fLiteral2);
             // REVISIT: Should we do anything with the non-normalized
             //          default attribute value? -Ac
-	    // yes--according to bug 5073.  - neilg
+            // yes--according to bug 5073.  - neilg
 
             // call handler
-            if (fDTDHandler != null) {
+            if (fDTDHandler != null)
+            {
                 String[] enum = null;
-                if (fEnumerationCount != 0) {
+                if (fEnumerationCount != 0)
+                {
                     enum = new String[fEnumerationCount];
-                    System.arraycopy(fEnumeration, 0, enum,
-                                     0, fEnumerationCount);
+                    System.arraycopy(fEnumeration, 0, enum, 0, fEnumerationCount);
                 }
                 // Determine whether the default value to be passed should be null. 
                 // REVISIT: should probably check whether fLiteral.ch is null instead. LM.
-                if (defaultType!=null && (defaultType.equals("#REQUIRED") || 
-                                          defaultType.equals("#IMPLIED"))) {
-                    fDTDHandler.attributeDecl(elName, name, type, enum,
-                                              defaultType, null, null, null);
-                }
-                else {
-                    fDTDHandler.attributeDecl(elName, name, type, enum,
-                                              defaultType, fLiteral, fLiteral2, null);
+                if (defaultType != null && (defaultType.equals("#REQUIRED") || defaultType.equals("#IMPLIED")))
+                {
+                    fDTDHandler.attributeDecl(elName, name, type, enum, defaultType, null, null, null);
+                } else
+                {
+                    fDTDHandler.attributeDecl(elName, name, type, enum, defaultType, fLiteral, fLiteral2, null);
                 }
             }
             skipSeparator(false, !scanningInternalSubset());
         }
 
         // call handler
-        if (fDTDHandler != null) {
+        if (fDTDHandler != null)
+        {
             fDTDHandler.endAttlist(null);
         }
         fMarkUpDepth--;
@@ -1150,8 +1216,8 @@ public class XMLDTDScannerImpl
      * @param elName The element type name this declaration is about.
      * @param atName The attribute name this declaration is about.
      */
-    private final String scanAttType(String elName, String atName)
-        throws IOException, XNIException {
+    private final String scanAttType(String elName, String atName) throws IOException, XNIException
+    {
 
         String type = null;
         fEnumerationCount = 0;
@@ -1160,94 +1226,96 @@ public class XMLDTDScannerImpl
          * be a substring of another string, the longer one needs to be
          * looked for first!!
          */
-        if (fEntityScanner.skipString("CDATA")) {
+        if (fEntityScanner.skipString("CDATA"))
+        {
             type = "CDATA";
-        }
-        else if (fEntityScanner.skipString("IDREFS")) {
+        } else if (fEntityScanner.skipString("IDREFS"))
+        {
             type = "IDREFS";
-        }
-        else if (fEntityScanner.skipString("IDREF")) {
+        } else if (fEntityScanner.skipString("IDREF"))
+        {
             type = "IDREF";
-        }
-        else if (fEntityScanner.skipString("ID")) {
+        } else if (fEntityScanner.skipString("ID"))
+        {
             type = "ID";
-        }
-        else if (fEntityScanner.skipString("ENTITY")) {
+        } else if (fEntityScanner.skipString("ENTITY"))
+        {
             type = "ENTITY";
-        }
-        else if (fEntityScanner.skipString("ENTITIES")) {
+        } else if (fEntityScanner.skipString("ENTITIES"))
+        {
             type = "ENTITIES";
-        }
-        else if (fEntityScanner.skipString("NMTOKENS")) {
+        } else if (fEntityScanner.skipString("NMTOKENS"))
+        {
             type = "NMTOKENS";
-        }
-        else if (fEntityScanner.skipString("NMTOKEN")) {
+        } else if (fEntityScanner.skipString("NMTOKEN"))
+        {
             type = "NMTOKEN";
-        }
-        else if (fEntityScanner.skipString("NOTATION")) {
+        } else if (fEntityScanner.skipString("NOTATION"))
+        {
             type = "NOTATION";
             // spaces
-            if (!skipSeparator(true, !scanningInternalSubset())) {
-                reportFatalError("MSG_SPACE_REQUIRED_AFTER_NOTATION_IN_NOTATIONTYPE",
-                                 new Object[]{elName, atName}); 
+            if (!skipSeparator(true, !scanningInternalSubset()))
+            {
+                reportFatalError("MSG_SPACE_REQUIRED_AFTER_NOTATION_IN_NOTATIONTYPE", new Object[] { elName, atName });
             }
             // open paren
             int c = fEntityScanner.scanChar();
-            if (c != '(') {
-                reportFatalError("MSG_OPEN_PAREN_REQUIRED_IN_NOTATIONTYPE",
-                                 new Object[]{elName, atName});
+            if (c != '(')
+            {
+                reportFatalError("MSG_OPEN_PAREN_REQUIRED_IN_NOTATIONTYPE", new Object[] { elName, atName });
             }
             fMarkUpDepth++;
-            do {
+            do
+            {
                 skipSeparator(false, !scanningInternalSubset());
                 String aName = fEntityScanner.scanName();
-                if (aName == null) {
-                    reportFatalError("MSG_NAME_REQUIRED_IN_NOTATIONTYPE",
-                                     new Object[]{elName, atName}); 
+                if (aName == null)
+                {
+                    reportFatalError("MSG_NAME_REQUIRED_IN_NOTATIONTYPE", new Object[] { elName, atName });
                 }
                 ensureEnumerationSize(fEnumerationCount + 1);
                 fEnumeration[fEnumerationCount++] = aName;
                 skipSeparator(false, !scanningInternalSubset());
                 c = fEntityScanner.scanChar();
             } while (c == '|');
-            if (c != ')') {
-                reportFatalError("NotationTypeUnterminated",
-                                 new Object[]{elName, atName});
+            if (c != ')')
+            {
+                reportFatalError("NotationTypeUnterminated", new Object[] { elName, atName });
             }
             fMarkUpDepth--;
-        }
-        else {              // Enumeration
+        } else
+        { // Enumeration
             type = "ENUMERATION";
             // open paren
             int c = fEntityScanner.scanChar();
-            if (c != '(') {
-//                       "OPEN_PAREN_REQUIRED_BEFORE_ENUMERATION_IN_ATTRDECL",
-                reportFatalError("AttTypeRequiredInAttDef",
-                                 new Object[]{elName, atName});
+            if (c != '(')
+            {
+                //                       "OPEN_PAREN_REQUIRED_BEFORE_ENUMERATION_IN_ATTRDECL",
+                reportFatalError("AttTypeRequiredInAttDef", new Object[] { elName, atName });
             }
             fMarkUpDepth++;
-            do {
+            do
+            {
                 skipSeparator(false, !scanningInternalSubset());
                 String token = fEntityScanner.scanNmtoken();
-                if (token == null) {
-                    reportFatalError("MSG_NMTOKEN_REQUIRED_IN_ENUMERATION",
-                                     new Object[]{elName, atName});
+                if (token == null)
+                {
+                    reportFatalError("MSG_NMTOKEN_REQUIRED_IN_ENUMERATION", new Object[] { elName, atName });
                 }
                 ensureEnumerationSize(fEnumerationCount + 1);
                 fEnumeration[fEnumerationCount++] = token;
                 skipSeparator(false, !scanningInternalSubset());
                 c = fEntityScanner.scanChar();
             } while (c == '|');
-            if (c != ')') {
-                reportFatalError("EnumerationUnterminated",
-                                 new Object[]{elName, atName});
+            if (c != ')')
+            {
+                reportFatalError("EnumerationUnterminated", new Object[] { elName, atName });
             }
             fMarkUpDepth--;
         }
         return type;
 
     } // scanAttType():String
-
 
     /**
      * Scans an attribute default declaration
@@ -1259,34 +1327,39 @@ public class XMLDTDScannerImpl
      * @param name The name of the attribute being scanned.
      * @param defaultVal The string to fill in with the default value.
      */
-    protected final String scanAttDefaultDecl(String elName, String atName,
-                                              String type,
-                                              XMLString defaultVal,
-                                              XMLString nonNormalizedDefaultVal)
-        throws IOException, XNIException {
+    protected final String scanAttDefaultDecl(
+        String elName,
+        String atName,
+        String type,
+        XMLString defaultVal,
+        XMLString nonNormalizedDefaultVal)
+        throws IOException, XNIException
+    {
 
         String defaultType = null;
         fString.clear();
         defaultVal.clear();
-        if (fEntityScanner.skipString("#REQUIRED")) {
+        if (fEntityScanner.skipString("#REQUIRED"))
+        {
             defaultType = "#REQUIRED";
-        }
-        else if (fEntityScanner.skipString("#IMPLIED")) {
+        } else if (fEntityScanner.skipString("#IMPLIED"))
+        {
             defaultType = "#IMPLIED";
-        }
-        else {
-            if (fEntityScanner.skipString("#FIXED")) {
+        } else
+        {
+            if (fEntityScanner.skipString("#FIXED"))
+            {
                 defaultType = "#FIXED";
                 // spaces
-                if (!skipSeparator(true, !scanningInternalSubset())) {
-                    reportFatalError("MSG_SPACE_REQUIRED_AFTER_FIXED_IN_DEFAULTDECL",
-                                     new Object[]{elName, atName});
+                if (!skipSeparator(true, !scanningInternalSubset()))
+                {
+                    reportFatalError("MSG_SPACE_REQUIRED_AFTER_FIXED_IN_DEFAULTDECL", new Object[] { elName, atName });
                 }
             }
             // AttValue 
-            boolean isVC = !fStandalone  &&  (fSeenExternalDTD || fSeenExternalPE) ;
-            scanAttributeValue(defaultVal, nonNormalizedDefaultVal, atName,
-                               fAttributes, 0, isVC);
+            boolean isVC = !fStandalone && (fSeenExternalDTD || fSeenExternalPE);
+            //   TODO fix         fEventHandler.attributeBegin(fAttributeQName.rawname, fEntityManager.fCurrentEntity.lineNumber, fEntityManager.fCurrentEntity.columnNumber - 1);
+            scanAttributeValue(defaultVal, nonNormalizedDefaultVal, atName, fAttributes, 0, isVC);
         }
         return defaultType;
 
@@ -1308,66 +1381,70 @@ public class XMLDTDScannerImpl
      * <p>
      * <strong>Note:</strong> Called after scanning past '&lt;!ENTITY'
      */
-    private final void scanEntityDecl() throws IOException, XNIException {
+    private final void scanEntityDecl() throws IOException, XNIException
+    {
 
         boolean isPEDecl = false;
         boolean sawPERef = false;
         fReportEntity = false;
-        if (fEntityScanner.skipSpaces()) {
-            if (!fEntityScanner.skipChar('%')) {
+        if (fEntityScanner.skipSpaces())
+        {
+            if (!fEntityScanner.skipChar('%'))
+            {
                 isPEDecl = false; // <!ENTITY x "x">
-            }
-            else if (skipSeparator(true, !scanningInternalSubset())) {
+            } else if (skipSeparator(true, !scanningInternalSubset()))
+            {
                 // <!ENTITY % x "x">
                 isPEDecl = true;
-            }
-            else if (scanningInternalSubset()) {
-                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ENTITY_NAME_IN_ENTITYDECL",
-                                 null);
+            } else if (scanningInternalSubset())
+            {
+                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ENTITY_NAME_IN_ENTITYDECL", null);
                 isPEDecl = true;
-            }
-            else if (fEntityScanner.peekChar() == '%') {
+            } else if (fEntityScanner.peekChar() == '%')
+            {
                 // <!ENTITY %%x; "x"> is legal
                 skipSeparator(false, !scanningInternalSubset());
                 isPEDecl = true;
-            }
-            else {
+            } else
+            {
                 sawPERef = true;
             }
-        }
-        else if (scanningInternalSubset() || !fEntityScanner.skipChar('%')) {
+        } else if (scanningInternalSubset() || !fEntityScanner.skipChar('%'))
+        {
             // <!ENTITY[^ ]...> or <!ENTITY[^ %]...>
-            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ENTITY_NAME_IN_ENTITYDECL",
-                             null);
+            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ENTITY_NAME_IN_ENTITYDECL", null);
             isPEDecl = false;
-        }
-        else if (fEntityScanner.skipSpaces()) {
+        } else if (fEntityScanner.skipSpaces())
+        {
             // <!ENTITY% ...>
-            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_PERCENT_IN_PEDECL",
-                             null);
+            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_PERCENT_IN_PEDECL", null);
             isPEDecl = false;
-        }
-        else {
+        } else
+        {
             sawPERef = true;
         }
-        if (sawPERef) {
-            while (true) {
+        if (sawPERef)
+        {
+            while (true)
+            {
                 String peName = fEntityScanner.scanName();
-                if (peName == null) {
+                if (peName == null)
+                {
                     reportFatalError("NameRequiredInPEReference", null);
-                }
-                else if (!fEntityScanner.skipChar(';')) {
-                    reportFatalError("SemicolonRequiredInPEReference",
-                                     new Object[]{peName});
-                }
-                else {
+                } else if (!fEntityScanner.skipChar(';'))
+                {
+                    reportFatalError("SemicolonRequiredInPEReference", new Object[] { peName });
+                } else
+                {
                     startPE(peName, false);
                 }
                 fEntityScanner.skipSpaces();
                 if (!fEntityScanner.skipChar('%'))
                     break;
-                if (!isPEDecl) {
-                    if (skipSeparator(true, !scanningInternalSubset())) {
+                if (!isPEDecl)
+                {
+                    if (skipSeparator(true, !scanningInternalSubset()))
+                    {
                         isPEDecl = true;
                         break;
                     }
@@ -1378,14 +1455,15 @@ public class XMLDTDScannerImpl
 
         // name
         String name = fEntityScanner.scanName();
-        if (name == null) {
+        if (name == null)
+        {
             reportFatalError("MSG_ENTITY_NAME_REQUIRED_IN_ENTITYDECL", null);
         }
 
         // spaces
-        if (!skipSeparator(true, !scanningInternalSubset())) {
-            reportFatalError("MSG_SPACE_REQUIRED_AFTER_ENTITY_NAME_IN_ENTITYDECL",
-                             new Object[]{name});
+        if (!skipSeparator(true, !scanningInternalSubset()))
+        {
+            reportFatalError("MSG_SPACE_REQUIRED_AFTER_ENTITY_NAME_IN_ENTITYDECL", new Object[] { name });
         }
 
         // external id
@@ -1393,34 +1471,37 @@ public class XMLDTDScannerImpl
         String systemId = fStrings[0];
         String publicId = fStrings[1];
 
-        if (isPEDecl && systemId != null) {
+        if (isPEDecl && systemId != null)
+        {
             fSeenExternalPE = true;
         }
 
         String notation = null;
         // NDATA
         boolean sawSpace = skipSeparator(true, !scanningInternalSubset());
-        if (!isPEDecl && fEntityScanner.skipString("NDATA")) {
+        if (!isPEDecl && fEntityScanner.skipString("NDATA"))
+        {
             // check whether there was space before NDATA
-            if (!sawSpace) {
-                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_NDATA_IN_UNPARSED_ENTITYDECL",
-                                 new Object[]{name});
+            if (!sawSpace)
+            {
+                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_NDATA_IN_UNPARSED_ENTITYDECL", new Object[] { name });
             }
 
             // spaces
-            if (!skipSeparator(true, !scanningInternalSubset())) {
-                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_NOTATION_NAME_IN_UNPARSED_ENTITYDECL",
-                                 new Object[]{name});
+            if (!skipSeparator(true, !scanningInternalSubset()))
+            {
+                reportFatalError("MSG_SPACE_REQUIRED_BEFORE_NOTATION_NAME_IN_UNPARSED_ENTITYDECL", new Object[] { name });
             }
             notation = fEntityScanner.scanName();
-            if (notation == null) {
-                reportFatalError("MSG_NOTATION_NAME_REQUIRED_FOR_UNPARSED_ENTITYDECL",
-                                 new Object[]{name});
+            if (notation == null)
+            {
+                reportFatalError("MSG_NOTATION_NAME_REQUIRED_FOR_UNPARSED_ENTITYDECL", new Object[] { name });
             }
         }
 
         // internal entity
-        if (systemId == null) {
+        if (systemId == null)
+        {
             scanEntityValue(fLiteral, fLiteral2);
         }
 
@@ -1428,40 +1509,49 @@ public class XMLDTDScannerImpl
         skipSeparator(false, !scanningInternalSubset());
 
         // end
-        if (!fEntityScanner.skipChar('>')) {
-            reportFatalError("EntityDeclUnterminated", new Object[]{name});
+        if (!fEntityScanner.skipChar('>'))
+        {
+            reportFatalError("EntityDeclUnterminated", new Object[] { name });
         }
         fMarkUpDepth--;
 
         // register entity and make callback
-        if (isPEDecl) {
+        if (isPEDecl)
+        {
             name = "%" + name;
         }
-        if (systemId != null) {
+        if (systemId != null)
+        {
             String baseSystemId = fEntityScanner.getBaseSystemId();
             String expandedSystemId = XMLEntityManager.expandSystemId(systemId, baseSystemId);
-            if (notation != null) {
+            if (notation != null)
+            {
                 fEntityManager.addUnparsedEntity(name, publicId, systemId, baseSystemId, notation);
+            } else
+            {
+                fEntityManager.addExternalEntity(name, publicId, systemId, baseSystemId);
             }
-            else {
-                fEntityManager.addExternalEntity(name, publicId, systemId, 
-                                                 baseSystemId);
-            }
-            if (fDTDHandler != null) {
-                fResourceIdentifier.setValues(publicId, systemId, baseSystemId, XMLEntityManager.expandSystemId(systemId, baseSystemId));
-                if (notation != null) {
-                    fDTDHandler.unparsedEntityDecl(name, fResourceIdentifier, 
-                                                   notation, null);
-                }
-                else {
+            if (fDTDHandler != null)
+            {
+                fResourceIdentifier.setValues(
+                    publicId,
+                    systemId,
+                    baseSystemId,
+                    XMLEntityManager.expandSystemId(systemId, baseSystemId));
+                if (notation != null)
+                {
+                    fDTDHandler.unparsedEntityDecl(name, fResourceIdentifier, notation, null);
+                } else
+                {
                     fDTDHandler.externalEntityDecl(name, fResourceIdentifier, null);
                 }
             }
-        }
-        else {
+        } else
+        {
             fEntityManager.addInternalEntity(name, fLiteral.toString());
-            if (fDTDHandler != null) {
-                fDTDHandler.internalEntityDecl(name, fLiteral, fLiteral2, null); 
+            if (fDTDHandler != null)
+            {
+                fDTDHandler.internalEntityDecl(name, fLiteral, fLiteral2, null);
             }
         }
         fReportEntity = true;
@@ -1479,12 +1569,11 @@ public class XMLDTDScannerImpl
      * the use of scanCharReferenceValue), and fStringBuffer2, anything in them
      * at the time of calling is lost.
      */
-    protected final void scanEntityValue(XMLString value, 
-                                         XMLString nonNormalizedValue)
-        throws IOException, XNIException
+    protected final void scanEntityValue(XMLString value, XMLString nonNormalizedValue) throws IOException, XNIException
     {
         int quote = fEntityScanner.scanChar();
-        if (quote != '\'' && quote != '"') {
+        if (quote != '\'' && quote != '"')
+        {
             reportFatalError("OpenQuoteMissingInDecl", null);
         }
         // store at which depth of entities we start
@@ -1492,55 +1581,59 @@ public class XMLDTDScannerImpl
 
         XMLString literal = fString;
         XMLString literal2 = fString;
-        if (fEntityScanner.scanLiteral(quote, fString) != quote) {
+        if (fEntityScanner.scanLiteral(quote, fString) != quote)
+        {
             fStringBuffer.clear();
             fStringBuffer2.clear();
-            do {
+            do
+            {
                 fStringBuffer.append(fString);
                 fStringBuffer2.append(fString);
-                if (fEntityScanner.skipChar('&')) {
-                    if (fEntityScanner.skipChar('#')) {
+                if (fEntityScanner.skipChar('&'))
+                {
+                    if (fEntityScanner.skipChar('#'))
+                    {
                         fStringBuffer2.append("&#");
                         scanCharReferenceValue(fStringBuffer, fStringBuffer2);
-                    }
-                    else {
+                    } else
+                    {
                         fStringBuffer.append('&');
                         fStringBuffer2.append('&');
                         String eName = fEntityScanner.scanName();
-                        if (eName == null) {
-                            reportFatalError("NameRequiredInReference",
-                                             null);
-                        }
-                        else {
+                        if (eName == null)
+                        {
+                            reportFatalError("NameRequiredInReference", null);
+                        } else
+                        {
                             fStringBuffer.append(eName);
                             fStringBuffer2.append(eName);
                         }
-                        if (!fEntityScanner.skipChar(';')) {
-                            reportFatalError("SemicolonRequiredInReference",
-                                             new Object[]{eName});
-                        }
-                        else {
+                        if (!fEntityScanner.skipChar(';'))
+                        {
+                            reportFatalError("SemicolonRequiredInReference", new Object[] { eName });
+                        } else
+                        {
                             fStringBuffer.append(';');
                             fStringBuffer2.append(';');
                         }
                     }
-                }
-                else if (fEntityScanner.skipChar('%')) {
-                    while (true) {
+                } else if (fEntityScanner.skipChar('%'))
+                {
+                    while (true)
+                    {
                         fStringBuffer2.append('%');
                         String peName = fEntityScanner.scanName();
-                        if (peName == null) {
-                            reportFatalError("NameRequiredInPEReference",
-                                             null);
-                        }
-                        else if (!fEntityScanner.skipChar(';')) {
-                            reportFatalError("SemicolonRequiredInPEReference",
-                                             new Object[]{peName});
-                        }
-                        else {
-                            if (scanningInternalSubset()) {
-                                reportFatalError("PEReferenceWithinMarkup",
-                                                 new Object[]{peName});
+                        if (peName == null)
+                        {
+                            reportFatalError("NameRequiredInPEReference", null);
+                        } else if (!fEntityScanner.skipChar(';'))
+                        {
+                            reportFatalError("SemicolonRequiredInPEReference", new Object[] { peName });
+                        } else
+                        {
+                            if (scanningInternalSubset())
+                            {
+                                reportFatalError("PEReferenceWithinMarkup", new Object[] { peName });
                             }
                             fStringBuffer2.append(peName);
                             fStringBuffer2.append(';');
@@ -1553,27 +1646,29 @@ public class XMLDTDScannerImpl
                         if (!fEntityScanner.skipChar('%'))
                             break;
                     }
-                }
-                else {
+                } else
+                {
                     int c = fEntityScanner.peekChar();
-                    if (XMLChar.isHighSurrogate(c)) {
+                    if (XMLChar.isHighSurrogate(c))
+                    {
                         scanSurrogates(fStringBuffer2);
-                    }
-                    else if (XMLChar.isInvalid(c)) {
-                        reportFatalError("InvalidCharInLiteral",
-                                         new Object[]{Integer.toHexString(c)});
+                    } else if (XMLChar.isInvalid(c))
+                    {
+                        reportFatalError("InvalidCharInLiteral", new Object[] { Integer.toHexString(c)});
                         fEntityScanner.scanChar();
                     }
                     // if it's not the delimiting quote or if it is but from a
                     // different entity than the one this literal started from,
                     // simply append the character to our buffer
-                    else if (c != quote || entityDepth != fEntityDepth) {
-                        fStringBuffer.append((char)c);
-                        fStringBuffer2.append((char)c);
+                    else if (c != quote || entityDepth != fEntityDepth)
+                    {
+                        fStringBuffer.append((char) c);
+                        fStringBuffer2.append((char) c);
                         fEntityScanner.scanChar();
                     }
                 }
-            } while (fEntityScanner.scanLiteral(quote, fString) != quote);
+            }
+            while (fEntityScanner.scanLiteral(quote, fString) != quote);
             fStringBuffer.append(fString);
             fStringBuffer2.append(fString);
             literal = fStringBuffer;
@@ -1581,7 +1676,8 @@ public class XMLDTDScannerImpl
         }
         value.setValues(literal);
         nonNormalizedValue.setValues(literal2);
-        if (!fEntityScanner.skipChar(quote)) {
+        if (!fEntityScanner.skipChar(quote))
+        {
             reportFatalError("CloseQuoteMissingInDecl", null);
         }
     } // scanEntityValue(XMLString,XMLString):void
@@ -1596,26 +1692,27 @@ public class XMLDTDScannerImpl
      * <p>
      * <strong>Note:</strong> Called after scanning past '&lt;!NOTATION'
      */
-    private final void scanNotationDecl() throws IOException, XNIException {
+    private final void scanNotationDecl() throws IOException, XNIException
+    {
 
         // spaces
         fReportEntity = false;
-        if (!skipSeparator(true, !scanningInternalSubset())) {
-            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_NOTATION_NAME_IN_NOTATIONDECL",
-                             null);
+        if (!skipSeparator(true, !scanningInternalSubset()))
+        {
+            reportFatalError("MSG_SPACE_REQUIRED_BEFORE_NOTATION_NAME_IN_NOTATIONDECL", null);
         }
 
         // notation name
         String name = fEntityScanner.scanName();
-        if (name == null) {
-            reportFatalError("MSG_NOTATION_NAME_REQUIRED_IN_NOTATIONDECL",
-                             null);
+        if (name == null)
+        {
+            reportFatalError("MSG_NOTATION_NAME_REQUIRED_IN_NOTATIONDECL", null);
         }
 
         // spaces
-        if (!skipSeparator(true, !scanningInternalSubset())) {
-            reportFatalError("MSG_SPACE_REQUIRED_AFTER_NOTATION_NAME_IN_NOTATIONDECL",
-                             new Object[]{name});
+        if (!skipSeparator(true, !scanningInternalSubset()))
+        {
+            reportFatalError("MSG_SPACE_REQUIRED_AFTER_NOTATION_NAME_IN_NOTATIONDECL", new Object[] { name });
         }
 
         // external id
@@ -1624,23 +1721,29 @@ public class XMLDTDScannerImpl
         String publicId = fStrings[1];
         String baseSystemId = fEntityScanner.getBaseSystemId();
 
-        if (systemId == null && publicId == null) {
-            reportFatalError("ExternalIDorPublicIDRequired",
-                             new Object[]{name});
-       }
+        if (systemId == null && publicId == null)
+        {
+            reportFatalError("ExternalIDorPublicIDRequired", new Object[] { name });
+        }
 
         // skip possible trailing space
         skipSeparator(false, !scanningInternalSubset());
 
         // end
-        if (!fEntityScanner.skipChar('>')) {
-            reportFatalError("NotationDeclUnterminated", new Object[]{name});
+        if (!fEntityScanner.skipChar('>'))
+        {
+            reportFatalError("NotationDeclUnterminated", new Object[] { name });
         }
         fMarkUpDepth--;
 
         // call handler
-        if (fDTDHandler != null) {
-            fResourceIdentifier.setValues(publicId, systemId, baseSystemId, XMLEntityManager.expandSystemId(systemId, baseSystemId));
+        if (fDTDHandler != null)
+        {
+            fResourceIdentifier.setValues(
+                publicId,
+                systemId,
+                baseSystemId,
+                XMLEntityManager.expandSystemId(systemId, baseSystemId));
             fDTDHandler.notationDecl(name, fResourceIdentifier, null);
         }
         fReportEntity = true;
@@ -1663,111 +1766,133 @@ public class XMLDTDScannerImpl
      * </pre>
      * <p>
      * <strong>Note:</strong> Called after scanning past '&lt;![' */
-    private final void scanConditionalSect()
-        throws IOException, XNIException {
+    private final void scanConditionalSect() throws IOException, XNIException
+    {
 
         fReportEntity = false;
         skipSeparator(false, !scanningInternalSubset());
 
-        if (fEntityScanner.skipString("INCLUDE")) {
+        if (fEntityScanner.skipString("INCLUDE"))
+        {
             skipSeparator(false, !scanningInternalSubset());
             // call handler
-            if (!fEntityScanner.skipChar('[')) {
+            if (!fEntityScanner.skipChar('['))
+            {
                 reportFatalError("MSG_MARKUP_NOT_RECOGNIZED_IN_DTD", null);
             }
 
-            if (fDTDHandler != null) {
-                fDTDHandler.startConditional(XMLDTDHandler.CONDITIONAL_INCLUDE,
-                                             null);
+            if (fDTDHandler != null)
+            {
+                fDTDHandler.startConditional(XMLDTDHandler.CONDITIONAL_INCLUDE, null);
             }
             fIncludeSectDepth++;
             // just stop there and go back to the main loop
             fReportEntity = true;
-        }
-        else if (fEntityScanner.skipString("IGNORE")) {
+        } else if (fEntityScanner.skipString("IGNORE"))
+        {
             skipSeparator(false, !scanningInternalSubset());
             // call handler
-            if (fDTDHandler != null) {
-                fDTDHandler.startConditional(XMLDTDHandler.CONDITIONAL_IGNORE,
-                                             null);
+            if (fDTDHandler != null)
+            {
+                fDTDHandler.startConditional(XMLDTDHandler.CONDITIONAL_IGNORE, null);
             }
-            if (!fEntityScanner.skipChar('[')) {
+            if (!fEntityScanner.skipChar('['))
+            {
                 reportFatalError("MSG_MARKUP_NOT_RECOGNIZED_IN_DTD", null);
             }
             fReportEntity = true;
             int initialDepth = ++fIncludeSectDepth;
-            if (fDTDHandler != null) {
+            if (fDTDHandler != null)
+            {
                 fIgnoreConditionalBuffer.clear();
             }
-            while (true) {
-                if (fEntityScanner.skipChar('<')) {
-                    if (fDTDHandler != null) {
+            while (true)
+            {
+                if (fEntityScanner.skipChar('<'))
+                {
+                    if (fDTDHandler != null)
+                    {
                         fIgnoreConditionalBuffer.append('<');
                     }
                     //
                     // These tests are split so that we handle cases like
                     // '<<![' and '<!<![' which we might otherwise miss.
                     //
-                    if (fEntityScanner.skipChar('!')) {
-                        if(fEntityScanner.skipChar('[')) {
-                            if (fDTDHandler != null) {
+                    if (fEntityScanner.skipChar('!'))
+                    {
+                        if (fEntityScanner.skipChar('['))
+                        {
+                            if (fDTDHandler != null)
+                            {
                                 fIgnoreConditionalBuffer.append("![");
                             }
                             fIncludeSectDepth++;
-                        } else {
-                            if (fDTDHandler != null) {
+                        } else
+                        {
+                            if (fDTDHandler != null)
+                            {
                                 fIgnoreConditionalBuffer.append("!");
                             }
                         }
                     }
-                }
-                else if (fEntityScanner.skipChar(']')) {
-                    if (fDTDHandler != null) {
+                } else if (fEntityScanner.skipChar(']'))
+                {
+                    if (fDTDHandler != null)
+                    {
                         fIgnoreConditionalBuffer.append(']');
                     }
                     //
                     // The same thing goes for ']<![' and '<]]>', etc.
                     //
-                    if (fEntityScanner.skipChar(']')) {
-                        if (fDTDHandler != null) {
+                    if (fEntityScanner.skipChar(']'))
+                    {
+                        if (fDTDHandler != null)
+                        {
                             fIgnoreConditionalBuffer.append(']');
                         }
-                        while (fEntityScanner.skipChar(']')) {
+                        while (fEntityScanner.skipChar(']'))
+                        {
                             /* empty loop body */
-                            if (fDTDHandler != null) {
+                            if (fDTDHandler != null)
+                            {
                                 fIgnoreConditionalBuffer.append(']');
                             }
                         }
-                        if (fEntityScanner.skipChar('>')) {
-                            if (fIncludeSectDepth-- == initialDepth) {
+                        if (fEntityScanner.skipChar('>'))
+                        {
+                            if (fIncludeSectDepth-- == initialDepth)
+                            {
                                 fMarkUpDepth--;
                                 // call handler
-                                if (fDTDHandler != null) {
-                                    fLiteral.setValues(fIgnoreConditionalBuffer.ch, 0,
-                                                       fIgnoreConditionalBuffer.length - 2);
+                                if (fDTDHandler != null)
+                                {
+                                    fLiteral.setValues(fIgnoreConditionalBuffer.ch, 0, fIgnoreConditionalBuffer.length - 2);
                                     fDTDHandler.ignoredCharacters(fLiteral, null);
                                     fDTDHandler.endConditional(null);
                                 }
                                 return;
-                            } else if(fDTDHandler != null) {
+                            } else if (fDTDHandler != null)
+                            {
                                 fIgnoreConditionalBuffer.append('>');
                             }
                         }
                     }
-                }
-                else {
+                } else
+                {
                     int c = fEntityScanner.scanChar();
-                    if (fScannerState == SCANNER_STATE_END_OF_INPUT) {
+                    if (fScannerState == SCANNER_STATE_END_OF_INPUT)
+                    {
                         reportFatalError("IgnoreSectUnterminated", null);
                         return;
                     }
-                    if (fDTDHandler != null) {
-                        fIgnoreConditionalBuffer.append((char)c);
+                    if (fDTDHandler != null)
+                    {
+                        fIgnoreConditionalBuffer.append((char) c);
                     }
                 }
             }
-        }
-        else {
+        } else
+        {
             reportFatalError("MSG_MARKUP_NOT_RECOGNIZED_IN_DTD", null);
         }
 
@@ -1785,77 +1910,80 @@ public class XMLDTDScannerImpl
      * @throws XNIException Thrown on parse error.
      *
      */
-    protected final boolean scanDecls(boolean complete)
-            throws IOException, XNIException {
-        
+    protected final boolean scanDecls(boolean complete) throws IOException, XNIException
+    {
+
         skipSeparator(false, true);
         boolean again = true;
-        while (again && fScannerState == SCANNER_STATE_MARKUP_DECL) {
+        while (again && fScannerState == SCANNER_STATE_MARKUP_DECL)
+        {
             again = complete;
-            if (fEntityScanner.skipChar('<')) {
+            if (fEntityScanner.skipChar('<'))
+            {
                 fMarkUpDepth++;
-                if (fEntityScanner.skipChar('?')) {
+                if (fEntityScanner.skipChar('?'))
+                {
                     scanPI();
-                }
-                else if (fEntityScanner.skipChar('!')) {
-                    if (fEntityScanner.skipChar('-')) {
-                        if (!fEntityScanner.skipChar('-')) {
-                            reportFatalError("MSG_MARKUP_NOT_RECOGNIZED_IN_DTD",
-                                             null);
-                        } else {
+                } else if (fEntityScanner.skipChar('!'))
+                {
+                    if (fEntityScanner.skipChar('-'))
+                    {
+                        if (!fEntityScanner.skipChar('-'))
+                        {
+                            reportFatalError("MSG_MARKUP_NOT_RECOGNIZED_IN_DTD", null);
+                        } else
+                        {
                             scanComment();
                         }
-                    }
-                    else if (fEntityScanner.skipString("ELEMENT")) {
+                    } else if (fEntityScanner.skipString("ELEMENT"))
+                    {
                         scanElementDecl();
-                    }
-                    else if (fEntityScanner.skipString("ATTLIST")) {
+                    } else if (fEntityScanner.skipString("ATTLIST"))
+                    {
                         scanAttlistDecl();
-                    }
-                    else if (fEntityScanner.skipString("ENTITY")) {
+                    } else if (fEntityScanner.skipString("ENTITY"))
+                    {
                         scanEntityDecl();
-                    }
-                    else if (fEntityScanner.skipString("NOTATION")) {
+                    } else if (fEntityScanner.skipString("NOTATION"))
+                    {
                         scanNotationDecl();
-                    }
-                    else if (fEntityScanner.skipChar('[') &&
-                             !scanningInternalSubset()) {
+                    } else if (fEntityScanner.skipChar('[') && !scanningInternalSubset())
+                    {
                         scanConditionalSect();
-                    }
-                    else {
+                    } else
+                    {
                         fMarkUpDepth--;
-                        reportFatalError("MSG_MARKUP_NOT_RECOGNIZED_IN_DTD",
-                                         null);
+                        reportFatalError("MSG_MARKUP_NOT_RECOGNIZED_IN_DTD", null);
                     }
-                }
-                else {
+                } else
+                {
                     fMarkUpDepth--;
                     reportFatalError("MSG_MARKUP_NOT_RECOGNIZED_IN_DTD", null);
                 }
-            }
-            else if (fIncludeSectDepth > 0 && fEntityScanner.skipChar(']')) {
+            } else if (fIncludeSectDepth > 0 && fEntityScanner.skipChar(']'))
+            {
                 // end of conditional section?
-                if (!fEntityScanner.skipChar(']')
-                    || !fEntityScanner.skipChar('>')) {
+                if (!fEntityScanner.skipChar(']') || !fEntityScanner.skipChar('>'))
+                {
                     reportFatalError("IncludeSectUnterminated", null);
                 }
                 // call handler
-                if (fDTDHandler != null) {
+                if (fDTDHandler != null)
+                {
                     fDTDHandler.endConditional(null);
                 }
                 // decreaseMarkupDepth();
                 fIncludeSectDepth--;
                 fMarkUpDepth--;
-            }
-            else if (scanningInternalSubset() &&
-                     fEntityScanner.peekChar() == ']') {
+            } else if (scanningInternalSubset() && fEntityScanner.peekChar() == ']')
+            {
                 // this is the end of the internal subset, let's stop here
                 return false;
-            }
-            else if (fEntityScanner.skipSpaces()) {
+            } else if (fEntityScanner.skipSpaces())
+            {
                 // simply skip
-            }
-            else {
+            } else
+            {
                 reportFatalError("MSG_MARKUP_NOT_RECOGNIZED_IN_DTD", null);
             }
             skipSeparator(false, true);
@@ -1879,22 +2007,23 @@ public class XMLDTDScannerImpl
      * @return True if any leading whitespace was found or the end of a
      *         parameter entity was crossed.
      */
-    private boolean skipSeparator(boolean spaceRequired, boolean lookForPERefs)
-        throws IOException, XNIException
+    private boolean skipSeparator(boolean spaceRequired, boolean lookForPERefs) throws IOException, XNIException
     {
         int depth = fPEDepth;
         boolean sawSpace = fEntityScanner.skipSpaces();
-        if (!lookForPERefs || !fEntityScanner.skipChar('%')) {
+        if (!lookForPERefs || !fEntityScanner.skipChar('%'))
+        {
             return !spaceRequired || sawSpace || (depth != fPEDepth);
         }
-        while (true) {
+        while (true)
+        {
             String name = fEntityScanner.scanName();
-            if (name == null) {
+            if (name == null)
+            {
                 reportFatalError("NameRequiredInPEReference", null);
-            }
-            else if (!fEntityScanner.skipChar(';')) {
-                reportFatalError("SemicolonRequiredInPEReference",
-                                 new Object[]{name});
+            } else if (!fEntityScanner.skipChar(';'))
+            {
+                reportFatalError("SemicolonRequiredInPEReference", new Object[] { name });
             }
             startPE(name, false);
             fEntityScanner.skipSpaces();
@@ -1903,12 +2032,13 @@ public class XMLDTDScannerImpl
         }
     }
 
-
     /*
      * Element Children Content Stack
      */
-    private final void pushContentStack(int c) {
-        if (fContentStack.length == fContentDepth) {
+    private final void pushContentStack(int c)
+    {
+        if (fContentStack.length == fContentDepth)
+        {
             int[] newStack = new int[fContentDepth * 2];
             System.arraycopy(fContentStack, 0, newStack, 0, fContentDepth);
             fContentStack = newStack;
@@ -1916,16 +2046,18 @@ public class XMLDTDScannerImpl
         fContentStack[fContentDepth++] = c;
     }
 
-    private final int popContentStack() {
+    private final int popContentStack()
+    {
         return fContentStack[--fContentDepth];
     }
-
 
     /*
      * Parameter Entity Stack
      */
-    private final void pushPEStack(int depth, boolean report) {
-        if (fPEStack.length == fPEDepth) {
+    private final void pushPEStack(int depth, boolean report)
+    {
+        if (fPEStack.length == fPEDepth)
+        {
             int[] newIntStack = new int[fPEDepth * 2];
             System.arraycopy(fPEStack, 0, newIntStack, 0, fPEDepth);
             fPEStack = newIntStack;
@@ -1940,21 +2072,24 @@ public class XMLDTDScannerImpl
     }
 
     /** pop the stack */
-    private final int popPEStack() {
+    private final int popPEStack()
+    {
         return fPEStack[--fPEDepth];
     }
 
     /** look at the top of the stack */
-    private final boolean peekReportEntity() {
-        return fPEReport[fPEDepth-1];
+    private final boolean peekReportEntity()
+    {
+        return fPEReport[fPEDepth - 1];
     }
-
 
     /*
      * Utility method
      */
-    private final void ensureEnumerationSize(int size) {
-        if (fEnumeration.length == size) {
+    private final void ensureEnumerationSize(int size)
+    {
+        if (fEnumeration.length == size)
+        {
             String[] newEnum = new String[size * 2];
             System.arraycopy(fEnumeration, 0, newEnum, 0, size);
             fEnumeration = newEnum;

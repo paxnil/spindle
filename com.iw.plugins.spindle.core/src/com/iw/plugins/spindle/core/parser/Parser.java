@@ -12,7 +12,7 @@ package com.iw.plugins.spindle.core.parser;
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
+ * The Original Code is Spindle, an Eclipse Plugin for Tapestry. 
  *
  * The Initial Developer of the Original Code is
  * Intelligent Works Incorporated.
@@ -35,254 +35,328 @@ import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLParseException;
+import org.apache.xerces.xni.parser.XMLPullParserConfiguration;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-import org.w3c.dom.Element;
+import org.eclipse.jface.text.IDocument;
 import org.w3c.dom.Node;
-import org.w3c.dom.Text;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
-import com.iw.plugins.spindle.core.Files;
+import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.xml.TapestryDOMParser;
 import com.iw.plugins.spindle.core.parser.xml.TapestryEntityResolver;
 import com.iw.plugins.spindle.core.parser.xml.TapestryParserConfiguration;
+import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParser;
+import com.iw.plugins.spindle.core.parser.xml.pull.TapestryPullParser;
+import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.core.util.Files;
 
 /**
  * The xml parser used in the builds.
+ * can be used to dom-parse or pull-parse XML content
  *
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public class Parser implements ISourceLocationResolver, XMLErrorHandler {
+public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProblemCollector
+{
 
-  private Document eclipseDocument;
-  private DocumentImpl xmlDocument;
+    private boolean usePullParser = false;
+    private IDocument eclipseDocument;
+    private DocumentImpl xmlDocument;
 
-  private TapestryDOMParser parser = null;
-  private ArrayList collectedExceptions;
+    private XMLPullParserConfiguration pullParseConfiguration;
+    private XMLPullParserConfiguration domParseConfiguration;
+    private TapestryDOMParser domParser = null;
+    private TapestryPullParser pullParser = null;
+    private ArrayList collectedProblems = new ArrayList();
 
-  public Parser() {
-    TapestryEntityResolver.register(
-      SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID,
-      "Tapestry_1_3.dtd");
-    TapestryEntityResolver.register(
-      SpecificationParser.TAPESTRY_DTD_1_4_PUBLIC_ID,
-      "Tapestry_1_4.dtd");
-  }
-
-  private void checkParser() {
-    if (parser == null) {
-      TapestryParserConfiguration parserConfig = new TapestryParserConfiguration(this);
-      parser = new TapestryDOMParser(parserConfig);
-      parser.setSourceResolver(this);
-      try {
-        parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-        parser.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
-        parser.setFeature(
-          "http://apache.org/xml/features/dom/include-ignorable-whitespace",
-          false);
-        parser.setFeature("http://xml.org/sax/features/validation", true);
-      } catch (SAXException e) {
-        TapestryCore.log(e);
-      }
+    public Parser()
+    {
+        this(false);
     }
-  }
 
-  public int getLineOffset(int parserReportedLineNumber) {
-    try {
-      if (eclipseDocument != null) {
-        return eclipseDocument.getLineOffset(parserReportedLineNumber - 1);
-      }
-    } catch (BadLocationException e) {
-      TapestryCore.log(e);
+    public Parser(boolean usePullParser)
+    {
+        this.usePullParser = usePullParser;
+        TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID, "Tapestry_1_3.dtd");
+        TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_1_4_PUBLIC_ID, "Tapestry_1_4.dtd");
     }
-    return 0;
-  }
 
-  public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn) {
-    int result = getLineOffset(parserReportedLineNumber);
-    int lineCount = eclipseDocument.getNumberOfLines();
-    int totalLength = eclipseDocument.getLength();
-    if (parserReportedColumn > 0) {
-      if (parserReportedLineNumber > lineCount) {
-        result = Math.min(totalLength - 2, result + parserReportedColumn - 1);
-      } else {
-        try {
-          int lastCharOnLine =
-            result + eclipseDocument.getLineLength(parserReportedLineNumber - 1) - 1;
-          result = Math.min(lastCharOnLine, result + parserReportedColumn - 1);
-        } catch (BadLocationException e) {
-        	TapestryCore.log(e);
+    private IDocument getEclipseDocument(String content)
+    {
+        if (eclipseDocument == null)
+        {
+            eclipseDocument = new Document();
         }
-      }
-
-    }
-    return result;
-  }
-
-  public Element parse(IFile file) throws IOException, DocumentParseException, CoreException {
-    return parse(file.getContents(true));
-  }
-
-  public Element parse(InputStream input) throws IOException, DocumentParseException {
-    String content = Files.readFileToString(input, null);
-    return parse(content);
-  }
-
-  public Element parse(String content) throws IOException, DocumentParseException {
-
-    collectedExceptions = new ArrayList();
-    eclipseDocument = new Document();
-    eclipseDocument.set(content);
-    StringReader reader = new StringReader(content);
-    xmlDocument = null;
-    Element result = null;
-
-    try {
-      //      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      //      factory.setValidating(true);
-      //      factory.setIgnoringElementContentWhitespace(true);
-      //      factory.setIgnoringComments(true);
-      //      factory.setCoalescing(true);
-      //      DocumentBuilder parser = factory.newDocumentBuilder();
-      //      parser.setErrorHandler(this);
-      checkParser();
-      parser.parse(new InputSource(reader));
-      xmlDocument = (DocumentImpl) parser.getDocument();
-      result = xmlDocument.getDocumentElement();
-    } catch (SAXException e) {
-
-      if (e instanceof SAXParseException) {
-
-        throw createDPEx((SAXParseException) e, IMarker.SEVERITY_ERROR);
-
-      }
-
-      throw new DocumentParseException(e.getMessage(), IMarker.SEVERITY_ERROR, 0, 0, 0, e);
-
-    } finally {
-      reader.close();
+        eclipseDocument.set(content);
+        return eclipseDocument;
     }
 
-    return result;
-
-  }
-
-  public DocumentImpl getParsedDocument() {
-    return xmlDocument;
-  }
-
-  public ElementSourceLocationInfo getSourceLocationInfo(Node node) {
-    if (xmlDocument != null) {
-      return (ElementSourceLocationInfo) xmlDocument.getUserData(node, TapestryCore.PLUGIN_ID);
-    }
-    return null;
-  }
-
-  private void collect(DocumentParseException ex) {
-    if (!collectedExceptions.contains(ex)) {
-      collectedExceptions.add(ex);
-    }
-  }
-
-  public DocumentParseException[] getCollectedExceptions() {
-    if (collectedExceptions != null && !collectedExceptions.isEmpty()) {
-      return (DocumentParseException[]) collectedExceptions.toArray(
-        new DocumentParseException[collectedExceptions.size()]);
-    }
-    return new DocumentParseException[0];
-  }
-
-  private DocumentParseException createDPEx(SAXParseException parseException, int severity) {
-    return createDPEx(
-      (Throwable) parseException,
-      parseException.getLineNumber(),
-      parseException.getColumnNumber(),
-      severity);
-  }
-
-  private DocumentParseException createDPEx(XMLParseException parseException, int severity) {
-    return createDPEx(
-      (Throwable) parseException,
-      parseException.getLineNumber(),
-      parseException.getColumnNumber(),
-      severity);
-  }
-
-  private DocumentParseException createDPEx(
-    Throwable ex,
-    int lineNumber,
-    int columnNumber,
-    int severity) {
-
-    int charStart = 0;
-    int charEnd = 0;
-
-    charStart = getColumnOffset(lineNumber, columnNumber);
-    charEnd = charStart + 1;
-
-    return new DocumentParseException(
-      ex.getMessage(),
-      severity,
-      lineNumber,
-      charStart,
-      charEnd,
-      ex);
-  }
-
-  public boolean isElement(Node node, String elementName) {
-    if (node.getNodeType() != Node.ELEMENT_NODE) {
-      return false;
-    }
-    Element element = (Element) node;
-    return element.getTagName().equals(elementName);
-  }
-
-  public String getValue(Node node) {
-    StringBuffer buffer = new StringBuffer();
-    for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
-      Text text = (Text) child;
-      buffer.append(text.getData());
+    public String getPublicId()
+    {
+        if (xmlDocument != null)
+        {
+            return xmlDocument.getDoctype().getPublicId();
+        }
+        // TODO handle this in pull parser case!
+        return null;
     }
 
-    String result = buffer.toString().trim();
-    if (result == null || "".equals(result)) {
-      return null;
+    private void checkPullParser()
+    {
+        Assert.isTrue(usePullParser, "can't pull parse, I'm set to dom parse!");
+        if (pullParser == null)
+        {
+            pullParseConfiguration = new TapestryParserConfiguration();
+            pullParser = new TapestryPullParser(pullParseConfiguration);
+            pullParser.setSourceResolver(this);
+            pullParseConfiguration.setDocumentHandler(pullParser);
+            pullParseConfiguration.setErrorHandler(this);
+            pullParseConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
+            pullParseConfiguration.setFeature("http://apache.org/xml/features/dom/include-ignorable-whitespace", false);
+            pullParseConfiguration.setFeature("http://xml.org/sax/features/validation", true);
+            pullParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
+            pullParseConfiguration.setProperty(
+                "http://apache.org/xml/properties/internal/grammar-pool",
+                TapestryParserConfiguration.GRAMMAR_POOL);
+        }
     }
 
-    return result;
-  }
+    private void checkDomParser()
+    {
+        Assert.isTrue(!usePullParser, "can't dom parse, I'm set to pull parse!");
+        if (domParser == null)
+        {
+            domParseConfiguration = new TapestryParserConfiguration();
+            domParser = new TapestryDOMParser(domParseConfiguration);
+            domParser.setSourceResolver(this);
+            domParseConfiguration.setDocumentHandler(domParser);
+            domParseConfiguration.setErrorHandler(this);
+            domParseConfiguration.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
+            domParseConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
+            domParseConfiguration.setFeature("http://apache.org/xml/features/dom/include-ignorable-whitespace", false);
+            domParseConfiguration.setFeature("http://xml.org/sax/features/validation", true);
+            domParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
+            domParseConfiguration.setProperty(
+                "http://apache.org/xml/properties/internal/grammar-pool",
+                TapestryParserConfiguration.GRAMMAR_POOL);
 
-  /**
-   * @see org.apache.xerces.xni.parser.XMLErrorHandler#error(String, String, XMLParseException)
-   */
-  public void error(String domain, String key, XMLParseException exception) throws XNIException {
-    collect(createDPEx(exception, IMarker.SEVERITY_ERROR));
-    TapestryCore.log(exception);
-  }
+        }
+    }
 
-  /**
-   * @see org.apache.xerces.xni.parser.XMLErrorHandler#fatalError(String, String, XMLParseException)
-   */
-  public void fatalError(String domain, String key, XMLParseException exception)
-    throws XNIException {
-    collect(createDPEx(exception, IMarker.SEVERITY_ERROR));
-    TapestryCore.log(exception);
-  }
+    public Node parse(IFile file) throws IOException, CoreException
+    {
+        return parse(file.getContents(true));
+    }
 
-  /**
-   * @see org.apache.xerces.xni.parser.XMLErrorHandler#warning(String, String, XMLParseException)
-   */
-  public void warning(String domain, String key, XMLParseException exception)
-    throws XNIException {
-    collect(createDPEx(exception, IMarker.SEVERITY_WARNING));
-    TapestryCore.log(exception);
-  }
+    public Node parse(InputStream input) throws IOException
+    {
+        String content = Files.readFileToString(input, null);
+        return parse(content);
+    }
+
+    public Node parse(String content) throws IOException
+    {
+        xmlDocument = null;
+        collectedProblems.clear();
+        getEclipseDocument(content);
+        if (usePullParser)
+        {
+            return pullParse(content);
+        } else
+        {
+            return domParse(content);
+        }
+    }
+
+    protected Node pullParse(String content) throws IOException
+    {
+        Assert.isTrue(usePullParser, "can't pull parse, I'm set to dom parse!");
+        StringReader reader = new StringReader(content);
+        try
+        {
+            checkPullParser();
+            pullParseConfiguration.parse(false);
+            return (Node) pullParser;
+
+        } catch (ParserRuntimeException e1)
+        {
+            // this could happen while scanning the prolog
+            createFatalProblem(e1, IProblem.ERROR);
+        } catch (Exception e1) {
+            //ignore
+        }
+        return null;
+    }
+
+    protected Node domParse(String content) throws IOException
+    {
+        Assert.isTrue(!usePullParser, "can't dom parse, I'm set to pull parse!");
+        StringReader reader = new StringReader(content);
+        Node result = null;
+
+        try
+        {
+            checkDomParser();
+            domParser.parse(new InputSource(reader));
+            xmlDocument = (DocumentImpl) domParser.getDocument();
+            result = xmlDocument.getDocumentElement();
+        } catch (SAXException e)
+        {
+            // there was a fatal error - return null
+            // all the exceptions are collected already because I am an XMLErrorHandler
+            return null;
+
+        } finally
+        {
+            reader.close();
+        }
+
+        return result;
+
+    }
+
+    public DocumentImpl getParsedDocument()
+    {
+        Assert.isTrue(!usePullParser, "can't get the document as we are using pull parsing!");
+        return xmlDocument;
+    }
+
+    public ISourceLocationInfo getSourceLocationInfo(Node node)
+    {
+        if (xmlDocument != null)
+        {
+            return (ElementSourceLocationInfo) xmlDocument.getUserData(node, TapestryCore.PLUGIN_ID);
+        }
+        // TODO handle this for Pull Parsing Case!
+        return null;
+    }
+
+    public int getLineOffset(int parserReportedLineNumber)
+    {
+        try
+        {
+            if (eclipseDocument != null)
+            {
+                return eclipseDocument.getLineOffset(parserReportedLineNumber - 1);
+            }
+        } catch (BadLocationException e)
+        {
+            TapestryCore.log(e);
+        }
+        return 0;
+    }
+
+    public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn)
+    {
+        int result = getLineOffset(parserReportedLineNumber);
+        int lineCount = eclipseDocument.getNumberOfLines();
+        int totalLength = eclipseDocument.getLength();
+        if (parserReportedColumn > 0)
+        {
+            if (parserReportedLineNumber > lineCount)
+            {
+                result = Math.min(totalLength - 2, result + parserReportedColumn - 1);
+            } else
+            {
+                try
+                {
+                    int lastCharOnLine = result + eclipseDocument.getLineLength(parserReportedLineNumber - 1) - 1;
+                    result = Math.min(lastCharOnLine, result + parserReportedColumn - 1);
+                } catch (BadLocationException e)
+                {
+                    TapestryCore.log(e);
+                }
+            }
+
+        }
+        return result;
+    }
+
+    public void addProblem(IProblem problem)
+    {
+        if (!collectedProblems.contains(problem))
+        {
+            collectedProblems.add(problem);
+        }
+    }
+    
+    public void addProblem(int severity, ISourceLocation location, String message) {
+        addProblem(
+             new DefaultProblem(
+                 ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+                 severity,
+                 message,
+                 location.getLineNumber(),
+                 location.getCharStart(),
+                 location.getCharEnd()));
+    }
+
+    public IProblem[] getProblems()
+    {
+        if (collectedProblems != null && !collectedProblems.isEmpty())
+        {
+            return (IProblem[]) collectedProblems.toArray(new IProblem[collectedProblems.size()]);
+        }
+        return new IProblem[0];
+    }
+
+    private IProblem createFatalProblem(XMLParseException parseException, int severity)
+    {
+        return createProblem(ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER, parseException, severity);
+    }
+
+    private IProblem createProblem(XMLParseException parseException, int severity)
+    {
+        return createProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, parseException, severity);
+    }
+
+    private IProblem createProblem(String type, XMLParseException ex, int severity)
+    {
+
+        int lineNumber = ex.getLineNumber();
+        int columnNumber = ex.getColumnNumber();
+        int charStart = 0;
+        int charEnd = 0;
+
+        charStart = getColumnOffset(lineNumber, columnNumber);
+        charEnd = charStart + 1;
+
+        return new DefaultProblem(type, severity, ex.getMessage(), lineNumber, charStart, charEnd);
+    }
+
+    //*** XMLErrorHandler for DOM && PULL Parsing **
+
+    /**
+     * @see org.apache.xerces.xni.parser.XMLErrorHandler#error(String, String, XMLParseException)
+     */
+    public void error(String domain, String key, XMLParseException exception) throws XNIException
+    {
+        addProblem(createProblem(exception, IMarker.SEVERITY_ERROR));
+    }
+
+    /**
+     * @see org.apache.xerces.xni.parser.XMLErrorHandler#fatalError(String, String, XMLParseException)
+     */
+    public void fatalError(String domain, String key, XMLParseException exception) throws XNIException
+    {
+        addProblem(createFatalProblem(exception, IMarker.SEVERITY_ERROR));
+        TapestryCore.log(exception);
+    }
+
+    /**
+     * @see org.apache.xerces.xni.parser.XMLErrorHandler#warning(String, String, XMLParseException)
+     */
+    public void warning(String domain, String key, XMLParseException exception) throws XNIException
+    {
+        addProblem(createProblem(exception, IMarker.SEVERITY_WARNING));
+    }
+
+    ///*** END OF XMLErrorHandler for DOM && PULL Parsing **
 
 }

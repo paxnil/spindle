@@ -63,6 +63,7 @@ import org.apache.xerces.impl.Constants;
 import org.apache.xerces.impl.XMLEntityScanner;
 import org.apache.xerces.impl.XMLErrorReporter;
 import org.apache.xerces.impl.msg.XMLMessageFormatter;
+import org.apache.xerces.impl.validation.XMLGrammarPoolImpl;
 import org.apache.xerces.util.AugmentationsImpl;
 import org.apache.xerces.util.SymbolTable;
 import org.apache.xerces.util.XMLChar;
@@ -125,6 +126,9 @@ public abstract class XMLScanner implements XMLComponent
 
     /** Property identifier: entity manager. */
     protected static final String ENTITY_MANAGER = Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_MANAGER_PROPERTY;
+
+    /** Property identifier: grammar pool. */
+    protected static final String GRAMMAR_POOL = Constants.XERCES_PROPERTY_PREFIX + Constants.XMLGRAMMAR_POOL_PROPERTY;
 
     // debugging
 
@@ -199,30 +203,19 @@ public abstract class XMLScanner implements XMLComponent
 
     /** Symbol: "apos". */
     protected String fAposSymbol;
-    
+
     // boundary locator information
 
     /** Augmentation switch */
     protected boolean fAugmentations;
-    
-    protected ParserEventHandler fEventHandler = new ParserEventHandler();
 
-//    /** Beginning line number. */
-//    protected int fBeginLineNumber;
-//
-//    /** Beginning column number. */
-//    protected int fBeginColumnNumber;
-//
-//    /** Ending line number. */
-//    protected int fEndLineNumber;
-//
-//    /** Ending column number. */
-//    protected int fEndColumnNumber;
-//
-//    protected final LocationItem fLocationItem = new LocationItem();
+    protected ParserEventHandler fEventHandler = new ParserEventHandler();
 
     /** Augmentations. */
     protected final Augmentations fInfosetAugs = new AugmentationsImpl();
+
+    /** GrammarPool property   */
+    protected XMLGrammarPoolImpl fGrammarPool;
 
     // temporary variables
 
@@ -266,6 +259,7 @@ public abstract class XMLScanner implements XMLComponent
         fSymbolTable = (SymbolTable) componentManager.getProperty(SYMBOL_TABLE);
         fErrorReporter = (XMLErrorReporter) componentManager.getProperty(ERROR_REPORTER);
         fEntityManager = (XMLEntityManager) componentManager.getProperty(ENTITY_MANAGER);
+        fGrammarPool = (XMLGrammarPoolImpl) componentManager.getProperty(GRAMMAR_POOL);
 
         // initialize scanner
         fEntityScanner = fEntityManager.getEntityScanner();
@@ -328,7 +322,6 @@ public abstract class XMLScanner implements XMLComponent
             }
             return;
         }
-
     } // setProperty(String,Object)
 
     /*
@@ -376,8 +369,7 @@ public abstract class XMLScanner implements XMLComponent
      * <strong>Note:</strong> This method uses fString, anything in it
      * at the time of calling is lost.
      */
-    protected void scanXMLDeclOrTextDecl(boolean scanningTextDecl, String[] pseudoAttributeValues)
-        throws IOException, XNIException
+    protected void scanXMLDeclOrTextDecl(boolean scanningTextDecl, String[] pseudoAttributeValues) throws IOException, XNIException
     {
 
         // pseudo-attribute values
@@ -784,12 +776,12 @@ public abstract class XMLScanner implements XMLComponent
         }
 
         // end of unmunged attribute here
-        fEventHandler.attributeEnd(fEntityManager.fCurrentEntity.lineNumber,fEntityManager.fCurrentEntity.columnNumber - 1);
-//        System.out.println(
-//            "Ends attribute at line: "
-//                + fEndLineNumber
-//                + " column: "
-//                + fEndColumnNumber);
+        fEventHandler.attributeEnd(fEntityManager.fCurrentEntity.lineNumber, fEntityManager.fCurrentEntity.columnNumber - 1);
+        //        System.out.println(
+        //            "Ends attribute at line: "
+        //                + fEndLineNumber
+        //                + " column: "
+        //                + fEndColumnNumber);
 
         fStringBuffer2.clear();
         fStringBuffer2.append(value);
@@ -1362,72 +1354,70 @@ public abstract class XMLScanner implements XMLComponent
         fErrorReporter.reportError(XMLMessageFormatter.XML_DOMAIN, msgId, args, XMLErrorReporter.SEVERITY_FATAL_ERROR);
     }
 
-
-
-//    // features
-//
-//    /** Location info item.*/
-//    class LocationItem implements XMLEnityEventInfo
-//    {
-//        /** Beginning line number. */
-//        protected int fBeginLineNumber;
-//
-//        /** Beginning column number. */
-//        protected int fBeginColumnNumber;
-//
-//        /** Ending line number. */
-//        protected int fEndLineNumber;
-//
-//        /** Ending column number. */
-//        protected int fEndColumnNumber;
-//
-//        /** Sets the values of this item. */
-//        public void setValues(int beginLine, int beginColumn, int endLine, int endColumn)
-//        {
-//            fBeginLineNumber = beginLine;
-//            fBeginColumnNumber = beginColumn;
-//            fEndLineNumber = endLine;
-//            fEndColumnNumber = endColumn;
-//        }
-//
-//        /** @return the line number of the beginning of this event.*/
-//        public int getBeginLineNumber()
-//        {
-//            return fBeginLineNumber;
-//        }
-//
-//        /** @return the column number of the beginning of this event.*/
-//        public int getBeginColumnNumber()
-//        {
-//            return fBeginColumnNumber;
-//        }
-//
-//        /** @return the line number of the end of this event.*/
-//        public int getEndLineNumber()
-//        {
-//            return fEndLineNumber;
-//        }
-//
-//        /** @return the column number of the end of this event.*/
-//        public int getEndColumnNumber()
-//        {
-//            return fEndColumnNumber;
-//        }
-//
-//        /** @return a string representation of this object. */
-//        public String toString()
-//        {
-//            StringBuffer str = new StringBuffer();
-//            str.append(fBeginLineNumber);
-//            str.append(':');
-//            str.append(fBeginColumnNumber);
-//            str.append(':');
-//            str.append(fEndLineNumber);
-//            str.append(':');
-//            str.append(fEndColumnNumber);
-//            return str.toString();
-//        }
-//
-//    } // class LocationItem
+    //    // features
+    //
+    //    /** Location info item.*/
+    //    class LocationItem implements XMLEnityEventInfo
+    //    {
+    //        /** Beginning line number. */
+    //        protected int fBeginLineNumber;
+    //
+    //        /** Beginning column number. */
+    //        protected int fBeginColumnNumber;
+    //
+    //        /** Ending line number. */
+    //        protected int fEndLineNumber;
+    //
+    //        /** Ending column number. */
+    //        protected int fEndColumnNumber;
+    //
+    //        /** Sets the values of this item. */
+    //        public void setValues(int beginLine, int beginColumn, int endLine, int endColumn)
+    //        {
+    //            fBeginLineNumber = beginLine;
+    //            fBeginColumnNumber = beginColumn;
+    //            fEndLineNumber = endLine;
+    //            fEndColumnNumber = endColumn;
+    //        }
+    //
+    //        /** @return the line number of the beginning of this event.*/
+    //        public int getBeginLineNumber()
+    //        {
+    //            return fBeginLineNumber;
+    //        }
+    //
+    //        /** @return the column number of the beginning of this event.*/
+    //        public int getBeginColumnNumber()
+    //        {
+    //            return fBeginColumnNumber;
+    //        }
+    //
+    //        /** @return the line number of the end of this event.*/
+    //        public int getEndLineNumber()
+    //        {
+    //            return fEndLineNumber;
+    //        }
+    //
+    //        /** @return the column number of the end of this event.*/
+    //        public int getEndColumnNumber()
+    //        {
+    //            return fEndColumnNumber;
+    //        }
+    //
+    //        /** @return a string representation of this object. */
+    //        public String toString()
+    //        {
+    //            StringBuffer str = new StringBuffer();
+    //            str.append(fBeginLineNumber);
+    //            str.append(':');
+    //            str.append(fBeginColumnNumber);
+    //            str.append(':');
+    //            str.append(fEndLineNumber);
+    //            str.append(':');
+    //            str.append(fEndColumnNumber);
+    //            return str.toString();
+    //        }
+    //
+    //    } // class LocationItem
 
 } // class XMLScanner

@@ -1,0 +1,2 @@
+These test are intended to be run in the development environment, not in the deployed plugin.
+Any tests of the deployed plugin, when they appear, will be delivered in another plugin.

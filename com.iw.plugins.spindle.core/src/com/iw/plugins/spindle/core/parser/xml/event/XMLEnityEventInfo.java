@@ -25,7 +25,6 @@ package com.iw.plugins.spindle.core.parser.xml.event;
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 /**
  * This interface is used to carry location information 
  *

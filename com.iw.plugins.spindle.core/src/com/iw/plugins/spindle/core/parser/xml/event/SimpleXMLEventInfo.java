@@ -25,70 +25,76 @@ package com.iw.plugins.spindle.core.parser.xml.event;
  *
  * ***** END LICENSE BLOCK ***** */
 
+public class SimpleXMLEventInfo implements XMLEnityEventInfo
+{
+    /** Beginning line number. */
+    protected int fBeginLineNumber = -1;
 
+    /** Beginning column number. */
+    protected int fBeginColumnNumber = -1;
 
+    /** Ending line number. */
+    protected int fEndLineNumber = -1;
 
-public class SimpleXMLEventInfo implements XMLEnityEventInfo {
-  /** Beginning line number. */
-  protected int fBeginLineNumber;
+    /** Ending column number. */
+    protected int fEndColumnNumber = -1;
 
-  /** Beginning column number. */
-  protected int fBeginColumnNumber;
+    /** Sets the values of this item. */
+    public void setBeginValues(int beginLine, int beginColumn)
+    {
+        fBeginLineNumber = beginLine;
+        fBeginColumnNumber = beginColumn;
+    }
 
-  /** Ending line number. */
-  protected int fEndLineNumber;
+    /** Sets the values of this item. */
+    public void setEndValues(int endLine, int endColumn)
+    {
+        fEndLineNumber = endLine;
+        fEndColumnNumber = endColumn;
+    }
 
-  /** Ending column number. */
-  protected int fEndColumnNumber;
+    public void setValues(int beginLine, int beginColumn, int endLine, int endColumn)
+    {
+        setBeginValues(beginLine, beginColumn);
+        setEndValues(endLine, endColumn);
+    }
 
-  /** Sets the values of this item. */
-  public void setBeginValues(int beginLine, int beginColumn) {
-    fBeginLineNumber = beginLine;
-    fBeginColumnNumber = beginColumn;
-  }
+    /** @return the line number of the beginning of this event.*/
+    public int getBeginLineNumber()
+    {
+        return fBeginLineNumber;
+    }
 
-  /** Sets the values of this item. */
-  public void setEndValues(int endLine, int endColumn) {
-    fEndLineNumber = endLine;
-    fEndColumnNumber = endColumn;
-  }
+    /** @return the column number of the beginning of this event.*/
+    public int getBeginColumnNumber()
+    {
+        return fBeginColumnNumber;
+    }
 
-  public void setValues(int beginLine, int beginColumn, int endLine, int endColumn) {
-    setBeginValues(beginLine, beginColumn);
-    setEndValues(endLine, endColumn);
-  }
+    /** @return the line number of the end of this event.*/
+    public int getEndLineNumber()
+    {
+        return fEndLineNumber;
+    }
 
-  /** @return the line number of the beginning of this event.*/
-  public int getBeginLineNumber() {
-    return fBeginLineNumber;
-  }
+    /** @return the column number of the end of this event.*/
+    public int getEndColumnNumber()
+    {
+        return fEndColumnNumber;
+    }
 
-  /** @return the column number of the beginning of this event.*/
-  public int getBeginColumnNumber() {
-    return fBeginColumnNumber;
-  }
-
-  /** @return the line number of the end of this event.*/
-  public int getEndLineNumber() {
-    return fEndLineNumber;
-  }
-
-  /** @return the column number of the end of this event.*/
-  public int getEndColumnNumber() {
-    return fEndColumnNumber;
-  }
-
-  /** @return a string representation of this object. */
-  public String toString() {
-    StringBuffer str = new StringBuffer();
-    str.append(fBeginLineNumber);
-    str.append(':');
-    str.append(fBeginColumnNumber);
-    str.append(':');
-    str.append(fEndLineNumber);
-    str.append(':');
-    str.append(fEndColumnNumber);
-    return str.toString();
-  }
+    /** @return a string representation of this object. */
+    public String toString()
+    {
+        StringBuffer str = new StringBuffer();
+        str.append(fBeginLineNumber);
+        str.append(':');
+        str.append(fBeginColumnNumber);
+        str.append(':');
+        str.append(fEndLineNumber);
+        str.append(':');
+        str.append(fEndColumnNumber);
+        return str.toString();
+    }
 
 }

@@ -25,11 +25,11 @@ package com.iw.plugins.spindle.core.parser;
  *
  * ***** END LICENSE BLOCK ***** */
 
+public interface ISourceLocation
+{
 
-public interface ISourceLocation {
-
-  public int getLineNumber();
-  public int getCharStart();
-  public int getCharEnd();
+    public int getLineNumber();
+    public int getCharStart();
+    public int getCharEnd();
 
 }

@@ -25,30 +25,27 @@ package com.iw.plugins.spindle.core.parser.xml;
  *
  * ***** END LICENSE BLOCK ***** */
 
-
+import org.apache.xerces.impl.dtd.XMLDTDValidator;
+import org.apache.xerces.impl.validation.XMLGrammarPoolImpl;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLDTDScanner;
 import org.apache.xerces.xni.parser.XMLDocumentScanner;
-import org.apache.xerces.xni.parser.XMLErrorHandler;
 
-
-public class TapestryParserConfiguration extends StandardParserConfiguration 
+public class TapestryParserConfiguration extends StandardParserConfiguration
 {
-	
-	
+    /** custom Xerces Feature identifier*/
+    public static final String AUGMENTATIONS = "http://intelligentworks.com/xml/features/augmentations-location";
 
+    public static final XMLGrammarPoolImpl GRAMMAR_POOL = new XMLGrammarPoolImpl();
     /**
      * Constructor for MyConfiguration.
      */
-    public TapestryParserConfiguration(XMLErrorHandler errorHandler)
+    public TapestryParserConfiguration()
     {
         super();
-        if (errorHandler != null) {
-        	setProperty(StandardParserConfiguration.ERROR_HANDLER, errorHandler);
-        }
-    }
+        addRecognizedFeatures(new String[] { AUGMENTATIONS });
 
-  
+    }
     /**
      * @see org.apache.xerces.parsers.StandardParserConfiguration#createDocumentScanner()
      */
@@ -65,6 +62,15 @@ public class TapestryParserConfiguration extends StandardParserConfiguration
         return new XMLEntityManager();
     }
 
+    /* (non-Javadoc)
+    	* @see com.iw.plugins.spindle.core.parser.xml.StandardParserConfiguration#createDTDValidator()
+    	*/
+    protected XMLDTDValidator createDTDValidator()
+    {
+        // TODO Auto-generated method stub
+        return new TapestryXMLDTDValidator();
+    }
+
     /**
      * @see scanner.StandardParserConfiguration#createDTDScanner()
      */
@@ -79,7 +85,7 @@ public class TapestryParserConfiguration extends StandardParserConfiguration
     protected void reset() throws XNIException
     {
         super.reset();
-        
+
         setProperty("http://apache.org/xml/properties/internal/entity-resolver", new TapestryEntityResolver());
     }
 

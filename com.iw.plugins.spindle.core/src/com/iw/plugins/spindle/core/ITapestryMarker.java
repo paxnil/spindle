@@ -31,8 +31,9 @@ package com.iw.plugins.spindle.core;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public interface ITapestryMarker {
-
-  static public final String TAPESTRY_PROBLEM_MARKER = TapestryCore.PLUGIN_ID + ".problemmarker";
-  static public final String TAPESTRY_BUILDBROKEN_MARKER = TapestryCore.PLUGIN_ID + ".buildBroken";
+public interface ITapestryMarker
+{
+    static public final String TAPESTRY_PROBLEM_MARKER = TapestryCore.PLUGIN_ID + ".problemmarker";
+    static public final String TAPESTRY_FATAL_PROBLEM_MARKER = TapestryCore.PLUGIN_ID + ".fatalproblemmarker";
+    static public final String TAPESTRY_BUILDBROKEN_MARKER = TapestryCore.PLUGIN_ID + ".buildBroken";
 }

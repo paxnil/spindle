@@ -25,47 +25,53 @@ package com.iw.plugins.spindle.core.parser;
  *
  * ***** END LICENSE BLOCK ***** */
 
+public class SourceLocation implements ISourceLocation
+{
 
+    private int lineNumber;
+    private int charStart;
+    private int charEnd;
 
-public class SourceLocation implements ISourceLocation {
+    SourceLocation(int lineNumber, int charStart, int charEnd)
+    {
+        this.lineNumber = lineNumber;
+        this.charStart = charStart;
+        this.charEnd = charEnd;
+    }
+    /**
+     * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getStartLine()
+     */
+    public int getLineNumber()
+    {
+        return lineNumber;
+    }
 
-  private int lineNumber;
-  private int charStart;
-  private int charEnd;
+    /**
+     * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharStart()
+     */
+    public int getCharStart()
+    {
+        return charStart;
+    }
 
-  SourceLocation(int lineNumber, int charStart, int charEnd) {
-    this.lineNumber = lineNumber;
-    this.charStart = charStart;
-    this.charEnd = charEnd;
-  }
-  /**
-   * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getStartLine()
-   */
-  public int getLineNumber() {
-    return lineNumber;
-  }
+    /**
+     * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
+     */
+    public int getCharEnd()
+    {
+        return charEnd;
+    }
 
-  /**
-   * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharStart()
-   */
-  public int getCharStart() {
-    return charStart;
-  }
-
-  /**
-   * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
-   */
-  public int getCharEnd() {
-    return charEnd;
-  }
-  
-  public String toString() {
-  	StringBuffer buffer = new StringBuffer("line:charStart:charEnd[");
-  	buffer.append(lineNumber);buffer.append(", ");
-  	buffer.append(charStart);buffer.append(", ");
-  	buffer.append(charEnd);
-  	buffer.append("]");
-  	return buffer.toString();
-  }
+    public String toString()
+    {
+        StringBuffer buffer = new StringBuffer("line:charStart:charEnd[");
+        buffer.append(lineNumber);
+        buffer.append(", ");
+        buffer.append(charStart);
+        buffer.append(", ");
+        buffer.append(charEnd);
+        buffer.append("]");
+        return buffer.toString();
+    }
 
 }
