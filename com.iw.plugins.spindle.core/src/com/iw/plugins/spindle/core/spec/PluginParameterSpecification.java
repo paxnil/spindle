@@ -47,6 +47,9 @@ public class PluginParameterSpecification extends BaseSpecification implements I
     private String fPropertyName;
 
     private Direction fDirection = Direction.CUSTOM;
+    
+    private String fDefaultValue;
+
 
     public PluginParameterSpecification()
     {
@@ -141,6 +144,24 @@ public class PluginParameterSpecification extends BaseSpecification implements I
         Direction old = fDirection;
         fDirection = direction;
         firePropertyChange("direction", old, fDirection);
+    }
+
+    /**
+     * @see org.apache.tapestry.spec.IParameterSpecification#getDefaultValue()
+     */
+    public String getDefaultValue()
+    {
+        return fDefaultValue;
+    }
+
+    /**
+     * @see org.apache.tapestry.spec.IParameterSpecification#setDefaultValue(java.lang.String)
+     */
+    public void setDefaultValue(String defaultValue)
+    {
+        String old = fDefaultValue;
+        fDefaultValue = defaultValue;
+        firePropertyChange("defaultValue", old, fDefaultValue);
     }
 
 }

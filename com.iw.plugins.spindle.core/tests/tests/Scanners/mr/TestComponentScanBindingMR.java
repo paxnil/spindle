@@ -108,7 +108,7 @@ public class TestComponentScanBindingMR extends BaseComponentScannerTest
     {
         String content = "<binding name='poo' expression='fun.name'/>";
         doTestDynamicBinding(getXMLDocument(XMLUtil.DTD_1_3, "binding", content));
-        doTestDynamicBinding(getXMLDocument(XMLUtil.DTD_1_4, "binding", content));
+        doTestDynamicBinding(getXMLDocument(XMLUtil.DTD_3_0, "binding", content));
     }
 
     private void doTestDynamicBinding(String content) throws Exception
@@ -130,7 +130,7 @@ public class TestComponentScanBindingMR extends BaseComponentScannerTest
     {
         String content = "<binding name='poo' expression='listeners.{?#this instanceof antlr.TokenListener'/>";
         doTestDynamicBindingWithInvalidExpression(getXMLDocument(XMLUtil.DTD_1_3, "binding", content));
-        doTestDynamicBindingWithInvalidExpression(getXMLDocument(XMLUtil.DTD_1_4, "binding", content));
+        doTestDynamicBindingWithInvalidExpression(getXMLDocument(XMLUtil.DTD_3_0, "binding", content));
     }
 
     private void doTestDynamicBindingWithInvalidExpression(String content) throws Exception
@@ -151,7 +151,7 @@ public class TestComponentScanBindingMR extends BaseComponentScannerTest
     {
         String content = "<static-binding name=''>\nStuff\n</static-binding>";
         doTestDummyName(getXMLDocument(XMLUtil.DTD_1_3, "static-binding", content));
-        doTestDummyName(getXMLDocument(XMLUtil.DTD_1_4, "static-binding", content));
+        doTestDummyName(getXMLDocument(XMLUtil.DTD_3_0, "static-binding", content));
     }
 
     private void doTestDummyName(String content) throws Exception

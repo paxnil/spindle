@@ -105,7 +105,7 @@ public class TestComponentScanSetPropertyMR extends BaseComponentScannerTest
     {
         String content = "<set-property name='foo' expression='fun.name'/>";
         doTestSetProperty(getXMLDocument(XMLUtil.DTD_1_3, "set-property", content));
-        doTestSetProperty(getXMLDocument(XMLUtil.DTD_1_4, "set-property", content));
+        doTestSetProperty(getXMLDocument(XMLUtil.DTD_3_0, "set-property", content));
     }
 
     private void doTestSetProperty(String content) throws Exception
@@ -130,7 +130,7 @@ public class TestComponentScanSetPropertyMR extends BaseComponentScannerTest
 
         String content = "<set-property name='foo' expression='listeners.{?#this instanceof antlr.TokenListener'/>";
         doTestSetPropertyWithInvalidExpression(getXMLDocument(XMLUtil.DTD_1_3, "set-property", content));
-        doTestSetPropertyWithInvalidExpression(getXMLDocument(XMLUtil.DTD_1_4, "set-property", content));
+        doTestSetPropertyWithInvalidExpression(getXMLDocument(XMLUtil.DTD_3_0, "set-property", content));
     }
 
     private void doTestSetPropertyWithInvalidExpression(String content) throws Exception
@@ -147,7 +147,7 @@ public class TestComponentScanSetPropertyMR extends BaseComponentScannerTest
     {
         String content = "<set-property name='' expression='fun.name'/>";
         doTestDummyName(getXMLDocument(XMLUtil.DTD_1_3, "set-property", content));
-        doTestDummyName(getXMLDocument(XMLUtil.DTD_1_4, "set-property", content));
+        doTestDummyName(getXMLDocument(XMLUtil.DTD_3_0, "set-property", content));
     }
 
     private void doTestDummyName(String content) throws Exception

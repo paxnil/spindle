@@ -66,19 +66,19 @@ import junit.framework.TestCase;
 
 import org.apache.tapestry.ILocation;
 import org.apache.tapestry.IResourceLocation;
+import org.apache.tapestry.parse.AttributeType;
 import org.apache.tapestry.parse.ITemplateParserDelegate;
+import org.apache.tapestry.parse.TemplateAttribute;
+import org.apache.tapestry.parse.TemplateParseException;
+import org.apache.tapestry.parse.TemplateToken;
+import org.apache.tapestry.parse.TextToken;
+import org.apache.tapestry.parse.TokenType;
 import org.apache.tapestry.resource.ClasspathResourceLocation;
 import org.apache.tapestry.util.DefaultResourceResolver;
 
-import com.iw.plugins.spindle.core.parser.template.AttributeType;
-import com.iw.plugins.spindle.core.parser.template.LocalizationToken;
-import com.iw.plugins.spindle.core.parser.template.OpenToken;
-import com.iw.plugins.spindle.core.parser.template.TemplateAttribute;
-import com.iw.plugins.spindle.core.parser.template.TemplateParseException;
-import com.iw.plugins.spindle.core.parser.template.TemplateParser;
-import com.iw.plugins.spindle.core.parser.template.TemplateToken;
-import com.iw.plugins.spindle.core.parser.template.TextToken;
-import com.iw.plugins.spindle.core.parser.template.TokenType;
+import com.iw.plugins.spindle.core.parser.template.CoreLocalizationToken;
+import com.iw.plugins.spindle.core.parser.template.CoreOpenToken;
+import com.iw.plugins.spindle.core.parser.template.CoreTemplateParser;
 
 
 
@@ -122,7 +122,7 @@ public class TestSpindleTemplateParser extends TestCase
         IResourceLocation location)
         throws TemplateParseException
     {
-        return new TemplateParser().parse(templateData, delegate, location);
+        return new CoreTemplateParser().parse(templateData, delegate, location);
     }
 
     protected TemplateToken[] run(
@@ -213,7 +213,7 @@ public class TestSpindleTemplateParser extends TestCase
         Map attributes,
         int line)
     {
-        LocalizationToken t = (LocalizationToken) token;
+        CoreLocalizationToken t = (CoreLocalizationToken) token;
 
         assertEquals("Localization token type.", TokenType.LOCALIZATION, t.getType());
         assertEquals("Localization key.", key, t.getKey());
@@ -235,7 +235,7 @@ public class TestSpindleTemplateParser extends TestCase
         String tag,
         int line)
     {
-        OpenToken t = (OpenToken) token;
+        CoreOpenToken t = (CoreOpenToken) token;
 
         assertEquals("Open token type", TokenType.OPEN, t.getType());
         assertEquals("Open token id", id, t.getId());
@@ -247,7 +247,7 @@ public class TestSpindleTemplateParser extends TestCase
 
     protected void assertTemplateAttributes(TemplateToken token, AttributeType type, Map expected)
     {
-        OpenToken t = (OpenToken) token;
+        CoreOpenToken t = (CoreOpenToken) token;
 
         Map attributes = t.getAttributesMap();
 

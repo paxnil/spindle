@@ -109,7 +109,7 @@ public class MockLibraryScanner extends LibraryScanner
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.SpecificationScanner#getExtendedAttribute(org.w3c.dom.Node, java.lang.String, boolean)
      */
-    public String getExtendedAttribute(Node node, String attributeName, boolean required) throws ScannerException
+    public ExtendedAttributeResult getExtendedAttribute(Node node, String attributeName, boolean required) throws ScannerException
     {
         // TODO Auto-generated method stub
         return super.getExtendedAttribute(node, attributeName, required);

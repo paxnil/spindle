@@ -34,7 +34,6 @@ import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.SpecFactory;
 import org.w3c.dom.Node;
 
-import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
@@ -52,9 +51,8 @@ public class MockComponentScanner extends ComponentScanner
        fProblems.clear(); 
     }
 
-    public MockComponentScanner(Parser theParser, SpecFactory factory, IScannerValidator aValidator) {
+    public MockComponentScanner( SpecFactory factory, IScannerValidator aValidator) {
         super();
-        fParser = theParser;
         specificationFactory = factory;
         fValidator = aValidator;
         fValidator.setProblemCollector(this);        

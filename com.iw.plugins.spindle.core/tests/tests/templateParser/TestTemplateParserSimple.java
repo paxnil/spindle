@@ -9,7 +9,7 @@ import org.apache.tapestry.ILocation;
 import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.parse.ITemplateParserDelegate;
 
-import com.iw.plugins.spindle.core.parser.template.TemplateParser;
+import com.iw.plugins.spindle.core.parser.template.CoreTemplateParser;
 import com.iw.plugins.spindle.core.util.Files;
 
 /**
@@ -102,7 +102,7 @@ public class TestTemplateParserSimple extends TestCase
             }
         };
         String input = Files.readFileToString(getClass().getResourceAsStream("/testdata/Dates.html"), null);
-        TemplateParser parser = new TemplateParser();
+        CoreTemplateParser parser = new CoreTemplateParser();
         parser.parse(input.toCharArray(), delegate, new MockResourceLocation("Dates.html", "/tests/testData/"));
     }
 

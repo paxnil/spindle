@@ -38,6 +38,8 @@ import org.apache.tapestry.ILocation;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.parse.ITemplateParserDelegate;
+import org.apache.tapestry.parse.TemplateParseException;
+import org.apache.tapestry.parse.TemplateToken;
 import org.apache.tapestry.parse.TokenType;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
@@ -45,9 +47,9 @@ import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.parser.template.OpenToken;
-import com.iw.plugins.spindle.core.parser.template.TemplateParser;
-import com.iw.plugins.spindle.core.parser.template.TemplateToken;
+import com.iw.plugins.spindle.core.parser.template.CoreOpenToken;
+import com.iw.plugins.spindle.core.parser.template.CoreTemplateParser;
+
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
@@ -76,7 +78,8 @@ public class TemplateScanner extends AbstractScanner
 
     private PluginComponentSpecification fComponentSpec;
     private ICoreNamespace fNamespace;
-    private TemplateParser fParser;
+    private CoreTemplateParser fParser;
+    private ITemplateParserDelegate fParserDelegate = new ScannerDelegate();
 
     public void scanTemplate(
         PluginComponentSpecification spec,
@@ -88,11 +91,11 @@ public class TemplateScanner extends AbstractScanner
         Assert.isNotNull(spec.getNamespace());
         fComponentSpec = spec;
         fNamespace = (ICoreNamespace) spec.getNamespace();
-        fParser = new TemplateParser(new ScannerDelegate());
+        fParser = new CoreTemplateParser();
         fParser.setProblemCollector(this);
 
         scan(templateLocation, validator);
-        
+
     }
 
     /* (non-Javadoc)
@@ -118,10 +121,17 @@ public class TemplateScanner extends AbstractScanner
 
         List result = (List) resultObject;
 
-        TemplateToken[] parseResults;
+        TemplateToken[] parseResults = null;
 
-        parseResults = fParser.parse(data, location);
-        
+        try
+        {
+            parseResults = fParser.parse(data, fParserDelegate, location);
+        } catch (TemplateParseException e1)
+        {
+            // should never happen
+            TapestryCore.log(e1);
+        }
+
         if (parseResults == null)
             return;
 
@@ -129,12 +139,12 @@ public class TemplateScanner extends AbstractScanner
         {
             if (parseResults[i].getType() == TokenType.OPEN)
             {
-                scanOpenToken((OpenToken) parseResults[i], result);
+                scanOpenToken((CoreOpenToken) parseResults[i], result);
             }
         }
     }
 
-    private void scanOpenToken(OpenToken token, List result) throws ScannerException
+    private void scanOpenToken(CoreOpenToken token, List result) throws ScannerException
     {}
 
     /* (non-Javadoc)
@@ -188,7 +198,10 @@ public class TemplateScanner extends AbstractScanner
             IComponentSpecification spec = fNamespace.getComponentResolver().resolve(libraryId, type);
             if (spec == null)
                 throw new ApplicationRuntimeException(
-                    TapestryCore.getTapestryString("Namespace.no-such-component-type", type, libraryId == null ? TapestryCore.getString("project-namespace") : libraryId));
+                    TapestryCore.getTapestryString(
+                        "Namespace.no-such-component-type",
+                        type,
+                        libraryId == null ? TapestryCore.getString("project-namespace") : libraryId));
 
             return spec.getAllowBody();
         }

@@ -144,7 +144,7 @@ public class TestComponentScanAssetMR extends BaseComponentScannerTest
     {
         String content = getXMLAsset(AssetType.PRIVATE, "css", "/a/b/c/poo.css");
         doTestPrivateAsset(getXMLDocument(XMLUtil.DTD_1_3, "private-asset", content));
-        doTestPrivateAsset(getXMLDocument(XMLUtil.DTD_1_4, "private-asset", content));
+        doTestPrivateAsset(getXMLDocument(XMLUtil.DTD_3_0, "private-asset", content));
     }
 
     private void doTestPrivateAsset(String content) throws Exception
@@ -166,7 +166,7 @@ public class TestComponentScanAssetMR extends BaseComponentScannerTest
 
         String content = getXMLAsset(AssetType.PRIVATE, "", "/a/b/c/poo.css");
         doTestDummyName(getXMLDocument(XMLUtil.DTD_1_3, "private-asset", content));
-        doTestDummyName(getXMLDocument(XMLUtil.DTD_1_4, "private-asset", content));
+        doTestDummyName(getXMLDocument(XMLUtil.DTD_3_0, "private-asset", content));
     }
 
     private void doTestDummyName(String content) throws Exception
@@ -195,7 +195,7 @@ public class TestComponentScanAssetMR extends BaseComponentScannerTest
     {
         String content = getXMLAsset(AssetType.PRIVATE, "$template", "/a/b/c/poo.html");
         doTestTemplateName(getXMLDocument(XMLUtil.DTD_1_3, "private-asset", content));
-        doTestTemplateName(getXMLDocument(XMLUtil.DTD_1_4, "private-asset", content));
+        doTestTemplateName(getXMLDocument(XMLUtil.DTD_3_0, "private-asset", content));
     }
 
     private void doTestTemplateName(String content) throws Exception

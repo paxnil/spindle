@@ -66,7 +66,7 @@ public class BaseComponentScannerTest extends MRBaseParserTest
         super.setUp();
         factory = new TapestryCoreSpecFactory();
         validator = new BaseValidator();
-        scanner = new MockComponentScanner(parser, factory, validator);
+        scanner = new MockComponentScanner(factory, validator);
     }
 
 }

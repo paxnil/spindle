@@ -74,7 +74,12 @@ import org.apache.tapestry.ApplicationRuntimeException;
 import org.apache.tapestry.ILocation;
 import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.Location;
+import org.apache.tapestry.parse.AttributeType;
+import org.apache.tapestry.parse.CloseToken;
 import org.apache.tapestry.parse.ITemplateParserDelegate;
+import org.apache.tapestry.parse.TemplateParseException;
+import org.apache.tapestry.parse.TemplateToken;
+import org.apache.tapestry.parse.TextToken;
 import org.apache.tapestry.util.IdAllocator;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -364,8 +369,9 @@ public class TemplateParser
 
         _delegate = delegate;
     }
-    
-    public void setProblemCollector(IProblemCollector collector) {
+
+    public void setProblemCollector(IProblemCollector collector)
+    {
         fProblemCollector = collector;
     }
 
@@ -779,7 +785,7 @@ public class TemplateParser
 
         // Check for invisible localizations
 
-        String localizationKey = (String)findValueCaselessly(LOCALIZATION_KEY_ATTRIBUTE_NAME, _attributes);
+        String localizationKey = (String) findValueCaselessly(LOCALIZATION_KEY_ATTRIBUTE_NAME, _attributes);
 
         if (localizationKey != null && tagName.equalsIgnoreCase("span"))
         {
@@ -828,7 +834,7 @@ public class TemplateParser
             Map attributes = filter(_attributes, new String[] { LOCALIZATION_KEY_ATTRIBUTE_NAME, RAW_ATTRIBUTE_NAME });
 
             TemplateToken token =
-                new LocalizationToken(
+                new CoreLocalizationToken(
                     tagName,
                     localizationKey,
                     raw,
@@ -841,7 +847,7 @@ public class TemplateParser
             return;
         }
 
-        String jwcId = (String)findValueCaselessly(JWCID_ATTRIBUTE_NAME, _attributes);
+        String jwcId = (String) findValueCaselessly(JWCID_ATTRIBUTE_NAME, _attributes);
 
         if (jwcId != null)
         {
@@ -888,7 +894,8 @@ public class TemplateParser
             return;
         }
         Map attributeLocations = fEventHandler.getEventInfo().getAttributeMap();
-        ISourceLocation jwcIdSourceLocation = (ISourceLocation) findValueCaselessly(JWCID_ATTRIBUTE_NAME, attributeLocations);
+        ISourceLocation jwcIdSourceLocation =
+            (ISourceLocation) findValueCaselessly(JWCID_ATTRIBUTE_NAME, attributeLocations);
 
         boolean isRemoveId = jwcId.equalsIgnoreCase(REMOVE_ID);
 
@@ -1017,7 +1024,7 @@ public class TemplateParser
             addOpenToken(tagName, jwcId, type, startLocation);
 
             if (emptyTag)
-                _tokens.add(new CloseToken(tagName, getCurrentLocation(), null));
+                _tokens.add(new CloseToken(tagName, getCurrentLocation()));
         }
 
         advance();
@@ -1082,7 +1089,7 @@ public class TemplateParser
 
     private void addOpenToken(String tagName, String jwcId, String type, ILocation location)
     {
-        OpenToken token = new OpenToken(tagName, jwcId, type, location, fEventHandler.getEventInfo());
+        CoreOpenToken token = new CoreOpenToken(tagName, jwcId, type, location, fEventHandler.getEventInfo());
         _tokens.add(token);
 
         if (_attributes.isEmpty())
@@ -1113,7 +1120,7 @@ public class TemplateParser
      * 
      **/
 
-    private void addAttributeToToken(OpenToken token, String name, String attributeValue)
+    private void addAttributeToToken(CoreOpenToken token, String name, String attributeValue)
     {
         int pos = attributeValue.indexOf(":");
 
@@ -1257,7 +1264,7 @@ public class TemplateParser
         {
             addTextToken(cursorStart - 1);
 
-            _tokens.add(new CloseToken(tagName, getCurrentLocation(), null));
+            _tokens.add(new CloseToken(tagName, getCurrentLocation()));
         } else
         {
             // The close of a static tag.  Unless removing the tag
@@ -1469,7 +1476,7 @@ public class TemplateParser
 
     private boolean checkBoolean(String key, Map map)
     {
-        String value = (String)findValueCaselessly(key, map);
+        String value = (String) findValueCaselessly(key, map);
 
         if (value == null)
             return false;
