@@ -122,17 +122,20 @@ public class UIUtils
                     {
                         continue;
                     }
-                    
+
                     IEditorInput input = editor.getEditorInput();
                     IStorage editorStorage;
-                    if (input instanceof JarEntryEditorInput) {
-                        editorStorage = ((JarEntryEditorInput)input).getStorage();
-                    } else {
+                    if (input instanceof JarEntryEditorInput)
+                    {
+                        editorStorage = ((JarEntryEditorInput) input).getStorage();
+                    } else
+                    {
                         editorStorage = (IStorage) input.getAdapter(IStorage.class);
                     }
-                                           
-                    if (editorStorage != null)
+
+                    if (editorStorage != null && editorStorage.equals(storage))
                         return editor;
+
                 }
             }
         }

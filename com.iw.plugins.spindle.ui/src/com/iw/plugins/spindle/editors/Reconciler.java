@@ -91,7 +91,10 @@ public class Reconciler extends MonoReconciler implements IPartListener
      * @see IPartListener#partBroughtToTop(IWorkbenchPart)
      */
     public void partBroughtToTop(IWorkbenchPart part)
-    {}
+    {
+        if (part == fTextEditor)
+            Reconciler.this.forceReconciling();
+    }
 
     /*
      * @see IPartListener#partClosed(IWorkbenchPart)

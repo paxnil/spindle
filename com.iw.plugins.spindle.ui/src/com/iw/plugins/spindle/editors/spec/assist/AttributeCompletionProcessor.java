@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.eclipse.core.runtime.CoreException;
@@ -345,6 +346,21 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         if ("service".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
             return chooseJavaTypeNameProposals();
 
+        if ("property-specification".equals(fTagName) && "type".equals(fAttributeName) && fIsAttributeTerminated)
+            return chooseJavaTypeNameProposals();
+
+        if ("parameter".equals(fTagName) && fIsAttributeTerminated)
+        {
+            if (fDTD.getPublicId().equals(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID)
+                && "java-type".equals(fAttributeName))
+            {
+                return chooseJavaTypeNameProposals();
+            } else if ("type".equals(fAttributeName))
+            {
+                return chooseJavaTypeNameProposals();
+            }
+        }
+
         return Collections.EMPTY_LIST;
     }
 
@@ -625,7 +641,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
          */
         public String getAdditionalProposalInfo()
         {
-            return "Note due to a know pre-existing bug in eclispe:\n\n [Bug 45193] hierarchy scope search only shows types that exist in jars\n\nThe search can't be limited to Tapestry types";
+            return "Note due to a known pre-existing bug in eclispe:\n\n [Bug 45193] hierarchy scope search only shows types that exist in jars\n\nThe search can't be limited to Tapestry types";
         }
 
         /* (non-Javadoc)

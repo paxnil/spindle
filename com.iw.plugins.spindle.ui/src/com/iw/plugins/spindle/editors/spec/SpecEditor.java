@@ -40,6 +40,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -117,6 +118,8 @@ public class SpecEditor extends Editor implements IMultiPage
     private OutlinePageSelectionUpdater fUpdater;
     private List fReconcileListeners;
     private Control fControl;
+    
+   
     /** only here if this editor is embedded in a MultiPageSpecEditor */
     private MultiPageSpecEditor fMultiPageEditor;
 
@@ -124,6 +127,7 @@ public class SpecEditor extends Editor implements IMultiPage
     {
         super();
         fOutline = new SpecificationOutlinePage(this, fPreferenceStore);
+        
     }
 
     /* (non-Javadoc)
@@ -146,7 +150,7 @@ public class SpecEditor extends Editor implements IMultiPage
                 {
                     IStructuredSelection structured = (IStructuredSelection) selection;
                     Object first = structured.getFirstElement();
-                    openTo(first);
+                    highlight(first);
                 }
 
             }
@@ -170,11 +174,43 @@ public class SpecEditor extends Editor implements IMultiPage
                 if (valueRegion != null)
                 {
                     selectAndReveal(valueRegion.getOffset(), valueRegion.getLength());
+                }
+            } else
+            {
+                selectAndReveal(artifact.getOffset(), artifact.getLength());
+            }
+            highlight(obj);
+
+        }
+    }
+
+    public void highlight(Object obj)
+    {
+        if (obj instanceof DocumentArtifact)
+        {
+            DocumentArtifact artifact = (DocumentArtifact) obj;
+            String type = artifact.getType();
+            if (type == DocumentArtifactPartitioner.ATTR)
+            {
+                IRegion valueRegion = artifact.getAttributeValueRegion();
+                if (valueRegion != null)
+                {
+                    setHighlightRange(valueRegion.getOffset(), valueRegion.getLength(), false);
                     return;
                 }
             }
-            selectAndReveal(artifact.getOffset(), artifact.getLength());
-
+            if (artifact.getType() == DocumentArtifactPartitioner.TAG)
+            {
+                DocumentArtifact corr = artifact.getCorrespondingNode();
+                if (corr != null)
+                {
+                    int start = artifact.getOffset();
+                    int endStart = corr.getOffset();
+                    setHighlightRange(start, endStart - start + corr.getLength(), false);
+                    return;
+                }
+            }
+            setHighlightRange(artifact.getOffset(), artifact.getLength(), false);
         }
     }
 
@@ -235,8 +271,11 @@ public class SpecEditor extends Editor implements IMultiPage
             {
                 fReconciler = new LibraryReconciler();
             }
+
         }
         super.doSetInput(input);
+        // setup the outline view!
+        reconcileOutline();
     }
 
     /* (non-Javadoc)
@@ -620,10 +659,7 @@ public class SpecEditor extends Editor implements IMultiPage
         int caret = getCaretOffset();
         if (caret == -1)
             return;
-
-        fOutline.removeSelectionChangedListener(fSelectionChangedListener);
         ((SpecificationOutlinePage) fOutline).setSelection(new StructuredSelection(new Region(caret, 0)));
-        fOutline.addSelectionChangedListener(fSelectionChangedListener);
     }
 
     /**
@@ -742,9 +778,12 @@ public class SpecEditor extends Editor implements IMultiPage
     protected void editorContextMenuAboutToShow(IMenuManager menu)
     {
         super.editorContextMenuAboutToShow(menu);
-        menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
-        addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
-        addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
+        if (!(getStorage() instanceof JarEntryFile))
+        {
+            menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
+            addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
+            addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
+        }
     }
 
     /* (non-Javadoc)

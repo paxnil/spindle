@@ -39,7 +39,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -106,21 +105,34 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             if (elements == null || elements.length == 0)
                 return;
 
-            if (flatChildren.length == 0)
+            if (fFlatChildren.length == 0)
             {
-                flatChildren = elements;
+                fFlatChildren = elements;
+                fCorresponders = new Object[elements.length];
+                for (int i = 0; i < elements.length; i++)
+                    fCorresponders[i] = ((DocumentArtifact) elements[i]).getCorrespondingNode();
                 return;
             }
 
-            Object[] expanded = new Object[flatChildren.length + elements.length];
-            System.arraycopy(flatChildren, 0, expanded, 0, flatChildren.length);
-            System.arraycopy(elements, 0, expanded, flatChildren.length, elements.length);
-            flatChildren = expanded;
+            Object[] expandedFlat = new Object[fFlatChildren.length + elements.length];
+            System.arraycopy(fFlatChildren, 0, expandedFlat, 0, fFlatChildren.length);
+            System.arraycopy(elements, 0, expandedFlat, fFlatChildren.length, elements.length);
+            Object[] expandedCorresponders = new Object[fCorresponders.length + elements.length];
+            System.arraycopy(fCorresponders, 0, expandedCorresponders, 0, fCorresponders.length);
+            for (int i = 0; i < elements.length; i++)
+            {
+                expandedCorresponders[fCorresponders.length + i] =
+                    ((DocumentArtifact) elements[i]).getCorrespondingNode();
+            }
+
+            fFlatChildren = expandedFlat;
+            fCorresponders = expandedCorresponders;
 
         }
         public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
         {
-            flatChildren = new DocumentArtifact[0];
+            fFlatChildren = new DocumentArtifact[0];
+            fCorresponders = new DocumentArtifact[0];
         }
 
     }
@@ -200,57 +212,57 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             return null;
         }
 
-//        /* (non-Javadoc)
-//         * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-//         */
-//        public Color getBackground(Object element)
-//        {
-//            return fTree.getBackground();
-//        }
-//
-//        private Color getColor(String key)
-//        {
-//            ISharedTextColors colors = UIPlugin.getDefault().getSharedTextColors();
-//            return colors.getColor(PreferenceConverter.getColor(fPreferences, key + ITextStylePreferences.SUFFIX_FOREGROUND));
-//        }
-//
-//        /* (non-Javadoc)
-//         * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-//         */
-//        public Color getForeground(Object element)
-//        {
-//
-//            if (element instanceof DocumentArtifact)
-//            {
-//                DocumentArtifact artifact = (DocumentArtifact) element;
-//                String type = artifact.getType();
-//                if (type == DocumentArtifactPartitioner.DECL)
-//                {
-//
-//                    if (artifact.getParent().getType().equals("/"))
-//                        return getColor(IXMLSyntaxConstants.XML_DECL);
-//
-//                    return getColor(IXMLSyntaxConstants.XML_CDATA);
-//
-//                }
-//
-//                if (type == DocumentArtifactPartitioner.TAG)
-//                    return getColor(IXMLSyntaxConstants.XML_TAG);
-//
-//                if (type == DocumentArtifactPartitioner.EMPTYTAG)
-//                    return getColor(IXMLSyntaxConstants.XML_TAG);
-//
-//                if (type == DocumentArtifactPartitioner.ATTR)
-//                    return getColor(IXMLSyntaxConstants.XML_ATT_VALUE);
-//
-//                if (type == DocumentArtifactPartitioner.COMMENT)
-//                    return getColor(IXMLSyntaxConstants.XML_COMMENT);
-//
-//                if (type == DocumentArtifactPartitioner.PI)
-//                    return getColor(IXMLSyntaxConstants.XML_PI);
-//            }
-//            return fTree.getForeground();
-//        }
+        //        /* (non-Javadoc)
+        //         * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
+        //         */
+        //        public Color getBackground(Object element)
+        //        {
+        //            return fTree.getBackground();
+        //        }
+        //
+        //        private Color getColor(String key)
+        //        {
+        //            ISharedTextColors colors = UIPlugin.getDefault().getSharedTextColors();
+        //            return colors.getColor(PreferenceConverter.getColor(fPreferences, key + ITextStylePreferences.SUFFIX_FOREGROUND));
+        //        }
+        //
+        //        /* (non-Javadoc)
+        //         * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
+        //         */
+        //        public Color getForeground(Object element)
+        //        {
+        //
+        //            if (element instanceof DocumentArtifact)
+        //            {
+        //                DocumentArtifact artifact = (DocumentArtifact) element;
+        //                String type = artifact.getType();
+        //                if (type == DocumentArtifactPartitioner.DECL)
+        //                {
+        //
+        //                    if (artifact.getParent().getType().equals("/"))
+        //                        return getColor(IXMLSyntaxConstants.XML_DECL);
+        //
+        //                    return getColor(IXMLSyntaxConstants.XML_CDATA);
+        //
+        //                }
+        //
+        //                if (type == DocumentArtifactPartitioner.TAG)
+        //                    return getColor(IXMLSyntaxConstants.XML_TAG);
+        //
+        //                if (type == DocumentArtifactPartitioner.EMPTYTAG)
+        //                    return getColor(IXMLSyntaxConstants.XML_TAG);
+        //
+        //                if (type == DocumentArtifactPartitioner.ATTR)
+        //                    return getColor(IXMLSyntaxConstants.XML_ATT_VALUE);
+        //
+        //                if (type == DocumentArtifactPartitioner.COMMENT)
+        //                    return getColor(IXMLSyntaxConstants.XML_COMMENT);
+        //
+        //                if (type == DocumentArtifactPartitioner.PI)
+        //                    return getColor(IXMLSyntaxConstants.XML_PI);
+        //            }
+        //            return fTree.getForeground();
+        //        }
 
     }
 
@@ -258,8 +270,8 @@ public class SpecificationOutlinePage extends ContentOutlinePage
     private Tree fTree;
     private TreeViewer treeViewer;
     private DocumentArtifact fRoot;
-    private boolean fFireSelection = true;
-    private Object[] flatChildren = new DocumentArtifact[0];
+    private Object[] fFlatChildren = new DocumentArtifact[0];
+    private Object[] fCorresponders = new DocumentArtifact[0];
     private IPreferenceStore fPreferences;
     private IPropertyChangeListener fPreferenceStoreListener = new IPropertyChangeListener()
     {
@@ -289,15 +301,9 @@ public class SpecificationOutlinePage extends ContentOutlinePage
         {
             public void doubleClick(DoubleClickEvent event)
             {
-                try
-                {
-                    fFireSelection = true;
-                    selectionChanged(new SelectionChangedEvent(treeViewer, treeViewer.getSelection()));
-
-                } finally
-                {
-                    fFireSelection = false;
-                }
+                IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
+                if (!selection.isEmpty())
+                    fEditor.openTo(selection.getFirstElement());
             }
         });
         fPreferences.addPropertyChangeListener(fPreferenceStoreListener);
@@ -320,8 +326,6 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             {
                 try
                 {
-
-                    fFireSelection = false;
                     ISelection oldSelection = getSelection();
                     treeViewer.setInput(fRoot);
                     //                    treeViewer.refresh();
@@ -329,9 +333,6 @@ public class SpecificationOutlinePage extends ContentOutlinePage
                 } catch (RuntimeException e)
                 {
                     UIPlugin.log(e);
-                } finally
-                {
-                    fFireSelection = false;
                 }
             }
         });
@@ -364,14 +365,6 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             return StructuredSelection.EMPTY;
         return treeViewer.getSelection();
     }
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-     */
-    public void selectionChanged(SelectionChangedEvent event)
-    {
-        if (fFireSelection)
-            super.selectionChanged(event);
-    }
 
     /* (non-Javadoc)
      * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
@@ -384,18 +377,42 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             if (selected instanceof IRegion && fRoot != null)
             {
                 int documentOffset = ((IRegion) selected).getOffset();
-                for (int i = 0; i < flatChildren.length; i++)
+                Object found = null;
+                for (int i = 0; i < fFlatChildren.length; i++)
                 {
-                    Position p = (Position) flatChildren[i];
+                    Position p = (Position) fFlatChildren[i];
                     if (p.offset <= documentOffset && documentOffset < p.offset + p.length)
                     {
-                        treeViewer.setSelection(new StructuredSelection((DocumentArtifact) p));
+                        found = p;
                     }
-
+                }
+                if (found == null)
+                {
+                    int index = 0;
+                    boolean exists = false;
+                    for (; index < fCorresponders.length; index++)
+                    {
+                        Position p = (Position) fCorresponders[index];
+                        if (p != null && p.offset <= documentOffset && documentOffset < p.offset + p.length)
+                        {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (exists)
+                        found = fFlatChildren[index];
+                }
+                if (found != null)
+                {
+                    treeViewer.setSelection(new StructuredSelection(found));
+                } else
+                {
+                    treeViewer.setSelection(StructuredSelection.EMPTY);
                 }
             }
             super.setSelection(selection);
         }
 
     }
+
 }

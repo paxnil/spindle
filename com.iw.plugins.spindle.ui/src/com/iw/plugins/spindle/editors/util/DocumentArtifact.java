@@ -423,6 +423,9 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         {
             String content = fDocument.get(getOffset(), getLength());
             content = content.substring(index).trim();
+            
+            if (content.length() < 2)
+                return "";
 
             return content.substring(1, content.length() - 1);
         } catch (BadLocationException e)

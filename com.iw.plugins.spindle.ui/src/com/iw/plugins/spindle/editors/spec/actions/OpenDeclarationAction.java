@@ -26,20 +26,27 @@
 
 package com.iw.plugins.spindle.editors.spec.actions;
 
+import java.util.Map;
+
+import org.apache.tapestry.parse.SpecificationParser;
+import org.apache.tapestry.spec.IParameterSpecification;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Position;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.spec.assist.SpecTapestryAccess;
+import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 import com.iw.plugins.spindle.ui.util.UIUtils;
@@ -101,7 +108,7 @@ public class OpenDeclarationAction extends BaseSpecAction
             if (!parentName.equals("component"))
                 return;
 
-            handleComponentBinding(parent, artifact, name);
+            handleComponentBinding(parent, artifact);
             return;
         }
 
@@ -125,6 +132,21 @@ public class OpenDeclarationAction extends BaseSpecAction
 
         else if ("service".equals(name))
             handleTypeLookup(artifact, "class");
+
+        else if ("property-specification".equals(name))
+            handleTypeLookup(artifact, "type");
+
+        else if ("parameter".equals(name))
+        {
+            if (fDTD.getPublicId() == SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID)
+            {
+                handleTypeLookup(artifact, "java-type");
+            } else
+            {
+                handleTypeLookup(artifact, "type");
+            }
+        }
+
     }
 
     /**
@@ -170,13 +192,51 @@ public class OpenDeclarationAction extends BaseSpecAction
         if (location == null || !location.exists())
             return;
 
-        foundResult(location.getStorage(), null);
+        foundResult(location.getStorage(), null, null);
 
     }
 
-    private void handleComponentBinding(DocumentArtifact parent, DocumentArtifact binding, String attrName)
+    private void handleComponentBinding(DocumentArtifact parent, DocumentArtifact binding)
     {
-        // TODO Auto-generated method stub
+        try
+        {
+            SpecTapestryAccess access = new SpecTapestryAccess(fEditor);
+            // first try and resolve the component...
+            Map attrMap = parent.getAttributesMap();
+            DocumentArtifact typeAttribute = (DocumentArtifact) attrMap.get("type");
+            if (typeAttribute == null)
+                return;
+
+            String resolveType = typeAttribute.getAttributeValue();
+
+            if (resolveType == null)
+                return;
+
+            PluginComponentSpecification spec = (PluginComponentSpecification) access.resolveComponentType(resolveType);
+            if (spec == null)
+                return;
+
+            Map bindingAttrs = binding.getAttributesMap();
+            DocumentArtifact nameAttribute = (DocumentArtifact) bindingAttrs.get("name");
+            if (nameAttribute == null)
+                return;
+
+            String parameterName = nameAttribute.getAttributeValue();
+            if (parameterName == null)
+                return;
+
+            IParameterSpecification parameterSpec = spec.getParameter(parameterName);
+
+            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) spec.getSpecificationLocation();
+            if (location == null || !location.exists())
+                return;
+
+            foundResult(location.getStorage(), parameterName, parameterSpec);
+
+        } catch (IllegalArgumentException e)
+        {
+            // do nothing
+        }
 
     }
 
@@ -215,11 +275,11 @@ public class OpenDeclarationAction extends BaseSpecAction
         if (type == null)
             return;
 
-        foundResult(type, null);
+        foundResult(type, null, null);
 
     }
 
-    protected void foundResult(Object result, Object moreInfo)
+    protected void foundResult(Object result, String key, Object moreInfo)
     {
         if (result instanceof IType)
         {
@@ -237,12 +297,61 @@ public class OpenDeclarationAction extends BaseSpecAction
         {
             UIPlugin.openTapestryEditor((IStorage) result);
             IEditorPart editor = UIUtils.getEditorFor((IStorage) result);
-            if (editor != null && (editor instanceof Editor) || moreInfo != null)
+            if (editor != null && (editor instanceof AbstractTextEditor) || moreInfo != null)
             {
-                // TODO implement
-                //((Editor)editor).openTo(moreInfo);
+                if (moreInfo instanceof IParameterSpecification && key != null)
+                {
+                    revealParameter((AbstractTextEditor) editor, key);
+                }
             }
-
         }
     }
+
+    private void revealParameter(AbstractTextEditor editor, String parameterName)
+    {
+        IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
+        DocumentArtifactPartitioner partitioner =
+            new DocumentArtifactPartitioner(ContentAssistProcessor.SCANNER, DocumentArtifactPartitioner.TYPES);
+        try
+        {
+            DocumentArtifact reveal = null;
+            partitioner.connect(document);
+            Position[] pos = null;
+            pos = document.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
+            for (int i = 0; i < pos.length; i++)
+            {
+                DocumentArtifact artifact = (DocumentArtifact) pos[i];
+                if (artifact.getType() == DocumentArtifactPartitioner.ENDTAG)
+                    continue;
+                String name = artifact.getName();
+                if (name == null)
+                    continue;
+
+                if (!"parameter".equals(name.toLowerCase()))
+                    continue;
+
+                Map attributesMap = artifact.getAttributesMap();
+                DocumentArtifact attribute = (DocumentArtifact) attributesMap.get("name");
+                if (attribute == null)
+                    continue;
+
+                String value = attribute.getAttributeValue();
+                if (value != null && value.equals(parameterName))
+                {
+                    reveal = artifact;
+                    break;
+                }
+            }
+            if (reveal != null)
+                 editor.setHighlightRange(reveal.getOffset(), reveal.getLength(), true);
+
+        } catch (Exception e)
+        {
+            UIPlugin.log(e);
+        } finally
+        {
+            partitioner.disconnect();
+        }
+    }
+
 }

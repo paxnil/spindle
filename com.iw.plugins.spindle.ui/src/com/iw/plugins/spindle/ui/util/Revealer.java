@@ -34,10 +34,11 @@ import java.util.List;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -150,35 +151,46 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
         Object first = structured.getFirstElement();
         if (structured.size() > 1 || !(first instanceof JarEntryFile))
             return useSelection;
+
+        JarEntryFile entry = (JarEntryFile) first;
+        IPath path = entry.getFullPath().removeFileExtension();
+        String name = path.lastSegment();
+
         IPackageFragment[] fragments = null;
         try
         {
             if (jproject != null)
             {
-                IPackageFragment frag = JarEntryFileUtil.getPackageFragment(jproject, (JarEntryFile) first);
+                IPackageFragment frag = JarEntryFileUtil.getPackageFragment(jproject, entry);
                 if (frag != null)
                     fragments = new IPackageFragment[] { frag };
 
             } else
             {
-                fragments =
-                    JarEntryFileUtil.getPackageFragments(
-                        ResourcesPlugin.getWorkspace().getRoot(),
-                        (JarEntryFile) first);
+                fragments = JarEntryFileUtil.getPackageFragments(ResourcesPlugin.getWorkspace().getRoot(), entry);
             }
             if (fragments.length != 1)
                 return useSelection;
 
             //check to see if there is an IClassFile in the package
             IJavaElement[] children = fragments[0].getChildren();
-            for (int i = 0; i < children.length; i++)
+            if (children.length > 0)
             {
-                if (children[i].getElementType() != IJavaElement.CLASS_FILE)
-                    continue;
+                IClassFile revealInstead = null;
+                for (int i = 0; i < children.length; i++)
+                {
+                    if (children[i].getElementType() != IJavaElement.CLASS_FILE)
+                        continue;
 
-                return new StructuredSelection(children[i]);
+                    revealInstead = (IClassFile) children[i];
+                    String temp = revealInstead.getElementName();
+                    temp = temp.substring(0, temp.length() - 6);
+                    if (temp.equals(name))
+                        return new StructuredSelection(revealInstead);
+                }
+                if (revealInstead != null)
+                    return new StructuredSelection(revealInstead);
             }
-
             return new StructuredSelection(fragments[0]);
 
         } catch (CoreException e)
