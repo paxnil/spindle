@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description>
+      Eclipse update site for JettyLauncher builds. 
+   </description>
+   <feature url="features/com.iw.features.jettylauncher_@version@.jar" id="com.iw.features.jettylauncher" version="@version@">
+      <category name="jettylauncher"/>
+   </feature>
+     <feature url="features/com.iw.features.jettylauncher_profile_@version@.jar" id="com.iw.features.jettylauncher_profile" version="@version@">
+      <category name="jettylauncher_profile"/>
+   </feature>
+   <category-def name="jettylauncher" label="Jetty Launcher"/>
+   <category-def name="jettylauncher_profile" label="Jetty Launcher - Profiler Edition"/>
+</site>
