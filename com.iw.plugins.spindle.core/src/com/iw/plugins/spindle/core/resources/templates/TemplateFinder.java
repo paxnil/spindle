@@ -27,12 +27,10 @@
 package com.iw.plugins.spindle.core.resources.templates;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
-import org.apache.oro.text.PatternCacheLRU;
-import org.apache.oro.text.perl.Perl5Util;
 import org.apache.tapestry.Tapestry;
 import org.apache.tapestry.engine.ITemplateSource;
 import org.apache.tapestry.spec.AssetType;
@@ -44,7 +42,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor;
+import com.iw.plugins.spindle.core.resources.I18NResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
@@ -58,35 +56,8 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class TemplateFinder implements IResourceLocationAcceptor
+public class TemplateFinder
 {
-
-    public static Perl5Util Perl;
-    public static final String PatternPrefix = "/^";
-    public static String PatternSuffix;
-    public static String[] ALL_SUFFIXES;
-
-    static {
-        Locale[] all = Locale.getAvailableLocales();
-        List suffixes = new ArrayList();
-        StringBuffer buffer = new StringBuffer();
-        for (int i = 0; i < all.length; i++)
-        {
-            String next = "_" + all[i].toString();
-            suffixes.add(next);
-            buffer.append(next);
-            if (i < all.length - 1)
-            {
-                buffer.append('|');
-            }
-        }
-
-        ALL_SUFFIXES = new String[suffixes.size()];
-        suffixes.toArray(ALL_SUFFIXES);
-
-        PatternSuffix = "(" + buffer.toString() + "){0,1}$/i";
-        Perl = new Perl5Util(new PatternCacheLRU(100));
-    }
 
     /**
      * Filter a list of template locations.
@@ -119,12 +90,12 @@ public class TemplateFinder implements IResourceLocationAcceptor
                 foundName = name.substring(0, dotx);
                 foundExtension = name.substring(dotx + 1);
                 if (foundName.length() == 0 || !expectedExtension.equals(foundExtension))
-                continue;
+                    continue;
             }
             boolean ok = true;
-            for (int i = 0; i < ALL_SUFFIXES.length; i++)
+            for (int i = 0; i < I18NResourceAcceptor.ALL_I18N_SUFFIXES.length; i++)
             {
-                if (foundName.endsWith(ALL_SUFFIXES[i]))
+                if (foundName.endsWith(I18NResourceAcceptor.ALL_I18N_SUFFIXES[i]))
                 {
                     ok = false;
                     break;
@@ -137,13 +108,13 @@ public class TemplateFinder implements IResourceLocationAcceptor
         return result;
     }
 
-    private List fFindResults = new ArrayList();
+    private ArrayList fFindResults = new ArrayList();
     private String fExtension;
     private IProblemCollector fProblemCollector;
     private TapestryProject fTapestryProject;
+    private I18NResourceAcceptor fAcceptor = new I18NResourceAcceptor();
 
     private String fTemplateBaseName;
-    private String fPerlExpression;
 
     private ITemplateFinderListener fListener = TapestryArtifactManager.getTapestryArtifactManager();
 
@@ -192,7 +163,7 @@ public class TemplateFinder implements IResourceLocationAcceptor
 
         findStandardTemplates(specification);
 
-        if (fFindResults.isEmpty()
+        if ((fFindResults.isEmpty())
             && specification.isPageSpecification()
             && specification.getNamespace().isApplicationNamespace())
         {
@@ -217,7 +188,7 @@ public class TemplateFinder implements IResourceLocationAcceptor
             extension = Tapestry.DEFAULT_TEMPLATE_EXTENSION;
 
         fListener.templateExtensionSeen(extension);
-        
+
         return extension;
     }
 
@@ -298,8 +269,9 @@ public class TemplateFinder implements IResourceLocationAcceptor
             (IResourceWorkspaceLocation) location.getRelativeLocation(fTemplateBaseName + "." + fExtension);
         if (baseLocation.exists())
         {
-            fPerlExpression = PatternPrefix + fTemplateBaseName + PatternSuffix;
-            location.lookup(this);
+            fAcceptor.configure(fTemplateBaseName, fExtension);
+            location.lookup(fAcceptor);
+            fFindResults.addAll(Arrays.asList(fAcceptor.getResults()));
         }
     }
 
@@ -308,25 +280,6 @@ public class TemplateFinder implements IResourceLocationAcceptor
         if (fProblemCollector != null)
             fProblemCollector.addProblem(severity, location, message);
 
-    }
-
-    public boolean accept(IResourceWorkspaceLocation location)
-    {
-        String name = location.getName();
-        if (name == null || name.trim().length() > 0)
-        {
-            String foundName = null;
-            String foundExtension = null;
-            int dotx = name.lastIndexOf('.');
-            if (dotx > 0)
-            {
-                foundName = name.substring(0, dotx);
-                foundExtension = name.substring(dotx + 1);
-            }
-            if (fExtension.equals(foundExtension) && Perl.match(fPerlExpression, foundName))
-                fFindResults.add(location);
-        }
-        return true;
     }
 
     /* (non-Javadoc)

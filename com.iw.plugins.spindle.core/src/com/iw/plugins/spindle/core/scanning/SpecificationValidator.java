@@ -49,6 +49,7 @@ import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
+import com.iw.plugins.spindle.core.resources.I18NResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
@@ -180,7 +181,7 @@ public class SpecificationValidator extends BaseValidator
             return false;
         }
         validateContainedComponentBindings(specification, containedSpecification, component, info);
-        
+
         // if the contained is a framework component, extra validation might occur at the end of the
         // entire build!
         FrameworkComponentValidator.validate(
@@ -189,7 +190,8 @@ public class SpecificationValidator extends BaseValidator
             type,
             containedSpecification,
             component,
-            info, containedSpecification.getPublicId());
+            info,
+            containedSpecification.getPublicId());
 
         return true;
     }
@@ -348,6 +350,7 @@ public class SpecificationValidator extends BaseValidator
             return true;
 
         IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) root.getRelativeLocation(assetPath);
+        String fileName = relative.getName();
 
         if (!relative.exists())
         {
@@ -361,20 +364,52 @@ public class SpecificationValidator extends BaseValidator
                 errorLoc = sourceLocation.getAttributeSourceLocation("resource-path");
             }
 
-            String name = pAsset.getIdentifier();
+            String assetSpecName = pAsset.getIdentifier();
 
-            reportProblem(
-                IProblem.ERROR,
-                errorLoc,
-                TapestryCore.getString(
-                    "scan-component-missing-asset",
-                    name.startsWith(getDummyStringPrefix()) ? "not specified" : name,
-                    relative.toString()));
+            if (hasI18NAssetEquivalents(relative, fileName))
+            {
+                int handleI18NPriority = TapestryCore.getDefault().getHandleAssetProblemPriority();
+                if (handleI18NPriority >= 0)
+                {
+                    reportProblem(
+                        handleI18NPriority,
+                        errorLoc,
+                        TapestryCore.getString(
+                            "scan-component-missing-asset-but-has-i18n",
+                            assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified" : assetSpecName,
+                            relative.toString()));
+                }
+            } else
+            {
+                reportProblem(
+                    IProblem.ERROR,
+                    errorLoc,
+                    TapestryCore.getString(
+                        "scan-component-missing-asset",
+                        assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified" : assetSpecName,
+                        relative.toString()));
 
+            }
             return false;
         }
 
         return true;
+    }
+
+    private I18NResourceAcceptor fI18NAcceptor = new I18NResourceAcceptor();
+
+    private boolean hasI18NAssetEquivalents(IResourceWorkspaceLocation baseLocation, String name)
+    {
+        try
+        {
+            fI18NAcceptor.configure(name);
+            baseLocation.lookup(fI18NAcceptor);
+            return fI18NAcceptor.getResults().length > 0;
+        } catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        }
+        return false;
     }
 
     private boolean checkTemplateAsset(IComponentSpecification specification, IAssetSpecification templateAsset)
@@ -383,7 +418,8 @@ public class SpecificationValidator extends BaseValidator
         AssetType type = templateAsset.getType();
         String templatePath = templateAsset.getPath();
 
-        IResourceWorkspaceLocation templateLocation;
+        //set relative to the context by default!
+        IResourceWorkspaceLocation templateLocation = (IResourceWorkspaceLocation) fContextRoot.getRelativeLocation(templatePath); ;
         if (type == AssetType.EXTERNAL)
         {
             reportProblem(
@@ -394,7 +430,6 @@ public class SpecificationValidator extends BaseValidator
         }
         if (type == AssetType.CONTEXT)
         {
-            IResourceWorkspaceLocation context = fContextRoot;
             if (fTapestryProject.getProjectType() != TapestryProject.APPLICATION_PROJECT_TYPE)
             {
                 reportProblem(
@@ -404,29 +439,71 @@ public class SpecificationValidator extends BaseValidator
                 return false;
             }
 
-            templateLocation = (IResourceWorkspaceLocation) context.getRelativeLocation(templatePath);
+//            templateLocation = (IResourceWorkspaceLocation) fContextRoot.getRelativeLocation(templatePath);
 
-            if (templateLocation == null || !templateLocation.exists())
-            {
-                reportProblem(
-                    IProblem.ERROR,
-                    ((ISourceLocationInfo) templateAsset.getLocation()).getAttributeSourceLocation("path"),
-                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
-                return false;
-            }
+//            if (templateLocation == null || !templateLocation.exists())
+//            {
+//                reportProblem(
+//                    IProblem.ERROR,
+//                    ((ISourceLocationInfo) templateAsset.getLocation()).getAttributeSourceLocation("path"),
+//                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
+//                return false;
+//            }
         }
         if (type == AssetType.PRIVATE)
         {
-            IResourceWorkspaceLocation classpath = fClasspathRoot;
-            templateLocation = (IResourceWorkspaceLocation) classpath.getRelativeLocation(templatePath);
-            if (templateLocation == null || !templateLocation.exists())
+            templateLocation = (IResourceWorkspaceLocation) fClasspathRoot.getRelativeLocation(templatePath);
+//            if (templateLocation == null || !templateLocation.exists())
+//            {
+//                reportProblem(
+//                    IProblem.ERROR,
+//                    ((ISourceLocationInfo) templateAsset.getLocation()).getAttributeSourceLocation("resource-path"),
+//                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
+//                return false;
+//            }
+        }
+        
+        if (!templateLocation.exists())
+        {
+            String fileName = templateLocation.getName();
+            // find the attribute source location for the error
+            ISourceLocationInfo sourceLocation = (ISourceLocationInfo) templateAsset.getLocation();
+            ISourceLocation errorLoc;
+            if (type == AssetType.CONTEXT)
+            {
+                errorLoc = sourceLocation.getAttributeSourceLocation("path");
+            } else
+            {
+                errorLoc = sourceLocation.getAttributeSourceLocation("resource-path");
+            }
+
+            String assetSpecName = ((PluginAssetSpecification)templateAsset).getIdentifier();
+
+            if (hasI18NAssetEquivalents(templateLocation, fileName))
+            {
+                int handleI18NPriority = TapestryCore.getDefault().getHandleAssetProblemPriority();
+                if (handleI18NPriority >= 0)
+                {
+                    reportProblem(
+                        handleI18NPriority,
+                        errorLoc,
+                        TapestryCore.getString(
+                            "scan-component-missing-asset-but-has-i18n",
+                            assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified" : assetSpecName,
+                            templateLocation.toString()));
+                }
+            } else
             {
                 reportProblem(
                     IProblem.ERROR,
-                    ((ISourceLocationInfo) templateAsset.getLocation()).getAttributeSourceLocation("resource-path"),
-                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
-                return false;
+                    errorLoc,
+                    TapestryCore.getString(
+                        "scan-component-missing-asset",
+                        assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified" : assetSpecName,
+                         templateLocation.toString()));
+
             }
+            return false;
         }
         return true;
     }
@@ -438,7 +515,7 @@ public class SpecificationValidator extends BaseValidator
         ISourceLocation source)
         throws ScannerException
     {
-        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation)specLocation;
+        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) specLocation;
 
         if (!useLocation.isOnClasspath())
             useLocation = fClasspathRoot;

@@ -79,8 +79,9 @@ public class BaseValidator implements IScannerValidator
         {
             return 1;
         }
-        
-        public int getLength() {
+
+        public int getLength()
+        {
             return getCharEnd() - getCharStart() + 1;
         }
 
@@ -302,10 +303,10 @@ public class BaseValidator implements IScannerValidator
         ISourceLocation location)
         throws ScannerException
     {
-        
+
         if (value != null && value.startsWith(fDummyString))
             return true;
-            
+
         if (value != null)
         {
             if (fCompiledPatterns == null)
@@ -347,6 +348,16 @@ public class BaseValidator implements IScannerValidator
         return false;
     }
 
+    public boolean validateResourceLocation(
+        IResourceLocation location,
+        String relativePath,
+        String errorKey,
+        ISourceLocation source)
+        throws ScannerException
+    {
+        return validateResourceLocation(location, relativePath, errorKey, source, false);
+    }
+
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(org.apache.tapestry.IResourceLocation, java.lang.String)
      */
@@ -354,7 +365,8 @@ public class BaseValidator implements IScannerValidator
         IResourceLocation location,
         String relativePath,
         String errorKey,
-        ISourceLocation source)
+        ISourceLocation source,
+        boolean accountForI18N)
         throws ScannerException
     {
         if (relativePath.startsWith(getDummyStringPrefix()))
@@ -399,7 +411,5 @@ public class BaseValidator implements IScannerValidator
         }
         return true;
     }
-
-   
 
 }
