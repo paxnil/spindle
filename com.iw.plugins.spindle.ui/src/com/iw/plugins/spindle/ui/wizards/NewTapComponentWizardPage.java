@@ -318,7 +318,8 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     fApplicationLocationField.init(
         fComponentNameDialogField,
         fTapestryProjectDialogField,
-        fGenerateHTML, initResource,
+        fGenerateHTML,
+        initResource,
         context);
 
     namespaceChanged();
@@ -815,7 +816,8 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     if (fTemplateFile == null)
       fTemplateFile = findResource(
           fComponentNameDialogField.getTextValue() + ".html",
-          fNamespaceDialogField.getSelectedNamespace(), true);
+          fNamespaceDialogField.getSelectedNamespace(),
+          true);
 
     return fTemplateFile;
   }
@@ -907,8 +909,8 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
    */
   public boolean canFlipToNextPage()
   {
-    return getCurrentStatus().getSeverity() != IStatus.ERROR;
-
+    IStatus status = getCurrentStatus();
+    return super.canFlipToNextPage() && status != null && status.getSeverity() != IStatus.ERROR;
   }
 
   private void namespaceChanged()

@@ -34,6 +34,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.wutka.dtd.OrderPreservingMap;
 
@@ -167,10 +168,9 @@ public class UpdateStatusContainer implements IDialogFieldChangedListener
    */
   public void dialogFieldStatusChanged(IStatus status, DialogField field)
   {
-    if (map.containsKey(field) && field.isVisible())
-    {
-      map.put(field, status);
-    }
+    Assert.isNotNull(status);
+    if (map.containsKey(field))      
+      map.put(field, status);    
   }
 
 }
