@@ -138,6 +138,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
         HashCodeBuilder builder = new HashCodeBuilder(5591, 1009);
 
         builder.append(getPath());
+        builder.append(getName());
         builder.append(fRoot);
 
         return builder.toHashCode();

@@ -72,6 +72,8 @@ import org.apache.xerces.xni.parser.XMLConfigurationException;
 import org.apache.xerces.xni.parser.XMLDTDScanner;
 import org.apache.xerces.xni.parser.XMLInputSource;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+
 /**
  * This class is responsible for scanning XML document structure
  * and content. The scanner acts as the source for the document
@@ -128,7 +130,8 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
     // feature identifiers
 
     /** Feature identifier: load external DTD. */
-    protected static final String LOAD_EXTERNAL_DTD = Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE;
+    protected static final String LOAD_EXTERNAL_DTD =
+        Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE;
 
     // property identifiers
 
@@ -142,7 +145,8 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
         { NAMESPACES, VALIDATION, LOAD_EXTERNAL_DTD, NOTIFY_BUILTIN_REFS, NOTIFY_CHAR_REFS, };
 
     /** Recognized properties. */
-    private static final String[] RECOGNIZED_PROPERTIES = { SYMBOL_TABLE, ERROR_REPORTER, ENTITY_MANAGER, DTD_SCANNER, };
+    private static final String[] RECOGNIZED_PROPERTIES =
+        { SYMBOL_TABLE, ERROR_REPORTER, ENTITY_MANAGER, DTD_SCANNER, };
 
     //
     // Data
@@ -575,7 +579,8 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
                         {
                             fStringBuffer.append((char) fEntityScanner.scanChar());
                         }
-                        String target = fSymbolTable.addSymbol(fStringBuffer.ch, fStringBuffer.offset, fStringBuffer.length);
+                        String target =
+                            fSymbolTable.addSymbol(fStringBuffer.ch, fStringBuffer.offset, fStringBuffer.length);
                         scanPIData(target, fString);
                     }
 
@@ -788,14 +793,15 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
          * @throws XNIException Thrown on parse error.
          */
         public boolean dispatch(boolean complete) throws IOException, XNIException
-        {
+        {           
+
             fEntityManager.setEntityHandler(null);
             try
             {
                 boolean again;
                 XMLResourceIdentifierImpl resourceIdentifier = new XMLResourceIdentifierImpl();
                 do
-                {
+                {               
                     again = false;
                     switch (fScannerState)
                     {
@@ -804,7 +810,8 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
                                 // REVISIT: Should there be a feature for
                                 //          the "complete" parameter?
                                 boolean completeDTD = true;
-                                boolean moreToScan = fDTDScanner.scanDTDInternalSubset(completeDTD, fStandalone, fHasExternalDTD);
+                                boolean moreToScan =
+                                    fDTDScanner.scanDTDInternalSubset(completeDTD, fStandalone, fHasExternalDTD);
                                 if (!moreToScan)
                                 {
                                     // end doctype declaration
@@ -841,7 +848,7 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
                                 resourceIdentifier.setValues(fDoctypePublicId, fDoctypeSystemId, null, null);
                                 if (!isGrammerCached(fDoctypePublicId))
                                 {
-                                    
+
                                     // TODO short circuit DTD scanning if necessary
                                     XMLInputSource xmlInputSource = fEntityManager.resolveEntity(resourceIdentifier);
                                     fDTDScanner.setInputSource(xmlInputSource);
@@ -909,6 +916,8 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
          */
         private boolean isGrammerCached(String publicId)
         {
+            if (!TapestryCore.isCachingDTDGrammars())
+                return false;
 
             return fGrammarPool.getGrammar(publicId) != null;
         }

@@ -75,11 +75,10 @@ public class FullBuild extends Build
 
     }
 
-    public void build() throws BuilderException
+    public void build() throws BuilderException, CoreException
     {
 
-        try
-        {
+       
             Parser parser = new Parser(false);
 
             findDeclaredApplication(parser);
@@ -111,10 +110,7 @@ public class FullBuild extends Build
 
             saveState();
 
-        } catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
+        
     }
 
     protected void saveState()
@@ -238,7 +234,7 @@ public class FullBuild extends Build
         super.cleanUp();
     }
 
-    protected void findDeclaredApplication(Parser parser)
+    protected void findDeclaredApplication(Parser parser) throws CoreException
     {
         IResourceWorkspaceLocation webXML =
             (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot.getRelativeLocation("WEB-INF/web.xml");
@@ -253,12 +249,7 @@ public class FullBuild extends Build
                 wxmlElement = parseToNode(parser, webXML);
             } catch (IOException e1)
             {
-                TapestryCore.log(e1);
-                e1.printStackTrace();
-            } catch (CoreException e1)
-            {
-                TapestryCore.log(e1);
-                e1.printStackTrace();
+                TapestryCore.log(e1);               
             }
             if (wxmlElement == null)
                 throw new BuilderException("Tapestry Build failed: could not parse web.xml");

@@ -46,7 +46,6 @@ import org.eclipse.jface.text.IDocument;
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -95,7 +94,6 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, "Tapestry_3_0.dtd");
     }
 
-   
     public boolean isDoValidation()
     {
         return fDoValidation;
@@ -187,6 +185,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
 
     public Node parse(IStorage storage) throws IOException, CoreException
     {
+
         return parse(storage.getContents());
     }
 
@@ -257,12 +256,12 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         {
             reader.close();
         }
-        
+
         fXmlDocument = (DocumentImpl) fDomParser.getDocument();
         if (fXmlDocument == null)
             return null;
-            
-        return  fXmlDocument.getDocumentElement();        
+
+        return fXmlDocument.getDocumentElement();
     }
 
     public boolean getHasFatalErrors()

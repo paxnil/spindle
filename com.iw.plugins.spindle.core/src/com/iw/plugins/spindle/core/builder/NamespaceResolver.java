@@ -226,7 +226,6 @@ public class NamespaceResolver
         String libraryId,
         IResourceWorkspaceLocation location)
     {
-        System.out.println("resolving Library ************" + location);
         if (fIsIncrementalBuild && fBuild.fLastState.fBinaryNamespaces.containsKey(location))
             return (ICoreNamespace) fBuild.fLastState.fBinaryNamespaces.get(location);
 

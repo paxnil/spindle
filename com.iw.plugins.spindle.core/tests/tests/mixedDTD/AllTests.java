@@ -24,18 +24,28 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.builder;
+package tests.mixedDTD;
 
-import org.eclipse.core.runtime.CoreException;
+import tests.Parser.mr.*;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- *  TODO Add Type comment
+ *  RUNS ALL THE MIXED DTD TESTS 
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface IBuild
+public class AllTests
 {
-    public void build() throws BuilderException, CoreException;
-    public void cleanUp();
+
+     public static Test suite()
+     {
+         TestSuite suite = new TestSuite("Test for tests.mixedDTD");
+         //$JUnit-BEGIN$
+         suite.addTest(new TestSuite(MixedDTDTest.class));
+         suite.addTest(AllTestsMR.suite());   
+         //$JUnit-END$
+         return suite;
+     }
 }

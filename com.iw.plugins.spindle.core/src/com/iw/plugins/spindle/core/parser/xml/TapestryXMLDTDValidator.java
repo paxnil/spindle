@@ -36,6 +36,8 @@ import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLComponentManager;
 import org.apache.xerces.xni.parser.XMLConfigurationException;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+
 /**
  *  Adds ability to use cached DTD Grammars
  * 
@@ -76,6 +78,7 @@ public class TapestryXMLDTDValidator extends XMLDTDValidator
         if (!fSeenRootElement)
         {
             fSeenRootElement = true;
+
             if (fDTDGrammar == null)
                 fDTDGrammar = getGrammar(fPublicId);
         }
@@ -89,9 +92,7 @@ public class TapestryXMLDTDValidator extends XMLDTDValidator
      */
     private DTDGrammar getGrammar(String publicId)
     {
-        
-        
-        if (fGrammarPool != null && publicId != null)
+        if (TapestryCore.isCachingDTDGrammars() && publicId != null)
             return (DTDGrammar) fGrammarPool.getGrammar(publicId);
 
         return null;
@@ -120,7 +121,7 @@ public class TapestryXMLDTDValidator extends XMLDTDValidator
                 (XMLGrammarPoolImpl) componentManager.getProperty(
                     "http://apache.org/xml/properties/internal/grammar-pool");
 
-        if (fPublicId != null)
+        if (fPublicId != null && TapestryCore.isCachingDTDGrammars())
         {
             if (fGrammarPool != null && fDTDGrammar != null && fGrammarPool.getGrammar(fPublicId) == null)
                 fGrammarPool.putGrammar(fPublicId, fDTDGrammar);

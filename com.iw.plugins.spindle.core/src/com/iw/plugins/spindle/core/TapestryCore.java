@@ -45,15 +45,20 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.parser.IProblem;
+import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
 import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
 
 /**
  * The main plugin class to be used in the desktop.
  */
-public class TapestryCore extends AbstractUIPlugin
+public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeListener
 {
 
     /**
@@ -72,6 +77,8 @@ public class TapestryCore extends AbstractUIPlugin
     public static final String PLUGIN_ID = "com.iw.plugins.spindle.core";
     public static final String NATURE_ID = PLUGIN_ID + ".tapestrynature";
     public static final String BUILDER_ID = PLUGIN_ID + ".tapestrybuilder";
+
+    public static final String CACHE_GRAMMAR_PREFERENCE = PLUGIN_ID + ".cachinggrammars";
 
     /**
      * SpecFactory instance used by the Scanners
@@ -369,6 +376,61 @@ public class TapestryCore extends AbstractUIPlugin
             SPEC_FACTORY = new TapestryCoreSpecFactory();
         }
         return SPEC_FACTORY;
+    }
+
+    public static boolean isCachingDTDGrammars()
+    {
+        // short circuit for testing outside of an 
+        // Eclipse runtime
+
+        if (getDefault() == null)
+            return false;
+
+        return getDefault().getPreferenceStore().getBoolean(CACHE_GRAMMAR_PREFERENCE);
+    }
+
+    public static void setCachingDTDGrammars(boolean flag)
+    {
+        getDefault().getPreferenceStore().setValue(CACHE_GRAMMAR_PREFERENCE, flag);
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.ui.plugin.AbstractUIPlugin#initializeDefaultPreferences(org.eclipse.jface.preference.IPreferenceStore)
+     */
+    protected void initializeDefaultPreferences(IPreferenceStore store)
+    {
+        store.setDefault(CACHE_GRAMMAR_PREFERENCE, true);
+        store.addPropertyChangeListener(this);
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+     */
+    public void propertyChange(PropertyChangeEvent event)
+    {
+        if (event.getProperty().equals(CACHE_GRAMMAR_PREFERENCE))
+        {
+
+            boolean oldValue = ((Boolean) event.getOldValue()).booleanValue();
+            boolean newValue = ((Boolean) event.getNewValue()).booleanValue();
+            if (oldValue != newValue && !newValue)
+            {
+                //clear the cache
+                if (!newValue)
+                    TapestryDOMParserConfiguration.clearCache();
+
+                // force full builds
+                TapestryArtifactManager.getTapestryArtifactManager().invalidateBuildStates();
+            }
+        }
+
+    }
+
+    public void clearDTDCache()
+    {
+        TapestryDOMParserConfiguration.clearCache();
+        // force full builds
+        TapestryArtifactManager.getTapestryArtifactManager().invalidateBuildStates();
     }
 
 }

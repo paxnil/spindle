@@ -44,7 +44,13 @@ public class TapestryDOMParserConfiguration extends StandardParserConfiguration
     /** custom Xerces Feature identifier*/
     public static final String AUGMENTATIONS = "http://intelligentworks.com/xml/features/augmentations-location";
 
-    public static final XMLGrammarPoolImpl GRAMMAR_POOL = new XMLGrammarPoolImpl();
+    public static XMLGrammarPoolImpl GRAMMAR_POOL = new XMLGrammarPoolImpl();
+
+    public static void clearCache()
+    {
+        GRAMMAR_POOL = new XMLGrammarPoolImpl();
+    }
+
     /**
      * Constructor for MyConfiguration.
      */

@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jface.dialogs.ErrorDialog;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
@@ -149,42 +150,20 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             {
                 if (kind == FULL_BUILD)
                 {
-                    buildAll();
+                    buildAll(); 
                 } else
                 {
                     buildIncremental();
                 }
                 ok = true;
-                //          if ((this.lastState = getLastState(currentProject)) == null) {
-                //            if (DEBUG)
-                //              System.out.println("Performing full build since last saved state was not found"); //$NON-NLS-1$
-                //            buildAll();
-                //          } else if (hasClasspathChanged() || hasOutputLocationChanged()) {
-                //            // if the output location changes, do not delete the binary files from old location
-                //            // the user may be trying something
-                //            buildAll();
-                //          } else if (
-                //            sourceFolders.length > 0) {
-                //            // if there is no source to compile & no classpath changes then we are done
-                //            SimpleLookupTable deltas = findDeltas();
-                //            if (deltas == null)
-                //              buildAll();
-                //            else if (deltas.elementSize > 0)
-                //              buildDeltas(deltas);
-                //            else if (DEBUG)
-                //              System.out.println("Nothing to build since deltas were empty"); //$NON-NLS-1$
-                //          } else {
-                //            if (hasBinaryDelta()) { // double check that a jar file didn't get replaced
-                //              buildAll();
-                //            } else {
-                //              if (DEBUG)
-                //                System.out.println("Nothing to build since there are no source folders and no deltas"); //$NON-NLS-1$
-                //              this.lastState.tagAsNoopBuild();
-                //            }
-                //          }
-                //        }
-
             }
+        } catch (CoreException e)
+        {
+            ErrorDialog.openError(
+                TapestryCore.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell(),
+                TapestryCore.getString("build-failed-core-title"),
+                TapestryCore.getString("build-failed-core-message"),
+                e.getStatus());
         } catch (BuilderException e)
         {
             Markers.addBuildBrokenProblemMarkerToResource(getProject(), e.getMessage());
@@ -294,7 +273,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     /**
      * Method buildAll.
      */
-    private void buildAll() throws BuilderException
+    private void buildAll() throws BuilderException, CoreException
     {
         if (TapestryBuilder.DEBUG)
             System.out.println("FULL Tapestry build");
@@ -319,7 +298,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
     }
 
-    private void buildIncremental() throws BuilderException
+    private void buildIncremental() throws BuilderException, CoreException
     {
 
         int type = fTapestryProject.getProjectType();

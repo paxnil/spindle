@@ -122,5 +122,9 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         }
 
     }
+    
+    public void invalidateBuildStates() {
+        fProjectBuildStates.clear();
+    }
 
 }

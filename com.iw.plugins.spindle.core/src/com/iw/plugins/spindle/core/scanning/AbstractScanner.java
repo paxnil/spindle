@@ -189,11 +189,7 @@ public abstract class AbstractScanner implements IProblemCollector
     protected ISourceLocation getBestGuessSourceLocation(Node node, boolean forNodeContent)
     {
         ISourceLocationInfo info = getSourceLocationInfo(node);
-        if (TapestryBuilder.DEBUG)
-        {
-            System.out.println(node.getNodeName());
-            System.out.println(info);
-        }
+        
         if (info != null)
         {
             if (forNodeContent)

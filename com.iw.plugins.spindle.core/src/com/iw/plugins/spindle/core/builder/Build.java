@@ -541,7 +541,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.builder.IBuild#build()
      */
-    public void build() throws BuilderException
+    public void build() throws BuilderException, CoreException
     {
         // TODO Auto-generated method stub
 

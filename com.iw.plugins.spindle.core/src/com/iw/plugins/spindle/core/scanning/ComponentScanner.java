@@ -259,7 +259,11 @@ public class ComponentScanner extends SpecificationScanner
 
         } catch (ScannerException e)
         {
-            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());
+            if (type == BindingType.STATIC) {
+                addProblem(IProblem.WARNING, getNodeStartSourceLocation(node), e.getMessage());
+            } else {
+                addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());
+            }
             value = getNextDummyString();
         }
 
@@ -703,7 +707,10 @@ public class ComponentScanner extends SpecificationScanner
 
             String type = null;
 
-            type = getAttribute(node, "type", true).trim();
+            type = getAttribute(node, "type");
+            
+            if (type == null || type.trim().length() == 0)
+                type = "java.lang.Object";
 
             if (!typeList.contains(type))
             {

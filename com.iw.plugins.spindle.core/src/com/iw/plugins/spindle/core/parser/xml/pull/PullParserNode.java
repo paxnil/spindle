@@ -353,7 +353,6 @@ public class PullParserNode implements Node
      */
     public Node getNextSibling()
     {
-        System.out.println("PPNode.getNextSibling called on: " + getNodeName());
 
         if (fNextSibling == null)
         {
