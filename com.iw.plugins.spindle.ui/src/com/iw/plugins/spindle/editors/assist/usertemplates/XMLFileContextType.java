@@ -175,7 +175,5 @@ public class XMLFileContextType extends TemplateContextType
     addResolver(new XMLFileContextType.PageClass());
     addResolver(new XMLFileContextType.AllowInformal());
     addResolver(new XMLFileContextType.AllowBody());
-
-
   }
 }
