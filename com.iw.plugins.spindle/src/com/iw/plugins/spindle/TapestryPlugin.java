@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.tapestry.Tapestry;
 import net.sf.tapestry.util.xml.AbstractDocumentParser;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -71,7 +72,7 @@ import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
-import com.iw.plugins.spindle.parser.SpecificationParser;
+import com.iw.plugins.spindle.parser.PluginSpecificationParser;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.project.TapestryProject;
 import com.iw.plugins.spindle.refactor.RenamedComponentOrPageRefactor;
@@ -91,7 +92,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
   // Default instance of the receiver
 
   private static TapestryPlugin instance;
-  private static SpecificationParser parser;
+  private static PluginSpecificationParser parser;
   private static TapestryProjectModelManager modelManager = null;
 
 
@@ -117,6 +118,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
    */
   public TapestryPlugin(IPluginDescriptor descriptor) {
     super(descriptor);
+    
     if (instance == null)
       instance = this;
 
@@ -127,7 +129,8 @@ public class TapestryPlugin extends AbstractUIPlugin {
   }
 
   static {
-    parser = new SpecificationParser(); 
+  	
+    parser = new PluginSpecificationParser(); 
 
     String ID_PLUGIN = "com.iw.plugins.spindle";
     editorIdLookup = new HashMap();
@@ -140,7 +143,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
 
   }
 
-  static public void registerParser(String extension, SpecificationParser parser) {
+  static public void registerParser(String extension, PluginSpecificationParser parser) {
     parsers.put(extension, parser);
   }
 
@@ -160,8 +163,8 @@ public class TapestryPlugin extends AbstractUIPlugin {
 
   }
 
-  static public SpecificationParser getParserFor(String extension) {
-    return (SpecificationParser) parsers.get(extension);
+  static public PluginSpecificationParser getParserFor(String extension) {
+    return (PluginSpecificationParser) parsers.get(extension);
   }
 
   /**
@@ -406,7 +409,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
     return null;
   }
 
-  static public SpecificationParser getParser() {
+  static public PluginSpecificationParser getParser() {
     return parser;
   }
 

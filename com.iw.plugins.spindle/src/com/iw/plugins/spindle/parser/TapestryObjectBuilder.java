@@ -1,6 +1,7 @@
 package com.iw.plugins.spindle.parser;
 
 import net.sf.tapestry.IResourceLocation;
+import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.spec.ComponentSpecification;
 import net.sf.tapestry.spec.IApplicationSpecification;
 import net.sf.tapestry.spec.ILibrarySpecification;
@@ -10,7 +11,7 @@ import org.w3c.dom.Document;
 import com.iw.plugins.spindle.parser.xml.TapestryEntityResolver;
 import com.iw.plugins.spindle.spec.TapestryPluginSpecFactory;
 
-public class TapestryObjectBuilder extends net.sf.tapestry.parse.SpecificationParser {
+public class TapestryObjectBuilder extends SpecificationParser {
 
   /**
    * Constructor for SpecificationParser.
@@ -61,7 +62,7 @@ public class TapestryObjectBuilder extends net.sf.tapestry.parse.SpecificationPa
   public IApplicationSpecification buildApplicationSpecification(Document document, IResourceLocation location)
     throws DocumentParseException {
 
-    setResourceLocation(location);
+   // setResourceLocation(location);
     
     return convertApplicationSpecification(document, null);
 

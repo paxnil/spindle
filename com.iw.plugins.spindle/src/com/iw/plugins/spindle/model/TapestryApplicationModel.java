@@ -38,7 +38,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.parser.SpecificationParser;
+import com.iw.plugins.spindle.parser.PluginSpecificationParser;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.util.SourceWriter;
 import com.iw.plugins.spindle.util.SpindleMultiStatus;
@@ -56,6 +56,7 @@ public class TapestryApplicationModel
 
   public void load(final InputStream source) throws CoreException {
     final TapestryApplicationModel thisModel = this;
+    final InputStream useStream = source;
     TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) {
 
@@ -69,14 +70,14 @@ public class TapestryApplicationModel
           pluginSpec.setParent(null);
         }
 
-        SpecificationParser parser =
-          (SpecificationParser) TapestryPlugin.getParserFor("application");
+        PluginSpecificationParser parser =
+          (PluginSpecificationParser) TapestryPlugin.getParserFor("application");
 
         try {
 
           librarySpecification =
             (PluginApplicationSpecification) parser.parseApplicationSpecification(
-              source,
+              useStream,
               getResourceLocation());
 
           pluginSpec = (PluginApplicationSpecification) librarySpecification;
@@ -94,6 +95,10 @@ public class TapestryApplicationModel
 
           loaded = false;
 
+        } catch (Throwable e) {
+        	
+        	e.printStackTrace();
+        	
         } finally {
 
           IStatus status = parser.getStatus();

@@ -2,6 +2,7 @@
 <classpath>
     <classpathentry kind="src" path="/org.apache.xerces"/>
     <classpathentry kind="src" path="src"/>
+    <classpathentry kind="src" path="framework/src"/>
     <classpathentry kind="src" path="/org.eclipse.ui"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.ui"/>
     <classpathentry kind="src" path="/org.eclipse.core.runtime"/>
@@ -11,16 +12,16 @@
     <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
     <classpathentry kind="src" path="/org.eclipse.help"/>
     <classpathentry kind="src" path="/org.eclipse.update.ui.forms"/>
-    <classpathentry kind="src" path="/jakarta-tapestry"/>
     <classpathentry kind="lib" path="commons-lang-1.0.jar"/>
     <classpathentry kind="lib" path="commons-logging-1.0.2.jar"/>
     <classpathentry kind="lib" path="jakarta-oro-2.0.6.jar"/>
     <classpathentry kind="lib" path="javax.servlet.jar"/>
-    <classpathentry kind="lib" path="javax.xml.jaxp.jar"/>
     <classpathentry kind="lib" path="jcommon-0.6.4.jar"/>
     <classpathentry kind="lib" path="log4j-1.2.6.jar"/>
     <classpathentry kind="lib" path="ognl-2.1.4-opt.jar"/>
-    <classpathentry kind="lib" path="org.apache.crimson.jar"/>
-    <classpathentry kind="lib" path="tapestry-2.4.jar"/>
+    <classpathentry kind="lib" path="javax.xml.jaxp.jar"/>
+    <classpathentry kind="lib" path="tlib/bsf-2.3.0.jar"/>
+    <classpathentry kind="lib" path="tlib/bcel-5.0.jar"/>
+    <classpathentry kind="lib" path="tlib/ejb.jar"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>

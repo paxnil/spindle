@@ -86,8 +86,8 @@ public class SpindleMultiStatus extends SpindleStatus {
    * @see org.eclipse.core.runtime.IStatus#getSeverity()
    */
   public int getSeverity() {
-    int builtin = getSeverity();
-    if (getSeverity() >= 0) {
+    int builtin = super.getSeverity();
+    if (builtin >= 0) {
       return builtin;
     }
     if (!subStatii.isEmpty()) {

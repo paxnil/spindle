@@ -41,7 +41,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.parser.SpecificationParser;
+import com.iw.plugins.spindle.parser.PluginSpecificationParser;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.util.SourceWriter;
@@ -87,8 +87,8 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
 
           String extension = element.getFullPath().getFileExtension();
 
-          SpecificationParser parser =
-            (SpecificationParser) TapestryPlugin.getParserFor(extension);
+          PluginSpecificationParser parser =
+            (PluginSpecificationParser) TapestryPlugin.getParserFor(extension);
 
           if (extension.equals("jwc")) {
 

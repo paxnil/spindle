@@ -30,22 +30,27 @@ import com.iw.plugins.spindle.parser.xml.TapestryParserConfiguration;
 import com.iw.plugins.spindle.parser.xml.XMLEnityEventInfo;
 import com.iw.plugins.spindle.util.SpindleMultiStatus;
 
-public class SpecificationParser {
+public class PluginSpecificationParser {
 
-  private TapestryErrorReporter reporter;
+  private SpecificationConfiguration parserConfig;
   private TapestryDOMParser parser;
   private TapestryObjectBuilder builder;
 
-  public SpecificationParser() {
+  public PluginSpecificationParser() {
 
-    reporter = new TapestryErrorReporter();
-    parser = new TapestryDOMParser(new SpecificationConfiguration());
     builder = new TapestryObjectBuilder();
 
   }
 
   public IStatus getStatus() {
-    return reporter.getStatus();
+    return parserConfig.getErrorReporter().getStatus();
+  }
+
+  private void checkParser() {
+    if (parser == null) {
+      parserConfig = new SpecificationConfiguration();
+      parser = new TapestryDOMParser(parserConfig);
+    }
   }
 
   /**
@@ -131,8 +136,11 @@ public class SpecificationParser {
     throws DocumentParseException {
     Document document;
 
+    checkParser();
+
     try {
-      parser.parse(new InputSource(stream));
+      InputSource input = new InputSource(stream);
+      parser.parse(input);
     } catch (SAXParseException ex) {
       // This constructor captures the line number and column number
 
@@ -155,24 +163,26 @@ public class SpecificationParser {
     return document;
   }
 
- 
-
   protected class SpecificationConfiguration extends TapestryParserConfiguration {
-  	
-  	private TapestryValidator tapestryValidator = new TapestryValidator();
+
+    private TapestryValidator tapestryValidator = new TapestryValidator();
 
     /**
     * @see com.iw.plugins.spindle.parser.xml.StandardParserConfiguration#createErrorReporter()
     */
     protected XMLErrorReporter createErrorReporter() {
-      return reporter;
+      return new TapestryErrorReporter();
+    }
+
+    public TapestryErrorReporter getErrorReporter() {
+      return (TapestryErrorReporter) fErrorReporter;
     }
 
     /**
      * setup pipeline - schemas are not supported!
      */
     protected void configurePipeline() {
-    	
+
       if (fDTDValidator != null) {
         fScanner.setDocumentHandler(fDTDValidator);
         fDTDValidator.setDocumentHandler(fNamespaceBinder);
@@ -197,12 +207,12 @@ public class SpecificationParser {
           fDTDScanner.setDTDContentModelHandler(fDTDContentModelHandler);
         }
       }
-      
-      tapestryValidator.setErrorReporter(reporter);
-      
+
+      tapestryValidator.setErrorReporter(fErrorReporter);
+
       tapestryValidator.setDocumentSource(fLastComponent);
       tapestryValidator.setDocumentHandler(fDocumentHandler);
-      
+
       fLastComponent = tapestryValidator;
     }
 

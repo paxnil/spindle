@@ -8,11 +8,9 @@ import net.sf.tapestry.ITemplateSource;
 import net.sf.tapestry.Tapestry;
 import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.util.xml.InvalidStringException;
-
 import ognl.ExpressionSyntaxException;
 import ognl.Ognl;
 import ognl.OgnlException;
-
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.QName;
 import org.apache.xerces.xni.XMLAttributes;
@@ -20,9 +18,7 @@ import org.apache.xerces.xni.XNIException;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.parser.TapestryErrorReporter;
-import com.iw.plugins.spindle.parser.xml.TapestryEntityResolver;
 import com.iw.plugins.spindle.parser.xml.XMLEnityEventInfo;
-import com.iw.plugins.spindle.parser.xml.XMLScanner;
 import com.iw.plugins.spindle.spec.XMLUtil;
 
 /**
