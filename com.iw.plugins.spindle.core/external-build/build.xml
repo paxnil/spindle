@@ -8,7 +8,7 @@
 </target>
 
 <target name="clover.swing" depends="with.clover">
-   <clover-view span="1d"/>
+   <clover-view/>
 </target>
 
 <target name="clover.pdf" depends="with.clover">
