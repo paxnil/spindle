@@ -16,5 +16,6 @@
 	  <toc file="defaulttaskstoc.xml"/>
 	  <toc file="defaultcreditstoc.xml"/> 
 	  <toc file="extraconceptstoc.xml"/>
+	  <toc file="extrataskstoc.xml"/>
    </extension>
 </fragment>
