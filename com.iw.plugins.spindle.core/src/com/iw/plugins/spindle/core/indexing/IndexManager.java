@@ -1,3 +1,6 @@
+package com.iw.plugins.spindle.core.indexing;
+import org.eclipse.core.resources.IProject;
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -24,26 +27,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.scanning;
-
-import org.eclipse.jdt.core.IType;
-
 /**
- *  Listener interface for classes that are interested in things the
- *  Validators find/don't find.
- * 
+ *  Interface for managing the lifecyle of Indexes.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface IScannerValidatorListener
+public interface IndexManager
 {
-    /**
-     * @deprecated use recordTypeDependency
-     *  @param fullyQualifiedName the fully qualified name of a type defined in a Tapestry artifact
-     *  @param result the IType the fullyQualifiedName resolved to, if any
-     */
-    void typeChecked(String fullyQualifiedName, IType result);
-
-
+    Index getIndex(IProject project);
+    
+    void destroyIndex(IProject project);
 }

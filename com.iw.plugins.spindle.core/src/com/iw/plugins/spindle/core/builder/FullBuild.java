@@ -72,27 +72,40 @@ public class FullBuild extends Build
      */
     protected void preBuild() throws CoreException
     {
+        setDependencyListener(new BuilderDependencyListener());
         findDeclaredApplication();
+    }
+
+    protected void postBuild()
+    {
+        BuilderDependencyListener listener = (BuilderDependencyListener) getDependencyListener();
+        if (fTapestryBuilder.DEBUG)
+        {
+            listener.dump();
+        }
     }
 
     /**
      * Resolve the Tapesty framework namespace
      */
-    protected void resolveFramework()
+    protected void resolveFramework(Parser parser)
     {
         IResourceWorkspaceLocation frameworkLocation =
             (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot.getRelativeLocation(
                 "/org/apache/tapestry/Framework.library");
-        fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace(frameworkLocation);
+        FrameworkResolver resolver = new FrameworkResolver(this, parser, frameworkLocation);
+        fFrameworkNamespace = resolver.resolve();
+        //        fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace(frameworkLocation);
     }
 
     /**
      * Resolve the application namespace
      *
      */
-    protected void doBuild()
+    protected void doBuild(Parser parser)
     {
-        fApplicationNamespace = fNSResolver.resolveApplicationNamespace(fFrameworkNamespace, fApplicationServlet);
+        ApplicationResolver resolver = new ApplicationResolver(this, parser, fFrameworkNamespace, fApplicationServlet);
+        fApplicationNamespace = resolver.resolve();
     }
 
     public void saveState()
@@ -137,11 +150,6 @@ public class FullBuild extends Build
             }
 
         }
-    }
-
-    protected NamespaceResolver getNamespaceResolver(Parser parser)
-    {
-        return new NamespaceResolver(this, parser);
     }
 
     public void cleanUp()

@@ -48,6 +48,8 @@ import org.apache.tapestry.spec.IContainedComponent;
 import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.Build;
+import com.iw.plugins.spindle.core.builder.IDependencyListener;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
@@ -164,7 +166,13 @@ public class BaseValidator implements IScannerValidator
             fListeners.remove(listener);
     }
 
-    protected void fireTypeCheck(String fullyQulaifiedName, IType result)
+    /**
+     *  Notify listeners that a type check occured.
+     * 
+     * @param fullyQulaifiedName the name of the type
+     * @param result the resolved IType, if any
+     */
+    protected void fireTypeDependency(IResourceWorkspaceLocation dependant, String fullyQulaifiedName, IType result)
     {
         if (fListeners == null)
             return;
@@ -172,7 +180,10 @@ public class BaseValidator implements IScannerValidator
         for (Iterator iter = fListeners.iterator(); iter.hasNext();)
         {
             IScannerValidatorListener listener = (IScannerValidatorListener) iter.next();
-            listener.typeChecked(fullyQulaifiedName, result);
+            listener.typeChecked(fullyQulaifiedName, result); //TODO remove eventually
+            IDependencyListener depListener = Build.getDependencyListener();
+            if (depListener != null)
+                depListener.foundTypeDependency(dependant, result.getFullyQualifiedName());
         }
     }
 
@@ -181,7 +192,6 @@ public class BaseValidator implements IScannerValidator
      *  Returns a pattern compiled for single line matching
      * 
      **/
-
     protected Pattern compilePattern(String pattern)
     {
         if (fPatternCompiler == null)
@@ -202,7 +212,7 @@ public class BaseValidator implements IScannerValidator
      * @param fullyQualifiedName
      * @return
      */
-    public Object findType(String fullyQualifiedName)
+    public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
     {
         return this;
     }
@@ -389,18 +399,23 @@ public class BaseValidator implements IScannerValidator
         return relative.exists();
     }
 
-    public boolean validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
+    public boolean validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType, int severity)
+        throws ScannerException
     {
-        return validateTypeName(fullyQualifiedType, severity, DefaultSourceLocation);
+        return validateTypeName(dependant, fullyQualifiedType, severity, DefaultSourceLocation);
     }
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
      */
-    public boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location)
+    public boolean validateTypeName(
+        IResourceWorkspaceLocation dependant,
+        String fullyQualifiedType,
+        int severity,
+        ISourceLocation location)
         throws ScannerException
     {
 
-        Object type = findType(fullyQualifiedType);
+        Object type = findType(dependant, fullyQualifiedType);
         if (type == null)
         {
             reportProblem(

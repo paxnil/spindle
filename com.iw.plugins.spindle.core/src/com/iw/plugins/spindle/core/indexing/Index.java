@@ -24,26 +24,32 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.scanning;
-
-import org.eclipse.jdt.core.IType;
+package com.iw.plugins.spindle.core.indexing;
 
 /**
- *  Listener interface for classes that are interested in things the
- *  Validators find/don't find.
+ *  Interface to the underlying index.
  * 
+ *  Client code connects to Indexes as a reader or a writer.
+ * 
+ *  Allows one writer to be connected at a time, but any number of readers.
+ * 
+ *  TODO Decide a real concurrency strategy.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface IScannerValidatorListener
+public interface Index
 {
     /**
-     * @deprecated use recordTypeDependency
-     *  @param fullyQualifiedName the fully qualified name of a type defined in a Tapestry artifact
-     *  @param result the IType the fullyQualifiedName resolved to, if any
+     *  Mechanism by which client code requests to be a reader or writer.
+     * 
+     * @param forWhat
+     * @param requestor
      */
-    void typeChecked(String fullyQualifiedName, IType result);
-
-
+    public void connect(int forWhat, Object requestor);
+    
+    /**
+     * @param requestor
+     */
+    public void disconnect(Object requestor);
 }

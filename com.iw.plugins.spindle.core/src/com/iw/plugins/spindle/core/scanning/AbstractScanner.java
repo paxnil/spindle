@@ -37,6 +37,7 @@ import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
@@ -323,18 +324,15 @@ public abstract class AbstractScanner implements IProblemCollector
         return fValidator.validateExpression(expression, severity, location);
     }
 
-    protected boolean validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
+    protected boolean validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType, int severity) throws ScannerException
     {
-        return fValidator.validateTypeName(fullyQualifiedType, severity);
+        return fValidator.validateTypeName(dependant, fullyQualifiedType, severity);
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
-     */
-    protected boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location)
+    protected boolean validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType, int severity, ISourceLocation location)
         throws ScannerException
     {
-        return fValidator.validateTypeName(fullyQualifiedType, severity, location);
+        return fValidator.validateTypeName(dependant, fullyQualifiedType, severity, location);
     }
 
     protected boolean validateLibraryResourceLocation(

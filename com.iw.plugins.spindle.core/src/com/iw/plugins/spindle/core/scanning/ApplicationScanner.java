@@ -31,6 +31,7 @@ import org.apache.tapestry.spec.IApplicationSpecification;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
 
 /**
@@ -93,7 +94,11 @@ public class ApplicationScanner extends LibraryScanner
         specification.setName(getAttribute(rootNode, "name"));
         String engineClass = getAttribute(rootNode, "engine-class");
         if (engineClass != null)
-            validateTypeName(engineClass, IProblem.ERROR, getAttributeSourceLocation(rootNode, "engine-class"));
+            validateTypeName(
+                (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
+                engineClass,
+                IProblem.ERROR,
+                getAttributeSourceLocation(rootNode, "engine-class"));
         specification.setEngineClassName(getAttribute(rootNode, "engine-class"));
 
         scanLibrarySpecification(rootNode, specification, resolver);

@@ -40,38 +40,59 @@ import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.Tapestry;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
-import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
 import com.iw.plugins.spindle.core.namespace.PageSpecificationResolver;
 import com.iw.plugins.spindle.core.parser.Parser;
-import com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.TapestryResourceLocationAcceptor;
-import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
-import com.iw.plugins.spindle.core.scanning.ComponentScanner;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
-import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.Markers;
 
 /**
- *  Resolver for a Namespace
+  *  Resolver for a Namespace
+ * 
+ * 
+ * To resolve a namespace you need:
+ * 
+ *  Given, the framework namespace, or null if this is the framework
+ *  Given, the resource location of the library spec.
+ * 
+ * component resolve rules (library)
+ * <ul>
+ *   <li>As declared in the library specification</li>
+ *   <li>*.jwc in the same folder as the library specification</li>
+ * </ul>
+ * 
+ *  page resolve rules (ordinary library)
+ * 
+ *  <ul>        
+ *    <li>As declared in the library specification</li>
+ *    <li>*.page in the same folder as the library specification</li>
+ * </ul>
+ * 
+ *  template lookup rules:
+ * 
+ * <ul>
+ *  <li>If the component has a $template asset, use that</li>
+ *  <li>Look for a template in the same folder as the component</li>
+ *  <li>If a page in the application namespace, search in the application root</li>
+ * </ul>
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class NamespaceResolver
+public abstract class NamespaceResolver
 {
     /**
      * The parser used to parse Tapestry xml files
@@ -82,10 +103,6 @@ public class NamespaceResolver
      *  collector for any problems not handled by the Build
      */
     private ProblemCollector fProblemCollector = new ProblemCollector();
-    /**
-     * information culled from the servlet - Application namespaces only
-     */
-    protected ServletInfo fServlet;
     /** 
      * the instance of IBuild that instantiated the first Resolver 
      **/
@@ -102,7 +119,7 @@ public class NamespaceResolver
      * the location of the library spec that defines the 
      * Namespace being resolved 
      */
-    protected IResourceWorkspaceLocation fSpecLocation;
+    protected IResourceWorkspaceLocation fNamespaceSpecLocation;
     /**
      * The id of the Namespace being resolved
      */
@@ -127,66 +144,7 @@ public class NamespaceResolver
      * flag to indicate that this resolver is resolving
      * the Tapestry Framework Namespace
      **/
-    protected boolean fResolvingFramework;
 
-    /**
-     * 
-     * To resolve a namespace you need:
-     * 
-     *  Given, the framework namespace, or null if this is the framework
-     *  Given, the resource location of the library spec.
-     *  Given, the servlet name from web.xml (ignored if its not an application)
-     * 
-     *  - parse the library spec
-     *  - figure out if its a library or an application
-     *  - for each <pre><library></pre> tag create and run an new NamespaceResolver
-     *    and install the results in this namespace as children.
-     * 
-     *  - need to keep track somehow of templates and thier owners.
-     * 
-     *  component resolve rules (application) 
-     * 
-     * <ul>
-     *  <li>As declared in the application specification</li>
-     *  <li>*.jwc in the same folder as the application specification</li>
-     *  <li>* jwc in the WEB-INF/<i>servlet-name</i> directory of the context root</li>
-     *  <li>*.jwc in WEB-INF</li>
-     *  <li>*.jwc in the application root (within the context root)</li>
-     * </ul>
-     * 
-     * component resolve rules (library)
-     * <ul>
-     *   <li>As declared in the library specification</li>
-     *   <li>*.jwc in the same folder as the library specification</li>
-     * </ul>
-     * 
-     * page resolve rules (application namespace):
-     * 
-     * <ul>        
-     *  <li>As declared in the application specification</li>
-     *  <li>*.page in the same folder as the application specification</li>
-     *  <li>*.page page in the WEB-INF/<i>servlet-name</i> directory of the context root</li>
-     *  <li>*.page in WEB-INF</li>
-     *  <li>*.page in the application root (within the context root)</li>
-     *  <li>*.html as a template in the application root</li>
-     * </ul> 
-     * 
-     *  page resolve rules (ordinary library)
-     * 
-     *  <ul>        
-     *    <li>As declared in the library specification</li>
-     *    <li>*.page in the same folder as the library specification</li>
-     * </ul>
-     * 
-     *  template lookup rules:
-     * 
-     * <ul>
-     *  <li>If the component has a $template asset, use that</li>
-     *  <li>Look for a template in the same folder as the component</li>
-     *  <li>If a page in the application namespace, search in the application root</li>
-     * </ul>
-     * 
-     */
     public NamespaceResolver(Build build, Parser parser)
     {
         super();
@@ -194,93 +152,28 @@ public class NamespaceResolver
         fParser = parser;
     }
 
-    public ICoreNamespace resolveFrameworkNamespace(IResourceWorkspaceLocation frameworkLocation)
-    {
-        reset();
-        fResolvingFramework = true;
-        resolve(ICoreNamespace.FRAMEWORK_NAMESPACE, frameworkLocation);
-        return fResultNamespace;
-    }
-
-    public ICoreNamespace resolveApplicationNamespace(ICoreNamespace framework, ServletInfo servlet)
-    {
-        reset();
-        fFrameworkNamespace = framework;
-        resolve(servlet);
-        return fResultNamespace;
-    }
-
-    public ICoreNamespace resolveLibrary(
-        ICoreNamespace framework,
-        ICoreNamespace parent,
-        String libraryId,
-        IResourceWorkspaceLocation location)
-    {
-        reset();
-        fFrameworkNamespace = framework;
-        resolve(libraryId, location);
-        if (parent != null && fResultNamespace != null)
-            parent.installChildNamespace(libraryId, fResultNamespace);
-        return fResultNamespace;
-    }
+    /**
+     * Invoke the resolve. If the namespace can't be resolved, problems have already been added.
+     * 
+     * @return the resolved namespage or null if it couldn't be parsed.
+     */
+    public abstract ICoreNamespace resolve();
 
     protected ICoreNamespace resolve(String namespaceId, IResourceWorkspaceLocation location)
     {
         this.fNamespaceId = namespaceId;
-        this.fSpecLocation = location;
-        ICoreNamespace prebuilt = fBuild.getPreBuiltNamespace(fSpecLocation);
+        this.fNamespaceSpecLocation = location;
+        ICoreNamespace prebuilt = fBuild.getPreBuiltNamespace(fNamespaceSpecLocation);
         if (prebuilt != null)
-        {   
+        {
             // this can only happen in an incremental build!
             fResultNamespace = prebuilt;
         } else
         {
-            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation, null);
+            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fNamespaceSpecLocation, null);
             doResolve();
         }
         return fResultNamespace;
-    }
-
-    protected ICoreNamespace resolve(ServletInfo servlet)
-    {
-        this.fServlet = servlet;
-        fSpecLocation = servlet.applicationSpecLocation;
-        if (fSpecLocation != null)
-        {
-            if (!fSpecLocation.exists())
-                throw new BuilderException(
-                    TapestryCore.getString("build-failed-missing-application-spec", fSpecLocation.toString()));
-
-            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation, null);
-        } else
-        {
-            fResultNamespace = createStandinApplicationNamespace(servlet);
-            fSpecLocation = (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
-        }
-        if (fResultNamespace != null)
-        {
-            ILibrarySpecification spec = fResultNamespace.getSpecification();
-            for (Iterator iter = servlet.parameters.keySet().iterator(); iter.hasNext();)
-            {
-                String key = (String) iter.next();
-                spec.setProperty(key, (String) servlet.parameters.get(key));
-            }
-            doResolve();
-        }
-        return fResultNamespace;
-    }
-
-    protected ICoreNamespace createStandinApplicationNamespace(ServletInfo servlet)
-    {
-
-        PluginApplicationSpecification applicationSpec = new PluginApplicationSpecification();
-        IResourceLocation virtualLocation = fBuild.fTapestryBuilder.fContextRoot.getRelativeLocation("/WEB-INF/");
-        applicationSpec.setSpecificationLocation(virtualLocation);
-        applicationSpec.setName(servlet.name);
-
-        CoreNamespace result = new CoreNamespace(null, applicationSpec);
-
-        return result;
     }
 
     protected void reset()
@@ -288,9 +181,7 @@ public class NamespaceResolver
         fComponentStack.clear();
         fFrameworkNamespace = null;
         fNamespaceId = null;
-        fSpecLocation = null;
-        fServlet = null;
-        fResolvingFramework = false;
+        fNamespaceSpecLocation = null;
         fWorking = false;
         fJwcFiles = null;
         fProblemCollector.beginCollecting();
@@ -309,50 +200,30 @@ public class NamespaceResolver
             fComponentStack.clear();
             if (fResultNamespace == null)
                 throw new RuntimeException("Null namespace!");
-            if (fServlet != null)
-                fResultNamespace.setAppNameFromWebXML(fServlet.name);
 
-            NamespaceResourceLookup lookup = new NamespaceResourceLookup();
-            IResourceWorkspaceLocation specLocation = (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
-            if (fResultNamespace.isApplicationNamespace())
-            {
-                lookup.configure(
-                    (PluginApplicationSpecification) fResultNamespace.getSpecification(),
-                    fBuild.fTapestryBuilder.fContextRoot,
-                    fServlet.name);
-            } else
-            {
-                lookup.configure((PluginLibrarySpecification) fResultNamespace.getSpecification());
-            }
+            IResourceWorkspaceLocation specLocation =
+                (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
+
+            NamespaceResourceLookup lookup = create();
 
             fResultNamespace.setResourceLookup(lookup);
 
-            //set a special component resolver that will prompt recusive component/page resolution                
+            //set a special component resolver that will prompt recursive component/page resolution                
             fResultNamespace.setComponentResolver(new BuilderComponentResolver(fFrameworkNamespace));
 
             //no special page resolver needed
             fResultNamespace.setPageResolver(new PageSpecificationResolver(fFrameworkNamespace, fResultNamespace));
 
-            // Special case! can't resolve children of the framework
-            // until the framework is resolved!
-            if (!fResolvingFramework)
-                resolveChildNamespaces();
+            // do any work needed before we go ahead and resolve the pages and components
+            // for libraries other than the framework, child libraries are resolved here.
+            namespaceConfigured();
 
-            resolveComponents();
-            Set definitelyNotSpeclessPages = getAllComponentTemplates();
-            resolvePages(definitelyNotSpeclessPages);
+            //resolve the pages/components in the Namespace
+            resolveNamespaceContents();
 
-            // now we can resolve the child libraries
-            // of the framework
-            if (fResolvingFramework)
-            {
-                fFrameworkNamespace = fResultNamespace;
-                resolveChildNamespaces();
-            }
-
-            //replace the special resolver with the normal one.               
-            fResultNamespace.setComponentResolver(
-                new ComponentSpecificationResolver(fFrameworkNamespace, fResultNamespace));
+            //now that we have resolved the pages/components, we need to replace the special ComponentResolver
+            //with a regular one. Also gives subclasses the opportunity to do some final adjustments.
+            namespaceResolved();
 
         } catch (Exception e)
         {
@@ -365,19 +236,44 @@ public class NamespaceResolver
     }
 
     /**
-     * @return List a list of all the templates for all components in this Namespace
+     *  Code that actually finds and resolves all the libraries, pages and components declared in this
+     *  Namespace.
      */
-    protected Set getAllComponentTemplates()
+    protected void resolveNamespaceContents()
     {
-        Set result = new HashSet();
-        for (Iterator iter = fResultNamespace.getComponentTypes().iterator(); iter.hasNext();)
-        {
-            String type = (String) iter.next();
-            PluginComponentSpecification spec =
-                (PluginComponentSpecification) fResultNamespace.getComponentSpecification(type);
-            result.addAll(spec.getTemplateLocations());
-        }
-        return result;
+        resolveComponents();
+        resolvePages();
+    }
+
+    /**
+     *  Called during a doResolve to setup the Namespace when it has been configures but just before 
+     *  child libraries, pages, and components are resolved.
+     */
+    protected void namespaceConfigured()
+    {
+        resolveChildNamespaces();
+    }
+
+    /**
+     *  Called in doResolve() right after the Namespace has been resolved.
+     *  Usually this just entails setting the ComponentResolver for the Namespace. 
+     */
+    protected void namespaceResolved()
+    {
+        fResultNamespace.setComponentResolver(
+            new ComponentSpecificationResolver(fFrameworkNamespace, fResultNamespace));
+    }
+
+    /**
+     *  Every namespace has a Namespace resource lookup object for finding files
+     * according to Tapestry lookup rules.
+     * @return a properly configured instance of NamespaceResourceLookup
+     */
+    protected NamespaceResourceLookup create()
+    {
+        NamespaceResourceLookup lookup = new NamespaceResourceLookup();
+        lookup.configure((PluginLibrarySpecification) fResultNamespace.getSpecification());
+        return lookup;
     }
 
     /**
@@ -389,15 +285,17 @@ public class NamespaceResolver
         for (Iterator iter = fResultNamespace.getPageNames().iterator(); iter.hasNext();)
         {
             String name = (String) iter.next();
+
             PluginComponentSpecification spec =
                 (PluginComponentSpecification) fResultNamespace.getPageSpecification(name);
+
             result.addAll(spec.getTemplateLocations());
         }
         return result;
     }
 
     /**
-     * resolve/build all the child namespaces declared in the library specification
+     * resolve/build all the child namespaces declared in the library/application specification
      */
     protected void resolveChildNamespaces()
     {
@@ -406,10 +304,10 @@ public class NamespaceResolver
         List ids = spec.getLibraryIds();
         if (!ids.isEmpty())
         {
-            NamespaceResolver childResolver = getChildNamespaceResolver();
             for (Iterator iter = ids.iterator(); iter.hasNext();)
             {
                 String libraryId = (String) iter.next();
+
                 if (fResultNamespace.getChildNamespace(libraryId) != null)
                     continue;
 
@@ -417,6 +315,7 @@ public class NamespaceResolver
                     (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
 
                 IResourceWorkspaceLocation libLocation;
+
                 if (namespaceLocation.isOnClasspath())
                     libLocation =
                         (IResourceWorkspaceLocation) namespaceLocation.getRelativeLocation(
@@ -428,8 +327,16 @@ public class NamespaceResolver
 
                 if (libLocation.exists())
                 {
-                    ICoreNamespace childNamespace =
-                        childResolver.resolveLibrary(fFrameworkNamespace, fResultNamespace, libraryId, libLocation);
+                    NamespaceResolver childResolver =
+                        new LibraryResolver(
+                            fBuild,
+                            fParser,
+                            fFrameworkNamespace,
+                            fResultNamespace,
+                            libraryId,
+                            libLocation);
+
+                    ICoreNamespace childNamespace = childResolver.resolve();
 
                 } else if (fBuild.fTapestryBuilder.DEBUG)
                 {
@@ -439,17 +346,13 @@ public class NamespaceResolver
         }
     }
 
-    protected NamespaceResolver getChildNamespaceResolver()
-    {
-        return new NamespaceResolver(fBuild, new Parser(false));
-    }
-
     /**
      * resolve all the components declared in the spec (or found in the appropriate locations!)
      */
     protected void resolveComponents()
     {
         fJwcFiles = getAllJWCFilesForNamespace();
+
         for (Iterator iter = fJwcFiles.keySet().iterator(); iter.hasNext();)
         {
             String name = (String) iter.next();
@@ -467,7 +370,9 @@ public class NamespaceResolver
      */
     protected IComponentSpecification resolveComponent(String name, IResourceWorkspaceLocation location)
     {
+
         IComponentSpecification result = fResultNamespace.getComponentSpecification(name);
+
         if (result != null || location == null)
             return result;
 
@@ -493,7 +398,7 @@ public class NamespaceResolver
     }
 
     /**
-     * build an error message or circular component references
+     * build an error message for circular component references
      * @param location
      * @return
      */
@@ -504,6 +409,7 @@ public class NamespaceResolver
         Stack clone = (Stack) fComponentStack.clone();
 
         IResourceWorkspaceLocation sloc = (IResourceWorkspaceLocation) clone.pop();
+
         if (sloc.equals(location))
             return location.toString() + " refers to itself";
 
@@ -519,6 +425,11 @@ public class NamespaceResolver
 
     }
 
+    /**
+     *  Scan the namespace looking for all jwc files that are in allowed places.
+     *  
+     * @return a Map of Component Type name -> location
+     */
     private Map getAllJWCFilesForNamespace()
     {
         IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
@@ -614,11 +525,9 @@ public class NamespaceResolver
     }
 
     /**
-     * Resolve all the pages in the Namespace.
-     * 1st Step resolve all the .page files.
-     * 2nd Step resolve all the spec-less pages.
+     *  Resolve all the .page files in the namespace
      */
-    protected void resolvePages(Set componentTemplates)
+    protected void resolvePages()
     {
         Map dotPageFiles = getAllPageFilesForNamespace();
         for (Iterator iter = dotPageFiles.keySet().iterator(); iter.hasNext();)
@@ -627,110 +536,18 @@ public class NamespaceResolver
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) dotPageFiles.get(name);
             resolvePageFile(name, location);
         }
-        resolveSpeclessPages(componentTemplates);
-
     }
 
-    protected void resolveSpeclessPages(Set componentTemplates)
-    {
-        if (!fResultNamespace.isApplicationNamespace())
-            return;
-
-        //now gather all the templates seen so far.
-        //they are definitely not spec-less pages!
-        final List allTemplates = new ArrayList(componentTemplates);
-        allTemplates.addAll(getAllPageFileTemplates());
-        final List speclessPages = new ArrayList();
-        final String seek_extension = getTemplateExtension();
-
-        //now find all the html files in the application root
-
-        IResourceWorkspaceLocation appRoot = fBuild.fTapestryBuilder.fContextRoot;
-
-        IResourceLocationAcceptor acceptor = new IResourceLocationAcceptor()
-        {
-            public boolean accept(IResourceWorkspaceLocation location)
-            {
-                String fullname = location.getName();
-                String name = null;
-                String extension = null;
-
-                if (fullname != null)
-                {
-                    int cut = fullname.lastIndexOf('.');
-                    if (cut < 0)
-                    {
-                        name = fullname;
-                    } else if (cut == 0)
-                    {
-                        extension = fullname;
-                    } else
-                    {
-                        name = fullname.substring(0, cut);
-                        extension = fullname.substring(cut + 1);
-                    }
-                    if (seek_extension.equals(extension) && !allTemplates.contains(location))
-                        speclessPages.add(location);
-                }
-                return true;
-            }
-
-            // not used
-            public IResourceWorkspaceLocation[] getResults()
-            {
-                IResourceWorkspaceLocation[] result = new IResourceWorkspaceLocation[speclessPages.size()];
-                return (IResourceWorkspaceLocation[]) speclessPages.toArray(result);
-            }
-        };
-
-        try
-        {
-            appRoot.lookup(acceptor);
-        } catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
-
-        // need to filter out localized page templates. They will be picked up
-        // again later.
-        List filtered = TemplateFinder.filterTemplateList(speclessPages, fResultNamespace);
-        for (Iterator iter = filtered.iterator(); iter.hasNext();)
-        {
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
-            resolveSpeclessPage(location);
-        }
-    }
-
-    private String getTemplateExtension()
+    /**
+     *  Library and Application Specs can specify what file extension to use instead of the default "html"
+     * @return the specified extension or the Tapestry default extension if none is defined.
+     */
+    protected String getTemplateExtension()
     {
         String result = fResultNamespace.getSpecification().getProperty(Tapestry.TEMPLATE_EXTENSION_PROPERTY);
         if (result == null)
             return Tapestry.DEFAULT_TEMPLATE_EXTENSION;
         return result;
-    }
-
-    protected void resolveSpeclessPage(IResourceWorkspaceLocation location)
-    {
-        PluginComponentSpecification specification = new PluginComponentSpecification();
-        specification.setPageSpecification(true);
-        specification.setSpecificationLocation(location);
-        specification.setNamespace(fResultNamespace);
-
-        ComponentScanner scanner = new ComponentScanner();
-        scanner.scanForTemplates(specification);
-
-        List templates = specification.getTemplateLocations();
-
-        String name = location.getName();
-        int dotx = name.lastIndexOf('.');
-        if (dotx > 0)
-        {
-            name = name.substring(0, dotx);
-        }
-        fResultNamespace.installPageSpecification(name, specification);
-        fBuild.parseTemplates(specification);
-
-        fBuild.fBuildQueue.finished(templates);
     }
 
     /**
@@ -752,8 +569,6 @@ public class NamespaceResolver
         {
             fResultNamespace.installPageSpecification(name, result);
             fBuild.parseTemplates((PluginComponentSpecification) result);
-            //((PluginComponentSpecification) result).setNamespace(fResultNamespace);
-            //fBuild.parseTemplates((PluginComponentSpecification) result);
         }
         return result;
     }
@@ -766,32 +581,8 @@ public class NamespaceResolver
             super(framework, fResultNamespace);
         }
 
-        //        /* (non-Javadoc)
-        //         * @see com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver#resolve(org.apache.tapestry.INamespace, java.lang.String)
-        //         */
-        //        public IComponentSpecification resolve(String type)
-        //        {
-        //            IComponentSpecification result = null;
-        //            if (type.indexOf(':') < 0)
-        //            {
-        //                result = fContainerNamespace.getComponentSpecification(type);
-        //                if (result == null && fJwcFiles.containsKey(type))
-        //                {
-        //                    result = resolveComponent(type, (IResourceWorkspaceLocation) fJwcFiles.get(type));
-        //                } else
-        //                {
-        //                    result = super.resolve(type);
-        //                }
-        //
-        //            } else
-        //            {
-        //                result = super.resolve(type);
-        //            }
-        //            return result;
-        //        }
-
         /* (non-Javadoc)
-         * @see com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver#resolve(org.apache.tapestry.INamespace, java.lang.String, java.lang.String)
+         * @see com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver#resolve(java.lang.String, java.lang.String)
          */
         public IComponentSpecification resolve(String libraryId, String type)
         {

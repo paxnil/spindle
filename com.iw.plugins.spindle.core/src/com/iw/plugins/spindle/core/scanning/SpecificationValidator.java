@@ -84,7 +84,7 @@ public class SpecificationValidator extends BaseValidator
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.BaseValidator#findType(java.lang.String)
      */
-    public Object findType(String fullyQualifiedName)
+    public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
     {
         IType result = null;
         try
@@ -97,7 +97,7 @@ public class SpecificationValidator extends BaseValidator
 
         } finally
         {
-            fireTypeCheck(fullyQualifiedName, result);
+            fireTypeDependency(dependant, fullyQualifiedName, result);
         }
         return result;
 
@@ -180,7 +180,7 @@ public class SpecificationValidator extends BaseValidator
             }
             return false;
         }
-        validateContainedComponentBindings(specification, containedSpecification, component, info);
+         validateContainedComponentBindings(specification, containedSpecification, component, info);
 
         // if the contained is a framework component, extra validation might occur at the end of the
         // entire build!
@@ -365,8 +365,9 @@ public class SpecificationValidator extends BaseValidator
             }
 
             String assetSpecName = pAsset.getIdentifier();
+            IResourceWorkspaceLocation[] I18NEquivalents = getI18NAssetEquivalents(relative, fileName);
 
-            if (hasI18NAssetEquivalents(relative, fileName))
+            if (I18NEquivalents.length > 0)
             {
                 int handleI18NPriority = TapestryCore.getDefault().getHandleAssetProblemPriority();
                 if (handleI18NPriority >= 0)
@@ -398,18 +399,18 @@ public class SpecificationValidator extends BaseValidator
 
     private I18NResourceAcceptor fI18NAcceptor = new I18NResourceAcceptor();
 
-    private boolean hasI18NAssetEquivalents(IResourceWorkspaceLocation baseLocation, String name)
+    private IResourceWorkspaceLocation[] getI18NAssetEquivalents(IResourceWorkspaceLocation baseLocation, String name)
     {
         try
         {
             fI18NAcceptor.configure(name);
             baseLocation.lookup(fI18NAcceptor);
-            return fI18NAcceptor.getResults().length > 0;
+            return fI18NAcceptor.getResults();
         } catch (CoreException e)
         {
             TapestryCore.log(e);
         }
-        return false;
+        return new IResourceWorkspaceLocation[] {};
     }
 
     private boolean checkTemplateAsset(IComponentSpecification specification, IAssetSpecification templateAsset)
@@ -419,7 +420,9 @@ public class SpecificationValidator extends BaseValidator
         String templatePath = templateAsset.getPath();
 
         //set relative to the context by default!
-        IResourceWorkspaceLocation templateLocation = (IResourceWorkspaceLocation) fContextRoot.getRelativeLocation(templatePath); ;
+        IResourceWorkspaceLocation templateLocation =
+            (IResourceWorkspaceLocation) fContextRoot.getRelativeLocation(templatePath);
+        ;
         if (type == AssetType.EXTERNAL)
         {
             reportProblem(
@@ -439,30 +442,31 @@ public class SpecificationValidator extends BaseValidator
                 return false;
             }
 
-//            templateLocation = (IResourceWorkspaceLocation) fContextRoot.getRelativeLocation(templatePath);
+            //            templateLocation = (IResourceWorkspaceLocation) fContextRoot.getRelativeLocation(templatePath);
 
-//            if (templateLocation == null || !templateLocation.exists())
-//            {
-//                reportProblem(
-//                    IProblem.ERROR,
-//                    ((ISourceLocationInfo) templateAsset.getLocation()).getAttributeSourceLocation("path"),
-//                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
-//                return false;
-//            }
+            //            if (templateLocation == null || !templateLocation.exists())
+            //            {
+            //                reportProblem(
+            //                    IProblem.ERROR,
+            //                    ((ISourceLocationInfo) templateAsset.getLocation()).getAttributeSourceLocation("path"),
+            //                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
+            //                return false;
+            //            }
         }
         if (type == AssetType.PRIVATE)
         {
             templateLocation = (IResourceWorkspaceLocation) fClasspathRoot.getRelativeLocation(templatePath);
-//            if (templateLocation == null || !templateLocation.exists())
-//            {
-//                reportProblem(
-//                    IProblem.ERROR,
-//                    ((ISourceLocationInfo) templateAsset.getLocation()).getAttributeSourceLocation("resource-path"),
-//                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
-//                return false;
-//            }
+            //            if (templateLocation == null || !templateLocation.exists())
+            //            {
+            //                reportProblem(
+            //                    IProblem.ERROR,
+            //                    ((ISourceLocationInfo) templateAsset.getLocation()).getAttributeSourceLocation("resource-path"),
+            //                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
+            //                return false;
+            //            }
         }
         
+
         if (!templateLocation.exists())
         {
             String fileName = templateLocation.getName();
@@ -477,9 +481,10 @@ public class SpecificationValidator extends BaseValidator
                 errorLoc = sourceLocation.getAttributeSourceLocation("resource-path");
             }
 
-            String assetSpecName = ((PluginAssetSpecification)templateAsset).getIdentifier();
-
-            if (hasI18NAssetEquivalents(templateLocation, fileName))
+            String assetSpecName = ((PluginAssetSpecification) templateAsset).getIdentifier();
+            IResourceWorkspaceLocation[] I18NEquivalents = getI18NAssetEquivalents(templateLocation, fileName);
+ 
+            if (I18NEquivalents.length > 0)
             {
                 int handleI18NPriority = TapestryCore.getDefault().getHandleAssetProblemPriority();
                 if (handleI18NPriority >= 0)
@@ -500,7 +505,7 @@ public class SpecificationValidator extends BaseValidator
                     TapestryCore.getString(
                         "scan-component-missing-asset",
                         assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified" : assetSpecName,
-                         templateLocation.toString()));
+                        templateLocation.toString()));
 
             }
             return false;

@@ -24,26 +24,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.scanning;
+package com.iw.plugins.spindle.core.indexing;
 
-import org.eclipse.jdt.core.IType;
+import org.eclipse.core.resources.IFile;
+
+import com.iw.plugins.spindle.core.source.ISourceLocation;
 
 /**
- *  Listener interface for classes that are interested in things the
- *  Validators find/don't find.
- * 
+ *  TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface IScannerValidatorListener
+public interface Indexer
 {
-    /**
-     * @deprecated use recordTypeDependency
-     *  @param fullyQualifiedName the fully qualified name of a type defined in a Tapestry artifact
-     *  @param result the IType the fullyQualifiedName resolved to, if any
-     */
-    void typeChecked(String fullyQualifiedName, IType result);
-
+   
 
 }

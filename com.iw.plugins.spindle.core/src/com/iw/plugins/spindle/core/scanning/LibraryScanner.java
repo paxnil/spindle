@@ -34,6 +34,7 @@ import org.apache.tapestry.spec.ILibrarySpecification;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
@@ -124,7 +125,7 @@ public class LibraryScanner extends SpecificationScanner
 
             if (isElement(node, "property"))
             {
-                scanProperty((IPluginPropertyHolder)specification, node);
+                scanProperty((IPluginPropertyHolder) specification, node);
                 continue;
             }
 
@@ -242,7 +243,11 @@ public class LibraryScanner extends SpecificationScanner
         String name = getAttribute(node, "name", true);
         String className = getAttribute(node, "class");
 
-        validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
+        validateTypeName(
+            (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
+            className,
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "class"));
 
         boolean immediate = getBooleanAttribute(node, "immediate");
 
@@ -281,7 +286,7 @@ public class LibraryScanner extends SpecificationScanner
 
             if (isElement(child, "property"))
             {
-                scanProperty((IPluginPropertyHolder)exSpec, child);
+                scanProperty((IPluginPropertyHolder) exSpec, child);
                 continue;
             }
         }
@@ -377,7 +382,11 @@ public class LibraryScanner extends SpecificationScanner
             getAttributeSourceLocation(node, "name"));
 
         String className = getAttribute(node, "class");
-        validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
+        validateTypeName(
+            (IResourceWorkspaceLocation) spec.getSpecificationLocation(),
+            className,
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "class"));
         spec.setServiceClassName(name, className);
         PluginEngineServiceDeclaration declaration =
             new PluginEngineServiceDeclaration(name, className, getSourceLocationInfo(node));

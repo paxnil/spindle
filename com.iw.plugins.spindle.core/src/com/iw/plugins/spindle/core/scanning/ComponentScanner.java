@@ -186,7 +186,11 @@ public class ComponentScanner extends SpecificationScanner
 
             String className = getAttribute(node, "class", true);
 
-            validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
+            validateTypeName(
+                (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
+                className,
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "class"));
 
             String lifecycleString = getAttribute(node, "lifecycle");
 
@@ -506,7 +510,11 @@ public class ComponentScanner extends SpecificationScanner
         } else
         {
             specification.setComponentClassName(componentClassname);
-            validateTypeName(componentClassname, IProblem.ERROR, getAttributeSourceLocation(rootNode, "class"));
+            validateTypeName(
+                (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
+                componentClassname,
+                IProblem.ERROR,
+                getAttributeSourceLocation(rootNode, "class"));
         }
 
         for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
@@ -668,7 +676,11 @@ public class ComponentScanner extends SpecificationScanner
 
             if (!typeList.contains(type))
             {
-                validateTypeSpecial(type, IProblem.ERROR, getAttributeSourceLocation(node, typeAttr));
+                validateTypeSpecial(
+                    (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
+                    type,
+                    IProblem.ERROR,
+                    getAttributeSourceLocation(node, typeAttr));
             }
 
             param.setType(type);
@@ -778,12 +790,20 @@ public class ComponentScanner extends SpecificationScanner
                     {
                         fixedType = fixedType.substring(0, fixedType.length() - 2);
                     }
-                    validateTypeName(fixedType, IProblem.ERROR, getAttributeSourceLocation(node, "type"));
+                    validateTypeName(
+                        (IResourceWorkspaceLocation) spec.getSpecificationLocation(),
+                        fixedType,
+                        IProblem.ERROR,
+                        getAttributeSourceLocation(node, "type"));
 
                 } else
                 {
 
-                    validateTypeName(type, IProblem.ERROR, getAttributeSourceLocation(node, "type"));
+                    validateTypeName(
+                        (IResourceWorkspaceLocation) spec.getSpecificationLocation(),
+                        type,
+                        IProblem.ERROR,
+                        getAttributeSourceLocation(node, "type"));
                 }
             }
 
@@ -931,13 +951,18 @@ public class ComponentScanner extends SpecificationScanner
         ((PluginComponentSpecification) specification).setTemplateLocations(locations);
     }
 
-    public boolean validateTypeSpecial(String typeName, int severity, ISourceLocation location) throws ScannerException
+    public boolean validateTypeSpecial(
+        IResourceWorkspaceLocation dependant,
+        String typeName,
+        int severity,
+        ISourceLocation location)
+        throws ScannerException
     {
         String useName = typeName;
         if (useName.indexOf(".") < 0)
             useName = "java.lang." + useName;
 
-        return validateTypeName(useName, severity, location);
+        return validateTypeName(dependant, useName, severity, location);
 
     }
 
