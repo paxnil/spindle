@@ -485,4 +485,11 @@ public class JarEntryFileFaker implements IFile {
 		return true;
 	}
 
+	/**
+	 * @see org.eclipse.core.resources.IFile#getEncoding()
+	 */
+	public int getEncoding() throws CoreException {
+		return 0;
+	}
+
 }

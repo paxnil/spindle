@@ -23,7 +23,7 @@ public class DefaultScanner extends RuleBasedScanner {
 	public DefaultScanner(ISpindleColorManager manager) {
 		
 		IToken procInstr =
-			new Token(new TextAttribute(manager.getColor(IColorConstants.PROC_INSTR)));
+			new Token(new TextAttribute(manager.getColor(IColorConstants.P_PROC_INSTR)));
 
 		
 		setRules(

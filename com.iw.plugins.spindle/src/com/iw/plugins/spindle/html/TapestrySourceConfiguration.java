@@ -109,35 +109,35 @@ public class TapestrySourceConfiguration extends SourceViewerConfiguration {
     RuleBasedDamagerRepairer dr = 
       new RuleBasedDamagerRepairer(
         getDefaultScanner(),
-        new TextAttribute(colorManager.getColor(IColorConstants.DEFAULT)));
+        new TextAttribute(colorManager.getColor(IColorConstants.P_DEFAULT)));
     reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
     reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
 
     dr =
       new RuleBasedDamagerRepairer(
         getJWCTagScanner(),
-        new TextAttribute(colorManager.getColor(IColorConstants.TAG)));
+        new TextAttribute(colorManager.getColor(IColorConstants.P_TAG)));
     reconciler.setDamager(dr, TapestryPartitionScanner.JWC_TAG);
     reconciler.setRepairer(dr, TapestryPartitionScanner.JWC_TAG);
     
     dr =
       new RuleBasedDamagerRepairer(
         getJWCIDTagScanner(),
-        new TextAttribute(colorManager.getColor(IColorConstants.TAG)));
+        new TextAttribute(colorManager.getColor(IColorConstants.P_TAG)));
     reconciler.setDamager(dr, TapestryPartitionScanner.JWCID_TAG);
     reconciler.setRepairer(dr, TapestryPartitionScanner.JWCID_TAG);
 
     dr =
       new RuleBasedDamagerRepairer(
         getTagScanner(),
-        new TextAttribute(colorManager.getColor(IColorConstants.TAG)));
+        new TextAttribute(colorManager.getColor(IColorConstants.P_TAG)));
     reconciler.setDamager(dr, TapestryPartitionScanner.HTML_TAG);
     reconciler.setRepairer(dr, TapestryPartitionScanner.HTML_TAG);
 
     dr =
       new RuleBasedDamagerRepairer(
         null,
-        new TextAttribute(colorManager.getColor(IColorConstants.XML_COMMENT)));
+        new TextAttribute(colorManager.getColor(IColorConstants.P_XML_COMMENT)));
     reconciler.setDamager(dr, TapestryPartitionScanner.HTML_COMMENT);
     reconciler.setRepairer(dr, TapestryPartitionScanner.HTML_COMMENT);
 

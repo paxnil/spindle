@@ -63,308 +63,348 @@ import com.iw.plugins.spindle.ui.IToolTipProvider;
 import com.iw.plugins.spindle.ui.TableViewerWithToolTips;
 import com.iw.plugins.spindle.ui.UneditableComboBox;
 import net.sf.tapestry.spec.BindingType;
+import org.eclipse.core.runtime.CoreException;
 
 public class ChooseBindingTypeDialog extends ChooseFromListDialog {
 
-  private HashMap precomputed;
-  private HashMap recomputed;
-  private HashMap parameterMap = new HashMap();
-  private Set existingBindingParameters;
-  private TapestryComponentModel component;
+	private HashMap precomputed;
+	private HashMap recomputed;
+	private HashMap parameterMap = new HashMap();
+	private Set existingBindingParameters;
+	private TapestryComponentModel component;
 
-  private UneditableComboBox combo;
-  private Label componentNameLabel;
-  private Table table;
-  private TableViewerWithToolTips viewer;
+	private UneditableComboBox combo;
+	private Label componentNameLabel;
+	private Table table;
+	private TableViewerWithToolTips viewer;
 
-  private java.util.List chosenParameters = Collections.EMPTY_LIST;
+	private java.util.List chosenParameters = Collections.EMPTY_LIST;
 
-  static private String[] COLUMN_HEADERS = { "name", "required", "java-type", "description" };
-  static private ColumnLayoutData COLUMN_LAYOUTS[] =
-    {
-      new ColumnPixelData(100),
-      new ColumnPixelData(50, false),
-      new ColumnPixelData(200),
-      new ColumnWeightData(100)};
+	static private String[] COLUMN_HEADERS =
+		{ "name", "required", "java-type", "description" };
+	static private ColumnLayoutData COLUMN_LAYOUTS[] =
+		{
+			new ColumnPixelData(100),
+			new ColumnPixelData(50, false),
+			new ColumnPixelData(200),
+			new ColumnWeightData(100)};
 
-  public ChooseBindingTypeDialog(
-    Shell shell,
-    HashMap precomputedAliasInfo,
-    Set existingBindingParameters) {
-    this(shell);
-    this.precomputed = precomputedAliasInfo;
-    this.existingBindingParameters = existingBindingParameters;
-  }
+	public ChooseBindingTypeDialog(
+		Shell shell,
+		HashMap precomputedAliasInfo,
+		Set existingBindingParameters) {
+		this(shell);
+		this.precomputed = precomputedAliasInfo;
+		this.existingBindingParameters = existingBindingParameters;
+	}
 
-  public ChooseBindingTypeDialog(
-    Shell shell,
-    TapestryComponentModel component,
-    Set existingBindingParameters) {
-    this(shell);
-    this.component = component;
-    this.existingBindingParameters = existingBindingParameters;
-    populateParameters(component);
-  }
+	public ChooseBindingTypeDialog(
+		Shell shell,
+		TapestryComponentModel component,
+		Set existingBindingParameters) {
+		this(shell);
+		this.component = component;
+		this.existingBindingParameters = existingBindingParameters;
+		populateParameters(component);
+	}
 
-  public ChooseBindingTypeDialog(Shell shell) {
-    super(
-      shell,
-      new String[] { "Dynamic", "Field", "Inherited", "Static", "String" },
-      new Object[] { BindingType.DYNAMIC, BindingType.FIELD, BindingType.INHERITED, BindingType.STATIC, BindingType.STRING },
-      "New Binding");
-  }
+	public ChooseBindingTypeDialog(Shell shell) {
+		super(
+			shell,
+			new String[] {
+				"Dynamic",
+				"Field",
+				"Inherited",
+				"Static",
+				"String" },
+			new Object[] {
+				BindingType.DYNAMIC,
+				BindingType.FIELD,
+				BindingType.INHERITED,
+				BindingType.STATIC,
+				BindingType.STRING },
+			"New Binding");
+	}
 
-  protected Control createDialogArea(Composite parent) {
-    Composite container = new Composite(parent, SWT.NULL);
-    GridData gd;
-    GridLayout layout = new GridLayout();
-    layout.verticalSpacing = 8;
-    container.setLayout(layout);
-    if (precomputed != null) {
-      combo = new UneditableComboBox(container, SWT.NULL);
-      gd = new GridData(GridData.FILL_HORIZONTAL);
-      combo.setLayoutData(gd);
-      combo.addSelectionListener(new SelectionListener() {
-        public void widgetSelected(SelectionEvent event) {
-          selectComponent(combo.getSelectionIndex());
-        }
+	protected Control createDialogArea(Composite parent) {
+		Composite container = new Composite(parent, SWT.NULL);
+		GridData gd;
+		GridLayout layout = new GridLayout();
+		layout.verticalSpacing = 8;
+		container.setLayout(layout);
+		if (precomputed != null) {
+			combo = new UneditableComboBox(container, SWT.NULL);
+			gd = new GridData(GridData.FILL_HORIZONTAL);
+			combo.setLayoutData(gd);
+			combo.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent event) {
+					selectComponent(combo.getSelectionIndex());
+				}
 
-        public void widgetDefaultSelected(SelectionEvent event) {
-        }
-      });
-      createItems();
-      combo.select(0);
-      component = (TapestryComponentModel) (recomputed.get(combo.getItem(0)));
-    }
-    if (component != null) {
-      componentNameLabel = new Label(container, SWT.NULL);
-      gd = new GridData(GridData.FILL_BOTH);
-      componentNameLabel.setLayoutData(gd);
+				public void widgetDefaultSelected(SelectionEvent event) {
+				}
+			});
+			createItems();
+			combo.select(0);
+			component =
+				(TapestryComponentModel) (recomputed.get(combo.getItem(0)));
+		}
+		if (component != null) {
+			componentNameLabel = new Label(container, SWT.NULL);
+			gd = new GridData(GridData.FILL_BOTH);
+			componentNameLabel.setLayoutData(gd);
 
-      table = createTable(container);
-      gd = new GridData(GridData.FILL_BOTH);
-      gd.heightHint = 200;
-      table.setLayoutData(gd);
-      createColumns();
-      viewer = new TableViewerWithToolTips(table);
-      BTLabelProvider prov = new BTLabelProvider();
-      viewer.setToolTipProvider(prov);
-      viewer.setLabelProvider(prov);
-      viewer.setContentProvider(new BTContentProvider());
-      componentNameLabel.setText(component.getUnderlyingStorage().getFullPath().toString());
-      viewer.setInput(parameterMap.get(component));
-    }
-    super.createDialogArea(container);
-    return container;
-  }
+			table = createTable(container);
+			gd = new GridData(GridData.FILL_BOTH);
+			gd.heightHint = 200;
+			table.setLayoutData(gd);
+			createColumns();
+			viewer = new TableViewerWithToolTips(table);
+			BTLabelProvider prov = new BTLabelProvider();
+			viewer.setToolTipProvider(prov);
+			viewer.setLabelProvider(prov);
+			viewer.setContentProvider(new BTContentProvider());
+			componentNameLabel.setText(
+				component.getUnderlyingStorage().getFullPath().toString());
+			viewer.setInput(parameterMap.get(component));
+		}
+		super.createDialogArea(container);
+		return container;
+	}
 
-  private Table createTable(Composite parent) {
-    Table result = new Table(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
-    result.setLinesVisible(true);
-    return result;
-  }
+	private Table createTable(Composite parent) {
+		Table result =
+			new Table(
+				parent,
+				SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
+		result.setLinesVisible(true);
+		return result;
+	}
 
-  private void createColumns() {
-    TableLayout layout = new TableLayout();
-    table.setLayout(layout);
-    table.setHeaderVisible(true);
-    for (int i = 0; i < COLUMN_HEADERS.length; i++) {
-      layout.addColumnData(COLUMN_LAYOUTS[i]);
-      TableColumn tc = new TableColumn(table, SWT.NONE, i);
-      tc.setResizable(COLUMN_LAYOUTS[i].resizable);
-      tc.setText(COLUMN_HEADERS[i]);
-    }
-  }
+	private void createColumns() {
+		TableLayout layout = new TableLayout();
+		table.setLayout(layout);
+		table.setHeaderVisible(true);
+		for (int i = 0; i < COLUMN_HEADERS.length; i++) {
+			layout.addColumnData(COLUMN_LAYOUTS[i]);
+			TableColumn tc = new TableColumn(table, SWT.NONE, i);
+			tc.setResizable(COLUMN_LAYOUTS[i].resizable);
+			tc.setText(COLUMN_HEADERS[i]);
+		}
+	}
 
-  protected void okPressed() {
-    if (viewer != null) {
-      IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-      if (!selection.isEmpty()) {
-        chosenParameters = selection.toList();
-      }
-    }
-    super.okPressed();
-  }
+	protected void okPressed() {
+		if (viewer != null) {
+			IStructuredSelection selection =
+				(IStructuredSelection) viewer.getSelection();
+			if (!selection.isEmpty()) {
+				chosenParameters = selection.toList();
+			}
+		}
+		super.okPressed();
+	}
 
-  private void selectComponent(int index) {
-    component = (TapestryComponentModel) recomputed.get(combo.getItem(index));
-    componentNameLabel.setText(component.getUnderlyingStorage().getFullPath().toString());
-    viewer.setInput(parameterMap.get(component));
-  }
+	private void selectComponent(int index) {
+		component =
+			(TapestryComponentModel) recomputed.get(combo.getItem(index));
+		componentNameLabel.setText(
+			component.getUnderlyingStorage().getFullPath().toString());
+		viewer.setInput(parameterMap.get(component));
+	}
 
-  private void createItems() {
-    recomputed = new HashMap();
-    parameterMap = new HashMap();
-    Iterator iter = precomputed.keySet().iterator();
-    while (iter.hasNext()) {
-      TapestryApplicationModel appModel = (TapestryApplicationModel) iter.next();
-      TapestryComponentModel cmodel = (TapestryComponentModel) precomputed.get(appModel);
-      String newKey = appModel.getUnderlyingStorage().getFullPath().toString();
-      combo.add(newKey);
-      recomputed.put(newKey, cmodel);
-      populateParameters(cmodel);
-    }
-  }
+	private void createItems() {
+		recomputed = new HashMap();
+		parameterMap = new HashMap();
+		Iterator iter = precomputed.keySet().iterator();
+		while (iter.hasNext()) {
+			TapestryApplicationModel appModel =
+				(TapestryApplicationModel) iter.next();
+			TapestryComponentModel cmodel =
+				(TapestryComponentModel) precomputed.get(appModel);
+			String newKey =
+				appModel.getUnderlyingStorage().getFullPath().toString();
+			combo.add(newKey);
+			recomputed.put(newKey, cmodel);
+			populateParameters(cmodel);
+		}
+	}
 
-  private void populateParameters(TapestryComponentModel componentModel) {
-    PluginComponentSpecification componentSpec = componentModel.getComponentSpecification();
-    ArrayList availableParameters = new ArrayList();
-    parameterMap.put(componentModel, availableParameters);
-    if (componentSpec != null) {
-      // lets find the parms not yet bound
-      Iterator parameterNames = new TreeSet(componentSpec.getParameterNames()).iterator();
-      while (parameterNames.hasNext()) {
-        String parameter = (String) parameterNames.next();
-        if (!existingBindingParameters.contains(parameter)) {
-          availableParameters.add(parameter);
-        }
-      }
-    }
-  }
+	private void populateParameters(TapestryComponentModel componentModel) {
+		PluginComponentSpecification componentSpec =
+			componentModel.getComponentSpecification();
+		ArrayList availableParameters = new ArrayList();
+		parameterMap.put(componentModel, availableParameters);
+		if (componentSpec == null) {
+			try {
+				// Load the component and
+				componentModel.load();
+				// Try again
+				componentModel.getComponentSpecification();
+			} catch (CoreException e) {
+			}
+		}
+		if (componentSpec != null) {
+			// lets find the parms not yet bound
+			Iterator parameterNames =
+				new TreeSet(componentSpec.getParameterNames()).iterator();
+			while (parameterNames.hasNext()) {
+				String parameter = (String) parameterNames.next();
+				if (!existingBindingParameters.contains(parameter)) {
+					availableParameters.add(parameter);
+				}
+			}
+		}
+	}
 
-  public BindingType getSelectedBindingType() {
-    Object selected = getSelectedResult();
-    if (selected != null) {
-      return (BindingType) selected;
-    }
-    return null;
-  }
+	public BindingType getSelectedBindingType() {
+		Object selected = getSelectedResult();
+		if (selected != null) {
+			return (BindingType) selected;
+		}
+		return null;
+	}
 
-  public java.util.List getParameterNames() {
-    return chosenParameters;
-  }
+	public java.util.List getParameterNames() {
+		return chosenParameters;
+	}
 
-  protected class BTLabelProvider implements IToolTipProvider, ITableLabelProvider {
+	protected class BTLabelProvider
+		implements IToolTipProvider, ITableLabelProvider {
 
-    /**
-     * Constructor for BTLabelProvider
-     */
-    public BTLabelProvider() {
-      super();
-    }
+		/**
+		 * Constructor for BTLabelProvider
+		 */
+		public BTLabelProvider() {
+			super();
+		}
 
-    //---------- IToolTipProvider ----------------------------//
+		//---------- IToolTipProvider ----------------------------//
 
-    public String getToolTipText(Object object) {
-      String parameter = (String) object;
-      PluginParameterSpecification spec =
-        (PluginParameterSpecification) component.getComponentSpecification().getParameter(parameter);
-      if (spec == null) {
-        return null;
-      }
-      String description = spec.getDescription();
-      if (description != null && !"".equals(description.trim())) {
-        return parameter + "\n" + description;
-      }
-      return "No description found for '"+parameter+"'";
-    }
-    
-    public Image getToolTipImage(Object object) {
-    	return null;
-    }
+		public String getToolTipText(Object object) {
+			String parameter = (String) object;
+			PluginParameterSpecification spec =
+				(PluginParameterSpecification) component
+					.getComponentSpecification()
+					.getParameter(parameter);
+			if (spec == null) {
+				return null;
+			}
+			String description = spec.getDescription();
+			if (description != null && !"".equals(description.trim())) {
+				return parameter + "\n" + description;
+			}
+			return "No description found for '" + parameter + "'";
+		}
 
-    //---------- ITableLabelProvider -------------------------//
-    /**
-     * @see ITableLabelProvider#getColumnImage(Object, int)
-     */
-    public Image getColumnImage(Object element, int index) {
-      return null;
-    }
+		public Image getToolTipImage(Object object) {
+			return null;
+		}
 
-    /**
-     * @see ITableLabelProvider#getColumnText(Object, int)
-     */
-    public String getColumnText(Object element, int index) {
-      String parameterName = (String) element;
-      if (index == 0) {
-        return parameterName;
-      }
-      PluginParameterSpecification pspec =
-        (PluginParameterSpecification)
-          ((PluginComponentSpecification) component.getComponentSpecification()).getParameter(
-          parameterName);
-      if (index == 1) {
-        if (pspec.isRequired()) {
-          return "YES";
-        } else {
-          return "NO";
-        }
-      }
-      if (index == 2) {
-        String type = pspec.getType();
-        if (type != null && !"".equals(type.trim())) {
-          return type;
-        } else {
-          return "";
-        }
-      }
-      if (index == 3) {
-        String description = pspec.getDescription();
-        if (description != null && !"".equals(description.trim())) {
-          return description;
-        } else {
-          return "No description found";
-        }
-      }
-      return "";
-    }
+		//---------- ITableLabelProvider -------------------------//
+		/**
+		 * @see ITableLabelProvider#getColumnImage(Object, int)
+		 */
+		public Image getColumnImage(Object element, int index) {
+			return null;
+		}
 
-    /**
-     * @see IBaseLabelProvider#addListener(ILabelProviderListener)
-     */
-    public void addListener(ILabelProviderListener element) {
-    }
+		/**
+		 * @see ITableLabelProvider#getColumnText(Object, int)
+		 */
+		public String getColumnText(Object element, int index) {
+			String parameterName = (String) element;
+			if (index == 0) {
+				return parameterName;
+			}
+			PluginParameterSpecification pspec =
+				(PluginParameterSpecification)
+					(
+						(PluginComponentSpecification) component
+							.getComponentSpecification())
+							.getParameter(
+					parameterName);
+			if (index == 1) {
+				if (pspec.isRequired()) {
+					return "YES";
+				} else {
+					return "NO";
+				}
+			}
+			if (index == 2) {
+				String type = pspec.getType();
+				if (type != null && !"".equals(type.trim())) {
+					return type;
+				} else {
+					return "";
+				}
+			}
+			if (index == 3) {
+				String description = pspec.getDescription();
+				if (description != null && !"".equals(description.trim())) {
+					return description;
+				} else {
+					return "No description found";
+				}
+			}
+			return "";
+		}
 
-    /**
-     * @see IBaseLabelProvider#dispose()
-     */
-    public void dispose() {
-    }
+		/**
+		 * @see IBaseLabelProvider#addListener(ILabelProviderListener)
+		 */
+		public void addListener(ILabelProviderListener element) {
+		}
 
-    /**
-     * @see IBaseLabelProvider#isLabelProperty(Object, String)
-     */
-    public boolean isLabelProperty(Object element, String property) {
-      return false;
-    }
+		/**
+		 * @see IBaseLabelProvider#dispose()
+		 */
+		public void dispose() {
+		}
 
-    /**
-     * @see IBaseLabelProvider#removeListener(ILabelProviderListener)
-     */
-    public void removeListener(ILabelProviderListener element) {
-    }
+		/**
+		 * @see IBaseLabelProvider#isLabelProperty(Object, String)
+		 */
+		public boolean isLabelProperty(Object element, String property) {
+			return false;
+		}
 
-  }
+		/**
+		 * @see IBaseLabelProvider#removeListener(ILabelProviderListener)
+		 */
+		public void removeListener(ILabelProviderListener element) {
+		}
 
-  public class BTContentProvider implements IStructuredContentProvider {
+	}
 
-    /**
-     * Constructor for BTContentProvider
-     */
-    public BTContentProvider() {
-      super();
-    }
+	public class BTContentProvider implements IStructuredContentProvider {
 
-    /**
-     * @see IContentProvider#getElement(Object)
-     */
-    public Object[] getElements(Object obj) {
-      ArrayList parameterNames = (ArrayList) obj;
-      return parameterNames.toArray();
-    }
+		/**
+		 * Constructor for BTContentProvider
+		 */
+		public BTContentProvider() {
+			super();
+		}
 
-    /**
-     * @see IContentProvider#dispose()
-     */
-    public void dispose() {
-    }
+		/**
+		 * @see IContentProvider#getElement(Object)
+		 */
+		public Object[] getElements(Object obj) {
+			ArrayList parameterNames = (ArrayList) obj;
+			return parameterNames.toArray();
+		}
 
-    /**
-     * @see IContentProvider#inputChanged(Viewer, Object, Object)
-     */
-    public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
-    }
+		/**
+		 * @see IContentProvider#dispose()
+		 */
+		public void dispose() {
+		}
 
-  }
+		/**
+		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
+		 */
+		public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
+		}
+
+	}
 
 }
