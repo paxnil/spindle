@@ -69,14 +69,16 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
 
     static private final Object[] empty = new Object[0];
 
-    private SearchAcceptor acceptor = new SearchAcceptor();
-    private ISearch searcher;
-    private String resultString;
+    
+    private SearchAcceptor fAcceptor;
+    private ISearch fSearcher;
+    private String fResultString;
 
     public SearchForLibraryWidget(IJavaProject project)
     {
         super();
         configure(project);
+        fAcceptor = new SearchAcceptor(project);
         NameProvider nameProvider = new NameProvider();
         setUpperListLabelProvider(nameProvider);
         setUpperListContentProvider(nameProvider);
@@ -106,17 +108,17 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
         String elementName = fragment.getElementName();
         if (elementName == null || elementName.trim().length() == 0)
         {
-            resultString = "/" + name;
+            fResultString = "/" + name;
         } else
         {
-            resultString = "/" + elementName.replace('.', '/') + "/" + name;
+            fResultString = "/" + elementName.replace('.', '/') + "/" + name;
         }
-        return new StructuredSelection(resultString);
+        return new StructuredSelection(fResultString);
     }
 
     public void refresh()
     {
-        if (searcher == null)
+        if (fSearcher == null)
         {
             return;
 
@@ -128,11 +130,11 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
 
     public void configure(IJavaProject project)
     {
-        searcher = null;
+        fSearcher = null;
         try
         {
             ClasspathRootLocation rootLocation = new ClasspathRootLocation(project);
-            searcher = rootLocation.getSearch();
+            fSearcher = rootLocation.getSearch();
 
         } catch (CoreException e)
         {
@@ -143,12 +145,12 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
     public void dispose()
     {
         super.dispose();
-        searcher = null;
+        fSearcher = null;
     }
 
     public String getResult()
     {
-        return resultString;
+        return fResultString;
     }
 
     class NameProvider extends LabelProvider implements IStructuredContentProvider
@@ -163,10 +165,10 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
             {
                 return empty;
             }
-            acceptor.reset();
-            acceptor.setMatchString(searchFilter.trim());
-            searcher.search(acceptor);
-            return acceptor.getNames();
+            fAcceptor.reset();
+            fAcceptor.setMatchString(searchFilter.trim());
+            fSearcher.search(fAcceptor);
+            return fAcceptor.getNames();
         }
 
         public void dispose()
@@ -194,7 +196,7 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
             {
                 return empty;
             }
-            return acceptor.getPackagesFor(selectedName);
+            return fAcceptor.getPackagesFor(selectedName);
 
         }
         public void dispose()
@@ -209,10 +211,12 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
 
         Map results;
         Map packageLookup;
+        IJavaProject jproject;
 
-        public SearchAcceptor()
+        public SearchAcceptor(IJavaProject jproject)
         {
             super(getAcceptFlags());
+            this.jproject = jproject;
             reset();
         }
 
@@ -270,11 +274,13 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
         public boolean acceptTapestry(Object parent, IStorage storage)
         {
             IPackageFragment fragment = (IPackageFragment) parent;
+            
             IPackageFragmentRoot root = (IPackageFragmentRoot) fragment.getParent();
             try
             {
-                if (root.getKind() == root.K_BINARY)
+                if (root.getKind() == root.K_BINARY || !fragment.getJavaProject().equals(jproject))
                 {
+                    // continue the search
                     return true;
                 }
             } catch (JavaModelException e)

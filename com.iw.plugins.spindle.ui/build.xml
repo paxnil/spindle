@@ -1,0 +1,85 @@
+<project name="builder" default="init" basedir=".">
+
+  <property name="templates" value="${basedir}/templates"/>
+  <property name="buildRelease" value="${basedir}/buildRelease"/>  
+  <property name="plugin-home" value="${buildRelease}/plugin"/>
+  <property name="version" value="0.0.1"/>
+  
+  <target name="init">
+    <available property="buildReleaseAvailable" file="${basedir}/buildRelease"/>
+  </target>
+
+  <target name="build-plugin-jar">
+  	<delete file="${basedir}/ui.jar"/>
+  	<jar jarfile="${basedir}/ui.jar">
+    	<fileset dir="${basedir}/bin">
+    	 <exclude name="**/*.gif"/>
+    	 <exclude name="**/*.jpg"/>
+    	 <exclude name="**/*.png"/>
+    	 <exclude name="**/*.txt"/>
+    	 <exclude name="**/*.html"/>
+    	 <exclude name="**/feature/*.*"/>
+    	 <exclude name="**/plugin/*.*"/>
+    	 <exclude name="**/scratchpad/**/*.*"/>
+    	 </fileset>
+  	</jar> 
+  </target>
+  
+  <target name="build-src-jar" depends="release-build-dir">  	
+  	<jar jarfile="${plugin-home}/core-ui-src.jar">
+  		<fileset dir="${basedir}/src"> 
+    	 <exclude name="**/scratchpad/**/*.*"/>    	 
+  		</fileset>   	
+  	</jar> 
+  </target>
+  
+  <target name="build-plugin-release" depends="prepare-to-build-release">
+  	<jar jarfile="${buildRelease}/com.iw.plugins.spindle.ui_${version}.jar" basedir="${plugin-home}"/>  	  
+  </target>
+  
+  <target name="release-build-dir" depends="clean-release">
+  	<mkdir dir="${buildRelease}"/>
+    <mkdir dir="${plugin-home}"/>
+    <mkdir dir="${buildRelease}/cranky/com.iw.plugins.spindle.ui_${version}"/>
+  </target>
+  
+  
+  <target name="prepare-to-build-release" depends="release-build-dir, build-plugin-jar, build-src-jar">      	
+    
+    <copy toDir="${plugin-home}">
+      <fileset dir="${basedir}">
+        <exclude name="spindle.jar"/>
+        <exclude name="*.jardesc"/>
+        <exclude name="**/external-build/*.*"/>
+        <exclude name="**/test-launchers/*.*"/>
+        <exclude name="**/plugin/*.*"/>
+  	    <include name="*.jar"/>
+  	    <include name="plugin.xml"/>
+  	    <include name="*.html"/> 
+  	    <include name="*.txt"/> 
+  	    <include name="*.jpg"/> 	    
+  	  </fileset>    
+    </copy>
+    <copy toDir="${plugin-home}/icons">
+      <fileset dir="${basedir}/icons"/>
+    </copy>
+  </target>
+  
+  <target name="cranky-release" depends="prepare-to-build-release">
+  	<copy toDir="${buildRelease}/cranky/com.iw.plugins.spindle.ui_${version}">
+  		<fileset dir="${plugin-home}"/>
+  	</copy>
+  	<jar jarfile="${buildRelease}/com.iw.plugins.spindle.ui_${version}_unjar.jar" basedir="${buildRelease}/cranky/"/>  	  
+  	
+  </target>
+  
+  <target name="clean-release" depends="init" if="buildReleaseAvailable">    
+  	<delete includeEmptyDirs="true" >
+      <fileset dir="${buildRelease}" />
+    </delete>    
+  </target>  
+  
+  <target name="clean-all" depends="clean-release">
+    <delete file="${basedir}/ui.jar"/>
+  </target>
+</project>

@@ -1,0 +1,416 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
+ *
+ * The Initial Developer of the Original Code is
+ * Intelligent Works Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2003
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ * 
+ *  glongman@intelligentworks.com
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+package com.iw.plugins.spindle.ui.wizards.project;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.ClasspathEntry;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.ClassPathDetector;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+
+import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.TapestryCore;
+
+/**
+ * As addition to the JavaCapabilityConfigurationPage, the wizard does an
+ * early project creation (so that linked folders can be defined) and, if an
+ * existing external location was specified, offers to do a classpath detection
+ */
+public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
+{
+
+    static private IClasspathEntry TAPESTRY_FRAMEWORK =
+        new ClasspathEntry(
+            IPackageFragmentRoot.K_BINARY,
+            ClasspathEntry.CPE_CONTAINER,
+            new Path(TapestryCore.CORE_CONTAINER),
+            new Path[] {},
+            null,
+            null,
+            null,
+            false);
+
+    private WizardNewProjectCreationPage fMainPage;
+
+    private IPath fCurrProjectLocation;
+    protected IProject fCurrProject;
+
+    protected boolean fCanRemoveContent;
+
+    /**
+     * Constructor for NewProjectCreationWizardPage.
+     */
+    public NewTapestryProjectJavaPage(WizardNewProjectCreationPage mainPage)
+    {
+        super();
+        fMainPage = mainPage;
+        fCurrProjectLocation = null;
+        fCurrProject = null;
+        fCanRemoveContent = false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+     */
+    public void setVisible(boolean visible)
+    {
+        if (visible)
+        {
+            changeToNewProject();
+        } else
+        {
+            removeProject();
+        }
+        super.setVisible(visible);
+    }
+
+    private void changeToNewProject()
+    {
+        IProject newProjectHandle = fMainPage.getProjectHandle();
+        IPath newProjectLocation = fMainPage.getLocationPath();
+
+        if (fMainPage.useDefaults())
+        {
+            fCanRemoveContent = !newProjectLocation.append(fMainPage.getProjectName()).toFile().exists();
+        } else
+        {
+            fCanRemoveContent = !newProjectLocation.toFile().exists();
+        }
+
+        final boolean initialize =
+            !(newProjectHandle.equals(fCurrProject) && newProjectLocation.equals(fCurrProjectLocation));
+
+        IRunnableWithProgress op = new IRunnableWithProgress()
+        {
+            public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+            {
+                try
+                {
+                    updateProject(initialize, monitor);
+                } catch (CoreException e)
+                {
+                    throw new InvocationTargetException(e);
+                }
+            }
+        };
+
+        try
+        {
+            getContainer().run(false, true, op);
+        } catch (InvocationTargetException e)
+        {
+            String title = NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.error.title"); //$NON-NLS-1$
+            String message = NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.error.desc"); //$NON-NLS-1$
+            ExceptionHandler.handle(e, getShell(), title, message);
+        } catch (InterruptedException e)
+        {
+            // cancel pressed
+        }
+    }
+
+    protected void updateProject(boolean initialize, IProgressMonitor monitor)
+        throws CoreException, InterruptedException
+    {
+        fCurrProject = fMainPage.getProjectHandle();
+        fCurrProjectLocation = fMainPage.getLocationPath();
+        boolean noProgressMonitor = !initialize && fCanRemoveContent;
+
+        if (monitor == null || noProgressMonitor)
+        {
+            monitor = new NullProgressMonitor();
+        }
+        try
+        {
+            monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.EarlyCreationOperation.desc"), 2); //$NON-NLS-1$
+
+            createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 1));
+
+            if (initialize)
+            {
+                IClasspathEntry[] entries = null;
+                IPath outputLocation = null;
+
+                if (fCurrProjectLocation.toFile().exists() && !Platform.getLocation().equals(fCurrProjectLocation))
+                {
+                    // detect classpath
+                    if (!fCurrProject.getFile(".classpath").exists())
+                    { //$NON-NLS-1$
+                        // if .classpath exists noneed to look for files
+                        ClassPathDetector detector = new ClassPathDetector(fCurrProject);
+                        entries = detector.getClasspath();
+                        outputLocation = detector.getOutputLocation();
+                    }
+                }
+                if (outputLocation == null)
+                {
+
+                    outputLocation = new Path(fCurrProject.getName() + "/WEB-INF/classes");
+                    fCurrProject.open(null);
+                    IFolder folder = fCurrProject.getFolder("WEB-INF");
+                    if (!folder.exists())
+                        folder.create(true, true, null);
+                    folder = folder.getFolder("classes");
+                    if (!folder.exists())
+                        folder.create(true, true, null);
+
+                }
+
+                entries = checkEntries(entries);
+
+                init(JavaCore.create(fCurrProject), outputLocation, entries, false);
+            }
+            monitor.worked(1);
+        } finally
+        {
+            monitor.done();
+        }
+    }
+
+    /**
+     * @param entries
+     * @return
+     */
+    private IClasspathEntry[] checkEntries(IClasspathEntry[] entries) throws CoreException
+    {
+
+        if (entries == null)
+        {
+            createSrcFolder();
+            return new IClasspathEntry[] { TAPESTRY_FRAMEWORK, createSrcClasspathEntry()};
+
+        }
+
+        boolean hasSrcEntry = false;
+        boolean hasTapestryEntry = false;
+        List allEntries = Arrays.asList(entries);
+        for (Iterator iter = allEntries.iterator(); iter.hasNext();)
+        {
+            IClasspathEntry element = (IClasspathEntry) iter.next();
+            if (!hasSrcEntry && element.getEntryKind() == IClasspathEntry.CPE_SOURCE)
+            {
+                hasSrcEntry = true;
+            } else if (!hasTapestryEntry && element.getEntryKind() == IClasspathEntry.CPE_CONTAINER)
+            {
+                hasTapestryEntry = element.getPath().segment(0).equals(TapestryCore.CORE_CONTAINER);
+            }
+        }
+
+        if (!hasSrcEntry)
+        {
+            createSrcFolder();
+            allEntries.add(createSrcClasspathEntry());
+
+        }
+
+        if (!hasTapestryEntry)
+            allEntries.add(TAPESTRY_FRAMEWORK);
+
+        return (IClasspathEntry[]) allEntries.toArray(new IClasspathEntry[allEntries.size()]);
+    }
+
+    private IClasspathEntry createSrcClasspathEntry()
+    {
+
+        return new ClasspathEntry(
+            IPackageFragmentRoot.K_SOURCE,
+            ClasspathEntry.CPE_SOURCE,
+            new Path("/" + fCurrProject.getName() + "/src"),
+            new Path[] {},
+            null,
+            null,
+            null,
+            false);
+    }
+
+    private void createSrcFolder()
+    {
+        IFolder srcFolder = fCurrProject.getFolder("src");
+        if (!srcFolder.exists())
+        {
+
+            try
+            {
+                srcFolder.create(true, true, null);
+            } catch (CoreException e)
+            {
+                UIPlugin.log(e);
+            }
+        }
+    }
+
+    /**
+     * Called from the wizard on finish.
+     */
+    public void performFinish(IProgressMonitor monitor) throws CoreException, InterruptedException
+    {
+        try
+        {
+            monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.createproject.desc"), 3); //$NON-NLS-1$
+            if (fCurrProject == null)
+            {
+                updateProject(true, new SubProgressMonitor(monitor, 1));
+            }
+            configureJavaProject(new SubProgressMonitor(monitor, 2));
+        } finally
+        {
+            monitor.done();
+            fCurrProject = null;
+        }
+    }
+
+    private void removeProject()
+    {
+        if (fCurrProject == null || !fCurrProject.exists())
+        {
+            return;
+        }
+
+        IRunnableWithProgress op = new IRunnableWithProgress()
+        {
+            public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+            {
+                boolean noProgressMonitor = Platform.getLocation().equals(fCurrProjectLocation);
+                if (monitor == null || noProgressMonitor)
+                {
+                    monitor = new NullProgressMonitor();
+                }
+                monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.removeproject.desc"), 3); //$NON-NLS-1$
+
+                try
+                {
+                    fCurrProject.delete(fCanRemoveContent, false, monitor);
+                } catch (CoreException e)
+                {
+                    throw new InvocationTargetException(e);
+                } finally
+                {
+                    monitor.done();
+                    fCurrProject = null;
+                    fCanRemoveContent = false;
+                }
+            }
+        };
+
+        try
+        {
+            getContainer().run(false, true, op);
+        } catch (InvocationTargetException e)
+        {
+            String title = NewWizardMessages.getString("NewProjectCreationWizardPage.op_error.title"); //$NON-NLS-1$
+            String message = NewWizardMessages.getString("NewProjectCreationWizardPage.op_error_remove.message"); //$NON-NLS-1$
+            ExceptionHandler.handle(e, getShell(), title, message);
+        } catch (InterruptedException e)
+        {
+            // cancel pressed
+        }
+    }
+
+    /**
+     * Called from the wizard on cancel.
+     */
+    public void performCancel()
+    {
+        removeProject();
+    }
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.ui.wizards.NewElementWizardPage#updateStatus(org.eclipse.core.runtime.IStatus)
+     */
+    protected void updateStatus(IStatus status)
+    {
+        super.updateStatus(status);
+        if (status.isOK())
+        {
+            IClasspathEntry[] classpath = getRawClassPath();
+            boolean hasSrcEntry = false;
+            boolean hasTapestryFramework = false;
+            for (int i = 0; i < classpath.length; i++)
+            {
+                if (!hasSrcEntry && classpath[i].getEntryKind() == IClasspathEntry.CPE_SOURCE)
+                {
+                    hasSrcEntry = true;
+
+                } else if (!hasTapestryFramework && classpath[i].getEntryKind() == IClasspathEntry.CPE_SOURCE)
+                {
+                    IPath path = classpath[i].getPath();
+                    if (path.segment(0).equals(TapestryCore.CORE_CONTAINER))
+                    {
+                        hasTapestryFramework = true;
+                    }
+                }
+
+            }
+            IStatus tapStatus = null;
+            if (!hasSrcEntry)
+            {
+
+                tapStatus =
+                    new Status(
+                        IStatus.ERROR,
+                        TapestryCore.PLUGIN_ID,
+                        0,
+                        UIPlugin.getString("new-project-wizard-must-have-src-folder"),
+                        null);
+            } 
+            
+//            else if (!hasTapestryFramework)
+//            {
+//                tapStatus =
+//                    new Status(
+//                        IStatus.ERROR,
+//                        TapestryCore.PLUGIN_ID,
+//                        0,
+//                        UIPlugin.getString("new-project-wizard-should-have-tapestry-folder"),
+//                        null);
+//            }
+
+            if (tapStatus != null)
+                super.updateStatus(tapStatus);
+        }
+    }
+
+}

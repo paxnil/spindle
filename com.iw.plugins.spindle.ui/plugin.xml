@@ -16,6 +16,8 @@
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.core"/>
    </requires>
+
+
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
@@ -35,9 +37,9 @@
       <decorator
             lightweight="true"
             location="TOP_RIGHT"
+            adaptable="true"
             label="Indicator for Tapestry Projects"
             state="true"
-            adaptable="true"
             class="com.iw.plugins.spindle.ui.decorators.ProjectDecorator"
             id="com.iw.plugins.spindle.ui.projectDecorator">
          <enablement>
@@ -52,9 +54,9 @@
       <decorator
             lightweight="true"
             location="TOP_RIGHT"
+            adaptable="true"
             label="Indicator for the context root of Tapestry Projects"
             state="true"
-            adaptable="true"
             class="com.iw.plugins.spindle.ui.decorators.ContextRootDecorator"
             id="com.iw.plugins.spindle.ui.contextDecorator">
          <enablement>
@@ -70,7 +72,33 @@
             name="Spindle 3.0"
             class="com.iw.plugins.spindle.ui.preferences.SpindleDTDCachingPreferencePage"
             id="SpindlePreferences">
-      </page>     
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.ui.classpathContainerPage">
+      <classpathContainerPage
+            name="Tapestry Framework (plugin default)"
+            class="com.iw.plugins.spindle.ui.classpath.CoreContainerWizardPage"
+            id="com.iw.plugins.spindle.core.TAPESTRY_FRAMEWORK">
+      </classpathContainerPage>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Tapestry"
+            id="com.iw.plugins.spindle.ui.new">
+      </category>
+      <wizard
+            name="Tapestry Web Project"
+            icon="./icons/basic/application16.gif"
+            category="com.iw.plugins.spindle.ui.new"
+            project="true"
+            class="com.iw.plugins.spindle.ui.wizards.project.NewTapestryProjectWizard"
+            id="com.iw.plugins.spindle.ui.new_project_wizard">
+         <description>
+            Create a new Tapestry Web Project
+         </description>
+      </wizard>
    </extension>
 
 </plugin>
