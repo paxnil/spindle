@@ -73,6 +73,8 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
  *  this project needs to read/write an xml file defining its application
  */
 public class TapestryProject implements IProjectNature, ITapestryProject {
+	
+  static public boolean migrating = false;
 
   private IPath projectModelPath;
   private String projectName;
@@ -233,7 +235,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
   }
 
-  private void createModelManager() throws CoreException {
+  private synchronized void createModelManager() throws CoreException {
 
     modelManager = new TapestryProjectModelManager(getProject());
 
@@ -533,6 +535,12 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
     */
     public void resourceChanged(IResourceChangeEvent event) {
+    	
+      if (migrating) {
+      	
+      	return;
+      	
+      }
 
       if (event.getType() == IResourceChangeEvent.PRE_CLOSE) {
 

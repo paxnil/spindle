@@ -32,12 +32,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.Composite;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.project.ITapestryProject;
+import com.iw.plugins.spindle.project.actions.MigrateToTapestryDTD13;
 import com.iw.plugins.spindle.wizards.NewTapestryElementWizard;
 import com.iw.plugins.spindle.wizards.TapestryWizardPage;
 
@@ -184,17 +186,17 @@ public class ConvertToTapestryProjectWizard extends NewTapestryElementWizard {
    */
   private void runMigration() {
 
-    //  	MigrateToTapestryDTD13 migrationAction = new MigrateToTapestryDTD13();
-    //  	
-    //  	migrationAction.selectionChanged(migrationAction, getSelection());
-    //  	
-    //  	if (!migrationAction.isEnabled()) {
-    //  		
-    //  		MessageDialog.openInformation(getShell(), "Migration Aborted", "Migration refused to start");
-    //  		
-    //  	}
-    //  	
-    //  	migrationAction.run();
+      	MigrateToTapestryDTD13 migrationAction = new MigrateToTapestryDTD13();
+      	
+      	migrationAction.selectionChanged(migrationAction, getSelection());
+      	
+      	if (!migrationAction.isEnabled()) {
+      		
+      		MessageDialog.openInformation(getShell(), "Migration Aborted", "Migration refused to start");
+      		
+      	}
+      	
+      	migrationAction.run(null);
 
   }
 

@@ -849,6 +849,11 @@ public class TapestryProjectModelManager
     
     IPath thisProjectPath = getProject().getFullPath();
     IResourceDelta topLevelDelta = event.getDelta();
+    if (topLevelDelta == null) {
+    	
+    	return;
+    	
+    }
     IResourceDelta thisProjectDelta = topLevelDelta.findMember(thisProjectPath);
     if (thisProjectDelta == null) {
     	
@@ -1049,15 +1054,15 @@ public class TapestryProjectModelManager
 
   private ITapestryModel getWorkspaceModel(IStorage storage) {
     String extension = extension(storage);
-    List models = null;
+    List result = null;
     validate();
 
     ITapestryModelManagerDelegate delegate = getDelegate(storage);
     if (delegate == null) {
       return null;
     }
-    models = delegate.getAllModels();
-    return getWorkspaceModel(storage, models);
+    result = delegate.getAllModels();
+    return getWorkspaceModel(storage, result);
   }
 
   private ITapestryModel getWorkspaceModel(IStorage storage, List models) {

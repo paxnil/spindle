@@ -100,7 +100,7 @@ public class MovedComponentOrPageRefactor
     IProject thisProject = project.getProject();
     topLevelDelta = event.getDelta();
 
-    if (topLevelDelta.getKind() == IResourceDelta.CHANGED) {
+    if (topLevelDelta != null && topLevelDelta.getKind() == IResourceDelta.CHANGED) {
 
       IResourceDelta projectDelta = topLevelDelta.findMember(thisProject.getFullPath());
 
@@ -116,7 +116,13 @@ public class MovedComponentOrPageRefactor
         try {
 
           baseModel = (TapestryLibraryModel) project.getProjectModel();
+          if (baseModel == null) {
+          	
+          	return;
+          	
+          }
           projectStorage = baseModel.getUnderlyingStorage();
+          
 
           jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisProject);
 

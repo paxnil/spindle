@@ -91,6 +91,12 @@ public class RenamedComponentOrPageRefactor
    */
   public void resourceChanged(IResourceChangeEvent event) {
 
+    if (TapestryProject.migrating) {
+
+      return;
+
+    }
+
     if (event.getType() != IResourceChangeEvent.PRE_AUTO_BUILD) {
 
       return;
@@ -100,7 +106,7 @@ public class RenamedComponentOrPageRefactor
     IProject thisProject = project.getProject();
     topLevelDelta = event.getDelta();
 
-    if (topLevelDelta.getKind() == IResourceDelta.CHANGED) {
+    if (topLevelDelta != null && topLevelDelta.getKind() == IResourceDelta.CHANGED) {
 
       IResourceDelta projectDelta = topLevelDelta.findMember(thisProject.getFullPath());
 
@@ -116,6 +122,11 @@ public class RenamedComponentOrPageRefactor
         try {
 
           baseModel = (TapestryLibraryModel) project.getProjectModel();
+          if (baseModel == null) {
+
+            return;
+
+          }
           projectStorage = baseModel.getUnderlyingStorage();
 
           jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisProject);

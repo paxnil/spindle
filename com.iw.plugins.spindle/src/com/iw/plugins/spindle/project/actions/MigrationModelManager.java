@@ -30,6 +30,7 @@ package com.iw.plugins.spindle.project.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
@@ -75,6 +76,8 @@ public class MigrationModelManager extends TapestryProjectModelManager {
     initialized = true;
 
     allModels = new ArrayList();
+    
+    models = new HashMap();
 
     Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchShell();
 

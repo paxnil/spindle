@@ -24,8 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.wizards.migrate;
 
 import java.lang.reflect.InvocationTargetException;
@@ -49,6 +47,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 
+import com.iw.plugins.spindle.project.TapestryProject;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.spec.XMLUtil;
 import com.iw.plugins.spindle.ui.migrate.MigrateComponentModel;
@@ -92,7 +91,7 @@ public class MigrationWizard extends Wizard {
       //			ExceptionHandler.handle(e, shell, title, message);
       return false;
     } catch (InterruptedException e) {
-    	
+
       e.printStackTrace();
       return false;
     }
@@ -134,46 +133,51 @@ public class MigrationWizard extends Wizard {
       convertToNewPages);
 
     migrators.add(0, libraryWorker);
-       
 
     return doFinish(new IRunnableWithProgress() {
 
       public void run(IProgressMonitor monitor)
         throws InvocationTargetException, InterruptedException {
-        	
-        monitor.beginTask("Performing Migration", migrators.size() * 2);
 
-        for (Iterator iter = migrators.iterator(); iter.hasNext();) {
-          MigrationWorkUnit worker = (MigrationWorkUnit) iter.next();
+        try {
 
-          try {
+          TapestryProject.migrating = true;
 
-            worker.migrate();
-            monitor.worked(1);
+          monitor.beginTask("Performing Migration", migrators.size() * 2);
 
-          } catch (CoreException e) {
+          for (Iterator iter = migrators.iterator(); iter.hasNext();) {
+            MigrationWorkUnit worker = (MigrationWorkUnit) iter.next();
 
-            throw new InvocationTargetException(e);
+            try {
+
+              worker.migrate();
+              monitor.worked(1);
+
+            } catch (CoreException e) {
+              TapestryProject.migrating = false;
+              throw new InvocationTargetException(e);
+            }
+
           }
 
-        }
+          for (Iterator iter = migrators.iterator(); iter.hasNext();) {
+            MigrationWorkUnit worker = (MigrationWorkUnit) iter.next();
 
-        for (Iterator iter = migrators.iterator(); iter.hasNext();) {
-          MigrationWorkUnit worker = (MigrationWorkUnit) iter.next();
+            try {
+              worker.commitMigration(monitor);
+              monitor.worked(1);
+            } catch (CoreException e) {
 
-          try {
-            worker.commitMigration(monitor);
-            monitor.worked(1);
-          } catch (CoreException e) {
-          	
-          	throw new InvocationTargetException(e);
+              TapestryProject.migrating = false;
+              throw new InvocationTargetException(e);
+            }
+
           }
-
+        } finally {
+          TapestryProject.migrating = false;
         }
-
       }
     });
-    
 
   }
 

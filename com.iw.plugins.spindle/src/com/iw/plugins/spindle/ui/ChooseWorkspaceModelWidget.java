@@ -178,8 +178,7 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
       }
 
     } catch (CoreException jmex) {
-
-      TapestryPlugin.getDefault().logException(jmex);
+      
       lookup = new TapestryLookup();
 
       try {

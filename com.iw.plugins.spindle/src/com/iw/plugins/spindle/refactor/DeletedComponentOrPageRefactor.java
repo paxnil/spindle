@@ -86,6 +86,7 @@ public class DeletedComponentOrPageRefactor
    * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
    */
   public void resourceChanged(IResourceChangeEvent event) {
+  	 
 
     if (event.getType() != IResourceChangeEvent.PRE_AUTO_BUILD) {
 
@@ -96,7 +97,7 @@ public class DeletedComponentOrPageRefactor
     IProject thisProject = project.getProject();
     IResourceDelta topLevelDelta = event.getDelta();
 
-    if (topLevelDelta.getKind() == IResourceDelta.CHANGED) {
+    if (topLevelDelta != null && topLevelDelta.getKind() == IResourceDelta.CHANGED) {
 
       IResourceDelta projectDelta = topLevelDelta.findMember(thisProject.getFullPath());
 
@@ -110,6 +111,11 @@ public class DeletedComponentOrPageRefactor
         try {
 
           baseModel = (TapestryLibraryModel) project.getProjectModel();
+          if (baseModel == null) {
+          	
+          	return;
+          	
+          }
           projectStorage = baseModel.getUnderlyingStorage();
 
           //      refactorer =
