@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui;
 
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -52,15 +53,27 @@ public class TableViewerWithToolTips extends TableViewer {
   public TableViewerWithToolTips(Composite parent, int flags) {
     super(parent, flags);
   }
-  
+
   public TableViewerWithToolTips(Table table) {
-  	super(table);
+    super(table);
   };
-  
+
   protected void hookControl(Control control) {
-  	super.hookControl(control);
-  	toolTipHandler = new TableViewerToolTipHandler(control.getShell());
-  	toolTipHandler.activateHoverHelp(control);
+    super.hookControl(control);
+    toolTipHandler = new TableViewerToolTipHandler(control.getShell());
+    toolTipHandler.activateHoverHelp(control);
+  }
+
+  public void setTooltipsEnabled(boolean flag) {
+    if (toolTipHandler != null) {
+      toolTipHandler.setHandlerEnabled(flag);
+    }
+  }
+  public boolean isTooltipsEnabled() {
+    if (toolTipHandler != null) {
+      return toolTipHandler.isHandlerEnabled();
+    }
+    return false;
   }
 
   /**
@@ -74,11 +87,9 @@ public class TableViewerWithToolTips extends TableViewer {
     this.tipProvider = tipProvider;
   }
 
-
   public IToolTipProvider getToolTipProvider() {
     return this.tipProvider;
   }
-
 
   private String getTVToolTipText(Item item) {
     if (tipProvider != null) {

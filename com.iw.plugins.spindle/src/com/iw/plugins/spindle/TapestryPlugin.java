@@ -78,6 +78,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import com.iw.plugins.spindle.editorjwc.components.ChooseBindingTypeDialog;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
@@ -419,9 +420,9 @@ public class TapestryPlugin extends AbstractUIPlugin {
   static public SpecificationParser getParser() {
     return parser;
   }
-  
+
   public void logStatus(IStatus status) {
-  	getLog().log(status);
+    getLog().log(status);
   }
 
   public void logException(Throwable e) {
@@ -433,14 +434,16 @@ public class TapestryPlugin extends AbstractUIPlugin {
       message = e.toString();
     Status status = new Status(IStatus.ERROR, getPluginId(), IStatus.OK, message, e);
     getLog().log(status);
-  } /** 
-                      * Sets default preference values. These values will be used
-                      * until some preferences are actually set using Preference dialog.
-                      */
+  }
+  /** 
+   * Sets default preference values. These values will be used
+   * until some preferences are actually set using Preference dialog.
+   */
   protected void initializeDefaultPreferences(IPreferenceStore store) {
     ColorManager.initializeDefaults(store);
     RenamedComponentOrPageRefactor.initializeDefaults(store);
     NewTapComponentWizardPage.initializeDefaults(store);
+    ChooseBindingTypeDialog.initializeDefaults(store);
   }
 
   static public void openTapestryEditor(IStorage storage) {

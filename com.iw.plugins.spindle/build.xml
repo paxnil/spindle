@@ -1,17 +1,18 @@
 <project name="builder" default="init" basedir=".">
 
-  <property name="version" value="1.1.3"/>
-  <property name="size" value="3277"/>
-  <property name="tap_version" value="2.2"/>
-  
   <property name="templates" value="${basedir}/templates"/>
   <property name="buildRelease" value="${basedir}/buildRelease"/>
-
+  
   <property name="feature-home" value="${buildRelease}/feature"/>
   <property name="plugin-home" value="${buildRelease}/plugin"/>
   <property name="site-home" value="${buildRelease}/site"/>
 
   
+  <property name="version" value="1.1.4"/>
+  <property name="size" value="3277"/>
+  <property name="tap_version" value="2.2, 2.3 beta1"/>
+  <property name="eclipse_version" value="R2.0, 2.0.1, 2.0.2 (SDK)"/>
+   
   <target name="build-plugin-xml">
   	<delete file="${basedir}/plugin.xml"/>
     <copy file="${templates}/plugin.xml.template" toFile="${basedir}/plugin.xml"/>
@@ -34,6 +35,13 @@
     <replace file="${site-home}/index.html" token="@version@" value="${version}"/>    
   </target>
   
+  <target name="buildReadme">
+    <copy file="${templates}/Readme.template.html" toFile="${basedir}/Readme.html"/>
+    <replace file="${basedir}/Readme.html" token="@version@" value="${version}"/>  
+    <replace file="${basedir}/Readme.html" token="@tap_version@" value="${tap_version}"/>  
+    <replace file="${basedir}/Readme.html" token="@eclipse_version@" value="${eclipse_version}"/>  
+  </target>    
+  
   <target name="init">
     <available property="buildReleaseAvailable" file="${basedir}/buildRelease"/>
   </target>
@@ -49,7 +57,7 @@
     	 <exclude name="**/*.html"/>
     	 <exclude name="**/feature/*.*"/>
     	 <exclude name="**/plugin/*.*"/>
-    	 <exclude name="**/scratchpad/*.*"/>
+    	 <exclude name="**/scratchpad/**/*.*"/>
     	 </fileset>
   	</jar> 
   </target>
@@ -57,7 +65,7 @@
   <target name="build-src-jar" depends="release-build-dir">  	
   	<jar jarfile="${plugin-home}/spindle-${version}-src.jar">
   		<fileset dir="${basedir}/src"> 
-    	 <exclude name="**/scratchpad/*.*"/>    	 
+    	 <exclude name="**/scratchpad/**/*.*"/>    	 
   		</fileset>   	
   	</jar> 
   </target>
@@ -85,7 +93,7 @@
   </target>
   
   
-  <target name="prepare-to-build-release" depends="build-plugin-xml, release-build-dir, build-plugin-jar, build-src-jar">      	
+  <target name="prepare-to-build-release" depends="buildReadme, build-plugin-xml, release-build-dir, build-plugin-jar, build-src-jar">      	
     
     <copy toDir="${plugin-home}">
       <fileset dir="${basedir}">

@@ -25,9 +25,9 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.html;
 
-import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
+import org.eclipse.ui.editors.text.TextEditorActionContributor;
 
-public class TapestryHTMLEditorContributor extends BasicTextEditorActionContributor {
+public class TapestryHTMLEditorContributor extends TextEditorActionContributor {
 
   /**
    * Constructor for TapestryMultipageEditorContributor

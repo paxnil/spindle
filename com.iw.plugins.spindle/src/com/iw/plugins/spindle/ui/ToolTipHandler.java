@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Widget;
 public class ToolTipHandler {
 
   private TooltipController tipController;
+  private boolean handlerEnabled = true;
 
   /**
    * Creates a new tooltip handler
@@ -61,13 +62,20 @@ public class ToolTipHandler {
     tipController = new TooltipController(new TooltipCreator());
   }
 
+  public boolean isHandlerEnabled() {
+    return handlerEnabled;
+  }
+
+  public void setHandlerEnabled(boolean flag) {
+    this.handlerEnabled = flag;
+  }
+
   protected String getToolTipText(Object object) {
     if (object instanceof Widget) {
       return (String) ((Widget) object).getData("TIP_TEXT");
     }
     return null;
   }
-
 
   /**
    * Enables customized hover help for a specified control
@@ -112,7 +120,7 @@ public class ToolTipHandler {
       IInformationControl control = getInformationControl();
       if (control != null) {
         control.setVisible(false);
-        setEnabled(true);
+        this.setEnabled(true);
       }
     }
 
@@ -120,6 +128,10 @@ public class ToolTipHandler {
      * @see org.eclipse.jface.text.AbstractInformationControlManager#computeInformation()
      */
     protected void computeInformation() {
+    
+      if (!handlerEnabled) {
+      	return;
+      }
 
       Point widgetPosition = getHoverEventLocation();
       int heightCue = -1;

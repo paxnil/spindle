@@ -51,13 +51,14 @@ public class TreeViewerWithToolTips extends TreeViewer {
   public TreeViewerWithToolTips(Composite parent, int flags) {
     super(parent, flags);
   }
-  
+
   protected void hookControl(Control control) {
-  	super.hookControl(control);
-  	toolTipHandler = new TVToolTipHandler(control.getShell());
-  	toolTipHandler.activateHoverHelp(control);
+    super.hookControl(control);
+    toolTipHandler = new TVToolTipHandler(control.getShell());
+    toolTipHandler.activateHoverHelp(control);
   }
-  /**
+
+  /**
    * Constructor for TreeViewerWithToolTips
    */
   public TreeViewerWithToolTips(Tree tree) {
@@ -68,11 +69,9 @@ public class TreeViewerWithToolTips extends TreeViewer {
     this.tipProvider = tipProvider;
   }
 
-
   public IToolTipProvider getToolTipProvider() {
     return this.tipProvider;
   }
-
 
   private String getTVToolTipText(Item item) {
     if (tipProvider != null) {
@@ -81,6 +80,17 @@ public class TreeViewerWithToolTips extends TreeViewer {
     return null;
   }
 
+  public void setTooltipsEnabled(boolean flag) {
+    if (toolTipHandler != null) {
+      toolTipHandler.setHandlerEnabled(flag);
+    }
+  }
+  public boolean isTooltipsEnabled() {
+    if (toolTipHandler != null) {
+      return toolTipHandler.isHandlerEnabled();
+    }
+    return false;
+  }
 
   protected class TVToolTipHandler extends ToolTipHandler {
 

@@ -34,9 +34,11 @@ import java.util.TreeSet;
 
 import net.sf.tapestry.spec.BindingType;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
-import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -44,6 +46,8 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -51,12 +55,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
+import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
@@ -67,6 +71,8 @@ import com.iw.plugins.spindle.ui.TableViewerWithToolTips;
 import com.iw.plugins.spindle.ui.UneditableComboBox;
 
 public class ChooseBindingTypeDialog extends ChooseFromListDialog {
+
+  public static final String DISABLE_TOOLTIPS_PREFERENCE = "ChooseBindingTypeDialog.tooltips";
 
   private HashMap precomputed;
   private HashMap recomputed;
@@ -99,20 +105,20 @@ public class ChooseBindingTypeDialog extends ChooseFromListDialog {
   }
 
   public ChooseBindingTypeDialog(Shell shell, boolean isDTD12) {
-    super(
-    	shell, 
-    	(isDTD12  
-    		? new String[] { "Dynamic", "Field", "Inherited", "Static", "String" }
-    		: new String[] { "Dynamic", "Field", "Inherited", "Static" }),
-    	(isDTD12  
-    		? new Object[] { BindingType.DYNAMIC, BindingType.FIELD, BindingType.INHERITED, BindingType.STATIC, BindingType.STRING }
-    		: new Object[] { BindingType.DYNAMIC, BindingType.FIELD, BindingType.INHERITED, BindingType.STATIC}),
-      "New Binding");
+    super(shell, (isDTD12 ? new String[] { "Dynamic", "Field", "Inherited", "Static", "String" }
+    : new String[] { "Dynamic", "Field", "Inherited", "Static" }),
+      (isDTD12
+        ? new Object[] { BindingType.DYNAMIC, BindingType.FIELD, BindingType.INHERITED, BindingType.STATIC, BindingType.STRING }
+    : new Object[] { BindingType.DYNAMIC, BindingType.FIELD, BindingType.INHERITED, BindingType.STATIC }), "New Binding");
+  }
+
+  public static void initializeDefaults(IPreferenceStore pstore) {
+    pstore.setDefault(DISABLE_TOOLTIPS_PREFERENCE, false);
   }
 
   protected Control createDialogArea(Composite parent) {
     Composite container = new Composite(parent, SWT.NULL);
-    GridData gd; 
+    GridData gd;
     GridLayout layout = new GridLayout();
     layout.verticalSpacing = 8;
     container.setLayout(layout);
@@ -142,10 +148,10 @@ public class ChooseBindingTypeDialog extends ChooseFromListDialog {
       table = createTable(container);
       gd = new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
       gd.heightHint = 100;
-      gd.widthHint=400;
+      gd.widthHint = 400;
       table.setLayoutData(gd);
       createColumns();
-      viewer = new TableViewerWithToolTips(table);
+      viewer = new BindingTableViewer(table);
       BTLabelProvider prov = new BTLabelProvider();
       viewer.setToolTipProvider(prov);
       viewer.setLabelProvider(prov);
@@ -373,6 +379,40 @@ public class ChooseBindingTypeDialog extends ChooseFromListDialog {
      * @see IContentProvider#inputChanged(Viewer, Object, Object)
      */
     public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
+    }
+
+  }
+
+  public class BindingTableViewer extends TableViewerWithToolTips {
+
+    private IPropertyChangeListener preferenceListener;
+
+    public BindingTableViewer(Table table) {
+      super(table);
+    }
+
+    /**
+     * @see com.iw.plugins.spindle.ui.TableViewerWithToolTips#hookTooltips(Control)
+     */
+    protected void hookControl(Control control) {
+      super.hookControl(control);
+      IPreferenceStore store = TapestryPlugin.getDefault().getPreferenceStore();
+      setTooltipsEnabled(!store.getBoolean(DISABLE_TOOLTIPS_PREFERENCE));
+      
+      preferenceListener = new IPropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent event) {
+          if (event.getProperty().equals(DISABLE_TOOLTIPS_PREFERENCE)) {
+            setTooltipsEnabled(!((Boolean) event.getNewValue()).booleanValue());
+          }
+        }
+      };
+      TapestryPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(preferenceListener);
+      
+      control.addDisposeListener(new DisposeListener() {
+        public void widgetDisposed(DisposeEvent e) {
+          TapestryPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(preferenceListener);
+        }
+      });
     }
 
   }

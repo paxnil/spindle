@@ -75,6 +75,7 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.views.properties.IPropertySheetPage;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
@@ -96,6 +97,7 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
   private static String WRONG_LOCATION = EDITOR_NAME + ".wrongLocation";
   private boolean dirty = false;
   private boolean duringInit = false;
+  private IPropertySheetPage propertySheetPage;
 
   public static final String SOURCE_PAGE = "SOURCEPAGE";
   /**

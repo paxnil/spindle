@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.refactor.preferences;
+package com.iw.plugins.spindle.preferences;
 
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
