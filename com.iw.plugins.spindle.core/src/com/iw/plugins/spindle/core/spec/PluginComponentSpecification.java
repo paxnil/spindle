@@ -636,6 +636,5 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
                 element.validate(this, validator);
             }
         }
-
     }
 }

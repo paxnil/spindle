@@ -79,13 +79,7 @@ public class PluginComponentTypeDeclaration extends DescribableSpecification
 
         try
         {
-            validator.validatePattern(
-                getId(),
-                SpecificationParser.COMPONENT_ALIAS_PATTERN,
-                "SpecificationParser.invalid-component-type",
-                IProblem.ERROR,
-                info.getAttributeSourceLocation("type"));
-
+            
             ILibrarySpecification parentLib = (ILibrarySpecification) parent;
 
             validator.validateResourceLocation(
