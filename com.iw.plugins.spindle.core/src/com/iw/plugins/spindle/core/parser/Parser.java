@@ -428,17 +428,17 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
   private IProblem createParserProblem(String type, XMLParseException ex, int severity)
   {
 
-    int lineNumber = ex.getLineNumber() - 1;
+    int lineNumber = Math.max(ex.getLineNumber() - 1, 0);
     int charStart = -1;
     int charEnd = -1;
 
     try
     {
       charStart = fEclipseDocument.getLineOffset(lineNumber);
-      charEnd = charStart + fEclipseDocument.getLineLength(lineNumber) - 1;
+      charEnd = Math.max(charStart, charStart + fEclipseDocument.getLineLength(lineNumber) - 1);
     } catch (BadLocationException e)
     {
-      TapestryCore.log(e);
+      TapestryCore.log("exception line:" + ex.getLineNumber() + "document line count:" + fEclipseDocument.getNumberOfLines(), e);
     }
 
     return new DefaultProblem(type, severity, ex.getMessage(), lineNumber, charStart, charEnd, false);
