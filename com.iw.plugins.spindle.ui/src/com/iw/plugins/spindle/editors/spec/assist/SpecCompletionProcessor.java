@@ -145,8 +145,9 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
   private String getSkeletonSpecification(String extension)
   {
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
-    int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    boolean useTabs = store.getBoolean(UIPlugin.PLUGIN_ID
+          + ".FORMATTER_USE_TABS_TO_INDENT");
+    int tabSize = store.getInt(UIPlugin.PLUGIN_ID + ".EDITOR_DISPLAY_TAB_WIDTH");
     StringWriter swriter = new StringWriter();
     IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
     if ("jwc".equals(extension))
