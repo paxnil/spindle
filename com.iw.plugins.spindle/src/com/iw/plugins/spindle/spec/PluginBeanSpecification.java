@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
+import com.iw.plugins.spindle.bean.PluginFieldBeanInitializer;
 import com.iw.plugins.spindle.bean.PluginPropertyBeanInitializer;
 import com.iw.plugins.spindle.bean.PluginStaticBeanInitializer;
 import com.iw.plugins.spindle.util.Indenter;
@@ -146,6 +147,13 @@ public class PluginBeanSpecification extends BeanSpecification implements Proper
       writer.println("\">");
       Indenter.printlnIndented(writer, indent + 2, StaticTypeValue.value);
       Indenter.printlnIndented(writer, indent + 1, "</static-value>");
+    } else if (initializer instanceof PluginFieldBeanInitializer) {
+    	Indenter.printIndented(
+        writer,
+        indent + 1,
+        "<field-value field-name=\""
+          + ((PluginFieldBeanInitializer) initializer).getFieldName());
+      writer.println("\"/>");
     }
     Indenter.printlnIndented(writer, indent, "</set-property>");
   }

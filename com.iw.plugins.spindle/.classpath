@@ -6,7 +6,6 @@
     <classpathentry exported="true" kind="lib"
         path="org.apache.crimson.jar" sourcepath="/com.iw.plugins.spindle/org.apache.crimsonsrc.zip"/>
     <classpathentry exported="true" kind="lib" path="javax.servlet.jar" sourcepath="/com.iw.plugins.spindle/javax.servletsrc.zip"/>
-    <classpathentry exported="true" kind="lib" path="iw_tapestry.jar" sourcepath="/com.iw.plugins.spindle/iw_tapestrysrc.zip"/>
     <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
     <classpathentry kind="lib"
         path="Q:/eclipseF1Test/plugins/org.eclipse.ui_2.0.0/workbench.jar" sourcepath="Q:/eclipseF1Test/plugins/org.eclipse.ui_2.0.0/workbenchsrc.zip"/>

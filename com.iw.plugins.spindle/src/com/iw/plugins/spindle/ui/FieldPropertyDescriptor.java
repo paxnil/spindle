@@ -37,7 +37,7 @@ import com.iw.plugins.spindle.model.ITapestryModel;
  * @version 	1.0
  * @author
  */
-public class FieldBindingPropertyDescriptor extends PropertyDescriptor {
+public class FieldPropertyDescriptor extends PropertyDescriptor {
 
   private ITapestryModel model;
 
@@ -46,7 +46,7 @@ public class FieldBindingPropertyDescriptor extends PropertyDescriptor {
    * @param id
    * @param displayName
    */
-  public FieldBindingPropertyDescriptor(Object id, String displayName, ITapestryModel model) {
+  public FieldPropertyDescriptor(Object id, String displayName, ITapestryModel model) {
     super(id, displayName);
     this.model = model;
   }

@@ -54,6 +54,7 @@ import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.eclipse.update.ui.forms.internal.FormSection;
 
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.bean.PluginFieldBeanInitializer;
 import com.iw.plugins.spindle.bean.PluginPropertyBeanInitializer;
 import com.iw.plugins.spindle.bean.PluginStaticBeanInitializer;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
@@ -63,7 +64,10 @@ import com.iw.plugins.spindle.spec.PluginBeanSpecification;
 import com.iw.plugins.spindle.ui.CheckboxPropertyDescriptor;
 import com.iw.plugins.spindle.ui.ComboBoxPropertyDescriptor;
 import com.iw.plugins.spindle.ui.EmptySelection;
+import com.iw.plugins.spindle.ui.FieldPropertyDescriptor;
 import com.iw.plugins.spindle.util.JavaListSelectionProvider;
+
+import net.sf.tapestry.bean.FieldBeanInitializer;
 import net.sf.tapestry.bean.IBeanInitializer;
 import net.sf.tapestry.bean.PropertyBeanInitializer;
 import net.sf.tapestry.bean.StaticBeanInitializer;
@@ -76,6 +80,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
   private NewInitializerButtonAction newInitializerAction = new NewInitializerButtonAction();
   private NewPropertyInitializerAction newPropertyAction = new NewPropertyInitializerAction();
   private NewStaticInitializerAction newStaticAction = new NewStaticInitializerAction();
+  private NewFieldInitializerAction newFieldAction = new NewFieldInitializerAction();
 
   private PluginBeanSpecification selectedBean;
 
@@ -100,6 +105,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
       newInitializerAction.setEnabled(false);
       newPropertyAction.setEnabled(false);
       newStaticAction.setEnabled(false);
+      newFieldAction.setEnabled(false);
     }
   }
 
@@ -119,7 +125,8 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
       if (changed.equals("beanInitializers")
         || changed.equals("propertyName")
         || changed.equals("propertyPath")
-        || changed.equals("staticValue")) {
+        || changed.equals("staticValue")
+        || changed.equals("fieldValue")) {
         updateNeeded = true;
       }
     }
@@ -149,6 +156,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     MenuManager submenu = new MenuManager("New");
     submenu.add(newPropertyAction);
     submenu.add(newStaticAction);
+    submenu.add(newFieldAction);
     manager.add(submenu);
     if (object != null) {
       manager.add(new Separator());
@@ -212,11 +220,29 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     if (initer instanceof PluginPropertyBeanInitializer) {
       return new PropertyInitializerHolder((PluginPropertyBeanInitializer) initer);
     }
+    if (initer instanceof PluginFieldBeanInitializer) {
+    	return new FieldInitializerHolder((PluginFieldBeanInitializer) initer);
+    }
     return null;
   }
 
-  protected abstract class BaseInitializerHolder {
+  protected abstract class BaseInitializerHolder implements IPropertySource {
     public abstract IBeanInitializer getInitializer();
+
+    public Object getAdapter(Class clazz) {
+      if (clazz == IPropertySource.class) {
+        return (IPropertySource) this;
+      }
+      return null;
+    }
+
+    public IPropertySource getPropertySource(Object key) {
+      return this;
+    }
+
+    public void resetPropertyValue(Object key) {
+    }
+
   }
 
   protected class PropertyInitializerHolder
@@ -226,9 +252,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     private PluginPropertyBeanInitializer initer;
 
     private IPropertyDescriptor[] descriptors =
-      {
-        new TextPropertyDescriptor("property", "Property Name"),
-        new TextPropertyDescriptor("value", "Property Path")};
+      { new TextPropertyDescriptor("property", "Property Name"), new TextPropertyDescriptor("value", "Property Path")};
 
     public PropertyInitializerHolder(PluginPropertyBeanInitializer initer) {
       super();
@@ -248,13 +272,6 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
       return initer;
     }
 
-    public void resetPropertyValue(Object key) {
-    }
-
-    public IPropertySource getPropertySource(Object key) {
-      return this;
-    }
-
     public void setPropertyValue(Object key, Object value) {
       if (!isModelEditable()) {
         updateNeeded = true;
@@ -269,8 +286,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
           newName = oldName;
         } else if (alreadyHasInitializer(newName)) {
           newName = "Copy of " + newName;
-          PluginPropertyBeanInitializer copy =
-            new PluginPropertyBeanInitializer(newName, initer.getOriginalPropertyPath());
+          PluginPropertyBeanInitializer copy = new PluginPropertyBeanInitializer(newName, initer.getOriginalPropertyPath());
           forceDirty();
           update();
           setSelection(copy);
@@ -312,13 +328,6 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
       return initer.getPropertyName();
     }
 
-    public Object getAdapter(Class clazz) {
-      if (clazz == IPropertySource.class) {
-        return (IPropertySource) this;
-      }
-      return null;
-    }
-
   }
 
   static final String[] typeNames = { "Boolean", "String", "Double", "Integer" };
@@ -337,23 +346,15 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
 
     private PluginStaticBeanInitializer initer;
 
-    private TextPropertyDescriptor propertyDescriptor =
-      new TextPropertyDescriptor("property", "Property Name");
+    private TextPropertyDescriptor propertyDescriptor = new TextPropertyDescriptor("property", "Property Name");
 
-    private ComboBoxPropertyDescriptor typeDescriptor =
-      new ComboBoxPropertyDescriptor("type", "Type", typeNames, false);
+    private ComboBoxPropertyDescriptor typeDescriptor = new ComboBoxPropertyDescriptor("type", "Type", typeNames, false);
 
     private IPropertyDescriptor[] booleanTypeDescriptors =
-      new IPropertyDescriptor[] {
-        propertyDescriptor,
-        typeDescriptor,
-        new CheckboxPropertyDescriptor("value", "Value")};
+      new IPropertyDescriptor[] { propertyDescriptor, typeDescriptor, new CheckboxPropertyDescriptor("value", "Value")};
 
     private IPropertyDescriptor[] otherTypeDescriptors =
-      new IPropertyDescriptor[] {
-        propertyDescriptor,
-        typeDescriptor,
-        new TextPropertyDescriptor("value", "Value")};
+      new IPropertyDescriptor[] { propertyDescriptor, typeDescriptor, new TextPropertyDescriptor("value", "Value")};
 
     public StaticInitializerHolder(PluginStaticBeanInitializer initer) {
       super();
@@ -366,23 +367,11 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
       if (value == null) {
         return result + "\" value is null";
       }
-      return result
-        + "\" type = \""
-        + typeNames[getInitializerValueType()]
-        + "\" value = \""
-        + value.toString()
-        + "\"";
+      return result + "\" type = \"" + typeNames[getInitializerValueType()] + "\" value = \"" + value.toString() + "\"";
     }
 
     public IBeanInitializer getInitializer() {
       return initer;
-    }
-
-    public void resetPropertyValue(Object key) {
-    }
-
-    public IPropertySource getPropertySource(Object key) {
-      return this;
     }
 
     public void setPropertyValue(Object key, Object value) {
@@ -553,11 +542,107 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
       return initer.getPropertyName();
     }
 
-    public Object getAdapter(Class clazz) {
-      if (clazz == IPropertySource.class) {
-        return (IPropertySource) this;
+  }
+
+  protected class FieldInitializerHolder
+    extends BaseInitializerHolder
+    implements IAdaptable, IPropertySource, IPropertySourceProvider {
+
+    private PluginFieldBeanInitializer initer;
+
+    private IPropertyDescriptor[] descriptors =
+      {
+        new TextPropertyDescriptor("property", "Property Name"),
+        new FieldPropertyDescriptor("value", "Field Name", getModel())};
+
+    public FieldInitializerHolder(PluginFieldBeanInitializer initer) {
+      this.initer = initer;
+    }
+
+    public String toString() {
+      String result = "property = \"" + initer.getPropertyName();
+      String value = initer.getFieldName();
+      if (value == null) {
+        return result + "\" value is null";
+      }
+      return result + "\" field-name = \"" + value + "\"";
+    }
+    /* (non-Javadoc)
+    * @see IPropertySource#getEditableValue()
+    */
+    public Object getEditableValue() {
+      return initer.getPropertyName();
+    }
+
+    /* (non-Javadoc)
+     * @see IPropertySource#getPropertyDescriptors()
+     */
+    public IPropertyDescriptor[] getPropertyDescriptors() {
+      return descriptors;
+    }
+
+    /* (non-Javadoc)
+     * @see IPropertySource#getPropertyValue(Object)
+     */
+    public Object getPropertyValue(Object key) {
+      if ("property".equals(key)) {
+        return initer.getPropertyName();
+      } else if ("value".equals(key)) {
+        return initer.getFieldName();
       }
       return null;
+    }
+
+    /* (non-Javadoc)
+     * @see IPropertySource#isPropertySet(Object)
+     */
+    public boolean isPropertySet(Object key) {
+      if ("property".equals(key)) {
+        return initer.getPropertyName() != null;
+      } else if ("value".equals(key)) {
+        return initer.getFieldName() != null;
+      } else {
+        return true;
+      }
+    }
+
+    /* (non-Javadoc)
+    * @see IPropertySource#setPropertyValue(Object, Object)
+    */
+    public void setPropertyValue(Object key, Object value) {
+      if (!isModelEditable()) {
+        updateNeeded = true;
+        update();
+        setSelection(initer);
+        return;
+      }
+      if ("property".equals(key)) {
+        String oldName = initer.getPropertyName();
+        String newName = (String) value;
+        if ("".equals(newName.trim())) {
+          newName = oldName;
+        } else if (alreadyHasInitializer(newName)) {
+          newName = "Copy of " + newName;
+          PluginFieldBeanInitializer copy = new PluginFieldBeanInitializer(newName, initer.getFieldName());
+          forceDirty();
+          update();
+          setSelection(copy);
+          return;
+        }
+        initer.setPropertyName(newName);
+      } else if ("value".equals(key)) {
+        initer.setFieldName((String) value);
+      }
+      forceDirty();
+      update();
+      setSelection(initer);
+    }
+
+    /* (non-Javadoc)
+    * @see BaseInitializerHolder#getInitializer()
+    */
+    public IBeanInitializer getInitializer() {
+      return initer;
     }
 
   }
@@ -566,6 +651,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
 
     private Image staticImage = TapestryImages.getSharedImage("bean-static-init.gif");
     private Image propertyImage = TapestryImages.getSharedImage("bean-property-init.gif");
+    private Image fieldImage = TapestryImages.getSharedImage("bean-property-init.gif");
 
     public String getText(Object object) {
       return object.toString();
@@ -587,6 +673,9 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
       if (initer instanceof PluginPropertyBeanInitializer) {
         return propertyImage;
       }
+      if (initer instanceof PluginFieldBeanInitializer) {
+      	return fieldImage;
+      }
       return null;
     }
 
@@ -598,9 +687,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     }
   }
 
-  class InitializerEditorContentProvider
-    extends DefaultContentProvider
-    implements ITreeContentProvider {
+  class InitializerEditorContentProvider extends DefaultContentProvider implements ITreeContentProvider {
 
     Comparator comparer = new Comparator() {
       public int compare(Object a, Object b) {
@@ -672,7 +759,9 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
           newPropertyAction.run();
         } else if (chosen == StaticBeanInitializer.class) {
           newStaticAction.run();
-        }
+        } if (chosen == FieldBeanInitializer.class) {
+          newFieldAction.run();
+        } 
       }
       updateSelection = false;
     }
@@ -689,7 +778,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     */
     public void run() {
       if (selectedBean == null) {
-      	return;
+        return;
       }
       PluginBeanSpecification spec = selectedBean;
       String newName = "property";
@@ -735,6 +824,19 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
 
     public IBeanInitializer getNewInitializerFor(String propertyName) {
       return new PluginPropertyBeanInitializer(propertyName, "fill in value");
+    }
+
+  }
+  class NewFieldInitializerAction extends BaseNewInitializerAction {
+
+    protected NewFieldInitializerAction() {
+      super();
+      setText("Field Initializer");
+      setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("bean-property-init.gif")));
+    }
+
+    public IBeanInitializer getNewInitializerFor(String propertyName) {
+      return new PluginFieldBeanInitializer(propertyName, "select value");
     }
 
   }

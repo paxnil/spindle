@@ -69,7 +69,7 @@ import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.spec.PluginParameterSpecification;
 import com.iw.plugins.spindle.ui.ComponentAliasParameterViewer;
 import com.iw.plugins.spindle.ui.EmptySelection;
-import com.iw.plugins.spindle.ui.FieldBindingPropertyDescriptor;
+import com.iw.plugins.spindle.ui.FieldPropertyDescriptor;
 import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 import com.iw.plugins.spindle.ui.TreeViewerWithToolTips;
@@ -252,7 +252,7 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
       { new TextPropertyDescriptor("name", "Name"), new TextPropertyDescriptor("value", "Parameter Name")};
 
     private IPropertyDescriptor[] fieldDescriptors =
-      { new FieldBindingPropertyDescriptor("value", "Field Name", getModel())};
+      { new FieldPropertyDescriptor("value", "Field Name", getModel())};
       
     private IPropertyDescriptor[] stringDescriptiors =
       { new TextPropertyDescriptor("name", "Name"), new TextPropertyDescriptor("value", "Key")};
