@@ -24,14 +24,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.wizards.extra;
 
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -43,6 +42,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.wizards.NewTapestryElementWizard;
 
 /**
@@ -52,7 +52,7 @@ import com.iw.plugins.spindle.wizards.NewTapestryElementWizard;
  * @author gwl
  * @version $Id$
  */
-public abstract class AbstractCreateFromTemplateAction
+public abstract class AbstractTapestryResourceAction
   extends Action
   implements IObjectActionDelegate {
 
@@ -62,7 +62,7 @@ public abstract class AbstractCreateFromTemplateAction
   /**
    * Constructor for AbstractCreateFromTemplateAction.
    */
-  public AbstractCreateFromTemplateAction() {
+  public AbstractTapestryResourceAction() {
     super();
   }
 
@@ -77,11 +77,11 @@ public abstract class AbstractCreateFromTemplateAction
    * @see org.eclipse.ui.IActionDelegate#run(IAction)
    */
   public void run(IAction action) {
-  	
+
     if (selection != null) {
 
       try {
-      	
+
         for (Iterator iter = selection.iterator(); iter.hasNext();) {
 
           IFile file = (IFile) iter.next();
@@ -97,7 +97,7 @@ public abstract class AbstractCreateFromTemplateAction
 
         }
       } catch (ClassCastException e) {
-      	// do nothing
+        // do nothing
       }
     }
   }
@@ -110,7 +110,7 @@ public abstract class AbstractCreateFromTemplateAction
   public void selectionChanged(IAction action, ISelection sel) {
     boolean enable = false;
     this.selection = null;
-    
+
     IStructuredSelection selection = null;
 
     if (sel instanceof IStructuredSelection) {
@@ -150,8 +150,17 @@ public abstract class AbstractCreateFromTemplateAction
 
           IFile candidateFile = (IFile) iter.next();
 
-          if (checkJWCExists(candidateFile)) {
+          try {
+          	
+            ITapestryProject project =
+              TapestryPlugin.getDefault().getTapestryProjectFor(candidateFile);
 
+            if (checkJWCExists(candidateFile)) {
+
+              result = false;
+            }
+            
+          } catch (CoreException e) {
             result = false;
           }
 

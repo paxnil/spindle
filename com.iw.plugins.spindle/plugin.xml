@@ -142,6 +142,7 @@
          </description>
       </wizard>
    </extension>
+   <!--
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
@@ -156,6 +157,7 @@
          </description>
       </decorator>
    </extension>
+   -->   
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
@@ -233,6 +235,22 @@
       </persistent>
    </extension>
    <extension
+         id="badwordproblem"
+         name="TapestryInvalidStringProblem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+      <attribute name="invalidString"/>
+      <attribute name="pattern"/>
+      <persistent
+            value="false">
+      </persistent>
+   </extension>
+   <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
             label="Spindle Toolbar Action Set"
@@ -285,7 +303,7 @@
             </separator>
          </menu>
          <action
-               label="Migrate to Tapestry DTD 1.3"
+               label="Migration Tool"
                icon="icons/full/migrate16_dark.gif"
                class="com.iw.plugins.spindle.project.actions.MigrateToTapestryDTD13"
                menubarPath="org.eclipse.ui.popupMenus.project.menu1/group1"
@@ -329,6 +347,26 @@
                id="com.iw.plugins.spindle.popupMenus.createComponents.pageFromTemplate">
          </action>
       </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            nameFilter="*.jwc"
+            id="com.iw.plugins.spindle.popupMenus">
+         <menu
+               label="Spindle"
+               id="com.iw.plugins.spindle.popupMenus.convert">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Convert to Tapestry Page (.page)"
+               icon="icons/full/page16.gif"
+               class="com.iw.plugins.spindle.wizards.extra.ConvertComponentIntoPageAction"
+               menubarPath="com.iw.plugins.spindle.popupMenus.convert/group1"
+               enablesFor="1"
+               id="com.iw.plugins.spindle.popupMenus.convert.ConvertToTapestryPage">
+         </action>         
+      </objectContribution>
    </extension>
    <extension
          point="modelManagers">
@@ -348,5 +386,13 @@
             file-extension="library"
             class="com.iw.plugins.spindle.model.manager.LibraryManagerDelegate">
       </manager>
+   </extension>
+   
+    <extension
+         point="org.eclipse.ui.markerUpdaters">
+      <updater
+            class="com.iw.plugins.spindle.editors.BadStringMarkerUpdater"
+            id="com.iw.plugins.spindle.editors.BadStringMarkerUpdater">
+      </updater>
    </extension>
 </plugin>

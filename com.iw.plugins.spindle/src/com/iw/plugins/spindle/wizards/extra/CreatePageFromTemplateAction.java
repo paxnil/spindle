@@ -38,7 +38,7 @@ import com.iw.plugins.spindle.wizards.NewTapestryElementWizard;
  * @author gwl
  * @version $Id$
  */
-public class CreatePageFromTemplateAction extends AbstractCreateFromTemplateAction {
+public class CreatePageFromTemplateAction extends AbstractTapestryResourceAction {
 
   /**
    * Constructor for CreatePageFromTemplateAction.

@@ -353,7 +353,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
           }
           performAddToModel(spec);
           Utils.saveModel(useModel, monitor);
-          TapestryPlugin.openTapestryEditor(useModel.getUnderlyingStorage());
+          //TapestryPlugin.openTapestryEditor(useModel.getUnderlyingStorage());
           mgr.disconnect(useModel.getUnderlyingStorage(), consumer);
         } catch (CoreException e) {
 
