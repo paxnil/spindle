@@ -117,6 +117,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     }
   };
 
+  private NewTapestryProjectWizard fWizard;
   private TemplateListener fTemplateListener;
 
   /* the file factories used by this wizard */
@@ -132,6 +133,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
       ITemplateSource source)
   {
     super(pageName);
+    fWizard = wizard;
 
     fInsertTapestryFilter = new CheckBoxField(UIPlugin
         .getString("new-project-wizard-page-insert-filter-servlet-2.3-and-up-only"));
@@ -146,8 +148,21 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         XMLFileContextType.APPLICATION_FILE_CONTEXT_TYPE,
         PreferenceConstants.APP_TEMPLATE,
         UIPlugin.getDefault().getPreferenceStore());
+    
+    fApplicationTemplateSelector.setReadOnly(true);
   }
 
+  public void setVisible(boolean visible)
+  {
+    super.setVisible(visible);
+    if (visible)
+    {
+      fWizard.entering(this);
+    } else
+    {
+      fWizard.leaving(this);
+    }
+  }
   /**
    * (non-Javadoc) Method declared on IDialogPage.
    */
@@ -253,8 +268,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
       {
         int dtdId = XMLUtil.getDTDVersion(getServletSpecPublicId());
         if (fInsertTapestryFilter != null)
-          fInsertTapestryFilter.setEnabled(
-              dtdId >= XMLUtil.DTD_SERVLET_2_3);
+          fInsertTapestryFilter.setEnabled(dtdId >= XMLUtil.DTD_SERVLET_2_3);
       }
 
       public void widgetDefaultSelected(SelectionEvent e)
@@ -280,18 +294,17 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
 
     setGroupEnabled(fTapestryGroup, nameSpecified);
     setGroupEnabled(fTemplateGroup, nameSpecified);
-    
+
     int dtdId = XMLUtil.getDTDVersion(getServletSpecPublicId());
     if (fInsertTapestryFilter != null)
-      fInsertTapestryFilter.setEnabled(fServletSpecVersionCombo.isEnabled() && nameSpecified && dtdId >= XMLUtil.DTD_SERVLET_2_3);
+      fInsertTapestryFilter.setEnabled(fServletSpecVersionCombo.isEnabled()
+          && nameSpecified && dtdId >= XMLUtil.DTD_SERVLET_2_3);
 
     if (!superValid)
       return false;
 
-  
     if (nameSpecified)
     {
-      
 
       IWorkspace workspace = ResourcesPlugin.getWorkspace();
 
@@ -326,7 +339,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     return true;
   }
 
-  private void setGroupEnabled(Group group, boolean flag)
+  protected void setGroupEnabled(Group group, boolean flag)
   {
     Control[] children = group.getChildren();
     for (int i = 0; i < children.length; i++)
@@ -453,8 +466,8 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     monitor.worked(1);
 
     // the project application spec
-    fReveal.add(fAppFactory.createApplication(webInfFolder, fTemplateSource
-        .getTemplate(fAppFactory), projectName, TapestryCore
+    fReveal.add(fAppFactory.createApplication(webInfFolder, fApplicationTemplateSelector
+        .getSelectedTemplate(), projectName, TapestryCore
         .getString("TapestryEngine.defaultEngine"), "Home.page", monitor));
 
     monitor.worked(1);

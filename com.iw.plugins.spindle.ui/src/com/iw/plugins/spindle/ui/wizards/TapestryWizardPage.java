@@ -45,11 +45,11 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
 public abstract class TapestryWizardPage extends WizardPage
 {
 
-  private IStatus fCurrStatus = new SpindleStatus();
+  protected IStatus fCurrStatus = new SpindleStatus();
 
   private UpdateStatusContainer statusContainer = new UpdateStatusContainer();
 
-  private boolean fPageVisible;
+  protected boolean fPageVisible;
 
   public TapestryWizardPage(String name)
   {
@@ -67,12 +67,12 @@ public abstract class TapestryWizardPage extends WizardPage
     super.setVisible(visible);
     fPageVisible = visible;
     // policy: wizards are not allowed to come up with an error message
-    if (visible && (fCurrStatus != null && fCurrStatus.matches(IStatus.ERROR)))
-    {
-      SpindleStatus status = new SpindleStatus();
-      status.setError(""); //$NON-NLS-1$
-      fCurrStatus = status;
-    }
+//    if (visible && (fCurrStatus != null && fCurrStatus.matches(IStatus.ERROR)))
+//    {
+//      SpindleStatus status = new SpindleStatus();
+//      status.setError(""); //$NON-NLS-1$
+//      fCurrStatus = status;
+//    }
     updateStatus(fCurrStatus);
   }
 
@@ -86,8 +86,7 @@ public abstract class TapestryWizardPage extends WizardPage
    */
   protected void updateStatus(IStatus status)
   {
-
-    fCurrStatus = statusContainer.getStatus(true);
+    fCurrStatus = status;;
 
     setPageComplete(fCurrStatus != null && !fCurrStatus.matches(IStatus.ERROR));
     if (fPageVisible)

@@ -51,6 +51,7 @@ public class PreferenceTemplateSelector extends SimpleTemplateSelector
 {
   private String fPreferenceKey;
   private IPreferenceStore fPreferenceStore;
+  private boolean fReadOnly = false;
 
   /**
    * @param templateContextId
@@ -60,13 +61,35 @@ public class PreferenceTemplateSelector extends SimpleTemplateSelector
   {
     super(templateContextId);
     fPreferenceKey = preferenceKey;
-    fPreferenceStore = store;
+    setPreferenceStore(store);
     UIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
   }
 
+  public void setReadOnly(boolean flag)
+  {
+    fReadOnly = flag;
+  }
+
+  public void setPreferenceStore(IPreferenceStore store)
+  {
+
+    IPreferenceStore old = fPreferenceStore;
+    if (old != null)
+      old.removePropertyChangeListener(this);
+
+    fPreferenceStore = store;
+    
+    if (store != null)
+      fPreferenceStore.addPropertyChangeListener(this);
+
+    if (old != null)
+      reload();
+  }
+  
   public void propertyChange(PropertyChangeEvent event)
   {
-    if (fCombo != null && !fCombo.isDisposed() && (UIPlugin.PLUGIN_ID + ".customtemplates").equals(event.getProperty()))
+    if (fCombo != null && !fCombo.isDisposed()
+        && (UIPlugin.PLUGIN_ID + ".customtemplates").equals(event.getProperty()))
       reload();
   }
   public void dispose()
@@ -77,6 +100,8 @@ public class PreferenceTemplateSelector extends SimpleTemplateSelector
 
   public void loadDefault()
   {
+    if (fPreferenceStore == null)
+      return;
     populate();
     select(fPreferenceStore.getDefaultString(fPreferenceKey));
     fireSelectionChanged();
@@ -84,12 +109,16 @@ public class PreferenceTemplateSelector extends SimpleTemplateSelector
 
   public void load()
   {
+    if (fPreferenceStore == null)
+      return;
     select(fPreferenceStore.getString(fPreferenceKey));
     fireSelectionChanged();
   }
 
   private void select(String templateName)
   {
+    if (fPreferenceStore == null)
+      return;
     String[] items = fCombo.getItems();
     int i = 0;
     for (; i < items.length; i++)
@@ -153,13 +182,24 @@ public class PreferenceTemplateSelector extends SimpleTemplateSelector
     return status;
   }
 
+  protected void populate()
+  {
+    if (fPreferenceStore == null)
+      return;
+    super.populate();
+  }
   private void store()
   {
+    if (fReadOnly || fPreferenceStore == null)
+      return;
+
     String value;
     Template selectedTemplate = getSelectedTemplate();
-    if (selectedTemplate != null) {
+    if (selectedTemplate != null)
+    {
       value = selectedTemplate.getName();
-    } else {
+    } else
+    {
       value = fCombo.getItem(fCombo.getSelectionIndex());
     }
     fPreferenceStore.setValue(fPreferenceKey, value);

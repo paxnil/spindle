@@ -60,6 +60,7 @@ import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ProjectPreferenceStore;
 import com.iw.plugins.spindle.core.util.SpindleMultiStatus;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.ui.preferences.WizardTemplatesPreferencePage;
 import com.iw.plugins.spindle.ui.util.UIUtils;
@@ -83,20 +84,35 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
 
   class Listener implements ISelectionChangedListener, IPropertyChangeListener
   {
+
+    boolean run = true;
+
+    public void start()
+    {
+      run = true;
+    }
+
+    public void stop()
+    {
+      run = false;
+    }
+    
     public void selectionChanged(SelectionChangedEvent event)
     {
-      validate();
+      if (run)
+        validate();
     }
 
     public void propertyChange(PropertyChangeEvent event)
     {
-      if ((UIPlugin.PLUGIN_ID + ".customtemplates").equals(event.getProperty()))
-        validate();
+      if (run)
+        if ((UIPlugin.PLUGIN_ID + ".customtemplates").equals(event.getProperty()))
+          validate();
     }
   }
 
   private Button fUseWorkspaceDefaultTemplates;
-   private PreferenceTemplateSelector fLibraryTemplateSelector;
+  private PreferenceTemplateSelector fLibraryTemplateSelector;
   private PreferenceTemplateSelector fComponentTemplateSelector;
   private PreferenceTemplateSelector fPageTemplateSelector;
   private PreferenceTemplateSelector fTapestryTemplateSelector;
@@ -108,13 +124,17 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
 
   String PAGE_NAME;
 
-  public TemplateSelectionPage(String name)
+  private NewTapestryProjectWizard fWizard;
+
+  public TemplateSelectionPage(NewTapestryProjectWizard wizard, String name)
   {
     super(name);
+    fWizard = wizard;
+
     PAGE_NAME = name;
     //    this.setImageDescriptor(ImageDescriptor.createFromURL(Images.getImageURL(UIPlugin
     //        .getString(PAGE_NAME + ".image"))));
-//    this.setDescription(UIPlugin.getString(PAGE_NAME + ".description"));
+    //    this.setDescription(UIPlugin.getString(PAGE_NAME + ".description"));
     this.setDescription("Project file generation templates");
 
     fProjectPreferences = ProjectPreferenceStore.createEmptyStore(UIPlugin
@@ -144,6 +164,18 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
     fListener = new Listener();
   }
 
+  public void setVisible(boolean visible)
+  {
+    super.setVisible(visible);
+    if (visible)
+    {
+      fWizard.entering(this);
+    } else
+    {
+      fWizard.leaving(this);
+    }
+  }
+
   /*
    * (non-Javadoc)
    * 
@@ -151,6 +183,8 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
    */
   public void createControl(Composite parent)
   {
+    setPageComplete(true);
+
     Font font = parent.getFont();
     Composite composite = new Composite(parent, SWT.NULL);
     composite.setFont(font);
@@ -292,8 +326,15 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
   }
   public IRunnableWithProgress getRunnable(Object object)
   {
+
     if (fUseWorkspaceDefaultTemplates.getSelection())
-      return null;
+    {
+      fListener.stop();
+      fLibraryTemplateSelector.loadDefault();
+      fComponentTemplateSelector.loadDefault();
+      fPageTemplateSelector.loadDefault();
+      fTapestryTemplateSelector.loadDefault();
+    }
 
     IProject project = null;
     if (object instanceof IProject)
@@ -374,8 +415,6 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
 
   private void validate()
   {
-    setErrorMessage(null);
-    setPageComplete(true);
 
     IStatus resultStatus;
 
@@ -385,7 +424,7 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
     } else
     {
       SpindleMultiStatus status = new SpindleMultiStatus();
-       status.addStatus(fComponentTemplateSelector.validate());
+      status.addStatus(fComponentTemplateSelector.validate());
       status.addStatus(fPageTemplateSelector.validate());
       status.addStatus(fTapestryTemplateSelector.validate());
 
@@ -395,12 +434,23 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
     {
       if (fUseWorkspaceDefaultTemplates.getSelection())
       {
-        setErrorMessage("There are problems with the workspace defaults. Go fix them or choose project defaults instead.");
-      } else
-      {
-        setErrorMessage(resultStatus.getMessage());
+        SpindleStatus newResult = new SpindleStatus();
+        newResult
+            .setError("There are problems with the workspace defaults. Go fix them or choose project defaults instead.");
+        resultStatus = newResult;
       }
-      setPageComplete(false);
+      updateStatus(resultStatus);
+    }
+  }
+
+  protected void updateStatus(IStatus status)
+  {
+    fCurrStatus = status;
+
+    setPageComplete(fCurrStatus != null && !fCurrStatus.matches(IStatus.ERROR));
+    if (fPageVisible)
+    {
+      applyToStatusLine(this, fCurrStatus);
     }
   }
   /**
@@ -439,4 +489,5 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
     return status.getMostSevere(status.getChildren());
 
   }
+
 }

@@ -32,7 +32,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.text.templates.Template;
 
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
+import com.iw.plugins.spindle.ui.widgets.PreferenceTemplateSelector;
 import com.iw.plugins.spindle.ui.wizards.factories.PageFactory;
 
 public class NewTapPageWizardPage extends NewTapComponentWizardPage
@@ -41,6 +44,13 @@ public class NewTapPageWizardPage extends NewTapComponentWizardPage
   public NewTapPageWizardPage(IWorkspaceRoot root, String pageName)
   {
     super(root, pageName);
+  }
+  
+  protected PreferenceTemplateSelector createComponentTemplateSelector()
+  {
+    return createTemplateSelector(
+        XMLFileContextType.PAGE_FILE_CONTEXT_TYPE,
+        PreferenceConstants.PAGE_TEMPLATE);
   }
 
   protected void createSpecificationResource(
@@ -53,7 +63,7 @@ public class NewTapPageWizardPage extends NewTapComponentWizardPage
         .getSpecificationLocation();
 
     PageFactory factory = new PageFactory();
-    Template template = factory.getAllTemplates()[0];
+    Template template = fComponentTemplateSelector.getSelectedTemplate();
 
     if (libLocation != null)
     {

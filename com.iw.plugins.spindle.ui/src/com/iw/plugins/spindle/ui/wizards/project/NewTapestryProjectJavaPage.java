@@ -51,6 +51,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -83,37 +84,35 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
   protected IProject fCurrProject;
 
   protected boolean fCanRemoveContent;
+  
+  private NewTapestryProjectWizard fWizard;
 
   /**
    * Constructor for NewProjectCreationWizardPage.
    */
-  public NewTapestryProjectJavaPage(WizardNewProjectCreationPage mainPage)
+  public NewTapestryProjectJavaPage(NewTapestryProjectWizard wizard, WizardNewProjectCreationPage mainPage)
   {
     super();
+    fWizard = wizard;
     fMainPage = mainPage;
     fCurrProjectLocation = null;
     fCurrProject = null;
     fCanRemoveContent = false;
   }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-   */
+  
   public void setVisible(boolean visible)
   {
+    super.setVisible(visible);
     if (visible)
     {
-      changeToNewProject();
+      fWizard.entering(this);
     } else
     {
-      removeProject();
+      fWizard.leaving(this);
     }
-    super.setVisible(visible);
   }
-
-  private void changeToNewProject()
+  
+  public  void changeToNewProject()
   {
     IProject newProjectHandle = fMainPage.getProjectHandle();
     IPath newProjectLocation = fMainPage.getLocationPath();
@@ -361,7 +360,7 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
     }
   }
 
-  private void removeProject()
+   public void removeProject()
   {
     if (fCurrProject == null || !fCurrProject.exists())
     {

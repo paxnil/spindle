@@ -42,6 +42,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -172,6 +175,45 @@ public class SimpleTemplateSelector implements ISelectionProvider
     return createControl(parent, UIPlugin.getString(fTemplateContextId), columnCount);
   }
 
+//  public Control createFormControl(Composite parent, int columnCount)
+//  {
+//   Font font = parent.getFont();
+//   Composite container = new Composite(parent, SWT.NULL);
+//
+//    fIconLabel = new Label(parent, SWT.NULL);
+//    fLabel = new Label(parent, SWT.NULL);
+//    fCombo = new Combo(parent, SWT.READ_ONLY);
+//
+//    Font font = parent.getFont();
+//
+//    Composite container = new Composite(parent, SWT.NULL);
+//    FormLayout layout = new FormLayout();
+//    container.setLayout(layout);
+//
+//    FormData formData = new FormData();
+//    formData.width = 7;
+//    formData.top = new FormAttachment(0, 5);
+//    formData.left = new FormAttachment(0, 0);
+//    fIconLabel.setLayoutData(formData);
+//
+//    fLabel.setText(UIPlugin.getString(fTemplateContextId));
+//    formData = new FormData();
+//    formData.top = new FormAttachment(0, 3);
+//    formData.left = new FormAttachment(fIconLabel, 4);
+//    formData.width = 75;
+//    formData.right = new FormAttachment(fCombo, -4);
+//    fLabel.setLayoutData(formData);
+//
+//    formData = new FormData();
+//    formData.height = 25;
+//    formData.left = new FormAttachment(fLabel,14);
+//    formData.right = new FormAttachment(100, 0);
+//    fCombo.setLayoutData(formData);
+//
+//    return container;
+//
+//  }
+
   /** @deprecated */
   public Control createControl(Composite parent, String label, int columnCount)
   {
@@ -238,18 +280,19 @@ public class SimpleTemplateSelector implements ISelectionProvider
 
   protected void processValidationResult(IStatus status)
   {
-    setImage(!status.isOK());    
+    setImage(!status.isOK());
   }
 
   public void setEnabled(boolean flag)
   {
     if (fCombo != null)
     {
+      fLabel.setEnabled(flag);
       fCombo.setEnabled(flag);
       setImage(fIconLabel.getImage() != null);
     }
   }
-  
+
   void setImage(boolean flag)
   {
     if (fIconLabel != null)

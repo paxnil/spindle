@@ -48,6 +48,8 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
   private NewTapestryProjectJavaPage fJavaPage;
   private TemplateSelectionPage fTemplatePage;
 
+  private IWizardPage fEntering = null;
+
   private boolean beenThere = false;
 
   public NewTapestryProjectWizard()
@@ -57,14 +59,30 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
     setWindowTitle(UIPlugin.getString("new-project-wizard-window-title"));
   }
 
+  public void entering(IWizardPage page)
+  {
+    fEntering = page;
+  }
+
+  public void leaving(IWizardPage page)
+  {
+    if (page == fMainPage && fEntering == fJavaPage )
+    {
+      	fJavaPage.changeToNewProject();
+    } else if (page == fJavaPage && fEntering == fMainPage )
+    {
+      	fJavaPage.removeProject();
+    }
+  }
   /**
    * @see Wizard#createPages
    */
   public void addPages()
   {
-    ImageDescriptor descriptor = Images.getImageDescriptor("applicationDialog.gif");
 
-    fTemplatePage = new TemplateSelectionPage("FileGeneration");
+    ImageDescriptor descriptor = Images.getImageDescriptor("applicationDialog.gif"); 
+
+    fTemplatePage = new TemplateSelectionPage(this, "FileGeneration");
 
     fMainPage = new NewTapestryProjectPage(UIPlugin
         .getString("new-project-wizard-page-title"), this, fTemplatePage);
@@ -73,16 +91,18 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
     fMainPage.setDescription(UIPlugin.getString("new-project-wizard-page-title"));
 
     addPage(fMainPage);
-    addPage(fTemplatePage);
 
-    fJavaPage = new NewTapestryProjectJavaPage(fMainPage);
+    fJavaPage = new NewTapestryProjectJavaPage(this, fMainPage);
     fJavaPage.setImageDescriptor(descriptor);
     addPage(fJavaPage);
+
     // bug [ 843021 ] Is this what 3 Beta is supposed to do
     // for some reason sometimes the page's wizard is not set
     //
     // should have been set by addPagr()
     fJavaPage.setWizard(this);
+    addPage(fTemplatePage);
+
   }
 
   /**
@@ -97,6 +117,7 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
       {
         jproject.open(null);
         finishPage(fMainPage.getRunnable(jproject));
+        finishPage(fTemplatePage.getRunnable(jproject.getProject()));
         IResource[] reveal = fMainPage.getReveal();
         for (int i = 0; i < reveal.length; i++)
         {
@@ -109,7 +130,6 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
     }
     return true;
   }
-  
 
   /*
    * (non-Javadoc)
@@ -138,9 +158,9 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
   public boolean canFinish()
   {
     IWizardPage currentPage = getContainer().getCurrentPage();
-    if (currentPage == fMainPage || currentPage == fTemplatePage)
+    if (currentPage == fMainPage)
       return false;
-    return super.canFinish();
+    return super.canFinish() && fTemplatePage.isPageComplete();
   }
 
 }

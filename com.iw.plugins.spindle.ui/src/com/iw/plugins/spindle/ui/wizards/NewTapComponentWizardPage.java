@@ -30,13 +30,13 @@ import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
@@ -46,25 +46,39 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchPart;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.actions.RequiredSaveEditorAction;
+import com.iw.plugins.spindle.core.ProjectPreferenceStore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.ContextResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
+import com.iw.plugins.spindle.ui.widgets.PreferenceTemplateSelector;
 import com.iw.plugins.spindle.ui.wizards.factories.ComponentFactory;
 import com.iw.plugins.spindle.ui.wizards.factories.TapestryTemplateFactory;
 import com.iw.plugins.spindle.ui.wizards.fields.ComponentNameField;
@@ -75,7 +89,9 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 {
 
   public static final String P_GENERATE_HTML = "new.component.generate.html";
+  /** @deprecated */
   public static final String P_HTML_TO_GENERATE = "new.component.html.to.generate";
+  /** @deprecated */
   public static final String P_OPENALL = "new.component.open.all";
 
   String PAGE_NAME;
@@ -93,17 +109,25 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   protected TapestryProjectDialogField fTapestryProjectDialogField;
   protected NamespaceDialogField fNamespaceDialogField;
   protected ComponentNameField fComponentNameDialogField;
-  protected CheckBoxField fGenerateHTML;
-  protected CheckBoxField fOpenAllField;
+  protected Button fGenerateHTML;
   protected DialogField fNextLabel;
   protected IFile fComponentFile = null;
   protected IFile fGeneratedHTMLFile = null;
+  protected ProjectPreferenceStore fPreferenceStore;
+
+  protected PreferenceTemplateSelector fComponentTemplateSelector;
+  protected PreferenceTemplateSelector fTapestryTemplateSelector;
+  private Group fTemplatesGroup;
+  private FieldEventsAdapter fListener;
+  private boolean fBroken = false;
 
   public static void initializeDefaultPreferences(IPreferenceStore pstore)
   {
     pstore.setDefault(P_GENERATE_HTML, true);
-    pstore.setDefault(P_HTML_TO_GENERATE, UIPlugin.getString("TAPESTRY.xmlComment")
-        + UIPlugin.getString("TAPESTRY.genHTMLSource"));
+    //    pstore.setDefault(P_HTML_TO_GENERATE,
+    // UIPlugin.getString("TAPESTRY.xmlComment")
+    //        + UIPlugin.getString("TAPESTRY.genHTMLSource"));
+
   }
 
   /**
@@ -126,26 +150,49 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
     this.setDescription(UIPlugin.getString(PAGE_NAME + ".description"));
 
-    IDialogFieldChangedListener listener = new FieldEventsAdapter();
-
+    fListener = new FieldEventsAdapter();
     fTapestryProjectDialogField = new TapestryProjectDialogField(
         PROJECT,
         root,
         LABEL_WIDTH);
     connect(fTapestryProjectDialogField);
-    fTapestryProjectDialogField.addListener(listener);
+    fTapestryProjectDialogField.addListener(fListener);
 
     fNamespaceDialogField = new NamespaceDialogField(NAMESPACE, LABEL_WIDTH + 40);
     connect(fNamespaceDialogField);
-    fNamespaceDialogField.addListener(listener);
+    fNamespaceDialogField.addListener(fListener);
 
     fComponentNameDialogField = new ComponentNameField(COMPONENTNAME);
     connect(fComponentNameDialogField);
-    fComponentNameDialogField.addListener(listener);
+    fComponentNameDialogField.addListener(fListener);
 
-    fGenerateHTML = new CheckBoxField(UIPlugin.getString(GENERATE_HTML + ".label"));
-    fOpenAllField = new CheckBoxField(UIPlugin.getString(OPEN_ALL + ".label"));
     fNextLabel = new DialogField(UIPlugin.getString(PAGE_NAME + ".nextPage"));
+
+    fComponentTemplateSelector = createComponentTemplateSelector();
+
+    fTapestryTemplateSelector = createTemplateSelector(
+        XMLFileContextType.TEMPLATE_FILE_CONTEXT_TYPE,
+        PreferenceConstants.TAP_TEMPLATE_TEMPLATE);
+
+  }
+
+  protected PreferenceTemplateSelector createComponentTemplateSelector()
+  {
+    return createTemplateSelector(
+        XMLFileContextType.COMPONENT_FILE_CONTEXT_TYPE,
+        PreferenceConstants.COMPONENT_TEMPLATE);
+  }
+
+  protected final PreferenceTemplateSelector createTemplateSelector(
+      String templateContextId,
+      String preferenceKey)
+  {
+    PreferenceTemplateSelector result = new PreferenceTemplateSelector(
+        templateContextId,
+        preferenceKey,
+        null);
+    result.setReadOnly(true);
+    return result;
   }
 
   /**
@@ -157,11 +204,18 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     IRunnableContext context = (IRunnableContext) container;
 
     fTapestryProjectDialogField.init(jelem, context);
+    if (fTapestryProjectDialogField.isProjectBroken()) {
+       updateStatus(fTapestryProjectDialogField.getStatus());
+      setCompositeEnabled((Composite)getControl(), false);
+       return;
+    }
+    findPreferenceStore();
     if (prepopulateName != null)
     {
       fComponentNameDialogField.setTextValue(prepopulateName);
-      fGenerateHTML.setCheckBoxValue(false);
-      fGenerateHTML.setEnabled(false);
+      setCompositeEnabled(fTemplatesGroup, false);
+      //      fGenerateHTML.setSelection(false);
+      //      fGenerateHTML.setEnabled(false);
     } else
     {
       fComponentNameDialogField.setTextValue("");
@@ -171,6 +225,43 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         fTapestryProjectDialogField,
         fComponentNameDialogField,
         getWizard().getClass() == NewTapComponentWizard.class);
+    
+    updateStatus();   
+  }
+
+  /**
+   *  
+   */
+  private void findPreferenceStore()
+  {
+    fPreferenceStore = null;
+    TapestryProject tproject = fTapestryProjectDialogField.getTapestryProject();
+    if (tproject != null && tproject.getProject() != null)
+    {
+      IProject project = tproject.getProject();
+      if (project.exists())
+      {
+        fPreferenceStore = ProjectPreferenceStore.getStore(fTapestryProjectDialogField
+            .getTapestryProject()
+            .getProject(), UIPlugin.SPINDLEUI_PREFS_FILE, UIPlugin
+            .getDefault()
+            .getPreferenceStore());
+      }
+    }
+
+    fComponentTemplateSelector.setPreferenceStore(fPreferenceStore);
+    fTapestryTemplateSelector.setPreferenceStore(fPreferenceStore);
+  }
+
+  protected void setCompositeEnabled(Composite composite, boolean flag)
+  {
+    Control[] children = composite.getChildren();
+    for (int i = 0; i < children.length; i++)
+    {
+      children[i].setEnabled(flag);
+      if (children[i] instanceof Composite)
+        setCompositeEnabled((Composite)children[i], flag);
+    }
   }
 
   /**
@@ -195,9 +286,9 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     Control projectFieldControl = fTapestryProjectDialogField.getControl(composite);
     Control namespaceFieldControl = fNamespaceDialogField.getControl(composite);
     Control nameFieldControl = fComponentNameDialogField.getControl(composite);
-    Control genHTML = fGenerateHTML.getControl(composite);
-    Control openAll = fOpenAllField.getControl(composite);
+
     Control labelControl = fNextLabel.getControl(composite);
+    fTemplatesGroup = createGroup(composite);
 
     addControl(nameFieldControl, composite, 10);
 
@@ -208,21 +299,45 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
     separator = createSeparator(composite, namespaceFieldControl);
 
-    addControl(genHTML, separator, 10);
+    addControl(fTemplatesGroup, separator, 10);
 
-    addControl(openAll, genHTML, 10);
-
-    addControl(labelControl, openAll, 50);
+    addControl(labelControl, fTemplatesGroup, 50);
 
     setControl(composite);
     setFocus();
 
     fNamespaceDialogField.updateStatus();
     IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
-    fGenerateHTML.setCheckBoxValue(pstore.getBoolean(P_GENERATE_HTML));
-    fOpenAllField.setCheckBoxValue(pstore.getBoolean(P_OPENALL));
-    updateStatus();
+    fGenerateHTML.setSelection(pstore.getBoolean(P_GENERATE_HTML));
+         
+  }
 
+  private Group createGroup(Composite container)
+  {
+    Font font = container.getFont();
+    Group group = new Group(container, SWT.NONE);
+    GridLayout layout = new GridLayout();
+    int columnCount = 3;
+    layout.numColumns = columnCount;
+    group.setLayout(layout);
+    //    group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    group.setFont(font);
+    group.setText("File Generation: ");
+
+    fComponentTemplateSelector.createControl(group, columnCount);
+    //    fComponentTemplateSelector.addSelectionChangedListener(f);
+
+    fGenerateHTML = new Button(group, SWT.CHECK);
+    fGenerateHTML.setText(UIPlugin.getString(GENERATE_HTML + ".label"));
+    GridData data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+    data.horizontalSpan = columnCount;
+    fGenerateHTML.setLayoutData(data);
+    fGenerateHTML.addSelectionListener(fListener);
+
+    fTapestryTemplateSelector.createControl(group, columnCount);
+    //    fTapestryTemplateSelector.addSelectionChangedListener(fListener);
+
+    return group;
   }
 
   public INamespace getSelectedNamespace()
@@ -261,7 +376,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
           createSpecificationResource(monitor, useClass, useLibLocation);
 
-          if (fGenerateHTML.getCheckBoxValue())
+          if (fGenerateHTML.getSelection())
           {
             createHTMLResource(new SubProgressMonitor(monitor, 1), useLibLocation);
           }
@@ -280,7 +395,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
       IFolder libLocation) throws CoreException, InterruptedException
   {
     ComponentFactory factory = new ComponentFactory();
-    Template template = factory.getAllTemplates()[0];
+    Template template = fComponentTemplateSelector.getSelectedTemplate();
     if (libLocation != null)
     {
       fComponentFile = factory.createComponent(
@@ -512,16 +627,14 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     };
   };
 
+  /** @deprecated */
   public boolean getOpenAll()
   {
-    return fOpenAllField.getCheckBoxValue();
+    return true;
   }
 
   public boolean performFinish()
   {
-    UIPlugin.getDefault().getPreferenceStore().setValue(
-        P_OPENALL,
-        fOpenAllField.getCheckBoxValue());
     return true;
   }
 
@@ -532,9 +645,9 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     IResourceWorkspaceLocation namespaceLocation = (IResourceWorkspaceLocation) fNamespaceDialogField
         .getSelectedNamespace()
         .getSpecificationLocation();
-    
+
     IFile namespaceFile = (IFile) namespaceLocation.getStorage();
-    
+
     IContainer container = null;
     if (libLocation != null)
     {
@@ -549,7 +662,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     }
 
     TapestryTemplateFactory factory = new TapestryTemplateFactory();
-    Template template = factory.getAllTemplates()[0];
+    Template template = fTapestryTemplateSelector.getSelectedTemplate();
 
     fGeneratedHTMLFile = factory.createTapestryTemplate(
         container,
@@ -604,8 +717,9 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     boolean flag = fComponentNameDialogField.getStatus().getSeverity() != IStatus.ERROR;
     fTapestryProjectDialogField.setEnabled(flag);
     fNamespaceDialogField.setEnabled(flag);
-    fGenerateHTML.setEnabled(flag);
-    fOpenAllField.setEnabled(flag);
+    setCompositeEnabled(fTemplatesGroup, flag);
+    if (fGenerateHTML.isEnabled())
+      fTapestryTemplateSelector.setEnabled(fGenerateHTML.getSelection());
   }
 
   public void updateStatus()
@@ -614,12 +728,17 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     checkEnabled(fComponentNameDialogField.getStatus());
   }
 
-  private class FieldEventsAdapter implements IDialogFieldChangedListener
+  private class FieldEventsAdapter
+      implements
+        IDialogFieldChangedListener,
+        SelectionListener
   {
 
     public void dialogFieldChanged(DialogField field)
     {
       updateStatus();
+      if (field == fTapestryProjectDialogField)
+        findPreferenceStore();
     }
     /**
      * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
@@ -636,6 +755,17 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     {
       if (field == fNamespaceDialogField)
         updateStatus();
+    }
+
+    public void widgetDefaultSelected(SelectionEvent e)
+    {
+      //do nothing
+    }
+    public void widgetSelected(SelectionEvent e)
+    {
+      if (e.getSource() == fGenerateHTML)
+        fTapestryTemplateSelector.setEnabled(fGenerateHTML.isEnabled()
+            && fGenerateHTML.getSelection());
     }
   }
 

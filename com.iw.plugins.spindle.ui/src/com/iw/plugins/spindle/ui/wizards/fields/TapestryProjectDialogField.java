@@ -70,6 +70,7 @@ public class TapestryProjectDialogField extends StringButtonField
   protected String fName;
   private IWorkspaceRoot fWorkspaceRoot;
   private TapestryProject fCurrentTapestryProject;
+  private boolean fCurrentProjectIsBroken;
 
   public TapestryProjectDialogField(String name, IWorkspaceRoot root, int labelWidth)
   {
@@ -243,6 +244,7 @@ public class TapestryProjectDialogField extends StringButtonField
   protected IStatus projectChanged()
   {
     SpindleStatus status = new SpindleStatus();
+    fCurrentProjectIsBroken = false;
 
     fCurrentTapestryProject = null;
     String str = getContainerText();
@@ -295,6 +297,7 @@ public class TapestryProjectDialogField extends StringButtonField
         if (brokenBuildMarkers.length > 0)
         {
           status.setError(UIPlugin.getString(fName + ".error.ProjectIsBroken", str));
+          fCurrentProjectIsBroken = true;
           return status;
         }
       } catch (CoreException e)
@@ -345,6 +348,14 @@ public class TapestryProjectDialogField extends StringButtonField
 
     }
     return false;
+  }
+
+  /**
+   * @return
+   */
+  public boolean isProjectBroken()
+  { 
+    return fCurrentProjectIsBroken;
   }
 
 }
