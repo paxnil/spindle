@@ -29,6 +29,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
+import javax.swing.ProgressMonitor;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -43,11 +45,14 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.pde.core.IModelChangedEvent;
+import org.eclipse.pde.core.ModelChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -152,11 +157,12 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
   /**
    * Should be called from the wizard with the input element. 
    */
-  public void init(IJavaElement jelem) {
+  public void init(IJavaElement jelem, String prepopulateName) {
 
     WizardDialog container = (WizardDialog) getWizard().getContainer();
     IRunnableContext context = (IRunnableContext) container;
 
+	
     fContainerDialogField.init(jelem, context);
     fPackageDialogField.init(fContainerDialogField, context);
     IPackageFragment pack = null;
@@ -164,7 +170,13 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
       pack = (IPackageFragment) Utils.findElementOfKind(jelem, IJavaElement.PACKAGE_FRAGMENT);
     }
     fPackageDialogField.setPackageFragment(pack);
-    fComponentNameDialog.setTextValue("");
+    if (prepopulateName != null) {
+		fComponentNameDialog.setTextValue(prepopulateName);
+		fGenerateHTML.setCheckBoxValue(false);
+		fGenerateHTML.setEnabled(false);
+	} else {
+    	fComponentNameDialog.setTextValue("");
+    }
     fComponentNameDialog.init(fPackageDialogField);
     fAutoAddField.init(jelem, fComponentNameDialog, getWizard().getClass() == NewTapComponentWizard.class);
   }
@@ -314,12 +326,12 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
             spec.setPageSpecification(useComponentName, new PluginPageSpecification(useTapestryPath));
           }
           if (targetEditor == null) {
+          	Utils.saveModel(useSelectedModel, monitor);
             TapestryPlugin.openTapestryEditor(useSelectedModel);
-          }
-          if (targetEditor != null) {
+          } else {
             useSelectedModel.setOutOfSynch(true);
+            targetEditor.doSave(monitor);
             targetEditor.showPage(SpindleMultipageEditor.SOURCE_PAGE);
-            targetEditor.fireSaveNeeded();
           }
 
         }

@@ -161,7 +161,7 @@ public class MigrateAllTo204PlusDTD extends Action implements IWorkbenchWindowAc
       public void run(IProgressMonitor pm) {      	
         pm.beginTask(MessageUtil.getFormattedString(NAME+".migrationCount", Integer.toString(migratedModelsToSave.length)), 1); //$NON-NLS-1$
         for (int i = 0; i < useModelsToSave.length; i++) {
-          saveModel(useModelsToSave[i], pm);
+          Utils.saveModel(useModelsToSave[i], pm);
           pm.worked(1);
         }
         pm.done();
@@ -171,34 +171,7 @@ public class MigrateAllTo204PlusDTD extends Action implements IWorkbenchWindowAc
 
   
 
-  private void saveModel(ITapestryModel model, IProgressMonitor monitor) {
-    InputStream stream = null;
-    PrintWriter writer = null;
-    try {
-      StringWriter swriter = new StringWriter();
-      writer = new PrintWriter(swriter);
-      model.save(writer);
-      writer.flush();
-
-      stream = new ByteArrayInputStream(swriter.toString().getBytes());
-
-      IFile file = (IFile) ((IAdaptable) model.getUnderlyingStorage()).getAdapter(IFile.class);
-      //assuming here the file exists!
-
-      file.setContents(stream, true, true, monitor);
-
-      model.reload();
-
-    } catch (CoreException c) {
-
-    } finally {
-      try {
-        writer.close();
-        stream.close();
-      } catch (IOException e) {
-      }
-    }
-  }
+  
   /**
    * @see org.eclipse.ui.IActionDelegate#selectionChanged(IAction, ISelection)
    */

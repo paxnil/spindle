@@ -37,6 +37,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
@@ -52,6 +53,8 @@ import com.iw.plugins.spindle.TapestryPlugin;
  * All Rights Reserved
  */
 public abstract class NewTapestryElementWizard extends BasicNewResourceWizard implements INewWizard {
+
+  protected String prepopulateName = null;
 
   public NewTapestryElementWizard() {
     setNeedsProgressMonitor(true);
@@ -112,10 +115,14 @@ public abstract class NewTapestryElementWizard extends BasicNewResourceWizard im
         jelem = (IJavaElement) adaptable.getAdapter(IJavaElement.class);
         if (jelem == null) {
           IResource resource = (IResource) adaptable.getAdapter(IResource.class);
-          if (resource != null) {
-            IProject proj = resource.getProject();
-            if (proj != null) {
-              jelem = JavaCore.create(proj);
+          IResource parent = resource.getParent();
+          jelem = (IJavaElement) ((IAdaptable) parent).getAdapter(IJavaElement.class);
+          if (jelem == null) {
+            if (resource != null) {
+              IProject proj = resource.getProject();
+              if (proj != null) {
+                jelem = JavaCore.create(proj);
+              }
             }
           }
         }
@@ -125,6 +132,21 @@ public abstract class NewTapestryElementWizard extends BasicNewResourceWizard im
       jelem = TapestryPlugin.getActiveEditorJavaInput();
     }
     return jelem;
+  }
+
+  /**
+   * @see org.eclipse.ui.IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
+   */
+  public void init(IWorkbench workbench, IStructuredSelection selection, String prepopulateName) {
+    super.init(workbench, selection);
+    this.prepopulateName = prepopulateName;
+  }
+
+  /**
+   * @see org.eclipse.jface.wizard.IWizard#performFinish()
+   */
+  public boolean performFinish() {
+    return false;
   }
 
 }

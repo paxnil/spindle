@@ -26,23 +26,49 @@
 package com.iw.plugins.spindle.editorapp;
 
 import net.sf.tapestry.parse.SpecificationParser;
+
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.pde.core.IEditable;
 import org.eclipse.pde.core.IModel;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.update.ui.forms.internal.FormEntry;
 import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 import org.eclipse.update.ui.forms.internal.IFormTextListener;
+import sun.security.action.GetPropertyAction;
 
 import com.iw.plugins.spindle.MessageUtil;
+import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormSection;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.util.Utils;
 
 public class OverviewGeneralSection extends SpindleFormSection implements IModelChangedListener {
 
@@ -50,6 +76,9 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
   private FormEntry nameText;
   private FormEntry engineClassText;
   private boolean updateNeeded;
+  private ChooseEngineClassAction chooseEngineAction = new ChooseEngineClassAction();
+  private OpenEngineClassAction openEngineClassAction = new OpenEngineClassAction();
+  private String hierarchyRoot = "net.sf.tapestry.IEngine";
 
   public OverviewGeneralSection(SpindleFormPage page) {
     super(page);
@@ -85,13 +114,13 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     String name = spec.getName();
     String dtdVersion = spec.getDTDVersion();
     if (dtdVersion == null) {
-    	dtdVersion = "Unknown DTD or pre 1.1 DTD";
+      dtdVersion = "Unknown DTD or pre 1.1 DTD";
     } else if ("1.1".equals(dtdVersion)) {
-    	dtdVersion = SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID;
+      dtdVersion = SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID;
     } else if ("1.2".equals(dtdVersion)) {
-    	dtdVersion = SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID;
+      dtdVersion = SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID;
     }
-   
+
     getFormPage().getForm().setHeadingText(name);
     ((SpindleMultipageEditor) getFormPage().getEditor()).updateTitle();
     nameText.setValue(model.getApplicationSpec().getName(), true);
@@ -153,8 +182,28 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
         forceDirty();
       }
     });
+    MenuManager popupMenuManager = new MenuManager();
+    IMenuListener listener = new IMenuListener() {
+      public void menuAboutToShow(IMenuManager mng) {
+        fillContextMenu(mng);
+      }
+    };
+    popupMenuManager.setRemoveAllWhenShown(true);
+    popupMenuManager.addMenuListener(listener);
+    Menu menu = popupMenuManager.createContextMenu(engineClassText.getControl());
+    engineClassText.getControl().setMenu(menu);
     factory.paintBordersFor(container);
     return container;
+  }
+
+  protected void fillContextMenu(IMenuManager manager) {
+    String engineClass = engineClassText.getValue();
+    openEngineClassAction.setEnabled(engineClass != null && !"".equals(engineClass.trim()));
+    TapestryApplicationModel model = (TapestryApplicationModel) getFormPage().getModel();
+    chooseEngineAction.setEnabled(model.isEditable());
+
+    manager.add(openEngineClassAction);
+    manager.add(chooseEngineAction);
   }
 
   private boolean checkEngineClass(String value) {
@@ -189,6 +238,109 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     if (eventType == IModelChangedEvent.CHANGE) {
       updateNeeded = true;
     }
+  }
+
+  class OpenEngineClassAction extends Action {
+
+    /**
+     * Constructor for NewPropertyAction
+     */
+    protected OpenEngineClassAction() {
+      super();
+      setText("open engine class");
+      setToolTipText("open the engine class in an editor");
+    }
+
+    /**
+    * @see Action#run()
+    */
+    public void run() {
+      String engineClass = engineClassText.getValue();
+      ITapestryModel model = (ITapestryModel) getFormPage().getModel();
+      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
+      try {
+        IType type = Utils.findType(jproject, engineClass);
+        JavaUI.openInEditor(type);
+      } catch (Exception e) {
+      	MessageDialog.openError(engineClassText.getControl().getShell(), "Error opening editor", "could not open an editor for "+engineClass);      
+      }
+    }
+  }
+
+  class ChooseEngineClassAction extends Action {
+
+    /**
+     * Constructor for NewPropertyAction
+     */
+    protected ChooseEngineClassAction() {
+      super();
+      setText("choose engine class");
+      setToolTipText("choose the engine class");
+    }
+
+    /**
+    * @see Action#run()
+    */
+    public void run() {
+      IType newEngine = chooseType();
+      if (newEngine != null) {
+        engineClassText.setValue(newEngine.getFullyQualifiedName());
+      }
+    }
+
+    private IType chooseType() {
+      ITapestryModel model = (ITapestryModel) getFormPage().getModel();
+      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
+      if (jproject == null) {
+        return null;
+      }
+      IJavaSearchScope scope = createSearchScope(jproject);
+      Shell shell = engineClassText.getControl().getShell();
+      try {
+
+        SelectionDialog dialog =
+          JavaUI.createTypeDialog(
+            shell,
+            new ProgressMonitorDialog(shell),
+            scope,
+            IJavaElementSearchConstants.CONSIDER_CLASSES,
+            false);
+
+        dialog.setTitle("Choose Engine Class");
+        String message = "choose Engine class";
+        dialog.setMessage(hierarchyRoot == null ? message : message + " (implements " + hierarchyRoot + ")");
+
+        if (dialog.open() == dialog.OK) {
+          return (IType) dialog.getResult()[0]; //FirstResult();
+        }
+      } catch (JavaModelException jmex) {
+        TapestryPlugin.getDefault().logException(jmex);
+      }
+      return null;
+    }
+
+    private IJavaSearchScope createSearchScope(IJavaProject jproject) {
+
+      IJavaSearchScope result = null;
+      IType hrootElement = null;
+      try {
+        if (hierarchyRoot != null) {
+          hrootElement = Utils.findType(jproject, hierarchyRoot);
+        }
+        if (hrootElement != null) {
+          result = SearchEngine.createHierarchyScope(hrootElement);
+        }
+      } catch (JavaModelException jmex) {
+        //ignore
+        jmex.printStackTrace();
+      }
+      if (result == null) {
+        IJavaElement[] elements = new IJavaElement[] { jproject };
+        result = SearchEngine.createJavaSearchScope(elements);
+      }
+      return result;
+    }
+
   }
 
 }

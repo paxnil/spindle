@@ -92,7 +92,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard {
     super.createPageControls(pageContainer);
     setWindowTitle(MessageUtil.getString("NewTapComponentWizard.windowtitle"));
     IJavaElement initElem = getInitElement();
-    fPage1.init(initElem);
+    fPage1.init(initElem, prepopulateName);
     fPage2.init(initElem);
   }
 

@@ -176,5 +176,29 @@
          </action>
       </actionSet>
    </extension>
-
+   <extension point="org.eclipse.ui.popupMenus"> 
+      <objectContribution 
+         id="com.iw.plugins.spindle.popupMenus" 
+         objectClass="org.eclipse.core.resources.IFile" 
+         nameFilter="*.html"> 
+         <menu id="com.iw.plugins.spindle.popupMenus.createComponents" 
+               label="Spindle"> 
+            <separator name="group1"/> 
+         </menu> 
+         <action id="com.iw.plugins.spindle.popupMenus.createComponents.componentFromTemplate" 
+              label="Create Tapestry Component" 
+              menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1" 
+              icon="icons/full/component16_dark.gif"               
+              class="com.iw.plugins.spindle.wizards.extra.CreateComponentFromTemplateAction" 
+              enablesFor="1"> 
+          </action> 
+          <action id="com.iw.plugins.spindle.popupMenus.createComponents.pageFromTemplate" 
+              label="Create Tapestry Page" 
+              menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1" 
+              icon="icons/full/page16.gif"               
+              class="com.iw.plugins.spindle.wizards.extra.CreatePageFromTemplateAction" 
+              enablesFor="1"> 
+          </action> 
+        </objectContribution> 
+	</extension>
 </plugin>

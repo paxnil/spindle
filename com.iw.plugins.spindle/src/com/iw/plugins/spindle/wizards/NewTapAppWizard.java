@@ -100,4 +100,6 @@ public class NewTapAppWizard extends NewTapestryElementWizard {
     fPage1.init(getInitElement());
   }
 
+  
+
 }

@@ -25,12 +25,20 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -425,6 +433,30 @@ public class Utils {
       match = false;
     }
     return match;
+  }
+  
+  public static  void saveModel(ITapestryModel model, IProgressMonitor monitor) {
+    InputStream stream = null;
+    try {
+      
+
+      stream = new ByteArrayInputStream(model.toXML().getBytes());
+
+      IFile file = (IFile) ((IAdaptable) model.getUnderlyingStorage()).getAdapter(IFile.class);
+      //assuming here the file exists!
+
+      file.setContents(stream, true, true, monitor);
+
+      model.reload();
+
+    } catch (CoreException c) {
+
+    } finally {
+      try {
+        stream.close();
+      } catch (IOException e) {
+      }
+    }
   }
 
 }

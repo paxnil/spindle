@@ -129,13 +129,16 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
     if (allModels == null) {
       populateAllModels(model);
     }
-    if (model instanceof TapestryApplicationModel && !applicationModels.contains(model)) {
-      applicationModels.add(model);
-    } else if (model instanceof TapestryComponentModel && !componentModels.contains(model)) {
-      componentModels.add(model);
-    }
+    if (!allModels.containsKey(model.getUnderlyingStorage())) {
+      allModels.put(model.getUnderlyingStorage(), model);
+      if (model instanceof TapestryApplicationModel && !applicationModels.contains(model)) {
+        applicationModels.add(model);
+      } else if (model instanceof TapestryComponentModel && !componentModels.contains(model)) {
+        componentModels.add(model);
+      }
 
-    fireModelProviderEvent(ModelProviderEvent.MODELS_ADDED, (IModel) model);
+      fireModelProviderEvent(ModelProviderEvent.MODELS_ADDED, (IModel) model);
+    }
   }
 
   public ITapestryModel getModel(Object element) {
@@ -218,11 +221,7 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
     Iterator foundElements = lookupCollector.getResults().iterator();
     while (foundElements.hasNext()) {
       ITapestryModel model = createModel(foundElements.next());
-      if (model != null) {
-        try {
-          ((BaseTapestryModel) model).load();
-        } catch (CoreException e) {
-        }
+      if (model != null) {        
         addModel(model);
       }
     }

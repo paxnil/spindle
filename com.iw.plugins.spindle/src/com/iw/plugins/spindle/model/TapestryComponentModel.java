@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -51,7 +52,6 @@ import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.util.SourceWriter;
 import com.iw.plugins.spindle.util.TapestryLookup;
-import net.sf.tapestry.util.xml.DocumentParseException;
 
 public class TapestryComponentModel extends BaseTapestryModel implements PropertyChangeListener {
 
@@ -292,6 +292,17 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
   		return spec.getDTDVersion();
   	}
     return null;
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.model.ITapestryModel#toXML()
+   */
+  public String toXML() {
+      StringWriter swriter = new StringWriter();
+      PrintWriter writer = new PrintWriter(swriter);
+      save(writer);
+      writer.flush();
+      return swriter.toString();
   }
 
 }

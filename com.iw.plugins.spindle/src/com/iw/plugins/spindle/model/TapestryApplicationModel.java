@@ -315,4 +315,18 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
     return null;
   }
 
+  /**
+   * @see com.iw.plugins.spindle.model.ITapestryModel#toXML()
+   */
+   /**
+   * @see com.iw.plugins.spindle.model.ITapestryModel#toXML()
+   */
+  public String toXML() {
+      StringWriter swriter = new StringWriter();
+      PrintWriter writer = new PrintWriter(swriter);
+      save(writer);
+      writer.flush();
+      return swriter.toString();
+  }
+
 }

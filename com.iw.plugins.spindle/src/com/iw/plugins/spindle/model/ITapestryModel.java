@@ -38,5 +38,7 @@ public interface ITapestryModel extends IModel, IEditable {
   public void reload() throws CoreException;
   
   public String getDTDVersion();
+  
+  public String toXML();
 
 }
