@@ -59,9 +59,10 @@ public class SpindleEditorPreferencePage extends PreferencePage
       IWorkbenchPreferencePage,
       IPropertyChangeListener
 {
-  private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
+  private static final String EDITOR_DISPLAY_TAB_WIDTH = UIPlugin.PLUGIN_ID + ".EDITOR_DISPLAY_TAB_WIDTH";
   private static final String FORMATTER_PRESERVE_BLANK_LINES = PreferenceConstants.FORMATTER_PRESERVE_BLANK_LINES;
-  private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
+  private static final String FORMATTER_USE_TABS_TO_INDENT = UIPlugin.PLUGIN_ID
+        + ".FORMATTER_USE_TABS_TO_INDENT";
   private static final String AUTO_ACTIVATE_CONTENT_ASSIST = PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST;
 
   private static final String OFFER_XHTML = PreferenceConstants.TEMPLATE_EDITOR_HTML_SHOW_XHTML;

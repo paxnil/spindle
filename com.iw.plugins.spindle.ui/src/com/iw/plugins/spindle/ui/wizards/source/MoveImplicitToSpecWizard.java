@@ -78,9 +78,9 @@ import com.iw.plugins.spindle.editors.template.assist.TemplateTapestryAccess;
 public class MoveImplicitToSpecWizard extends Wizard
 {
 
-  private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
-  private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
-
+  private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_TAB_CHAR;
+  private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.FORMATTER_TAB_SIZE;
+  
   // info for formatting
   private boolean fUseTabIndent;
   private int fTabSpaces;
