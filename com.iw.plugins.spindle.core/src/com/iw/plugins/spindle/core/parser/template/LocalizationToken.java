@@ -58,6 +58,7 @@ package com.iw.plugins.spindle.core.parser.template;
 import java.util.Map;
 
 import org.apache.tapestry.ILocation;
+import org.apache.tapestry.parse.TokenType;
 
 /**
  *  Represents localized text from the template.
@@ -92,7 +93,7 @@ public class LocalizationToken extends TemplateToken
     
     public LocalizationToken(String tag, String key, boolean raw, Map attributes, ILocation location, TagEventInfo eventInfo)
     {
-        super(TokenType.LOCALIZATION, location, eventInfo);
+        super(TokenType.LOCALIZATION, location, eventInfo); 
         
         _tag = tag;
         _key = key;

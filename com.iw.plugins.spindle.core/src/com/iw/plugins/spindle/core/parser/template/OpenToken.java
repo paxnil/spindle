@@ -60,6 +60,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.tapestry.ILocation;
+import org.apache.tapestry.parse.TokenType;
 
 /**
  *  Token representing the open tag for a component.  Components may be either
@@ -116,7 +117,6 @@ public class OpenToken extends TemplateToken
 
     /**
      *  Returns the tag used to represent the component within the template.
-     * 
      **/
     
     public String getTag()

@@ -82,7 +82,7 @@ public class BuilderValidator extends BaseValidator
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.BaseValidator#findType(java.lang.String)
      */
-    protected Object findType(String fullyQualifiedName)
+    public Object findType(String fullyQualifiedName)
     {
         return fBuild.fTapestryBuilder.getType(fullyQualifiedName);
     }
@@ -146,8 +146,7 @@ public class BuilderValidator extends BaseValidator
                     reportProblem(
                         IProblem.ERROR,
                         info.getAttributeSourceLocation("type"),
-                        
-                            TapestryCore.getTapestryString("Namespace.no-such-component-type", type, namespaceId));
+                        TapestryCore.getTapestryString("Namespace.no-such-component-type", type, namespaceId));
 
                 }
 
@@ -407,11 +406,19 @@ public class BuilderValidator extends BaseValidator
         return true;
     }
 
-    public boolean validateLibraryResourceLocation(String path, String errorKey, ISourceLocation source)
+    public boolean validateLibraryResourceLocation(
+        IResourceWorkspaceLocation specLocation,
+        String path,
+        String errorKey,
+        ISourceLocation source)
         throws ScannerException
     {
-        // TODO Auto-generated method stub
-        return validateResourceLocation(fBuild.fTapestryBuilder.fClasspathRoot, path, errorKey, source);
+        IResourceWorkspaceLocation useLocation = specLocation;
+
+        if (!specLocation.isOnClasspath())
+            useLocation = fBuild.fTapestryBuilder.fClasspathRoot;
+            
+        return validateResourceLocation(useLocation, path, errorKey, source);
     }
 
 }

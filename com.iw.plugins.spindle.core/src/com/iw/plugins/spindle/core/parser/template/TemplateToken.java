@@ -58,6 +58,7 @@ package com.iw.plugins.spindle.core.parser.template;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.tapestry.ILocatable;
 import org.apache.tapestry.ILocation;
+import org.apache.tapestry.parse.TokenType;
 
 /**
  *  Base class for a number of different types of tokens that can be extracted

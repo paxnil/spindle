@@ -162,6 +162,19 @@ public class TemplateFinder implements IResourceLocationAcceptor
         return (TapestryProject) location.getProject().getNature(TapestryCore.NATURE_ID);
     }
 
+    /**
+     * 
+     *  template lookup rules:
+     * 
+     * <ul>
+     *  <li>If the component has a $template asset, use that</li>
+     *  <li>Look for a template in the same folder as the component</li>
+     *  <li>If a page in the application namespace, search in the application root</li>
+     * </ul>
+     * 
+     * @param specification
+     * @throws CoreException
+     */
     private void findTemplates(PluginComponentSpecification specification) throws CoreException
     {
         IAssetSpecification templateAsset = specification.getAsset(ITemplateSource.TEMPLATE_ASSET_NAME);

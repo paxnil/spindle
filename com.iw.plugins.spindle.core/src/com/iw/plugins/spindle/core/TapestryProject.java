@@ -117,9 +117,24 @@ public class TapestryProject implements IProjectNature
     {
         removeFromBuildSpec(TapestryCore.BUILDER_ID);
         Markers.removeProblemsForProject(getProject());
+        clearProperties();
     }
 
- 
+    /**
+     * get rid of the .tapestryplugin file
+     */
+    private void clearProperties()
+    {
+        IFile properties = getPropertiesFile();
+        if (properties != null && properties.exists())
+            try
+            {
+                properties.delete(true, false, null);
+            } catch (CoreException e)
+            {
+                TapestryCore.log(e);
+            }
+    }
 
     public boolean isOnOutputPath(IPath candidate)
     {

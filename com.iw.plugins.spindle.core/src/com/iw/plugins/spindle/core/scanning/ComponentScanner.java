@@ -69,8 +69,10 @@ public class ComponentScanner extends SpecificationScanner
     /* Don't need to throw an exception or add a problem here, the Parser will already have caught this
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(
      */
-    protected Object beforeScan(Node rootNode) throws ScannerException
+    protected Object beforeScan(Object source) throws ScannerException
     {
+        isNode(source);
+        Node rootNode = (Node) source;
         fIsPageSpec = isElement(rootNode, "page-specification");
         fSeenTemplateAsset = false;
         if (!(fIsPageSpec || isElement(rootNode, "component-specification")))
@@ -83,11 +85,12 @@ public class ComponentScanner extends SpecificationScanner
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.processing.AbstractScanner#doScan(org.w3c.dom.Node)
      */
-    protected void doScan(Object resultObject, Node rootNode) throws ScannerException
+    protected void doScan(Object source, Object resultObject) throws ScannerException
     {
+        Node rootNode = (Node) source;
         IComponentSpecification specification = (IComponentSpecification) resultObject;
 
-        specification.setPublicId(fParser.getPublicId());
+        specification.setPublicId(fPublicId);
         specification.setSpecificationLocation(fResourceLocation);
         ((PluginComponentSpecification) specification).setNamespace(fNamespace);
 
@@ -383,7 +386,7 @@ public class ComponentScanner extends SpecificationScanner
 
                     if (isElement(child, "field-binding"))
                     {
-                        if (XMLUtil.getDTDVersion(fParser.getPublicId()) < XMLUtil.DTD_3_0)
+                        if (XMLUtil.getDTDVersion(fPublicId) < XMLUtil.DTD_3_0)
                         {
                             scanBinding(c, child, BindingType.FIELD, "field-name");
                         } else
@@ -472,7 +475,11 @@ public class ComponentScanner extends SpecificationScanner
         {
             if (isElement(node, "parameter"))
             {
-                scanParameter(specification, node);
+                try {
+                    scanParameter(specification, node);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 continue;
             }
 
@@ -617,7 +624,11 @@ public class ComponentScanner extends SpecificationScanner
             if (type == null)
                 type = "java.lang.Object";
 
-            validateTypeName(type, IProblem.ERROR, getAttributeSourceLocation(node, typeAttr));
+            if (!typeList.contains(type))
+            {
+                validateTypeSpecial(type, IProblem.ERROR, getAttributeSourceLocation(node, typeAttr));
+            }
+
             param.setType(type);
 
             param.setRequired(getBooleanAttribute(node, "required"));
@@ -626,17 +637,18 @@ public class ComponentScanner extends SpecificationScanner
 
             // If not specified, use the name of the parameter.
 
-            if (propertyName == null)
+            if (TapestryCore.isNull(propertyName))
             {
                 propertyName = name;
 
+            } else
+            {
                 validatePattern(
                     propertyName,
                     SpecificationParser.PROPERTY_NAME_PATTERN,
                     "SpecificationParser.invalid-property-name",
                     IProblem.ERROR,
                     getAttributeSourceLocation(node, name));
-
             }
 
             param.setPropertyName(propertyName);
@@ -833,6 +845,16 @@ public class ComponentScanner extends SpecificationScanner
             TapestryCore.log(e);
         }
         ((PluginComponentSpecification) specification).setTemplateLocations(locations);
+    }
+
+    public boolean validateTypeSpecial(String typeName, int severity, ISourceLocation location) throws ScannerException
+    {
+        String useName = typeName;
+        if (useName.indexOf(".") < 0)
+            useName = "java.lang." + useName;
+
+        return validateTypeName(useName, severity, location);
+
     }
 
 }

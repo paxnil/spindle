@@ -38,8 +38,8 @@ public class TagEventHandler
 
     public void tagBegin(int lineNumber, int startOffset)
     {
-        TagEventInfo info = new TagEventInfo();
-        info.fStartTagLocation = new SourceLocation(lineNumber, startOffset);
+        fInfo = new TagEventInfo();
+        fInfo.fStartTagLocation = new SourceLocation(lineNumber, startOffset);
     }
 
     public void tagEnd(int endOffset)

@@ -69,13 +69,14 @@ public class WebXMLScanner extends AbstractScanner
         this.fJavaProject = fBuilder.fJavaProject;
     }
 
-    public ServletInfo[] scanServletInformation(Node webxml) throws ScannerException
+    public ServletInfo[] scanServletInformation(Object source) throws ScannerException
     {
-        List result = (List) scan(fBuilder.fParser, null, webxml);
+        Node webxml = (Node) source;
+        List result = (List) scan(webxml, null);
         return (ServletInfo[]) result.toArray(new ServletInfo[result.size()]);
     }
 
-    public Object beforeScan(Node node)
+    public Object beforeScan(Object source)
     {
         fSeenServletNames = new ArrayList();
         return new ArrayList(11);
@@ -88,12 +89,14 @@ public class WebXMLScanner extends AbstractScanner
 
         if (location.getStorage() == null)
             throw new ScannerException(
-                TapestryCore.getString("web-xml-ignore-application-path-not-found", location == null ? "no location found" : location.toString()));
-                
+                TapestryCore.getString(
+                    "web-xml-ignore-application-path-not-found",
+                    location == null ? "no location found" : location.toString()));
+
         IPath ws_path = new Path(location.getName());
-                String extension = ws_path.getFileExtension();
-                if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
-                    throw new ScannerException(TapestryCore.getString("web-xml-wrong-file-extension", location.toString()));                
+        String extension = ws_path.getFileExtension();
+        if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
+            throw new ScannerException(TapestryCore.getString("web-xml-wrong-file-extension", location.toString()));
 
     }
 
@@ -168,8 +171,9 @@ public class WebXMLScanner extends AbstractScanner
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.processing.AbstractProcessor#doProcessing(org.w3c.dom.Node)
      */
-    protected void doScan(Object resultObject, Node rootNode) throws ScannerException
+    protected void doScan(Object source, Object resultObject) throws ScannerException
     {
+        Node rootNode = (Node) source;
         ArrayList infos = (ArrayList) resultObject;
         for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
         {
@@ -199,7 +203,7 @@ public class WebXMLScanner extends AbstractScanner
                 (IResourceWorkspaceLocation) context.getRelativeLocation("/WEB-INF/");
             IResourceWorkspaceLocation webInfAppLocation =
                 (IResourceWorkspaceLocation) webInfLocation.getRelativeLocation(servletName + "/");
-                
+
             IResourceWorkspaceLocation result = check(webInfAppLocation, expectedName);
             if (result != null)
                 return result;
@@ -212,7 +216,7 @@ public class WebXMLScanner extends AbstractScanner
     {
         if (location == null)
             return null;
-            
+
         IResourceWorkspaceLocation result = (IResourceWorkspaceLocation) location.getRelativeLocation(name);
 
         if (result != null && result.exists())
@@ -360,8 +364,8 @@ public class WebXMLScanner extends AbstractScanner
         {
             return false;
 
-        } 
-        
+        }
+
         if (!fBuilder.fTapestryServletType.equals(servletType))
         {
             newInfo.isServletSubclass = true; // its a subclass
@@ -385,7 +389,7 @@ public class WebXMLScanner extends AbstractScanner
 
                     return false;
                 }
-                
+
             }
         } else
         {
@@ -406,7 +410,7 @@ public class WebXMLScanner extends AbstractScanner
                 return false;
             }
         }
-        
+
         newInfo.applicationSpecLocation = location;
         return true;
     }

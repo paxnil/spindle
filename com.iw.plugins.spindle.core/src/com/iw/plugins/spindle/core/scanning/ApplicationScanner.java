@@ -33,7 +33,7 @@ import org.w3c.dom.Node;
 import com.iw.plugins.spindle.core.parser.IProblem;
 
 /**
- *  Scanner that turns a node tree into a ILibrarySpecification
+ *  Scanner that turns a node tree into a IApplicationSpecification
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -44,8 +44,10 @@ public class ApplicationScanner extends LibraryScanner
     /* Don't need to throw an exception or add a problem here, the Parser will already have caught this
      * @see com.iw.plugins.spindle.core.scanner.AbstractScanner#beforeScan()
      */
-    protected Object beforeScan(Node rootNode) throws ScannerException
+    protected Object beforeScan(Object source) throws ScannerException
     {
+        isNode(source);
+        Node rootNode = (Node)source;
         if (!isElement(rootNode, "application"))
         {
             return null;
@@ -56,7 +58,7 @@ public class ApplicationScanner extends LibraryScanner
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(org.w3c.dom.Node)
      */
-    protected void doScan(Object resultObject, Node rootNode) throws ScannerException
+    protected void doScan(Node rootNode, Object resultObject) throws ScannerException
     {
         IApplicationSpecification specification = (IApplicationSpecification) resultObject;
         scanApplicationSpecification(rootNode, specification, null);

@@ -57,6 +57,7 @@ package com.iw.plugins.spindle.core.parser.template;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.tapestry.ILocation;
+import org.apache.tapestry.parse.TokenType;
 
 /**
  *  Represents the closing tag of a component element in the template.

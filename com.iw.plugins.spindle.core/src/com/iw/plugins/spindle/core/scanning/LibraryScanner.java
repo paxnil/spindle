@@ -49,8 +49,10 @@ public class LibraryScanner extends SpecificationScanner
     /* Don't need to throw an exception or add a problem here, the Parser will already have caught this
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(
      */
-    protected Object beforeScan(Node rootNode) throws ScannerException
+    protected Object beforeScan(Object source) throws ScannerException
     {
+        isNode(source);
+        Node rootNode = (Node) source;
         if (!isElement(rootNode, "library-specification"))
         {
             return null;
@@ -61,8 +63,9 @@ public class LibraryScanner extends SpecificationScanner
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(org.w3c.dom.Node)
      */
-    protected void doScan(Object resultObject, Node rootNode) throws ScannerException
+    protected void doScan(Object source, Object resultObject) throws ScannerException
     {
+        Node rootNode = (Node) source;
         ILibrarySpecification specification = (ILibrarySpecification) resultObject;
         scanLibrarySpecification(rootNode, specification, null);
     }
@@ -73,7 +76,7 @@ public class LibraryScanner extends SpecificationScanner
         IResourceResolver resolver)
         throws ScannerException
     {
-        specification.setPublicId(fParser.getPublicId());
+        specification.setPublicId(fPublicId);
         specification.setSpecificationLocation(fResourceLocation);
         //   TODO figure out ResourceResolver
         //        specification.setResourceResolver(resolver);
@@ -278,7 +281,8 @@ public class LibraryScanner extends SpecificationScanner
         String specificationPath = getAttribute(node, "specification-path", true);
 
         boolean validLibLoc =
-            validateLibraryResourceLocation(                
+            validateLibraryResourceLocation(
+                specification.getSpecificationLocation(),
                 specificationPath,
                 "scan-library-missing-library",
                 getAttributeSourceLocation(node, "specification-path"));

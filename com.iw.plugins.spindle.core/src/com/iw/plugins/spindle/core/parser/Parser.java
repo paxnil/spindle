@@ -248,8 +248,6 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         {
             checkDomParser();
             fDomParser.parse(new InputSource(reader));
-            fXmlDocument = (DocumentImpl) fDomParser.getDocument();
-            result = fXmlDocument.getDocumentElement();
         } catch (SAXException e)
         {
             // there was a fatal error - return null
@@ -260,9 +258,12 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         {
             reader.close();
         }
-
-        return result;
-
+        
+        fXmlDocument = (DocumentImpl) fDomParser.getDocument();
+        if (fXmlDocument == null)
+            return null;
+            
+        return  fXmlDocument.getDocumentElement();        
     }
 
     public boolean getHasFatalErrors()

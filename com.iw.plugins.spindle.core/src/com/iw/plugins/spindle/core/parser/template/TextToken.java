@@ -61,6 +61,7 @@ import org.apache.tapestry.IMarkupWriter;
 import org.apache.tapestry.IRender;
 import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.Tapestry;
+import org.apache.tapestry.parse.TokenType;
 
 /**
  *  Represents static text in the template that may be passed through

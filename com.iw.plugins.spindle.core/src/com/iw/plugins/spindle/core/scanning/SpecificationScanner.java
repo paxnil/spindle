@@ -40,6 +40,7 @@ import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.IProblem;
+import com.iw.plugins.spindle.core.util.Assert;
 
 /**
  *  Scanner for building Tapestry Specs
@@ -51,6 +52,7 @@ public abstract class SpecificationScanner extends AbstractScanner
 {
 
     protected IResourceLocation fResourceLocation;
+    protected String fPublicId;
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#afterScan(java.lang.Object)
@@ -64,6 +66,10 @@ public abstract class SpecificationScanner extends AbstractScanner
     public void setResourceLocation(IResourceLocation location)
     {
         this.fResourceLocation = location;
+    }
+    
+    public void setPublicId(String publicId) {
+        fPublicId = publicId;
     }
 
     protected interface IConverter
@@ -335,6 +341,15 @@ public abstract class SpecificationScanner extends AbstractScanner
     {
         public String value;
         public boolean fromAttribute;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#beforeScan(java.lang.Object)
+     */
+    protected boolean isNode(Object source) throws ScannerException
+    {
+        Assert.isLegal(source instanceof Node);
+        return true;
     }
 
 }

@@ -73,10 +73,9 @@ import org.apache.tapestry.util.DefaultResourceResolver;
 import com.iw.plugins.spindle.core.parser.template.AttributeType;
 import com.iw.plugins.spindle.core.parser.template.LocalizationToken;
 import com.iw.plugins.spindle.core.parser.template.OpenToken;
-import com.iw.plugins.spindle.core.parser.template.SpindleTemplateParser;
 import com.iw.plugins.spindle.core.parser.template.TemplateAttribute;
 import com.iw.plugins.spindle.core.parser.template.TemplateParseException;
-
+import com.iw.plugins.spindle.core.parser.template.TemplateParser;
 import com.iw.plugins.spindle.core.parser.template.TemplateToken;
 import com.iw.plugins.spindle.core.parser.template.TextToken;
 import com.iw.plugins.spindle.core.parser.template.TokenType;
@@ -123,7 +122,7 @@ public class TestSpindleTemplateParser extends TestCase
         IResourceLocation location)
         throws TemplateParseException
     {
-        return new SpindleTemplateParser().parse(templateData, delegate, location);
+        return new TemplateParser().parse(templateData, delegate, location);
     }
 
     protected TemplateToken[] run(

@@ -62,8 +62,8 @@ public class BaseValidator implements IScannerValidator
 
     static class SLocation implements ISourceLocation
     { /* (non-Javadoc)
-                                     * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
-                                     */
+                                        * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
+                                        */
         public int getCharEnd()
         {
             return 1;
@@ -152,7 +152,7 @@ public class BaseValidator implements IScannerValidator
      * @param fullyQualifiedName
      * @return
      */
-    protected Object findType(String fullyQualifiedName)
+    public Object findType(String fullyQualifiedName)
     {
         return this;
     }
@@ -253,7 +253,7 @@ public class BaseValidator implements IScannerValidator
         ISourceLocation location)
         throws ScannerException
     {
-            
+
         if (value != null && !value.startsWith(fDummyString))
         {
             if (fCompiledPatterns == null)
@@ -285,7 +285,8 @@ public class BaseValidator implements IScannerValidator
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(java.lang.String, java.lang.String, com.iw.plugins.spindle.core.parser.ISourceLocation)
      */
-    public boolean validateLibraryResourceLocation(String path, String errorKey, ISourceLocation source) throws ScannerException
+    public boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path, String errorKey, ISourceLocation source)
+        throws ScannerException
     {
         return true;
     }
@@ -330,6 +331,7 @@ public class BaseValidator implements IScannerValidator
     public boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location)
         throws ScannerException
     {
+       
         Object type = findType(fullyQualifiedType);
         if (type == null)
         {

@@ -75,21 +75,13 @@ import org.apache.tapestry.ILocation;
 import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.Location;
 import org.apache.tapestry.parse.ITemplateParserDelegate;
-import org.apache.tapestry.spec.IComponentSpecification;
-import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.util.IdAllocator;
 
-import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.parser.DefaultProblem;
 import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.IProblemCollector;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.SourceLocation;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.spec.PluginParameterSpecification;
 
 /**
  * 
@@ -101,7 +93,7 @@ import com.iw.plugins.spindle.core.spec.PluginParameterSpecification;
  * 
  **/
 
-public class TemplateParser implements IProblemCollector
+public class TemplateParser
 {
     /**
      *  Attribute value prefix indicating that the attribute is an OGNL expression.
@@ -255,7 +247,7 @@ public class TemplateParser implements IProblemCollector
      * List of Problems found during the parse. 
      */
 
-    private List fProblems = new ArrayList();
+    private IProblemCollector fProblemCollector;
 
     private static class Tag
     {
@@ -355,12 +347,7 @@ public class TemplateParser implements IProblemCollector
 
     private Map _attributes = new HashMap();
 
-    /**
-     * The component that owns the template being parsed
-     */
-    private IComponentSpecification fParentSpec;
-
-    public TemplateParser()
+    public TemplateParser(ITemplateParserDelegate delegate)
     {
         Perl5Compiler compiler = new Perl5Compiler();
 
@@ -375,7 +362,11 @@ public class TemplateParser implements IProblemCollector
 
         _patternMatcher = new Perl5Matcher();
 
-        _delegate = new ParserDelegate();
+        _delegate = delegate;
+    }
+    
+    public void setProblemCollector(IProblemCollector collector) {
+        fProblemCollector = collector;
     }
 
     /**
@@ -392,11 +383,7 @@ public class TemplateParser implements IProblemCollector
      *
      **/
 
-    public TemplateToken[] parse(
-        char[] templateData,
-        IComponentSpecification parentSpec,
-        IResourceLocation resourceLocation)
-        throws TemplateParseException
+    public TemplateToken[] parse(char[] templateData, IResourceLocation resourceLocation)
     {
         TemplateToken[] result = null;
 
@@ -405,10 +392,8 @@ public class TemplateParser implements IProblemCollector
             _templateData = templateData;
             _resourceLocation = resourceLocation;
             _templateLocation = new Location(resourceLocation);
-            fParentSpec = parentSpec;
             _ignoring = false;
             _line = 1;
-            fProblems.clear();
 
             parse();
 
@@ -418,7 +403,6 @@ public class TemplateParser implements IProblemCollector
             // do nothing, the problems will tell all.
         } finally
         {
-            _delegate = null;
             _templateData = null;
             _resourceLocation = null;
             _templateLocation = null;
@@ -522,7 +506,7 @@ public class TemplateParser implements IProblemCollector
         {
             if (_cursor >= length)
             {
-                addFatalProblem(
+                fProblemCollector.addProblem(
                     IProblem.ERROR,
                     new SourceLocation(startLine - 1, startCursor - 1),
                     TapestryCore.getTapestryString("TemplateParser.comment-not-ended", Integer.toString(startLine)));
@@ -610,7 +594,7 @@ public class TemplateParser implements IProblemCollector
             if (_cursor >= length)
             {
                 String key = (tagName == null) ? "TemplateParser.unclosed-unknown-tag" : "TemplateParser.unclosed-tag";
-                addFatalProblem(
+                fProblemCollector.addProblem(
                     IProblem.ERROR,
                     new SourceLocation(startLine - 1, cursorStart - 1),
                     TapestryCore.getTapestryString(key, tagName, Integer.toString(startLine)));
@@ -709,8 +693,7 @@ public class TemplateParser implements IProblemCollector
 
                     if (ch == '/' || ch == '>')
                     {
-
-                        addFatalProblem(
+                        fProblemCollector.addProblem(
                             IProblem.ERROR,
                             new SourceLocation(_line - 1, _cursor - 1),
                             TapestryCore.getTapestryString(
@@ -737,7 +720,7 @@ public class TemplateParser implements IProblemCollector
                         state = COLLECT_QUOTED_VALUE;
                         advance();
                         attributeValueStart = _cursor;
-                        fEventHandler.attributeBegin(attributeName, _line, _cursor - 1);
+                        fEventHandler.attributeBegin(attributeName, _line, attributeValueStart);
                         break;
                     }
 
@@ -745,7 +728,7 @@ public class TemplateParser implements IProblemCollector
 
                     state = COLLECT_UNQUOTED_VALUE;
                     attributeValueStart = _cursor;
-                    fEventHandler.attributeBegin(attributeName, _line, _cursor - 1);
+                    fEventHandler.attributeBegin(attributeName, _line, attributeValueStart);
 
                     break;
 
@@ -760,7 +743,7 @@ public class TemplateParser implements IProblemCollector
                             new String(_templateData, attributeValueStart, _cursor - attributeValueStart);
 
                         _attributes.put(attributeName, attributeValue);
-                        fEventHandler.attributeEnd(_cursor - 1);
+                        fEventHandler.attributeEnd(_cursor);
 
                         // Advance over the quote.
                         advance();
@@ -796,13 +779,13 @@ public class TemplateParser implements IProblemCollector
 
         // Check for invisible localizations
 
-        String localizationKey = findValueCaselessly(LOCALIZATION_KEY_ATTRIBUTE_NAME, _attributes);
+        String localizationKey = (String)findValueCaselessly(LOCALIZATION_KEY_ATTRIBUTE_NAME, _attributes);
 
         if (localizationKey != null && tagName.equalsIgnoreCase("span"))
         {
             if (_ignoring)
             {
-                addFatalProblem(
+                fProblemCollector.addProblem(
                     IProblem.ERROR,
                     (ISourceLocation) fEventHandler.getEventInfo().getAttributeMap().get(localizationKey),
                     TapestryCore.getTapestryString(
@@ -858,7 +841,7 @@ public class TemplateParser implements IProblemCollector
             return;
         }
 
-        String jwcId = findValueCaselessly(JWCID_ATTRIBUTE_NAME, _attributes);
+        String jwcId = (String)findValueCaselessly(JWCID_ATTRIBUTE_NAME, _attributes);
 
         if (jwcId != null)
         {
@@ -905,15 +888,16 @@ public class TemplateParser implements IProblemCollector
             return;
         }
         Map attributeLocations = fEventHandler.getEventInfo().getAttributeMap();
-        ISourceLocation jwcIdSourceLocation = (ISourceLocation) attributeLocations.get(jwcId);
+        ISourceLocation jwcIdSourceLocation = (ISourceLocation) findValueCaselessly(JWCID_ATTRIBUTE_NAME, attributeLocations);
 
         boolean isRemoveId = jwcId.equalsIgnoreCase(REMOVE_ID);
 
         if (_ignoring && !isRemoveId)
         {
-            addFatalProblem(
+            ISourceLocation location = jwcIdSourceLocation;
+            fProblemCollector.addProblem(
                 IProblem.ERROR,
-                jwcIdSourceLocation,
+                location,
                 TapestryCore.getTapestryString(
                     "TemplateParser.component-may-not-be-ignored",
                     tagName,
@@ -950,16 +934,10 @@ public class TemplateParser implements IProblemCollector
                 allowBody = _delegate.getAllowBody(libraryId, simpleType, startLocation);
             } catch (ApplicationRuntimeException e)
             {
-                addFatalProblem(IProblem.ERROR, jwcIdSourceLocation, e.getMessage());
+                int severity = IProblem.ERROR;
+                fProblemCollector.addProblem(severity, jwcIdSourceLocation, e.getMessage());
                 throw new AbortParseException();
 
-            }
-
-            if (fParentSpec != null)
-            {
-                PluginComponentSpecification pluginParent = (PluginComponentSpecification) fParentSpec;
-                ICoreNamespace namespace = (ICoreNamespace) pluginParent.getNamespace();
-                checkParameters(namespace.getComponentResolver().resolve(libraryId, simpleType), jwcIdSourceLocation);
             }
 
         } else
@@ -968,9 +946,10 @@ public class TemplateParser implements IProblemCollector
             {
                 if (!_patternMatcher.matches(jwcId, _simpleIdPattern))
                 {
-                    addFatalProblem(
+                    ISourceLocation location = jwcIdSourceLocation;
+                    fProblemCollector.addProblem(
                         IProblem.ERROR,
-                        jwcIdSourceLocation,
+                        location,
                         TapestryCore.getTapestryString(
                             "TemplateParser.component-id-invalid",
                             tagName,
@@ -982,9 +961,10 @@ public class TemplateParser implements IProblemCollector
 
                 if (!_delegate.getKnownComponent(jwcId))
                 {
-                    addFatalProblem(
+                    ISourceLocation location = jwcIdSourceLocation;
+                    fProblemCollector.addProblem(
                         IProblem.ERROR,
-                        jwcIdSourceLocation,
+                        location,
                         TapestryCore.getTapestryString(
                             "TemplateParser.unknown-component-id",
                             tagName,
@@ -1000,16 +980,10 @@ public class TemplateParser implements IProblemCollector
                     allowBody = _delegate.getAllowBody(jwcId, startLocation);
                 } catch (ApplicationRuntimeException e)
                 {
-                    addFatalProblem(IProblem.ERROR, jwcIdSourceLocation, e.getMessage());
+                    int severity = IProblem.ERROR;
+                    fProblemCollector.addProblem(severity, jwcIdSourceLocation, e.getMessage());
                     throw new AbortParseException();
 
-                }
-
-                if (fParentSpec != null)
-                {
-                    PluginComponentSpecification pluginParent = (PluginComponentSpecification) fParentSpec;
-                    ICoreNamespace namespace = (ICoreNamespace) pluginParent.getNamespace();
-                    checkParameters(namespace.getComponentResolver().resolve(jwcId), jwcIdSourceLocation);
                 }
 
             }
@@ -1023,7 +997,7 @@ public class TemplateParser implements IProblemCollector
 
         if (_ignoring && ignoreBody)
         {
-            addFatalProblem(
+            fProblemCollector.addProblem(
                 IProblem.ERROR,
                 fEventHandler.getEventInfo().getStartTagLocation(),
                 TapestryCore.getTapestryString("TemplateParser.nested-ignore", tagName, Integer.toString(startLine)));
@@ -1049,38 +1023,6 @@ public class TemplateParser implements IProblemCollector
         advance();
     }
 
-    /**
-     * @param specification
-     */
-    protected void checkParameters(IComponentSpecification spec, ISourceLocation location)
-    {
-        List parameterNames = new ArrayList();
-        for (Iterator iter = spec.getParameterNames().iterator(); iter.hasNext();)
-        {
-            String name = (String) iter.next();
-            PluginParameterSpecification parameter = (PluginParameterSpecification) spec.getParameter(name);
-            if (parameter.isRequired())
-                parameterNames.add(name.toUpperCase());
-
-        }
-        for (Iterator iter = _attributes.keySet().iterator(); iter.hasNext();)
-        {
-            String attrName = ((String) iter.next()).toUpperCase();
-            if (parameterNames.contains(attrName))
-                parameterNames.remove(attrName);
-        }
-        if (!parameterNames.isEmpty())
-        {
-            addProblem(
-                IProblem.ERROR,
-                location,
-                TapestryCore.getTapestryString(
-                    "PageLoader.required-parameter-not-bound",
-                    parameterNames,
-                    spec.getSpecificationLocation().toString()));
-        }
-    }
-
     private void pushNewTag(String tagName, int startLine, boolean isRemoveId, boolean ignoreBody)
     {
         Tag tag = new Tag(tagName, startLine);
@@ -1101,7 +1043,7 @@ public class TemplateParser implements IProblemCollector
     {
         if (_ignoring)
         {
-            addFatalProblem(
+            fProblemCollector.addProblem(
                 IProblem.ERROR,
                 fEventHandler.getEventInfo().getStartTagLocation(),
                 TapestryCore.getTapestryString(
@@ -1114,7 +1056,7 @@ public class TemplateParser implements IProblemCollector
 
         if (emptyTag)
         {
-            addFatalProblem(
+            fProblemCollector.addProblem(
                 IProblem.ERROR,
                 fEventHandler.getEventInfo().getStartTagLocation(),
                 TapestryCore.getTapestryString(
@@ -1188,8 +1130,9 @@ public class TemplateParser implements IProblemCollector
                     Ognl.parseExpression(expression);
                 } catch (OgnlException e)
                 {
-                    addProblem(
-                        IProblem.ERROR,
+                    int severity = IProblem.ERROR;
+                    fProblemCollector.addProblem(
+                        severity,
                         (ISourceLocation) fEventHandler.getEventInfo().getAttributeMap().get(name),
                         e.getMessage());
                 }
@@ -1238,8 +1181,7 @@ public class TemplateParser implements IProblemCollector
         {
             if (_cursor >= length)
             {
-
-                addFatalProblem(
+                fProblemCollector.addProblem(
                     IProblem.ERROR,
                     new SourceLocation(startLine - 1, cursorStart - 1),
                     TapestryCore.getTapestryString("TemplateParser.incomplete-close-tag", Integer.toString(startLine)));
@@ -1268,8 +1210,7 @@ public class TemplateParser implements IProblemCollector
 
             if (tag._mustBalance)
             {
-
-                addFatalProblem(
+                fProblemCollector.addProblem(
                     IProblem.ERROR,
                     new SourceLocation(startLine - 1, cursorStart - 1),
                     TapestryCore.getTapestryString(
@@ -1287,7 +1228,7 @@ public class TemplateParser implements IProblemCollector
 
         if (stackPos < 0)
         {
-            addFatalProblem(
+            fProblemCollector.addProblem(
                 IProblem.ERROR,
                 new SourceLocation(startLine - 1, cursorStart - 1),
                 TapestryCore.getTapestryString(
@@ -1445,15 +1386,14 @@ public class TemplateParser implements IProblemCollector
     }
 
     /**
-     *  Searches a Map for given key, caselessly.  The Map is expected to consist of Strings for keys and
-     *  values.  Returns the value for the first key found that matches (caselessly) the input key.  Returns null
+     *  Searches a Map for given key, caselessly.  The Map is expected to consist of Strings for keys.
+     *  Returns the value for the first key found that matches (caselessly) the input key.  Returns null
      *  if no value found.
-     * 
      **/
 
-    private String findValueCaselessly(String key, Map map)
+    private Object findValueCaselessly(String key, Map map)
     {
-        String result = (String) map.get(key);
+        Object result = map.get(key);
 
         if (result != null)
             return result;
@@ -1466,7 +1406,7 @@ public class TemplateParser implements IProblemCollector
             String entryKey = (String) entry.getKey();
 
             if (entryKey.equalsIgnoreCase(key))
-                return (String) entry.getValue();
+                return entry.getValue();
         }
 
         return null;
@@ -1529,7 +1469,7 @@ public class TemplateParser implements IProblemCollector
 
     private boolean checkBoolean(String key, Map map)
     {
-        String value = findValueCaselessly(key, map);
+        String value = (String)findValueCaselessly(key, map);
 
         if (value == null)
             return false;
@@ -1552,118 +1492,6 @@ public class TemplateParser implements IProblemCollector
             _currentLocation = new Location(_resourceLocation, _line);
 
         return _currentLocation;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.parser.IProblemCollector#addProblem(int, com.iw.plugins.spindle.core.parser.ISourceLocation, java.lang.String)
-     */
-    public void addFatalProblem(int severity, ISourceLocation location, String message)
-    {
-        addProblem(
-            new DefaultProblem(
-                ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER,
-                severity,
-                message,
-                location.getLineNumber(),
-                location.getCharStart(),
-                location.getCharEnd()));
-
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.parser.IProblemCollector#addProblem(int, com.iw.plugins.spindle.core.parser.ISourceLocation, java.lang.String)
-     */
-    public void addProblem(int severity, ISourceLocation location, String message)
-    {
-        addProblem(
-            new DefaultProblem(
-                ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
-                severity,
-                message,
-                location.getLineNumber(),
-                location.getCharStart(),
-                location.getCharEnd()));
-
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.parser.IProblemCollector#addProblem(com.iw.plugins.spindle.core.parser.IProblem)
-     */
-    public void addProblem(IProblem problem)
-    {
-        fProblems.add(problem);
-
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.parser.IProblemCollector#getProblems()
-     */
-    public IProblem[] getProblems()
-    {
-        return (IProblem[]) fProblems.toArray(new IProblem[fProblems.size()]);
-    }
-
-    class ParserDelegate implements ITemplateParserDelegate
-    {
-
-        /* (non-Javadoc)
-         * @see org.apache.tapestry.parse.ITemplateParserDelegate#getAllowBody(java.lang.String, org.apache.tapestry.ILocation)
-         */
-        public boolean getAllowBody(String componentId, ILocation location)
-        {
-            PluginComponentSpecification pluginParent = (PluginComponentSpecification) fParentSpec;
-
-            if (fParentSpec != null)
-            {
-                IContainedComponent embedded = fParentSpec.getComponent(componentId);
-
-                if (embedded == null)
-                    throw new ApplicationRuntimeException(
-                        TapestryCore.getTapestryString(
-                            "no-such-component",
-                            componentId,
-                            fParentSpec.getSpecificationLocation()));
-
-                ComponentSpecificationResolver resolver =
-                    ((ICoreNamespace) pluginParent.getNamespace()).getComponentResolver();
-                IComponentSpecification spec = resolver.resolve(embedded.getType());
-                return spec.getAllowBody();
-            }
-            throw new ApplicationRuntimeException(
-                TapestryCore.getTapestryString(
-                    "no-such-component",
-                    componentId,
-                    fParentSpec.getSpecificationLocation()));
-        }
-
-        /* (non-Javadoc)
-         * @see org.apache.tapestry.parse.ITemplateParserDelegate#getAllowBody(java.lang.String, java.lang.String, org.apache.tapestry.ILocation)
-         */
-        public boolean getAllowBody(String libraryId, String type, ILocation location)
-        {
-            PluginComponentSpecification pluginParent = (PluginComponentSpecification) fParentSpec;
-
-            if (fParentSpec != null)
-            {
-                ComponentSpecificationResolver resolver =
-                    ((ICoreNamespace) pluginParent.getNamespace()).getComponentResolver();
-                IComponentSpecification spec = resolver.resolve(libraryId, type);
-                return spec.getAllowBody();
-            }
-            throw new ApplicationRuntimeException(
-                TapestryCore.getTapestryString("no-such-component", type, fParentSpec.getSpecificationLocation()));
-        }
-
-        /* (non-Javadoc)
-         * @see org.apache.tapestry.parse.ITemplateParserDelegate#getKnownComponent(java.lang.String)
-         */
-        public boolean getKnownComponent(String componentId)
-        {
-            if (fParentSpec != null)
-                return fParentSpec.getComponent(componentId) != null;
-            return false;
-        }
-
     }
 
 }

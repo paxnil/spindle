@@ -424,8 +424,7 @@ public class NamespaceResolver
         if (result != null)
         {
             fResultNamespace.installComponentSpecification(name, result);
-            //((PluginComponentSpecification) result).setNamespace(fResultNamespace);
-            //fBuild.parseTemplates((PluginComponentSpecification) result);
+            fBuild.parseTemplates((PluginComponentSpecification) result);
         }
         fComponentStack.pop();
         return result;

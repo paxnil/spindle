@@ -43,7 +43,6 @@ import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.IProblemCollector;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.parser.ParserRuntimeException;
 import com.iw.plugins.spindle.core.util.Assert;
 
@@ -67,13 +66,11 @@ public abstract class AbstractScanner implements IProblemCollector
 
     protected List fProblems = new ArrayList();
     protected IScannerValidator fValidator;
-    protected Parser fParser;
 
-    public final Object scan(final Parser parser, IScannerValidator validator, Node node) throws ScannerException
+    public Object scan(Object source, IScannerValidator validator) throws ScannerException
     {
-        Assert.isNotNull(node);
+        Assert.isNotNull(source);
         fProblems.clear();
-        this.fParser = parser;
         if (validator == null)
         {
             this.fValidator = new BaseValidator();
@@ -82,13 +79,13 @@ public abstract class AbstractScanner implements IProblemCollector
             this.fValidator = validator;
         }
         this.fValidator.setProblemCollector(this);
-        fResultObject = beforeScan(node);
+        fResultObject = beforeScan(source);
         if (fResultObject == null)
             return null;
 
         try
         {
-            doScan(fResultObject, node);
+            doScan(source, fResultObject);
 
         } catch (ParserRuntimeException e)
         {
@@ -99,9 +96,9 @@ public abstract class AbstractScanner implements IProblemCollector
         return afterScan(fResultObject);
     }
 
-    protected abstract void doScan(Object resultObject, Node rootNode) throws ScannerException;
+    protected abstract void doScan(Object source, Object resultObject) throws ScannerException;
 
-    protected abstract Object beforeScan(Node rootNode) throws ScannerException;
+    protected abstract Object beforeScan(Object source) throws ScannerException;
 
     protected Object afterScan(Object scanResults) throws ScannerException
     {
@@ -298,10 +295,10 @@ public abstract class AbstractScanner implements IProblemCollector
         return fValidator.validateTypeName(fullyQualifiedType, severity, location);
     }
 
-    protected boolean validateLibraryResourceLocation(String path, String errorKey, ISourceLocation source)
+    protected boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path, String errorKey, ISourceLocation source)
         throws ScannerException
     {
-        return fValidator.validateLibraryResourceLocation(path, errorKey, source);
+        return fValidator.validateLibraryResourceLocation(specLocation, path, errorKey, source);
 
     }
 
