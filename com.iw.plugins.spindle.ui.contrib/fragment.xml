@@ -83,4 +83,42 @@
          </enablement>
       </decorator>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="Spindle 3"
+            class="com.iw.plugins.spindle.ui.preferences.SpindleGeneralPreferencePage"
+            id="SpindlePreferences">
+      </page>
+      <page
+            name="Editors"
+            category="SpindlePreferences"
+            class="com.iw.plugins.spindle.ui.preferences.SpindleEditorPreferencePage"
+            id="SpindleEditorPreferences">
+      </page>
+      <page
+            name="Folding"
+            category="SpindleEditorPreferences"
+            class="com.iw.plugins.spindle.ui.preferences.SpecFoldingPreferencePage"
+            id="SpindleFoldingPreferences">
+      </page>
+      <page
+            name="Specification Formatter"
+            category="SpindleEditorPreferences"
+            class="com.iw.plugins.spindle.ui.preferences.SpindleFormatterPreferencePage"
+            id="SpindleFormatterPreferences">
+      </page>
+      <page
+            name="Templates"
+            category="SpindlePreferences"
+            class="com.iw.plugins.spindle.ui.preferences.TemplatesPreferencePage"
+            id="SpindleTemplatePreferences">
+      </page>
+       <page
+            name="Wizard Templates"
+            category="SpindleTemplatePreferences"
+            class="com.iw.plugins.spindle.ui.preferences.WizardTemplatesPreferencePage"
+            id="SpindleWizardTemplatePreferences">
+      </page>
+   </extension>
 </fragment>
