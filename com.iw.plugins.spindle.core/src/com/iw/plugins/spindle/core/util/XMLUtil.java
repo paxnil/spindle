@@ -135,13 +135,13 @@ public class XMLUtil
     public static void writeSpecification(Writer writer, BaseSpecification specification)
     {
         IndentingWriter indenter = checkWriter(writer);
-       writeSpecification(indenter, specification, 0);
+        writeSpecification(indenter, specification, 0);
     }
 
     public static void writeSpecification(Writer writer, BaseSpecification specification, int indent)
     {
         IndentingWriter indenter = checkWriter(writer);
-       
+
         switch (specification.getSpecificationType())
         {
             case BaseSpecification.LIBRARY_SPEC :
@@ -178,11 +178,21 @@ public class XMLUtil
 
     public static void writeComponentSpecification(Writer writer, PluginComponentSpecification component, int indent)
     {
+        writeComponentSpecification(writer, component, indent, true);
+    }
+
+    public static void writeComponentSpecification(
+        Writer writer,
+        PluginComponentSpecification component,
+        int indent,
+        boolean writeHeader)
+    {
         IndentingWriter indenter = checkWriter(writer);
         boolean isPage = component.isPageSpecification();
         String rootElement = isPage ? "page-specification" : "component-specification";
 
-        writeXMLHeader(component.getPublicId(), rootElement, indenter);
+        if (writeHeader)
+            writeXMLHeader(component.getPublicId(), rootElement, indenter);
 
         indenter.print("<" + rootElement + " class=\"");
         indenter.print(component.getComponentClassName());
@@ -193,7 +203,7 @@ public class XMLUtil
             indenter.print(
                 " allow-informal-parameters=\"" + (component.getAllowInformalParameters() ? "yes" : "no") + "\"");
         }
-        indenter.println(">");
+        indenter.print(">");
         writeDescription(indenter, indent + 1, component.getDescription());
         if (!isPage)
         {
@@ -206,6 +216,7 @@ public class XMLUtil
         writeContainedComponents(component, indenter, indent + 1, component.getPublicId());
         writeAssets(component, indenter, indent + 1);
 
+        indenter.println();
         indenter.println("</" + rootElement + ">");
     }
 
@@ -238,81 +249,108 @@ public class XMLUtil
      */
     private static void writeBeans(PluginComponentSpecification component, Writer writer, int indent)
     {
-        IndentingWriter indenter = checkWriter(writer);
 
         Collection beanNames = component.getBeanNames();
         if (beanNames != null && !beanNames.isEmpty())
         {
-            indenter.println();
             Iterator names = new TreeSet(beanNames).iterator();
 
             while (names.hasNext())
             {
                 String beanName = (String) names.next();
                 PluginBeanSpecification bean = (PluginBeanSpecification) component.getBeanSpecification(beanName);
-                indenter.printIndented(indent, "<bean name=\"" + beanName);
-                indenter.print("\" class=\"" + bean.getClassName());
-                indenter.print("\" lifecycle=\"");
-
-                BeanLifecycle lifecycle = bean.getLifecycle();
-
-                if (lifecycle == null || lifecycle.equals(BeanLifecycle.REQUEST))
-                {
-                    indenter.print("request\"");
-
-                } else if (lifecycle.equals(BeanLifecycle.NONE))
-                {
-
-                    indenter.print("none\"");
-
-                } else if (lifecycle.equals(BeanLifecycle.PAGE))
-                {
-
-                    indenter.print("page\"");
-
-                } else if (lifecycle.equals(BeanLifecycle.RENDER))
-                {
-
-                    indenter.print("render\"");
-
-                }
-                String description = bean.getDescription();
-                Collection inits = bean.getInitializers();
-
-                boolean writeableDescription = description != null && !"".equals(description.trim());
-                boolean writeableInitializers = inits != null && !inits.isEmpty();
-
-                if (writeableDescription || writeableInitializers)
-                {
-
-                    indenter.println(">");
-
-                    if (writeableDescription)
-                    {
-
-                        XMLUtil.writeDescription(indenter, indent + 1, description.trim(), false);
-                    }
-
-                    if (writeableInitializers)
-                    {
-
-                        Iterator initializers = inits.iterator();
-
-                        while (initializers.hasNext())
-                        {
-
-                            IBeanInitializer initer = (IBeanInitializer) initializers.next();
-                            writeBeanInitializer(component, initer, indenter, indent + 1);
-                        }
-                    }
-                } else
-                {
-
-                    indenter.println("/>");
-                    return;
-                }
-                indenter.printlnIndented(indent, "</bean>");
+                BeanLifecycle lifecycle;
+                String description;
+                Collection inits;
+                boolean writeableDescription;
+                boolean writeableInitializers;
+                writeBean(component, indent, writer, beanName, bean);
             }
+        }
+    }
+
+    public static void writeBean(
+        PluginComponentSpecification component,
+        int indent,
+        Writer writer,
+        String beanName,
+        PluginBeanSpecification bean)
+    {
+        writeBean(component, indent, writer, beanName, bean, true);
+    }
+
+    public static void writeBean(
+        PluginComponentSpecification component,
+        int indent,
+        Writer writer,
+        String beanName,
+        PluginBeanSpecification bean,
+        boolean newLine)
+    {
+        IndentingWriter indenter = checkWriter(writer);
+        if (newLine)
+            indenter.println();
+
+        indenter.printIndented(indent, "<bean name=\"" + beanName);
+        indenter.print("\" class=\"" + bean.getClassName());
+        indenter.print("\" lifecycle=\"");
+
+        BeanLifecycle lifecycle = bean.getLifecycle();
+
+        if (lifecycle == null || lifecycle.equals(BeanLifecycle.REQUEST))
+        {
+            indenter.print("request\"");
+
+        } else if (lifecycle.equals(BeanLifecycle.NONE))
+        {
+
+            indenter.print("none\"");
+
+        } else if (lifecycle.equals(BeanLifecycle.PAGE))
+        {
+
+            indenter.print("page\"");
+
+        } else if (lifecycle.equals(BeanLifecycle.RENDER))
+        {
+
+            indenter.print("render\"");
+
+        }
+        String description = bean.getDescription();
+        Collection inits = bean.getInitializers();
+
+        boolean writeableDescription = description != null && !"".equals(description.trim());
+        boolean writeableInitializers = inits != null && !inits.isEmpty();
+
+        if (writeableDescription || writeableInitializers)
+        {
+
+            indenter.println(">");
+
+            if (writeableDescription)
+            {
+
+                XMLUtil.writeDescription(indenter, indent + 1, description.trim(), false);
+            }
+
+            if (writeableInitializers)
+            {
+
+                Iterator initializers = inits.iterator();
+
+                while (initializers.hasNext())
+                {
+
+                    IBeanInitializer initer = (IBeanInitializer) initializers.next();
+                    writeBeanInitializer(component, initer, indenter, indent + 1);
+                }
+            }
+            indenter.printlnIndented(indent, "</bean>");
+
+        } else
+        {
+            indenter.println("/>");
         }
     }
 
@@ -368,7 +406,7 @@ public class XMLUtil
         int DTDVersion = XMLUtil.getDTDVersion(component.getPublicId());
         if (DTDVersion < XMLUtil.DTD_3_0 || component.getPropertySpecificationNames().isEmpty())
             return;
-
+        //TODO does nothing!
     }
 
     public static void writeAssets(IComponentSpecification component, Writer writer, int indent)
@@ -444,7 +482,7 @@ public class XMLUtil
 
                     indenter.printIndented(indent, "<reserved-parameter name=\"");
                     indenter.print(reservedInformals.next());
-                    indenter.println("\"/>");
+                    indenter.print("\"/>");
                 }
             }
         }
@@ -464,7 +502,6 @@ public class XMLUtil
         Collection parms = component.getParameterNames();
         if (!parms.isEmpty())
         {
-            indenter.println();
             Iterator parameterNames = parms.iterator();
 
             while (parameterNames.hasNext())
@@ -483,7 +520,20 @@ public class XMLUtil
         int indent,
         String publicId)
     {
+        writeParameter(name, parameter, writer, indent, publicId, true);
+    }
+
+    public static void writeParameter(
+        String name,
+        IParameterSpecification parameter,
+        Writer writer,
+        int indent,
+        String publicId,
+        boolean nextLine)
+    {
         IndentingWriter indenter = checkWriter(writer);
+        if (nextLine)
+            indenter.println();
 
         boolean isDTD13 = XMLUtil.getDTDVersion(publicId) == XMLUtil.DTD_1_3;
         indenter.printlnIndented(indent, "<parameter");
@@ -583,8 +633,7 @@ public class XMLUtil
         {
             while (iter.hasNext())
             {
-                indenter.println();
-                String containedName = (String) iter.next();
+                 String containedName = (String) iter.next();
                 currentComponent = component.getComponent(containedName);
                 writeContainedComponent(currentComponent, containedName, indenter, indent, publicId);
             }
@@ -615,6 +664,9 @@ public class XMLUtil
                     }
                     copyOfMap.remove(containedName);
                 }
+                if (iter.hasNext())
+                    indenter.println();
+
             }
             if (!copyOfMap.isEmpty())
             {
@@ -635,10 +687,8 @@ public class XMLUtil
                     }
                 }
             }
-
         }
     }
-
     public static void writeContainedComponent(
         IContainedComponent contained,
         String name,
@@ -646,8 +696,21 @@ public class XMLUtil
         int indent,
         String publicId)
     {
+        writeContainedComponent(contained, name, writer, indent, publicId, true);
+    }
 
+    public static void writeContainedComponent(
+        IContainedComponent contained,
+        String name,
+        Writer writer,
+        int indent,
+        String publicId,
+        boolean nextLine)
+    {
         IndentingWriter indenter = checkWriter(writer);
+
+        if (nextLine)
+            indenter.println();
 
         indenter.printIndented(indent, "<component id=\"" + name);
 
@@ -680,7 +743,7 @@ public class XMLUtil
                 }
             }
         }
-        indenter.printlnIndented(indent, "</component>");
+        indenter.printIndented(indent, "</component>");
     }
 
     public static void writeBinding(
@@ -958,10 +1021,10 @@ public class XMLUtil
         if (hasProperties || hasConfiguration)
         {
 
-            indenter.println(">");
+            indenter.print(">");
 
             if (hasProperties)
-                writeProperties(spec, indenter, indent + 1, false);
+                writeProperties(spec, indenter, indent + 1);
 
             if (hasConfiguration)
             {
@@ -976,17 +1039,16 @@ public class XMLUtil
                     }
                 }
             }
-            indenter.printlnIndented(indent, "</extension>");
+            indenter.printIndented(indent, "</extension>");
         } else
         {
-            indenter.println("/>");
+            indenter.print("/>");
         }
     }
 
-    public static void writeDescription(Writer writer , int indent, String description)
+    public static void writeDescription(Writer writer, int indent, String description)
     {
-        IndentingWriter indenter = checkWriter(writer);
-        writeDescription(indenter, indent, description, true);
+        writeDescription(writer, indent, description, true);
     }
 
     public static void writeDescription(Writer writer, int indent, String description, boolean nextLine)
@@ -1000,7 +1062,7 @@ public class XMLUtil
 
             boolean tooLong = description.length() > 40;
             boolean singleLine = description.indexOf("\r") <= 0 && description.indexOf("\n") <= 0;
-            indenter.printIndented( indent, "<description>");
+            indenter.printIndented(indent, "<description>");
             if (singleLine && !tooLong)
             {
                 indenter.print("<![CDATA[   " + description + "   ]]>");
@@ -1008,15 +1070,15 @@ public class XMLUtil
             } else if (singleLine && tooLong)
             {
                 indenter.println();
-                indenter.printlnIndented( indent + 1, "<![CDATA[   " + description + "   ]]>");
-                indenter.printlnIndented( indent, "</description>");
+                indenter.printlnIndented(indent + 1, "<![CDATA[   " + description + "   ]]>");
+                indenter.printlnIndented(indent, "</description>");
             } else
             {
                 indenter.println();
                 indenter.println("<![CDATA[");
                 writeMultiLine(indenter, description);
                 indenter.println("]]>");
-                indenter.printlnIndented( indent, "</description>");
+                indenter.printlnIndented(indent, "</description>");
             };
         }
     }
@@ -1046,19 +1108,9 @@ public class XMLUtil
     public static void writeProperties(IPropertyHolder propertyHolder, Writer writer, int indent)
     {
         IndentingWriter indenter = checkWriter(writer);
-
-        writeProperties(propertyHolder, indenter, indent, true);
-    }
-
-    public static void writeProperties(IPropertyHolder propertyHolder, Writer writer, int indent, boolean nextLine)
-    {
-        IndentingWriter indenter = checkWriter(writer);
         Collection properties = propertyHolder.getPropertyNames();
         if (properties != null)
         {
-            if (nextLine)
-                indenter.println();
-
             Iterator propertyNames = new TreeSet(properties).iterator();
             while (propertyNames.hasNext())
             {
@@ -1084,7 +1136,7 @@ public class XMLUtil
                 String pname = (String) pageNames.next();
                 String ppath = (String) pageMap.get(pname);
 
-                indenter.printIndented( indent, "<page name=\"" + pname);
+                indenter.printIndented(indent, "<page name=\"" + pname);
                 indenter.print("\" specification-path=\"");
                 indenter.print(ppath);
                 indenter.println("\"/>");
@@ -1106,7 +1158,7 @@ public class XMLUtil
             {
 
                 String alias = (String) componentAliases.next();
-                indenter.printIndented( indent, "<component-alias type=\"");
+                indenter.printIndented(indent, "<component-alias type=\"");
                 indenter.print(alias);
                 indenter.print("\" specification-path=\"");
                 indenter.print(componentMap.get(alias));
@@ -1138,7 +1190,7 @@ public class XMLUtil
     public static void writeLibrary(String name, String speclocation, Writer writer, int indent)
     {
         IndentingWriter indenter = checkWriter(writer);
-        indenter.printIndented( indent, "<library id=\"");
+        indenter.printIndented(indent, "<library id=\"");
         indenter.print(name);
         indenter.print("\" specification-path=\"");
         indenter.print(speclocation);
@@ -1163,16 +1215,23 @@ public class XMLUtil
 
     static public void writeProperty(String name, String value, Writer writer, int indent)
     {
+        writeProperty(name, value, writer, indent, true);
+    }
+
+    static public void writeProperty(String name, String value, Writer writer, int indent, boolean nextLine)
+    {
         IndentingWriter indenter = checkWriter(writer);
-        indenter.printIndented( indent, "<property name=\"" + name);
+        if (nextLine)
+            indenter.println();
+        indenter.printIndented(indent, "<property name=\"" + name);
         if (value == null || "".equals(value))
         {
             indenter.println("\"/>");
         } else
         {
             indenter.println("\">");
-            indenter.printlnIndented( indent + 1, value);
-            indenter.printlnIndented( indent, "</property>");
+            indenter.printlnIndented(indent + 1, value);
+            indenter.printlnIndented(indent, "</property>");
         }
     }
 
@@ -1228,11 +1287,11 @@ public class XMLUtil
     public static void writeLibraryServices(Map serviceMap, Writer writer, int indent)
     {
         IndentingWriter indenter = checkWriter(writer);
-       if (serviceMap != null && !serviceMap.isEmpty())
+        if (serviceMap != null && !serviceMap.isEmpty())
         {
             Iterator serviceNames = new TreeSet(serviceMap.keySet()).iterator();
             if (serviceNames.hasNext())
-            indenter.println();
+                indenter.println();
 
             while (serviceNames.hasNext())
             {
@@ -1240,7 +1299,7 @@ public class XMLUtil
                 String classname = (String) serviceMap.get(serviceName);
                 if (classname != null)
                 {
-                    indenter.printIndented( indent, "<service name=\"");
+                    indenter.printIndented(indent, "<service name=\"");
                     indenter.print(serviceName);
                     indenter.print("\" class=\"");
                     indenter.print(classname);

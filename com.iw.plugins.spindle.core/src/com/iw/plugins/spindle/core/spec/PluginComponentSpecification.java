@@ -164,6 +164,22 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     {
         super(BasePropertyHolder.COMPONENT_SPEC);
     }
+    
+    /**
+     * Create a new specification configured the same as the parent, but with no children info
+     * @param other the spec we are copying config info from
+     */
+    public PluginComponentSpecification(PluginComponentSpecification other)
+   {
+       super(BasePropertyHolder.COMPONENT_SPEC);
+       fComponentClassName = other.fComponentClassName;
+       fPageSpecification = other.fPageSpecification;
+       fPublicId = other.fPublicId;
+       setLocation(other.getLocation());
+       setSpecificationLocation(other.getSpecificationLocation());
+       fAllowBody = other.fAllowBody;
+       fAllowInformalParameters = other.fAllowInformalParameters;       
+   }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#addAsset(java.lang.String, org.apache.tapestry.spec.IAssetSpecification)

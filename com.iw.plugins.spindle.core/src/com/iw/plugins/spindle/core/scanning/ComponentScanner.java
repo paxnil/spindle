@@ -461,6 +461,10 @@ public class ComponentScanner extends SpecificationScanner
     protected void scanComponentSpecification(Node rootNode, IComponentSpecification specification, boolean isPage)
         throws ScannerException
     {
+        
+        ISourceLocationInfo location = getSourceLocationInfo(rootNode);
+        specification.setLocation(location);
+        
         String rootName = rootNode.getNodeName();
         if (isPage)
         {
