@@ -143,6 +143,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         checkSanity();
         try
         {
+            System.err.println("pp bump");
             return configuration.parse();
         } catch (IOException e)
         {
@@ -243,18 +244,8 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
 
             } else
             {
-                PullParserNode temp2 = parent.firstChild;
-                if (parent.firstChild.nextSibling != null)
-                {
-                    
-                    while (temp2.nextSibling != null)
-                    {
-                        temp2 = temp2.nextSibling;
-                    }
-                }
-
-                temp.setPreviousSibling(temp2);
-                temp2.setNextSibling(temp);
+                temp.setPreviousSibling(lastElement);
+                lastElement.setNextSibling(temp);
             }
             parseStack.push(temp);
 
