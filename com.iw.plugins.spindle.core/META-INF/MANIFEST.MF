@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-Name: Spindle Core Plugin
+Bundle-SymbolicName: com.iw.plugins.spindle.core; singleton=true
+Bundle-Version: 0.1.0
+Bundle-ClassPath: core.jar,
+ commons-digester-1.5.jar,
+ commons-logging-1.0.2.jar,
+ commons-beanutils-1.6.1.jar,
+ commons-collections-2.1.jar,
+ commons-fileupload-1.0.jar,
+ commons-lang-cvs-HEAD.jar,
+ jakarta-oro-2.0.6.jar,
+ javassist-2.5.1.jar,
+ javax.servlet.jar,
+ ognl-2.6.3.jar,
+ tapestry-3.0.jar,
+ tapestry-contrib-3.0.jar,
+ bsf-2.3.0.jar,
+ dtdparser.jar,
+ commons-codec-1.2.jar
+Bundle-Activator: com.iw.plugins.spindle.core.TapestryCore
+Bundle-Vendor: Intelligent Works Inc.
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.ui.ide;reprovide=true,
+ org.eclipse.ui.views;reprovide=true,
+ org.eclipse.ui.workbench.texteditor;reprovide=true,
+ org.eclipse.ui.editors;reprovide=true,
+ org.eclipse.core.resources;reprovide=true,
+ org.eclipse.jdt.core;reprovide=true,
+ org.eclipse.ui;reprovide=true,
+ org.apache.xerces;reprovide=true,
+ org.eclipse.jface.text,
+ org.eclipse.core.runtime
+Eclipse-AutoStart: true
