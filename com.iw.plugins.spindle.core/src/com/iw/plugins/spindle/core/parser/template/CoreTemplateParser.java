@@ -50,238 +50,226 @@ import com.iw.plugins.spindle.core.source.SourceLocation;
  * Subclass of the Tapestry template parser, tweaked for Spindle.
  * 
  * @author glongman@gmail.com
- * 
  */
 public class CoreTemplateParser extends TemplateParser
 {
-  public static final String REMOVE_ID = "$remove$";
-  public static final String CONTENT_ID = "$content$";
-  public static final int IMPLICIT_ID_PATTERN_ID_GROUP = 1;
-  public static final int IMPLICIT_ID_PATTERN_TYPE_GROUP = 2;
-  public static final int IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP = 4;
-  public static final int IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP = 5;
+    public static final String REMOVE_ID = "$remove$";
 
-  static class CoreTemplateTokenFactory extends TemplateTokenFactory
-  {
-    private TagEventHandler eventHandler;
+    public static final String CONTENT_ID = "$content$";
 
-    public CoreTemplateTokenFactory(TagEventHandler eventHandler)
+    public static final int IMPLICIT_ID_PATTERN_ID_GROUP = 1;
+
+    public static final int IMPLICIT_ID_PATTERN_TYPE_GROUP = 2;
+
+    public static final int IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP = 4;
+
+    public static final int IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP = 5;
+
+    static class CoreTemplateTokenFactory extends TemplateTokenFactory
     {
-      this.eventHandler = eventHandler;
+        private TagEventHandler eventHandler;
+
+        public CoreTemplateTokenFactory(TagEventHandler eventHandler)
+        {
+            this.eventHandler = eventHandler;
+        }
+
+        public LocalizationToken createLocalizationToken(String tagName, String localizationKey,
+                boolean raw, Map attributes, ILocation startLocation)
+        {
+            return new CoreLocalizationToken(tagName, localizationKey, raw, attributes,
+                    startLocation, eventHandler.getEventInfo());
+        }
+
+        public OpenToken createOpenToken(String tagName, String jwcId, String type,
+                ILocation location)
+        {
+            return new CoreOpenToken(tagName, jwcId, type, location, eventHandler.getEventInfo());
+        }
+
     }
 
-    public LocalizationToken createLocalizationToken(
-        String tagName,
-        String localizationKey,
-        boolean raw,
-        Map attributes,
-        ILocation startLocation)
+    /**
+     * Handler to collect line/offset information for Start Tags, Includes attributes too.
+     */
+
+    private TagEventHandler fEventHandler = new TagEventHandler();
+
+    /**
+     * List of Problems found during the parse.
+     */
+
+    private IProblemCollector fProblemCollector;
+
+    public CoreTemplateParser()
     {
-      return new CoreLocalizationToken(
-          tagName,
-          localizationKey,
-          raw,
-          attributes,
-          startLocation,
-          eventHandler.getEventInfo());
+        super();
+        _factory = new CoreTemplateTokenFactory(fEventHandler);
     }
 
-    public OpenToken createOpenToken(
-        String tagName,
-        String jwcId,
-        String type,
-        ILocation location)
+    public TemplateToken[] parse(char[] templateData, ITemplateParserDelegate delegate,
+            IResourceLocation resourceLocation) throws TemplateParseException
     {
-      return new CoreOpenToken(tagName, jwcId, type, location, eventHandler
-          .getEventInfo());
+        TemplateToken[] result = null;
+
+        try
+        {
+            beforeParse(templateData, delegate, resourceLocation);
+            try
+            {
+                parse();
+            }
+            catch (Exception e)
+            {
+                //ignore, problems already recorded
+                //e.printStackTrace();
+            }
+
+            List tokens = getTokens();
+
+            result = (TemplateToken[]) tokens.toArray(new TemplateToken[tokens.size()]);
+        }
+        catch (RuntimeException e)
+        {
+            TapestryCore.log(e);
+            throw e;
+        }
+        finally
+        {
+            afterParse();
+        }
+
+        return result;
     }
 
-  }
-
-  /**
-   * Handler to collect line/offset information for Start Tags, Includes
-   * attributes too.
-   */
-
-  private TagEventHandler fEventHandler = new TagEventHandler();
-
-  /**
-   * List of Problems found during the parse.
-   */
-
-  private IProblemCollector fProblemCollector;
-
-  public CoreTemplateParser()
-  {
-    super();
-    _factory = new CoreTemplateTokenFactory(fEventHandler);
-  }
-
-  public TemplateToken[] parse(
-      char[] templateData,
-      ITemplateParserDelegate delegate,
-      IResourceLocation resourceLocation) throws TemplateParseException
-  {
-    TemplateToken[] result = null;
-
-    try
+    public void setProblemCollector(IProblemCollector collector)
     {
-      beforeParse(templateData, delegate, resourceLocation);
-      try
-      {
-        parse();
-      } catch (Exception e)
-      {
-        //ignore, problems already recorded
-        //e.printStackTrace();
-      }
-
-      List tokens = getTokens();
-
-      result = (TemplateToken[]) tokens.toArray(new TemplateToken[tokens.size()]);
-    } catch (RuntimeException e)
-    {
-      TapestryCore.log(e);
-      throw e;
-    } finally
-    {
-      afterParse();
+        fProblemCollector = collector;
     }
 
-    return result;
-  }
-
-  public void setProblemCollector(IProblemCollector collector)
-  {
-    fProblemCollector = collector;
-  }
-
-  private ISourceLocation getSourceLocation(int line, int cursor, String message)
-  {
-    if (message.startsWith("Tag"))
+    private ISourceLocation getSourceLocation(int line, int cursor, String message)
     {
-      return getJWCIDLocation();
-    }
-    ISourceLocation result = fEventHandler.getEventInfo().findLocation(cursor);
-    if (result == null)
-      result = new SourceLocation(line, cursor);
-    return result;
-  }
-
-  private ISourceLocation getJWCIDLocation()
-  {
-    Map attrMap = fEventHandler.getEventInfo().getAttributeMap();
-    ISourceLocation result = (ISourceLocation) findCaselessly(
-        TemplateParser.JWCID_ATTRIBUTE_NAME,
-        attrMap);
-    if (result == null)
-      result = fEventHandler.getEventInfo().getStartTagLocation();
-    return result;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.parse.TemplateParser#templateParseProblem(org.apache.tapestry.ApplicationRuntimeException,
-   *      int, int)
-   */
-  protected void templateParseProblem(
-      ApplicationRuntimeException exception,
-      int line,
-      int cursor) throws ApplicationRuntimeException
-  {
-    if (fProblemCollector != null)
-      fProblemCollector.addProblem(IProblem.ERROR, getJWCIDLocation(), exception
-          .getMessage(), false);
-    super.templateParseProblem(exception, line, cursor);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.parse.TemplateParser#templateParseProblem(java.lang.String,
-   *      org.apache.tapestry.ILocation, int, int)
-   */
-  protected void templateParseProblem(
-      String message,
-      ILocation location,
-      int line,
-      int cursor) throws TemplateParseException
-  {
-    if (fProblemCollector != null)
-    {
-      fProblemCollector.addProblem(IProblem.ERROR, getSourceLocation(
-          line,
-          cursor,
-          message), message, false);
+        if (message.startsWith("Tag"))
+        {
+            return getJWCIDLocation();
+        }
+        ISourceLocation result = fEventHandler.getEventInfo().findLocation(cursor);
+        if (result == null)
+            result = new SourceLocation(line, cursor);
+        return result;
     }
 
-    super.templateParseProblem(message, location, line, cursor);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.parse.TemplateParser#attributeBeginEvent(java.lang.String,
-   *      int, int)
-   */
-  protected void attributeBeginEvent(
-      String attributeName,
-      int startLine,
-      int cursorPosition)
-  {
-    fEventHandler.attributeBegin(attributeName, startLine, cursorPosition);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.parse.TemplateParser#attributeEndEvent(int)
-   */
-  protected void attributeEndEvent(int cursorPosition)
-  {
-    fEventHandler.attributeEnd(cursorPosition);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.parse.TemplateParser#tagBeginEvent(int, int)
-   */
-  protected void tagBeginEvent(int startLine, int cursorPosition)
-  {
-    fEventHandler.tagBegin(startLine, cursorPosition);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.parse.TemplateParser#tagEndEvent(int)
-   */
-  protected void tagEndEvent(int cursorPosition)
-  {
-    fEventHandler.tagEnd(cursorPosition);
-  }
-
-  protected Object findCaselessly(String key, Map map)
-  {
-    Object result = map.get(key);
-
-    if (result != null)
-      return result;
-
-    Iterator i = map.entrySet().iterator();
-    while (i.hasNext())
+    private ISourceLocation getJWCIDLocation()
     {
-      Map.Entry entry = (Map.Entry) i.next();
-
-      String entryKey = (String) entry.getKey();
-
-      if (entryKey.equalsIgnoreCase(key))
-        return entry.getValue();
+        Map attrMap = fEventHandler.getEventInfo().getAttributeMap();
+        ISourceLocation result = (ISourceLocation) findCaselessly(
+                TemplateParser.JWCID_ATTRIBUTE_NAME,
+                attrMap);
+        if (result == null)
+            result = fEventHandler.getEventInfo().getStartTagLocation();
+        return result;
     }
 
-    return null;
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.parse.TemplateParser#templateParseProblem(org.apache.tapestry.ApplicationRuntimeException,
+     *      int, int)
+     */
+    protected void templateParseProblem(ApplicationRuntimeException exception, int line, int cursor)
+            throws ApplicationRuntimeException
+    {
+        if (fProblemCollector != null)
+            fProblemCollector.addProblem(
+                    IProblem.ERROR,
+                    getJWCIDLocation(),
+                    exception.getMessage(),
+                    false,
+                    IProblem.NOT_QUICK_FIXABLE);
+        super.templateParseProblem(exception, line, cursor);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.parse.TemplateParser#templateParseProblem(java.lang.String,
+     *      org.apache.tapestry.ILocation, int, int)
+     */
+    protected void templateParseProblem(String message, ILocation location, int line, int cursor)
+            throws TemplateParseException
+    {
+        if (fProblemCollector != null)
+        {
+            fProblemCollector.addProblem(
+                    IProblem.ERROR,
+                    getSourceLocation(line, cursor, message),
+                    message,
+                    false,
+                    IProblem.NOT_QUICK_FIXABLE);
+        }
+
+        super.templateParseProblem(message, location, line, cursor);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.parse.TemplateParser#attributeBeginEvent(java.lang.String, int, int)
+     */
+    protected void attributeBeginEvent(String attributeName, int startLine, int cursorPosition)
+    {
+        fEventHandler.attributeBegin(attributeName, startLine, cursorPosition);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.parse.TemplateParser#attributeEndEvent(int)
+     */
+    protected void attributeEndEvent(int cursorPosition)
+    {
+        fEventHandler.attributeEnd(cursorPosition);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.parse.TemplateParser#tagBeginEvent(int, int)
+     */
+    protected void tagBeginEvent(int startLine, int cursorPosition)
+    {
+        fEventHandler.tagBegin(startLine, cursorPosition);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.parse.TemplateParser#tagEndEvent(int)
+     */
+    protected void tagEndEvent(int cursorPosition)
+    {
+        fEventHandler.tagEnd(cursorPosition);
+    }
+
+    protected Object findCaselessly(String key, Map map)
+    {
+        Object result = map.get(key);
+
+        if (result != null)
+            return result;
+
+        Iterator i = map.entrySet().iterator();
+        while (i.hasNext())
+        {
+            Map.Entry entry = (Map.Entry) i.next();
+
+            String entryKey = (String) entry.getKey();
+
+            if (entryKey.equalsIgnoreCase(key))
+                return entry.getValue();
+        }
+
+        return null;
+    }
 
 }
