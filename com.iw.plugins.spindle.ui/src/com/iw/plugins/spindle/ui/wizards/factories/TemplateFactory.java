@@ -26,6 +26,7 @@
 package com.iw.plugins.spindle.ui.wizards.factories;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -92,19 +93,33 @@ public class TemplateFactory
       TemplateBuffer buffer = translator.translate(template);
 
       resolve(buffer, this);
-
       return buffer;
     }
+  }
 
+  public static List getAllTemplates(TemplateFactory factory)
+  {
+    return getAllTemplates(factory.fTemplateContextId);
+  }
+
+  public static List getAllTemplates(String templateContextId)
+  {
+    return Arrays.asList(UserTemplateAccess.getDefault().getTemplateStore().getTemplates(
+        templateContextId));
   }
 
   private String fTemplateContextId;
   /** Variable resolvers used by this content factory. */
   private final Map fResolvers = new HashMap();
 
-  public TemplateFactory(String templateContextId)
+  TemplateFactory(String templateContextId)
   {
     fTemplateContextId = templateContextId;
+  }
+
+  public String getTemplateContextId()
+  {
+    return fTemplateContextId;
   }
 
   protected String getGeneratedContent(
@@ -118,12 +133,6 @@ public class TemplateFactory
       content = XMLUtil.fomat(content);
 
     return content;
-  }
-
-  public Template[] getAllTemplates()
-  {
-    return UserTemplateAccess.getDefault().getTemplateStore().getTemplates(
-        fTemplateContextId);
   }
 
   protected TemplateContext createTemplateContext()

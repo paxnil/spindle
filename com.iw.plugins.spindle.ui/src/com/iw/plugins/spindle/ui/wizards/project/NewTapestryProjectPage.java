@@ -45,7 +45,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
@@ -67,13 +66,14 @@ import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
-import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.spec.PluginPageDeclaration;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.properties.ProjectPropertyPage;
+import com.iw.plugins.spindle.ui.wizards.factories.ApplicationFactory;
+import com.iw.plugins.spindle.ui.wizards.factories.ITemplateSource;
+import com.iw.plugins.spindle.ui.wizards.factories.PageFactory;
+import com.iw.plugins.spindle.ui.wizards.factories.TapestryTemplateFactory;
 
 /**
  * A wizard page for creating a new Tapestry web project.
@@ -100,15 +100,27 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     }
   };
 
+  /* the file factories used by this wizard */
+  private ApplicationFactory fAppFactory;
+  private PageFactory fPageFactory;
+  private TapestryTemplateFactory fTemplateFactory;
+  /* the source of the actual templates to use */
+  private ITemplateSource fTemplateSource;
   /**
    * @param pageName
    */
-  public NewTapestryProjectPage(String pageName)
+  public NewTapestryProjectPage(String pageName, NewTapestryProjectWizard wizard,
+      ITemplateSource source)
   {
     super(pageName);
 
     fInsertTapestryFilter = new CheckBoxField(UIPlugin
         .getString("new-project-wizard-page-insert-filter-servlet-2.3-and-up-only"));
+
+    fAppFactory = new ApplicationFactory();
+    fPageFactory = new PageFactory();
+    fTemplateFactory = new TapestryTemplateFactory();
+    fTemplateSource = source;
   }
 
   /**
@@ -249,11 +261,6 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     return true;
   }
 
-  public IJavaProject getNewJavaProject()
-  {
-    return JavaCore.create(getProjectHandle());
-  }
-
   public String getContextFolderName()
   {
     if (fProjectContextFolderField == null)
@@ -321,15 +328,13 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     // No longer required, library projects are deprecated
     //        prj.setProjectType(TapestryProject.APPLICATION_PROJECT_TYPE);
     prj.setWebContext("/" + getContextFolderName());
-    
+
     int version = XMLUtil.getDTDVersion(getServletSpecPublicId());
     if (version == XMLUtil.UNKNOWN_DTD)
       prj.setValidateWebXML(false);
 
-    
     prj.saveProperties();
 
-   
   }
 
   /**
@@ -344,29 +349,53 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
    * 
    * @param monitor
    */
-  protected void configureTapestryProject(IJavaProject jproject, IProgressMonitor monitor) throws CoreException
+  protected void configureTapestryProject(IJavaProject jproject, IProgressMonitor monitor) throws CoreException,
+      InterruptedException
   {
     fReveal = new ArrayList();
     monitor.beginTask(UIPlugin.getString("new-project-wizard-page-initializing"), 6);
+
     IProject underlyingProject = jproject.getProject();
     String projectName = underlyingProject.getName();
+
     IFolder contextFolder = underlyingProject.getFolder(getContextFolderName());
     fReveal.add(contextFolder);
+
     if (!contextFolder.exists())
       contextFolder.create(true, true, monitor);
+
     monitor.worked(1);
+
     IFolder webInfFolder = contextFolder.getFolder("WEB-INF");
     fReveal.add(webInfFolder);
+
     if (!webInfFolder.exists())
       webInfFolder.create(true, true, monitor);
+
     monitor.worked(1);
+
     configureWebXML(projectName, webInfFolder, writeTapestryRedirectFilter(), monitor);
+
     monitor.worked(1);
-    configureApplication(projectName, webInfFolder, monitor);
+
+    // the project application spec
+    fReveal.add(fAppFactory.createApplication(webInfFolder, fTemplateSource
+        .getTemplate(fAppFactory), projectName, TapestryCore
+        .getString("TapestryEngine.defaultEngine"), "Home.page", monitor));
+
     monitor.worked(1);
-    configureHomePage(webInfFolder, monitor);
+
+    //the home page spec
+    fReveal.add(fPageFactory.createPage(webInfFolder, fTemplateSource
+        .getTemplate(fPageFactory), "Home", TapestryCore
+        .getString("TapestryPageSpec.defaultSpec"), monitor));
+
     monitor.worked(1);
-    configureHomeTemplate(webInfFolder, monitor);
+
+    // the home page template
+    fReveal.add(fTemplateFactory.createTapestryTemplate(webInfFolder, fTemplateSource
+        .getTemplate(fTemplateFactory), "Home", "html", monitor));
+
     monitor.done();
   }
 
@@ -396,70 +425,6 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     fReveal.add(webDotXML);
     InputStream contents = new ByteArrayInputStream(swriter.toString().getBytes());
     webDotXML.create(contents, true, new SubProgressMonitor(monitor, 1));
-  }
-
-  /**
-   * @param webInfFolder
-   * @param monitor
-   */
-  private void configureApplication(
-      String projectName,
-      IFolder webInfFolder,
-      IProgressMonitor monitor) throws CoreException
-  {
-    PluginApplicationSpecification spec = new PluginApplicationSpecification();
-    spec.setName(projectName);
-    spec.setEngineClassName(TapestryCore.getString("TapestryEngine.defaultEngine"));
-    spec.setDescription("add a description");
-    spec.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
-    spec.addPageDeclaration(new PluginPageDeclaration("Home", "Home.page", null));
-    IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_TAB_CHAR);
-    int tabSize = store.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
-    StringWriter swriter = new StringWriter();
-    IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
-    XMLUtil.writeApplicationSpecification(iwriter, spec, 0);
-    iwriter.flush();
-    IFile appFile = webInfFolder.getFile(projectName + ".application");
-    fReveal.add(appFile);
-    InputStream contents = new ByteArrayInputStream(swriter.toString().getBytes());
-    appFile.create(contents, true, new SubProgressMonitor(monitor, 1));
-  }
-
-  private void configureHomePage(IFolder webInfFolder, IProgressMonitor monitor) throws CoreException
-  {
-
-    PluginComponentSpecification homeSpec = new PluginComponentSpecification();
-    homeSpec.setPageSpecification(true);
-    homeSpec
-        .setComponentClassName(TapestryCore.getString("TapestryPageSpec.defaultSpec"));
-    homeSpec.setDescription("add a description");
-    homeSpec.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
-    IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_TAB_CHAR);
-    int tabSize = store.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
-    StringWriter swriter = new StringWriter();
-    IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
-    XMLUtil.writeSpecification(iwriter, homeSpec, 0);
-    iwriter.flush();
-    IFile pageFile = webInfFolder.getFile("Home.page");
-    fReveal.add(pageFile);
-    InputStream contents = new ByteArrayInputStream(swriter.toString().getBytes());
-    pageFile.create(contents, true, new SubProgressMonitor(monitor, 1));
-  }
-
-  /**
-   * @param webInfFolder
-   * @param monitor
-   */
-  private void configureHomeTemplate(IFolder webInfFolder, IProgressMonitor monitor) throws CoreException
-  {
-    IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
-    String source = pstore.getString(PreferenceConstants.P_HTML_TO_GENERATE);
-    IFile pageFile = webInfFolder.getFile("Home.html");
-    fReveal.add(pageFile);
-    InputStream contents = new ByteArrayInputStream(source.getBytes());
-    pageFile.create(contents, true, new SubProgressMonitor(monitor, 1));
   }
 
   /**

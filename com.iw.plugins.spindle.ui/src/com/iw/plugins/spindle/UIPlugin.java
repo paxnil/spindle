@@ -511,10 +511,4 @@ public class UIPlugin extends AbstractUIPlugin
     return fModelProvider;
   }
   
-  
-
-  protected void initializeDefaultPreferences(IPreferenceStore store)
-  {
-    new PreferenceInitializer().initializeDefaultPreferences();
-  }
 }

@@ -26,12 +26,16 @@
 package com.iw.plugins.spindle.editors.assist.usertemplates;
 
 import org.apache.tapestry.parse.SpecificationParser;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.SimpleTemplateVariableResolver;
+import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 
 /**
  * XMLFileContextType context type for creating new xml files.
@@ -121,7 +125,7 @@ public class XMLFileContextType extends TemplateContextType
       setEvaluationString("yes");
     }
   }
-  
+
   public static class AllowBody extends SimpleTemplateVariableResolver
   {
     public static final String NAME = "allowBody";
@@ -131,6 +135,40 @@ public class XMLFileContextType extends TemplateContextType
       super(NAME, "does this component allow a body?");
       setEvaluationString("yes");
     }
+  }
+
+  public static IStatus validateTemplateName(
+      IPreferenceStore store,
+      String contextId,
+      String templateName)
+  {
+
+    SpindleStatus status = new SpindleStatus();
+    String value = store.getString(contextId);
+
+    if (!templateExists(value, contextId))
+      status.setError(UIPlugin.getString("templates.missing.pref", value, UIPlugin
+          .getString(contextId + ".label")));
+
+    return status;
+  }
+
+  private static boolean templateExists(String name, String contextId)
+  {
+    Template[] templates = UserTemplateAccess
+        .getDefault()
+        .getTemplateStore()
+        .getTemplates(contextId);
+    boolean found = false;
+    for (int i = 0; i < templates.length; i++)
+    {
+      if (templates[i].getName().equals(name))
+      {
+        found = true;
+        break;
+      }
+    }
+    return found;
   }
 
   public static final TemplateVariableResolver PUBLIC_ID = new PublicId();

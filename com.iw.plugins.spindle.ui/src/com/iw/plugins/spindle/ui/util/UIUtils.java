@@ -28,17 +28,25 @@ package com.iw.plugins.spindle.ui.util;
 
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
+import org.eclipse.jface.preference.IPreferenceNode;
+import org.eclipse.jface.preference.IPreferencePage;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.preference.PreferenceManager;
+import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.formatter.IContentFormatter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -51,9 +59,9 @@ import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.editors.formatter.DoctypeEditFormatWorker;
+import com.iw.plugins.spindle.editors.formatter.FixedMultiPassContentFormatter;
 import com.iw.plugins.spindle.editors.formatter.FormattingPreferences;
 import com.iw.plugins.spindle.editors.formatter.MasterFormattingStrategy;
-import com.iw.plugins.spindle.editors.formatter.FixedMultiPassContentFormatter;
 import com.iw.plugins.spindle.editors.formatter.SlaveFormattingStrategy;
 import com.iw.plugins.spindle.editors.formatter.StartTagEditFormatWorker;
 
@@ -65,6 +73,22 @@ import com.iw.plugins.spindle.editors.formatter.StartTagEditFormatWorker;
  */
 public class UIUtils
 {
+	public static boolean showPreferencePage(Shell shell, String id, IPreferencePage page) {
+		final IPreferenceNode targetNode = new PreferenceNode(id, page);
+		
+		PreferenceManager manager = new PreferenceManager();
+		manager.addToRoot(targetNode);
+		final PreferenceDialog dialog = new PreferenceDialog(shell, manager);
+		final boolean [] result = new boolean[] { false };
+		BusyIndicator.showWhile(shell.getDisplay(), new Runnable() {
+			public void run() {
+				dialog.create();
+				dialog.setMessage(targetNode.getLabelText());
+				result[0]= (dialog.open() == Window.OK);
+			}
+		});
+		return result[0];
+	}	
 
   public static XMLDocumentPartitioner createXMLStructurePartitioner()
   {

@@ -26,6 +26,8 @@
 
 package com.iw.plugins.spindle;
 
+import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
+
 /**
  * Preference constants used by Spindle
  * 
@@ -57,5 +59,11 @@ public interface PreferenceConstants
   String FORMATTER_TAB_SIZE = UIPlugin.PLUGIN_ID + ".EDITOR_DISPLAY_TAB_WIDTH";
 
   String FORMATTER_TAB_CHAR = UIPlugin.PLUGIN_ID + ".FORMATTER_USE_TABS_TO_INDENT";
+
+  String APP_TEMPLATE = XMLFileContextType.APPLICATION_FILE_CONTEXT_TYPE;
+  String LIB_TEMPLATE = XMLFileContextType.LIBRARY_FILE_CONTEXT_TYPE;
+  String PAGE_TEMPLATE = XMLFileContextType.PAGE_FILE_CONTEXT_TYPE;
+  String COMPONENT_TEMPLATE = XMLFileContextType.COMPONENT_FILE_CONTEXT_TYPE;
+  String TAP_TEMPLATE_TEMPLATE = XMLFileContextType.TEMPLATE_FILE_CONTEXT_TYPE;
 
 }

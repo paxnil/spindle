@@ -43,6 +43,8 @@ import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 public class ApplicationFactory extends TemplateFactory
 {
 
+  public static final String CONTEXT_TYPE = XMLFileContextType.APPLICATION_FILE_CONTEXT_TYPE;
+
   static private final String APP_NAME = "applicationName";
   static private final String ENGINE_CLASS = "engineClass";
   static private final String PAGE_PATH = "homePage";
@@ -50,7 +52,7 @@ public class ApplicationFactory extends TemplateFactory
 
   public ApplicationFactory()
   {
-    super(XMLFileContextType.APPLICATION_FILE_CONTEXT_TYPE);
+    super(CONTEXT_TYPE);
     addDefaultResolvers();
     addXMLFileResolvers();
   }

@@ -45,12 +45,14 @@ import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 public class ComponentFactory extends TemplateFactory
 {
 
+  public static final String CONTEXT_TYPE = XMLFileContextType.COMPONENT_FILE_CONTEXT_TYPE;
+
   static private final String COMPONENT_CLASS = "componentClass";
   static private final String DESCRIPTION = "description";
 
   public ComponentFactory()
   {
-    super(XMLFileContextType.COMPONENT_FILE_CONTEXT_TYPE);
+    super(CONTEXT_TYPE);
     addDefaultResolvers();
     addXMLFileResolvers();
     addResolver(new XMLFileContextType.AllowBody());
@@ -101,8 +103,8 @@ public class ComponentFactory extends TemplateFactory
     monitor.done();
     return newFile;
   }
-  
-  public  IFile createComponent(
+
+  public IFile createComponent(
       IResourceWorkspaceLocation namespaceLocation,
       Template template,
       String componentName,

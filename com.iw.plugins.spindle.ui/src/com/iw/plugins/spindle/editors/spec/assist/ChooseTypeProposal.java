@@ -142,7 +142,10 @@ public class ChooseTypeProposal implements ICompletionProposal
 
       if (dialog.open() == dialog.OK)
       {
-        IType chosen = (IType) dialog.getResult()[0];
+        Object [] result = dialog.getResult();
+        if (result == null)
+          return null;
+        IType chosen = (IType) result[0];
         return chosen.getFullyQualifiedName(); //FirstResult();
       }
     } catch (CoreException jmex)

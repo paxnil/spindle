@@ -34,7 +34,7 @@
 	context="com.iw.plugins.spindle.ui.templateContextType.applicationFile" 
 	description="%applicationSkel.description" 
 	id="com.iw.plugins.spindle.ui.templates.application1" 
-	name="application"><![CDATA[<?xml version="1.0" encoding="${encoding}"?>
+	name="default"><![CDATA[<?xml version="1.0" encoding="${encoding}"?>
 <!DOCTYPE application PUBLIC
   "${publicId}"
   "${publicIdUrl}">
@@ -55,7 +55,7 @@
 	context="com.iw.plugins.spindle.ui.templateContextType.libraryFile" 
 	description="%librarySkel.description" 
 	id="com.iw.plugins.spindle.ui.templates.library1" 
-	name="library"><![CDATA[<?xml version="1.0" encoding="${encoding}"?>
+	name="default"><![CDATA[<?xml version="1.0" encoding="${encoding}"?>
 <!DOCTYPE library PUBLIC
   "${publicId}"
   "${publicIdUrl}">
@@ -74,7 +74,7 @@
 	context="com.iw.plugins.spindle.ui.templateContextType.pageFile" 
 	description="%pageSkel.description" 
 	id="com.iw.plugins.spindle.ui.templates.page1" 
-	name="page"><![CDATA[<?xml version="1.0" encoding="${encoding}"?>
+	name="default"><![CDATA[<?xml version="1.0" encoding="${encoding}"?>
 <!DOCTYPE page-specification PUBLIC
   "${publicId}"
   "${publicIdUrl}">
@@ -93,7 +93,7 @@
 	context="com.iw.plugins.spindle.ui.templateContextType.componentFile" 
 	description="%componentSkel.description" 
 	id="com.iw.plugins.spindle.ui.templates.component1" 
-	name="component"><![CDATA[<?xml version="1.0" encoding="${encoding}"?>
+	name="default"><![CDATA[<?xml version="1.0" encoding="${encoding}"?>
 <!DOCTYPE component-specification PUBLIC
   "${publicId}"
   "${publicIdUrl}">
@@ -114,10 +114,15 @@
 	context="com.iw.plugins.spindle.ui.templateContextType.templateFile" 
 	description="%templateSkel.description" 
 	id="com.iw.plugins.spindle.ui.templates.template1" 
-	name="template"><![CDATA[
-<span jwcid="$$content$$">
-  ${cursor}
-</span>	]]>
+	name="default"><![CDATA[<html>
+<head>
+
+</head>
+
+<body>
+   ${cursor}
+</body>
+</html>]]>
 </template>
 <template 
 	context="com.iw.plugins.spindle.ui.templateContextType.user" 

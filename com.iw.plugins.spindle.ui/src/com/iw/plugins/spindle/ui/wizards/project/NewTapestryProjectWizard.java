@@ -30,6 +30,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
@@ -39,13 +41,12 @@ import com.iw.plugins.spindle.ui.wizards.NewTapestryElementWizard;
  * Wizard for creating new Tapestry projects.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: NewTapestryProjectWizard.java,v 1.4 2003/11/17 18:49:37
- *          glongman Exp $
  */
 public class NewTapestryProjectWizard extends NewTapestryElementWizard
 {
   private NewTapestryProjectPage fMainPage;
   private NewTapestryProjectJavaPage fJavaPage;
+  private TemplateSelectionPage fTemplatePage;
 
   private boolean beenThere = false;
 
@@ -63,12 +64,16 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
   {
     ImageDescriptor descriptor = Images.getImageDescriptor("applicationDialog.gif");
 
+    fTemplatePage = new TemplateSelectionPage("File generation");
+
     fMainPage = new NewTapestryProjectPage(UIPlugin
-        .getString("new-project-wizard-page-title"));
+        .getString("new-project-wizard-page-title"), this, fTemplatePage);
+
     fMainPage.setImageDescriptor(descriptor);
     fMainPage.setDescription(UIPlugin.getString("new-project-wizard-page-title"));
 
     addPage(fMainPage);
+    addPage(fTemplatePage);
 
     fJavaPage = new NewTapestryProjectJavaPage(fMainPage);
     fJavaPage.setImageDescriptor(descriptor);
@@ -104,6 +109,7 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
     }
     return true;
   }
+  
 
   /*
    * (non-Javadoc)
@@ -131,7 +137,8 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
    */
   public boolean canFinish()
   {
-    if (getContainer().getCurrentPage() == fMainPage)
+    IWizardPage currentPage = getContainer().getCurrentPage();
+    if (currentPage == fMainPage || currentPage == fTemplatePage)
       return false;
     return super.canFinish();
   }

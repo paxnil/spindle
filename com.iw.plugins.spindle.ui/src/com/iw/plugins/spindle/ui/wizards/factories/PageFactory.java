@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  BEGIN LICENSE BLOCK Version: MPL 1.1
+ * BEGIN LICENSE BLOCK Version: MPL 1.1
  * 
  * The contents of this file are subject to the Mozilla Public License Version
  * 1.1 (the "License"); you may not use this file except in compliance with the
@@ -45,14 +45,16 @@ import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 public class PageFactory extends TemplateFactory
 {
 
+  public static final String CONTEXT_TYPE = XMLFileContextType.PAGE_FILE_CONTEXT_TYPE;
+  
   static private final String PAGE_CLASS = "pageClass";
   static private final String DESCRIPTION = "description";
 
   public PageFactory()
   {
-    super(XMLFileContextType.PAGE_FILE_CONTEXT_TYPE);
+    super(CONTEXT_TYPE);
     addDefaultResolvers();
-    addXMLFileResolvers();    
+    addXMLFileResolvers();
   }
 
   public String getPageContent(Template template, String qualifiedPageClass) throws BadLocationException,
@@ -73,9 +75,8 @@ public class PageFactory extends TemplateFactory
       String qualifiedPageClass,
       IProgressMonitor monitor) throws CoreException, InterruptedException
   {
-    monitor.beginTask(UIPlugin.getString(
-        "ApplicationFactory.operationdesc",
-        pageName), 3);
+    monitor
+        .beginTask(UIPlugin.getString("ApplicationFactory.operationdesc", pageName), 3);
     String fileName = pageName + ".page";
     IFile newFile = container.getFile(new Path("/" + fileName));
 
@@ -84,9 +85,8 @@ public class PageFactory extends TemplateFactory
     InputStream contents;
     try
     {
-      contents = new ByteArrayInputStream(getPageContent(
-          template,
-          qualifiedPageClass).getBytes());
+      contents = new ByteArrayInputStream(getPageContent(template, qualifiedPageClass)
+          .getBytes());
     } catch (Exception e)
     {
       UIPlugin.log(e);
@@ -99,8 +99,8 @@ public class PageFactory extends TemplateFactory
     monitor.done();
     return newFile;
   }
-  
-  public  IFile createPage(
+
+  public IFile createPage(
       IResourceWorkspaceLocation namespaceLocation,
       Template template,
       String pageName,

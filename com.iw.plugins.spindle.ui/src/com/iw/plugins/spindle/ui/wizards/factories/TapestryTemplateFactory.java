@@ -42,9 +42,11 @@ import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 public class TapestryTemplateFactory extends TemplateFactory
 {
 
+  public static final String CONTEXT_TYPE =XMLFileContextType.TEMPLATE_FILE_CONTEXT_TYPE;
+  
   public TapestryTemplateFactory()
   {
-    super(XMLFileContextType.TEMPLATE_FILE_CONTEXT_TYPE);
+    super(CONTEXT_TYPE);
     addDefaultResolvers();
   }
 

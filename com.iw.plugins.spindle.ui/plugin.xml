@@ -110,6 +110,12 @@
             class="com.iw.plugins.spindle.ui.preferences.TemplatesPreferencePage"
             id="SpindleTemplatePreferences">
       </page>
+       <page
+            name="Wizard Templates"
+            category="SpindleTemplatePreferences"
+            class="com.iw.plugins.spindle.ui.preferences.WizardTemplatesPreferencePage"
+            id="SpindleWizardTemplatePreferences">
+      </page>
    </extension>
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">

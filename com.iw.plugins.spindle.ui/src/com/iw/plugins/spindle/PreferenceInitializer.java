@@ -43,7 +43,7 @@ import com.iw.plugins.spindle.ui.wizards.NewTapComponentWizardPage;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: PreferenceInitializer.java,v 1.1 2004/06/05 04:21:44 glongman
- *          Exp $
+ *                     Exp $
  */
 public class PreferenceInitializer extends AbstractPreferenceInitializer
     implements
@@ -63,7 +63,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
   {
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
     EditorsUI.useAnnotationsPreferencePage(store);
-	EditorsUI.useQuickDiffPreferencePage(store);
+    EditorsUI.useQuickDiffPreferencePage(store);
     initializeDefaultValues(store);
     XMLSyntaxPreferencePage.initializeDefaultPreferences(store);
     NewTapComponentWizardPage.initializeDefaultPreferences(store);
@@ -88,20 +88,29 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
         "0,64,128",
         ITextStylePreferences.STYLE_BOLD);
 
-    
     store.setDefault(EDITOR_USE_SMART_INDENT, true);
     store.setDefault(TEMPLATE_EDITOR_HTML_SHOW_XHTML, TemplateEditor.XHTML_NONE_LABEL);
     store.setDefault(AUTO_ACTIVATE_CONTENT_ASSIST, false);
-    
-    store.setDefault(FORMATTER_MAX_LINE_LENGTH, 80); 
-    store.setDefault(FORMATTER_WRAP_LONG, true);  
-    store.setDefault(FORMATTER_ALIGN, false);  
+
+    store.setDefault(FORMATTER_MAX_LINE_LENGTH, 82);
+    store.setDefault(FORMATTER_WRAP_LONG, true);
+    store.setDefault(FORMATTER_ALIGN, false);
     store.setDefault(FORMATTER_PRESERVE_BLANK_LINES, false);
-    store.setDefault(FORMATTER_TAB_SIZE, 4); 
+    store.setDefault(FORMATTER_TAB_SIZE, 4);
     store.setDefault(FORMATTER_TAB_CHAR, false);
 
+    setTemplateDefaults(store);
   }
 
+  public void setTemplateDefaults(IPreferenceStore store)
+  {
+    store.setDefault(APP_TEMPLATE, "default");
+    store.setDefault(LIB_TEMPLATE, "default");
+    store.setDefault(PAGE_TEMPLATE, "default");
+    store.setDefault(COMPONENT_TEMPLATE, "default");
+    store.setDefault(TAP_TEMPLATE_TEMPLATE, "default");
+  }
+  
   private void setDefaultTextStyleInfo(
       IPreferenceStore store,
       String constant,
