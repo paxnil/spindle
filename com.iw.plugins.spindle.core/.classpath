@@ -2,28 +2,28 @@
 <classpath>
     <classpathentry kind="src" path="src"/>
     <classpathentry kind="src" path="tests"/>
-    <classpathentry kind="src" path="dtdparser"/>
     <classpathentry exported="true" kind="lib" path="commons-digester-1.4.jar"/>
     <classpathentry exported="true" kind="lib" path="commons-logging-1.0.2.jar"/>
     <classpathentry exported="true" kind="lib" path="commons-beanutils-1.6.1.jar"/>
     <classpathentry exported="true" kind="lib" path="commons-collections-2.1.jar"/>
-    <classpathentry kind="lib" path="commons-fileupload-1.0.jar"/>
+    <classpathentry exported="true" kind="lib" path="commons-fileupload-1.0.jar"/>
     <classpathentry exported="true" kind="lib" path="commons-lang-1.0.jar"/>
     <classpathentry exported="true" kind="lib" path="jakarta-oro-2.0.6.jar"/>
-    <classpathentry kind="lib" path="javassist-2.5.1.jar"/>
+    <classpathentry exported="true" kind="lib" path="javassist-2.5.1.jar"/>
     <classpathentry exported="true" kind="lib" path="javax.servlet.jar"/>
-    <classpathentry kind="lib" path="ognl-2.5.1.jar"/>
-    <classpathentry exported="true" kind="lib"
-        path="tapestry-3.0-beta-2.jar" sourcepath="/jakarta-tapestry/framework/src"/>
-    <classpathentry kind="lib" path="tapestry-contrib-3.0-beta-2.jar"/>
+    <classpathentry exported="true" kind="lib" path="ognl-2.5.1.jar"/>
+    <classpathentry exported="true" kind="lib" path="tapestry-3.0-beta-2.jar"/>
+    <classpathentry exported="true" kind="lib" path="tapestry-contrib-3.0-beta-2.jar"/>
+    <classpathentry exported="true" kind="lib" path="bsf-2.3.0.jar"/>
     <classpathentry kind="src" path="/org.eclipse.core.resources"/>
+    <classpathentry kind="src" path="/org.eclipse.core.resources.spysupport"/>
     <classpathentry exported="true" kind="src" path="/org.eclipse.jdt.core"/>
     <classpathentry exported="true" kind="src" path="/org.eclipse.ui"/>
-    <classpathentry kind="src" path="/org.apache.xerces"/>
+    <classpathentry exported="true" kind="src" path="/org.apache.xerces"/>
     <classpathentry kind="src" path="/org.eclipse.core.boot"/>
     <classpathentry kind="src" path="/org.eclipse.core.runtime"/>
     <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-    <classpathentry kind="var" path="JUNIT/junit.jar"/>
-    <classpathentry kind="lib" path="bsf-2.3.0.jar"/>
+    <classpathentry kind="src" path="/org.junit"/>
+    <classpathentry kind="src" path="dtdparser"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
