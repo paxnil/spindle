@@ -3,7 +3,7 @@
 
 	<target name="init">
 		<property name="feature" value="com.iw.features.spindle"/>
-		<property name="feature.version.suffix" value="_3.0.42"/>
+		<property name="feature.version.suffix" value="_3.0.43"/>
 		<property name="feature.full.name" value="${feature}${feature.version.suffix}"/>
 		<property name="feature.temp.folder" value="${basedir}/feature.temp.folder"/>
 		<property name="feature.destination" value="${basedir}"/>
