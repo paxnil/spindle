@@ -81,6 +81,7 @@ public class ComponentFactory {
   
   static private String getComponentContent(String qualifiedSpecClassname) {
   	PluginComponentSpecification newSpec = new PluginComponentSpecification();
+  	newSpec.setDTDVersion("1.2");
   	newSpec.setAllowBody(true);
   	newSpec.setAllowInformalParameters(true);
   	newSpec.setComponentClassName(qualifiedSpecClassname);

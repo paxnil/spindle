@@ -64,6 +64,7 @@ import com.iw.plugins.spindle.dialogfields.DialogField;
 import com.iw.plugins.spindle.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.factories.ComponentFactory;
+import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
@@ -328,14 +329,14 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
   }
 
   private boolean checkSaveEditor(SpindleMultipageEditor targetEditor) throws InterruptedException {
-    TapestryComponentModel model = null;
+    BaseTapestryModel model = null;
     if (targetEditor != null && targetEditor.isDirty()) {
 
       RequiredSaveEditorAction saver = new RequiredSaveEditorAction(targetEditor);
       if (!saver.save()) {
         throw new InterruptedException();
       }
-      model = (TapestryComponentModel) targetEditor.getModel();
+      model = (BaseTapestryModel) targetEditor.getModel();
 
       if (!model.isLoaded()) {
         return false;

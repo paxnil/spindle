@@ -76,21 +76,18 @@ public class ApplicationFactory {
 
     String qualifiedEngineClassname = engineClass.getFullyQualifiedName();
     InputStream contents =
-      new ByteArrayInputStream(
-        getApplicationContent(appname, qualifiedEngineClassname, pack.getElementName()).getBytes());
+      new ByteArrayInputStream(getApplicationContent(appname, qualifiedEngineClassname, pack.getElementName()).getBytes());
     file.create(contents, false, new SubProgressMonitor(monitor, 1));
     monitor.worked(1);
     monitor.done();
     return file;
   }
 
-  static private String getApplicationContent(
-    String appname,
-    String qualifiedEngineClassname,
-    String packageFragment)
+  static private String getApplicationContent(String appname, String qualifiedEngineClassname, String packageFragment)
     throws CoreException, InterruptedException {
 
     PluginApplicationSpecification appSpec = new PluginApplicationSpecification();
+    appSpec.setDTDVersion("1.2");
     appSpec.setName(appname);
     appSpec.setEngineClassName(qualifiedEngineClassname);
     String path = "/" + packageFragment.replace('.', '/') + "/Home.jwc";
