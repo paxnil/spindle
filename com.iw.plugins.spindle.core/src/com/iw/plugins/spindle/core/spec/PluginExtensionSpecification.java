@@ -50,8 +50,6 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * TODO complete transformation away from strict Tapestry interface adherence.
  * 
  * @author glongman@gmail.com
- * @version $Id: PluginExtensionSpecification.java,v 1.6 2004/05/17 02:31:49
- *          glongman Exp $
  */
 public class PluginExtensionSpecification extends BasePropertyHolder
     implements

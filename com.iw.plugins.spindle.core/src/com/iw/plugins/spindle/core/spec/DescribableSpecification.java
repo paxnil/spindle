@@ -34,8 +34,6 @@ import java.util.List;
  * Specification types that can have description tags
  * 
  * @author glongman@gmail.com
- * @version $Id: DescribableSpecification.java,v 1.2 2004/05/17 02:31:49
- *          glongman Exp $
  */
 public class DescribableSpecification extends BaseSpecification
     implements

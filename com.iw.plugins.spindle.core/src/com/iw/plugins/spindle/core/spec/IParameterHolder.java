@@ -34,7 +34,7 @@ import org.apache.tapestry.spec.ParameterSpecification;
  * @author gwl
  * 
  * 
- * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
+ * Copyright 2002, Geoffrey Longman. All Rights Reserved.
  */
 public interface IParameterHolder
 {

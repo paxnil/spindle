@@ -32,8 +32,6 @@ import org.apache.tapestry.ILocation;
  * Record <reserved-parameter>tags in a document
  * 
  * @author glongman@gmail.com
- * @version $Id: PluginReservedParameterDeclaration.java,v 1.1 2003/11/21
- *          17:46:26 glongman Exp $
  */
 public class PluginReservedParameterDeclaration extends BaseSpecification
 {

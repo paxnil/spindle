@@ -46,8 +46,6 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * Spindle aware concrete implementation of IContainedComponent
  * 
  * @author glongman@gmail.com
- * @version $Id: PluginContainedComponent.java,v 1.8 2004/05/17 02:31:49
- *          glongman Exp $
  */
 public class PluginContainedComponent extends BasePropertyHolder
     implements

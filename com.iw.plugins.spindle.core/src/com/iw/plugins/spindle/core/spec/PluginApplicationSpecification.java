@@ -39,8 +39,6 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * Spindle implementation of IApplicationSpecification
  * 
  * @author glongman@gmail.com
- * @version $Id: PluginApplicationSpecification.java,v 1.3 2004/05/17 02:31:49
- *          glongman Exp $
  */
 public class PluginApplicationSpecification extends PluginLibrarySpecification
     implements

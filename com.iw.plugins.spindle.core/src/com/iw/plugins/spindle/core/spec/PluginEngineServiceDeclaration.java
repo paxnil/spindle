@@ -40,8 +40,6 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * Record <service>tags in a document
  * 
  * @author glongman@gmail.com
- * @version $Id: PluginEngineServiceDeclaration.java,v 1.2 2004/05/17 02:31:49
- *          glongman Exp $
  */
 public class PluginEngineServiceDeclaration extends DescribableSpecification
 {

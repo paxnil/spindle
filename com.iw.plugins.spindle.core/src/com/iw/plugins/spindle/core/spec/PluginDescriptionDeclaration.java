@@ -32,8 +32,6 @@ import org.apache.tapestry.ILocation;
  * Record <description>tags in a document
  * 
  * @author glongman@gmail.com
- * @version $Id: PluginDescriptionDeclaration.java,v 1.1 2003/11/21 17:46:26
- *          glongman Exp $
  */
 public class PluginDescriptionDeclaration extends BaseSpecification
 {

@@ -31,8 +31,6 @@ import org.apache.tapestry.spec.IListenerBindingSpecification;
  * Spindle implementation of IListenerBindingSpecification
  * 
  * @author glongman@gmail.com
- * @version $Id: PluginListenerBindingSpecification.java,v 1.4 2004/05/17
- *          02:31:49 glongman Exp $
  */
 public class PluginListenerBindingSpecification extends PluginBindingSpecification
     implements

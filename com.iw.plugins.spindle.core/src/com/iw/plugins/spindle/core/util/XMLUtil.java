@@ -70,7 +70,7 @@ import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
  * @author gwl
  * 
  * 
- * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
+ * Copyright 2002, Geoffrey Longman. All Rights Reserved.
  */
 public class XMLUtil
 {

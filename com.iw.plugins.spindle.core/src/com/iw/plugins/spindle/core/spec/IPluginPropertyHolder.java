@@ -35,8 +35,6 @@ import org.apache.tapestry.util.IPropertyHolder;
  * declarations found in a document during a parse/scan episode.
  * 
  * @author glongman@gmail.com
- * @version $Id: IPluginPropertyHolder.java,v 1.1 2003/11/21 17:46:26 glongman
- *          Exp $
  */
 public interface IPluginPropertyHolder extends IPropertyHolder
 {

@@ -43,8 +43,6 @@ import com.iw.plugins.spindle.core.scanning.IScannerValidator;
  * Spindle aware concrete implementation of ILibrarySpecification
  * 
  * @author glongman@gmail.com
- * @version $Id: PluginLibrarySpecification.java,v 1.7 2004/05/17 02:31:49
- *          glongman Exp $
  */
 public class PluginLibrarySpecification extends BaseSpecLocatable
     implements

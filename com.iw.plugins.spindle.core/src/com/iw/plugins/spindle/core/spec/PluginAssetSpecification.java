@@ -39,8 +39,6 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * Spindle's implementation of IAssetSpecification
  * 
  * @author glongman@gmail.com
- * @version $Id: PluginAssetSpecification.java,v 1.5 2004/05/17 02:31:49
- *          glongman Exp $
  */
 public class PluginAssetSpecification extends BasePropertyHolder
     implements

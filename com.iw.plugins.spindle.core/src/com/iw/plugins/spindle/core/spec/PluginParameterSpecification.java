@@ -45,8 +45,6 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
  * Spindle aware concrete implementation of ILibrarySpecification
  * 
  * @author glongman@gmail.com
- * @version $Id: PluginParameterSpecification.java,v 1.6 2004/05/17 02:31:49
- *          glongman Exp $
  */
 public class PluginParameterSpecification extends DescribableSpecification
     implements
