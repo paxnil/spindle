@@ -1,96 +1,50 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="com.iw.plugins.spindle" default="plugin.zip" basedir=".">
-  <target name="initTemplate" unless="template">
-    <initTemplate/>
-  </target>
-  <target name="init" depends="initTemplate">
-    <property name="plugin" value="com.iw.plugins.spindle"/>
-    <property name="version" value="0.0.9"/>
-    <property name="stamp" value=""/>
-    <property name="os" value="win32"/>
-    <property name="ws" value="win32"/>
-    <property name="nl" value="en_US"/>
-    <property name="arch" value="x86"/>
+<project name="builder" default="init" basedir=".">
+
+  <property name="version" value="0.0.9-20020321"/>
+  
+  <target name="init">
+    <available property="buildReleaseAvailable" file="${basedir}/buildRelease"/>
   </target>
 
-  <target name="src.zip" depends="init">
-    <property name="base" value="${basedir}/src.zip.pdetemp"/>
-    <delete dir="${base}"/>
-    <mkdir dir="${base}"/>
-    <antcall target="src">
-      <param name ="destroot" value="${base}/plugins/${plugin}_${version}"/>
-    </antcall>
-	<ant antfile="${template}" target="runZip">
-      <property name="resultingFile" value="${basedir}/${plugin}_${version}.src.zip"/>
-      <property name="targetDir" value="${base}"/>
-	</ant>
-    <delete dir="${base}"/>
+  <target name="build-plugin-jar">
+  	<delete file="${basedir}/iw_tapestry.jar"/>
+  	<jar jarfile="${basedir}/iw_tapestry.jar">
+    	<fileset dir="${basedir}/bin">
+    	 <exclude name="**/*.gif"/>
+    	 <exclude name="**/*.jpg"/>
+    	 <exclude name="**/*.png"/>
+    	 </fileset>
+  	</jar> 
   </target>
-
-  <target name="plugin.zip" depends="bin.zip"/>
-  <target name="bin.zip" depends="init">
-    <property name="base" value="${basedir}/bin.zip.pdetemp"/>
-    <delete dir="${base}"/>
-    <mkdir dir="${base}"/>
-    <antcall target="jar">
-      <param name ="destroot" value="${base}/plugins/${plugin}_${version}"/>
-    </antcall>
-    <antcall target="bin">
-      <param name ="destroot" value="${base}/plugins/${plugin}_${version}"/>
-    </antcall>
-    <delete>
-      <fileset dir="${base}" includes="**/*.bin.log"/>
-    </delete>
-	<ant antfile="${template}" target="runZip">
-      <property name="resultingFile" value="${basedir}/${plugin}_${version}.zip"/>
-      <property name="targetDir" value="${base}"/>
-	</ant>
-    <delete dir="${base}"/>
+  
+  <target name="build-plugin-release" depends="prepare-to-build-release">
+  	<jar jarfile="${basedir}/com.iw.plugins.spindle-${version}.jar" basedir="${basedir}/buildRelease"/>  	  
   </target>
-
-  <target name="log.zip" depends="init">
-    <property name="base" value="${basedir}/log.zip.pdetemp"/>
-    <delete dir="${base}"/>
-    <mkdir dir="${base}"/>
-    <antcall target="log">
-      <param name ="destroot" value="${base}/plugins/${plugin}_${version}"/>
-    </antcall>
-	<ant antfile="${template}" target="runZip">
-      <property name="resultingFile" value="${basedir}/${plugin}_${version}.log.zip"/>
-      <property name="targetDir" value="${base}"/>
-	</ant>
-    <delete dir="${base}"/>
+  
+  <target name="prepare-to-build-release" depends="clean-release, build-plugin-jar">      	
+    <mkdir dir="${basedir}/buildRelease"/>
+    <mkdir dir="${basedir}/buildRelease/com.iw.plugins.spindle"/>
+    <copy toDir="buildRelease/com.iw.plugins.spindle">
+      <fileset dir="${basedir}">
+        <exclude name="spindle.jar"/>
+  	    <include name="*.jar"/>
+  	    <include name="plugin.xml"/>
+  	    <include name="*.html"/> 
+  	    <include name="*.txt"/>  	    
+  	  </fileset>    
+    </copy>
+    <copy toDir="${basedir}/buildRelease/com.iw.plugins.spindle/icons">
+      <fileset dir="${basedir}/icons"/>
+    </copy>
   </target>
-
-  <target name="jar" depends="init">
-  </target>
-
-  <target name="src" depends="init">
-  </target>
-
-  <target name="bin" depends="init">
-    <property name="destroot" value="${basedir}"/>
-    <ant antfile="${template}" target="bin">
-      <property name="includes" value="**"/>
-      <property name="excludes" value=""/>
-      <property name="dest" value="${destroot}"/>
-    </ant>
-  </target>
-
-  <target name="log" depends="init">
-    <property name="destroot" value="${basedir}"/>
-    <ant antfile="${template}" target="log">
-      <property name="dest" value="${destroot}"/>
-    </ant>
-  </target>
-
-  <target name="clean" depends="init">
-    <delete>
-      <fileset dir="." includes="**/*.pdetemp"/>
-    </delete>
-    <delete file="${plugin}_${version}.zip"/>
-    <delete file="${plugin}_${version}.src.zip"/>
-    <delete file="${plugin}_${version}.doc.zip"/>
-    <delete file="${plugin}_${version}.log.zip"/>
+  
+  <target name="clean-release" depends="init" if="buildReleaseAvailable">    
+  	<delete includeEmptyDirs="true" >
+      <fileset dir="${basedir}/buildRelease" />
+    </delete>    
+  </target>  
+  
+  <target name="clean-all" depends="clean-release">
+    <delete file="${basedir}/iw_tapestry.jar"/>
   </target>
 </project>
