@@ -84,6 +84,7 @@ import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.project.TapestryProject;
+import com.iw.plugins.spindle.refactor.RenamedComponentOrPageRefactor;
 import com.iw.plugins.spindle.spec.TapestryPluginSpecFactory;
 import com.iw.plugins.spindle.ui.text.ColorManager;
 import com.iw.plugins.spindle.util.SpindleStatus;
@@ -438,6 +439,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
                       */
   protected void initializeDefaultPreferences(IPreferenceStore store) {
     ColorManager.initializeDefaults(store);
+    RenamedComponentOrPageRefactor.initializeDefaults(store);
     NewTapComponentWizardPage.initializeDefaults(store);
   }
 

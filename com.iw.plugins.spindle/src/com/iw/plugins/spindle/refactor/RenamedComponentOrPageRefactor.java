@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -71,6 +72,10 @@ import com.iw.plugins.spindle.ui.TapestryStorageLabelProvider;
  */
 public class RenamedComponentOrPageRefactor implements IResourceChangeListener, IResourceDeltaVisitor {
 
+  public static final String RENAME_ALIASES_BEHAVIOUR = "Refactor.Rename.RenameBehaviour";
+  public static final String RENAME_ALIASES = "Refactor.Rename.renameAliases";
+  public static final String RENAME_SPEC_ONLY = "Refactor.Rename.renameSpecOnly";
+
   private TapestryProject project;
   private HashMap potentialModelMoves;
   private HashMap templatesToBeRenamed;
@@ -78,6 +83,11 @@ public class RenamedComponentOrPageRefactor implements IResourceChangeListener, 
   private IResourceDelta topLevelDelta = null;
   private List languageCodes = null;
   private boolean hasAliases = false;
+  
+  
+   public static void initializeDefaults(IPreferenceStore pstore) {
+    pstore.setDefault(RENAME_ALIASES_BEHAVIOUR, RENAME_SPEC_ONLY);
+  }
 
   public RenamedComponentOrPageRefactor(TapestryProject project) {
     super();
@@ -156,25 +166,25 @@ public class RenamedComponentOrPageRefactor implements IResourceChangeListener, 
         TapestryLibraryModel baseModel = null;
 
         try {
-        	
+
           baseModel = (TapestryLibraryModel) project.getProjectModel();
-          
+
           if (baseModel == null) {
-          	
-          	return;
-          	
+
+            return;
+
           }
           getRefactorer(baseModel);
-          
+
         } catch (CoreException e) {
         }
-        
+
         if (baseModel == null || refactorer == null) {
 
           return;
 
         }
-        
+
         try {
 
           HashMap confirmed = findConfirmed();
@@ -261,6 +271,9 @@ public class RenamedComponentOrPageRefactor implements IResourceChangeListener, 
 
   private void updateProjectModel(HashMap confirmed) throws CoreException {
 
+    IPreferenceStore store = TapestryPlugin.getDefault().getPreferenceStore();
+
+    boolean renameAliases = RENAME_ALIASES.equals(store.getString(RENAME_ALIASES_BEHAVIOUR));
 
     IPluginLibrarySpecification refactorSpec = refactorer.getSpecification();
 
@@ -279,6 +292,15 @@ public class RenamedComponentOrPageRefactor implements IResourceChangeListener, 
         String newTapestryPath = getTapestryPath(newFile);
 
         if ("jwc".equals(extension)) {
+
+          if (renameAliases) {
+          	
+          	refactorSpec.removeComponentSpecificationPath(alias);
+
+            IPath path = newFile.getFullPath().removeFileExtension();
+            alias = path.lastSegment();
+
+          }
 
           refactorSpec.setComponentSpecificationPath(alias, newTapestryPath);
 
@@ -422,7 +444,6 @@ public class RenamedComponentOrPageRefactor implements IResourceChangeListener, 
 
   private String findAlias(String tapestryPath, String extension) throws CoreException {
     String alias = null;
-
 
     TapestryLibraryModel libModel = refactorer.getEditableModel();
 

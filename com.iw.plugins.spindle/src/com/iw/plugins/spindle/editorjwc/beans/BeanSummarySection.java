@@ -57,7 +57,7 @@ public class BeanSummarySection extends SpindleFormSection {
    */
   public BeanSummarySection(SpindleFormPage page) {
     super(page);
-    setHeaderText("Bean Summary");
+    setHeaderText("Bean Summary (READ ONLY)");
     setDescription("This section will show info about the selected bean");
   }
 

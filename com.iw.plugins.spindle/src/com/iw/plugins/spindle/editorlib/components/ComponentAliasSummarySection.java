@@ -77,7 +77,7 @@ public class ComponentAliasSummarySection
    */
   public ComponentAliasSummarySection(SpindleFormPage page) {
     super(page);
-    setHeaderText("Component Summary");
+    setHeaderText("Component Summary (READ ONLY)");
     setDescription("This section will show a summary of the selected Component (if it can be resolved).");
   }
 

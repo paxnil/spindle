@@ -74,7 +74,7 @@ public abstract class BasePagesSummarySection extends SpindleFormSection impleme
    */
   public BasePagesSummarySection(SpindleFormPage page) {
     super(page);
-    setHeaderText("Page Summary");
+    setHeaderText("Page Summary  (READ ONLY)");
     setDescription("This section will show a summary of the selected Page (if it can be resolved).");
   }
 

@@ -55,7 +55,7 @@ public class ComponentSummarySection extends SpindleFormSection {
    */
   public ComponentSummarySection(SpindleFormPage page) {
     super(page);
-    setHeaderText("Contained Component Summary");
+    setHeaderText("Contained Component Summary (READ ONLY)");
     setDescription("This section will show info about the selected component");
   }
 
