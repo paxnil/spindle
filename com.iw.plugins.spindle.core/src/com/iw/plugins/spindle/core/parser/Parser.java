@@ -323,6 +323,12 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
     }
 
+    public void addProblem(int severity, ISourceLocation location, String message, boolean survivor) {
+        // we ignore survivor flaf in the parser
+        addProblem(severity, location, message);
+    }
+
+
     public void addProblem(int severity, ISourceLocation location, String message)
     {
         addProblem(

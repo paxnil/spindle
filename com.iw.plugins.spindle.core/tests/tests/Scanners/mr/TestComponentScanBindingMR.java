@@ -27,7 +27,6 @@
 package tests.Scanners.mr;
 
 import java.net.URL;
-import java.util.List;
 import java.util.Locale;
 
 import org.apache.tapestry.IResourceLocation;

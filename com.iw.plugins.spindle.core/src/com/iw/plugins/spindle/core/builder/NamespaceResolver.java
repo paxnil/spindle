@@ -603,7 +603,7 @@ public class NamespaceResolver
             {
                 if (!result.get(name).equals(pages[i]))
                     Markers.recordProblems(
-                pages[i],
+                        pages[i],
                         new IProblem[] {
                              new DefaultProblem(
                                 Markers.TAPESTRY_MARKER_TAG,
@@ -826,16 +826,23 @@ public class NamespaceResolver
             problems.clear();
         }
 
-        public void addProblem(int severity, ISourceLocation location, String message)
+        public void addProblem(int severity, ISourceLocation location, String message, boolean survivor)
         {
             addProblem(
                 new DefaultProblem(
-                    ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+                    survivor
+                        ? ITapestryMarker.TAPESTRY_PROBLEM_MARKER_SURVIVES_REVALIDATION
+                        : ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
                     severity,
                     message,
                     location.getLineNumber(),
                     location.getCharStart(),
                     location.getCharEnd()));
+        }
+
+        public void addProblem(int severity, ISourceLocation location, String message)
+        {
+            addProblem(severity, location, message, false);
         }
 
         public void addProblem(IProblem problem)
