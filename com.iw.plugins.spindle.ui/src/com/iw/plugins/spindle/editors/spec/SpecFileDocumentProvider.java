@@ -31,7 +31,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 
@@ -39,12 +38,15 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.template.TemplateFileDocumentProvider;
@@ -140,23 +142,26 @@ public class SpecFileDocumentProvider extends TemplateFileDocumentProvider
 
     private String getSkeletonSpecification(String extension)
     {
+        IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+        boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
+        int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
         StringWriter swriter = new StringWriter();
-        PrintWriter pwriter = new PrintWriter(swriter);
+        IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
         if ("jwc".equals(extension))
         {
-            XMLUtil.writeComponentSpecification(pwriter, UIPlugin.DEFAULT_COMPONENT_SPEC, 0);
+            XMLUtil.writeComponentSpecification(iwriter, UIPlugin.DEFAULT_COMPONENT_SPEC, 0);
             return swriter.toString();
         } else if ("page".equals(extension))
         {
-            XMLUtil.writeComponentSpecification(pwriter, UIPlugin.DEFAULT_PAGE_SPEC, 0);
+            XMLUtil.writeComponentSpecification(iwriter, UIPlugin.DEFAULT_PAGE_SPEC, 0);
             return swriter.toString();
         } else if ("application".equals(extension))
         {
-            XMLUtil.writeApplicationSpecification(pwriter, UIPlugin.DEFAULT_APPLICATION_SPEC, 0);
+            XMLUtil.writeApplicationSpecification(iwriter, UIPlugin.DEFAULT_APPLICATION_SPEC, 0);
             return swriter.toString();
         } else if ("library".equals(extension))
         {
-            XMLUtil.writeLibrarySpecification(pwriter, UIPlugin.DEFAULT_LIBRARY_SPEC, 0);
+            XMLUtil.writeLibrarySpecification(iwriter, UIPlugin.DEFAULT_LIBRARY_SPEC, 0);
             return swriter.toString();
         }
         return "";

@@ -71,6 +71,7 @@ public class DTDProposalGenerator
     private static final String ELEMENT_ATTRIBUTE_ALLOWED_VALUES = "ELEMENT_ATTRIBUTE_ALLOWED_VALUES";
     private static final String ELEMENT_COMMENT = "ELEMENT_ATTRIBUTE_ALLOWED_VALUES";
     private static final String ALL_ELEMENTS = "ALL_ELEMENTS";
+    private static final String ALL_ELEMENTS_BY_ROOT = "ALL_ELEMENTS_BY_ROOT";
 
     /**
       * Map caching the results of all of the lookup methods in this class
@@ -138,7 +139,6 @@ public class DTDProposalGenerator
             DTDInfoMap.put(key, result);
         }
         return result;
-
     }
 
     /**
@@ -153,7 +153,7 @@ public class DTDProposalGenerator
      * @param sort if true place the last child at the front of a sorted list of elementNames
      * @return list of String
      */
-    private static List getAllowedChildren(DTD dtd, String parentElement, String lastChild, boolean sort)
+    public static List getAllowedChildren(DTD dtd, String parentElement, String lastChild, boolean sort)
     {
         Assert.isLegal(dtd != null);
 
@@ -545,6 +545,42 @@ public class DTDProposalGenerator
             return Collections.EMPTY_LIST;
         return attributes;
     }
+
+//    public static boolean isElementAllowedInDocument(DTD dtd, String rootElementName, String elementName)
+//    {
+//        Assert.isNotNull(dtd);
+//        return internalGetAllElementNames(dtd).contains(elementName);
+//    }
+//
+//    private static List internalGetAllElementsByRoot(DTD dtd, String rootElementName)
+//    {
+//        if (dtd == null)
+//            return Collections.EMPTY_LIST;
+//
+//        MultiKey key = new MultiKey(new Object[] { dtd, rootElementName, ALL_ELEMENTS_BY_ROOT }, false);
+//        List result = (List) DTDInfoMap.get(key);
+//         if (result == null)
+//        {
+//            HashSet collectedSet = new HashSet();
+//            result.add(rootElementName);
+//            collectChildElements(dtd, collectedSet, getAllowedChildren(dtd, rootElementName, null, false));
+//            DTDInfoMap.put(key, Collections.unmodifiableList(new ArrayList(collectedSet)));
+//            return (List) DTDInfoMap.get(key);
+//        }
+//        return result;
+//
+//    }
+//    
+//    private static void collectChildElements(DTD dtd, HashSet target, List childNames) {
+//        for (Iterator iter = childNames.iterator(); iter.hasNext();)
+//        {
+//            String childName = (String) iter.next();
+//            if (target.contains(childName))
+//                continue;
+//           target.add(childName);
+//           collectChildElements(dtd, target, getAllowedChildren(dtd, childName, null, false));
+//        }
+//    }
 
     public static String getTapestryDefaultValue(DTD dtd, String elementName, String attrName)
     {

@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.wizards.fields;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
@@ -76,15 +77,16 @@ public class ComponentNameField extends AbstractNameField
         {
             if (val.getSeverity() == IStatus.ERROR)
             {
-                status.setError(UIPlugin.getString(fName + ".error.InvalidComponentName", val.getMessage()));
+                String message = val.getMessage();
+                message = StringUtils.replace(message, "type", "");
+                status.setError(UIPlugin.getString(fName + ".error.InvalidComponentName", message));
                 return status;
             } else if (val.getSeverity() == IStatus.WARNING)
             {
                 String message = val.getMessage();
-                message = message.replaceAll("Java", "Tapestry");
-                message = message.replaceAll("type", "component/page");
-                status.setWarning(
-                    UIPlugin.getString(fName + ".warning.ComponentNameDiscouraged", name,  message));
+                message = StringUtils.replace(message, "Java", "Tapestry");
+                message = StringUtils.replace(message, "type", "component/page");
+                 status.setWarning(UIPlugin.getString(fName + ".warning.ComponentNameDiscouraged", name, message));
                 return status;
             }
         }

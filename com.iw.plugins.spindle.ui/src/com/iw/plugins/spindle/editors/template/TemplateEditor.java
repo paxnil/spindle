@@ -76,6 +76,7 @@ import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
+import com.iw.plugins.spindle.editors.template.actions.MoveToSpecAction;
 import com.iw.plugins.spindle.editors.template.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.template.actions.ShowInPackageExplorerAction;
 import com.wutka.dtd.DTD;
@@ -176,7 +177,9 @@ public class TemplateEditor extends Editor
         ShowInPackageExplorerAction showInPackage = new ShowInPackageExplorerAction();
         showInPackage.setActiveEditor(this);
         setAction(ShowInPackageExplorerAction.ACTION_ID, showInPackage);
-
+        MoveToSpecAction moveAction = new MoveToSpecAction();
+        moveAction.setActiveEditor(this);
+        setAction(MoveToSpecAction.ACTION_ID, moveAction);
     }
 
     protected void editorContextMenuAboutToShow(IMenuManager menu)
@@ -203,6 +206,13 @@ public class TemplateEditor extends Editor
         //        menu.appendToGroup(HTML_GROUP, templateMenu);
         //        addAction(menu, HTML_GROUP, SAVE_HTML_TEMPLATE);
         //        addAction(menu, HTML_GROUP, REVERT_HTML_TEMPLATE);
+
+        menu.insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
+        MenuManager sourceMenu = new MenuManager("Source");
+        MoveToSpecAction moveAction = (MoveToSpecAction)getAction(MoveToSpecAction.ACTION_ID);
+        moveAction.update();
+        sourceMenu.add(moveAction);
+        menu.appendToGroup(SOURCE_GROUP, sourceMenu);
     }
 
     /* (non-Javadoc)

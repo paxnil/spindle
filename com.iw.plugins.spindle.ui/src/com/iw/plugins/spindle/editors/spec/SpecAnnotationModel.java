@@ -155,7 +155,7 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
         switch (fStage)
         {
             case STAGE_PARSER :
-                if (!fCollectedParserProblems.isEmpty())
+                if (fCollectedParserProblems != null && !fCollectedParserProblems.isEmpty())
                 {
                     updateAnnotationsParser();
                     fStage = STAGE_INACTIVE;

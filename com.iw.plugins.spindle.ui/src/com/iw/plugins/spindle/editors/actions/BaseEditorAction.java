@@ -433,7 +433,8 @@ public abstract class BaseEditorAction extends Action
                         table.setSelection(index >= 1 ? index - 1 : table.getItemCount() - 1);
                     } else if (
                         keyCode != SWT.ALT
-                            && keyCode != SWT.COMMAND
+                            && 
+                            keyCode != SWT.COMMAND
                             && keyCode != SWT.CTRL
                             && keyCode != SWT.SHIFT
                             && keyCode != SWT.ARROW_DOWN
@@ -461,7 +462,7 @@ public abstract class BaseEditorAction extends Action
 //                            + KeySupport.formatStroke(Stroke.create(accelerator), true)
 //                            + ")");
     
-                    if ((firstKey || quickReleaseMode) && keyCode == stateMask)
+                    if ((firstKey || quickReleaseMode) && keyCode == stateMask && keyCode != SWT.ALT)
                         ok(dialog, table);
                 }
             });

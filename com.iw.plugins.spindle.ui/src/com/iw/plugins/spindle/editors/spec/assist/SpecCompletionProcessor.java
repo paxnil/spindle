@@ -26,10 +26,10 @@
 
 package com.iw.plugins.spindle.editors.spec.assist;
 
-import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -37,8 +37,10 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.xmen.xml.XMLNode;
 
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
+import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
@@ -142,23 +144,26 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 
     private String getSkeletonSpecification(String extension)
     {
+        IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+        boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
+        int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
         StringWriter swriter = new StringWriter();
-        PrintWriter pwriter = new PrintWriter(swriter);
+        IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
         if ("jwc".equals(extension))
         {
-            XMLUtil.writeComponentSpecification(pwriter, UIPlugin.DEFAULT_COMPONENT_SPEC, 0);
+            XMLUtil.writeComponentSpecification(iwriter, UIPlugin.DEFAULT_COMPONENT_SPEC, 0);
             return swriter.toString();
         } else if ("page".equals(extension))
         {
-            XMLUtil.writeComponentSpecification(pwriter, UIPlugin.DEFAULT_PAGE_SPEC, 0);
+            XMLUtil.writeComponentSpecification(iwriter, UIPlugin.DEFAULT_PAGE_SPEC, 0);
             return swriter.toString();
         } else if ("application".equals(extension))
         {
-            XMLUtil.writeApplicationSpecification(pwriter, UIPlugin.DEFAULT_APPLICATION_SPEC, 0);
+            XMLUtil.writeApplicationSpecification(iwriter, UIPlugin.DEFAULT_APPLICATION_SPEC, 0);
             return swriter.toString();
         } else if ("library".equals(extension))
         {
-            XMLUtil.writeLibrarySpecification(pwriter, UIPlugin.DEFAULT_LIBRARY_SPEC, 0);
+            XMLUtil.writeLibrarySpecification(iwriter, UIPlugin.DEFAULT_LIBRARY_SPEC, 0);
             return swriter.toString();
         }
         return "";

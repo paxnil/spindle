@@ -179,21 +179,36 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         Map attrmap = tag.getAttributesMap();
 
-        XMLNode existingAttr = tag.getAttributeAt(documentOffset);
-        if (existingAttr != null)
+        // all that's left is to compute attribute proposals...
+        // first ensure that the tag is allowed here!
+
+        XMLNode parent = tag.getParent();
+        if (parent != null
+            && (parent.getType().equals("/")
+                || DTDProposalGenerator.getAllowedChildren(fDTD, parent.getName(), null, false).contains(tagName)))
         {
-            if (baseState != XMLNode.AFTER_ATT_VALUE
-                && existingAttr != null
-                && existingAttr.getOffset() < documentOffset)
+
+            XMLNode existingAttr = tag.getAttributeAt(documentOffset);
+            if (existingAttr != null)
             {
-                computeAttributeNameReplacements(documentOffset, existingAttr, tagName, attrmap.keySet(), proposals);
+                if (baseState != XMLNode.AFTER_ATT_VALUE
+                    && existingAttr != null
+                    && existingAttr.getOffset() < documentOffset)
+                {
+                    computeAttributeNameReplacements(
+                        documentOffset,
+                        existingAttr,
+                        tagName,
+                        attrmap.keySet(),
+                        proposals);
+                } else
+                {
+                    computeAttributeProposals(documentOffset, addLeadingSpace, tagName, attrmap.keySet(), proposals);
+                }
             } else
             {
                 computeAttributeProposals(documentOffset, addLeadingSpace, tagName, attrmap.keySet(), proposals);
             }
-        } else
-        {
-            computeAttributeProposals(documentOffset, addLeadingSpace, tagName, attrmap.keySet(), proposals);
         }
 
         if (proposals.isEmpty())
