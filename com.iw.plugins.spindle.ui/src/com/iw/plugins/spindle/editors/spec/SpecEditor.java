@@ -71,6 +71,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -382,7 +383,7 @@ public class SpecEditor extends Editor implements IMultiPage
         action = new TextOperationAction(UIPlugin.getResourceBundle(), "ShowOutline.", this, SpecSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
         action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.xml.show.outline");
         setAction("com.iw.plugins.spindle.ui.editor.xml.show.outline", action);
-        
+
         action = new TextOperationAction(UIPlugin.getResourceBundle(), "ShowStructure.", this, SpecSourceViewer.OPEN_STRUCTURE, true); //$NON-NLS-1$
         action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.xml.open.structure");
         setAction("com.iw.plugins.spindle.ui.editor.xml.open.structure", action);
@@ -646,16 +647,22 @@ public class SpecEditor extends Editor implements IMultiPage
                     String publicId = W3CAccess.getPublicId(document);
                     if (publicId != null)
                     {
-                        scanner.setNamespace(useSpec.getNamespace());
-                        scanner.setExternalProblemCollector(collector);
-                        scanner.setResourceLocation(useSpec.getSpecificationLocation());
-                        validator.setProblemCollector(scanner);
-
                         try
                         {
+                            scanner.setNamespace(useSpec.getNamespace());
+                            scanner.setExternalProblemCollector(collector);
+                            scanner.setResourceInformation(
+                                ((IStorageEditorInput) getEditorInput()).getStorage(),
+                                useSpec.getSpecificationLocation());
+                            validator.setProblemCollector(scanner);
+
                             return scanner.scan(document, validator);
                         } catch (ScannerException e)
                         {
+                            e.printStackTrace();
+                        } catch (CoreException e)
+                        {
+                            // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
@@ -685,7 +692,7 @@ public class SpecEditor extends Editor implements IMultiPage
         protected SpecificationScanner getInitializedScanner(ILibrarySpecification library)
         {
             scanner.setExternalProblemCollector(collector);
-            scanner.setResourceLocation(library.getSpecificationLocation());
+            scanner.setResourceInformation(null, library.getSpecificationLocation());
             String publicId = W3CAccess.getPublicId(fParser.getParsedDocument());
             if (publicId == null)
                 return null;
@@ -789,7 +796,7 @@ public class SpecEditor extends Editor implements IMultiPage
         protected SpecificationScanner getInitializedScanner(IApplicationSpecification application)
         {
             scanner.setExternalProblemCollector(collector);
-            scanner.setResourceLocation(application.getSpecificationLocation());
+            scanner.setResourceInformation(null, application.getSpecificationLocation());
             String publicId = W3CAccess.getPublicId(fParser.getParsedDocument());
             if (publicId == null)
                 return null;

@@ -124,7 +124,7 @@ public class JumpToTemplateAction extends BaseJumpAction
             {
                 IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
                 Action openAction = new MenuOpenTemplateAction(element);
-                openAction.setEnabled(element.exists());
+                openAction.setEnabled(element.getStorage() != null);
                 menu.add(openAction);
             }
         }

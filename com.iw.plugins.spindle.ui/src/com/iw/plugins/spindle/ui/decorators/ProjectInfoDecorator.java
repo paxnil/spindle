@@ -106,7 +106,7 @@ public class ProjectInfoDecorator extends AbstractDecorator implements ILightwei
                         project,
                         false);
                 IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
-                if (!location.exists())
+                if (location == null || location.getStorage() == null)
                 {
                     return "";
                 } else

@@ -120,12 +120,12 @@ public class OpenDeclarationAction extends BaseTemplateAction
         {
             String simpleId = fAccess.getSimpleId();
             location = (IResourceWorkspaceLocation) fAccess.getBaseSpecification().getSpecificationLocation();
-            if (location != null && location.exists())
+            if (location != null && location.getStorage() != null)
                 foundResult(location.getStorage(), simpleId, contained);
         } else
         {
             location = (IResourceWorkspaceLocation) componentSpec.getSpecificationLocation();
-            if (location == null || !location.exists())
+            if (location == null || location.getStorage() == null)
                 return;
 
             foundResult(location.getStorage(), null, null);
@@ -143,7 +143,7 @@ public class OpenDeclarationAction extends BaseTemplateAction
         if (parameterSpec != null)
         {
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) componentSpec.getSpecificationLocation();
-            if (location == null || !location.exists())
+            if (location == null || location.getStorage() == null)
                 return;
 
             foundResult(location.getStorage(), parameterName, parameterSpec);

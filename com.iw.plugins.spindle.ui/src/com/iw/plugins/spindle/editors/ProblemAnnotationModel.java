@@ -432,10 +432,15 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
         super.removeAnnotation(annotation, fireModelChanged);
     }
 
+    public void addProblem(int severity, ISourceLocation location, String message)
+    {
+        addProblem(severity, location, message, false);
+    }
+
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.parser.IProblemCollector#addProblem(int, com.iw.plugins.spindle.core.parser.ISourceLocation, java.lang.String)
      */
-    public void addProblem(int severity, ISourceLocation location, String message)
+    public void addProblem(int severity, ISourceLocation location, String message, boolean isTemporary)
     {
         addProblem(
             new DefaultProblem(
@@ -444,7 +449,8 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
                 message,
                 location.getLineNumber(),
                 location.getCharStart(),
-                location.getCharEnd()));
+                location.getCharEnd(),
+                isTemporary));
     }
 
     /* (non-Javadoc)

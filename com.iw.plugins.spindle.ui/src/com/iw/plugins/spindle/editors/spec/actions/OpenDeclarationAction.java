@@ -210,13 +210,14 @@ public class OpenDeclarationAction extends BaseSpecAction
                     return;
 
                 IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root.getRelativeLocation(path);
-                if (location != null && location.exists())
-                    foundResult(location.getStorage(), null, null);
+                IStorage s = location.getStorage();
+                if (s != null)
+                    foundResult(s, null, null);
             } catch (CoreException e)
             {
                 UIPlugin.log(e);
             }
-        }        
+        }
     }
 
     /**
@@ -256,8 +257,9 @@ public class OpenDeclarationAction extends BaseSpecAction
                     return;
 
                 IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root.getRelativeLocation(path);
-                if (location != null && location.exists())
-                    foundResult(location.getStorage(), null, null);
+                IStorage s = location.getStorage();
+                if (s != null)
+                    foundResult(s, null, null);
             } catch (CoreException e)
             {
                 UIPlugin.log(e);
@@ -301,8 +303,9 @@ public class OpenDeclarationAction extends BaseSpecAction
                 return;
 
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) contextRoot.getRelativeLocation(path);
-            if (location != null && location.exists())
-                foundResult(location.getStorage(), null, null);
+            IStorage s = location.getStorage();
+               if (s != null)
+                   foundResult(s, null, null);
         }
     }
 
@@ -335,8 +338,9 @@ public class OpenDeclarationAction extends BaseSpecAction
                 return;
 
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) rootLocation.getRelativeLocation(path);
-            if (location != null && location.exists())
-                foundResult(location.getStorage(), null, null);
+            IStorage s = location.getStorage();
+                if (s != null)
+                    foundResult(s, null, null);
         }
     }
 
@@ -380,7 +384,7 @@ public class OpenDeclarationAction extends BaseSpecAction
             return;
 
         IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) spec.getSpecificationLocation();
-        if (location == null || !location.exists())
+        if (location == null || location.getStorage() == null)
             return;
 
         foundResult(location.getStorage(), null, null);
@@ -419,7 +423,7 @@ public class OpenDeclarationAction extends BaseSpecAction
             IParameterSpecification parameterSpec = spec.getParameter(parameterName);
 
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) spec.getSpecificationLocation();
-            if (location == null || !location.exists())
+            if (location == null || location.getStorage() == null)
                 return;
 
             foundResult(location.getStorage(), parameterName, parameterSpec);

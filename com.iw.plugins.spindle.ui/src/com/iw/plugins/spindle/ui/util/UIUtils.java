@@ -119,7 +119,7 @@ public class UIUtils
                 {
 
                     IEditorReference ref = editors[z];
-                    IEditorPart editor = ref.getEditor(true);
+                    IEditorPart editor = ref.getEditor(true); 
 
                     if (editor == null)
                     {

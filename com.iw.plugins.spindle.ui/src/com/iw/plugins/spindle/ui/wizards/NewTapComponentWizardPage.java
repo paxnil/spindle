@@ -270,7 +270,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         INamespace useNamespace = fNamespaceDialogField.getSelectedNamespace();
         IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) useNamespace.getSpecificationLocation();
 
-        if (!location.exists() || location.getStorage() == null)
+        if (location.getStorage() == null)
         {
             ContextResourceWorkspaceLocation ctxLoc = (ContextResourceWorkspaceLocation) location;
             IContainer container = (IContainer) ctxLoc.getResource();

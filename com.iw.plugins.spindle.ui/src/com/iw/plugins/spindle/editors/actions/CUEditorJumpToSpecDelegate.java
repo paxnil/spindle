@@ -89,8 +89,7 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
         {
             BaseSpecLocatable locatable = (BaseSpecLocatable) foundSpecs.get(0);
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) locatable.getSpecificationLocation();
-            if (location != null && location.exists())
-                reveal(location);
+            reveal(location);
         } else
         {
             List locations = new ArrayList();
@@ -98,7 +97,7 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
             {
                 BaseSpecLocatable element = (BaseSpecLocatable) iter.next();
                 IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) element.getSpecificationLocation();
-                if (location != null && location.exists())
+                if (location != null && location.getStorage() != null)
                     locations.add(location);
             }
             new ChooseSpecPopup(locations, true).run();

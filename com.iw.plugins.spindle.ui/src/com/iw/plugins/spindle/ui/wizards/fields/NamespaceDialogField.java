@@ -189,7 +189,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
             }
             IResourceWorkspaceLocation childLocation =
                 (IResourceWorkspaceLocation) childNamespace.getSpecificationLocation();
-            if (childLocation.exists() && CoreUtils.toResource(childLocation) != null)
+            if (CoreUtils.toResource(childLocation) != null)
             {
                 results.add(childNamespace);
                 collectValidNamespaces(childNamespace, results);
@@ -246,7 +246,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
         IResourceWorkspaceLocation newLocation =
             (IResourceWorkspaceLocation) targetLocation.getRelativeLocation(fileName);
 
-        if (newLocation.exists())
+        if (newLocation.getStorage() != null)
         {
             newStatus.setError(UIPlugin.getString(fName + ".NameAlreadyExists", newName, storage.getName()));
             return newStatus;

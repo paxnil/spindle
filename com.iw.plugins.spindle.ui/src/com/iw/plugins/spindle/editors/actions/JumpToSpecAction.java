@@ -80,7 +80,7 @@ public class JumpToSpecAction extends BaseJumpAction
         {
             Action action = new MenuOpenSpecAction(location);
             menu.add(action);
-            action.setEnabled(location.exists());
+            action.setEnabled(location.getStorage() != null);
         }
     }
 

@@ -164,7 +164,7 @@
       </editor>
       <editor
             name="Tapestry Spec Editor"
-            default="false"
+            default="true"
             icon="./icons/basic/application16.gif"
             extensions="application, page, jwc, library"
             contributorClass="com.iw.plugins.spindle.editors.spec.SpecEditorContributor"

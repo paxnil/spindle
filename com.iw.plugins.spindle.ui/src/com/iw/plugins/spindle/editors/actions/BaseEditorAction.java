@@ -140,12 +140,13 @@ public abstract class BaseEditorAction extends Action
         }
         return null;
     }
-    
-    protected IType resolveType(IFile file) {
-        ICompilationUnit unit = (ICompilationUnit)JavaCore.create(file);
+
+    protected IType resolveType(IFile file)
+    {
+        ICompilationUnit unit = (ICompilationUnit) JavaCore.create(file);
         try
         {
-            IType [] types = unit.getAllTypes();
+            IType[] types = unit.getAllTypes();
             if (types.length > 0)
                 return types[0];
         } catch (JavaModelException e)
@@ -180,25 +181,25 @@ public abstract class BaseEditorAction extends Action
 
     protected abstract class ChooseLocationPopup
     {
-    
+
         String commandForward = null;
         String commandBackward = null;
         boolean forward;
         private Object selection;
         private List fTemplateLocations;
-    
+
         protected ChooseLocationPopup(List templateLocations, boolean forward)
         {
             this.forward = forward;
             fTemplateLocations = templateLocations;
         }
-    
+
         /** 
          * Dispose the resources cached by this action.
          */
         protected void dispose()
         {}
-    
+
         /**
          * @see Action#run()
          */
@@ -207,7 +208,7 @@ public abstract class BaseEditorAction extends Action
             openDialog();
             activate(selection);
         }
-    
+
         /**
          * Activate the selected item.
          */
@@ -219,19 +220,19 @@ public abstract class BaseEditorAction extends Action
                 reveal(location);
             }
         }
-    
+
         /*
          * Open a dialog showing all views in the activation order
          */
         private void openDialog()
         {
             final int MAX_ITEMS = 22;
-    
+
             selection = null;
             final Shell dialog = new Shell(UIPlugin.getDefault().getActiveWorkbenchShell(), SWT.MODELESS);
             Display display = dialog.getDisplay();
             dialog.setLayout(new FillLayout());
-    
+
             final Table table = new Table(dialog, SWT.SINGLE | SWT.FULL_SELECTION);
             table.setHeaderVisible(true);
             table.setLinesVisible(true);
@@ -240,7 +241,7 @@ public abstract class BaseEditorAction extends Action
             tc.setText(getTableHeader());
             addItems(table);
             int tableItemCount = table.getItemCount();
-    
+
             switch (tableItemCount)
             {
                 case 0 :
@@ -252,31 +253,31 @@ public abstract class BaseEditorAction extends Action
                 default :
                     table.setSelection(forward ? 1 : table.getItemCount() - 1);
             }
-    
+
             tc.pack();
             table.pack();
             Rectangle tableBounds = table.getBounds();
             tableBounds.height = Math.min(tableBounds.height, table.getItemHeight() * MAX_ITEMS);
             table.setBounds(tableBounds);
             dialog.pack();
-    
+
             tc.setWidth(table.getClientArea().width);
             table.setFocus();
             table.addFocusListener(new FocusListener()
             {
                 public void focusGained(FocusEvent e)
                 {}
-    
+
                 public void focusLost(FocusEvent e)
                 {
                     cancel(dialog);
                 }
             });
-    
+
             Rectangle dialogBounds = dialog.getBounds();
             Rectangle displayBounds = display.getClientArea();
             Rectangle parentBounds = dialog.getParent().getBounds();
-    
+
             //Place it in the center of its parent;
             dialogBounds.x = parentBounds.x + ((parentBounds.width - dialogBounds.width) / 2);
             dialogBounds.y = parentBounds.y + ((parentBounds.height - dialogBounds.height) / 2);
@@ -289,21 +290,21 @@ public abstract class BaseEditorAction extends Action
                 dialogBounds.y = (displayBounds.height - dialogBounds.height) / 2;
             }
             dialogBounds.height = dialogBounds.height + 3 - table.getHorizontalBar().getSize().y;
-    
+
             dialog.setBounds(dialogBounds);
-    
+
             table.addHelpListener(new HelpListener()
             {
                 public void helpRequested(HelpEvent event)
                 {}
             });
-    
+
             try
             {
                 dialog.open();
                 addMouseListener(table, dialog);
                 addKeyListener(table, dialog);
-    
+
                 while (!dialog.isDisposed())
                     if (!display.readAndDispatch())
                         display.sleep();
@@ -313,7 +314,7 @@ public abstract class BaseEditorAction extends Action
                     cancel(dialog);
             }
         }
-    
+
         /**
          * Returns the string which will be shown in the table header.
          */
@@ -321,7 +322,7 @@ public abstract class BaseEditorAction extends Action
         {
             return UIPlugin.getString("choose-template-table-header");
         }
-    
+
         /**
          * Add all views to the dialog in the activation order
          */
@@ -330,7 +331,7 @@ public abstract class BaseEditorAction extends Action
             for (Iterator iter = fTemplateLocations.iterator(); iter.hasNext();)
             {
                 IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
-                if (!element.exists())
+                if (element.getStorage() == null)
                     continue;
                 TableItem item = new TableItem(table, SWT.NONE);
                 item.setText(element.getName());
@@ -338,50 +339,50 @@ public abstract class BaseEditorAction extends Action
                 item.setData(element);
             }
         }
-    
+
         protected abstract Image getImage(IResourceWorkspaceLocation location);
-    
+
         private void addKeyListener(final Table table, final Shell dialog)
         {
             table.addKeyListener(new KeyListener()
             {
                 private boolean firstKey = true;
                 private boolean quickReleaseMode = false;
-    
+
                 public void keyPressed(KeyEvent e)
                 {
                     int keyCode = e.keyCode;
                     int stateMask = e.stateMask;
                     char character = e.character;
                     int accelerator = stateMask | (keyCode != 0 ? keyCode : convertCharacter(character));
-    
-//                    System.out.println("\nPRESSED");
-//                    printKeyEvent(e);
-//                    System.out.println(
-//                        "accelerat:\t"
-//                            + accelerator
-//                            + "\t ("
-//                            + KeySupport.formatStroke(Stroke.create(accelerator), true)
-//                            + ")");
-    
+
+                    //                    System.out.println("\nPRESSED");
+                    //                    printKeyEvent(e);
+                    //                    System.out.println(
+                    //                        "accelerat:\t"
+                    //                            + accelerator
+                    //                            + "\t ("
+                    //                            + KeySupport.formatStroke(Stroke.create(accelerator), true)
+                    //                            + ")");
+
                     boolean acceleratorForward = false;
                     boolean acceleratorBackward = false;
-    
+
                     if (commandForward != null)
                     {
                         Map commandMap = Manager.getInstance().getKeyMachine().getCommandMap();
                         SortedSet sequenceSet = (SortedSet) commandMap.get(commandForward);
-    
+
                         if (sequenceSet != null)
                         {
                             Iterator iterator = sequenceSet.iterator();
-    
+
                             while (iterator.hasNext())
                             {
                                 Sequence sequence = (Sequence) iterator.next();
                                 List strokes = sequence.getStrokes();
                                 int size = strokes.size();
-    
+
                                 if (size > 0 && accelerator == ((Stroke) strokes.get(size - 1)).getValue())
                                 {
                                     acceleratorForward = true;
@@ -390,22 +391,22 @@ public abstract class BaseEditorAction extends Action
                             }
                         }
                     }
-    
+
                     if (commandBackward != null)
                     {
                         Map commandMap = Manager.getInstance().getKeyMachine().getCommandMap();
                         SortedSet sequenceSet = (SortedSet) commandMap.get(commandBackward);
-    
+
                         if (sequenceSet != null)
                         {
                             Iterator iterator = sequenceSet.iterator();
-    
+
                             while (iterator.hasNext())
                             {
                                 Sequence sequence = (Sequence) iterator.next();
                                 List strokes = sequence.getStrokes();
                                 int size = strokes.size();
-    
+
                                 if (size > 0 && accelerator == ((Stroke) strokes.get(size - 1)).getValue())
                                 {
                                     acceleratorBackward = true;
@@ -414,27 +415,26 @@ public abstract class BaseEditorAction extends Action
                             }
                         }
                     }
-    
+
                     if (character == SWT.CR || character == SWT.LF)
                         ok(dialog, table);
                     else if (acceleratorForward)
                     {
                         if (firstKey && e.stateMask != 0)
                             quickReleaseMode = true;
-    
+
                         int index = table.getSelectionIndex();
                         table.setSelection((index + 1) % table.getItemCount());
                     } else if (acceleratorBackward)
                     {
                         if (firstKey && e.stateMask != 0)
                             quickReleaseMode = true;
-    
+
                         int index = table.getSelectionIndex();
                         table.setSelection(index >= 1 ? index - 1 : table.getItemCount() - 1);
                     } else if (
                         keyCode != SWT.ALT
-                            && 
-                            keyCode != SWT.COMMAND
+                            && keyCode != SWT.COMMAND
                             && keyCode != SWT.CTRL
                             && keyCode != SWT.SHIFT
                             && keyCode != SWT.ARROW_DOWN
@@ -442,68 +442,68 @@ public abstract class BaseEditorAction extends Action
                             && keyCode != SWT.ARROW_LEFT
                             && keyCode != SWT.ARROW_RIGHT)
                         cancel(dialog);
-    
+
                     firstKey = false;
                 }
-    
+
                 public void keyReleased(KeyEvent e)
                 {
                     int keyCode = e.keyCode;
                     int stateMask = e.stateMask;
                     char character = e.character;
                     int accelerator = stateMask | (keyCode != 0 ? keyCode : convertCharacter(character));
-    
-//                    System.out.println("\nRELEASED");
-//                    printKeyEvent(e);
-//                    System.out.println(
-//                        "accelerat:\t"
-//                            + accelerator
-//                            + "\t ("
-//                            + KeySupport.formatStroke(Stroke.create(accelerator), true)
-//                            + ")");
-    
+
+                    //                    System.out.println("\nRELEASED");
+                    //                    printKeyEvent(e);
+                    //                    System.out.println(
+                    //                        "accelerat:\t"
+                    //                            + accelerator
+                    //                            + "\t ("
+                    //                            + KeySupport.formatStroke(Stroke.create(accelerator), true)
+                    //                            + ")");
+
                     if ((firstKey || quickReleaseMode) && keyCode == stateMask && keyCode != SWT.ALT)
                         ok(dialog, table);
                 }
             });
         }
-    
+
         private char convertCharacter(char c)
         {
             return c >= 0 && c <= 31 ? (char) (c + '@') : Character.toUpperCase(c);
         }
-//    
-//        private void printKeyEvent(KeyEvent keyEvent)
-//        {
-//            System.out.println(
-//                "keyCode:\t"
-//                    + keyEvent.keyCode
-//                    + "\t ("
-//                    + KeySupport.formatStroke(Stroke.create(keyEvent.keyCode), true)
-//                    + ")");
-//            System.out.println(
-//                "stateMask:\t"
-//                    + keyEvent.stateMask
-//                    + "\t ("
-//                    + KeySupport.formatStroke(Stroke.create(keyEvent.stateMask), true)
-//                    + ")");
-//            System.out.println("character:\t" + (int) keyEvent.character + "\t (" + keyEvent.character + ")");
-//        }
-    
+        //    
+        //        private void printKeyEvent(KeyEvent keyEvent)
+        //        {
+        //            System.out.println(
+        //                "keyCode:\t"
+        //                    + keyEvent.keyCode
+        //                    + "\t ("
+        //                    + KeySupport.formatStroke(Stroke.create(keyEvent.keyCode), true)
+        //                    + ")");
+        //            System.out.println(
+        //                "stateMask:\t"
+        //                    + keyEvent.stateMask
+        //                    + "\t ("
+        //                    + KeySupport.formatStroke(Stroke.create(keyEvent.stateMask), true)
+        //                    + ")");
+        //            System.out.println("character:\t" + (int) keyEvent.character + "\t (" + keyEvent.character + ")");
+        //        }
+
         /*
          * Close the dialog saving the selection
          */
         private void ok(Shell dialog, final Table table)
         {
             TableItem[] items = table.getSelection();
-    
+
             if (items != null && items.length == 1)
                 selection = items[0].getData();
-    
+
             dialog.close();
             dispose();
         }
-    
+
         /*
          * Close the dialog and set selection to null.
          */
@@ -513,7 +513,7 @@ public abstract class BaseEditorAction extends Action
             dialog.close();
             dispose();
         }
-    
+
         /*
          * Add mouse listener to the table closing it when
          * the mouse is pressed.
@@ -526,26 +526,26 @@ public abstract class BaseEditorAction extends Action
                 {
                     ok(dialog, table);
                 }
-    
+
                 public void mouseDown(MouseEvent e)
                 {
                     ok(dialog, table);
                 }
-    
+
                 public void mouseUp(MouseEvent e)
                 {
                     ok(dialog, table);
                 }
             });
         }
-    
+
     }
     /**
             * @param location
             */
     protected void reveal(IResourceWorkspaceLocation location)
     {
-        if (location == null || !location.exists())
+        if (location == null)
             return;
         reveal(location.getStorage());
     }
