@@ -47,6 +47,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.update.ui.forms.internal.FormSection;
 
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editorjwc.components.ChooseBindingTypeDialog;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.spec.IBindingHolder;
@@ -162,7 +163,7 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
 
   protected ChooseBindingTypeDialog getDialog() {
 
-    return new ChooseBindingTypeDialog(newButton.getShell(), DTDVersion >= XMLUtil.DTD_1_2);
+    return new ChooseBindingTypeDialog(TapestryPlugin.getDefault().getActiveWorkbenchShell(), DTDVersion >= XMLUtil.DTD_1_2);
 
   }
 

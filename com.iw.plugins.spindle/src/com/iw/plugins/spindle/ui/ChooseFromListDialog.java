@@ -56,6 +56,8 @@ public class ChooseFromListDialog extends Dialog implements IDialogFieldChangedL
     this.buttonNames = buttonNames;
     this.results = results;
     this.title = title;
+    int shellStyle= getShellStyle();
+    setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
   }
 
   protected void configureShell(Shell newShell) {

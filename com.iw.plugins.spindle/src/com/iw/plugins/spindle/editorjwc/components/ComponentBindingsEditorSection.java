@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.update.ui.forms.internal.FormSection;
@@ -89,7 +90,8 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
     ChooseBindingTypeDialog dialog = null;
 
     TapestryComponentModel cmodel = null;
-    Shell shell = newButton.getShell();
+    Shell oldshell = TapestryPlugin.getDefault().getActiveWorkbenchShell().getShell();
+    Shell shell = new Shell(oldshell.getDisplay(), oldshell.getStyle() | SWT.Resize | SWT.RESIZE);
 
     PluginContainedComponent containedComponent = (PluginContainedComponent) selectedComponent;
 

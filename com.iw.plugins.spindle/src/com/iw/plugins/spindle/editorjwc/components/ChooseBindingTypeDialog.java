@@ -51,6 +51,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -82,7 +83,7 @@ public class ChooseBindingTypeDialog extends ChooseFromListDialog {
 
   static private String[] COLUMN_HEADERS = { "name", "required", "java-type", "description" };
   static private ColumnLayoutData COLUMN_LAYOUTS[] =
-    { new ColumnPixelData(100), new ColumnPixelData(50, false), new ColumnPixelData(200), new ColumnWeightData(100)};
+    { new ColumnPixelData(100), new ColumnPixelData(75), new ColumnPixelData(100), new ColumnPixelData(300)};
 
   public ChooseBindingTypeDialog(Shell shell, HashMap precomputedAliasInfo, Set existingBindingParameters, boolean isDTD12) {
     this(shell, isDTD12);
@@ -111,10 +112,12 @@ public class ChooseBindingTypeDialog extends ChooseFromListDialog {
 
   protected Control createDialogArea(Composite parent) {
     Composite container = new Composite(parent, SWT.NULL);
-    GridData gd;
+    GridData gd; 
     GridLayout layout = new GridLayout();
     layout.verticalSpacing = 8;
     container.setLayout(layout);
+    gd = new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL | GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_FILL);
+    container.setLayoutData(gd);
     if (precomputed != null) {
       combo = new UneditableComboBox(container, SWT.NULL);
       gd = new GridData(GridData.FILL_HORIZONTAL);
@@ -133,12 +136,13 @@ public class ChooseBindingTypeDialog extends ChooseFromListDialog {
     }
     if (component != null) {
       componentNameLabel = new Label(container, SWT.NULL);
-      gd = new GridData(GridData.FILL_BOTH);
+      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.BEGINNING);
       componentNameLabel.setLayoutData(gd);
 
       table = createTable(container);
-      gd = new GridData(GridData.FILL_BOTH);
-      gd.heightHint = 200;
+      gd = new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
+      gd.heightHint = 100;
+      gd.widthHint=400;
       table.setLayoutData(gd);
       createColumns();
       viewer = new TableViewerWithToolTips(table);
@@ -149,7 +153,10 @@ public class ChooseBindingTypeDialog extends ChooseFromListDialog {
       componentNameLabel.setText(component.getUnderlyingStorage().getFullPath().toString());
       viewer.setInput(parameterMap.get(component));
     }
-    super.createDialogArea(container);
+    Control radios = createButtonGroup(container);
+    gd = new GridData(GridData.BEGINNING | GridData.FILL_HORIZONTAL);
+    radios.setLayoutData(gd);
+    //super.createDialogArea(container);
     return container;
   }
 
