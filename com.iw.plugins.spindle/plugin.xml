@@ -7,11 +7,15 @@
    class="com.iw.plugins.spindle.TapestryPlugin">
 
    <runtime>
-      <library name="javax.xml.jaxp.jar"/>
+      <library name="javax.xml.jaxp.jar">
+         <export name="*"/>
+      </library>
       <library name="log4j-core.jar">
          <export name="*"/>
       </library>
-      <library name="org.apache.crimson.jar"/>
+      <library name="org.apache.crimson.jar">
+         <export name="*"/>
+      </library>
       <library name="javax.servlet.jar">
          <export name="*"/>
       </library>
