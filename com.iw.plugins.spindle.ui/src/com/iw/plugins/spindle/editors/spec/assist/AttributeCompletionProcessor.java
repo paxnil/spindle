@@ -39,16 +39,7 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.internal.core.search.JavaSearchScope;
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -56,11 +47,8 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.dialogs.SelectionDialog;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
@@ -71,7 +59,6 @@ import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.AbstractRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
@@ -120,7 +107,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             fTag = XMLNode.getArtifactAt(viewer.getDocument(), fDocumentOffset);
             fTagName = fTag.getName();
             String type = fTag.getType();
-            if (fTagName == null || (type != XMLDocumentPartitioner.TAG && type != XMLDocumentPartitioner.EMPTYTAG))
+            if (fTagName == null || (type != ITypeConstants.TAG && type != ITypeConstants.EMPTYTAG))
                 return NoProposals;
 
             XMLNode attribute = fTag.getAttributeAt(fDocumentOffset);
@@ -443,7 +430,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         {
             XMLNode child = (XMLNode) iter.next();
             String childType = child.getType();
-            if ((childType != XMLDocumentPartitioner.TAG && childType != XMLDocumentPartitioner.EMPTYTAG)
+            if ((childType != ITypeConstants.TAG && childType != ITypeConstants.EMPTYTAG)
                 || child.equals(fTag))
                 continue;
 

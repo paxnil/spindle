@@ -36,11 +36,11 @@ import net.sf.solareclipse.xml.internal.ui.text.XMLCDATAScanner;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocumentExtension3;
-import org.eclipse.jface.text.IDocumentPartitionerExtension2;
 import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 /**
@@ -106,7 +106,7 @@ public class TemplateTextTools extends AbstractTextTools
   {
     super(store, TOKENS);
 
-    fTemplatePartitionScanner = new TemplatePartitionScanner(false);
+    fTemplatePartitionScanner = new TemplatePartitionScanner(false);   
 
     Map tokens = getTokens();
 
@@ -155,7 +155,7 @@ public class TemplateTextTools extends AbstractTextTools
   {
     return new XMLDocumentPartitioner(
         XMLDocumentPartitioner.SCANNER,
-        XMLDocumentPartitioner.TYPES);
+        ITypeConstants.TYPES);
   }
 
   /*

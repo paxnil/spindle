@@ -41,6 +41,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
@@ -75,11 +76,11 @@ public class OpenDeclarationAction extends BaseTemplateAction
         if (artifact == null)
             return;
         String type = artifact.getType();
-        if (type == XMLDocumentPartitioner.TEXT
-            || type == XMLDocumentPartitioner.COMMENT
-            || type == XMLDocumentPartitioner.PI
-            || type == XMLDocumentPartitioner.DECL
-            || type == XMLDocumentPartitioner.ENDTAG)
+        if (type == ITypeConstants.TEXT
+            || type == ITypeConstants.COMMENT
+            || type == ITypeConstants.PI
+            || type == ITypeConstants.DECL
+            || type == ITypeConstants.ENDTAG)
         {
             return;
         }
@@ -207,18 +208,16 @@ public class OpenDeclarationAction extends BaseTemplateAction
     private void reveal(AbstractTextEditor editor, String elementName, String attrName, String attrValue)
     {
         IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
-        XMLDocumentPartitioner partitioner =
-            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+       
         try
         {
             XMLNode reveal = null;
-            partitioner.connect(document);
-            Position[] pos = null;
-            pos = document.getPositions(partitioner.getManagingPositionCategories()[0]);
+             Position[] pos = null;
+            pos = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
             for (int i = 0; i < pos.length; i++)
             {
                 XMLNode artifact = (XMLNode) pos[i];
-                if (artifact.getType() == XMLDocumentPartitioner.ENDTAG)
+                if (artifact.getType() == ITypeConstants.ENDTAG)
                     continue;
                 String name = artifact.getName();
                 if (name == null)
@@ -245,9 +244,6 @@ public class OpenDeclarationAction extends BaseTemplateAction
         } catch (Exception e)
         {
             UIPlugin.log(e);
-        } finally
-        {
-            partitioner.disconnect();
         }
     }
 

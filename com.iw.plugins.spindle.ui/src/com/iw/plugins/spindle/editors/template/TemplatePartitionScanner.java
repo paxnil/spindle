@@ -179,7 +179,7 @@ public class TemplatePartitionScanner implements IPartitionTokenScanner
                     return getToken(null);
 
                 case '<' :
-                    if (fParsedtd || isInternal())
+                    if (fLength == 0 || fParsedtd || isInternal())
                     {
                         switch (read())
                         {
@@ -325,6 +325,7 @@ public class TemplatePartitionScanner implements IPartitionTokenScanner
 
     private IToken nextDeclToken()
     {
+      System.out.println("oops");
         loop : while (true)
         {
             switch (read())
@@ -627,7 +628,8 @@ public class TemplatePartitionScanner implements IPartitionTokenScanner
             fState = isContinuationPartition(document, offset) ? STATE_TAG : STATE_DEFAULT;
         } else if (contentType == XML_DECL)
         {
-            fState = isContinuationPartition(document, offset) ? STATE_DECL : STATE_DEFAULT;
+//            fState = isContinuationPartition(document, offset) ? STATE_DECL : STATE_DEFAULT;
+         fState = STATE_DEFAULT;
         } else if (
             contentType == DTD_INTERNAL
                 || contentType == DTD_INTERNAL_PI

@@ -215,6 +215,7 @@ public class UIUtils
         return null;
     }
 
+    //TODO remove and replace
     public static void XMLFormatDocument(IDocument document)
     {
         XMLContentFormatter formatter =

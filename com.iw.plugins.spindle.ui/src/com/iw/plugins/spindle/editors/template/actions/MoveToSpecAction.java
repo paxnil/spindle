@@ -44,7 +44,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -199,7 +199,6 @@ public class MoveToSpecAction extends BaseTemplateAction
         if (editor != null && editor instanceof ITextEditor)
             fRelatedSpecEditor = (ITextEditor) editor;
 
-        disconnect();
         launchWizard(UIPlugin.getDefault().getActiveWorkbenchShell());
     }
 
@@ -234,7 +233,7 @@ public class MoveToSpecAction extends BaseTemplateAction
         SpindleStatus status = new SpindleStatus();
         fNode = XMLNode.getArtifactAt(fDocument, fOffset);
         if (fNode == null
-            || (fNode.getType() != XMLDocumentPartitioner.TAG && fNode.getType() != XMLDocumentPartitioner.EMPTYTAG))
+            || (fNode.getType() != ITypeConstants.TAG && fNode.getType() != ITypeConstants.EMPTYTAG))
         {
             status.setError("invalid selection at cursor position.");
         } else if (!fNode.isTerminated())

@@ -30,12 +30,11 @@ import java.io.StringWriter;
 
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
-import org.xmen.xml.XMLNode;
+import org.xmen.internal.ui.text.XMLReconciler;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
@@ -43,6 +42,7 @@ import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
@@ -66,20 +66,16 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
    * 
    * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect()
    */
-  protected void connect(IDocument document) throws IllegalStateException
+  protected void init(IDocument document) throws IllegalStateException
   {
-    String publicId = null;
+
     fDTD = null;
 
-    try
-    {
-      XMLNode root = XMLNode.createTree(document, -1);
-      publicId = root.fPublicId;
-      fDTD = DOMValidator.getDTD(publicId);
-    } catch (BadLocationException e)
-    {
-      // do nothing
-    }
+    IXMLModelProvider modelProvider = (IXMLModelProvider) fEditor.getDocumentProvider();
+    XMLReconciler model = modelProvider.getModel(fEditor.getEditorInput());
+    
+    if (model != null)
+      fDTD = DOMValidator.getDTD(model.getPublicId());
 
     if (fDTD == null)
       throw new IllegalStateException();

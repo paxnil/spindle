@@ -55,7 +55,7 @@ public class CDATACompletionProcessor extends ContentAssistProcessor
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect(org.eclipse.jface.text.IDocument)
      */
-    protected void connect(IDocument document) throws IllegalStateException
+    protected void init(IDocument document) throws IllegalStateException
     {
       // TODO fix this, is it really necessary?
       // do nothing.

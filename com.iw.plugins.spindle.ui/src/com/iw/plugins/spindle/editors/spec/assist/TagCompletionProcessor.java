@@ -40,7 +40,7 @@ import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
@@ -80,7 +80,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         String tagName = tag.getName();
 
-        if (tag.getType() == XMLDocumentPartitioner.ENDTAG && !tag.isTerminated())
+        if (tag.getType() == ITypeConstants.ENDTAG && !tag.isTerminated())
             return getEndTagProposal(document, tag, tagName);
 
         int baseState = tag.getStateAt(documentOffset);
@@ -91,11 +91,11 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
             tag = tag.getNextArtifact();
 
         boolean atStart =
-            tag.getType() == XMLDocumentPartitioner.ENDTAG
+            tag.getType() == ITypeConstants.ENDTAG
                 ? tag.getOffset() + 2 == documentOffset
                 : tag.getOffset() == documentOffset;
 
-        if ((tag.getType() == XMLDocumentPartitioner.ENDTAG && !atStart))
+        if ((tag.getType() == ITypeConstants.ENDTAG && !atStart))
             return NoSuggestions;
 
         boolean addLeadingSpace = false;
@@ -385,7 +385,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
         int baseState = tag.getStateAt(documentOffset);
         String name = null;
-        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
+        if (tag.getType() == ITypeConstants.ENDTAG)
         {
             XMLNode start = tag.getCorrespondingNode();
             if (start != null)

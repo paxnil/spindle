@@ -28,18 +28,20 @@ package com.iw.plugins.spindle.editors.spec.actions;
 
 import org.apache.tapestry.INamespace;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
+import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 import com.wutka.dtd.DTD;
 
 /**
- *  Base class for spec actions that need the xml partitioning.
+ * Base class for spec actions that need the xml partitioning.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -47,86 +49,88 @@ import com.wutka.dtd.DTD;
 public abstract class BaseSpecAction extends BaseEditorAction
 {
 
-    protected String fDeclaredRootElementName;
-    protected String fPublicId;
-    protected DTD fDTD;
-// TODO remove   protected XMLDocumentPartitioner fPartitioner;
-    protected INamespace fNamespace;
- 
-    protected IDocument fDocument;
+  protected String fDeclaredRootElementName;
+  protected String fPublicId;
+  protected DTD fDTD;
+  // TODO remove protected XMLDocumentPartitioner fPartitioner;
+  protected INamespace fNamespace;
 
-    public BaseSpecAction()
+  protected IDocument fDocument;
+
+  public BaseSpecAction()
+  {
+    super();
+    // TODO remove fPartitioner =
+    //            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
+    // XMLDocumentPartitioner.TYPES);
+  }
+
+  public BaseSpecAction(String text)
+  {
+    super(text);
+  }
+
+  public BaseSpecAction(String text, ImageDescriptor image)
+  {
+    super(text, image);
+  }
+
+  public BaseSpecAction(String text, int style)
+  {
+    super(text, style);
+  }
+
+  public final void run()
+  {
+    super.run();
+
+    INamespace namespace = fEditor.getNamespace();
+    if (namespace == null)
+      return;
+
+    if (fDocumentOffset < 0)
+      return;
+
+    fDeclaredRootElementName = null;
+    fPublicId = null;
+    fDTD = null;
+
+    try
     {
-        super();
-// TODO remove       fPartitioner =
-//            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
-    }
 
-    public BaseSpecAction(String text)
+      IEditorInput editorInput = fEditor.getEditorInput();
+      IDocumentProvider documentProvider = fEditor.getDocumentProvider();
+      fDocument = documentProvider.getDocument(editorInput);
+      if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
+        return;
+
+      if (!(documentProvider instanceof IXMLModelProvider))
+        return;
+
+      XMLReconciler model = ((IXMLModelProvider) documentProvider).getModel(editorInput);
+      if (model == null)
+        return;
+
+      XMLNode root = model.getRoot();
+      fPublicId = model.getPublicId();
+      fDeclaredRootElementName = model.getRootNodeId();
+      fDTD = DOMValidator.getDTD(fPublicId);
+
+      if (fDTD == null || fDeclaredRootElementName == null)
+        return;
+
+      doRun();
+    } catch (RuntimeException e)
     {
-        super(text);
+      UIPlugin.log(e);
+      throw e;
     }
+    //   TODO remove finally
+    //        {
+    //            fPartitioner.disconnect();
+    //        }
+  }
 
-    public BaseSpecAction(String text, ImageDescriptor image)
-    {
-        super(text, image);
-    }
-
-    public BaseSpecAction(String text, int style)
-    {
-        super(text, style);
-    }
-
-    public final void run()
-    {
-        super.run();
-
-        INamespace namespace = fEditor.getNamespace();
-        if (namespace == null)
-            return;
-
-        if (fDocumentOffset < 0)
-            return;
-
-        fDeclaredRootElementName = null;
-        fPublicId = null;
-        fDTD = null;
-
-        try
-        {
-            fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-//    TODO remove        fPartitioner.connect(fDocument);
-            if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
-                return;
-
-            try
-            {
-                XMLNode root = XMLNode.createTree(fDocument, -1);
-                fPublicId = root.fPublicId;
-                fDeclaredRootElementName = root.fRootNodeId;
-                fDTD = DOMValidator.getDTD(fPublicId);
-
-            } catch (BadLocationException e)
-            {
-                UIPlugin.log(e);
-                return;
-            }
-
-            if (fDTD == null || fDeclaredRootElementName == null)
-                return;
-
-            doRun();
-        } catch (RuntimeException e)
-        {
-            UIPlugin.log(e);
-            throw e;
-        }
-//   TODO remove     finally
-//        {
-//            fPartitioner.disconnect();
-//        }
-    }
-
-    protected abstract void doRun();
+  protected abstract void doRun();
 
 }

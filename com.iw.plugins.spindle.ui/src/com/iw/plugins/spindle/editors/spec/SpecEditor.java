@@ -47,8 +47,6 @@ import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
@@ -77,7 +75,9 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -104,6 +104,7 @@ import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.IReconcileWorker;
+import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
@@ -202,7 +203,7 @@ public class SpecEditor extends Editor
     {
       XMLNode artifact = (XMLNode) obj;
       String type = artifact.getType();
-      if (type == XMLDocumentPartitioner.ATTR)
+      if (type == ITypeConstants.ATTR)
       {
         IRegion valueRegion = artifact.getAttributeValueRegion();
         if (valueRegion != null)
@@ -229,7 +230,7 @@ public class SpecEditor extends Editor
     {
       XMLNode artifact = (XMLNode) obj;
       String type = artifact.getType();
-      if (type == XMLDocumentPartitioner.ATTR)
+      if (type == ITypeConstants.ATTR)
       {
         IRegion valueRegion = artifact.getAttributeValueRegion();
         if (valueRegion != null)
@@ -238,7 +239,7 @@ public class SpecEditor extends Editor
           return;
         }
       }
-      if (artifact.getType() == XMLDocumentPartitioner.TAG)
+      if (artifact.getType() == ITypeConstants.TAG)
       {
         XMLNode corr = artifact.getCorrespondingNode();
         if (corr != null)
@@ -249,7 +250,7 @@ public class SpecEditor extends Editor
           return;
         }
       }
-      if (type == XMLDocumentPartitioner.ENDTAG)
+      if (type == ITypeConstants.ENDTAG)
       {
         XMLNode corr = artifact.getCorrespondingNode();
         if (corr != null)
@@ -278,7 +279,8 @@ public class SpecEditor extends Editor
 
     IStorage storage = getStorage();
     IProject project = TapestryCore.getDefault().getProjectFor(storage);
-    TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+    TapestryArtifactManager manager = TapestryArtifactManager
+        .getTapestryArtifactManager();
     Map specs = manager.getSpecMap(project);
     if (specs != null)
     {
@@ -294,7 +296,8 @@ public class SpecEditor extends Editor
   {
     IStorage storage = getStorage();
     IProject project = TapestryCore.getDefault().getProjectFor(storage);
-    TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+    TapestryArtifactManager manager = TapestryArtifactManager
+        .getTapestryArtifactManager();
     Map specs = manager.getSpecMap(project);
     if (specs != null)
     {
@@ -366,13 +369,21 @@ public class SpecEditor extends Editor
    * @see org.eclipse.ui.texteditor.AbstractTextEditor#createSourceViewer(Composite,
    *      IVerticalRuler, int)
    */
-  protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles)
+  protected ISourceViewer createSourceViewer(
+      Composite parent,
+      IVerticalRuler ruler,
+      int styles)
   {
 
     fAnnotationAccess = createAnnotationAccess();
     fOverviewRuler = createOverviewRuler(getSharedColors());
 
-    ISourceViewer viewer = new SpecSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
+    ISourceViewer viewer = new SpecSourceViewer(
+        parent,
+        ruler,
+        getOverviewRuler(),
+        isOverviewRulerVisible(),
+        styles);
     // ensure decoration support has been created and configured.
     getSourceViewerDecorationSupport(viewer);
 
@@ -386,7 +397,9 @@ public class SpecEditor extends Editor
    */
   protected SourceViewerConfiguration createSourceViewerConfiguration()
   {
-    return new SpecConfiguration(UIPlugin.getDefault().getXMLTextTools(), this, UIPlugin.getDefault().getPreferenceStore());
+    return new SpecConfiguration(UIPlugin.getDefault().getXMLTextTools(), this, UIPlugin
+        .getDefault()
+        .getPreferenceStore());
   }
 
   /**
@@ -395,17 +408,26 @@ public class SpecEditor extends Editor
   protected void createActions()
   {
     super.createActions();
-    IAction action = new TextOperationAction(UIPlugin.getResourceBundle(), "ContentAssistProposal.", this,
+    IAction action = new TextOperationAction(
+        UIPlugin.getResourceBundle(),
+        "ContentAssistProposal.",
+        this,
         ISourceViewer.CONTENTASSIST_PROPOSALS);
     action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-    markAsStateDependentAction(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, true);
+    markAsStateDependentAction(
+        ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS,
+        true);
     setAction("ContentAssistProposal", action);
 
-    action = new TextOperationAction(UIPlugin.getResourceBundle(), "ShowOutline.", this, SpecSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
+    action = new TextOperationAction(
+        UIPlugin.getResourceBundle(),
+        "ShowOutline.", this, SpecSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
     action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.xml.show.outline");
     setAction("com.iw.plugins.spindle.ui.editor.xml.show.outline", action);
 
-    action = new TextOperationAction(UIPlugin.getResourceBundle(), "ShowStructure.", this, SpecSourceViewer.OPEN_STRUCTURE, true); //$NON-NLS-1$
+    action = new TextOperationAction(
+        UIPlugin.getResourceBundle(),
+        "ShowStructure.", this, SpecSourceViewer.OPEN_STRUCTURE, true); //$NON-NLS-1$
     action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.xml.open.structure");
     setAction("com.iw.plugins.spindle.ui.editor.xml.open.structure", action);
 
@@ -449,38 +471,40 @@ public class SpecEditor extends Editor
 
   private void reconcileOutline()
   {
-//    if (fOutlinePartitioner == null)
-//      fOutlinePartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
-    try
-    {
-      IDocument document = getDocumentProvider().getDocument(getEditorInput());
-      if (document.getLength() == 0 || document.get().trim().length() == 0)
-      {
-        ((MultiPageContentOutline) fOutline).setInput(null);
-      } else
-      {
-
-//        fOutlinePartitioner.connect(document);
-        try
-        {
-          ((MultiPageContentOutline) fOutline).setInput(XMLNode.createTree(document, -1));
-        } catch (BadLocationException e)
-        {
-          // do nothing
-        }
-      }
-      if (fUpdater != null)
-        fUpdater.post();
-
-    } catch (RuntimeException e)
-    {
-      UIPlugin.log(e);
-      throw e;
-    } 
-//    finally
+    //    if (fOutlinePartitioner == null)
+    //      fOutlinePartitioner = new
+    // XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
+    // XMLDocumentPartitioner.TYPES);
+// TODO remove ?   try
 //    {
-//      fOutlinePartitioner.disconnect();
+//      IDocument document = getDocumentProvider().getDocument(getEditorInput());
+//      if (document.getLength() == 0 || document.get().trim().length() == 0)
+//      {
+//        ((MultiPageContentOutline) fOutline).setInput(null);
+//      } else
+//      {
+//
+//        //        fOutlinePartitioner.connect(document);
+//        try
+//        {
+//          ((MultiPageContentOutline) fOutline).setInput(XMLNode.createTree(document, -1));
+//        } catch (BadLocationException e)
+//        {
+//          // do nothing
+//        }
+//      }
+//      if (fUpdater != null)
+//        fUpdater.post();
+//
+//    } catch (RuntimeException e)
+//    {
+//      UIPlugin.log(e);
+//      throw e;
 //    }
+    //    finally
+    //    {
+    //      fOutlinePartitioner.disconnect();
+    //    }
   }
   /**
    * return the Tapestry specification object obtained during the last build
@@ -561,12 +585,15 @@ public class SpecEditor extends Editor
       return monitor != null && monitor.isCanceled();
     }
 
-    public final void reconcile(IProblemCollector problemCollector, IProgressMonitor progressMonitor)
+    public final void reconcile(
+        IProblemCollector problemCollector,
+        IProgressMonitor progressMonitor)
     {
       Assert.isNotNull(problemCollector);
       fireReconcileStarted();
       this.collector = problemCollector;
-      this.monitor = progressMonitor == null ? new NullProgressMonitor() : progressMonitor;
+      this.monitor = progressMonitor == null
+          ? new NullProgressMonitor() : progressMonitor;
       Object reconcileResult = null;
       fReconciledSpec = null;
       boolean didReconcile = false;
@@ -586,7 +613,9 @@ public class SpecEditor extends Editor
             try
             {
               validator = new SpecificationValidator(project, false);
-              reconcileResult = doReconcile(getDocumentProvider().getDocument(input).get(), spec, validator);
+              reconcileResult = doReconcile(getDocumentProvider()
+                  .getDocument(input)
+                  .get(), spec, validator);
             } catch (CoreException e)
             {
               UIPlugin.log(e);
@@ -605,7 +634,10 @@ public class SpecEditor extends Editor
       }
     }
     /** return true iff a reconcile occured * */
-    protected abstract Object doReconcile(String content, Object spec, IScannerValidator validator);
+    protected abstract Object doReconcile(
+        String content,
+        Object spec,
+        IScannerValidator validator);
 
     protected Document parse(String content)
     {
@@ -684,8 +716,8 @@ public class SpecEditor extends Editor
             {
               scanner.setNamespace(useSpec.getNamespace());
               scanner.setExternalProblemCollector(collector);
-              scanner.setResourceInformation(((IStorageEditorInput) getEditorInput()).getStorage(), useSpec
-                  .getSpecificationLocation());
+              scanner.setResourceInformation(((IStorageEditorInput) getEditorInput())
+                  .getStorage(), useSpec.getSpecificationLocation());
               validator.setProblemCollector(scanner);
 
               return scanner.scan(document, validator);
@@ -826,7 +858,8 @@ public class SpecEditor extends Editor
       return spec instanceof IApplicationSpecification;
     }
 
-    protected SpecificationScanner getInitializedScanner(IApplicationSpecification application)
+    protected SpecificationScanner getInitializedScanner(
+        IApplicationSpecification application)
     {
       scanner.setExternalProblemCollector(collector);
       scanner.setResourceInformation(null, application.getSpecificationLocation());
@@ -907,7 +940,8 @@ public class SpecEditor extends Editor
     }
     if (!moreNav.isEmpty())
       menu.appendToGroup(NAV_GROUP, moreNav);
-    menu.insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
+    menu
+        .insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
     if (!UIPlugin.isEclipse3())
     {
       MenuManager sourceMenu = new MenuManager("Source");
@@ -916,11 +950,14 @@ public class SpecEditor extends Editor
     }
   }
 
-  public static class SpecEditorInformationProvider implements IInformationProvider, IInformationProviderExtension
+  public static class SpecEditorInformationProvider
+      implements
+        IInformationProvider,
+        IInformationProviderExtension
   {
     private SpecEditor fEditor;
     private boolean fUseReconcileResults;
-//  TODO remove  private XMLDocumentPartitioner fPartitioner;
+    //  TODO remove private XMLDocumentPartitioner fPartitioner;
 
     public SpecEditorInformationProvider(IEditorPart editor)
     {
@@ -969,30 +1006,17 @@ public class SpecEditor extends Editor
       if (fUseReconcileResults)
         return fEditor.getReconciledSpec();
 
-//  TODO remove    if (fPartitioner == null)
-//        fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
-      IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-      if (document == null)
+      IDocumentProvider documentProvider = fEditor.getDocumentProvider();
+      if (!(documentProvider instanceof IXMLModelProvider))
         return null;
-      try
-      {
-//  TODO remove      fPartitioner.connect(document);
-        return XMLNode.createTree(document, -1);
-      } catch (Exception e)
-      {
-        UIPlugin.log(e);
+
+      XMLReconciler model = ((IXMLModelProvider) documentProvider).getModel(fEditor
+          .getEditorInput());
+      if (model == null)
         return null;
-      } 
-//   TODO remove   finally
-//      {
-//        try
-//        {
-//          fPartitioner.disconnect();
-//        } catch (RuntimeException e)
-//        {
-//          UIPlugin.log(e);
-//        }
-//      }
+
+      return model.getRoot();
+
     }
   }
 }

@@ -60,7 +60,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.PreferenceConstants;
@@ -461,13 +461,13 @@ public class TemplateEditor extends Editor
             try
             {
 //                fHighlightPartitioner.connect(document);
-                XMLNode.createTree(document, -1);
+//                XMLNode.createTree(document, -1);
                 XMLNode artifact = XMLNode.getArtifactAt(document, fOffset);
                 if (artifact == null)
                     return;
 
                 String type = artifact.getType();
-                if (type == XMLDocumentPartitioner.TAG)
+                if (type == ITypeConstants.TAG)
                 {
                     XMLNode corr = artifact.getCorrespondingNode();
                     if (corr != null)
@@ -478,7 +478,7 @@ public class TemplateEditor extends Editor
                         return;
                     }
                 }
-                if (type == XMLDocumentPartitioner.ENDTAG)
+                if (type == ITypeConstants.ENDTAG)
                 {
                     XMLNode corr = artifact.getCorrespondingNode();
                     if (corr != null)

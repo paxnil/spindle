@@ -40,6 +40,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
@@ -76,15 +77,15 @@ public class OpenDeclarationAction extends BaseSpecAction
     {
         XMLNode artifact = XMLNode.getArtifactAt(fDocument, fDocumentOffset);
         String type = artifact.getType();
-        if (type == XMLDocumentPartitioner.TEXT
-            || type == XMLDocumentPartitioner.COMMENT
-            || type == XMLDocumentPartitioner.PI
-            || type == XMLDocumentPartitioner.DECL)
+        if (type == ITypeConstants.TEXT
+            || type == ITypeConstants.COMMENT
+            || type == ITypeConstants.PI
+            || type == ITypeConstants.DECL)
         {
             return;
         }
-        if (type == XMLDocumentPartitioner.ENDTAG)
-            artifact = artifact.getCorrespondingNode();
+        if (type == ITypeConstants.ENDTAG)
+            artifact = artifact.getCorrespondingNode(); 
 
         if (artifact == null)
             return;
@@ -504,7 +505,7 @@ public class OpenDeclarationAction extends BaseSpecAction
             for (int i = 0; i < pos.length; i++)
             {
                 XMLNode artifact = (XMLNode) pos[i];
-                if (artifact.getType() == XMLDocumentPartitioner.ENDTAG)
+                if (artifact.getType() == ITypeConstants.ENDTAG)
                     continue;
                 String name = artifact.getName();
                 if (name == null)

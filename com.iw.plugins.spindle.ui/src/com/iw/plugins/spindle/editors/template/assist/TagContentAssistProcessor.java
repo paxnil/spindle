@@ -39,7 +39,7 @@ import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
@@ -70,7 +70,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
         XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
         String tagName = tag.getName();
         int baseState = tag.getStateAt(documentOffset);
-        if (tag.getType() != XMLDocumentPartitioner.TAG && tag.getType() != XMLDocumentPartitioner.EMPTYTAG)
+        if (tag.getType() != ITypeConstants.TAG && tag.getType() != ITypeConstants.EMPTYTAG)
             return NoProposals;
 
         if (baseState == XMLNode.IN_TERMINATOR)
@@ -600,7 +600,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
     {
         XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
         int baseState = tag.getStateAt(documentOffset);
-        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
+        if (tag.getType() == ITypeConstants.ENDTAG)
             return NoInformation;
 
         Map attrMap = tag.getAttributesMap();

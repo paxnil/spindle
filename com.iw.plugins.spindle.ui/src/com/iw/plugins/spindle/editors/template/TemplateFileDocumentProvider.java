@@ -26,67 +26,19 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.template;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
-import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.editors.documentsAndModels.FileDocumentModelProvider;
 
 /**
  * Document provider for templates that come from files
  *  
  */
-public class TemplateFileDocumentProvider extends FileDocumentProvider
+public class TemplateFileDocumentProvider extends FileDocumentModelProvider
 {
-  /*
-   * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createDocument(Object)
-   */
-  protected IDocument createDocument(Object element) throws CoreException
-  {
-    IDocument document = super.createDocument(element);
-    
-    if (document != null)
-      TextUtilities.addDocumentPartitioners(document, createParitionerMap());
-    //            DefaultPartitioner defaultPartitioner = createParitioner();
-    //
-    //            if (defaultPartitioner != null)
-    //            {
-    //              	Map paritionerMap =
-    //                defaultPartitioner.connect(document);
-    //                document.setDocumentPartitioner(defaultPartitioner);
-    //            }
-
-    return document;
-  }
-
-  private Map createParitionerMap()
-  {
-    Map result = new HashMap();
-    TemplateTextTools tools = UIPlugin.getDefault().getTemplateTextTools();
-
-    DefaultPartitioner syntaxPartitioner = tools.createXMLPartitioner();
-    result.put(syntaxPartitioner.getManagingPositionCategories()[0], syntaxPartitioner);
-
-    XMLDocumentPartitioner structureParitioner = tools.createXMLStructurePartitioner();
-    result.put(
-        structureParitioner.getManagingPositionCategories()[0],
-        structureParitioner);
-
-    return result;
-  }
-
-  protected DefaultPartitioner createParitioner()
-  {
-    return UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
-  }
+ 
 
   protected IAnnotationModel createAnnotationModel(Object element) throws CoreException
   {

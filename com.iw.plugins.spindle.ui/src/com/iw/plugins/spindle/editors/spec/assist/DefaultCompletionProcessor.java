@@ -37,7 +37,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorInput;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
@@ -138,9 +138,9 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
         {
             XMLNode element = (XMLNode) iter.next();
             String type = element.getType();
-            if (type == XMLDocumentPartitioner.TAG
-                || type == XMLDocumentPartitioner.EMPTYTAG
-                || type == XMLDocumentPartitioner.ENDTAG)
+            if (type == ITypeConstants.TAG
+                || type == ITypeConstants.EMPTYTAG
+                || type == ITypeConstants.ENDTAG)
             {
                 realRootNode = element;
                 break;
@@ -187,7 +187,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
         if (parent.getType().equals("/"))
             return computeRootTagProposal(artifact, parent, documentOffset);
 
-        if (type == XMLDocumentPartitioner.TEXT || name == null)
+        if (type == ITypeConstants.TEXT || name == null)
             name = parent.getName();
 
         if (name == null)
@@ -216,7 +216,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     public static ICompletionProposal computeEndTagProposal(ITextViewer viewer, int documentOffset)
     {
         XMLNode artifact = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
-        if (artifact.getType() == XMLDocumentPartitioner.TAG && artifact.getName() != null)
+        if (artifact.getType() == ITypeConstants.TAG && artifact.getName() != null)
         {
             String tmp = artifact.getName();
             return new CompletionProposal(
@@ -232,7 +232,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
         XMLNode parentArtifact = artifact.getParent();
         if (parentArtifact == null
             || parentArtifact.getType().equals("/")
-            || parentArtifact.getType() != XMLDocumentPartitioner.TAG)
+            || parentArtifact.getType() != ITypeConstants.TAG)
             return null;
         String parentName = parentArtifact.getName();
         if (parentName == null)

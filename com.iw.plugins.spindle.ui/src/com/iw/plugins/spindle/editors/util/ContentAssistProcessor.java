@@ -27,7 +27,6 @@
 package com.iw.plugins.spindle.editors.util;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -36,8 +35,6 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
-import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
@@ -72,7 +69,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
     }
 
     
-    protected  abstract void connect(IDocument document) throws IllegalStateException;
+    protected  abstract void init(IDocument document) throws IllegalStateException;
     {
 // TODO remove       fAssistParititioner.connect(document);
 //        try
@@ -84,19 +81,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
 //            throw new IllegalStateException();
 //        }
     }
-    /** @deprecated */
-    protected void disconnect()
-    {
-//    TODO remove
-//      try
-//        {
-//            fAssistParititioner.disconnect();
-//        } catch (RuntimeException e)
-//        {
-//            UIPlugin.log(e);
-//        }
-    }
-
+   
     public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
         IDocument document = viewer.getDocument();
@@ -105,7 +90,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
 
         try
         {
-            connect(document);
+            init(document);
             Point p = viewer.getSelectedRange();
             if (p.y > 0)
                 return NoProposals;
@@ -119,10 +104,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
         {
             UIPlugin.log(e);
             throw e;
-        } finally
-        {
-            disconnect();
-        }
+        } 
     }
 
     protected  ICompletionProposal[] computeEmptyDocumentProposal(ITextViewer viewer, int documentOffset) {
@@ -139,24 +121,18 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
         return NoInformation;
     }
 
-    /**
-     * @param viewer
-     * @param fDocumentOffset
-     * @return
-     */
+   
+   
     public IContextInformation[] computeInformation(ITextViewer viewer, int documentOffset)
     {
         try
         {
-            connect(viewer.getDocument());
+            init(viewer.getDocument());
             return doComputeContextInformation(viewer, documentOffset);
         } catch (IllegalStateException e)
         {
             return NoInformation;
-        } finally
-        {
-            disconnect();
-        }
+        } 
     }
 
     // default result, override in subclass

@@ -47,7 +47,6 @@ import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.texteditor.IDocumentProvider;

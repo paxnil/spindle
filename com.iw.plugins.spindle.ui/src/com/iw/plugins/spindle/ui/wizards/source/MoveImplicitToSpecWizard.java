@@ -51,7 +51,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.PreferenceConstants;
@@ -615,7 +615,7 @@ public class MoveImplicitToSpecWizard extends Wizard
             }
         }
         String type = fImplicitNode.getType();
-        if (type == XMLDocumentPartitioner.TAG)
+        if (type == ITypeConstants.TAG)
             buffer.append(">");
         else
             buffer.append("/>");

@@ -36,7 +36,7 @@ import org.apache.tapestry.parse.TemplateParser;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
@@ -69,10 +69,10 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
 
         String type = tag.getType();
 
-        if (type == XMLDocumentPartitioner.TEXT)
+        if (type == ITypeConstants.TEXT)
             return computeTextProposals(viewer, documentOffset);
 
-        if (type != XMLDocumentPartitioner.TAG && type != XMLDocumentPartitioner.EMPTYTAG)
+        if (type != ITypeConstants.TAG && type != ITypeConstants.EMPTYTAG)
             return NoProposals;
 
         if (tag.isTerminated() && documentOffset == tag.getOffset() + tag.getLength())

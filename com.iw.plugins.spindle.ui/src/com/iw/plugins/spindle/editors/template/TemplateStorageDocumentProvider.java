@@ -34,7 +34,7 @@ import org.eclipse.ui.editors.text.StorageDocumentProvider;
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
- * HTML file document provider.
+ * HTML file document provider. TODO ditch
  * 
  * @author Igor Malinin
  */
