@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
@@ -36,7 +37,7 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
-import com.iw.plugins.spindle.ui.DialogCellEditor;
+
 
 public class ChoosePageFromLibraryPropertyDescriptor extends PropertyDescriptor implements INeedsModelInitialization {
 
