@@ -35,9 +35,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.IDialogFieldChangedListener;
-import com.iw.plugins.spindle.dialogfields.RadioDialogField;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
+import com.iw.plugins.spindle.ui.dialogfields.RadioDialogField;
 
 public class ChooseFromListDialog extends Dialog implements IDialogFieldChangedListener {
 
@@ -65,35 +65,40 @@ public class ChooseFromListDialog extends Dialog implements IDialogFieldChangedL
 
   protected Control createDialogArea(Composite parent) {
     Composite container = new Composite(parent, SWT.NULL);
-    
+
     FormLayout layout = new FormLayout();
-    layout.marginHeight=4;
+    layout.marginHeight = 4;
     layout.marginWidth = 4;
     container.setLayout(layout);
-    
+
     Control buttonGroupControl = createButtonGroup(container);
-    
+
     FormData formData = new FormData();
-    formData.top = new FormAttachment(0,0);
-    formData.left = new FormAttachment(0,0);
-    
+    formData.top = new FormAttachment(0, 0);
+    formData.left = new FormAttachment(0, 0);
+
     buttonGroupControl.setLayoutData(formData);
-    
+
     return container;
   }
 
   protected Control createButtonGroup(Composite parent) {
 
-	buttonGroup = new RadioDialogField("Choose:", 64, buttonNames, SWT.HORIZONTAL);
-	buttonGroup.addListener(this);	return buttonGroup.getControl(parent);
-	
+    buttonGroup = new RadioDialogField("Choose:", 64, buttonNames, SWT.HORIZONTAL);
+    buttonGroup.addListener(this);
+
+    Control result = buttonGroup.getControl(parent);
+    buttonGroup.setSelected(0);
+
+    return result;
+
   }
 
   public Object getSelectedResult() {
-     if (resultIndex >= 0) {
+    if (resultIndex >= 0) {
       return results[resultIndex];
     }
-    return null;
+    return results[0];
   }
   /**
    * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)

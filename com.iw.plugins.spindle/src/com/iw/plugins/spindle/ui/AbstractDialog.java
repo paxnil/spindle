@@ -45,7 +45,14 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+
+import com.iw.plugins.spindle.TapestryImages;
 
 public abstract class AbstractDialog extends TitleAreaDialog {
 
@@ -440,11 +447,42 @@ public abstract class AbstractDialog extends TitleAreaDialog {
     }
     getShell().setText(windowTitle);
   }
-  
+
   public void create() {
-  	super.create();
-  	update();
-  } 
-  
- 
+    super.create();
+    update();
+  }
+
+  /**
+   * Returns the titleImageString.
+   * @return String
+   */
+  public String getTitleImageString() {
+    return titleImageString;
+  }
+
+  /**
+   * Sets the titleImageString.
+   * @param titleImageString The titleImageString to set
+   */
+  public void setTitleImageString(String titleImageString) {
+    this.titleImageString = titleImageString;
+  }
+
+  protected String titleImageString;
+
+  /**
+   * @see org.eclipse.jface.window.Window#createContents(Composite)
+   */
+  protected Control createContents(Composite parent) {
+    Control result =  super.createContents(parent);
+    
+    if (titleImageString != null) {
+
+      setTitleImage(TapestryImages.getSharedImage(titleImageString));
+    }
+    
+    return result;
+  }
+
 }

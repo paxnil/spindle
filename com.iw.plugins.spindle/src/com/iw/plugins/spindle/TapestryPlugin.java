@@ -27,20 +27,36 @@ package com.iw.plugins.spindle;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.tapestry.Tapestry;
 import net.sf.tapestry.parse.SpecificationParser;
+import net.sf.tapestry.util.xml.AbstractDocumentParser;
+import org.apache.log4j.Category;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.Priority;
+import org.apache.oro.text.regex.MalformedPatternException;
+import org.apache.oro.text.regex.Pattern;
+import org.apache.oro.text.regex.PatternCompiler;
+import org.apache.oro.text.regex.PatternMatcher;
+import org.apache.oro.text.regex.Perl5Compiler;
+import org.apache.oro.text.regex.Perl5Matcher;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
@@ -55,19 +71,24 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import com.iw.plugins.spindle.model.BaseTapestryModel;
+import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
-import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
-import com.iw.plugins.spindle.spec.TapestryPluginFactory;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
+import com.iw.plugins.spindle.project.TapestryProject;
+import com.iw.plugins.spindle.refactor.RenamedComponentOrPageRefactor;
+import com.iw.plugins.spindle.spec.TapestryPluginSpecFactory;
 import com.iw.plugins.spindle.ui.text.ColorManager;
+import com.iw.plugins.spindle.util.SpindleStatus;
+import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 
@@ -79,18 +100,24 @@ import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 public class TapestryPlugin extends AbstractUIPlugin {
   // Default instance of the receiver
 
-  private static TapestryPlugin inst;
+  private static TapestryPlugin instance;
   private static SpecificationParser parser;
-  private static TapestryModelManager modelManager = null;
-  private static Map builtInAliasLookup;
+  private static TapestryProjectModelManager modelManager = null;
+
+  protected PatternCompiler _patternCompiler;
+  protected PatternMatcher _matcher;
+  protected Map _compiledPatterns;
+
+  static public final String ID_PLUGIN = "com.iw.plugins.spindle";
+  static public final String NATURE_ID = ID_PLUGIN + ".project.TapestryProject";
 
   public static TapestryApplicationModel selectedApplication = null;
 
-  static public final String ID_PLUGIN = "com.iw.plugins.spindle";
+  static private Map editorIdLookup;
 
-  static public String appEditorId = "com.iw.plugins.spindle.editors.app_editor";
+  static private HashMap parsers = new HashMap();
 
-  static public String compEditorId = "com.iw.plugins.spindle.editors.jwc_editor";
+  private static List managedExtensions = new ArrayList();
 
   /**
    * Creates the Tapestry plugin and caches its default instance
@@ -99,58 +126,52 @@ public class TapestryPlugin extends AbstractUIPlugin {
    */
   public TapestryPlugin(IPluginDescriptor descriptor) {
     super(descriptor);
-    if (inst == null)
-      inst = this;
+    if (instance == null)
+      instance = this;
+
+    Category CAT = Category.getInstance(AbstractDocumentParser.class);
+    CAT.setPriority(Priority.DEBUG);
+    CAT.addAppender(new ConsoleAppender(new PatternLayout("%c{1} [%p] %m%n"), "System.out"));
+
   }
 
   static {
     parser = new SpecificationParser();
-    parser.setFactory(new TapestryPluginFactory());
-    builtInAliasLookup = new HashMap();
-    builtInAliasLookup.put("Insert", "/com/primix/tapestry/components/Insert.jwc");
-    builtInAliasLookup.put("Action", "/com/primix/tapestry/link/Action.jwc");
-    builtInAliasLookup.put("Checkbox", "/com/primix/tapestry/form/Checkbox.jwc");
-    builtInAliasLookup.put("InsertWrapped", "/com/primix/tapestry/components/InsertWrapped.jwc");
-    builtInAliasLookup.put("Conditional", "/com/primix/tapestry/components/Conditional.jwc");
-    builtInAliasLookup.put("Foreach", "/com/primix/tapestry/components/Foreach.jwc");
-    builtInAliasLookup.put("ExceptionDisplay", "/com/primix/tapestry/html/ExceptionDisplay.jwc");
-    builtInAliasLookup.put("Delegator", "/com/primix/tapestry/components/Delegator.jwc");
-    builtInAliasLookup.put("Form", "/com/primix/tapestry/form/Form.jwc");
-    builtInAliasLookup.put("TextField", "/com/primix/tapestry/form/TextField.jwc");
-    builtInAliasLookup.put("Text", "/com/primix/tapestry/form/Text.jwc");
-    builtInAliasLookup.put("Select", "/com/primix/tapestry/form/Select.jwc");
-    builtInAliasLookup.put("Option", "/com/primix/tapestry/form/Option.jwc");
-    builtInAliasLookup.put("Image", "/com/primix/tapestry/html/Image.jwc");
-    builtInAliasLookup.put("Any", "/com/primix/tapestry/components/Any.jwc");
-    builtInAliasLookup.put("RadioGroup", "/com/primix/tapestry/form/RadioGroup.jwc");
-    builtInAliasLookup.put("Radio", "/com/primix/tapestry/form/Radio.jwc");
-    builtInAliasLookup.put("Rollover", "/com/primix/tapestry/html/Rollover.jwc");
-    builtInAliasLookup.put("Body", "/com/primix/tapestry/html/Body.jwc");
-    builtInAliasLookup.put("Direct", "/com/primix/tapestry/link/Direct.jwc");
-    builtInAliasLookup.put("Page", "/com/primix/tapestry/link/Page.jwc");
-    builtInAliasLookup.put("Service", "/com/primix/tapestry/link/Service.jwc");
-    builtInAliasLookup.put("ImageSubmit", "/com/primix/tapestry/form/ImageSubmit.jwc");
-    builtInAliasLookup.put("PropertySelection", "/com/primix/tapestry/form/PropertySelection.jwc");
-    builtInAliasLookup.put("Submit", "/com/primix/tapestry/form/Submit.jwc");
-    builtInAliasLookup.put("Hidden", "/com/primix/tapestry/form/Hidden.jwc");
-    builtInAliasLookup.put("ShowInspector", "/com/primix/tapestry/inspector/ShowInspector.jwc");
-    builtInAliasLookup.put("Shell", "/com/primix/tapestry/html/Shell.jwc");
-    builtInAliasLookup.put("InsertText", "/com/primix/tapestry/html/InsertText.jwc");
-    builtInAliasLookup.put(
-      "ValidatingTextField",
-      "/com/primix/tapestry/valid/ValidatingTextField.jwc");
-    builtInAliasLookup.put("DateField", "/com/primix/tapestry/valid/DateField.jwc");
-    builtInAliasLookup.put("IntegerField", "/com/primix/tapestry/valid/IntegerField.jwc");
-    builtInAliasLookup.put("FieldLabel", "/com/primix/tapestry/valid/FieldLabel.jwc");
-    builtInAliasLookup.put("Script", "/com/primix/tapestry/html/Script.jwc");
-    builtInAliasLookup.put("Block", "/com/primix/tapestry/components/Block.jwc");
-    builtInAliasLookup.put("InsertBlock", "/com/primix/tapestry/components/InsertBlock.jwc");
-    builtInAliasLookup.put("NumericField", "/com/primix/tapestry/valid/NumericField.jwc");
-    builtInAliasLookup.put("ListEdit", "/com/primix/tapestry/form/ListEdit.jwc");
-    builtInAliasLookup.put("StaleLink", "/com/primix/tapestry/pages/StaleLink.jwc");
-    builtInAliasLookup.put("StaleSession", "/com/primix/tapestry/pages/StaleSession.jwc");
-    builtInAliasLookup.put("Exception", "/com/primix/tapestry/pages/Exception.jwc");
-    builtInAliasLookup.put("Inspector", "/com/primix/tapestry/inspector/Inspector.jwc");
+    parser.setFactory(new TapestryPluginSpecFactory());
+
+    String ID_PLUGIN = "com.iw.plugins.spindle";
+    editorIdLookup = new HashMap();
+    editorIdLookup.put("application", ID_PLUGIN + ".editors.app_editor");
+    editorIdLookup.put("library", ID_PLUGIN + ".editors.library_editor");
+    editorIdLookup.put("jwc", ID_PLUGIN + ".editors.jwc_editor");
+    editorIdLookup.put("page", ID_PLUGIN + ".editors.page_editor");
+    editorIdLookup.put("html", ID_PLUGIN + ".editors.html");
+    editorIdLookup.put("htm", ID_PLUGIN + ".editors.html");
+
+  }
+
+  static public void registerParser(String extension, AbstractDocumentParser parser) {
+    parsers.put(extension, parser);
+  }
+
+  public static List getManagedExtensions() {
+
+    return Collections.unmodifiableList(managedExtensions);
+
+  }
+
+  public static void registerManagedExtension(String extension) {
+
+    if (!managedExtensions.contains(extension)) {
+
+      managedExtensions.add(extension);
+
+    }
+
+  }
+
+  static public AbstractDocumentParser getParserFor(String extension) {
+    return (AbstractDocumentParser) parsers.get(extension);
   }
 
   /**
@@ -159,57 +180,124 @@ public class TapestryPlugin extends AbstractUIPlugin {
    * @return the default TapestryPlugin instance
    */
   static public TapestryPlugin getDefault() {
-    return inst;
+
+    return instance;
+
   }
 
-  /** expects a valid IProject in order to find the IJavaProject to search and either an alias name
-   * or a path to a tapestry file like:
-   * <b>
-   * /a/b/c/d/test.jwc
-   * /bob.application
-   */
-  public IStorage[] resolveTapestryComponent(IStorage storage, String name) {
-    if (storage == null || name == null) {
+  public ITapestryProject getTapestryProjectFor(Object element) throws CoreException {
+
+    ITapestryProject result = null;
+
+    IProject project = null;
+
+    if (element instanceof IResource) {
+
+      project = ((IResource) element).getProject();
+
+    } else if (element instanceof IStorage) {
+
+      project = getProjectFor((IStorage) element);
+
+    } else if (element instanceof IJavaProject) {
+
+      project = ((IJavaProject) element).getProject();
+
+    } else if (element instanceof ITapestryModel) {
+
+      project = getProjectFor(((ITapestryModel) element).getUnderlyingStorage());
+
+    }
+
+    if (project != null && project.isOpen() && project.hasNature(NATURE_ID)) {
+
+      result = (ITapestryProject) project.getNature(NATURE_ID);
+    }
+
+    if (result == null) {
+
+      SpindleStatus status = new SpindleStatus();
+      status.setError(project.getFullPath().toString() + " is not open or is not a Tapestry project");
+
+      throw new CoreException(status);
+
+    }
+
+    return result;
+  }
+
+  public ITapestryProject addTapestryProjectNatureTo(IJavaProject jproject, IProgressMonitor monitor) throws CoreException {
+
+    IProject project = jproject.getProject();
+
+    if (project.hasNature(NATURE_ID)) {
+
       return null;
-    }
-    String useName;
-    if (name.endsWith(".jwc")) {
-      useName = name;
-    } else {
-      useName = (String) builtInAliasLookup.get(name);
-    }
-    if (useName == null) {
-      return new IStorage[0];
+
     }
 
-    IJavaProject jproject = getJavaProjectFor(storage);
+    IProjectDescription description = project.getDescription();
+
+    String[] natures = description.getNatureIds();
+
+    String[] newNatures = new String[natures.length + 1];
+
+    System.arraycopy(natures, 0, newNatures, 0, natures.length);
+
+    newNatures[natures.length] = NATURE_ID;
+
+    description.setNatureIds(newNatures);
+
+    project.setDescription(description, monitor);
+
+    return getTapestryProjectFor(jproject);
+
+  }
+
+  public void removeTapestryProjectNature(TapestryProject tproject, IProgressMonitor monitor) {
+
+    IProject project = tproject.getProject();
+
     try {
-      TapestryLookup lookup = new TapestryLookup();
-      lookup.configure(jproject);
-      return lookup.findComponent(useName);
-    } catch (JavaModelException jmex) {
-      jmex.printStackTrace();
-      return new IStorage[0];
-    }
-  }
+      if (project.exists() && project.isOpen() && project.hasNature(NATURE_ID)) {
 
-  public IResource getParentResourceFor(IStorage storage) {
-    if (storage instanceof IResource) {
-      return (IResource) ((IResource) storage).getParent();
-    }
-    if (storage instanceof JarEntryFile) {
-      try {
-        TapestryLookup lookup = new TapestryLookup();
-        lookup.configure(getJavaProjectFor(storage));
-        return lookup.findParentResource(storage);
-      } catch (JavaModelException jmex) {
-        jmex.printStackTrace();
+        IProjectDescription description = project.getDescription();
+
+        ArrayList natures = new ArrayList(Arrays.asList(description.getNatureIds()));
+
+        natures.remove(NATURE_ID);
+
+        description.setNatureIds((String[]) natures.toArray(new String[natures.size()]));
+
+        project.setDescription(description, monitor);
+
       }
+    } catch (CoreException e) {
     }
-    return null;
+
   }
 
-  public IJavaProject getJavaProjectFor(Object obj) {
+  //  public IResource getParentResourceFor(IStorage storage) {
+  //    if (storage instanceof IResource) {
+  //      return (IResource) ((IResource) storage).getParent();
+  //    }
+  //    if (storage instanceof JarEntryFile) {
+  //
+  //      try {
+  //
+  //        TapestryLookup lookup = new TapestryLookup();
+  //        lookup.configure(getJavaProjectFor(storage));
+  //        return lookup.findParentResource(storage);
+  //
+  //      } catch (CoreException jmex) {
+  //
+  //        jmex.printStackTrace();
+  //      }
+  //    }
+  //    return null;
+  //  }
+
+  public IJavaProject getJavaProjectFor(Object obj) throws CoreException {
     IProject project = null;
     if (obj instanceof IProject) {
       project = (IProject) obj;
@@ -219,6 +307,10 @@ public class TapestryPlugin extends AbstractUIPlugin {
       project = getProjectFor((IStorage) obj);
     }
     if (project == null) {
+      return null;
+    }
+
+    if (!project.hasNature(JavaCore.NATURE_ID)) {
       return null;
     }
     return JavaCore.create(project);
@@ -232,15 +324,19 @@ public class TapestryPlugin extends AbstractUIPlugin {
         IWorkspace workspace = getWorkspace();
         IProject[] projects = workspace.getRoot().getProjects();
         for (int i = 0; i < projects.length; i++) {
+          if (!projects[i].isOpen()) {
+            continue;
+          }
           if (lookup == null) {
             lookup = new TapestryLookup();
           }
-          lookup.configure(getJavaProjectFor(projects[i]));
+          IJavaProject jproject = getJavaProjectFor(projects[i]);
+          lookup.configure(jproject);
           if (lookup.projectContainsJarEntry((JarEntryFile) storage)) {
             return projects[i];
           }
         }
-      } catch (JavaModelException jmex) {
+      } catch (CoreException jmex) {
         jmex.printStackTrace();
       }
       return null;
@@ -259,12 +355,9 @@ public class TapestryPlugin extends AbstractUIPlugin {
     return ResourcesPlugin.getWorkspace();
   }
 
-  public static synchronized TapestryModelManager getTapestryModelManager() {
-    if (modelManager == null) {
-      modelManager = new TapestryModelManager();
-      modelManager.buildModelDelegates();
-    }
-    return modelManager;
+  public static synchronized TapestryProjectModelManager getTapestryModelManager(IStorage storage) throws CoreException {
+    ITapestryProject tproject = getDefault().getTapestryProjectFor(storage);
+    return tproject.getModelManager();
   }
 
   public Object[] getAllTapestryElementsFromWorkspace() throws CoreException {
@@ -280,8 +373,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
     return result.toArray();
   }
 
-  protected void searchForTapestryElementsIn(IContainer container, List collect)
-    throws CoreException {
+  protected void searchForTapestryElementsIn(IContainer container, List collect) throws CoreException {
     IResource[] members = container.members(false);
     for (int i = 0; i < members.length; i++) {
       if (members[i] instanceof IFile) {
@@ -297,7 +389,11 @@ public class TapestryPlugin extends AbstractUIPlugin {
   }
 
   public IWorkbenchPage getActivePage() {
-    return getActiveWorkbenchWindow().getActivePage();
+    IWorkbenchWindow window = getActiveWorkbenchWindow();
+    if (window != null) {
+      return window.getActivePage();
+    }
+    return null;
   }
 
   public String getPluginId() {
@@ -305,15 +401,27 @@ public class TapestryPlugin extends AbstractUIPlugin {
   }
 
   public Shell getActiveWorkbenchShell() {
-    return getActiveWorkbenchWindow().getShell();
+    IWorkbenchWindow window = getActiveWorkbenchWindow();
+    if (window != null) {
+      return window.getShell();
+    }
+    return null;
   }
 
   public IWorkbenchWindow getActiveWorkbenchWindow() {
-    return getWorkbench().getActiveWorkbenchWindow();
+    IWorkbench workbench = getWorkbench();
+    if (workbench != null) {
+      return workbench.getActiveWorkbenchWindow();
+    }
+    return null;
   }
 
   static public SpecificationParser getParser() {
     return parser;
+  }
+  
+  public void logStatus(IStatus status) {
+  	getLog().log(status);
   }
 
   public void logException(Throwable e) {
@@ -324,56 +432,48 @@ public class TapestryPlugin extends AbstractUIPlugin {
     if (message == null)
       message = e.toString();
     Status status = new Status(IStatus.ERROR, getPluginId(), IStatus.OK, message, e);
-    ErrorDialog.openError(getActiveWorkbenchShell(), null, null, status);
-    ResourcesPlugin.getPlugin().getLog().log(status);
+    getLog().log(status);
   } /** 
-      * Sets default preference values. These values will be used
-      * until some preferences are actually set using Preference dialog.
-      */
+                      * Sets default preference values. These values will be used
+                      * until some preferences are actually set using Preference dialog.
+                      */
   protected void initializeDefaultPreferences(IPreferenceStore store) {
     ColorManager.initializeDefaults(store);
+    RenamedComponentOrPageRefactor.initializeDefaults(store);
     NewTapComponentWizardPage.initializeDefaults(store);
   }
 
   static public void openTapestryEditor(IStorage storage) {
     String editorId = null;
-    
-    TapestryModelManager mgr = getTapestryModelManager();
-    
-    ITapestryModel model = mgr.getReadOnlyModel(storage);
-    
-    if (model instanceof TapestryApplicationModel) {
-    	
-      editorId = TapestryPlugin.appEditorId;
-      
-    } else if (model instanceof TapestryComponentModel) {
-    	
-      editorId = TapestryPlugin.compEditorId;
-      
-    } else {
-    	
+
+    String extension = storage.getFullPath().getFileExtension();
+
+    editorId = (String) editorIdLookup.get(extension);
+
+    if (editorId == null) {
+
       return;
     }
-    
+
     IEditorInput input = null;
-    
+
     if (storage instanceof JarEntryFile) {
-    	
+
       input = new JarEntryEditorInput(storage);
-      
+
     } else {
-    	
+
       input = new FileEditorInput((IFile) storage);
-      
+
     }
     try {
-    	
+
       TapestryPlugin.getDefault().getActivePage().openEditor(input, editorId);
-      
+
     } catch (PartInitException piex) {
-    	
+
       TapestryPlugin.getDefault().logException(piex);
-      
+
     }
   }
 
@@ -433,6 +533,73 @@ public class TapestryPlugin extends AbstractUIPlugin {
       }
     }
     return null;
+  }
+
+  public static boolean isInSpindleEditor(Object obj) {
+
+    IStorage storage = null;
+
+    if (obj instanceof ITapestryModel) {
+
+      storage = ((ITapestryModel) obj).getUnderlyingStorage();
+
+    } else if (obj instanceof IResource || obj instanceof IStorage) {
+
+      storage = (IStorage) obj;
+
+    }
+
+    if (storage == null) {
+
+      IEditorPart part = Utils.getEditorFor(storage);
+
+      if (part != null) {
+
+        return part instanceof SpindleMultipageEditor;
+
+      }
+
+    }
+
+    return false;
+  }
+
+  //the following is ugly because its ripped off from Howard. added a reminder task to
+  // see if the validation stuff in AbstractSpecificationParser could be made available as static methods.
+
+  protected Pattern compilePattern(String pattern) throws CoreException {
+    if (_patternCompiler == null)
+      _patternCompiler = new Perl5Compiler();
+
+    try {
+      return _patternCompiler.compile(pattern, Perl5Compiler.SINGLELINE_MASK);
+    } catch (MalformedPatternException ex) {
+      throw new CoreException(new SpindleStatus(ex));
+    }
+  }
+
+  public IStatus validate(String value, String pattern, String errorKey) throws CoreException {
+
+    SpindleStatus result = new SpindleStatus();
+    if (_compiledPatterns == null)
+      _compiledPatterns = new HashMap();
+
+    Pattern compiled = (Pattern) _compiledPatterns.get(pattern);
+
+    if (compiled == null) {
+      compiled = compilePattern(pattern);
+
+      _compiledPatterns.put(pattern, compiled);
+    }
+
+    if (_matcher == null)
+      _matcher = new Perl5Matcher();
+
+    if (_matcher.matches(value, compiled))
+      return result;
+
+    result.setError(Tapestry.getString(errorKey, value));
+    return result;
   }
 
 }

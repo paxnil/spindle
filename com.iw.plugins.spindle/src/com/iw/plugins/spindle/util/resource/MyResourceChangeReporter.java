@@ -25,7 +25,12 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.util.resource;
 
-import org.eclipse.core.resources.*;
+import org.eclipse.core.resources.IMarkerDelta;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
 
 public class MyResourceChangeReporter implements IResourceChangeListener {

@@ -25,17 +25,8 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.wizards;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
-
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
@@ -55,16 +46,13 @@ public class NewTapPageWizard extends NewTapComponentWizard {
     if (workspace == null) {
       throw new IllegalArgumentException();
     }
-    fPage1 = new NewTapComponentWizardPage(workspace.getRoot(), "FirstPageWizardPage");
+    fPage1 = new NewTapPageWizardPage(workspace.getRoot(), "FirstPageWizardPage");
     addPage(fPage1);
-    fPage2 = new NewTapComponentWizardClassPage(workspace.getRoot(), "SecondPageWizardPage", fPage1);
+    fPage2 = new NewTapPageWizardClassPage(workspace.getRoot(), "SecondPageWizardPage", fPage1);
     addPage(fPage2);
   }
 
- 
-  /**
-             * @see IWizard#createPageControls(Composite)
-             */
+
   public void createPageControls(Composite pageContainer) {
     super.createPageControls(pageContainer);
     setWindowTitle(MessageUtil.getString("NewTapPageWizard.windowtitle"));

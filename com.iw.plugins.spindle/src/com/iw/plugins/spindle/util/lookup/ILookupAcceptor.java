@@ -26,6 +26,7 @@
 package com.iw.plugins.spindle.util.lookup;
 
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.jdt.core.IJavaProject;
 
 /**
  * @author gwl
@@ -54,8 +55,16 @@ public interface ILookupAcceptor {
    */
   public int WRITEABLE = 0x00000010;
   
-  public int NULL_FLAG = 0x00000000;
+  public int ACCEPT_LIBRARIES = 0x00000020;
+  
+  public int ACCEPT_PAGES = 0x00000040;
+  
+  public int THIS_PROJECT_ONLY = 0x00000080;
+  
+  public int ACCEPT_ANY = 0x00000100;
+  
+  public int ACCEPT_TAPESTRY_PROJECTS_ONLY = 0x00000200;
 
-  public boolean acceptAsTapestry(IStorage s, int acceptFlags);
+  public boolean acceptAsTapestry(IJavaProject jproject, IStorage s, int acceptFlags);
 
 }

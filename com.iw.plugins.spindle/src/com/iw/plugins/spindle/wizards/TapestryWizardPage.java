@@ -25,7 +25,9 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.wizards;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
@@ -34,9 +36,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.DialogFieldStatus;
-import com.iw.plugins.spindle.dialogfields.UpdateStatusContainer;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.UpdateStatusContainer;
+import com.iw.plugins.spindle.util.SpindleStatus;
 
 /**
  * @author GWL
@@ -47,12 +49,12 @@ import com.iw.plugins.spindle.dialogfields.UpdateStatusContainer;
  */
 public abstract class TapestryWizardPage extends WizardPage {
 
-  private IStatus fCurrStatus = new DialogFieldStatus();
+  private IStatus fCurrStatus = new SpindleStatus();
 
   private UpdateStatusContainer statusContainer = new UpdateStatusContainer();
 
   private boolean fPageVisible;
-
+  
   public TapestryWizardPage(String name) {
     super(name);
     fPageVisible = false;
@@ -68,7 +70,7 @@ public abstract class TapestryWizardPage extends WizardPage {
     fPageVisible = visible;
     // policy: wizards are not allowed to come up with an error message
     if (visible && (fCurrStatus != null && fCurrStatus.matches(IStatus.ERROR))) {
-      DialogFieldStatus status = new DialogFieldStatus();
+      SpindleStatus status = new SpindleStatus();
       status.setError(""); //$NON-NLS-1$
       fCurrStatus = status;
     }
@@ -192,4 +194,14 @@ public abstract class TapestryWizardPage extends WizardPage {
   }
 
  
+  public abstract IResource getResource();
+  
+  public abstract IRunnableWithProgress getRunnable(Object object);
+
+  /**
+   * @see org.eclipse.jface.dialogs.IDialogPage#createControl(Composite)
+   */
+  public void createControl(Composite parent) {
+  }
+
 }

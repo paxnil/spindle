@@ -29,8 +29,10 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
+import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -59,28 +61,26 @@ import org.eclipse.swt.widgets.Shell;
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.dialogfields.CheckBoxField;
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
-import com.iw.plugins.spindle.factories.ComponentFactory;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.spec.PluginPageSpecification;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
+import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
+import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.util.Utils;
-import com.iw.plugins.spindle.wizards.fields.ChooseAutoAddApplicationField;
+import com.iw.plugins.spindle.wizards.factories.ComponentFactory;
 import com.iw.plugins.spindle.wizards.fields.ComponentNameField;
 import com.iw.plugins.spindle.wizards.fields.ContainerDialogField;
 import com.iw.plugins.spindle.wizards.fields.PackageDialogField;
+import com.iw.plugins.spindle.wizards.fields.TapestryContainerDialogField;
 
 public class NewTapComponentWizardPage extends TapestryWizardPage {
 
   public static final String P_ADD_TO_APPLICATION = "new.component.default.add.to.application";
-  public static final String P_ENABLE_ADD_TO_APPLICATION =
-    "new.component.default.add.to.application.enabled";
   public static final String P_GENERATE_HTML = "new.component.generate.html";
   public static final String P_HTML_TO_GENERATE = "new.component.html.to.generate";
 
@@ -95,18 +95,16 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
   String AUTO_ADD;
   String GENERATE_HTML;
 
-  private ContainerDialogField fContainerDialogField;
-  private PackageDialogField fPackageDialogField;
-  private ComponentNameField fComponentNameDialog;
-  private CheckBoxField fAutoAddLabel;
-  private ChooseAutoAddApplicationField fAutoAddField;
-  private CheckBoxField fGenerateHTML;
-  private DialogField fNextLabel;
-  private IFile component = null;
+  protected ContainerDialogField fContainerDialogField;
+  protected PackageDialogField fPackageDialogField;
+  protected ComponentNameField fComponentNameDialog;
+  protected TapestryContainerDialogField fAutoAddField;
+  protected CheckBoxField fGenerateHTML;
+  protected DialogField fNextLabel;
+  protected IFile component = null;
 
   public static void initializeDefaults(IPreferenceStore pstore) {
     pstore.setDefault(P_ADD_TO_APPLICATION, "");
-    pstore.setDefault(P_ENABLE_ADD_TO_APPLICATION, false);
     pstore.setDefault(P_GENERATE_HTML, true);
     pstore.setDefault(
       P_HTML_TO_GENERATE,
@@ -144,9 +142,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
     fComponentNameDialog = new ComponentNameField(COMPONENTNAME);
     connect(fComponentNameDialog);
     fComponentNameDialog.addListener(listener);
-    fAutoAddLabel = new CheckBoxField(MessageUtil.getString(AUTO_ADD));
-    fAutoAddLabel.addListener(listener);
-    fAutoAddField = new ChooseAutoAddApplicationField(null, LABEL_WIDTH, new String[0]);
+    fAutoAddField = new TapestryContainerDialogField(AUTO_ADD, LABEL_WIDTH + 40);
     connect(fAutoAddField);
     fAutoAddField.addListener(listener);
     fGenerateHTML = new CheckBoxField(MessageUtil.getString(GENERATE_HTML + ".label"));
@@ -178,7 +174,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
     }
     fComponentNameDialog.init(fPackageDialogField);
     fAutoAddField.init(
-      jelem,
+      fContainerDialogField,
       fComponentNameDialog,
       getWizard().getClass() == NewTapComponentWizard.class);
   }
@@ -204,7 +200,6 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
     Control nameFieldControl = fComponentNameDialog.getControl(composite);
     Control containerFieldControl = fContainerDialogField.getControl(composite);
     Control packageFieldControl = fPackageDialogField.getControl(composite);
-    Control autoAddLabelControl = fAutoAddLabel.getControl(composite);
     Control autoAddControl = fAutoAddField.getControl(composite);
     Control genHTML = fGenerateHTML.getControl(composite);
     Control labelControl = fNextLabel.getControl(composite);
@@ -217,8 +212,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
 
     separator = createSeparator(composite, packageFieldControl);
 
-    addControl(autoAddLabelControl, separator, 4);
-    addControl(autoAddControl, autoAddLabelControl, 4);
+    addControl(autoAddControl, separator, 4);
 
     separator = createSeparator(composite, autoAddControl);
 
@@ -230,9 +224,6 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
     setFocus();
 
     IPreferenceStore pstore = TapestryPlugin.getDefault().getPreferenceStore();
-    boolean autoAdd = pstore.getBoolean(P_ENABLE_ADD_TO_APPLICATION);
-    fAutoAddLabel.setCheckBoxValue(autoAdd);
-    fAutoAddField.setEnabled(autoAdd);
     fAutoAddField.updateStatus();
     fGenerateHTML.setCheckBoxValue(pstore.getBoolean(P_GENERATE_HTML));
     updateStatus();
@@ -242,8 +233,8 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
   /**
    * @see NewElementWizardPage#getRunnable()
    */
-  public IRunnableWithProgress getRunnable(IType specClass) {
-    final IType useClass = specClass;
+  public IRunnableWithProgress getRunnable(Object specClass) {
+    final IType useClass = (IType) specClass;
     return new IRunnableWithProgress() {
       public void run(IProgressMonitor monitor)
         throws InvocationTargetException, InterruptedException {
@@ -268,18 +259,25 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
   * @return IRunnableWithProgress
   */
   public IRunnableWithProgress getAutoAddRunnable() {
+    final boolean addingNewComponent = getWizard().getClass() == NewTapComponentWizard.class;
+
+    String extension = "page";
+    if (addingNewComponent) {
+
+      extension = "jwc";
+
+    }
     IPackageFragment frag = fPackageDialogField.getPackageFragment();
     String componentName = fComponentNameDialog.getTextValue();
     String componentTapestryPath = null;
     if (frag.isDefaultPackage()) {
-      componentTapestryPath = "/" + componentName + ".jwc";
+      componentTapestryPath = "/" + componentName + "." + extension;
     } else {
       componentTapestryPath =
-        ("/" + frag.getElementName() + "/").replace('.', '/') + componentName + ".jwc";
+        ("/" + frag.getElementName() + "/").replace('.', '/') + componentName + "." + extension;
     }
-    final boolean addingNewComponent = getWizard().getClass() == NewTapComponentWizard.class;
-    final boolean doAutoAdd = fAutoAddLabel.getCheckBoxValue();
-    final TapestryApplicationModel useSelectedModel = fAutoAddField.getSelectedModel();
+    final boolean doAutoAdd = true;
+    final TapestryLibraryModel useSelectedModel = fAutoAddField.getContainerModel();
     final String useTapestryPath = componentTapestryPath;
     final String useComponentName = componentName;
     final Shell shell = this.getShell();
@@ -292,12 +290,12 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
         if (doAutoAdd && useSelectedModel != null) {
           SpindleMultipageEditor targetEditor =
             (SpindleMultipageEditor) Utils.getEditorFor(useSelectedModel.getUnderlyingStorage());
-			
+
           if (targetEditor != null) {
             try {
               doAddInEditor(targetEditor, monitor);
             } catch (InterruptedException e) {
-            	//do nothing
+              //do nothing
             }
           } else {
             doAddInWorkspace(monitor);
@@ -307,8 +305,9 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
 
       }
 
-      private void doAddInEditor(SpindleMultipageEditor targetEditor, IProgressMonitor monitor) throws InterruptedException  {
-        TapestryApplicationModel useModel = (TapestryApplicationModel) targetEditor.getModel();
+      private void doAddInEditor(SpindleMultipageEditor targetEditor, IProgressMonitor monitor)
+        throws InterruptedException {
+        TapestryLibraryModel useModel = (TapestryLibraryModel) targetEditor.getModel();
         if (!checkSaveEditor(targetEditor)) {
           MessageDialog
             .openInformation(shell, MessageUtil.getString(PAGE_NAME + ".autoAddNotPossible"),
@@ -322,7 +321,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
           );
           return;
         }
-        PluginApplicationSpecification spec = useModel.getApplicationSpec();
+        ILibrarySpecification spec = (ILibrarySpecification) useModel.getSpecification();
 
         if (componentAlreadyExists(spec)) {
           return;
@@ -333,32 +332,41 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
         targetEditor.showPage(SpindleMultipageEditor.SOURCE_PAGE);
       }
 
-      private void doAddInWorkspace(IProgressMonitor monitor) {
+      private void doAddInWorkspace(IProgressMonitor monitor) throws InterruptedException {
         String consumer = "WizardAutoAddToAppInWorkspace";
-        TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
-        mgr.connect(useSelectedModel.getUnderlyingStorage(), consumer, true);
-        TapestryApplicationModel useModel =
-          (TapestryApplicationModel) mgr.getEditableModel(
-            useSelectedModel.getUnderlyingStorage(),
-            consumer);
 
-        PluginApplicationSpecification spec = useModel.getApplicationSpec();
+        try {
+          ITapestryProject tproject =
+            TapestryPlugin.getDefault().getTapestryProjectFor(useSelectedModel);
 
-        if (componentAlreadyExists(spec)) {
-          return;
+          TapestryProjectModelManager mgr = tproject.getModelManager();
+          mgr.connect(useSelectedModel.getUnderlyingStorage(), consumer, true);
+          TapestryLibraryModel useModel =
+            (TapestryLibraryModel) mgr.getEditableModel(
+              useSelectedModel.getUnderlyingStorage(),
+              consumer);
+
+          IPluginLibrarySpecification spec = (IPluginLibrarySpecification) useModel.getSpecification();
+
+          if (componentAlreadyExists(spec)) {
+            return;
+          }
+          performAddToModel(spec);
+          Utils.saveModel(useModel, monitor);
+          //TapestryPlugin.openTapestryEditor(useModel.getUnderlyingStorage());
+          mgr.disconnect(useModel.getUnderlyingStorage(), consumer);
+        } catch (CoreException e) {
+
+          throw new InterruptedException("AutoAdd failed");
         }
-        performAddToModel(spec);
-        Utils.saveModel(useSelectedModel, monitor);
-        TapestryPlugin.openTapestryEditor(useSelectedModel.getUnderlyingStorage());
-        mgr.disconnect(useSelectedModel.getUnderlyingResource(), consumer);
       }
 
-      private boolean componentAlreadyExists(PluginApplicationSpecification spec) {
+      private boolean componentAlreadyExists(ILibrarySpecification spec) {
         boolean result = false;
         if (addingNewComponent) {
-          result = spec.getComponentAlias(useComponentName) != null;
+          result = spec.getComponentSpecificationPath(useComponentName) != null;
         } else {
-          result = spec.getPageSpecification(useComponentName) != null;
+          result = spec.getPageSpecificationPath(useComponentName) != null;
         }
         if (result) {
           MessageDialog
@@ -380,11 +388,11 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
         return result;
       }
 
-      private void performAddToModel(PluginApplicationSpecification spec) {
+      private void performAddToModel(ILibrarySpecification spec) {
         if (addingNewComponent) {
-          spec.setComponentAlias(useComponentName, useTapestryPath);
+          spec.setComponentSpecificationPath(useComponentName, useTapestryPath);
         } else {
-          spec.setPageSpecification(useComponentName, new PluginPageSpecification(useTapestryPath));
+          spec.setPageSpecificationPath(useComponentName, useTapestryPath);
         }
       }
 
@@ -409,17 +417,13 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
   };
 
   public boolean performFinish() {
-    IPreferenceStore pstore = TapestryPlugin.getDefault().getPreferenceStore();
-    boolean autoAdd = fAutoAddLabel.getCheckBoxValue();
-    pstore.setValue(P_ENABLE_ADD_TO_APPLICATION, autoAdd);
-    pstore.setValue(P_GENERATE_HTML, fGenerateHTML.getCheckBoxValue());
+    boolean autoAdd = true;
     if (autoAdd) {
-      TapestryApplicationModel model = fAutoAddField.getSelectedModel();
+      TapestryLibraryModel model = fAutoAddField.getContainerModel();
       IPackageFragment spackage = fAutoAddField.getSelectedPackage();
-      if (model != null) {
+      if (model != null && spackage != null) {
         String packageName = "." + spackage.getElementName() + ".";
         packageName = packageName.replace('.', '/');
-        pstore.setValue(P_ADD_TO_APPLICATION, packageName + model.getUnderlyingStorage().getName());
       }
     }
     return true;
@@ -474,7 +478,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
 
   }
 
-  public IFile getComponent() {
+  public IResource getResource() {
     return component;
   }
 
@@ -483,11 +487,10 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
   }
 
   private void checkEnabled(IStatus status) {
-    boolean flag = status.isOK();
+    boolean flag = status.getSeverity() != status.ERROR;
     fContainerDialogField.setEnabled(flag);
     fPackageDialogField.setEnabled(flag);
-    boolean autoAdd = fAutoAddLabel.getCheckBoxValue();
-    fAutoAddField.setEnabled(autoAdd);
+    fAutoAddField.setEnabled(flag);
 
   }
 
@@ -500,8 +503,6 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
 
     public void dialogFieldChanged(DialogField field) {
       updateStatus();
-      if (field == fAutoAddLabel) {
-      }
     }
     /**
      * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
@@ -525,7 +526,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
    * @see IWizardPage#canFlipToNextPage()
    */
   public boolean canFlipToNextPage() {
-    return getCurrentStatus().isOK();
+    return getCurrentStatus().getSeverity() != IStatus.ERROR;
 
   }
 

@@ -25,16 +25,28 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui;
 
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.HelpEvent;
+import org.eclipse.swt.events.HelpListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.Widget;
 
 public class ToolTipHandler {
 
@@ -91,8 +103,7 @@ public class ToolTipHandler {
   }
   protected Object getToolTipHelp(Object object) {
     if (object instanceof Control) {
-      IToolTipHelpProvider handler =
-        (IToolTipHelpProvider) ((Control) object).getData("TIP_HELPTEXTHANDLER");
+      IToolTipHelpProvider handler = (IToolTipHelpProvider) ((Control) object).getData("TIP_HELPTEXTHANDLER");
       return handler.getHelp(object);
     }
     return null;
@@ -109,8 +120,16 @@ public class ToolTipHandler {
      */
     control.addMouseListener(new MouseAdapter() {
       public void mouseDown(MouseEvent e) {
-        if (tipShell.isVisible())
+        if (!tipShell.isDisposed() && tipShell.isVisible())
           tipShell.setVisible(false);
+      }
+    });
+
+    control.addDisposeListener(new DisposeListener() {
+      public void widgetDisposed(DisposeEvent e) {
+        if (!tipShell.isDisposed() && tipShell.isVisible())
+          tipShell.setVisible(false);
+
       }
     });
 
@@ -119,11 +138,11 @@ public class ToolTipHandler {
      */
     control.addMouseTrackListener(new MouseTrackAdapter() {
       public void mouseExit(MouseEvent e) {
-        if (tipShell.isVisible())
+        if (!tipShell.isDisposed() && tipShell.isVisible())
           tipShell.setVisible(false);
         tipWidget = null;
       }
-      public void mouseHover(MouseEvent event) {        
+      public void mouseHover(MouseEvent event) {
         widgetPosition = new Point(event.x, event.y);
         Widget widget = event.widget;
         if (widget instanceof ToolBar) {
@@ -150,7 +169,7 @@ public class ToolTipHandler {
         String text = getToolTipText(widget);
         Image image = getToolTipImage(widget);
         if (text == null) {
-        	return;
+          return;
         }
         Control control = (Control) event.getSource();
         control.setFocus();
@@ -172,8 +191,8 @@ public class ToolTipHandler {
         Object help = getToolTipHelp(tipWidget);
         if (help == null)
           return;
-        if (help.getClass() != String.class &&  !(help instanceof HelpViewer)) {
-        	return;
+        if (help.getClass() != String.class && !(help instanceof HelpViewer)) {
+          return;
         }
 
         if (tipShell.isVisible()) {
@@ -182,11 +201,11 @@ public class ToolTipHandler {
           helpShell.setLayout(new FillLayout());
           if (help instanceof String) {
             Label label = new Label(helpShell, SWT.NONE);
-            label.setText((String)help);
+            label.setText((String) help);
           } else {
-          	HelpViewer view = (HelpViewer)help;
-          	view.createClient(helpShell);
-          	helpShell.setText(view.getViewerTitle());
+            HelpViewer view = (HelpViewer) help;
+            view.createClient(helpShell);
+            helpShell.setText(view.getViewerTitle());
           }
           helpShell.pack();
           setHoverLocation(helpShell, tipPosition);

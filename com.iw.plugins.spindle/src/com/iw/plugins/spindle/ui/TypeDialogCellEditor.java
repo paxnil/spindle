@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.swt.widgets.Composite;
@@ -41,24 +40,28 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.util.Utils;
+import com.iw.plugins.spindle.util.HierarchyScope;
 
-public class TypeDialogCellEditor extends EditableDialogCellEditor {
+public class TypeDialogCellEditor extends DialogCellEditor {
 
   private Label label;
   private IPackageFragmentRoot root;
   private String hierarchyRoot;
+  private int searchFlags;
 
   /**
    * Constructor for TypeDialogCellEditor
+   * 
+   * searchFlags come from IJavaElementSearchConstants
    */
-  protected TypeDialogCellEditor(Composite parent, IPackageFragmentRoot root) {
+  public TypeDialogCellEditor(Composite parent, IPackageFragmentRoot root, int searchFlags) {
     super(parent);
     this.root = root;
+    this.searchFlags = searchFlags;
   }
 
-  protected TypeDialogCellEditor(Composite parent, IPackageFragmentRoot root, String hierarchyRoot) {
-    this(parent, root);
+  public TypeDialogCellEditor(Composite parent, IPackageFragmentRoot root, int searchFlags, String hierarchyRoot) {
+    this(parent, root, searchFlags);
     this.hierarchyRoot = hierarchyRoot;
   }
 
@@ -68,10 +71,10 @@ public class TypeDialogCellEditor extends EditableDialogCellEditor {
     IType hrootElement = null;
     try {
       if (hierarchyRoot != null) {
-        hrootElement = Utils.findType(jproject, hierarchyRoot);
+        hrootElement = jproject.findType(hierarchyRoot);
       }
       if (hrootElement != null) {
-        result = SearchEngine.createHierarchyScope(hrootElement);
+        result = new HierarchyScope(hrootElement, jproject);
       }
     } catch (JavaModelException jmex) {
       //ignore
@@ -95,7 +98,7 @@ public class TypeDialogCellEditor extends EditableDialogCellEditor {
           cellEditorWindow.getShell(),
           new ProgressMonitorDialog(cellEditorWindow.getShell()),
           createSearchScope(),
-          IJavaElementSearchConstants.CONSIDER_CLASSES,
+          searchFlags,
           false);
       dialog.setTitle("Type");
       dialog.setMessage(

@@ -29,16 +29,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
-public class DocumentationCellEditor extends EditableDialogCellEditor {
+public class DocumentationCellEditor extends DialogCellEditor {
 
   private Label label;
   private String title;
   private String message;
 
-  /**
-   * Constructor for TypeDialogCellEditor
-   */
-  protected DocumentationCellEditor(Composite parent, String dialogTitle, String dialogMessage) {
+ 
+  public DocumentationCellEditor(Composite parent, String dialogTitle, String dialogMessage) {
     super(parent);
     this.title = dialogTitle == null ? "Documentation" : dialogTitle;
     this.message = dialogMessage == null ? "Add some documentation" : dialogMessage;

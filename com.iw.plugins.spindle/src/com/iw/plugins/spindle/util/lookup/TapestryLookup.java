@@ -26,13 +26,16 @@
 package com.iw.plugins.spindle.util.lookup;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Set;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -42,13 +45,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
 import com.iw.plugins.spindle.util.JarEntryFileFaker;
 
 // does not stay up to date as time goes on!
 
 public class TapestryLookup implements ILookupAcceptor {
-
 
   protected IPackageFragmentRoot[] fPackageFragmentRoots = null;
 
@@ -59,34 +60,35 @@ public class TapestryLookup implements ILookupAcceptor {
   protected IWorkspace workspace;
 
   private boolean initialized = false;
-  
+
   protected ILookupAcceptor acceptor;
 
-  private Set seekExtensions;
+  private Collection seekExtensions;
 
   public TapestryLookup() {
-  	
-  	acceptor = new DefaultAcceptor();
+
+    acceptor = new DefaultAcceptor();
 
   }
-  
+
   public void configure(IJavaProject project, ILookupAcceptor acceptor) throws JavaModelException {
-  	if (acceptor == null) {
-  		throw new IllegalArgumentException("null acceptor");
-  	}
-  	this.acceptor = acceptor;
-  	configure(project);
+    if (acceptor == null) {
+      throw new IllegalArgumentException("null acceptor");
+    }
+    this.acceptor = acceptor;
+    configure(project);
   }
 
   public void configure(IJavaProject project) throws JavaModelException {
     this.project = project;
     workspace = project.getJavaModel().getWorkspace();
-    fPackageFragmentRoots = project.getPackageFragmentRoots();
+    fPackageFragmentRoots = project.getAllPackageFragmentRoots();
     fPackageFragments = new HashMap();
     IPackageFragment[] frags = getPackageFragmentsInRoots(fPackageFragmentRoots, project);
     for (int i = 0; i < frags.length; i++) {
       IPackageFragment fragment = frags[i];
-      IPackageFragment[] entry = (IPackageFragment[]) fPackageFragments.get(fragment.getElementName());
+      IPackageFragment[] entry =
+        (IPackageFragment[]) fPackageFragments.get(fragment.getElementName());
       if (entry == null) {
         entry = new IPackageFragment[1];
         entry[0] = fragment;
@@ -101,7 +103,9 @@ public class TapestryLookup implements ILookupAcceptor {
     initialized = true;
   }
 
-  private IPackageFragment[] getPackageFragmentsInRoots(IPackageFragmentRoot[] roots, IJavaProject project) {
+  private IPackageFragment[] getPackageFragmentsInRoots(
+    IPackageFragmentRoot[] roots,
+    IJavaProject project) {
 
     ArrayList frags = new ArrayList();
     for (int i = 0; i < roots.length; i++) {
@@ -131,32 +135,51 @@ public class TapestryLookup implements ILookupAcceptor {
   }
 
   public IStorage[] findComponent(String tapestryPath) {
+
+    return findComponent(tapestryPath, ACCEPT_COMPONENTS);
+
+  }
+
+  public IStorage[] findByTapestryPath(String tapestryPath, int acceptFlags) {
     if (!initialized) {
       throw new Error("not initialized");
     }
+    acceptFlags |= FULL_TAPESTRY_PATH;
     StorageOnlyRequest request = new StorageOnlyRequest();
-    findAll(tapestryPath, false, ACCEPT_COMPONENTS | FULL_TAPESTRY_PATH, request);
+    findAll(tapestryPath, false, acceptFlags, request);
     return request.getResults();
+
+  }
+
+  public IStorage[] findComponent(String tapestryPath, int acceptFlags) {
+    acceptFlags |= ACCEPT_COMPONENTS;
+    return findByTapestryPath(tapestryPath, acceptFlags);
+  }
+
+  public IStorage findDefaultLibrary() {
+    return findByTapestryPath(
+      "/net/sf/tapestry/Framework.library",
+      ACCEPT_LIBRARIES | FULL_TAPESTRY_PATH)[0];
+  }
+
+  public IStorage[] findPage(String tapestryPath) {
+    return findByTapestryPath(tapestryPath, ACCEPT_PAGES);
   }
 
   public IStorage[] findApplication(String tapestryPath) {
-    if (!initialized) {
-      throw new Error("not initialized");
-    }
-    StorageOnlyRequest request = new StorageOnlyRequest();
-    findAll(tapestryPath, false, ACCEPT_APPLICATIONS | FULL_TAPESTRY_PATH, request);
-    return request.getResults();
+    return findByTapestryPath(tapestryPath, ACCEPT_APPLICATIONS);
   }
-  
+
+  public IStorage[] findLibrary(String tapestryPath) {
+    return findByTapestryPath(tapestryPath, ACCEPT_LIBRARIES);
+  }
+
   public IStorage[] findHtmlFor(String tapestryPath) {
-    if (!tapestryPath.endsWith(".jwc")) {
-      return new IStorage[0];
-    }
+
     String usePath = tapestryPath.substring(0, tapestryPath.lastIndexOf("."));
     usePath += ".html";
-    StorageOnlyRequest request = new StorageOnlyRequest();
-    findAll(usePath, false, ACCEPT_HTML | FULL_TAPESTRY_PATH, request);
-    return request.getResults();
+
+    return findByTapestryPath(usePath, ACCEPT_HTML);
   }
 
   public IResource findParentResource(IStorage storage) throws JavaModelException {
@@ -169,13 +192,41 @@ public class TapestryLookup implements ILookupAcceptor {
     }
     return (IResource) fragment.getParent().getUnderlyingResource();
   }
+  
+  public IPackageFragment findPackageFragment(String tapestryPath) {
+  	
+  	IStorage [] found = findByTapestryPath(tapestryPath, ACCEPT_ANY);
+  	
+  	if (found != null && found.length != 0) {
+  		
+      try {
+      	
+        return findPackageFragment(found[0]);
+        
+      } catch (JavaModelException e) {
+      }
+  		
+  	}
+  	
+  	return null;
+  	
+  }
 
   public IPackageFragment findPackageFragment(IStorage storage) throws JavaModelException {
     if (storage instanceof JarEntryFileFaker) {
       storage = (IStorage) storage.getAdapter(IStorage.class);
     }
     if (storage instanceof IResource) {
-      return project.findPackageFragment(((IResource) storage).getParent().getFullPath());
+
+      IPackageFragment result =
+        (IPackageFragment) project.findPackageFragment(
+          ((IResource) storage).getParent().getFullPath());
+
+      if (result != null) {
+
+        return result;
+
+      }
     }
     for (int i = 0; i < fPackageFragmentRoots.length; i++) {
       boolean isBinary = fPackageFragmentRoots[i].getKind() == IPackageFragmentRoot.K_BINARY;
@@ -187,14 +238,22 @@ public class TapestryLookup implements ILookupAcceptor {
         }
         for (int j = 0; j < children.length; j++) {
           IPackageFragment fragment = (IPackageFragment) children[j];
+
           Object[] nonJavaResources = fragment.getNonJavaResources();
+
+          if (nonJavaResources.length == 0) {
+
+            nonJavaResources = getSourcePackageResources(fragment);
+
+          }
+
           for (int k = 0; k < nonJavaResources.length; k++) {
             if (nonJavaResources[k].equals(storage)) {
               return fragment;
             }
           }
         }
-      } catch (JavaModelException ex) {
+      } catch (CoreException ex) {
         //do nothing
       }
     }
@@ -237,29 +296,60 @@ public class TapestryLookup implements ILookupAcceptor {
     }
     return false;
   }
-  
-  public void findAllManaged(String prefix, boolean partialMatch, ITapestryLookupRequestor requestor) {
-    seekExtensions = TapestryPlugin.getTapestryModelManager().getManagedExtensions();
+
+  public void findAllManaged(String prefix, boolean partialMatch, ILookupRequestor requestor) {
+
+    findAllManaged(prefix, partialMatch, requestor, ACCEPT_ANY);
+
+  }
+
+  public void findAllManaged(
+    String prefix,
+    boolean partialMatch,
+    ILookupRequestor requestor,
+    int acceptFlags) {
+
+    seekExtensions = TapestryPlugin.getManagedExtensions();
+
     if (!initialized) {
+
       throw new Error("not initialized");
+
     }
     int count = fPackageFragmentRoots.length;
+
     for (int i = 0; i < count; i++) {
-      if (requestor.isCancelled())
+
+      if (requestor.isCancelled()) {
+
         return;
+
+      }
       IPackageFragmentRoot root = fPackageFragmentRoots[i];
       IJavaElement[] packages = null;
+
       try {
+
         packages = root.getChildren();
+
       } catch (JavaModelException npe) {
+
         continue; // the root is not present, continue;
+
       }
       if (packages != null) {
+
         for (int j = 0, packageCount = packages.length; j < packageCount; j++) {
-          if (requestor.isCancelled())
+
+          if (requestor.isCancelled()) {
+
             return;
-          if (seek(prefix, (IPackageFragment) packages[j], partialMatch, NULL_FLAG, requestor)) {
+
+          }
+          if (seek(prefix, (IPackageFragment) packages[j], partialMatch, acceptFlags, requestor)) {
+
             return;
+
           }
         }
       }
@@ -267,8 +357,11 @@ public class TapestryLookup implements ILookupAcceptor {
     seekExtensions = null;
   }
 
-
-  public void findAll(String prefix, boolean partialMatch, int acceptFlags, ITapestryLookupRequestor requestor) {
+  public void findAll(
+    String prefix,
+    boolean partialMatch,
+    int acceptFlags,
+    ILookupRequestor requestor) {
 
     if (!initialized) {
       throw new Error("not initialized");
@@ -297,12 +390,18 @@ public class TapestryLookup implements ILookupAcceptor {
 
   }
 
+  public int findCount(String prefix, boolean partialMatch, int acceptFlags) {
+    StorageOnlyRequest request = new StorageOnlyRequest();
+    findAll(prefix, partialMatch, acceptFlags, request);
+    return request.getResults().length;
+  }
+
   public boolean seek(
     String name,
     IPackageFragment pkg,
     boolean partialMatch,
     int acceptFlags,
-    ITapestryLookupRequestor requestor) {
+    ILookupRequestor requestor) {
 
     if (!initialized) {
       throw new Error("not initialized");
@@ -342,7 +441,7 @@ public class TapestryLookup implements ILookupAcceptor {
     IPackageFragment pkg,
     boolean partialMatch,
     int acceptFlags,
-    ITapestryLookupRequestor requestor) {
+    ILookupRequestor requestor) {
 
     Object[] jarFiles = null;
     try {
@@ -355,15 +454,15 @@ public class TapestryLookup implements ILookupAcceptor {
       if (requestor.isCancelled()) {
         return true;
       }
-      
+
       JarEntryFile jarFile = null;
       try {
-      	jarFile = (JarEntryFile) jarFiles[i];
+        jarFile = (JarEntryFile) jarFiles[i];
       } catch (ClassCastException ccex) {
-      	//skip it
-      	continue;
+        //skip it
+        continue;
       }
-      if (acceptAsTapestry(jarFile, acceptFlags)) {
+      if (acceptAsTapestry(project, jarFile, acceptFlags)) {
         if ((acceptFlags & FULL_TAPESTRY_PATH) != 0) {
           if (nameMatchesFull(name, pkg, jarFile.getFullPath())) {
             requestor.accept((IStorage) jarFile, pkg);
@@ -383,13 +482,21 @@ public class TapestryLookup implements ILookupAcceptor {
     IPackageFragment pkg,
     boolean partialMatch,
     int acceptFlags,
-    ITapestryLookupRequestor requestor) {
+    ILookupRequestor requestor) {
 
     Object[] files = null;
     try {
-      files = pkg.getNonJavaResources();
-    } catch (JavaModelException npe) {
+
+      files = getSourcePackageResources(pkg);
+
+    } catch (CoreException npe) {
       return false; // the package is not present
+    }
+
+    if (files == null) {
+
+      return false;
+
     }
     int length = files.length;
 
@@ -404,8 +511,8 @@ public class TapestryLookup implements ILookupAcceptor {
         // skip it
         continue;
       }
-      boolean acceptedAsTapestry = acceptAsTapestry(file, acceptFlags);
-      if (acceptAsTapestry(file, acceptFlags)) {
+      boolean acceptedAsTapestry = acceptAsTapestry(project, file, acceptFlags);
+      if (acceptAsTapestry(project, file, acceptFlags)) {
         if ((acceptFlags & FULL_TAPESTRY_PATH) != 0) {
           if (nameMatchesFull(name, pkg, file.getFullPath())) {
             requestor.accept((IStorage) file, pkg);
@@ -418,6 +525,46 @@ public class TapestryLookup implements ILookupAcceptor {
       }
     }
     return false;
+  }
+
+  /**
+   * Method getPackageResources.
+   * @param pkg
+   * @return Object[]
+   */
+  private Object[] getSourcePackageResources(IPackageFragment pkg) throws CoreException {
+
+    Object[] result = new Object[0];
+
+    if (!pkg.isDefaultPackage()) {
+
+      result = pkg.getNonJavaResources();
+
+    } else {
+
+      IContainer container = (IContainer) pkg.getUnderlyingResource();
+
+      if (container != null) {
+
+        IResource[] members = container.members(false);
+
+        ArrayList resultList = new ArrayList();
+
+        for (int i = 0; i < members.length; i++) {
+
+          if (members[i] instanceof IFile) {
+
+            resultList.add(members[i]);
+
+          }
+
+          result = resultList.toArray();
+
+        }
+      }
+
+    }
+    return result;
   }
 
   protected boolean nameMatches(String candidate, String existing, boolean partialMatch) {
@@ -441,16 +588,34 @@ public class TapestryLookup implements ILookupAcceptor {
     return LHS.equals(RHS);
   }
 
-  public boolean acceptAsTapestry(IStorage s, int acceptFlags) {
-  	if (seekExtensions != null) {
-  		String extension = s.getFullPath().getFileExtension();
-  		boolean result = seekExtensions.contains(extension);
-  		return result;
-  	}
-    return acceptor.acceptAsTapestry(s, acceptFlags);
+  public boolean acceptAsTapestry(IJavaProject jproject, IStorage s, int acceptFlags) {
+    if (seekExtensions != null) {
+      String extension = s.getFullPath().getFileExtension();
+      boolean result = seekExtensions.contains(extension);
+
+      if (result && (acceptFlags & ACCEPT_TAPESTRY_PROJECTS_ONLY) != 0 && s instanceof IResource) {
+
+        try {
+
+          IProject thisProject = jproject.getProject();
+          IProject resourceProject = ((IResource) s).getProject();
+
+          if (!thisProject.equals(resourceProject)
+            || !resourceProject.hasNature(TapestryPlugin.NATURE_ID)) {
+
+            return false;
+          }
+        } catch (CoreException e) {
+
+          return false;
+        }
+      }
+      return result;
+    }
+    return acceptor.acceptAsTapestry(jproject, s, acceptFlags);
   }
 
-  protected class StorageOnlyRequest implements ITapestryLookupRequestor {
+  public static class StorageOnlyRequest implements ILookupRequestor {
 
     ArrayList result;
 
@@ -480,6 +645,13 @@ public class TapestryLookup implements ILookupAcceptor {
       }
     }
   }
-  
-  
+
+  /**
+   * Method createRequest.
+   * @return StorageOnlyRequest
+   */
+  public static StorageOnlyRequest createRequest() {
+    return new StorageOnlyRequest();
+  }
+
 }

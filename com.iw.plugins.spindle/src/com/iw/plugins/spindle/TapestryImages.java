@@ -56,6 +56,11 @@ public class TapestryImages {
     }
     return result;
   }
+  
+  public static ImageDescriptor getImageDescriptor(String name) {
+  	return createImageDescriptor(getImageURL(name));
+  }
+  		
 
   static private ImageRegistry getImageRegistry() {
     if (Registry == null) {

@@ -26,14 +26,8 @@
 package com.iw.plugins.spindle.wizards;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 
 import com.iw.plugins.spindle.MessageUtil;
@@ -68,9 +62,9 @@ public class NewTapComponentWizard extends NewTapestryElementWizard {
    */
   public boolean performFinish() {
     if (finishPage(fPage1.getAutoAddRunnable())) {
-      if (finishPage(fPage2.getRunnable())) {
+      if (finishPage(fPage2.getRunnable(null))) {
         if (finishPage(fPage1.getRunnable(fPage2.getFinalSpecClass()))) {
-          IFile file = fPage1.getComponent();
+          IFile file = (IFile)fPage1.getResource();
           try {
             selectAndReveal(file);
             openResource(file);

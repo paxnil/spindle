@@ -45,7 +45,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -63,10 +62,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.IDialogFieldChangedListener;
-import com.iw.plugins.spindle.dialogfields.StringButtonField;
-import com.iw.plugins.spindle.util.Utils;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
+import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 
 public class PublicStaticFieldSelectionDialog extends AbstractDialog {
 
@@ -204,7 +202,7 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
       IType type = null;
 
       try {
-        type = Utils.findType(jproject, qualifiedClass);
+        type = jproject.findType(qualifiedClass);
       } catch (JavaModelException e) {
         TapestryPlugin.getDefault().logException(e);
       }

@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.ui;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,16 +46,23 @@ import com.iw.plugins.spindle.TapestryPlugin;
 
 public class RequiredSaveEditorAction {
 
-  IEditorPart editor;
+  IEditorPart [] unsavedEditors;
   public RequiredSaveEditorAction(IEditorPart editor) {
-    this.editor = editor;
+    this(new IEditorPart[] {editor});
+  }
+  
+  public RequiredSaveEditorAction(Collection editorParts) {
+  	this((IEditorPart [])editorParts.toArray(new IEditorPart[editorParts.size()]));
+  }
+  
+  public RequiredSaveEditorAction(IEditorPart [] editors) {
+  	unsavedEditors = editors;
   }
 
   public boolean save() {
     Shell parent = getShell();
     String message = "Warning, listed files need to be saved before continuing";
-    String title = "not saving here will abort the current operation";
-    Object[] unsavedEditors = new Object[] { editor };
+    String title = "not saving all here will abort the current operation";  
     ListSelectionDialog dialog =
       new ListSelectionDialog(
         parent,
@@ -65,7 +73,7 @@ public class RequiredSaveEditorAction {
     dialog.setTitle(title);
     dialog.setBlockOnOpen(true);
     dialog.setInitialSelections(unsavedEditors);
-    if (dialog.open() == ListSelectionDialog.CANCEL || dialog.getResult().length == 0) {
+    if (dialog.open() == ListSelectionDialog.CANCEL || dialog.getResult().length != unsavedEditors.length) {
       return false;
     }
 
