@@ -125,13 +125,6 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
     {
         super();
         plugin = this;
-        try
-        {
-        }
-        catch (MissingResourceException x)
-        {
-            SpindleCoreStrings = null;
-        }
     }
 
     /*
@@ -712,7 +705,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         if (jproject == null)
             return null;
 
-        return jproject.getProject();
+        return jproject.getProject(); 
     }
 
     public ProjectExternalMetadataLocator getExternalMetadataLocator()
