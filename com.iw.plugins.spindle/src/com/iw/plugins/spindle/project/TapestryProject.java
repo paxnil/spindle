@@ -29,6 +29,8 @@ package com.iw.plugins.spindle.project;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Properties;
 
 import org.eclipse.core.internal.events.ResourceDelta;
@@ -54,6 +56,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.refactor.DeletedComponentOrPageRefactor;
 import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
@@ -76,7 +79,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
   private TapestryProjectModelManager modelManager;
 
-  private ProjectResourceChangeListener listener = null;
+  private ArrayList listeners = null;
 
   private boolean dirty; // has the application changed?
 
@@ -97,14 +100,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
    */
   public void configure() throws CoreException {
 
-    if (listener == null) {
-
-      listener = new ProjectResourceChangeListener();
-      ResourcesPlugin.getWorkspace().addResourceChangeListener(
-        listener,
-        IResourceChangeEvent.POST_AUTO_BUILD | IResourceChangeEvent.PRE_CLOSE);
-
-    }
+    addResourceListeners();
   }
 
   /**
@@ -112,11 +108,45 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
    */
   public void deconfigure() throws CoreException {
 
-    if (listener != null) {
-      ResourcesPlugin.getWorkspace().removeResourceChangeListener(listener);
-    }
+    removeResourceListeners();
 
     removeProperties();
+  }
+
+  private void addResourceListeners() {
+
+    if (listeners == null) {
+
+      listeners = new ArrayList();
+
+      listeners.add(new ProjectResourceChangeListener());
+
+      listeners.add(new DeletedComponentOrPageRefactor(this));
+
+      for (Iterator iter = listeners.iterator(); iter.hasNext();) {
+
+        ResourcesPlugin.getWorkspace().addResourceChangeListener(
+          (IResourceChangeListener) iter.next(),
+          IResourceChangeEvent.PRE_AUTO_BUILD | IResourceChangeEvent.PRE_CLOSE);
+
+      }
+
+    }
+  }
+
+  private void removeResourceListeners() {
+
+    if (listeners != null) {
+    	
+      for (Iterator iter = listeners.iterator(); iter.hasNext();) {
+      	
+        ResourcesPlugin.getWorkspace().removeResourceChangeListener(
+          (IResourceChangeListener) iter.next());
+
+      }
+      
+      listeners = null;
+    }
   }
 
   /**
