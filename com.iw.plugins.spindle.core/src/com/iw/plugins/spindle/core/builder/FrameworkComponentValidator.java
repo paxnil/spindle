@@ -153,7 +153,8 @@ public class FrameworkComponentValidator
                     if (isTemplate()) {                    
                         location = getAttributeSourceLocation("page");
                     } else {
-                        location = getAttributeSourceLocation("value");
+                        ISourceLocationInfo bindingInfo = (ISourceLocationInfo)pageBinding.getLocation();
+                        location = bindingInfo.getAttributeSourceLocation("value");
                     }
                     if (pageSpec == null)
                     {
