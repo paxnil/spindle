@@ -4,21 +4,6 @@
    <description>
       Eclipse update site for Spindle 3 integration builds. Select builds on this site are promoted to beta status and made available at http://spindle.sourceforge.net/updates.
    </description>
-   <feature url="features/com.iw.features.spindle_3.0.19.jar" id="com.iw.features.spindle" version="3.0.19">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.20.jar" id="com.iw.features.spindle" version="3.0.20">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.21.jar" id="com.iw.features.spindle" version="3.0.21">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.22.jar" id="com.iw.features.spindle" version="3.0.22">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.23.jar" id="com.iw.features.spindle" version="3.0.23">
-      <category name="older_alphas"/>
-   </feature>
    <feature url="features/com.iw.features.spindle_3.0.24.jar" id="com.iw.features.spindle" version="3.0.24">
       <category name="older_alphas"/>
    </feature>
@@ -31,19 +16,31 @@
    <feature url="features/com.iw.features.spindle_3.0.27.jar" id="com.iw.features.spindle" version="3.0.27">
       <category name="older_alphas"/>
    </feature>
-   <feature url="features/com.iw.features.spindle_3.0.18.jar" id="com.iw.features.spindle" version="3.0.18">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.17.jar" id="com.iw.features.spindle" version="3.0.17">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.16.jar" id="com.iw.features.spindle" version="3.0.16">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.15.jar" id="com.iw.features.spindle" version="3.0.15">
-      <category name="older_alphas"/>
-   </feature>
    <feature url="features/com.iw.features.spindle_3.0.28.jar" id="com.iw.features.spindle" version="3.0.28">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.29.jar" id="com.iw.features.spindle" version="3.0.29">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.30.jar" id="com.iw.features.spindle" version="3.0.30">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.32.jar" id="com.iw.features.spindle" version="3.0.32">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.31.jar" id="com.iw.features.spindle" version="3.0.31">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.33.jar" id="com.iw.features.spindle" version="3.0.33">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.jettylauncher_1.0.8.jar" id="com.iw.features.jettylauncher" version="1.0.8">
+      <category name="jetty_launcher"/>
+   </feature>
+   <feature url="features/com.iw.features.jettylauncher_profile_1.0.8.jar" id="com.iw.features.jettylauncher_profile" version="1.0.8">
+      <category name="jetty_launcher"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.34.jar" id="com.iw.features.spindle" version="3.0.34">
       <category name="spindle3_0_latest"/>
    </feature>
    <category-def name="spindle3_0_latest" label="Spindle 3 latest integration build">
@@ -54,6 +51,11 @@
    <category-def name="older_alphas" label="Older integration builds">
       <description>
          Not the latest, or the greatest
+      </description>
+   </category-def>
+   <category-def name="jetty_launcher" label="Jetty Launcher unstable">
+      <description>
+         New builds of Jetty Launcher that have not been promoted to the sourceforge site yet. may be unstable
       </description>
    </category-def>
 </site>
