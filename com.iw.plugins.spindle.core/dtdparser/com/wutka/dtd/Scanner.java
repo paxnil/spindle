@@ -7,7 +7,7 @@ import java.util.*;
  * Lexical scanner for DTD's
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 
 class Scanner

@@ -8,7 +8,7 @@ import java.util.*;
  * DTD as (value1,value2,value3,etc.)
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDSequence extends DTDContainer
 {

@@ -9,7 +9,7 @@ import java.util.*;
  * pipe-separated names.
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDMixed extends DTDContainer
 {

@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.core.builder;
 /**
  * Exception that is thrown internally by the Builds
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class BuilderException extends RuntimeException

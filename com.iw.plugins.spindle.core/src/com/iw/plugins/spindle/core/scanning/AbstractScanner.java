@@ -57,7 +57,8 @@ import com.iw.plugins.spindle.core.util.Assert;
  * </p>
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: AbstractScanner.java,v 1.18.2.1 2004/06/22 12:10:10 glongman
+ *          Exp $
  */
 public abstract class AbstractScanner implements IProblemCollector
 {
@@ -99,6 +100,18 @@ public abstract class AbstractScanner implements IProblemCollector
           throw (RuntimeException) e;
       }
       return afterScan(resultObject);
+
+    } catch (ScannerException scex)
+    {
+      addProblem(new DefaultProblem(
+          ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+          IProblem.ERROR,
+          scex.getMessage(),
+          0,
+          0,
+          0,
+          false));
+      return null;
     } catch (RuntimeException e)
     {
       TapestryCore.log(e);

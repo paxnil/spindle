@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.core;
 /**
  * handy spot to store the ids of Tapestry marker types.
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public interface ITapestryMarker

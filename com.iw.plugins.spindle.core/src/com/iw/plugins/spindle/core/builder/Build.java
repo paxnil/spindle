@@ -77,7 +77,7 @@ import com.iw.plugins.spindle.core.util.Markers;
 /**
  * Abstract base class for full and incremental builds
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public abstract class Build

@@ -33,7 +33,7 @@ import org.eclipse.core.runtime.IStatus;
  * Exception type for Tapestry Model problems
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class TapestryModelException extends CoreException
 {

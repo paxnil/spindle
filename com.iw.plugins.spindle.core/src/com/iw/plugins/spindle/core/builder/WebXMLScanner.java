@@ -50,7 +50,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocation;
  * A Processor class used by FullBuild that extracts Tapestry information from
  * the file web.xml
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class WebXMLScanner extends AbstractScanner
@@ -292,7 +292,7 @@ public class WebXMLScanner extends AbstractScanner
       }
     } catch (JavaModelException e)
     {
-      TapestryCore.log(e);
+      TapestryCore.log("Not a valid Tapestry ApplicationServlet subclass", e);
     }
 
     return result;

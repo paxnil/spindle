@@ -30,7 +30,7 @@ package com.iw.plugins.spindle.core.parser.validator;
  * Exceptions thrown while validating a DOM tree
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class ValidatorException extends Exception
 {

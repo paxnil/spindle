@@ -49,7 +49,7 @@ import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
  * All pages and components must be explicity installed.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class CoreNamespace implements ICoreNamespace
 {

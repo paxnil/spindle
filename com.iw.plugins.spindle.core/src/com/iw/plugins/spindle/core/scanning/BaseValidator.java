@@ -60,7 +60,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class BaseValidator implements IScannerValidator
 {

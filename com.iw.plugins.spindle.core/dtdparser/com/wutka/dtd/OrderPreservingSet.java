@@ -39,7 +39,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  * A Set that preserves the order things are added
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class OrderPreservingSet implements Set
 {

@@ -39,7 +39,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * Record <page>tags in a document
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: PluginLibraryDeclaration.java,v 1.3 2004/06/14 19:09:41
+ * @version $Id: PluginLibraryDeclaration.java,v 1.2 2004/05/17 02:31:49
  *          glongman Exp $
  */
 public class PluginLibraryDeclaration extends BaseSpecification

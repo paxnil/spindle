@@ -35,7 +35,7 @@ import org.apache.tapestry.parse.OpenToken;
  * 
  * @see org.apache.tapestry.parse.OpenToken
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  *  
  */
 

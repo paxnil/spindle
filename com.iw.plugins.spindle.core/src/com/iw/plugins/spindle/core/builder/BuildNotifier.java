@@ -35,7 +35,7 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 /**
  * Notifies users of the progress of a Build
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class BuildNotifier

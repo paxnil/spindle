@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
  * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class JarEntryFileUtil
 {

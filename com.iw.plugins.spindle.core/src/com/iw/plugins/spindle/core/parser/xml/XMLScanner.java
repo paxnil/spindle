@@ -100,7 +100,7 @@ import com.iw.plugins.spindle.core.parser.xml.event.ParserEventHandler;
  * @author Arnaud Le Hors, IBM
  * @author Eric Ye, IBM
  * 
- * @version $Id$
+ * 
  */
 public abstract class XMLScanner implements XMLComponent
 {

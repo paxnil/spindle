@@ -41,7 +41,7 @@ import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
  * A search for looking into resource deltas!
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class ResourceDeltaSearch implements ISearch, IResourceDeltaVisitor
 {

@@ -6,7 +6,7 @@ import java.io.*;
  * Represents the possible values for an attribute declaration
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDDecl implements DTDOutput
 {

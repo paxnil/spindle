@@ -54,7 +54,7 @@ import com.iw.plugins.spindle.core.util.Markers;
 /**
  * The Tapestry project nature. Configures and Deconfigures the builder
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class TapestryProject implements IProjectNature

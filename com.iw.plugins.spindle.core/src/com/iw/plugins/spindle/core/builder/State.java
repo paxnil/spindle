@@ -50,7 +50,7 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
  * 
  * TODO extend design so that States can be persisted!
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class State

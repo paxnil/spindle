@@ -63,7 +63,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  * You also need to call completed() when it appropriate
  * 
  * @author bgarson@intelligentworks.com, glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class PullParserNode implements Node
 {

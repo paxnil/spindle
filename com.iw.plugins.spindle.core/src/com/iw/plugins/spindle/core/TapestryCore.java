@@ -69,7 +69,7 @@ import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
 /**
  * The main plugin class to be used in the desktop.
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class TapestryCore extends AbstractUIPlugin

@@ -7,7 +7,7 @@ import java.net.*;
  * Represents an Entity defined in a DTD
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDEntity implements DTDOutput
 {

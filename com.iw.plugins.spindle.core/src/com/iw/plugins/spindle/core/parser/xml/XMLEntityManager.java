@@ -113,7 +113,7 @@ import org.apache.xerces.xni.parser.XMLInputSource;
  * @author Andy Clark, IBM
  * @author Arnaud Le Hors, IBM
  * 
- * @version $Id$
+ * 
  */
 public class XMLEntityManager implements XMLComponent, XMLEntityResolver
 {

@@ -32,7 +32,7 @@ import org.apache.commons.lang.enums.Enum;
  * An easy way to determine the type of a DTDContainer
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class DTDItemType extends Enum
 {

@@ -7,7 +7,7 @@ import java.io.*;
  * Represents an enumeration of attribute values
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDEnumeration implements DTDOutput
 {

@@ -32,7 +32,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocation;
  * Exception type thrown by Processors
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class ScannerException extends Exception
 {

@@ -34,7 +34,7 @@ import org.eclipse.core.resources.IMarker;
  * IProblems are convertable into IMarkers
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface IProblem
 {

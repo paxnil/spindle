@@ -6,7 +6,7 @@ import java.io.*;
  * Represents a comment in the DTD
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDComment implements DTDOutput
 {

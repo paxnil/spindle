@@ -34,7 +34,7 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
  * Namespace resolver for libraries.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class LibraryResolver extends NamespaceResolver
 {

@@ -4,7 +4,7 @@ package com.wutka.dtd;
  * Token returned by the lexical scanner
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 class Token
 {

@@ -44,7 +44,7 @@ import com.iw.plugins.spindle.core.util.Markers;
 /**
  * Builds a Tapestry project from scratch.
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class FullBuild extends Build

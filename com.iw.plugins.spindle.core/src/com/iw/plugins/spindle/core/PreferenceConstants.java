@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.core;
  * Preference contstants for the Core plugin.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface PreferenceConstants
 {

@@ -7,7 +7,7 @@ import java.io.*;
  * Represents a parsed Document Type Definition
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 
 public class DTD implements DTDOutput

@@ -32,7 +32,7 @@ import org.apache.tapestry.spec.ParameterSpecification;
 
 /**
  * @author gwl
- * @version $Id$
+ * 
  * 
  * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
  */

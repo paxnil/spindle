@@ -33,7 +33,7 @@ import java.util.List;
  * declarations found in a document during a parse/scan episode.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface IPluginDescribable
 {

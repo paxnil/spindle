@@ -88,7 +88,7 @@ import com.iw.plugins.spindle.core.util.Markers;
  * </ul>
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class NamespaceResolver
 {

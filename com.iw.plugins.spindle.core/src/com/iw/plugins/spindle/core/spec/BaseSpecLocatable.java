@@ -33,7 +33,7 @@ import org.apache.tapestry.IResourceLocation;
  * Superclass for Top level spec classes
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class BaseSpecLocatable extends BasePropertyHolder
 {

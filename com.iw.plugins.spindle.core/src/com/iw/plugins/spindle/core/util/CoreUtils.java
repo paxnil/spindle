@@ -50,7 +50,7 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 /**
  * A Utility class
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class CoreUtils

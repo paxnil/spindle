@@ -10,7 +10,7 @@ import java.util.Vector;
  * DTDSequence)
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public abstract class DTDContainer extends DTDItem
 {

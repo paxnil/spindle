@@ -11,7 +11,7 @@ import java.io.*;
  * used to keep track of where it is.
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDAttlist implements DTDOutput
 {

@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.CoreException;
  * Interface for all kinds of searches in the Tapestry context
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface ISearch
 {

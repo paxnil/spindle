@@ -77,7 +77,7 @@ import com.iw.plugins.spindle.core.util.Files;
  * its namepsace already.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class TemplateScanner extends AbstractScanner
 {

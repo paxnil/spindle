@@ -36,7 +36,7 @@ import java.util.Map;
  * Base class for Spec classes that have properties
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class BasePropertyHolder extends DescribableSpecification
     implements
