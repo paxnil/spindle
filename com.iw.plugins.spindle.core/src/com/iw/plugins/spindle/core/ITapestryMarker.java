@@ -26,7 +26,7 @@ package com.iw.plugins.spindle.core;
  * ***** END LICENSE BLOCK ***** */
 
 /**
- * handy spot to store the ids of Tapestry marker types
+ * handy spot to store the ids of Tapestry marker types.
  * 
  * @version $Id$
  * @author glongman@intelligentworks.com
