@@ -121,11 +121,11 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     private void checkSanity() throws RuntimeException
     {
         // TODO this needs to be revisited 
-        
-//        if (!documentStarted || !rootElementSeen || documentIsDone)
-//        {
-//            throw new RuntimeException("TapestryPullParser is insane!");
-//        }
+
+        //        if (!documentStarted || !rootElementSeen || documentIsDone)
+        //        {
+        //            throw new RuntimeException("TapestryPullParser is insane!");
+        //        }
     }
 
     /**
@@ -180,8 +180,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     /* (non-Javadoc)
      * @see org.apache.xerces.xni.XMLDocumentHandler#doctypeDecl(java.lang.String, java.lang.String, java.lang.String, org.apache.xerces.xni.Augmentations)
      */
-    public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs)
-        throws XNIException
+    public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs) throws XNIException
     {
 
         super.doctypeDecl(rootElement, publicId, systemId, augs);
@@ -222,8 +221,14 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         System.out.println("endElement: " + element.rawname);
         configuration.stopParsing();
         lastCompletedElement = parseStack.pop();
-        if (lastCompletedElement != null) {
+        if (lastCompletedElement != null)
+        {
             lastCompletedElement.completed();
+        }
+        //check to see if the only element left is the root
+        if (parseStack.peek() == rootElement)
+        {
+            //            bump();
         }
     }
 
