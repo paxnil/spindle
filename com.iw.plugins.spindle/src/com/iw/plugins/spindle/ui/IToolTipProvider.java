@@ -35,11 +35,5 @@ public interface IToolTipProvider {
    */
   public String getToolTipText(Object object);
   
-  /**
-   * Get tooltip image
-   * @param object that needs a tooltip
-   * @return a tooltip image string
-   */
-  public Image getToolTipImage(Object object);
 
 }

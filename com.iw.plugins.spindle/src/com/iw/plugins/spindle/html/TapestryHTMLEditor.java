@@ -113,7 +113,6 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
   private ISpindleColorManager colorManager = new ColorManager();
   private HTMLContentOutlinePage outline = null;
   private Shell shell;
-  private DebugToolTipHandler handler;
   private IEditorInput input;
   private StyledText stext;
 
@@ -140,13 +139,6 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     super.createPartControl(parent);
     shell = parent.getShell();
     stext = (StyledText) getSourceViewer().getTextWidget();
-
-    //    text.setKeyBinding(262144, ST.COPY);
-    //    //text.setKeyBinding(131072, ST.CUT);
-    //    text.setKeyBinding(131072, ST.COPY);
-    // for debugging the partitioning only		
-    //    		handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
-    //    		handler.activateHoverHelp(text);
 
   }
 
@@ -559,49 +551,6 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
 
   }
 
-  public class DebugToolTipHandler extends ToolTipHandler {
-
-    IDocument document;
-
-    /**
-     * Constructor for DebugToolTipHandler.
-     * @param parent
-     */
-    public DebugToolTipHandler(Shell parent, IDocument document) {
-      super(parent);
-      this.document = document;
-    }
-
-    /**
-     * @see ToolTipHandler#getToolTipHelp(Object)
-     */
-    protected Object getToolTipHelp(Object object) {
-      return null;
-    }
-
-    /**
-     * @see ToolTipHandler#getToolTipImage(Object)
-     */
-    protected Image getToolTipImage(Object object) {
-      return null;
-    }
-
-    /**
-     * @see ToolTipHandler#getToolTipText(Object)
-     */
-    protected String getToolTipText(Object object) {
-      StyledText widget = (StyledText) object;
-      int currentOffset = widget.getOffsetAtLocation(widgetPosition);
-      ITypedRegion region;
-      try {
-        region = document.getPartition(currentOffset);
-      } catch (BadLocationException e) {
-        return "bad location";
-      }
-      return region.getType();
-    }
-
-  }
 
   static public final String SAVE_HTML_TEMPLATE = "com.iw.plugins.spindle.html.saveTemplateAction";
   static public final String REVERT_HTML_TEMPLATE = "com.iw.plugins.spindle.html.revertTemplateAction";

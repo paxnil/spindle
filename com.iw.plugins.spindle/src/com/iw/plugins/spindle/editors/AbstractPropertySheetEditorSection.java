@@ -73,7 +73,6 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.XMLUtil;
 import com.iw.plugins.spindle.ui.EmptySelection;
-import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 import com.iw.plugins.spindle.ui.TreeViewerWithToolTips;
 import com.iw.plugins.spindle.ui.descriptors.INeedsModelInitialization;
@@ -113,7 +112,6 @@ public abstract class AbstractPropertySheetEditorSection
   private boolean useToolTips = false;
 
   private IToolTipProvider toolTipProvider = defaultTooltipProvider;
-  private IToolTipHelpProvider toolTipHelpProvider = defaultTooltipProvider;
 
   /**
    * Constructor for PropertySection
@@ -196,7 +194,6 @@ public abstract class AbstractPropertySheetEditorSection
 
     if (useToolTips) {
       TreeViewerWithToolTips viewer = (TreeViewerWithToolTips) treeViewer;
-      viewer.setToolTipHelpProvider(toolTipHelpProvider);
       viewer.setToolTipProvider(toolTipProvider);
     }
 
@@ -281,7 +278,6 @@ public abstract class AbstractPropertySheetEditorSection
 
       TreeViewerWithToolTips viewer = new TreeViewerWithToolTips(tree);
       viewer.setToolTipProvider(toolTipProvider);
-      viewer.setToolTipHelpProvider(toolTipHelpProvider);
       treeViewer = viewer;
 
     } else {
@@ -656,24 +652,7 @@ public abstract class AbstractPropertySheetEditorSection
     }
   }
 
-  /**
-   * Returns the tooltipHelpProvider.
-   * @return IToolTipHelpProvider
-   */
-  public IToolTipHelpProvider getToolTipHelpProvider() {
-    if (useToolTips) {
 
-      if (treeViewer != null) {
-
-        return ((TreeViewerWithToolTips) treeViewer).getToolTipHelpProvider();
-
-      } else {
-
-        return toolTipHelpProvider;
-      }
-    }
-    return null;
-  }
 
   /**
    * Returns the tooltipProvider.
@@ -686,23 +665,7 @@ public abstract class AbstractPropertySheetEditorSection
     return null;
   }
 
-  /**
-   * Sets the tooltipHelpProvider.
-   * @param tooltipHelpProvider The tooltipHelpProvider to set
-   */
-  public void setToolTipHelpProvider(IToolTipHelpProvider tooltipHelpProvider) {
-    if (useToolTips) {
 
-      if (treeViewer != null) {
-
-        ((TreeViewerWithToolTips) treeViewer).setToolTipHelpProvider(tooltipHelpProvider);
-
-      } else if (tooltipHelpProvider != null) {
-
-        this.toolTipHelpProvider = tooltipHelpProvider;
-      }
-    }
-  }
 
   /**
    * Sets the tooltipProvider.
@@ -722,14 +685,8 @@ public abstract class AbstractPropertySheetEditorSection
     }
   }
 
-  public static class DefaultTooltipProvider implements IToolTipHelpProvider, IToolTipProvider {
+  public static class DefaultTooltipProvider implements IToolTipProvider {
 
-    /**
-     * @see com.iw.plugins.spindle.ui.IToolTipHelpProvider#getHelp(Object)
-     */
-    public Object getHelp(Object object) {
-      return "Tooltip provider not supplied!";
-    }
 
     /**
      * @see com.iw.plugins.spindle.ui.IToolTipProvider#getToolTipText(Object)
@@ -738,12 +695,6 @@ public abstract class AbstractPropertySheetEditorSection
       return "Tooltip provider not supplied!";
     }
 
-    /**
-     * @see com.iw.plugins.spindle.ui.IToolTipProvider#getToolTipImage(Object)
-     */
-    public Image getToolTipImage(Object object) {
-      return null;
-    }
 
   }
 

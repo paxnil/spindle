@@ -37,7 +37,6 @@ public class TreeViewerWithToolTips extends TreeViewer {
 
   private ToolTipHandler toolTipHandler;
   private IToolTipProvider tipProvider;
-  private IToolTipHelpProvider helpProvider;
 
   /**
    * Constructor for TreeViewerWithToolTips
@@ -69,17 +68,11 @@ public class TreeViewerWithToolTips extends TreeViewer {
     this.tipProvider = tipProvider;
   }
 
-  public void setToolTipHelpProvider(IToolTipHelpProvider helpProvider) {
-    this.helpProvider = helpProvider;
-  }
 
   public IToolTipProvider getToolTipProvider() {
     return this.tipProvider;
   }
 
-  public IToolTipHelpProvider getToolTipHelpProvider() {
-    return this.helpProvider;
-  }
 
   private String getTVToolTipText(Item item) {
     if (tipProvider != null) {
@@ -88,19 +81,6 @@ public class TreeViewerWithToolTips extends TreeViewer {
     return null;
   }
 
-  private Image getTVToolTipImage(Item item) {
-    if (tipProvider != null) {
-      return tipProvider.getToolTipImage(item.getData());
-    }
-    return null;
-  }
-
-  private Object getTVToolHelpText(Item item) {
-    if (helpProvider != null) {
-      return helpProvider.getHelp(item.getData());
-    }
-    return null;
-  }
 
   protected class TVToolTipHandler extends ToolTipHandler {
 
@@ -112,22 +92,6 @@ public class TreeViewerWithToolTips extends TreeViewer {
       String result = getTVToolTipText((Item) object);
       if (result == null) {
         result = super.getToolTipText(object);
-      }
-      return result;
-    }
-
-    protected Image getToolTipImage(Object object) {
-      Image result = getTVToolTipImage((Item) object);
-      if (result == null) {
-        result = super.getToolTipImage(object);
-      }
-      return result;
-    }
-
-    protected Object getToolTipHelp(Object object) {
-      Object result = getTVToolHelpText((Item) object);
-      if (result == null) {
-        result = super.getToolTipHelp(object);
       }
       return result;
     }

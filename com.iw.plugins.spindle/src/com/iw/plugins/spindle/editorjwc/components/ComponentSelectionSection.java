@@ -80,7 +80,7 @@ import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.ui.ChooseFromNamespaceDialog;
 import com.iw.plugins.spindle.ui.ComponentAliasViewer;
 import com.iw.plugins.spindle.ui.CopyToClipboardAction;
-import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
+
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 import com.iw.plugins.spindle.ui.OpenClassAction;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
@@ -161,7 +161,6 @@ public class ComponentSelectionSection
     setUseToolTips(true);
     setLabelProvider(labelProvider);
     setToolTipProvider(labelProvider);
-    setToolTipHelpProvider(labelProvider);
   }
 
   public void selectionChanged(SelectionChangedEvent event) {
@@ -338,7 +337,7 @@ public class ComponentSelectionSection
 
   protected class ContainedComponentLabelProvider
     extends AbstractIdentifiableLabelProvider
-    implements IToolTipProvider, IToolTipHelpProvider {
+    implements IToolTipProvider {
 
     Image componentImage;
     Image componentAliasImage;
@@ -421,32 +420,7 @@ public class ComponentSelectionSection
 
     }
 
-    public Image getToolTipImage(Object object) {
-      return getImage(object);
-    }
 
-    //---------- IToolTipHelpProvider --------------------//
-
-    public Object getHelp(Object object) {
-
-      PluginContainedComponent selectedComponent = (PluginContainedComponent) object;
-      TapestryComponentModel componentModel = null;
-
-      try {
-
-        ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(getModel());
-
-        componentModel = resolveContainedComponent(project, selectedComponent);
-
-      } catch (CoreException e) {
-
-        return null;
-
-      }
-
-      return new ComponentAliasViewer(selectedComponent.getIdentifier(), selectedComponent.getType(), componentModel);
-
-    }
 
   }
 

@@ -45,7 +45,6 @@ import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.spec.PluginParameterSpecification;
 import com.iw.plugins.spindle.spec.XMLUtil;
-import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 
 public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
@@ -61,7 +60,6 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
     setDescription("This section allows one to edit selected component's bindings");
     setUseToolTips(true);
     setToolTipProvider(toolTipProvider);
-    setToolTipHelpProvider(toolTipProvider);
   }
 
   public void sectionChanged(FormSection source, int changeType, Object changeObject) {
@@ -109,12 +107,7 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
 
     if (cmodel != null) {
 
-      dialog =
-        new ChooseBindingTypeDialog(
-          shell,
-          cmodel,
-          existingBindingParms,
-          DTDVersion >= XMLUtil.DTD_1_2);
+      dialog = new ChooseBindingTypeDialog(shell, cmodel, existingBindingParms, DTDVersion >= XMLUtil.DTD_1_2);
 
     } else {
 
@@ -125,9 +118,7 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
 
   }
 
-  public class ToolTipProvider
-    extends BindingEditorLabelProvider
-    implements IToolTipProvider, IToolTipHelpProvider {
+  public class ToolTipProvider extends BindingEditorLabelProvider implements IToolTipProvider {
 
     private HashMap toolTipInfo = new HashMap();
 
@@ -161,19 +152,14 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
 
         String parameter = bindingSpec.getIdentifier();
 
-        PluginParameterSpecification parameterSpec =
-          (PluginParameterSpecification) componentSpec.getParameter(parameter);
+        PluginParameterSpecification parameterSpec = (PluginParameterSpecification) componentSpec.getParameter(parameter);
 
         if (parameterSpec == null) {
 
-          result =
-            "no parameter '"
-              + parameter
-              + "' found in "
-              + cmodel.getUnderlyingStorage().getFullPath().toString();
+          result = "no parameter '" + parameter + "' found in " + cmodel.getUnderlyingStorage().getFullPath().toString();
         } else {
 
-		  StringBuffer buffer = new StringBuffer();
+          StringBuffer buffer = new StringBuffer();
           parameterSpec.getHelpText(parameter, buffer);
           result = buffer.toString();
 
@@ -183,26 +169,6 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
 
       return result;
 
-
-    }
-
-
-    public Image getToolTipImage(Object object) {
-      return getImage(object);
-    }
-
-    //---------- IToolTipHelpTextProvider --------------------//
-
-    public Object getHelp(Object obj) {
-
-      return null;
-
-      //      String parameter = ((PluginBindingSpecification) obj).getIdentifier();
-      //      if (precomputedAliasInfo.isEmpty()) {
-      //        return null;
-      //      }
-      //      // its not a possible alias now...
-      //      return new ComponentAliasParameterViewer(parameter, precomputedAliasInfo);
     }
 
   }

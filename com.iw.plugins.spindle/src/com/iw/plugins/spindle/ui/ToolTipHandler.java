@@ -25,38 +25,32 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui;
 
+import org.eclipse.jface.text.AbstractHoverInformationControlManager;
+import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.DefaultInformationControl.IInformationPresenter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.HelpEvent;
-import org.eclipse.swt.events.HelpListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseTrackAdapter;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
+/** 
+ * toolip handler for Trees, Tables & Toolbars!
+ */
+
 public class ToolTipHandler {
 
-  private Shell parentShell;
-  private Shell tipShell;
-  //  private Label tipLabelImage; 
-  private Label tipLabelText;
-  private Widget tipWidget; // widget this tooltip is hovering over
-  protected Point tipPosition; // the position being hovered over on the Entire display
-  protected Point widgetPosition; // the position hovered over in the Widget;
+  private TooltipController tipController;
 
   /**
    * Creates a new tooltip handler
@@ -64,66 +58,16 @@ public class ToolTipHandler {
    * @param parent the parent Shell
    */
   public ToolTipHandler(Shell parent) {
-    final Display display = parent.getDisplay();
-    this.parentShell = parent;
-
-  }
-
-  protected void createTipShell() {
-    if (parentShell.isDisposed()) {
-    	tipShell = null;
-    	return;
-    }
-    Display display = parentShell.getDisplay();
-    tipShell = new Shell(parentShell, SWT.NONE);
-    GridLayout gridLayout = new GridLayout();
-    gridLayout.numColumns = 1;
-    gridLayout.marginWidth = 2;
-    gridLayout.marginHeight = 2;
-    tipShell.setLayout(gridLayout);
-
-    tipShell.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-
-    //    tipLabelImage = new Label(tipShell, SWT.NONE);
-    //    tipLabelImage.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-    //    tipLabelImage.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-    //    tipLabelImage.setLayoutData(
-    //      new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_CENTER));
-
-    tipLabelText = new Label(tipShell, SWT.NONE);
-    tipLabelText.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-    tipLabelText.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-    tipLabelText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_CENTER));
-  }
-  
-  private Shell getTipShell() {  	
-  	
-  	if (tipShell == null || tipShell.isDisposed()) {
-  		createTipShell();
-  	}
-  	return tipShell;
+    tipController = new TooltipController(new TooltipCreator());
   }
 
   protected String getToolTipText(Object object) {
-    if (object instanceof Control) {
-      return (String) ((Control) object).getData("TIP_TEXT");
+    if (object instanceof Widget) {
+      return (String) ((Widget) object).getData("TIP_TEXT");
     }
     return null;
   }
 
-  protected Image getToolTipImage(Object object) {
-    if (object instanceof Control) {
-      return (Image) ((Control) object).getData("TIP_IMAGE");
-    }
-    return null;
-  }
-  protected Object getToolTipHelp(Object object) {
-    if (object instanceof Control) {
-      IToolTipHelpProvider handler = (IToolTipHelpProvider) ((Control) object).getData("TIP_HELPTEXTHANDLER");
-      return handler.getHelp(object);
-    }
-    return null;
-  }
 
   /**
    * Enables customized hover help for a specified control
@@ -131,126 +75,120 @@ public class ToolTipHandler {
    * @control the control on which to enable hoverhelp
    */
   public void activateHoverHelp(final Control control) {
-    /*
-     * Get out of the way if we attempt to activate the control underneath the tooltip
-     */
-    control.addMouseListener(new MouseAdapter() {
-      public void mouseDown(MouseEvent e) {
-      	Shell shell = getTipShell();
-        if (shell != null && tipShell.isVisible())
-          tipShell.setVisible(false);
-      }
-    });
 
-    control.addDisposeListener(new DisposeListener() {
-      public void widgetDisposed(DisposeEvent e) {
-      	Shell shell = getTipShell();
-        if (shell != null && tipShell.isVisible())
-          tipShell.setVisible(false);
+    tipController.install(control);
 
-      }
-    });
-
-    /*
-     * Trap hover events to pop-up tooltip
-     */
-    control.addMouseTrackListener(new MouseTrackAdapter() {
-      public void mouseExit(MouseEvent e) {
-      	Shell shell = getTipShell();
-        if (shell != null && tipShell.isVisible())
-          tipShell.setVisible(false);
-        tipWidget = null;
-      }
-      public void mouseHover(MouseEvent event) {
-      	Shell shell = getTipShell();
-      	if (shell == null) {
-      		return;
-      	}
-        widgetPosition = new Point(event.x, event.y);
-        Widget widget = event.widget;
-        if (widget instanceof ToolBar) {
-          ToolBar w = (ToolBar) widget;
-          widget = w.getItem(widgetPosition);
-        }
-        if (widget instanceof Table) {
-          Table w = (Table) widget;
-          widget = w.getItem(widgetPosition);
-        }
-        if (widget instanceof Tree) {
-          Tree w = (Tree) widget;
-          widget = w.getItem(widgetPosition);
-        }
-        if (widget == null) {
-          tipShell.setVisible(false);
-          tipWidget = null;
-          return;
-        }
-        if (widget == tipWidget)
-          return;
-        tipWidget = widget;
-        tipPosition = control.toDisplay(widgetPosition);
-        String text = getToolTipText(widget);
-        Image image = getToolTipImage(widget);
-        if (text == null) {
-          return;
-        }
-        Control control = (Control) event.getSource();
-        control.setFocus();
-        tipLabelText.setText(text);
-        //tipLabelImage.setImage(image); // accepts null
-        tipShell.pack();
-        setHoverLocation(tipShell, tipPosition);
-        tipShell.setVisible(true);
-      }
-    });
-
-    /*
-     * Trap F1 Help to pop up a custom help box
-     */
-    control.addHelpListener(new HelpListener() {
-      public void helpRequested(HelpEvent event) {
-      	Shell shell = getTipShell();
-        if (shell == null || tipWidget == null)
-          return;
-        Object help = getToolTipHelp(tipWidget);
-        if (help == null)
-          return;
-        if (help.getClass() != String.class && !(help instanceof HelpViewer)) {
-          return;
-        }
-
-        if (tipShell.isVisible()) {
-          tipShell.setVisible(false);
-          Shell helpShell = new Shell(parentShell, SWT.SHELL_TRIM);
-          helpShell.setLayout(new FillLayout());
-          if (help instanceof String) {
-            Label label = new Label(helpShell, SWT.NONE);
-            label.setText((String) help);
-          } else {
-            HelpViewer view = (HelpViewer) help;
-            view.createClient(helpShell);
-            helpShell.setText(view.getViewerTitle());
-          }
-          helpShell.pack();
-          setHoverLocation(helpShell, tipPosition);
-          helpShell.open();
-        }
-      }
-    });
   }
 
-  /**
-   * Sets the location for a hovering shell
-   * @param shell the object that is to hover
-   * @param position the position of a widget to hover over
-   * @return the top-left location for a hovering box
-   */
-  private void setHoverLocation(Shell shell, Point position) {
-    Rectangle displayBounds = shell.getDisplay().getBounds();
-    Rectangle shellBounds = shell.getBounds();
-    shellBounds.x = Math.max(Math.min(position.x, displayBounds.width - shellBounds.width), 0);
-    shellBounds.y = Math.max(Math.min(position.y + 16, displayBounds.height - shellBounds.height), 0);
-    shell.setBounds(shellBounds);
+  public class TooltipCreator implements IInformationControlCreator {
+
+    /**
+     * @see org.eclipse.jface.text.IInformationControlCreator#createInformationControl(Shell)
+     */
+    public IInformationControl createInformationControl(Shell parent) {
+      return new DefaultInformationControl(parent, new TooltipPresenter());
+    }
+
+  }
+
+  class TooltipController extends AbstractHoverInformationControlManager {
+
+    /**
+    * Constructor for InformationController.
+    * @param creator
+    */
+    public TooltipController(IInformationControlCreator creator) {
+      super(creator);
+      setAnchor(ANCHOR_TOP);
+      setFallbackAnchors(new Anchor[] { ANCHOR_LEFT, ANCHOR_BOTTOM, ANCHOR_RIGHT });
+      setSizeConstraints(50, 10, false, false);
+
+    }
+
+    /**
+    * Hides the information control and stops the information control closer.
+    */
+    protected void hideInformationControl() {
+      IInformationControl control = getInformationControl();
+      if (control != null) {
+        control.setVisible(false);
+        setEnabled(true);
+      }
+    }
+
+    /**
+     * @see org.eclipse.jface.text.AbstractInformationControlManager#computeInformation()
+     */
+    protected void computeInformation() {
+
+      Point widgetPosition = getHoverEventLocation();
+      int heightCue = -1;
+
+      Widget widget = (Widget) getSubjectControl();
+
+      if (widget instanceof ToolBar) {
+        ToolBar w = (ToolBar) widget;
+        widget = w.getItem(widgetPosition);
+      }
+      if (widget instanceof Table) {
+        Table w = (Table) widget;
+        heightCue = w.getItemHeight();
+        widget = w.getItem(widgetPosition);
+      }
+      if (widget instanceof Tree) {
+        Tree w = (Tree) widget;
+        heightCue = w.getItemHeight();
+        widget = w.getItem(widgetPosition);
+      }
+
+      String information = null;
+
+      Rectangle area = null;
+      if (widget instanceof Control) {
+
+        area = ((Control) widget).getBounds();
+        area.x = 0;
+        area.y = 0;
+
+      } else {
+
+        area = new Rectangle(widgetPosition.x - 16, widgetPosition.y - 16, 32, heightCue == -1 ? 32 : heightCue);
+
+      }
+      if (widget != null) {
+        information = getToolTipText(widget);
+      }
+
+      setInformation(information, area);
+
+    }
+
+  }
+
+  public class TooltipPresenter implements IInformationPresenter {
+
+    /**
+    * @see org.eclipse.jface.text.DefaultInformationControl.IInformationPresenter#updatePresentation(Display, String, TextPresentation, int, int)
+    */
+    public String updatePresentation(
+      Display display,
+      String hoverInfo,
+      TextPresentation presentation,
+      int maxWidth,
+      int maxHeight) {
+
+      if (hoverInfo == null)
+        return null;
+
+      int firstLineBreak = hoverInfo.indexOf("\n");
+      firstLineBreak = (firstLineBreak == -1 ? hoverInfo.length() : firstLineBreak);
+
+      presentation.addStyleRange(new StyleRange(0, firstLineBreak, null, null, SWT.BOLD));
+
+      return hoverInfo;
+
+    }
+
   }
 
 }
