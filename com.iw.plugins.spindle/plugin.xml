@@ -39,11 +39,57 @@
       <import plugin="org.eclipse.pde.ui"/>
       <import plugin="org.eclipse.pde.core"/>
       <import plugin="org.eclipse.update.ui.forms"/>
+      <import plugin="org.apache.xerces"/>
    </requires>
 
 
    <extension-point id="modelManagers" name="Internal Model Manager Point" schema="schema/modelManagers.exsd"/>
 
+   <extension
+         id="spindlenature"
+         name="SpindleProjectNature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="com.iw.plugins.spindle.project.TapestryProject">
+         </run>
+      </runtime>
+   </extension>
+   <extension
+         point="org.eclipse.ui.projectNatureImages">
+      <image
+            icon="icons/full/application16.gif"
+            natureId="com.iw.plugins.spindle.spindlenature"
+            id="org.eclipse.ui.spindleProjectNatureImage">
+      </image>
+   </extension>
+   <extension
+         point="org.eclipse.team.core.fileTypes">
+      <fileTypes
+            type="text"
+            extension="application">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="spindle">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="library">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="jwc">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="page">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="script">
+      </fileTypes>
+   </extension>
    <extension
          point="org.eclipse.ui.newWizards">
       <category
@@ -59,7 +105,7 @@
          <description>
             Create a new Tapestry Library
          </description>
-      </wizard>      
+      </wizard>
       <wizard
             name="Tapestry Application"
             icon="./icons/basic/application16.gif"
@@ -132,7 +178,7 @@
             filenames="*.page"
             contributorClass="com.iw.plugins.spindle.editorjwc.JWCMultipageEditorContributor"
             class="com.iw.plugins.spindle.editorjwc.JWCPageMultipageEditor"
-            id="com.iw.plugins.spindle.editors.jwc_editor">
+            id="com.iw.plugins.spindle.editors.page_editor">
       </editor>
       <editor
             name="Spindle HTML Editor for Tapestry"
@@ -173,7 +219,7 @@
             label="Spindle Toolbar Action Set"
             visible="false"
             id="com.iw.spindle.actions.set">
-          <action
+         <action
                label="New Tapestry Library"
                icon="icons/full/library16_dark.gif"
                tooltip="Create a new Tapestry Library"
@@ -181,7 +227,6 @@
                toolbarPath="Normal/spindle"
                id="com.iw.spindle.actions.set.OpenTapestryLibraryWizard">
          </action>
-
          <action
                label="New Tapestry Application"
                icon="icons/full/application16_dark.gif"
@@ -218,6 +263,35 @@
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
+         
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            id="com.iw.plugins.spindle.popupMenus">
+         <menu
+               label="Spindle"
+               id="com.iw.plugins.spindle.popupMenus.createComponents">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Create Tapestry Component"
+               icon="icons/full/component16_dark.gif"
+               class="com.iw.plugins.spindle.wizards.extra.CreateComponentFromTemplateAction"
+               menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
+               enablesFor="+"
+               id="com.iw.plugins.spindle.popupMenus.createComponents.componentFromTemplate">
+         </action>
+         <action
+               label="Create Tapestry Page"
+               icon="icons/full/page16.gif"
+               class="com.iw.plugins.spindle.wizards.extra.CreatePageFromTemplateAction"
+               menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
+               enablesFor="+"
+               id="com.iw.plugins.spindle.popupMenus.createComponents.pageFromTemplate">
+         </action>
+      </objectContribution>
+       
       <objectContribution
             objectClass="org.eclipse.core.resources.IFile"
             nameFilter="*.html"

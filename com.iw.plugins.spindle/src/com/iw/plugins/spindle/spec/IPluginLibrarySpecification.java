@@ -18,5 +18,9 @@ public interface IPluginLibrarySpecification extends ILibrarySpecification {
       public void removeLibrarySpecificationPath(String name);
       
       public void removeExtensionSpecification(String name);
+      
+      public boolean canDeleteService(String name);
+      
+      public boolean canRevertService(String name);
 
 }

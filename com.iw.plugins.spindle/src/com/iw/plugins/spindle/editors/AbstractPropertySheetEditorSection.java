@@ -377,7 +377,7 @@ public abstract class AbstractPropertySheetEditorSection
     IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
     if (!selection.isEmpty()) {
       Object object = ((IStructuredSelection) selection).getFirstElement();
-      fireSelectionNotification(object);
+      fireSelectionNotification(((IIdentifiable) object).getIdentifier());
       setPageSelection();
       pAction.run();
     }

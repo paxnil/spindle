@@ -29,8 +29,6 @@ package com.iw.plugins.spindle.editorlib.components;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -51,11 +49,9 @@ import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
 
 public class ComponentAliasSection
@@ -305,12 +301,12 @@ public class ComponentAliasSection
     public void run() {
       updateSelection = true;
 
-      PluginApplicationSpecification appSpec =
-        (PluginApplicationSpecification) ((TapestryApplicationModel) getModel())
+      IPluginLibrarySpecification appSpec =
+        (IPluginLibrarySpecification) ((TapestryLibraryModel) getModel())
           .getSpecification();
 
       ComponentRefDialog dialog =
-        new ComponentRefDialog(newButton.getShell(), getModel(), appSpec.getComponentMapAliases());
+        new ComponentRefDialog(newButton.getShell(), getModel(), appSpec.getComponentAliases());
 
       dialog.create();
       if (dialog.open() == dialog.OK) {
@@ -348,8 +344,8 @@ public class ComponentAliasSection
       AliasHolder holder = (AliasHolder) getSelected();
       if (holder != null) {
 
-        PluginApplicationSpecification appSpec =
-          (PluginApplicationSpecification) holder.getParent();
+        IPluginLibrarySpecification appSpec =
+          (IPluginLibrarySpecification) holder.getParent();
 
         String prev = findPrevious(holder.getIdentifier());
         appSpec.removeComponentSpecificationPath(holder.getIdentifier());

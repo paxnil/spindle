@@ -53,7 +53,6 @@ import com.iw.plugins.spindle.editors.SpindleFormSection;
 import com.iw.plugins.spindle.editors.SummaryHTMLViewer;
 import com.iw.plugins.spindle.editors.SummarySourceViewer;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 

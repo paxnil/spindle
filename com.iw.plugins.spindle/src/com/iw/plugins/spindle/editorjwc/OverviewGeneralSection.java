@@ -67,6 +67,7 @@ import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.spec.XMLUtil;
 import com.iw.plugins.spindle.util.Utils;
 
 public class OverviewGeneralSection extends SpindleFormSection implements IModelChangedListener {
@@ -262,18 +263,26 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     openSpecClassAction.setEnabled(engineClass != null && !"".equals(engineClass.trim()));
     TapestryComponentModel model = (TapestryComponentModel) getFormPage().getModel();
     chooseComponentSpecAction.setEnabled(model.isEditable());
+    
+    int DTDVersion = XMLUtil.getDTDVersion(model.getPublicId());
 
     manager.add(openSpecClassAction);
     
-    if (allowBody == null) {
+    if (allowBody != null) {
     	
-      manager.add(choosePageSpecAction);
+      manager.add(chooseComponentSpecAction);
+      
+      if (DTDVersion < XMLUtil.DTD_1_3) {
+      	
+      	manager.add(choosePageSpecAction);
+      }
       
     } else {
     	
-      manager.add(chooseComponentSpecAction);
       manager.add(choosePageSpecAction);
+      
     }
+    
   }
 
   public boolean isDirty() {

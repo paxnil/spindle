@@ -58,45 +58,140 @@ import org.eclipse.swt.widgets.Text;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public class ChooseApplicationDialog extends AbstractDialog {
+public class ChooseWorkspaceModelDialog extends AbstractDialog {
+
+  static public ChooseWorkspaceModelDialog createLibraryModelDialog(
+    Shell shell,
+    IJavaProject project,
+    String windowTitle,
+    String description) {
+
+    ChooseWorkspaceModelDialog result =
+      new ChooseWorkspaceModelDialog(
+        shell,
+        project,
+        windowTitle,
+        description,
+        TapestryLookup.ACCEPT_LIBRARIES);
+
+    result.setTitleImageString("application48.gif");
+
+    return result;
+  }
+
+  static public ChooseWorkspaceModelDialog createApplicationModelDialog(
+    Shell shell,
+    IJavaProject project,
+    String windowTitle,
+    String description) {
+
+    ChooseWorkspaceModelDialog result =
+      new ChooseWorkspaceModelDialog(
+        shell,
+        project,
+        windowTitle,
+        description,
+        TapestryLookup.ACCEPT_APPLICATIONS);
+
+    result.setTitleImageString("application48.gif");
+
+    return result;
+
+  }
+
+  static public ChooseWorkspaceModelDialog createApplicationAndLibraryModelDialog(
+    Shell shell,
+    IJavaProject project,
+    String windowTitle,
+    String description) {
+
+    ChooseWorkspaceModelDialog result =
+      new ChooseWorkspaceModelDialog(
+        shell,
+        project,
+        windowTitle,
+        description,
+        TapestryLookup.ACCEPT_LIBRARIES | TapestryLookup.ACCEPT_APPLICATIONS);
+
+    result.setTitleImageString("application48.gif");
+
+    return result;
+
+  }
+
+  static public ChooseWorkspaceModelDialog createComponentModelDialog(
+    Shell shell,
+    IJavaProject project,
+    String windowTitle,
+    String description) {
+
+    ChooseWorkspaceModelDialog result =
+      new ChooseWorkspaceModelDialog(
+        shell,
+        project,
+        windowTitle,
+        description,
+        TapestryLookup.ACCEPT_COMPONENTS);
+    result.setTitleImageString("component48.gif");
+
+    return result;
+  }
+
+  static public ChooseWorkspaceModelDialog createPageModelDialog(
+    Shell shell,
+    IJavaProject project,
+    String windowTitle,
+    String description) {
+
+    ChooseWorkspaceModelDialog result =
+      new ChooseWorkspaceModelDialog(
+        shell,
+        project,
+        windowTitle,
+        description,
+        TapestryLookup.ACCEPT_PAGES);
+    result.setTitleImageString("component48.gif");
+
+    return result;
+
+  }
 
   private Text nameText;
   private Table applications;
   private Table packages;
   private ScanCollector collector = new ScanCollector();
-  private ILabelProvider nameLabelProvider = new ApplicationLabelProvider();
-  private ILabelProvider packageLabelProvider = new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS);
-
+  private ILabelProvider nameLabelProvider = new LabelProvider();
+  private ILabelProvider packageLabelProvider =
+    new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS);
 
   private TapestryLookup lookup;
 
-  private String resultApplication;
+  private String resultString;
+
+  private IPackageFragment resultPackage;
+
+  private int acceptFlags;
+
+  private String titleImageString;
   
-  protected int acceptFlags = TapestryLookup.ACCEPT_APPLICATIONS;
+  private boolean ignoreReadOnly = false;
 
   static private final Object[] empty = new Object[0];
 
-  /**
-    * Constructor for PageRefDialog
-    */
-  public ChooseApplicationDialog(Shell shell, IJavaProject project, String windowTitle, String description) {
-    super(shell);
-    updateWindowTitle(windowTitle);
-    updateMessage(description);
-    configure(project); 
-  }
-
-  public ChooseApplicationDialog(
+  public ChooseWorkspaceModelDialog(
     Shell shell,
     IJavaProject project,
     String windowTitle,
     String description,
-    boolean showAliases,
     int acceptFlags) {
-    this(shell, project, windowTitle, description);
+    super(shell);
+    updateWindowTitle(windowTitle);
+    updateMessage(description);
+    configure(project);
     this.acceptFlags = acceptFlags;
   }
 
@@ -127,9 +222,12 @@ public class ChooseApplicationDialog extends AbstractDialog {
     return super.hardClose();
   }
 
-   protected Composite createAreaContents(Composite parent) {
-  	
-    setTitleImage(TapestryImages.getSharedImage("application48.gif"));
+  protected Composite createAreaContents(Composite parent) {
+
+    if (titleImageString != null) {
+
+      setTitleImage(TapestryImages.getSharedImage(titleImageString));
+    }
 
     Composite container = new Composite(parent, SWT.NONE);
     GridData data = null;
@@ -138,7 +236,6 @@ public class ChooseApplicationDialog extends AbstractDialog {
     layout.verticalSpacing = 10;
     container.setLayout(layout);
 
-    
     nameText = createText(container);
     applications = createUpperList(container);
     packages = createLowerList(container);
@@ -205,7 +302,6 @@ public class ChooseApplicationDialog extends AbstractDialog {
     return text;
   }
 
-
   private Table createUpperList(Composite parent) {
     (new Label(parent, SWT.NONE)).setText("choose application:");
 
@@ -238,11 +334,16 @@ public class ChooseApplicationDialog extends AbstractDialog {
 
   protected void handleUpperSelectionChanged() {
     int selection = applications.getSelectionIndex();
+
     if (selection >= 0) {
+
       String name = applications.getItem(selection).getText();
-      updateListWidget(collector.getPackagesForName(name), packages, packageLabelProvider);
+      updateListWidget(collector.getPackagesFor(name), packages, packageLabelProvider);
+
     } else {
+
       updateListWidget(empty, packages, packageLabelProvider);
+
     }
   }
 
@@ -301,6 +402,7 @@ public class ChooseApplicationDialog extends AbstractDialog {
         ti = new TableItem(table, i);
       }
       ti.setText(provider.getText(elements[i]));
+      ti.setData(elements[i]);
       Image img = provider.getImage(elements[i]);
       if (img != null) {
         ti.setImage(img);
@@ -329,30 +431,44 @@ public class ChooseApplicationDialog extends AbstractDialog {
 
   public Object getWidgetSelection() {
 
-    resultApplication = null;
+    resultString = null;
+    resultPackage = null;
 
     int i = applications.getSelectionIndex();
-    int j = packages.getSelectionIndex();
 
     if (i >= 0) {
-      String chosenApplication = applications.getItem(i).getText();
-      if (chosenApplication.endsWith(".application") && j >= 0) {
-        resultApplication = "/" + packages.getItem(j).getText() + "/";
-        resultApplication = resultApplication.replace('.', '/') + chosenApplication;
-      } else {
-        resultApplication = chosenApplication;
-      }
+
+      resultString = applications.getItem(i).getText();
     }
-    return resultApplication;
+
+    int j = packages.getSelectionIndex();
+
+    if (j >= 0) {
+
+      resultPackage = (IPackageFragment) packages.getItem(j).getData();
+
+    }
+
+    return resultString;
   }
 
-  public String getResultApplication() {
-    return resultApplication;
+  public String getResultString() {
+    return resultString;
+  }
+
+  public IPackageFragment getResultPackage() {
+    return resultPackage;
+  }
+
+  public ITapestryModel getResultModel() {
+
+    return collector.getModel(resultString, resultPackage);
   }
 
   protected class ScanCollector implements ITapestryLookupRequestor {
 
     Map results;
+    Map storageLookup;
 
     /**
      * Constructor for ScanCollector
@@ -364,10 +480,24 @@ public class ChooseApplicationDialog extends AbstractDialog {
 
     public void reset() {
       results = new HashMap();
+      storageLookup = new HashMap();
     }
 
     public Map getResults() {
       return results;
+    }
+
+    public ITapestryModel getModel(String name, IPackageFragment pack) {
+
+      String packname = "(default package)";
+      if (pack != null) {
+
+        packname = pack.getElementName();
+      }
+
+      IStorage storage = (IStorage) storageLookup.get(name + packname);
+
+      return (ITapestryModel) TapestryPlugin.getTapestryModelManager().getReadOnlyModel(storage);
     }
 
     public Object[] getApplicationNames() {
@@ -377,12 +507,16 @@ public class ChooseApplicationDialog extends AbstractDialog {
       return new TreeSet(results.keySet()).toArray();
     }
 
-    public Object[] getPackagesForName(String name) {
+    public Object[] getPackagesFor(String name) {
       if (results == null) {
+
         return empty;
+
       }
       Set packages = (Set) results.get(name);
+
       if (packages == null) {
+
         return empty;
       }
       return packages.toArray();
@@ -399,40 +533,77 @@ public class ChooseApplicationDialog extends AbstractDialog {
      * @see ITapestryLookupRequestor#accept(IStorage, IPackageFragment)
      */
     public boolean accept(IStorage storage, IPackageFragment fragment) {
-      
-      String name = storage.getFullPath().lastSegment();
-      Object storePackageFragment;
-      if (fragment == null ) {
-        storePackageFragment = "(default package)";
-      } else {
-        storePackageFragment = fragment;
+    	
+      if (ignoreReadOnly && storage.isReadOnly()) {
+      	return false;
       }
+
+      String name = storage.getName();
+      Object storePackageFragment;
+      String packageElementName; 
+      
+      if (fragment == null) {
+      	
+        storePackageFragment = "(default package)";
+        packageElementName = (String)storePackageFragment;
+        
+      } else {
+      	
+        storePackageFragment = fragment;
+        packageElementName = fragment.getElementName();
+      }
+
+      storageLookup.put(name + packageElementName, storage);
+
       Set packages = (Set) results.get(name);
+
       if (packages == null) {
+
         packages = new HashSet();
         packages.add(storePackageFragment);
         results.put(name, packages);
+
       } else if (!packages.contains(storePackageFragment)) {
+
         packages.add(storePackageFragment);
       }
       return true;
     }
 
-  
   }
 
-  protected class ApplicationLabelProvider implements ILabelProvider, IBaseLabelProvider {
+  protected class LabelProvider implements ILabelProvider, IBaseLabelProvider {
 
-    Image image;
+    Image applicationImage = TapestryImages.getSharedImage("application16.gif");
+    Image libraryImage = TapestryImages.getSharedImage("library16.gif");
+    Image componentImage = TapestryImages.getSharedImage("component16.gif");
+    Image pageImage = TapestryImages.getSharedImage("page16.gif");
 
     public Image getImage(Object element) {
-      if (image == null) {
-        image = TapestryImages.getSharedImage("application16.gif");
+
+      String name = (String) element;
+      if (name.indexOf(".application") >= 0) {
+
+        return applicationImage;
+
+      } else if (name.indexOf(".library") >= 0) {
+
+        return libraryImage;
+
+      } else if (name.indexOf(".jwc") >= 0) {
+
+        return componentImage;
+
+      } else if (name.indexOf(".page") >= 0) {
+
+        return pageImage;
+
       }
-      return image;
+      return null;
     }
 
     public String getText(Object element) {
+
       return (String) element;
     }
 
@@ -450,6 +621,36 @@ public class ChooseApplicationDialog extends AbstractDialog {
 
   }
 
-
-
+  /**
+   * Returns the titleImageString.
+   * @return String
+   */
+  public String getTitleImageString() {
+    return titleImageString;
   }
+
+  /**
+   * Sets the titleImageString.
+   * @param titleImageString The titleImageString to set
+   */
+  public void setTitleImageString(String titleImageString) {
+    this.titleImageString = titleImageString;
+  }
+
+  /**
+   * Returns the ignoreReadOnly.
+   * @return boolean
+   */
+  public boolean isIgnoreReadOnly() {
+    return ignoreReadOnly;
+  }
+
+  /**
+   * Sets the ignoreReadOnly.
+   * @param ignoreReadOnly The ignoreReadOnly to set
+   */
+  public void setIgnoreReadOnly(boolean ignoreReadOnly) {
+    this.ignoreReadOnly = ignoreReadOnly;
+  }
+
+}

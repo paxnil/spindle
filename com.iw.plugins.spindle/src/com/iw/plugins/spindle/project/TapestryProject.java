@@ -1,5 +1,6 @@
 package com.iw.plugins.spindle.project;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,6 +33,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
@@ -43,180 +46,332 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
  * 
  *  this project needs to read/write an xml file defining its application
  */
-public class TapestryProject implements IProjectNature {
+public class TapestryProject implements IProjectNature, ITapestryProject {
 
-	private String applicationPath;
-	private String projectName;
-	private IProject project;
+  private String applicationPath;
+  private String projectName;
+  private IProject project;
 
-	private boolean dirty; // has the application changed?
+  private boolean dirty; // has the application changed?
 
-	/**
-	 * @see org.eclipse.core.resources.IProjectNature#configure()
-	 */
-	public void configure() throws CoreException {
+  /**
+   * @see org.eclipse.core.resources.IProjectNature#configure()
+   */
+  public void configure() throws CoreException {
 
-		// we do nothing - for now
-	}
+    // we do nothing - for now
+  }
 
-	/**
-	 * @see org.eclipse.core.resources.IProjectNature#deconfigure()
-	 */
-	public void deconfigure() throws CoreException {
-		// we do nothing - for now
-	}
+  /**
+   * @see org.eclipse.core.resources.IProjectNature#deconfigure()
+   */
+  public void deconfigure() throws CoreException {
+    // we do nothing - for now
+  }
 
-	/**
-	 * @see org.eclipse.core.resources.IProjectNature#getProject()
-	 */
-	public IProject getProject() {
-		return project;
-	}
+  /**
+   * @see org.eclipse.core.resources.IProjectNature#getProject()
+   */
+  public IProject getProject() {
+    return project;
+  }
 
-	/**
-	 * @see org.eclipse.core.resources.IProjectNature#setProject(IProject)
-	 */
-	public void setProject(IProject project) {
+  /**
+   * @see org.eclipse.core.resources.IProjectNature#setProject(IProject)
+   */
+  public void setProject(IProject project) {
 
-		this.project = project;
-		this.projectName = project.getName();
-	}
+    this.project = project;
+    this.projectName = project.getName();
+  }
 
-	/**
-	 * Returns the applicationPath.
-	 * @return String
-	 */
-	public String getApplicationPath() {
-		return applicationPath;
-	}
+  /**
+   * Returns the applicationPath.
+   * @return String
+   */
+  public String getApplicationPath() {
+    return applicationPath;
+  }
 
-	/**
-	 * Returns the dirty.
-	 * @return boolean
-	 */
-	public boolean isDirty() {
-		return dirty;
-	}
-	
-	
-	public TapestryLookup getLookup() throws JavaModelException {
-		
-		TapestryLookup lookup = new TapestryLookup();
-		lookup.configure(TapestryPlugin.getDefault().getJavaProjectFor(project));
-		
-		return lookup;
-	}
+  /**
+   * Returns the dirty.
+   * @return boolean
+   */
+  public boolean isDirty() {
+    return dirty;
+  }
 
-	/**
-	 * Sets the applicationPath.
-	 * @param applicationPath The applicationPath to set
-	 */
-	public void setApplicationPath(String applicationPath) {
-		this.applicationPath = applicationPath;
-		dirty = true;
-	}
+  public TapestryLookup getLookup() throws JavaModelException {
 
-	/**
-	 * Sets the dirty.
-	 * @param dirty The dirty to set
-	 */
-	public void setDirty(boolean dirty) {
-		this.dirty = dirty;
-	}
+    TapestryLookup lookup = new TapestryLookup();
+    lookup.configure(TapestryPlugin.getDefault().getJavaProjectFor(project));
 
-	protected String readApplicationPath(String xmlSpec) throws IOException {
+    return lookup;
+  }
 
-		IPath projectPath = getProject().getFullPath();
-		StringReader reader = new StringReader(xmlSpec);
-		Element configElement;
+  /**
+   * Sets the applicationPath.
+   * @param applicationPath The applicationPath to set
+   */
+  public void setApplicationPath(String applicationPath) {
+    this.applicationPath = applicationPath;
+    dirty = true;
+  }
 
-		String path = null;
+  /**
+   * Sets the dirty.
+   * @param dirty The dirty to set
+   */
+  public void setDirty(boolean dirty) {
+    this.dirty = dirty;
+  }
 
-		try {
+  protected String readApplicationPath(String xmlSpec) throws IOException {
 
-			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			configElement = parser.parse(new InputSource(reader)).getDocumentElement();
+    IPath projectPath = getProject().getFullPath();
+    StringReader reader = new StringReader(xmlSpec);
+    Element configElement;
 
-		} catch (SAXException e) {
+    String path = null;
 
-			throw new IOException("bad file format");
-		} catch (ParserConfigurationException e) {
+    try {
 
-			reader.close();
-			throw new IOException("bad file format");
-		} finally {
+      DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      configElement = parser.parse(new InputSource(reader)).getDocumentElement();
 
-			reader.close();
-		}
+    } catch (SAXException e) {
 
-		if (!configElement.getNodeName().equalsIgnoreCase("spindle")) {
-			throw new IOException("bad file format");
-		}
+      throw new IOException("bad file format");
+    } catch (ParserConfigurationException e) {
 
-		NodeList list = configElement.getChildNodes();
-		int length = list.getLength();
+      reader.close();
+      throw new IOException("bad file format");
+    } finally {
 
-		for (int i = 0; i < length; ++i) {
-			Node node = list.item(i);
-			short type = node.getNodeType();
-			if (type == Node.ELEMENT_NODE) {
-				Element element = (Element) node;
+      reader.close();
+    }
 
-				if (element.getNodeName().equalsIgnoreCase("application")) {
+    if (!configElement.getNodeName().equalsIgnoreCase("spindle")) {
+      throw new IOException("bad file format");
+    }
 
-					path = element.getAttribute("path"); //$NON-NLS-1$
+    NodeList list = configElement.getChildNodes();
+    int length = list.getLength();
 
-				}
-			}
-		}
-		return path;
-	}
+    for (int i = 0; i < length; ++i) {
+      Node node = list.item(i);
+      short type = node.getNodeType();
+      if (type == Node.ELEMENT_NODE) {
+        Element element = (Element) node;
 
-	protected String saveApplicationPathAsXML(String applicationPath) throws IOException {
+        if (element.getNodeName().equalsIgnoreCase("application")) {
 
-		Document doc = new DocumentImpl();
-		Element configElement = doc.createElement("spindle");
-		doc.appendChild(configElement);
+          path = element.getAttribute("path"); //$NON-NLS-1$
 
-		Element appPathElement = doc.createElement("application");
-		appPathElement.setAttribute("path", applicationPath);
-		configElement.appendChild(appPathElement);
+        }
+      }
+    }
+    return path;
+  }
 
-		ByteArrayOutputStream s = new ByteArrayOutputStream();
-		OutputFormat format = new OutputFormat();
-		format.setIndenting(true);
-		format.setLineSeparator(System.getProperty("line.separator"));
+  protected String saveApplicationPathAsXML(String applicationPath) throws IOException {
 
-		Serializer serializer =
-			SerializerFactory.getSerializerFactory(Method.XML).makeSerializer(
-				new OutputStreamWriter(s, "UTF8"),
-				format);
-		serializer.asDOMSerializer().serialize(doc);
-		return s.toString("UTF8");
-	}
+    Document doc = new DocumentImpl();
+    Element configElement = doc.createElement("spindle");
+    doc.appendChild(configElement);
 
-	public void saveProperties(String xmlValue) throws CoreException {
+    Element appPathElement = doc.createElement("application");
+    appPathElement.setAttribute("path", applicationPath);
+    configElement.appendChild(appPathElement);
 
-		String filename = ".spindle";
-		IFile rscFile = getProject().getFile(filename);
-		InputStream inputStream = new ByteArrayInputStream(xmlValue.getBytes());
-		// update the resource content
-		if (rscFile.exists()) {
-			rscFile.setContents(inputStream, IResource.FORCE, null);
-		} else {
-			rscFile.create(inputStream, IResource.FORCE, null);
-		}
-	}
+    ByteArrayOutputStream s = new ByteArrayOutputStream();
+    OutputFormat format = new OutputFormat();
+    format.setIndenting(true);
+    format.setLineSeparator(System.getProperty("line.separator"));
 
-	public String readProperties() throws CoreException, IOException {
+    Serializer serializer =
+      SerializerFactory.getSerializerFactory(Method.XML).makeSerializer(
+        new OutputStreamWriter(s, "UTF8"),
+        format);
+    serializer.asDOMSerializer().serialize(doc);
+    return s.toString("UTF8");
+  }
 
-		String property = null;
-		String propertyFileName = ".spindle";
-		IFile rscFile = getProject().getFile(propertyFileName);
-		if (rscFile.exists()) {
-			property = new String(Utils.getResourceContentsAsByteArray(rscFile));
-		}
-		return property;
-	}
+  public void saveProperties(String xmlValue) throws CoreException {
+
+    String filename = ".spindle";
+    IFile rscFile = getProject().getFile(filename);
+    InputStream inputStream = new ByteArrayInputStream(xmlValue.getBytes());
+    // update the resource content
+    if (rscFile.exists()) {
+      rscFile.setContents(inputStream, IResource.FORCE, null);
+    } else {
+      rscFile.create(inputStream, IResource.FORCE, null);
+    }
+  }
+
+  public String readProperties() throws CoreException, IOException {
+
+    String property = null;
+    String propertyFileName = ".spindle";
+    IFile rscFile = getProject().getFile(propertyFileName);
+    if (rscFile.exists()) {
+      property = new String(getResourceContentsAsByteArray(rscFile));
+    }
+    return property;
+  }
+
+  /**
+   * Returns the given file's contents as a byte array.
+   */
+  public byte[] getResourceContentsAsByteArray(IFile file) throws CoreException {
+    InputStream stream = null;
+    try {
+
+      stream = new BufferedInputStream(file.getContents(true));
+
+      return getInputStreamAsByteArray(stream, -1);
+
+    } catch (IOException e) {
+
+      throw new CoreException(new TempStatus(e));
+
+    } finally {
+
+      try {
+
+        stream.close();
+
+      } catch (IOException e) {
+      }
+    }
+  }
+
+  public byte[] getInputStreamAsByteArray(InputStream stream, int length)
+    throws IOException {
+    byte[] contents;
+    if (length == -1) {
+      contents = new byte[0];
+      int contentsLength = 0;
+      int bytesRead = -1;
+      do {
+        int available = stream.available();
+
+        // resize contents if needed
+        if (contentsLength + available > contents.length) {
+          System.arraycopy(
+            contents,
+            0,
+            contents = new byte[contentsLength + available],
+            0,
+            contentsLength);
+        }
+
+        // read as many bytes as possible
+        bytesRead = stream.read(contents, contentsLength, available);
+
+        if (bytesRead > 0) {
+          // remember length of contents
+          contentsLength += bytesRead;
+        }
+      } while (bytesRead > 0);
+
+      // resize contents if necessary
+      if (contentsLength < contents.length) {
+        System.arraycopy(contents, 0, contents = new byte[contentsLength], 0, contentsLength);
+      }
+    } else {
+      contents = new byte[length];
+      int len = 0;
+      int readSize = 0;
+      while ((readSize != -1) && (len != length)) {
+        // See PR 1FMS89U
+        // We record first the read size. In this case len is the actual read size.
+        len += readSize;
+        readSize = stream.read(contents, len, length - len);
+      }
+    }
+
+    return contents;
+  }
+
+  public class TempStatus implements IStatus {
+
+    Throwable exception;
+
+    public TempStatus(Throwable e) {
+      this.exception = e;
+    }
+    /**
+    * @see org.eclipse.core.runtime.IStatus#getChildren()
+    */
+    public IStatus[] getChildren() {
+      return new IStatus[0];
+    }
+
+    /**
+     * @see org.eclipse.core.runtime.IStatus#getCode()
+     */
+    public int getCode() {
+      return IStatus.ERROR;
+    }
+
+    /**
+     * @see org.eclipse.core.runtime.IStatus#getException()
+     */
+    public Throwable getException() {
+      return exception;
+    }
+
+    /**
+     * @see org.eclipse.core.runtime.IStatus#getMessage()
+     */
+    public String getMessage() {
+      return exception.getMessage();
+    }
+
+    /**
+     * @see org.eclipse.core.runtime.IStatus#getPlugin()
+     */
+    public String getPlugin() {
+      return TapestryPlugin.ID_PLUGIN;
+    }
+
+    /**
+     * @see org.eclipse.core.runtime.IStatus#getSeverity()
+     */
+    public int getSeverity() {
+      return IStatus.ERROR;
+    }
+
+    /**
+     * @see org.eclipse.core.runtime.IStatus#isMultiStatus()
+     */
+    public boolean isMultiStatus() {
+      return false;
+    }
+
+    /**
+     * @see org.eclipse.core.runtime.IStatus#isOK()
+     */
+    public boolean isOK() {
+      return false;
+    }
+
+    /**
+     * @see org.eclipse.core.runtime.IStatus#matches(int)
+     */
+    public boolean matches(int severityMask) {
+      return false;
+    }
+
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.project.ITapestryProject#getApplicationModel()
+   */
+  public TapestryApplicationModel getApplicationModel() {
+    return null;
+  }
 
 }

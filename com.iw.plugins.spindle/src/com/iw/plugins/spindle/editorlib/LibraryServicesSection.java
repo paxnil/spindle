@@ -54,7 +54,9 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.spec.IIdentifiable;
+import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.descriptors.TypeDialogPropertyDescriptor;
 
 public class LibraryServicesSection
@@ -350,7 +352,7 @@ public class LibraryServicesSection
     boolean isEditable = isModelEditable();
     ServiceHolder holder = (ServiceHolder) selected;
     TapestryLibraryModel model = (TapestryLibraryModel) getModel();
-    PluginApplicationSpecification spec = (PluginApplicationSpecification) model.getSpecification();
+    IPluginLibrarySpecification spec = (IPluginLibrarySpecification) model.getSpecification();
     newButton.setEnabled(isEditable);
     if (deleteButton != null) {
       deleteButton.setEnabled(
