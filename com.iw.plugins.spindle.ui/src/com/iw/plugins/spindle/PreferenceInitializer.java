@@ -31,8 +31,8 @@ import net.sf.solareclipse.xml.internal.ui.preferences.XMLSyntaxPreferencePage;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import com.iw.plugins.spindle.editors.spec.MultiPageContentOutline;
-import com.iw.plugins.spindle.editors.spec.TapestryOutlinePage;
+import com.iw.plugins.spindle.editors.spec.outline.MultiPageContentOutline;
+import com.iw.plugins.spindle.editors.spec.outline.TapestryOutlinePage;
 import com.iw.plugins.spindle.editors.template.ITemplateSyntaxConstants;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.ui.wizards.NewTapComponentWizardPage;
@@ -141,12 +141,17 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
         "0,64,128",
         ITextStylePreferences.STYLE_BOLD);
 
-    store.setDefault(EDITOR_DISPLAY_TAB_WIDTH, 4);
+    
     store.setDefault(EDITOR_USE_SMART_INDENT, true);
-    store.setDefault(FORMATTER_PRESERVE_BLANK_LINES, true);
-    store.setDefault(FORMATTER_USE_TABS_TO_INDENT, false);
     store.setDefault(TEMPLATE_EDITOR_HTML_SHOW_XHTML, TemplateEditor.XHTML_NONE_LABEL);
     store.setDefault(AUTO_ACTIVATE_CONTENT_ASSIST, true);
+    
+    store.setDefault(FORMATTER_MAX_LINE_LENGTH, 132); 
+    store.setDefault(FORMATTER_WRAP_LONG, true);  
+    store.setDefault(FORMATTER_ALIGN, false);  
+    store.setDefault(FORMATTER_PRESERVE_BLANK_LINES, true);
+    store.setDefault(FORMATTER_TAB_SIZE, 4); 
+    store.setDefault(FORMATTER_TAB_CHAR, false);
 
   }
 
