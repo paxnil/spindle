@@ -24,25 +24,55 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors;
+package com.iw.plugins.spindle.editors.util;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import java.util.List;
 
-import com.iw.plugins.spindle.core.source.IProblemCollector;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 /**
- *  Called by Reconcilers on editors that perform thier own.
+ *  TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface IReconcileWorker
+public class DoubleClickSelection extends StructuredSelection
 {
-    public void addReconcileListener(IReconcileListener listener);
 
-    public void removeReconcileListener(IReconcileListener listener);
-    
-    public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor);
+    /**
+     * 
+     */
+    public DoubleClickSelection()
+    {
+        super();
+        // TODO Auto-generated constructor stub
+    }
 
-    public boolean isReadyToReconcile();
+    /**
+     * @param elements
+     */
+    public DoubleClickSelection(Object[] elements)
+    {
+        super(elements);
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param element
+     */
+    public DoubleClickSelection(Object element)
+    {
+        super(element);
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param elements
+     */
+    public DoubleClickSelection(List elements)
+    {
+        super(elements);
+        // TODO Auto-generated constructor stub
+    }
+
 }

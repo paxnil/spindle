@@ -34,18 +34,16 @@ import java.util.Map;
 
 import org.apache.tapestry.parse.TemplateParser;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
+import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
 /**
  *  Content assist inside of Tags (but not attributes)
@@ -53,7 +51,7 @@ import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class DefaultContentAssistProcessor extends ContentAssistProcessor
+public class DefaultContentAssistProcessor extends TemplateContentAssistProcessor
 {
 
     public DefaultContentAssistProcessor(TemplateEditor editor)
@@ -68,9 +66,15 @@ public class DefaultContentAssistProcessor extends ContentAssistProcessor
     {
         XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
         int baseState = tag.getStateAt(documentOffset);
-        if (tag.getType() != XMLDocumentPartitioner.TAG && tag.getType() != XMLDocumentPartitioner.EMPTYTAG)
+
+        String type = tag.getType();
+
+        if (type == XMLDocumentPartitioner.TEXT)
+            return computeTextProposals(viewer, documentOffset);
+
+        if (type != XMLDocumentPartitioner.TAG && type != XMLDocumentPartitioner.EMPTYTAG)
             return NoProposals;
-                    
+
         if (tag.isTerminated() && documentOffset == tag.getOffset() + tag.getLength())
             return NoProposals;
 
@@ -109,9 +113,7 @@ public class DefaultContentAssistProcessor extends ContentAssistProcessor
         jwcid = getJwcid(attrmap);
 
         XMLNode existingAttr = tag.getAttributeAt(documentOffset);
-        if (baseState != XMLNode.AFTER_ATT_VALUE
-            && existingAttr != null
-            && existingAttr.getOffset() < documentOffset)
+        if (baseState != XMLNode.AFTER_ATT_VALUE && existingAttr != null && existingAttr.getOffset() < documentOffset)
         {
             // no proposals if the attribute name is jwcid!
             if (TemplateParser.JWCID_ATTRIBUTE_NAME.equalsIgnoreCase(existingAttr.getName()))
@@ -193,6 +195,7 @@ public class DefaultContentAssistProcessor extends ContentAssistProcessor
         return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 
     }
+
     protected void computeAttributeProposals(
         int documentOffset,
         boolean addLeadingSpace,
@@ -203,10 +206,10 @@ public class DefaultContentAssistProcessor extends ContentAssistProcessor
         try
         {
             TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-//            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
-//            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-//            helper.setFrameworkNamespace(
-//                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+            //            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
+            //            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+            //            helper.setFrameworkNamespace(
+            //                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
             helper.setJwcid(jwcid);
             UITapestryAccess.Result[] infos = helper.findParameters(null, existingAttributeNames);
             for (int i = 0; i < infos.length; i++)
@@ -344,43 +347,59 @@ public class DefaultContentAssistProcessor extends ContentAssistProcessor
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer, int)
+    /**
+     * @param tag
+     * @param documentOffset
+     * @return
      */
-    public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
+    private ICompletionProposal[] computeTextProposals(ITextViewer viewer, int documentOffset)
     {
-        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
-        int baseState = tag.getStateAt(documentOffset);
-        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
-            return NoInformation;
+        ICompletionProposal endTagProposal = DefaultCompletionProcessor.computeEndTagProposal(viewer, documentOffset);
+        if (endTagProposal == null)
+            return NoSuggestions;
 
-        Map attrMap = tag.getAttributesMap();
-
-        if (!attrMap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME))
-            return NoInformation;
-
-        XMLNode attr = tag.getAttributeAt(documentOffset);
-        if (attr == null || attr.getName().equalsIgnoreCase(TemplateParser.JWCID_ATTRIBUTE_NAME))
-        {
-            return NoInformation;
-        }
-
-        try
-        {
-            TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-            XMLNode jwcidAttr = (XMLNode) attrMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
-            helper.setJwcid(jwcidAttr.getAttributeValue());
-
-            UITapestryAccess.Result result = helper.getParameterContextInformation(attr.getName());
-
-            if (result != null)
-                return new IContextInformation[] { new ContextInformation(result.displayName, result.description)};
-
-        } catch (IllegalArgumentException e)
-        {
-            //do nothing
-        }
-
-        return NoInformation;
+        return new ICompletionProposal[] { endTagProposal };
     }
+
+    // Not needed (I think)
+
+    //    /* (non-Javadoc)
+    //     * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer, int)
+    //     */
+    //    public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
+    //    {
+    //        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
+    //        int baseState = tag.getStateAt(documentOffset);
+    //        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
+    //            return NoInformation;
+    //
+    //        Map attrMap = tag.getAttributesMap();
+    //
+    //        if (!attrMap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME))
+    //            return NoInformation;
+    //
+    //        XMLNode attr = tag.getAttributeAt(documentOffset);
+    //        if (attr == null || attr.getName().equalsIgnoreCase(TemplateParser.JWCID_ATTRIBUTE_NAME))
+    //        {
+    //            return NoInformation;
+    //        }
+    //
+    //        try
+    //        {
+    //            TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
+    //            XMLNode jwcidAttr = (XMLNode) attrMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
+    //            helper.setJwcid(jwcidAttr.getAttributeValue());
+    //
+    //            UITapestryAccess.Result result = helper.getParameterContextInformation(attr.getName());
+    //
+    //            if (result != null)
+    //                return new IContextInformation[] { new ContextInformation(result.displayName, result.description)};
+    //
+    //        } catch (IllegalArgumentException e)
+    //        {
+    //            //do nothing
+    //        }
+    //
+    //        return NoInformation;
+    //    }
 }

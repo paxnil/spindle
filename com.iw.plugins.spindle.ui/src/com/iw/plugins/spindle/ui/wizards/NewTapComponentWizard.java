@@ -65,23 +65,56 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
      */
     public boolean performFinish()
     {
+
+        boolean openAllGenerated = fPage1.getOpenAll();
+        IFile template = null;
+        IFile spec = null;
+        IFile java = null;
         if (finishPage(fPage1.getAutoAddRunnable()))
         {
             if (finishPage(fPage2.getRunnable(null)))
             {
+                java = fPage2.getGeneratedJavaFile();
                 //create the class
                 if (finishPage(fPage1.getRunnable(fPage2.getFinalSpecClass())))
                 {
-                    IFile file = (IFile) fPage1.getResource();
-                    try
-                    {
-                        selectAndReveal(file);
-                        openResource(file);
-                    } catch (Exception e)
-                    { // let pass, only reveal and open will fail
-                    }
+
+                    spec = (IFile) fPage1.getResource();
+                    template = (IFile) fPage1.getGeneratedTemplate();
+
                 }
             }
+        }
+
+        if (openAllGenerated)
+        {
+            if (java != null)
+            {
+
+                try
+                {
+                    openResource(java);
+                } catch (Exception e)
+                { // let pass, only reveal and open will fail
+                }
+            }
+            if (template != null)
+            {
+                try
+                {
+                    openResource(template);
+                } catch (Exception e)
+                { // let pass, only reveal and open will fail
+                }
+            }
+
+        }
+        try
+        {
+            selectAndReveal(spec);
+            openResource(spec);
+        } catch (Exception e)
+        { // let pass, only reveal and open will fail
         }
 
         fPage1.performFinish();

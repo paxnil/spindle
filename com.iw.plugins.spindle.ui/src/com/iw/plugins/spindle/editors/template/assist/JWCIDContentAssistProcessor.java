@@ -47,7 +47,6 @@ import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.template.TemplatePartitionScanner;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
 /**
  *  Content assist inside of jwcid attributes
@@ -55,7 +54,7 @@ import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class JWCIDContentAssistProcessor extends ContentAssistProcessor
+public class JWCIDContentAssistProcessor extends TemplateContentAssistProcessor
 {
 
     private int fAtSign;

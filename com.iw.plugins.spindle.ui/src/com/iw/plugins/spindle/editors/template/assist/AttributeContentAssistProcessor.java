@@ -37,7 +37,6 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
 /**
  *  Content assist inside of Tags (but not attributes)
@@ -45,7 +44,7 @@ import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class AttributeContentAssistProcessor extends ContentAssistProcessor
+public class AttributeContentAssistProcessor extends TemplateContentAssistProcessor
 {
 
     private static String[] MISSPELLINGS = new String[] { "ongl:" };
@@ -167,7 +166,6 @@ public class AttributeContentAssistProcessor extends ContentAssistProcessor
 
         return result;
     }
-    
 
     /**
      * Compute proposals for converting a Message to a Dynamic or a Static binding;

@@ -34,5 +34,6 @@ package com.iw.plugins.spindle.editors;
  */
 public interface IReconcileListener
 {
+    public void reconcileStarted();
     public void reconciled(Object reconcileResults);
 }

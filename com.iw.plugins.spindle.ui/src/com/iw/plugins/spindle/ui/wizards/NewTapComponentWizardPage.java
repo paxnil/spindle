@@ -75,6 +75,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
     public static final String P_GENERATE_HTML = "new.component.generate.html";
     public static final String P_HTML_TO_GENERATE = "new.component.html.to.generate";
+    public static final String P_OPENALL = "new.component.open.all";
 
     String PAGE_NAME;
 
@@ -86,13 +87,16 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     String COMPONENTNAME;
     String AUTO_ADD;
     String GENERATE_HTML;
+    String OPEN_ALL;
 
     protected TapestryProjectDialogField fTapestryProjectDialogField;
     protected NamespaceDialogField fNamespaceDialogField;
     protected ComponentNameField fComponentNameDialogField;
     protected CheckBoxField fGenerateHTML;
+    protected CheckBoxField fOpenAllField;
     protected DialogField fNextLabel;
     protected IFile fComponentFile = null;
+    protected IFile fGeneratedHTMLFile = null;
 
     public static void initializeDefaults(IPreferenceStore pstore)
     {
@@ -115,6 +119,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         COMPONENTNAME = PAGE_NAME + ".componentname";
 
         GENERATE_HTML = PAGE_NAME + ".generateHTML";
+        OPEN_ALL = PAGE_NAME + ".openAll";
 
         this.setImageDescriptor(ImageDescriptor.createFromURL(Images.getImageURL("componentDialog.gif")));
 
@@ -135,6 +140,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         fComponentNameDialogField.addListener(listener);
 
         fGenerateHTML = new CheckBoxField(UIPlugin.getString(GENERATE_HTML + ".label"));
+        fOpenAllField = new CheckBoxField(UIPlugin.getString(OPEN_ALL + ".label"));
         fNextLabel = new DialogField("Choose a class for the specification on the next page..."); //TODO I10N
 
     }
@@ -187,6 +193,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         Control namespaceFieldControl = fNamespaceDialogField.getControl(composite);
         Control nameFieldControl = fComponentNameDialogField.getControl(composite);
         Control genHTML = fGenerateHTML.getControl(composite);
+        Control openAll = fOpenAllField.getControl(composite);
         Control labelControl = fNextLabel.getControl(composite);
 
         addControl(nameFieldControl, composite, 10);
@@ -200,7 +207,9 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
         addControl(genHTML, separator, 10);
 
-        addControl(labelControl, genHTML, 50);
+        addControl(openAll, genHTML, 10);
+
+        addControl(labelControl, openAll, 50);
 
         setControl(composite);
         setFocus();
@@ -208,6 +217,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         fNamespaceDialogField.updateStatus();
         IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
         fGenerateHTML.setCheckBoxValue(pstore.getBoolean(P_GENERATE_HTML));
+        fOpenAllField.setCheckBoxValue(pstore.getBoolean(P_OPENALL));
         updateStatus();
 
     }
@@ -458,9 +468,14 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
             }
         };
     };
+    
+    public boolean getOpenAll() {
+        return fOpenAllField.getCheckBoxValue();
+    }
 
     public boolean performFinish()
     {
+        UIPlugin.getDefault().getPreferenceStore().setValue(P_OPENALL, fOpenAllField.getCheckBoxValue());
         return true;
     }
 
@@ -504,6 +519,11 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         newFile.create(contents, false, new SubProgressMonitor(monitor, 1));
         monitor.worked(1);
         monitor.done();
+        fGeneratedHTMLFile = newFile;
+    }
+    
+    public IFile getGeneratedTemplate() {
+        return fGeneratedHTMLFile;
     }
 
     public IResource getResource()
@@ -522,6 +542,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         fTapestryProjectDialogField.setEnabled(flag);
         fNamespaceDialogField.setEnabled(flag);
         fGenerateHTML.setEnabled(flag);
+        fOpenAllField.setEnabled(flag);
     }
 
     public void updateStatus()

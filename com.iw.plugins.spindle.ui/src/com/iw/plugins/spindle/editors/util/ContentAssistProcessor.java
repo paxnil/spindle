@@ -26,10 +26,8 @@
 
 package com.iw.plugins.spindle.editors.util;
 
-import java.util.Map;
-
-import org.apache.tapestry.parse.TemplateParser;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -38,11 +36,12 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.xmen.internal.ui.text.*;
-import org.xmen.xml.*;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
+import com.wutka.dtd.DTD;
 
 /**
  *  Content Assist for Templates
@@ -64,6 +63,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
     protected IPreferenceStore fPreferenceStore = UIPlugin.getDefault().getPreferenceStore();
     protected XMLDocumentPartitioner fAssistParititioner;
     protected boolean fDoingContextInformation = false;
+    protected DTD fDTD;
 
     public ContentAssistProcessor(Editor editor)
     {
@@ -71,64 +71,93 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
         fAssistParititioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
     }
 
-    protected void startCompute()
-    {}
+    protected void connect(IDocument document) throws IllegalStateException
+    {
+        fAssistParititioner.connect(document);
+        try
+        {
+            XMLNode.createTree(document, -1);
+        } catch (BadLocationException e)
+        {
+            UIPlugin.log(e);
+            throw new IllegalStateException();
+        }
+    }
 
-    protected void endCompute()
-    {}
-
-    public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset)
+    protected void disconnect()
     {
         try
         {
-            IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-            fAssistParititioner.connect(document);
+            fAssistParititioner.disconnect();
+        } catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+        }
+    }
+
+    public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset)
+    {
+        IDocument document = viewer.getDocument();
+        if (document.getLength() == 0 || document.get().trim().length() == 0)
+            return computeEmptyDocumentProposal(viewer, documentOffset);
+
+        try
+        {
+            connect(document);
             Point p = viewer.getSelectedRange();
             if (p.y > 0)
                 return NoProposals;
 
             return doComputeCompletionProposals(viewer, documentOffset);
 
+        } catch (IllegalStateException e)
+        {
+            return NoProposals;
         } catch (RuntimeException e)
         {
             UIPlugin.log(e);
             throw e;
         } finally
         {
-            fAssistParititioner.disconnect();
+            disconnect();
         }
+    }
+
+    protected  ICompletionProposal[] computeEmptyDocumentProposal(ITextViewer viewer, int documentOffset) {
+        return NoProposals;
     }
 
     protected abstract ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset);
 
-    public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset)
-    {
-        if (!fDoingContextInformation)
-            return null;
-
-        return computeInformation(viewer, documentOffset);
-    }
     /* (non-Javadoc)
      * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
+     */
+    public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset)
+    {
+        return NoInformation;
+    }
+
+    /**
+     * @param viewer
+     * @param documentOffset
+     * @return
      */
     public IContextInformation[] computeInformation(ITextViewer viewer, int documentOffset)
     {
         try
         {
-            IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-            fAssistParititioner.connect(document);
-            //            Point p = viewer.getSelectedRange();
-            //            if (p.y > 0)
-            //                return NoInformation;
-
+            connect(viewer.getDocument());
             return doComputeContextInformation(viewer, documentOffset);
-
+        } catch (IllegalStateException e)
+        {
+            return NoInformation;
         } finally
         {
-            fAssistParititioner.disconnect();
+            disconnect();
         }
     }
 
+    // default result, override in subclass
     public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
     {
         return NoInformation;
@@ -163,15 +192,6 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
      */
     public IContextInformationValidator getContextInformationValidator()
     {
-        return null;
-    }
-
-    protected String getJwcid(Map attributeMap)
-    {
-        XMLNode jwcidArt = (XMLNode) attributeMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
-        if (jwcidArt != null)
-            return jwcidArt.getAttributeValue();
-
         return null;
     }
 

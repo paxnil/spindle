@@ -525,7 +525,8 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
                     fLineInfos.add(info);
                 } else if (fPreserveNewline && !alreadyKept)
                 {
-                    buffer.append(fLineDelimiter);
+                    writeLine("", fInitialIndent, fIndentLevel, buffer);
+//                    buffer.append(fLineDelimiter);
                     alreadyKept = true;
                 }
             }

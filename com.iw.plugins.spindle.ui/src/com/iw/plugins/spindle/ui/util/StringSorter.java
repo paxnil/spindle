@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.ui.util;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+
 public class StringSorter extends ViewerSorter {
 
   public StringSorter() {

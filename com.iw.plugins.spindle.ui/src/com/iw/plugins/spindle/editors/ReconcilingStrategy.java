@@ -36,6 +36,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 
 public class ReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension
@@ -84,7 +85,7 @@ public class ReconcilingStrategy implements IReconcilingStrategy, IReconcilingSt
 
         } catch (Exception x)
         {
-            // swallow exception
+           UIPlugin.log(x);
         }
     }
 

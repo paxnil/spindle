@@ -46,6 +46,7 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 
 /**
@@ -79,47 +80,9 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         String tagName = tag.getName();
 
-        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
-        {
-            XMLNode parentTag = tag.getCorrespondingNode();
-            String parentName = parentTag != null ? parentTag.getName() : null;
-            if (parentName == null || parentName.equals(tagName))
-                return NoSuggestions;
+        if (tag.getType() == XMLDocumentPartitioner.ENDTAG && !tag.isTerminated())
+            return getEndTagProposal(document, tag, tagName);
 
-            // we offer to replace everything with the correct end tag                  
-            int replacementOffset = tag.getOffset();
-            int replacementLength = tag.getLength();
-
-            try
-            {
-                if (!tag.isTerminated() && tag.getLength() > 2)
-                {
-                    replacementLength = 0;
-                    for (; replacementLength < tag.getLength(); replacementLength++)
-                    {
-                        char c = document.getChar(replacementOffset + replacementLength);
-                        if (Character.isWhitespace(c))
-                            break;
-                    }
-                }
-            } catch (BadLocationException e)
-            {
-                UIPlugin.log(e);
-                return NoSuggestions;
-            }
-
-            return new ICompletionProposal[] {
-                 new CompletionProposal(
-                    "</" + parentName + ">",
-                    replacementOffset,
-                    replacementLength,
-                    new Point(parentName.length() + 3, 0),
-                    Images.getSharedImage("bullet.gif"),
-                    null,
-                    null,
-                    null)};
-
-        }
         int baseState = tag.getStateAt(documentOffset);
         if (baseState == XMLNode.IN_TERMINATOR)
             return NoProposals;
@@ -135,7 +98,6 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         if ((tag.getType() == XMLDocumentPartitioner.ENDTAG && !atStart))
             return NoSuggestions;
 
-
         boolean addLeadingSpace = false;
         List proposals = new ArrayList();
 
@@ -145,7 +107,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
             {
                 String content = tag.getContent();
                 int length = tag.getLength();
-                List candidates = findRawNewTagProposals(fDTD, tag, documentOffset);
+                List candidates = DTDProposalGenerator.findRawNewTagProposals(fDTD, tag, documentOffset);
                 if (candidates.isEmpty())
                     return NoSuggestions;
 
@@ -242,6 +204,47 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 
     }
+    private ICompletionProposal[] getEndTagProposal(IDocument document, XMLNode tag, String tagName)
+    {
+        XMLNode parentTag = tag.getCorrespondingNode();
+        String parentName = parentTag != null ? parentTag.getName() : null;
+        if (parentName == null || parentName.equals(tagName))
+            return NoSuggestions;
+
+        // we offer to replace everything with the correct end tag                  
+        int replacementOffset = tag.getOffset();
+        int replacementLength = tag.getLength();
+
+        try
+        {
+            if (!tag.isTerminated() && tag.getLength() > 2)
+            {
+                replacementLength = 0;
+                for (; replacementLength < tag.getLength(); replacementLength++)
+                {
+                    char c = document.getChar(replacementOffset + replacementLength);
+                    if (Character.isWhitespace(c))
+                        break;
+                }
+            }
+        } catch (BadLocationException e)
+        {
+            UIPlugin.log(e);
+            return NoSuggestions;
+        }
+
+        return new ICompletionProposal[] {
+             new CompletionProposal(
+                "</" + parentName + ">",
+                replacementOffset,
+                replacementLength,
+                new Point(parentName.length() + 3, 0),
+                Images.getSharedImage("bullet.gif"),
+                null,
+                null,
+                null)};
+
+    }
 
     /**
      * @param documentOffset
@@ -273,11 +276,11 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         try
         {
-            List attrs = SpecTapestryAccess.getAttributes(fDTD, tagName);
+            List attrs = DTDProposalGenerator.getAttributes(fDTD, tagName);
 
             if (!attrs.isEmpty())
             {
-                List requiredAttributes = SpecTapestryAccess.getRequiredAttributes(fDTD, tagName);
+                List requiredAttributes = DTDProposalGenerator.getRequiredAttributes(fDTD, tagName);
                 for (Iterator iter = attrs.iterator(); iter.hasNext();)
                 {
                     String attrName = (String) iter.next();
@@ -335,11 +338,11 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         List proposals)
     {
 
-        List attrs = SpecTapestryAccess.getAttributes(fDTD, tagName);
+        List attrs = DTDProposalGenerator.getAttributes(fDTD, tagName);
 
         if (!attrs.isEmpty())
         {
-            List requiredAttributes = SpecTapestryAccess.getRequiredAttributes(fDTD, tagName);
+            List requiredAttributes = DTDProposalGenerator.getRequiredAttributes(fDTD, tagName);
             for (Iterator iter = attrs.iterator(); iter.hasNext();)
             {
                 String attrname = (String) iter.next();
@@ -382,9 +385,10 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         if (documentOffset - tag.getOffset() <= name.length() + 1)
         {
-            String comment = SpecTapestryAccess.getElementComment(fDTD, name);
-            return new IContextInformation[] {
-                 new ContextInformation(name, comment.length() == 0 ? "No Information" : comment)};
+            String comment = DTDProposalGenerator.getElementComment(fDTD, name);
+            if (comment != null)
+                return new IContextInformation[] {
+                     new ContextInformation(name, comment.length() == 0 ? "No Information" : comment)};
         }
 
         return NoInformation;

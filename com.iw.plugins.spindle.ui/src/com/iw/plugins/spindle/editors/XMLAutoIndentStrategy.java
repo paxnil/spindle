@@ -32,6 +32,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultAutoIndentStrategy;
+import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -60,6 +61,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
     private IPreferenceStore fPreferences;
     private int fTabDisplayWidth;
 
+    private DefaultLineTracker fLineTracker = new DefaultLineTracker();
+    ;
     public XMLAutoIndentStrategy(IPreferenceStore store)
     {
         super();
@@ -72,7 +75,7 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
      */
     public void customizeDocumentCommand(IDocument document, DocumentCommand command)
     {
-        if (command.length == 0 && command.text != null && endsWithDelimiter(document, command.text))
+        if (command.length == 0 && command.text != null && containsOnlyDelimiter(document, command.text))
         {
             int docLength = document.getLength();
             if (command.offset == -1 || docLength == 0)
@@ -96,6 +99,7 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
                     boolean inside =
                         offset <= artifact.getOffset() && offset < artifact.getOffset() + artifact.getLength();
 
+                    String newType = null;
                     if (inside && type != XMLDocumentPartitioner.TEXT)
                     {
                         doIndent(command, getIndent(document, artifact.getOffset()), 1);
@@ -105,6 +109,7 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
                         do
                         {
                             artifact = (XMLNode) walker.previous();
+
                         } while (artifact != null && artifact.getType() == XMLDocumentPartitioner.TEXT);
                     }
 
@@ -113,10 +118,21 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
                         super.customizeDocumentCommand(document, command);
                     } else
                     {
+                        type = artifact.getType();
                         if (type == XMLDocumentPartitioner.TAG)
+                        {
                             doIndent(command, getIndent(document, artifact.getOffset()), 1);
-                        else
+                        } else if (type == XMLDocumentPartitioner.ENDTAG)
+                        {
+                            XMLNode corr = artifact.getCorrespondingNode();
+                            if (corr != null)
+                                doIndent(command, getIndent(document, corr.getOffset()), 0);
+                            else
+                                doIndent(command, getIndent(document, artifact.getOffset()), 0);
+                        } else
+                        {
                             doIndent(command, getIndent(document, artifact.getOffset()), 0);
+                        }
                     }
                 }
             } catch (Exception e)
@@ -128,6 +144,13 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
                 disconnect();
             }
         }
+    }
+
+    private int getLineCount(IDocument document, XMLNode textNode)
+    {
+
+        fLineTracker.set(textNode.getContent());
+        return fLineTracker.getNumberOfLines();
     }
 
     private void doIndent(DocumentCommand command, int initialIndent, int additionalIndent)
@@ -145,12 +168,12 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
     /**
      * Returns whether or not the text ends with one of the given search strings.
      */
-    private boolean endsWithDelimiter(IDocument d, String txt)
+    private boolean containsOnlyDelimiter(IDocument d, String txt)
     {
         String[] delimiters = d.getLegalLineDelimiters();
         for (int i = 0; i < delimiters.length; i++)
         {
-            if (txt.endsWith(delimiters[i]))
+            if (txt.equals(delimiters[i]))
                 return true;
         }
         return false;

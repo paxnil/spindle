@@ -68,6 +68,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 
@@ -171,7 +172,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             String special = null;
 
             if (dtdAllowed.isEmpty())
-                special = SpecTapestryAccess.getTapestryDefaultValue(fDTD, fTagName, fAttributeName);
+                special = DTDProposalGenerator.getTapestryDefaultValue(fDTD, fTagName, fAttributeName);
 
             List proposals = new ArrayList(dtdAllowed);
 
@@ -466,8 +467,8 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
      */
     private List computeDTDAllowedProposals()
     {
-        List allowedValues = SpecTapestryAccess.getAllowedAttributeValues(fDTD, fTagName, fAttributeName);
-        String defaultValue = SpecTapestryAccess.getDefaultAttributeValue(fDTD, fTagName, fAttributeName);
+        List allowedValues = DTDProposalGenerator.getAllowedAttributeValues(fDTD, fTagName, fAttributeName);
+        String defaultValue = DTDProposalGenerator.getDefaultAttributeValue(fDTD, fTagName, fAttributeName);
 
         if (allowedValues == null || allowedValues.isEmpty())
             return Collections.EMPTY_LIST;

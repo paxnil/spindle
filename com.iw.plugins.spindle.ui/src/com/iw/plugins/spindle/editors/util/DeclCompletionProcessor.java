@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors.spec.assist;
+package com.iw.plugins.spindle.editors.util;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -40,7 +40,7 @@ import com.iw.plugins.spindle.editors.Editor;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class DeclCompletionProcessor extends SpecCompletionProcessor
+public class DeclCompletionProcessor extends ContentAssistProcessor
 {
 
     /**
@@ -74,7 +74,7 @@ public class DeclCompletionProcessor extends SpecCompletionProcessor
                     break;
             }
         }
-        return new ICompletionProposal[] {SpecTapestryAccess.getDefaultInsertCommentProposal(artifact.getOffset(), Math.max(2,index+1))};
+        return new ICompletionProposal[] {CommentCompletionProcessor.getDefaultInsertCommentProposal(artifact.getOffset(), Math.max(2,index+1))};
     }
 
 }

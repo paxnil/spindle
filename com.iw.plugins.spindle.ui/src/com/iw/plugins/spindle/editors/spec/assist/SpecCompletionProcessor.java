@@ -28,17 +28,12 @@ package com.iw.plugins.spindle.editors.spec.assist;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
 import org.xmen.xml.XMLNode;
 
@@ -48,7 +43,6 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
-import com.wutka.dtd.DTD;
 
 /**
  *  Base class for context assist processors for Tapestry specss
@@ -58,141 +52,73 @@ import com.wutka.dtd.DTD;
  */
 public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 {
-
-    protected static List findRawNewTagProposals(DTD dtd, XMLNode artifact, int documentOffset)
-    {
-        XMLNode parent = artifact.getParent();
-        XMLNode previousSibling = null;
-
-        if (parent != null && !parent.getType().equals("/"))
-        {
-            boolean lookupPreviousSib = artifact.getCorrespondingNode() != parent;
-            String parentName = parent.getName();
-            if (parentName != null)
-            {
-                String parentAllowedContent = SpecTapestryAccess.getAllowedElements(dtd, parentName);
-                if (parentAllowedContent != null)
-                {
-                    String sibName = null;
-                    if (lookupPreviousSib)
-                        previousSibling = artifact.getPreviousSiblingTag(parentAllowedContent);
-                    if (previousSibling != null)
-                        sibName = previousSibling.getName();
-                    return getRawNewTagProposals(dtd, parentName, sibName);
-                }
-            }
-        }
-        return Collections.EMPTY_LIST;
-
-    }
-
-    protected static List getRawNewTagProposals(DTD dtd, String parentName, String sibName)
-    {
-        List allowedChildren = SpecTapestryAccess.getAllowedChildren(dtd, parentName, sibName, false);
-        List result = new ArrayList();
-        for (Iterator iter = allowedChildren.iterator(); iter.hasNext();)
-        {
-            String tagName = (String) iter.next();
-            result.addAll(SpecTapestryAccess.getNewElementCompletionProposals(dtd, tagName));
-
-        }
-        return result;
-    }
-
-    protected String fDeclaredRootElementName;
-    protected String fPublicId;
-    protected DTD fDTD;
-    protected XMLNode fArtifact;
-
+    
     public SpecCompletionProcessor(Editor editor)
     {
         super(editor);
     }
 
-    public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset)
-    {
-        fDeclaredRootElementName = null;
-        fPublicId = null;
-        fDTD = null;
-        fArtifact = null;
-
-        try
-        {
-            IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-            fAssistParititioner.connect(document);
-            if (document.getLength() == 0 || document.get().trim().length() == 0)
-            {
-                return computeEmptyDocumentProposal(viewer, documentOffset);
-            }
-            Point p = viewer.getSelectedRange();
-            if (p.y > 0)
-                return NoProposals;
-
-            try
-            {
-                XMLNode root = XMLNode.createTree(document, -1);
-                fPublicId = root.fPublicId;
-                fDeclaredRootElementName = root.fRootNodeId;
-                fDTD = DOMValidator.getDTD(fPublicId);
-
-            } catch (BadLocationException e)
-            {
-                // do nothing
-            }
-
-            if (fDTD == null || fDeclaredRootElementName == null)
-                return NoProposals;
-
-            return doComputeCompletionProposals(viewer, documentOffset);
-
-        } catch (RuntimeException e)
-        {
-            UIPlugin.log(e);
-            throw e;
-        } finally
-        {
-            fAssistParititioner.disconnect();
-        }
-    }
-
     /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
+     * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect()
      */
-    public IContextInformation[] computeInformation(ITextViewer viewer, int documentOffset)
+    protected void connect(IDocument document) throws IllegalStateException
     {
+        String publicId = null;
+        fDTD = null;
+
+        super.connect(document);
         try
         {
-            IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-            fAssistParititioner.connect(document);
-
-            try
-            {
-                XMLNode root = XMLNode.createTree(document, -1);
-                fPublicId = root.fPublicId;
-                fDeclaredRootElementName = root.fRootNodeId;
-                fDTD = DOMValidator.getDTD(fPublicId);
-
-            } catch (BadLocationException e)
-            {
-                // do nothing
-            }
-
-            if (fDTD == null || fDeclaredRootElementName == null)
-                return NoInformation;
-
-            return doComputeContextInformation(viewer, documentOffset);
-
-        } catch (RuntimeException e)
+            XMLNode root = XMLNode.createTree(document, -1);
+            publicId = root.fPublicId;
+            fDTD = DOMValidator.getDTD(publicId);
+        } catch (BadLocationException e)
         {
-            UIPlugin.log(e);
-            throw e;
-        } finally
-        {
-            fAssistParititioner.disconnect();
+            // do nothing
         }
+
+        if (fDTD == null )
+            throw new IllegalStateException();
     }
 
-    private ICompletionProposal[] computeEmptyDocumentProposal(ITextViewer viewer, int documentOffset)
+    //    /* (non-Javadoc)
+    //     * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
+    //     */
+    //    public IContextInformation[] computeInformation(ITextViewer viewer, int documentOffset)
+    //    {
+    //        try
+    //        {
+    //            IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+    //            fAssistParititioner.connect(document);
+    //
+    //            try
+    //            {
+    //                XMLNode root = XMLNode.createTree(document, -1);
+    //                fPublicId = root.fPublicId;
+    //                fDeclaredRootElementName = root.fRootNodeId;
+    //                fDTD = DOMValidator.getDTD(fPublicId);
+    //
+    //            } catch (BadLocationException e)
+    //            {
+    //                // do nothing
+    //            }
+    //
+    //            if (fDTD == null || fDeclaredRootElementName == null)
+    //                return NoInformation;
+    //
+    //            return doComputeContextInformation(viewer, documentOffset);
+    //
+    //        } catch (RuntimeException e)
+    //        {
+    //            UIPlugin.log(e);
+    //            throw e;
+    //        } finally
+    //        {
+    //            fAssistParititioner.disconnect();
+    //        }
+    //    }
+
+    protected ICompletionProposal[] computeEmptyDocumentProposal(ITextViewer viewer, int documentOffset)
     {
 
         IStorage storage = fEditor.getStorage();

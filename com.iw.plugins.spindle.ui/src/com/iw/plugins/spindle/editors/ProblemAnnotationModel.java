@@ -291,7 +291,8 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
             if (annotation.isProblem())
             {
                 annotation.setOverlay(problemAnnotation);
-                fPreviouslyOverlaid.remove(annotation);
+                if (fPreviouslyOverlaid != null)
+                    fPreviouslyOverlaid.remove(annotation);
                 fCurrentlyOverlaid.add(annotation);
             }
         }

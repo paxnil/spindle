@@ -186,7 +186,7 @@ public abstract class UITapestryAccess
     {
         List result = new ArrayList();
 
-         List types = currentNamespace.getComponentTypes();
+        List types = currentNamespace.getComponentTypes();
 
         Map applicationTypes = new HashMap();
 
@@ -198,7 +198,7 @@ public abstract class UITapestryAccess
         }
 
         if (framework != null)
-        {            
+        {
             types = framework.getComponentTypes();
             for (Iterator iter = types.iterator(); iter.hasNext();)
             {
@@ -271,8 +271,22 @@ public abstract class UITapestryAccess
             pwriter.println();
             String description = componentSpec.getDescription();
             pwriter.println(description == null ? "no description available" : description);
-            pwriter.println();
             XMLUtil.writeComponentSpecificationHeader(pwriter, componentSpec, 0);
+            pwriter.println();
+            List parameterNames = componentSpec.getParameterNames();
+            if (!parameterNames.isEmpty())
+            {
+                pwriter.print("Parameters: ");
+                for (Iterator iter = parameterNames.iterator(); iter.hasNext();)
+                {
+                    String pname = (String) iter.next();
+                    pwriter.print(pname);
+                    if (iter.hasNext())
+                        pwriter.print(", ");
+                }
+            } else {
+                pwriter.print("No Parameters.");
+            }
             result.description = swriter.toString();
         }
 

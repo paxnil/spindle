@@ -25,8 +25,11 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.wizards.factories;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -61,6 +64,7 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
 public class ClassFactory
 {
 
+    private IFile fGeneratedFile;
     /**
      * Constructor for ClassFactory.
      */
@@ -80,6 +84,7 @@ public class ClassFactory
         IProgressMonitor monitor)
         throws CoreException, InterruptedException
     {
+        fGeneratedFile = null;
         ICompilationUnit createdWorkingCopy = null;
         IType createdType = null;
         try
@@ -148,7 +153,9 @@ public class ClassFactory
             buffer.replace(range.getOffset(), range.getLength(), formattedContent);
 
             cu.commit(false, new SubProgressMonitor(monitor, 1));
-
+            
+            IContainer container = (IContainer)pack.getUnderlyingResource();
+            fGeneratedFile =container.getFile(new Path(classname + ".java"));
         } catch (RuntimeException e)
         {
             UIPlugin.log(e);
@@ -325,6 +332,14 @@ public class ClassFactory
         IBuffer buf = createdType.getCompilationUnit().getBuffer();
         buf.replace(range.getOffset(), range.getLength(), formattedContent);
         buf.save(new SubProgressMonitor(monitor, 1), false);
+    }
+
+    /**
+     * @return
+     */
+    public IFile getGeneratedFile()
+    {
+       return fGeneratedFile;
     }
 
 }

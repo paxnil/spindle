@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
@@ -100,6 +101,8 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage
     private NewTapComponentWizardPage fFirstWizardPage;
 
     private IType finalSpecClass;
+    private IFile fGeneratedJavaFile = null;
+
 
     IDialogFieldChangedListener listener = new FieldEventsAdapter();
 
@@ -172,8 +175,8 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage
 
         IRunnableContext context = (IRunnableContext) getWizard().getContainer();
 
-        IJavaProject jproject = jelem.getJavaProject();
-        fChooseSpecClassDialogField.init(jproject, context);
+       
+        fChooseSpecClassDialogField.init(jelem == null ? null : jelem.getJavaProject(), context);
         fChooseSpecClassDialogField.setTextValue(fDefaultSpecClass);
 
         fChooseContainer.init(jelem, context);
@@ -356,7 +359,12 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage
                     fMakeAbstractField.getCheckBoxValue(),
                     null,
                     monitor);
+              fGeneratedJavaFile = factory.getGeneratedFile();
         }
+    }
+    
+    public IFile getGeneratedJavaFile() {
+        return fGeneratedJavaFile;
     }
 
     /**

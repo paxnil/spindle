@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors.spec.assist;
+package com.iw.plugins.spindle.editors.util;
 
 import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;
@@ -39,8 +39,6 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.util.CompletionProposal;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
 /**
  *  Processor for completing comments
@@ -123,4 +121,30 @@ public class CommentCompletionProcessor extends ContentAssistProcessor
 
     }
 
+    /**
+      * Return the default ICompletionProposal for inserting an XML Comment.
+      * <pre>
+      *  <!--  -->
+      * </pre>
+      * The cursor position after the proposal is applied is in the middle.
+      * 
+      * @param replacementOffset the location in the document where the proposal will be applied
+      * @param replacementLength the number of characters in the document from replacementOffset that will be replaced.
+      * @return
+      */
+    public static ICompletionProposal getDefaultInsertCommentProposal(int replacementOffset, int replacementLength)
+    {
+        CompletionProposal proposal =
+            new CompletionProposal(
+                "<!--  -->",
+                replacementOffset,
+                replacementLength,
+                new Point(5, 0),
+                Images.getSharedImage("bullet_d.gif"),
+                "Insert comment",
+                null,
+                null);
+        proposal.setYOrder(99);
+        return proposal;
+    }
 }

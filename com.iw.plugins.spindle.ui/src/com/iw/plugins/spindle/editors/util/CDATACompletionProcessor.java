@@ -23,8 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-
-package com.iw.plugins.spindle.editors.spec.assist;
+package com.iw.plugins.spindle.editors.util;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -33,6 +32,7 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.editors.Editor;
 
+
 /**
  *  Processor for default declType type - only works to insert comments within the
  *  body of the XML
@@ -40,7 +40,7 @@ import com.iw.plugins.spindle.editors.Editor;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class CDATACompletionProcessor extends SpecCompletionProcessor
+public class CDATACompletionProcessor extends ContentAssistProcessor
 {
 
     /**
@@ -66,7 +66,7 @@ public class CDATACompletionProcessor extends SpecCompletionProcessor
         if (content.equals("<!-"))
         {
             return new ICompletionProposal[] {
-                 SpecTapestryAccess.getDefaultInsertCommentProposal(artifact.getOffset(), 3)};
+                CommentCompletionProcessor.getDefaultInsertCommentProposal(artifact.getOffset(), 3)};
         }
         return NoProposals;
     }

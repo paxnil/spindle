@@ -77,13 +77,16 @@ public class DefaultTextHover implements ITextHover
             if (assistant == null)
                 return null;
 
-            ContentAssistProcessor assister =
-                (ContentAssistProcessor) assistant.getContentAssistProcessor(typedRegion.getType());
-            if (assister != null)
+            synchronized (fEditor)
             {
-                IContextInformation[] infos = assister.computeInformation(textViewer, hoverRegion.getOffset());
-                if (infos != null && infos.length > 0)
-                    return infos[0].getInformationDisplayString();
+                ContentAssistProcessor assister =
+                    (ContentAssistProcessor) assistant.getContentAssistProcessor(typedRegion.getType());
+                if (assister != null)
+                {
+                    IContextInformation[] infos = assister.computeInformation(textViewer, hoverRegion.getOffset());
+                    if (infos != null && infos.length > 0)
+                        return infos[0].getInformationDisplayString();
+                }
             }
 
         } catch (BadLocationException e)
