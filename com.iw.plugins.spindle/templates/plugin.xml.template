@@ -404,4 +404,17 @@
             id="com.iw.plugins.spindle.editors.BadStringMarkerUpdater">
       </updater>
    </extension>
+    
+   <extension point="org.eclipse.ui.preferencePages">
+ 	<page id="SpindleRefactoringPage"
+ 		name="Spindle"
+    		class="com.iw.plugins.spindle.preferences.SpindleRefactorPreferencePage">
+   	</page>
+   	
+ 	<page id="BadWordsColorPreferencePage"
+  	      	name="ToolTips"
+	      	class="com.iw.plugins.spindle.preferences.SpindleTooltipPreferencePage"
+		category="SpindleRefactoringPage">
+   	</page>
+	</extension>
 </plugin>

@@ -159,8 +159,8 @@ public class PluginParameterSpecification extends ParameterSpecification impleme
     }
   }
 
-  private String[] directionLabels = { "custom", "in" };
-  private Direction[] directions = { Direction.CUSTOM, Direction.IN };
+  private String[] directionLabels = { "custom", "in" , "form"};
+  private Direction[] directions = { Direction.CUSTOM, Direction.IN, Direction.FORM};
 
   /**
    * @see org.eclipse.ui.views.properties.IPropertySource#getEditableValue()
