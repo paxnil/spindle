@@ -8,7 +8,12 @@
    -->
   <property name="prefix" value="com.iw.plugins.spindle"/>
   <property name="solar.eclipse.prefix" value="net.sf.solareclipse"/>
+  <property name="xerces.prefix" value="org.apache.xerces"/>
   <property name="load.properties" value="build/build.properties"/>
+  
+  <property name="status" value="Beta">
+  	
+  </property>
   <!-- 
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
          Properties related to the directory tree and 
@@ -22,45 +27,29 @@
   <property name="templates.dir" value="templates"/>
   <!-- 
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         Locations of generated artifacts
-       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   -->
-  <!-- deployDir is passed in by Anthill -->
-  <property name="test.result.dir" value="${build.dir}/testresults"/>
-  <property name="test.report" value="testreports"/>
-  <property name="test.report.dir" value="${build.dir}/${test.report}"/>
-  <property name="test.coverage" value="testcoverage"/>
-  <property name="test.coverage.dir" value="${build.dir}/${test.coverage}"/>
-  <property name="java2html" value="java2html"/>
-  <property name="dist.java2html.dir" location="${build.dir}/${java2html}"/>
-  <property name="javadoc" value="javadoc"/>
-  <property name="javadoc.dir" value="${build.dir}/${javadoc}"/>
-  <property name="jar.location" value="${build.dir}"/>
-  <!-- 
-       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
          init - includes loading of properties from a file
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    -->
-  <target name="init" depends="load.properties">    
+  <target name="init">
+<!--    
+  <target name="init" depends="load.properties">
     <property name="core.jar" value="${prefix}.core_${version}.jar"/>
     <property name="ui.jar" value="${prefix}.ui_${version}.jar"/>
     <property name="doc.jar" value="${prefix}.doc_${doc.version}.jar"/>
-    <property name="se.ui.jar" 
-      value="${solar.eclipse.prefix}.ui_${solar.eclipse.ui.version}.jar"/>
-    <property name="se.ui.xml.jar" 
-      value="${solar.eclipse.prefix}.ui.xml_${solar.eclipse.ui.xml.version}.jar"/>
+-->
   </target>
   <target name="load.properties" if="properties.file">
     <loadproperties srcfile="${properties.file}"/>
     <echo message="version = ${version}"/>
+<!--    
     <echo message="doc.version = ${doc.version}"/>
     <echo message="solar.eclipse.ui.version = ${solar.eclipse.ui.version}"/>
     <echo 
       message="solar.eclipse.ui.xml.version = ${solar.eclipse.ui.xml.version}"/>
+-->
   </target>
   <target name="check.version" unless="version">
-    <fail> -Dversion=blah is required! 
-      </fail>
+    <fail> -Dversion=blah is required! </fail>
   </target>
   <!-- 
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -107,12 +96,14 @@
     <copy file="SpindleMasthead.jpg" tofile="${site.dir}/SpindleMasthead.jpg"/>
     <replace file="${site.dir}/site.xml" token="@version@" value="${version}"/>
     <replace file="${site.dir}/index.html" token="@version@" value="${version}"/>
+    <replace file="${site.dir}/index.html" token="@status@" value="${status}"/>
     <tar tarfile="${target.dir}/com.iw.plugins.spindle_${version}.tar.gz" 
       compression="gzip" >
       <tarfileset dir="${basedir}">
         <include name="features/com.iw.features.spindle*.jar"/>
         <include name="plugins/com.iw.plugins.spindle*.jar"/>
         <include name="plugins/net.sf.solareclipse*.jar"/>
+        <include name="plugins/org.apache.xerces*.jar"/>
       </tarfileset>
       <tarfileset dir="${site.dir}">
         <include name="site.xml"/>
@@ -135,6 +126,7 @@
       <tarfileset dir="${plugins.dir}">
         <include name="com.iw.plugins.spindle*.jar"/>
         <include name="net.sf.solareclipse*.jar"/>
+        <include name="org.apache.xerces*.jar"/>
       </tarfileset>
       <tarfileset dir="${target.dir}">
         <include name="com.iw.plugins.spindle*.gz"/>
