@@ -292,7 +292,7 @@ public class WebXMLScanner extends AbstractScanner
       }
     } catch (JavaModelException e)
     {
-      TapestryCore.log(e);
+      TapestryCore.log("Not a valid Tapestry ApplicationServlet subclass", e);
     }
 
     return result;
