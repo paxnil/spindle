@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="com.iw.plugins.spindle"
+   name="Spindle, an Eclipse Plugin for Tapestry (tapestry.sourceforge.net)"
+   version="0.0.9"
+   provider-name="Intelligent Works Inc."
+   class="com.iw.plugins.spindle.TapestryPlugin">
+
+   <runtime>
+      <library name="javax.xml.jaxp.jar"/>
+      <library name="log4j-core.jar"/>
+      <library name="org.apache.crimson.jar"/>
+      <library name="javax.servlet.jar"/>
+      <library name="iw_tapestry.jar"/>
+      <library name="com.primix.tapestry-2.0.1.jar"/>
+   </runtime>
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.pde"/>
+      <import plugin="org.eclipse.update.ui.forms"/>
+   </requires>
+
+
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Spindle (Tapestry)"
+            id="com.iw.plugins.spindle.new">
+      </category>
+      <wizard
+            name="Tapestry Application"
+            icon="./icons/basic/application16.gif"
+            category="com.iw.plugins.spindle.new"
+            class="com.iw.plugins.spindle.wizards.NewTapAppWizard"
+            id="com.iw.plugins.spindle.new_app_wizard">
+         <description>
+            Create a new Tapestry Application
+         </description>
+      </wizard>
+      <wizard
+            name="Tapestry Component"
+            icon="./icons/basic/component16.gif"
+            category="com.iw.plugins.spindle.new"
+            class="com.iw.plugins.spindle.wizards.NewTapComponentWizard"
+            id="com.iw.plugins.spindle.new_jwc_wizard">
+         <description>
+            Create a new Tapestry Component
+         </description>
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="Spindle editor for Tapestry Applications"
+            default="true"
+            icon="icons/basic/application16.gif"
+            filenames="*.application"
+            contributorClass="com.iw.plugins.spindle.editorapp.APPMultipageEditorContributor"
+            class="com.iw.plugins.spindle.editorapp.APPMultipageEditor"
+            id="com.iw.plugins.spindle.editors.app_editor">
+      </editor>
+      <editor
+            name="Spindle Editor for Tapestry Components"
+            default="true"
+            icon="./icons/basic/component16.gif"
+            filenames="*.jwc"
+            contributorClass="com.iw.plugins.spindle.editorjwc.JWCMultipageEditorContributor"
+            class="com.iw.plugins.spindle.editorjwc.JWCMultipageEditor"
+            id="com.iw.plugins.spindle.editors.jwc_editor">
+      </editor>
+      <editor
+            name="Spindle HTML Editor for Tapestry"
+            default="true"
+            icon="./icons/basic/html16.gif"
+            filenames="*.html"
+            contributorClass="com.iw.plugins.spindle.html.TapestryHTMLEditorContributor"
+            class="com.iw.plugins.spindle.html.TapestryHTMLEditor"
+            id="com.iw.plugins.spindle.editors.html">
+      </editor>
+   </extension>
+   <extension
+         id="tapestryproblem"
+         name="TapestryProblem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="Spindle Toolbar Action Set"
+            visible="false"
+            id="com.iw.spindle.actions.set">
+         <action
+               label="New Tapestry Application"
+               icon="icons/full/application16.jpg"
+               tooltip="Create a new Tapestry Application"
+               class="com.iw.plugins.spindle.wizards.OpenTapestryApplicationWizard"
+               toolbarPath="Normal/spindle"
+               id="com.iw.spindle.actions.set.OpenTapestryApplicationWizard">
+         </action>
+         <action
+               label="New Tapestry Component"
+               icon="icons/full/component16.gif"
+               tooltip="Create a new Tapestry Component"
+               class="com.iw.plugins.spindle.wizards.OpenTapestryComponentWizard"
+               toolbarPath="Normal/spindle"
+               id="com.iw.spindle.actions.set.OpenTapestryComponentWizard">
+         </action>
+      </actionSet>
+   </extension>
+
+</plugin>
