@@ -139,7 +139,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
 
     /**
      * @param viewer
-     * @param documentOffset
+     * @param fDocumentOffset
      * @return
      */
     public IContextInformation[] computeInformation(ITextViewer viewer, int documentOffset)

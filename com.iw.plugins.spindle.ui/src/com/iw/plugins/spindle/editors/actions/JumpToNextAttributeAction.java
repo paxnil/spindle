@@ -208,7 +208,7 @@ public class JumpToNextAttributeAction extends BaseJumpAction implements IDocume
 
                 if (!overlaps(documentOffset, regions[i]) && offset > documentOffset)
                     return i;
-                //            } else if (documentOffset <= end)
+                //            } else if (fDocumentOffset <= end)
                 //        {
                 //            return i;
                 //        }

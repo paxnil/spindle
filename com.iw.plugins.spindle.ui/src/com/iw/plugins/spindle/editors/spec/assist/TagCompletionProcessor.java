@@ -262,7 +262,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
     }
 
     /**
-     * @param documentOffset
+     * @param fDocumentOffset
      * @param existingAttr
      * @param tagName
      * @param set

@@ -486,7 +486,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
    * </ul>
    * 
    * @param status
-   * @param jproject
+   * @param fJavaProject
    */
   protected void checkNewType(SpindleStatus status, IJavaProject jproject) throws JavaModelException
   {

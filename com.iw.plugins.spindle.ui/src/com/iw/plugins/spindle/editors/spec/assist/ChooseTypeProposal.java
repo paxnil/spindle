@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.core.search.JavaSearchScope;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -51,145 +52,194 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
- *  Proposal that gets it contents from the user!
+ * Proposal that gets it contents from the user!
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public class ChooseTypeProposal implements ICompletionProposal
 {
-    protected IJavaProject jproject;
-    String chosenType;
-    boolean includeInterfaces;
-    int documentOffset;
-    int replacementOffset;
-    int replacementLength;
- 
-    public ChooseTypeProposal(
-        IJavaProject project,
-        boolean includeInterfaces,
-        int documentOffset,
-        int replacementOffset,
-        int replacementLength)
+  protected IJavaProject fJavaProject;
+  String chosenType;
+  String fHierarchyRoot;
+  boolean fIncludeInterfaces;
+  int fDocumentOffset;
+  int fReplacementOffset;
+  int fReplacementLength;
+
+  public ChooseTypeProposal(IJavaProject project, boolean includeInterfaces,
+      int documentOffset, int replacementOffset, int replacementLength)
+  {
+    this(
+        project,
+        null,
+        includeInterfaces,
+        documentOffset,
+        replacementLength,
+        replacementLength);
+  }
+
+  public ChooseTypeProposal(IJavaProject project, String hierarchyRoot,
+      boolean includeInterfaces, int documentOffset, int replacementOffset,
+      int replacementLength)
+  {
+    Assert.isNotNull(project);
+    fJavaProject = project;
+    fHierarchyRoot = hierarchyRoot;
+    fIncludeInterfaces = includeInterfaces;
+    fDocumentOffset = documentOffset;
+    fReplacementOffset = replacementOffset;
+    fReplacementLength = replacementLength;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
+   */
+  public void apply(IDocument document)
+  {
+    chosenType = chooseType("Java Type Chooser");
+    if (chosenType != null)
     {
-        Assert.isNotNull(project);
-        jproject = project;
-        this.includeInterfaces = includeInterfaces;
-        this.documentOffset = documentOffset;
-        this.replacementOffset = replacementOffset;
-        this.replacementLength = replacementLength;
+      if (chosenType.length() == 0)
+      {
+        chosenType = null;
+        return;
+      }
+
+      try
+      {
+        document.replace(fReplacementOffset, fReplacementLength, chosenType);
+      } catch (BadLocationException x)
+      {
+        // ignore
+      }
+
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
-     */
-    public void apply(IDocument document)
-    {
-        chosenType = chooseType("Java Type Chooser");
-        if (chosenType != null)
-        {
-            if (chosenType.length() == 0)
-            {
-                chosenType = null;
-                return;
-            }
+  }
 
-            try
-            {
-                document.replace(replacementOffset, replacementLength, chosenType);
-            } catch (BadLocationException x)
-            {
-                // ignore
-            }
+  protected String chooseType(String title)
+  {
 
-        }
-
-    }
-
-    protected String chooseType(String title)
+    Shell shell = UIPlugin.getDefault().getActiveWorkbenchShell();
+    try
     {
 
-        Shell shell = UIPlugin.getDefault().getActiveWorkbenchShell();
-        try
-        {
-
-            if (jproject == null)
-                return null;
-
-            IJavaSearchScope scope = createSearchScope(jproject);
-
-            SelectionDialog dialog =
-                JavaUI.createTypeDialog(
-                    shell,
-                    new ProgressMonitorDialog(shell),
-                    scope,
-                    (includeInterfaces
-                        ? IJavaElementSearchConstants.CONSIDER_TYPES
-                        : IJavaElementSearchConstants.CONSIDER_CLASSES),
-                    false);
-
-            dialog.setTitle(includeInterfaces ? "Java Type Chooser" : "Java Class Chooser");
-            dialog.setMessage("Choose " + (includeInterfaces ? "Type" : "a Class"));
-
-            if (dialog.open() == dialog.OK)
-            {
-                IType chosen = (IType) dialog.getResult()[0];
-                return chosen.getFullyQualifiedName(); //FirstResult();
-            }
-        } catch (CoreException jmex)
-        {
-            ErrorDialog.openError(shell, "Spindle error", "unable to continue", jmex.getStatus());
-        }
+      if (fJavaProject == null)
         return null;
-    }
 
-    protected IJavaSearchScope createSearchScope(IJavaElement element) throws JavaModelException
+      IJavaSearchScope scope = createSearchScope(fJavaProject, fHierarchyRoot);
+
+      SelectionDialog dialog = JavaUI.createTypeDialog(shell, new ProgressMonitorDialog(
+          shell), scope, (fIncludeInterfaces
+          ? IJavaElementSearchConstants.CONSIDER_TYPES
+          : IJavaElementSearchConstants.CONSIDER_CLASSES), false);
+
+      dialog.setTitle(fIncludeInterfaces ? "Java Type Chooser" : "Java Class Chooser");
+      dialog.setMessage("Choose " + (fIncludeInterfaces ? "Type" : "a Class"));
+
+      if (dialog.open() == dialog.OK)
+      {
+        IType chosen = (IType) dialog.getResult()[0];
+        return chosen.getFullyQualifiedName(); //FirstResult();
+      }
+    } catch (CoreException jmex)
     {
-        JavaSearchScope scope = new JavaSearchScope();
-        scope.add(element);
-        return scope;
+      ErrorDialog.openError(shell, "Spindle error", "unable to continue", jmex
+          .getStatus());
     }
+    return null;
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-     */
-    public String getAdditionalProposalInfo()
+  protected IJavaSearchScope createSearchScope(IJavaProject jproject, String hierarchyRoot) throws JavaModelException
+  {
+    IJavaSearchScope result = null;
+    IType hrootElement = null;
+    try
     {
-        return "Note due to a known pre-existing bug in eclispe:\n\n [Bug 45193] hierarchy scope search only shows types that exist in jars\n\nThe search can't be limited to Tapestry types";
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
-     */
-    public IContextInformation getContextInformation()
+      if (hierarchyRoot != null)
+      {
+        hrootElement = resolveTypeName(jproject, hierarchyRoot);
+      }
+      if (hrootElement != null)
+      {
+        result = SearchEngine.createHierarchyScope(hrootElement);
+      }
+    } catch (JavaModelException jmex)
     {
-        return null;
+      //ignore
+      jmex.printStackTrace();
     }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
-     */
-    public String getDisplayString()
+    if (result == null)
     {
-        return "Choose Type Dialog";
+      IJavaElement[] elements = new IJavaElement[]{jproject};
+      result = SearchEngine.createJavaSearchScope(elements);
     }
+    return result;
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-     */
-    public Image getImage()
-    {
-        return Images.getSharedImage("opentype.gif");
-    }
+  protected IType resolveTypeName(IJavaProject jproject, String typeName) throws JavaModelException
+  {
+    if (jproject == null)
+      return null;
+    return jproject.findType(typeName);
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-     */
-    public Point getSelection(IDocument document)
-    {
-        if (chosenType == null)
-            return new Point(documentOffset, 0);
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+   */
+  public String getAdditionalProposalInfo()
+  {
+    //        return "Note due to a known pre-existing bug in eclispe:\n\n [Bug 45193]
+    // hierarchy scope search only shows types that exist in jars\n\nThe search
+    // can't be limited to Tapestry types";
+    return null;
+  }
 
-        return new Point(replacementOffset + chosenType.length(), 0);
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
+   */
+  public IContextInformation getContextInformation()
+  {
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
+   */
+  public String getDisplayString()
+  {
+    return "Choose Type Dialog" + (fHierarchyRoot != null ? " implements ("+fHierarchyRoot+")": "");
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
+   */
+  public Image getImage()
+  {
+    return Images.getSharedImage("opentype.gif");
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
+   */
+  public Point getSelection(IDocument document)
+  {
+    if (chosenType == null)
+      return new Point(fDocumentOffset, 0);
+
+    return new Point(fReplacementOffset + chosenType.length(), 0);
+  }
 }

@@ -86,7 +86,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
     //    /* (non-Javadoc)
     //     * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
     //     */
-    //    public IContextInformation[] computeInformation(ITextViewer viewer, int documentOffset)
+    //    public IContextInformation[] computeInformation(ITextViewer viewer, int fDocumentOffset)
     //    {
     //        try
     //        {
@@ -108,7 +108,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
     //            if (fDTD == null || fDeclaredRootElementName == null)
     //                return NoInformation;
     //
-    //            return doComputeContextInformation(viewer, documentOffset);
+    //            return doComputeContextInformation(viewer, fDocumentOffset);
     //
     //        } catch (RuntimeException e)
     //        {

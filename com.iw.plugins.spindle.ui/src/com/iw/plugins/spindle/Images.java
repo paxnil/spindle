@@ -108,19 +108,19 @@ public class Images
 
   static private URL checkBase(URL candidate)
   {
-    String current = candidate.getPath();
-    int index = current.indexOf("_");
-    if (index != -1)
-    {
-      try
-      {
-        current = current.substring(0, index) + "/";
-        return new URL(candidate.getProtocol(), "", current);
-      } catch (MalformedURLException mex)
-      {
-        UIPlugin.log(mex);
-      }
-    }
+//    String current = candidate.getPath();
+//    int index = current.indexOf("_");
+//    if (index != -1)
+//    {
+//      try
+//      {
+//        current = current.substring(0, index) + "/";
+//        return new URL(candidate.getProtocol(), "", current);
+//      } catch (MalformedURLException mex)
+//      {
+//        UIPlugin.log(mex);
+//      }
+//    }
     return candidate;
   }
 
