@@ -4,21 +4,6 @@
    <description>
       Eclipse update site for Spindle 3 integration builds. Select builds on this site are promoted to beta status and made available at http://spindle.sourceforge.net/updates.
    </description>
-   <feature url="features/com.iw.features.spindle_3.0.14.jar" id="com.iw.features.spindle" version="3.0.14">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.15.jar" id="com.iw.features.spindle" version="3.0.15">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.16.jar" id="com.iw.features.spindle" version="3.0.16">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.17.jar" id="com.iw.features.spindle" version="3.0.17">
-      <category name="older_alphas"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.0.18.jar" id="com.iw.features.spindle" version="3.0.18">
-      <category name="older_alphas"/>
-   </feature>
    <feature url="features/com.iw.features.spindle_3.0.19.jar" id="com.iw.features.spindle" version="3.0.19">
       <category name="older_alphas"/>
    </feature>
@@ -35,6 +20,30 @@
       <category name="older_alphas"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.0.24.jar" id="com.iw.features.spindle" version="3.0.24">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.25.jar" id="com.iw.features.spindle" version="3.0.25">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.26.jar" id="com.iw.features.spindle" version="3.0.26">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.27.jar" id="com.iw.features.spindle" version="3.0.27">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.18.jar" id="com.iw.features.spindle" version="3.0.18">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.17.jar" id="com.iw.features.spindle" version="3.0.17">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.16.jar" id="com.iw.features.spindle" version="3.0.16">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.15.jar" id="com.iw.features.spindle" version="3.0.15">
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.28.jar" id="com.iw.features.spindle" version="3.0.28">
       <category name="spindle3_0_latest"/>
    </feature>
    <category-def name="spindle3_0_latest" label="Spindle 3 latest integration build">

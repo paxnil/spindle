@@ -26,6 +26,8 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.template;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Map;
 
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -76,6 +78,8 @@ import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.template.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.template.actions.ShowInPackageExplorerAction;
+import com.wutka.dtd.DTD;
+import com.wutka.dtd.DTDParser;
 
 /**
  * HTML Editor.
@@ -88,6 +92,45 @@ public class TemplateEditor extends Editor
     static public final String SAVE_HTML_TEMPLATE = HTML_GROUP + ".saveTemplateAction";
     static public final String REVERT_HTML_TEMPLATE = HTML_GROUP + ".revertTemplateAction";
 
+    static public String XHTML_NONE_LABEL = "none";
+    static public String XHTML_STRICT_LABEL = "strict";
+    static public String XHTML_STRICT_DTD = "xhtml1-strict.dtd";
+    static public String XHTML_TRANSITIONAL_LABEL = "transitional";
+    static public String XHTML_TRANSITIONAL_DTD = "xhtml1-transitional.dtd";
+    static public String XHTML_FRAMES_LABEL = "frameset";
+    static public String XHTML_FRAMES_DTD = "xhtml1-frameset.dtd";
+
+    static public DTD XHTML_STRICT;
+    static public DTD XHTML_TRANSITIONAL;
+    static public DTD XHTML_FRAMESET;
+
+    static {
+        try
+        {
+            XHTML_STRICT =
+                new DTDParser(
+                    new InputStreamReader(TemplateEditor.class.getResourceAsStream(XHTML_STRICT_DTD)),
+                    null,
+                    false)
+                    .parse();
+            XHTML_TRANSITIONAL =
+                new DTDParser(
+                    new InputStreamReader(TemplateEditor.class.getResourceAsStream(XHTML_TRANSITIONAL_DTD)),
+                    null,
+                    false)
+                    .parse();
+            XHTML_FRAMESET =
+                new DTDParser(
+                    new InputStreamReader(TemplateEditor.class.getResourceAsStream(XHTML_FRAMES_DTD)),
+                    null,
+                    false)
+                    .parse();
+        } catch (IOException e)
+        {
+            UIPlugin.log(e);
+        }
+    }
+
     private TemplateScanner fScanner = new TemplateScanner();
     private IScannerValidator fValidator = new BaseValidator();
     private HighlightUpdater fHighlightUpdater;
@@ -95,7 +138,6 @@ public class TemplateEditor extends Editor
     public TemplateEditor()
     {
         super();
-
     }
 
     protected boolean affectsTextPresentation(PropertyChangeEvent event)
@@ -290,7 +332,7 @@ public class TemplateEditor extends Editor
     /* (non-Javadoc)
       * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
       */
-    public void addListener(IReconcileListener listener)
+    public void addReconcileListener(IReconcileListener listener)
     {
         // ignore
 
@@ -299,7 +341,7 @@ public class TemplateEditor extends Editor
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.editors.IReconcileWorker#removeListener(com.iw.plugins.spindle.editors.IReconcileListener)
      */
-    public void removeListener(IReconcileListener listener)
+    public void removeReconcileListener(IReconcileListener listener)
     {
         // ignore
     }
@@ -396,9 +438,7 @@ public class TemplateEditor extends Editor
         {
             if (fHighlightPartitioner == null)
                 fHighlightPartitioner =
-                    new XMLDocumentPartitioner(
-                        XMLDocumentPartitioner.SCANNER,
-                        XMLDocumentPartitioner.TYPES);
+                    new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
 
             IDocument document = getDocumentProvider().getDocument(getEditorInput());
 

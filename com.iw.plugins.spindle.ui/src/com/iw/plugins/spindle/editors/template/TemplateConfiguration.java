@@ -30,9 +30,12 @@ import net.sf.solareclipse.text.TextDoubleClickStrategy;
 import net.sf.solareclipse.xml.internal.ui.text.AttValueDoubleClickStrategy;
 import net.sf.solareclipse.xml.internal.ui.text.SimpleDoubleClickStrategy;
 import net.sf.solareclipse.xml.internal.ui.text.TagDoubleClickStrategy;
+import net.sf.solareclipse.xml.internal.ui.text.XMLPartitionScanner;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DefaultAutoIndentStrategy;
+import org.eclipse.jface.text.IAutoIndentStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
@@ -50,6 +53,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
+import com.iw.plugins.spindle.editors.XMLAutoIndentStrategy;
 import com.iw.plugins.spindle.editors.template.assist.AttributeContentAssistProcessor;
 import com.iw.plugins.spindle.editors.template.assist.DefaultContentAssistProcessor;
 import com.iw.plugins.spindle.editors.template.assist.JWCIDContentAssistProcessor;
@@ -252,6 +256,16 @@ public class TemplateConfiguration extends BaseSourceConfiguration
         assistant.install(sourceViewer);
 
         return assistant;
+    }
+
+    /* (non-Javadoc)
+        * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAutoIndentStrategy(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
+        */
+    public IAutoIndentStrategy getAutoIndentStrategy(ISourceViewer sourceViewer, String contentType)
+    {
+        if (contentType == XMLPartitionScanner.XML_COMMENT || contentType == XMLPartitionScanner.XML_CDATA)
+            return new DefaultAutoIndentStrategy();
+        return new XMLAutoIndentStrategy(UIPlugin.getDefault().getPreferenceStore());
     }
 
 }

@@ -26,6 +26,7 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,11 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      **/
     private Map fComponents;
 
-    private String fDescription;
+    /**
+       *  The locations and values of all component declarations in a document.
+       *  Immutable after a parse/scan episode.
+       */
+    private List fComponentTypeDeclarations;
 
     /**
      *  Map of extension name to {@link IExtensionSpecification}.
@@ -70,11 +75,23 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     private Map fLibraries;
 
     /**
+     *  The locations and values of all library declarations in a document.
+     *  Immutable after a parse/scan episode.
+     */
+    private List fLibraryDeclarations;
+
+    /**
      *  Map of page name to page specification path.
      * 
      **/
 
     private Map fPages;
+
+    /**
+       *  The locations and values of all page declarations in a document.
+       *  Immutable after a parse/scan episode.
+       */
+    private List fPageDeclarations;
 
     /**
      *  Map of service name to service class name.
@@ -84,12 +101,18 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     private Map fServices;
 
     /**
+      *  The locations and values of all service declarations in a document.
+      *  Immutable after a parse/scan episode.
+      */
+    private List fEngineServiceDeclarations;
+
+    /**
      *  Resource resolver 
      * 
      **/
 
     private IResourceResolver fResourceResolver;
-    
+
     private INamespace fNamespace;
 
     private String fPublicId;
@@ -107,6 +130,70 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     protected PluginLibrarySpecification(int type)
     {
         super(type);
+    }
+    
+    public void addLibraryDeclaration(PluginLibraryDeclaration declaration)
+     {
+         if (fLibraryDeclarations == null)
+         fLibraryDeclarations = new ArrayList();
+
+         fLibraryDeclarations.add(declaration);
+     }
+
+     public List getLibraryDeclaration()
+     {
+         if (fLibraryDeclarations != null)
+             return Collections.unmodifiableList(fLibraryDeclarations);
+
+         return Collections.EMPTY_LIST;
+     }
+
+    public void addPageDeclaration(PluginPageDeclaration declaration)
+    {
+        if (fPageDeclarations == null)
+            fPageDeclarations = new ArrayList();
+
+        fPageDeclarations.add(declaration);
+    }
+
+    public List getPageDeclarations()
+    {
+        if (fPageDeclarations != null)
+            return Collections.unmodifiableList(fPageDeclarations);
+
+        return Collections.EMPTY_LIST;
+    }
+
+    public void addComponentTypeDeclaration(PluginComponentTypeDeclaration declaration)
+    {
+        if (fComponentTypeDeclarations == null)
+            fComponentTypeDeclarations = new ArrayList();
+
+        fComponentTypeDeclarations.add(declaration);
+    }
+
+    public List getComponentTypeDeclarations()
+    {
+        if (fComponentTypeDeclarations != null)
+            return Collections.unmodifiableList(fComponentTypeDeclarations);
+
+        return Collections.EMPTY_LIST;
+    }
+
+    public void addEngineServiceDeclaration(PluginEngineServiceDeclaration declaration)
+    {
+        if (fEngineServiceDeclarations == null)
+            fEngineServiceDeclarations = new ArrayList();
+
+        fEngineServiceDeclarations.add(declaration);
+    }
+
+    public List getEngineServiceDeclaration()
+    {
+        if (fEngineServiceDeclarations != null)
+            return Collections.unmodifiableList(fEngineServiceDeclarations);
+
+        return Collections.EMPTY_LIST;
     }
 
     /* (non-Javadoc)
@@ -153,19 +240,11 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     }
 
     /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.ILibrarySpecification#getDescription()
-     */
-    public String getDescription()
-    {
-        return fDescription;
-    }
-
-    /* (non-Javadoc)
      * @see org.apache.tapestry.spec.ILibrarySpecification#getExtension(java.lang.String)
      */
     public Object getExtension(String name)
     {
-        return null;
+        return get(fExtensions, name);
     }
 
     /* (non-Javadoc)
@@ -303,8 +382,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      * @see org.apache.tapestry.spec.ILibrarySpecification#instantiateImmediateExtensions()
      */
     public void instantiateImmediateExtensions()
-    {
-    }
+    {}
 
     public void removeComponentSpecificationPath(String type)
     {
@@ -335,17 +413,6 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
             fComponents = new PropertyFiringMap(this, "components");
 
         fComponents.put(type, path);
-
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.ILibrarySpecification#setDescription(java.lang.String)
-     */
-    public void setDescription(String description)
-    {
-        String old = fDescription;
-        fDescription = description;
-        firePropertyChange("description", old, fDescription);
 
     }
 

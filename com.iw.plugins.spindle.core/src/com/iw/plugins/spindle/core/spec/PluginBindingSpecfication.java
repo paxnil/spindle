@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.BindingType;
 import org.apache.tapestry.spec.IBindingSpecification;
 
@@ -36,7 +35,7 @@ import org.apache.tapestry.spec.IBindingSpecification;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class PluginBindingSpecfication extends BaseSpecification implements IBindingSpecification
+public class PluginBindingSpecfication extends DescribableSpecification implements IBindingSpecification
 {
 
     private BindingType fBindingType;
@@ -88,17 +87,5 @@ public class PluginBindingSpecfication extends BaseSpecification implements IBin
         firePropertyChange("value", old, this.fValue);
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#setNamespace(org.apache.tapestry.INamespace)
-     */
-    public void setNamespace(INamespace ns)
-    {}
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#getNamespace()
-     */
-    public INamespace getNamespace()
-    {
-        return null;
-    }
+   
 }

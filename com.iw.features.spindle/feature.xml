@@ -2,13 +2,13 @@
 <feature
       id="com.iw.features.spindle"
       label="Spindle 3, an Eclipse Plugin for Tapestry"
-      version="3.0.24"
+      version="3.0.28"
       provider-name="Intelligent Works Inc"
       image="spindle.gif">
 
    <description url="http://spindle.sourceforge.net">
-      Spindle 3.0 provides IDE support for Web Applications built with
-Tapestry Web Components (http://jakarat.apache.org/tapestry).
+      Spindle 3 provides IDE support for Web Applications built with
+Tapestry Web Components (http://jakarta.apache.org/tapestry).
    </description>
 
    <copyright>
@@ -77,12 +77,12 @@ All Rights Reserved
          id="com.iw.plugins.spindle.core"
          download-size="0"
          install-size="0"
-         version="0.0.24"/>
+         version="0.0.28"/>
 
    <plugin
          id="com.iw.plugins.spindle.ui"
          download-size="0"
          install-size="0"
-         version="0.0.24"/>
+         version="0.0.28"/>
 
 </feature>

@@ -31,8 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.tapestry.util.IPropertyHolder;
-
 import com.iw.plugins.spindle.core.util.PropertyFiringMap;
 
 /**
@@ -41,9 +39,15 @@ import com.iw.plugins.spindle.core.util.PropertyFiringMap;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class BasePropertyHolder extends BaseSpecification implements IPropertyHolder
+public abstract class BasePropertyHolder extends DescribableSpecification implements IPluginPropertyHolder
 {
     Map fProperties;
+    
+    /**
+     *  The locations and values of all reserved property declarations in a the document for this holder.
+     *  Immutable after a parse/scan episode.
+     */
+    List fPropertyDeclarations;
 
     /**
      * 
@@ -52,6 +56,19 @@ public abstract class BasePropertyHolder extends BaseSpecification implements IP
     {
         super(type);
 
+    }
+    
+    public void addPropertyDeclaration(PluginPropertyDeclaration declaration) {
+        if (fPropertyDeclarations == null)
+            fPropertyDeclarations = new ArrayList();
+            
+        fPropertyDeclarations.add(declaration);
+    }
+    
+    public List getPropertyDeclarations() {
+        if (fPropertyDeclarations == null)
+            return Collections.EMPTY_LIST;
+        return fPropertyDeclarations;
     }
 
     /* (non-Javadoc)

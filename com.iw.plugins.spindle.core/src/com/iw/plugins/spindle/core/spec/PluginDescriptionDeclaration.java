@@ -26,46 +26,41 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.INamespace;
-import org.apache.tapestry.IResourceLocation;
+import org.apache.tapestry.ILocation;
 
 /**
- *  Superclass for Top level spec classes
+ *  Record <description> tags in a document
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class BaseSpecLocatable extends BasePropertyHolder
+public class PluginDescriptionDeclaration extends BaseSpecification
 {
 
-    IResourceLocation fSpecificationLocation;
+    String fLang;
+    String fValue;
 
-    public BaseSpecLocatable(int type)
+    public PluginDescriptionDeclaration(String lang, String value, ILocation location)
     {
-        super(type);
+        super(BaseSpecification.DESCRIPTION_DECLARATION);
+        fLang = lang;
+        fValue = value;
+        setLocation(location);
     }
 
-    /**
-     * @return
-     */
-    public IResourceLocation getSpecificationLocation()
+    public String getIdentifier()
     {
-        return fSpecificationLocation;
+        return (fLang != null ? fLang + " : " + fValue : fValue);
     }
 
-    /**
-     * @param location
-     */
-    public void setSpecificationLocation(IResourceLocation location)
+    public String getLang()
     {
-        this.fSpecificationLocation = location;
+        return fLang;
     }
-    
-    public abstract INamespace getNamespace();
 
-    public abstract void setNamespace(INamespace ns);
-
-    
-   
+    public String getValue()
+    {
+        return fValue;
+    }
 
 }

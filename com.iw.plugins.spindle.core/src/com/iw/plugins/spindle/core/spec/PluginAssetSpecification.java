@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.AssetType;
 import org.apache.tapestry.spec.IAssetSpecification;
 
@@ -90,22 +89,6 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
     {
         this.fAssetType = type;
         firePropertyChange("type", null, fPath);
-    }
-
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.BasePropertyHolder#setNamespace(org.apache.tapestry.INamespace)
-     */
-    public void setNamespace(INamespace ns)
-    {}
-
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.BasePropertyHolder#getNamespace()
-     */
-    public INamespace getNamespace()
-    {
-        return null;
     }
 
 }

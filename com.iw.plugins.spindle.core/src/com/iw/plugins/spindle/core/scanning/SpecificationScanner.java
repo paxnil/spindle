@@ -42,6 +42,8 @@ import org.w3c.dom.Node;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
+import com.iw.plugins.spindle.core.spec.PluginPropertyDeclaration;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 
@@ -296,7 +298,7 @@ public abstract class SpecificationScanner extends AbstractScanner
         typeList.add("java.lang.String[]");
     }
 
-    protected void scanProperty(IPropertyHolder holder, Node node)
+    protected void scanProperty(IPluginPropertyHolder holder, Node node)
     {
         String name = getAttribute(node, "name", true);
 
@@ -309,16 +311,17 @@ public abstract class SpecificationScanner extends AbstractScanner
         // Starting in DTD 1.4, the value may be specified
         // as an attribute.  Only if that is null do we
         // extract the node's value.
-
+        String value = null;
         try
         {
-            String value = getExtendedAttribute(node, "value", true).value;
-            holder.setProperty(name, value);
+            value = getExtendedAttribute(node, "value", true).value;
         } catch (ScannerException e)
         {
             addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());
         }
-
+        holder.setProperty(name, value);
+        PluginPropertyDeclaration declaration = new PluginPropertyDeclaration(name, value, getSourceLocationInfo(node));
+        holder.addPropertyDeclaration(declaration);
     }
 
     /**
@@ -333,7 +336,7 @@ public abstract class SpecificationScanner extends AbstractScanner
         {
             if (isElement(child, "property"))
             {
-                scanProperty(holder, child);
+                scanProperty((IPluginPropertyHolder) holder, child);
                 continue;
             }
         }

@@ -40,6 +40,7 @@ import org.apache.tapestry.IResourceLocation;
  */
 public interface ISourceLocationInfo extends ILocation
 {
+
     public abstract boolean hasAttributes();
     public abstract boolean isEmptyTag();
     /** return a location for the element - includes all wrapped by it**/
@@ -53,4 +54,7 @@ public interface ISourceLocationInfo extends ILocation
     /** return a new set containing the names **/
     public Set getAttributeNames();
     public abstract void setResourceLocation(IResourceLocation location);
+    /** useful in Eclipse documents */
+    public int getOffset();
+    public int getLength();
 }

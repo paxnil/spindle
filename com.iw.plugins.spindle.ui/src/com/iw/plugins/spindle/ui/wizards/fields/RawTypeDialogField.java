@@ -234,6 +234,8 @@ public class RawTypeDialogField extends StringButtonField
 
     protected IType resolveTypeName(String typeName) throws JavaModelException
     {
+        if (jproject == null)
+            return null;
         return jproject.findType(typeName);
     }
 

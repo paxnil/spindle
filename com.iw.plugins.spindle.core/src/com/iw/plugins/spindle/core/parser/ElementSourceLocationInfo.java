@@ -25,6 +25,7 @@ package com.iw.plugins.spindle.core.parser;
  *
  * ***** END LICENSE BLOCK ***** */
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,6 +34,7 @@ import java.util.Set;
 
 import org.apache.tapestry.IResourceLocation;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.xml.event.ElementXMLEventInfo;
 import com.iw.plugins.spindle.core.parser.xml.event.SimpleXMLEventInfo;
 import com.iw.plugins.spindle.core.parser.xml.event.XMLEnityEventInfo;
@@ -43,11 +45,21 @@ import com.iw.plugins.spindle.core.source.SourceLocation;
 
 public class ElementSourceLocationInfo implements ISourceLocationInfo
 {
+    public static final Comparator COMPARATOR = new Comparator()
+       {
+           public int compare(Object o1, Object o2)
+           {
+               int offset1 = ((ISourceLocationInfo) o1).getOffset();
+               int offset2 = ((ISourceLocationInfo) o2).getOffset();
+               return (offset1 > offset2) ? 1 : ((offset1 < offset2) ? -1 : 0);
+           }
+       };
 
     private static final int LINE = 0;
     private static final int CHAR_START = 1;
     private static final int CHAR_END = 2;
 
+    private String fElementName;
     private boolean fIsEmpty;
 
     private int fSourceStartLine = 0;
@@ -91,6 +103,23 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
     {
         init(elementName, eventInfo, resolver);
     }
+
+    public int getOffset()
+    {
+        return fSourceCharStart;
+    }
+
+    public int getLength()
+    {
+        int result = fSourceCharEnd - fSourceCharStart + 1;
+        if (result < 0) {
+            StringBuffer buf = new StringBuffer("error found, tag source length is negative!\n");
+            buf.append(this.toString());
+            TapestryCore.log(buf.toString());
+            return 1;
+        }
+        return result;
+     }
 
     public boolean hasAttributes()
     {
@@ -167,7 +196,7 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
      */
     public Set getAttributeNames()
     {
-       return new HashSet(getAttributes().keySet());
+        return new HashSet(getAttributes().keySet());
     }
 
     private Map getAttributes()
@@ -181,7 +210,7 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
 
     private void init(String elementName, ElementXMLEventInfo eventInfo, ISourceLocationResolver resolver)
     {
-
+       fElementName = elementName;
         XMLEnityEventInfo startTag = eventInfo.getStartTagLocation();
         XMLEnityEventInfo endTag = eventInfo.getEndTagLocation();
 
@@ -230,6 +259,7 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
             fEndTagCharEnd = column;
 
             fContentsCharEnd = fEndTagCharStart;
+            fSourceCharEnd = fEndTagCharEnd;
         }
 
         Map attributeMap = eventInfo.getAttributeMap();
@@ -257,7 +287,7 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
     public String toString()
     {
         StringBuffer buffer = new StringBuffer("ElementLocation[\n");
-        buffer.append("Name: ");
+        buffer.append("Name: " + fElementName);
         buffer.append(getTagNameLocation());
         buffer.append("Start Tag: ");
         buffer.append(getStartTagSourceLocation());
@@ -290,7 +320,12 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
                 buffer.append("\n");
             }
         }
-        buffer.append("]");
+        buffer.append("]\n");
+        buffer.append("fSourceStart:" + fSourceCharStart);
+        buffer.append(" fSourceCharEnd:" + fSourceCharEnd);
+        buffer.append("\n");
+        buffer.append("offset: "+getOffset());
+        buffer.append(" length:"); buffer.append(fSourceCharEnd - fSourceCharStart + 1);
         return buffer.toString();
     }
 
@@ -328,5 +363,7 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
     {
         this.fResourceLocation = location;
     }
+
+    
 
 }

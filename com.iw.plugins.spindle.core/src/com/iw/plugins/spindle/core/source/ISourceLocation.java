@@ -31,6 +31,7 @@ public interface ISourceLocation
     public int getLineNumber();
     public int getCharStart();
     public int getCharEnd();
+    public int getLength();
     public boolean contains(int cursorPosition);
     public ISourceLocation getLocationOffset(int cursorPosition);
 }

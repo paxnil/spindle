@@ -58,12 +58,12 @@ import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.XMLContentFormatter;
 import com.iw.plugins.spindle.editors.XMLFormattingStrategy;
 import com.iw.plugins.spindle.editors.spec.assist.AttributeCompletionProcessor;
-import com.iw.plugins.spindle.editors.spec.assist.CDATACompletionProcessor;
-import com.iw.plugins.spindle.editors.spec.assist.CommentCompletionProcessor;
-import com.iw.plugins.spindle.editors.spec.assist.DeclCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.TagCompletionProcessor;
+import com.iw.plugins.spindle.editors.util.CDATACompletionProcessor;
+import com.iw.plugins.spindle.editors.util.CommentCompletionProcessor;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
+import com.iw.plugins.spindle.editors.util.DeclCompletionProcessor;
 
 /**
  *  SourceViewerConfiguration for the TemplateEditor

@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.IPropertySpecification;
 
 /**
@@ -35,7 +34,7 @@ import org.apache.tapestry.spec.IPropertySpecification;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class PluginPropertySpecification extends BaseSpecification implements IPropertySpecification
+public class PluginPropertySpecification extends DescribableSpecification implements IPropertySpecification
 {
 
     private String fName;
@@ -120,18 +119,6 @@ public class PluginPropertySpecification extends BaseSpecification implements IP
         firePropertyChange("type", old, fType);
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#setNamespace(org.apache.tapestry.INamespace)
-     */
-    public void setNamespace(INamespace ns)
-    {}
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#getNamespace()
-     */
-    public INamespace getNamespace()
-    {
-        return null;
-    }
+  
 
 }

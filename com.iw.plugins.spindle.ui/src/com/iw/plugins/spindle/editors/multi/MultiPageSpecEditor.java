@@ -148,7 +148,7 @@ public abstract class MultiPageSpecEditor extends MultiPageEditorPart implements
     public void removePage(int pageIndex)
     {
         if (pageIndex == fSourceIndex)
-             ((SpecEditor) fSourcePage).removeListener(this);
+             ((SpecEditor) fSourcePage).removeReconcileListener(this);
         super.removePage(pageIndex);
     }
 

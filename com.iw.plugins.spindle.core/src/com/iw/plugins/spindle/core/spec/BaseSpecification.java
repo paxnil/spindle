@@ -38,7 +38,6 @@ import java.util.Set;
 import org.apache.tapestry.ILocatable;
 import org.apache.tapestry.ILocation;
 import org.apache.tapestry.ILocationHolder;
-import org.apache.tapestry.INamespace;
 
 /**
  *  Base class for all Spec classes.
@@ -66,6 +65,15 @@ public abstract class BaseSpecification implements IIdentifiable, PropertyChange
     public static final int FIELD_BEAN_INIT = 21;
     public static final int STATIC_BEAN_INIT = 22;
     public static final int STRING_BEAN_INIT = 23;
+    
+    public static final int PROPERTY_DECLARATION=24;
+    public static final int PAGE_DECLARATION=25;
+    public static final int COMPONENT_TYPE_DECLARATION = 26;
+    public static final int DESCRIPTION_DECLARATION = 27;
+    public static final int RESERVED_PARAMETER_DECLARATION = 28;
+    public static final int ENGINE_SERVICE_DECLARATION = 29;
+    public static final int LIBRARY_DECLARATION = 30;
+    
 
     private String fIdentifier;
     private Object fParent;
@@ -213,9 +221,6 @@ public abstract class BaseSpecification implements IIdentifiable, PropertyChange
         this.fILocation = location;
     }
 
-    public abstract INamespace getNamespace();
-
-    public abstract void setNamespace(INamespace ns);
 
     /**
      * @return

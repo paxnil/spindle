@@ -79,6 +79,10 @@ public class BaseValidator implements IScannerValidator
         {
             return 1;
         }
+        
+        public int getLength() {
+            return getCharEnd() - getCharStart() + 1;
+        }
 
         public boolean contains(int cursorPosition)
         {

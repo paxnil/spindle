@@ -28,7 +28,6 @@ package com.iw.plugins.spindle.core.spec;
 
 import java.util.List;
 
-import org.apache.tapestry.INamespace;
 import org.apache.tapestry.bean.IBeanInitializer;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.IBeanSpecification;
@@ -148,18 +147,6 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
         firePropertyChange("lifecycle", old, this.fLifecycle);
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.BasePropertyHolder#setNamespace(org.apache.tapestry.INamespace)
-     */
-    public void setNamespace(INamespace ns)
-    {}
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.BasePropertyHolder#getNamespace()
-     */
-    public INamespace getNamespace()
-    {
-        return null;
-    }
+ 
 
 }

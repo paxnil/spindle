@@ -356,7 +356,7 @@ public class ClasspathRootLocation extends AbstractRootLocation
 
     public String toString()
     {
-        return "cp(" + fJavaProject.getProject().getName() + ")/";
+        return "Classpath ";
     }
 
     String toHashString()

@@ -66,6 +66,10 @@ public class SourceLocation implements ISourceLocation
     {
         return fCharEnd;
     }
+    
+    public int getLength() {
+        return fCharEnd - fCharStart + 1;
+    }
 
     public String toString()
     {

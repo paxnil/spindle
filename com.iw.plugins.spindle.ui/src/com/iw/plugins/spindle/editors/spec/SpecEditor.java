@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.tapestry.ILocatable;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -90,7 +91,9 @@ import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
 import com.iw.plugins.spindle.core.scanning.W3CAccess;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
-import com.iw.plugins.spindle.core.spec.BaseSpecification;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
@@ -125,8 +128,7 @@ public class SpecEditor extends Editor implements IMultiPage
     public SpecEditor()
     {
         super();
-        fOutline = new SpecificationOutlinePage(this, fPreferenceStore);
-
+        fOutline = new MultiPageContentOutline(this);
     }
 
     /* (non-Javadoc)
@@ -182,7 +184,12 @@ public class SpecEditor extends Editor implements IMultiPage
                 selectAndReveal(artifact.getOffset(), artifact.getLength());
             }
             highlight(obj);
-
+        } else if (obj instanceof ILocatable)
+        {
+            ISourceLocationInfo info = (ISourceLocationInfo) ((ILocatable) obj).getLocation(); 
+            ISourceLocation startTagLocation = info.getStartTagSourceLocation();
+            selectAndReveal(startTagLocation.getCharStart(), startTagLocation.getLength());
+            setHighlightRange(info.getOffset(), info.getLength(), true);
         }
     }
 
@@ -224,6 +231,10 @@ public class SpecEditor extends Editor implements IMultiPage
                 }
             }
             setHighlightRange(artifact.getOffset(), artifact.getLength(), false);
+        } else if (obj instanceof ILocatable)
+        {
+            ISourceLocationInfo info = (ISourceLocationInfo) ((ILocatable) obj).getLocation();
+            setHighlightRange(info.getOffset(), info.getLength(), false);
         }
     }
 
@@ -239,7 +250,7 @@ public class SpecEditor extends Editor implements IMultiPage
         Map specs = manager.getSpecMap(project);
         if (specs != null)
         {
-            BaseSpecification bspec = (BaseSpecification) specs.get(storage);
+            BaseSpecLocatable bspec = (BaseSpecLocatable) specs.get(storage);
             if (bspec != null)
                 return (ICoreNamespace) bspec.getNamespace();
         }
@@ -362,9 +373,9 @@ public class SpecEditor extends Editor implements IMultiPage
         reconcileOutline();
 
         if (fReconciler != null)
+        {
             fReconciler.reconcile(collector, monitor);
-
-        //        (() fOutline.setSpec(fReconciledSpec));
+        }
     }
 
     XMLDocumentPartitioner fOutlinePartitioner;
@@ -379,14 +390,14 @@ public class SpecEditor extends Editor implements IMultiPage
             IDocument document = getDocumentProvider().getDocument(getEditorInput());
             if (document.getLength() == 0 || document.get().trim().length() == 0)
             {
-                ((SpecificationOutlinePage) fOutline).setRoot(null);
+                ((MultiPageContentOutline) fOutline).setInput(null);
             } else
             {
 
                 fOutlinePartitioner.connect(document);
                 try
                 {
-                    ((SpecificationOutlinePage) fOutline).setRoot(XMLNode.createTree(document, -1));
+                    ((MultiPageContentOutline) fOutline).setInput(XMLNode.createTree(document, -1));
                 } catch (BadLocationException e)
                 {
                     // do nothing
@@ -412,7 +423,7 @@ public class SpecEditor extends Editor implements IMultiPage
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
      */
-    public void addListener(IReconcileListener listener)
+    public void addReconcileListener(IReconcileListener listener)
     {
         if (fReconcileListeners == null)
             fReconcileListeners = new ArrayList();
@@ -424,7 +435,7 @@ public class SpecEditor extends Editor implements IMultiPage
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.editors.IReconcileWorker#removeListener(com.iw.plugins.spindle.editors.IReconcileListener)
      */
-    public void removeListener(IReconcileListener listener)
+    public void removeReconcileListener(IReconcileListener listener)
     {
         if (fReconcileListeners == null)
             return;
@@ -433,12 +444,21 @@ public class SpecEditor extends Editor implements IMultiPage
 
     }
 
-    private void fireReconciled()
+    private void fireReconcileStarted()
     {
         for (Iterator iter = fReconcileListeners.iterator(); iter.hasNext();)
         {
             IReconcileListener listener = (IReconcileListener) iter.next();
-            listener.reconciled(fReconciledSpec);
+            listener.reconcileStarted();
+        }
+    }
+
+    private void fireReconciled(Object reconcileResult)
+    {
+        for (Iterator iter = fReconcileListeners.iterator(); iter.hasNext();)
+        {
+            IReconcileListener listener = (IReconcileListener) iter.next();
+            listener.reconciled(reconcileResult);
         }
     }
 
@@ -471,6 +491,7 @@ public class SpecEditor extends Editor implements IMultiPage
         public final void reconcile(IProblemCollector problemCollector, IProgressMonitor progressMonitor)
         {
             Assert.isNotNull(problemCollector);
+            fireReconcileStarted();
             this.collector = problemCollector;
             this.monitor = progressMonitor == null ? new NullProgressMonitor() : progressMonitor;
             Object reconcileResult = null;
@@ -503,7 +524,7 @@ public class SpecEditor extends Editor implements IMultiPage
                 }
             }
             fReconciledSpec = reconcileResult;
-            fireReconciled();
+            fireReconciled(reconcileResult);
             // Inform the collector that no reconcile occured 
             if (!didReconcile)
             {
@@ -541,7 +562,7 @@ public class SpecEditor extends Editor implements IMultiPage
         /* (non-Javadoc)
          * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
          */
-        public void addListener(IReconcileListener listener)
+        public void addReconcileListener(IReconcileListener listener)
         {
             //ignore
 
@@ -550,7 +571,7 @@ public class SpecEditor extends Editor implements IMultiPage
         /* (non-Javadoc)
          * @see com.iw.plugins.spindle.editors.IReconcileWorker#removeListener(com.iw.plugins.spindle.editors.IReconcileListener)
          */
-        public void removeListener(IReconcileListener listener)
+        public void removeReconcileListener(IReconcileListener listener)
         {
             //ignore
         }
@@ -666,7 +687,7 @@ public class SpecEditor extends Editor implements IMultiPage
         int caret = getCaretOffset();
         if (caret == -1)
             return;
-        ((SpecificationOutlinePage) fOutline).setSelection(new StructuredSelection(new Region(caret, 0)));
+        fOutline.setSelection(new StructuredSelection(new Region(caret, 0)));
     }
 
     /**

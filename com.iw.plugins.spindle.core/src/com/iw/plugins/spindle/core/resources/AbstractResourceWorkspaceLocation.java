@@ -137,7 +137,7 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
     {
         StringBuffer buffer = new StringBuffer();
         buffer.append(fRoot.toString());
-        buffer.append(":");
+        buffer.append(": ");
         buffer.append(fPath);
         buffer.append(fName);
         return buffer.toString();

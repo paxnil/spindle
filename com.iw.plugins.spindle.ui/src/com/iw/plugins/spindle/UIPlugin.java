@@ -74,8 +74,10 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.SharedTextColors;
+import com.iw.plugins.spindle.editors.spec.MultiPageContentOutline;
 import com.iw.plugins.spindle.editors.spec.SpecFileDocumentProvider;
 import com.iw.plugins.spindle.editors.spec.SpecStorageDocumentProvider;
+import com.iw.plugins.spindle.editors.spec.TapestryOutlinePage;
 import com.iw.plugins.spindle.editors.template.TemplateFileDocumentProvider;
 import com.iw.plugins.spindle.editors.template.TemplateStorageDocumentProvider;
 import com.iw.plugins.spindle.editors.template.TemplateTextTools;
@@ -317,7 +319,6 @@ public class UIPlugin extends AbstractUIPlugin
         {
             Revealer.start();
         }
-
     }
 
     private IWindowListener RevealerTrigger = new IWindowListener()
@@ -455,6 +456,8 @@ public class UIPlugin extends AbstractUIPlugin
         PreferenceConstants.initializeDefaultValues(store);
         XMLSyntaxPreferencePage.initDefaults(store);
         NewTapComponentWizardPage.initializeDefaults(store);
+        MultiPageContentOutline.initializeDefaultPrefrences();
+        TapestryOutlinePage.initializePluginDefaults();
     }
 
     /**

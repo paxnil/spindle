@@ -36,6 +36,13 @@ import org.w3c.dom.Node;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
+import com.iw.plugins.spindle.core.spec.PluginComponentTypeDeclaration;
+import com.iw.plugins.spindle.core.spec.PluginDescriptionDeclaration;
+import com.iw.plugins.spindle.core.spec.PluginEngineServiceDeclaration;
+import com.iw.plugins.spindle.core.spec.PluginLibraryDeclaration;
+import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
+import com.iw.plugins.spindle.core.spec.PluginPageDeclaration;
 
 /**
  *  Scanner that turns a node tree into a ILibrarySpecification
@@ -117,7 +124,7 @@ public class LibraryScanner extends SpecificationScanner
 
             if (isElement(node, "property"))
             {
-                scanProperty(specification, node);
+                scanProperty((IPluginPropertyHolder)specification, node);
                 continue;
             }
 
@@ -129,7 +136,11 @@ public class LibraryScanner extends SpecificationScanner
 
             if (isElement(node, "description"))
             {
-                specification.setDescription(getValue(node));
+                String value = getValue(node);
+                specification.setDescription(value);
+                PluginDescriptionDeclaration declaration =
+                    new PluginDescriptionDeclaration(null, value, getSourceLocationInfo(node));
+                ((PluginLibrarySpecification) specification).addDescriptionDeclaration(declaration);
                 continue;
             }
 
@@ -175,6 +186,9 @@ public class LibraryScanner extends SpecificationScanner
             "scan-library-missing-component",
             getAttributeSourceLocation(node, "specification-path"));
 
+        PluginComponentTypeDeclaration declaration =
+            new PluginComponentTypeDeclaration(type, path, getSourceLocationInfo(node));
+        ((PluginLibrarySpecification) specification).addComponentTypeDeclaration(declaration);
         specification.setComponentSpecificationPath(type, path);
     }
     /** @since 2.2 **/
@@ -267,7 +281,7 @@ public class LibraryScanner extends SpecificationScanner
 
             if (isElement(child, "property"))
             {
-                scanProperty(exSpec, child);
+                scanProperty((IPluginPropertyHolder)exSpec, child);
                 continue;
             }
         }
@@ -311,6 +325,9 @@ public class LibraryScanner extends SpecificationScanner
                     getAttributeSourceLocation(node, "specification-path"));
         }
 
+        PluginLibraryDeclaration declaration =
+            new PluginLibraryDeclaration(id, specificationPath, getSourceLocationInfo(node));
+        ((PluginLibrarySpecification) specification).addLibraryDeclaration(declaration);
         specification.setLibrarySpecificationPath(id, specificationPath);
 
     }
@@ -341,6 +358,9 @@ public class LibraryScanner extends SpecificationScanner
             "scan-library-missing-page",
             getAttributeSourceLocation(node, "specification-path"));
 
+        PluginPageDeclaration declaration =
+            new PluginPageDeclaration(name, specificationPath, getSourceLocationInfo(node));
+        ((PluginLibrarySpecification) specification).addPageDeclaration(declaration);
         specification.setPageSpecificationPath(name, specificationPath);
 
     }
@@ -359,6 +379,9 @@ public class LibraryScanner extends SpecificationScanner
         String className = getAttribute(node, "class");
         validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
         spec.setServiceClassName(name, className);
+        PluginEngineServiceDeclaration declaration =
+            new PluginEngineServiceDeclaration(name, className, getSourceLocationInfo(node));
+        ((PluginLibrarySpecification) spec).addEngineServiceDeclaration(declaration);
     }
 
 }

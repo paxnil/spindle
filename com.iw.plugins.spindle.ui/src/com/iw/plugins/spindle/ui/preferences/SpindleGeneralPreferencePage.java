@@ -46,6 +46,7 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
  * @author GWL
@@ -69,12 +70,20 @@ public class SpindleGeneralPreferencePage
             new String[] { TapestryCore.BUILDER_MARKER_MISSES_ERROR, TapestryCore.BUILDER_MARKER_MISSES_ERROR },
             new String[] { TapestryCore.BUILDER_MARKER_MISSES_IGNORE, TapestryCore.BUILDER_MARKER_MISSES_IGNORE }
     };
+    private static final String OFFER_XHTML = PreferenceConstants.TEMPLATE_EDITOR_HTML_SHOW_XHTML;
+    private static final String[][] OFFER_XHTML_OPTIONS =
+        new String[][] {
+             new String[] { TemplateEditor.XHTML_STRICT_LABEL, TemplateEditor.XHTML_STRICT_LABEL },
+            new String[] { TemplateEditor.XHTML_TRANSITIONAL_LABEL, TemplateEditor.XHTML_TRANSITIONAL_LABEL },
+            new String[] { TemplateEditor.XHTML_FRAMES_LABEL, TemplateEditor.XHTML_FRAMES_LABEL },
+            new String[] { TemplateEditor.XHTML_NONE_LABEL,  TemplateEditor.XHTML_NONE_LABEL},
+            };
 
     private RadioGroupFieldEditor fBuildMisses;
     private IntegerFieldEditor fDisplayTabWidth;
     private BooleanFieldEditor fPreserveBlankLines;
     private BooleanFieldEditor fUseTabsForIndentation;
-    //    private BooleanFieldEditor fToggleDTDCaching;
+    private RadioGroupFieldEditor fOfferXHTML;
 
     /**
      * Constructor for SpindleRefactorPreferencePage.
@@ -119,7 +128,7 @@ public class SpindleGeneralPreferencePage
         fBuildMisses.load();
         setValid(fBuildMisses.isValid());
         fBuildMisses.setPropertyChangeListener(this);
-        
+
         createVerticalSpacer(top, 1);
 
         Composite displayComp = new Composite(top, SWT.NONE);
@@ -177,19 +186,22 @@ public class SpindleGeneralPreferencePage
         fUseTabsForIndentation.load();
         fUseTabsForIndentation.setPropertyChangeListener(this);
 
-        //        createVerticalSpacer(top, 1);
+        createVerticalSpacer(top, 1);
 
-        //        fToggleDTDCaching =
-        //            new BooleanFieldEditor(
-        //                TapestryCore.CACHE_GRAMMAR_PREFERENCE,
-        //                UIPlugin.getString("preference-dtd-caching"),
-        //                BooleanFieldEditor.DEFAULT,
-        //                top);
-        //
-        //        fToggleDTDCaching.setPreferencePage(this);
-        //        fToggleDTDCaching.setPreferenceStore(TapestryCore.getDefault().getPreferenceStore());
-        //        fToggleDTDCaching.load();
-        //
+        fOfferXHTML =
+            new RadioGroupFieldEditor(
+                OFFER_XHTML,
+                UIPlugin.getString("preference-offer-xhtml-proposals"),
+                4,
+                OFFER_XHTML_OPTIONS,
+                top);
+
+        fOfferXHTML.setPreferencePage(this);
+        fOfferXHTML.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
+        fOfferXHTML.load();
+        setValid(fBuildMisses.isValid());
+        fOfferXHTML.setPropertyChangeListener(this);
+
         //        createVerticalSpacer(top, 1);
         //
         //        Composite clearCacheComp = new Composite(top, SWT.NONE);
@@ -240,7 +252,7 @@ public class SpindleGeneralPreferencePage
         fDisplayTabWidth.loadDefault();
         fPreserveBlankLines.loadDefault();
         fUseTabsForIndentation.loadDefault();
-        //        fToggleDTDCaching.loadDefault();
+        fOfferXHTML.loadDefault();
 
         super.performDefaults();
     }
@@ -251,7 +263,7 @@ public class SpindleGeneralPreferencePage
         fDisplayTabWidth.store();
         fPreserveBlankLines.store();
         fUseTabsForIndentation.store();
-        //        fToggleDTDCaching.store();
+        fOfferXHTML.store();
         return super.performOk();
     }
 

@@ -50,7 +50,10 @@ import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.spec.PluginDescriptionDeclaration;
+import com.iw.plugins.spindle.core.spec.PluginReservedParameterDeclaration;
 import com.iw.plugins.spindle.core.spec.bean.PluginExpressionBeanInitializer;
 import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
 import com.iw.plugins.spindle.core.util.XMLUtil;
@@ -210,7 +213,7 @@ public class ComponentScanner extends SpecificationScanner
 
                 if (isElement(child, "property"))
                 {
-                    scanProperty(bspec, child);
+                    scanProperty((IPluginPropertyHolder)bspec, child);
                     continue;
                 }
 
@@ -440,7 +443,7 @@ public class ComponentScanner extends SpecificationScanner
 
                     if (isElement(child, "property"))
                     {
-                        scanProperty(c, child);
+                        scanProperty((IPluginPropertyHolder)c, child);
                         continue;
                     }
                 }
@@ -565,13 +568,16 @@ public class ComponentScanner extends SpecificationScanner
 
             if (isElement(node, "property"))
             {
-                scanProperty(specification, node);
+                scanProperty((IPluginPropertyHolder)specification, node);
                 continue;
             }
 
             if (isElement(node, "description"))
             {
-                specification.setDescription(getValue(node));
+                String value = getValue(node);
+                specification.setDescription(value);
+                PluginDescriptionDeclaration declaration = new PluginDescriptionDeclaration(null, value, getSourceLocationInfo(node));
+                ((PluginComponentSpecification)specification).addDescriptionDeclaration(declaration);
                 continue;
             }
 
@@ -781,6 +787,8 @@ public class ComponentScanner extends SpecificationScanner
                 getAttributeSourceLocation(node, "name"),
                 "duplicate reserved paramter name: " + name);
         }
+        PluginReservedParameterDeclaration declaration = new PluginReservedParameterDeclaration(name, getSourceLocationInfo(node));
+        ((PluginComponentSpecification)spec).addReservedParameterDeclaration(declaration);
         spec.addReservedParameterName(name);
     }
 

@@ -27,11 +27,8 @@
 package com.iw.plugins.spindle.editors.spec;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -54,6 +51,7 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
 
 /**
  *  TODO Add Type comment
@@ -61,7 +59,7 @@ import com.iw.plugins.spindle.UIPlugin;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class SpecificationOutlinePage extends ContentOutlinePage
+public class XMLOutlinePage extends ContentOutlinePage
 {
 
     public class BasicContentProvider implements ITreeContentProvider
@@ -121,8 +119,7 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             System.arraycopy(fCorresponders, 0, expandedCorresponders, 0, fCorresponders.length);
             for (int i = 0; i < elements.length; i++)
             {
-                expandedCorresponders[fCorresponders.length + i] =
-                    ((XMLNode) elements[i]).getCorrespondingNode();
+                expandedCorresponders[fCorresponders.length + i] = ((XMLNode) elements[i]).getCorrespondingNode();
             }
 
             fFlatChildren = expandedFlat;
@@ -212,58 +209,6 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             return null;
         }
 
-        //        /* (non-Javadoc)
-        //         * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-        //         */
-        //        public Color getBackground(Object element)
-        //        {
-        //            return fTree.getBackground();
-        //        }
-        //
-        //        private Color getColor(String key)
-        //        {
-        //            ISharedTextColors colors = UIPlugin.getDefault().getSharedTextColors();
-        //            return colors.getColor(PreferenceConverter.getColor(fPreferences, key + ITextStylePreferences.SUFFIX_FOREGROUND));
-        //        }
-        //
-        //        /* (non-Javadoc)
-        //         * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-        //         */
-        //        public Color getForeground(Object element)
-        //        {
-        //
-        //            if (element instanceof XMLNode)
-        //            {
-        //                XMLNode artifact = (XMLNode) element;
-        //                String type = artifact.getType();
-        //                if (type == XMLDocumentPartitioner.DECL)
-        //                {
-        //
-        //                    if (artifact.getParent().getType().equals("/"))
-        //                        return getColor(IXMLSyntaxConstants.XML_DECL);
-        //
-        //                    return getColor(IXMLSyntaxConstants.XML_CDATA);
-        //
-        //                }
-        //
-        //                if (type == XMLDocumentPartitioner.TAG)
-        //                    return getColor(IXMLSyntaxConstants.XML_TAG);
-        //
-        //                if (type == XMLDocumentPartitioner.EMPTYTAG)
-        //                    return getColor(IXMLSyntaxConstants.XML_TAG);
-        //
-        //                if (type == XMLDocumentPartitioner.ATTR)
-        //                    return getColor(IXMLSyntaxConstants.XML_ATT_VALUE);
-        //
-        //                if (type == XMLDocumentPartitioner.COMMENT)
-        //                    return getColor(IXMLSyntaxConstants.XML_COMMENT);
-        //
-        //                if (type == XMLDocumentPartitioner.PI)
-        //                    return getColor(IXMLSyntaxConstants.XML_PI);
-        //            }
-        //            return fTree.getForeground();
-        //        }
-
     }
 
     private SpecEditor fEditor;
@@ -272,20 +217,10 @@ public class SpecificationOutlinePage extends ContentOutlinePage
     private XMLNode fRoot;
     private Object[] fFlatChildren = new XMLNode[0];
     private Object[] fCorresponders = new XMLNode[0];
-    private IPreferenceStore fPreferences;
-    private IPropertyChangeListener fPreferenceStoreListener = new IPropertyChangeListener()
-    {
-        public void propertyChange(PropertyChangeEvent event)
-        {
-            treeViewer.refresh(true);
-        }
 
-    };
-
-    public SpecificationOutlinePage(SpecEditor editor, IPreferenceStore store)
+    public XMLOutlinePage(SpecEditor editor)
     {
         fEditor = editor;
-        fPreferences = store;
     }
 
     public void createControl(Composite parent)
@@ -303,32 +238,28 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             {
                 IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
                 if (!selection.isEmpty())
-                    fEditor.openTo(selection.getFirstElement());
+                    fireSelectionChanged(new DoubleClickSelection(selection.getFirstElement()));
             }
         });
-        fPreferences.addPropertyChangeListener(fPreferenceStoreListener);
-
+        setInput(fRoot);
     }
 
     public void dispose()
     {
-        fPreferences.removePropertyChangeListener(fPreferenceStoreListener);
         super.dispose();
     }
 
-    public void setRoot(final XMLNode artifact)
+    public void setInput(final Object input)
     {
-        fRoot = artifact;
-        Display d = null;
-        if (getControl() != null)
-        {
-            d = getControl().getDisplay();
-        } else
-        {
-            d = Display.getCurrent();
-            if (d == null)
-                d = Display.getDefault();
-        }
+        if (input == null)
+            return;
+
+        fRoot = (XMLNode) input;
+
+        if (fTree == null || fTree.isDisposed())
+            return;
+
+        Display d = fTree.getDisplay();
         d.asyncExec(new Runnable()
         {
             public void run()
@@ -336,12 +267,10 @@ public class SpecificationOutlinePage extends ContentOutlinePage
                 try
                 {
                     ISelection oldSelection = getSelection();
-                    if (treeViewer != null && !treeViewer.getControl().isDisposed())
-                    {
-                        treeViewer.setInput(fRoot);
-                        //                    treeViewer.refresh();
-                        treeViewer.setSelection(oldSelection);
-                    }
+
+                    treeViewer.setInput(fRoot);
+                    treeViewer.setSelection(oldSelection);
+
                 } catch (RuntimeException e)
                 {
                     UIPlugin.log(e);

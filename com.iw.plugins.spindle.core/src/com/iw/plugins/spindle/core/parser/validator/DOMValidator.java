@@ -140,6 +140,8 @@ public class DOMValidator implements IProblemCollector
 
     public static DTD getDTD(String publicId)
     {
+        if (publicId == null)
+            return null;
         return (DTD) DTDS.get(publicId);
     }
 
@@ -163,7 +165,8 @@ public class DOMValidator implements IProblemCollector
         documentStart(xmlDocument);
         Node rootNode = xmlDocument.getDocumentElement();
         traverseNode(rootNode);
-        if (!fSeenIds.isEmpty()) {
+        if (!fSeenIds.isEmpty())
+        {
             for (Iterator iter = fSeenIds.entrySet().iterator(); iter.hasNext();)
             {
                 Map.Entry entry = (Map.Entry) iter.next();
@@ -173,8 +176,11 @@ public class DOMValidator implements IProblemCollector
                 for (Iterator iterator = nodeList.iterator(); iterator.hasNext();)
                 {
                     Node node = (Node) iterator.next();
-                    recordAttributeError(node, "id", TapestryCore.getString("dom-validator-id-attribute-must-be-unique"));
-                }                               
+                    recordAttributeError(
+                        node,
+                        "id",
+                        TapestryCore.getString("dom-validator-id-attribute-must-be-unique"));
+                }
             }
         }
         documentEnd();

@@ -49,7 +49,7 @@ public class Images
             urlString = imageURL.toString();
         } else
         {
-            return registry.get("missing");
+            return getSharedImage("missing.gif");
         }
         Image result = registry.get(urlString);
         if (result == null)

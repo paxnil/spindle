@@ -33,6 +33,7 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.swt.graphics.RGB;
 
 import com.iw.plugins.spindle.editors.template.ITemplateSyntaxConstants;
+import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
  *  Preference constants used by Spindle
@@ -113,6 +114,7 @@ public class PreferenceConstants
 
     public static final String FORMATTER_USE_TABS_TO_INDENT = UIPlugin.PLUGIN_ID + ".FORMATTER_USE_TABS_TO_INDENT";
 
+    public static final String TEMPLATE_EDITOR_HTML_SHOW_XHTML = UIPlugin.PLUGIN_ID + ".TEMPLATE_EDITOR_HTML_SHOW_XHTML_STRICT";
 
     public static void initializeDefaultValues(IPreferenceStore store)
     {
@@ -171,7 +173,8 @@ public class PreferenceConstants
         store.setDefault(EDITOR_USE_SMART_INDENT, true);
         store.setDefault(FORMATTER_PRESERVE_BLANK_LINES, true);
         store.setDefault(FORMATTER_USE_TABS_TO_INDENT, false);
- 
+        store.setDefault(TEMPLATE_EDITOR_HTML_SHOW_XHTML, TemplateEditor.XHTML_NONE_LABEL);
+
     }
 
     private static void setDefault(IPreferenceStore store, String constant, String color, String style)

@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.Direction;
 import org.apache.tapestry.spec.IParameterSpecification;
 
@@ -36,13 +35,11 @@ import org.apache.tapestry.spec.IParameterSpecification;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class PluginParameterSpecification extends BaseSpecification implements IParameterSpecification
+public class PluginParameterSpecification extends DescribableSpecification implements IParameterSpecification
 {
     private boolean fRequired = false;
     private String fType;
 
-    /** @since 1.0.9 **/
-    private String fDescription;
 
     /** @since 2.0.3 **/
     private String fPropertyName;
@@ -93,23 +90,7 @@ public class PluginParameterSpecification extends BaseSpecification implements I
         firePropertyChange("type", old, fType);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IParameterSpecification#getDescription()
-     */
-    public String getDescription()
-    {
-        return fDescription;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IParameterSpecification#setDescription(java.lang.String)
-     */
-    public void setDescription(String description)
-    {
-        String old = fDescription;
-        fDescription = description;
-        firePropertyChange("description", old, fDescription);
-    }
+   
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IParameterSpecification#setPropertyName(java.lang.String)
@@ -165,18 +146,6 @@ public class PluginParameterSpecification extends BaseSpecification implements I
         firePropertyChange("defaultValue", old, fDefaultValue);
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#setNamespace(org.apache.tapestry.INamespace)
-     */
-    public void setNamespace(INamespace ns)
-    {}
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#getNamespace()
-     */
-    public INamespace getNamespace()
-    {
-        return null;
-    }
+  
 
 }

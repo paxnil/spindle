@@ -183,6 +183,10 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
         {
             String childName = (String) iter.next();
             INamespace childNamespace = parentNamespace.getChildNamespace(childName);
+            if (childNamespace == null) {
+                UIPlugin.log("null namespace found - Namespace Dialog Field!");
+                continue;
+            }
             IResourceWorkspaceLocation childLocation =
                 (IResourceWorkspaceLocation) childNamespace.getSpecificationLocation();
             if (childLocation.exists() && CoreUtils.toResource(childLocation) != null)

@@ -26,46 +26,34 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.INamespace;
-import org.apache.tapestry.IResourceLocation;
+import org.apache.tapestry.ILocation;
 
 /**
- *  Superclass for Top level spec classes
+ *  Record <reserved-parameter> tags in a document
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class BaseSpecLocatable extends BasePropertyHolder
+public class PluginReservedParameterDeclaration extends BaseSpecification
 {
 
-    IResourceLocation fSpecificationLocation;
+    String fReservedName;
 
-    public BaseSpecLocatable(int type)
+    public PluginReservedParameterDeclaration(String reservedName, ILocation location)
     {
-        super(type);
+        super(BaseSpecification.RESERVED_PARAMETER_DECLARATION);
+        fReservedName = reservedName;
+        setLocation(location);
     }
 
-    /**
-     * @return
-     */
-    public IResourceLocation getSpecificationLocation()
+    public String getIdentfier()
     {
-        return fSpecificationLocation;
+        return getResevedName();
     }
 
-    /**
-     * @param location
-     */
-    public void setSpecificationLocation(IResourceLocation location)
+    public String getResevedName()
     {
-        this.fSpecificationLocation = location;
+        return fReservedName;
     }
-    
-    public abstract INamespace getNamespace();
-
-    public abstract void setNamespace(INamespace ns);
-
-    
-   
 
 }

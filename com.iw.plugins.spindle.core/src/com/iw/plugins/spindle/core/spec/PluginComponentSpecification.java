@@ -46,7 +46,6 @@ import org.apache.tapestry.spec.IPropertySpecification;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.IIdentifiableMap;
 import com.iw.plugins.spindle.core.util.PropertyFiringList;
-import com.iw.plugins.spindle.core.util.PropertyFiringMap;
 import com.iw.plugins.spindle.core.util.PropertyFiringSet;
 
 /**
@@ -58,10 +57,6 @@ import com.iw.plugins.spindle.core.util.PropertyFiringSet;
 public class PluginComponentSpecification extends BaseSpecLocatable implements IComponentSpecification
 {
     private String fComponentClassName;
-
-    /** @since 1.0.9 **/
-
-    private String fDescription;
 
     /**
      *  Keyed on component id, value is {@link IContainedComponent}.
@@ -103,6 +98,12 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      **/
 
     protected Set fReservedParameterNames;
+
+    /**
+     *  The locations and values of all reserved parameter declarations in a document.
+     *  Immutable after a parse/scan episode.
+     */
+    protected List fReservedParameterDeclarations;
 
     /**
      *  Is the component allowed to have a body (that is, wrap other elements?).
@@ -385,6 +386,21 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
         fReservedParameterNames.add(value);
     }
 
+    public void addReservedParameterDeclaration(PluginReservedParameterDeclaration decl)
+    {
+        if (fReservedParameterDeclarations == null)
+            fReservedParameterDeclarations = new ArrayList();
+        fReservedParameterDeclarations.add(decl);
+    }
+
+    public List getReservedParameterDeclarations()
+    {
+        if (fReservedParameterDeclarations == null)
+            return Collections.EMPTY_LIST;
+
+        return fReservedParameterDeclarations;
+    }
+
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#isReservedParameterName(java.lang.String)
      */
@@ -410,25 +426,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
             return Collections.EMPTY_SET;
 
         return fReservedParameterNames;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IComponentSpecification#getDescription()
-     */
-    public String getDescription()
-    {
-        return fDescription;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IComponentSpecification#setDescription(java.lang.String)
-     */
-    public void setDescription(String description)
-    {
-        String old = fDescription;
-        fDescription = description;
-        firePropertyChange("description", old, this.fDescription);
-    }
+    } 
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#getPublicId()
@@ -472,7 +470,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     public void addPropertySpecification(IPropertySpecification spec)
     {
         if (fPropertySpecifications == null)
-            fPropertySpecifications = new PropertyFiringMap(this, "tapestryProperties");
+            fPropertySpecifications = new IIdentifiableMap(this, "tapestryProperties");
 
         String name = spec.getName();
 
@@ -487,7 +485,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     public void setPropertySpecification(IPropertySpecification spec)
     {
         if (fPropertySpecifications == null)
-            fPropertySpecifications = new PropertyFiringMap(this, "tapestryProperties");
+            fPropertySpecifications = new IIdentifiableMap(this, "tapestryProperties");
 
         String name = spec.getName();
 
