@@ -38,9 +38,9 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbenchWindow;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.State;
@@ -122,8 +122,8 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         {
             try
             {
-                IWorkbenchWindow window = TapestryCore.getDefault().getActiveWorkbenchWindow();
-                window.run(false, false, new IRunnableWithProgress()
+                ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
+                dialog.run(false, false, new IRunnableWithProgress()
                 {
                     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
                     {
