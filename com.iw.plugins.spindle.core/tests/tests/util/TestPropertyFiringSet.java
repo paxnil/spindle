@@ -28,6 +28,7 @@ package tests.util;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Collection;
 
 import com.iw.plugins.spindle.core.util.PropertyFiringSet;
 
@@ -59,9 +60,9 @@ public class TestPropertyFiringSet extends PropertyFiringBase
             public void propertyChange(PropertyChangeEvent evt)
             {
                 super.propertyChange(evt);
-                assertEquals(propertyName, eventProperty);
-                assertNull(oldValue);
-                assertEquals(newValue, stored);
+                assertEquals(eventPropertyName, eventProperty);
+                assertNull(eventOldValue);
+                assertEquals(eventNewValue, stored);
             }
         };
 
@@ -98,24 +99,84 @@ public class TestPropertyFiringSet extends PropertyFiringBase
         OneShotListener listener1 = new OneShotListener(testOwner, null, stored, eventProperty);
         set.addPropertyChangeListener(listener1);
         set.add(stored);
-        
-        set.removePropertyChangeListener(listener1);        
+
+        set.removePropertyChangeListener(listener1);
         OneShotListener listener2 = new OneShotListener(testOwner, stored, null, eventProperty);
         set.addPropertyChangeListener(listener2);
-        
+
         set.remove(stored);
-        
+
         // try and remove same twice
         set.removePropertyChangeListener(listener2);
         set.addPropertyChangeListener(error);
         set.remove(stored);
-        
+
         //try and remove a non existant value
         // note that the error listener is still registered
-        
+
         set.remove("dummy");
-        
-        
+
+    }
+
+    public void testaddAll()
+    {
+        String testOwner = "Porsche Dealership";
+        final String eventProperty = "Carrera";
+        final String stored = "3 in stock";
+        TestListener listener1 = new TestListener(testOwner);
+        PropertyFiringSet testSet = new PropertyFiringSet(testOwner, eventProperty);
+        PropertyFiringSet testSet2 = new PropertyFiringSet("Dealership", "Carrera");
+        testSet2.add("Carrera");
+        testSet2.add("Carrera G2");
+        testSet2.add("Carrera G3");
+        testSet.addAll(testSet2);
+
+    }
+
+    public void testRemoveAll()
+    {
+        String testOwner = "Porsche Dealership";
+        final String eventProperty = "Carrera";
+        final String stored = "3 in stock";
+        TestListener listener1 = new TestListener(testOwner);
+        PropertyFiringSet testSet = new PropertyFiringSet(testOwner, eventProperty);
+        PropertyFiringSet testSet2 = new PropertyFiringSet("Dealership", "Carrera 2");
+        testSet2.add("Carrera");
+        testSet2.add("Carrera G2");
+        testSet2.add("Carrera G3");
+        testSet.addAll(testSet2);
+        testSet.removeAll(testSet2);
+
+    }
+    public void testRetainAll()
+    {
+        String testOwner = "Porsche Dealership";
+        final String eventProperty = "Carrera";
+        final String stored = "3 in stock";
+        TestListener listener1 = new TestListener(testOwner);
+        PropertyFiringSet testSet = new PropertyFiringSet(testOwner, eventProperty);
+        PropertyFiringSet testSet2 = new PropertyFiringSet("Dealership", "Carrera");
+        PropertyFiringSet testSet3 = new PropertyFiringSet("Dealership", "Boxers");
+        testSet3.add("Carrera G2");
+        testSet2.add("Carrera");
+        testSet2.add("Carrera G2");
+        testSet2.add("Carrera G3");
+        testSet.addAll(testSet2);
+        testSet.retainAll(testSet3);
+
+    }
+
+    public void testClear()
+    {
+        String testOwner = "Porsche Dealership";
+        final String eventProperty = "Carrera";
+        final String stored = "3 in stock";
+        OneShotListener listener1 = new OneShotListener(testOwner, null, stored, eventProperty);
+        PropertyFiringSet testSet = new PropertyFiringSet(testOwner, eventProperty);
+        testSet.addPropertyChangeListener(listener1);
+        testSet.add(stored);
+        testSet.clear();
+
     }
 
     public static void main(String[] args)
