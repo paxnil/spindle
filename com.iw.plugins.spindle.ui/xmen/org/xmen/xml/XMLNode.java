@@ -31,6 +31,7 @@ import org.eclipse.jface.text.TypedPosition;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.util.OrderPreservingMap;
 
 /**
  *  Produced by the XMLDocumentPartitioner.
@@ -498,7 +499,7 @@ public class XMLNode extends TypedPosition implements Comparable
 
     public Map getAttributesMap()
     {
-        Map result = new HashMap();
+        Map result = new OrderPreservingMap();
         for (Iterator iter = getAttributes().iterator(); iter.hasNext();)
         {
             XMLNode attr = (XMLNode) iter.next();
@@ -630,7 +631,6 @@ public class XMLNode extends TypedPosition implements Comparable
                         }
                     }
             }
-
         }
 
         if (start != -1)

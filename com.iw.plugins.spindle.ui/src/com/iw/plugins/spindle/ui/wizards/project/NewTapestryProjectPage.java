@@ -28,7 +28,6 @@ package com.iw.plugins.spindle.ui.wizards.project;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -67,6 +66,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.ui.properties.ProjectPropertyPage;
 
@@ -327,10 +327,14 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     private void configureWebXML(String projectName, IFolder webInfFolder, IProgressMonitor monitor)
         throws CoreException
     {
+        IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+        boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
+        int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
         StringWriter swriter = new StringWriter();
-        PrintWriter writer = new PrintWriter(swriter);
-        XMLUtil.writeWebDOTXML(projectName, getServletSpecPublicId(), writer);
-        writer.flush();
+        IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
+        
+        XMLUtil.writeWebDOTXML(projectName, getServletSpecPublicId(), iwriter);
+        iwriter.flush();
         IFile webDotXML = webInfFolder.getFile("web.xml");
         fReveal.add(webDotXML);
         InputStream contents = new ByteArrayInputStream(swriter.toString().getBytes());
@@ -350,10 +354,13 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         spec.setDescription("add a description");
         spec.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
         spec.setPageSpecificationPath("Home", "Home.page");
+        IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+        boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
+        int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
         StringWriter swriter = new StringWriter();
-        PrintWriter writer = new PrintWriter(swriter);
-        XMLUtil.writeApplicationSpecification(writer, spec, 0);
-        writer.flush();
+        IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
+        XMLUtil.writeApplicationSpecification(iwriter, spec, 0);
+        iwriter.flush();
         IFile appFile = webInfFolder.getFile(projectName + ".application");
         fReveal.add(appFile);
         InputStream contents = new ByteArrayInputStream(swriter.toString().getBytes());
@@ -368,10 +375,13 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         homeSpec.setComponentClassName(TapestryCore.getString("TapestryPageSpec.defaultSpec"));
         homeSpec.setDescription("add a description");
         homeSpec.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
+        IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+        boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
+        int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
         StringWriter swriter = new StringWriter();
-        PrintWriter writer = new PrintWriter(swriter);
-        XMLUtil.writeSpecification(writer, homeSpec, 0);
-        writer.flush();
+        IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
+        XMLUtil.writeSpecification(iwriter, homeSpec, 0);
+        iwriter.flush();
         IFile pageFile = webInfFolder.getFile("Home.page");
         fReveal.add(pageFile);
         InputStream contents = new ByteArrayInputStream(swriter.toString().getBytes());

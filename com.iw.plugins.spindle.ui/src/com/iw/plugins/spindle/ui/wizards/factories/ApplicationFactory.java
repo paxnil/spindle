@@ -27,7 +27,6 @@ package com.iw.plugins.spindle.ui.wizards.factories;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import org.apache.tapestry.parse.SpecificationParser;
@@ -40,9 +39,12 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.preference.IPreferenceStore;
 
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 
 public class ApplicationFactory
@@ -115,9 +117,12 @@ public class ApplicationFactory
         appSpec.setEngineClassName(qualifiedEngineClassname);
         String path = "/" + packageFragment.replace('.', '/') + "/pages/Home.page";
         appSpec.setPageSpecificationPath("Home", path);
+        IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+        boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
+        int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
         StringWriter swriter = new StringWriter();
-        PrintWriter pwriter = new PrintWriter(swriter);
-        XMLUtil.writeApplicationSpecification(pwriter, appSpec, 0);
+        IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
+        XMLUtil.writeApplicationSpecification(iwriter, appSpec, 0);
         return swriter.toString();
         /*   
            StringReplacer replacer = new StringReplacer(UIPlugin.getResourceFile("Templates.application"));

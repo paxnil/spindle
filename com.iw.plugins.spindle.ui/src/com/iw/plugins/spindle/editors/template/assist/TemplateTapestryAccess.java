@@ -177,6 +177,10 @@ public class TemplateTapestryAccess extends UITapestryAccess
     {
         return fSimpleId;
     }
+    
+    public String getFullType() {
+        return fFullType;
+    }
 
     Result[] findParameters()
     {

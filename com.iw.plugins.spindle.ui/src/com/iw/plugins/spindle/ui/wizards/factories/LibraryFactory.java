@@ -28,7 +28,6 @@ package com.iw.plugins.spindle.ui.wizards.factories;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import org.apache.tapestry.parse.SpecificationParser;
@@ -40,9 +39,12 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jface.preference.IPreferenceStore;
 
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
+import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
@@ -98,9 +100,13 @@ public class LibraryFactory
 
         PluginLibrarySpecification librarySpec = new PluginLibrarySpecification();
         librarySpec.setPublicId(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID);
+        IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+        boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
+        int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
         StringWriter swriter = new StringWriter();
-        PrintWriter pwriter = new PrintWriter(swriter);
-        XMLUtil.writeLibrarySpecification(pwriter, librarySpec, 0);
+        IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
+        XMLUtil.writeLibrarySpecification(iwriter, librarySpec, 0);
+        iwriter.flush();
         return swriter.toString();
     }
 

@@ -37,6 +37,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -46,6 +47,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.editors.XMLContentFormatter;
+import com.iw.plugins.spindle.editors.XMLFormattingStrategy;
 
 /**
  *  Access to features exposed by the JDT UI plugin
@@ -203,8 +206,17 @@ public class UIUtils
             else
                 return new Region(start + 1, end - start - 1);
         }
-
         return null;
+    }
+
+    public static void XMLFormatDocument(IDocument document)
+    {
+        XMLContentFormatter formatter =
+            new XMLContentFormatter(
+                new XMLFormattingStrategy(),
+                new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY },
+                UIPlugin.getDefault().getPreferenceStore());
+        formatter.format(document, new Region(0, document.getLength()));
     }
 
 }
