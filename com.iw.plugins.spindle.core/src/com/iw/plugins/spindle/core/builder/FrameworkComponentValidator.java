@@ -208,10 +208,10 @@ public class FrameworkComponentValidator
         public void run()
         {
             //look for static bindings for the 'script' parameter
-            IBindingSpecification pageBinding = fContainedComponent.getBinding("script");
-            if (pageBinding != null && pageBinding.getType() == BindingType.STATIC)
+            IBindingSpecification scriptBinding = fContainedComponent.getBinding("script");
+            if (scriptBinding != null && scriptBinding.getType() == BindingType.STATIC)
             {
-                String value = pageBinding.getValue();
+                String value = scriptBinding.getValue();
                 if (value != null && value.trim().length() > 0 && !value.startsWith(BaseValidator.DefaultDummyString))
                 {
                     IResourceWorkspaceLocation namespaceLocation =
@@ -226,8 +226,8 @@ public class FrameworkComponentValidator
                             location = getAttributeSourceLocation("script");
                         } else
                         {
-                            ISourceLocationInfo bindingInfo = (ISourceLocationInfo) pageBinding.getLocation();
-                            location = bindingInfo.getAttributeSourceLocation("script");
+                            ISourceLocationInfo bindingInfo = (ISourceLocationInfo) scriptBinding.getLocation();
+                            location = bindingInfo.getAttributeSourceLocation("value");
                         }
 
                         Markers.addTapestryProblemMarkerToResource(
