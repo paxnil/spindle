@@ -92,7 +92,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     {
         fUsePullParser = usePullParser;
         TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID, "Tapestry_1_3.dtd");
-        TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_1_4_PUBLIC_ID, "Tapestry_1_4.dtd");
+        TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, "Tapestry_3_0.dtd");
     }
 
     /**

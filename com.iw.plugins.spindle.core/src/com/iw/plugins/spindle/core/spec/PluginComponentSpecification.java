@@ -26,6 +26,8 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.tapestry.INamespace;
+import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBeanSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -40,7 +43,9 @@ import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.spec.IPropertySpecification;
 
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.IIdentifiableMap;
+import com.iw.plugins.spindle.core.util.PropertyFiringList;
 import com.iw.plugins.spindle.core.util.PropertyFiringMap;
 import com.iw.plugins.spindle.core.util.PropertyFiringSet;
 
@@ -142,7 +147,17 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
 
     private Map fPropertySpecifications;
 
+    /**
+     * The Namespace this component belongs to
+     */
     private INamespace fNamespace;
+
+    /**
+     * A List of the resource locations of all the templates
+     * for this component    
+     */
+
+    private List fTemplates;
 
     public PluginComponentSpecification()
     {
@@ -246,7 +261,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public IContainedComponent getComponent(String id)
     {
-        return (IContainedComponent) keys(fComponents);
+        return (IContainedComponent) get(fComponents, id);
     }
 
     /* (non-Javadoc)
@@ -489,10 +504,37 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
         this.fNamespace = namespace;
     }
 
+    public void addTemplate(IResourceLocation location)
+    {
+        if (fTemplates == null)
+        {
+            fTemplates = new PropertyFiringList(this, "templates");
+        }
+        fTemplates.add(location);
+    }
+
     public List getTemplateLocations()
     {
-        //TODO implement getTemplateLocations()
-        return Collections.EMPTY_LIST;
+        if (fTemplates == null)
+        {
+            return Collections.EMPTY_LIST;
+        }
+        return fTemplates;
+    }
+
+    /**
+     * @param locations
+     */
+    public void setTemplateLocations(IResourceWorkspaceLocation[] locations)
+    {
+        if (fTemplates == null)
+        {
+            fTemplates = new ArrayList();
+        } else
+        {
+            fTemplates.clear();
+        }
+        fTemplates.addAll(Arrays.asList(locations));
     }
 
 }

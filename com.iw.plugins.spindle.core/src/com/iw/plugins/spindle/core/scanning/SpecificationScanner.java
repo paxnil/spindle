@@ -26,7 +26,9 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.IResourceLocation;
@@ -149,6 +151,8 @@ public abstract class SpecificationScanner extends AbstractScanner
      **/
     protected static final Map conversionMap = new HashMap();
 
+    protected static final List typeList = new ArrayList();
+
     // Identify all the different acceptible values.
     // We continue to sneak by with a single map because
     // there aren't conflicts;  when we have 'foo' meaning
@@ -185,6 +189,36 @@ public abstract class SpecificationScanner extends AbstractScanner
         conversionMap.put("in", Direction.IN);
         conversionMap.put("form", Direction.FORM);
         conversionMap.put("custom", Direction.CUSTOM);
+
+        typeList.add("boolean");
+        typeList.add("boolean[]");
+
+        typeList.add("short");
+        typeList.add("short[]");
+
+        typeList.add("int");
+        typeList.add("int[]");
+
+        typeList.add("long");
+        typeList.add("long[]");
+
+        typeList.add("float");
+        typeList.add("float[]");
+
+        typeList.add("double");
+        typeList.add("double[]");
+
+        typeList.add("char");
+        typeList.add("char[]");
+
+        typeList.add("byte");
+        typeList.add("byte[]");
+
+        typeList.add("java.lang.Object");
+        typeList.add("java.lang.Object[]");
+
+        typeList.add("java.lang.String");
+        typeList.add("java.lang.String[]");
     }
 
     protected void scanProperty(IPropertyHolder holder, Node node)
@@ -203,7 +237,7 @@ public abstract class SpecificationScanner extends AbstractScanner
 
         try
         {
-            String value = getExtendedAttribute(node, "value", true);
+            String value = getExtendedAttribute(node, "value", true).value;
             holder.setProperty(name, value);
         } catch (ScannerException e)
         {
@@ -260,7 +294,8 @@ public abstract class SpecificationScanner extends AbstractScanner
      * 
      **/
 
-    protected String getExtendedAttribute(Node node, String attributeName, boolean required) throws ScannerException
+    protected ExtendedAttributeResult getExtendedAttribute(Node node, String attributeName, boolean required)
+        throws ScannerException
     {
 
         String attributeValue = getAttribute(node, attributeName);
@@ -281,11 +316,25 @@ public abstract class SpecificationScanner extends AbstractScanner
                     "SpecificationParser.required-extended-attribute",
                     node.getNodeName(),
                     attributeName));
-
+        ExtendedAttributeResult result = new ExtendedAttributeResult();
         if (nullAttributeValue)
-            return bodyValue;
+        {
 
-        return attributeValue;
+            result.value = bodyValue;
+        } else
+        {
+            result.value = attributeValue;
+            result.fromAttribute = true;
+
+        }
+
+        return result;
+    }
+
+    static public class ExtendedAttributeResult
+    {
+        public String value;
+        public boolean fromAttribute;
     }
 
 }

@@ -76,6 +76,7 @@ public class BaseSpecification implements IIdentifiable, PropertyChangeListener,
     public BaseSpecification(int type)
     {
         super();
+        fSpecificationType = type;
         fPropertySupport = new PropertyChangeSupport(this);
     }
 

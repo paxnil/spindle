@@ -36,4 +36,6 @@ public interface IResourceLocationAcceptor
 {
     /** should return false to cancel the operation */
     public boolean accept(IResourceWorkspaceLocation location);
+    
+    public IResourceWorkspaceLocation[] getResults();
 }

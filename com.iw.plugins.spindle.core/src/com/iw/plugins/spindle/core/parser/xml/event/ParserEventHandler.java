@@ -27,6 +27,8 @@ package com.iw.plugins.spindle.core.parser.xml.event;
 
 import java.util.Stack;
 
+import com.iw.plugins.spindle.core.builder.TapestryBuilder;
+
 public class ParserEventHandler
 {
 
@@ -82,7 +84,7 @@ public class ParserEventHandler
         if (fCurrentAttribute != null)
         {
             fCurrentAttribute.setEndValues(lineNumber, columnNumber);
-        } else
+        } else if (TapestryBuilder.DEBUG)
         {
             System.err.print("peh:");
         }
@@ -96,7 +98,7 @@ public class ParserEventHandler
         if (fCurrentAttribute != null)
         {
             fCurrentAttribute.setEndValues(fCurrentAttribute.getBeginLineNumber(), fCurrentAttribute.getBeginColumnNumber()+1);
-        } else
+        } else if (TapestryBuilder.DEBUG)
         {
             System.err.print("peh2:");
         }

@@ -27,7 +27,8 @@
 package com.iw.plugins.spindle.core.parser;
 
 /**
- *  TODO Add Type comment
+ *  Interface for collecting the problems found by Spindle parsers
+ *  and Scanners.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$

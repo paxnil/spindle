@@ -148,6 +148,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         if (fCurrentProject == null || !fCurrentProject.isAccessible())
             return new IProject[0];
 
+        long start = System.currentTimeMillis();
         if (DEBUG)
             System.out.println(
                 "\nStarting build of " + fCurrentProject.getName() + " @ " + new Date(System.currentTimeMillis()));
@@ -236,9 +237,10 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             cleanup();
         }
         IProject[] requiredProjects = getRequiredProjects(true);
+        long stop = System.currentTimeMillis();
         if (DEBUG)
-            System.out.println(
-                "Finished build of " + fCurrentProject.getName() + " @ " + new Date(System.currentTimeMillis()));
+            System.out.println("Finished build of " + fCurrentProject.getName() + " @ " + new Date(stop));
+        System.out.println("elapsed (ms) = " + (stop - start));
         return requiredProjects;
     }
 
@@ -512,19 +514,22 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         try
         {
             fJavaProject = (IJavaProject) fCurrentProject.getNature(JavaCore.NATURE_ID);
-            fClasspathRoot = new ClasspathRootLocation(fJavaProject);
         } catch (CoreException e)
         {
             TapestryCore.log(e);
+            throw new BuilderException("could not obtain the Java Project!");
         }
+        fClasspathRoot = new ClasspathRootLocation(fJavaProject);
         try
         {
             fTapestryProject = (TapestryProject) fCurrentProject.getNature(TapestryCore.NATURE_ID);
-            fContextRoot = new ContextRootLocation(fTapestryProject.getWebContextFolder());
         } catch (CoreException e)
         {
             TapestryCore.log(e);
+            throw new BuilderException("could not obtain the Tapestry Project!");
         }
+        fContextRoot = new ContextRootLocation(fTapestryProject.getWebContextFolder());
+
 
     }
 

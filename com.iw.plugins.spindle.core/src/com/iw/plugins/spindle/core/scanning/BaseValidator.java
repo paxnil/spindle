@@ -62,8 +62,8 @@ public class BaseValidator implements IScannerValidator
 
     static class SLocation implements ISourceLocation
     { /* (non-Javadoc)
-                            * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
-                            */
+                                  * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
+                                  */
         public int getCharEnd()
         {
             return 1;
@@ -194,6 +194,9 @@ public class BaseValidator implements IScannerValidator
     {
         return true;
     }
+    
+
+ 
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateContainedComponent(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.spec.IContainedComponent)
@@ -289,15 +292,22 @@ public class BaseValidator implements IScannerValidator
         ISourceLocation source)
         throws ScannerException
     {
-        IResourceWorkspaceLocation real = (IResourceWorkspaceLocation) location;
-        IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) real.getRelativeLocation(relativePath);
 
-        if (!relative.exists())
+        if (!resourceLocationExists(location, relativePath))
         {
+            IResourceWorkspaceLocation relative =
+                (IResourceWorkspaceLocation) location.getRelativeLocation(relativePath);
             reportProblem(IProblem.ERROR, source, TapestryCore.getString(errorKey, relative.toString()));
             return false;
         }
         return true;
+    }
+
+    protected boolean resourceLocationExists(IResourceLocation location, String relativePath)
+    {
+        IResourceWorkspaceLocation real = (IResourceWorkspaceLocation) location;
+        IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) real.getRelativeLocation(relativePath);
+        return relative.exists();
     }
 
     public boolean validateTypeName(String fullyQualifiedType, int severity) throws ScannerException

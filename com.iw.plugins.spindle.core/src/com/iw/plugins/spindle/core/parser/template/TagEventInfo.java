@@ -1,3 +1,4 @@
+package com.iw.plugins.spindle.core.parser.template;
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -24,32 +25,29 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.spec.bean;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.iw.plugins.spindle.core.spec.BaseSpecification;
+import com.iw.plugins.spindle.core.parser.ISourceLocation;
+import com.iw.plugins.spindle.core.parser.SourceLocation;
 
-/**
- *  Spindle implementation of a StringBeanInitializer
- * 
- * @author glongman@intelligentworks.com
- * @version $Id$
- */
-public class PluginStringBeanInitializer extends AbstractPluginBeanInitializer
+public class TagEventInfo
 {
 
-    public PluginStringBeanInitializer()
+    private Map fAttributeMap;
+    SourceLocation fStartTagLocation;
+
+    public Map getAttributeMap()
     {
-        super(BaseSpecification.STRING_BEAN_INIT);
+        if (fAttributeMap == null)
+            fAttributeMap = new HashMap();
+
+        return fAttributeMap;
     }
 
-    public String getKey()
+    public ISourceLocation getStartTagLocation()
     {
-        return getValue();
-    }
-
-    public void setKey(String value)
-    {
-        setValue(value);
+        return fStartTagLocation;
     }
 
 }

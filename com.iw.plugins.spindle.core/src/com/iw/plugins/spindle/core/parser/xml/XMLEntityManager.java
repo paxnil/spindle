@@ -140,7 +140,8 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
         Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE;
 
     /** Feature identifier: allow Java encodings. */
-    protected static final String ALLOW_JAVA_ENCODINGS = Constants.XERCES_FEATURE_PREFIX + Constants.ALLOW_JAVA_ENCODINGS_FEATURE;
+    protected static final String ALLOW_JAVA_ENCODINGS =
+        Constants.XERCES_FEATURE_PREFIX + Constants.ALLOW_JAVA_ENCODINGS_FEATURE;
 
     // property identifiers
 
@@ -151,7 +152,8 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
     protected static final String ERROR_REPORTER = Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_REPORTER_PROPERTY;
 
     /** Property identifier: entity resolver. */
-    protected static final String ENTITY_RESOLVER = Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_RESOLVER_PROPERTY;
+    protected static final String ENTITY_RESOLVER =
+        Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_RESOLVER_PROPERTY;
 
     // recognized features and properties
 
@@ -395,7 +397,8 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
                 for (int i = size - 1; i >= 0; i--)
                 {
                     ScannedEntity externalEntity = (ScannedEntity) fEntityStack.elementAt(i);
-                    if (externalEntity.entityLocation != null && externalEntity.entityLocation.getExpandedSystemId() != null)
+                    if (externalEntity.entityLocation != null
+                        && externalEntity.entityLocation.getExpandedSystemId() != null)
                     {
                         baseSystemId = externalEntity.entityLocation.getExpandedSystemId();
                         break;
@@ -454,7 +457,10 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
         if (!fEntities.containsKey(name))
         {
             Entity entity =
-                new ExternalEntity(name, new XMLResourceIdentifierImpl(publicId, systemId, baseSystemId, null), notation);
+                new ExternalEntity(
+                    name,
+                    new XMLResourceIdentifierImpl(publicId, systemId, baseSystemId, null),
+                    notation);
             fEntities.put(name, entity);
         }
     } // addUnparsedEntity(String,String,String,String)
@@ -609,12 +615,18 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
                         // externalEntity, how could this have got here if it wasn't already
                         // expanded??? - neilg
                         String extLitSysId =
-                            (externalEntity.entityLocation != null ? externalEntity.entityLocation.getLiteralSystemId() : null);
+                            (externalEntity.entityLocation != null
+                                ? externalEntity.entityLocation.getLiteralSystemId()
+                                : null);
                         String extBaseSysId =
-                            (externalEntity.entityLocation != null ? externalEntity.entityLocation.getBaseSystemId() : null);
+                            (externalEntity.entityLocation != null
+                                ? externalEntity.entityLocation.getBaseSystemId()
+                                : null);
                         String expandedSystemId = expandSystemId(extLitSysId, extBaseSysId);
                         fResourceIdentifier.setValues(
-                            (externalEntity.entityLocation != null ? externalEntity.entityLocation.getPublicId() : null),
+                            (externalEntity.entityLocation != null
+                                ? externalEntity.entityLocation.getPublicId()
+                                : null),
                             extLitSysId,
                             extBaseSysId,
                             expandedSystemId);
@@ -655,12 +667,18 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
                         ExternalEntity externalEntity = (ExternalEntity) entity;
                         // REVISIT:  for the same reason above...
                         String extLitSysId =
-                            (externalEntity.entityLocation != null ? externalEntity.entityLocation.getLiteralSystemId() : null);
+                            (externalEntity.entityLocation != null
+                                ? externalEntity.entityLocation.getLiteralSystemId()
+                                : null);
                         String extBaseSysId =
-                            (externalEntity.entityLocation != null ? externalEntity.entityLocation.getBaseSystemId() : null);
+                            (externalEntity.entityLocation != null
+                                ? externalEntity.entityLocation.getBaseSystemId()
+                                : null);
                         String expandedSystemId = expandSystemId(extLitSysId, extBaseSysId);
                         fResourceIdentifier.setValues(
-                            (externalEntity.entityLocation != null ? externalEntity.entityLocation.getPublicId() : null),
+                            (externalEntity.entityLocation != null
+                                ? externalEntity.entityLocation.getPublicId()
+                                : null),
                             extLitSysId,
                             extBaseSysId,
                             expandedSystemId);
@@ -1936,10 +1954,9 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
         /** Returns a string representation of this object. */
         public String toString()
         {
-
             StringBuffer str = new StringBuffer();
             str.append("name=\"" + name + '"');
-            str.append(",ch=" + ch);
+            str.append(",ch=" + String.valueOf(ch));
             str.append(",position=" + position);
             str.append(",count=" + count);
             return str.toString();
@@ -3351,7 +3368,8 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
         {
             if (fCurrentEntity != null)
             {
-                if (fCurrentEntity.entityLocation != null && fCurrentEntity.entityLocation.getExpandedSystemId() != null)
+                if (fCurrentEntity.entityLocation != null
+                    && fCurrentEntity.entityLocation.getExpandedSystemId() != null)
                 {
                     return fCurrentEntity.entityLocation.getExpandedSystemId();
                 } else
@@ -3362,7 +3380,8 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
                     {
                         ScannedEntity externalEntity = (ScannedEntity) fEntityStack.elementAt(i);
 
-                        if (externalEntity.entityLocation != null && externalEntity.entityLocation.getExpandedSystemId() != null)
+                        if (externalEntity.entityLocation != null
+                            && externalEntity.entityLocation.getExpandedSystemId() != null)
                         {
                             return externalEntity.entityLocation.getExpandedSystemId();
                         }
@@ -3386,7 +3405,8 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
         {
             if (fCurrentEntity != null)
             {
-                if (fCurrentEntity.entityLocation != null && fCurrentEntity.entityLocation.getLiteralSystemId() != null)
+                if (fCurrentEntity.entityLocation != null
+                    && fCurrentEntity.entityLocation.getLiteralSystemId() != null)
                 {
                     return fCurrentEntity.entityLocation.getLiteralSystemId();
                 } else
@@ -3397,7 +3417,8 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
                     {
                         ScannedEntity externalEntity = (ScannedEntity) fEntityStack.elementAt(i);
 
-                        if (externalEntity.entityLocation != null && externalEntity.entityLocation.getLiteralSystemId() != null)
+                        if (externalEntity.entityLocation != null
+                            && externalEntity.entityLocation.getLiteralSystemId() != null)
                         {
                             return externalEntity.entityLocation.getLiteralSystemId();
                         }

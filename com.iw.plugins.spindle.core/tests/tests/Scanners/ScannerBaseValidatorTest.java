@@ -553,15 +553,6 @@ public class ScannerBaseValidatorTest extends TestCase
     {
         List problems = new ArrayList();
         /* (non-Javadoc)
-        * @see com.iw.plugins.spindle.core.parser.IProblemCollector#addProblem(int, com.iw.plugins.spindle.core.parser.ISourceLocation, java.lang.String)
-        */
-        public void addProblem(int severity, ISourceLocation location, String message)
-        {
-            problems.add(new TestProblem(severity, location, message));
-
-        }
-
-        /* (non-Javadoc)
          * @see com.iw.plugins.spindle.core.parser.IProblemCollector#addProblem(com.iw.plugins.spindle.core.parser.IProblem)
          */
         public void addProblem(IProblem problem)
@@ -587,6 +578,15 @@ public class ScannerBaseValidatorTest extends TestCase
         {
             return problems.isEmpty();
         }
+        /* (non-Javadoc)
+         * @see com.iw.plugins.spindle.core.parser.IProblemCollector#addProblem(int, com.iw.plugins.spindle.core.parser.ISourceLocation, java.lang.String)
+         */
+        public void addProblem(int severity, ISourceLocation location, String message)
+        {
+            // TODO Auto-generated method stub
+
+        }
+
     }
 
     class DummySourceLocation implements ISourceLocation

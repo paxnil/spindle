@@ -75,8 +75,8 @@ public class NodeAccess
     public static boolean getBooleanAttribute(Node node, String attributeName)
     {
         String attributeValue = getAttribute(node, attributeName);
-
-        return attributeValue.equals("yes");
+        
+        return "yes".equals(attributeValue);
     }
 
     public static String getValue(Node node)
@@ -97,7 +97,7 @@ public class NodeAccess
 
     public static boolean isElement(Node node, String elementName)
     {
-        if (node.getNodeType() != Node.ELEMENT_NODE)
+        if (node == null || node.getNodeType() != Node.ELEMENT_NODE)
             return false;
 
         return node.getNodeName().equals(elementName);

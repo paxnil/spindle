@@ -42,29 +42,13 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
  *  A Lookup that bases its searches on the namespace it is configured with.
  *  Does not take into account any sub namespaces.
  * 
- *  This lookup can find:
- * 
- *  .jwc files
- *  .page files
- * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public class NamespaceResourceLookup
 {
 
-    /**
-    * Accept flag for specifying .jwc files.
-    */
-    public int ACCEPT_JWC = 0x00000001;
-
-    /**
-     * Accept flag for specifying .page files.
-     */
-    public int ACCEPT_PAGE = 0x00000002;
-
     private List fLocations;
-    private ResourceAcceptor fAcceptor;
 
     public void configure(PluginLibrarySpecification specification)
     {
@@ -95,108 +79,23 @@ public class NamespaceResourceLookup
         }
     }
 
-    public IResourceWorkspaceLocation[] find(String name, boolean exactMatch, int acceptFlags)
+    public IResourceWorkspaceLocation[] lookup(IResourceLocationAcceptor acceptor)
     {
         if (fLocations == null)
             throw new Error("not initialized");
 
-        if (fAcceptor == null)
-            fAcceptor = new ResourceAcceptor();
-
         try
         {
-            fAcceptor.reset(name, exactMatch, acceptFlags);
             for (Iterator iter = fLocations.iterator(); iter.hasNext();)
             {
                 IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
-                location.lookup(fAcceptor);
+                location.lookup(acceptor);
             }
         } catch (CoreException e)
         {
             TapestryCore.log(e);
         }
-        return fAcceptor.getResults();
-    }
-
-    class ResourceAcceptor implements IResourceLocationAcceptor
-    {
-
-        List results = new ArrayList();
-        String expectedName;
-        boolean exactMatch;
-        int acceptFlags;
-
-        public void reset(String name, boolean exactMatch, int acceptFlags)
-        {
-            results.clear();
-            this.expectedName = name;
-            this.exactMatch = exactMatch;
-            this.acceptFlags = acceptFlags;
-        }
-        /* (non-Javadoc)
-         * @see com.iw.plugins.spindle.core.resources.IResourceLocationRequestor#accept(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
-         */
-        public boolean accept(IResourceWorkspaceLocation location)
-        {
-            String fullname = location.getName();
-            String name = null;
-            String extension = null;
-
-            boolean match = false;
-            if (fullname != null)
-            {
-                int cut = fullname.lastIndexOf('.');
-                if (cut < 0)
-                {
-                    name = fullname;
-                } else if (cut == 0)
-                {
-                    extension = fullname;
-                } else
-                {
-                    name = fullname.substring(0, cut);
-                    extension = fullname.substring(cut + 1);
-                }
-            }
-            if (name != null)
-            {
-                if ("*".equals(expectedName))
-                {
-                    match = true;
-                } else if (exactMatch)
-                {
-                    match = expectedName.equals(name);
-                } else
-                {
-                    match = name.startsWith(expectedName);
-                }
-            }
-            if (match)
-            {
-                if ("jwc".equals(extension))
-                {
-                    match = (acceptFlags & ACCEPT_JWC) != 0;
-                }
-
-                if ("page".equals(extension))
-                {
-                    match = (acceptFlags & ACCEPT_PAGE) != 0;
-                } else
-                {
-                    match = false;
-                }
-            }
-            if (match)
-                results.add(location);
-
-            return true;
-        }
-
-        public IResourceWorkspaceLocation[] getResults()
-        {
-            return (IResourceWorkspaceLocation[]) results.toArray(new IResourceWorkspaceLocation[results.size()]);
-        }
-
+        return acceptor.getResults();
     }
 
 }

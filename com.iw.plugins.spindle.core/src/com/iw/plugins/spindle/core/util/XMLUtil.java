@@ -41,7 +41,7 @@ import org.apache.tapestry.util.IPropertyHolder;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
-import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.core.spec.appSpec;
 import com.iw.plugins.spindle.core.spec.PluginExtensionConfiguration;
 import com.iw.plugins.spindle.core.spec.PluginExtensionSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
@@ -68,7 +68,7 @@ public class XMLUtil
         if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID))
             return DTD_1_3;
 
-        if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_4_PUBLIC_ID))
+        if (publicId.equals(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID))
             return DTD_1_4;
 
         return UNKNOWN_DTD;
@@ -87,7 +87,7 @@ public class XMLUtil
             case DTD_1_3 :
                 return SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID;
             case DTD_1_4 :
-                return SpecificationParser.TAPESTRY_DTD_1_4_PUBLIC_ID;
+                return SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID;
 
         }
 
@@ -109,7 +109,7 @@ public class XMLUtil
                 break;
 
             case BaseSpecification.APPLICATION_SPEC :
-                writeApplicationSpecification(writer, (PluginApplicationSpecification) specification, indent);
+                writeApplicationSpecification(writer, (appSpec) specification, indent);
                 break;
             case BaseSpecification.EXTENSION_CONFIGURATION :
                 writeExtensionConfiguration(writer, (PluginExtensionConfiguration) specification, indent);
@@ -150,7 +150,7 @@ public class XMLUtil
 
     public static void writeApplicationSpecification(
         PrintWriter writer,
-        PluginApplicationSpecification application,
+        appSpec application,
         int indent)
     {
 

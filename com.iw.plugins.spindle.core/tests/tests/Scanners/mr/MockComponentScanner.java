@@ -153,9 +153,9 @@ public class MockComponentScanner extends ComponentScanner
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.ComponentScanner#scanSetStringProperty(org.apache.tapestry.spec.IBeanSpecification, org.w3c.dom.Node)
      */
-    public void scanSetStringProperty(IBeanSpecification spec, Node node)
+    public void scanSetMessageProperty(IBeanSpecification spec, Node node)
     {
-        super.scanSetStringProperty(spec, node);
+        super.scanSetMessageProperty(spec, node);
     }
 
 }

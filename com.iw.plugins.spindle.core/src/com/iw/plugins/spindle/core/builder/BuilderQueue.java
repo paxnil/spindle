@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.core.builder;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 /**
  * Helper class used by the Full Build
@@ -83,6 +84,15 @@ public class BuilderQueue
     {
         fToBeProcessed.remove(element);
         fHaveBeenProcessed.add(element);
+    }
+
+    public void finished(List elements)
+    {
+        for (Iterator iter = elements.iterator(); iter.hasNext();)
+        {
+            finished(iter.next());
+
+        }
     }
 
     public boolean isProcessed(Object element)

@@ -31,7 +31,7 @@ package com.iw.plugins.spindle.core.builder;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public class BuilderException extends Exception
+public class BuilderException extends RuntimeException
 {
 
     public BuilderException()

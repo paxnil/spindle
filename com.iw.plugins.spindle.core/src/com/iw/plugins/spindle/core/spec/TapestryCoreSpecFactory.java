@@ -41,7 +41,7 @@ import org.apache.tapestry.spec.SpecFactory;
 
 import com.iw.plugins.spindle.core.spec.bean.PluginExpressionBeanInitializer;
 import com.iw.plugins.spindle.core.spec.bean.PluginFieldBeanInitializer;
-import com.iw.plugins.spindle.core.spec.bean.PluginStringBeanInitializer;
+import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
 
 public class TapestryCoreSpecFactory extends SpecFactory
 {
@@ -149,10 +149,9 @@ public class TapestryCoreSpecFactory extends SpecFactory
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.SpecFactory#createStringBeanInitializer()
      */
-    public IBeanInitializer createStringBeanInitializer()
+    public IBeanInitializer createMessageBeanInitializer()
     {
-        // TODO Auto-generated method stub
-        return new PluginStringBeanInitializer();
+        return new PluginMessageBeanInitializer();
     }
 
 }

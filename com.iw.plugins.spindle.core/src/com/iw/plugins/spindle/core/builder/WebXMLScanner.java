@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.FullBuild.ServletInfo;
 import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -70,10 +69,10 @@ public class WebXMLScanner extends AbstractScanner
         this.fJavaProject = fBuilder.fJavaProject;
     }
 
-    public FullBuild.ServletInfo[] scanServletInformation(Node webxml) throws ScannerException
+    public ServletInfo[] scanServletInformation(Node webxml) throws ScannerException
     {
         List result = (List) scan(fBuilder.fParser, null, webxml);
-        return (FullBuild.ServletInfo[]) result.toArray(new FullBuild.ServletInfo[result.size()]);
+        return (ServletInfo[]) result.toArray(new ServletInfo[result.size()]);
     }
 
     public Object beforeScan(Node node)
@@ -95,10 +94,7 @@ public class WebXMLScanner extends AbstractScanner
 
     }
 
-    protected void checkApplicationServletPathParam(
-        String value,
-        FullBuild.ServletInfo currentInfo,
-        ISourceLocation location)
+    protected void checkApplicationServletPathParam(String value, ServletInfo currentInfo, ISourceLocation location)
     {
         if (currentInfo.isServletSubclass && currentInfo.applicationSpecLocation != null)
         {
@@ -108,8 +104,8 @@ public class WebXMLScanner extends AbstractScanner
                 TapestryCore.getString("web-xml-application-path-param-but-servlet-defines"));
             return;
         }
-        IResourceWorkspaceLocation ws_location = getApplicationLocation(value);
-        if (ws_location.getStorage() == null)
+        IResourceWorkspaceLocation ws_location = getApplicationLocation(currentInfo, value);
+        if (ws_location == null)
         {
             addProblem(
                 IProblem.ERROR,
@@ -148,8 +144,8 @@ public class WebXMLScanner extends AbstractScanner
             TapestryCore.log(e);
             e.printStackTrace();
         }
-        if (!match)
-            addProblem(IProblem.ERROR, location, "web-xml-does-not-subclass");
+//        if (!match)
+//            addProblem(IProblem.ERROR, location, "web-xml-does-not-subclass");
 
         return match;
     }
@@ -176,33 +172,52 @@ public class WebXMLScanner extends AbstractScanner
         {
             if (isElement(node, "servlet"))
             {
-                FullBuild.ServletInfo info = getServletInfo(node);
-                if (info != null && info.applicationSpecLocation != null)
+                ServletInfo info = getServletInfo(node);
+                if (info != null)
                     infos.add(info);
 
             }
         }
     }
 
-    protected IResourceWorkspaceLocation getApplicationLocation(String path)
+    protected IResourceWorkspaceLocation getApplicationLocation(ServletInfo info, String path)
     {
-        if (path == null)
-            return null;
+        if (path != null)
+        {
+            return check(fBuilder.fTapestryBuilder.fClasspathRoot, path);
+        } else
+        {
 
-        IPath ws_path = new Path(path);
-        IResourceWorkspaceLocation location =
-            (IResourceWorkspaceLocation) fBuilder.fTapestryBuilder.fClasspathRoot.getRelativeLocation(path.toString());
-        if (!location.exists())
-            location =
-                (IResourceWorkspaceLocation) fBuilder.fTapestryBuilder.fContextRoot.getRelativeLocation(
-                    path.toString());
+            IResourceWorkspaceLocation context = fBuilder.fTapestryBuilder.fContextRoot;
+            String servletName = info.name;
+            String expectedName = servletName + ".application";
 
-        return location;
+            IResourceWorkspaceLocation webInfLocation =
+                (IResourceWorkspaceLocation) context.getRelativeLocation("/WEB-INF/");
+            IResourceWorkspaceLocation webInfAppLocation =
+                (IResourceWorkspaceLocation) webInfLocation.getRelativeLocation(servletName + "/");
+
+            IResourceWorkspaceLocation result = check(webInfAppLocation, expectedName);
+            if (result != null)
+                return result;
+
+            return check(webInfLocation, expectedName);
+        }
     }
 
-    private IPath getApplicationPathFromServlet(IType servletType)
+    private IResourceWorkspaceLocation check(IResourceWorkspaceLocation location, String name)
     {
-        IPath result = null;
+        IResourceWorkspaceLocation result = (IResourceWorkspaceLocation) location.getRelativeLocation(name);
+
+        if (result.exists())
+            return result;
+
+        return null;
+    }
+
+    private String getApplicationPathFromServlet(IType servletType)
+    {
+        String result = null;
         try
         {
             IMethod pathMethod = servletType.getMethod("getApplicationSpecificationPath", new String[0]);
@@ -216,7 +231,7 @@ public class WebXMLScanner extends AbstractScanner
                     int first = methodSource.indexOf("\"");
                     int last = methodSource.lastIndexOf("\"");
                     if (first >= 0 && last > first)
-                        result = new Path(methodSource.substring(first + 1, last));
+                        result = methodSource.substring(first + 1, last);
 
                 }
             }
@@ -225,9 +240,9 @@ public class WebXMLScanner extends AbstractScanner
         return result;
     }
 
-    protected FullBuild.ServletInfo getServletInfo(Node servletNode)
+    protected ServletInfo getServletInfo(Node servletNode)
     {
-        FullBuild.ServletInfo newInfo = fBuilder.new ServletInfo();
+        ServletInfo newInfo = new ServletInfo();
         for (Node node = servletNode.getFirstChild(); node != null; node = node.getNextSibling())
         {
             if (isElement(node, "servlet-name"))
@@ -266,13 +281,17 @@ public class WebXMLScanner extends AbstractScanner
 
     private boolean isTapestryServlet(IType candidate, ISourceLocation location)
     {
-        if (candidate != null && !candidate.equals(fBuilder.fTapestryServletType))
-            return checkJavaSubclassOfImplements(fBuilder.fTapestryServletType, candidate, location);
+        if (candidate == null)
+            return false;
 
-        return false;
+        if (candidate.equals(fBuilder.fTapestryServletType))
+            return true;
+
+        return checkJavaSubclassOfImplements(fBuilder.fTapestryServletType, candidate, location);
+
     }
 
-    protected boolean scanInitParam(Node initParamNode, FullBuild.ServletInfo currentInfo) throws ScannerException
+    protected boolean scanInitParam(Node initParamNode, ServletInfo currentInfo) throws ScannerException
     {
         String key = null;
         String value = null;
@@ -314,7 +333,7 @@ public class WebXMLScanner extends AbstractScanner
         }
         return true;
     }
-    protected boolean scanServletClass(Node node, FullBuild.ServletInfo newInfo)
+    protected boolean scanServletClass(Node node, ServletInfo newInfo)
     {
         newInfo.classname = getValue(node);
         ISourceLocation nodeLocation = getBestGuessSourceLocation(node, true);
@@ -337,13 +356,13 @@ public class WebXMLScanner extends AbstractScanner
         } else if (!fBuilder.fTapestryServletType.equals(servletType))
         {
             newInfo.isServletSubclass = true; // its a subclass
-            IPath path = getApplicationPathFromServlet(servletType);
+            String path = getApplicationPathFromServlet(servletType);
             if (path != null)
             {
                 IResourceWorkspaceLocation location = null;
                 try
                 {
-                    location = getApplicationLocation(path.toString());
+                    location = getApplicationLocation(newInfo, path);
                     checkApplicationLocation(location);
                 } catch (ScannerException e)
                 {
@@ -363,7 +382,7 @@ public class WebXMLScanner extends AbstractScanner
         return true;
     }
 
-    protected boolean scanServletName(Node node, FullBuild.ServletInfo newInfo)
+    protected boolean scanServletName(Node node, ServletInfo newInfo)
     {
         newInfo.name = getValue(node);
         ISourceLocation bestGuessSourceLocation = getBestGuessSourceLocation(node, true);

@@ -26,6 +26,7 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
+import org.apache.tapestry.INamespace;
 import org.apache.tapestry.engine.ITemplateSource;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.AssetType;
@@ -40,13 +41,18 @@ import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IListenerBindingSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.spec.IPropertySpecification;
+import org.eclipse.core.runtime.CoreException;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.IProblem;
+import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
+import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.bean.PluginExpressionBeanInitializer;
-import com.iw.plugins.spindle.core.spec.bean.PluginStringBeanInitializer;
+import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
@@ -58,13 +64,15 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
 public class ComponentScanner extends SpecificationScanner
 {
     boolean fIsPageSpec;
-
+    boolean fSeenTemplateAsset;
+    protected INamespace fNamespace;
     /* Don't need to throw an exception or add a problem here, the Parser will already have caught this
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(
      */
     protected Object beforeScan(Node rootNode) throws ScannerException
     {
         fIsPageSpec = isElement(rootNode, "page-specification");
+        fSeenTemplateAsset = false;
         if (!(fIsPageSpec || isElement(rootNode, "component-specification")))
         {
             return null;
@@ -81,6 +89,7 @@ public class ComponentScanner extends SpecificationScanner
 
         specification.setPublicId(fParser.getPublicId());
         specification.setSpecificationLocation(fResourceLocation);
+        ((PluginComponentSpecification) specification).setNamespace(fNamespace);
 
         // Only components specify these two attributes.
 
@@ -88,6 +97,12 @@ public class ComponentScanner extends SpecificationScanner
         specification.setAllowInformalParameters(getBooleanAttribute(rootNode, "allow-informal-parameters"));
 
         scanComponentSpecification(rootNode, specification, fIsPageSpec);
+        scanForTemplates(specification);
+    }
+
+    public void setNamespace(INamespace namespace)
+    {
+        fNamespace = namespace;
     }
 
     protected void scanAsset(IComponentSpecification specification, Node node, AssetType type, String attributeName)
@@ -96,32 +111,44 @@ public class ComponentScanner extends SpecificationScanner
         String name = getAttribute(node, "name", true);
         String validateName = (name.startsWith(getDummyStringPrefix()) ? "" : name);
 
-        // As a special case, allow the exact value through (even though
-        // it is not, technically, a valid asset name).
+        if (specification.getAsset(name) != null)
+        {
 
-        if (!validateName.equals(ITemplateSource.TEMPLATE_ASSET_NAME))
-            validatePattern(
-                validateName,
-                SpecificationParser.ASSET_NAME_PATTERN,
-                "SpecificationParser.invalid-asset-name",
+            addProblem(
                 IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"));
+                getAttributeSourceLocation(node, "name"),
+                TapestryCore.getTapestryString(
+                    "ComponentSpecification.duplicate-asset",
+                    specification.getSpecificationLocation().getName(),
+                    name));
 
-        String value = getAttribute(node, attributeName);
-        IAssetSpecification asset = specificationFactory.createAssetSpecification();
+        } else
+        {
 
-        asset.setType(type);
-        asset.setPath(value);
+            if (!validateName.equals(ITemplateSource.TEMPLATE_ASSET_NAME))
+                validatePattern(
+                    validateName,
+                    SpecificationParser.ASSET_NAME_PATTERN,
+                    "SpecificationParser.invalid-asset-name",
+                    IProblem.ERROR,
+                    getAttributeSourceLocation(node, "name"));
 
-        ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(specification.getSpecificationLocation());
-        asset.setLocation(location);
+            String value = getAttribute(node, attributeName);
+            IAssetSpecification asset = specificationFactory.createAssetSpecification();
 
-        validateAsset(specification, asset, getSourceLocationInfo(node));
+            asset.setType(type);
+            asset.setPath(value);
 
-        specification.addAsset(name, asset);
+            ISourceLocationInfo location = getSourceLocationInfo(node);
+            location.setResourceLocation(specification.getSpecificationLocation());
+            asset.setLocation(location);
 
-        scanPropertiesInNode(asset, node);
+            specification.addAsset(name, asset);
+
+            validateAsset(specification, asset, getSourceLocationInfo(node));
+
+            scanPropertiesInNode(asset, node);
+        }
     }
 
     /**
@@ -132,57 +159,75 @@ public class ComponentScanner extends SpecificationScanner
     protected void scanBean(IComponentSpecification specification, Node node) throws ScannerException
     {
         String name = getAttribute(node, "name", true);
-
-        validatePattern(
-            name,
-            SpecificationParser.BEAN_NAME_PATTERN,
-            "SpecificationParser.invalid-bean-name",
-            IProblem.ERROR,
-            getAttributeSourceLocation(node, "name"));
-
-        String className = getAttribute(node, "class", true);
-
-        validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
-
-        String lifecycleString = getAttribute(node, "lifecycle");
-
-        BeanLifecycle lifecycle = (BeanLifecycle) SpecificationScanner.conversionMap.get(lifecycleString);
-
-        IBeanSpecification bspec = specificationFactory.createBeanSpecification();
-
-        bspec.setClassName(className);
-        bspec.setLifecycle(lifecycle);
-
-        ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(specification.getSpecificationLocation());
-        bspec.setLocation(location);
-
-        specification.addBeanSpecification(name, bspec);
-
-        for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
+        if (specification.getBeanSpecification(name) != null)
         {
-            if (isElement(child, "description"))
-            {
-                bspec.setDescription(getValue(child));
-                continue;
-            }
+            addProblem(
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "name"),
+                TapestryCore.getTapestryString(
+                    "ComponentSpecification.duplicate-bean",
+                    specification.getSpecificationLocation().getName(),
+                    name));
+        } else
+        {
+            validatePattern(
+                name,
+                SpecificationParser.BEAN_NAME_PATTERN,
+                "SpecificationParser.invalid-bean-name",
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "name"));
 
-            if (isElement(child, "property"))
-            {
-                scanProperty(bspec, child);
-                continue;
-            }
+            String className = getAttribute(node, "class", true);
 
-            if (isElement(child, "set-property"))
-            {
-                scanSetProperty(bspec, child);
-                continue;
-            }
+            validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
 
-            if (isElement(child, "set-string-property"))
+            String lifecycleString = getAttribute(node, "lifecycle");
+
+            BeanLifecycle lifecycle = (BeanLifecycle) SpecificationScanner.conversionMap.get(lifecycleString);
+
+            IBeanSpecification bspec = specificationFactory.createBeanSpecification();
+
+            bspec.setClassName(className);
+            bspec.setLifecycle(lifecycle);
+
+            ISourceLocationInfo location = getSourceLocationInfo(node);
+            location.setResourceLocation(specification.getSpecificationLocation());
+            bspec.setLocation(location);
+
+            specification.addBeanSpecification(name, bspec);
+
+            for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
             {
-                scanSetStringProperty(bspec, child);
-                continue;
+                if (isElement(child, "description"))
+                {
+                    bspec.setDescription(getValue(child));
+                    continue;
+                }
+
+                if (isElement(child, "property"))
+                {
+                    scanProperty(bspec, child);
+                    continue;
+                }
+
+                if (isElement(child, "set-property"))
+                {
+                    scanSetProperty(bspec, child);
+                    continue;
+                }
+
+                if (isElement(child, "set-string-property"))
+                {
+                    scanSetMessageProperty(bspec, child);
+                    continue;
+                }
+
+                if (isElement(child, "set-message-property"))
+                {
+                    scanSetMessageProperty(bspec, child);
+                    continue;
+                }
+
             }
         }
     }
@@ -193,9 +238,13 @@ public class ComponentScanner extends SpecificationScanner
         String name = getAttribute(node, "name", true);
 
         String value = null;
+        boolean fromAttribute = false;
         try
         {
-            value = getExtendedAttribute(node, attributeName, true);
+            ExtendedAttributeResult result = getExtendedAttribute(node, attributeName, true);
+            value = result.value;
+            fromAttribute = result.fromAttribute;
+
         } catch (ScannerException e)
         {
             addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());
@@ -212,7 +261,11 @@ public class ComponentScanner extends SpecificationScanner
 
         if (type == BindingType.DYNAMIC)
         {
-            validateExpression(value, IProblem.ERROR, getNodeStartSourceLocation(node));
+            ISourceLocation src =
+                fromAttribute
+                    ? getAttributeSourceLocation(node, attributeName)
+                    : getBestGuessSourceLocation(node, true);
+            validateExpression(value, IProblem.ERROR, src);
         }
 
         component.setBinding(name, binding);
@@ -222,144 +275,162 @@ public class ComponentScanner extends SpecificationScanner
     {
         String id = getAttribute(node, "id", true);
 
-        validatePattern(
-            id,
-            SpecificationParser.COMPONENT_ID_PATTERN,
-            "SpecificationParser.invalid-component-id",
-            IProblem.ERROR,
-            getAttributeSourceLocation(node, "id"));
-
-        String type = getAttribute(node, "type");
-        String copyOf = getAttribute(node, "copy-of");
-        IContainedComponent c = null;
-
-        if (type != null && copyOf != null)
+        if (specification.getComponent(id) != null)
         {
-
             addProblem(
                 IProblem.ERROR,
-                getNodeStartSourceLocation(node),
-                TapestryCore.getTapestryString("SpecificationParser.both-type-and-copy-of", id));
+                getAttributeSourceLocation(node, "id"),
+                TapestryCore.getTapestryString(
+                    "ComponentSpecification.duplicate-component",
+                    specification.getSpecificationLocation().getName(),
+                    id));
         } else
         {
-            if (copyOf != null)
+            validatePattern(
+                id,
+                SpecificationParser.COMPONENT_ID_PATTERN,
+                "SpecificationParser.invalid-component-id",
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "id"));
+
+            String type = getAttribute(node, "type");
+            String copyOf = getAttribute(node, "copy-of");
+            IContainedComponent c = null;
+
+            if (type != null && copyOf != null)
             {
 
-                c = specificationFactory.createContainedComponent();
-                IContainedComponent parent = specification.getComponent(copyOf);
-                if (parent == null)
-                {
-                    c.setType(getNextDummyString());
-                    c.setCopyOf(copyOf);
-                    addProblem(
-                        IProblem.ERROR,
-                        getAttributeSourceLocation(node, "copy-of"),
-                        TapestryCore.getTapestryString("SpecificationParser.unable-to-copy", copyOf));
-
-                } else
-                {
-                    c.setType(parent.getType());
-                    c.setCopyOf(copyOf);
-                }
-
+                addProblem(
+                    IProblem.ERROR,
+                    getNodeStartSourceLocation(node),
+                    TapestryCore.getTapestryString("SpecificationParser.both-type-and-copy-of", id));
             } else
             {
-                if (type == null)
+                if (copyOf != null)
                 {
-                    addProblem(
-                        IProblem.ERROR,
-                        getNodeStartSourceLocation(node),
-                        TapestryCore.getTapestryString("SpecificationParser.missing-type-or-copy-of", id));
-                } else
-                {
-
-                    // In prior versions, its more free-form, because you can specify the path to
-                    // a component as well.  In version 3, you must use an alias and define it
-                    // in a library.
-
-                    validatePattern(
-                        type,
-                        SpecificationParser.COMPONENT_TYPE_PATTERN,
-                        "SpecificationParser.invalid-component-type",
-                        IProblem.ERROR,
-                        getAttributeSourceLocation(node, "type"));
 
                     c = specificationFactory.createContainedComponent();
-                    c.setType(type);
-                }
-            }
-
-            if (c == null)
-            {
-                c = specificationFactory.createContainedComponent();
-                c.setType(getNextDummyString());
-            }
-
-            ISourceLocationInfo location = getSourceLocationInfo(node);
-            location.setResourceLocation(specification.getSpecificationLocation());
-            c.setLocation(location);
-
-            for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
-            {
-                if (isElement(child, "binding"))
-                {
-                    scanBinding(c, child, BindingType.DYNAMIC, "expression");
-                    continue;
-                }
-
-                // Field binding is in 1.3 DTD, but removed from 1.4
-
-                if (isElement(child, "field-binding"))
-                {
-                    if (XMLUtil.getDTDVersion(fParser.getPublicId()) < XMLUtil.DTD_1_4)
+                    IContainedComponent parent = specification.getComponent(copyOf);
+                    if (parent == null)
                     {
-                        scanBinding(c, child, BindingType.FIELD, "field-name");
+                        c.setType(getNextDummyString());
+                        c.setCopyOf(copyOf);
+                        addProblem(
+                            IProblem.ERROR,
+                            getAttributeSourceLocation(node, "copy-of"),
+                            TapestryCore.getTapestryString("SpecificationParser.unable-to-copy", copyOf));
+
                     } else
+                    {
+                        c.setType(parent.getType());
+                        c.setCopyOf(copyOf);
+                    }
+
+                } else
+                {
+                    if (type == null)
                     {
                         addProblem(
                             IProblem.ERROR,
-                            getNodeStartSourceLocation(child),
-                            "field-binding not supported in DTD 1.4 and up.");
+                            getNodeStartSourceLocation(node),
+                            TapestryCore.getTapestryString("SpecificationParser.missing-type-or-copy-of", id));
+                    } else
+                    {
+
+                        // In prior versions, its more free-form, because you can specify the path to
+                        // a component as well.  In version 3, you must use an alias and define it
+                        // in a library.
+
+                        validatePattern(
+                            type,
+                            SpecificationParser.COMPONENT_TYPE_PATTERN,
+                            "SpecificationParser.invalid-component-type",
+                            IProblem.ERROR,
+                            getAttributeSourceLocation(node, "type"));
+
+                        c = specificationFactory.createContainedComponent();
+                        c.setType(type);
                     }
-                    continue;
                 }
 
-                if (isElement(child, "listener-binding"))
+                if (c == null)
                 {
-                    scanListenerBinding(c, child);
-                    continue;
+                    c = specificationFactory.createContainedComponent();
+                    c.setType(getNextDummyString());
                 }
 
-                if (isElement(child, "inherited-binding"))
+                ISourceLocationInfo location = getSourceLocationInfo(node);
+                location.setResourceLocation(specification.getSpecificationLocation());
+                c.setLocation(location);
+
+                for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
                 {
-                    scanBinding(c, child, BindingType.INHERITED, "parameter-name");
-                    continue;
+                    if (isElement(child, "binding"))
+                    {
+                        scanBinding(c, child, BindingType.DYNAMIC, "expression");
+                        continue;
+                    }
+
+                    // Field binding is in 1.3 DTD, but removed from 1.4
+
+                    if (isElement(child, "field-binding"))
+                    {
+                        if (XMLUtil.getDTDVersion(fParser.getPublicId()) < XMLUtil.DTD_1_4)
+                        {
+                            scanBinding(c, child, BindingType.FIELD, "field-name");
+                        } else
+                        {
+                            addProblem(
+                                IProblem.ERROR,
+                                getNodeStartSourceLocation(child),
+                                "field-binding not supported in DTD 1.4 and up.");
+                        }
+                        continue;
+                    }
+
+                    if (isElement(child, "listener-binding"))
+                    {
+                        scanListenerBinding(c, child);
+                        continue;
+                    }
+
+                    if (isElement(child, "inherited-binding"))
+                    {
+                        scanBinding(c, child, BindingType.INHERITED, "parameter-name");
+                        continue;
+                    }
+
+                    if (isElement(child, "static-binding"))
+                    {
+                        scanBinding(c, child, BindingType.STATIC, "value");
+                        continue;
+                    }
+
+                    // <string-binding> added in release 2.0.4
+
+                    if (isElement(child, "string-binding"))
+                    {
+                        scanBinding(c, child, BindingType.STRING, "key");
+                        continue;
+                    }
+
+                    if (isElement(child, "message-binding"))
+                    {
+                        scanBinding(c, child, BindingType.STRING, "key");
+                        continue;
+                    }
+
+                    if (isElement(child, "property"))
+                    {
+                        scanProperty(c, child);
+                        continue;
+                    }
                 }
 
-                if (isElement(child, "static-binding"))
-                {
-                    scanBinding(c, child, BindingType.STATIC, "value");
-                    continue;
-                }
+                validateContainedComponent(specification, c, getSourceLocationInfo(node));
 
-                // <string-binding> added in release 2.0.4
-
-                if (isElement(child, "string-binding"))
-                {
-                    scanBinding(c, child, BindingType.STRING, "key");
-                    continue;
-                }
-
-                if (isElement(child, "property"))
-                {
-                    scanProperty(c, child);
-                    continue;
-                }
+                specification.addComponent(id, c);
             }
-
-            validateContainedComponent(specification, c, getSourceLocationInfo(node));
-
-            specification.addComponent(id, c);
         }
 
     }
@@ -369,9 +440,23 @@ public class ComponentScanner extends SpecificationScanner
     {
 
         String componentClassname = getAttribute(rootNode, "class");
-        specification.setComponentClassName(componentClassname);
 
-        validateTypeName(componentClassname, IProblem.ERROR, getAttributeSourceLocation(rootNode, "class"));
+        if (componentClassname == null)
+        {
+            if (fIsPageSpec)
+            {
+
+                specification.setComponentClassName("org.apache.tapestry.html.BasePage");
+            } else
+            {
+                specification.setComponentClassName("org.apache.tapestry.BaseComponent");
+            }
+
+        } else
+        {
+            specification.setComponentClassName(componentClassname);
+            validateTypeName(componentClassname, IProblem.ERROR, getAttributeSourceLocation(rootNode, "class"));
+        }
 
         for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
         {
@@ -476,110 +561,143 @@ public class ComponentScanner extends SpecificationScanner
 
     protected void scanParameter(IComponentSpecification specification, Node node) throws ScannerException
     {
-        IParameterSpecification param = specificationFactory.createParameterSpecification();
-
-        ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(specification.getSpecificationLocation());
-        param.setLocation(location);
 
         String name = getAttribute(node, "name", true);
 
-        validatePattern(
-            name,
-            SpecificationParser.PARAMETER_NAME_PATTERN,
-            "SpecificationParser.invalid-parameter-name",
-            IProblem.ERROR,
-            getAttributeSourceLocation(node, "name"));
-
-        String type = getAttribute(node, "type");
-
-        // The attribute was called "java-type" in the 1.3 and earlier DTD
-
-        if (type == null)
-            type = getAttribute(node, "java-type");
-
-        if (type == null)
-            type = "java.lang.Object";
-
-        param.setType(type);
-
-        param.setRequired(getBooleanAttribute(node, "required"));
-
-        String propertyName = getAttribute(node, "property-name");
-
-        // If not specified, use the name of the parameter.
-
-        if (propertyName == null)
+        if (specification.getParameter(name) != null)
         {
-            propertyName = name;
+            addProblem(
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "name"),
+                TapestryCore.getTapestryString(
+                    "ComponentSpecification.duplicate-parameter",
+                    specification.getSpecificationLocation().getName(),
+                    name));
+        } else
+        {
+
+            IParameterSpecification param = specificationFactory.createParameterSpecification();
+
+            ISourceLocationInfo location = getSourceLocationInfo(node);
+            location.setResourceLocation(specification.getSpecificationLocation());
+            param.setLocation(location);
 
             validatePattern(
-                propertyName,
-                SpecificationParser.PROPERTY_NAME_PATTERN,
-                "SpecificationParser.invalid-property-name",
+                name,
+                SpecificationParser.PARAMETER_NAME_PATTERN,
+                "SpecificationParser.invalid-parameter-name",
                 IProblem.ERROR,
-                getAttributeSourceLocation(node, name));
+                getAttributeSourceLocation(node, "name"));
+
+            String type = getAttribute(node, "type");
+
+            // The attribute was called "java-type" in the 1.3 and earlier DTD
+
+            if (type == null)
+                type = getAttribute(node, "java-type");
+
+            if (type == null)
+                type = "java.lang.Object";
+
+            param.setType(type);
+
+            param.setRequired(getBooleanAttribute(node, "required"));
+
+            String propertyName = getAttribute(node, "property-name");
+
+            // If not specified, use the name of the parameter.
+
+            if (propertyName == null)
+            {
+                propertyName = name;
+
+                validatePattern(
+                    propertyName,
+                    SpecificationParser.PROPERTY_NAME_PATTERN,
+                    "SpecificationParser.invalid-property-name",
+                    IProblem.ERROR,
+                    getAttributeSourceLocation(node, name));
+
+            }
+
+            param.setPropertyName(propertyName);
+
+            String direction = getAttribute(node, "direction");
+
+            if (direction != null)
+                param.setDirection((Direction) conversionMap.get(direction));
+
+            specification.addParameter(name, param);
+
+            Node child = node.getFirstChild();
+            if (child != null && isElement(child, "description"))
+                param.setDescription(getValue(child));
 
         }
-
-        param.setPropertyName(propertyName);
-
-        String direction = getAttribute(node, "direction");
-
-        if (direction != null)
-            param.setDirection((Direction) conversionMap.get(direction));
-
-        specification.addParameter(name, param);
-
-        Node child = node.getFirstChild();
-        if (child != null && isElement(child, "description"))
-            param.setDescription(getValue(child));
     }
 
     /** @since 2.4 **/
 
     protected void scanPropertySpecification(IComponentSpecification spec, Node node) throws ScannerException
     {
-        IPropertySpecification ps = specificationFactory.createPropertySpecification();
-
-        ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(spec.getSpecificationLocation());
-        ps.setLocation(location);
 
         String name = getAttribute(node, "name", true);
 
-        validatePattern(
-            name,
-            SpecificationParser.PROPERTY_NAME_PATTERN,
-            "SpecificationParser.invalid-property-name",
-            IProblem.ERROR,
-            getAttributeSourceLocation(node, "name"));
-
-        ps.setName(name);
-
-        String type = null;
-
-        type = getAttribute(node, "type", true);
-
-        ps.setType(type);
-
-        boolean persistent = getBooleanAttribute(node, "persistent");
-
-        ps.setPersistent(persistent);
-
-        String initialValue = null;
-
-        try
+        if (spec.getPropertySpecification(name) != null)
         {
-            initialValue = getExtendedAttribute(node, "initial-value", false);
-        } catch (ScannerException e1)
+            addProblem(
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "name"),
+                TapestryCore.getTapestryString(
+                    "ComponentSpecification.duplicate-property-specification",
+                    spec.getSpecificationLocation().getName(),
+                    name));
+        } else
         {
-            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e1.getMessage());
+            IPropertySpecification ps = specificationFactory.createPropertySpecification();
+
+            ISourceLocationInfo location = getSourceLocationInfo(node);
+            location.setResourceLocation(spec.getSpecificationLocation());
+            ps.setLocation(location);
+
+            validatePattern(
+                name,
+                SpecificationParser.PROPERTY_NAME_PATTERN,
+                "SpecificationParser.invalid-property-name",
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "name"));
+
+            ps.setName(name);
+
+            String type = null;
+
+            type = getAttribute(node, "type", true).trim();
+
+            if (!typeList.contains(type))
+            {
+                validateTypeName(type, IProblem.ERROR, getAttributeSourceLocation(node, "type"));
+            }
+
+            ps.setType(type);
+
+            boolean persistent = getBooleanAttribute(node, "persistent");
+
+            ps.setPersistent(persistent);
+
+            String initialValue = null;
+
+            try
+            {
+                initialValue = getExtendedAttribute(node, "initial-value", false).value;
+            } catch (ScannerException e1)
+            {
+                addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e1.getMessage());
+            }
+
+            ps.setInitialValue(initialValue);
+
+            spec.addPropertySpecification(ps);
         }
-
-        ps.setInitialValue(initialValue);
-
-        spec.addPropertySpecification(ps);
     }
 
     /**
@@ -632,8 +750,14 @@ public class ComponentScanner extends SpecificationScanner
         String expression = null;
         try
         {
-            expression = getExtendedAttribute(node, "expression", true);
-            validateExpression(expression, IProblem.ERROR, getNodeStartSourceLocation(node));
+            ExtendedAttributeResult result = getExtendedAttribute(node, "expression", true);
+            expression = result.value;
+            ISourceLocation src =
+                result.fromAttribute
+                    ? getAttributeSourceLocation(node, "expression")
+                    : getBestGuessSourceLocation(node, true);
+            validateExpression(expression, IProblem.ERROR, src);
+
         } catch (ScannerException e)
         {
             addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());
@@ -658,13 +782,13 @@ public class ComponentScanner extends SpecificationScanner
      * 
      **/
 
-    protected void scanSetStringProperty(IBeanSpecification spec, Node node)
+    protected void scanSetMessageProperty(IBeanSpecification spec, Node node)
     {
         String name = getAttribute(node, "name");
         String key = getAttribute(node, "key");
 
-        PluginStringBeanInitializer iz =
-            (PluginStringBeanInitializer) specificationFactory.createStringBeanInitializer();
+        PluginMessageBeanInitializer iz =
+            (PluginMessageBeanInitializer) specificationFactory.createMessageBeanInitializer();
         iz.setPropertyName(name);
         iz.setKey(key);
 
@@ -673,6 +797,23 @@ public class ComponentScanner extends SpecificationScanner
         iz.setLocation(location);
 
         spec.addInitializer(iz);
+    }
+
+    /**
+     * @param IComponentSpecification the spec we are looking up templates on behalf of
+     */
+    public void scanForTemplates(IComponentSpecification specification)
+    {
+        IResourceWorkspaceLocation[] locations = new IResourceWorkspaceLocation[0];
+        TemplateFinder finder = new TemplateFinder();
+        try
+        {
+            locations = finder.getTemplates(specification, this);
+        } catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        }
+        ((PluginComponentSpecification) specification).setTemplateLocations(locations);
     }
 
 }

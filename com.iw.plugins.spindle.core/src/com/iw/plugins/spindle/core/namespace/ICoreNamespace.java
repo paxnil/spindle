@@ -61,5 +61,9 @@ public interface ICoreNamespace extends INamespace
     public void setResourceLookup(NamespaceResourceLookup lookup);
     
     public NamespaceResourceLookup getResourceLookup();
+    
+    public ComponentSpecificationResolver getComponentResolver();
+    
+    public void setComponentResolver(ComponentSpecificationResolver resolver);
 
 }

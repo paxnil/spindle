@@ -173,7 +173,7 @@ public class LibraryScanner extends SpecificationScanner
         String value = null;
         try
         {
-            value = getExtendedAttribute(node, "value", true);
+            value = getExtendedAttribute(node, "value", true).value;
         } catch (ScannerException e)
         {
             addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());

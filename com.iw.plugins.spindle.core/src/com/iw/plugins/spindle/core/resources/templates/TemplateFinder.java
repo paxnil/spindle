@@ -27,6 +27,7 @@
 package com.iw.plugins.spindle.core.resources.templates;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -41,6 +42,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.IProblemCollector;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
@@ -61,21 +63,77 @@ public class TemplateFinder implements IResourceLocationAcceptor
     public static Perl5Util Perl;
     public static final String PatternPrefix = "/^";
     public static String PatternSuffix;
+    public static String[] ALL_SUFFIXES;
 
     static {
         Locale[] all = Locale.getAvailableLocales();
+        List suffixes = new ArrayList();
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < all.length; i++)
         {
-            buffer.append("_" + all[i].toString());
+            String next = "_" + all[i].toString();
+            suffixes.add(next);
+            buffer.append(next);
             if (i < all.length - 1)
             {
                 buffer.append('|');
             }
         }
 
+        ALL_SUFFIXES = new String[suffixes.size()];
+        suffixes.toArray(ALL_SUFFIXES);
+
         PatternSuffix = "(" + buffer.toString() + "){0,1}$/i";
         Perl = new Perl5Util(new PatternCacheLRU(100));
+    }
+
+    /**
+     * Filter a list of template locations.
+     * Use the extension defined in the library spec, or the default (html)
+     * Exclude any localized names.
+     * 
+     * Klunky imlementation - will have to do until I figure out a regular expression
+     * 
+     * @param locations
+     * @param namespace
+     * @return List a list with any non templates or localized templates removed.
+     */
+    public static List filterTemplateList(List locations, ICoreNamespace namespace)
+    {
+        List result = new ArrayList();
+
+        String expectedExtension = namespace.getSpecification().getProperty(Tapestry.TEMPLATE_EXTENSION_PROPERTY);
+        if (expectedExtension == null)
+            expectedExtension = Tapestry.DEFAULT_TEMPLATE_EXTENSION;
+
+        for (Iterator iter = locations.iterator(); iter.hasNext();)
+        {
+            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
+            String name = location.getName();
+            String foundName = null;
+            String foundExtension = null;
+            int dotx = name.lastIndexOf('.');
+            if (dotx > 0)
+            {
+                foundName = name.substring(0, dotx);
+                foundExtension = name.substring(dotx + 1);
+                if (foundName.length() == 0 || !expectedExtension.equals(foundExtension));
+                continue;
+            }
+            boolean ok = true;
+            for (int i = 0; i < ALL_SUFFIXES.length; i++)
+            {
+                if (foundName.endsWith(ALL_SUFFIXES[i]))
+                {
+                    ok = false;
+                    break;
+                }
+            }
+            if (ok)
+                result.add(location);
+
+        }
+        return result;
     }
 
     private List fFindResults = new ArrayList();
@@ -87,16 +145,21 @@ public class TemplateFinder implements IResourceLocationAcceptor
     private String fPerlExpression;
 
     public IResourceWorkspaceLocation[] getTemplates(
-        TapestryProject tproject,
         IComponentSpecification specification,
         IProblemCollector collector)
         throws CoreException
     {
-        this.fTapestryProject = tproject;
-        this.fProblemCollector = collector;
+        fTapestryProject = getTapestryProject(specification);
+        fProblemCollector = collector;
         fFindResults.clear();
         findTemplates((PluginComponentSpecification) specification);
         return (IResourceWorkspaceLocation[]) fFindResults.toArray(new IResourceWorkspaceLocation[fFindResults.size()]);
+    }
+
+    private TapestryProject getTapestryProject(IComponentSpecification specification) throws CoreException
+    {
+        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) specification.getSpecificationLocation();
+        return (TapestryProject) location.getProject().getNature(TapestryCore.NATURE_ID);
     }
 
     private void findTemplates(PluginComponentSpecification specification) throws CoreException
@@ -109,7 +172,7 @@ public class TemplateFinder implements IResourceLocationAcceptor
         fExtension = getTemplateExtension(specification);
         String name = specification.getSpecificationLocation().getName();
         int dotx = name.lastIndexOf('.');
-        fTemplateBaseName = name.substring(0, dotx + 1);
+        fTemplateBaseName = name.substring(0, dotx);
 
         findStandardTemplates(specification);
 
@@ -127,7 +190,9 @@ public class TemplateFinder implements IResourceLocationAcceptor
      */
     private String getTemplateExtension(PluginComponentSpecification specification)
     {
-        String extension = specification.getProperty(Tapestry.TEMPLATE_EXTENSION_PROPERTY);
+
+        String extension =
+            specification == null ? null : specification.getProperty(Tapestry.TEMPLATE_EXTENSION_PROPERTY);
         if (extension != null)
             return extension;
 
@@ -230,7 +295,7 @@ public class TemplateFinder implements IResourceLocationAcceptor
     public boolean accept(IResourceWorkspaceLocation location)
     {
         String name = location.getName();
-        if (name == null && name.trim().length() > 0)
+        if (name == null || name.trim().length() > 0)
         {
             String foundName = null;
             String foundExtension = null;
@@ -240,13 +305,19 @@ public class TemplateFinder implements IResourceLocationAcceptor
                 foundName = name.substring(0, dotx);
                 foundExtension = name.substring(dotx + 1);
             }
-            if (fExtension.equals(foundExtension))
-            {
-                if (Perl.match(fPerlExpression, foundName))
-                    fFindResults.add(location);
-            }
+            if (fExtension.equals(foundExtension) && Perl.match(fPerlExpression, foundName))
+                fFindResults.add(location);
         }
         return true;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor#getResults()
+     */
+    public IResourceWorkspaceLocation[] getResults()
+    {
+        IResourceWorkspaceLocation[] results = new IResourceWorkspaceLocation[fFindResults.size()];
+        return (IResourceWorkspaceLocation[]) fFindResults.toArray(results);
     }
 
 }

@@ -26,15 +26,22 @@
 
 package com.iw.plugins.spindle.core.builder;
 
+import org.apache.tapestry.engine.ITemplateSource;
+import org.apache.tapestry.spec.AssetType;
+import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.IProblem;
+import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.BaseValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.spec.PluginAssetSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 
@@ -146,6 +153,117 @@ public class BuilderValidator extends BaseValidator
                     type,
                     use_namespace.getExtendedId()));
             return false;
+        }
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateAsset(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.spec.IAssetSpecification, com.iw.plugins.spindle.core.parser.ISourceLocationInfo)
+     */
+    public boolean validateAsset(
+        IComponentSpecification specification,
+        IAssetSpecification asset,
+        ISourceLocationInfo sourceLocation)
+        throws ScannerException
+    {
+
+        PluginAssetSpecification pAsset = (PluginAssetSpecification) asset;
+        IResourceWorkspaceLocation specLoc = (IResourceWorkspaceLocation) specification.getSpecificationLocation();
+        String assetPath = asset.getPath();
+        if (ITemplateSource.TEMPLATE_ASSET_NAME.equals(pAsset.getIdentifier()))
+        {
+            return checkTemplateAsset(specification, asset);
+        }
+        AssetType type = asset.getType();
+        IResourceWorkspaceLocation root = null;
+        if (type == AssetType.CONTEXT)
+        {
+            root = fBuild.fTapestryBuilder.fContextRoot;
+        } else if (type == AssetType.PRIVATE)
+        {
+            root = fBuild.fTapestryBuilder.fClasspathRoot;
+        }
+
+        if (root == null)
+            return true;
+
+        IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) root.getRelativeLocation(assetPath);
+
+        if (!relative.exists())
+        {
+
+            ISourceLocation errorLoc;
+            if (type == AssetType.CONTEXT)
+            {
+                errorLoc = sourceLocation.getAttributeSourceLocation("path");
+            } else
+            {
+                errorLoc = sourceLocation.getAttributeSourceLocation("resource-path");
+
+            }
+
+            String name = pAsset.getIdentifier();
+            if (name.startsWith(getDummyStringPrefix()))
+                name = "not specified";
+            String message =
+                TapestryCore.getString("scan-component-missing-asset", pAsset.getIdentifier(), relative.toString());
+            reportProblem(IProblem.ERROR, errorLoc, message);
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean checkTemplateAsset(IComponentSpecification specification, IAssetSpecification templateAsset)
+        throws ScannerException
+    {
+        AssetType type = templateAsset.getType();
+        String templatePath = templateAsset.getPath();
+
+        IResourceWorkspaceLocation templateLocation;
+        if (type == AssetType.EXTERNAL)
+        {
+            reportProblem(
+                IProblem.WARNING,
+                ((ISourceLocationInfo) templateAsset.getLocation()).getStartTagSourceLocation(),
+                "Spindle can't resolve templates from external assets");
+            return false;
+        }
+        if (type == AssetType.CONTEXT)
+        {
+            IResourceWorkspaceLocation context = fBuild.fTapestryBuilder.fContextRoot;
+            if (fBuild.fTapestryBuilder.fTapestryProject.getProjectType() != TapestryProject.APPLICATION_PROJECT_TYPE)
+            {
+                reportProblem(
+                    IProblem.WARNING,
+                    ((ISourceLocationInfo) templateAsset.getLocation()).getStartTagSourceLocation(),
+                    "Spindle can't resolve templates from context assets in Library projects");
+                return false;
+            }
+
+            templateLocation = (IResourceWorkspaceLocation) context.getRelativeLocation(templatePath);
+
+            if (templateLocation == null || !templateLocation.exists())
+            {
+                reportProblem(
+                    IProblem.ERROR,
+                    ((ISourceLocationInfo) templateAsset.getLocation()).getAttributeSourceLocation("path"),
+                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
+                return false;
+            }
+        }
+        if (type == AssetType.PRIVATE)
+        {
+            IResourceWorkspaceLocation classpath = fBuild.fTapestryBuilder.fClasspathRoot;
+            templateLocation = (IResourceWorkspaceLocation) classpath.getRelativeLocation(templatePath);
+            if (templateLocation == null || !templateLocation.exists())
+            {
+                reportProblem(
+                    IProblem.ERROR,
+                    ((ISourceLocationInfo) templateAsset.getLocation()).getAttributeSourceLocation("resource-path"),
+                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template", templatePath));
+                return false;
+            }
         }
         return true;
     }

@@ -27,7 +27,6 @@ package com.iw.plugins.spindle.core.builder;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,10 +57,9 @@ public class FullBuild extends Build
 {
 
     protected IType fTapestryServletType;
-    protected Map fKnownValidServlets;
+    protected ServletInfo fApplicationServlet;
     protected Map fInfoCache;
-
-    BuilderQueue fBuildQueue;
+    protected NamespaceResolver fNSResolver;
 
     /**
      * Constructor for FullBuilder.
@@ -69,7 +67,7 @@ public class FullBuild extends Build
     public FullBuild(TapestryBuilder builder)
     {
         super(builder);
-        this.fTapestryServletType = builder.getType(TapestryCore.getString(TapestryBuilder.APPLICATION_SERVLET_NAME));
+        fTapestryServletType = builder.getType(TapestryCore.getString(TapestryBuilder.APPLICATION_SERVLET_NAME));
 
     }
 
@@ -83,24 +81,19 @@ public class FullBuild extends Build
             fNotifier.subTask(TapestryCore.getString(TapestryBuilder.STARTING));
             Markers.removeProblemsForProject(fTapestryBuilder.fCurrentProject);
 
-            findDeclaredApplications();
-            //            if (knownValidServlets == null || knownValidServlets.isEmpty())
-            //            {
-            //                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_NO_SERVLETS));
-            //            }
-            //            if (knownValidServlets.size() > 1)
-            //            {
-            //                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_ONE_SERVLET_ONLY));
-            //            }
-            //            goofTest();
+            findDeclaredApplication();
+
             fNotifier.updateProgressDelta(0.1f);
 
             fNotifier.subTask(TapestryCore.getString(TapestryBuilder.LOCATING_ARTIFACTS));
-            fBuildQueue = new BuilderQueue();
 
             fBuildQueue.addAll(findAllTapestryArtifacts());
 
-            namespaceTest();
+            fNSResolver = new NamespaceResolver(this);
+
+            fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace();
+
+            fApplicationNamespace = fNSResolver.resolveApplicationNamespace(fFrameworkNamespace, fApplicationServlet);
 
             fNotifier.updateProgressDelta(0.15f);
             if (fBuildQueue.hasWaiting())
@@ -121,18 +114,7 @@ public class FullBuild extends Build
         }
     }
 
-    /**
-     * 
-     */
-    private void namespaceTest()
-    {
-        NamespaceResolver resolver = new NamespaceResolver(this);
-        resolver.resolveFrameworkNamespace();
-    }
-
-    /**
-     * 
-     */
+   
     private void goofTest()
     {
         IResourceLocation goof = fTapestryBuilder.fClasspathRoot.getRelativeLocation("com/Framework.library");
@@ -221,7 +203,7 @@ public class FullBuild extends Build
     public void cleanUp()
     {}
 
-    protected void findDeclaredApplications()
+    protected void findDeclaredApplication()
     {
         IResourceWorkspaceLocation webXML =
             (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot.getRelativeLocation("WEB-INF/web.xml");
@@ -256,14 +238,17 @@ public class FullBuild extends Build
             {
                 TapestryCore.log(e);
             }
-            if (servletInfos != null && servletInfos.length > 0)
+
+            if (servletInfos == null || servletInfos.length == 0)
             {
-                fKnownValidServlets = new HashMap();
-                for (int i = 0; i < servletInfos.length; i++)
-                    fKnownValidServlets.put(servletInfos[i].name, servletInfos[i]);
-
+                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_NO_SERVLETS));
             }
-
+            if (servletInfos.length > 1)
+            {
+                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_ONE_SERVLET_ONLY));
+            }
+            fApplicationServlet = servletInfos[0];
+           
         } else
         {
             String definedWebRoot = fTapestryBuilder.fTapestryProject.getWebContext();
@@ -299,28 +284,6 @@ public class FullBuild extends Build
                 return false;
             }
             return true;
-        }
-    }
-
-    public class ServletInfo
-    {
-        String name;
-        String classname;
-        Map parameters = new HashMap();
-        boolean isServletSubclass;
-        IResourceWorkspaceLocation applicationSpecLocation;
-        public String toString()
-        {
-            StringBuffer buffer = new StringBuffer("ServletInfo(");
-            buffer.append(name);
-            buffer.append(")::");
-            buffer.append("classname = ");
-            buffer.append(classname);
-            buffer.append(", params = ");
-            buffer.append(parameters);
-            buffer.append(" loc= ");
-            buffer.append(applicationSpecLocation);
-            return buffer.toString();
         }
     }
 

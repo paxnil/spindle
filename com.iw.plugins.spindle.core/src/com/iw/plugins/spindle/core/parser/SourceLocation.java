@@ -32,7 +32,12 @@ public class SourceLocation implements ISourceLocation
     private int fCharStart;
     private int fCharEnd;
 
-    SourceLocation(int lineNumber, int charStart, int charEnd)
+    public SourceLocation(int lineNumber, int charStart)
+    {
+        this(lineNumber, charStart, charStart);
+    }
+
+    public SourceLocation(int lineNumber, int charStart, int charEnd)
     {
         this.fLineNumber = lineNumber;
         this.fCharStart = charStart;
@@ -72,6 +77,30 @@ public class SourceLocation implements ISourceLocation
         buffer.append(fCharEnd);
         buffer.append("]");
         return buffer.toString();
+    }
+
+    /**
+     * @param i
+     */
+    public void setCharEnd(int i)
+    {
+        fCharEnd = i;
+    }
+
+    /**
+     * @param i
+     */
+    public void setCharStart(int i)
+    {
+        fCharStart = i;
+    }
+
+    /**
+     * @param i
+     */
+    public void setLineNumber(int i)
+    {
+        fLineNumber = i;
     }
 
 }

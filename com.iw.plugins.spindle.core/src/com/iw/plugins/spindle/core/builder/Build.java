@@ -26,6 +26,7 @@ package com.iw.plugins.spindle.core.builder;
  * ***** END LICENSE BLOCK ***** */
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IApplicationSpecification;
@@ -41,12 +42,15 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.parser.template.TemplateParseException;
+import com.iw.plugins.spindle.core.parser.template.TemplateParser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.ApplicationScanner;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;
 import com.iw.plugins.spindle.core.scanning.LibraryScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.util.Files;
 import com.iw.plugins.spindle.core.util.Markers;
 import com.iw.plugins.spindle.core.util.Utils;
 /**
@@ -62,14 +66,17 @@ public abstract class Build implements IBuild
     protected IJavaProject fJavaProject;
     protected State fNewState;
     protected BuildNotifier fNotifier;
+    protected BuilderQueue fBuildQueue;
     protected Parser fParser;
     protected TapestryBuilder fTapestryBuilder;
-    protected ICoreNamespace fFramework;
+    protected ICoreNamespace fFrameworkNamespace;
+    protected ICoreNamespace fApplicationNamespace;
 
     public Build(TapestryBuilder builder)
     {
         fTapestryBuilder = builder;
         fNewState = new State(builder);
+        this.fBuildQueue = new BuilderQueue();
         this.fNotifier = builder.fNotifier;
         this.fJavaProject = builder.fJavaProject;
         this.fParser = BUILD_PARSER;
@@ -116,6 +123,7 @@ public abstract class Build implements IBuild
                         ((IResourceWorkspaceLocation) location).getStorage(),
                         scanner.getProblems());
                 }
+                return result;
             }
         } catch (IOException e)
         {
@@ -293,42 +301,42 @@ public abstract class Build implements IBuild
         return result;
     }
 
-    protected IComponentSpecification resolveComponent(String type, ICoreNamespace namespace) throws BuilderException
-    {
-        IComponentSpecification result = namespace.getComponentSpecification(type);
-        if (result == null)
-        {
-            ILibrarySpecification namespaceSpec = namespace.getSpecification();
-
-            IResourceWorkspaceLocation location = null;
-            String specPath = namespaceSpec.getPageSpecificationPath(type);
-            if (specPath != null)
-            {
-                location =
-                    (IResourceWorkspaceLocation) namespaceSpec.getSpecificationLocation().getRelativeLocation(specPath);
-                if (!location.exists())
-                    return null;
-
-            }
-            if (location == null)
-                location = null; // find page using any funny rules!
-
-            result = resolveIComponentSpecification(namespace, location);
-
-            if (result != null)
-            {
-                if (result.isPageSpecification())
-                {
-                    throw new BuilderException("expected component but got page");
-                } else
-                {
-                    namespace.installComponentSpecification(type, result);
-                }
-            }
-        }
-
-        return result;
-    }
+    //    protected IComponentSpecification resolveComponent(String type, ICoreNamespace namespace) throws BuilderException
+    //    {
+    //        IComponentSpecification result = namespace.getComponentSpecification(type);
+    //        if (result == null)
+    //        {
+    //            ILibrarySpecification namespaceSpec = namespace.getSpecification();
+    //
+    //            IResourceWorkspaceLocation location = null;
+    //            String specPath = namespaceSpec.getPageSpecificationPath(type);
+    //            if (specPath != null)
+    //            {
+    //                location =
+    //                    (IResourceWorkspaceLocation) namespaceSpec.getSpecificationLocation().getRelativeLocation(specPath);
+    //                if (!location.exists())
+    //                    return null;
+    //
+    //            }
+    //            if (location == null)
+    //                location = null; // find page using any funny rules!
+    //
+    //            result = resolveIComponentSpecification(namespace, location);
+    //
+    //            if (result != null)
+    //            {
+    //                if (result.isPageSpecification())
+    //                {
+    //                    throw new BuilderException("expected component but got page");
+    //                } else
+    //                {
+    //                    namespace.installComponentSpecification(type, result);
+    //                }
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
 
     protected IComponentSpecification resolveIComponentSpecification(
         ICoreNamespace namespace,
@@ -341,11 +349,12 @@ public abstract class Build implements IBuild
                 try
                 {
                     Node node = parseToNode(location);
+                    ComponentScanner scanner = new ComponentScanner();
+                    scanner.setResourceLocation(location);
+                    scanner.setNamespace(namespace);
+                    scanner.setFactory(TapestryCore.getSpecificationFactory());
                     if (node != null)
                     {
-                        ComponentScanner scanner = new ComponentScanner();
-                        scanner.setResourceLocation(location);
-                        scanner.setFactory(TapestryCore.getSpecificationFactory());
                         try
                         {
                             result =
@@ -353,21 +362,27 @@ public abstract class Build implements IBuild
                                     fParser,
                                     new BuilderValidator(this, namespace),
                                     node);
-                            ((PluginComponentSpecification) result).setNamespace(namespace);
                         } catch (ScannerException e1)
                         {
                             e1.printStackTrace();
                         }
-                        IResource res = Utils.toResource(location);
-                        if (res != null)
-                        {
-                            Markers.addTapestryProblemMarkersToResource(res, scanner.getProblems());
-                        } else
-                        {
-                            TapestryCore.logProblems(
-                                ((IResourceWorkspaceLocation) location).getStorage(),
-                                scanner.getProblems());
-                        }
+                    } else
+                    {
+                        PluginComponentSpecification dummy = new PluginComponentSpecification();
+                        dummy.setSpecificationLocation(location);
+                        dummy.setNamespace(namespace);
+                        scanner.scanForTemplates(dummy);
+                        result = dummy;
+                    }
+                    IResource res = Utils.toResource(location);
+                    if (res != null)
+                    {
+                        Markers.addTapestryProblemMarkersToResource(res, scanner.getProblems());
+                    } else
+                    {
+                        TapestryCore.logProblems(
+                            ((IResourceWorkspaceLocation) location).getStorage(),
+                            scanner.getProblems());
                     }
                 } catch (IOException e)
                 {
@@ -375,45 +390,111 @@ public abstract class Build implements IBuild
                 } catch (CoreException e)
                 {
                     e.printStackTrace();
+                } finally
+                {
+                    if (fBuildQueue.isWaiting(location))
+                    {
+                        fBuildQueue.finished(location);
+                        fNotifier.processed(location);
+                    }
+
                 }
 
             }
         return result;
     }
 
-    protected IComponentSpecification resolvePage(String pageName, ICoreNamespace namespace) throws BuilderException
+    protected void parseTemplates(PluginComponentSpecification spec)
     {
-        IComponentSpecification result = namespace.getPageSpecification(pageName);
-        if (result == null)
+        TemplateParser parser = new TemplateParser();
+        for (Iterator iter = spec.getTemplateLocations().iterator(); iter.hasNext();)
         {
-            ILibrarySpecification namespaceSpec = namespace.getSpecification();
-
-            IResourceWorkspaceLocation location = null;
-            String specPath = namespaceSpec.getPageSpecificationPath(pageName);
-            if (specPath != null)
+            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
+            try
             {
-                location =
-                    (IResourceWorkspaceLocation) namespaceSpec.getSpecificationLocation().getRelativeLocation(specPath);
-                if (!location.exists())
-                    return null;
+                char[] data = null;
+                try
+                {
+                    data = Files.readFileToString(location.getContents(), null).toCharArray();
+                } catch (IOException e1)
+                {
 
+                    e1.printStackTrace();
+                } catch (CoreException e1)
+                {
+                    e1.printStackTrace();
+                }
+                if (data != null)
+                {
+                    try
+                    {
+                        parser.parse(data, spec, location);
+                    } catch (TemplateParseException e)
+                    {
+                        // do nothing, the problems will tell all
+                    }
+                    if (fBuildQueue.isWaiting(location))
+                    {
+                        fBuildQueue.finished(location);
+                        fNotifier.processed(location);
+                    }
+                    IResource res = Utils.toResource(location);
+                    if (res != null)
+                    {
+                        Markers.addTapestryProblemMarkersToResource(res, parser.getProblems());
+                    } else
+                    {
+                        TapestryCore.logProblems(
+                            ((IResourceWorkspaceLocation) location).getStorage(),
+                            parser.getProblems());
+                    }
+                }
+            } finally
+            {
+                if (fBuildQueue.isWaiting(location))
+                {
+                    fBuildQueue.finished(location);
+                    fNotifier.processed(location);
+                }
             }
-            if (location == null)
-                location = null; // find page using any funny rules!
 
-            result = resolveIComponentSpecification(namespace, location);
         }
-        if (result != null)
-        {
-            if (result.isPageSpecification())
-            {
-                throw new BuilderException("expected page but got component");
-            } else
-            {
-                namespace.installPageSpecification(pageName, result);
-            }
-        }
-        return result;
+
     }
+
+    //    protected IComponentSpecification resolvePage(String pageName, ICoreNamespace namespace) throws BuilderException
+    //    {
+    //        IComponentSpecification result = namespace.getPageSpecification(pageName);
+    //        if (result == null)
+    //        {
+    //            ILibrarySpecification namespaceSpec = namespace.getSpecification();
+    //
+    //            IResourceWorkspaceLocation location = null;
+    //            String specPath = namespaceSpec.getPageSpecificationPath(pageName);
+    //            if (specPath != null)
+    //            {
+    //                location =
+    //                    (IResourceWorkspaceLocation) namespaceSpec.getSpecificationLocation().getRelativeLocation(specPath);
+    //                if (!location.exists())
+    //                    return null;
+    //
+    //            }
+    //            if (location == null)
+    //                location = null; // find page using any funny rules!
+    //
+    //            result = resolveIComponentSpecification(namespace, location);
+    //        }
+    //        if (result != null)
+    //        {
+    //            if (result.isPageSpecification())
+    //            {
+    //                throw new BuilderException("expected page but got component");
+    //            } else
+    //            {
+    //                namespace.installPageSpecification(pageName, result);
+    //            }
+    //        }
+    //        return result;
+    //    }
 
 }

@@ -34,11 +34,11 @@ import java.util.Map;
 import org.apache.tapestry.ILocation;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceLocation;
-import org.apache.tapestry.Tapestry;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.lookup.ComponentLookup;
 import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
@@ -63,10 +63,11 @@ public class CoreNamespace implements ICoreNamespace
 
     private ComponentLookup fComponentLookup;
     private PageLookup fPageLookup;
+    private ComponentSpecificationResolver fComponentResolver;
 
     private String fAppNameFromWebXML;
 
-    private Map pages = new HashMap();
+    private Map fPages = new HashMap();
 
     private NamespaceResourceLookup fLookup;
 
@@ -92,6 +93,8 @@ public class CoreNamespace implements ICoreNamespace
 
         fApplicationNamespace = (id == null && specification instanceof IApplicationSpecification);
         fFrameworkNamespace = FRAMEWORK_NAMESPACE.equals(id);
+        if (fFrameworkNamespace)
+        {}
     }
 
     /* (non-Javadoc)
@@ -137,12 +140,12 @@ public class CoreNamespace implements ICoreNamespace
     public String getNamespaceId()
     {
         if (fFrameworkNamespace)
-            return Tapestry.getString("Namespace.framework-namespace");
+            return TapestryCore.getTapestryString("Namespace.framework-namespace");
 
         if (fApplicationNamespace)
-            return Tapestry.getString("Namespace.application-namespace");
+            return TapestryCore.getTapestryString("Namespace.application-namespace");
 
-        return Tapestry.getString("Namespace.nested-namespace", getExtendedId());
+        return TapestryCore.getTapestryString("Namespace.nested-namespace", getExtendedId());
     }
 
     /* (non-Javadoc)
@@ -201,7 +204,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public IComponentSpecification getPageSpecification(String name)
     {
-        return (IComponentSpecification) pages.get(name);
+        return (IComponentSpecification) fPages.get(name);
     }
 
     /* (non-Javadoc)
@@ -209,7 +212,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public boolean containsPage(String name)
     {
-        return pages.containsKey(name);
+        return fPages.containsKey(name);
     }
 
     /* (non-Javadoc)
@@ -217,7 +220,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public List getPageNames()
     {
-        return new ArrayList(pages.keySet());
+        return new ArrayList(fPages.keySet());
     }
 
     /* (non-Javadoc)
@@ -302,13 +305,13 @@ public class CoreNamespace implements ICoreNamespace
      */
     public void installPageSpecification(String pageName, IComponentSpecification specification)
     {
-        pages.put(pageName, specification);
+        fPages.put(pageName, specification);
         ((PluginComponentSpecification) specification).setNamespace(this);
     }
 
     public IComponentSpecification deinstallPageSpecification(String pageName)
     {
-        PluginComponentSpecification result = (PluginComponentSpecification) pages.get(pageName);
+        PluginComponentSpecification result = (PluginComponentSpecification) fPages.get(pageName);
         if (result != null)
             result.setNamespace(null);
 
@@ -421,6 +424,22 @@ public class CoreNamespace implements ICoreNamespace
     public NamespaceResourceLookup getResourceLookup()
     {
         return fLookup;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#getComponentResolver()
+     */
+    public ComponentSpecificationResolver getComponentResolver()
+    {
+        return fComponentResolver;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#setComponentResolver(com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver)
+     */
+    public void setComponentResolver(ComponentSpecificationResolver resolver)
+    {
+        fComponentResolver = resolver;
     }
 
 }
