@@ -25,15 +25,11 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.formatter;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TypedPosition;
-import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.xmen.xml.XMLNode;
@@ -46,7 +42,8 @@ import com.iw.plugins.spindle.UIPlugin;
  * (leaving them in a state where slave formatters can do thier work!).
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: StartTagEditFormatWorker.java,v 1.1.2.2 2004/07/14 21:15:48
+ *                     glongman Exp $
  */
 public class StartTagEditFormatWorker extends FormatWorker
 {
@@ -100,19 +97,20 @@ public class StartTagEditFormatWorker extends FormatWorker
       int totalLength = fInitialIndent + walker.totalLength;
 
       List attrs = node.getAttributes();
-//criteria for splitting a line...
-// A - Prefs call for splitting
-// B - the tag is too long
-// C - the tag has 2 or more attrs
-      
-      boolean shouldSplit = fPreferences.wrapLongTags() && totalLength > fPreferences.getMaximumLineWidth() && attrs.size() >= 2;
+      //criteria for splitting a line...
+      // A - Prefs call for splitting
+      // B - the tag is too long
+      // C - the tag has 2 or more attrs
+
+      boolean shouldSplit = fPreferences.wrapLongTags()
+          && totalLength > fPreferences.getMaximumLineWidth() && attrs.size() >= 2;
       if (shouldSplit)
       {
         //format - no line splitting
         formatWithSplits(walker, result);
       } else
       {
-        //format with line spliting       
+        //format with line spliting
         formatNoLineSplit(walker, result);
       }
 
@@ -166,6 +164,8 @@ public class StartTagEditFormatWorker extends FormatWorker
         edit.addChild(new ReplaceEdit(chunk.offset, delta, ""));
     }
 
+    boolean firstAttribute = true;
+
     chunk = walker.nextChunk();
     while (walker.hasNext())
     {
@@ -173,8 +173,16 @@ public class StartTagEditFormatWorker extends FormatWorker
       chunk.setWriteOffset(chunk.offset);
       delta = -1 * chunk.delta;
       if (delta > 0)
-        edit.addChild(new ReplaceEdit(chunk.offset, delta, fLineDelimiter + lineIndent));
-
+      {
+        if (firstAttribute)
+        {
+            edit.addChild(new ReplaceEdit(chunk.offset, delta, " "));
+          	firstAttribute = false;
+        } else
+        {
+          edit.addChild(new ReplaceEdit(chunk.offset, delta, fLineDelimiter + lineIndent));
+        }
+      }
       chunk = walker.nextChunk();
     }
 
