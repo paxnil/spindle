@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 
@@ -58,30 +59,54 @@ public class ContextRootDecorator
      */
     public void decorate(Object element, IDecoration decoration)
     {
-        if (isContextRoot(element))
-        {
-            decoration.addOverlay(Images.getImageDescriptor("project_ovr.gif"));
-        }
 
-    }
-
-    private boolean isContextRoot(Object element)
-    {
-        try
+        IContainer container = (IContainer) ((IAdaptable) element).getAdapter(IContainer.class);
+        if (container != null)
         {
-            IContainer container = (IContainer) ((IAdaptable) element).getAdapter(IContainer.class);
-            if (container != null)
+            try
             {
                 IProject project = container.getProject();
                 TapestryProject tproject = (TapestryProject) project.getNature(TapestryCore.NATURE_ID);
                 if (tproject != null && tproject.getProjectType() == tproject.APPLICATION_PROJECT_TYPE)
                 {
-                    return container.equals(tproject.getWebContextFolder());
+                    IContainer projectWebContextRoot = tproject.getWebContextFolder();
+                    if (container.equals(projectWebContextRoot))
+                    {
+                        decoration.addOverlay(Images.getImageDescriptor("project_ovr.gif"));
+                    } else if (projectWebContextRoot != null && onContextPath(container, projectWebContextRoot))
+                    {
+                        decoration.addOverlay(Images.getImageDescriptor("project_ovr_grey.gif"));
+                    }
                 }
-            }
-        } catch (CoreException e)
-        {} catch (ClassCastException e)
-        {}
+            } catch (CoreException e)
+            {}
+        }
+
+    }
+
+    /**
+     * @param container
+     * @param projectWebContextRoot
+     * @return
+     */
+    private boolean onContextPath(IContainer container, IContainer projectWebContextRoot)
+    {
+
+        IPath containerPath = container.getFullPath();
+        IPath contextPath = projectWebContextRoot.getFullPath();
+        int containerLength = containerPath.segmentCount();
+        int contextLength = contextPath.segmentCount();
+        if (containerLength < contextLength)
+        {
+            IContainer parent = projectWebContextRoot.getParent();
+            do
+            {
+                if (parent.equals(container))
+                    return true;
+
+                parent = parent.getParent();
+            } while (parent != null);
+        }
         return false;
     }
 

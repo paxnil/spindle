@@ -64,5 +64,13 @@
          </enablement>
       </decorator>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="Spindle 3.0"
+            class="com.iw.plugins.spindle.ui.preferences.SpindleDTDCachingPreferencePage"
+            id="SpindlePreferences">
+      </page>     
+   </extension>
 
 </plugin>
