@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.core.parser.xml;
 import org.apache.xerces.impl.dtd.XMLDTDValidator;
 import org.apache.xerces.impl.validation.XMLGrammarPoolImpl;
 import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.grammars.XMLGrammarPool;
 import org.apache.xerces.xni.parser.XMLDTDScanner;
 import org.apache.xerces.xni.parser.XMLDocumentScanner;
 
@@ -45,6 +46,12 @@ public class TapestryParserConfiguration extends StandardParserConfiguration
         super();
         addRecognizedFeatures(new String[] { AUGMENTATIONS });
 
+    }
+
+    public TapestryParserConfiguration(XMLGrammarPool grammarPool)
+    {
+        super(null, grammarPool);
+        addRecognizedFeatures(new String[] { AUGMENTATIONS });
     }
     /**
      * @see org.apache.xerces.parsers.StandardParserConfiguration#createDocumentScanner()

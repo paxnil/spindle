@@ -60,8 +60,9 @@ public class TapestryProject implements IProjectNature
     public static final String KEY_TYPE = "project-type";
     public static final String KEY_CONTEXT = "context-root";
     public static final String KEY_LIBRARY = "library-spec";
-    public static final String APPLICATION_PROJECT = "application";
-    public static final String LIBRARY_PROJECT = "library";
+
+    public static final int APPLICATION_PROJECT_TYPE = 0;
+    public static final int LIBRARY_PROJECT_TYPE = 1;
 
     /**
      * The platform project this <code>TapestryProject</code> is based on
@@ -72,7 +73,7 @@ public class TapestryProject implements IProjectNature
     protected IFolder webContextFolder;
     protected String librarySpecPath;
 
-    protected String projectType;
+    protected int projectType;
     protected String webContext;
 
     /** needed for project nature creation **/
@@ -198,7 +199,7 @@ public class TapestryProject implements IProjectNature
             {
                 properties.delete();
             }
-            
+
             Markers.removeProblemsForProject(project.getProject());
 
         } catch (CoreException ex)
@@ -230,7 +231,6 @@ public class TapestryProject implements IProjectNature
      */
     static public TapestryProject create(IProject project)
     {
-
         IJavaProject javaProject = JavaCore.create(project);
         if (javaProject != null)
         {
@@ -254,13 +254,7 @@ public class TapestryProject implements IProjectNature
             result = Files.readPropertyInXMLFile(getPropertiesFile(), key);
         } catch (IOException e)
         {
-            //      try {
-            //        result =
-            //          getJavaProject().getCorrespondingResource().getPersistentProperty(
-            //            new QualifiedName("TomcatProject", key));
-            //      } catch (Exception e2) {
-            //        TapestryCore.log(e2);
-            //      }
+            TapestryCore.log(e);
         }
 
         if (result == null)
@@ -271,14 +265,24 @@ public class TapestryProject implements IProjectNature
         return result;
     }
 
-    public void setProjectType(String projectType)
+    private int readIntProperty(String key)
+    {
+        String result = readProperty(key);
+        if (result != null)
+        {
+            return new Integer(result).intValue();
+        }
+        return -1;
+    }
+
+    public void setProjectType(int projectType)
     {
         this.projectType = projectType;
     }
 
-    public String getProjectType()
+    public int getProjectType()
     {
-        return this.readProperty(KEY_TYPE);
+        return this.readIntProperty(KEY_TYPE);
     }
 
     /**
@@ -299,23 +303,25 @@ public class TapestryProject implements IProjectNature
         this.webContext = context;
         webContextFolder = null;
     }
-    
-    public String getLibrarySpecPath() {
+
+    public String getLibrarySpecPath()
+    {
         String path = this.readProperty(KEY_LIBRARY);
-        if ("NOT_SPECIFIED".equals(path)) {
+        if ("NOT_SPECIFIED".equals(path))
+        {
             return "";
         }
         return path;
     }
-    
-    public void setLibrarySpecPath(String librarySpecPath) {
+
+    public void setLibrarySpecPath(String librarySpecPath)
+    {
         this.librarySpecPath = librarySpecPath;
     }
 
-   
     public void saveProperties()
     {
-        boolean isApplicationProject = APPLICATION_PROJECT.equals(projectType);
+        boolean isApplicationProject = APPLICATION_PROJECT_TYPE == projectType;
         try
         {
             StringBuffer fileContent = new StringBuffer();
@@ -327,7 +333,8 @@ public class TapestryProject implements IProjectNature
                 fileContent.append("    <context-root>" + (webContext != null ? webContext : "") + "</context-root>\n");
             } else
             {
-                fileContent.append("    <library-spec>" + (librarySpecPath != null ? librarySpecPath : "NOT_SPECIFIED") + "</library-spec>\n");
+                fileContent.append(
+                    "    <library-spec>" + (librarySpecPath != null ? librarySpecPath : "NOT_SPECIFIED") + "</library-spec>\n");
             }
             fileContent.append("</tapestry-project-properties>\n");
             Files.toTextFile(getPropertiesFile(), fileContent.toString());
@@ -402,17 +409,8 @@ public class TapestryProject implements IProjectNature
         return folder;
     }
 
-//    public void createContextFolder() throws CoreException
-//    {
-//        IFolder webinfFolder = this.getWebContextFolder();
-//        this.createFolder(webinfFolder);
-//        this.createFolder(webinfFolder.getFolder("classes"));
-//        this.createFolder(webinfFolder.getFolder("lib"));
-//    }
-
     protected void addToBuildSpec(String builderID) throws CoreException
     {
-
         IProjectDescription description = getProject().getDescription();
         ICommand javaCommand = getTapestryCommand(description);
 
@@ -427,7 +425,6 @@ public class TapestryProject implements IProjectNature
 
     protected void removeFromBuildSpec(String builderID) throws CoreException
     {
-
         IProjectDescription description = getProject().getDescription();
         ICommand[] commands = description.getBuildSpec();
         for (int i = 0; i < commands.length; ++i)
@@ -446,7 +443,6 @@ public class TapestryProject implements IProjectNature
 
     private ICommand getTapestryCommand(IProjectDescription description) throws CoreException
     {
-
         ICommand[] commands = description.getBuildSpec();
         for (int i = 0; i < commands.length; ++i)
         {
@@ -460,7 +456,6 @@ public class TapestryProject implements IProjectNature
 
     private void setTapestryCommand(IProjectDescription description, ICommand newCommand) throws CoreException
     {
-
         ICommand[] oldCommands = description.getBuildSpec();
         ICommand oldTapestryCommand = getTapestryCommand(description);
         ICommand[] newCommands;

@@ -71,13 +71,17 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
     public ContextResourceWorkspaceLocation(IFolder contextRoot, String path)
     {
         super(path);
-        this.contextRoot = contextRoot;
+        this.contextRoot = contextRoot;        
     }
 
     public ContextResourceWorkspaceLocation(IFolder contextLocation, IResource resource)
     {
         this(contextLocation, findPath(contextLocation, resource));
 
+    }
+    
+    public boolean exists() {
+        return getStorage() != null;
     }
 
     private IFile getWorkspaceFile(IPath path)

@@ -33,7 +33,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 
-import org.apache.xerces.impl.validation.XMLGrammarPoolImpl;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLParseException;
@@ -71,7 +70,6 @@ public class ConfiguredDOMParserBase extends DOMParserBase implements XMLErrorHa
         parserConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
         parserConfiguration.setFeature("http://apache.org/xml/features/dom/include-ignorable-whitespace", false);
         parserConfiguration.setFeature("http://xml.org/sax/features/validation", true);
-        parserConfiguration.setProperty("http://apache.org/xml/properties/internal/grammar-pool", new XMLGrammarPoolImpl());
         parserConfiguration.setDocumentHandler(domParser);
         parserConfiguration.setErrorHandler(this);
 

@@ -55,6 +55,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
  */
 public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspaceLocation
 {
+
     IPackageFragment fragment;
 
     public ClasspathResourceWorkspaceLocation(IJavaProject jproject, String path)
@@ -65,7 +66,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
 
     public ClasspathResourceWorkspaceLocation(IPackageFragment fragment, IStorage storage)
     {
-        this(fragment, createPath(fragment, storage));
+        this(fragment.getJavaProject(), createPath(fragment, storage));
     }
 
     private static String createPath(IPackageFragment fragment, IStorage storage)
@@ -73,39 +74,52 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
         return "/" + fragment.getElementName().replace('.', '/') + "/" + storage.getName();
     }
 
-    protected ClasspathResourceWorkspaceLocation(IPackageFragment fragment, String path)
-    {
-        super(path);
-        this.fragment = fragment;
-    }
-
     private void initialize(IJavaProject jproject)
     {
-        IPath path = getIPath();
+        IPath path = getIPath().makeRelative();
         IPath prefix = path.removeLastSegments(1);
 
         String packageName = prefix.toString();
-        packageName.replace('/', '.');
+        packageName = packageName.replace('/', '.');
 
         IPackageFragment[] fragments = null;
         try
         {
             NameLookup lookup = ((JavaProject) jproject).getNameLookup();
             fragments = lookup.findPackageFragments(packageName, false);
+            return;
 
-            if (fragments == null || fragments.length == 0)
-            {
-                throw new Error("no package found!");
-            }
         } catch (JavaModelException e)
         {
-            throw new Error("no package found!", e);
+            TapestryCore.log(e);
         }
 
-        fragment = fragments[0];
+        if (fragments != null || fragments.length >= 0)
+        {
+            for (int i = 0; i < fragments.length; i++)
+            {
+                Object[] contents = getNonJavaResources(fragments[i]);
+
+                for (int j = 0; j < contents.length; j++)
+                {
+                    IStorage storage = (IStorage) contents[i];
+                    if (storage.getName().equals(getName()))
+                    {
+                        fragment = fragments[i];
+                        break;
+                    }
+                }
+            }
+
+        }
     }
 
-    private Object[] getNonJavaResources()
+    public boolean exists()
+    {
+        return fragment != null;
+    }
+
+    private Object[] getNonJavaResources(IPackageFragment fragment)
     {
         try
         {
@@ -119,13 +133,17 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
 
     private IStorage findStorage(String name)
     {
-        Object[] nonJavaResources = getNonJavaResources();
-        for (int i = 0; i < nonJavaResources.length; i++)
+        if (fragment != null)
         {
-            IStorage storage = (IStorage) nonJavaResources[i];
-            if (storage.getName().equals(name))
+
+            Object[] nonJavaResources = getNonJavaResources(fragment);
+            for (int i = 0; i < nonJavaResources.length; i++)
             {
-                return storage;
+                IStorage storage = (IStorage) nonJavaResources[i];
+                if (storage.getName().equals(name))
+                {
+                    return storage;
+                }
             }
         }
         return null;
@@ -136,7 +154,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     protected IResourceLocation buildNewResourceLocation(String path)
     {
-        return new ClasspathResourceWorkspaceLocation(fragment, path);
+        return new ClasspathResourceWorkspaceLocation(fragment.getJavaProject(), path);
     }
 
     /* (non-Javadoc)
@@ -152,16 +170,19 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public boolean isWorkspaceResource()
     {
-        try
+        if (fragment != null)
         {
-            IPackageFragmentRoot root =
-                (IPackageFragmentRoot) fragment.getJavaProject().getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-            return root.getKind() == IPackageFragmentRoot.K_SOURCE;
-        } catch (JavaModelException e)
-        {
-            TapestryCore.log(e);
+            try
+            {
+                IPackageFragmentRoot root =
+                    (IPackageFragmentRoot) fragment.getJavaProject().getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+                return root.getKind() == IPackageFragmentRoot.K_SOURCE;
+            } catch (JavaModelException e)
+            {
+                TapestryCore.log(e);
+            }
         }
-        return true;
+        return false;
     }
 
     /* (non-Javadoc)
@@ -169,7 +190,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public IProject getProject()
     {
-        return fragment.getJavaProject().getProject();
+        return fragment == null ? null : fragment.getJavaProject().getProject();
     }
 
     /* (non-Javadoc)
@@ -190,23 +211,28 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public IResourceLocation getLocalization(Locale locale)
     {
-        LocalizedClasspathResourceFinder finder = new LocalizedClasspathResourceFinder();
-
-        String path = getPath();
-        String localizedPath = finder.resolve(locale);
-
-        if (localizedPath == null)
+        if (fragment != null)
         {
 
-            return null;
-        }
+            LocalizedClasspathResourceFinder finder = new LocalizedClasspathResourceFinder();
 
-        if (path.equals(localizedPath))
-        {
-            return this;
-        }
+            String path = getPath();
+            String localizedPath = finder.resolve(locale);
 
-        return new ClasspathResourceWorkspaceLocation(fragment, localizedPath);
+            if (localizedPath == null)
+            {
+
+                return null;
+            }
+
+            if (path.equals(localizedPath))
+            {
+                return this;
+            }
+
+            return new ClasspathResourceWorkspaceLocation(fragment.getJavaProject(), localizedPath);
+        }
+        return null;
     }
 
     public int hashCode()
@@ -241,7 +267,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
 
         public LocalizedClasspathResourceFinder()
         {
-            nonJavaResources = getNonJavaResources();
+            nonJavaResources = getNonJavaResources(fragment);
         }
 
         public String resolve(Locale locale)

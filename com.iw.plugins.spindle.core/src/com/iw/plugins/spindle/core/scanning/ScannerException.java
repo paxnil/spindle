@@ -26,6 +26,8 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
+import com.iw.plugins.spindle.core.parser.ISourceLocation;
+
 /**
  *  Exception type thrown by Processors
  * 
@@ -35,6 +37,8 @@ package com.iw.plugins.spindle.core.scanning;
 public class ScannerException extends Exception
 {
 
+    ISourceLocation location;
+    
     public ScannerException()
     {
         super();
@@ -63,6 +67,15 @@ public class ScannerException extends Exception
     public ScannerException(Throwable arg0)
     {
         super(arg0);
+    }
+    
+    public ScannerException(String message, ISourceLocation location) {
+        super(message);
+        this.location = location;
+    }
+    
+    public ISourceLocation getLocation() {
+        return this.location;
     }
 
 }

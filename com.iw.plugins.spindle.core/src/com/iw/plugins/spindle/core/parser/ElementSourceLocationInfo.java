@@ -165,6 +165,8 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
 
         XMLEnityEventInfo startTag = eventInfo.getStartTagLocation();
         XMLEnityEventInfo endTag = eventInfo.getEndTagLocation();
+        
+        boolean isEmpty = endTag == null;
 
         locationLineNumber = startTag.getBeginLineNumber();
         
@@ -172,7 +174,7 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
         int column = resolver.getColumnOffset(locationLineNumber, locationColumnNumber);
 
         startTagStartLine = sourceStartLine = locationLineNumber;
-        startTagCharStart = sourceCharStart = locationColumnNumber;
+        startTagCharStart = sourceCharStart = column;
 
         int line = startTag.getEndLineNumber();
         column = resolver.getColumnOffset(line, startTag.getEndColumnNumber());

@@ -10,9 +10,37 @@
       <library name="core.jar">
          <export name="*"/>
       </library>
-      <library name="tapestry-2.4.jar">
+      <library name="commons-digester-1.4.jar">
          <export name="*"/>
       </library>
+      <library name="commons-logging-1.0.2.jar">
+         <export name="*"/>
+      </library>
+      <library name="commons-beanutils-1.6.1.jar">
+         <export name="*"/>
+      </library>
+      <library name="commons-collections-2.1.jar">
+         <export name="*"/>
+      </library>
+      <library name="commons-fileupload-1.0-beta-1.jar">
+         <export name="*"/>
+      </library>
+      <library name="commons-lang-1.0.jar">
+         <export name="*"/>
+      </library>
+      <library name="jakarta-oro-2.0.6.jar">
+         <export name="*"/>
+      </library>
+      <library name="ognl-2.4.2.jar">
+         <export name="*"/>
+      </library>
+      <library name="javax.servlet.jar">
+         <export name="*"/>
+      </library>
+            <library name="tapestry-3.0.jar">
+         <export name="*"/>
+      </library>
+      
    </runtime>
    <requires>
       <import plugin="org.eclipse.core.resources"/>
@@ -75,6 +103,20 @@
    </extension>
    <extension
          id="buildBroken"
+         name="Tapestry Build Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
+         id="fatalproblemmarker"
          name="Tapestry Build Problem"
          point="org.eclipse.core.resources.markers">
       <super

@@ -168,10 +168,10 @@ public class BasicParserDOMTest extends TestCase
         {
             fail("IOException: " + e.getMessage());
         }
-        assertNotNull(node);
         IProblem[] problems = parser.getProblems();
-        assertTrue(problems.length == 0);
         printProblems(problems);
+        assertNotNull(node);
+        assertTrue(problems.length == 0);
         assertNull(parser.getPublicId());
 
     }

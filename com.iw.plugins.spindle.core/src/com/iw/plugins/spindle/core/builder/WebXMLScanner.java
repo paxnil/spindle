@@ -27,24 +27,26 @@ package com.iw.plugins.spindle.core.builder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.FullBuild.ServletInfo;
+import com.iw.plugins.spindle.core.parser.IProblem;
+import com.iw.plugins.spindle.core.parser.ISourceLocation;
+import com.iw.plugins.spindle.core.resources.ClasspathResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ContextResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.AbstractScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
-import com.iw.plugins.spindle.core.util.Utils;
 
 /**
  * A Processor class used by FullBuild that extracts Tapestry information from the file web.xml
@@ -55,6 +57,17 @@ import com.iw.plugins.spindle.core.util.Utils;
 public class WebXMLScanner extends AbstractScanner
 {
 
+    public static final String NULL_NAME = "web-xml-servlet-has-null-name";
+    public static final String DUPLICATE_NAME = "web-xml-servlet-duplicate-name";
+    public static final String NULL_CLASSNAME = "web-xml-servlet-null-classname";
+    public static final String IGNORE_NOT_TAPESTRY = "web-xml-ignore-servlet-not-tapestry";
+    public static final String IGNORE_INVALID_APPLICATION_PATH = "web-xml-ignore-invalid-application-path";
+    public static final String IGNORE_APPLICATION_PATH_NOT_FOUND = "web-xml-ignore-application-path-not-found";
+    public static final String DUPLICATE_APPLICATION_PATH_SUBCLASS = "web-xml-application-path-param-but-servlet-defines";
+    public static final String DUPLICATE_APPLICATION_PATH = "web-xml-duplicate-application-path";
+    public static final String NULL_APPLICATION_PATH = "web-xml-null-application-path";
+    public static final String WRONG_FILE_EXTENSION = "web-xml-wrong-file-extension";
+
     protected FullBuild builder;
     protected IJavaProject javaProject;
     protected ArrayList servletNames;
@@ -64,6 +77,7 @@ public class WebXMLScanner extends AbstractScanner
      */
     public WebXMLScanner(FullBuild fullBuilder)
     {
+        super();
         this.builder = fullBuilder;
         this.javaProject = builder.javaProject;
     }
@@ -84,18 +98,18 @@ public class WebXMLScanner extends AbstractScanner
      */
     protected void doScan(Object resultObject, Node rootNode) throws ScannerException
     {
-        ArrayList infos = (ArrayList)resultObject;
+        ArrayList infos = (ArrayList) resultObject;
         for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
         {
             if (isElement(node, "servlet"))
             {
                 FullBuild.ServletInfo info = getServletInfo(node);
-                if (info != null)
+                if (info != null && info.applicationSpecLocation != null)
                 {
-                    infos.add(getServletInfo(node));
+                    infos.add(info);
                 }
             }
-        }        
+        }
     }
 
     protected FullBuild.ServletInfo getServletInfo(Node servletNode)
@@ -121,7 +135,7 @@ public class WebXMLScanner extends AbstractScanner
             {
                 try
                 {
-                    getInitParam(node, newInfo.parameters);
+                    getInitParam(node, newInfo);
                 } catch (ScannerException e)
                 {
                     TapestryCore.log(e.getMessage());
@@ -136,18 +150,23 @@ public class WebXMLScanner extends AbstractScanner
         }
         return newInfo;
     }
-
     protected boolean processServletName(Node node, FullBuild.ServletInfo newInfo)
     {
         newInfo.name = getValue(node);
+        if (newInfo.name == null || "".equals(newInfo.name.trim()))
+        {
+            addProblem(IProblem.WARNING, getBestGuessSourceLocation(node, true), TapestryCore.getString(NULL_NAME));
+            return false;
+
+        }
         if (servletNames == null)
         {
             servletNames = new ArrayList(11);
         }
         if (servletNames.contains(newInfo.name))
         {
-            String message = " spindle ignoring duplicate servlet name: " + newInfo.name;
-            TapestryCore.log(message);
+            String message = TapestryCore.getString(DUPLICATE_NAME, newInfo.name);
+            addProblem(IProblem.WARNING, getBestGuessSourceLocation(node, true), message);
             if (TapestryBuilder.DEBUG)
             {
                 System.out.println(message);
@@ -156,163 +175,277 @@ public class WebXMLScanner extends AbstractScanner
         }
         return true;
     }
-
     protected boolean processServletClass(Node node, FullBuild.ServletInfo newInfo)
     {
         newInfo.classname = getValue(node);
+        ISourceLocation nodeLocation = getBestGuessSourceLocation(node, true);
+
         if (newInfo.classname == null)
         {
-            String message = "ignoring servlet: " + newInfo.name + ". found null for classname.";
-            TapestryCore.log(message);
-            addProblem(IMarker.SEVERITY_WARNING, getBestGuessSourceLocation(node, false), message);
-            if (TapestryBuilder.DEBUG)
-            {
-                System.out.println(message);
-            }
+            String message = TapestryCore.getString(NULL_CLASSNAME, newInfo.name);
+            addProblem(IMarker.SEVERITY_WARNING, nodeLocation, message);
             return false;
         }
-        IType servletType = builder.tapestryBuilder.getType(newInfo.classname);
+
+        IType servletType = checkJavaType(newInfo.classname, nodeLocation);
         if (servletType == null)
         {
-            addProblem(
-                IMarker.SEVERITY_ERROR,
-                getBestGuessSourceLocation(node, true),
-                "servlet class not found: " + newInfo.classname);
             return false;
         }
-        if (!isTapestryServlet(servletType))
+        if (!isTapestryServlet(servletType, nodeLocation))
         {
-            String message = "ignoring servlet: " + newInfo.name + ". servlet class is not a Tapestry servlet";
-            TapestryCore.log(message);
-            if (TapestryBuilder.DEBUG)
-            {
-                System.out.println(message);
-                return false;
-            }
+            return false;
+
         } else if (!builder.tapestryServletType.equals(servletType))
         {
             newInfo.isServletSubclass = true; // its a subclass
             IPath path = getApplicationPathFromServlet(servletType);
             if (path != null)
             {
+                IResourceWorkspaceLocation location = null;
                 try
                 {
-                    checkApplicationLocation(path);
+                    location = getApplicationLocation(path.toString());
+                    checkApplicationLocation(location);
                 } catch (ScannerException e)
                 {
                     addProblem(
                         IMarker.SEVERITY_ERROR,
-                        getBestGuessSourceLocation(node, true),
-                        "ignoring servlet: "
-                            + newInfo.name
-                            + "'s getApplicationSpecificationPath() method returns invalid: "
-                            + e.getMessage());
+                        nodeLocation,
+                        TapestryCore.getString(IGNORE_INVALID_APPLICATION_PATH, servletType.getElementName(), path.toString()));
+
                     return false;
                 }
-                newInfo.parameters.put(TapestryBuilder.APP_SPEC_PATH_PARAM, path.toString());
+                newInfo.applicationSpecLocation = location;
             }
         }
         return true;
     }
 
-    protected void getInitParam(Node initParamNode, Map map) throws ScannerException
+    protected void checkApplicationServletPathParam(String value, FullBuild.ServletInfo currentInfo, ISourceLocation location)
+    {
+        if (currentInfo.isServletSubclass && currentInfo.applicationSpecLocation != null)
+        {
+            addProblem(IProblem.ERROR, location, TapestryCore.getString(DUPLICATE_APPLICATION_PATH_SUBCLASS));
+            return;
+        }
+        IResourceWorkspaceLocation ws_location = getApplicationLocation(value);
+        if (ws_location.getStorage() == null)
+        {
+            addProblem(IProblem.ERROR, location, TapestryCore.getString(IGNORE_APPLICATION_PATH_NOT_FOUND, value));
+            return;
+        }
+        currentInfo.applicationSpecLocation = ws_location;
+    }
+
+    protected IType checkJavaType(String className, ISourceLocation location)
+    {
+        IType found = builder.tapestryBuilder.getType(className);
+        if (found == null)
+        {
+            addProblem(
+                IProblem.ERROR,
+                location,
+                TapestryCore.getTapestryString(TapestryBuilder.TAPESTRY_CLASS_NOT_FOUND, className));
+        }
+        return found;
+    }
+
+    protected boolean checkJavaSubclassOfImplements(IType superclass, IType candidate, ISourceLocation location)
+    {
+        boolean match = false;
+        try
+        {
+            if (candidate.isInterface())
+            {
+                addProblem(IProblem.ERROR, location, "web-xml-must-be-class-not-interface");
+            }
+            ITypeHierarchy hierarchy = candidate.newSupertypeHierarchy(null);
+            if (hierarchy.exists())
+            {
+                IType[] superClasses = hierarchy.getAllSupertypes(candidate);
+                for (int i = 0; i < superClasses.length; i++)
+                {
+                    if (superClasses[i].equals(superclass))
+                    {
+                        match = true;
+                    }
+                }
+            }
+        } catch (JavaModelException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+        if (!match)
+        {
+            addProblem(IProblem.ERROR, location, "web-xml-does-not-subclass");
+        }
+        return match;
+    }
+
+    protected void getInitParam(Node initParamNode, FullBuild.ServletInfo currentInfo) throws ScannerException
     {
         String key = null;
         String value = null;
-        boolean appSpecLocationSpecified = false;
+        ISourceLocation keyLoc = null;
+        ISourceLocation valueLoc = null;
         for (Node node = initParamNode.getFirstChild(); node != null; node = node.getNextSibling())
         {
             if (isElement(node, "param-name"))
             {
                 key = getValue(node);
-                appSpecLocationSpecified = TapestryBuilder.APP_SPEC_PATH_PARAM.equals(key);
-                if (appSpecLocationSpecified && map.containsKey(TapestryBuilder.APP_SPEC_PATH_PARAM))
+                keyLoc = getBestGuessSourceLocation(node, true);
+                if (key == null)
                 {
-                    addProblem(
-                        IMarker.SEVERITY_WARNING,
-                        getBestGuessSourceLocation(node, true),
-                        "Duplicate application location found. Using first one = " + map.get(TapestryBuilder.APP_SPEC_PATH_PARAM));
-                    return;
+                    addProblem(IProblem.ERROR, keyLoc, "NULL KEY");
+                } else if (currentInfo.parameters.containsKey(key))
+                {
+                    addProblem(IProblem.ERROR, keyLoc, "DUPLICATE KEY");
+                    key = null;
                 }
             }
+
             if (isElement(node, "param-value"))
             {
                 value = getValue(node);
-                if (appSpecLocationSpecified)
+                valueLoc = getBestGuessSourceLocation(node, true);
+                if (value == null)
                 {
-                    if (value == null)
-                    {
-                        ScannerException ex =
-                            new ScannerException("null value found for property 'org.apache.tapestry.application-specification'");
-                        addProblem(IMarker.SEVERITY_ERROR, getBestGuessSourceLocation(node, true), ex.getMessage());
-                        throw ex;
-                    } else
-                    {
-                        IPath path = new Path(value);
-                        try
-                        {
-                            checkApplicationLocation(path);
-                        } catch (ScannerException e)
-                        {
-                            addProblem(
-                                IMarker.SEVERITY_ERROR,
-                                getBestGuessSourceLocation(node, true),
-                                "invalid value for 'org.apache.tapestry.application-specification': " + e.getMessage());
-                            throw e;
-                        }
-
-                    }
+                    addProblem(IProblem.ERROR, valueLoc, "NULL VALUE");
                 }
             }
-            if (key != null && value != null)
+        }
+        if (key != null && value != null)
+        {
+            if (TapestryBuilder.APP_SPEC_PATH_PARAM.equals(key))
             {
-                map.put(key, value);
+                checkApplicationServletPathParam(value, currentInfo, valueLoc);
+            } else
+            {
+                currentInfo.parameters.put(key, value);
             }
         }
+
+        //        Map map = currentInfo.parameters;
+        //        String value = null;
+        //        boolean appSpecLocationSpecified = currentInfo.applicationSpecLocation != null;
+        //        for (Node node = initParamNode.getFirstChild(); node != null; node = node.getNextSibling())
+        //        {
+        //            String currentKey = null;
+        //            if (isElement(node, "param-name"))
+        //            {
+        //                currentKey = getValue(node);
+        //                if (value == null)
+        //                {
+        //                    addProblem(IProblem.ERROR, getBestGuessSourceLocation(node, true), "NULL param-name");
+        //                    continue;
+        //                }
+        //                boolean isAppSpecLocation = TapestryBuilder.APP_SPEC_PATH_PARAM.equals(currentKey);
+        //                if (isAppSpecLocation)
+        //                {
+        //
+        //                    if (appSpecLocationSpecified)
+        //                    {
+        //                        addProblem(
+        //                            IProblem.WARNING,
+        //                            getBestGuessSourceLocation(node, true),
+        //                            TapestryCore.getString(DUPLICATE_APPLICATION_PATH_SUBCLASS));
+        //                        return;
+        //                    } else if (map.containsKey(TapestryBuilder.APP_SPEC_PATH_PARAM))
+        //                    {
+        //                        addProblem(
+        //                            IMarker.SEVERITY_WARNING,
+        //                            getBestGuessSourceLocation(node, true),
+        //                            TapestryCore.getString(DUPLICATE_APPLICATION_PATH, map.get(TapestryBuilder.APP_SPEC_PATH_PARAM)));
+        //                        return;
+        //                    }
+        //                }
+        //            }
+        //            if (isElement(node, "param-value"))
+        //            {
+        //                if (currentKey == null)
+        //                {
+        //                    continue;
+        //                }
+        //                value = getValue(node);
+        //                if (TapestryBuilder.APP_SPEC_PATH_PARAM.equals(currentKey) && !appSpecLocationSpecified)
+        //                {
+        //                    if (value == null)
+        //                    {
+        //                        addProblem(
+        //                            IMarker.SEVERITY_ERROR,
+        //                            getBestGuessSourceLocation(node, true),
+        //                            TapestryCore.getString(NULL_APPLICATION_PATH));
+        //                        return;
+        //                    } else
+        //                    {
+        //                        IPath path = new Path(value);
+        //                        IResourceWorkspaceLocation location = null;
+        //                        try
+        //                        {
+        //                            location = checkApplicationLocation(path);
+        //                        } catch (ScannerException e)
+        //                        {
+        //                            addProblem(
+        //                                IMarker.SEVERITY_ERROR,
+        //                                getBestGuessSourceLocation(node, true),
+        //                                "invalid value for 'org.apache.tapestry.application-specification': " + e.getMessage());
+        //                            throw e;
+        //                        }
+        //                        currentInfo.applicationSpecLocation = location;
+        //
+        //                    }
+        //                }
+        //            }
+        //            if (currentKey != null && value != null)
+        //            {
+        //                map.put(currentKey, value);
+        //            }
+        //        }
     }
 
-    protected IStorage checkApplicationLocation(IPath path) throws ScannerException
+    protected void checkApplicationLocation(IResourceWorkspaceLocation location) throws ScannerException
     {
-        String extension = path.getFileExtension();
+        IPath ws_path = new Path(location.getPath());
+        String extension = ws_path.getFileExtension();
         if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
         {
-            throw new ScannerException("wrong file ext: " + path.toString());
+            throw new ScannerException(TapestryCore.getString(WRONG_FILE_EXTENSION, location.toString()));
         }
 
-        IStorage found = null;
-        try
+        if (location.getStorage() == null)
         {
-            IJavaElement element = javaProject.findElement(path.makeRelative().removeLastSegments(1));
-            if (element != null)
-            {
-                IPackageFragment frag = (IPackageFragment) element;
-                found = builder.findInPackage(frag, path.lastSegment());
-            }
-        } catch (JavaModelException e)
-        {
-            TapestryCore.log(e);
+            throw new ScannerException(TapestryCore.getString(IGNORE_APPLICATION_PATH_NOT_FOUND, location.toString()));
         }
-        if (found == null)
-        {
-            throw new ScannerException("not found on classpath: " + path.toString());
-        }
-        return found;
     }
 
-    private boolean isTapestryServlet(IType candidate)
+    protected IResourceWorkspaceLocation getApplicationLocation(String path)
     {
-        try
+        if (path == null)
         {
-            if (candidate != null)
+            return null;
+        }
+        IPath ws_path = new Path(path);
+        IResourceWorkspaceLocation location = new ClasspathResourceWorkspaceLocation(builder.javaProject, path.toString());
+        if (location.getStorage() == null)
+        {
+            location = new ContextResourceWorkspaceLocation(builder.tapestryBuilder.contextRoot, path.toString());
+
+        }
+        return location;
+    }
+
+    private boolean isTapestryServlet(IType candidate, ISourceLocation location)
+    {
+        if (candidate != null)
+        {
+            if (!candidate.equals(builder.tapestryServletType))
             {
-                if (!candidate.equals(builder.tapestryServletType))
-                {
-                    return Utils.extendsType(candidate, builder.tapestryServletType);
-                }
-                return true;
+                return checkJavaSubclassOfImplements(builder.tapestryServletType, candidate, location);
             }
-        } catch (JavaModelException e)
-        {}
+
+        }
         return false;
     }
 

@@ -47,7 +47,6 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
     {
         _path = new Path(path);
     }
-    
 
     public String getName()
     {
@@ -61,18 +60,23 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
 
     public IResourceLocation getRelativeLocation(String name)
     {
-        if (name.startsWith("/"))
+        if (exists())
         {
-            if (name.equals(_path))
+
+            if (name.startsWith("/"))
+            {
+                if (name.equals(_path))
+                    return this;
+
+                return buildNewResourceLocation(name);
+            }
+
+            if (name.equals(getName()))
                 return this;
 
-            return buildNewResourceLocation(name);
+            return buildNewResourceLocation(getFolderPath().append(name).toString());
         }
-
-        if (name.equals(getName()))
-            return this;
-
-        return buildNewResourceLocation(getFolderPath().append(name).toString());
+        return null;
     }
 
     public String getPath()
@@ -80,7 +84,8 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
         return _path.toString();
     }
 
-    protected IPath getIPath() {
+    protected IPath getIPath()
+    {
         return _path;
     }
 

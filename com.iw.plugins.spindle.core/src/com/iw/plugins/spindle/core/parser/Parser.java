@@ -79,6 +79,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     private ArrayList collectedProblems = new ArrayList();
 
     private boolean doValidation = true;
+    private boolean hasFatalErrors;
 
     public Parser()
     {
@@ -128,7 +129,8 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         if (xmlDocument != null)
         {
             DocumentType type = xmlDocument.getDoctype();
-            if (type != null) {
+            if (type != null)
+            {
                 return type.getPublicId();
             }
         }
@@ -141,7 +143,14 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         Assert.isTrue(usePullParser, "can't pull parse, I'm set to dom parse!");
         if (pullParser == null)
         {
-            pullParseConfiguration = new TapestryParserConfiguration();
+            if (doValidation)
+            {
+                pullParseConfiguration = new TapestryParserConfiguration(TapestryParserConfiguration.GRAMMAR_POOL);
+
+            } else
+            {
+                pullParseConfiguration = new TapestryParserConfiguration();
+            }
             pullParser = new TapestryPullParser(pullParseConfiguration);
             pullParser.setSourceResolver(this);
             pullParseConfiguration.setDocumentHandler(pullParser);
@@ -150,12 +159,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             pullParseConfiguration.setFeature("http://apache.org/xml/features/dom/include-ignorable-whitespace", false);
             pullParseConfiguration.setFeature("http://xml.org/sax/features/validation", doValidation);
             pullParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
-            if (doValidation)
-            {
-                pullParseConfiguration.setProperty(
-                    "http://apache.org/xml/properties/internal/grammar-pool",
-                    TapestryParserConfiguration.GRAMMAR_POOL);
-            }
+
         }
     }
 
@@ -164,7 +168,14 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         Assert.isTrue(!usePullParser, "can't dom parse, I'm set to pull parse!");
         if (domParser == null)
         {
-            domParseConfiguration = new TapestryParserConfiguration();
+            if (doValidation)
+            {
+                domParseConfiguration = new TapestryParserConfiguration(TapestryParserConfiguration.GRAMMAR_POOL);
+
+            } else
+            {
+                domParseConfiguration = new TapestryParserConfiguration();
+            }
             domParser = new TapestryDOMParser(domParseConfiguration);
             domParseConfiguration.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
             domParseConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
@@ -173,14 +184,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             domParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
             domParser.setSourceResolver(this);
             domParseConfiguration.setDocumentHandler(domParser);
-            domParseConfiguration.setErrorHandler(this);
-            if (doValidation)
-            {
-                domParseConfiguration.setProperty(
-                    "http://apache.org/xml/properties/internal/grammar-pool",
-                    TapestryParserConfiguration.GRAMMAR_POOL);
-            }
-
+            domParseConfiguration.setErrorHandler(this);           
         }
     }
 
@@ -200,6 +204,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         xmlDocument = null;
         collectedProblems.clear();
         getEclipseDocument(content);
+        hasFatalErrors = false;
         if (usePullParser)
         {
             return pullParse(content);
@@ -255,6 +260,11 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
 
         return result;
 
+    }
+
+    public boolean getHasFatalErrors()
+    {
+        return hasFatalErrors;
     }
 
     public DocumentImpl getParsedDocument()
@@ -382,6 +392,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
      */
     public void fatalError(String domain, String key, XMLParseException exception) throws XNIException
     {
+        hasFatalErrors = true;
         addProblem(createFatalProblem(exception, IMarker.SEVERITY_ERROR));
         TapestryCore.log(exception);
     }

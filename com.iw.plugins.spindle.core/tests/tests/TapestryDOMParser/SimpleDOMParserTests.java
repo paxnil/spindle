@@ -45,6 +45,7 @@ import org.apache.xerces.xni.parser.XMLParseException;
 import org.xml.sax.SAXException;
 
 import com.iw.plugins.spindle.core.parser.xml.TapestryEntityResolver;
+import com.iw.plugins.spindle.core.parser.xml.TapestryParserConfiguration;
 
 /**
  *  Simplest pull parser tests
@@ -195,8 +196,8 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
         } catch (SAXException e)
         {
             e.printStackTrace();
-            fail("SAXException: " +e.getClass().getName()+" "+ e.getMessage());
-            
+            fail("SAXException: " + e.getClass().getName() + " " + e.getMessage());
+
         } catch (IOException e)
         {
             fail("IOException " + e.getMessage());
@@ -224,6 +225,47 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
             reader.close();
         }
         assertNotNull("pool didn't cache the DTD", pool.getGrammar(TAPESTRY_1_3_PUBLIC_ID));
+
+    }
+
+    public void testJ2EEGrammar() throws Exception
+    {
+
+        String J2EEPublicId = "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
+        XMLGrammarPoolImpl grammarPool = TapestryParserConfiguration.GRAMMAR_POOL;
+        assertSame(parserConfiguration.getProperty(GRAMMAR_POOL), grammarPool);
+        assertNull(grammarPool.getGrammar(J2EEPublicId));
+
+        Reader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/testdata/web.xml")));
+        try
+        {
+            parseAll(reader);
+        } catch (SAXException e)
+        {
+            fail("SAXException: " + e.getMessage());
+        } catch (IOException e)
+        {
+            fail("IOException " + e.getMessage());
+        } finally
+        {
+            reader.close();
+        }
+        // parseAll forces a reset, which triggers the caching
+        reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/testdata/basicTapestryComponent.jwc")));
+        try
+        {
+            parseAll(reader);
+        } catch (SAXException e)
+        {
+            fail("SAXException: " + e.getMessage());
+        } catch (IOException e)
+        {
+            fail("IOException " + e.getMessage());
+        } finally
+        {
+            reader.close();
+        }
+        assertNotNull("pool didn't cache the DTD", grammarPool.getGrammar(J2EEPublicId));
 
     }
 

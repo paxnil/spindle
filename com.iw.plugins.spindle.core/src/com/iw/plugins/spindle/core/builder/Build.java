@@ -48,9 +48,10 @@ import com.iw.plugins.spindle.core.util.Markers;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public abstract class Build
+public abstract class Build implements IBuild
 {
 
+    private static final Parser BUILD_PARSER = new Parser();
     protected TapestryBuilder tapestryBuilder;
     protected State newState;
     protected BuildNotifier notifier;
@@ -63,11 +64,9 @@ public abstract class Build
         newState = new State(builder);
         this.notifier = builder.notifier;
         this.javaProject = builder.javaProject;
-        this.parser = new Parser();
+        this.parser = BUILD_PARSER;
     }
 
-    public abstract void build();
-    public abstract void cleanUp();
 
     protected Node parseToNode(IFile file) throws IOException, CoreException
     {

@@ -47,6 +47,7 @@ public class Markers
 
     public static final String TAPESTRY_MARKER_TAG = ITapestryMarker.TAPESTRY_PROBLEM_MARKER;
     public static final String TAPESTRY_BUILBROKEN_TAG = ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER;
+    public static final String TAPESTRY_FATAL = ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER;
 
     public static void addTapestryProblemMarkersToResource(IResource resource, IProblem[] problems)
     {
@@ -173,6 +174,7 @@ public class Markers
             if (resource != null && resource.exists())
             {
                 resource.deleteMarkers(Markers.TAPESTRY_MARKER_TAG, false, IResource.DEPTH_INFINITE);
+                resource.deleteMarkers(Markers.TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
             }
         } catch (CoreException e)
         {} // assume there were no problems
@@ -189,6 +191,7 @@ public class Markers
             if (iProject != null && iProject.exists()) {
             
                 iProject.deleteMarkers(Markers.TAPESTRY_MARKER_TAG, false, IResource.DEPTH_INFINITE);
+                iProject.deleteMarkers(Markers.TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
                 iProject.deleteMarkers(Markers.TAPESTRY_BUILBROKEN_TAG, false, IResource.DEPTH_ZERO);
             }
         } catch (CoreException e)

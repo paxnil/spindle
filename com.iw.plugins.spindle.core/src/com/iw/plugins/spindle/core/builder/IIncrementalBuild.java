@@ -24,39 +24,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package tests.TapestryDOMParser;
-
-import junit.framework.TestCase;
-
-import org.apache.xerces.xni.parser.XMLParserConfiguration;
-
-import com.iw.plugins.spindle.core.parser.xml.TapestryParserConfiguration;
-import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParser;
+package com.iw.plugins.spindle.core.builder;
 
 /**
- *  Base for PullParser tests
+ *  Common Question asked of all kinds of Incremental Builders
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class DOMParserBase extends TestCase
+public interface IIncrementalBuild extends IBuild
 {
-
-    protected XMLParserConfiguration parserConfiguration;
-    protected TapestryDOMParser domParser;
-
-    public DOMParserBase(String arg0)
-    {
-        super(arg0);
-    }
-
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#setUp()
-     */
-    protected void setUp() throws Exception
-    {
-        parserConfiguration = new TapestryParserConfiguration(TapestryParserConfiguration.GRAMMAR_POOL);
-        domParser = new TapestryDOMParser(parserConfiguration);
-    }
-
+    public boolean canIncrementalBuild();
 }

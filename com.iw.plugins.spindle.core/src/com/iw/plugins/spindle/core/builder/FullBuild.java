@@ -74,7 +74,7 @@ public class FullBuild extends Build
 
     }
 
-    public void build()
+    public void build() throws BuilderException
     {
         if (TapestryBuilder.DEBUG)
             System.out.println("FULL Tapestry build");
@@ -85,6 +85,14 @@ public class FullBuild extends Build
             Markers.removeProblemsForProject(tapestryBuilder.currentProject);
 
             findDeclaredApplications();
+            if (knownValidServlets == null || knownValidServlets.isEmpty())
+            {
+                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_NO_SERVLETS));
+            }
+            if (knownValidServlets.size() > 1)
+            {
+                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_ONE_SERVLET_ONLY));
+            }
             notifier.updateProgressDelta(0.1f);
 
             notifier.subTask(TapestryCore.getString(TapestryBuilder.LOCATING_ARTIFACTS));
@@ -107,9 +115,6 @@ public class FullBuild extends Build
         } catch (CoreException e)
         {
             TapestryCore.log(e);
-        } finally
-        {
-            cleanUp();
         }
     }
 
@@ -172,28 +177,28 @@ public class FullBuild extends Build
 
     protected void findDeclaredApplications()
     {
-
-        IFile webXML = tapestryBuilder.contextRoot.getFile("web.xml");
+        IFile webXML = tapestryBuilder.contextRoot.getFile("WEB-INF/web.xml");
         if (webXML != null && webXML.exists())
         {
-            // TODO need to pull any IProblems out and make them into Markers!
             Node wxmlElement = null;
             try
             {
+                tapestryBuilder.notifier.subTask(TapestryCore.getString(TapestryBuilder.SCANNING, webXML.getFullPath().toString()));
                 wxmlElement = parseToNode(webXML);
             } catch (IOException e1)
             {
-                // TODO Auto-generated catch block
+                TapestryCore.log(e1);
                 e1.printStackTrace();
             } catch (CoreException e1)
             {
-                // TODO Auto-generated catch block
+                TapestryCore.log(e1);
                 e1.printStackTrace();
             }
             if (wxmlElement == null)
             {
                 return;
             }
+
             ServletInfo[] servletInfos = null;
             try
             {
@@ -256,6 +261,7 @@ public class FullBuild extends Build
         String classname;
         Map parameters = new HashMap();
         boolean isServletSubclass;
+        IResourceWorkspaceLocation applicationSpecLocation;
         public String toString()
         {
             StringBuffer buffer = new StringBuffer("ServletInfo(");
@@ -265,6 +271,8 @@ public class FullBuild extends Build
             buffer.append(classname);
             buffer.append(", params = ");
             buffer.append(parameters);
+            buffer.append(" loc= ");
+            buffer.append(applicationSpecLocation);
             return buffer.toString();
         }
     }

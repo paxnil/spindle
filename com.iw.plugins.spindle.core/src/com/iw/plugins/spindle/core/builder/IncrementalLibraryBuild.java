@@ -1,3 +1,5 @@
+package com.iw.plugins.spindle.core.builder;
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -24,39 +26,42 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package tests.TapestryDOMParser;
-
-import junit.framework.TestCase;
-
-import org.apache.xerces.xni.parser.XMLParserConfiguration;
-
-import com.iw.plugins.spindle.core.parser.xml.TapestryParserConfiguration;
-import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParser;
-
 /**
- *  Base for PullParser tests
+ * Builds a Tapestry Library project incrementally
  * 
- * @author glongman@intelligentworks.com
  * @version $Id$
+ * @author glongman@intelligentworks.com
  */
-public class DOMParserBase extends TestCase
+public class IncrementalLibraryBuild extends Build implements IIncrementalBuild
 {
 
-    protected XMLParserConfiguration parserConfiguration;
-    protected TapestryDOMParser domParser;
-
-    public DOMParserBase(String arg0)
+    /**
+     * Constructor for IncrementalBuilder.
+     * @param builder
+     */
+    public IncrementalLibraryBuild(TapestryBuilder builder)
     {
-        super(arg0);
+        super(builder);
     }
 
     /* (non-Javadoc)
-     * @see junit.framework.TestCase#setUp()
+     * @see com.iw.plugins.spindle.core.builder.IBuild#build()
      */
-    protected void setUp() throws Exception
+    public void build() throws BuilderException
+    {}
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.builder.IBuild#cleanUp()
+     */
+    public void cleanUp()
+    {}
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild()
+     */
+    public boolean canIncrementalBuild()
     {
-        parserConfiguration = new TapestryParserConfiguration(TapestryParserConfiguration.GRAMMAR_POOL);
-        domParser = new TapestryDOMParser(parserConfiguration);
+        return false;
     }
 
 }

@@ -94,12 +94,10 @@ public class CorePropertyPage extends PropertyPage
     private static final String OUTPUT_FOLDER_ERROR = "property-page-output-folder";
     private static final String SOURCE_PATH_ERROR = "property-page-source-path";
     private static final String APP_TYPE = "property-page-project-type-application";
-    private static final int APP = 0;
-    ;
-    private static final String LIB_TYPE = "property-page-project-type-library";
-    private static final int LIB = 1;
 
-    private static final String APP_ROOT_PROPERTY = TapestryCore.PLUGIN_ID + ".app-root";
+    private static final String LIB_TYPE = "property-page-project-type-library";
+
+    private static final String PROJECT_TYPE_PROPERTY = TapestryCore.PLUGIN_ID + ".project-type";
     private static final String CONTEXT_ROOT_PROPERTY = TapestryCore.PLUGIN_ID + ".context-root";
     private static final String LIBRARY_SPEC_PROPERTY = TapestryCore.PLUGIN_ID + ".library-spec";
 
@@ -259,8 +257,8 @@ public class CorePropertyPage extends PropertyPage
 
             projectTypeCombo.setEnabled(canEnable);
 
-            boolean appSelected = projectTypeCombo.getSelectionIndex() == APP;
-            boolean libSelected = projectTypeCombo.getSelectionIndex() == LIB;
+            boolean appSelected = projectTypeCombo.getSelectionIndex() == TapestryProject.APPLICATION_PROJECT_TYPE;
+            boolean libSelected = projectTypeCombo.getSelectionIndex() == TapestryProject.LIBRARY_PROJECT_TYPE;
             boolean showApp = appSelected && canEnable;
             boolean showLib = libSelected && canEnable;
 
@@ -291,7 +289,9 @@ public class CorePropertyPage extends PropertyPage
         composite.setLayout(layout);
         composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        boolean isEnabled = isTapestryProjectCheck.getSelection() && projectTypeCombo.getSelectionIndex() == APP;
+        boolean isEnabled =
+            isTapestryProjectCheck.getSelection()
+                && projectTypeCombo.getSelectionIndex() == TapestryProject.APPLICATION_PROJECT_TYPE;
 
         Composite fieldGroup = new Composite(composite, SWT.NONE);
         layout = new GridLayout();
@@ -339,7 +339,8 @@ public class CorePropertyPage extends PropertyPage
         composite.setLayout(layout);
         composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        boolean isEnabled = isTapestryProjectCheck.getSelection() && projectTypeCombo.getSelectionIndex() == LIB;
+        boolean isEnabled =
+            isTapestryProjectCheck.getSelection() && projectTypeCombo.getSelectionIndex() == TapestryProject.LIBRARY_PROJECT_TYPE;
 
         Composite fieldGroup = new Composite(composite, SWT.NONE);
         layout = new GridLayout();
@@ -416,6 +417,18 @@ public class CorePropertyPage extends PropertyPage
     //        return result;
     //    }
 
+    private int getIntPropertyFromWorkspace(QualifiedName key) throws CoreException
+    {
+        String result = getPropertyFromWorkspace(key);
+        try
+        {
+            return new Integer(result).intValue();
+        } catch (NumberFormatException e)
+        {
+            return TapestryProject.APPLICATION_PROJECT_TYPE;
+        }
+    }
+
     private String getPropertyFromWorkspace(QualifiedName key) throws CoreException
     {
         String result = ((IResource) getElement()).getPersistentProperty(key);
@@ -428,32 +441,23 @@ public class CorePropertyPage extends PropertyPage
 
     protected int getProjectType()
     {
-        int result = APP;
+        int result = TapestryProject.APPLICATION_PROJECT_TYPE;
         try
         {
-            QualifiedName key = new QualifiedName("", CONTEXT_ROOT_PROPERTY);
+            QualifiedName key = new QualifiedName("", PROJECT_TYPE_PROPERTY);
             TapestryProject prj = getTapestryProject();
-            String type = null;
             if (prj != null)
             {
-                type = prj.getProjectType();
+                result = prj.getProjectType();
 
-                if (type == null || "".equals(type.trim()))
+                if (result == -1)
                 {
-                    type = getPropertyFromWorkspace(key);
+                    result = getIntPropertyFromWorkspace(key);
                 }
             } else
             {
-                type = getPropertyFromWorkspace(key);
+                result = getIntPropertyFromWorkspace(key);
             }
-            if (TapestryProject.APPLICATION_PROJECT.equals(type))
-            {
-                result = APP;
-            } else if (TapestryProject.LIBRARY_PROJECT.equals(type))
-            {
-                result = LIB;
-            }
-
         } catch (CoreException ex)
         {}
         return result;
@@ -544,10 +548,12 @@ public class CorePropertyPage extends PropertyPage
         // store the values as properties
         try
         {
-            ((IResource) getElement()).setPersistentProperty(
-                new QualifiedName("", CONTEXT_ROOT_PROPERTY),
-                webContextRoot.getText());
-            ((IResource) getElement()).setPersistentProperty(new QualifiedName("", LIBRARY_SPEC_PROPERTY), librarySpec.getText());
+            IResource resource = (IResource) getElement();
+            resource.setPersistentProperty(
+                new QualifiedName("", PROJECT_TYPE_PROPERTY),
+                new Integer(projectTypeCombo.getSelectionIndex()).toString());
+            resource.setPersistentProperty(new QualifiedName("", CONTEXT_ROOT_PROPERTY), webContextRoot.getText());
+            resource.setPersistentProperty(new QualifiedName("", LIBRARY_SPEC_PROPERTY), librarySpec.getText());
         } catch (CoreException e)
         {}
         // now configure/deconfigure the project
@@ -564,16 +570,16 @@ public class CorePropertyPage extends PropertyPage
                         TapestryProject prj = getTapestryProject();
                         switch (projectTypeCombo.getSelectionIndex())
                         {
-                            case APP :
-                                prj.setProjectType(TapestryProject.APPLICATION_PROJECT);
+                            case TapestryProject.APPLICATION_PROJECT_TYPE :
+                                prj.setProjectType(TapestryProject.APPLICATION_PROJECT_TYPE);
                                 String projectName = prj.getProject().getName();
                                 String temp = webContextRoot.getText();
                                 createFolderIfRequired(projectName + temp);
                                 prj.setWebContext(temp);
                                 break;
 
-                            case LIB :
-                                prj.setProjectType(TapestryProject.LIBRARY_PROJECT);
+                            case TapestryProject.LIBRARY_PROJECT_TYPE :
+                                prj.setProjectType(TapestryProject.LIBRARY_PROJECT_TYPE);
                                 prj.setLibrarySpecPath(librarySpec.getText());
                                 break;
                         }

@@ -1,5 +1,3 @@
-package com.iw.plugins.spindle.core.builder;
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -26,34 +24,16 @@ package com.iw.plugins.spindle.core.builder;
  *
  * ***** END LICENSE BLOCK ***** */
 
+package com.iw.plugins.spindle.core.builder;
+
 /**
- * Builds a Tapestry project from scratch.
+ *  TODO Add Type comment
  * 
- * @version $Id$
  * @author glongman@intelligentworks.com
+ * @version $Id$
  */
-public class IncrementalBuild extends Build
+public interface IBuild
 {
-
-    /**
-     * Constructor for IncrementalBuilder.
-     * @param builder
-     */
-    public IncrementalBuild(TapestryBuilder builder)
-    {
-        super(builder);
-    }
-
-    /**
-     * @see com.iw.plugins.spindle.core.builder.Build#build()
-     */
-    public void build()
-    {}
-
-    /**
-     * @see com.iw.plugins.spindle.core.builder.Build#cleanUp()
-     */
-    public void cleanUp()
-    {}
-
+    public void build() throws BuilderException;
+    public void cleanUp();
 }

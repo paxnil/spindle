@@ -43,6 +43,8 @@ import org.eclipse.core.runtime.CoreException;
 
 public interface IResourceWorkspaceLocation extends IResourceLocation
 {
+    
+    public boolean exists();
 
     /**
      * return the workspace storage associated with this descriptor

@@ -39,12 +39,16 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -62,10 +66,11 @@ import com.iw.plugins.spindle.core.util.Markers;
  */
 public class TapestryBuilder extends IncrementalProjectBuilder
 {
-
+    public static final String TAPESTRY_CLASS_NOT_FOUND = "unable-to-resolve-class";
     public static final String STRING_KEY = "builder-";
     public static final String APPLICATION_SERVLET_NAME = STRING_KEY + "applicationServletClassname";
     public static final String STARTING = STRING_KEY + "full-build-starting";
+    public static final String SCANNING = STRING_KEY + "scanning";
     public static final String TAPESTRY_JAR_MISSING = STRING_KEY + "tapestry-jar-missing";
     public static final String LOCATING_ARTIFACTS = STRING_KEY + "locating-artifacts";
     public static final String MISSING_CONTEXT = STRING_KEY + "missing-context";
@@ -73,6 +78,14 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     public static final String JAVA_BUILDER_FAILED = STRING_KEY + "java-builder-failed";
     public static final String ABORT_PREREQ_NOT_BUILT = STRING_KEY + "abort-prereq-not-built";
     public static final String ABORT_MISSING_WEB_XML = STRING_KEY + "abort-missing-web-xml";
+    public static final String ABORT_INVALID_OUTPUT_LOCATION = STRING_KEY + "abort-invalid-output-location";
+    public static final String ABORT_NO_OUTPUT_LOCATION = STRING_KEY + "abort-no-output-location";
+    public static final String ABORT_MISSING_LIBRARY_SPEC = STRING_KEY + "abort-missing-library-spec";
+    public static final String ABORT_LIBRARY_SPEC_NOT_ON_SOURCE_PATH = STRING_KEY + "-abort-library-spec-not-on-classpath";
+    public static final String ABORT_LIBRARY_SPEC_IN_WRONG_PROJECT = STRING_KEY + "abort-library-not-in-this-project";
+    public static final String ABORT_APPLICATION_NO_SERVLETS = STRING_KEY + "abort-no-valid-application-servlets-found";
+    public static final String ABORT_APPLICATION_ONE_SERVLET_ONLY = STRING_KEY + "abort-too-many-valid-servlets-found";
+    
 
     public static final String APPLICATION_EXTENSION = "application";
     public static final String COMPONENT_EXTENSION = "jwc";
@@ -90,6 +103,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     TapestryProject tapestryProject;
     IWorkspaceRoot workspaceRoot;
     IFolder contextRoot;
+    int projectType;
+
+    private IBuild build;
 
     BuildNotifier notifier;
 
@@ -134,10 +150,13 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
             if (isWorthBuilding())
             {
-                buildAll();
-                //        if (kind == FULL_BUILD) {
-                //          
-                //        } else {
+                if (kind == FULL_BUILD)
+                {
+                    buildAll();
+                } else
+                {
+                    buildIncremental();
+                }
                 //          if ((this.lastState = getLastState(currentProject)) == null) {
                 //            if (DEBUG)
                 //              System.out.println("Performing full build since last saved state was not found"); //$NON-NLS-1$
@@ -166,8 +185,11 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 //            }
                 //          }
                 //        }
-                ok = true;
+
             }
+        } catch (BuilderException e)
+        {
+            Markers.addBuildBrokenProblemMarkerToResource(getProject(), e.getMessage());
             //    } catch (CoreException e) {
             //      Util.log(e, "JavaBuilder handling CoreException"); //$NON-NLS-1$
             //      IMarker marker = currentProject.createMarker(ProblemMarkerTag);
@@ -193,6 +215,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             //      IMarker marker = currentProject.createMarker(ProblemMarkerTag);
             //      marker.setAttribute(IMarker.MESSAGE, Util.bind("build.missingSourceFile", e.missingSourceFile)); //$NON-NLS-1$
             //      marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+
         } finally
         {
             if (!ok)
@@ -211,7 +234,12 @@ public class TapestryBuilder extends IncrementalProjectBuilder
      * Method cleanup.
      */
     private void cleanup()
-    {}
+    {
+        if (build != null)
+        {
+            build.cleanUp();
+        }
+    }
 
     private IProject[] getRequiredProjects(boolean includeBinaryPrerequisites)
     {
@@ -270,10 +298,50 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     /**
      * Method buildAll.
      */
-    private void buildAll()
+    private void buildAll() throws BuilderException
     {
-        FullBuild builder = new FullBuild(this);
-        builder.build();
+        int type = tapestryProject.getProjectType();
+        switch (type)
+        {
+            case TapestryProject.APPLICATION_PROJECT_TYPE :
+                build = new FullBuild(this);
+                break;
+
+            case TapestryProject.LIBRARY_PROJECT_TYPE :
+
+            default :
+                break;
+        }
+        if (build != null)
+        {
+            build.build();
+        }
+    }
+
+    private void buildIncremental() throws BuilderException
+    {
+        int type = tapestryProject.getProjectType();
+        IIncrementalBuild inc = null;
+        switch (type)
+        {
+            case TapestryProject.APPLICATION_PROJECT_TYPE :
+                inc = new IncrementalApplicationBuild(this);
+                break;
+
+            case TapestryProject.LIBRARY_PROJECT_TYPE :
+                inc = new IncrementalLibraryBuild(this);
+
+            default :
+                break;
+        }
+        if (inc != null && inc.canIncrementalBuild())
+        {
+            build = inc;
+            inc.build();
+        } else
+        {
+            buildAll();
+        }
     }
 
     /**
@@ -282,9 +350,10 @@ public class TapestryBuilder extends IncrementalProjectBuilder
      */
     private boolean isWorthBuilding()
     {
-        Markers.removeProblemsForProject(getProject());
+
         if (javaProject == null)
         {
+            Markers.removeProblemsForProject(getProject());
             Markers.addBuildBrokenProblemMarkerToResource(getProject(), TapestryCore.getString(NON_JAVA_PROJECTS));
             return false;
         }
@@ -297,12 +366,32 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 jprojectMarkers = resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_ZERO);
             if (jprojectMarkers.length > 0)
             {
+                Markers.removeProblemsForProject(getProject());
                 Markers.addBuildBrokenProblemMarkerToResource(getProject(), TapestryCore.getString(JAVA_BUILDER_FAILED));
                 return false;
             }
         } catch (CoreException e)
         {
             // assume there are no Java builder problems 
+        }
+
+        try
+        {
+            IPath outputPath = javaProject.getOutputLocation();
+            IPath projectPath = javaProject.getPath();
+            if (projectPath.equals(outputPath))
+            {
+                Markers.removeProblemsFor(currentProject);
+                Markers.addBuildBrokenProblemMarkerToResource(
+                    currentProject,
+                    TapestryCore.getString(ABORT_INVALID_OUTPUT_LOCATION, outputPath.toString()));
+                return false;
+            }
+        } catch (JavaModelException e1)
+        {
+            Markers.removeProblemsFor(currentProject);
+            Markers.addBuildBrokenProblemMarkerToResource(currentProject, TapestryCore.getString(ABORT_NO_OUTPUT_LOCATION));
+            return false;
         }
 
         // make sure all prereq projects have valid build states... 
@@ -323,17 +412,18 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             }
         }
 
-        if (getType(APPLICATION_SERVLET_NAME) == null)
+        if (getType(TapestryCore.getString(APPLICATION_SERVLET_NAME)) == null)
         {
+            Markers.removeProblemsForProject(getProject());
             Markers.addBuildBrokenProblemMarkerToResource(
                 currentProject,
                 TapestryCore.getString(TapestryBuilder.TAPESTRY_JAR_MISSING));
             return false;
         }
 
-        String projectType = tapestryProject.getProjectType();
+        int projectType = tapestryProject.getProjectType();
 
-        if (TapestryProject.APPLICATION_PROJECT.equals(projectType))
+        if (projectType == TapestryProject.APPLICATION_PROJECT_TYPE)
         {
             if (contextRoot == null || !contextRoot.exists())
             {
@@ -342,18 +432,59 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 return false;
             }
 
-            IFile webXML = contextRoot.getFile("web.xml");
-            if (contextRoot == null || !contextRoot.exists())
+            IFile webXML = contextRoot.getFile("WEB-INF/web.xml");
+            if (webXML == null || !webXML.exists())
             {
                 Markers.removeProblemsFor(currentProject); // make this the only problem for this project
                 Markers.addBuildBrokenProblemMarkerToResource(
                     currentProject,
-                    TapestryCore.getString(ABORT_MISSING_WEB_XML, contextRoot.getFullPath()));
+                    TapestryCore.getString(ABORT_MISSING_WEB_XML, webXML.getFullPath()));
                 return false;
             }
-        } else if (TapestryProject.APPLICATION_PROJECT.equals(projectType))
+        } else if (projectType == TapestryProject.LIBRARY_PROJECT_TYPE)
         {
-            // TODO handle library projects!
+            IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+            IFile librarySpec = root.getFile(new Path(tapestryProject.getLibrarySpecPath()));
+            if (librarySpec == null || !librarySpec.exists())
+            {
+                Markers.removeProblemsFor(currentProject); // make this the only problem for this project
+                Markers.addBuildBrokenProblemMarkerToResource(
+                    currentProject,
+                    TapestryCore.getString(ABORT_MISSING_LIBRARY_SPEC, librarySpec.getFullPath()));
+                return false;
+            }
+            IPackageFragment fragment = null;
+            boolean isBinaryPackage = false;
+            try
+            {
+                IFolder container = (IFolder) librarySpec.getParent();
+                fragment = (IPackageFragment) JavaCore.create(container);
+                if (fragment != null)
+                {
+                    IPackageFragmentRoot fragRoot = (IPackageFragmentRoot) fragment.getParent();
+                    isBinaryPackage = fragRoot.getKind() == IPackageFragmentRoot.K_BINARY;
+                }
+            } catch (JavaModelException e2)
+            {
+                // do nothing
+            }
+
+            if (fragment == null || isBinaryPackage)
+            {
+                Markers.removeProblemsFor(currentProject); // make this the only problem for this project
+                Markers.addBuildBrokenProblemMarkerToResource(
+                    currentProject,
+                    TapestryCore.getString(ABORT_LIBRARY_SPEC_NOT_ON_SOURCE_PATH, librarySpec.getFullPath()));
+                return false;
+            } else if (!fragment.getJavaProject().equals(javaProject))
+            {
+                Markers.removeProblemsFor(currentProject); // make this the only problem for this project
+                Markers.addBuildBrokenProblemMarkerToResource(
+                    currentProject,
+                    TapestryCore.getString(ABORT_LIBRARY_SPEC_IN_WRONG_PROJECT, librarySpec.getFullPath()));
+                return false;
+            }
+
         }
 
         return true;
