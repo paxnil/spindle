@@ -41,11 +41,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.ILock;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
@@ -62,11 +62,11 @@ import com.iw.plugins.spindle.core.util.Markers;
  * right now the models/build states are not persited between sessions.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: TapestryArtifactManager.java,v 1.7 2004/06/15 04:11:27 glongman
- *          Exp $
  */
 public class TapestryArtifactManager implements ITemplateFinderListener
 {
+
+  static final Object MANAGER_JOB_FAMILY = new Object();
 
   static private TapestryArtifactManager instance = new TapestryArtifactManager();
 
@@ -75,6 +75,8 @@ public class TapestryArtifactManager implements ITemplateFinderListener
 
     return instance;
   }
+
+  private final ILock fNonJobBuildLock = Platform.getJobManager().newLock();
 
   Map fProjectBuildStates = new HashMap();
   List fTemplateExtensionListeners;
@@ -100,14 +102,11 @@ public class TapestryArtifactManager implements ITemplateFinderListener
     fProjectBuildStates.remove(project);
   }
 
-  public synchronized Object getLastBuildState(IProject project, boolean buildIfRequired)
-  {
-    return getLastBuildState(project, buildIfRequired, null);
-  }
-
-  public synchronized Object getLastBuildState(
-      IProject project,
-      boolean buildIfRequired,
+  // get the build state if exists, if not build using context - this one always
+  // blocks
+  public Object getLastBuildState(
+      final IProject project,
+      final boolean buildIfRequired,
       IRunnableContext context)
   {
     if (project == null)
@@ -117,11 +116,79 @@ public class TapestryArtifactManager implements ITemplateFinderListener
       return null;
 
     Object state = getProjectState(project);
-    if (state == null && buildIfRequired)
+
+    if (state == null && (buildIfRequired && canBuild(project)))
+    {
+      IRunnableWithProgress runnable = new IRunnableWithProgress()
+      {
+        public void run(IProgressMonitor monitor) throws InvocationTargetException,
+            InterruptedException
+        {
+          try
+          {
+            fNonJobBuildLock.acquire();
+            Object state = getProjectState(project);
+
+            if (state == null && (buildIfRequired && canBuild(project)))
+            {
+              project.build(
+                  IncrementalProjectBuilder.FULL_BUILD,
+                  TapestryCore.BUILDER_ID,
+                  new HashMap(),
+                  monitor);
+            }
+          } catch (CoreException e)
+          {
+            TapestryCore.log(e);
+          } finally
+          {
+            fNonJobBuildLock.release();
+          }
+        }
+      };
+
+      try
+      {
+        context.run(false, false, runnable);
+      } catch (Exception e)
+      {
+        TapestryCore.log(e);
+      }
+      state = getProjectState(project);
+    }
+    return state;
+  }
+
+  public synchronized void pingProjectState(IProject project)
+  {
+    Assert.isLegal(project != null);
+    getLastBuildState(project, true, false);
+  }
+
+  //will block if a build is indicated
+  public synchronized Object getLastBuildState(IProject project, boolean buildIfRequired)
+  {
+    return getLastBuildState(project, buildIfRequired, true);
+  }
+
+  //may block if a build is indicated
+  public synchronized Object getLastBuildState(
+      IProject project,
+      boolean buildIfRequired,
+      boolean block)
+  {
+    if (project == null)
+      return null;
+
+    if (!TapestryCore.hasTapestryNature(project))
+      return null;
+
+    Object state = getProjectState(project);
+    if (state == null && (buildIfRequired && canBuild(project)))
     {
       try
       {
-        buildStateIfPossible(project, context);
+        buildStateIfPossible(project, block);
         state = getProjectState(project);
       } catch (CoreException e)
       {
@@ -129,6 +196,14 @@ public class TapestryArtifactManager implements ITemplateFinderListener
       }
     }
     return state;
+  }
+
+  private boolean canBuild(IProject project)
+  {
+    if (project == null || !project.isAccessible())
+      return false;
+
+    return Markers.getBrokenBuildProblemsFor(project).length == 0;
   }
 
   // the fsking hashcode on IProjects is never the same twice!
@@ -148,76 +223,54 @@ public class TapestryArtifactManager implements ITemplateFinderListener
     fProjectBuildStates.remove(project.getFullPath());
   }
 
-  /**
-   *  
-   */
-  private void buildStateIfPossible(final IProject project, IRunnableContext context) throws CoreException
+  private void buildStateIfPossible(final IProject project, boolean block) throws CoreException
   {
+
+    if (project == null || !project.isAccessible())
+      return;
     // don't bother building if the last one was busted beyond saving!
-    if (Markers.getBrokenBuildProblemsFor(project).length > 0)
+    if (project == null || !project.isAccessible()
+        || Markers.getBrokenBuildProblemsFor(project).length > 0)
       return;
 
-    IRunnableWithProgress runnable = new IRunnableWithProgress()
+    Job buildJob = findBuildJob(project);
+    try
     {
-      public void run(IProgressMonitor monitor) throws InvocationTargetException,
-          InterruptedException
-      {
-        try
-        {
-          project.build(
-              IncrementalProjectBuilder.FULL_BUILD,
-              TapestryCore.BUILDER_ID,
-              new HashMap(),
-              monitor);
-        } catch (CoreException e)
-        {
-          TapestryCore.log(e);
-        }
-      }
-
-    };
-
-    if (context == null && Display.getCurrent() != null)
+      if (block)
+        buildJob.join();
+    } catch (InterruptedException e)
     {
-      //            Shell shell = TapestryCore.getDefault().getActiveWorkbenchShell();
-      //            if (shell != null && shell.getVisible())
-
-      //            {
-      try
-      {
-        PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);
-        //                    context = new ProgressMonitorDialog(shell);
-
-      } catch (Exception e)
-      {
-        TapestryCore.log(e);
-      }
-      return;
-    }
-
-    //        }
-
-    if (context != null)
-    {
-      try
-      {
-        context.run(false, false, runnable);
-
-      } catch (Exception e)
-      {
-        TapestryCore.log(e);
-      }
-    } else
-    {
-      project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+      //eat it
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#addListener(com.iw.plugins.spindle.core.scanning.IScannerValidatorListener)
-   */
+  private Job findBuildJob(IProject project)
+  {
+    Assert.isLegal(project != null);
+    Job buildJob = null;
+    Job[] jobs = Platform.getJobManager().find(MANAGER_JOB_FAMILY);
+    for (int i = 0; i < jobs.length; i++)
+    {
+      if (((BuildJob) jobs[i]).getProject().equals(project))
+      {
+        buildJob = jobs[i];
+        break;
+      }
+    }
+    if (buildJob == null)
+    {
+      buildJob = new BuildJob(project);
+      buildJob.setRule(project.getParent());
+      buildJob.setUser(true);
+      buildJob.schedule();
+    }
+    return buildJob;
+
+  } /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#addListener(com.iw.plugins.spindle.core.scanning.IScannerValidatorListener)
+     */
   public void addTemplateFinderListener(ITemplateFinderListener listener)
   {
     if (fTemplateExtensionListeners == null)

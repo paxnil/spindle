@@ -8,3 +8,4 @@ core-src.jar
 dtdparser.jar
 .checkstyle
 dev.properties
+build.xml

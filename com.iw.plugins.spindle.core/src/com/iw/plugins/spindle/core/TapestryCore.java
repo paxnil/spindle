@@ -241,7 +241,7 @@ public class TapestryCore extends AbstractUIPlugin
       return project.hasNature(NATURE_ID);
     } catch (CoreException e)
     {
-      log(e);
+      //eat it
     }
     return false;
   }
@@ -539,7 +539,7 @@ public class TapestryCore extends AbstractUIPlugin
         IProject[] projects = workspace.getRoot().getProjects();
         for (int i = 0; i < projects.length; i++)
         {
-          if (!projects[i].isOpen())
+          if (!projects[i].isAccessible())
           {
             continue;
           }

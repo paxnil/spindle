@@ -345,7 +345,7 @@ public class SpecificationValidator extends BaseValidator
    *      org.apache.tapestry.spec.IAssetSpecification,
    *      com.iw.plugins.spindle.core.parser.ISourceLocationInfo)
    */
-  public boolean validateAsset(
+ public boolean validateAsset(
       IComponentSpecification specification,
       IAssetSpecification asset,
       ISourceLocationInfo sourceLocation) throws ScannerException
@@ -354,18 +354,19 @@ public class SpecificationValidator extends BaseValidator
     PluginAssetSpecification pAsset = (PluginAssetSpecification) asset;
     IResourceWorkspaceLocation specLoc = (IResourceWorkspaceLocation) specification
         .getSpecificationLocation();
-    String assetPath = asset.getPath();
-    if (ITemplateSource.TEMPLATE_ASSET_NAME.equals(pAsset.getIdentifier()))
-    {
-      return checkTemplateAsset(specification, asset);
-    }
     AssetType type = asset.getType();
+    String assetPath = asset.getPath();
+    String assetSpecName = pAsset.getIdentifier();
+
     IResourceWorkspaceLocation root = null;
+    ISourceLocation errorLoc;
     if (type == AssetType.CONTEXT)
     {
+      errorLoc = sourceLocation.getAttributeSourceLocation("path");
       root = fContextRoot;
-    } else if (type == AssetType.PRIVATE)
+    } else
     {
+      errorLoc = sourceLocation.getAttributeSourceLocation("resource-path");
       if (specLoc.isOnClasspath())
       {
         root = specLoc;
@@ -378,23 +379,29 @@ public class SpecificationValidator extends BaseValidator
     if (root == null)
       return true;
 
+    if (errorLoc == null)
+      errorLoc = sourceLocation.getTagNameLocation();
+
+    if (assetPath == null)
+    {
+      addProblem(IProblem.ERROR, errorLoc, TapestryCore.getString(
+          "scan-component-missing-asset",
+          (assetSpecName == null || assetSpecName.startsWith(getDummyStringPrefix()))
+              ? "not specified" : assetSpecName,
+          root.toString()), true);
+      return false;
+    }
+
+    if (ITemplateSource.TEMPLATE_ASSET_NAME.equals(pAsset.getIdentifier()))
+    {
+      return checkTemplateAsset(specification, asset);
+    }
     IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) root
         .getRelativeLocation(assetPath);
     String fileName = relative.getName();
 
     if (relative.getStorage() == null)
     {
-      // find the attribute source location for the error
-      ISourceLocation errorLoc;
-      if (type == AssetType.CONTEXT)
-      {
-        errorLoc = sourceLocation.getAttributeSourceLocation("path");
-      } else
-      {
-        errorLoc = sourceLocation.getAttributeSourceLocation("resource-path");
-      }
-
-      String assetSpecName = pAsset.getIdentifier();
       IResourceWorkspaceLocation[] I18NEquivalents = getI18NAssetEquivalents(
           relative,
           fileName);

@@ -3,7 +3,7 @@
 <plugin
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
-   version="0.1.9"
+   version="0.1.14"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.core.TapestryCore">
 
@@ -11,49 +11,51 @@
       <library name="core.jar">
          <export name="*"/>
       </library>
-      <library name="commons-digester-1.5.jar">
-         <export name="*"/>
-      </library>
-      <library name="commons-logging-1.0.2.jar">
-         <export name="*"/>
-      </library>
-      <library name="commons-beanutils-1.6.1.jar">
-         <export name="*"/>
-      </library>
-      <library name="commons-collections-2.1.jar">
-         <export name="*"/>
-      </library>
-      <library name="commons-fileupload-1.0.jar">
-         <export name="*"/>
-      </library>
-      <library name="commons-lang-cvs-HEAD.jar">
-         <export name="*"/> 
-      </library>
-      <library name="jakarta-oro-2.0.6.jar">
-         <export name="*"/>
-      </library>
-      <library name="javassist-2.5.1.jar">
-         <export name="*"/>
-      </library>
-      <library name="javax.servlet.jar">
-         <export name="*"/>
-      </library>
-      <library name="ognl-2.6.3.jar">
-         <export name="*"/>
-      </library>
-      <library name="tapestry-3.0.jar">
-         <export name="*"/>
-      </library>
-      <library name="tapestry-contrib-3.0.jar">
-         <export name="*"/>
-      </library>
-      <library name="bsf-2.3.0.jar">
-         <export name="*"/>
-      </library>
       <library name="dtdparser.jar">
          <export name="*"/>
       </library>
-      <library name="commons-codec-1.2.jar"/>
+      <library name="lib/tapestry-3.0.1.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/tapestry-contrib-3.0.1.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/ext/bsf-2.3.0.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/ext/commons-beanutils-1.6.1.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/ext/commons-codec-1.2.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/ext/commons-collections-2.1.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/ext/commons-digester-1.5.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/ext/commons-fileupload-1.0.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/ext/commons-lang-cvs-HEAD.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/ext/commons-logging-1.0.2.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/ext/jakarta-oro-2.0.6.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/ext/javassist-2.5.1.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/ext/ognl-2.6.3.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/j2ee/javax.servlet.jar">
+         <export name="*"/>
+      </library>      
    </runtime>
    <requires>
       <import plugin="org.eclipse.ui.ide" export="true"/>
@@ -66,6 +68,7 @@
    </requires>
    <extension-point id="componentTypeResolver" name="Component Type Resolvers" schema="schema/componentTypeResolver.exsd"/>
    <extension-point id="incrementalBuildVeto" name="Option to veto an incremental build" schema="schema/incrementalBuildVeto.exsd"/>
+   <extension-point id="beanSpecificationValidators" name="Contributed Validators for Tapestry Bean Specs" schema="schema/beanSpecificationValidators.exsd"/>
 
    <extension
          point="org.eclipse.team.core.fileTypes">

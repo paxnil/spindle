@@ -39,8 +39,6 @@ import com.iw.plugins.spindle.core.TapestryCore;
  * Resolves a container for a Tapestry classpath container entry
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: CoreClasspathContainerInitializer.java,v 1.2 2003/09/01
- *          22:25:29 glongman Exp $
  */
 public class CoreClasspathContainerInitializer extends ClasspathContainerInitializer
 {

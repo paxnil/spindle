@@ -29,25 +29,25 @@ package com.iw.plugins.spindle.core.source;
  * Interface used to convert Parser supplied line/column number into Document
  * based character offsets
  * 
- * @version $Id: ISourceLocationResolver.java,v 1.2 2004/01/09 18:41:48 glongman
- *          Exp $
  * @author glongman@intelligentworks.com
  */
 
 public interface ISourceLocationResolver
 {
 
-  public int getLineOffset(int parserReportedLineNumber);
+  int getLineOffset(int parserReportedLineNumber);
 
-  public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn);
+  int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn);
 
-  public int getColumnOffset(
+  int getColumnOffset(
       int parserReportedLineNumber,
       int parserReportedColumn,
       char expected);
 
-  public ISourceLocation getTagNameLocation(
+  ISourceLocation getTagNameLocation(
       String elementName,
       ISourceLocation elementStartLocation);
+  
+  int [] trim(int startOffset, int stopOffset);
 
 }

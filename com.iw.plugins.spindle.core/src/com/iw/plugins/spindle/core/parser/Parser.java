@@ -218,8 +218,12 @@ public class Parser
 
     } catch (CoreException e)
     {
-      // TODO Auto-generated catch block
+//      if (e.getStatus().getCode() == IResourceStatus.OUT_OF_SYNC_LOCAL) {
+//        ErrorDialog.openError(TapestryCore.getDefault().getActiveWorkbenchShell(), "Resource out of Sync", null, e.getStatus());
+//      } else {
+      
       e.printStackTrace();
+//      }
       throw e;
     }
   }
@@ -391,6 +395,42 @@ public class Parser
     return result;
   }
 
+  public int[] trim(int startOffset, int stopOffset)
+  {
+    int[] result = new int[]{startOffset, stopOffset};
+    try
+    {
+      String content = fEclipseDocument.get(startOffset, stopOffset - startOffset + 1);
+      int oldLength = content.length();
+      if (oldLength == 0)
+        return result;
+
+      int index = 0;
+     
+      while ( index < oldLength && Character.isWhitespace(content.charAt(index)) )
+        index++;
+
+      if (index == oldLength)
+        return result;
+      
+      oldLength -= (index - 1);
+      
+      content = content.trim();
+      int newLength = content.length();
+      if (newLength == 0)
+        return result;
+
+      result[0] = startOffset + index;
+      result[1] = result[0] + newLength;
+
+      return result;
+
+    } catch (BadLocationException e)
+    {
+      //eat it.
+    }
+    return result;
+  }
   /*
    * (non-Javadoc)
    * 

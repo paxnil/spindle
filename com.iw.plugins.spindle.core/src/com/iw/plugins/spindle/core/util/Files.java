@@ -125,17 +125,15 @@ public class Files
   {
     Reader in;
     if (encoding == null)
-      in = new InputStreamReader(contentStream);
+      in = new BufferedReader(new InputStreamReader(contentStream));
     else
-      in = new InputStreamReader(contentStream, encoding);
+      in = new BufferedReader(new InputStreamReader(contentStream, encoding));
     int chunkSize = contentStream.available();
     StringBuffer buffer = new StringBuffer(chunkSize);
-    char[] readBuffer = new char[chunkSize];
-    int n = in.read(readBuffer);
-    while (n > 0)
+    int c = -1;
+    while ((c = in.read()) != -1)
     {
-      buffer.append(readBuffer);
-      n = in.read(readBuffer);
+      buffer.append((char) c);
     }
     in.close();
     return buffer.toString();

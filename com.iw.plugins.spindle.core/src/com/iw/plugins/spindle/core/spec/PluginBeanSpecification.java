@@ -32,8 +32,12 @@ import java.util.List;
 import org.apache.tapestry.bean.IBeanInitializer;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.IBeanSpecification;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.extensions.BeanSpecificationValidators;
+import com.iw.plugins.spindle.core.extensions.IBeanSpecificationValidator;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
@@ -45,7 +49,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: PluginBeanSpecification.java,v 1.5 2004/05/17 02:31:49 glongman
- *          Exp $
+ *                     Exp $
  */
 public class PluginBeanSpecification extends BasePropertyHolder
     implements
@@ -175,9 +179,22 @@ public class PluginBeanSpecification extends BasePropertyHolder
 
     try
     {
-      validator.validateTypeName((IResourceWorkspaceLocation) component
-          .getSpecificationLocation(), fClassName, IProblem.ERROR, sourceInfo
-          .getAttributeSourceLocation("class"));
+      IType type = validator.validateTypeName((IResourceWorkspaceLocation) component
+          .getSpecificationLocation(), fClassName, IProblem.ERROR, (fClassName != null ? sourceInfo
+          .getAttributeSourceLocation("class") : sourceInfo.getTagNameLocation()));
+
+      if (type != null)
+      {
+        IBeanSpecificationValidator beanValidator = new BeanSpecificationValidators();
+        if (beanValidator.canValidate(this))
+        {
+          IStatus status = beanValidator.validate(this);
+          if (!status.isOK())
+          {
+            validator.addProblem(status, sourceInfo.getStartTagSourceLocation(), false);
+          }
+        }
+      }
     } catch (ScannerException e)
     {
       TapestryCore.log(e);

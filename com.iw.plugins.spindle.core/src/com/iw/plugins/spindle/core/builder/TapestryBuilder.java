@@ -46,6 +46,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
@@ -55,6 +56,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.ui.internal.Workbench;
+import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
@@ -74,6 +76,8 @@ import com.iw.plugins.spindle.core.util.Markers;
 public class TapestryBuilder extends IncrementalProjectBuilder
 {
 
+  private final Bundle systemBundle = Platform.getBundle("org.eclipse.osgi");
+  
   private static ThreadLocal PACKAGE_CACHE;
   private static ThreadLocal TYPE_CACHE;
   private static ThreadLocal STORAGE_CACHE;
@@ -185,6 +189,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
    */
   protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException
   {
+    
+    if (systemBundle.getState() == Bundle.STOPPING)
+		throw new OperationCanceledException();
     PACKAGE_CACHE.set(new HashMap());
     TYPE_CACHE.set(new HashMap());
     STORAGE_CACHE.set(new HashMap());

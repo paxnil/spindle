@@ -202,8 +202,7 @@ public class ClasspathSearch implements ISearch
   }
 
   protected boolean searchInBinaryPackage(IPackageFragment pkg, ISearchAcceptor requestor)
-  {
-    boolean keepGoing = true;
+  { 
     Object[] jarFiles = null;
     try
     {
@@ -225,26 +224,26 @@ public class ClasspathSearch implements ISearch
         continue;
       }
 
-      keepGoing = requestor.accept(pkg, (IStorage) jarFile);
+      if (requestor.accept(pkg, (IStorage) jarFile))
+      return false; //stop the search
     }
-    return keepGoing;
+    return true; // continue the search.
   }
 
   protected boolean searchInSourcePackage(IPackageFragment pkg, ISearchAcceptor requestor)
   {
     Object[] files = null;
-
-    boolean keepGoing = true;
+    
     try
     {
       files = getSourcePackageResources(pkg);
 
     } catch (CoreException npe)
     {
-      return false; // the package is not present
+      return true; // the package is not present
     }
     if (files == null)
-      return false;
+      return true;
 
     int length = files.length;
     for (int i = 0; i < length; i++)
@@ -259,10 +258,11 @@ public class ClasspathSearch implements ISearch
         continue;
       }
 
-      keepGoing = requestor.accept(pkg, (IStorage) file);
+      if ( requestor.accept(pkg, (IStorage) file))
+        return false; //stop the search
 
     }
-    return keepGoing;
+    return true; // continue the search
   }
 
   /**
@@ -307,7 +307,7 @@ public class ClasspathSearch implements ISearch
     public boolean accept(Object parent, IStorage storage)
     {
       success = storage.equals(fToBeFound);
-      return !success;
+      return success;
     }
   }
 

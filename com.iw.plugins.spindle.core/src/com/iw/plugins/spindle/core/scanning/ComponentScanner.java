@@ -142,7 +142,7 @@ public class ComponentScanner extends SpecificationScanner
     }
 
     // not revalidatable - error state would only change if the file changed!
-    if (!name.equals(ITemplateSource.TEMPLATE_ASSET_NAME))
+    if (name != null && !name.equals(ITemplateSource.TEMPLATE_ASSET_NAME))
       validatePattern(
           name,
           SpecificationParser.ASSET_NAME_PATTERN,
@@ -195,7 +195,7 @@ public class ComponentScanner extends SpecificationScanner
         getAttributeSourceLocation(node, "name"));
 
     // className is revalidatable (see below)
-    String className = getAttribute(node, "class", true);
+    String className = getAttribute(node, "class", false);
 
     String lifecycleString = getAttribute(node, "lifecycle");
 
@@ -214,7 +214,7 @@ public class ComponentScanner extends SpecificationScanner
 
     specification.addBeanSpecification(name, bspec);
 
-    bspec.validate(specification, fValidator);
+   
 
     for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
     {
@@ -249,6 +249,8 @@ public class ComponentScanner extends SpecificationScanner
         continue;
       }
     }
+    
+    bspec.validate(specification, fValidator);
   }
 
   protected void scanBinding(

@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.core.util.SpindleStatusWithLocation;
 
 /**
  * Default impl of IProblem
@@ -78,9 +79,12 @@ public class DefaultProblem implements IProblem
         type,
         statusToMarkerServerity(status),
         status.getMessage(),
-        lineNumber,
-        charStart,
-        charEnd,
+        (status instanceof SpindleStatusWithLocation)
+            ? ((SpindleStatusWithLocation) status).getLineNumber() : lineNumber,
+        (status instanceof SpindleStatusWithLocation)
+            ? ((SpindleStatusWithLocation) status).getCharStart() : charStart,
+        (status instanceof SpindleStatusWithLocation)
+            ? ((SpindleStatusWithLocation) status).getCharEnd() : charEnd,
         isTemporary);
   }
 

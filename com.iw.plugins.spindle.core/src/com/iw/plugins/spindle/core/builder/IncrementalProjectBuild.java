@@ -277,7 +277,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
       return super.resolveIComponentSpecification(
           parser,
           namespace,
-          file,
+          storage,
           location,
           encoding);
     }

@@ -254,5 +254,7 @@ public class SpindleStatus implements IStatus
   {
     return new IStatus[0];
   }
+  
+  
 
 }

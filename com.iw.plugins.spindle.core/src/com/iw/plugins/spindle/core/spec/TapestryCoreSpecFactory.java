@@ -118,7 +118,7 @@ public class TapestryCoreSpecFactory extends SpecFactory
 
   public IBeanInitializer createFieldBeanInitializer()
   {
-    TapestryCore.log(new Throwable().fillInStackTrace());
+    TapestryCore.log("Spindle broke - somebody asked for a FieldBeanInitializer", new Throwable().fillInStackTrace());
     return null;
   }
 

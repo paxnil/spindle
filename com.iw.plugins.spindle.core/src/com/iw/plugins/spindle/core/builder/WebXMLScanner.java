@@ -115,6 +115,14 @@ public class WebXMLScanner extends AbstractScanner
           currentInfo.classname), false);
       return;
     }
+    
+    if (!value.endsWith(".application")) {
+      addProblem(IProblem.ERROR, location, TapestryCore.getString(
+          "web-xml-wrong-file-extension",
+          value), false);
+      return;
+    }
+    
     IResourceWorkspaceLocation ws_location = getApplicationLocation(currentInfo, value);
     if (ws_location == null)
     {

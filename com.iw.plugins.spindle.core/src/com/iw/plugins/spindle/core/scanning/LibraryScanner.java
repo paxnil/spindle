@@ -331,7 +331,7 @@ public class LibraryScanner extends SpecificationScanner
         IProblem.ERROR,
         getAttributeSourceLocation(node, "id"));
 
-    if (id.equals(INamespace.FRAMEWORK_NAMESPACE))
+    if (id != null && id.equals(INamespace.FRAMEWORK_NAMESPACE))
       addProblem(IProblem.ERROR, getAttributeSourceLocation(node, "id"), TapestryCore
           .getTapestryString(
               "SpecificationParser.framework-library-id-is-reserved",

@@ -253,9 +253,8 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
     {
 
       fContentsStartLine = fStartTagStartLine;
-      fContentsCharStart = fStartTagCharEnd + 1;
-
-      line = endTag.getBeginLineNumber();
+  
+      line = endTag.getBeginLineNumber(); 
       column = resolver.getColumnOffset(line, endTag.getBeginColumnNumber());
 
       fEndTagStartLine = line;
@@ -266,9 +265,14 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
 
       fEndTagEndLine = line;
       fEndTagCharEnd = column;
-
-      fContentsCharEnd = fEndTagCharStart;
+      
+      fContentsCharStart =  fStartTagCharEnd + (fStartTagCharEnd == fEndTagCharStart - 1 ? 0 : 1);
+      fContentsCharEnd = Math.max(fStartTagCharEnd,  fEndTagCharStart - 1);
       fSourceCharEnd = fEndTagCharEnd;
+            
+      int [] trimmed = resolver.trim(fContentsCharStart, fContentsCharEnd);
+      fContentsCharStart = trimmed[0];
+      fContentsCharEnd = trimmed[1];
     }
 
     Map attributeMap = eventInfo.getAttributeMap();

@@ -434,7 +434,7 @@ public class BaseValidator implements IScannerValidator
       ISourceLocation source,
       boolean accountForI18N) throws ScannerException
   {
-    if (relativePath.startsWith(getDummyStringPrefix()))
+    if (relativePath == null || relativePath.startsWith(getDummyStringPrefix()))
       return false;
 
     if (!resourceLocationExists(location, relativePath))

@@ -50,8 +50,6 @@ import com.iw.plugins.spindle.core.TapestryCore;
  * Tapestry Libraries.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: CoreClasspathContainer.java,v 1.5 2004/02/13 05:30:52 glongman
- *          Exp $
  */
 public class CoreClasspathContainer implements IClasspathContainer
 {
@@ -106,20 +104,22 @@ public class CoreClasspathContainer implements IClasspathContainer
         if (jarName.equals("core.jar"))
           continue;
 
-        if (jarName.equals("javax.servlet.jar"))
+        if (jarName.endsWith("javax.servlet.jar"))
           continue;
 
         if (jarName.equals("dtdparser.jar"))
           continue;
 
+        IPath tempPath = new Path(jarName);
+        String trueJarName = tempPath.lastSegment();
         try
         {
           IPath sourceAttachmentPath = null;
           IPath sourceAttachmentRootPath = null;
-          if (jarName.startsWith("tapestry-3"))
+          if (trueJarName.startsWith("tapestry-3"))
           {
             sourceAttachmentPath = getSourceAttachmentPath(installUrl, "tapestry-src.jar");
-          } else if (jarName.startsWith("tapestry-contrib"))
+          } else if (trueJarName.startsWith("tapestry-contrib"))
           {
             sourceAttachmentPath = getSourceAttachmentPath(
                 installUrl,
@@ -127,8 +127,8 @@ public class CoreClasspathContainer implements IClasspathContainer
           } else
           {
 
-            int index = jarName.lastIndexOf('-');
-            String attachment = jarName.substring(0, index) + "-src.jar";
+            int index = trueJarName.lastIndexOf('-');
+            String attachment = trueJarName.substring(0, index) + "-src.jar";
             sourceAttachmentPath = getSourceAttachmentPath(installUrl, attachment);
           }
 
@@ -173,6 +173,9 @@ public class CoreClasspathContainer implements IClasspathContainer
    */
   private static IPath getSourceAttachmentPath(URL installUrl, String srcJar)
   {
+    
+    IPath path = new Path(srcJar);
+    srcJar = path.lastSegment();
     URL temp;
     try
     {
