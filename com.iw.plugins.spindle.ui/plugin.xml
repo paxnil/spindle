@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.0.50"
+   version="0.0.52"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -11,7 +11,7 @@
       <library name="xmen.jar"/>
    </runtime>
    <requires>
-      <import plugin="com.iw.plugins.spindle.core"/>
+      <import plugin="com.iw.plugins.spindle.core" export="true"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.search"/>
       <import plugin="net.sf.solareclipse.ui"/>
@@ -263,15 +263,12 @@ the new Spindle
             id="com.iw.plugins.spindle.ui.editor.commands">
       </scope>
 <!-- define a format command that we will associate with the key binding Ctrl-Shift-F -->
-   
-      		
       <command
             name="Format"
             description="Format this file"
             category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.format">
       </command>
-     
       <command
             name="Next Attribute"
             description="Move right/down to the next attribute"
@@ -331,7 +328,7 @@ the new Spindle
             scope="com.iw.plugins.spindle.ui.editor.commands"
             command="com.iw.plugins.spindle.ui.editor.commands.jump.java"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>      
+      </keyBinding>
       <command
             name="Jump to Specification"
             description="Jump to the specification file (if possible)"
@@ -437,7 +434,7 @@ the new Spindle
                enablesFor="*"
                id="com.iw.plugins.spindle.editors.cu.jump.template">
          </action>
-      </editorContribution>      
+      </editorContribution>
    </extension>
 
 </plugin>

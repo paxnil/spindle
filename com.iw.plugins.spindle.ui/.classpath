@@ -2,7 +2,7 @@
 <classpath>
     <classpathentry kind="src" path="src/"/>
     <classpathentry kind="src" path="xmen/"/>
-    <classpathentry kind="src" path="/com.iw.plugins.spindle.core"/>
+    <classpathentry exported="true" kind="src" path="/com.iw.plugins.spindle.core"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.ui"/>
     <classpathentry kind="src" path="/org.eclipse.search"/>
     <classpathentry kind="src" path="/net.sf.solareclipse.ui"/>

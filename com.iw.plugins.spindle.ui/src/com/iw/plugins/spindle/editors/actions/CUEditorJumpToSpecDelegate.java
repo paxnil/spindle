@@ -117,7 +117,7 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
         if (obj instanceof IClassFile)
         {
             return findTapestryProject((IClassFile) obj);
-        } else if (obj instanceof IFile)
+        } else if (obj instanceof IFile) 
         {
             return findTapestryProject((IFile) obj);
         }

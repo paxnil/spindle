@@ -237,7 +237,7 @@ public class UIPlugin extends AbstractUIPlugin
         return null;
     }
 
-    static public void openTapestryEditor(IStorage storage)
+    static public IEditorPart openTapestryEditor(IStorage storage)
     {
         String editorId = null;
 
@@ -267,11 +267,20 @@ public class UIPlugin extends AbstractUIPlugin
             {
                 input = new FileEditorInput((IFile) storage);
             }
-            UIPlugin.getDefault().getActivePage().openEditor(input, editorId);
+            return UIPlugin.getDefault().getActivePage().openEditor(input, editorId);
+
         } catch (PartInitException piex)
         {
             UIPlugin.log(piex);
         }
+        return null;
+    }
+
+    //TODO remove when needed!
+    static public boolean isEclipse3()
+    {
+        ResourcesPlugin resP = ResourcesPlugin.getPlugin();
+        return resP.getPlugin().getDescriptor().getVersionIdentifier().getMajorComponent() == 3;
     }
 
     //The shared instance.

@@ -112,15 +112,13 @@ import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
 
-
-
 /**
  *  Editor for Tapestry Spec files
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class SpecEditor extends Editor 
+public class SpecEditor extends Editor
 {
 
     private IReconcileWorker fReconciler = null;
@@ -133,7 +131,6 @@ public class SpecEditor extends Editor
     private Control fControl;
 
     private Object fInformationControlInput;
-
 
     public SpecEditor()
     {
@@ -893,12 +890,13 @@ public class SpecEditor extends Editor
         if (!moreNav.isEmpty())
             menu.appendToGroup(NAV_GROUP, moreNav);
         menu.insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
-        MenuManager sourceMenu = new MenuManager("Source");
-        sourceMenu.add(getAction("Format"));
-        menu.appendToGroup(SOURCE_GROUP, sourceMenu);
+        if (!UIPlugin.isEclipse3())
+        {
+            MenuManager sourceMenu = new MenuManager("Source");
+            sourceMenu.add(getAction("Format"));
+            menu.appendToGroup(SOURCE_GROUP, sourceMenu);
+        }
     }
-
- 
 
     public static class SpecEditorInformationProvider implements IInformationProvider, IInformationProviderExtension
     {
