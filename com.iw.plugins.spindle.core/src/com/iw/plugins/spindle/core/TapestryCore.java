@@ -57,7 +57,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
 import com.iw.plugins.spindle.core.resources.ClasspathSearch;
 import com.iw.plugins.spindle.core.source.IProblem;

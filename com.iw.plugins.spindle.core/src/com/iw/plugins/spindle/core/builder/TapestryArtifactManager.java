@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.artifacts;
+package com.iw.plugins.spindle.core.builder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.tapestry.INamespace;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
@@ -43,7 +44,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.State;
 import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
 import com.iw.plugins.spindle.core.util.Markers;
 
@@ -86,8 +86,9 @@ public class TapestryArtifactManager implements ITemplateFinderListener
 
         fProjectBuildStates.put(project, state);
     }
-    
-    public void clearBuildState(IProject project) {
+
+    public void clearBuildState(IProject project)
+    {
         fProjectBuildStates.remove(project);
     }
 
@@ -133,7 +134,11 @@ public class TapestryArtifactManager implements ITemplateFinderListener
                     {
                         try
                         {
-                            project.build(IncrementalProjectBuilder.FULL_BUILD, TapestryCore.BUILDER_ID, new HashMap(), monitor);
+                            project.build(
+                                IncrementalProjectBuilder.FULL_BUILD,
+                                TapestryCore.BUILDER_ID,
+                                new HashMap(),
+                                monitor);
                         } catch (CoreException e)
                         {
                             TapestryCore.log(e);
@@ -193,7 +198,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
     {
         State state = (State) getLastBuildState(project);
         if (state != null)
-            return state.getTemplateMap();
+            return state.fTemplateMap;
         return null;
     }
 
@@ -206,7 +211,15 @@ public class TapestryArtifactManager implements ITemplateFinderListener
     {
         State state = (State) getLastBuildState(project);
         if (state != null)
-            return state.getSpecificationMap();
+            return state.fSpecificationMap;
+        return null;
+    }
+
+    public INamespace getProjectNamespace(IProject project)
+    {
+        State state = (State) getLastBuildState(project);
+        if (state != null)
+            return state.fPrimaryNamespace;
         return null;
     }
 

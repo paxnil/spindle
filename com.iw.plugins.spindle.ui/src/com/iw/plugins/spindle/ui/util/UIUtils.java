@@ -28,9 +28,18 @@ package com.iw.plugins.spindle.ui.util;
 
 import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+
+import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /**
  *  Access to features exposed by the JDT UI plugin
@@ -38,7 +47,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class JavaUIUtils
+public class UIUtils
 {
     public static int getImportNumberThreshold()
     {
@@ -72,6 +81,49 @@ public class JavaUIUtils
             res[i] = tok.nextToken();
         }
         return res;
+    }
+
+    public static IEditorPart getEditorFor(IResourceWorkspaceLocation location)
+    {
+        IStorage storage = location.getStorage();
+        if (storage != null)
+            return UIUtils.getEditorFor(storage);
+
+        return null;
+    }
+
+    public static IEditorPart getEditorFor(IStorage storage)
+    {
+
+        IWorkbench workbench = UIPlugin.getDefault().getWorkbench();
+        IWorkbenchWindow[] windows = workbench.getWorkbenchWindows();
+
+        for (int i = 0; i < windows.length; i++)
+        {
+            IWorkbenchPage[] pages = windows[i].getPages();
+            for (int x = 0; x < pages.length; x++)
+            {
+
+                IEditorReference[] editors = pages[x].getEditorReferences();
+
+                for (int z = 0; z < editors.length; z++)
+                {
+
+                    IEditorReference ref = editors[z];
+                    IEditorPart editor = ref.getEditor(true);
+
+                    if (editor == null)
+                    {
+                        continue;
+                    }
+
+                    IStorage editorStorage = (IStorage) editor.getEditorInput().getAdapter(IStorage.class);
+                    if (editorStorage != null)
+                        return editor;
+                }
+            }
+        }
+        return null;
     }
 
 }

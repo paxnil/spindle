@@ -47,7 +47,7 @@ import org.w3c.dom.Node;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
-import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.scanning.ApplicationScanner;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;

@@ -107,8 +107,11 @@ public abstract class NewTapestryElementWizard extends BasicNewResourceWizard im
     /**
      * Run a runnable
      */
-    protected boolean finishPage(IRunnableWithProgress runnable)
+    protected boolean finishPage(IRunnableWithProgress runnable)       
     {
+        if (runnable == null)
+            return true;
+            
         IRunnableWithProgress op = new WorkspaceModifyDelegatingOperation(runnable);
         try
         {

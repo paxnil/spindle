@@ -10,10 +10,9 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.util.Utils;
+import com.iw.plugins.spindle.core.util.CoreUtils;
 
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
@@ -129,7 +128,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
         IResourceWorkspaceLocation appSpecLocation = fLastState.fApplicationServlet.applicationSpecLocation;
         if (appSpecLocation != null)
         {
-            IResource specResource = Utils.toResource(appSpecLocation);
+            IResource specResource = CoreUtils.toResource(appSpecLocation);
             if (specResource == null)
                 return false;
             IResourceDelta specDelta = fProjectDelta.findMember(specResource.getProjectRelativePath());
@@ -161,7 +160,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
 
             if (!previousSpecLocation.equals(WEB_INF))
             {
-                existingSpecFile = Utils.toResource(previousSpecLocation);
+                existingSpecFile = CoreUtils.toResource(previousSpecLocation);
             }
 
             if (existingSpecFile != null)

@@ -44,7 +44,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
-import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;

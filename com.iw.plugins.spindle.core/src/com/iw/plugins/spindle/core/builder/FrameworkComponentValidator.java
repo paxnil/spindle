@@ -45,7 +45,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Markers;
-import com.iw.plugins.spindle.core.util.Utils;
+import com.iw.plugins.spindle.core.util.CoreUtils;
 
 /**
  *  Additional validation for Framework components.
@@ -71,7 +71,7 @@ public class FrameworkComponentValidator
         Object sourceInfo)
     {
 
-        IResource putProblemsResource = Utils.toResource(putErrorsHere);
+        IResource putProblemsResource = CoreUtils.toResource(putErrorsHere);
         if (putProblemsResource == null)
             return;
 

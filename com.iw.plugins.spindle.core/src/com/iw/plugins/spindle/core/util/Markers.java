@@ -79,7 +79,7 @@ public class Markers
 
     public static void recordProblems(IResourceWorkspaceLocation location, IProblem[] problems)
     {
-        IResource res = Utils.toResource(location);
+        IResource res = CoreUtils.toResource(location);
         boolean workspace = res != null;
         for (int i = 0; i < problems.length; i++)
         {

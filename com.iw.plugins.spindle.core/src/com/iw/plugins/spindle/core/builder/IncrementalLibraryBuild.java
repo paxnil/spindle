@@ -2,7 +2,6 @@ package com.iw.plugins.spindle.core.builder;
 
 import org.eclipse.core.resources.IResourceDelta;
 
-import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.parser.Parser;
 
 /* ***** BEGIN LICENSE BLOCK *****

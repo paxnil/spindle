@@ -101,6 +101,27 @@
             Create a new Tapestry Web Project
          </description>
       </wizard>
+      <wizard
+            name="Tapestry Component"
+            icon="./icons/basic/component16.gif"
+            category="com.iw.plugins.spindle.ui.new"
+            class="com.iw.plugins.spindle.ui.wizards.NewTapComponentWizard"
+            id="com.iw.plugins.spindle.ui.new_jwc_wizard">
+         <description>
+            Create a new Tapestry Component
+         </description>
+      </wizard>
+            <wizard
+            name="Tapestry Page"
+            icon="./icons/basic/page16.gif"
+            category="com.iw.plugins.ui.spindle.new"
+            class="com.iw.plugins.spindle.ui.wizards.NewTapPageWizard"
+            id="com.iw.plugins.spindle.ui.new_page_wizard">
+         <description>
+            Create a new Tapestry Page
+         </description>
+      </wizard>
+      
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -122,12 +143,46 @@
             class="com.iw.plugins.spindle.editors.spec.SpecEditor"
             id="com.iw.plugins.spindle.editors.spec">
       </editor>
+      <!--
       <editor
             name="Tapestry MultiEditor (Stacked)"
             icon="./icons/basic/application16.gif"
             class="com.iw.plugins.spindle.editors.multi.StackedMultiEditor"
             id="com.iw.plugins.spindle.editors.multi.stacked">
       </editor>
+      -->
    </extension>
+   <!--
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Spindle (Tapestry)"
+            id="com.iw.plugins.spindle.new">
+      </category>
+      <wizard
+            name="Tapestry Library Project"
+            icon="./icons/basic/library16.gif"
+            project="true"
+            category="com.iw.plugins.spindle.new"
+            class="com.iw.plugins.spindle.wizards.project.NewLibraryProjectWizard"
+            id="com.iw.plugins.spindle.new_library_wizard">
+         <description>
+            Create a new Tapestry Library Project
+         </description>
+      </wizard>
+      <wizard
+            name="Tapestry Application Project"
+            icon="./icons/basic/application16.gif"
+            category="com.iw.plugins.spindle.new"
+            project="true"
+            class="com.iw.plugins.spindle.wizards.project.NewApplicationProjectWizard"
+            id="com.iw.plugins.spindle.new_app_wizard">
+         <description>
+            Create a new Tapestry Application Project
+         </description>
+      </wizard>
+      
+   </extension>
+   -->
 
 </plugin>

@@ -171,7 +171,10 @@ public class XMLUtil
 
         writeXMLHeader(component.getPublicId(), rootElement, writer);
 
-        writer.print("<" + rootElement);
+        
+        writer.print("<" + rootElement + " class=\"");
+            writer.print(component.getComponentClassName());
+            writer.print("\"");
         if (!isPage)
         {
             writer.print(" allow-body=\"" + (component.getAllowBody() ? "yes" : "no") + "\"");

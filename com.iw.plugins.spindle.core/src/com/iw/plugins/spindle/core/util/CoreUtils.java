@@ -26,8 +26,13 @@ package com.iw.plugins.spindle.core.util;
  * ***** END LICENSE BLOCK ***** */
 
 import org.apache.tapestry.IResourceLocation;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -38,6 +43,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import com.iw.plugins.spindle.core.ITapestryMarker;
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /**
@@ -46,8 +53,68 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public class Utils
+public class CoreUtils
 {
+    /**
+     * Do some common checks on a Storage
+     * 
+     * return OK unless:
+     * 1. The storage is in a closed project.
+     * 2. The storage is not in a TapestryProject.
+     * 3. The Project build is broken.
+     * 4. The storage is an IResource and has a fatal problem marker.
+     * 
+     * Note that the checks are not very good right now if the storage is
+     * not really an IResource.
+     * 
+     * @param storage IStorage to
+     * @return the result of the check in the form of an <code>IStatus</code>
+     */
+    public static SpindleStatus checkStorage(IStorage storage) throws CoreException
+    {
+        SpindleStatus result = new SpindleStatus(IStatus.OK, "");
+        // TODO I10N
+        if (storage instanceof IResource)
+        {
+
+            IResource resource = (IResource) storage;
+            IProject project = resource.getProject();
+            if (!project.isOpen())
+            {
+                result.setError(resource.getName() + " is in a closed project.");
+                return result;
+            }
+
+            if (!project.hasNature(TapestryCore.NATURE_ID))
+            {
+                result.setError(resource.getName() + " is not in a Tapestry project.");
+                return result;
+            }
+
+            IMarker[] markers =
+                project.findMarkers(ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER, false, IResource.DEPTH_ONE);
+
+            if (markers.length != 0)
+            {
+                result.setError(resource.getName() + " is in a broken project.");
+                return result;
+            }
+
+            markers = resource.findMarkers(ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER, false, IResource.DEPTH_ONE);
+
+            if (markers.length != 0)
+            {
+                result.setError(resource.getName() + " is could not be parsed.");
+                return result;
+            }
+
+        } else
+        {
+            //need to fix this for real IStorages.
+        }
+
+        return result;
+    }
 
     /**
      * Answer true iff the candidate type is a subclass of the base Type
@@ -191,7 +258,7 @@ public class Utils
     {
         return (IPackageFragmentRoot) findElementOfKind(element, IJavaElement.PACKAGE_FRAGMENT_ROOT);
     }
-
-  
+    
+    
 
 }

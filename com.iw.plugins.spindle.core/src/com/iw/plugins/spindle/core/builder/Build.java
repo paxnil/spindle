@@ -57,7 +57,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Document;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
@@ -449,7 +448,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
                         String name = path.removeFileExtension().lastSegment();
                         IContainer container = resource.getParent();
-                        IJavaElement element = (IPackageFragment) JavaCore.getJavaCore().create((IFolder) container);
+                        IJavaElement element = (IJavaElement) JavaCore.getJavaCore().create((IFolder) container);
                         if (element == null)
                             return true;
                         if (element instanceof IPackageFragmentRoot && fLastState.fMissingJavaTypes.contains(name))

@@ -52,7 +52,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.scanning.BaseValidator;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;

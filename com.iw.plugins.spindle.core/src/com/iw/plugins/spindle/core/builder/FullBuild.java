@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.w3c.dom.Document;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;

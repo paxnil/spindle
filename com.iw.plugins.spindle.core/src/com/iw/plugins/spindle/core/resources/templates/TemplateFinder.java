@@ -42,7 +42,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
-import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;

@@ -144,6 +144,5 @@ public class State
     public Map getSpecificationMap()
     {
         return fSpecificationMap;
-    }
-
+    }   
 }

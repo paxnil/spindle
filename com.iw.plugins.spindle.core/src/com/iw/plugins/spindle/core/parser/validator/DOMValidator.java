@@ -362,7 +362,7 @@ public class DOMValidator implements IProblemCollector
             for (Iterator iter = sourceAttributeNames.iterator(); iter.hasNext();)
             {
                 String undeclaredName = (String) iter.next();
-                recordAttributeError(node, undeclaredName, TapestryCore.getString("", undeclaredName, nodeName));
+                recordAttributeError(node, undeclaredName, TapestryCore.getString("dom-validator-undeclared-atttribute", undeclaredName, nodeName));
             }
         }
     }

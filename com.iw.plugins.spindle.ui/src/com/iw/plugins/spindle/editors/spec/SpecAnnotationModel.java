@@ -35,7 +35,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.ui.IFileEditorInput;
 
-import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.editors.ProblemAnnotation;
 import com.iw.plugins.spindle.editors.ProblemAnnotationModel;

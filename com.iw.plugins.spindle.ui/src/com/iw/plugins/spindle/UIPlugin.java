@@ -68,6 +68,7 @@ import com.iw.plugins.spindle.editors.template.TemplateStorageDocumentProvider;
 import com.iw.plugins.spindle.editors.template.TemplateTextTools;
 import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 import com.iw.plugins.spindle.ui.util.Revealer;
+import com.iw.plugins.spindle.ui.wizards.NewTapComponentWizardPage;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -355,6 +356,7 @@ public class UIPlugin extends AbstractUIPlugin
         super.initializeDefaultPreferences(store);
         PreferenceConstants.initializeDefaultValues(store);
         XMLSyntaxPreferencePage.initDefaults(store);
+        NewTapComponentWizardPage.initializeDefaults(store);
     }
 
     /**
