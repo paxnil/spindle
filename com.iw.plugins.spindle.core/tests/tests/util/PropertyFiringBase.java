@@ -43,15 +43,6 @@ import junit.framework.TestCase;
 public abstract class PropertyFiringBase extends TestCase
 {
 
-    /**
-     *  A simple listener that subclasses of PropertyFiringBase can use to
-     *  verify that PropertyChangeEvents are not being fired when they are not
-     *  supposed to. This listener forces any tests using it to fail if an
-     *  event is recieved!
-     * 
-     * @author glongman@intelligentworks.com
-     * @version $Id$
-     */
     protected class ErrorListener implements PropertyChangeListener
     {
         public void propertyChange(PropertyChangeEvent arg0)
@@ -59,6 +50,7 @@ public abstract class PropertyFiringBase extends TestCase
            fail("property event was fired but should not have been"); 
         }
     }
+
 
     /**
      *  A Listener that sublcasses of PropertyFiringBase can use.
@@ -72,31 +64,31 @@ public abstract class PropertyFiringBase extends TestCase
      */
     protected class TestListener implements PropertyChangeListener
     {
-        String owner;
+        Object owner;
 
         public TestListener()
         {}
 
-        public TestListener(String owner)
+        public TestListener(Object owner)
         {
             this.owner = owner;
         }
 
-        protected Object source;
-        protected Object oldValue;
-        protected Object newValue;
-        protected String propertyName;
+        protected Object eventSource;
+        protected Object eventOldValue;
+        protected Object eventNewValue;
+        protected String eventPropertyName;
 
         public void propertyChange(PropertyChangeEvent evt)
         {
-            source = evt.getSource();
-            oldValue = evt.getOldValue();
-            newValue = evt.getNewValue();
-            propertyName = evt.getPropertyName();
+            eventSource = evt.getSource();
+            eventOldValue = evt.getOldValue();
+            eventNewValue = evt.getNewValue();
+            eventPropertyName = evt.getPropertyName();
             if (owner != null)
             {
                 // all events should be fired on behalf of the owner
-                assertTrue(source == owner);
+                assertSame(owner,eventSource);
             }
         }
     };
@@ -117,19 +109,18 @@ public abstract class PropertyFiringBase extends TestCase
     protected class OneShotListener extends TestListener
     {
 
-        private Object expectedSource;
-        private Object expectedOldValue;
-        private Object expectedNewValue;
-        private String expectedPropertyName;
+        protected Object expectedOldValue;
+        protected Object expectedNewValue;
+        protected String expectedPropertyName;
+        private boolean fired = false;
 
         public OneShotListener(
-            Object expectedSource,
+            Object owner,
             Object expectedOldValue,
             Object expectedNewValue,
             String expectedPropertyName)
         {
-            super();
-            this.expectedSource = expectedSource;
+            super(owner);
             this.expectedOldValue = expectedOldValue;
             this.expectedNewValue = expectedNewValue;
             this.expectedPropertyName = expectedPropertyName;
@@ -138,10 +129,15 @@ public abstract class PropertyFiringBase extends TestCase
         public void propertyChange(PropertyChangeEvent evt)
         {
             super.propertyChange(evt);
-            assertEquals("wrong source", expectedSource, source);
-            assertEquals("wrong old", expectedOldValue, oldValue);
-            assertEquals("wrong new", expectedNewValue, newValue);
-            assertEquals("wrong propertyName", expectedPropertyName, propertyName);
+            if(fired)
+            {
+                fail("this OneShot has already been fired");
+            }
+            assertEquals("wrong source", owner, eventSource);
+            assertEquals("wrong old", expectedOldValue, eventOldValue);
+            assertEquals("wrong new", expectedNewValue, eventNewValue);
+            assertEquals("wrong propertyName", expectedPropertyName, eventPropertyName);
+            fired = true;
         }
     }
 
