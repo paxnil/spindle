@@ -65,10 +65,6 @@ public class TapestryProjectLableDecorator extends LabelProvider implements ILab
   }
 
   public Image decorateImage(Image image, Object obj) {
-//  	
-//  	return image;
-//  	
-//  }
     if (shouldDecorateImage(obj)) {
         ImageDescriptor baseImage = new WrappedImageDescriptor(image);
         Rectangle bounds = image.getBounds();

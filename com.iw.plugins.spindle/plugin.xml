@@ -162,7 +162,7 @@
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
-            objectClass="org.eclipse.jdt.core.IJavaProject"
+            objectClass="org.eclipse.core.resources.IProject"
             adaptable="true"
             label="Spindle Project Decorator"
             state="true"

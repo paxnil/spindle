@@ -26,6 +26,8 @@
 package com.iw.plugins.spindle.ui;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.HelpEvent;
 import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.events.MouseAdapter;
@@ -101,8 +103,7 @@ public class ToolTipHandler {
   }
   protected Object getToolTipHelp(Object object) {
     if (object instanceof Control) {
-      IToolTipHelpProvider handler =
-        (IToolTipHelpProvider) ((Control) object).getData("TIP_HELPTEXTHANDLER");
+      IToolTipHelpProvider handler = (IToolTipHelpProvider) ((Control) object).getData("TIP_HELPTEXTHANDLER");
       return handler.getHelp(object);
     }
     return null;
@@ -124,6 +125,14 @@ public class ToolTipHandler {
       }
     });
 
+    control.addDisposeListener(new DisposeListener() {
+      public void widgetDisposed(DisposeEvent e) {
+        if (tipShell.isVisible())
+          tipShell.setVisible(false);
+
+      }
+    });
+
     /*
      * Trap hover events to pop-up tooltip
      */
@@ -133,7 +142,7 @@ public class ToolTipHandler {
           tipShell.setVisible(false);
         tipWidget = null;
       }
-      public void mouseHover(MouseEvent event) {        
+      public void mouseHover(MouseEvent event) {
         widgetPosition = new Point(event.x, event.y);
         Widget widget = event.widget;
         if (widget instanceof ToolBar) {
@@ -160,7 +169,7 @@ public class ToolTipHandler {
         String text = getToolTipText(widget);
         Image image = getToolTipImage(widget);
         if (text == null) {
-        	return;
+          return;
         }
         Control control = (Control) event.getSource();
         control.setFocus();
@@ -182,8 +191,8 @@ public class ToolTipHandler {
         Object help = getToolTipHelp(tipWidget);
         if (help == null)
           return;
-        if (help.getClass() != String.class &&  !(help instanceof HelpViewer)) {
-        	return;
+        if (help.getClass() != String.class && !(help instanceof HelpViewer)) {
+          return;
         }
 
         if (tipShell.isVisible()) {
@@ -192,11 +201,11 @@ public class ToolTipHandler {
           helpShell.setLayout(new FillLayout());
           if (help instanceof String) {
             Label label = new Label(helpShell, SWT.NONE);
-            label.setText((String)help);
+            label.setText((String) help);
           } else {
-          	HelpViewer view = (HelpViewer)help;
-          	view.createClient(helpShell);
-          	helpShell.setText(view.getViewerTitle());
+            HelpViewer view = (HelpViewer) help;
+            view.createClient(helpShell);
+            helpShell.setText(view.getViewerTitle());
           }
           helpShell.pack();
           setHoverLocation(helpShell, tipPosition);

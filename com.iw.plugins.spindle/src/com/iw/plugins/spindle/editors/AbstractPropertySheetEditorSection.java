@@ -60,6 +60,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
@@ -310,7 +311,7 @@ public abstract class AbstractPropertySheetEditorSection
   }
 
   public void setSelection(IStructuredSelection selection) {
-  	treeViewer.getControl().setFocus();
+    treeViewer.getControl().setFocus();
     treeViewer.setSelection(selection);
   }
 
@@ -558,28 +559,35 @@ public abstract class AbstractPropertySheetEditorSection
    */
   public void setPropertyValue(Object id, Object value) {
 
-    String oldSelected = ((IIdentifiable) getSelected()).getIdentifier();
+    final String oldSelected = ((IIdentifiable) getSelected()).getIdentifier();
     if (!isModelEditable()) {
       updateNeeded = true;
       update();
       setSelection(oldSelected);
       return;
     }
-    IPropertySource selected = getSelectedPropertySource();
+    final IPropertySource selected = getSelectedPropertySource();
     if (selected != null) {
       selected.setPropertyValue(id, value);
     }
 
-    updateUI();
+    Display d = Display.getCurrent();
 
-    // we may have changed the identifier, must ensure that
-    // which was selected is still selected!
+    d.asyncExec(new Runnable() {
 
-    String newSelected = ((IIdentifiable) selected).getIdentifier();
+      public void run() {
+        updateUI();
 
-    if (!newSelected.equals(oldSelected) || getSelection() == null) {
-      setSelection(newSelected);
-    }
+        // we may have changed the identifier, must ensure that
+        // which was selected is still selected!
+
+        String newSelected = ((IIdentifiable) selected).getIdentifier();
+
+        if (!newSelected.equals(oldSelected) || getSelection() == null) {
+          setSelection(newSelected);
+        }
+      }
+    });
 
   }
 

@@ -109,9 +109,9 @@ public class ComponentAliasSection
           IPluginLibrarySpecification spec = (IPluginLibrarySpecification) aliasHolder.getParent();
           String tapestryPath = spec.getComponentSpecificationPath(alias);
           if (tapestryPath != null) {
-          	
+
             openComponentAction.configure(lookup, tapestryPath);
-            
+
             if (openComponentAction.isEnabled()) {
               MenuManager jumpMenu = new MenuManager("Jump To...");
               jumpMenu.add(openComponentAction);
@@ -163,9 +163,9 @@ public class ComponentAliasSection
 
     if (ids.isEmpty()) {
 
-      setInput(holderArray);
       fireSelectionNotification(null);
       clearPageSelection();
+      setInput(holderArray);
       return;
     }
 
@@ -257,19 +257,25 @@ public class ComponentAliasSection
         String specPath = parent.getComponentSpecificationPath(oldName);
         String newName = (String) value;
 
-        if ("".equals(newName.trim())) {
+        if (newName != null) {
 
-          newName = oldName;
+          newName = newName.trim();
 
-        } else if (parent.getComponentSpecificationPath(newName) != null) {
+          if (oldName.equals(newName) || "".equals(newName)) {
 
-          newName = "Copy of " + newName;
-          parent.setComponentSpecificationPath(newName, specPath);
-          return;
+            return;
+          }
+
+          if (parent.getComponentSpecificationPath(newName) != null) {
+
+            newName = "Copy of " + newName;
+            parent.setComponentSpecificationPath(newName, specPath);
+            return;
+          }
+          this.identifier = newName;
+          parent.removeComponentSpecificationPath(oldName);
+          parent.setComponentSpecificationPath(this.identifier, specPath);
         }
-        this.identifier = newName;
-        parent.removeComponentSpecificationPath(oldName);
-        parent.setComponentSpecificationPath(this.identifier, specPath);
 
       } else if ("spec".equals(key)) {
         parent.setComponentSpecificationPath(this.identifier, (String) value);

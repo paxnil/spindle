@@ -108,13 +108,7 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
     duringInit = true;
     if (isValidContentType(input) == false) {
       String message = MessageUtil.getFormattedString(WRONG_EDITOR, input.getName());
-      IStatus s =
-        new Status(
-          IStatus.ERROR,
-          TapestryPlugin.getDefault().getPluginId(),
-          IStatus.OK,
-          message,
-          null);
+      IStatus s = new Status(IStatus.ERROR, TapestryPlugin.getDefault().getPluginId(), IStatus.OK, message, null);
       throw new PartInitException(s);
     }
 
@@ -173,6 +167,7 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
 
     if (documentProvider == null)
       return;
+      
 
     if (documentProvider.isDeleted(getEditorInput())) {
       if (isSaveAsAllowed()) {
@@ -204,8 +199,11 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
         TapestryPlugin.getDefault().logException(x);
       }
       try {
+      	
+   	    BaseTapestryModel tmodel = (BaseTapestryModel) model;
 
-        BaseTapestryModel tmodel = (BaseTapestryModel) model;
+
+        tmodel.setDirty(false);
         tmodel.reload();
 
         if (!tmodel.isLoaded()) {
@@ -325,11 +323,11 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
 
             IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(file);
             if (jproject != null) {
-            	
-            	IFolder parentFolder = (IFolder)file.getParent();
-            	IJavaElement element = JavaCore.create(parentFolder);
-            	
-            	result = element != null;
+
+              IFolder parentFolder = (IFolder) file.getParent();
+              IJavaElement element = JavaCore.create(parentFolder);
+
+              result = element != null;
 
             }
 
@@ -398,12 +396,12 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
       return null;
     }
 
-//    try {
-//      model.load(stream);
-//    } catch (CoreException e) {
-//      e.printStackTrace();
-//      TapestryPlugin.getDefault().logException(e);
-//    }
+    //    try {
+    //      model.load(stream);
+    //    } catch (CoreException e) {
+    //      e.printStackTrace();
+    //      TapestryPlugin.getDefault().logException(e);
+    //    }
     try {
       stream.close();
     } catch (IOException e) {
@@ -465,11 +463,7 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
 
     WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
       public void execute(final IProgressMonitor monitor) throws CoreException {
-        getDocumentProvider().saveDocument(
-          monitor,
-          newInput,
-          getDocumentProvider().getDocument(getEditorInput()),
-          true);
+        getDocumentProvider().saveDocument(monitor, newInput, getDocumentProvider().getDocument(getEditorInput()), true);
       }
     };
 
@@ -626,5 +620,6 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
    * @return Image
    */
   public abstract Image getDefaultHeadingImage();
+  
 
 }

@@ -71,6 +71,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -387,7 +388,11 @@ public class TapestryPlugin extends AbstractUIPlugin {
   }
 
   public IWorkbenchPage getActivePage() {
-    return getActiveWorkbenchWindow().getActivePage();
+    IWorkbenchWindow window = getActiveWorkbenchWindow();
+    if (window != null) {
+      return window.getActivePage();
+    }
+    return null;
   }
 
   public String getPluginId() {
@@ -395,11 +400,19 @@ public class TapestryPlugin extends AbstractUIPlugin {
   }
 
   public Shell getActiveWorkbenchShell() {
-    return getActiveWorkbenchWindow().getShell();
+    IWorkbenchWindow window = getActiveWorkbenchWindow();
+    if (window != null) {
+      return window.getShell();
+    }
+    return null;
   }
 
   public IWorkbenchWindow getActiveWorkbenchWindow() {
-    return getWorkbench().getActiveWorkbenchWindow();
+    IWorkbench workbench = getWorkbench();
+    if (workbench != null) {
+      return workbench.getActiveWorkbenchWindow();
+    }
+    return null;
   }
 
   static public SpecificationParser getParser() {
@@ -417,9 +430,9 @@ public class TapestryPlugin extends AbstractUIPlugin {
     ErrorDialog.openError(getActiveWorkbenchShell(), null, null, status);
     ResourcesPlugin.getPlugin().getLog().log(status);
   } /** 
-                   * Sets default preference values. These values will be used
-                   * until some preferences are actually set using Preference dialog.
-                   */
+                      * Sets default preference values. These values will be used
+                      * until some preferences are actually set using Preference dialog.
+                      */
   protected void initializeDefaultPreferences(IPreferenceStore store) {
     ColorManager.initializeDefaults(store);
     NewTapComponentWizardPage.initializeDefaults(store);
@@ -561,8 +574,8 @@ public class TapestryPlugin extends AbstractUIPlugin {
   }
 
   public IStatus validate(String value, String pattern, String errorKey) throws CoreException {
-  	
-  	SpindleStatus result = new SpindleStatus();
+
+    SpindleStatus result = new SpindleStatus();
     if (_compiledPatterns == null)
       _compiledPatterns = new HashMap();
 
@@ -580,8 +593,8 @@ public class TapestryPlugin extends AbstractUIPlugin {
     if (_matcher.matches(value, compiled))
       return result;
 
-	result.setError(Tapestry.getString(errorKey, value));
-	return result;
+    result.setError(Tapestry.getString(errorKey, value));
+    return result;
   }
 
 }

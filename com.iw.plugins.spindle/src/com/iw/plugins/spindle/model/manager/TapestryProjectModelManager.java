@@ -124,13 +124,11 @@ public class TapestryProjectModelManager implements IResourceChangeListener, IRe
     super();
     this.project = project;
     addModelProviderListener(this);
-    
-    
 
   }
 
   public TapestryProjectModelManager(IProject project, String message) {
-    this(project);    
+    this(project);
     this.message = message;
 
   }
@@ -945,13 +943,13 @@ public class TapestryProjectModelManager implements IResourceChangeListener, IRe
         info.readOnlyModel.dispose();
       info = null;
     }
-    
+
     for (Iterator iter = modelDelegates.keySet().iterator(); iter.hasNext();) {
       String extension = (String) iter.next();
-      ITapestryModelManagerDelegate delegate = (ITapestryModelManagerDelegate)modelDelegates.get(extension);
+      ITapestryModelManagerDelegate delegate = (ITapestryModelManagerDelegate) modelDelegates.get(extension);
       delegate.clear();
     }
-    
+
     models.clear();
     allModels = null;
     initialized = false;
@@ -1149,23 +1147,25 @@ public class TapestryProjectModelManager implements IResourceChangeListener, IRe
 
   }
 
-  
   public void modelsChanged(IModelProviderEvent event) {
 
     Object[] changed = event.getChangedModels();
 
-    for (int i = 0; i < changed.length; i++) {
+    if (changed != null) {
 
-      ITapestryModel model = (ITapestryModel) changed[i];
-      IStorage storage = model.getUnderlyingStorage();
+      for (int i = 0; i < changed.length; i++) {
 
-      ModelInfo info = (ModelInfo) models.get(storage);
-      if (info != null) {
+        ITapestryModel model = (ITapestryModel) changed[i];
+        IStorage storage = model.getUnderlyingStorage();
 
-        info.readOnlyModel = model;
+        ModelInfo info = (ModelInfo) models.get(storage);
+        if (info != null) {
+
+          info.readOnlyModel = model;
+
+        }
 
       }
-
     }
   }
 
