@@ -2,7 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src/"/>
 	<classpathentry kind="src" path="xmen/"/>
-	<classpathentry exported="true" kind="lib" path="jdom.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-io-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jdom.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>

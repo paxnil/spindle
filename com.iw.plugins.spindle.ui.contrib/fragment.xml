@@ -14,7 +14,14 @@
       <import plugin="org.eclipse.ui"/>
    </requires>
    
-   
+    <extension
+         point="org.eclipse.ui.ide.projectNatureImages">
+      <image
+            icon="icons/full/project_ovr.gif"
+            natureId="com.iw.plugins.spindle.core.tapestrynature"
+            id="com.iw.plugins.spindle.core.tapestryProjectNatureImage">
+      </image>
+   </extension>
    <extension
          point="org.eclipse.ui.newWizards">
       <wizard

@@ -58,11 +58,13 @@ public class WebXMLInspector {
 
 	public static Set getServletNames(Document document) {
 		Set result = new HashSet();		
-		List servletElements = document.getRootElement().getChildren("servlet");
+		Element rootElement = document.getRootElement();
+		Namespace ns = rootElement.getNamespace();
+		List servletElements = rootElement.getChildren("servlet", ns);
 		for (Iterator iter = servletElements.iterator(); iter.hasNext();) {
 			Element servletElement = (Element) iter.next();
 
-			Element nameElement = servletElement.getChild("servlet-name");
+			Element nameElement = servletElement.getChild("servlet-name", ns);
 			String name = nameElement != null ? nameElement.getTextTrim()
 					: "";
 
@@ -74,11 +76,13 @@ public class WebXMLInspector {
 	
 	public static Set getServletTypes(Document document) {
 		Set result = new HashSet();		
-		List servletElements = document.getRootElement().getChildren("servlet");
+		Element rootElement = document.getRootElement();
+		Namespace ns = rootElement.getNamespace();
+		List servletElements = rootElement.getChildren("servlet", ns);
 		for (Iterator iter = servletElements.iterator(); iter.hasNext();) {
 			Element servletElement = (Element) iter.next();
 
-			Element typeElement = servletElement.getChild("servlet-class");
+			Element typeElement = servletElement.getChild("servlet-class", ns);
 			String type = typeElement != null ? typeElement.getTextTrim()
 					: "";
 

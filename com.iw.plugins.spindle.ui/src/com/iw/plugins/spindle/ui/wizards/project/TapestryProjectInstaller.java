@@ -7,20 +7,32 @@
 package com.iw.plugins.spindle.ui.wizards.project;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -51,6 +63,8 @@ import com.iw.plugins.spindle.xmlinspector.WebXMLInspector;
 public class TapestryProjectInstaller {
 
 	TapestryProjectInstallData installData;
+
+	private Map tapestryJarNames;
 
 	public TapestryProjectInstaller(TapestryProjectInstallData data) {
 		super();
@@ -268,12 +282,149 @@ public class TapestryProjectInstaller {
 	}
 
 	public List findLibraryCollisions() {
-		return Collections.EMPTY_LIST;
+		if (tapestryJarNames == null)
+			collectTapestryJars();
+
+		List result = Collections.EMPTY_LIST;
+
+		IFolder webInfLib = installData.getProject().getFolder(
+				installData.getContextPath() + "/WEB-INF/lib");
+
+		if (!webInfLib.exists())
+			return result;
+
+		if (tapestryJarNames.isEmpty())
+			return Collections.EMPTY_LIST;
+
+		try {
+			Set jarNames = tapestryJarNames.keySet();
+			result = new ArrayList();
+			IResource[] members = webInfLib.members();
+			for (int i = 0; i < members.length; i++) {
+				if (members[i].getType() != IResource.FILE)
+					continue;
+
+				String name = members[i].getName();
+				if (jarNames.contains(name))
+					result.add(name);
+			}
+		} catch (CoreException e) {
+			UIPlugin.log(e);
+		}
+		return result;
+
 	}
 
-	public IStatus installLibraries(boolean overwriteExisting,
+	public IStatus installLibraries(boolean overwriteExisting, List collisions,
 			IProgressMonitor monitor) {
+
+		if (tapestryJarNames == null)
+			collectTapestryJars();
+
+		IFolder root = installData.getProject().getFolder(
+				installData.getContextPath());
+		try {
+			if (!root.exists()) {
+				root.create(true, true, monitor);
+			}
+		} catch (CoreException e1) {
+			return e1.getStatus();
+		}
+
+		IFolder webInf = root.getFolder("WEB-INF");
+
+		try {
+			if (!webInf.exists()) {
+				webInf.create(true, true, monitor);
+			}
+		} catch (CoreException e1) {
+			return e1.getStatus();
+		}
+
+		IFolder lib = webInf.getFolder("lib");
+
+		try {
+			if (!webInf.exists()) {
+				webInf.create(true, true, monitor);
+			}
+		} catch (CoreException e1) {
+			return e1.getStatus();
+		}
+
+		int totalCount = tapestryJarNames.size();
+		int count = collisions.isEmpty() ? totalCount
+				: (overwriteExisting ? totalCount : totalCount
+						- collisions.size());
+
+		monitor.beginTask("copying Tapestry jar files..", count);
+
+		File destFolder = new File(lib.getLocation().toString());
+
+		List toCopy = new ArrayList();
+		for (Iterator iter = tapestryJarNames.keySet().iterator(); iter
+				.hasNext();) {
+			String jarName = (String) iter.next();
+			if (!overwriteExisting && collisions.contains(jarName))
+				continue;
+			try {
+				FileUtils.copyFile((File)tapestryJarNames.get(jarName), new File(
+						destFolder, jarName));
+			} catch (IOException e) {
+				UIPlugin.log(e);
+			}
+			monitor.worked(1);
+			toCopy.add(tapestryJarNames.get(jarName));
+		}
+
+		monitor.done();
+
 		return SpindleStatus.OK_STATUS;
+	}
+
+	/**
+	 *  
+	 */
+	private void collectTapestryJars() {
+		URL installUrl = TapestryCore.getDefault().getBundle().getEntry("/");
+		tapestryJarNames = Collections.EMPTY_MAP;
+		File lib = null;
+		File ext = null;
+		try {
+			installUrl = Platform.resolve(installUrl);
+			URL libFolderUrl = new URL(installUrl, "lib/");
+			libFolderUrl = Platform.resolve(libFolderUrl);
+			lib = new File(new URI(libFolderUrl.toString()));
+
+			URL extFolderUrl = new URL(libFolderUrl, "ext/");
+			extFolderUrl = Platform.resolve(extFolderUrl);
+			ext = new File(new URI(extFolderUrl.toString()));
+
+		} catch (Exception e) {
+			UIPlugin.log(e);
+			return;
+		}
+		tapestryJarNames = new HashMap();
+		collectJars(lib, tapestryJarNames);
+		collectJars(ext, tapestryJarNames);
+
+	}
+
+	private void collectJars(File directory, Map result) {
+
+		if (directory == null || !directory.exists()
+				|| !directory.isDirectory())
+			return;
+
+		String[] jars = directory.list(new FilenameFilter() {
+
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".jar");
+			}
+		});
+
+		for (int i = 0; i < jars.length; i++)
+			result.put(jars[i], new File(directory, jars[i]));
+
 	}
 
 	public TapestryProjectInstallData getInstallData() {

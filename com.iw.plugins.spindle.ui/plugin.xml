@@ -12,7 +12,10 @@
          <export name="*"/>
       </library>
       <library name="xmen.jar"/>
-      <library name="jdom.jar">
+      <library name="lib/commons-io-1.0.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/jdom.jar">
          <export name="*"/>
       </library>
    </runtime>
