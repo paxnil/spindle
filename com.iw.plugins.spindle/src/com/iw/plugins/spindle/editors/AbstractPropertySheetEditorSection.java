@@ -62,6 +62,7 @@ import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.ui.TreeViewerWithToolTips;
 import com.iw.plugins.spindle.util.JavaListSelectionProvider;
 import com.iw.plugins.spindle.util.StringSorter;
@@ -86,6 +87,8 @@ public abstract class AbstractPropertySheetEditorSection
 
   protected boolean hasFocus;
   private Composite container;
+  
+  protected boolean isDTD12;
 
   /**
    * Constructor for PropertySection
@@ -153,6 +156,10 @@ public abstract class AbstractPropertySheetEditorSection
     if (canUpdate()) {
       update();
     }
+    TapestryComponentModel tmodel = (TapestryComponentModel)model;
+    String DTDVersion = tmodel.getComponentSpecification().getDTDVersion();
+    isDTD12 = DTDVersion != null && DTDVersion.equals("1.2");
+    
     model.addModelChangedListener(this);
   }
 

@@ -75,7 +75,7 @@ import com.iw.plugins.spindle.wizards.fields.ComponentNameField;
 import com.iw.plugins.spindle.wizards.fields.ContainerDialogField;
 import com.iw.plugins.spindle.wizards.fields.PackageDialogField;
 
-public class NewTapComponentWizardPage extends NewTapestryElementWizardPage {
+public class NewTapComponentWizardPage extends TapestryWizardPage {
 
   public static final String P_ADD_TO_APPLICATION = "new.component.default.add.to.application";
   public static final String P_ENABLE_ADD_TO_APPLICATION = "new.component.default.add.to.application.enabled";

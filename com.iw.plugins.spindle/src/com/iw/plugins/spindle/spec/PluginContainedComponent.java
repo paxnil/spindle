@@ -74,7 +74,7 @@ public class PluginContainedComponent extends ContainedComponent {
 
 
   // e.g.  <component id="link" type="Direct">
-  public void write(String name, PrintWriter writer, int indent) {
+  public void write(String name, PrintWriter writer, int indent, boolean isDTD12) {
     Indenter.printIndented(writer, indent, "<component id=\"" + name);
     if (getCopyOf() != null) {
       writer.print("\" copy-of=\"" + getCopyOf());
@@ -93,7 +93,7 @@ public class PluginContainedComponent extends ContainedComponent {
           Iterator bindingNames = new TreeSet(bns).iterator();
           while (bindingNames.hasNext()) {
             String bindingName = (String) bindingNames.next();
-            ((PluginBindingSpecification) getBinding(bindingName)).write(bindingName, writer, indent + 1);
+            ((PluginBindingSpecification) getBinding(bindingName)).write(bindingName, writer, indent + 1, isDTD12);
           }
         }
       }

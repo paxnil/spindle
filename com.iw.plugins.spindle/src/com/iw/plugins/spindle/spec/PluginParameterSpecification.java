@@ -34,19 +34,18 @@ import net.sf.tapestry.spec.ParameterSpecification;
 import net.sf.tapestry.spec.Direction;
 
 public class PluginParameterSpecification extends ParameterSpecification {
-	
-	
+
   public void getHelpText(String name, StringBuffer buffer) {
-  	buffer.append(getHelpText(name));
+    buffer.append(getHelpText(name));
   }
-  
+
   public String getHelpText(String name) {
-  	StringWriter swriter = new StringWriter();
-  	SourceWriter writer = new SourceWriter(swriter);
-  	write(name, writer, 0);
-  	return swriter.toString();
-  	/*
-  	StringBuffer buffer = new StringBuffer(name);
+    StringWriter swriter = new StringWriter();
+    SourceWriter writer = new SourceWriter(swriter);
+    write(name, writer, 0, true);
+    return swriter.toString();
+    /*
+    StringBuffer buffer = new StringBuffer(name);
     buffer.append(" ");
     if (isRequired()) {
       buffer.append("  (Required)\n");
@@ -72,20 +71,28 @@ public class PluginParameterSpecification extends ParameterSpecification {
     }
     return buffer.toString();
     */
-  }	
-	
-  // e.g. -- <parameter name="book" java-type="com.primix.vlib.ejb.Book" required="yes"/>
-  public void write(String name, PrintWriter writer, int indent) {
+  }
+
+  // e.g. -- <parameter name="book" java-type="com.primix.vlib.ejb.Book" required="yes" parameterName="poo" direction="in"/>
+  public void write(String name, PrintWriter writer, int indent, boolean isDTD12) {
     Indenter.printIndented(writer, indent, "<parameter name=\"" + name);
     writer.print("\" java-type=\"" + getType());
     writer.print("\" required=\"" + (isRequired() ? "yes" : "no"));
+    if (isDTD12) {
+      String propertyName = getPropertyName();
+      if (propertyName != null && !"".equals(propertyName)) {
+        writer.print("\" property-name=\"" + getPropertyName());
+      }
+      writer.print("\" direction=\"");
+      writer.print(getDirection() == Direction.CUSTOM ? "custom" : "in");
+    }
     String description = getDescription();
     if (description == null || "".equals(description.trim())) {
-    	writer.println("\"/>");
+      writer.println("\"/>");
     } else {
-    	writer.println("\">");
-    	PluginApplicationSpecification.writeDescription(description, writer, indent+1);
-    	Indenter.printlnIndented(writer, indent, "</parameter>");
+      writer.println("\">");
+      PluginApplicationSpecification.writeDescription(description, writer, indent + 1);
+      Indenter.printlnIndented(writer, indent, "</parameter>");
     }
   }
 

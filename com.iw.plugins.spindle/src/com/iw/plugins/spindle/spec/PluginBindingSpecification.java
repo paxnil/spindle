@@ -41,7 +41,7 @@ public class PluginBindingSpecification extends BindingSpecification {
     super(type, value);
   }   
 
-  public void write(String name, PrintWriter writer, int indent) {
+  public void write(String name, PrintWriter writer, int indent, boolean isDTD12) {
     Indenter.printIndented(writer, indent, "<");
     BindingType type = getType();
     if (type.equals(BindingType.FIELD)) {
@@ -59,7 +59,7 @@ public class PluginBindingSpecification extends BindingSpecification {
     } else if (type.equals(BindingType.DYNAMIC)) {
       writer.print("binding name=\"" + name);
       writer.print("\" property-path=\"");
-    } else if (type.equals(BindingType.STRING)) {
+    } else if (isDTD12 && type.equals(BindingType.STRING)) {
       writer.print("string-binding name=\"" + name);
       writer.print("\" key=\"");
     }

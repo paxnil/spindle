@@ -45,7 +45,7 @@ import com.iw.plugins.spindle.dialogfields.UpdateStatusContainer;
  * Copyright 2002, Intelligent Works Incoporated
  * All Rights Reserved
  */
-public abstract class NewTapestryElementWizardPage extends WizardPage {
+public abstract class TapestryWizardPage extends WizardPage {
 
   private IStatus fCurrStatus = new DialogFieldStatus();
 
@@ -53,7 +53,7 @@ public abstract class NewTapestryElementWizardPage extends WizardPage {
 
   private boolean fPageVisible;
 
-  public NewTapestryElementWizardPage(String name) {
+  public TapestryWizardPage(String name) {
     super(name);
     fPageVisible = false;
   }

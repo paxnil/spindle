@@ -44,7 +44,7 @@ import com.iw.plugins.spindle.wizards.fields.SuperClassDialogField;
  * Copyright 2002, Intelligent Works Incoporated
  * All Rights Reserved
  */
-public class NewTapComponentWizardClassPage extends NewTapestryElementWizardPage {
+public class NewTapComponentWizardClassPage extends TapestryWizardPage {
 
   String PAGE_NAME;
 

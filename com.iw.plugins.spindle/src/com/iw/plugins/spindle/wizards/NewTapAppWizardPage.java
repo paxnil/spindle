@@ -70,7 +70,7 @@ import com.iw.plugins.spindle.wizards.fields.EngineClassDialog;
 import com.iw.plugins.spindle.wizards.fields.PackageDialogField;
 import com.iw.plugins.spindle.wizards.fields.ServletClassnameField;
 
-public class NewTapAppWizardPage extends NewTapestryElementWizardPage {
+public class NewTapAppWizardPage extends TapestryWizardPage {
 
   private final static String PAGE_NAME = "NewTapAppWizardPage";
 

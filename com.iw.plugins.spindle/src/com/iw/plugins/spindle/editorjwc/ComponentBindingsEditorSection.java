@@ -94,6 +94,8 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
   private BindingEditorLabelProvider labelProvider = new BindingEditorLabelProvider();
 
   private HashMap precomputedAliasInfo = new HashMap();
+  
+  private boolean isDTD12;
 
   /**
    * Constructor for ParameterEditorSection
@@ -115,12 +117,18 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
   public void initialize(Object object) {
     super.initialize(object);
     BaseTapestryModel model = (BaseTapestryModel) object;
+    TapestryComponentModel tmodel = (TapestryComponentModel)model;
+    String DTDVersion = tmodel.getComponentSpecification().getDTDVersion();
+    isDTD12 = DTDVersion != null && DTDVersion.equals("1.2");
     if (!model.isEditable()) {
       newInheritedAction.setEnabled(false);
       newBindingAction.setEnabled(false);
       newFieldAction.setEnabled(false);
       newStaticAction.setEnabled(false);
       newStringAction.setEnabled(false);
+    }
+    if (!isDTD12) {
+    	newStringAction.setEnabled(false);
     }
     TreeViewerWithToolTips viewer = (TreeViewerWithToolTips) getViewer();
     viewer.setToolTipProvider(labelProvider);
@@ -346,7 +354,7 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
     if (type == BindingType.FIELD) {
       return fieldDescriptors;
     }
-    if (type == BindingType.STRING) {
+    if (isDTD12 && type == BindingType.STRING) {
     	return stringDescriptiors;
     }
 
@@ -498,7 +506,7 @@ public class BindingEditorLabelProvider
     if (type == BindingType.INHERITED) {
       return holder.name + " parameter-name = " + spec.getValue();
     }
-    if (type == BindingType.STRING) {
+    if (isDTD12 && type == BindingType.STRING) {
       return holder.name + " key = " + spec.getValue();
     }
 
@@ -532,7 +540,7 @@ public class BindingEditorLabelProvider
     if (type == BindingType.STATIC) {
       return staticBindingImage;
     }
-    if (type == BindingType.STRING) {
+    if (isDTD12 && type == BindingType.STRING) {
       return stringBindingImage;
     }
     return null;
@@ -612,15 +620,15 @@ protected class NewBindingButtonAction extends Action {
         TapestryComponentModel cmodel =
           TapestryPlugin.getTapestryModelManager().findComponent(selectedType, getModel());
         if (cmodel != null) {
-          dialog = new ChooseBindingTypeDialog(shell, cmodel, existingBindingParms);
+          dialog = new ChooseBindingTypeDialog(shell, cmodel, existingBindingParms, isDTD12);
         } else {
-          dialog = new ChooseBindingTypeDialog(shell);
+          dialog = new ChooseBindingTypeDialog(shell, isDTD12);
         }
       } else {
         return;
       }
     } else {
-      dialog = new ChooseBindingTypeDialog(shell, precomputedAliasInfo, existingBindingParms);
+      dialog = new ChooseBindingTypeDialog(shell, precomputedAliasInfo, existingBindingParms, isDTD12);
     }
     dialog.create();
     if (dialog.open() == dialog.OK) {
@@ -655,7 +663,7 @@ protected class NewBindingButtonAction extends Action {
       newInheritedAction.run();
     } else if (type == BindingType.STATIC) {
       newStaticAction.run();
-    } else if (type == BindingType.STRING) {
+    } else if (isDTD12 && type == BindingType.STRING) {
       newStringAction.run();
     }
   }
@@ -668,7 +676,7 @@ protected class NewBindingButtonAction extends Action {
       newInheritedAction.run(parameterName);
     } else if (type == BindingType.STATIC) {
       newStaticAction.run(parameterName);
-    } else if (type == BindingType.STRING) {
+    } else if (isDTD12 && type == BindingType.STRING) {
       newStringAction.run(parameterName);
     }
   }
@@ -718,7 +726,7 @@ class NewStringBindingAction
     super();
     setText("String Binding");
     defaultBindingName = "string";
-    setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("bind-string.gif")));
+    setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("bind-string.gif")));   
 
   }
 

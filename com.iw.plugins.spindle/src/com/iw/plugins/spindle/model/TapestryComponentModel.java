@@ -119,7 +119,8 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
    * Model events
    */
   public void propertyChange(PropertyChangeEvent event) {
-    fireModelObjectChanged(this, event.getPropertyName());
+  	dirty = true;
+    fireModelObjectChanged(this, event.getPropertyName());   
   }
 
   public void setDescription(String description) {

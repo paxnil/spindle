@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.tapestry.parse.SpecificationParser;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -47,7 +48,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
-import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -68,9 +68,7 @@ import com.iw.plugins.spindle.model.TapestryModelManager;
 import com.iw.plugins.spindle.spec.TapestryPluginFactory;
 import com.iw.plugins.spindle.ui.text.ColorManager;
 import com.iw.plugins.spindle.util.TapestryLookup;
-import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
-import net.sf.tapestry.parse.SpecificationParser;
 
 /**
  * This is the top-level class of the Tapestry plugin tool.

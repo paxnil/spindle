@@ -30,14 +30,22 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
+
+import net.sf.tapestry.parse.SpecificationParser;
+import net.sf.tapestry.spec.BeanSpecification;
+import net.sf.tapestry.spec.ComponentSpecification;
+import net.sf.tapestry.spec.ContainedComponent;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.util.Indenter;
 import com.iw.plugins.spindle.util.SourceWriter;
-import net.sf.tapestry.spec.BeanSpecification;
-import net.sf.tapestry.spec.ComponentSpecification;
-import net.sf.tapestry.spec.ContainedComponent;
 
 public class PluginComponentSpecification
   extends ComponentSpecification
@@ -234,11 +242,22 @@ public class PluginComponentSpecification
   }
 
   public void write(PrintWriter writer) {
+  	String DTDversion = getDTDVersion();
+  	boolean isDTD12 = DTDversion != null && "1.2".equals(DTDversion);
     int indent = 1;
     writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     writer.println("<!DOCTYPE specification ");
-    writer.println("      PUBLIC \"-//Howard Lewis Ship//Tapestry Specification 1.2//EN\"");
-    writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
+    writer.print("      PUBLIC \"");
+    
+    if (isDTD12) {
+      writer.print(SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID);
+      writer.println("\"");
+      writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
+    } else {
+      writer.print(SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID);
+      writer.println("\"");
+      writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
+    }
     writer.println(MessageUtil.getString("TAPESTRY.xmlComment"));
     writer.println();
 
@@ -257,7 +276,7 @@ public class PluginComponentSpecification
         Iterator parameterNames = parms.iterator();
         while (parameterNames.hasNext()) {
           String paramName = (String) parameterNames.next();
-          ((PluginParameterSpecification) getParameter(paramName)).write(paramName, writer, indent);
+          ((PluginParameterSpecification) getParameter(paramName)).write(paramName, writer, indent, isDTD12);
         }
       }
     }
@@ -299,7 +318,7 @@ public class PluginComponentSpecification
     }
 
     if (components != null && !components.isEmpty()) {
-      writeComponents(writer, indent);
+      writeComponents(writer, indent, isDTD12);
     }
 
     Collection ans = getAssetNames();
@@ -318,7 +337,7 @@ public class PluginComponentSpecification
   /** Need to do some funky stuff here to ensure "copy-of" components are written AFTER
    *  thier parents
    */
-  protected void writeComponents(PrintWriter writer, int indent) {
+  protected void writeComponents(PrintWriter writer, int indent, boolean isDTD12) {
     ArrayList keysList = new ArrayList(components.keySet());
     HashMap nonCopyOfs = new HashMap();
     HashMap copyOfMap = new HashMap();
@@ -341,13 +360,13 @@ public class PluginComponentSpecification
       while (iter.hasNext()) {
         writer.println();
         String containedName = (String) iter.next();
-        ((PluginContainedComponent) getComponent(containedName)).write(containedName, writer, indent);
+        ((PluginContainedComponent) getComponent(containedName)).write(containedName, writer, indent, isDTD12);
       }
     } else {
       while (iter.hasNext()) {
         writer.println();
         String containedName = (String) iter.next();
-        ((PluginContainedComponent) getComponent(containedName)).write(containedName, writer, indent);
+        ((PluginContainedComponent) getComponent(containedName)).write(containedName, writer, indent, isDTD12);
         if (copyOfMap.containsKey(containedName)) {
           ArrayList listForCopyOf = (ArrayList) copyOfMap.get(containedName);
           if (listForCopyOf == null | listForCopyOf.isEmpty()) {
@@ -357,7 +376,7 @@ public class PluginComponentSpecification
           while (copies.hasNext()) {
             writer.println();
             String copyOfName = (String) copies.next();
-            ((PluginContainedComponent) getComponent(copyOfName)).write(copyOfName, writer, indent);
+            ((PluginContainedComponent) getComponent(copyOfName)).write(copyOfName, writer, indent, isDTD12);
           }
           copyOfMap.remove(containedName);
         }
@@ -373,7 +392,7 @@ public class PluginComponentSpecification
           while (leftoverIter.hasNext()) {
             writer.println();
             String copyOfName = (String) leftoverIter.next();
-            ((PluginContainedComponent) getComponent(copyOfName)).write(copyOfName, writer, indent);
+            ((PluginContainedComponent) getComponent(copyOfName)).write(copyOfName, writer, indent, isDTD12);
           }
         }
       }
@@ -406,6 +425,14 @@ public class PluginComponentSpecification
       writer.println(description);
     }
     return swriter.toString();
+  }
+
+  /**
+   * @see net.sf.tapestry.spec.ComponentSpecification#setDTDVersion(String)
+   */
+  public void setDTDVersion(String dtdVersion) {
+    super.setDTDVersion(dtdVersion);
+    propertySupport.firePropertyChange("dtd", null, dtdVersion);
   }
 
 }

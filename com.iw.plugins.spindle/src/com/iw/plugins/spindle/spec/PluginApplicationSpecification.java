@@ -32,12 +32,12 @@ import java.util.*;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.util.Indenter;
+
+import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.spec.ApplicationSpecification;
 import net.sf.tapestry.spec.PageSpecification;
 
-public class PluginApplicationSpecification
-  extends ApplicationSpecification
-  implements ITapestrySpecification {
+public class PluginApplicationSpecification extends ApplicationSpecification implements ITapestrySpecification {
 
   private PropertyChangeSupport propertySupport;
 
@@ -73,7 +73,7 @@ public class PluginApplicationSpecification
     super.setName(name);
     propertySupport.firePropertyChange("name", old, name);
   }
-  
+
   public void setService(String name, String classname) {
     if (serviceMap == null) {
       super.addService(name, classname);
@@ -82,14 +82,14 @@ public class PluginApplicationSpecification
     }
     propertySupport.firePropertyChange("services", null, null);
   }
-  
+
   public void removeService(String name) {
     if (serviceMap != null) {
       serviceMap.remove(name);
       propertySupport.firePropertyChange("services", null, null);
     }
   }
-  
+
   public boolean canRevertService(String name) {
     String useName = name.toLowerCase();
     if (serviceMap != null && serviceMap.containsKey(useName) && getDefaultServiceMap().containsKey(useName)) {
@@ -97,14 +97,14 @@ public class PluginApplicationSpecification
     }
     return false;
   }
-  
+
   public boolean isDefaultService(String name) {
     return getDefaultServiceMap().containsKey(name.toLowerCase());
   }
-  
+
   public boolean canDeleteService(String name) {
     String useName = name.toLowerCase();
-    if (getDefaultServiceMap().containsKey(useName)) { 
+    if (getDefaultServiceMap().containsKey(useName)) {
       return false;
     }
     return serviceMap != null && serviceMap.containsKey(useName);
@@ -166,7 +166,7 @@ public class PluginApplicationSpecification
       propertySupport.firePropertyChange("pageMap", null, pageMap);
     }
   }
-  
+
   public String getPageName(String componentSpecLocation) {
     String useName = componentSpecLocation;
     //if (useName.indexOf("/") >= 0) {
@@ -179,20 +179,20 @@ public class PluginApplicationSpecification
     if (pageName == null) {
       pageName = findKeyInPageMap(useName, getDefaultPageMap());
     }
-    return pageName;    
+    return pageName;
   }
-  
+
   private String findKeyInPageMap(String componentLocation, Map map) {
     Iterator i = map.entrySet().iterator();
     while (i.hasNext()) {
       Map.Entry entry = (Map.Entry) i.next();
-      PageSpecification pageSpec = (PageSpecification)entry.getValue();
+      PageSpecification pageSpec = (PageSpecification) entry.getValue();
       if (pageSpec.getSpecificationPath().equals(componentLocation)) {
         return (String) entry.getKey();
       }
     }
     return null;
-  }  
+  }
 
   public String findAliasFor(String componentSpecLocation) {
     String result = null;
@@ -228,8 +228,17 @@ public class PluginApplicationSpecification
     int indent = 0;
     writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     writer.println("<!DOCTYPE application ");
-    writer.println("      PUBLIC \"-//Howard Lewis Ship//Tapestry Specification 1.2//EN\"");
-    writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
+    writer.print("      PUBLIC \"");
+    String DTDversion = getDTDVersion();
+    if (DTDversion == null || "1.2".equals(DTDversion)) {
+      writer.print(SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID);
+      writer.println("\"");
+      writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
+    } else {
+      writer.print(SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID);
+      writer.println("\"");
+      writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
+    }
     writer.println(MessageUtil.getString("TAPESTRY.xmlComment"));
 
     writer.println();
@@ -279,14 +288,14 @@ public class PluginApplicationSpecification
         }
       }
     }
-    
-    if (serviceMap != null) {      
+
+    if (serviceMap != null) {
       Iterator serviceNames = new TreeSet(serviceMap.keySet()).iterator();
       if (serviceNames.hasNext()) {
         writer.println();
       }
       while (serviceNames.hasNext()) {
-        String serviceName = (String)serviceNames.next();
+        String serviceName = (String) serviceNames.next();
         String classname = getServiceClassName(serviceName);
         if (classname != null) {
           Indenter.printIndented(writer, indent + 1, "<service name=\"");
@@ -297,7 +306,7 @@ public class PluginApplicationSpecification
         }
       }
     }
-    
+
     writer.println();
     writer.println("</application>");
   }
@@ -323,8 +332,7 @@ public class PluginApplicationSpecification
   }
 
   static public void writeMultiLine(PrintWriter writer, String message) {
-    BufferedReader reader =
-      new BufferedReader(new InputStreamReader(new ByteArrayInputStream(message.getBytes())));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(message.getBytes())));
     try {
       String line = reader.readLine();
       while (line != null) {
@@ -344,6 +352,14 @@ public class PluginApplicationSpecification
       Indenter.printlnIndented(writer, indent + 1, value);
       Indenter.printlnIndented(writer, indent, "</property>");
     }
+  }
+
+  /**
+   * @see net.sf.tapestry.spec.ApplicationSpecification#setDTDVersion(String)
+   */
+  public void setDTDVersion(String dtdVersion) {
+    super.setDTDVersion(dtdVersion);
+    propertySupport.firePropertyChange("dtd", null, dtdVersion);
   }
 
 }

@@ -189,7 +189,7 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
         this.name = newName;
         componentSpec.removeParameter(oldName);
 
-      } else if ("propertyName".equals(key)) {
+      } else if (isDTD12 && "propertyName".equals(key)) {
         spec.setPropertyName((String) value);
 
       } else if ("type".equals(key)) {
@@ -198,7 +198,7 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
       } else if ("required".equals(key)) {
         spec.setRequired(((Boolean) value).booleanValue());
 
-      } else if ("direction".equals(name)) {
+      } else if (isDTD12 && "direction".equals(name)) {
         String direction = (String) value;
         if ("in".equals(direction)) {
           spec.setDirection(Direction.IN);
@@ -236,7 +236,7 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
     public Object getPropertyValue(Object key) {
       if ("name".equals(key)) {
         return name;
-      } else if ("propertyName".equals(key)) {
+      } else if (isDTD12 && "propertyName".equals(key)) {
         return spec.getPropertyName();
       } else if ("type".equals(key)) {
         return spec.getType();
@@ -246,7 +246,7 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
         } else {
           return Boolean.FALSE;
         }
-      } else if ("direction".equals(key)) {
+      } else if (isDTD12 && "direction".equals(key)) {
         Direction currentDir = spec.getDirection();
         for (int i = 0; i < directions.length; i++) {
           if (currentDir == directions[i]) {
@@ -262,16 +262,17 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
 
     public IPropertyDescriptor[] getPropertyDescriptors() {
       BaseTapestryModel model = (BaseTapestryModel) getFormPage().getModel();
-      IPropertyDescriptor[] descriptors =
-        new IPropertyDescriptor[] {
-          new TextPropertyDescriptor("name", "Name"),
-          new TextPropertyDescriptor("propertyName", "Property Name"),
-          new TypeDialogPropertyDescriptor("type", "Type", model),
-          new CheckboxPropertyDescriptor("required", "Required"),
-          new ComboBoxPropertyDescriptor("direction", "Direction", directionLabels, false),
-          new DocumentationPropertyDescriptor("description", "Description", "Document parameter: " + this.name, null)
-      };
-      return descriptors;
+      ArrayList list = new ArrayList();
+      list.add(new TextPropertyDescriptor("name", "Name"));
+      list.add(new TypeDialogPropertyDescriptor("type", "Type", model));
+      list.add(new CheckboxPropertyDescriptor("required", "Required"));
+      if (isDTD12) {
+      	list.add(new ComboBoxPropertyDescriptor("direction", "Direction", directionLabels, false));
+      	list.add(new TextPropertyDescriptor("propertyName", "Property Name"));
+      }
+      list.add(new DocumentationPropertyDescriptor("description", "Description", "Document parameter: " + this.name, null));
+      
+      return (IPropertyDescriptor []) list.toArray(new IPropertyDescriptor[list.size()]);
     }
 
     public Object getEditableValue() {
@@ -295,9 +296,16 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
       PluginComponentSpecification componentSpec = ((TapestryComponentModel) getModel()).getComponentSpecification();
       String type = holder.spec.getType();
       type = type == null ? "" : type;
-      return holder.name
-        + (!"".equals(holder.spec.getType()) ? " type = " + type : "")
-        + (holder.spec.isRequired() ? " REQUIRED" : "");
+      StringBuffer buf = new StringBuffer();
+      buf.append("name = ");
+      buf.append(holder.spec.getPropertyName());
+      buf.append((!"".equals(holder.spec.getType()) ? " type = " + type : ""));
+      buf.append((holder.spec.isRequired() ? " REQUIRED" : ""));
+      if (isDTD12) {
+      	buf.append(" direction =");
+      	buf.append(holder.spec.getDirection() == Direction.CUSTOM ? "custom" : "in");
+      }
+      return buf.toString();       
     }
 
     public void dispose() {

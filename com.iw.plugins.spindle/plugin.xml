@@ -166,6 +166,14 @@
                toolbarPath="Normal/spindle"
                id="com.iw.spindle.actions.set.OpenTapestryPageWizard">
          </action>
+         <action
+               label="Migrate All to Tapestry 2.0.4+ DTD"
+               icon="icons/full/page16.gif"
+               tooltip="Migrate Tapestry XML files to Tapestry 2.0.4 compatible DTD"
+               class="com.iw.plugins.spindle.ui.migrate.MigrateAllTo204PlusDTD"
+               toolbarPath="Normal/spindle"
+               id="com.iw.spindle.actions.set.MigrateAllTo204PlusDTD">
+         </action>
       </actionSet>
    </extension>
 
