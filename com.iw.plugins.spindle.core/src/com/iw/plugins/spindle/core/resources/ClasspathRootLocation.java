@@ -69,6 +69,10 @@ public class ClasspathRootLocation extends AbstractRootLocation
     {
         fJavaProject = project;
     }
+    
+    public IJavaProject getJavaProject() {
+        return fJavaProject;
+    }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#exists()
@@ -365,6 +369,8 @@ public class ClasspathRootLocation extends AbstractRootLocation
 
         return result;
     }
+    
+  
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getSearch()

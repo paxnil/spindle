@@ -87,6 +87,9 @@ public class I18NResourceAcceptor implements IResourceLocationAcceptor
 
     public void configure(String fileNameInclExtension)
     {
+        if (fileNameInclExtension == null)
+            return;
+            
         fileNameInclExtension = fileNameInclExtension.trim();
 
         if (fileNameInclExtension.length() == 0)
