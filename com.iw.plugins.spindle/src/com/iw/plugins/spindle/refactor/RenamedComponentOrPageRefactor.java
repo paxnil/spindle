@@ -69,13 +69,11 @@ import com.iw.plugins.spindle.ui.TapestryStorageLabelProvider;
  * Copyright 2002, Intelligent Works Inc.
  * All Rights Reserved.
  */
-public class RenamedComponentOrPageRefactor
-  implements IResourceChangeListener, IResourceDeltaVisitor {
+public class RenamedComponentOrPageRefactor implements IResourceChangeListener, IResourceDeltaVisitor {
 
   private TapestryProject project;
   private HashMap potentialModelMoves;
   private HashMap templatesToBeRenamed;
-  private TapestryLibraryModel baseModel = null;
   private LibraryRefactorer refactorer = null;
   private IResourceDelta topLevelDelta = null;
   private List languageCodes = null;
@@ -113,7 +111,6 @@ public class RenamedComponentOrPageRefactor
       if (projectDelta != null) {
 
         IJavaProject jproject = null;
-        IStorage projectStorage = null;
         potentialModelMoves = new HashMap();
         templatesToBeRenamed = new HashMap();
         hasAliases = false;
@@ -121,21 +118,13 @@ public class RenamedComponentOrPageRefactor
 
         try {
 
-          baseModel = (TapestryLibraryModel) project.getProjectModel();
-          if (baseModel == null) {
-
-            return;
-
-          }
-          projectStorage = baseModel.getUnderlyingStorage();
-
           jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisProject);
 
         } catch (CoreException e) {
 
         }
 
-        if (projectStorage == null || jproject == null || baseModel == null) {
+        if (jproject == null) {
 
           return;
 
@@ -157,6 +146,35 @@ public class RenamedComponentOrPageRefactor
           }
 
         }
+
+        if (potentialModelMoves.isEmpty()) {
+
+          return;
+
+        }
+
+        TapestryLibraryModel baseModel = null;
+
+        try {
+        	
+          baseModel = (TapestryLibraryModel) project.getProjectModel();
+          
+          if (baseModel == null) {
+          	
+          	return;
+          	
+          }
+          getRefactorer(baseModel);
+          
+        } catch (CoreException e) {
+        }
+        
+        if (baseModel == null || refactorer == null) {
+
+          return;
+
+        }
+        
         try {
 
           HashMap confirmed = findConfirmed();
@@ -212,8 +230,7 @@ public class RenamedComponentOrPageRefactor
 
           String extension = oldTemplate.getFileExtension();
 
-          String newTemplateName =
-            renameTemplate(oldTemplate, oldComponentFile, newComponentFile, extension);
+          String newTemplateName = renameTemplate(oldTemplate, oldComponentFile, newComponentFile, extension);
 
           IPath completeNewPath = newTemplatePath.append(newTemplateName);
 
@@ -231,11 +248,7 @@ public class RenamedComponentOrPageRefactor
     }
   }
 
-  private String renameTemplate(
-    IFile oldTemplate,
-    IFile oldComponent,
-    IFile newComponent,
-    String extension) {
+  private String renameTemplate(IFile oldTemplate, IFile oldComponent, IFile newComponent, String extension) {
 
     String oldName = oldTemplate.getFullPath().removeFileExtension().lastSegment();
     String oldComponentName = oldComponent.getFullPath().removeFileExtension().lastSegment();
@@ -248,7 +261,6 @@ public class RenamedComponentOrPageRefactor
 
   private void updateProjectModel(HashMap confirmed) throws CoreException {
 
-    getRefactorer();
 
     IPluginLibrarySpecification refactorSpec = refactorer.getSpecification();
 
@@ -283,7 +295,7 @@ public class RenamedComponentOrPageRefactor
     refactorer.commit(new NullProgressMonitor());
   }
 
-  private void getRefactorer() throws CoreException {
+  private void getRefactorer(TapestryLibraryModel baseModel) throws CoreException {
     if (refactorer == null) {
 
       refactorer = new LibraryRefactorer(project, baseModel, true);
@@ -334,19 +346,11 @@ public class RenamedComponentOrPageRefactor
 
         if ("jwc".equals(extension)) {
 
-          return "<component-alias type=\""
-            + (String) entry.getValue()
-            + "\" specification-path=\""
-            + tapestryPath
-            + "\"/>";
+          return "<component-alias type=\"" + (String) entry.getValue() + "\" specification-path=\"" + tapestryPath + "\"/>";
 
         } else {
 
-          return "<page name=\""
-            + (String) entry.getValue()
-            + "\" specification-path=\""
-            + tapestryPath
-            + "\"/>";
+          return "<page name=\"" + (String) entry.getValue() + "\" specification-path=\"" + tapestryPath + "\"/>";
         }
       }
     };
@@ -357,7 +361,7 @@ public class RenamedComponentOrPageRefactor
         confirmed,
         content,
         labels,
-        "Selected will be removed from " + baseModel.getUnderlyingStorage().getName());
+        "Selected will be removed from " + refactorer.getEditableModel().getUnderlyingStorage().getName());
 
     if (dialog.open() == dialog.OK) {
 
@@ -419,7 +423,6 @@ public class RenamedComponentOrPageRefactor
   private String findAlias(String tapestryPath, String extension) throws CoreException {
     String alias = null;
 
-    getRefactorer();
 
     TapestryLibraryModel libModel = refactorer.getEditableModel();
 
@@ -449,8 +452,7 @@ public class RenamedComponentOrPageRefactor
       return "/" + potential.getName();
 
     }
-    String tapestryPath =
-      "/" + fragment.getElementName().replace('.', '/') + "/" + potential.getName();
+    String tapestryPath = "/" + fragment.getElementName().replace('.', '/') + "/" + potential.getName();
     return tapestryPath;
   }
 
@@ -490,8 +492,7 @@ public class RenamedComponentOrPageRefactor
 
       if (oldExtension != null && ("jwc".equals(oldExtension) || "page".equals(oldExtension))) {
 
-        if (delta.getKind() == IResourceDelta.REMOVED
-          && (delta.getFlags() & IResourceDelta.MOVED_TO) != 0) {
+        if (delta.getKind() == IResourceDelta.REMOVED && (delta.getFlags() & IResourceDelta.MOVED_TO) != 0) {
 
           IPath movedFromPath = movedFrom.getFullPath();
           IPath movedToPath = delta.getMovedToPath();
@@ -502,8 +503,7 @@ public class RenamedComponentOrPageRefactor
 
           //if its not the same folder, its not a rename!
 
-          boolean sameFolder =
-            movedFromPath.removeLastSegments(1).equals(movedToPath.removeLastSegments(1));
+          boolean sameFolder = movedFromPath.removeLastSegments(1).equals(movedToPath.removeLastSegments(1));
 
           if (oldExtension.equals(newExtension) && sameFolder) {
 
@@ -516,8 +516,7 @@ public class RenamedComponentOrPageRefactor
               try {
 
                 //now ensure the new location is still within the classpath!
-                IPackageFragment fragment =
-                  project.getLookup().findPackageFragment((IStorage) movedTo);
+                IPackageFragment fragment = project.getLookup().findPackageFragment((IStorage) movedTo);
                 if (fragment != null) {
 
                   potentialModelMoves.put(movedFrom, movedTo);
@@ -568,9 +567,7 @@ public class RenamedComponentOrPageRefactor
 
           String memberName = memberPath.removeFileExtension().lastSegment();
 
-          if (member != null
-            && member instanceof IFile
-            && templateMatchLocalization(fileName, memberName)) {
+          if (member != null && member instanceof IFile && templateMatchLocalization(fileName, memberName)) {
 
             templates.add(member);
 

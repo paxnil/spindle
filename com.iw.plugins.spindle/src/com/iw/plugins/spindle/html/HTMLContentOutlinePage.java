@@ -27,6 +27,8 @@
 package com.iw.plugins.spindle.html;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -38,9 +40,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -57,6 +61,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -98,7 +103,6 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
   ContentProvider contentProvider = new ContentProvider();
 
   private CreateContainedComponentAction createAction = new CreateContainedComponentAction();
-  private ContainedComponentAlreadyExistsAction alreadyHasAction = new ContainedComponentAlreadyExistsAction();
 
   private OpenComponentAction openAction = new OpenComponentAction();
 
@@ -126,7 +130,6 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
     TreeViewer viewer = getTreeViewer();
     viewer.setContentProvider(contentProvider);
     viewer.setLabelProvider(new LabelProvider());
-    viewer.setSorter(new Sorter());
     MenuManager popupMenuManager = new MenuManager();
     IMenuListener listener = new IMenuListener() {
       public void menuAboutToShow(IMenuManager mng) {
@@ -138,22 +141,36 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
     popupMenuManager.addMenuListener(listener);
     Menu menu = popupMenuManager.createContextMenu(treeControl);
     treeControl.setMenu(menu);
+
+    registerToolbarActions();
+
     viewer.setInput("Go!");
+  }
+
+  private void registerToolbarActions() {
+
+    IToolBarManager toolBarManager = getSite().getActionBars().getToolBarManager();
+    if (toolBarManager != null) {
+
+      Action action = new AlphabeticalSortingAction();
+      toolBarManager.add(action);
+
+    }
   }
 
   /**
    * @see IDocumentPartitioningListener#documentPartitioningChanged(IDocument)
    */
   public void documentPartitioningChanged(IDocument document) {
-  	if (getTreeViewer() != null) {
-    	getTreeViewer().setInput(new Long(System.currentTimeMillis()));
-  	}
+    if (getTreeViewer() != null) {
+      getTreeViewer().setInput(new Long(System.currentTimeMillis()));
+    }
   }
 
   public void selectionChanged(SelectionChangedEvent event) {
     IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-    ITypedRegion region = (ITypedRegion) selection.getFirstElement();
-    if (region != null) {
+    if (selection.size() == 1) {
+      ITypedRegion region = (ITypedRegion) selection.getFirstElement();
       fireSelectionChanged(new StructuredSelection(new Object[] { findJWCID(region)}));
     }
   }
@@ -196,33 +213,63 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
     TreeViewer viewer = (TreeViewer) getTreeViewer();
     IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 
-    String selectedJwcid = null;
-
-    if (selection != null && selection.size() > 0) {
-      ILabelProvider provider = (ILabelProvider) viewer.getLabelProvider();
-      selectedJwcid = provider.getText(selection.getFirstElement());
-      if (selectedJwcid.startsWith("$")) {
-        return;
-      }
-    }
     IFile file = findRelatedComponent();
+
+    IStructuredSelection canCreateSelection = filterSelection(file, selection);
+
+    if (canCreateSelection.isEmpty() && selection.size() == 1) {
+    	
+      ILabelProvider provider = (ILabelProvider)getTreeViewer().getLabelProvider();
+    	
+      openAction.configure(file, provider.getText(selection.getFirstElement()));
+      manager.add(openAction);
+
+    } else {
+
+      createAction.configure(file, canCreateSelection);
+      manager.add(createAction);
+    }
+
+  }
+
+  private IStructuredSelection filterSelection(IFile file, IStructuredSelection selection) {
+
+    if (selection == null || selection.isEmpty()) {
+      return selection;
+    }
+
+    if (file == null) {
+
+      return StructuredSelection.EMPTY;
+    }
+
     TapestryComponentModel model = getComponentModel(file);
 
-    boolean canCreate = (model != null);
-    if (canCreate) {
+    if (model == null || !model.isLoaded()) {
 
-      canCreate = !alreadyHasJWCID(selectedJwcid, file);
-      if (canCreate) {
+      return StructuredSelection.EMPTY;
 
-        createAction.configure(file, selectedJwcid);
-        manager.add(createAction);
-
-      } else {
-        openAction.configure(file, selectedJwcid);
-        manager.add(openAction);
-
-      }
     }
+
+    ILabelProvider provider = (ILabelProvider) getTreeViewer().getLabelProvider();
+
+    List collected = new ArrayList();
+
+    for (Iterator iter = selection.iterator(); iter.hasNext();) {
+      ITypedRegion element = (ITypedRegion) iter.next();
+      String jwcId = provider.getText(element);
+      if (jwcId.startsWith("$")) {
+        continue;
+      }
+
+      if (alreadyHasJWCID(jwcId, file)) {
+        continue;
+      }
+      collected.add(jwcId);
+
+    }
+
+    return new StructuredSelection(collected);
 
   }
 
@@ -236,6 +283,11 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
 
     TapestryComponentModel model = getComponentModel(componentResource);
 
+    return alreadyHasJWCID(jwcid, model);
+
+  }
+
+  private boolean alreadyHasJWCID(String jwcid, TapestryComponentModel model) {
     if (model != null) {
 
       PluginComponentSpecification spec = (PluginComponentSpecification) model.getComponentSpecification();
@@ -246,7 +298,6 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
     }
 
     return false;
-
   }
 
   private TapestryComponentModel getComponentModel(IFile file) {
@@ -518,33 +569,62 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
 
   }
 
-  protected class Sorter extends StringSorter {
+  protected class AlphabeticalSorter extends StringSorter {
 
-    protected Sorter() {
+    protected AlphabeticalSorter() {
       super();
     }
 
     public int compare(Viewer viewer, Object e1, Object e2) {
       LabelProvider provider = (LabelProvider) getTreeViewer().getLabelProvider();
-      return super.compare(viewer, provider.getText(e1), provider.getText(e2));
+
+      String s1 = stripDollars(provider.getText(e1));
+      String s2 = stripDollars(provider.getText(e2));
+
+      return super.compare(viewer, s1, s2);
+    }
+
+    private String stripDollars(String string) {
+
+      string = string.trim();
+
+      if (string.indexOf("$") >= 0) {
+        if (string.startsWith("$")) {
+          string = string.substring(1);
+        }
+        if (string.endsWith("$")) {
+          string = string.substring(0, string.length() - 2);
+        }
+      }
+      return string;
+
     }
   }
 
   class CreateContainedComponentAction extends Action {
 
     IFile modelFile;
-    String jwcid;
+    List jwcids;
 
     public CreateContainedComponentAction() {
       super();
       setToolTipText("create a contained component in the related .jwc file with the selected name");
     }
 
-    public void configure(IFile model, String jwcid) {
+    public void configure(IFile model, IStructuredSelection selection) {
       this.modelFile = model;
-      this.jwcid = jwcid;
+      this.jwcids = selection.toList();
 
-      setText("create '" + jwcid + "' in '" + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc'");
+      if (jwcids.size() == 1) {
+        String id = (String) jwcids.get(0);
+
+        setText("create '" + id + "' in '" + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc'");
+
+      } else {
+
+        setText("create multiple components in '" + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc'");
+      }
+
     }
 
     public void run() {
@@ -598,7 +678,12 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
       if (chosen == null) {
         return;
       }
-      Utils.createContainedComponentIn(jwcid, chosen, model);
+
+      for (Iterator iter = jwcids.iterator(); iter.hasNext();) {
+        String element = (String) iter.next();
+        Utils.createContainedComponentIn(element, chosen, model);
+
+      }
 
       if (targetEditor == null) {
 
@@ -627,7 +712,11 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
 
       if (chosen != null) {
 
-        Utils.createContainedComponentIn(jwcid, chosen, model);
+        for (Iterator iter = jwcids.iterator(); iter.hasNext();) {
+          String element = (String) iter.next();
+          Utils.createContainedComponentIn(element, chosen, model);
+
+        }
 
         try {
 
@@ -639,7 +728,6 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
             }
           }).execute(new NullProgressMonitor());
 
-          TapestryPlugin.openTapestryEditor(modelFile);
 
         } catch (CoreException e) {
         }
@@ -700,19 +788,6 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
     }
   }
 
-  class ContainedComponentAlreadyExistsAction extends Action {
-
-    public ContainedComponentAlreadyExistsAction() {
-      super();
-    }
-
-    public void configure(String jwcid) {
-      setText("'" + jwcid + "' already exists in " + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc");
-    }
-
-    public void run() { /* do nothing*/
-    }
-  }
 
   /**
    * @author phraktle@imapmail.org    
@@ -744,19 +819,19 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
       JWCMultipageEditor jwc = (JWCMultipageEditor) Utils.getEditorFor(modelFile);
 
       if (jwc != null) {
-      	
+
         ITapestryModel model = (ITapestryModel) jwc.getModel();
 
         if (!model.isLoaded()) {
-        	
-           jwc.showPage(jwc.SOURCE_PAGE);
+
+          jwc.showPage(jwc.SOURCE_PAGE);
 
         } else {
-        	
+
           // had to change this from SpindleFormPage as the source page is not a SpindleFormPage!
           IPDEEditorPage currentPage = (IPDEEditorPage) jwc.getCurrentPage();
           ComponentsFormPage desiredPage = (ComponentsFormPage) jwc.getPage(jwc.COMPONENTS);
-          
+
           if (currentPage != desiredPage) {
             jwc.showPage(jwc.COMPONENTS);
           }
@@ -765,5 +840,36 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
       }
     }
   }
+
+  class AlphabeticalSortingAction extends Action {
+
+    private AlphabeticalSorter alphaSorter = new AlphabeticalSorter();
+
+    public AlphabeticalSortingAction() {
+      super();
+      setText("Sort alphabetically");
+      setToolTipText("Toggle alphabetical sorting");
+      setImageDescriptor(TapestryImages.getImageDescriptor("alphab_sort_co.gif"));
+
+      IPreferenceStore store = TapestryPlugin.getDefault().getPreferenceStore();
+
+      boolean checked = store.getBoolean("AlphabeticalSorting.isChecked");
+      valueChanged(checked, false);
+    }
+
+    public void run() {
+      valueChanged(isChecked(), true);
+    }
+
+    private void valueChanged(boolean on, boolean store) {
+      setChecked(on);
+      TreeViewer viewer = getTreeViewer();
+      viewer.setSorter(on ? alphaSorter : null);
+      documentChanged(null);
+
+      if (store)
+        TapestryPlugin.getDefault().getPreferenceStore().setValue("AlphabeticalSorting.isChecked", on);
+    }
+  };
 
 }

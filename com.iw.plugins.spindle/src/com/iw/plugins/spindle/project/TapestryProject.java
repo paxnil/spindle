@@ -51,14 +51,17 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.IEditorPart;
 
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.refactor.DeletedComponentOrPageRefactor;
 import com.iw.plugins.spindle.refactor.MovedComponentOrPageRefactor;
 import com.iw.plugins.spindle.refactor.RenamedComponentOrPageRefactor;
+import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
@@ -282,6 +285,8 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     }
 
   }
+  
+
 
   public ITapestryModel getProjectModel() throws CoreException {
 

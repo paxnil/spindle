@@ -42,20 +42,18 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 
-import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.project.TapestryProject;
@@ -69,12 +67,10 @@ import com.iw.plugins.spindle.ui.TapestryStorageLabelProvider;
  * Copyright 2002, Intelligent Works Inc.
  * All Rights Reserved.
  */
-public class DeletedComponentOrPageRefactor
-  implements IResourceChangeListener, IResourceDeltaVisitor {
+public class DeletedComponentOrPageRefactor implements IResourceChangeListener, IResourceDeltaVisitor {
 
   private TapestryProject project;
   private List potentialModelDeletes;
-  private TapestryLibraryModel baseModel = null;
   private LibraryRefactorer refactorer = null;
 
   public DeletedComponentOrPageRefactor(TapestryProject project) {
@@ -86,7 +82,6 @@ public class DeletedComponentOrPageRefactor
    * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
    */
   public void resourceChanged(IResourceChangeEvent event) {
-  	 
 
     if (event.getType() != IResourceChangeEvent.PRE_AUTO_BUILD) {
 
@@ -101,7 +96,7 @@ public class DeletedComponentOrPageRefactor
 
       IResourceDelta projectDelta = topLevelDelta.findMember(thisProject.getFullPath());
 
-      if (projectDelta != null) {
+      if (projectDelta != null) { 
 
         IJavaProject jproject = null;
         IStorage projectStorage = null;
@@ -110,23 +105,13 @@ public class DeletedComponentOrPageRefactor
 
         try {
 
-          baseModel = (TapestryLibraryModel) project.getProjectModel();
-          if (baseModel == null) {
-          	
-          	return;
-          	
-          }
-          projectStorage = baseModel.getUnderlyingStorage();
-
-          //      refactorer =
-          //        new LibraryRefactorer(project, (TapestryLibraryModel) project.getProjectModel(), true);
           jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisProject);
 
         } catch (CoreException e) {
 
         }
 
-        if (projectStorage == null || jproject == null || baseModel == null) {
+        if (jproject == null) {
 
           return;
 
@@ -148,6 +133,36 @@ public class DeletedComponentOrPageRefactor
           }
 
         }
+        
+        if (potentialModelDeletes.isEmpty()) {
+        	
+        	return;
+        	
+        }
+
+        TapestryLibraryModel baseModel = null;
+
+        try {
+
+          baseModel = (TapestryLibraryModel) project.getProjectModel();
+
+          if (baseModel == null) {
+
+            return;
+
+          }
+
+          getRefactorer(baseModel);
+
+        } catch (CoreException e) {
+
+        }
+
+        if (refactorer == null) {
+
+          return;
+
+        }
 
         HashMap confirmed = getUserConfirmed(findConfirmed());
 
@@ -155,7 +170,7 @@ public class DeletedComponentOrPageRefactor
 
           try {
 
-            getRefactorer();
+            getRefactorer(baseModel);
 
             IPluginLibrarySpecification refactorSpec = refactorer.getSpecification();
 
@@ -240,19 +255,11 @@ public class DeletedComponentOrPageRefactor
 
         if ("jwc".equals(extension)) {
 
-          return "<component-alias type=\""
-            + (String) entry.getValue()
-            + "\" specification-path=\""
-            + tapestryPath
-            + "\"/>";
+          return "<component-alias type=\"" + (String) entry.getValue() + "\" specification-path=\"" + tapestryPath + "\"/>";
 
         } else {
 
-          return "<page name=\""
-            + (String) entry.getValue()
-            + "\" specification-path=\""
-            + tapestryPath
-            + "\"/>";
+          return "<page name=\"" + (String) entry.getValue() + "\" specification-path=\"" + tapestryPath + "\"/>";
         }
       }
     };
@@ -263,7 +270,7 @@ public class DeletedComponentOrPageRefactor
         confirmed,
         content,
         labels,
-        "Selected will be removed from " + baseModel.getUnderlyingStorage().getName());
+        "Selected will be removed from " + refactorer.getEditableModel().getUnderlyingStorage().getName());
 
     if (dialog.open() == dialog.OK) {
 
@@ -284,6 +291,8 @@ public class DeletedComponentOrPageRefactor
   private HashMap findConfirmed() {
     HashMap result = new HashMap();
 
+    TapestryLibraryModel baseModel = refactorer.getEditableModel();
+
     for (Iterator iter = potentialModelDeletes.iterator(); iter.hasNext();) {
 
       IFile potential = (IFile) iter.next();
@@ -291,6 +300,11 @@ public class DeletedComponentOrPageRefactor
       try {
 
         String tapestryPath = getTapestryPath(potential);
+
+        if (tapestryPath == null) {
+
+          continue;
+        }
 
         String extension = potential.getFileExtension();
 
@@ -322,8 +336,6 @@ public class DeletedComponentOrPageRefactor
   private String findAlias(String tapestryPath, String extension) throws CoreException {
     String alias = null;
 
-    getRefactorer();
-
     TapestryLibraryModel libModel = refactorer.getEditableModel();
 
     if ("jwc".equals(extension)) {
@@ -338,7 +350,7 @@ public class DeletedComponentOrPageRefactor
     return alias;
   }
 
-  private void getRefactorer() throws CoreException {
+  private void getRefactorer(TapestryLibraryModel baseModel) throws CoreException {
     if (refactorer == null) {
 
       refactorer = new LibraryRefactorer(project, baseModel, true);
@@ -348,17 +360,85 @@ public class DeletedComponentOrPageRefactor
 
   private String getTapestryPath(IResource potential) throws CoreException {
 
+    String tapestryPath = null;
+
     IPackageFragment fragment = project.getLookup().findPackageFragment((IStorage) potential);
 
-    if ("".equals(fragment.getElementName())) {
+    if (fragment != null) {
 
-      return "/" + potential.getName();
+      if ("".equals(fragment.getElementName())) {
+
+        return "/" + potential.getName();
+
+      }
+
+      tapestryPath = "/" + fragment.getElementName().replace('.', '/') + "/" + potential.getName();
+    } else {
+
+      // do a terrible kludge as the package fragment has been deleted.
+      IPath path = potential.getFullPath();
+      int pathSegmentCount = path.segmentCount();
+      String name = potential.getName();
+      IPluginLibrarySpecification spec = refactorer.getEditableModel().getSpecification();
+
+      if (name.endsWith(".jwc")) {
+
+        for (Iterator iter = spec.getComponentAliases().iterator(); iter.hasNext();) {
+
+          String alias = (String) iter.next();
+          String specPath = spec.getComponentSpecificationPath(alias);
+
+          if (!path.isValidPath(specPath)) {
+            continue;
+          }
+          if (specPath == null || !specPath.endsWith("/" + name)) {
+            continue;
+          }
+          IPath pathObject = new Path(specPath);
+          IPath temp = new Path(path.toString());
+          int cut = pathSegmentCount - pathObject.segmentCount();
+          temp = temp.uptoSegment(cut);
+          temp = temp.append(pathObject);
+
+          if (temp.equals(path)) {
+            tapestryPath = specPath;
+            break;
+
+          }
+        }
+
+      } else if (name.endsWith(".page")) {
+
+        for (Iterator iter = spec.getPageNames().iterator(); iter.hasNext();) {
+
+          String pageName = (String) iter.next();
+          String specPath = spec.getPageSpecificationPath(pageName);
+
+          if (!path.isValidPath(specPath)) {
+            continue;
+          }
+          if (specPath == null || !specPath.endsWith("/" + name)) {
+            continue;
+          }
+          IPath pathObject = new Path(specPath);
+          IPath temp = new Path(path.toString());
+          int cut = pathSegmentCount - pathObject.segmentCount();
+          temp = temp.uptoSegment(cut);
+          temp.append(pathObject);
+
+          if (temp.equals(pathObject)) {
+            tapestryPath = specPath;
+            break;
+
+          }
+
+        }
+      }
 
     }
 
-    String tapestryPath =
-      "/" + fragment.getElementName().replace('.', '/') + "/" + potential.getName();
     return tapestryPath;
+
   }
 
   private List getSourceRootPaths(IJavaProject jproject) {
@@ -397,8 +477,7 @@ public class DeletedComponentOrPageRefactor
 
       if (extension != null && ("jwc".equals(extension) || "page".equals(extension))) {
 
-        if (delta.getKind() == IResourceDelta.REMOVED
-          && (delta.getFlags() & IResourceDelta.MOVED_TO) == 0) {
+        if (delta.getKind() == IResourceDelta.REMOVED && (delta.getFlags() & IResourceDelta.MOVED_TO) == 0) {
 
           potentialModelDeletes.add(deltaFile);
 

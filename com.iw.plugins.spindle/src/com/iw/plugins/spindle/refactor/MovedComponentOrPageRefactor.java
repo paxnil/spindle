@@ -26,14 +26,11 @@
 package com.iw.plugins.spindle.refactor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -75,7 +72,6 @@ public class MovedComponentOrPageRefactor implements IResourceChangeListener, IR
   private TapestryProject project;
   private HashMap potentialModelMoves;
   private HashMap templatesToBeMoved;
-  private TapestryLibraryModel baseModel = null;
   private LibraryRefactorer refactorer = null;
   private IResourceDelta topLevelDelta = null;
   private boolean hasAliases = false;
@@ -106,7 +102,6 @@ public class MovedComponentOrPageRefactor implements IResourceChangeListener, IR
       if (projectDelta != null) {
 
         IJavaProject jproject = null;
-        IStorage projectStorage = null;
         potentialModelMoves = new HashMap();
         templatesToBeMoved = new HashMap();
         hasAliases = false;
@@ -114,21 +109,13 @@ public class MovedComponentOrPageRefactor implements IResourceChangeListener, IR
 
         try {
 
-          baseModel = (TapestryLibraryModel) project.getProjectModel();
-          if (baseModel == null) {
-
-            return;
-
-          }
-          projectStorage = baseModel.getUnderlyingStorage();
-
           jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisProject);
 
         } catch (CoreException e) {
 
         }
 
-        if (projectStorage == null || jproject == null || baseModel == null) {
+        if (jproject == null) {
 
           return;
 
@@ -150,6 +137,34 @@ public class MovedComponentOrPageRefactor implements IResourceChangeListener, IR
           }
 
         }
+
+        if (potentialModelMoves.isEmpty()) {
+
+          return;
+
+        }
+
+        TapestryLibraryModel baseModel = null;
+
+       try {
+           baseModel = (TapestryLibraryModel) project.getProjectModel();
+            if (baseModel == null) {
+          
+              return;
+          
+            }
+            
+            getRefactorer(baseModel);
+        } catch (CoreException e) {
+        }
+        
+        if (refactorer == null) {
+        	
+        	return;
+        	
+        }
+        
+
         try {
 
           HashMap confirmed = findConfirmed();
@@ -221,7 +236,6 @@ public class MovedComponentOrPageRefactor implements IResourceChangeListener, IR
 
   private void updateProjectModel(HashMap confirmed) throws CoreException {
 
-    getRefactorer();
 
     IPluginLibrarySpecification refactorSpec = refactorer.getSpecification();
 
@@ -256,7 +270,7 @@ public class MovedComponentOrPageRefactor implements IResourceChangeListener, IR
     refactorer.commit(new NullProgressMonitor());
   }
 
-  private void getRefactorer() throws CoreException {
+  private void getRefactorer(TapestryLibraryModel baseModel) throws CoreException {
     if (refactorer == null) {
 
       refactorer = new LibraryRefactorer(project, baseModel, true);
@@ -322,7 +336,7 @@ public class MovedComponentOrPageRefactor implements IResourceChangeListener, IR
         confirmed,
         content,
         labels,
-        "Selected will be removed from " + baseModel.getUnderlyingStorage().getName());
+        "Selected will be removed from " + refactorer.getEditableModel().getUnderlyingStorage().getName());
 
     if (dialog.open() == dialog.OK) {
 
@@ -395,8 +409,6 @@ public class MovedComponentOrPageRefactor implements IResourceChangeListener, IR
 
   private String findAlias(String tapestryPath, String extension) throws CoreException {
     String alias = null;
-
-    getRefactorer();
 
     TapestryLibraryModel libModel = refactorer.getEditableModel();
 
