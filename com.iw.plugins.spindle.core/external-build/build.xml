@@ -8,7 +8,15 @@
 </target>
 
 <target name="clover.swing" depends="with.clover">
-   <clover-view/>
+   <clover-view span="1d"/>
+</target>
+
+<target name="clover.pdf" depends="with.clover">
+   <clover-report> 
+      <current summary="yes" outfile="${clover.pdf}/coverage.pdf" title="Spindle Test Coverage">
+         <format type="pdf"/> 
+      </current>	 
+   </clover-report>
 </target>
 
 <target name="clover.html" depends="with.clover">
@@ -76,9 +84,7 @@
 			<pathelement path="${ant.home}/lib/clover.jar"/>
 		</classpath>
 		<formatter type="xml"/>
-		<test toDir="${reports.dir}" name="CoreTestSuite"/>
-		<test toDir="${reports.dir}" name="tests.TapestryPullParser.SimplePullParserTests"/>
-			
+		<test toDir="${reports.dir}" name="CoreTestSuite"/>			
 	</junit>
 	<!--<junitreport toDir="${reports.dir}">
 		<fileset dir="${reports.dir}">
