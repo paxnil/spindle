@@ -51,7 +51,6 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 import com.iw.plugins.spindle.UIPlugin;

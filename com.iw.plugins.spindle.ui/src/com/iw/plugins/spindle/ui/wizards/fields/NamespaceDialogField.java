@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceLocation;
-import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IStatus;
 
@@ -109,6 +108,8 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
     fValidNamespaces.clear();
     setValues(new String[]{});
     select(-1);
+    fSelectedNamespace = null;
+    fireDialogFieldChanged(this);
   }
 
   private void populateNamespaces()
@@ -171,9 +172,11 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
         {
           setValues((String[]) libNames.toArray(new String[libNames.size()]));
           select(0);
+          fireDialogFieldChanged(this);
         }
       }
     }
+    namespaceChanged();
     updateStatus();
   }
 
@@ -216,7 +219,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
     SpindleStatus newStatus = new SpindleStatus();
     if (fValidNamespaces.isEmpty())
     {
-      newStatus.setError(fName + "NoValidNamespaceToSelect");
+      newStatus.setError(UIPlugin.getString(fName + ".NoValidNamespaceToSelect"));
       return newStatus;
     }
 
@@ -230,52 +233,52 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
     }
 
     ICoreNamespace selectedTarget = (ICoreNamespace) fValidNamespaces.get(selectedIndex);
-    IResourceWorkspaceLocation targetLocation = (IResourceWorkspaceLocation) selectedTarget
-        .getSpecificationLocation();
-
-    IStorage storage = targetLocation.getStorage();
-
-    ILibrarySpecification spec = selectedTarget.getSpecification();
-
-    String newName = fComponentNameField.getTextValue();
-
-    if (fIsComponentWizard && spec.getComponentSpecificationPath(newName) != null)
-    {
-      if (pathExists(spec.getSpecificationLocation(), spec
-          .getComponentSpecificationPath(newName)))
-      {
-        newStatus.setError(UIPlugin.getString(
-            fName + ".NameAlreadyExists",
-            newName,
-            storage.getName()));
-        return newStatus;
-      }
-    } else if (spec.getPageSpecificationPath(newName) != null)
-    {
-      if (pathExists(spec.getSpecificationLocation(), spec
-          .getPageSpecificationPath(newName)))
-      {
-        newStatus.setError(UIPlugin.getString(
-            fName + ".NameAlreadyExists",
-            newName,
-            storage.getName()));
-      }
-      return newStatus;
-    }
-
-    String fileName = newName + (fIsComponentWizard ? ".jwc" : ".page");
-
-    IResourceWorkspaceLocation newLocation = (IResourceWorkspaceLocation) targetLocation
-        .getRelativeLocation(fileName);
-
-    if (newLocation.getStorage() != null)
-    {
-      newStatus.setError(UIPlugin.getString(
-          fName + ".NameAlreadyExists",
-          newName,
-          storage.getName()));
-      return newStatus;
-    }
+//    IResourceWorkspaceLocation targetLocation = (IResourceWorkspaceLocation) selectedTarget
+//        .getSpecificationLocation();
+//
+//    IStorage storage = targetLocation.getStorage();
+//
+//    ILibrarySpecification spec = selectedTarget.getSpecification();
+//
+//    String newName = fComponentNameField.getTextValue();
+//
+//    if (fIsComponentWizard && spec.getComponentSpecificationPath(newName) != null)
+//    {
+//      if (pathExists(spec.getSpecificationLocation(), spec
+//          .getComponentSpecificationPath(newName)))
+//      {
+//        newStatus.setError(UIPlugin.getString(
+//            fName + ".NameAlreadyExists",
+//            newName,
+//            storage.getName()));
+//        return newStatus;
+//      }
+//    } else if (spec.getPageSpecificationPath(newName) != null)
+//    {
+//      if (pathExists(spec.getSpecificationLocation(), spec
+//          .getPageSpecificationPath(newName)))
+//      {
+//        newStatus.setError(UIPlugin.getString(
+//            fName + ".NameAlreadyExists",
+//            newName,
+//            storage.getName()));
+//      }
+//      return newStatus;
+//    }
+//
+//    String fileName = newName + (fIsComponentWizard ? ".jwc" : ".page");
+//
+//    IResourceWorkspaceLocation newLocation = (IResourceWorkspaceLocation) targetLocation
+//        .getRelativeLocation(fileName);
+//
+//    if (newLocation.getStorage() != null)
+//    {
+//      newStatus.setError(UIPlugin.getString(
+//          fName + ".NameAlreadyExists",
+//          newName,
+//          storage.getName()));
+//      return newStatus;
+//    }
 
     fSelectedNamespace = selectedTarget;
 

@@ -23,13 +23,22 @@
  */
 package com.iw.plugins.spindle.ui.wizards;
 
+import java.io.IOException;
+
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 
 public class NewTapComponentWizard extends NewTapestryElementWizard
 {
@@ -66,33 +75,84 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
    */
   public boolean performFinish()
   {
-
-    boolean openAllGenerated = fPage1.getOpenAll();
     IFile template = null;
     IFile spec = null;
     IFile java = null;
-    IFolder libraryLocation = null;
 
-    if (finishPage(fPage1.getAutoAddRunnable()))
+    spec = (IFile) fPage1.getResource();
+    template = (IFile) fPage1.getTemplateFile();
+
+    ResourceCreationRunnable createRunnable = new ResourceCreationRunnable();
+    // the new spec file;
+    createRunnable.addFile(spec);
+    if (template != null)
+      createRunnable.addFile(template);
+
+    IRunnableWithProgress op = new WorkspaceModifyDelegatingOperation(createRunnable);
+    try
     {
+      getContainer().run(false, true, op);
+    } catch (Exception e)
+    {
+      Throwable cause = e.getCause();
+      if (cause != null && cause instanceof CoreException)
+      {
+        ErrorDialog.openError(
+            getShell(),
+            "Operation Failed",
+            "see details",
+            ((CoreException) cause).getStatus());
+      }
+      //undo
+      try
+      {
+        createRunnable.setMode(createRunnable.UNDO);
+        getContainer().run(false, true, op);
+      } catch (Exception e1)
+      {
+        //eat it
+        UIPlugin.log(e1);
+      } finally
+      {
+        fPage1.clearResource();
+        fPage1.clearTemplateFile();
+      }
+      return false;
+    }
+
+    try
+    {
+      IRunnableWithProgress autoAdd = null;
+      try
+      {
+         autoAdd = fPage1.getAutoAddRunnable();
+      } catch (CoreException e1)
+      {
+        ErrorDialog.openError(getShell(), "Operation Failed", null, e1.getStatus());
+        return false;
+      } catch (IOException e1)
+      {
+        SpindleStatus status = new SpindleStatus();
+        status.setError(e1.getMessage());
+        ErrorDialog.openError(
+            getShell(),
+            "Operation Failed",
+            e1.getClass().getName(),
+            status);
+      }
+
       if (finishPage(fPage2.getRunnable(null)))
       {
         java = fPage2.getGeneratedJavaFile();
-        //TODO activate
-        //                if (java != null && fPage1.isNamespaceLibrary()) {
-        //                  libraryLocation = (IFolder)java.getParent();
 
-        //create the class
-        if (finishPage(fPage1.getRunnable(fPage2.getFinalSpecClass(), libraryLocation)))
+        if (finishPage(fPage1.getRunnable(fPage2.getFinalSpecClass())))
         {
           spec = (IFile) fPage1.getResource();
-          template = (IFile) fPage1.getGeneratedTemplate();
+          template = fPage1.getTemplateFile();
+          finishPage(autoAdd);
         }
       }
-    }
 
-    if (openAllGenerated)
-    {
       if (java != null)
       {
         try
@@ -112,18 +172,26 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
         }
       }
 
-    }
-    try
-    {
-      selectAndReveal(spec);
-      openResource(spec);
-    } catch (Exception e)
-    { // let pass, only reveal and open will fail
-    }
+      try
+      {
+        selectAndReveal(spec);
+        openResource(spec);
+      } catch (Exception e)
+      { // let pass, only reveal and open will fail
+      }
 
-    fPage1.performFinish();
-    fPage2.performFinish();
-    return true;
+      fPage1.performFinish();
+      fPage2.performFinish();
+      return true;
+    } catch (Exception e)
+    {
+      UIPlugin.log(e);
+      MessageDialog.openError(
+          getShell(),
+          "Operation Failed",
+          "Could not complete the 'Finish'. Please check the log.");
+      return false;
+    }
   }
   /**
    * @see IWizard#createPageControls(Composite)

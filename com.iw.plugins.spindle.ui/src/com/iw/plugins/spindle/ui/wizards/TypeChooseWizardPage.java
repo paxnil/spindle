@@ -66,6 +66,8 @@ import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
+import com.iw.plugins.spindle.ui.wizards.fields.ContainerDialogField;
+import com.iw.plugins.spindle.ui.wizards.fields.PackageDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.RawTypeDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.TapestryProjectDialogField;
 
@@ -75,7 +77,7 @@ import com.iw.plugins.spindle.ui.wizards.fields.TapestryProjectDialogField;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: TypeChooseWizardPage.java,v 1.2 2004/06/10 15:50:47 glongman
- *          Exp $
+ *                     Exp $
  */
 public class TypeChooseWizardPage extends NewTypeWizardPage
 {
@@ -139,6 +141,8 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
   private NewTapComponentWizardPage fFirstWizardPage;
   private DialogField fFirstPageNameField;
   private TapestryProjectDialogField fFirstPageProjectField;
+  private ContainerDialogField fFirstPageContainerField;
+  private PackageDialogField fFirstPagePackageField;
 
   /**
    * @param isClass
@@ -158,6 +162,8 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
     fFirstPageNameField.addListener(fListener);
     fFirstPageProjectField = fFirstWizardPage.getProjectField();
     fFirstPageProjectField.addListener(fListener);
+    fFirstPageContainerField = fFirstWizardPage.getContainerField();
+    fFirstPagePackageField = fFirstWizardPage.getPackageField();
 
     fDefaultSpecClass = UIPlugin.getString(PAGE_NAME + ".defaultSpecClass");
     fBaseSpecClass = UIPlugin.getString(PAGE_NAME + ".baseClass");
@@ -179,12 +185,31 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
 
   }
 
+  public void setVisible(boolean visible)
+  {
+    super.setVisible(visible);
+    if (visible)
+    {
+      boolean updateContainerAndPackage = fFirstPageContainerField
+          .getButtonControl(null)
+          .isVisible();
+      if (updateContainerAndPackage)
+      {
+        setPackageFragmentRoot(fFirstPageContainerField.getPackageFragmentRoot(), true);
+        setPackageFragment(fFirstPagePackageField.getPackageFragment(), true);
+      } else
+      {
+        setPackageFragmentRoot(null, true);
+        setPackageFragment(null, true);
+      }
+    }
+  }
   /**
    * Find the file generated, if it was
    * 
    * @return the IFile that was generated. If no generation occured, return null
    * @throws JavaModelException if there is a problem getting the file from the
-   *           generated Type.
+   *                     generated Type.
    */
   public IFile getGeneratedJavaFile()
   {
@@ -411,7 +436,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         if (isEnclosingTypeSelected())
           checkEnclosingModifiers(spindle);
 
-        if (!isEnclosingTypeSelected() && getPackageFragment().isDefaultPackage())
+        if (!isEnclosingTypeSelected() && getPackageFragment().isDefaultPackage() && fContainerStatus.isOK())
         {
           spindle.setError(UIPlugin.getString(PAGE_NAME + ".newclass.package"));
         }
@@ -524,9 +549,9 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
    * @param baseType the IType we are checking
    * @param tapestryclass the name of a class we would like the IType to extend
    * @param tapestryinterface the name of an interface the IType might implement
-   *          instead of extending the type
+   *                     instead of extending the type
    * @return true iff the Itype extends tapestryclass or implements
-   *         tapestryinterface.
+   *                 tapestryinterface.
    */
   protected final boolean checkTypes(
       IType baseType,

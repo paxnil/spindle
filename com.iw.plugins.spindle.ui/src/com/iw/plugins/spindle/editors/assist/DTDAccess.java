@@ -77,7 +77,7 @@ public class DTDAccess
   {
     DTDInfoMap.clear();
   }
-
+  
   /**
    * Examine a DTD and return the names all of the children of a parent. The
    * string returned is in DTD source format.
@@ -89,7 +89,12 @@ public class DTDAccess
    * @return a String containing the child names, or null if the elementName is
    *                 not a valid element in the DTDs
    */
-  static String getAllowedElements(DTD dtd, String elementName)
+  public static String getAllowedElements(DTD dtd, String elementName) {
+    return internalGetAllowedElements(dtd, elementName);
+  }
+
+  
+  private static String internalGetAllowedElements(DTD dtd, String elementName)
   {
     Assert.isLegal(dtd != null);
 

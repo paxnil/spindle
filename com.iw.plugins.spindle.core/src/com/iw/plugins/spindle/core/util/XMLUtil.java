@@ -1278,12 +1278,20 @@ public class XMLUtil
         String pname = (String) pageNames.next();
         String ppath = (String) pageMap.get(pname);
 
-        indenter.printIndented(indent, "<page name=\"" + pname);
-        indenter.print("\" specification-path=\"");
-        indenter.print(ppath);
-        indenter.println("\"/>");
+        writeLibraryPage(indent, indenter, pname, ppath);
+        indenter.println();
       }
     }
+  }
+  
+ 
+
+  public static void writeLibraryPage(int indent, IndentingWriter indenter, String pname, String ppath)
+  {
+    indenter.printIndented(indent, "<page name=\"" + pname);
+    indenter.print("\" specification-path=\"");
+    indenter.print(ppath);
+    indenter.print("\"/>");
   }
 
   public static void writeLibraryComponents(Map componentMap, Writer writer, int indent)
@@ -1299,14 +1307,20 @@ public class XMLUtil
       while (componentAliases.hasNext())
       {
 
-        String alias = (String) componentAliases.next();
-        indenter.printIndented(indent, "<component-alias type=\"");
-        indenter.print(alias);
-        indenter.print("\" specification-path=\"");
-        indenter.print(componentMap.get(alias));
-        indenter.println("\" />");
+        String id = (String) componentAliases.next();
+        Object resourcePath = componentMap.get(id);
+        writeLibraryComponent(indent, indenter, id, resourcePath);
       }
     }
+  }
+
+  public static void writeLibraryComponent(int indent, IndentingWriter indenter, String id, Object resourcePath)
+  {
+    indenter.printIndented(indent, "<component-type type=\"");
+    indenter.print(id);
+    indenter.print("\" specification-path=\"");       
+    indenter.print(resourcePath);
+    indenter.println("\"/>");
   }
 
   public static void writeLibraries(Map libraryMap, Writer writer, int indent)

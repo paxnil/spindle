@@ -40,6 +40,7 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 
 public class RawTypeDialogField extends StringButtonField

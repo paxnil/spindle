@@ -26,7 +26,6 @@
 package com.iw.plugins.spindle.ui.wizards.project;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
@@ -66,7 +65,6 @@ import com.iw.plugins.spindle.ui.preferences.WizardTemplatesPreferencePage;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 import com.iw.plugins.spindle.ui.widgets.PreferenceTemplateSelector;
 import com.iw.plugins.spindle.ui.wizards.TapestryWizardPage;
-import com.iw.plugins.spindle.ui.wizards.factories.ApplicationFactory;
 import com.iw.plugins.spindle.ui.wizards.factories.ITemplateSource;
 import com.iw.plugins.spindle.ui.wizards.factories.PageFactory;
 import com.iw.plugins.spindle.ui.wizards.factories.TapestryTemplateFactory;

@@ -26,11 +26,9 @@ package com.iw.plugins.spindle.ui.wizards.factories;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.templates.Template;
@@ -38,8 +36,6 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateException;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.ContextResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 
 public class ComponentFactory extends TemplateFactory
@@ -71,17 +67,13 @@ public class ComponentFactory extends TemplateFactory
   }
 
   public IFile createComponent(
-      IContainer container,
+      IFile file,
       Template template,
-      String componentName,
       String qualifiedComponentClass,
       IProgressMonitor monitor) throws CoreException, InterruptedException
   {
-    monitor.beginTask(UIPlugin.getString(
-        "ApplicationFactory.operationdesc",
-        componentName), 3);
-    String fileName = componentName + ".jwc";
-    IFile newFile = container.getFile(new Path("/" + fileName));
+    monitor.beginTask(UIPlugin.getString("ApplicationFactory.operationdesc", file
+        .getName()), 3);
 
     monitor.worked(1);
 
@@ -98,31 +90,16 @@ public class ComponentFactory extends TemplateFactory
           .getBytes());
     }
     monitor.worked(1);
-    newFile.create(contents, false, new SubProgressMonitor(monitor, 1));
-    monitor.worked(1);
-    monitor.done();
-    return newFile;
-  }
-
-  public IFile createComponent(
-      IResourceWorkspaceLocation namespaceLocation,
-      Template template,
-      String componentName,
-      String specClass,
-      IProgressMonitor monitor) throws CoreException, InterruptedException
-  {
-    IContainer container = null;
-    if (namespaceLocation.getName().length() == 0
-        && namespaceLocation.isWorkspaceResource())
+    if (!file.exists())
     {
-      //we might be using a stand-in application - in the workspace
-      container = ((ContextResourceWorkspaceLocation) namespaceLocation).getContainer();
+      file.create(contents, false, new SubProgressMonitor(monitor, 1));
     } else
     {
-      IFile namespaceFile = (IFile) namespaceLocation.getStorage();
-      container = (IContainer) namespaceFile.getParent();
+      file.setContents(contents, true, true, new SubProgressMonitor(monitor, 1));
     }
-    return createComponent(container, template, componentName, specClass, monitor);
+    monitor.worked(1);
+    monitor.done();
+    return file;
   }
 
 }

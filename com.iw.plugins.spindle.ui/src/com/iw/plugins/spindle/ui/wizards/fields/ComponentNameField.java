@@ -39,17 +39,18 @@ public class ComponentNameField extends AbstractNameField
    * @param fieldName
    * @param labelWidth
    */
-  public ComponentNameField(String fieldName, int labelWidth)
+  public ComponentNameField(String fieldName, boolean isComponentName, int labelWidth)
   {
-    super(fieldName, labelWidth);
+    super(fieldName, labelWidth, isComponentName ? COMPONENT_NAME : PAGE_NAME);
+
   }
 
   /**
    * Constructor for ApplicationNameField
    */
-  public ComponentNameField(String fieldName)
+  public ComponentNameField(String fieldName, boolean isComponentName)
   {
-    super(fieldName);
+    this(fieldName,  isComponentName, -1);
   }
 
   protected IStatus nameChanged()
@@ -89,23 +90,6 @@ public class ComponentNameField extends AbstractNameField
         return status;
       }
     }
-    //        if (fPackageField != null && fPackageField.getPackageFragment() != null)
-    //        {
-    //            try
-    //            {
-    //                IContainer folder = (IContainer)
-    // fPackageField.getPackageFragment().getUnderlyingResource();
-    //                IFile file = folder.getFile(new Path(name + ".jwc"));
-    //                if (file.exists())
-    //                {
-    //                    status.setError(UIPlugin.getString(fName +
-    // ".error.ComponentAlreadyExists", name));
-    //                }
-    //            } catch (JavaModelException e)
-    //            {
-    //                // do nothing
-    //            }
-    //        }
     char first = name.charAt(0);
     if (Character.isLowerCase(first))
     {
@@ -115,6 +99,5 @@ public class ComponentNameField extends AbstractNameField
     }
 
     return status;
-
   }
 }

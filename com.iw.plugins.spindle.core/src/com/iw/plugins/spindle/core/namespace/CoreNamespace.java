@@ -39,6 +39,7 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.lookup.ComponentLookup;
 import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
@@ -152,6 +153,22 @@ public class CoreNamespace implements ICoreNamespace
       return TapestryCore.getTapestryString("Namespace.application-namespace");
 
     return TapestryCore.getTapestryString("Namespace.nested-namespace", getExtendedId());
+  }
+  
+  public boolean isBinary() {
+    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) getSpecificationLocation();
+    if (location == null)
+      return false;
+    
+    return location.isBinary();
+  }
+  
+  public boolean isOnClassPath() {
+    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) getSpecificationLocation();
+    if (location == null)
+      return false;
+    
+    return location.isOnClasspath();
   }
 
   /*

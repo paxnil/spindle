@@ -42,8 +42,8 @@ import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 public class TapestryTemplateFactory extends TemplateFactory
 {
 
-  public static final String CONTEXT_TYPE =XMLFileContextType.TEMPLATE_FILE_CONTEXT_TYPE;
-  
+  public static final String CONTEXT_TYPE = XMLFileContextType.TEMPLATE_FILE_CONTEXT_TYPE;
+
   public TapestryTemplateFactory()
   {
     super(CONTEXT_TYPE);
@@ -56,6 +56,40 @@ public class TapestryTemplateFactory extends TemplateFactory
     return getGeneratedContent(template, createTemplateContext(), true);
   }
 
+  public IFile createTapestryTemplate(
+      IFile file,
+      Template template,
+      IProgressMonitor monitor) throws CoreException, InterruptedException
+  {
+    monitor.beginTask(UIPlugin.getString("ApplicationFactory.operationdesc", template
+        .getDescription()), 3);
+
+    monitor.worked(1);
+
+    InputStream contents;
+    try
+    {
+      contents = new ByteArrayInputStream(getContent(template).getBytes());
+    } catch (Exception e)
+    {
+      UIPlugin.log(e);
+      contents = new ByteArrayInputStream("\n\n\n\nan error occured. Check the log"
+          .getBytes());
+    }
+    monitor.worked(1);
+    if (!file.exists())
+    {
+      file.create(contents, false, new SubProgressMonitor(monitor, 1));
+    } else
+    {
+      file.setContents(contents, true, true, new SubProgressMonitor(monitor, 1));
+    }
+    monitor.worked(1);
+    monitor.done();
+    return file;
+  }
+
+  /** @deprecated */
   public IFile createTapestryTemplate(
       IContainer container,
       Template template,

@@ -25,6 +25,7 @@ package com.iw.plugins.spindle.ui.wizards;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.Composite;
 
 import com.iw.plugins.spindle.UIPlugin;

@@ -65,6 +65,7 @@ import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration
 import com.iw.plugins.spindle.core.resources.ClasspathSearch;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -455,6 +456,19 @@ public class TapestryCore extends AbstractUIPlugin
   public static void setCachingDTDGrammars(boolean flag)
   {
     getDefault().getPreferenceStore().setValue(CACHE_GRAMMAR_PREFERENCE, flag);
+  }
+
+  public static void throwErrorException(String message) throws TapestryException
+  {
+    throw createErrorException(message);
+  }
+
+  public static TapestryException createErrorException(String message)
+  {
+    SpindleStatus status = new SpindleStatus();
+    status.setError(message);
+    TapestryException exception = new TapestryException(status);
+    return exception;
   }
 
   public int getBuildMissPriority()

@@ -1,4 +1,3 @@
-package com.iw.plugins.spindle.core;
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -24,26 +23,26 @@ package com.iw.plugins.spindle.core;
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
+package com.iw.plugins.spindle.core;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
 /**
- * Preference contstants for the Core plugin.
+ * TapestryException  extension to CoreException
  * 
- * @author glongman@intelligentworks.com
+ * @author glongman@gmail.com
  * 
  */
-public interface PreferenceConstants
+public class TapestryException extends CoreException
 {
-  String CACHE_GRAMMAR_PREFERENCE = TapestryCore.PLUGIN_ID + ".cachinggrammars";
-  String BUILDER_MARKER_MISSES = TapestryCore.PLUGIN_ID + ".BUILDER_MARKER_MISSES";
-  String BUILDER_HANDLE_ASSETS = TapestryCore.PLUGIN_ID + ".BUILDER_HANDLE_ASSETS";
 
-  String CORE_STATUS_INFO = "info";
-  String CORE_STATUS_WARN = "warn";
-  String CORE_STATUS_ERROR = "error";
-  String CORE_STATUS_IGNORE = "ignore";
-
-  String[] CORE_STATUS_ARRAY = new String[]{CORE_STATUS_INFO, CORE_STATUS_WARN,
-      CORE_STATUS_ERROR, CORE_STATUS_IGNORE};
-  
-  String TAPESTRY_LIBRARY = TapestryCore.PLUGIN_ID+".tapestryLibrary";
+  /**
+   * @param status
+   */
+  public TapestryException(IStatus status)
+  {
+    super(status);
+  }
 
 }

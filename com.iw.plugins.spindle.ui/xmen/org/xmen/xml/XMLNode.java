@@ -145,6 +145,14 @@ public class XMLNode extends TypedPosition
     return ITypeConstants.TAG.equals(type) || ITypeConstants.EMPTYTAG.equals(type)
         || ITypeConstants.ENDTAG.equals(type);
   }
+  
+  public boolean isTag() {
+    return ITypeConstants.TAG.equals(getType());
+  }
+  
+  public boolean isEmptyTag() {
+    return ITypeConstants.EMPTYTAG.equals(getType());
+  }
 
   public boolean isTagOrEmptyTag()
   {
