@@ -17,7 +17,7 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.search"/>
       <import plugin="net.sf.solareclipse.ui"/>
-      <import plugin="net.sf.solareclipse.xml.ui"/>      
+      <import plugin="net.sf.solareclipse.xml.ui"/>
    </requires>
 
 
@@ -106,7 +106,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            name="Tapestry Template editor"
+            name="Tapestry Template Editor"
             default="false"
             icon="./icons/basic/html16.gif"
             extensions="htm,html"
@@ -114,6 +114,50 @@
             class="com.iw.plugins.spindle.editors.template.TemplateEditor"
             id="com.iw.plugins.spindle.editors.template">
       </editor>
+      <editor
+            name="Tapestry Spec Editor"
+            default="false"
+            icon="./icons/basic/application16.gif"
+            extensions="application, page, jwc, library"
+            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            class="com.iw.plugins.spindle.editors.spec.SpecEditor"
+            id="com.iw.plugins.spindle.editors.spec">
+      </editor>
+      <editor
+            name="Tapestry MultiEditor (Stacked)"
+            icon="./icons/basic/application16.gif"
+            class="com.iw.plugins.spindle.editors.multi.StackedMultiEditor"
+            id="com.iw.plugins.spindle.editors.multi.stacked">
+      </editor>
    </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <viewerContribution
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
+            id="com.iw.plugins.spindle.viewerContributions.java.multiEditor">
+         <action
+               label="Open in MultiEditor"
+               class="com.iw.plugins.spindle.editors.multi.OpenActionDelegate"
+               menubarPath="group.open"
+               id="com.iw.plugins.spindle.viewerContributions.java.OpenInMultiEditor">
+         </action>
+      </viewerContribution>
+   </extension>
+   <!--
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="Spindle MultiEditor Action"
+            visible="true"
+            id="com.iw.plugins.spindle.actionset.multiEditor">
+         <action
+               label="Open in MultiEditor"
+               class="com.iw.plugins.spindle.editors.multi.OpenActionDelegate"
+               menubarPath="org.eclipse.jdt.ui.A_OpenActionSet/navigate/open.ext"
+               id="com.iw.plugins.spindle.actions.OpenInMultiEditor">
+         </action>
+      </actionSet>
+   </extension>
+   -->
 
 </plugin>

@@ -33,6 +33,7 @@ import java.util.ResourceBundle;
 
 import net.sf.solareclipse.xml.internal.ui.preferences.XMLSyntaxPreferencePage;
 import net.sf.solareclipse.xml.ui.XMLPlugin;
+import net.sf.solareclipse.xml.ui.text.XMLTextTools;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -308,7 +309,7 @@ public class UIPlugin extends AbstractUIPlugin
     }
 
     /**
-     * Returns instance of text tools for XML.
+     * Returns instance of text tools for Templates.
      */
     public TemplateTextTools getTemplateTextTools()
     {
@@ -320,6 +321,13 @@ public class UIPlugin extends AbstractUIPlugin
         }
 
         return fTemplatelTextTools;
+    }
+    
+    /**
+     * Returns instance of text tools for Tapestry spec files.
+     */
+    public XMLTextTools getXMLTextTools() {
+        return XMLPlugin.getDefault().getXMLTextTools();
     }
 
     public ISharedTextColors getSharedTextColors()

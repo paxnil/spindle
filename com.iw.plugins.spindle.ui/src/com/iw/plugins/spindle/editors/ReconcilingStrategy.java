@@ -36,7 +36,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
+import com.iw.plugins.spindle.core.source.IProblemCollector;
 
 public class ReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension
 {
@@ -62,10 +62,10 @@ public class ReconcilingStrategy implements IReconcilingStrategy, IReconcilingSt
 
     private void reconcile()
     {
-        if (!(fEditor instanceof ISelfReconcilingEditor))
+        if (!(fEditor instanceof ReconcileWorker))
             return;
             
-        ISelfReconcilingEditor selfReconciler = (ISelfReconcilingEditor) fEditor;
+        ReconcileWorker selfReconciler = (ReconcileWorker) fEditor;
 
         if (!selfReconciler.isReadyToReconcile())
             return;

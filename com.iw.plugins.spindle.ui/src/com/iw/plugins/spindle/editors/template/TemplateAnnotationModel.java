@@ -37,7 +37,8 @@ import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.editors.ProblemAnnotationModel;
 
 /**
- *  Model for Template annotations
+ *  Model for Template annotations - of course only files and not jar entries will
+ *  have an annotation model.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -54,7 +55,7 @@ public class TemplateAnnotationModel extends ProblemAnnotationModel
     public void beginCollecting()
     {
         IComponentSpecification component = getComponent();
-        if (component != null) 
+        if (component != null)
             setIsActive(true);
         else
             setIsActive(false);

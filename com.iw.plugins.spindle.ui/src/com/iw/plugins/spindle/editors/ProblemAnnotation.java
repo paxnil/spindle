@@ -40,7 +40,7 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
-import com.iw.plugins.spindle.core.parser.IProblem;
+import com.iw.plugins.spindle.core.source.IProblem;
 
 /**
  * Annotation representating an <code>IProblem</code>.

@@ -24,21 +24,34 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors;
+package com.iw.plugins.spindle.editors.spec;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.ui.IFileEditorInput;
 
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
+import com.iw.plugins.spindle.editors.template.TemplateFileDocumentProvider;
 
 /**
- *  Called by Reconcilers on editors that perform thier own.
+ *  Document provider for Tapestry Specs that come from workbench files
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface ISelfReconcilingEditor
+public class SpecFileDocumentProvider extends TemplateFileDocumentProvider
 {
-    public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor);
-    
-    public boolean isReadyToReconcile();
+    /* (non-Javadoc)
+     * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createAnnotationModel(java.lang.Object)
+     */
+    protected IAnnotationModel createAnnotationModel(Object element) throws CoreException
+    {
+
+        if (element instanceof IFileEditorInput)
+        {
+            return new SpecAnnotationModel((IFileEditorInput) element);
+        }
+
+        return super.createAnnotationModel(element);
+    }
+
 }

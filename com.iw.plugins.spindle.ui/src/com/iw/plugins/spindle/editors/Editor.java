@@ -26,6 +26,8 @@
 
 package com.iw.plugins.spindle.editors;
 
+import net.sf.solareclipse.xml.ui.XMLPlugin;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -51,6 +53,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
+import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 
 /**
  *  Abstract base class for Editors.
@@ -58,7 +61,7 @@ import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class Editor extends StatusTextEditor implements IAdaptable, ISelfReconcilingEditor
+public abstract class Editor extends StatusTextEditor implements IAdaptable, ReconcileWorker
 {
 
     /** Preference key for highlighting current line */
@@ -158,7 +161,10 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, ISe
     {
         super();
         setSourceViewerConfiguration(createSourceViewerConfiguration());
-        setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
+        setPreferenceStore(
+           new PreferenceStoreWrapper(
+               UIPlugin.getDefault().getPreferenceStore(),
+               XMLPlugin.getDefault().getPreferenceStore()));
         setRangeIndicator(new DefaultRangeIndicator());
     }
 
@@ -182,12 +188,12 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, ISe
     protected void doSetInput(IEditorInput input) throws CoreException
     {
         super.doSetInput(input);
-        fInput = input;
+        fInput = input;       
         if (fOutline != null)
             fOutline.dispose();
         fOutline = createContentOutlinePage(input);
     }
-
+    
     protected void configureSourceViewerDecorationSupport()
     {
 

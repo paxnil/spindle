@@ -28,8 +28,6 @@ package com.iw.plugins.spindle.editors.template;
 
 import java.util.Map;
 
-import net.sf.solareclipse.xml.ui.XMLPlugin;
-
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
@@ -55,14 +53,13 @@ import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.parser.IProblemCollector;
 import com.iw.plugins.spindle.core.scanning.BaseValidator;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.scanning.TemplateScanner;
+import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 
 /**
  * HTML Editor.
@@ -80,10 +77,7 @@ public class TemplateEditor extends Editor
     public TemplateEditor()
     {
         super();
-        setPreferenceStore(
-            new PreferenceStoreWrapper(
-                UIPlugin.getDefault().getPreferenceStore(),
-                XMLPlugin.getDefault().getPreferenceStore()));
+       
     }
 
     protected boolean affectsTextPresentation(PropertyChangeEvent event)
@@ -98,7 +92,7 @@ public class TemplateEditor extends Editor
     {
         super.createActions();
 
-        Action action = new SaveHTMLTemplateAction("Save current as template for New Component Wizards");
+        Action action = new SaveHTMLTemplateAction("Save current as template used by Tapestry Wizards");
         action.setActionDefinitionId(SAVE_HTML_TEMPLATE);
         setAction(SAVE_HTML_TEMPLATE, action);
         action = new RevertTemplateAction("Revert the saved template to the default value");
@@ -125,7 +119,10 @@ public class TemplateEditor extends Editor
      */
     protected IDocumentProvider createDocumentProvider(IEditorInput input)
     {
-        return new TemplateFileDocumentProvider();
+        if (input instanceof IFileEditorInput)
+            return new TemplateFileDocumentProvider();
+
+        return new TemplateStorageDocumentProvider();
     }
 
     /* (non-Javadoc)
@@ -138,7 +135,7 @@ public class TemplateEditor extends Editor
 
     public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor)
     {
-        boolean didReconcile = false;        
+        boolean didReconcile = false;
         if ((getEditorInput() instanceof IFileEditorInput))
         {
             PluginComponentSpecification component = (PluginComponentSpecification) getComponent();
@@ -152,7 +149,10 @@ public class TemplateEditor extends Editor
                 fValidator.setProblemCollector(fScanner);
                 try
                 {
-                    fScanner.scanTemplate(component, getDocumentProvider().getDocument(getEditorInput()).get(), fValidator);
+                    fScanner.scanTemplate(
+                        component,
+                        getDocumentProvider().getDocument(getEditorInput()).get(),
+                        fValidator);
                 } catch (ScannerException e)
                 {
                     UIPlugin.log(e);
