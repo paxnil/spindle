@@ -85,7 +85,7 @@ public class OrderPreservingMap implements Map
     public Set entrySet()
     {
         // not implemented
-        throw new Error("not implemented");
+        throw new RuntimeException("not implemented");
     }
 
     /* (non-Javadoc)
