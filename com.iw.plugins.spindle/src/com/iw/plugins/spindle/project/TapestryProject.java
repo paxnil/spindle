@@ -43,7 +43,6 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -82,6 +81,10 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
    */
   public TapestryProject() {
     super();
+    try {
+      configure();
+    } catch (CoreException e) {
+    }
 
   }
 
@@ -90,15 +93,24 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
    */
   public void configure() throws CoreException {
 
-    // called when this nature is added to a project
-    // should instantiate the model manager.
+    if (listener == null) {
+
+      listener = new ProjectResourceChangeListener();
+      ResourcesPlugin.getWorkspace().addResourceChangeListener(
+        listener,
+        IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_CLOSE);
+
+    }
   }
 
   /**
    * @see org.eclipse.core.resources.IProjectNature#deconfigure()
    */
   public void deconfigure() throws CoreException {
-    // we do nothing - for now
+
+    if (listener != null) {
+      ResourcesPlugin.getWorkspace().removeResourceChangeListener(listener);
+    }
   }
 
   /**
@@ -164,15 +176,6 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
    * @see com.iw.plugins.spindle.project.ITapestryProject#getModelManager()
    */
   public synchronized TapestryProjectModelManager getModelManager() throws CoreException {
-
-    if (listener == null) {
-
-      listener = new ProjectResourceChangeListener();
-      ResourcesPlugin.getWorkspace().addResourceChangeListener(
-        listener,
-        IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_CLOSE);
-
-    }
 
     if (modelManager == null) {
 
@@ -446,7 +449,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     return property;
   }
 
-  class ProjectResourceChangeListener implements IResourceChangeListener, IResourceDeltaVisitor {
+  class ProjectResourceChangeListener implements IResourceChangeListener {
 
     /**
     * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
@@ -464,65 +467,35 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
       } else if (event.getType() == IResourceChangeEvent.POST_CHANGE) {
 
-        if (getProject() != null) {
+        IProject project = getProject();
+        IResourceDelta topLevelDelta = event.getDelta();
+        IResourceDelta projectDelta = topLevelDelta.findMember(project.getFullPath());
 
-          if (getProject().isOpen()) {
+        if (project.isOpen() && projectDelta != null) {
 
-            IResource projectResource = null;
-            try {
+          IResource projectResource = null;
+          try {
 
-              projectResource = (IResource) getProjectStorage();
-            } catch (CoreException e) {
+            projectResource = (IResource) getProjectStorage();
+          } catch (CoreException e) {
+          }
+
+          if (projectResource != null) {
+
+            IResourceDelta projectResourceDelta =
+              topLevelDelta.findMember(projectResource.getFullPath());
+            if (projectResourceDelta != null) {
+
+              handleProjectResourcePresentCase(projectResource, projectResourceDelta);
             }
 
-            if (projectResource != null) {
-
-              IResourceDelta projectDelta =
-                event.getDelta().findMember(projectResource.getFullPath());
-              if (projectDelta != null) {
-
-                handleProjectResourcePresentCase(projectResource, projectDelta);
-              }
-
-            } else {
-
-              try {
-
-                event.getDelta().accept(this);
-              } catch (CoreException e) {
-
-              }
-
-            }
           }
         }
+
       }
     }
 
-    /**
-    * @see org.eclipse.core.resources.IResourceDeltaVisitor#visit(IResourceDelta)
-    */
-    public boolean visit(IResourceDelta delta) throws CoreException {
-
-      IResource resource = delta.getResource();
-      int flags = delta.getFlags();
-      if (resource.getProject().equals(getProject())) {
-
-        String extension = resource.getFullPath().getFileExtension();
-        if ("application".equals(extension) || "library".equals(extension)) {
-
-          if ((flags & IResourceDelta.ADDED) != 0) {
-
-            setProjectStorage((IStorage) resource);
-            return false;
-          }
-
-        }
-
-      }
-
-      return true;
-    }
+   
 
     /**
     * Method handleProjectResourcePresentCase.
