@@ -50,8 +50,7 @@ import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.editors.XMLContentFormatter;
-import com.iw.plugins.spindle.editors.XMLFormattingStrategy;
+import com.iw.plugins.spindle.editors.formatter.XMLContentFormatter;
 
 /**
  * Access to features exposed by the JDT UI plugin
@@ -192,11 +191,11 @@ public class UIUtils
    */
   public static void XMLFormatDocument(IDocument document)
   {
-    XMLContentFormatter formatter = new XMLContentFormatter(
-        new XMLFormattingStrategy(),
-        new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY },
-        UIPlugin.getDefault().getPreferenceStore());
-    formatter.format(document, new Region(0, document.getLength()));
+//    XMLContentFormatter formatter = new XMLContentFormatter(
+//        new XMLFormattingStrategy(),
+//        new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY },
+//        UIPlugin.getDefault().getPreferenceStore());
+//    formatter.format(document, new Region(0, document.getLength()));
   }
 
   /**
