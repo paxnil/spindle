@@ -50,12 +50,11 @@ import com.iw.plugins.spindle.core.util.Assert;
 /**
  * Base Class for Node processors
  * <p>
- * Node Processors can find problems, but these problems do not represent a list
- * of *all* the problems with this document.
+ * Node Processors can find problems, but these problems do not represent a list of *all* the
+ * problems with this document.
  * </p>
  * <p>
- * i.e.The Parser will hold problems for things like well-formedness and dtd
- * validation!
+ * i.e.The Parser will hold problems for things like well-formedness and dtd validation!
  * </p>
  * 
  * @author glongman@gmail.com
@@ -63,405 +62,368 @@ import com.iw.plugins.spindle.core.util.Assert;
 public abstract class AbstractScanner implements IProblemCollector
 {
 
-  protected IProblemCollector fExternalProblemCollector;
-  protected List fProblems = new ArrayList();
-  protected IScannerValidator fValidator;
+    protected IProblemCollector fExternalProblemCollector;
 
-  public Object scan(Object source, IScannerValidator validator) throws ScannerException
-  {
-    Assert.isNotNull(source);
-    Object resultObject = null;
-    beginCollecting();
-    try
+    protected List fProblems = new ArrayList();
+
+    protected IScannerValidator fValidator;
+
+    public Object scan(Object source, IScannerValidator validator) throws ScannerException
     {
-
-      if (validator == null)
-      {
-        this.fValidator = new BaseValidator();
-      } else
-      {
-        this.fValidator = validator;
-      }
-      this.fValidator.setProblemCollector(this);
-      resultObject = beforeScan(source);
-      if (resultObject == null)
-        return null;
-
-      doScan(source, resultObject);
-      return afterScan(resultObject);
-
-    } catch (ScannerException scex)
-    {
-
-      if (scex.getLocation() != null)
-      {
-        addProblem(IProblem.ERROR, scex.getLocation(), scex.getMessage(), scex
-            .isTemporary());
-      } else
-      {
-        addProblem(new DefaultProblem(
-            ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
-            IProblem.ERROR,
-            scex.getMessage(),
-            0,
-            0,
-            0,
-            false));
-      }
-      return null;
-    } catch (RuntimeException e)
-    {
-      TapestryCore.log(e);
-      throw e;
-
-    } finally
-    {
-      cleanup();
-      endCollecting();
-    }
-
-  }
-  protected abstract void doScan(Object source, Object resultObject) throws ScannerException;
-
-  protected abstract Object beforeScan(Object source) throws ScannerException;
-
-  protected abstract void cleanup();
-
-  protected Object afterScan(Object scanResults) throws ScannerException
-  {
-    return scanResults;
-  }
-
-  public void beginCollecting()
-  {
-    if (fExternalProblemCollector != null)
-      fExternalProblemCollector.beginCollecting();
-
-    fProblems.clear();
-  }
-
-  public void endCollecting()
-  {
-    if (fExternalProblemCollector != null)
-      fExternalProblemCollector.endCollecting();
-  }
-
-  public void addProblem(IProblem problem)
-  {
-    if (fExternalProblemCollector != null)
-    {
-      fExternalProblemCollector.addProblem(problem);
-    } else
-    {
-      fProblems.add(problem);
-    }
-  }
-
-  public void addProblem(
-      int severity,
-      ISourceLocation location,
-      String message,
-      boolean isTemporary)
-  {
-    addProblem(new DefaultProblem(
-        ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
-        severity,
-        message,
-        location.getLineNumber(),
-        location.getCharStart(),
-        location.getCharEnd(),
-        isTemporary));
-  }
-
-  public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
-  {
-    addProblem(new DefaultProblem(
-        ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
-        status,
-        location.getLineNumber(),
-        location.getCharStart(),
-        location.getCharEnd(),
-        isTemporary));
-  }
-
-  public void addProblems(IProblem[] problems)
-  {
-    if (problems != null)
-      for (int i = 0; i < problems.length; i++)
-      {
-        addProblem(problems[i]);
-      }
-  }
-
-  public IProblem[] getProblems()
-  {
-    if (fExternalProblemCollector != null)
-      return fExternalProblemCollector.getProblems();
-    return (IProblem[]) fProblems.toArray(new IProblem[fProblems.size()]);
-  }
-
-  public boolean isElement(Node node, String elementName)
-  {
-    return W3CAccess.isElement(node, elementName);
-  }
-
-  public String getValue(Node node)
-  {
-    return W3CAccess.getValue(node);
-  }
-
-  protected boolean isDummyString(String value)
-  {
-    if (value != null)
-      return value.startsWith(fValidator.getDummyStringPrefix());
-
-    return false;
-  }
-
-  protected String getAttribute(Node node, String attributeName)
-  {
-    return getAttribute(node, attributeName, false);
-  }
-
-  protected boolean getBooleanAttribute(Node node, String attributeName)
-  {
-    return W3CAccess.getBooleanAttribute(node, attributeName);
-  }
-
-  protected String getAttribute(Node node, String attributeName, boolean returnDummyIfNull)
-  {
-    String result = W3CAccess.getAttribute(node, attributeName);
-    if (TapestryCore.isNull(result) && returnDummyIfNull)
-      result = getNextDummyString();
-
-    return result;
-  }
-
-  protected String getAttribute(
-      Node node,
-      String attributeName,
-      boolean returnDummyIfNull,
-      boolean warnIfNull)
-  {
-    String result = W3CAccess.getAttribute(node, attributeName);
-    if (TapestryCore.isNull(result) && returnDummyIfNull)
-    {
-      result = getNextDummyString();
-      if (warnIfNull)
-        addProblem(
-            IProblem.WARNING,
-            getAttributeSourceLocation(node, attributeName),
-            "warning, attribute value is null!",
-            false);
-    }
-
-    return result;
-  }
-
-  protected ISourceLocationInfo getSourceLocationInfo(Node node)
-  {
-    return W3CAccess.getSourceLocationInfo(node);
-  }
-
-  protected ISourceLocation getBestGuessSourceLocation(Node node, boolean forNodeContent)
-  {
-    ISourceLocationInfo info = getSourceLocationInfo(node);
-
-    if (info != null)
-    {
-      if (forNodeContent)
-      {
-        if (!info.isEmptyTag())
+        Assert.isNotNull(source);
+        Object resultObject = null;
+        beginCollecting();
+        try
         {
-          return info.getContentSourceLocation();
-        } else
-        {
-          return info.getTagNameLocation();
+
+            if (validator == null)
+            {
+                this.fValidator = new BaseValidator();
+            }
+            else
+            {
+                this.fValidator = validator;
+            }
+            this.fValidator.setProblemCollector(this);
+            resultObject = beforeScan(source);
+            if (resultObject == null)
+                return null;
+
+            doScan(source, resultObject);
+            return afterScan(resultObject);
+
         }
-      } else
-      {
-        return info.getTagNameLocation();
-      }
+        catch (ScannerException scex)
+        {
+
+            if (scex.getLocation() != null)
+            {
+                addProblem(IProblem.ERROR, scex.getLocation(), scex.getMessage(), scex
+                        .isTemporary(), scex.getCode());
+            }
+            else
+            {
+                addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+                        IProblem.ERROR, scex.getMessage(), 0, 0, 0, false, scex.getCode()));
+            }
+            return null;
+        }
+        catch (RuntimeException e)
+        {
+            TapestryCore.log(e);
+            throw e;
+
+        }
+        finally
+        {
+            cleanup();
+            endCollecting();
+        }
+
     }
-    return null;
-  }
 
-  protected ISourceLocation getNodeStartSourceLocation(Node node)
-  {
-    ISourceLocationInfo info = getSourceLocationInfo(node);
-    ISourceLocation result = null;
-    if (info != null)
-      result = info.getTagNameLocation();
+    protected abstract void doScan(Object source, Object resultObject) throws ScannerException;
 
-    return result;
-  }
+    protected abstract Object beforeScan(Object source) throws ScannerException;
 
-  protected ISourceLocation getNodeEndSourceLocation(Node node)
-  {
-    ISourceLocationInfo info = getSourceLocationInfo(node);
-    ISourceLocation result = null;
-    if (info != null)
+    protected abstract void cleanup();
+
+    protected Object afterScan(Object scanResults) throws ScannerException
     {
-      result = info.getEndTagSourceLocation();
-      if (result == null)
-      {
-        result = info.getTagNameLocation();
-      }
+        return scanResults;
     }
-    return result;
-  }
 
-  protected ISourceLocation getNodeBodySourceLocation(Node node)
-  {
-    ISourceLocationInfo info = getSourceLocationInfo(node);
-    ISourceLocation result = null;
-
-    if (info != null)
+    public void beginCollecting()
     {
-      result = info.getContentSourceLocation();
-    }
-    return result;
-  }
+        if (fExternalProblemCollector != null)
+            fExternalProblemCollector.beginCollecting();
 
-  protected ISourceLocation getAttributeSourceLocation(Node node, String rawname)
-  {
-    ISourceLocationInfo info = getSourceLocationInfo(node);
-    ISourceLocation result = null;
-    if (info != null)
+        fProblems.clear();
+    }
+
+    public void endCollecting()
     {
-      result = info.getAttributeSourceLocation(rawname);
-      if (result == null)
-      {
-        result = info.getTagNameLocation();
-      }
+        if (fExternalProblemCollector != null)
+            fExternalProblemCollector.endCollecting();
     }
-    return result;
-  }
 
-  protected boolean validatePattern(
-      String value,
-      String pattern,
-      String errorKey,
-      int severity) throws ScannerException
-  {
-    return fValidator.validatePattern(value, pattern, errorKey, severity);
-  }
+    public void addProblem(IProblem problem)
+    {
+        if (fExternalProblemCollector != null)
+        {
+            fExternalProblemCollector.addProblem(problem);
+        }
+        else
+        {
+            fProblems.add(problem);
+        }
+    }
 
-  protected boolean validatePattern(
-      String value,
-      String pattern,
-      String errorKey,
-      int severity,
-      ISourceLocation location) throws ScannerException
-  {
-    return fValidator.validatePattern(value, pattern, errorKey, severity, location);
-  }
+    public void addProblem(int severity, ISourceLocation location, String message,
+            boolean isTemporary, int code)
+    {
+        addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity, message,
+                location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
+                isTemporary, code));
+    }
 
-  protected boolean validateExpression(String expression, int severity) throws ScannerException
-  {
-    return fValidator.validateExpression(expression, severity);
-  }
+    public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
+    {
+        addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, status, location
+                .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary));
+    }
 
-  protected boolean validateExpression(
-      String expression,
-      int severity,
-      ISourceLocation location) throws ScannerException
-  {
-    return fValidator.validateExpression(expression, severity, location);
-  }
+    public void addProblems(IProblem[] problems)
+    {
+        if (problems != null)
+            for (int i = 0; i < problems.length; i++)
+            {
+                addProblem(problems[i]);
+            }
+    }
 
-  protected IType validateTypeName(
-      IResourceWorkspaceLocation dependant,
-      String fullyQualifiedType,
-      int severity) throws ScannerException
-  {
-    return fValidator.validateTypeName(dependant, fullyQualifiedType, severity);
-  }
+    public IProblem[] getProblems()
+    {
+        if (fExternalProblemCollector != null)
+            return fExternalProblemCollector.getProblems();
+        return (IProblem[]) fProblems.toArray(new IProblem[fProblems.size()]);
+    }
 
-  protected IType validateTypeName(
-      IResourceWorkspaceLocation dependant,
-      String fullyQualifiedType,
-      int severity,
-      ISourceLocation location) throws ScannerException
-  {
-    return fValidator.validateTypeName(dependant, fullyQualifiedType, severity, location);
-  }
+    public boolean isElement(Node node, String elementName)
+    {
+        return W3CAccess.isElement(node, elementName);
+    }
 
-  protected boolean validateLibraryResourceLocation(
-      IResourceLocation specLocation,
-      String path,
-      String errorKey,
-      ISourceLocation source) throws ScannerException
-  {
-    return fValidator.validateLibraryResourceLocation(
-        specLocation,
-        path,
-        errorKey,
-        source);
+    public String getValue(Node node)
+    {
+        return W3CAccess.getValue(node);
+    }
 
-  }
+    protected boolean isDummyString(String value)
+    {
+        if (value != null)
+            return value.startsWith(fValidator.getDummyStringPrefix());
 
-  protected boolean validateResourceLocation(
-      IResourceLocation location,
-      String relativePath,
-      String errorKey,
-      ISourceLocation source) throws ScannerException
-  {
-    return fValidator.validateResourceLocation(location, relativePath, errorKey, source);
+        return false;
+    }
 
-  }
+    protected String getAttribute(Node node, String attributeName)
+    {
+        return getAttribute(node, attributeName, false);
+    }
 
-  protected boolean validateContainedComponent(
-      IComponentSpecification specification,
-      IContainedComponent component,
-      ISourceLocationInfo sourceLocation) throws ScannerException
-  {
-    return fValidator
-        .validateContainedComponent(specification, component, sourceLocation);
-  }
+    protected boolean getBooleanAttribute(Node node, String attributeName)
+    {
+        return W3CAccess.getBooleanAttribute(node, attributeName);
+    }
 
-  protected boolean validateAsset(
-      IComponentSpecification specification,
-      IAssetSpecification asset,
-      ISourceLocationInfo sourceLocation) throws ScannerException
-  {
-    return fValidator.validateAsset(specification, asset, sourceLocation);
-  }
+    protected String getAttribute(Node node, String attributeName, boolean returnDummyIfNull)
+    {
+        String result = W3CAccess.getAttribute(node, attributeName);
+        if (TapestryCore.isNull(result) && returnDummyIfNull)
+            result = getNextDummyString();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#getNextDummyString()
-   */
-  protected String getNextDummyString()
-  {
-    return fValidator.getDummyStringPrefix();
-  }
+        return result;
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#getDummyStringPrefix()
-   */
-  protected String getDummyStringPrefix()
-  {
-    return fValidator.getDummyStringPrefix();
-  }
+    protected String getAttribute(Node node, String attributeName, boolean returnDummyIfNull,
+            boolean warnIfNull)
+    {
+        String result = W3CAccess.getAttribute(node, attributeName);
+        if (TapestryCore.isNull(result) && returnDummyIfNull)
+        {
+            result = getNextDummyString();
+            if (warnIfNull)
+                addProblem(
+                        IProblem.WARNING,
+                        getAttributeSourceLocation(node, attributeName),
+                        "warning, attribute value is null!",
+                        false,
+                        -1);
+        }
 
-  /**
-   * @return
-   */
-  public IProblemCollector getExternalProblemCollector()
-  {
-    return fExternalProblemCollector;
-  }
+        return result;
+    }
 
-  /**
-   * @param collector
-   */
-  public void setExternalProblemCollector(IProblemCollector collector)
-  {
-    fExternalProblemCollector = collector;
-  }
+    protected ISourceLocationInfo getSourceLocationInfo(Node node)
+    {
+        return W3CAccess.getSourceLocationInfo(node);
+    }
+
+    protected ISourceLocation getBestGuessSourceLocation(Node node, boolean forNodeContent)
+    {
+        ISourceLocationInfo info = getSourceLocationInfo(node);
+
+        if (info != null)
+        {
+            if (forNodeContent)
+            {
+                if (!info.isEmptyTag())
+                {
+                    return info.getContentSourceLocation();
+                }
+                else
+                {
+                    return info.getTagNameLocation();
+                }
+            }
+            else
+            {
+                return info.getTagNameLocation();
+            }
+        }
+        return null;
+    }
+
+    protected ISourceLocation getNodeStartSourceLocation(Node node)
+    {
+        ISourceLocationInfo info = getSourceLocationInfo(node);
+        ISourceLocation result = null;
+        if (info != null)
+            result = info.getTagNameLocation();
+
+        return result;
+    }
+
+    protected ISourceLocation getNodeEndSourceLocation(Node node)
+    {
+        ISourceLocationInfo info = getSourceLocationInfo(node);
+        ISourceLocation result = null;
+        if (info != null)
+        {
+            result = info.getEndTagSourceLocation();
+            if (result == null)
+            {
+                result = info.getTagNameLocation();
+            }
+        }
+        return result;
+    }
+
+    protected ISourceLocation getNodeBodySourceLocation(Node node)
+    {
+        ISourceLocationInfo info = getSourceLocationInfo(node);
+        ISourceLocation result = null;
+
+        if (info != null)
+        {
+            result = info.getContentSourceLocation();
+        }
+        return result;
+    }
+
+    protected ISourceLocation getAttributeSourceLocation(Node node, String rawname)
+    {
+        ISourceLocationInfo info = getSourceLocationInfo(node);
+        ISourceLocation result = null;
+        if (info != null)
+        {
+            result = info.getAttributeSourceLocation(rawname);
+            if (result == null)
+            {
+                result = info.getTagNameLocation();
+            }
+        }
+        return result;
+    }
+
+    protected boolean validatePattern(String value, String pattern, String errorKey, int severity,
+            int code) throws ScannerException
+    {
+        return fValidator.validatePattern(value, pattern, errorKey, severity, code);
+    }
+
+    protected boolean validatePattern(String value, String pattern, String errorKey, int severity,
+            ISourceLocation location, int code) throws ScannerException
+    {
+        return fValidator.validatePattern(value, pattern, errorKey, severity, location, code);
+    }
+
+    protected boolean validateExpression(String expression, int severity) throws ScannerException
+    {
+        return fValidator.validateExpression(expression, severity);
+    }
+
+    protected boolean validateExpression(String expression, int severity, ISourceLocation location)
+            throws ScannerException
+    {
+        return fValidator.validateExpression(expression, severity, location);
+    }
+
+    protected IType validateTypeName(IResourceWorkspaceLocation dependant,
+            String fullyQualifiedType, int severity) throws ScannerException
+    {
+        return fValidator.validateTypeName(dependant, fullyQualifiedType, severity);
+    }
+
+    protected IType validateTypeName(IResourceWorkspaceLocation dependant,
+            String fullyQualifiedType, int severity, ISourceLocation location)
+            throws ScannerException
+    {
+        return fValidator.validateTypeName(dependant, fullyQualifiedType, severity, location);
+    }
+
+    protected boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path,
+            String errorKey, ISourceLocation source) throws ScannerException
+    {
+        return fValidator.validateLibraryResourceLocation(specLocation, path, errorKey, source);
+
+    }
+
+    protected boolean validateResourceLocation(IResourceLocation location, String relativePath,
+            String errorKey, ISourceLocation source) throws ScannerException
+    {
+        return fValidator.validateResourceLocation(location, relativePath, errorKey, source);
+
+    }
+
+    protected boolean validateContainedComponent(IComponentSpecification specification,
+            IContainedComponent component, ISourceLocationInfo sourceLocation)
+            throws ScannerException
+    {
+        return fValidator.validateContainedComponent(specification, component, sourceLocation);
+    }
+
+    protected boolean validateAsset(IComponentSpecification specification,
+            IAssetSpecification asset, ISourceLocationInfo sourceLocation) throws ScannerException
+    {
+        return fValidator.validateAsset(specification, asset, sourceLocation);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#getNextDummyString()
+     */
+    protected String getNextDummyString()
+    {
+        return fValidator.getDummyStringPrefix();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#getDummyStringPrefix()
+     */
+    protected String getDummyStringPrefix()
+    {
+        return fValidator.getDummyStringPrefix();
+    }
+
+    /**
+     * @return
+     */
+    public IProblemCollector getExternalProblemCollector()
+    {
+        return fExternalProblemCollector;
+    }
+
+    /**
+     * @param collector
+     */
+    public void setExternalProblemCollector(IProblemCollector collector)
+    {
+        fExternalProblemCollector = collector;
+    }
 
 }

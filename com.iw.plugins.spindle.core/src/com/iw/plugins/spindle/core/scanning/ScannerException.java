@@ -32,48 +32,58 @@ import com.iw.plugins.spindle.core.source.ISourceLocation;
  * Exception type thrown by Processors
  * 
  * @author glongman@gmail.com
- * 
  */
 public class ScannerException extends Exception
 {
 
-  ISourceLocation location;
-  boolean fTemporary = false;
+    ISourceLocation fLocation;
 
-  /**
-   * @param arg0
-   */
-  public ScannerException(String message, boolean temporary)
-  {
-    super(message);
-    fTemporary = temporary;
-  }
+    int fCode = -1;
 
-  /**
-   * @param arg0
-   * @param arg1
-   */
-  public ScannerException(String message, Throwable exception, boolean temporary)
-  {
-    super(message, exception);
-    fTemporary = temporary;
-  }
+    boolean fTemporary = false;
 
-  public ScannerException(String message, ISourceLocation location, boolean temporary)
-  {
-    super(message);
-    this.location = location;
-    fTemporary = temporary;
-  }
+    /**
+     * @param arg0
+     */
+    public ScannerException(String message, boolean temporary, int code)
+    {
+        super(message);
+        fCode = code;
+        fTemporary = temporary;
+    }
 
-  public ISourceLocation getLocation()
-  {
-    return this.location;
-  }
+    /**
+     * @param arg0
+     * @param arg1
+     */
+    public ScannerException(String message, Throwable exception, boolean temporary, int code)
+    {
+        super(message, exception);
+        fCode = code;
+        fTemporary = temporary;
+    }
 
-  public boolean isTemporary()
-  {
-    return fTemporary;
-  }
+    public ScannerException(String message, ISourceLocation location, boolean temporary, int code)
+    {
+        super(message);
+        this.fLocation = location;
+        fCode = code;
+        fTemporary = temporary;
+    }
+
+    public int getCode()
+    {
+        return fCode;
+    }
+
+    public ISourceLocation getLocation()
+    {
+        return this.fLocation;
+    }
+
+    public boolean isTemporary()
+    {
+        return fTemporary;
+    }
 
 }

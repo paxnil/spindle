@@ -36,173 +36,193 @@ import com.iw.plugins.spindle.core.util.SpindleStatusWithLocation;
  * Default impl of IProblem
  * 
  * @author glongman@gmail.com
- *  
  */
 public class DefaultProblem implements IProblem
 {
 
-  private int fCharEnd;
+    private int fCharEnd;
 
-  private int fCharStart;
+    private int fCharStart;
 
-  private int fLineNumber;
+    private int fLineNumber;
 
-  private String fMessage;
+    private String fMessage;
 
-  private int fSeverity;
+    private int fSeverity;
 
-  private String fType;
+    private String fType;
 
-  private boolean fTemporary;
+    private boolean fTemporary;
 
-  static private int statusToMarkerServerity(IStatus status)
-  {
-    switch (status.getSeverity())
+    private int fCode;
+
+    static private int statusToMarkerServerity(IStatus status)
     {
-      case IStatus.ERROR :
+        switch (status.getSeverity())
+        {
+            case IStatus.ERROR:
+                return ERROR;
+            case IStatus.WARNING:
+                return WARNING;
+            case IStatus.INFO:
+                return INFO;
+        }
+        Assert
+                .isLegal(
+                        false,
+                        "only statii with severity: ERROR, WARNING, && INFO can be problems!");
         return ERROR;
-      case IStatus.WARNING :
-        return WARNING;
-      case IStatus.INFO :
-        return INFO;
     }
-    Assert.isLegal(
-        false,
-        "only statii with severity: ERROR, WARNING, && INFO can be problems!");
-    return ERROR;
-  }
 
-  public DefaultProblem(String type, IStatus status, int lineNumber, int charStart,
-      int charEnd, boolean isTemporary)
-  {
-    this(
-        type,
-        statusToMarkerServerity(status),
-        status.getMessage(),
-        (status instanceof SpindleStatusWithLocation)
-            ? ((SpindleStatusWithLocation) status).getLineNumber() : lineNumber,
-        (status instanceof SpindleStatusWithLocation)
-            ? ((SpindleStatusWithLocation) status).getCharStart() : charStart,
-        (status instanceof SpindleStatusWithLocation)
-            ? ((SpindleStatusWithLocation) status).getCharEnd() : charEnd,
-        isTemporary);
-  }
-
-  public DefaultProblem(String type, int severity, String message, int lineNumber,
-      int charStart, int charEnd, boolean isTemporary)
-  {
-    fType = type;
-    fSeverity = severity;
-    fMessage = message;
-    fLineNumber = lineNumber;
-    fCharStart = charStart;
-    fCharEnd = charEnd;
-    fTemporary = isTemporary;
-  }
-
-  public String toString()
-  {
-    String name = getClass().getName();
-    int index = name.lastIndexOf(".");
-    if (index > 0)
-      name = name.substring(index + 1);
-
-    StringBuffer buffer = new StringBuffer(name);
-    buffer.append("[");
-    switch (fSeverity)
+    public DefaultProblem(String type, IStatus status, int lineNumber, int charStart, int charEnd,
+            boolean isTemporary)
     {
-      case IMarker.SEVERITY_ERROR :
-        buffer.append("ERROR");
-        break;
-      case IMarker.SEVERITY_WARNING :
-        buffer.append("WARNING");
-        break;
-      case IMarker.SEVERITY_INFO :
-        buffer.append("INFO");
-        break;
-
-      default :
-        buffer.append("NOT SET");
-        break;
+        this(
+                type,
+                statusToMarkerServerity(status),
+                status.getMessage(),
+                (status instanceof SpindleStatusWithLocation) ? ((SpindleStatusWithLocation) status)
+                        .getLineNumber()
+                        : lineNumber,
+                (status instanceof SpindleStatusWithLocation) ? ((SpindleStatusWithLocation) status)
+                        .getCharStart()
+                        : charStart,
+                (status instanceof SpindleStatusWithLocation) ? ((SpindleStatusWithLocation) status)
+                        .getCharEnd()
+                        : charEnd, isTemporary, status.getCode());
     }
-    buffer.append(", ");
-    buffer.append("L=");
-    buffer.append(getLineNumber());
-    buffer.append(", ");
-    buffer.append("CS=");
-    buffer.append(getCharStart());
-    buffer.append(", ");
-    buffer.append("CE=");
-    buffer.append(getCharEnd());
-    buffer.append(", ");
-    buffer.append(getMessage());
-    buffer.append("]");
-    return buffer.toString();
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.parser.IProblem#getCharEnd()
-   */
-  public int getCharEnd()
-  {
-    return fCharEnd;
-  }
+    public DefaultProblem(String type, int severity, String message, int lineNumber, int charStart,
+            int charEnd, boolean isTemporary, int code)
+    {
+        fType = type;
+        fSeverity = severity;
+        fMessage = message;
+        fLineNumber = lineNumber;
+        fCharStart = charStart;
+        fCharEnd = charEnd;
+        fTemporary = isTemporary;
+        fCode = code;
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.parser.IProblem#getCharStart()
-   */
-  public int getCharStart()
-  {
-    return fCharStart;
-  }
+    public String toString()
+    {
+        String name = getClass().getName();
+        int index = name.lastIndexOf(".");
+        if (index > 0)
+            name = name.substring(index + 1);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.parser.IProblem#getLineNumber()
-   */
-  public int getLineNumber()
-  {
-    return fLineNumber;
-  }
+        StringBuffer buffer = new StringBuffer(name);
+        buffer.append("[");
+        switch (fSeverity)
+        {
+            case IMarker.SEVERITY_ERROR:
+                buffer.append("ERROR");
+                break;
+            case IMarker.SEVERITY_WARNING:
+                buffer.append("WARNING");
+                break;
+            case IMarker.SEVERITY_INFO:
+                buffer.append("INFO");
+                break;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.parser.IProblem#getMessage()
-   */
-  public String getMessage()
-  {
-    return fMessage;
-  }
+            default:
+                buffer.append("NOT SET");
+                break;
+        }
+        buffer.append(", ");
+        buffer.append("L=");
+        buffer.append(getLineNumber());
+        buffer.append(", ");
+        buffer.append("CS=");
+        buffer.append(getCharStart());
+        buffer.append(", ");
+        buffer.append("CE=");
+        buffer.append(getCharEnd());
+        buffer.append(", ");
+        buffer.append(getMessage());
+        buffer.append("]");
+        return buffer.toString();
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.parser.IProblem#getSeverity()
-   */
-  public int getSeverity()
-  {
-    return fSeverity;
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.parser.IProblem#getCharEnd()
+     */
+    public int getCharEnd()
+    {
+        return fCharEnd;
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.parser.IProblem#getType()
-   */
-  public String getType()
-  {
-    return fType;
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.parser.IProblem#getCharStart()
+     */
+    public int getCharStart()
+    {
+        return fCharStart;
+    }
 
-  public boolean isTemporary()
-  {
-    return fTemporary;
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.parser.IProblem#getLineNumber()
+     */
+    public int getLineNumber()
+    {
+        return fLineNumber;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.parser.IProblem#getMessage()
+     */
+    public String getMessage()
+    {
+        return fMessage;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.parser.IProblem#getSeverity()
+     */
+    public int getSeverity()
+    {
+        return fSeverity;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.parser.IProblem#getType()
+     */
+    public String getType()
+    {
+        return fType;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.source.IProblem#isTemporary()
+     */
+    public boolean isTemporary()
+    {
+        return fTemporary;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.source.IProblem#getCode()
+     */
+    public int getCode()
+    {        
+        return fCode;
+    }
 
 }

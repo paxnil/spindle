@@ -3,7 +3,7 @@
 <plugin
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
-   version="0.1.18"
+   version="0.1.18 "
    provider-name="Geoffrey Longman"
    class="com.iw.plugins.spindle.core.TapestryCore">
 
@@ -136,14 +136,12 @@
          name="Tapestry Problem"
          point="org.eclipse.core.resources.markers">
       <super
-            type="org.eclipse.core.resources.problemmarker">
-      </super>
+            type="org.eclipse.core.resources.problemmarker"/>
       <super
-            type="org.eclipse.core.resources.textmarker">
-      </super>
+            type="org.eclipse.core.resources.textmarker"/>
       <persistent
-            value="true">
-      </persistent>
+            value="true"/>
+      <attribute name="code"/>
    </extension>
    <extension
          id="buildBroken"

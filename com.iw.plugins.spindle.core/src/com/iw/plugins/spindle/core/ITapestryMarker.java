@@ -34,6 +34,7 @@ package com.iw.plugins.spindle.core;
 public interface ITapestryMarker
 {
   public static final String TEMPORARY_FLAG = "temporary";
+  public static final String PROBLEM_CODE = "code";
   static public final String TAPESTRY_PROBLEM_MARKER = TapestryCore.PLUGIN_ID
       + ".problemmarker";
   static public final String TAPESTRY_SOURCE_PROBLEM_MARKER = TapestryCore.PLUGIN_ID
