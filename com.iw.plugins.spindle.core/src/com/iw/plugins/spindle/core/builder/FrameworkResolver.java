@@ -55,9 +55,15 @@ public class FrameworkResolver extends NamespaceResolver
      */
     public ICoreNamespace resolve()
     {
-        reset();
-        resolve(ICoreNamespace.FRAMEWORK_NAMESPACE, fFrameworkLocation);
-        return fResultNamespace;
+        try
+        {
+            resolve(ICoreNamespace.FRAMEWORK_NAMESPACE, fFrameworkLocation);
+
+            return fResultNamespace;
+        } finally
+        {
+            cleanup();
+        }
     }
 
     /**

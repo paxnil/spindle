@@ -96,6 +96,7 @@ public class ComponentScanner extends SpecificationScanner
         specification.setPublicId(fPublicId);
         specification.setSpecificationLocation(fResourceLocation);
         specification.setPageSpecification(fIsPageSpec);
+        specification.setLocation(getSourceLocationInfo(fRootNode));
         ((PluginComponentSpecification) specification).setNamespace(fNamespace);
 
         // Only components specify these two attributes.
@@ -266,13 +267,13 @@ public class ComponentScanner extends SpecificationScanner
 
         } catch (ScannerException e)
         {
+            int severity = IProblem.ERROR;
+
             if (type == BindingType.STATIC)
-            {
-                addProblem(IProblem.WARNING, getNodeStartSourceLocation(node), e.getMessage());
-            } else
-            {
-                addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());
-            }
+                severity = IProblem.WARNING;
+
+            addProblem(IProblem.WARNING, e.getLocation(), e.getMessage());
+
             value = getNextDummyString();
         }
 
@@ -466,9 +467,10 @@ public class ComponentScanner extends SpecificationScanner
         throws ScannerException
     {
 
-        ISourceLocationInfo location = getSourceLocationInfo(rootNode);
-        specification.setLocation(location);
+//     TODO remove   ISourceLocationInfo location = getSourceLocationInfo(rootNode);
+//        specification.setLocation(location);
 
+        //must be done here!
         String rootName = rootNode.getNodeName();
         if (isPage)
         {
@@ -510,6 +512,7 @@ public class ComponentScanner extends SpecificationScanner
         } else
         {
             specification.setComponentClassName(componentClassname);
+            //can be done in spec object TODO remove
             validateTypeName(
                 (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
                 componentClassname,
@@ -820,7 +823,7 @@ public class ComponentScanner extends SpecificationScanner
                 initialValue = getExtendedAttribute(node, "initial-value", false).value;
             } catch (ScannerException e1)
             {
-                addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e1.getMessage());
+                addProblem(IProblem.ERROR, e1.getLocation(), e1.getMessage());
             }
 
             ps.setInitialValue(initialValue);
@@ -892,7 +895,7 @@ public class ComponentScanner extends SpecificationScanner
 
         } catch (ScannerException e)
         {
-            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());
+            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage());
         }
 
         PluginExpressionBeanInitializer iz =

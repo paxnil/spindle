@@ -79,7 +79,7 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
  */
 public class ApplicationResolver extends NamespaceResolver
 {
-    
+
     /**
      * information culled from the servlet - Application namespaces only
      */
@@ -99,31 +99,40 @@ public class ApplicationResolver extends NamespaceResolver
 
     public ICoreNamespace resolve()
     {
-        fNamespaceSpecLocation = fServlet.applicationSpecLocation;
-        if (fNamespaceSpecLocation != null)
+        try
         {
-            if (!fNamespaceSpecLocation.exists())
-                throw new BuilderException(
-                    TapestryCore.getString("build-failed-missing-application-spec", fNamespaceSpecLocation.toString()));
 
-            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fNamespaceSpecLocation, null);
-        } else
-        {
-            fResultNamespace = createStandinApplicationNamespace(fServlet);
-            fNamespaceSpecLocation = (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
-        }
-        if (fResultNamespace != null)
-        {
-            fResultNamespace.setAppNameFromWebXML(fServlet.name);
-            ILibrarySpecification spec = fResultNamespace.getSpecification();
-            for (Iterator iter = fServlet.parameters.keySet().iterator(); iter.hasNext();)
+            fNamespaceSpecLocation = fServlet.applicationSpecLocation;
+            if (fNamespaceSpecLocation != null)
             {
-                String key = (String) iter.next();
-                spec.setProperty(key, (String) fServlet.parameters.get(key));
+                if (!fNamespaceSpecLocation.exists())
+                    throw new BuilderException(
+                        TapestryCore.getString(
+                            "build-failed-missing-application-spec",
+                            fNamespaceSpecLocation.toString()));
+
+                fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fNamespaceSpecLocation, null);
+            } else
+            {
+                fResultNamespace = createStandinApplicationNamespace(fServlet);
+                fNamespaceSpecLocation = (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
             }
-            doResolve();
+            if (fResultNamespace != null)
+            {
+                fResultNamespace.setAppNameFromWebXML(fServlet.name);
+                ILibrarySpecification spec = fResultNamespace.getSpecification();
+                for (Iterator iter = fServlet.parameters.keySet().iterator(); iter.hasNext();)
+                {
+                    String key = (String) iter.next();
+                    spec.setProperty(key, (String) fServlet.parameters.get(key));
+                }
+                doResolve();
+            }
+            return fResultNamespace;
+        } finally
+        {
+            cleanup();
         }
-        return fResultNamespace;
     }
 
     /**
@@ -282,7 +291,6 @@ public class ApplicationResolver extends NamespaceResolver
     protected void resolveSpeclessPage(IResourceWorkspaceLocation location)
     {
 
- 
         PluginComponentSpecification specification = new PluginComponentSpecification();
         specification.setPageSpecification(true);
         specification.setSpecificationLocation(location);

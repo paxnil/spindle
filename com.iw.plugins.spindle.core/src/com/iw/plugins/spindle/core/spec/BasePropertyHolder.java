@@ -42,7 +42,7 @@ import com.iw.plugins.spindle.core.util.PropertyFiringMap;
 public abstract class BasePropertyHolder extends DescribableSpecification implements IPluginPropertyHolder
 {
     Map fProperties;
-    
+
     /**
      *  The locations and values of all reserved property declarations in a the document for this holder.
      *  Immutable after a parse/scan episode.
@@ -57,15 +57,17 @@ public abstract class BasePropertyHolder extends DescribableSpecification implem
         super(type);
 
     }
-    
-    public void addPropertyDeclaration(PluginPropertyDeclaration declaration) {
+
+    public void addPropertyDeclaration(PluginPropertyDeclaration declaration)
+    {
         if (fPropertyDeclarations == null)
             fPropertyDeclarations = new ArrayList();
-            
+
         fPropertyDeclarations.add(declaration);
     }
-    
-    public List getPropertyDeclarations() {
+
+    public List getPropertyDeclarations()
+    {
         if (fPropertyDeclarations == null)
             return Collections.EMPTY_LIST;
         return fPropertyDeclarations;
@@ -106,8 +108,7 @@ public abstract class BasePropertyHolder extends DescribableSpecification implem
      */
     public void removeProperty(String name)
     {
-        if (fProperties != null)
-            fProperties.remove(name);
+        remove(fProperties, name);
     }
 
     /* (non-Javadoc)

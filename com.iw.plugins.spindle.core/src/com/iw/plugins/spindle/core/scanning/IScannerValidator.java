@@ -231,4 +231,12 @@ public interface IScannerValidator
 
     public void removeListener(IScannerValidatorListener listener);
 
+    /**
+     *  Allow users record ad hoc problems
+     * @param severity
+     * @param sourceLocation the location in the source code
+     * @param message a String describing the problem 
+     */
+    public void addProblem(int severity, ISourceLocation sourceLocation, String message) throws ScannerException;
+
 }

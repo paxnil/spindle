@@ -95,14 +95,14 @@ public abstract class AbstractScanner implements IProblemCollector
                 // this could only happen when pull parsing!
                 TapestryCore.log(e);
                 if (e instanceof RuntimeException)
-                    throw (RuntimeException)e;
+                    throw (RuntimeException) e;
             }
             return afterScan(resultObject);
         } catch (RuntimeException e)
         {
             TapestryCore.log(e);
             throw e;
-        
+
         } finally
         {
             cleanup();
@@ -281,6 +281,18 @@ public abstract class AbstractScanner implements IProblemCollector
         return result;
     }
 
+    protected ISourceLocation getNodeBodySourceLocation(Node node)
+    {
+        ISourceLocationInfo info = getSourceLocationInfo(node);
+        ISourceLocation result = null;
+
+        if (info != null)
+        {
+            result = info.getContentSourceLocation();
+        }
+        return result;
+    }
+
     protected ISourceLocation getAttributeSourceLocation(Node node, String rawname)
     {
         ISourceLocationInfo info = getSourceLocationInfo(node);
@@ -324,12 +336,17 @@ public abstract class AbstractScanner implements IProblemCollector
         return fValidator.validateExpression(expression, severity, location);
     }
 
-    protected boolean validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType, int severity) throws ScannerException
+    protected boolean validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType, int severity)
+        throws ScannerException
     {
         return fValidator.validateTypeName(dependant, fullyQualifiedType, severity);
     }
 
-    protected boolean validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType, int severity, ISourceLocation location)
+    protected boolean validateTypeName(
+        IResourceWorkspaceLocation dependant,
+        String fullyQualifiedType,
+        int severity,
+        ISourceLocation location)
         throws ScannerException
     {
         return fValidator.validateTypeName(dependant, fullyQualifiedType, severity, location);

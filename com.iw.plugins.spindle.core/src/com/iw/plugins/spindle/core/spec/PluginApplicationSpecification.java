@@ -28,6 +28,13 @@ package com.iw.plugins.spindle.core.spec;
 
 import org.apache.tapestry.spec.IApplicationSpecification;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+
 /**
  *  Spindle implementation of IApplicationSpecification
  * 
@@ -78,6 +85,34 @@ public class PluginApplicationSpecification extends PluginLibrarySpecification i
         String old = this.fName;
         this.fName = name;
         firePropertyChange("name", old, name);
+    }
+
+    public void validateSelf(IScannerValidator validator)
+    {
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        try
+        {
+            validator.validateTypeName(
+                (IResourceWorkspaceLocation) getSpecificationLocation(),
+                fEngineClassName,
+                IProblem.ERROR,
+                sourceInfo.getAttributeSourceLocation("engine-class"));
+
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.spec.PluginLibrarySpecification#validate(com.iw.plugins.spindle.core.scanning.IScannerValidator)
+     */
+    public void validate(IScannerValidator validator)
+    {
+        validateSelf(validator);
+        super.validate(validator);
     }
 
 }

@@ -27,6 +27,15 @@
 package com.iw.plugins.spindle.core.spec;
 
 import org.apache.tapestry.ILocation;
+import org.apache.tapestry.INamespace;
+import org.apache.tapestry.parse.SpecificationParser;
+import org.apache.tapestry.spec.ILibrarySpecification;
+
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Record <page> tags in a document
@@ -63,6 +72,59 @@ public class PluginLibraryDeclaration extends BaseSpecification
     public String getIdentifier()
     {
         return getName();
+    }
+
+    /**
+          *  Revalidate this declaration. Note that some validations, like duplicate ids, are
+          *  only possible during a parse/scan cycle. But that's ok 'cuz those kinds of problems
+          *  would have already been caught.
+          * 
+          * @param parent the object holding this
+          * @param validator a validator helper
+          */
+    public void validate(Object parent, IScannerValidator validator)
+    {
+        ISourceLocationInfo info = (ISourceLocationInfo) getLocation();
+
+        try
+        {
+
+            validator.validatePattern(
+                fName,
+                SpecificationParser.LIBRARY_ID_PATTERN,
+                "SpecificationParser.invalid-library-id",
+                IProblem.ERROR,
+                info.getAttributeSourceLocation("id"));
+
+            if (fName.equals(INamespace.FRAMEWORK_NAMESPACE))
+                validator.addProblem(
+                    IProblem.ERROR,
+                    info.getAttributeSourceLocation("id"),
+                    TapestryCore.getTapestryString(
+                        "SpecificationParser.framework-library-id-is-reserved",
+                        INamespace.FRAMEWORK_NAMESPACE));
+
+            if (fResourcePath.startsWith(validator.getDummyStringPrefix()))
+            {
+                validator.addProblem(IProblem.ERROR, info.getAttributeSourceLocation("id"), "blank value");
+            } else
+            {
+                ILibrarySpecification parentLib = (ILibrarySpecification) parent;
+
+                validator.validateLibraryResourceLocation(
+                    parentLib.getSpecificationLocation(),
+                    fResourcePath,
+                    "scan-library-missing-library",
+                    info.getAttributeSourceLocation("specification-path"));
+            }
+
+        } catch (ScannerException e)
+        {
+            // TODO remove
+            e.printStackTrace();
+            TapestryCore.log(e);
+        }
+
     }
 
 }

@@ -90,7 +90,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         if (!TapestryCore.hasTapestryNature(project))
             return;
 
-        fProjectBuildStates.put(project, state);
+        setProjectState(project, state);
     }
 
     public void clearBuildState(IProject project)
@@ -111,19 +111,36 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         if (!TapestryCore.hasTapestryNature(project))
             return null;
 
-        Object state = fProjectBuildStates.get(project);
+        Object state = getProjectState(project);
         if (state == null && buildIfRequired)
         {
             try
             {
                 buildStateIfPossible(project, context);
-                state = fProjectBuildStates.get(project);
+                state =getProjectState(project);
             } catch (CoreException e)
             {
                 TapestryCore.log(e);
             }
         }
         return state;
+    }
+
+    // the fsking hashcode on IProjects is never the same twice!
+
+    private Object getProjectState(IProject project)
+    {
+        return fProjectBuildStates.get(project.getFullPath());
+    }
+
+    private void setProjectState(IProject project, Object state)
+    {
+        fProjectBuildStates.put(project.getFullPath(), state);
+    }
+
+    private void removeProjectState(IProject project)
+    {
+        fProjectBuildStates.remove(project.getFullPath());
     }
 
     /**

@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.apache.tapestry.ILocatable;
 import org.apache.tapestry.ILocation;
@@ -47,6 +48,45 @@ import org.apache.tapestry.ILocationHolder;
  */
 public abstract class BaseSpecification implements IIdentifiable, PropertyChangeListener, ILocatable, ILocationHolder
 {
+
+    private static ThreadLocal INTERNAL_CALL_TRACKER = new ThreadLocal();
+
+    protected static void beginInternalCall(String debugMessage)
+    {
+
+        Stack internalStack = (Stack) INTERNAL_CALL_TRACKER.get();
+
+        if (internalStack == null)
+        {
+            internalStack = new Stack();
+            INTERNAL_CALL_TRACKER.set(internalStack);
+        }
+
+        internalStack.push(debugMessage);
+
+    }
+
+    protected static void endInternalCall()
+    {
+
+        Stack internalStack = (Stack) INTERNAL_CALL_TRACKER.get();
+
+        if (internalStack == null)
+            throw new IllegalStateException("stack is null ");
+
+        internalStack.pop();
+
+    }
+
+    protected static void checkInternalCall(String errorMessage)
+    {
+        Stack internalStack = (Stack) INTERNAL_CALL_TRACKER.get();
+        if (internalStack == null || internalStack.isEmpty())
+        {
+            throw new IllegalStateException(errorMessage);
+        }
+
+    }
 
     public static final int APPLICATION_SPEC = 0;
     public static final int ASSET_SPEC = 1;
@@ -65,15 +105,15 @@ public abstract class BaseSpecification implements IIdentifiable, PropertyChange
     public static final int FIELD_BEAN_INIT = 21;
     public static final int STATIC_BEAN_INIT = 22;
     public static final int STRING_BEAN_INIT = 23;
-    
-    public static final int PROPERTY_DECLARATION=24;
-    public static final int PAGE_DECLARATION=25;
+
+    public static final int PROPERTY_DECLARATION = 24;
+    public static final int PAGE_DECLARATION = 25;
     public static final int COMPONENT_TYPE_DECLARATION = 26;
     public static final int DESCRIPTION_DECLARATION = 27;
     public static final int RESERVED_PARAMETER_DECLARATION = 28;
     public static final int ENGINE_SERVICE_DECLARATION = 29;
     public static final int LIBRARY_DECLARATION = 30;
-    
+    public static final int CONFIGURE_DECLARATION = 31;
 
     private String fIdentifier;
     private Object fParent;
@@ -220,7 +260,6 @@ public abstract class BaseSpecification implements IIdentifiable, PropertyChange
     {
         this.fILocation = location;
     }
-
 
     /**
      * @return

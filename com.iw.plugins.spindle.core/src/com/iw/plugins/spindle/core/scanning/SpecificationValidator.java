@@ -124,7 +124,7 @@ public class SpecificationValidator extends BaseValidator
 
         if (use_namespace == null)
         {
-            reportProblem(
+            addProblem(
                 IProblem.ERROR,
                 info.getAttributeSourceLocation("type"),
                 TapestryCore.getTapestryString("Namespace.no-such-component-type", type, "unknown"));
@@ -151,7 +151,7 @@ public class SpecificationValidator extends BaseValidator
                 ICoreNamespace sub_namespace = (ICoreNamespace) use_namespace.getChildNamespace(namespaceId);
                 if (sub_namespace == null)
                 {
-                    reportProblem(
+                    addProblem(
                         IProblem.ERROR,
                         info.getAttributeSourceLocation("type"),
                         "Unable to resolve "
@@ -159,7 +159,7 @@ public class SpecificationValidator extends BaseValidator
 
                 } else
                 {
-                    reportProblem(
+                    addProblem(
                         IProblem.ERROR,
                         info.getAttributeSourceLocation("type"),
                         TapestryCore.getTapestryString("Namespace.no-such-component-type", type, namespaceId));
@@ -169,7 +169,7 @@ public class SpecificationValidator extends BaseValidator
             } else
             {
 
-                reportProblem(
+                addProblem(
                     IProblem.ERROR,
                     info.getAttributeSourceLocation("type"),
                     TapestryCore.getTapestryString(
@@ -208,7 +208,7 @@ public class SpecificationValidator extends BaseValidator
         required.removeAll(bindingNames);
         if (!required.isEmpty())
         {
-            reportProblem(
+            addProblem(
                 IProblem.ERROR,
                 sourceInfo.getTagNameLocation(),
                 TapestryCore.getTapestryString(
@@ -274,7 +274,7 @@ public class SpecificationValidator extends BaseValidator
 
             if (formalOnly && !isFormal)
             {
-                reportProblem(
+                addProblem(
                     IProblem.ERROR,
                     location,
                     TapestryCore.getTapestryString("PageLoader.formal-parameters-only", containedName, name));
@@ -288,7 +288,7 @@ public class SpecificationValidator extends BaseValidator
             if (!isFormal && containedSpecification.isReservedParameterName(name))
             {
 
-                reportProblem(
+                addProblem(
                     IProblem.WARNING,
                     location,
                     "ignoring binding '" + name + "'. trying to bind to reserved parameter.");
@@ -372,7 +372,7 @@ public class SpecificationValidator extends BaseValidator
                 int handleI18NPriority = TapestryCore.getDefault().getHandleAssetProblemPriority();
                 if (handleI18NPriority >= 0)
                 {
-                    reportProblem(
+                    addProblem(
                         handleI18NPriority,
                         errorLoc,
                         TapestryCore.getString(
@@ -382,7 +382,7 @@ public class SpecificationValidator extends BaseValidator
                 }
             } else
             {
-                reportProblem(
+                addProblem(
                     IProblem.ERROR,
                     errorLoc,
                     TapestryCore.getString(
@@ -425,7 +425,7 @@ public class SpecificationValidator extends BaseValidator
         ;
         if (type == AssetType.EXTERNAL)
         {
-            reportProblem(
+            addProblem(
                 IProblem.WARNING,
                 ((ISourceLocationInfo) templateAsset.getLocation()).getTagNameLocation(),
                 "Spindle can't resolve templates from external assets");
@@ -435,7 +435,7 @@ public class SpecificationValidator extends BaseValidator
         {
             if (fTapestryProject.getProjectType() != TapestryProject.APPLICATION_PROJECT_TYPE)
             {
-                reportProblem(
+                addProblem(
                     IProblem.WARNING,
                     ((ISourceLocationInfo) templateAsset.getLocation()).getTagNameLocation(),
                     "Spindle can't resolve templates from context assets in Library projects");
@@ -489,7 +489,7 @@ public class SpecificationValidator extends BaseValidator
                 int handleI18NPriority = TapestryCore.getDefault().getHandleAssetProblemPriority();
                 if (handleI18NPriority >= 0)
                 {
-                    reportProblem(
+                    addProblem(
                         handleI18NPriority,
                         errorLoc,
                         TapestryCore.getString(
@@ -499,7 +499,7 @@ public class SpecificationValidator extends BaseValidator
                 }
             } else
             {
-                reportProblem(
+                addProblem(
                     IProblem.ERROR,
                     errorLoc,
                     TapestryCore.getString(

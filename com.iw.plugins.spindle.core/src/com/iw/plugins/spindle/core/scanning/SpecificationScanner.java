@@ -42,6 +42,7 @@ import org.w3c.dom.Node;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
 import com.iw.plugins.spindle.core.spec.PluginPropertyDeclaration;
 import com.iw.plugins.spindle.core.util.Assert;
@@ -143,12 +144,12 @@ public abstract class SpecificationScanner extends AbstractScanner
         fPublicId = publicId;
     }
 
-    protected interface IConverter
+    public static interface IConverter
     {
         public Object convert(String value) throws ScannerException;
     }
 
-    protected static class BooleanConverter implements IConverter
+    public static class BooleanConverter implements IConverter
     
     {
         public Object convert(String value) throws ScannerException
@@ -163,7 +164,7 @@ public abstract class SpecificationScanner extends AbstractScanner
         }
     }
 
-    protected static class IntConverter implements IConverter
+    public static class IntConverter implements IConverter
     {
         public Object convert(String value) throws ScannerException
         {
@@ -179,7 +180,7 @@ public abstract class SpecificationScanner extends AbstractScanner
         }
     }
 
-    protected static class LongConverter implements IConverter
+    public static class LongConverter implements IConverter
     {
         public Object convert(String value) throws ScannerException
         {
@@ -195,7 +196,7 @@ public abstract class SpecificationScanner extends AbstractScanner
         }
     }
 
-    protected static class DoubleConverter implements IConverter
+    public static class DoubleConverter implements IConverter
     {
         public Object convert(String value) throws ScannerException
         {
@@ -211,7 +212,7 @@ public abstract class SpecificationScanner extends AbstractScanner
         }
     }
 
-    protected static class StringConverter implements IConverter
+    public static class StringConverter implements IConverter
     {
         public Object convert(String value)
         {
@@ -226,7 +227,7 @@ public abstract class SpecificationScanner extends AbstractScanner
      *  since the keys are unique.
      * 
      **/
-    protected static final Map conversionMap = new HashMap();
+    public static final Map conversionMap = new HashMap();
 
     protected static final List typeList = new ArrayList();
 
@@ -298,10 +299,11 @@ public abstract class SpecificationScanner extends AbstractScanner
         typeList.add("java.lang.String[]");
     }
 
-    protected void scanProperty(IPluginPropertyHolder holder, Node node)
+    protected void scanProperty(IPluginPropertyHolder holder, Node node) throws ScannerException
     {
-        String name = getAttribute(node, "name", true);
+        String name = getAttribute(node, "name", false);
 
+        //TODO reimplement somewhere else.
         if (holder.getPropertyNames().contains(name))
             addProblem(
                 IProblem.WARNING,
@@ -311,16 +313,20 @@ public abstract class SpecificationScanner extends AbstractScanner
         // Starting in DTD 1.4, the value may be specified
         // as an attribute.  Only if that is null do we
         // extract the node's value.
+
+        // must be validated here
         String value = null;
         try
         {
             value = getExtendedAttribute(node, "value", true).value;
         } catch (ScannerException e)
         {
-            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());
+            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage());
         }
         holder.setProperty(name, value);
+        
         PluginPropertyDeclaration declaration = new PluginPropertyDeclaration(name, value, getSourceLocationInfo(node));
+               
         holder.addPropertyDeclaration(declaration);
     }
 
@@ -330,7 +336,7 @@ public abstract class SpecificationScanner extends AbstractScanner
      * 
      **/
 
-    protected void scanPropertiesInNode(IPropertyHolder holder, Node node)
+    protected void scanPropertiesInNode(IPropertyHolder holder, Node node) throws ScannerException
     {
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
         {
@@ -386,14 +392,17 @@ public abstract class SpecificationScanner extends AbstractScanner
                 TapestryCore.getTapestryString(
                     "SpecificationParser.no-attribute-and-body",
                     attributeName,
-                    node.getNodeName()));
+                    node.getNodeName()),
+                getNodeBodySourceLocation(node));
 
         if (required && nullAttributeValue && nullBodyValue)
             throw new ScannerException(
                 TapestryCore.getTapestryString(
                     "SpecificationParser.required-extended-attribute",
                     node.getNodeName(),
-                    attributeName));
+                    attributeName),
+                getNodeStartSourceLocation(node));
+
         ExtendedAttributeResult result = new ExtendedAttributeResult();
         if (nullAttributeValue)
         {
@@ -413,6 +422,27 @@ public abstract class SpecificationScanner extends AbstractScanner
     {
         public String value;
         public boolean fromAttribute;
+    }
+
+    static public class ExtendedAttributeException extends ScannerException
+    {
+
+        static public int ERROR_ATTR = 0;
+        static public int ERROR_BODY = 1;
+        static public int ERROR_BOTH = 2;
+
+        public int errorType;
+
+        /**
+         * @param message
+         * @param location
+         */
+        public ExtendedAttributeException(int errorType, String message, ISourceLocation location)
+        {
+            super(message, location);
+            this.errorType = errorType;
+        }
+
     }
 
     /* (non-Javadoc)

@@ -31,6 +31,8 @@ import org.apache.tapestry.ILocation;
 /**
  *  Record <property> tags in a document
  * 
+ *  These can only be validated at the time the document is parsed/scanned.
+ * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
@@ -46,8 +48,9 @@ public class PluginPropertyDeclaration extends BaseSpecification
         fValue = value;
         setLocation(location);
     }
-    
-    public String getIdentifier() {
+
+    public String getIdentifier()
+    {
         return getKey();
     }
 

@@ -768,7 +768,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                         try
                         {
                             result = (IComponentSpecification) scanner.scan(document, useValidator);
-
+                        
                         } finally
                         {
                             useValidator.removeListener(this);
@@ -796,7 +796,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 } catch (ScannerException e)
                 {
                     recordFatalProblem(location, e);
-
+                
                 } finally
                 {
                     if (fBuildQueue.isWaiting(location))

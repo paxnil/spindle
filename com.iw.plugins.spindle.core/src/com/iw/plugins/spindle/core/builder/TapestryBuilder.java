@@ -76,13 +76,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     public static final String SCRIPT_EXTENSION = "script";
     public static final String LIBRARY_EXTENSION = "library";
     public static final String[] KnownExtensions =
-        new String[] {
-            APPLICATION_EXTENSION,
-            COMPONENT_EXTENSION,
-            PAGE_EXTENSION,
-            TEMPLATE_EXTENSION,
-//            SCRIPT_EXTENSION,
-            LIBRARY_EXTENSION };
+        new String[] { APPLICATION_EXTENSION, COMPONENT_EXTENSION, PAGE_EXTENSION, TEMPLATE_EXTENSION,
+        //            SCRIPT_EXTENSION,
+        LIBRARY_EXTENSION };
     public static final String APP_SPEC_PATH_PARAM = "org.apache.tapestry.application-specification";
     public static final String ENGINE_CLASS_PARAM = "org.apache.tapestry.engine-class";
 
@@ -175,6 +171,10 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         {
             Markers.addBuildBrokenProblemMarkerToResource(getProject(), e.getMessage());
         } catch (NullPointerException e)
+        {
+            TapestryCore.log(e);
+            throw e;
+        } catch (RuntimeException e)
         {
             TapestryCore.log(e);
             throw e;

@@ -64,14 +64,20 @@ public class LibraryResolver extends NamespaceResolver
 
     public ICoreNamespace resolve()
     {
-        reset();
+        try
+        {
 
-        resolve(fLibraryId, fLibLocation);
+            resolve(fLibraryId, fLibLocation);
 
-        if (fParentNamespace != null && fResultNamespace != null)
-            fParentNamespace.installChildNamespace(fLibraryId, fResultNamespace);
+            if (fParentNamespace != null && fResultNamespace != null)
+                fParentNamespace.installChildNamespace(fLibraryId, fResultNamespace);
 
-        return fResultNamespace;
+            return fResultNamespace;
+            
+        } finally
+        {
+            cleanup();
+        }
     }
 
 }

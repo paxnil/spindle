@@ -176,7 +176,7 @@ public abstract class NamespaceResolver
         return fResultNamespace;
     }
 
-    protected void reset()
+    protected void cleanup()
     {
         fComponentStack.clear();
         fFrameworkNamespace = null;
@@ -184,7 +184,6 @@ public abstract class NamespaceResolver
         fNamespaceSpecLocation = null;
         fWorking = false;
         fJwcFiles = null;
-        fProblemCollector.beginCollecting();
     }
 
     protected void doResolve()
@@ -198,6 +197,7 @@ public abstract class NamespaceResolver
         {
             fWorking = true;
             fComponentStack.clear();
+            fProblemCollector.beginCollecting();
             if (fResultNamespace == null)
                 throw new RuntimeException("Null namespace!");
 

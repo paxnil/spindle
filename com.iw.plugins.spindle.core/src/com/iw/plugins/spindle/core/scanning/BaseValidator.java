@@ -172,7 +172,7 @@ public class BaseValidator implements IScannerValidator
      * @param fullyQulaifiedName the name of the type
      * @param result the resolved IType, if any
      */
-    protected void fireTypeDependency(IResourceWorkspaceLocation dependant, String fullyQulaifiedName, IType result)
+    protected void fireTypeDependency(IResourceWorkspaceLocation dependant, String fullyQualifiedName, IType result)
     {
         if (fListeners == null)
             return;
@@ -180,11 +180,13 @@ public class BaseValidator implements IScannerValidator
         for (Iterator iter = fListeners.iterator(); iter.hasNext();)
         {
             IScannerValidatorListener listener = (IScannerValidatorListener) iter.next();
-            listener.typeChecked(fullyQulaifiedName, result); //TODO remove eventually
-            IDependencyListener depListener = Build.getDependencyListener();
-            if (depListener != null)
-                depListener.foundTypeDependency(dependant, result.getFullyQualifiedName());
+            listener.typeChecked(fullyQualifiedName, result); //TODO remove eventually
         }
+
+        IDependencyListener depListener = Build.getDependencyListener();
+        if (depListener != null && fullyQualifiedName != null && fullyQualifiedName.trim().length() > 0)
+            depListener.foundTypeDependency(dependant, fullyQualifiedName);
+
     }
 
     /** 
@@ -282,14 +284,14 @@ public class BaseValidator implements IScannerValidator
                 Ognl.parseExpression(expression);
             } catch (OgnlException e)
             {
-                reportProblem(severity, location, e.getMessage());
+                addProblem(severity, location, e.getMessage());
                 return false;
             }
         }
         return true;
     }
 
-    protected void reportProblem(int severity, ISourceLocation location, String message) throws ScannerException
+    public void addProblem(int severity, ISourceLocation location, String message) throws ScannerException
     {
         if (fProblemCollector == null)
         {
@@ -336,12 +338,12 @@ public class BaseValidator implements IScannerValidator
 
             if (!fMatcher.matches(value, compiled))
             {
-                reportProblem(severity, location, TapestryCore.getTapestryString(errorKey, value));
+                addProblem(severity, location, TapestryCore.getTapestryString(errorKey, value));
                 return false;
             }
             return true;
         }
-        reportProblem(severity, location, TapestryCore.getTapestryString(errorKey, "null value"));
+        addProblem(severity, location, TapestryCore.getTapestryString(errorKey, "null value"));
         return false;
     }
 
@@ -386,7 +388,7 @@ public class BaseValidator implements IScannerValidator
         {
             IResourceWorkspaceLocation relative =
                 (IResourceWorkspaceLocation) location.getRelativeLocation(relativePath);
-            reportProblem(IProblem.ERROR, source, TapestryCore.getString(errorKey, relative.toString()));
+            addProblem(IProblem.ERROR, source, TapestryCore.getString(errorKey, relative.toString()));
             return false;
         }
         return true;
@@ -418,7 +420,7 @@ public class BaseValidator implements IScannerValidator
         Object type = findType(dependant, fullyQualifiedType);
         if (type == null)
         {
-            reportProblem(
+            addProblem(
                 severity,
                 location,
                 TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType));

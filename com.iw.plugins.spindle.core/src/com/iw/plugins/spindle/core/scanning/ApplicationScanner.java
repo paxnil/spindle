@@ -31,8 +31,8 @@ import org.apache.tapestry.spec.IApplicationSpecification;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 
 /**
  *  Scanner that turns a node tree into a IApplicationSpecification
@@ -69,6 +69,7 @@ public class ApplicationScanner extends LibraryScanner
         IApplicationSpecification specification = (IApplicationSpecification) resultObject;
         specification.setPublicId(fPublicId);
         specification.setSpecificationLocation(fResourceLocation);
+        specification.setLocation(getSourceLocationInfo(fRootNode));
         String rootName = fRootNode.getNodeName();
         if (!rootName.equals("application"))
         {
@@ -92,14 +93,10 @@ public class ApplicationScanner extends LibraryScanner
     {
 
         specification.setName(getAttribute(rootNode, "name"));
-        String engineClass = getAttribute(rootNode, "engine-class");
-        if (engineClass != null)
-            validateTypeName(
-                (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
-                engineClass,
-                IProblem.ERROR,
-                getAttributeSourceLocation(rootNode, "engine-class"));
+
         specification.setEngineClassName(getAttribute(rootNode, "engine-class"));
+
+        ((PluginApplicationSpecification) specification).validateSelf(fValidator);
 
         scanLibrarySpecification(rootNode, specification, resolver);
 
