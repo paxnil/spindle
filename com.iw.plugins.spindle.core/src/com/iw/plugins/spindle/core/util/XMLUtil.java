@@ -633,7 +633,7 @@ public class XMLUtil
         {
             while (iter.hasNext())
             {
-                 String containedName = (String) iter.next();
+                String containedName = (String) iter.next();
                 currentComponent = component.getComponent(containedName);
                 writeContainedComponent(currentComponent, containedName, indenter, indent, publicId);
             }
@@ -953,6 +953,8 @@ public class XMLUtil
 
         indenter.println("<web-app>");
         indenter.printlnIndented(1, "<display-name>" + servletName + "</display-name>");
+        if (TapestryCore.SERVLET_2_3_PUBLIC_ID.equals(publicId))
+            writeTapestryFilter("org.apache.tapestry.RedirectFilter", writer, 1); //TODO add filter classname to properties file
         writeServlet(servletName, indenter, 1);
         writeServletMapping(servletName, indenter, 1);
         indenter.println("</web-app>");
@@ -976,6 +978,19 @@ public class XMLUtil
         indenter.printlnIndented(indent + 1, "<servlet-name>" + servletName + "</servlet-name>");
         indenter.printlnIndented(indent + 1, "<url-pattern>/app</url-pattern>");
         indenter.printlnIndented(indent, "</servlet-mapping>");
+    }
+
+    public static void writeTapestryFilter(String filterClassname, Writer writer, int indent)
+    {
+        IndentingWriter indenter = checkWriter(writer);
+        indenter.printlnIndented(indent, "<filter>");
+        indenter.printlnIndented(indent + 1, "<filter-name>redirect</filter-name>");
+        indenter.printlnIndented(indent + 1, "<filter-class>" + filterClassname + "</filter-class>");
+        indenter.printlnIndented(indent, "</filter>");
+        indenter.printlnIndented(indent, "<filter-mapping>");
+        indenter.printlnIndented(indent + 1, "<filter-name>redirect</filter-name>");
+        indenter.printlnIndented(indent + 1, "<url-pattern>/</url-pattern>");
+        indenter.printlnIndented(indent, "</filter-mapping>");
     }
 
     /**

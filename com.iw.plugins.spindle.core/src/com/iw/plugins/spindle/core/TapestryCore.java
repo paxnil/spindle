@@ -603,7 +603,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
             //Use Editor.getStorage() if you can.            
             project = getProjectFor((IStorage) ((IEditorInput) obj).getAdapter(IStorage.class));
         }
-        if (project == null)
+        if (project == null || !project.isOpen())
         {
             return null;
         }
