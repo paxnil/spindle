@@ -167,18 +167,18 @@ public class ProjectPropertyPage extends PropertyPage
 
     private static final int TEXT_FIELD_WIDTH = 30;
 
-    private Text ownerText;
+    private Text fOwnerText;
 
-    private Button isTapestryProjectCheck;
-    private Combo projectTypeCombo;
-    private Label contextRootLabel;
-    private Text webContextRoot;
-    private Button browseContextRoot;
-    private Label librarySpecLabel;
-    private Text librarySpec;
-    private Button browseLibrarySpecification;
+    private Button fIsTapestryProjectCheck;
+    private Combo fProjectTypeCombo;
+    private Label fContextRootLabel;
+    private Text fWebContextRoot;
+    private Button fBrowseContextRoot;
+    private Label fLibrarySpecLabel;
+    private Text fLibrarySpec;
+    private Button fBrowseLibrarySpecification;
 
-    private ApplicationContextValidator contextValidator = new ApplicationContextValidator();
+    private ApplicationContextValidator fContextValidator = new ApplicationContextValidator();
 
     /**
      * Constructor for SamplePropertyPage.
@@ -197,11 +197,11 @@ public class ProjectPropertyPage extends PropertyPage
         composite.setLayout(layout);
         composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        isTapestryProjectCheck = new Button(composite, SWT.CHECK | SWT.LEFT);
-        isTapestryProjectCheck.setText(UIPlugin.getString("property-page-is-tapestry-project"));
-        isTapestryProjectCheck.setEnabled(true);
+        fIsTapestryProjectCheck = new Button(composite, SWT.CHECK | SWT.LEFT);
+        fIsTapestryProjectCheck.setText(UIPlugin.getString("property-page-is-tapestry-project"));
+        fIsTapestryProjectCheck.setEnabled(true);
 
-        isTapestryProjectCheck.addSelectionListener(new SelectionListener()
+        fIsTapestryProjectCheck.addSelectionListener(new SelectionListener()
         {
             public void widgetSelected(SelectionEvent e)
             {
@@ -216,19 +216,19 @@ public class ProjectPropertyPage extends PropertyPage
         });
         try
         {
-            isTapestryProjectCheck.setSelection(getJavaProject().getProject().hasNature(TapestryCore.NATURE_ID));
+            fIsTapestryProjectCheck.setSelection(getJavaProject().getProject().hasNature(TapestryCore.NATURE_ID));
         } catch (CoreException ex)
         {
             TapestryCore.log(ex.getMessage());
         }
-        projectTypeCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
-        projectTypeCombo.setItems(
+        fProjectTypeCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        fProjectTypeCombo.setItems(
             new String[] {
                 UIPlugin.getString("property-page-project-type-application"),
                 UIPlugin.getString("property-page-project-type-library")});
-        projectTypeCombo.select(getProjectType());
-        projectTypeCombo.setEnabled(isTapestryProjectCheck.getSelection());
-        projectTypeCombo.addSelectionListener(new SelectionListener()
+        fProjectTypeCombo.select(getProjectType());
+        fProjectTypeCombo.setEnabled(fIsTapestryProjectCheck.getSelection());
+        fProjectTypeCombo.addSelectionListener(new SelectionListener()
         {
             public void widgetSelected(SelectionEvent e)
             {
@@ -245,23 +245,23 @@ public class ProjectPropertyPage extends PropertyPage
 
     private void checkEnabled()
     {
-        if (browseLibrarySpecification != null)
+        if (fBrowseLibrarySpecification != null)
         {
-            boolean canEnable = isTapestryProjectCheck.getSelection();
+            boolean canEnable = fIsTapestryProjectCheck.getSelection();
 
-            projectTypeCombo.setEnabled(canEnable);
+            fProjectTypeCombo.setEnabled(canEnable);
 
-            boolean appSelected = projectTypeCombo.getSelectionIndex() == TapestryProject.APPLICATION_PROJECT_TYPE;
-            boolean libSelected = projectTypeCombo.getSelectionIndex() == TapestryProject.LIBRARY_PROJECT_TYPE;
+            boolean appSelected = fProjectTypeCombo.getSelectionIndex() == TapestryProject.APPLICATION_PROJECT_TYPE;
+            boolean libSelected = fProjectTypeCombo.getSelectionIndex() == TapestryProject.LIBRARY_PROJECT_TYPE;
             boolean showApp = appSelected && canEnable;
             boolean showLib = libSelected && canEnable;
 
-            contextRootLabel.setEnabled(showApp);
-            webContextRoot.setEnabled(showApp);
-            browseContextRoot.setEnabled(showApp);
-            librarySpecLabel.setEnabled(showLib);
-            librarySpec.setEnabled(showLib);
-            browseLibrarySpecification.setEnabled(showLib);
+            fContextRootLabel.setEnabled(showApp);
+            fWebContextRoot.setEnabled(showApp);
+            fBrowseContextRoot.setEnabled(showApp);
+            fLibrarySpecLabel.setEnabled(showLib);
+            fLibrarySpec.setEnabled(showLib);
+            fBrowseLibrarySpecification.setEnabled(showLib);
         }
     }
 
@@ -284,8 +284,8 @@ public class ProjectPropertyPage extends PropertyPage
         composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         boolean isEnabled =
-            isTapestryProjectCheck.getSelection()
-                && projectTypeCombo.getSelectionIndex() == TapestryProject.APPLICATION_PROJECT_TYPE;
+            fIsTapestryProjectCheck.getSelection()
+                && fProjectTypeCombo.getSelectionIndex() == TapestryProject.APPLICATION_PROJECT_TYPE;
 
         Composite fieldGroup = new Composite(composite, SWT.NONE);
         layout = new GridLayout();
@@ -293,19 +293,19 @@ public class ProjectPropertyPage extends PropertyPage
         fieldGroup.setLayout(layout);
         fieldGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        contextRootLabel = new Label(fieldGroup, SWT.NONE);
-        contextRootLabel.setText(UIPlugin.getString("property-page-contextRoot"));
-        contextRootLabel.setEnabled(true);
+        fContextRootLabel = new Label(fieldGroup, SWT.NONE);
+        fContextRootLabel.setText(UIPlugin.getString("property-page-contextRoot"));
+        fContextRootLabel.setEnabled(true);
 
-        webContextRoot = new Text(fieldGroup, SWT.BORDER);
-        webContextRoot.setEditable(false);
-        webContextRoot.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        fWebContextRoot = new Text(fieldGroup, SWT.BORDER);
+        fWebContextRoot.setEditable(false);
+        fWebContextRoot.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         GridData data = new GridData(GridData.FILL_HORIZONTAL);
         data.widthHint = convertWidthInCharsToPixels(TEXT_FIELD_WIDTH);
-        webContextRoot.setLayoutData(data);
-        webContextRoot.setText(this.getContextRootLocation());
-        webContextRoot.setEnabled(isEnabled);
-        webContextRoot.addModifyListener(new ModifyListener()
+        fWebContextRoot.setLayoutData(data);
+        fWebContextRoot.setText(this.getContextRootLocation());
+        fWebContextRoot.setEnabled(isEnabled);
+        fWebContextRoot.addModifyListener(new ModifyListener()
         {
             public void modifyText(ModifyEvent e)
             {
@@ -313,21 +313,21 @@ public class ProjectPropertyPage extends PropertyPage
             }
         });
 
-        browseContextRoot = new Button(fieldGroup, SWT.PUSH);
-        browseContextRoot.setText(UIPlugin.getString("browse-button-label"));
-        browseContextRoot.addSelectionListener(new SelectionAdapter()
+        fBrowseContextRoot = new Button(fieldGroup, SWT.PUSH);
+        fBrowseContextRoot.setText(UIPlugin.getString("browse-button-label"));
+        fBrowseContextRoot.addSelectionListener(new SelectionAdapter()
         {
             public void widgetSelected(SelectionEvent evt)
             {
                 String newValue = chooseContextFolder();
                 if (newValue != null)
                 {
-                    webContextRoot.setText(newValue);
+                    fWebContextRoot.setText(newValue);
                 }
             }
         });
 
-        browseContextRoot.setEnabled(isEnabled);
+        fBrowseContextRoot.setEnabled(isEnabled);
 
     }
 
@@ -341,8 +341,8 @@ public class ProjectPropertyPage extends PropertyPage
         composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         boolean isEnabled =
-            isTapestryProjectCheck.getSelection()
-                && projectTypeCombo.getSelectionIndex() == TapestryProject.LIBRARY_PROJECT_TYPE;
+            fIsTapestryProjectCheck.getSelection()
+                && fProjectTypeCombo.getSelectionIndex() == TapestryProject.LIBRARY_PROJECT_TYPE;
 
         Composite fieldGroup = new Composite(composite, SWT.NONE);
         layout = new GridLayout();
@@ -350,19 +350,19 @@ public class ProjectPropertyPage extends PropertyPage
         fieldGroup.setLayout(layout);
         fieldGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        librarySpecLabel = new Label(fieldGroup, SWT.NONE);
-        librarySpecLabel.setText(UIPlugin.getString("property-page-project-library-spec"));
-        librarySpecLabel.setEnabled(true);
+        fLibrarySpecLabel = new Label(fieldGroup, SWT.NONE);
+        fLibrarySpecLabel.setText(UIPlugin.getString("property-page-project-library-spec"));
+        fLibrarySpecLabel.setEnabled(true);
 
-        librarySpec = new Text(fieldGroup, SWT.BORDER);
-        librarySpec.setEditable(false);
-        librarySpec.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        fLibrarySpec = new Text(fieldGroup, SWT.BORDER);
+        fLibrarySpec.setEditable(false);
+        fLibrarySpec.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
         GridData data = new GridData(GridData.FILL_HORIZONTAL);
         data.widthHint = convertWidthInCharsToPixels(TEXT_FIELD_WIDTH);
-        librarySpec.setLayoutData(data);
-        librarySpec.setText(this.getLibrarySpecLocation());
-        librarySpec.setEnabled(isEnabled);
-        librarySpec.addModifyListener(new ModifyListener()
+        fLibrarySpec.setLayoutData(data);
+        fLibrarySpec.setText(this.getLibrarySpecLocation());
+        fLibrarySpec.setEnabled(isEnabled);
+        fLibrarySpec.addModifyListener(new ModifyListener()
         {
             public void modifyText(ModifyEvent e)
             {
@@ -370,49 +370,83 @@ public class ProjectPropertyPage extends PropertyPage
             }
         });
 
-        browseLibrarySpecification = new Button(fieldGroup, SWT.PUSH);
-        browseLibrarySpecification.setText(UIPlugin.getString("browse-button-label"));
-        browseLibrarySpecification.addSelectionListener(new SelectionAdapter()
+        fBrowseLibrarySpecification = new Button(fieldGroup, SWT.PUSH);
+        fBrowseLibrarySpecification.setText(UIPlugin.getString("browse-button-label"));
+        fBrowseLibrarySpecification.addSelectionListener(new SelectionAdapter()
         {
             public void widgetSelected(SelectionEvent evt)
             {
                 String newValue = chooseLibraryFile();
                 if (newValue != null)
                 {
-                    librarySpec.setText(newValue);
+                    fLibrarySpec.setText(newValue);
                 }
             }
         });
 
-        browseLibrarySpecification.setEnabled(isEnabled);
+        fBrowseLibrarySpecification.setEnabled(isEnabled);
     }
 
     public boolean isValid()
     {
         setErrorMessage(null);
-        if (!isTapestryProjectCheck.getSelection())
+
+        IJavaProject jproject = null;
+        try
+        {
+            jproject = getJavaProject();
+        } catch (CoreException e)
+        {
+            UIPlugin.log(e);
+        }
+
+        if (jproject == null)
+        {
+            setErrorMessage("Could not determine the Java Project"); //TODO internationalize!
+            disableAll();
+            return true;
+        }
+
+        IProject project = jproject.getProject();
+
+        try
+        {
+            // old spindle and new spindle can't co-exist!
+            if (project.hasNature("com.iw.plugins.spindle.project.TapestryProject"))
+            {
+                setErrorMessage("Spindle 2.0 and Spindle 1.1.X can't coexist in the same project");
+                //TODO internationalize!
+                disableAll();
+                return true;
+            }
+        } catch (CoreException e1)
+        {
+            UIPlugin.log(e1);
+        }
+
+        if (!fIsTapestryProjectCheck.getSelection())
         {
             return true;
         }
-        int type = projectTypeCombo.getSelectionIndex();
+        int type = fProjectTypeCombo.getSelectionIndex();
         switch (type)
         {
             case TapestryProject.APPLICATION_PROJECT_TYPE :
-                String wcroot = webContextRoot.getText();
+                String wcroot = fWebContextRoot.getText();
                 if ("/context".equals(wcroot.trim()))
                 {
                     return true;
                 }
-                String badApp = contextValidator.isValidString((String) wcroot);
+                String badApp = fContextValidator.isValidString((String) wcroot);
                 if (badApp != null)
                 {
                     setErrorMessage(badApp);
                     return false;
                 }
-                return contextValidator.isValid(wcroot) == null;
+                return fContextValidator.isValid(wcroot) == null;
 
             case TapestryProject.LIBRARY_PROJECT_TYPE :
-                String libFile = librarySpec.getText();
+                String libFile = fLibrarySpec.getText();
                 String badLib = validateLibraryPath(libFile);
                 if (badLib != null)
                 {
@@ -423,6 +457,19 @@ public class ProjectPropertyPage extends PropertyPage
                 break;
         }
         return true;
+    }
+
+    //called by isValid() disable if the project is already an old Tapestry project
+    private void disableAll()
+    {
+        fIsTapestryProjectCheck.setEnabled(false);
+        fProjectTypeCombo.setEnabled(false);
+        fContextRootLabel.setEnabled(false);
+        fWebContextRoot.setEnabled(false);
+        fBrowseContextRoot.setEnabled(false);
+        fLibrarySpecLabel.setEnabled(false);
+        fLibrarySpec.setEnabled(false);
+        fBrowseLibrarySpecification.setEnabled(false);
     }
 
     private String validateLibraryPath(String value)
@@ -442,7 +489,7 @@ public class ProjectPropertyPage extends PropertyPage
     {
         IContainer project = (IContainer) getElement().getAdapter(IContainer.class);
         ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(), project, true, "");
-        dialog.setValidator(contextValidator);
+        dialog.setValidator(fContextValidator);
         dialog.showClosedProjects(false);
         if (dialog.open() == ContainerSelectionDialog.OK)
         {
@@ -466,7 +513,7 @@ public class ProjectPropertyPage extends PropertyPage
         }
         if (jproject == null)
         {
-            return librarySpec.getText();
+            return fLibrarySpec.getText();
         }
         LibrarySearchDialog dialog =
             new LibrarySearchDialog(
@@ -604,7 +651,7 @@ public class ProjectPropertyPage extends PropertyPage
 
     protected void performDefaults()
     {
-        webContextRoot.setText("/context");
+        fWebContextRoot.setText("/context");
     }
 
     public boolean performOk()
@@ -615,31 +662,31 @@ public class ProjectPropertyPage extends PropertyPage
             IResource resource = (IResource) getElement();
             resource.setPersistentProperty(
                 new QualifiedName("", PROJECT_TYPE_PROPERTY),
-                new Integer(projectTypeCombo.getSelectionIndex()).toString());
-            resource.setPersistentProperty(new QualifiedName("", CONTEXT_ROOT_PROPERTY), webContextRoot.getText());
-            resource.setPersistentProperty(new QualifiedName("", LIBRARY_SPEC_PROPERTY), librarySpec.getText());
+                new Integer(fProjectTypeCombo.getSelectionIndex()).toString());
+            resource.setPersistentProperty(new QualifiedName("", CONTEXT_ROOT_PROPERTY), fWebContextRoot.getText());
+            resource.setPersistentProperty(new QualifiedName("", LIBRARY_SPEC_PROPERTY), fLibrarySpec.getText());
         } catch (CoreException e)
         {}
         // now configure/deconfigure the project
         try
         {
-            if (isTapestryProjectCheck.getSelection())
+            if (fIsTapestryProjectCheck.getSelection())
             {
                 TapestryProject.addTapestryNature(getJavaProject());
                 TapestryProject prj = getTapestryProject();
-                switch (projectTypeCombo.getSelectionIndex())
+                switch (fProjectTypeCombo.getSelectionIndex())
                 {
                     case TapestryProject.APPLICATION_PROJECT_TYPE :
                         prj.setProjectType(TapestryProject.APPLICATION_PROJECT_TYPE);
                         String projectName = prj.getProject().getName();
-                        String temp = webContextRoot.getText();
+                        String temp = fWebContextRoot.getText();
                         createFolderIfRequired(projectName + temp);
                         prj.setWebContext(temp);
                         break;
 
                     case TapestryProject.LIBRARY_PROJECT_TYPE :
                         prj.setProjectType(TapestryProject.LIBRARY_PROJECT_TYPE);
-                        prj.setLibrarySpecPath(librarySpec.getText());
+                        prj.setLibrarySpecPath(fLibrarySpec.getText());
                         break;
                 }
                 prj.saveProperties();
