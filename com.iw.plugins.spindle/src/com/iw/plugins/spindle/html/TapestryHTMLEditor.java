@@ -51,6 +51,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
+import org.eclipse.jdt.internal.ui.workingsets.ClearWorkingSetAction;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -125,7 +126,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     duringInit = true;
     setDocumentProvider(createDocumentProvider(input));
     super.init(site, input);
-//    TapestryPlugin.getTapestryModelManager(input.getAdapter(IStorage.class)).addModelProviderListener(this);
+    //    TapestryPlugin.getTapestryModelManager(input.getAdapter(IStorage.class)).addModelProviderListener(this);
     duringInit = false;
 
   }
@@ -135,12 +136,12 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     shell = parent.getShell();
     text = (StyledText) getSourceViewer().getTextWidget();
 
-//    text.setKeyBinding(262144, ST.COPY);
-//    //text.setKeyBinding(131072, ST.CUT);
-//    text.setKeyBinding(131072, ST.COPY);
+    //    text.setKeyBinding(262144, ST.COPY);
+    //    //text.setKeyBinding(131072, ST.CUT);
+    //    text.setKeyBinding(131072, ST.COPY);
     // for debugging the partitioning only		
-//    		handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
-//    		handler.activateHoverHelp(text);
+    //    		handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
+    //    		handler.activateHoverHelp(text);
   }
 
   protected void doSetInput(IEditorInput input) throws CoreException {
@@ -175,9 +176,85 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     return result;
   }
 
+  public void openTo(String jwcid) {
+  	
+	selectAndReveal(0,0);
+    ITypedRegion[] partitions = null;
+    IDocument document = getDocumentProvider().getDocument(getEditorInput());
+    if (document == null) {
+
+      return;
+
+    }
+    try {
+      partitions = document.computePartitioning(0, document.getLength() - 1);
+      for (int i = 0; i < partitions.length; i++) {
+
+        String type = partitions[i].getType();
+
+        if (type.equals(TapestryHTMLPartitionScanner.JWC_TAG) || type.equals(TapestryHTMLPartitionScanner.JWCID_TAG)) {
+          String found = getJWCID(document, partitions[i]);
+
+          if (found != null && jwcid.equals(found)) {
+
+            Position position = findJWCID(document, partitions[i]);
+            selectAndReveal(position.getOffset(), position.getLength());
+
+          }
+        }
+      }
+    } catch (BadLocationException e) {
+    }
+  }
+
+  private String getJWCID(IDocument document, ITypedRegion region) {
+    try {
+      Position p = findJWCID(document, region);
+      if (p == null) {
+        return null;
+      }
+      return document.get(p.getOffset(), p.getLength());
+    } catch (BadLocationException blex) {
+      return null;
+    }
+  }
+
+  private Position findJWCID(IDocument document, ITypedRegion region) {
+    if (region == null) {
+      return null;
+    }
+    Position result = new Position(region.getOffset(), region.getLength());
+    String type = region.getType();
+    String start = null;
+    if (TapestryHTMLPartitionScanner.JWCID_TAG.equals(type)) {
+      start = "jwcid=\"";
+    } else if (TapestryHTMLPartitionScanner.JWC_TAG.equals(type)) {
+      start = "id=\"";
+    }
+    if (start != null) {
+
+      try {
+        String tag = document.get(region.getOffset(), region.getLength());
+        int startIndex = tag.indexOf(start);
+        if (startIndex >= 0) {
+          startIndex += start.length();
+          tag = tag.substring(startIndex);
+          int end = tag.indexOf("\"");
+          if (end >= 0) {
+            result = new Position(region.getOffset() + startIndex, tag.substring(0, end).length());
+          }
+        } else {
+          return null;
+        }
+      } catch (BadLocationException blex) {
+      }
+    }
+    return result;
+  }
+
   public void dispose() {
     colorManager.dispose();
-//    TapestryPlugin.getTapestryModelManager().removeModelProviderListener(this);
+    //    TapestryPlugin.getTapestryModelManager().removeModelProviderListener(this);
     super.dispose();
   }
 
@@ -210,11 +287,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
           TemplateParser parser = new TemplateParser();
           TapestryComponentModel model = ModelUtils.findComponentWithHTML(file);
           if (model == null) {
-            addProblemMarker(
-              "There is no .jwc file for this template.",
-              0,
-              0,
-              IMarker.SEVERITY_WARNING);
+            addProblemMarker("There is no .jwc file for this template.", 0, 0, IMarker.SEVERITY_WARNING);
             return;
           }
           ITemplateParserDelegate delegate = new TemplateParseDelegate(model);
@@ -242,10 +315,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
         map.put(IMarker.LINE_NUMBER, new Integer(line));
         map.put(IMarker.CHAR_START, new Integer(column));
         map.put(IMarker.CHAR_END, new Integer(column + 1));
-        MarkerUtilities.createMarker(
-          (IResource) storage,
-          map,
-          "com.iw.plugins.spindle.tapestryproblem");
+        MarkerUtilities.createMarker((IResource) storage, map, "com.iw.plugins.spindle.tapestryproblem");
       } catch (CoreException corex) {
       }
     }
@@ -322,8 +392,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
       }
       return document;
     }
-    protected void setDocumentContent(IDocument document, InputStream contentStream)
-      throws CoreException {
+    protected void setDocumentContent(IDocument document, InputStream contentStream) throws CoreException {
 
       Reader in = null;
 
@@ -352,11 +421,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
         }
       }
     }
-    protected void doSaveDocument(
-      IProgressMonitor monitor,
-      Object element,
-      IDocument document,
-      boolean overwrite)
+    protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document, boolean overwrite)
       throws CoreException {
       if (element instanceof IFileEditorInput) {
 
@@ -456,9 +521,9 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
 
       } else {
 
-       try {
-           TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(underlier);
-            model = (TapestryComponentModel) mgr.getReadOnlyModel(underlier);
+        try {
+          TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(underlier);
+          model = (TapestryComponentModel) mgr.getReadOnlyModel(underlier);
         } catch (CoreException e) {
         }
 
@@ -533,8 +598,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
   }
 
   static public final String SAVE_HTML_TEMPLATE = "com.iw.plugins.spindle.html.saveTemplateAction";
-  static public final String REVERT_HTML_TEMPLATE =
-    "com.iw.plugins.spindle.html.revertTemplateAction";
+  static public final String REVERT_HTML_TEMPLATE = "com.iw.plugins.spindle.html.revertTemplateAction";
 
   /**
    * @see org.eclipse.ui.texteditor.AbstractTextEditor#createActions()
@@ -542,8 +606,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
   protected void createActions() {
     super.createActions();
 
-    Action action =
-      new SaveHTMLTemplateAction("Save current as template for New Component Wizards");
+    Action action = new SaveHTMLTemplateAction("Save current as template for New Component Wizards");
     action.setActionDefinitionId(SAVE_HTML_TEMPLATE);
     setAction(SAVE_HTML_TEMPLATE, action);
     action = new RevertTemplateAction("Revert the saved template to the default value");

@@ -34,8 +34,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -614,7 +616,98 @@ public class Utils {
     return contents;
   }
   
+  // find any templates for the supplied file
+  public static List findTemplatesFor(IFile movedFrom) {
 
+    ArrayList templates = new ArrayList();
+    IContainer parent = movedFrom.getParent();
+    String fileName = movedFrom.getFullPath().removeFileExtension().lastSegment();
+    try {
+
+      IResource[] members = parent.members();
+
+      for (int i = 0; i < members.length; i++) {
+
+        IPath memberPath = members[i].getFullPath();
+        String extension = memberPath.getFileExtension();
+
+        if ("html".equals(extension) || "htm".equals(extension)) {
+
+          IResource member = parent.findMember(memberPath.lastSegment());          
+
+          String memberName = memberPath.removeFileExtension().lastSegment();
+
+          if (member != null
+            && member instanceof IFile
+            && templateMatchLocalization(fileName, memberName)) {
+
+            templates.add(member);
+
+          }
+
+        }
+
+       
+
+      }
+    } catch (CoreException e) {
+    }
+    
+    return templates;
+  }
+
+  private static boolean templateMatchLocalization(String fileName, String memberName) {
+
+    if (fileName.equals(memberName)) {
+
+      return true;
+
+    } else if (memberName.startsWith(fileName + '_')) {
+
+      int firstUnderscore = memberName.indexOf('_');
+      int secondUnderscore = firstUnderscore + 3;
+
+      String languageString = null;
+
+      if (secondUnderscore < memberName.length()) {
+
+        char next = memberName.charAt(secondUnderscore);
+
+        if (next != '_') {
+
+          return false;
+
+        }
+
+        languageString = memberName.substring(firstUnderscore + 1, secondUnderscore);
+
+      } else {
+
+        languageString = memberName.substring(firstUnderscore + 1);
+
+      }
+
+      if (languageCodes == null) {
+
+        buildLanguageCodes();
+
+      }
+
+      return languageCodes.contains(languageString);
+
+    }
+
+    return false;
+  }
+  
+  private static List languageCodes = null;
+
+
+  private static void buildLanguageCodes() {
+
+    languageCodes = Arrays.asList(Locale.getISOLanguages());
+
+  }
  
 
 }

@@ -27,9 +27,11 @@ package com.iw.plugins.spindle.editorjwc.components;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -41,6 +43,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -64,6 +67,7 @@ import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
+import com.iw.plugins.spindle.html.TapestryHTMLEditor;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
@@ -98,10 +102,7 @@ public class ComponentSelectionSection
 
   private ContainedComponentLabelProvider labelProvider = new ContainedComponentLabelProvider();
 
-
-  static public TapestryComponentModel resolveContainedComponent(
-    ITapestryProject project,
-    PluginContainedComponent component)
+  static public TapestryComponentModel resolveContainedComponent(ITapestryProject project, PluginContainedComponent component)
     throws CoreException {
 
     TapestryLibraryModel projectModel = (TapestryLibraryModel) project.getProjectModel();
@@ -114,10 +115,7 @@ public class ComponentSelectionSection
 
     if (componentPath != null) {
 
-      result =
-        (TapestryComponentModel) project.findModelByPath(
-          componentPath,
-          TapestryLookup.ACCEPT_COMPONENTS);
+      result = (TapestryComponentModel) project.findModelByPath(componentPath, TapestryLookup.ACCEPT_COMPONENTS);
 
       if (result == null) {
 
@@ -133,11 +131,7 @@ public class ComponentSelectionSection
 
         } catch (Exception e) {
 
-          status.setError(
-            "could not load the component "
-              + "("
-              + componentPath
-              + "). There could be a parse error.");
+          status.setError("could not load the component " + "(" + componentPath + "). There could be a parse error.");
 
           throw new CoreException(status);
 
@@ -190,7 +184,6 @@ public class ComponentSelectionSection
     }
   }
 
-
   /**
    * @see com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection#createButtons(Composite, FormWidgetFactory)
    */
@@ -225,20 +218,28 @@ public class ComponentSelectionSection
         if (component.getCopyOf() == null) {
           manager.add(new Separator());
           manager.add(copyAction);
-          manager.add(copyToAction);
+//          manager.add(copyToAction);
           MenuManager submenu = new MenuManager("Copy To Clipboard");
           Display d = getViewer().getControl().getDisplay();
-          submenu.add(
-            new CopyToClipboardAction(d, "jwcid=\"$value$\"", "value", component.getIdentifier()));
-          submenu.add(
-            new CopyToClipboardAction(
-              d,
-              "<span jwcid=\"$value$\"></span>",
-              "value",
-              component.getIdentifier()));
+          submenu.add(new CopyToClipboardAction(d, "jwcid=\"$value$\"", "value", component.getIdentifier()));
+          submenu.add(new CopyToClipboardAction(d, "<span jwcid=\"$value$\"></span>", "value", component.getIdentifier()));
           manager.add(submenu);
         }
       }
+    }
+    IStorage storage = (IStorage) getModel().getUnderlyingStorage();
+    if (storage instanceof IFile) {
+      List templates = Utils.findTemplatesFor((IFile) storage);
+      if (!templates.isEmpty()) {
+
+        MenuManager jumpMenu = new MenuManager("Jump to..");
+        for (Iterator iter = templates.iterator(); iter.hasNext();) {
+          IFile element = (IFile) iter.next();
+          jumpMenu.add(new JumpToTemplateAction((IStorage) element, component.getIdentifier()));
+        }
+        manager.add(jumpMenu);
+      }
+
     }
     manager.add(new Separator());
     pAction.setEnabled(((IModel) getFormPage().getModel()).isEditable());
@@ -381,10 +382,7 @@ public class ComponentSelectionSection
 
       }
 
-      return new ComponentAliasViewer(
-        selectedComponent.getIdentifier(),
-        selectedComponent.getType(),
-        componentModel);
+      return new ComponentAliasViewer(selectedComponent.getIdentifier(), selectedComponent.getType(), componentModel);
 
     }
 
@@ -532,10 +530,7 @@ public class ComponentSelectionSection
     }
   }
 
-  private void performCopyInEditor(
-    PluginContainedComponent component,
-    IEditorPart editor,
-    String name) {
+  private void performCopyInEditor(PluginContainedComponent component, IEditorPart editor, String name) {
     SpindleMultipageEditor targetEditor = null;
 
     try {
@@ -569,9 +564,7 @@ public class ComponentSelectionSection
 
   }
 
-  private boolean alreadyHasComponent(
-    PluginContainedComponent component,
-    TapestryComponentModel model) {
+  private boolean alreadyHasComponent(PluginContainedComponent component, TapestryComponentModel model) {
     boolean result = false;
     PluginComponentSpecification spec = model.getComponentSpecification();
     if (spec.getComponent(component.getIdentifier()) != null) {
@@ -579,9 +572,7 @@ public class ComponentSelectionSection
       MessageDialog.openError(
         newButton.getShell(),
         "Copy To action aborted",
-        "The selected target component already has '"
-          + component.getIdentifier()
-          + "'. Can not continue");
+        "The selected target component already has '" + component.getIdentifier() + "'. Can not continue");
     }
     return result;
   }
@@ -596,18 +587,12 @@ public class ComponentSelectionSection
         result = true;
       }
     } catch (Exception e) {
-      MessageDialog.openError(
-        newButton.getShell(),
-        "Copy To action failed",
-        e.getClass().getName());
+      MessageDialog.openError(newButton.getShell(), "Copy To action failed", e.getClass().getName());
     }
     return result;
   }
 
-  private void performCopyInWorkspace(
-    PluginContainedComponent component,
-    IStorage storage,
-    String name) {
+  private void performCopyInWorkspace(PluginContainedComponent component, IStorage storage, String name) {
     String consumer = "PerformCopyToInWorkspace";
 
     TapestryProjectModelManager mgr = null;
@@ -653,11 +638,7 @@ public class ComponentSelectionSection
         IStatus.OK,
         "Abort, target component is has parse errors",
         null);
-    ErrorDialog.openError(
-      TapestryPlugin.getDefault().getActiveWorkbenchShell(),
-      null,
-      null,
-      status);
+    ErrorDialog.openError(TapestryPlugin.getDefault().getActiveWorkbenchShell(), null, null, status);
   }
 
   class CopyComponentAction extends Action {
@@ -724,4 +705,50 @@ public class ComponentSelectionSection
 
   }
 
+  class JumpToTemplateAction extends Action {
+
+    IStorage target;
+    String jwcid;
+
+    public JumpToTemplateAction(IStorage target, String jwcid) {
+      super();
+      this.target = target;
+      this.jwcid = jwcid;
+      setText(target.getName());
+    }
+
+    public void run() {
+
+      IEditorPart editor = Utils.getEditorFor(target);
+
+      if (editor != null) {
+
+        TapestryPlugin.getDefault().getActivePage().bringToTop(editor);
+
+      } else {
+
+        TapestryPlugin.getDefault().openTapestryEditor(target);
+        
+        
+        editor = Utils.getEditorFor(target);
+
+        //might have failed - try the Workspace default editor
+
+        if (editor == null) {
+
+          TapestryPlugin.getDefault().openNonTapistryEditor(target);
+
+        }
+
+      }
+
+      if (editor != null && editor instanceof TapestryHTMLEditor) {
+
+        ((TapestryHTMLEditor) editor).openTo(jwcid);
+
+      }
+
+    }
+
+  }
 }

@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editorapp;
 import net.sf.tapestry.parse.SpecificationParser;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -65,11 +66,10 @@ import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.util.HierarchyScope;
 import com.iw.plugins.spindle.util.Utils;
 
-public class OverviewAppGeneralSection
-  extends SpindleFormSection
-  implements IModelChangedListener {
+public class OverviewAppGeneralSection extends SpindleFormSection implements IModelChangedListener {
 
   private Text dtdText;
   private FormEntry nameText;
@@ -143,8 +143,7 @@ public class OverviewAppGeneralSection
     nameText = new FormEntry(createText(container, labelName, factory));
     nameText.addFormTextListener(new IFormTextListener() {
       public void textValueChanged(FormEntry text) {
-        PluginApplicationSpecification appSpec =
-          (PluginApplicationSpecification) model.getSpecification();
+        PluginApplicationSpecification appSpec = (PluginApplicationSpecification) model.getSpecification();
         String name = appSpec.getName();
         appSpec.setName(text.getValue());
         if (model.isEditable() == false) {
@@ -162,16 +161,12 @@ public class OverviewAppGeneralSection
     engineClassText = new FormEntry(createText(container, labelName, factory));
     engineClassText.addFormTextListener(new IFormTextListener() {
       public void textValueChanged(FormEntry text) {
-        PluginApplicationSpecification appSpec =
-          (PluginApplicationSpecification) model.getSpecification();
+        PluginApplicationSpecification appSpec = (PluginApplicationSpecification) model.getSpecification();
         if (model.isEditable() == false) {
 
           String name = appSpec.getEngineClassName();
           appSpec.setEngineClassName(text.getValue());
-          name =
-            MessageUtil.getFormattedString(
-              "{0} can't change engine class, application is READON",
-              name);
+          name = MessageUtil.getFormattedString("{0} can't change engine class, application is READON", name);
           getFormPage().getForm().setHeadingText(name);
           return;
         }
@@ -258,8 +253,7 @@ public class OverviewAppGeneralSection
       String engineClass = engineClassText.getValue();
       ITapestryModel model = (ITapestryModel) getFormPage().getModel();
       try {
-        IJavaProject jproject =
-          TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
+        IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
         IType type = Utils.findType(jproject, engineClass);
         JavaUI.openInEditor(type);
       } catch (Exception e) {
@@ -296,8 +290,7 @@ public class OverviewAppGeneralSection
       ITapestryModel model = (ITapestryModel) getFormPage().getModel();
       Shell shell = engineClassText.getControl().getShell();
       try {
-        IJavaProject jproject =
-          TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
+        IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
         if (jproject == null) {
           return null;
         }
@@ -313,8 +306,7 @@ public class OverviewAppGeneralSection
 
         dialog.setTitle("Choose Engine Class");
         String message = "choose Engine class";
-        dialog.setMessage(
-          hierarchyRoot == null ? message : message + " (implements " + hierarchyRoot + ")");
+        dialog.setMessage(hierarchyRoot == null ? message : message + " (implements " + hierarchyRoot + ")");
 
         if (dialog.open() == dialog.OK) {
           return (IType) dialog.getResult()[0]; //FirstResult();
@@ -334,7 +326,11 @@ public class OverviewAppGeneralSection
           hrootElement = Utils.findType(jproject, hierarchyRoot);
         }
         if (hrootElement != null) {
-          result = SearchEngine.createHierarchyScope(hrootElement);
+//          result = SearchEngine.createHierarchyScope(hrootElement);
+// note, this is a kludge to work around bug 
+//[ 621849 ] Class selection dlg searches workspace
+          result = new HierarchyScope(hrootElement, jproject);
+
         }
       } catch (JavaModelException jmex) {
         //ignore

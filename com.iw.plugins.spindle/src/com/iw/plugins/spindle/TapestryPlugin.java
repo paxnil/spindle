@@ -143,6 +143,8 @@ public class TapestryPlugin extends AbstractUIPlugin {
     editorIdLookup.put("library", ID_PLUGIN + ".editors.library_editor");
     editorIdLookup.put("jwc", ID_PLUGIN + ".editors.jwc_editor");
     editorIdLookup.put("page", ID_PLUGIN + ".editors.page_editor");
+    editorIdLookup.put("html", ID_PLUGIN + ".editors.html");
+    editorIdLookup.put("htm", ID_PLUGIN + ".editors.html");
 
   }
 

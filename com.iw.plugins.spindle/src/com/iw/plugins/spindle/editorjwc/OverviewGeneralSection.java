@@ -70,6 +70,7 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.XMLUtil;
+import com.iw.plugins.spindle.util.HierarchyScope;
 import com.iw.plugins.spindle.util.Utils;
 
 public class OverviewGeneralSection extends SpindleFormSection implements IModelChangedListener {
@@ -434,7 +435,10 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
           hrootElement = Utils.findType(jproject, hierarchyRoot);
         }
         if (hrootElement != null) {
-          result = SearchEngine.createHierarchyScope(hrootElement);
+//          result = SearchEngine.createHierarchyScope(hrootElement);
+// note, this is a kludge to work around bug 
+//[ 621849 ] Class selection dlg searches workspace        	
+          result = new HierarchyScope(hrootElement, jproject);
         }
       } catch (JavaModelException jmex) {
         //ignore
