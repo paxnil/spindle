@@ -66,8 +66,9 @@ public class ConfiguredPullParserBase extends PullParserBase
         pullParseConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
         pullParseConfiguration.setFeature("http://xml.org/sax/features/validation", true);
         pullParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
-        pullParseConfiguration.setProperty("http://apache.org/xml/properties/internal/grammar-pool", new XMLGrammarPoolImpl());
-
+        pullParseConfiguration.setProperty(
+            "http://apache.org/xml/properties/internal/grammar-pool",
+            new XMLGrammarPoolImpl());
     }
 
     protected void parseAll(final String content) throws XMLConfigurationException, IOException, XMLParseException
@@ -78,7 +79,6 @@ public class ConfiguredPullParserBase extends PullParserBase
     protected void parseAll(InputStream content) throws XMLConfigurationException, IOException, XMLParseException
     {
         parseAll(new BufferedReader(new InputStreamReader(content)));
-
     }
 
     protected void parseAll(Reader reader) throws XMLConfigurationException, IOException, XMLParseException
