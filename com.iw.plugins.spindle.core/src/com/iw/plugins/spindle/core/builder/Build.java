@@ -73,6 +73,7 @@ import com.iw.plugins.spindle.core.scanning.IScannerValidatorListener;
 import com.iw.plugins.spindle.core.scanning.LibraryScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.scanning.TemplateScanner;
+import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
@@ -287,13 +288,15 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         String name = location.getName();
         if (name.endsWith(".application"))
         {
-            lib = parseApplication(parser, location);
+            lib = parseApplication(parser, location);            
         } else if (name.endsWith(".library"))
         {
             lib = parseLibrary(parser, location);
         }
         if (lib != null)
             result = new CoreNamespace(id, lib);
+            
+        ((BaseSpecification)lib).setNamespace(result);
 
         return result;
     }

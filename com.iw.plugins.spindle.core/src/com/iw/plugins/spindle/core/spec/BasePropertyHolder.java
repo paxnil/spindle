@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.tapestry.INamespace;
 import org.apache.tapestry.util.IPropertyHolder;
 
 import com.iw.plugins.spindle.core.util.PropertyFiringMap;
@@ -41,7 +42,7 @@ import com.iw.plugins.spindle.core.util.PropertyFiringMap;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class BasePropertyHolder extends BaseSpecification implements IPropertyHolder
+public abstract class BasePropertyHolder extends BaseSpecification implements IPropertyHolder
 {
     Map fProperties;
 
