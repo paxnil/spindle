@@ -2,14 +2,14 @@
 <?eclipse version="3.0"?>
 <plugin
    id="com.iw.plugins.spindle.docs"
-   name="com.iw.plugins.spindle.docs"
+   name="Spindle 3 Documentation"
    version="0.0.2"
    provider-name="Intelligent Works Incorporated">
 
    <runtime>
    </runtime>
    <requires>
-      <import plugin="com.iw.plugins.spindle.ui"/>
+      <import plugin="org.eclipse.help"/>
    </requires>
 
 
