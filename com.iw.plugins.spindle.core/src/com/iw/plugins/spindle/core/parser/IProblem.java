@@ -79,9 +79,8 @@ public interface IProblem
     public int getLineNumber();
     /**
      * Returns the message describing the problem.
-     * TODO The message should be localized to the current locale.
      *
-     * @return a (localized?) message
+     * @return a message
      */
     public String getMessage();
     /**

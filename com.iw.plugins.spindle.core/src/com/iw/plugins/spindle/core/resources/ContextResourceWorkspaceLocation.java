@@ -29,7 +29,6 @@ package com.iw.plugins.spindle.core.resources;
 import java.io.InputStream;
 import java.util.Locale;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -136,15 +135,15 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
         throw new RuntimeException("not implemented");
     }
 
-    public int hashCode()
-    {
-        HashCodeBuilder builder = new HashCodeBuilder(5589, 1117);
-
-        builder.append(getPath());
-        builder.append(fRoot);
-
-        return builder.toHashCode();
-    }
+//    public int hashCode()
+//    {
+//        HashCodeBuilder builder = new HashCodeBuilder(5589, 1117);
+//
+//        builder.append(getPath());
+//        builder.append(fRoot);
+//
+//        return builder.toHashCode();
+//    }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)

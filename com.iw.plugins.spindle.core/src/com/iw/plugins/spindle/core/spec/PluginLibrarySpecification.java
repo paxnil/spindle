@@ -83,7 +83,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     private Map fServices;
 
     /**
-     *  Resource resolver TODO not used yet.
+     *  Resource resolver 
      * 
      **/
 
@@ -122,7 +122,6 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public boolean checkExtension(String name)
     {
-        // TODO not used
         return true;
     }
 
@@ -163,7 +162,6 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public Object getExtension(String name)
     {
-        // TODO not used
         return null;
     }
 
@@ -172,7 +170,6 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public Object getExtension(String name, Class typeConstraint)
     {
-        // TODO not used
         return null;
     }
 
@@ -304,7 +301,6 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void instantiateImmediateExtensions()
     {
-        // TODO not used
     }
 
     public void removeComponentSpecificationPath(String type)

@@ -72,5 +72,7 @@ public abstract class AbstractRootLocation implements IResourceWorkspaceLocation
     public URL getResourceURL()
     {
         return null;
-    }    
+    } 
+    
+    abstract String toHashString();   
 }

@@ -75,7 +75,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public Object getAdapter(Class adapter)
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -100,7 +99,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public long getTimeStamp()
     {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -133,7 +131,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public boolean isDirty()
     {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -142,7 +139,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public boolean isDisposed()
     {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -151,7 +147,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public boolean isEditable()
     {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -160,7 +155,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public boolean isInSync()
     {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -169,7 +163,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public boolean isLoaded()
     {
-        // TODO Auto-generated method stub
         return false;
     }
   
@@ -186,7 +179,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public boolean isValid()
     {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -195,8 +187,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public void load() throws CoreException
     {
-        // TODO Auto-generated method stub
-
     }
 
     /* (non-Javadoc)
@@ -204,8 +194,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public void load(InputStream source, boolean outOfSync) throws CoreException
     {
-        // TODO Auto-generated method stub
-
     }
 
     /* (non-Javadoc)
@@ -213,8 +201,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public void reload(InputStream source, boolean outOfSync) throws CoreException
     {
-        // TODO Auto-generated method stub
-
     }
 
     /* (non-Javadoc)
@@ -222,8 +208,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public void save(PrintWriter writer)
     {
-        // TODO Auto-generated method stub
-
     }
 
     /* (non-Javadoc)
@@ -231,8 +215,6 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public void setDirty(boolean dirty)
     {
-        // TODO Auto-generated method stub
-
     }
 
     /**

@@ -32,24 +32,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -59,6 +53,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.resources.ClasspathResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -150,7 +145,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             {
                 if (kind == FULL_BUILD)
                 {
-                    buildAll(); 
+                    buildAll();
                 } else
                 {
                     buildIncremental();
@@ -289,7 +284,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 break;
 
             case TapestryProject.LIBRARY_PROJECT_TYPE :
-                //TODO build library projects
+                fBuild = new LibraryBuild(this);
             default :
                 break;
         }
@@ -458,52 +453,53 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             }
         } else if (projectType == TapestryProject.LIBRARY_PROJECT_TYPE)
         {
-            IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-            IFile librarySpec = root.getFile(new Path(fTapestryProject.getLibrarySpecPath()));
-            if (librarySpec == null || !librarySpec.exists())
-            {
-                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
-                Markers.addBuildBrokenProblemMarkerToResource(
-                    fCurrentProject,
-                    TapestryCore.getString(STRING_KEY + "abort-missing-library-spec", librarySpec.getFullPath()));
-                return false;
-            }
-            IPackageFragment fragment = null;
-            boolean isBinaryPackage = false;
+            ClasspathResourceWorkspaceLocation libLoc = null;
             try
             {
-                IFolder container = (IFolder) librarySpec.getParent();
-                fragment = (IPackageFragment) JavaCore.create(container);
-                if (fragment != null)
-                {
-                    IPackageFragmentRoot fragRoot = (IPackageFragmentRoot) fragment.getParent();
-                    isBinaryPackage = fragRoot.getKind() == IPackageFragmentRoot.K_BINARY;
-                }
-            } catch (JavaModelException e2)
-            {
-                // do nothing
-            }
-
-            if (fragment == null || isBinaryPackage)
+                libLoc = (ClasspathResourceWorkspaceLocation) fTapestryProject.getLibraryLocation();
+            } catch (CoreException e2)
+            {}
+            if (libLoc == null || !libLoc.exists())
             {
                 Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
                 Markers.addBuildBrokenProblemMarkerToResource(
                     fCurrentProject,
-                    TapestryCore.getString(
-                        STRING_KEY + "-abort-library-spec-not-on-classpath",
-                        librarySpec.getFullPath()));
+                    TapestryCore.getString(STRING_KEY + "abort-missing-library-spec", libLoc.toString()));
                 return false;
-            } else if (!fragment.getJavaProject().equals(fJavaProject))
+            }
+            //            IPackageFragment fragment = null;
+            //            boolean isBinaryPackage = false;
+            //            try
+            //            {
+            //                IFolder container = (IFolder) librarySpec.getParent();
+            //                fragment = (IPackageFragment) JavaCore.create(container);
+            //                if (fragment != null)
+            //                {
+            //                    IPackageFragmentRoot fragRoot = (IPackageFragmentRoot) fragment.getParent();
+            //                    isBinaryPackage = fragRoot.getKind() == IPackageFragmentRoot.K_BINARY;
+            //                }
+            //            } catch (JavaModelException e2)
+            //            {
+            //                // do nothing
+            //            }
+            //
+            //            if (fragment == null || isBinaryPackage)
+            //            {
+            //                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
+            //                Markers.addBuildBrokenProblemMarkerToResource(
+            //                    fCurrentProject,
+            //                    TapestryCore.getString(
+            //                        STRING_KEY + "-abort-library-spec-not-on-classpath",
+            //                        librarySpec.getFullPath()));
+            //                return false;
+            if (!libLoc.getProject().equals(fJavaProject.getProject()))
             {
                 Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
                 Markers.addBuildBrokenProblemMarkerToResource(
                     fCurrentProject,
-                    TapestryCore.getString(
-                        STRING_KEY + "abort-library-not-in-this-project",
-                        librarySpec.getFullPath()));
+                    TapestryCore.getString(STRING_KEY + "abort-library-not-in-this-project", libLoc.toString()));
                 return false;
             }
-
         }
 
         return true;
@@ -525,7 +521,6 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             throw new BuilderException("could not obtain the Java Project!");
         }
 
-        fClasspathRoot = new ClasspathRootLocation(fJavaProject);
         try
         {
             fTapestryProject = (TapestryProject) fCurrentProject.getNature(TapestryCore.NATURE_ID);
@@ -535,6 +530,15 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             throw new BuilderException("could not obtain the Tapestry Project!");
         }
         fContextRoot = new ContextRootLocation(fTapestryProject.getWebContextFolder());
+
+        try
+        {
+            fClasspathRoot = fTapestryProject.getClasspathRoot();
+        } catch (CoreException e1)
+        {
+
+            throw new BuilderException("could not obtain the Classpath Root!");
+        }
 
     }
 

@@ -45,6 +45,7 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -61,6 +62,8 @@ import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.search.AbstractTapestrySearchAcceptor;
+import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
 import com.iw.plugins.spindle.core.scanning.ApplicationScanner;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;
@@ -71,7 +74,6 @@ import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.scanning.TemplateScanner;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Markers;
-import com.iw.plugins.spindle.core.util.Utils;
 /**
  * Abstract base class for full and incremental builds
  * 
@@ -81,22 +83,65 @@ import com.iw.plugins.spindle.core.util.Utils;
 public abstract class Build implements IIncrementalBuild, IScannerValidatorListener, ITemplateFinderListener
 {
 
-//    private static final Parser BUILD_PARSER = new Parser();
-    protected IJavaProject fJavaProject;
-    protected State fNewState;
-    protected BuildNotifier fNotifier;
-    protected BuilderQueue fBuildQueue;
-//    protected Parser fParser;
-    protected TapestryBuilder fTapestryBuilder;
-    protected ICoreNamespace fFrameworkNamespace;
+    /**
+     * A search acceptor that is used to find all the Tapestry
+     * artifacts in the web context or the classpath.
+     */
+    private abstract class ArtifactCollector extends AbstractTapestrySearchAcceptor
+    {
+
+        public ArtifactCollector()
+        {
+            super(AbstractTapestrySearchAcceptor.ACCEPT_ANY);
+        }
+
+        public boolean keepGoing()
+        {
+            try
+            {
+                fTapestryBuilder.fNotifier.checkCancel();
+            } catch (OperationCanceledException e)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    /**
+     * An exception used to break out of a resource delta scan if an incremental build is
+     * indicated.
+     * 
+     * @see #needsIncrementalBuild(IResourceDelta)
+     */
+    private static class NeedToBuildException extends RuntimeException
+    {
+        public NeedToBuildException()
+        {
+            super();
+        }
+    }
+    
     protected ICoreNamespace fApplicationNamespace;
-    protected BuilderValidator fValidator;
-    protected State fLastState;
+    protected BuilderQueue fBuildQueue;
+
+    private ComponentScanner fComponentScanner = new ComponentScanner();
 
     protected List fFoundTypes;
+    protected ICoreNamespace fFrameworkNamespace;
+
+    //    private static final Parser BUILD_PARSER = new Parser();
+    protected IJavaProject fJavaProject;
+    protected State fLastState;
     protected List fMissingTypes;
+    protected State fNewState;
+    protected BuildNotifier fNotifier;
+    protected NamespaceResolver fNSResolver;
     protected Map fProcessedLocations;
     protected List fSeenTemplateExtensions;
+    //    protected Parser fParser;
+    protected TapestryBuilder fTapestryBuilder;
+    protected BuilderValidator fValidator;
 
     public Build(TapestryBuilder builder)
     {
@@ -105,7 +150,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fBuildQueue = new BuilderQueue();
         fNotifier = builder.fNotifier;
         fJavaProject = builder.fJavaProject;
-//        fParser = BUILD_PARSER;
+        //        fParser = BUILD_PARSER;
         fValidator = new BuilderValidator(this);
         fValidator.addListener(this);
         fFoundTypes = new ArrayList();
@@ -114,6 +159,41 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fSeenTemplateExtensions = new ArrayList();
         TapestryArtifactManager.getTapestryArtifactManager().addTemplateFinderListener(this);
     }
+
+    public void build() throws BuilderException, CoreException
+    {
+        Parser parser = new Parser(false);
+
+        preBuild(parser);
+
+        fNotifier.updateProgressDelta(0.1f);
+
+        fNotifier.subTask(TapestryCore.getString(TapestryBuilder.STRING_KEY + "locating-artifacts"));
+
+        fBuildQueue.addAll(findAllTapestryArtifacts());
+
+        fNSResolver = getNamespaceResolver(parser);
+
+        resolveFramework();
+
+        doBuild();
+
+        fNotifier.updateProgressDelta(0.15f);
+        if (fBuildQueue.hasWaiting())
+        {
+            fNotifier.setProcessingProgressPer(0.75f / fBuildQueue.getWaitingCount());
+            while (fBuildQueue.getWaitingCount() > 0)
+            {
+
+                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fBuildQueue.peekWaiting();
+                fNotifier.processed(location);
+                fBuildQueue.finished(location);
+            }
+        }
+        saveState();
+    }
+    
+    protected abstract void saveState();
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild(org.eclipse.core.resources.IResourceDelta)
@@ -138,7 +218,153 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
     }
 
     /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild(org.eclipse.core.resources.IResourceDelta)
+     * @see com.iw.plugins.spindle.core.builder.IBuild#cleanUp()
+     */
+    public void cleanUp()
+    {
+        fLastState = null;
+        fFoundTypes.clear();
+        fMissingTypes.clear();
+        fProcessedLocations.clear();
+        fSeenTemplateExtensions.clear();
+        TapestryArtifactManager.getTapestryArtifactManager().removeTemplateFinderListener(this);
+    }
+
+    protected ICoreNamespace createNamespace(Parser parser, String id, IResourceWorkspaceLocation location)
+    {
+        ICoreNamespace result = null;
+
+        ILibrarySpecification lib = null;
+        String name = location.getName();
+        if (name.endsWith(".application"))
+        {
+            lib = parseApplication(parser, location);
+        } else if (name.endsWith(".library"))
+        {
+            lib = parseLibrary(parser, location);
+        }
+        if (lib != null)
+            result = new CoreNamespace(id, lib);
+
+        return result;
+    }
+
+    /**
+     * Perform the build.
+     */
+    protected abstract void doBuild();
+
+    /**
+     * Find and add all files with Tapestry extensions found in the classpath
+     * to a List.
+     */
+    protected void findAllArtifactsInClasspath(final ArrayList found)
+    {
+        ISearch searcher = null;
+        try
+        {
+            searcher = fTapestryBuilder.fClasspathRoot.getSearch();
+        } catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        }
+        if (searcher != null)
+        {
+            searcher.search(new ArtifactCollector()
+            {
+                public boolean acceptTapestry(Object parent, IStorage storage)
+                {
+                    IPackageFragment fragment = (IPackageFragment) parent;
+                    IResourceWorkspaceLocation location =
+                        fTapestryBuilder.fClasspathRoot.getRelativeLocation(fragment, storage);
+                    found.add(location);
+                    if (TapestryBuilder.DEBUG)
+                        System.out.println(location);
+
+                    return keepGoing();
+                }
+            });
+        }
+    }
+
+    /**
+     * Find and add all files with Tapestry extensions found in the web
+     * context to a List.
+     */
+    protected void findAllArtifactsInWebContext(final ArrayList found)
+    {
+        ISearch searcher = null;
+        try
+        {
+            searcher = fTapestryBuilder.fContextRoot.getSearch();
+        } catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        }
+        if (searcher != null)
+        {
+            searcher.search(new ArtifactCollector()
+            {
+                public boolean acceptTapestry(Object parent, IStorage storage)
+                {
+
+                    IResourceWorkspaceLocation location =
+                        fTapestryBuilder.fContextRoot.getRelativeLocation((IResource) storage);
+                    found.add(location);
+                    if (TapestryBuilder.DEBUG)
+                        System.out.println(location);
+
+                    return keepGoing();
+
+                }
+            });
+        }
+    }
+
+    /**
+     * Find all files in the project that have Tapestry extensions.
+     * @return List a list containing all the Tapestry files in the project
+     */
+    protected List findAllTapestryArtifacts() throws CoreException
+    {
+        ArrayList found = new ArrayList();
+        findAllArtifactsInWebContext(found);
+        findAllArtifactsInClasspath(found);
+        return found;
+    }
+
+    /**
+     * Obtain a namespace resolver for the build. Full and Incremental builds
+     * configure thier resolver differently.
+     */
+    protected abstract NamespaceResolver getNamespaceResolver(Parser parser);
+
+    protected boolean hasClasspathChanged()
+    {
+        IClasspathEntry[] currentEntries = fTapestryBuilder.fClasspath;
+
+        if (currentEntries.length != fLastState.fLastKnownClasspath.length)
+            return true;
+
+        List old = Arrays.asList(fLastState.fLastKnownClasspath);
+        List current = Arrays.asList(currentEntries);
+
+        return !current.containsAll(old);
+    }
+
+    /**
+     * Basic incremental build check.
+     * called by sub implementations in IncrementalBuild classes before thier own checks.
+     * <p>
+     * An incremental build is possible if:
+     * <ul>
+     * <li>a file recognized as a Tapestry template was changed, added, or deleted</li>
+     * <li>a java type referenced by a Tapestry file was changed, added, or deleted</li>
+     * <li>a Tapestry xml file was changed, added, or deleted</li>
+     * </ul>
+     * Note that before this method is called it has already been determined
+     * that an incremental build is indicated (i.e. web.xml has not changed,
+     * last build did not fail, etc).
      */
     public boolean needsIncrementalBuild(IResourceDelta projectDelta)
     {
@@ -188,7 +414,6 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                         }
 
                     }
-
                     return true;
                 }
             });
@@ -203,63 +428,31 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
     }
 
-    protected boolean hasClasspathChanged()
-    {
-        IClasspathEntry[] currentEntries = fTapestryBuilder.fClasspath;
-
-        if (currentEntries.length != fLastState.fLastKnownClasspath.length)
-            return true;
-
-        List old = Arrays.asList(fLastState.fLastKnownClasspath);
-        List current = Arrays.asList(currentEntries);
-
-        return !current.containsAll(old);
-    }
-
-    protected ICoreNamespace createNamespace(Parser parser, String id, IResourceWorkspaceLocation location)
-    {
-        ICoreNamespace result = null;
-
-        ILibrarySpecification lib = null;
-        String name = location.getName();
-        if (name.endsWith(".application"))
-        {
-            lib = parseApplication(parser, location);
-        } else if (name.endsWith(".library"))
-        {
-            lib = parseLibrary(parser, location);
-        }
-        if (lib != null)
-            result = new CoreNamespace(id, lib);
-
-        return result;
-    }
-
+    /**
+     * Completely process an application specification file, recording any
+     * problems encountered.
+     * <p>
+     * If the entity referred to by the location is really a file in the workspace, 
+     * the problems are recorded as resource markers. Otherwise, the problem is logged. 
+     */
     protected IApplicationSpecification parseApplication(Parser parser, IResourceLocation location)
     {
         try
         {
             Node node = parseToNode(parser, location);
-//            Node node = parseToNode(location);
+            //            Node node = parseToNode(location);
             if (node != null)
             {
                 ApplicationScanner scanner = new ApplicationScanner();
                 scanner.setResourceLocation(location);
                 scanner.setFactory(TapestryCore.getSpecificationFactory());
                 scanner.setPublicId(parser.getPublicId());
-//                scanner.setPublicId(fParser.getPublicId());
+                //                scanner.setPublicId(fParser.getPublicId());
 
                 IApplicationSpecification result = (IApplicationSpecification) scanner.scan(node, fValidator);
-                IResource res = Utils.toResource(location);
-                if (res != null)
-                {
-                    Markers.addTapestryProblemMarkersToResource(res, scanner.getProblems());
-                } else
-                {
-                    TapestryCore.logProblems(
-                        ((IResourceWorkspaceLocation) location).getStorage(),
-                        scanner.getProblems());
-                }
+                
+                Markers.recordProblems((IResourceWorkspaceLocation)location, scanner.getProblems());
+                
                 return result;
             }
         } catch (IOException e)
@@ -275,6 +468,13 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         return null;
     }
 
+    /**
+     * Completely process a library specification file, recording any
+     * problems encountered.
+     * <p>
+     * If the entity referred to by the location is really a resource in the workspace, 
+     * the problems are recorded as resource markers. Otherwise, the problem is logged. 
+     */
     protected ILibrarySpecification parseLibrary(Parser parser, IResourceLocation location)
     {
         if (fProcessedLocations.containsKey(location))
@@ -283,28 +483,20 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         try
         {
             Node node = parseToNode(parser, location);
-//            Node node = parseToNode(location);
+            //            Node node = parseToNode(location);
             if (node != null)
             {
                 LibraryScanner scanner = new LibraryScanner();
                 scanner.setResourceLocation(location);
                 scanner.setFactory(TapestryCore.getSpecificationFactory());
-//                scanner.setPublicId(fParser.getPublicId());
+                //                scanner.setPublicId(fParser.getPublicId());
                 scanner.setPublicId(parser.getPublicId());
                 ILibrarySpecification result = (ILibrarySpecification) scanner.scan(node, fValidator);
                 if (result != null)
                     fProcessedLocations.put(location, result);
-
-                IResource res = Utils.toResource(location);
-                if (res != null)
-                {
-                    Markers.addTapestryProblemMarkersToResource(res, scanner.getProblems());
-                } else
-                {
-                    TapestryCore.logProblems(
-                        ((IResourceWorkspaceLocation) location).getStorage(),
-                        scanner.getProblems());
-                }
+                    
+                Markers.recordProblems((IResourceWorkspaceLocation) location, scanner.getProblems());
+                
                 return result;
             }
         } catch (IOException e)
@@ -320,6 +512,51 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         return null;
     }
 
+    /**
+     * Process completely all the templates found for a component or page.
+     * Problems encountered are recorded. 
+     * <p>
+     * If the entity referred to by the specification location is really a resource in the workspace, 
+     * the problems are recorded as resource markers. Otherwise, the problem is logged. 
+     */
+    protected void parseTemplates(PluginComponentSpecification spec)
+    {
+        TemplateScanner scanner = new TemplateScanner();
+        scanner.setFactory(TapestryCore.getSpecificationFactory());
+
+        for (Iterator iter = spec.getTemplateLocations().iterator(); iter.hasNext();)
+        {
+            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
+            if (fProcessedLocations.containsKey(location))
+                continue;
+            try
+            {
+                scanner.scanTemplate(spec, location, fValidator);
+
+                Markers.recordProblems((IResourceWorkspaceLocation) location, scanner.getProblems());
+
+                fProcessedLocations.put(location, null);
+            } catch (ScannerException e)
+            {
+                TapestryCore.log(e);
+            } finally
+            {
+                if (fBuildQueue.isWaiting(location))
+                {
+                    fBuildQueue.finished(location);
+                    fNotifier.processed(location);
+                }
+            }
+        }
+    }
+
+    /**
+     * Invoke the Parser on an xml file given a resource location.
+     * Problems encountered by the Parser are recorded. 
+     * <p>
+     * If the entity referred to by the location is really a resource in the workspace, the problems are
+     * recorded as resource markers. Otherwise, the problem is logged. 
+     */
     protected Node parseToNode(Parser parser, IResourceLocation location) throws IOException, CoreException
     {
         IResourceWorkspaceLocation use_loc = (IResourceWorkspaceLocation) location;
@@ -333,12 +570,19 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         }
     }
 
+    /**
+     * Invoke the Parser on an xml file given an instance of IStorage.
+     * Problems encountered by the Parser are recorded.
+     * <p>
+     * If the IStorage is really a resource in the workspace, the problems are
+     * recorded as resource markers. Otherwise, the problem is logged. 
+     */
     protected Node parseToNode(Parser parser, IStorage storage) throws IOException, CoreException
     {
         Node result = null;
         try
         {
-//            result = fParser.parse(storage);
+            //            result = fParser.parse(storage);
             result = parser.parse(storage);
 
         } catch (CoreException e)
@@ -350,25 +594,28 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             TapestryCore.log(e);
             throw e;
         }
-
-        if (storage.getAdapter(IResource.class) != null)
-        {
-            Markers.addTapestryProblemMarkersToResource(((IResource) storage), parser.getProblems());
-//            Markers.addTapestryProblemMarkersToResource(((IResource) storage), fParser.getProblems());
-        } else
-        {
-//            TapestryCore.logProblems(storage, fParser.getProblems());
-            TapestryCore.logProblems(storage, parser.getProblems());
-        }
-
+        
+        Markers.recordProblems(storage, parser.getProblems());
+        
         if (parser.getHasFatalErrors())
-//        if (fParser.getHasFatalErrors())
+            //        if (fParser.getHasFatalErrors())
             return null;
 
         return result;
     }
 
-    private ComponentScanner fComponentScanner = new ComponentScanner();
+    /**
+     * Perform any work that needs to be done before the build proper can begin.
+     * For example the application builder parses web.xml here.
+     */
+    protected abstract void preBuild(Parser parser) throws CoreException;
+
+    /**
+     * Resolve the Tapestry Framework namespace here.
+     * Library builds check to see if the library being built *is*
+     * the framework library. If so it skips this step.
+     */
+    protected abstract void resolveFramework();
 
     protected IComponentSpecification resolveIComponentSpecification(
         Parser parser,
@@ -411,16 +658,9 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                         fComponentScanner.scanForTemplates(dummy);
                         result = dummy;
                     }
-                    IResource res = Utils.toResource(location);
-                    if (res != null)
-                    {
-                        Markers.addTapestryProblemMarkersToResource(res, fComponentScanner.getProblems());
-                    } else
-                    {
-                        TapestryCore.logProblems(
-                            ((IResourceWorkspaceLocation) location).getStorage(),
-                            fComponentScanner.getProblems());
-                    }
+                    
+                    Markers.recordProblems(location, fComponentScanner.getProblems());
+                    
                 } catch (IOException e)
                 {
                     e.printStackTrace();
@@ -443,60 +683,20 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         return result;
     }
 
-    protected void parseTemplates(PluginComponentSpecification spec)
-    {
-        TemplateScanner scanner = new TemplateScanner();
-        scanner.setFactory(TapestryCore.getSpecificationFactory());
-
-        for (Iterator iter = spec.getTemplateLocations().iterator(); iter.hasNext();)
-        {
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
-            if (fProcessedLocations.containsKey(location))
-                continue;
-            try
-            {
-                scanner.scanTemplate(spec, location, fValidator);
-
-                IResource res = Utils.toResource(location);
-                if (res != null)
-                {
-                    Markers.addTapestryProblemMarkersToResource(res, scanner.getProblems());
-                } else
-                {
-                    TapestryCore.logProblems(
-                        ((IResourceWorkspaceLocation) location).getStorage(),
-                        scanner.getProblems());
-                }
-                fProcessedLocations.put(location, null);
-            } catch (ScannerException e)
-            {
-                TapestryCore.log(e);
-            } finally
-            {
-                if (fBuildQueue.isWaiting(location))
-                {
-                    fBuildQueue.finished(location);
-                    fNotifier.processed(location);
-                }
-            }
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.builder.IBuild#cleanUp()
+    /**
+     * Template extensions seen during a build are stored in the State
+     * Used by Incremental builds.
      */
-    public void cleanUp()
+    public void templateExtensionSeen(String extension)
     {
-        fLastState = null;
-        fFoundTypes.clear();
-        fMissingTypes.clear();
-        fProcessedLocations.clear();
-        fSeenTemplateExtensions.clear();
-        TapestryArtifactManager.getTapestryArtifactManager().removeTemplateFinderListener(this);
+        if (!fSeenTemplateExtensions.contains(extension))
+            fSeenTemplateExtensions.add(extension);
+
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.scanning.IScannerValidatorListener#typeChecked(java.lang.String, org.eclipse.jdt.core.IType)
+    /**
+     * Trigger fired whenever a type check occurs during a build.
+     * Type names are stored in the State and used to by incremental builds
      */
     public void typeChecked(String fullyQualifiedName, IType result)
     {
@@ -515,36 +715,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             {
                 TapestryCore.log(e);
             }
-
         }
-
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener#templateExtensionSeen(java.lang.String)
-     */
-    public void templateExtensionSeen(String extension)
-    {
-        if (!fSeenTemplateExtensions.contains(extension))
-            fSeenTemplateExtensions.add(extension);
-
-    }
-
-    private static class NeedToBuildException extends RuntimeException
-    {
-        public NeedToBuildException()
-        {
-            super();
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.builder.IBuild#build()
-     */
-    public void build() throws BuilderException, CoreException
-    {
-        // TODO Auto-generated method stub
-
     }
 
 }

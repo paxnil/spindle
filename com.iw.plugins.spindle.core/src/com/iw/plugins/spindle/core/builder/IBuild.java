@@ -29,7 +29,7 @@ package com.iw.plugins.spindle.core.builder;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- *  TODO Add Type comment
+ *  Interface for Builders
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -37,5 +37,5 @@ import org.eclipse.core.runtime.CoreException;
 public interface IBuild
 {
     public void build() throws BuilderException, CoreException;
-    public void cleanUp();
+    public void cleanUp();    
 }

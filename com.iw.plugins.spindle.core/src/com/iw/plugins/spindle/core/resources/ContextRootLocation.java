@@ -171,6 +171,10 @@ public class ContextRootLocation extends AbstractRootLocation
     {
         return "ctx(" + fRootFolder.getFullPath() + ")/";
     }
+    
+    String toHashString() {
+        return toString();
+    }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()

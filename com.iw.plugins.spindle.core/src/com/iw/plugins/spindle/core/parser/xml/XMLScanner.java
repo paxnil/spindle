@@ -766,7 +766,6 @@ public abstract class XMLScanner implements XMLComponent
             reportFatalError("OpenQuoteExpected", new Object[] { atName });
         }
 
-        // TODO lksjdlsjdlskjdlksjds        
 
         fEventHandler.attributeBegin(atName, fEntityScanner.getLineNumber(), fEntityScanner.getColumnNumber() + 1);
 

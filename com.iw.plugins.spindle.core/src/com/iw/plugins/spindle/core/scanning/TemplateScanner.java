@@ -407,7 +407,6 @@ public class TemplateScanner extends AbstractScanner
                         + "' expects bindings to be of type '"
                         + pType
                         + "'");
-            //TODO internationalize
         }
 
         //        else
@@ -702,7 +701,6 @@ public class TemplateScanner extends AbstractScanner
      *  Static bindings that conflict with bindings in the
      *  specification are warned.
      * 
-     *  //TODO figure this out.
      *
      **/
 

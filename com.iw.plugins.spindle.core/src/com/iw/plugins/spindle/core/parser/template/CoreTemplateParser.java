@@ -46,7 +46,7 @@ import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.SourceLocation;
 
 /**
- *  TODO Add Type comment
+ *  Subclass of the Tapestry template parser, tweaked for Spindle.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$

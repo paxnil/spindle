@@ -314,12 +314,33 @@ public class ClasspathRootLocation extends AbstractRootLocation
     {
         return "cp(" + fJavaProject.getProject().getName() + ")/";
     }
+    
+    String toHashString() {
+        return toString();
+    }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
      */
     public boolean isBinary()
     {       
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+            return false;
+            
+        if (obj.getClass().equals(getClass()))
+        {
+            ClasspathRootLocation other = (ClasspathRootLocation) obj;
+            return this.fJavaProject.equals(other.fJavaProject);
+        }
+
         return false;
     }
 

@@ -95,7 +95,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.builder.FullBuild#saveState()
      */
-    protected void saveState()
+    public void saveState()
     {
         State newState = new State();
         newState.copyFrom(fLastState);

@@ -28,12 +28,14 @@ package com.iw.plugins.spindle.core.util;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /**
  * Marker utililties
@@ -47,6 +49,48 @@ public class Markers
     public static final String TAPESTRY_MARKER_TAG = ITapestryMarker.TAPESTRY_PROBLEM_MARKER;
     public static final String TAPESTRY_BUILBROKEN_TAG = ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER;
     public static final String TAPESTRY_FATAL = ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER;
+
+    /**
+         * Method addBuildBrokenProblemMarkerToResource.
+         * @param iProject
+         * @param string
+         */
+    public static void addBuildBrokenProblemMarkerToResource(IProject iProject, String message)
+    {
+        addProblemMarkerToResource(iProject, TAPESTRY_BUILBROKEN_TAG, message, IMarker.SEVERITY_ERROR, 0, 0, 0);
+    }
+
+    public static void recordProblems(IStorage storage, IProblem[] problems)
+    {
+        IResource res = (IResource) storage.getAdapter(IResource.class);
+        boolean workspace = res != null;
+        for (int i = 0; i < problems.length; i++)
+        {
+            if (workspace)
+            {
+                Markers.addTapestryProblemMarkerToResource(res, problems[i]);
+            } else
+            {
+                TapestryCore.logProblem(storage, problems[i]);
+            }
+        }
+    }
+
+    public static void recordProblems(IResourceWorkspaceLocation location, IProblem[] problems)
+    {
+        IResource res = Utils.toResource(location);
+        boolean workspace = res != null;
+        for (int i = 0; i < problems.length; i++)
+        {
+            if (workspace)
+            {
+                addTapestryProblemMarkerToResource(res, problems[i]);
+            } else
+            {
+                TapestryCore.logProblem(location.getStorage(), problems[i]);
+            }
+        }
+    }
 
     public static void addTapestryProblemMarkersToResource(IResource resource, IProblem[] problems)
     {
@@ -219,22 +263,11 @@ public class Markers
             if (iProject != null && iProject.exists())
             {
 
-                
                 iProject.deleteMarkers(Markers.TAPESTRY_BUILBROKEN_TAG, false, IResource.DEPTH_ZERO);
             }
         } catch (CoreException e)
         {} // assume there were no problems
 
-    }
-
-    /**
-     * Method addBuildBrokenProblemMarkerToResource.
-     * @param iProject
-     * @param string
-     */
-    public static void addBuildBrokenProblemMarkerToResource(IProject iProject, String message)
-    {
-        addProblemMarkerToResource(iProject, TAPESTRY_BUILBROKEN_TAG, message, IMarker.SEVERITY_ERROR, 0, 0, 0);
     }
 
 }

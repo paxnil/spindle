@@ -30,7 +30,8 @@ import org.apache.tapestry.ILocation;
 import org.apache.tapestry.IResourceLocation;
 
 /**
- *  TODO Add Type comment
+ *  Records all the line and offset information for a chunk of
+ *  markup.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$

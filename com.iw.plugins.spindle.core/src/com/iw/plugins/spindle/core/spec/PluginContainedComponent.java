@@ -47,6 +47,8 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
 
     private String fCopyOf;
 
+    private boolean fInheritInformalParameters;
+
     protected Map fBindings;
 
     /**
@@ -88,7 +90,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
     {
         if (fBindings == null)
             fBindings = new PropertyFiringMap(this, "bindings");
-        PluginBindingSpecfication pluginSpec = (PluginBindingSpecfication)spec;
+        PluginBindingSpecfication pluginSpec = (PluginBindingSpecfication) spec;
         pluginSpec.setIdentifier(name);
         pluginSpec.setParent(this);
         fBindings.put(name, spec);
@@ -133,8 +135,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public boolean getInheritInformalParameters()
     {
-        // TODO whaaaa?
-        return false;
+         return fInheritInformalParameters;
     }
 
     /* (non-Javadoc)
@@ -142,8 +143,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public void setInheritInformalParameters(boolean value)
     {
-        // TODO whaaaa?
-
+        fInheritInformalParameters = value;
     }
 
 }

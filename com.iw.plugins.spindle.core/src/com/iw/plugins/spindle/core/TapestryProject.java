@@ -44,9 +44,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.util.*;
+import com.iw.plugins.spindle.core.util.Files;
+import com.iw.plugins.spindle.core.util.Markers;
 
 /**
  * The Tapestry project nature. Configures and Deconfigures the builder
@@ -72,11 +74,13 @@ public class TapestryProject implements IProjectNature
     protected IProject fProject;
     protected IJavaProject fJavaProject;
 
+    protected String fWebContext;
     protected IFolder fWebContextFolder;
+    
     protected String fLibrarySpecPath;
+    protected IFile fLibraryFile;
 
     protected int fProjectType;
-    protected String fWebContext;
 
     /** needed for project nature creation **/
     public TapestryProject()
@@ -330,6 +334,14 @@ public class TapestryProject implements IProjectNature
     public void setLibrarySpecPath(String librarySpecPath)
     {
         this.fLibrarySpecPath = librarySpecPath;
+    }
+    
+    public IResourceWorkspaceLocation getLibraryLocation() throws CoreException {
+        return (IResourceWorkspaceLocation)getClasspathRoot().getRelativeLocation(getLibrarySpecPath());  
+    }
+    
+    public ClasspathRootLocation getClasspathRoot() throws CoreException{
+       return new ClasspathRootLocation(getJavaProject());      
     }
 
     public void saveProperties()

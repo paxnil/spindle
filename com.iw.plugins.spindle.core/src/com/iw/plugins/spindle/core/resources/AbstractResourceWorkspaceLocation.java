@@ -27,6 +27,7 @@
 package com.iw.plugins.spindle.core.resources;
 
 import java.net.URL;
+import java.util.Locale;
 
 import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.runtime.Path;
@@ -112,13 +113,12 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
 
     /* (non-Javadoc)
      * 
-     * TODO what do we do with this? nothing?
      * 
      * @see org.apache.tapestry.IResourceLocation#getResourceURL()
      */
     public URL getResourceURL()
     {
-        throw new Error("not implemented, yet");
+        throw new Error("Not useful in an Eclipse environment");
     }
 
     /* (non-Javadoc)
@@ -128,6 +128,8 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
     {
         return fRoot.isOnClasspath();
     }
+    
+    
 
     public String toString()
     {
@@ -137,6 +139,26 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
         buffer.append(fPath);
         buffer.append(fName);
         return buffer.toString();
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.tapestry.IResourceLocation#getLocalization(java.util.Locale)
+     */
+    public IResourceLocation getLocalization(Locale locale)
+    {
+        throw new Error("Not useful in an Eclipse environment");
+    }
+    
+    String toHashString() {
+        return fPath + (fName == null ? "" :  fName);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode()
+    {        
+        return (fRoot.toHashString() + toHashString()).hashCode();
     }
 
 }

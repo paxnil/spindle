@@ -112,7 +112,6 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
      */
     public Object instantiateExtension(IResourceResolver resolver)
     {
-        // TODO not used
         return null;
     }
 

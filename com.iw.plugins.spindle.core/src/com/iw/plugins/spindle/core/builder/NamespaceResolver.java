@@ -62,6 +62,7 @@ import com.iw.plugins.spindle.core.scanning.ComponentScanner;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
+import com.iw.plugins.spindle.core.util.Markers;
 
 /**
  *  Resolver for a Namespace
@@ -253,8 +254,7 @@ public class NamespaceResolver
         {
             if (!fSpecLocation.exists())
                 throw new BuilderException(
-                    "Tapestry Build failed: application spec does not exist: '" + fSpecLocation.toString() + "'");
-            //TODO internationalize
+                    TapestryCore.getString("build-failed-missing-application-spec", fSpecLocation.toString()));
 
             fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation);
         } else
@@ -479,11 +479,10 @@ public class NamespaceResolver
 
         result = null;
 
-        // TODO handle this without a runtime exception!
         if (fComponentStack.contains(location))
         {
-            new Throwable("CIRCULAR").printStackTrace();
-            throw new RuntimeException("poo");
+            throw new BuilderException(
+                TapestryCore.getString("build-failed-circular-component-reference", getCircularErrorMessage(location)));
         }
 
         fComponentStack.push(location);
@@ -495,6 +494,33 @@ public class NamespaceResolver
         }
         fComponentStack.pop();
         return result;
+    }
+
+    /**
+     * build an error message or circular component references
+     * @param location
+     * @return
+     */
+    private String getCircularErrorMessage(IResourceWorkspaceLocation location)
+    {
+        List result = new ArrayList();
+        result.add(location);
+        Stack clone = (Stack) fComponentStack.clone();
+
+        IResourceWorkspaceLocation sloc = (IResourceWorkspaceLocation) clone.pop();
+        if (sloc.equals(location))
+            return location.toString() + " refers to itself";
+
+        result.add(sloc);
+        while (!sloc.equals(location))
+        {
+
+            result.add(sloc);
+            sloc = (IResourceWorkspaceLocation) clone.pop();
+        }
+
+        return result.toString();
+
     }
 
     private Map getAllJWCFilesForNamespace()
@@ -526,10 +552,17 @@ public class NamespaceResolver
 
             } else
             {
-                //this is a problem. a component is being hidden by one defined in the spec, or some place else
-                //in the lookup path.
-                //TODO handle this error! - need to mark the resource if we can
-                throw new Error("fix me!");
+
+                Markers.recordProblems(
+                    jwcs[i],
+                    new IProblem[] {
+                         new DefaultProblem(
+                            Markers.TAPESTRY_MARKER_TAG,
+                            IProblem.ERROR,
+                            TapestryCore.getString("builder-hidden-jwc-file", jwcs[i], result.get(type)),
+                            1,
+                            0,
+                            0)});
             }
         }
         return result;
@@ -569,10 +602,16 @@ public class NamespaceResolver
             } else
             {
                 if (!result.get(name).equals(pages[i]))
-                    //this is a problem. a component is being hidden by one defined in the spec, or some place else
-                    //in the lookup path.
-                    //TODO handle this error! - need to mark the resource if we can
-                    throw new Error("fix me!");
+                    Markers.recordProblems(
+                pages[i],
+                        new IProblem[] {
+                             new DefaultProblem(
+                                Markers.TAPESTRY_MARKER_TAG,
+                                IProblem.ERROR,
+                                TapestryCore.getString("builder-hidden-page-file", pages[i], result.get(name)),
+                                1,
+                                0,
+                                0)});
             }
         }
         return result;
@@ -634,7 +673,6 @@ public class NamespaceResolver
                         name = fullname.substring(0, cut);
                         extension = fullname.substring(cut + 1);
                     }
-                    // TODO handle for other extensions than 'html'.
                     if (seek_extension.equals(extension) && !allTemplates.contains(location))
                         speclessPages.add(location);
                 }
@@ -770,10 +808,10 @@ public class NamespaceResolver
             {
                 result = resolveComponent(type, (IResourceWorkspaceLocation) fJwcFiles.get(type));
             }
-            
+
             if (result == null)
                 result = resolveInFramework(type);
-                
+
             return result;
         }
 

@@ -26,17 +26,12 @@
 package com.iw.plugins.spindle.core.builder;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.w3c.dom.Node;
 
@@ -45,8 +40,6 @@ import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.resources.search.AbstractTapestrySearchAcceptor;
-import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.util.Markers;
 
@@ -62,8 +55,6 @@ public class FullBuild extends Build
     protected IType fTapestryServletType;
     protected ServletInfo fApplicationServlet;
     protected Map fInfoCache;
-    protected NamespaceResolver fNSResolver;
-
     /**
      * Constructor for FullBuilder.
      */
@@ -75,45 +66,31 @@ public class FullBuild extends Build
 
     }
 
-    public void build() throws BuilderException, CoreException
-    {
+    /**
+	 * Use the parser to find declared applications in web.xml
+	 * @param parser
+	 * @throws CoreException
+	 */
+	protected void preBuild(Parser parser) throws CoreException {
+		findDeclaredApplication(parser);
+	}
+	
+	/**
+	 * Resolve the Tapesty framework namespace
+	 */
+	protected void resolveFramework() {
+		fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace();
+	}
+	
+	/**
+	 * Resolve the application namespace
+	 *
+	 */
+	protected void doBuild() {
+		fApplicationNamespace = fNSResolver.resolveApplicationNamespace(fFrameworkNamespace, fApplicationServlet);
+	}
 
-       
-            Parser parser = new Parser(false);
-
-            findDeclaredApplication(parser);
-
-            fNotifier.updateProgressDelta(0.1f);
-
-            fNotifier.subTask(TapestryCore.getString(TapestryBuilder.STRING_KEY + "locating-artifacts"));
-
-            fBuildQueue.addAll(findAllTapestryArtifacts());
-
-            fNSResolver = getNamespaceResolver(parser);
-
-            fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace();
-
-            fApplicationNamespace = fNSResolver.resolveApplicationNamespace(fFrameworkNamespace, fApplicationServlet);
-
-            fNotifier.updateProgressDelta(0.15f);
-            if (fBuildQueue.hasWaiting())
-            {
-                fNotifier.setProcessingProgressPer(0.75f / fBuildQueue.getWaitingCount());
-                while (fBuildQueue.getWaitingCount() > 0)
-                {
-
-                    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fBuildQueue.peekWaiting();
-                    fNotifier.processed(location);
-                    fBuildQueue.finished(location);
-                }
-            }
-
-            saveState();
-
-        
-    }
-
-    protected void saveState()
+    public void saveState()
     {
         State newState = new State(fTapestryBuilder);
         newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
@@ -144,89 +121,12 @@ public class FullBuild extends Build
             {
                 state.fBinaryNamespaces.put(libraryLocation, namespace);
             }
-
         }
     }
 
     protected NamespaceResolver getNamespaceResolver(Parser parser)
     {
         return new NamespaceResolver(this, parser, false);
-    }
-
-    /**
-     * Method findAllTapestryArtifacts.
-     */
-    protected List findAllTapestryArtifacts() throws CoreException
-    {
-        ArrayList found = new ArrayList();
-        findAllArtifactsInWebContext(found);
-        findAllArtifactsInClasspath(found);
-        return found;
-    }
-
-    /**
-     * Method findAllArtifactsInBinaryClasspath.
-     */
-    private void findAllArtifactsInClasspath(final ArrayList found)
-    {
-        ISearch searcher = null;
-        try
-        {
-            searcher = fTapestryBuilder.fClasspathRoot.getSearch();
-        } catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
-        if (searcher != null)
-        {
-            searcher.search(new ArtifactCollector()
-            {
-                public boolean acceptTapestry(Object parent, IStorage storage)
-                {
-                    IPackageFragment fragment = (IPackageFragment) parent;
-                    IResourceWorkspaceLocation location =
-                        fTapestryBuilder.fClasspathRoot.getRelativeLocation(fragment, storage);
-                    found.add(location);
-                    if (TapestryBuilder.DEBUG)
-                        System.out.println(location);
-
-                    return keepGoing();
-                }
-            });
-        }
-    }
-
-    /**
-     * Method findAllArtifactsInProjectProper.
-     */
-    private void findAllArtifactsInWebContext(final ArrayList found)
-    {
-        ISearch searcher = null;
-        try
-        {
-            searcher = fTapestryBuilder.fContextRoot.getSearch();
-        } catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
-        if (searcher != null)
-        {
-            searcher.search(new ArtifactCollector()
-            {
-                public boolean acceptTapestry(Object parent, IStorage storage)
-                {
-
-                    IResourceWorkspaceLocation location =
-                        fTapestryBuilder.fContextRoot.getRelativeLocation((IResource) storage);
-                    found.add(location);
-                    if (TapestryBuilder.DEBUG)
-                        System.out.println(location);
-
-                    return keepGoing();
-
-                }
-            });
-        }
     }
 
     public void cleanUp()
@@ -295,25 +195,6 @@ public class FullBuild extends Build
 
     }
 
-    private abstract class ArtifactCollector extends AbstractTapestrySearchAcceptor
-    {
 
-        public ArtifactCollector()
-        {
-            super(AbstractTapestrySearchAcceptor.ACCEPT_ANY);
-        }
-
-        public boolean keepGoing()
-        {
-            try
-            {
-                fTapestryBuilder.fNotifier.checkCancel();
-            } catch (OperationCanceledException e)
-            {
-                return false;
-            }
-            return true;
-        }
-    }
 
 }

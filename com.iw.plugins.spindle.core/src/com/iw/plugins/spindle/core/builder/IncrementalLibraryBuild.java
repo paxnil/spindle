@@ -2,6 +2,9 @@ package com.iw.plugins.spindle.core.builder;
 
 import org.eclipse.core.resources.IResourceDelta;
 
+import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.parser.Parser;
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -34,7 +37,7 @@ import org.eclipse.core.resources.IResourceDelta;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public class IncrementalLibraryBuild extends Build implements IIncrementalBuild
+public class IncrementalLibraryBuild extends LibraryBuild implements IIncrementalBuild
 {
 
     /**
@@ -47,23 +50,39 @@ public class IncrementalLibraryBuild extends Build implements IIncrementalBuild
     }
 
     /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.builder.IBuild#build()
-     */
-    public void build() throws BuilderException
-    {}
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.builder.IBuild#cleanUp()
-     */
-    public void cleanUp()
-    {}
-
-    /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild(org.eclipse.core.resources.IResourceDelta)
      */
     public boolean canIncrementalBuild(IResourceDelta projectDelta)
-    {       
-        return true;
+    {
+        if (super.canIncrementalBuild(projectDelta))
+        {}
+        return false;
+
     }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.builder.FullBuild#getNamespaceResolver()
+     */
+    protected NamespaceResolver getNamespaceResolver(Parser parser)
+    {
+        return new NamespaceResolver(this, parser, true);
+    }
+    
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.builder.FullBuild#saveState()
+     */
+    public void saveState()
+    {
+        State newState = new State();
+        newState.copyFrom(fLastState);
+        newState.fJavaDependencies = fFoundTypes;
+        newState.fMissingJavaTypes = fMissingTypes;
+        newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
+        saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
+        TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
+            fTapestryBuilder.fCurrentProject,
+            newState);
+    }
+
 
 }
