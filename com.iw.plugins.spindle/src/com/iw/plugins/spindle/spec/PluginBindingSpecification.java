@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 
 import net.sf.tapestry.spec.BindingSpecification;
 import net.sf.tapestry.spec.BindingType;
+
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;

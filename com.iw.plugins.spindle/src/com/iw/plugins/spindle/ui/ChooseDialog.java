@@ -52,6 +52,7 @@ public class ChooseDialog extends TitleAreaDialog {
   private ILabelProvider labelProvider;
   private int heightInCharacters = 10;
   private int widthInCharacters = 10;
+  private String title;
 
   private ISelection resultSelection;
 
@@ -70,7 +71,7 @@ public class ChooseDialog extends TitleAreaDialog {
 
   public ChooseDialog(Shell parentShell, String title) {
     super(parentShell);
-    setTitle(title);
+    this.title = title == null ? "" : title;
   }
 
   /**
@@ -103,6 +104,7 @@ public class ChooseDialog extends TitleAreaDialog {
     viewer.setLabelProvider(labelProvider);
 
     viewer.setInput("fake");
+    setTitle(title);
 
     return container;
 

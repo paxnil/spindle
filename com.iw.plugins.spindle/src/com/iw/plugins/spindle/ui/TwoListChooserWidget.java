@@ -96,8 +96,12 @@ public class TwoListChooserWidget extends Viewer {
   }
 
   public Composite createControl(Composite parent) {
+  	
+  	
 
     Composite container = new Composite(parent, SWT.NONE);
+
+		
 
     FormLayout layout = new FormLayout();
     layout.marginWidth = 4;
@@ -106,7 +110,8 @@ public class TwoListChooserWidget extends Viewer {
 
     FormData formData = new FormData();
     formData.top = new FormAttachment(0, 0);
-    formData.left = new FormAttachment(0, 0);
+    formData.left = new FormAttachment(0, 0); 
+    formData.right = new FormAttachment(100, 0);
     formData.width = 400;
 
     container.setLayoutData(formData);

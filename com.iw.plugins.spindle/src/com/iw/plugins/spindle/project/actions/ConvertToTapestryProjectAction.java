@@ -24,8 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.project.actions;
 
 import org.eclipse.core.resources.IProject;
@@ -80,7 +78,6 @@ public class ConvertToTapestryProjectAction extends AbstractTapestryProjectActio
       return;
     }
 
-
     if (!checkHasTapestryJars(jproject)) {
 
       MessageDialog.openInformation(
@@ -96,32 +93,31 @@ public class ConvertToTapestryProjectAction extends AbstractTapestryProjectActio
     wizard.init(TapestryPlugin.getDefault().getWorkbench(), selection);
 
     WizardDialog dialog = new WizardDialog(shell, wizard);
-    PixelConverter converter= new PixelConverter(TapestryPlugin.getDefault().getActiveWorkbenchShell());
-		
-	dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
+    PixelConverter converter = new PixelConverter(TapestryPlugin.getDefault().getActiveWorkbenchShell());
 
-    dialog.create(); 
+    dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
+
+    dialog.create();
     dialog.getShell().setText("Tapestry Project Conversion");
 
     dialog.open();
 
   }
 
-  private boolean hasExistingApplicationsOrLibraries(ITapestryProject tproject)
-    throws CoreException {
+  private boolean hasExistingApplicationsOrLibraries(ITapestryProject tproject) throws CoreException {
 
     TapestryLookup lookup = tproject.getLookup();
 
     Requestor requestor = new Requestor();
 
-    lookup.findAll(
+    lookup.findAllManaged(
       "*",
       true,
+      requestor,
       TapestryLookup.ACCEPT_APPLICATIONS
         | TapestryLookup.ACCEPT_COMPONENTS
         | TapestryLookup.WRITEABLE
-        | TapestryLookup.THIS_PROJECT_ONLY,
-      requestor);
+        | TapestryLookup.THIS_PROJECT_ONLY);
 
     return requestor.count >= 0;
   }

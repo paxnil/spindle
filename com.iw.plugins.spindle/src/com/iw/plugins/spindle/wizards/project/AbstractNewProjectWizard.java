@@ -34,16 +34,18 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPage;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
+import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.wizards.NewTapestryElementWizard;
 
 public abstract class AbstractNewProjectWizard extends NewTapestryElementWizard {
 
   protected WizardNewProjectCreationPage mainPage;
-  private NewJavaProjectWizardPage javaPage;
+  protected NewJavaProjectWizardPage javaPage;
 
   private NewTapestryProjectPage tapestryPage;
 
@@ -54,15 +56,19 @@ public abstract class AbstractNewProjectWizard extends NewTapestryElementWizard 
   }
   
   public abstract NewTapestryProjectPage createTapestryPage(IWorkspaceRoot root);
+  
 
   /**
    * @see Wizard#createPages
    */
   public void addPages() {
+  	ImageDescriptor descriptor = TapestryImages.getImageDescriptor("applicationDialog.gif");
     mainPage = new WizardNewProjectCreationPage("Project Name");
+    mainPage.setImageDescriptor(descriptor);
     addPage(mainPage);
 
     javaPage = new NewJavaProjectWizardPage(ResourcesPlugin.getWorkspace().getRoot(), mainPage);
+    javaPage.setImageDescriptor(descriptor);
     addPage(javaPage);
     
     javaPage.setDescription(javaPage.getDescription()+" - add Tapestry and Servlet jars here.");

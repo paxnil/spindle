@@ -29,6 +29,8 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -36,17 +38,17 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public class ChooseWorkspaceModelDialog
-  extends AbstractDialog
-  implements ISelectionChangedListener, IDoubleClickListener {
+public class ChooseWorkspaceModelDialog extends TitleAreaDialog implements ISelectionChangedListener, IDoubleClickListener {
 
   static public ChooseWorkspaceModelDialog createLibraryModelDialog(
     Shell shell,
@@ -55,14 +57,7 @@ public class ChooseWorkspaceModelDialog
     String description) {
 
     ChooseWorkspaceModelDialog result =
-      new ChooseWorkspaceModelDialog(
-        shell,
-        project,
-        windowTitle,
-        description,
-        TapestryLookup.ACCEPT_LIBRARIES, false);
-
-    result.setTitleImageString("application48.gif");
+      new ChooseWorkspaceModelDialog(shell, project, windowTitle, description, TapestryLookup.ACCEPT_LIBRARIES, false);
 
     return result;
   }
@@ -74,14 +69,7 @@ public class ChooseWorkspaceModelDialog
     String description) {
 
     ChooseWorkspaceModelDialog result =
-      new ChooseWorkspaceModelDialog(
-        shell,
-        project,
-        windowTitle,
-        description,
-        TapestryLookup.ACCEPT_APPLICATIONS, false);
-
-    result.setTitleImageString("application48.gif");
+      new ChooseWorkspaceModelDialog(shell, project, windowTitle, description, TapestryLookup.ACCEPT_APPLICATIONS, false);
 
     return result;
 
@@ -99,14 +87,13 @@ public class ChooseWorkspaceModelDialog
         project,
         windowTitle,
         description,
-        TapestryLookup.ACCEPT_LIBRARIES | TapestryLookup.ACCEPT_APPLICATIONS, false);
-
-    result.setTitleImageString("application48.gif");
+        TapestryLookup.ACCEPT_LIBRARIES | TapestryLookup.ACCEPT_APPLICATIONS,
+        false);
 
     return result;
 
   }
-  
+
   static public ChooseWorkspaceModelDialog createProjectModelDialog(
     Shell shell,
     IJavaProject project,
@@ -119,9 +106,8 @@ public class ChooseWorkspaceModelDialog
         project,
         windowTitle,
         description,
-        TapestryLookup.ACCEPT_LIBRARIES | TapestryLookup.ACCEPT_APPLICATIONS | TapestryLookup.THIS_PROJECT_ONLY, false);
-
-    result.setTitleImageString("application48.gif");
+        TapestryLookup.ACCEPT_LIBRARIES | TapestryLookup.ACCEPT_APPLICATIONS | TapestryLookup.THIS_PROJECT_ONLY,
+        false);
 
     return result;
 
@@ -131,40 +117,31 @@ public class ChooseWorkspaceModelDialog
     Shell shell,
     IJavaProject project,
     String windowTitle,
-    String description, boolean filterLibraries) {
+    String description,
+    boolean filterLibraries) {
 
     ChooseWorkspaceModelDialog result =
-      new ChooseWorkspaceModelDialog(
-        shell,
-        project,
-        windowTitle,
-        description,
-        TapestryLookup.ACCEPT_COMPONENTS, filterLibraries);
-    result.setTitleImageString("component48.gif");
+      new ChooseWorkspaceModelDialog(shell, project, windowTitle, description, TapestryLookup.ACCEPT_COMPONENTS, filterLibraries);
 
     return result;
   }
-  
- 
 
   static public ChooseWorkspaceModelDialog createPageModelDialog(
     Shell shell,
     IJavaProject project,
     String windowTitle,
-    String description, boolean filterLibraries) {
+    String description,
+    boolean filterLibraries) {
 
     ChooseWorkspaceModelDialog result =
-      new ChooseWorkspaceModelDialog(
-        shell,
-        project,
-        windowTitle,
-        description,
-        TapestryLookup.ACCEPT_PAGES, filterLibraries);
-    result.setTitleImageString("component48.gif");
+      new ChooseWorkspaceModelDialog(shell, project, windowTitle, description, TapestryLookup.ACCEPT_PAGES, filterLibraries);
 
     return result;
 
   }
+
+  private String title;
+  private String description;
 
   private ChooseWorkspaceModelWidget chooserWidget;
 
@@ -177,8 +154,8 @@ public class ChooseWorkspaceModelDialog
     boolean filterLibraries) {
 
     super(shell);
-    updateWindowTitle(windowTitle);
-    updateMessage(description);
+    this.title = title == null ? "" : title;
+    this.description = description == null ? "" : description;
     chooserWidget = new ChooseWorkspaceModelWidget(project, acceptFlags, filterLibraries);
 
     chooserWidget.addSelectionChangedListener(this);
@@ -188,6 +165,8 @@ public class ChooseWorkspaceModelDialog
 
   public void create() {
     super.create();
+    setTitle(title);
+    setMessage(description, IMessageProvider.NONE);
     chooserWidget.setFocus();
     chooserWidget.refresh();
     updateOkState();
@@ -210,28 +189,23 @@ public class ChooseWorkspaceModelDialog
   protected boolean hardClose() {
     // dispose any contained stuff
     chooserWidget.dispose();
-    return super.hardClose();
+    return super.close();
   }
 
-  protected Composite createAreaContents(Composite parent) {
+  protected Control createDialogArea(Composite parent) {
 
-    if (titleImageString != null) {
-
-      setTitleImage(TapestryImages.getSharedImage(titleImageString));
-    }
-
-    Composite container = new Composite(parent, SWT.NONE);
-
+    Composite container = (Composite) super.createDialogArea(parent);
+    Composite useContainer = new Composite(container, SWT.NONE);
     FillLayout layout = new FillLayout();
-    container.setLayout(layout);
-
-    chooserWidget.createControl(container);
+    useContainer.setLayout(layout);
+    useContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
+    chooserWidget.createControl(useContainer);
+    setTitleImage(TapestryImages.getSharedImage("applicationDialog.gif"));
     return container;
   }
 
   private void updateOkState() {
-    Button okButton = getOkButton();
-
+    Button okButton = getButton(IDialogConstants.OK_ID);
     if (okButton != null) {
 
       ISelection selection = chooserWidget.getSelection();
@@ -262,11 +236,11 @@ public class ChooseWorkspaceModelDialog
     return chooserWidget.getResultStorage();
 
   }
-  
+
   public String getResultPath() {
-  	
-  	return chooserWidget.getResultPath();
-  	
+
+    return chooserWidget.getResultPath();
+
   }
 
   /**

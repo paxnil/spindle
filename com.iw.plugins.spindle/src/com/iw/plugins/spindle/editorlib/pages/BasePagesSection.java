@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jface.action.Action;
@@ -60,6 +61,7 @@ import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.OpenTapestryPath;
 import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
+import com.iw.plugins.spindle.ui.descriptors.PagePathDialogPropertyDescriptor;
 import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
@@ -516,7 +518,7 @@ public abstract class BasePagesSection
     }
 
     private IPropertyDescriptor[] descriptors =
-      { new TextPropertyDescriptor("name", "Name"), new ComponentTypeDialogPropertyDescriptor("spec", "Spec", null, null)};
+      { new TextPropertyDescriptor("name", "Name"), new PagePathDialogPropertyDescriptor("spec", "Spec", null, null)};
 
     public void resetPropertyValue(Object key) {
     }

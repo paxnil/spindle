@@ -26,6 +26,7 @@
 package com.iw.plugins.spindle.wizards.fields;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IPackageFragment;

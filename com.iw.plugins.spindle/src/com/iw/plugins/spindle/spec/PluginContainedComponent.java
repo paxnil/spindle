@@ -35,6 +35,7 @@ import java.util.TreeSet;
 
 import net.sf.tapestry.spec.BindingSpecification;
 import net.sf.tapestry.spec.ContainedComponent;
+
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;

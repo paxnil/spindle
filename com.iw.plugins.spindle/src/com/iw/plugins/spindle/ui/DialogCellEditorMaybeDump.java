@@ -43,7 +43,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Text;
 
-public abstract class DialogCellEditor extends TextCellEditor {
+public abstract class DialogCellEditorMaybeDump extends TextCellEditor {
 
   private Composite editor;
 
@@ -84,11 +84,11 @@ public abstract class DialogCellEditor extends TextCellEditor {
    * Creates a new dialog cell editor parented under the given control. 
    * @param parent the parent control
    */
-  protected DialogCellEditor(Composite parent) {
+  protected DialogCellEditorMaybeDump(Composite parent) {
     this(parent, false);
   }
   
-  protected DialogCellEditor(Composite parent, boolean textEditable) {
+  protected DialogCellEditorMaybeDump(Composite parent, boolean textEditable) {
   	super(parent);
   	defaultText.setEditable(textEditable);
   }

@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui;
 
+import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -41,16 +42,14 @@ public class DocumentationCellEditor extends DialogCellEditor {
     this.title = dialogTitle == null ? "Documentation" : dialogTitle;
     this.message = dialogMessage == null ? "Add some documentation" : dialogMessage;
   }
-
+ 
   /**
    * @see DialogCellEditor#openDialogBox(Control)
    */
   protected Object openDialogBox(Control cellEditorWindow) {
     Object value = getValue();
-    TextAreaDialog dialog = new TextAreaDialog(cellEditorWindow.getShell());
-    dialog.updateWindowTitle(title);
-    dialog.updateMessage(message);
-    if (dialog.open(value.toString()) == dialog.OK) {
+    TextAreaDialog dialog = new TextAreaDialog(cellEditorWindow.getShell(), title, message);
+    if (dialog.open(value == null ? "" : value.toString()) == dialog.OK) {
       return dialog.getResult();
     }
     return value;

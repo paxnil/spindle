@@ -25,6 +25,8 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui;
 
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -35,58 +37,61 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-public class TextAreaDialog extends AbstractDialog {
+public class TextAreaDialog extends TitleAreaDialog {
 
+  private String title;
   private boolean editing;
   private Text text;
   private Font font;
   private String openText;
+  private String message;
 
   private String result;
 
   /**
    * Constructor for PageRefDialog
    */
-  public TextAreaDialog(Shell shell) {
+  public TextAreaDialog(Shell shell, String title, String message) {
     super(shell);
+    this.title = title == null ? "" : title;
+    this.message = message == null ? "" : message;
+
   }
 
   /**
    * @see AbstractDialog#createAreaContents(Composite)
    */
-  protected Composite createAreaContents(Composite parent) {    
+  protected Control createDialogArea(Composite parent) {
 
+    Composite container =(Composite)super.createDialogArea(parent);
     GridData gd;
     Control control;
 
-    Composite container = new Composite(parent, SWT.NULL);
+    Composite innerContainer = new Composite(container, SWT.NULL);
     gd = new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
-    container.setLayoutData(gd);
+    innerContainer.setLayoutData(gd);
     GridLayout layout = new GridLayout();
-    layout = new GridLayout();       
-    container.setLayout(layout);
+    layout = new GridLayout();
+    innerContainer.setLayout(layout);
 
-    text = new Text(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-    gd =
-      new GridData(
-        GridData.FILL_BOTH
-          | GridData.VERTICAL_ALIGN_BEGINNING
-          | GridData.GRAB_HORIZONTAL
-          | GridData.GRAB_VERTICAL);
+    text = new Text(innerContainer, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+    gd = new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
     gd.heightHint = convertHeightInCharsToPixels(20);
     gd.widthHint = convertWidthInCharsToPixels(45);
     text.setLayoutData(gd);
-    
+
     text.setText(openText);
-    
+
     FontData data = new FontData("courier", SWT.NULL, 6);
     // on windows platform, I need to do the following
     // even though the values are the same as the constructor's
     data.setStyle(SWT.NORMAL);
     data.setHeight(6);
     font = new Font(text.getDisplay(), data);
-
-    text.setFont(font);
+    text.setFont(font); 
+    
+    setTitle(title);   
+    setMessage(message, IMessageProvider.NONE);
 
     return container;
   }
@@ -95,15 +100,15 @@ public class TextAreaDialog extends AbstractDialog {
    * @see AbstractDialog#performCancel()
    */
   protected boolean performCancel() {
-   
-    return true; 
+
+    return true;
 
   }
-  
+
   protected void okPressed() {
-  	setReturnCode(OK);
-  	result = text.getText();
-  	super.okPressed();
+    setReturnCode(OK);
+    result = text.getText();
+    super.okPressed();
   }
 
   protected void cancelPressed() {
@@ -112,7 +117,7 @@ public class TextAreaDialog extends AbstractDialog {
   }
 
   public boolean close() {
-    return hardClose();
+    return super.close();
   }
 
   protected boolean okToClose() {

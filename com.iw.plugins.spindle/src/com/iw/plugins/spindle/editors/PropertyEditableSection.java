@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editors;
 import java.util.Iterator;
 
 import net.sf.tapestry.util.IPropertyHolder;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;

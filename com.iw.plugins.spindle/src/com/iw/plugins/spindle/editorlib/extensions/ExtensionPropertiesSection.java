@@ -26,6 +26,7 @@
 package com.iw.plugins.spindle.editorlib.extensions;
 
 import net.sf.tapestry.util.IPropertyHolder;
+
 import org.eclipse.pde.core.IModelChangedListener;
 import org.eclipse.update.ui.forms.internal.FormSection;
 

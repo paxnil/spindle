@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.sf.tapestry.spec.BindingType;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;

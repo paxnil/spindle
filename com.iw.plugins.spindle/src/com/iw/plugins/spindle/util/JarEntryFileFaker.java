@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IFileState;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspace;
@@ -509,5 +510,37 @@ public class JarEntryFileFaker implements IFile {
 	public int getEncoding() throws CoreException {
 		return 0;
 	}
+
+  /* (non-Javadoc)
+   * @see org.eclipse.core.resources.IFile#createLink(org.eclipse.core.runtime.IPath, int, org.eclipse.core.runtime.IProgressMonitor)
+   */
+  public void createLink(IPath localLocation, int updateFlags, IProgressMonitor monitor) throws CoreException {
+    // TODO Auto-generated method stub
+
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.core.resources.IResource#accept(org.eclipse.core.resources.IResourceProxyVisitor, int)
+   */
+  public void accept(IResourceProxyVisitor visitor, int memberFlags) throws CoreException {
+    // TODO Auto-generated method stub
+
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.core.resources.IResource#getRawLocation()
+   */
+  public IPath getRawLocation() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.core.resources.IResource#isLinked()
+   */
+  public boolean isLinked() {
+    // TODO Auto-generated method stub
+    return false;
+  }
 
 }

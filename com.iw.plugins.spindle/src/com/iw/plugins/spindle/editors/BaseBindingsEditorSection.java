@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.sf.tapestry.spec.BindingType;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;

@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.jdom.IDOMMethod;
 import org.eclipse.jdt.core.jdom.IDOMNode;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -107,7 +106,7 @@ public class ApplicationWizardPage extends NewTapestryProjectPage {
     super(MessageUtil.getString("NewTapAppWizardPage.title"));
 
     this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
+      TapestryImages.getImageDescriptor("applicationDialog.gif"));
     this.setDescription(MessageUtil.getString("NewTapAppWizardPage.description"));
 
     IDialogFieldChangedListener listener = new FieldEventsAdapter();
@@ -248,7 +247,7 @@ public class ApplicationWizardPage extends NewTapestryProjectPage {
     String appname = fApplicationNameDialog.getTextValue();
 
     IClasspathEntry srcEntry = fContainerDialogField.getClasspathEntry();
-    IPackageFragmentRoot root = project.getPackageFragmentRoots(srcEntry)[0];
+    IPackageFragmentRoot root = project.findPackageFragmentRoots(srcEntry)[0];
 
     String packageName = fPackageDialogField.getTextValue();
     applicationPackage = root.createPackageFragment(packageName, true, monitor);
@@ -279,7 +278,7 @@ public class ApplicationWizardPage extends NewTapestryProjectPage {
     if (fGenerateServletClass.getCheckBoxValue()) {
 
       IClasspathEntry srcEntry = fContainerDialogField.getClasspathEntry();
-      IPackageFragmentRoot root = project.getPackageFragmentRoots(srcEntry)[0];
+      IPackageFragmentRoot root = project.findPackageFragmentRoots(srcEntry)[0];
 
       String packageName = fServletPackageDialog.getTextValue();
       IPackageFragment pack = root.createPackageFragment(packageName, true, monitor);

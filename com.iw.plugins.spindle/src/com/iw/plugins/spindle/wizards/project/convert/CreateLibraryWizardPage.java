@@ -87,7 +87,7 @@ public class CreateLibraryWizardPage extends TapestryWizardPage {
     super(MessageUtil.getString("NewTapLibWizardPage.title"));
     
 
-    this.setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
+    this.setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("applicationDialog.gif")));
     this.setDescription(MessageUtil.getString("NewTapLibWizardPage.description"));
 
     IDialogFieldChangedListener listener = new FieldEventsAdapter();

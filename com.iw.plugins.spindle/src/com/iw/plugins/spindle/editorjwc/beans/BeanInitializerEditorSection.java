@@ -35,9 +35,9 @@ import java.util.Set;
 import net.sf.tapestry.bean.ExpressionBeanInitializer;
 import net.sf.tapestry.bean.FieldBeanInitializer;
 import net.sf.tapestry.bean.IBeanInitializer;
-import net.sf.tapestry.bean.PropertyBeanInitializer;
 import net.sf.tapestry.bean.StaticBeanInitializer;
 import net.sf.tapestry.bean.StringBeanInitializer;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.Action;

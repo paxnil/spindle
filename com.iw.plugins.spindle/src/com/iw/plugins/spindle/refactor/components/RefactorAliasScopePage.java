@@ -67,7 +67,7 @@ public class RefactorAliasScopePage extends WizardPage implements ISelectionProv
   public RefactorAliasScopePage(String name, List affectedComponents) {
     super(name);
 
-    this.setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("component32.gif")));
+    this.setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("componentDialog.gif")));
     this.setDescription("Preview of Component Alias refactoring");
 
     this.affectedComponents = affectedComponents;

@@ -37,9 +37,9 @@ import java.util.Set;
 
 import net.sf.tapestry.bean.ExpressionBeanInitializer;
 import net.sf.tapestry.bean.FieldBeanInitializer;
-import net.sf.tapestry.bean.PropertyBeanInitializer;
 import net.sf.tapestry.bean.StaticBeanInitializer;
 import net.sf.tapestry.bean.StringBeanInitializer;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;

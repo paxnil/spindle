@@ -26,6 +26,7 @@
 package com.iw.plugins.spindle.editorlib;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
+
 import org.eclipse.pde.core.IEditable;
 import org.eclipse.pde.core.IModel;
 import org.eclipse.pde.core.IModelChangedEvent;

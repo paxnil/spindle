@@ -63,7 +63,7 @@ public class QuestionPage extends WizardPage implements IDialogFieldChangedListe
     super(name);
 
     this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
+      ImageDescriptor.createFromURL(TapestryImages.getImageURL("applicationDialog.gif")));
     this.setDescription("Migration Option");
 
     yesNoQuestion =

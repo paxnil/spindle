@@ -32,12 +32,12 @@ import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Iterator;
 
-import net.sf.tapestry.bean.ExpressionBeanInitializer;
 import net.sf.tapestry.bean.IBeanInitializer;
 import net.sf.tapestry.bean.StaticBeanInitializer;
 import net.sf.tapestry.bean.StringBeanInitializer;
 import net.sf.tapestry.spec.BeanLifecycle;
 import net.sf.tapestry.spec.BeanSpecification;
+
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;

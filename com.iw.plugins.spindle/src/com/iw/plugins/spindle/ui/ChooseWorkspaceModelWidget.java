@@ -85,10 +85,7 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
 
   }
 
-  public ChooseWorkspaceModelWidget(
-    IJavaProject project,
-    int acceptFlags,
-    boolean filterLibraries) {
+  public ChooseWorkspaceModelWidget(IJavaProject project, int acceptFlags, boolean filterLibraries) {
 
     super();
 
@@ -103,8 +100,7 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
     setUpperListContentProvider(new StorageContentProvider());
 
     setLowerListLabel("in package:");
-    setLowerListLabelProvider(
-      new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
+    setLowerListLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
     setLowerListContentProvider(new PackageContentProvider());
 
   }
@@ -178,7 +174,7 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
       }
 
     } catch (CoreException jmex) {
-      
+
       lookup = new TapestryLookup();
 
       try {
@@ -209,8 +205,7 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
 
       for (int i = 0; i < found.length; i++) {
 
-        TapestryLibraryModel foundModel =
-          (TapestryLibraryModel) modelManager.getReadOnlyModel(found[i]);
+        TapestryLibraryModel foundModel = (TapestryLibraryModel) modelManager.getReadOnlyModel(found[i]);
 
         if (foundModel != null && foundModel.isLoaded()) {
 
@@ -289,7 +284,7 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
 
       collector.reset();
 
-      lookup.findAll(searchFilter, true, acceptFlags, collector);
+      lookup.findAllManaged(searchFilter, true, collector, acceptFlags);
 
       return collector.getStorages().toArray();
 
@@ -386,8 +381,7 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
 
         IStorage storage = getStorage(name, pack);
 
-        return (ITapestryModel) TapestryPlugin.getTapestryModelManager(storage).getReadOnlyModel(
-          storage);
+        return (ITapestryModel) TapestryPlugin.getTapestryModelManager(storage).getReadOnlyModel(storage);
 
       } catch (CoreException e) {
 
@@ -416,7 +410,6 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
       }
       return packages.toArray();
     }
-
 
     public boolean isCancelled() {
       return false;

@@ -25,20 +25,14 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.html;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.tapestry.parse.ITemplateParserDelegate;
 import net.sf.tapestry.parse.TemplateParseException;
 import net.sf.tapestry.parse.TemplateParser;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -48,9 +42,6 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -73,23 +64,19 @@ import org.eclipse.pde.internal.core.IModelProviderListener;
 import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.pde.internal.ui.editor.SystemFileDocumentProvider;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.dialogs.ContainerGenerator;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.StorageDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.MarkerUtilities;
-import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.iw.plugins.spindle.MessageUtil;
@@ -102,7 +89,6 @@ import com.iw.plugins.spindle.model.ModelUtils;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.ui.ToolTipHandler;
 import com.iw.plugins.spindle.ui.text.ColorManager;
 import com.iw.plugins.spindle.ui.text.ISpindleColorManager;
 import com.iw.plugins.spindle.util.Utils;

@@ -112,7 +112,7 @@ public class CreateApplicationWizardPage extends TapestryWizardPage {
     super(MessageUtil.getString("NewTapAppWizardPage.title"));
     
 
-    this.setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
+    this.setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("applicationDialog.gif")));
     this.setDescription(MessageUtil.getString("NewTapAppWizardPage.description"));
 
     IDialogFieldChangedListener listener = new FieldEventsAdapter();

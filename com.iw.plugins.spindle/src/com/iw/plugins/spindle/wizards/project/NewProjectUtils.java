@@ -24,8 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.wizards.project;
 
 import java.io.IOException;
@@ -52,10 +50,9 @@ import com.iw.plugins.spindle.TapestryPlugin;
  */
 public class NewProjectUtils {
 
-  public static void fixClasspath(IJavaProject jproject, IProgressMonitor monitor)
-    throws InterruptedException, CoreException {
+  public static void fixClasspath(IJavaProject jproject, IProgressMonitor monitor) throws InterruptedException, CoreException {
 
-    IType checkTapVersion = jproject.findType( "net.sf.tapestry.ILibrarySpecification");
+    IType checkTapVersion = jproject.findType("net.sf.tapestry.ILibrarySpecification");
 
     if (checkTapVersion == null) {
 
@@ -63,7 +60,7 @@ public class NewProjectUtils {
 
     }
 
-    IType checkServlet =jproject.findType( "javax.servlet.http.HttpServlet");
+    IType checkServlet = jproject.findType("javax.servlet.http.HttpServlet");
 
     if (checkServlet == null) {
 
@@ -105,6 +102,8 @@ public class NewProjectUtils {
         IPackageFragmentRoot.K_BINARY,
         ClasspathEntry.CPE_LIBRARY,
         new Path(jarURL.getFile()),
+        new Path[] {},
+        null,
         null,
         null,
         false);

@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.ui;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;

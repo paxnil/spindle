@@ -26,6 +26,8 @@
 package com.iw.plugins.spindle.ui;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -33,20 +35,22 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.project.ITapestryProject;
+import com.iw.plugins.spindle.util.lookup.ILookupAcceptor;
 import com.iw.plugins.spindle.util.lookup.INamespaceFragment;
 
-public class ChooseFromNamespaceDialog
-  extends AbstractDialog
-  implements ISelectionChangedListener, IDoubleClickListener {
-
- 
+public class ChooseFromNamespaceDialog extends TitleAreaDialog implements ISelectionChangedListener, IDoubleClickListener {
 
   private ChooseFromNamespaceWidget chooserWidget;
+  private String title;
+  private String description;
 
   public ChooseFromNamespaceDialog(
     Shell shell,
@@ -56,8 +60,8 @@ public class ChooseFromNamespaceDialog
     int acceptFlags) {
 
     super(shell);
-    updateWindowTitle(windowTitle);
-    updateMessage(description);
+    this.title = title == null ? "" : title;
+    this.description = description == null ? "" : description;
     chooserWidget = new ChooseFromNamespaceWidget(project, acceptFlags);
 
     chooserWidget.addSelectionChangedListener(this);
@@ -67,6 +71,8 @@ public class ChooseFromNamespaceDialog
 
   public void create() {
     super.create();
+    setTitle(title);
+    setMessage(description, IMessageProvider.NONE);
     chooserWidget.setFocus();
     chooserWidget.refresh();
     updateOkState();
@@ -89,56 +95,55 @@ public class ChooseFromNamespaceDialog
   protected boolean hardClose() {
     // dispose any contained stuff
     chooserWidget.dispose();
-    return super.hardClose();
+    return super.close();
   }
 
-  protected Composite createAreaContents(Composite parent) {
-
-
-    Composite container = new Composite(parent, SWT.NONE);
-
+  protected Control createDialogArea(Composite parent) {
+    Composite container = (Composite) super.createDialogArea(parent);
+    Composite useContainer = new Composite(container, SWT.NONE);
     FillLayout layout = new FillLayout();
-    container.setLayout(layout);
-
-    chooserWidget.createControl(container);
+    useContainer.setLayout(layout);
+    useContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
+    chooserWidget.createControl(useContainer);
+    final int flags = chooserWidget.getAcceptFlags();
+    switch (flags) {
+      case ILookupAcceptor.ACCEPT_COMPONENTS :
+        setTitleImage(TapestryImages.getSharedImage("componentDialog.gif"));
+        break;
+      case ILookupAcceptor.ACCEPT_PAGES :
+        setTitleImage(TapestryImages.getSharedImage("componentDialog.gif"));
+        break;
+      default :
+        setTitleImage(TapestryImages.getSharedImage("applicationDialog.gif"));
+        break;
+    }
     return container;
   }
 
   private void updateOkState() {
-    Button okButton = getOkButton();
-
+    Button okButton = getButton(IDialogConstants.OK_ID);
     if (okButton != null) {
-
       ISelection selection = chooserWidget.getSelection();
       okButton.setEnabled(selection != null && !selection.isEmpty());
-
     }
   }
 
-
   public String getResultString() {
-
     return chooserWidget.getResultString();
-
   }
 
   public INamespaceFragment getResultNamespace() {
-
     return chooserWidget.getResultNamespace();
-
   }
-  
+
   public String getResultPath() {
-  	
-  	return chooserWidget.getResultPath();
-  	
+    return chooserWidget.getResultPath();
   }
 
   /**
    * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
    */
   public void selectionChanged(SelectionChangedEvent event) {
-
     updateOkState();
   }
 

@@ -88,7 +88,7 @@ public class DefinePagesComponentsPage extends WizardPage {
     super(pageName);
 
     this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
+      ImageDescriptor.createFromURL(TapestryImages.getImageURL("applicationDialog.gif")));
     this.setDescription(
       "If listed, Spindle can't tell if those below are pages or components. You need to make the distinction.");
 

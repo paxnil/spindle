@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editorjwc;
 import java.util.Iterator;
 
 import net.sf.tapestry.spec.AssetType;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;

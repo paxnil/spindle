@@ -60,7 +60,7 @@ public class MigrationWelcomePage extends WizardPage {
     super(name);
 
     this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
+      ImageDescriptor.createFromURL(TapestryImages.getImageURL("applicationDialog.gif")));
     this.setDescription("Migrate a Tapestry Project");
 
     this.context = context;

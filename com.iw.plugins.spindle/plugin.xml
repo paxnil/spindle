@@ -33,7 +33,6 @@
       </library>
    </runtime>
    <requires>
-     
       <import plugin="org.apache.xerces"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.jdt.ui"/>
@@ -44,6 +43,11 @@
       <import plugin="org.eclipse.pde.ui"/>
       <import plugin="org.eclipse.pde.core"/>
       <import plugin="org.eclipse.update.ui.forms"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.help"/>
    </requires>
 
 
@@ -103,9 +107,9 @@
       <wizard
             name="Tapestry Library Project"
             icon="./icons/basic/library16.gif"
-            project="true"
             category="com.iw.plugins.spindle.new"
             class="com.iw.plugins.spindle.wizards.project.NewLibraryProjectWizard"
+            project="true"
             id="com.iw.plugins.spindle.new_library_wizard">
          <description>
             Create a new Tapestry Library Project
@@ -115,8 +119,8 @@
             name="Tapestry Application Project"
             icon="./icons/basic/application16.gif"
             category="com.iw.plugins.spindle.new"
-            project="true"
             class="com.iw.plugins.spindle.wizards.project.NewApplicationProjectWizard"
+            project="true"
             id="com.iw.plugins.spindle.new_app_wizard">
          <description>
             Create a new Tapestry Application Project
@@ -143,7 +147,7 @@
          </description>
       </wizard>
    </extension>
-   <!--
+<!--
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
@@ -158,7 +162,7 @@
          </description>
       </decorator>
    </extension>
-   -->   
+   -->
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
@@ -245,8 +249,12 @@
       <super
             type="org.eclipse.core.resources.textmarker">
       </super>
-      <attribute name="invalidString"/>
-      <attribute name="pattern"/>
+      <attribute
+            name="invalidString">
+      </attribute>
+      <attribute
+            name="pattern">
+      </attribute>
       <persistent
             value="false">
       </persistent>
@@ -288,7 +296,7 @@
                class="com.iw.plugins.spindle.wizards.OpenTapestryPageWizard"
                toolbarPath="Normal/spindle"
                id="com.iw.spindle.actions.set.OpenTapestryPageWizard">
-         </action>         
+         </action>
       </actionSet>
    </extension>
    <extension
@@ -326,7 +334,6 @@
                enablesFor="1"
                id="com.iw.plugins.spindle.project.popupMenus.project.JumpToTapestryProjectAction">
          </action>
-
       </objectContribution>
       <objectContribution
             objectClass="org.eclipse.core.resources.IFile"
@@ -374,7 +381,7 @@
                menubarPath="com.iw.plugins.spindle.popupMenus.convert/group1"
                enablesFor="1"
                id="com.iw.plugins.spindle.popupMenus.convert.ConvertToTapestryPage">
-         </action>         
+         </action>
       </objectContribution>
    </extension>
    <extension
@@ -396,25 +403,26 @@
             class="com.iw.plugins.spindle.model.manager.LibraryManagerDelegate">
       </manager>
    </extension>
-   
-    <extension
+   <extension
          point="org.eclipse.ui.markerUpdaters">
       <updater
             class="com.iw.plugins.spindle.editors.BadStringMarkerUpdater"
             id="com.iw.plugins.spindle.editors.BadStringMarkerUpdater">
       </updater>
    </extension>
-    
-   <extension point="org.eclipse.ui.preferencePages">
- 	<page id="SpindleRefactoringPage"
- 		name="Spindle" 
-    		class="com.iw.plugins.spindle.preferences.SpindleRefactorPreferencePage">
-   	</page>
-   	
- 	<page id="BadWordsColorPreferencePage"
-  	      	name="ToolTips"
-	      	class="com.iw.plugins.spindle.preferences.SpindleTooltipPreferencePage"
-		category="SpindleRefactoringPage">
-   	</page>
-	</extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="Spindle"
+            class="com.iw.plugins.spindle.preferences.SpindleRefactorPreferencePage"
+            id="SpindleRefactoringPage">
+      </page>
+      <page
+            name="ToolTips"
+            category="SpindleRefactoringPage"
+            class="com.iw.plugins.spindle.preferences.SpindleTooltipPreferencePage"
+            id="TooltipPreferencePage">
+      </page>
+   </extension>
+
 </plugin>

@@ -32,6 +32,7 @@ import java.io.StringWriter;
 
 import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.util.xml.DocumentParseException;
+
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;

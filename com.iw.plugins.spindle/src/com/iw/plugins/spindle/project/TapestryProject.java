@@ -72,7 +72,7 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
  *  this project needs to read/write an xml file defining its application
  */
 public class TapestryProject implements IProjectNature, ITapestryProject {
-	
+
   static public boolean migrating = false;
 
   private IPath projectModelPath;
@@ -125,9 +125,9 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
       listeners.add(new ProjectResourceChangeListener());
 
       listeners.add(new DeletedComponentOrPageRefactor(this));
-      
+
       listeners.add(new RenamedComponentOrPageRefactor(this));
-      
+
       listeners.add(new MovedComponentOrPageRefactor(this));
 
       for (Iterator iter = listeners.iterator(); iter.hasNext();) {
@@ -144,14 +144,13 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
   private void removeResourceListeners() {
 
     if (listeners != null) {
-    	
+
       for (Iterator iter = listeners.iterator(); iter.hasNext();) {
-      	
-        ResourcesPlugin.getWorkspace().removeResourceChangeListener(
-          (IResourceChangeListener) iter.next());
+
+        ResourcesPlugin.getWorkspace().removeResourceChangeListener((IResourceChangeListener) iter.next());
 
       }
-      
+
       listeners = null;
     }
   }
@@ -281,8 +280,6 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     }
 
   }
-  
-
 
   public ITapestryModel getProjectModel() throws CoreException {
 
@@ -313,16 +310,11 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     return findModelByPath(specificationPath, TapestryLookup.ACCEPT_ANY);
   }
 
-  public ITapestryModel findModelByPath(String specificationPath, int acceptFlags)
-    throws CoreException {
+  public ITapestryModel findModelByPath(String specificationPath, int acceptFlags) throws CoreException {
 
     TapestryLookup.StorageOnlyRequest request = new TapestryLookup.StorageOnlyRequest();
 
-    getLookup().findAll(
-      specificationPath,
-      false,
-      acceptFlags | TapestryLookup.FULL_TAPESTRY_PATH,
-      request);
+    getLookup().findAllManaged(specificationPath, false, request, acceptFlags | TapestryLookup.FULL_TAPESTRY_PATH);
 
     IStorage[] results = request.getResults();
 
@@ -366,10 +358,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
         if (!file.exists() || !file.getProject().equals(project)) {
 
-          SpindleStatus status =
-            new SpindleStatus(
-              SpindleStatus.ERROR,
-              path.toString() + "does not exist in " + projectPath);
+          SpindleStatus status = new SpindleStatus(SpindleStatus.ERROR, path.toString() + "does not exist in " + projectPath);
 
           throw new CoreException(status);
         }
@@ -536,11 +525,11 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
     */
     public void resourceChanged(IResourceChangeEvent event) {
-    	
+
       if (migrating) {
-      	
-      	return;
-      	
+
+        return;
+
       }
 
       if (event.getType() == IResourceChangeEvent.PRE_CLOSE) {
@@ -569,8 +558,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
           if (projectResource != null) {
 
-            IResourceDelta projectResourceDelta =
-              topLevelDelta.findMember(projectResource.getFullPath());
+            IResourceDelta projectResourceDelta = topLevelDelta.findMember(projectResource.getFullPath());
             if (projectResourceDelta != null) {
 
               handleProjectResourcePresentCase(projectResource, projectResourceDelta);
@@ -587,9 +575,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     * @param delta
     * @return boolean
     */
-    private void handleProjectResourcePresentCase(
-      IResource projectResource,
-      IResourceDelta delta) {
+    private void handleProjectResourcePresentCase(IResource projectResource, IResourceDelta delta) {
 
       IResource resource = delta.getResource();
       if (projectResource.equals(resource)) {

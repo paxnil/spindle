@@ -85,7 +85,7 @@ public class LibraryWizardPage extends NewTapestryProjectPage {
     super(MessageUtil.getString("NewTapLibWizardPage.title"));
 
     this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
+      ImageDescriptor.createFromURL(TapestryImages.getImageURL("applicationDialog.gif")));
     this.setDescription(MessageUtil.getString("NewTapLibWizardPage.description"));
 
     IDialogFieldChangedListener listener = new FieldEventsAdapter();
@@ -200,7 +200,7 @@ public class LibraryWizardPage extends NewTapestryProjectPage {
     NewProjectUtils.fixClasspath(project, monitor);
 
     IClasspathEntry srcEntry = fContainerDialogField.getClasspathEntry();
-    IPackageFragmentRoot root = project.getPackageFragmentRoots(srcEntry)[0];
+    IPackageFragmentRoot root = project.findPackageFragmentRoots(srcEntry)[0];
 
     String packageName = fPackageDialogField.getTextValue();
     IPackageFragment pack = root.createPackageFragment(packageName, true, monitor);

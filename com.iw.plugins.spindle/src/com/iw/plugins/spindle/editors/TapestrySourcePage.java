@@ -93,11 +93,11 @@ public abstract class TapestrySourcePage extends PDESourcePage {
     return false;
   }
 
-  private void warnErrorsInSource() {
+  protected void warnErrorsInSource() {
     Display.getCurrent().beep();
     MessageDialog.openError(
       TapestryPlugin.getDefault().getActiveWorkbenchShell(),
-      "Source Error:",
+      getEditor().getSite().getRegisteredName(),
       "The Source page has errors. Other pages cannot be used until these errors are corrected.");
   }
 

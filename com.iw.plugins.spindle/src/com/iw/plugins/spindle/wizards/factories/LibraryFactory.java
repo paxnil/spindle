@@ -32,6 +32,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import net.sf.tapestry.parse.SpecificationParser;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;

@@ -59,7 +59,7 @@ public class ChooseExistingPage extends WizardPage implements ISelectionChangedL
     super(name);
 
     this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
+      ImageDescriptor.createFromURL(TapestryImages.getImageURL("applicationDialog.gif")));
     this.setDescription("Choose an Application or Library for this project");
 
     IJavaProject jproject = (IJavaProject) selection.getFirstElement();

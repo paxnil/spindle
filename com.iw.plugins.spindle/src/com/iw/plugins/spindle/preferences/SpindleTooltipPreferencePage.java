@@ -27,13 +27,11 @@ package com.iw.plugins.spindle.preferences;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editorjwc.components.ChooseBindingTypeDialog;
-import com.iw.plugins.spindle.refactor.RenamedComponentOrPageRefactor;
 
 /**
  * @author GWL

@@ -26,6 +26,7 @@
 package com.iw.plugins.spindle.editorlib.pages;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
+
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IStorage;

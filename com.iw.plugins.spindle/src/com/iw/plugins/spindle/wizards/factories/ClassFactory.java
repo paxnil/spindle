@@ -42,10 +42,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import com.iw.plugins.spindle.MessageUtil;
+import com.iw.plugins.spindle.util.Utils;
 
 /**
  * @author GWL
@@ -112,8 +112,8 @@ public class ClassFactory {
 
   private ImportsStructure getImports(ICompilationUnit parentCU) {
     ImportsStructure imports = null;
-    String[] prefOrder = ImportOrganizePreferencePage.getImportOrderPreference();
-    int threshold = ImportOrganizePreferencePage.getImportNumberThreshold();
+    String[] prefOrder = Utils.getImportOrderPreference();
+    int threshold = Utils.getImportNumberThreshold();
     try {
       imports = new ImportsStructure(parentCU, prefOrder, threshold, false);
     } catch (CoreException correx) {
@@ -210,7 +210,7 @@ public class ClassFactory {
   }
   
   private static String[] getInheritedMethods(IType createdType, ImportsStructure imports, IProgressMonitor monitor)
-    throws JavaModelException {
+    throws CoreException {
 
     ITypeHierarchy hierarchy = createdType.newSupertypeHierarchy(monitor);
     CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings();

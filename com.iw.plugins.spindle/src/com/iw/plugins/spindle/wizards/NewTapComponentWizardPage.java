@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -127,7 +128,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
     GENERATE_HTML = PAGE_NAME + ".generateHTML";
 
     this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("component32.gif")));
+      ImageDescriptor.createFromURL(TapestryImages.getImageURL("componentDialog.gif")));
 
     this.setDescription(MessageUtil.getString(PAGE_NAME + ".description"));
 

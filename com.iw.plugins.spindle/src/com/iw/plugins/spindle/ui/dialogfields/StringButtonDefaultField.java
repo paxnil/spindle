@@ -62,8 +62,8 @@ public class StringButtonDefaultField extends StringButtonField {
 
   public StringButtonDefaultField(String label, String defaultLabel, int labelWidth) {
     super(label, labelWidth);
-    this.defaultValue = defaultValue;
-    this.defaultLableWidth = defaultLableWidth;
+    this.defaultValue = defaultLabel;
+    this.defaultLableWidth = labelWidth;
   }
 
   public Control getControl(Composite parent) {

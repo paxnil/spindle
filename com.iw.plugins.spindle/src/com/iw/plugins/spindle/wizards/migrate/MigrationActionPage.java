@@ -69,7 +69,7 @@ public class MigrationActionPage
     super(name);
 
     this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
+      ImageDescriptor.createFromURL(TapestryImages.getImageURL("applicationDialog.gif")));
     this.setDescription("Include/Exclude migration actions");
 
     this.context = context;

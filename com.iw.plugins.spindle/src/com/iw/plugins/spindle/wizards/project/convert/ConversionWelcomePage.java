@@ -66,9 +66,7 @@ import com.iw.plugins.spindle.wizards.TapestryWizardPage;
  * Copyright 2002, Intelligent Work Inc.
  * All Rights Reserved.
  */
-public class ConversionWelcomePage
-  extends TapestryWizardPage
-  implements IDialogFieldChangedListener {
+public class ConversionWelcomePage extends TapestryWizardPage implements IDialogFieldChangedListener {
 
   IStructuredSelection selection;
 
@@ -91,16 +89,10 @@ public class ConversionWelcomePage
   public ConversionWelcomePage(String name, IStructuredSelection selection) {
     super(name);
 
-    this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
+    this.setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("applicationDialog.gif")));
     this.setDescription("Conversion Options");
 
-    applicationOrLibrary =
-      new RadioDialogField(
-        "Create:",
-        80,
-        new String[] { "A new Application", "A new Library" },
-        SWT.VERTICAL);
+    applicationOrLibrary = new RadioDialogField("Create:", 80, new String[] { "A new Application", "A new Library" }, SWT.VERTICAL);
 
     applicationOrLibrary.addListener(this);
 
@@ -123,14 +115,14 @@ public class ConversionWelcomePage
 
       TapestryLookup.StorageOnlyRequest request = TapestryLookup.createRequest();
 
-      lookup.findAll(
+      lookup.findAllManaged(
         "*",
         true,
+        request,
         TapestryLookup.ACCEPT_APPLICATIONS
           | TapestryLookup.ACCEPT_LIBRARIES
           | TapestryLookup.WRITEABLE
-          | TapestryLookup.THIS_PROJECT_ONLY,
-        request);
+          | TapestryLookup.THIS_PROJECT_ONLY);
 
       foundModelStorages = request.getResults();
 
@@ -281,21 +273,15 @@ public class ConversionWelcomePage
 
     return new IRunnableWithProgress() {
 
-      public void run(IProgressMonitor monitor)
-        throws InvocationTargetException, InterruptedException {
+      public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
         try {
-          ITapestryProject tproject =
-            TapestryPlugin.getDefault().addTapestryProjectNatureTo(jproject, null);
+          ITapestryProject tproject = TapestryPlugin.getDefault().addTapestryProjectNatureTo(jproject, null);
 
           tproject.setProjectStorage(file);
         } catch (CoreException e) {
 
-          ErrorDialog.openError(
-            getShell(),
-            "Conversion Failed",
-            "Could not add Tapestry Project Nature",
-            e.getStatus());
+          ErrorDialog.openError(getShell(), "Conversion Failed", "Could not add Tapestry Project Nature", e.getStatus());
 
           throw new InterruptedException();
 

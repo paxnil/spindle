@@ -94,6 +94,10 @@ public class ChooseFromNamespaceWidget extends TwoListChooserWidget {
     setLowerListContentProvider(namespaceProvider);
 
   }
+  
+  public int getAcceptFlags() {
+  	return acceptFlags;
+  }
 
   /**
    * Method checkAcceptFlags.

@@ -138,7 +138,7 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage {
 
     this.predecessor = predecessor;
 
-    this.setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("component32.gif")));
+    this.setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("componentDialog.gif")));
 
     this.setDescription(MessageUtil.getString(PAGE_NAME + ".description"));
 

@@ -38,6 +38,7 @@ import java.util.Set;
 
 import net.sf.tapestry.spec.ExtensionSpecification;
 import net.sf.tapestry.spec.ILibrarySpecification;
+
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.TapestryPlugin;

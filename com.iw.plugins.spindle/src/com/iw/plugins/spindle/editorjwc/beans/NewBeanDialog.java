@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editorjwc.beans;
 import java.util.Collection;
 
 import net.sf.tapestry.spec.BeanLifecycle;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
@@ -41,12 +42,15 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -57,7 +61,6 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.PluginBeanSpecification;
 import com.iw.plugins.spindle.spec.XMLUtil;
-import com.iw.plugins.spindle.ui.AbstractDialog;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
@@ -65,7 +68,7 @@ import com.iw.plugins.spindle.ui.dialogfields.StringField;
 import com.iw.plugins.spindle.ui.dialogfields.UneditableComboBoxDialogField;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public class NewBeanDialog extends AbstractDialog {
+public class NewBeanDialog extends TitleAreaDialog {
 
   static private int FIELD_WIDTH = 64;
 
@@ -82,7 +85,7 @@ public class NewBeanDialog extends AbstractDialog {
 
   private String resultName;
   private PluginBeanSpecification resultBeanSpec;
-  
+
   private int DTDVersion;
 
   private String[] pre13comboChoices = { "None", "Page", "Request" };
@@ -95,10 +98,7 @@ public class NewBeanDialog extends AbstractDialog {
    */
   public NewBeanDialog(Shell shell, ITapestryModel model, Collection existingBeanNames) {
     super(shell);
-    String windowTitle = "New Bean";
-    String description = "Enter the new information";
-    updateWindowTitle(windowTitle);
-    updateMessage(description);
+
     calculateRoot(model);
     this.existingNames = existingBeanNames;
     DTDVersion = XMLUtil.getDTDVersion(model.getPublicId());
@@ -107,32 +107,34 @@ public class NewBeanDialog extends AbstractDialog {
   /**
    * @see AbstractDialog#createAreaContents(Composite)
    */
-  protected Composite createAreaContents(Composite parent) {
-    Composite container = new Composite(parent, SWT.NONE);
+  protected Control createDialogArea(Composite parent) {
+    Composite container = (Composite) super.createDialogArea(parent);
+
+    Composite innerContainer = new Composite(parent, SWT.NONE);
+    innerContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
     FormLayout layout = new FormLayout();
     layout.marginHeight = 4;
     layout.marginWidth = 4;
-    container.setLayout(layout);
+    innerContainer.setLayout(layout);
 
     beanName = new StringField("Bean name:", FIELD_WIDTH);
     beanName.addListener(adapter);
-    Control beanNameControl = beanName.getControl(container);
+    Control beanNameControl = beanName.getControl(innerContainer);
 
     beanClassname = new StringButtonField("Bean Class:", FIELD_WIDTH);
     beanClassname.addListener(adapter);
-    Control beanClassnameControl = beanClassname.getControl(container);
-    
-    String [] choices = comboChoices;
+    Control beanClassnameControl = beanClassname.getControl(innerContainer);
 
-	if (DTDVersion < XMLUtil.DTD_1_3) {
-		
-		choices = pre13comboChoices;
-		
-	}
-    lifecycleCombo =
-      new UneditableComboBoxDialogField("Bean Lifecycle:", FIELD_WIDTH, choices);
+    String[] choices = comboChoices;
+
+    if (DTDVersion < XMLUtil.DTD_1_3) {
+
+      choices = pre13comboChoices;
+
+    }
+    lifecycleCombo = new UneditableComboBoxDialogField("Bean Lifecycle:", FIELD_WIDTH, choices);
     lifecycleCombo.addListener(adapter);
-    Control lifecycleControl = lifecycleCombo.getControl(container);
+    Control lifecycleControl = lifecycleCombo.getControl(innerContainer);
 
     FormData data = new FormData();
     data.top = new FormAttachment(0, 5);
@@ -151,6 +153,9 @@ public class NewBeanDialog extends AbstractDialog {
     data.left = new FormAttachment(0, 0);
     data.right = new FormAttachment(100, 0);
     lifecycleControl.setLayoutData(data);
+
+    setTitle("New Bean");
+    setMessage("Enter the new bean information", IMessageProvider.NONE);
 
     return container;
   }
@@ -209,7 +214,7 @@ public class NewBeanDialog extends AbstractDialog {
   }
 
   public boolean close() {
-    return hardClose();
+    return super.close();
   }
 
   protected boolean okToClose() {
@@ -236,8 +241,7 @@ public class NewBeanDialog extends AbstractDialog {
       resultBeanSpec = null;
       return false;
     }
-    resultBeanSpec =
-      new PluginBeanSpecification(classname, lifecyclechoices[lifecycleCombo.getSelectedIndex()]);
+    resultBeanSpec = new PluginBeanSpecification(classname, lifecyclechoices[lifecycleCombo.getSelectedIndex()]);
     return true;
   }
 
@@ -277,7 +281,7 @@ public class NewBeanDialog extends AbstractDialog {
   protected class NewBeanDialogAdapter implements IDialogFieldChangedListener {
 
     public void dialogFieldChanged(DialogField field) {
-      update();
+      okToClose();
     }
     /**
      * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)

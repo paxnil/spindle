@@ -45,7 +45,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.IPropertySheetEntry;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.PropertySheetPage;
+
+import com.iw.plugins.spindle.ui.propertysheet.PropertySheetPage;
 
 public class SpindlePropertySheet extends PropertySheetPage {
   public static final String CLONE_LABEL = "Clone";

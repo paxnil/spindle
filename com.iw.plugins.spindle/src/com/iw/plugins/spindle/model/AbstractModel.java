@@ -42,192 +42,183 @@ import org.eclipse.pde.core.ModelChangedEvent;
 import com.iw.plugins.spindle.MessageUtil;
 
 public abstract class AbstractModel implements ITapestryModel, IModel, IModelChangeProvider {
-	private long timeStamp;
-	private ArrayList changeListeners;
-	protected boolean disposed;
-	protected boolean loaded;
-	/**
-	 * Constructor for AbstractModel
-	 */
-	public AbstractModel() {
-		super();
-		changeListeners = new ArrayList(5);
-		disposed = false;
-		loaded = false;
-	}
+  private long timeStamp;
+  private ArrayList changeListeners;
+  protected boolean disposed;
+  protected boolean loaded;
+  /**
+   * Constructor for AbstractModel
+   */
+  public AbstractModel() {
+    super();
+    changeListeners = new ArrayList(5);
+    disposed = false;
+    loaded = false;
+  }
 
-	/**
-	 * @see IModel#dispose()
-	 */
-	public void dispose() {
-		disposed = true;
-	}
+  /**
+   * @see IModel#dispose()
+   */
+  public void dispose() {
+    disposed = true;
+  }
 
-	/**
-	 * @see IModel#getResourceString(String)
-	 */
-	public String getResourceString(String key) {
-		return MessageUtil.getString(key);
-	}
+  /**
+   * @see IModel#getResourceString(String)
+   */
+  public String getResourceString(String key) {
+    return MessageUtil.getString(key);
+  }
 
-	/**
-	 * @see IModel#getUnderlyingResource()
-	 */
-	public IResource getUnderlyingResource() {
-		throw new Error();
-	}
+  /**
+   * @see IModel#getUnderlyingResource()
+   */
+  public IResource getUnderlyingResource() {
+    throw new Error();
+  }
 
-	public IStorage getUnderlyingStorage() {
-		return null;
-	}
+  public IStorage getUnderlyingStorage() {
+    return null;
+  }
 
-	/**
-	 * @see IModel#isDisposed()
-	 */
-	public boolean isDisposed() {
-		return disposed;
-	}
+  /**
+   * @see IModel#isDisposed()
+   */
+  public boolean isDisposed() {
+    return disposed;
+  }
 
-	/**
-	 * @see IModel#isEditable()
-	 */
-	abstract public boolean isEditable();
+  /**
+   * @see IModel#isEditable()
+   */
+  abstract public boolean isEditable();
 
-	/**
-	 * @see IModel#isLoaded()
-	 */
-	public boolean isLoaded() {
-		return loaded;
-	}
+  /**
+   * @see IModel#isLoaded()
+   */
+  public boolean isLoaded() {
+    return loaded;
+  }
 
-	/**
-	 * @see IModel#load()
-	 */
-	public abstract void load() throws CoreException;
+  /**
+   * @see IModel#load()
+   */
+  public abstract void load() throws CoreException;
 
-	/**
-	 * @see IModel#load(InputStream)
-	 */
-	public void load(InputStream source) throws CoreException {
-		load(source, true);
-	}
+  /**
+   * @see IModel#load(InputStream)
+   */
+  public void load(InputStream source) throws CoreException {
+    load(source, true);
+  }
 
-	/**
-	 * @see IModel#load(InputStream, boolean)
-	 */
-	public void load(InputStream source, boolean outOfSync) throws CoreException {
-		loaded = true;
-	}		
+  /**
+   * @see IModel#load(InputStream, boolean)
+   */
+  public void load(InputStream source, boolean outOfSync) throws CoreException {
+    loaded = true;
+  }
 
-	/**
-	 * @see IModel#reload(InputStream)
-	 */
-	public void reload(InputStream source) throws CoreException {
-		reload(source, true);
-	}
-	
-	/**
-	 * @see IModel#reload(InputStream, boolean)
-	 */
-	public void reload(InputStream source, boolean outOfSync) throws CoreException {
-	}
+  /**
+   * @see IModel#reload(InputStream)
+   */
+  public void reload(InputStream source) throws CoreException {
+    reload(source, true);
+  }
 
-	/**
-	 * @see IModelChangeProvider#addModelChangedListener(IModelChangedListener)
-	 */
-	public void addModelChangedListener(IModelChangedListener listener) {
-		changeListeners.add(listener);
-	}
-	
+  /**
+   * @see IModel#reload(InputStream, boolean)
+   */
+  public void reload(InputStream source, boolean outOfSync) throws CoreException {
+  }
 
-	/**
-	 * @see IModelChangeProvider#fireModelChanged(IModelChangedEvent)
-	 */
-	public void fireModelChanged(IModelChangedEvent event) {
-		Iterator i = changeListeners.iterator();
-		while (i.hasNext()) {
-			IModelChangedListener listener = (IModelChangedListener) i.next();
-			listener.modelChanged(event);
-		}
-	}
+  /**
+   * @see IModelChangeProvider#addModelChangedListener(IModelChangedListener)
+   */
+  public void addModelChangedListener(IModelChangedListener listener) {
+    changeListeners.add(listener);
+  }
 
-	/**
-	 * @see IModelChangeProvider#fireModelObjectChanged(Object, String)
-	 */
-	public void fireModelObjectChanged(Object obj, String property) {
-		Object[] objects = new Object[] { obj };
-		fireModelChanged(new ModelChangedEvent(IModelChangedEvent.WORLD_CHANGED, objects, property));
-	}
+  /**
+   * @see IModelChangeProvider#fireModelChanged(IModelChangedEvent)
+   */
+  public void fireModelChanged(IModelChangedEvent event) {
+    Iterator i = changeListeners.iterator();
+    while (i.hasNext()) {
+      IModelChangedListener listener = (IModelChangedListener) i.next();
+      listener.modelChanged(event);
+    }
+  }
 
-	/**
-	* @see IModelChangeProvider#fireModelObjectChanged(Object, String, Object, Object)
-	*/
-	public void fireModelObjectChanged(
-		Object object,
-		String property,
-		Object oldValue,
-		Object newValue) {
-		Object[] objects = new Object[] { oldValue, newValue };
-		fireModelChanged(new ModelChangedEvent(IModelChangedEvent.WORLD_CHANGED, objects, property));		
-	}
+  /**
+   * @see IModelChangeProvider#fireModelObjectChanged(Object, String)
+   */
+  public void fireModelObjectChanged(Object obj, String property) {
+    Object[] objects = new Object[] { obj };
+    fireModelChanged(new ModelChangedEvent(IModelChangedEvent.WORLD_CHANGED, objects, property));
+  }
 
-	/**
-	 * @see IModelChangeProvider#removeModelChangedListener(IModelChangedListener)
-	 */
-	public void removeModelChangedListener(IModelChangedListener listener) {
-		changeListeners.remove(listener);
-	}
+  /**
+  * @see IModelChangeProvider#fireModelObjectChanged(Object, String, Object, Object)
+  */
+  public void fireModelObjectChanged(Object object, String property, Object oldValue, Object newValue) {
+    Object[] objects = new Object[] { oldValue, newValue };
+    fireModelChanged(new ModelChangedEvent(IModelChangedEvent.WORLD_CHANGED, objects, property));
+  }
 
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
-		ITapestryModel other = (ITapestryModel) obj;
-		return getUnderlyingStorage().equals(other.getUnderlyingStorage());
-	}
+  /**
+   * @see IModelChangeProvider#removeModelChangedListener(IModelChangedListener)
+   */
+  public void removeModelChangedListener(IModelChangedListener listener) {
+    changeListeners.remove(listener);
+  }
 
-	/**
-	 * Not used (yet)
-	 * @see IModel#getTimeStamp()
-	 */
-	public long getTimeStamp() {
-		return timeStamp;
-	}
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    ITapestryModel other = (ITapestryModel) obj;
+    return getUnderlyingStorage().equals(other.getUnderlyingStorage());
+  }
 
-	/**
-	 * @see IModel#isInSync()
-	 */
-	public boolean isInSync() {
-		return !outOfSynch;
-	}
+  /**
+   * Not used (yet)
+   * @see IModel#getTimeStamp()
+   */
+  public long getTimeStamp() {
+    return timeStamp;
+  }
 
-	/**
-	 * @see IEditable#isDirty()
-	 */
-	public boolean isDirty() {
-		return false;
-	}
+  /**
+   * @see IModel#isInSync()
+   */
+  public boolean isInSync() {
+    return !outOfSynch;
+  }
 
-	/**
-	 * @see IEditable#save(PrintWriter)
-	 */
-	public void save(PrintWriter arg0) {
-	}
+  /**
+   * @see IEditable#isDirty()
+   */
+  public boolean isDirty() {
+    return false;
+  }
 
-	/**
-	 * @see IEditable#setDirty(boolean)
-	 */
-	public void setDirty(boolean arg0) {
-	}
+  /**
+   * @see IEditable#save(PrintWriter)
+   */
+  public void save(PrintWriter arg0) {
+  }
 
+  /**
+   * @see IEditable#setDirty(boolean)
+   */
+  public void setDirty(boolean arg0) {
+  }
 
-
-	protected boolean outOfSynch = false;
-
-
+  protected boolean outOfSynch = false;
 
   /**
    * Sets the timeStamp.
@@ -235,6 +226,14 @@ public abstract class AbstractModel implements ITapestryModel, IModel, IModelCha
    */
   public void setTimeStamp(long timeStamp) {
     this.timeStamp = timeStamp;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.pde.core.IModel#isValid()
+   */
+  public boolean isValid() {
+    // TODO Auto-generated method stub
+    return true;
   }
 
 }

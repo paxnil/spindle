@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editorjwc.beans;
 import java.util.Iterator;
 
 import net.sf.tapestry.spec.BeanLifecycle;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;

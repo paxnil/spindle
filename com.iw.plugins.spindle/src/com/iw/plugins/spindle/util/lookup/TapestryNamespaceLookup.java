@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
+
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;

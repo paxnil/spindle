@@ -78,9 +78,7 @@ import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.ui.ChooseFromNamespaceDialog;
-import com.iw.plugins.spindle.ui.ComponentAliasViewer;
 import com.iw.plugins.spindle.ui.CopyToClipboardAction;
-
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 import com.iw.plugins.spindle.ui.OpenClassAction;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;

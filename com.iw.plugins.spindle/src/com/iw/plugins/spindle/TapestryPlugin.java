@@ -36,6 +36,7 @@ import java.util.Map;
 import net.sf.tapestry.Tapestry;
 import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.util.xml.AbstractDocumentParser;
+
 import org.apache.log4j.Category;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;

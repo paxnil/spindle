@@ -29,6 +29,7 @@ package com.iw.plugins.spindle.wizards.extra;
 import java.util.Iterator;
 
 import net.sf.tapestry.parse.SpecificationParser;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;

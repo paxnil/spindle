@@ -29,13 +29,13 @@ package com.iw.plugins.spindle.refactor.components;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import com.iw.plugins.spindle.project.ITapestryProject;
-import com.iw.plugins.spindle.ui.DialogCellEditor;
 import com.iw.plugins.spindle.ui.ToolTipHandler;
 
 /**
@@ -76,8 +76,7 @@ public class ComponentAliasRefactorablePropertyDescriptor extends PropertyDescri
      * Constructor for TypeDialogCellEditor
      */
     protected ComponentNameCellEditor(Composite parent) {
-      super(parent, true);
-
+      super(parent);
     }
 
     /**
@@ -86,35 +85,20 @@ public class ComponentAliasRefactorablePropertyDescriptor extends PropertyDescri
     protected Object openDialogBox(Control cellEditorWindow) {
       String value = (String) getValue();
       if (value == null || "".equals(value.trim()) || "fill in value".equals(value.trim())) {
-
         return value;
-
       }
 
       RefactorComponentAliasWizard wizard = RefactorComponentAliasWizard.createWizard(project, value, existingComponentAliases);
-
       if (wizard != null) {
-
         WizardDialog dialog = new WizardDialog(cellEditorWindow.getShell(), wizard);
-
         if (dialog.open() != dialog.CANCEL) {
-
           value = wizard.getNewName();
-
         }
-
       }
-
       return value;
     }
 
-    protected Control createControl(Composite parent) {
-      Control result = super.createControl(parent);
-      handler = new ToolTipHandler(parent.getShell());
-      handler.activateHoverHelp(defaultText);
-      defaultText.setData("TIP_TEXT", "to refactor, use the button -->");
-      return result;
-    }
+    
 
   }
 

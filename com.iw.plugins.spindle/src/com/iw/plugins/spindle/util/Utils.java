@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -55,6 +56,9 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorPart;
@@ -876,7 +880,7 @@ public class Utils {
     ArrayList result = new ArrayList();
     for (int i = 0; i < allFragments.length; i++) {
       if (allFragments[i].isDefaultPackage()) {
-      	continue;
+        continue;
       }
       if (allFragments[i].getElementName().equals(fragment.getElementName())) {
         result.add(allFragments[i]);
@@ -885,4 +889,33 @@ public class Utils {
     return (IPackageFragment[]) result.toArray(new IPackageFragment[result.size()]);
 
   }
+
+  public static String[] getImportOrderPreference() {
+    IPreferenceStore prefs = JavaPlugin.getDefault().getPreferenceStore();
+    String str = prefs.getString(PreferenceConstants.ORGIMPORTS_IMPORTORDER);
+    if (str != null) {
+      return unpackOrderList(str);
+    }
+    return new String[0];
+  }
+
+  private static String[] unpackOrderList(String str) {
+    StringTokenizer tok = new StringTokenizer(str, ";");
+    int nTokens = tok.countTokens();
+    String[] res = new String[nTokens];
+    for (int i = 0; i < nTokens; i++) {
+      res[i] = tok.nextToken();
+    }
+    return res;
+  }
+
+  public static int getImportNumberThreshold() {
+    IPreferenceStore prefs = JavaPlugin.getDefault().getPreferenceStore();
+    int threshold = prefs.getInt(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
+    if (threshold < 0) {
+      threshold = Integer.MAX_VALUE;
+    }
+    return threshold;
+  }
+
 }

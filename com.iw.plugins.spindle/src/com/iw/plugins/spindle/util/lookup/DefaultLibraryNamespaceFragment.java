@@ -29,6 +29,7 @@
 package com.iw.plugins.spindle.util.lookup;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
+
 import org.eclipse.core.runtime.CoreException;
 
 /**

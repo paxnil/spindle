@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import net.sf.tapestry.spec.ExtensionSpecification;
+
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;

@@ -39,7 +39,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -66,7 +68,7 @@ import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 
-public class PublicStaticFieldSelectionDialog extends AbstractDialog {
+public class PublicStaticFieldSelectionDialog extends TitleAreaDialog {
 
   private boolean editing;
   private StringButtonField typeField;
@@ -85,10 +87,6 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
   public PublicStaticFieldSelectionDialog(Shell shell, IJavaProject project) {
     super(shell);
     this.jproject = project;
-    String windowTitle = "Choose Field Value";
-    String description = "Choose a Type and one of it public static fields";
-    updateWindowTitle(windowTitle);
-    updateMessage(description);
   }
 
   public PublicStaticFieldSelectionDialog(Shell shell, IJavaProject project, String existingBinding) {
@@ -99,40 +97,42 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
   /**
    * @see AbstractDialog#createAreaContents(Composite)
    */
-  protected Composite createAreaContents(Composite parent) {
-    Composite container = new Composite(parent, SWT.NONE);
+  protected Control createDialogArea(Composite parent) {
+    Composite container = (Composite) super.createDialogArea(parent);
+
+    Composite innerContainer = new Composite(container, SWT.NONE);
     FormLayout layout = new FormLayout();
-    layout.marginHeight= 4;
+    layout.marginHeight = 4;
     layout.marginWidth = 4;
-    container.setLayout(layout);
-    
+    innerContainer.setLayout(layout);
+
     //our container is embedded in a GridLayout 
     GridData gd = new GridData();
     gd.widthHint = 500;
     gd.heightHint = 300;
-  
-    container.setLayoutData(gd);
+
+    innerContainer.setLayoutData(gd);
 
     typeField = new StringButtonField("Type:", 64);
     typeField.addListener(adapter);
-    
-    Control typeFieldControl = typeField.getControl(container)    ;
-    Text text = typeField.getTextControl(container);
+
+    Control typeFieldControl = typeField.getControl(innerContainer);
+    Text text = typeField.getTextControl(innerContainer);
     text.setEditable(false);
     text.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-    
+
     FormData formData = new FormData();
-    formData.top = new FormAttachment(0,0);
-    formData.left = new FormAttachment(0,0);
-    formData.right = new FormAttachment(100,0);
+    formData.top = new FormAttachment(0, 0);
+    formData.left = new FormAttachment(0, 0);
+    formData.right = new FormAttachment(100, 0);
     typeFieldControl.setLayoutData(formData);
 
-    Control fieldListControl = createFieldList(container);
-    
+    Control fieldListControl = createFieldList(innerContainer);
+
     formData = new FormData();
     formData.top = new FormAttachment(typeFieldControl, 4);
-    formData.left = new FormAttachment(0,0);
-    formData.right = new FormAttachment(100,0);
+    formData.left = new FormAttachment(0, 0);
+    formData.right = new FormAttachment(100, 0);
     formData.bottom = new FormAttachment(100, 0);
     fieldListControl.setLayoutData(formData);
 
@@ -140,24 +140,27 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
       populateFromExistingBinding();
     }
 
+    setTitle("Choose Field Value");
+    setMessage("Choose a Type and one of it public static fields", IMessageProvider.NONE);
+
     return container;
   }
 
   private Control createFieldList(Composite parent) {
-    
-    Composite container = new  Composite(parent, SWT.NULL);
+
+    Composite container = new Composite(parent, SWT.NULL);
     FormLayout layout = new FormLayout();
     layout.marginHeight = 0;
     layout.marginWidth = 0;
     container.setLayout(layout);
-    
+
     Label label = new Label(container, SWT.NONE);
     label.setText("Fields:");
-    
+
     FormData formData = new FormData();
     formData.width = 64;
-    formData.top = new FormAttachment(0,0);
-    formData.left = new FormAttachment(0,0);
+    formData.top = new FormAttachment(0, 0);
+    formData.left = new FormAttachment(0, 0);
     label.setLayoutData(formData);
 
     Table list = new Table(container, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -179,12 +182,12 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
         fieldRenderer.dispose();
       }
     });
-    
+
     formData = new FormData(300, 200);
-    formData.top = new FormAttachment(0,0);
+    formData.top = new FormAttachment(0, 0);
     formData.left = new FormAttachment(label, 4);
-    formData.right = new FormAttachment(100,0);
-    formData.bottom = new FormAttachment(100,0);
+    formData.right = new FormAttachment(100, 0);
+    formData.bottom = new FormAttachment(100, 0);
     list.setLayoutData(formData);
 
     fields = list;
@@ -280,7 +283,7 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
       fields.setSelection(0);
     }
     fields.setRedraw(true);
-    update();
+    //    update();
   }
 
   private IField getSelectedField() {
@@ -292,7 +295,7 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
   }
 
   private void handleFieldSelectionChanged() {
-    update();
+    okToClose();
   }
 
   private void handleDefaultSelected() {
@@ -316,7 +319,7 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
   }
 
   public boolean close() {
-    return hardClose();
+    return super.close();
   }
 
   protected boolean okToClose() {
@@ -339,7 +342,7 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
   protected class DialogAdapter implements IDialogFieldChangedListener {
 
     public void dialogFieldChanged(DialogField field) {
-      update();
+      okToClose();
     }
     /**
      * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
@@ -372,12 +375,12 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
     }
 
   }
-//
-//  /*
-//   * @see Window#getInitialSize()
-//   */
-//  protected Point getInitialSize() {
-//    return new Point(525, 450);
-//  }
+  //
+  //  /*
+  //   * @see Window#getInitialSize()
+  //   */
+  //  protected Point getInitialSize() {
+  //    return new Point(525, 450);
+  //  }
 
 }

@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editorlib;
 import java.util.Iterator;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
+
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;

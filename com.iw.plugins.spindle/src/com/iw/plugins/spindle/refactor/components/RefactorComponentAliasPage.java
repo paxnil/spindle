@@ -29,6 +29,7 @@ package com.iw.plugins.spindle.refactor.components;
 import java.util.List;
 
 import net.sf.tapestry.parse.SpecificationParser;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -82,7 +83,7 @@ public class RefactorComponentAliasPage extends TapestryWizardPage {
     
     
     this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("component32.gif")));
+      ImageDescriptor.createFromURL(TapestryImages.getImageURL("componentDialog.gif")));
   }
 
   public String getNewName() {

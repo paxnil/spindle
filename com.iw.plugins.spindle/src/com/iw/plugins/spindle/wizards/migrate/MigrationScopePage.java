@@ -67,7 +67,7 @@ public class MigrationScopePage extends WizardPage implements ISelectionProvider
     super(name);
 
     this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
+      ImageDescriptor.createFromURL(TapestryImages.getImageURL("applicationDialog.gif")));
     this.setDescription("Tune Migration Scope");
 
     this.context = context;
