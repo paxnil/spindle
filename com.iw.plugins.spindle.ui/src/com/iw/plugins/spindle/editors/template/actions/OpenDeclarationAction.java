@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editors.template.actions;
 
 import java.util.Map;
 
+import org.apache.tapestry.INamespace;
 import org.apache.tapestry.parse.TemplateParser;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
@@ -36,6 +37,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.ui.IEditorPart;
@@ -55,7 +57,7 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: OpenDeclarationAction.java,v 1.4.2.2 2004/06/22 12:23:46
- *          glongman Exp $
+ *                     glongman Exp $
  */
 public class OpenDeclarationAction extends BaseTemplateAction
 {
@@ -72,6 +74,17 @@ public class OpenDeclarationAction extends BaseTemplateAction
 
   protected void doRun()
   {
+
+    INamespace namespace = fEditor.getNamespace();
+    if (namespace == null)
+    {
+      MessageDialog.openError(
+          UIPlugin.getDefault().getActiveWorkbenchShell(),
+          "Operation Aborted",
+          "This file can not be seen by the Tapestry builder");
+      return;
+    }
+
     XMLNode artifact = XMLNode.getArtifactAt(fDocument, fDocumentOffset);
     if (artifact == null)
       return;

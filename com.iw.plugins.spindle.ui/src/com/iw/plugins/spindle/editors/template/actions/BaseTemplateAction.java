@@ -72,10 +72,6 @@ public abstract class BaseTemplateAction extends BaseEditorAction
   {
     super.run();
 
-    INamespace namespace = fEditor.getNamespace();
-    if (namespace == null)
-      return;
-
     if (fDocumentOffset < 0)
       return;
 

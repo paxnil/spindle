@@ -8,7 +8,9 @@
    class="com.iw.plugins.spindle.UIPlugin">
 
    <runtime>
-      <library name="spindle_ui.jar"/>
+      <library name="spindle_ui.jar">
+         <export name="*"/>
+      </library>
       <library name="xmen.jar"/>
    </runtime>
    <requires>

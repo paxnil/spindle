@@ -28,10 +28,15 @@ package com.iw.plugins.spindle.editors.spec.actions;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.core.BinaryType;
 import org.eclipse.jdt.internal.core.JarEntryFile;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -42,7 +47,7 @@ import com.iw.plugins.spindle.ui.util.Revealer;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: ShowInPackageExplorerAction.java,v 1.3 2003/11/13 21:36:28
- *          glongman Exp $
+ *                     glongman Exp $
  */
 public class ShowInPackageExplorerAction extends OpenDeclarationAction
 {
@@ -56,6 +61,17 @@ public class ShowInPackageExplorerAction extends OpenDeclarationAction
     setId(ACTION_ID);
   }
 
+  protected void canNotContinue(String message)
+  {
+    super.canNotContinue(message);
+    try
+    {
+      foundResult(((IStorageEditorInput) fEditor.getEditorInput()).getStorage(), null, null);
+    } catch (CoreException e)
+    {
+     ErrorDialog.openError(UIPlugin.getDefault().getActiveWorkbenchShell(), "Error", null, e.getStatus());
+    }
+  }
   protected void foundResult(Object result, String key, Object moreInfo)
   {
     IJavaProject jproject = null;

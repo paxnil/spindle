@@ -27,6 +27,7 @@
 package com.iw.plugins.spindle.editors.spec.actions;
 
 import org.apache.tapestry.INamespace;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
@@ -79,10 +80,6 @@ public abstract class BaseSpecAction extends BaseEditorAction
   public final void run()
   {
     super.run();
-
-    INamespace namespace = fEditor.getNamespace();
-    if (namespace == null)
-      return;
 
     if (fDocumentOffset < 0)
       return;

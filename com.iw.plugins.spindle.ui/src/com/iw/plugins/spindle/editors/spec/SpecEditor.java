@@ -64,7 +64,9 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -169,12 +171,13 @@ public class SpecEditor extends Editor
   public void createPartControl(Composite parent)
   {
     super.createPartControl(parent);
-    
+
     IStorage storage = getStorage();
     IProject project = TapestryCore.getDefault().getProjectFor(storage);
-    TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+    TapestryArtifactManager manager = TapestryArtifactManager
+        .getTapestryArtifactManager();
     Map specs = manager.getSpecMap(project);
-    
+
     Control[] children = parent.getChildren();
     fControl = children[children.length - 1];
 
@@ -405,9 +408,10 @@ public class SpecEditor extends Editor
    */
   protected SourceViewerConfiguration createSourceViewerConfiguration()
   {
-    return new SpecEditorConfiguration(UIPlugin.getDefault().getXMLTextTools(), this, UIPlugin
-        .getDefault()
-        .getPreferenceStore());
+    return new SpecEditorConfiguration(
+        UIPlugin.getDefault().getXMLTextTools(),
+        this,
+        UIPlugin.getDefault().getPreferenceStore());
   }
 
   /**
@@ -467,10 +471,21 @@ public class SpecEditor extends Editor
   {
     fReconciledSpec = null;
 
+    Display display = Display.getDefault();
+    display.asyncExec(new Runnable()
+    {
+      public void run()
+      {
+        IActionBars bars = getEditorSite().getActionBars();
+        bars.getStatusLineManager().setMessage(null);
+      }
+    });
+
     reconcileOutline();
 
     if (fReconciler != null)
     {
+
       fReconciler.reconcile(collector, monitor);
     }
   }
@@ -937,8 +952,8 @@ public class SpecEditor extends Editor
     super.editorContextMenuAboutToShow(menu);
     menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
     if (!(getStorage() instanceof JarEntryFile))
-    {
-      addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
+    {     
+       addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
       addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
     }
     MenuManager moreNav = new MenuManager("Jump");

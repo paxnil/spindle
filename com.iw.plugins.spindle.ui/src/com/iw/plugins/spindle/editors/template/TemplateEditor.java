@@ -202,7 +202,7 @@ public class TemplateEditor extends Editor
 
     menu
         .insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
-    MenuManager sourceMenu = new MenuManager("Source");
+    MenuManager sourceMenu = new MenuManager("Refactor");
     MoveToSpecAction moveAction = (MoveToSpecAction) getAction(MoveToSpecAction.ACTION_ID);
     moveAction.update();
     sourceMenu.add(moveAction);

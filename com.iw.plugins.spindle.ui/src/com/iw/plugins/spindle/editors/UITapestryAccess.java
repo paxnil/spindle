@@ -369,7 +369,7 @@ public abstract class UITapestryAccess
     setFrameworkNamespace((ICoreNamespace) TapestryArtifactManager
         .getTapestryArtifactManager()
         .getFrameworkNamespace(project));
-    Assert.isLegal(fFrameworkNamespace != null);
+    Assert.isLegal(fFrameworkNamespace != null, "Could not resolve the Tapestry framework");
   }
 
   public ICoreNamespace getFrameworkNamespace()
