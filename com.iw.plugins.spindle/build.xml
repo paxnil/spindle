@@ -1,6 +1,6 @@
 <project name="builder" default="init" basedir=".">
 
-  <property name="version" value="1.1alpha3"/>
+  <property name="version" value="1.1beta1"/>
   
   <target name="init">
     <available property="buildReleaseAvailable" file="${basedir}/buildRelease"/>
