@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+<title>Creating Pages and Components</title>
+<link rel="stylesheet" href="style/book.css" type="text/css">
+</head>
+<body>
+<img src="images/headerBkgII.jpg"> 
+<h1>Creating Pages and Components</h1>
+<p class="Note"><strong>Note:</strong> this page has been updated to reflect the Wizard changes release 
+  since build 3.1.7</p>
+<p class="Note"> <strong>Tip</strong> - Select a resource in the project you want to create a page or 
+  component in <em>before invoking the wizard</em>. This selection is usually done in the Package Explorer. 
+  You don't have to do this but the wizard takes some context from the workbench selection state if available. 
+  If you don't you'll need to select the project in the wizard. </p>
+<p>To access the page or component wizards, Choose "File"-&gt;"New"-&gt;"Other"</p>
+<p><img src="images/new_other_2.jpg" alt="" width="469" height="305" ></p>
+<p> Creating a Tapestry page or component is simple. First choose: </p>
+<ul>
+  <li> Tapestry Component; or </li>
+  <li> Tapestry Page </li>
+</ul>
+<p> <img src="images/new_pg_cmpt_1.jpg" alt="" width="500" height="520" ></p>
+<p> <strong>The UI components for both wizards are identical</strong> </p>
+<h3>Page 1</h3>
+<p> <img src="images/aaawiz_new1.jpg" alt="" width="361" height="515" > </p>
+<table border="1" cellpadding="1" cellspacing="1" >
+<tbody><tr><td align="left"> <strong>Field</strong> </td><td align="left"> <strong>Notes</strong> </td><td align="left"> <strong>Required</strong> </td></tr>
+<tr><td align="left"> Component Name </td><td align="left"> The name that will be used to gen the files (ie. MyComponent.jwc) </td><td align="left"> Yes </td></tr>
+<tr><td align="left"> Show Advanced Options </td><td align="left"> Toggles additional fields for more options (Described below) </td></tr>
+<tr><td align="left"> Project </td><td align="left"> The Tapestry project to create in </td><td align="left"> Yes </td></tr>
+<tr><td align="left"> Namespace </td><td align="left"> The namespace (application or library) that will own the new artifact </td><td align="left"> Yes </td></tr>
+<tr><td colspan="2" align="left"> Generate an associated HTML file? </td><td align="left"> No </td></tr>
+<tr><td colspan="2" align="left"> Open all generated files in editors (removed - all are opened by default) </td><td align="left"> N/A </td></tr>
+</tbody></table>
+<p>
+Once the required fields are filled in here you can click "Finish" and
+a page or component using the Tapestry default classes will be
+generated. In this mode, all generated files are placed in the same
+folder as the namespace file (.application or .library). Files are
+generated using the workspace default templates (or project default
+templates if define). To change where the generated files will be
+placed, or, to choose another template, see <em>Advanced Options</em> below.
+</p>
+<p>
+To choose a different java class or to have the wizard generate a new class, click "Next"
+</p>
+<h3>Page 2</h3>
+<p> <img src="images/new_pg_cmpt_3.jpg" alt="http://spindle.sourceforge.net/unstable/images/new_pg_cmpt_3.jpg" width="500" height="520"> 
+</p>
+<p>
+To choose an existing class, ensure that the box "Choose an existing
+Class" is checked and click on the "Browse" button. The Eclipse JDT
+standard Type chooser dialog is used to pick the class.
+</p>
+<p>
+To generate a new Java class, check the "Create a new class" box:
+</p>
+<p> <img src="images/new_pg_cmpt_4.jpg" alt="" width="500" height="520" > </p>
+<table border="1" cellpadding="1" cellspacing="1" >
+<tbody><tr><td align="left"> <strong>Field</strong> </td><td align="left"> <strong>Notes</strong> </td><td align="left"> <strong>Required</strong> </td></tr>
+<tr><td align="left"> Folder </td><td align="left"> The java source folder inside of which to create the new class </td><td align="left"> yes </td></tr>
+<tr><td align="left"> Package </td><td align="left"> The package inside of which to create the class </td><td align="left"> yes - the default package is not allowed </td></tr>
+<tr><td colspan="2" align="left"> Class name </td><td align="left"> yes </td></tr>
+<tr><td colspan="2" align="left"> Abstract </td><td align="left"> no </td></tr>
+<tr><td colspan="2" align="left"> Superclass </td><td align="left"> no - java.lang.Object will be the superclass if none specified </td></tr>
+<tr><td align="left"> Interface(s) </td><td align="left"> specify one or more interfaces the new class will implement </td><td align="left"> no </td></tr>
+</tbody></table>
+<hr>
+<p>
+<strong>Advanced Options</strong>
+</p>
+<p>
+Clicking the Advanced Options button will cause some extra fields to appear. These fields give you the ability to specify:
+</p>
+<ul>
+<li>
+What templates to use when new files are generated; and
+</li>
+<li>
+Where the generated files should be placed.
+</li>
+</ul>
+<p>
+The fields change depending on what kind of namespace has been chosen as the target namespace.
+</p>
+<p>
+The following shows the fields that appear if a namespace hosted on the classpath is selected:
+</p>
+<p> <img src="images/aaawiz_new4.jpg" alt="" width="370" height="540" > </p>
+<table border="1" cellpadding="1" cellspacing="1">
+<tbody><tr><td align="left"> <strong>Field</strong> </td><td align="left"> <strong>Notes</strong> </td><td align="left"> <strong>Required</strong> </td></tr>
+<tr><td align="left"> .jwc template </td><td align="left"> The template used to generate a .jwc file </td><td align="left"> No </td></tr>
+<tr><td align="left"> .html template </td><td align="left"> The template used to generate a .html file </td><td align="left"> No </td></tr>
+<tr><td align="left"> Source Folder </td><td align="left"> The java source folder inside of which to create files </td><td align="left"> yes </td></tr>
+<tr><td align="left"> Package </td><td align="left"> The package inside of which to create the files </td><td align="left"> yes - the default package is not allowed </td></tr>
+</tbody></table>
+<p>
+Otherwize the component wizard looks like this:
+</p>
+<p> <img src="images/aaawiz_new2.jpg" alt="" width="374" height="514" > </p>
+<table border="1" cellpadding="1" cellspacing="1">
+<tbody><tr><td align="left"> <strong>Field</strong> </td><td align="left"> <strong>Notes</strong> </td><td align="left"> <strong>Required</strong> </td></tr>
+<tr><td align="left"> .jwc template </td><td align="left"> The template used to generate a .jwc file </td><td align="left"> No </td></tr>
+<tr><td align="left"> .html template </td><td align="left"> The template used to generate a .html file </td><td align="left"> No </td></tr>
+<tr><td align="left"> Location </td><td align="left"> The folder in which Spindle will place files (must be relative to WEB-INF) </td><td align="left"> yes </td></tr>
+</tbody></table>
+<p>
+The page wizard is slightly different if the Application Namespace is chosen:
+</p>
+<p> <img src="images/aaawiz_new3.jpg" alt="" width="378" height="543" > </p>
+<table border="1" cellpadding="1" cellspacing="1">
+<tbody><tr><td align="left"> <strong>Field</strong> </td><td align="left"> <strong>Notes</strong> </td><td align="left"> <strong>Required</strong> </td></tr>
+<tr><td align="left"> .jwc template </td><td align="left"> The template used to generate a .jwc file </td><td align="left"> No </td></tr>
+<tr><td align="left"> .html template </td><td align="left"> The template used to generate a .html file </td><td align="left"> No </td></tr>
+<tr><td align="left"> Location </td><td align="left"> The folder in which Spindle will place files (must be relative to WEB-INF) </td><td align="left"> yes </td></tr>
+<tr><td align="left"> Place template in ? </td><td align="left"> Tapestry allows page templates to reside in the context root, check this field to avail yourself of this option </td><td align="left"> No </td></tr>
+</tbody></table>
+<h4>Links</h4>
+<a href="template_kinds.html" title="Wizards">Kinds of Templates</a><br>
+<a href="template_vars.html" title="Wizards">Template Viariables</a><br>
+<a href="template_pvars.html" title="Wizards">Pseudo Variables</a><br> 
+</body>
+</html>

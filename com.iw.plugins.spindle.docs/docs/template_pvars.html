@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>Pseudo Variables</title>
+   <link rel="stylesheet" href="style/book.css" type="text/css">
+</head>
+<body>
+<img src="images/headerBkgII.jpg">
+<h1>Pseudo Variables
+</h1>
+<p>You can put in your own variables and when the template is inserted
+(by content assist) you can tab over to it and enter a value. There is
+no facility to resolve values for your custom variables automatically.
+</p>
+<p>
+It might be tempting to name your own variable with a string you intend to be the default value. Something like...
+</p>
+<p class="code"> &lt;property-specification class="${com.mypack.MyObject}"/&gt; 
+</p>
+<p>Variable names must be valid according to the rules for Java
+identifiers. That means, unfortunately, that the above template is
+invalid....
+</p>
+<p>
+The Eclipse template parser will reject the variable because '.' characters are not allowed.
+</p>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <plugin
    id="com.iw.plugins.spindle.docs"
    name="Spindle 3 Documentation"
-   version="0.0.2"
+   version="0.1.1"
    provider-name="Intelligent Works Incorporated">
 
    <runtime>
@@ -13,11 +13,8 @@
    </requires>
 
 
-   <extension
-         point="org.eclipse.help.toc">
-      <toc
-            file="toc.xml"
-            primary="true">
+   <extension point="org.eclipse.help.toc">
+      <toc file="toc.xml" primary="true" extradir="docs">
       </toc>
    </extension>
 

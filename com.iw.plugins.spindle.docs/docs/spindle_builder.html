@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+<title>Spindle Builder</title>
+<link rel="stylesheet" href="style/book.css" type="text/css">
+</head>
+<body>
+<img src="images/headerBkgII.jpg"> 
+<h1>Spindle Builder</h1>
+<p>TODO - add more</p>
+<hr>
+<p>Spindle provides a project builder for projects that have the Tapestry Nature.</p>
+<p>The builder runs immedaitely after a Java build on the project, locating and validation many Tapestry 
+  aspects of the project. More than 50 static errors are identifiable and are marked as error markers 
+  on the resources affected. The builder depends on the the project layout adhering to that discussed 
+  on the Tapestry Nature page (see link below). If the builder can not run for some reason, an error marker 
+  is placed on the project folder with description of the problem.</p>
+<p>The value of the builder is that many problems that would result in the Tapestry runtime showing the 
+  error page are intercepted before the project is ever deployed to a server.</p>
+<p class="Note"><strong>Note:</strong> not all errors can be caught by the builder. Logic errors that 
+  arise because of the runtime state of the application are not caught. So, for example, while the builder 
+  can detect if an OGNL expression is not well formed, it can not determine if the expression given might 
+  trhow an exception at runtime.</p>
+<p>The builder <em>simulates</em> the internal workings of Tapestry by providing it's own implementations 
+  of internal Tapestry objects that represent applications, libraries, components, and pages. The underlying 
+  mechanisms of Spindle are geared towards development time and no runtime artifacts (like the Servlet 
+  spec's context object) are available to the builder. </p>
+<h4>Links</h4>
+<a href="tap_nature.html">Tapestry Project Nature</a> 
+</body>
+</html>

@@ -1,6 +1,42 @@
 <?xml version="1.0" encoding="UTF-8" ?> 
-
-<toc label="Spindle 3" topic="docs/index.html"> 
+<toc label="Spindle 3 Users' Guide" topic="docs/index.html"> 
+	<topic label="Quick Start" href="docs/quickstart.html">
+		<topic label="Installing Spindle" href="docs/installing.html"></topic>
+		<topic label="Installing Jetty" href="docs/installing_jetty.html"></topic>
+		<topic label="Installing Jetty Launcher" href="docs/installing_jettylauncher.html"></topic>
+		<topic label="Creating a Project" href="docs/create.html"></topic>
+		<topic label="Running a Project" href="docs/running.html"></topic>
+		<topic label="Running a Project with Jetty" href="docs/running_jetty.html"></topic>		
+	</topic>
+	<topic label="Tasks">
+		<topic label="Add/Remove Tapestry Project Nature" href="docs/tapestry_nature_work.html"></topic>	
+		<topic label="Work with Tapestry Framework Library" href="docs/tapestry_frmwk_lib_wrk.html"></topic>
+		<topic label="Wizards" href="docs/wizards.html">
+			<topic label="Creating Tapestry Projects" href="docs/project_wizard.html"></topic>
+			<topic label="Creating Pages and Components" href="docs/component_wizard.html"></topic>
+		</topic>		
+		<topic label="Adding Images and Other Assets" href="docs/addingassets.html"></topic>
+		<topic label="Configuring Spindle" href="docs/preferences.html"></topic>
+		
+	</topic>
+	<topic label="Concepts">
+		<topic label="Tapestry Project Nature" href="docs/tap_nature.html"></topic>		
+		<topic label="Spindle Builder" href="docs/spindle_builder.html"></topic>
+		<topic label="Tapestry Framework Library" href="docs/tapestry_frmwk_lib.html"></topic>	
+		<topic label="Spindle Editors" href="docs/editors.html">
+			<topic label="Tapestry Template Editor" href="docs/template_editor.html"></topic>
+			<topic label="Specification Editor" href="docs/spec_editor.html"></topic>
+		</topic>
+		<topic label="Code Templates">
+			<topic label="Kinds of Templates" href="docs/template_kinds.html"></topic>
+			<topic label="Template Variables" href="docs/template_vars.html"></topic>
+			<topic label="Pseudo Variables" href="docs/template_pvars.html"></topic>
+		</topic>				
+	</topic>
 	
+	<topic label="Credits &amp; Resources" href="docs/credits.html">
+		<topic label="Software Versions" href="docs/versions.html"></topic>
+		<topic label="Resources" href="docs/resources.html"></topic>
+	</topic>
 </toc>
 	

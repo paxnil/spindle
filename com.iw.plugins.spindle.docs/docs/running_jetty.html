@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>Spindle Users Guide</title>
+   <link rel="stylesheet" href="style/book.css" type="text/css">
+</head>
+<body>
+<img alt="Spindle Logo" src="images/headerBkgII.jpg">
+<h1>Running Your Project with Jetty
+</h1>
+<p><a href="http://jetty.mortbay.org/jetty/index.html">Jetty</a> is an
+open source web server and servlet container that you can use to run
+your Tapestry applications.
+</p>
+<p>Jetty Launcher is an Eclipse plug-in that lets you easily run and
+debug Tapestry applications from with Eclipse, using Jetty.
+</p>
+<p>First <a href="installing_jetty.html">install Jetty and Jetty Launcher</a>. It will only take a couple 
+  minutes. </p>
+<h2>Running the Project</h2>
+<p>First make sure you are in the Java Perspective. If you don't, the Run
+menu won't have the correct entries in it.</p>
+<ul>
+  <li>On the Window menu</li>
+  <li>Select Open Perspective</li>
+  <li>Select Java
+  </li>
+</ul>
+<p>To run your project:</p>
+<ul>
+  <li>Open the <span style="font-style: italic;">Run </span>menu</li>
+  <li>Select <span style="font-style: italic;">Run&#8230;</span></li>
+  <li>Select <span style="font-style: italic;">Jetty Web</span> in the
+Configurations section 
+  </li>
+  <li>Click <span style="font-style: italic;">New</span></li>
+  <li>Enter &#8220;Tapestry Sample App&#8221;, if prompted (varies by Eclipse
+version)
+  </li>
+  <li>Under Jetty Configuration, click Browse, and find your jetty
+installation directory.</li>
+  <li>Make sure the port number is OK
+If you&#8217;re running a web server already, you may need to change the
+port
+number Jetty uses.
+This is under <span style="font-style: italic;">Use Options</span>, <span
+ style="font-style: italic;">http port</span> on this tab. 
+  </li>
+  <li>Click the <span style="font-style: italic;">Run </span>button
+  </li>
+  <li>In your browser, go to <a href="http://localhost:8080/app">http://localhost:8080/app</a>
+Or use whatever port you specified, instead of 8080
+  </li>
+</ul>
+<p>You should see &#8220;Tom&#8217;s Sample Tapestry Application&#8221;, or whatever
+string
+you entered above.
+</p>
+<p>If there is a problem, check in Eclipse's console window. The most
+common problem is a port conflict.
+</p>
+<p>If you have Jetty Launcher installed, then you might also want to review the Jetty Launcher integrated 
+  help (<a href="http://jettylauncher.sourceforge.net/docs/index.html">also available online</a>).</p>
+</body>
+</html>
