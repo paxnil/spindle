@@ -46,6 +46,8 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JarEntryFile;
@@ -640,6 +642,43 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
             log(e);
         }
         return null;
+    }
+
+    /**
+     * @param file
+     * @return
+     */
+    public TapestryProject getTapestryProjectFor(IClassFile file)
+    {
+        if (file == null)
+            return null;
+
+        IProject project = getProjectFor(file);
+        if (project == null)
+            return null;
+
+        try
+        {
+            if (project.hasNature(TapestryCore.NATURE_ID))
+                return (TapestryProject) project.getNature(TapestryCore.NATURE_ID);
+        } catch (CoreException e)
+        {
+            log(e);
+        }
+        return null;
+    }
+
+    /**
+     * @param file
+     * @return
+     */
+    private IProject getProjectFor(IClassFile file)
+    {
+        IJavaProject jproject = (IJavaProject) file.getParent().getAncestor(IJavaElement.JAVA_PROJECT);
+        if (jproject == null)
+            return null;
+
+        return jproject.getProject();
     }
 
 }
