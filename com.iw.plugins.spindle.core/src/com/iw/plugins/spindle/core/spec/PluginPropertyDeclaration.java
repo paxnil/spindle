@@ -28,6 +28,12 @@ package com.iw.plugins.spindle.core.spec;
 
 import org.apache.tapestry.ILocation;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+
 /**
  *  Record <property> tags in a document
  * 
@@ -40,28 +46,83 @@ public class PluginPropertyDeclaration extends BaseSpecification
 {
     String fKey;
     String fValue;
+    boolean fValueIsFromAttribute;
 
-    public PluginPropertyDeclaration(String key, String value, ILocation location)
+    public PluginPropertyDeclaration(String key, String value)
     {
         super(BaseSpecification.PROPERTY_DECLARATION);
-        fKey = key;
+        setKey(key);
         fValue = value;
-        setLocation(location);
-    }
-
-    public String getIdentifier()
-    {
-        return getKey();
     }
 
     public String getKey()
     {
-        return fKey;
+        return getIdentifier();
+    }
+
+    public void setKey(String key)
+    {
+        setIdentifier(key);
     }
 
     public String getValue()
     {
         return fValue;
+    }
+
+    public void validate(Object parent, IScannerValidator validator)
+    {
+
+        BasePropertyHolder spec = (BasePropertyHolder) parent;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        if (sourceInfo == null) //TODO is this the right thing to do?
+            return;
+
+        String key = getKey();
+
+        try
+        {
+            if (spec.getPropertyDeclaration(key) != this)
+            {
+                validator.addProblem(
+                    IProblem.WARNING,
+                    sourceInfo.getAttributeSourceLocation("name"),
+                    "duplicate definition of property: " + key);
+            }
+
+            String value = getValue();
+
+            if (value != null && value.trim().length() == 0)
+            {
+                validator.addProblem(
+                    IProblem.WARNING,
+                    fValueIsFromAttribute
+                        ? sourceInfo.getAttributeSourceLocation("value")
+                        : sourceInfo.getContentSourceLocation(),
+                    "missing value of property: " + key);
+            }
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+    }
+    /**
+     * @return
+     */
+    public boolean isValueIsFromAttribute()
+    {
+        return fValueIsFromAttribute;
+    }
+
+    /**
+     * @param b
+     */
+    public void setValueIsFromAttribute(boolean flag)
+    {
+        fValueIsFromAttribute = flag;
     }
 
 }

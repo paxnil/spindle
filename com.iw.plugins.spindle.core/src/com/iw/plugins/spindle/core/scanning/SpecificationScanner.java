@@ -303,31 +303,25 @@ public abstract class SpecificationScanner extends AbstractScanner
     {
         String name = getAttribute(node, "name", false);
 
-        //TODO reimplement somewhere else.
-        if (holder.getPropertyNames().contains(name))
-            addProblem(
-                IProblem.WARNING,
-                getAttributeSourceLocation(node, "name"),
-                "duplicate definition of property: " + name);
-
-        // Starting in DTD 1.4, the value may be specified
-        // as an attribute.  Only if that is null do we
-        // extract the node's value.
-
-        // must be validated here
+        //      must be done now - not revalidatable
+        ExtendedAttributeResult result = null;
         String value = null;
         try
         {
-            value = getExtendedAttribute(node, "value", true).value;
+            result = getExtendedAttribute(node, "value", true);
+            value = result.value;
         } catch (ScannerException e)
         {
             addProblem(IProblem.ERROR, e.getLocation(), e.getMessage());
         }
-        holder.setProperty(name, value);
-        
-        PluginPropertyDeclaration declaration = new PluginPropertyDeclaration(name, value, getSourceLocationInfo(node));
-               
+
+        PluginPropertyDeclaration declaration = new PluginPropertyDeclaration(name, value);
+        declaration.setLocation(getSourceLocationInfo(node));
+        declaration.setValueIsFromAttribute(result == null ? false : result.fromAttribute);
+
         holder.addPropertyDeclaration(declaration);
+
+        declaration.validate(holder, fValidator);
     }
 
     /**

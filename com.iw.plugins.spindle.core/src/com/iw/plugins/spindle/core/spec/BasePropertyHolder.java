@@ -28,10 +28,12 @@ package com.iw.plugins.spindle.core.spec;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.iw.plugins.spindle.core.util.PropertyFiringMap;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 
 /**
  *  Base class for Spec classes that have properties
@@ -61,9 +63,16 @@ public abstract class BasePropertyHolder extends DescribableSpecification implem
     public void addPropertyDeclaration(PluginPropertyDeclaration declaration)
     {
         if (fPropertyDeclarations == null)
+        {
             fPropertyDeclarations = new ArrayList();
+            fProperties = new HashMap();
+        }
 
         fPropertyDeclarations.add(declaration);
+
+        if (!fProperties.containsKey(declaration.getKey()))
+            fProperties.put(declaration.getKey(), declaration);
+
     }
 
     public List getPropertyDeclarations()
@@ -91,16 +100,17 @@ public abstract class BasePropertyHolder extends DescribableSpecification implem
      */
     public void setProperty(String name, String value)
     {
-        if (value == null)
-        {
-            removeProperty(name);
-            return;
-        }
-
-        if (fProperties == null)
-            fProperties = new PropertyFiringMap(this, "properties");
-
-        fProperties.put(name, value);
+        throw new IllegalStateException("not used in SPindle!");
+        //        if (value == null)
+        //        {
+        //            removeProperty(name);
+        //            return;
+        //        }
+        //
+        //        if (fProperties == null)
+        //            fProperties = new PropertyFiringMap(this, "properties");
+        //
+        //        fProperties.put(name, value);
     }
 
     /* (non-Javadoc)
@@ -108,7 +118,8 @@ public abstract class BasePropertyHolder extends DescribableSpecification implem
      */
     public void removeProperty(String name)
     {
-        remove(fProperties, name);
+        throw new IllegalStateException("not used in SPindle!");
+        //        remove(fProperties, name);
     }
 
     /* (non-Javadoc)
@@ -119,6 +130,26 @@ public abstract class BasePropertyHolder extends DescribableSpecification implem
         if (fProperties == null)
             return null;
 
-        return (String) fProperties.get(name);
+        PluginPropertyDeclaration declaration = (PluginPropertyDeclaration) fProperties.get(name);
+        if (declaration == null)
+            return null;
+        return declaration.getValue();
+    }
+
+    PluginPropertyDeclaration getPropertyDeclaration(String name)
+    {
+        if (fProperties == null)
+            return null;
+
+        return (PluginPropertyDeclaration) fProperties.get(name);
+    }
+
+    public void validateProperties(IScannerValidator validator)
+    {
+        for (Iterator iter = fPropertyDeclarations.iterator(); iter.hasNext();)
+        {
+            PluginPropertyDeclaration element = (PluginPropertyDeclaration) iter.next();
+            element.validate(this, validator);
+        }
     }
 }
