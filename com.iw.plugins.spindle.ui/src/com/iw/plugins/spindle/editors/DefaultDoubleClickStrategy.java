@@ -35,8 +35,6 @@ import org.eclipse.jface.text.ITextViewer;
  * Default strategy for selecting text on double click
  * 
  * @author glongman@gmail.com
- * @version $Id: DefaultDoubleClickStrategy.java,v 1.1 2003/10/29 12:33:58
- *          glongman Exp $
  */
 public class DefaultDoubleClickStrategy implements ITextDoubleClickStrategy
 {

@@ -47,8 +47,6 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
  * tags.
  * 
  * @author glongman@gmail.com
- * @version $Id: TemplateTextTools.java,v 1.2.4.2 2004/06/22 12:23:34 glongman
- *          Exp $
  */
 public class TemplateTextTools extends AbstractTextTools
 {

@@ -38,8 +38,6 @@ import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
  * TODO Add Type comment
  * 
  * @author glongman@gmail.com
- * @version $Id: XMLOutlineInformationControl.java,v 1.2.2.2 2004/06/22 12:22:52
- *          glongman Exp $
  */
 public class XMLOutlineInformationControl extends TreeInformationControl
 {

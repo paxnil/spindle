@@ -51,8 +51,6 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
  * Knows how to extract tapestry information.
  * 
  * @author glongman@gmail.com
- * @version $Id: TemplateTapestryAccess.java,v 1.3 2003/12/13 14:43:11 glongman
- *          Exp $
  */
 public class TemplateTapestryAccess extends UITapestryAccess
 {

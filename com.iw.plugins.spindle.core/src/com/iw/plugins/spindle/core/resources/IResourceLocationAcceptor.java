@@ -30,8 +30,6 @@ package com.iw.plugins.spindle.core.resources;
  * A requestor that is invoked by the seek method in IResourceWorkspaceLocation.
  * 
  * @author glongman@gmail.com
- * @version $Id: IResourceLocationAcceptor.java,v 1.2 2003/06/17 20:05:16
- *          glongman Exp $
  */
 public interface IResourceLocationAcceptor
 {

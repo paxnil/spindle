@@ -43,8 +43,6 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * Copyright 2002 Intelligent Works Inc. All rights reserved
  * 
  * @author gwl
- * @version $Id: JumpToApplicationSpecAction.java,v 1.1 2003/10/29 12:33:56
- *          glongman Exp $
  */
 public class JumpToApplicationSpecAction extends AbstractTapestryProjectAction
 {

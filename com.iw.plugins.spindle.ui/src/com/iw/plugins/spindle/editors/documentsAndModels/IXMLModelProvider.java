@@ -33,8 +33,6 @@ import org.xmen.internal.ui.text.XMLReconciler;
  * models attached.
  * 
  * @author glongman@gmail.com
- * @version $Id: IXMLModelProvider.java,v 1.1.2.1 2004/06/22 12:13:52 glongman
- *          Exp $
  */
 public interface IXMLModelProvider
 {

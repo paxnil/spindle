@@ -68,8 +68,6 @@ import com.iw.plugins.spindle.editors.util.BusyIndicatorSpindle;
  * InformationControl for choosing Assets
  * 
  * @author glongman@gmail.com
- * @version $Id: ResourceChooserInformationControl.java,v 1.2.2.1 2004/06/11
- *          11:23:08 glongman Exp $
  */
 public class ResourceChooserInformationControl extends TreeInformationControl
 {

@@ -38,6 +38,7 @@ import java.io.Reader;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * File utilities
@@ -73,7 +74,7 @@ public class Files
 
   }
 
-  public static void toTextFile(IFile f, String content) throws IOException
+  public static void toTextFile(IFile f, String content, IProgressMonitor monitor) throws IOException
   {
     try
     {

@@ -429,7 +429,6 @@ public class TemplateEditor extends Editor
      * 
      * @deprecated
      * @author glongman@gmail.com
-     * @version $Id$
      */
     protected class OutlineSelectionListener implements ISelectionChangedListener
     {

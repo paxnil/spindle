@@ -39,8 +39,6 @@ import com.iw.plugins.spindle.core.util.SpindleStatus;
  * an ISelectionValidator that validates the type of the elements.
  * 
  * @author glongman@gmail.com
- * @version $Id: TypeSelectionValidator.java,v 1.1 2003/10/20 20:19:13 glongman
- *          Exp $
  */
 public class TypeSelectionValidator implements ISelectionStatusValidator
 {

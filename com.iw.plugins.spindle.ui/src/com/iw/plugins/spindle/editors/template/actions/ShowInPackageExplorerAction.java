@@ -41,8 +41,6 @@ import com.iw.plugins.spindle.ui.util.Revealer;
  * Show something interesting in the PackageExplorer
  * 
  * @author glongman@gmail.com
- * @version $Id: ShowInPackageExplorerAction.java,v 1.1 2003/11/09 21:24:41
- *          glongman Exp $
  */
 public class ShowInPackageExplorerAction extends OpenDeclarationAction
 {

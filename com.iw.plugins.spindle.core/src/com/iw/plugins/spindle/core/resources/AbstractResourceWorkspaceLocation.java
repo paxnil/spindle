@@ -36,8 +36,6 @@ import org.eclipse.core.runtime.Path;
  * Abstract base class for implementations of IResourceWorkspaceLocations.
  * 
  * @author glongman@gmail.com
- * @version $Id: AbstractResourceWorkspaceLocation.java,v 1.13 2003/11/21
- *          17:46:26 glongman Exp $
  */
 public abstract class AbstractResourceWorkspaceLocation
     implements

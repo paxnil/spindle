@@ -46,8 +46,6 @@ import com.iw.plugins.spindle.UIPlugin;
  * Jump to the next attribute in the document
  * 
  * @author glongman@gmail.com
- * @version $Id: JumpToNextAttributeAction.java,v 1.2.2.2 2004/06/22 12:13:30
- *          glongman Exp $
  */
 public class JumpToNextAttributeAction extends BaseJumpAction
     implements

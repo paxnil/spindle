@@ -51,8 +51,6 @@ import com.iw.plugins.spindle.core.util.Assert;
  * </ul>
  * 
  * @author glongman@gmail.com
- * @version $Id: I18NResourceAcceptor.java,v 1.2 2004/05/17 02:31:49 glongman
- *          Exp $
  */
 public class I18NResourceAcceptor implements IResourceLocationAcceptor
 {

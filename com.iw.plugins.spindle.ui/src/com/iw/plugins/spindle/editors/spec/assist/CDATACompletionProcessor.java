@@ -38,8 +38,6 @@ import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
  * the body of the XML
  * 
  * @author glongman@gmail.com
- * @version $Id: CDATACompletionProcessor.java,v 1.1.2.2 2004/06/22 12:24:20
- *          glongman Exp $
  */
 public class CDATACompletionProcessor extends AbstractContentAssistProcessor
 {

@@ -41,8 +41,6 @@ import com.iw.plugins.spindle.editors.ProblemAnnotationModel;
  * will have an annotation model.
  * 
  * @author glongman@gmail.com
- * @version $Id: TemplateAnnotationModel.java,v 1.4 2003/10/20 20:19:14 glongman
- *          Exp $
  */
 public class TemplateAnnotationModel extends ProblemAnnotationModel
 {

@@ -59,10 +59,8 @@ import com.iw.plugins.spindle.ui.widgets.TwoListSearchWidget;
  * path of a Java Project
  * 
  * @author glongman@gmail.com
- * @version $Id: SearchForLibraryWidget.java,v 1.2 2003/08/25 21:22:23 glongman
- *          Exp $
  * 
- * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
+ * Copyright 2002, Geoffrey Longman. All Rights Reserved.
  */
 public class SearchForLibraryWidget extends TwoListSearchWidget
 {

@@ -65,8 +65,6 @@ import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
  * Mulitpage content outline. Users can toggle between two
  * 
  * @author glongman@gmail.com
- * @version $Id: MultiPageContentOutline.java,v 1.1.2.1 2004/06/10 16:48:20
- *          glongman Exp $
  */
 public class MultiPageContentOutline
     implements

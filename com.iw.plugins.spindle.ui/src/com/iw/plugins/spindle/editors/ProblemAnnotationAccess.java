@@ -33,8 +33,6 @@ import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
  * Used by callers to access info about IAnnotations.
  * 
  * @author glongman@gmail.com
- * @version $Id: ProblemAnnotationAccess.java,v 1.1.4.1 2004/06/10 16:48:19
- *          glongman Exp $
  */
 public class ProblemAnnotationAccess extends DefaultMarkerAnnotationAccess
 {

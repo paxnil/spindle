@@ -44,8 +44,6 @@ import com.iw.plugins.spindle.UIPlugin;
  * TODO Add Type comment
  * 
  * @author glongman@gmail.com
- * @version $Id: SimpleSourceViewerConfiguration.java,v 1.1 2004/01/02 20:00:15
- *                     glongman Exp $
  */
 public class SimpleSourceViewerConfiguration extends SourceViewerConfiguration
 {

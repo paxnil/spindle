@@ -47,8 +47,6 @@ import com.iw.plugins.spindle.UIPlugin;
  * Auto indent strategy sensitive to XML tags
  * 
  * @author glongman@gmail.com
- * @version $Id: XMLAutoIndentStrategy.java,v 1.4 2003/11/21 17:41:23 glongman
- *                     Exp $
  */
 public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
 {

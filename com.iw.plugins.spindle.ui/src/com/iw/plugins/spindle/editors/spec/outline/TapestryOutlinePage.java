@@ -77,8 +77,6 @@ import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
  * Outline view for Spec Editor that shows parse results only.
  * 
  * @author glongman@gmail.com
- * @version $Id: TapestryOutlinePage.java,v 1.3.2.1 2004/06/10 16:48:20 glongman
- *          Exp $
  */
 public class TapestryOutlinePage extends ContentOutlinePage
 {

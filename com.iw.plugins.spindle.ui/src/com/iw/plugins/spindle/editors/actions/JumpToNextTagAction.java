@@ -43,8 +43,6 @@ import com.iw.plugins.spindle.UIPlugin;
  * Jump to the next tag action
  * 
  * @author glongman@gmail.com
- * @version $Id: JumpToNextTagAction.java,v 1.1.2.1 2004/06/22 12:13:30 glongman
- *          Exp $
  */
 public class JumpToNextTagAction extends JumpToNextAttributeAction
 {

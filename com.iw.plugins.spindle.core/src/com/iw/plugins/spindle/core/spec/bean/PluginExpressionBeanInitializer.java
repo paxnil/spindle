@@ -32,8 +32,6 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
  * Spindle implementation Spindle implementation of an ExpressionBeanInitializer
  * 
  * @author glongman@gmail.com
- * @version $Id: PluginExpressionBeanInitializer.java,v 1.2 2004/05/17 02:31:48
- *          glongman Exp $
  */
 public class PluginExpressionBeanInitializer extends AbstractPluginBeanInitializer
 {

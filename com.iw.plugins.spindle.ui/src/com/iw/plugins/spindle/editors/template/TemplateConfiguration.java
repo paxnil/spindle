@@ -63,8 +63,6 @@ import com.iw.plugins.spindle.editors.template.assist.TagTemplateContentAssistPr
  * SourceViewerConfiguration for the TemplateEditor
  * 
  * @author glongman@gmail.com
- * @version $Id: TemplateConfiguration.java,v 1.9.2.2 2004/06/22 12:23:34
- *          glongman Exp $
  */
 public class TemplateConfiguration extends BaseSourceConfiguration
 {

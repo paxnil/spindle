@@ -47,8 +47,6 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
  * context of a web application.
  * 
  * @author glongman@gmail.com
- * @version $Id: ContextResourceWorkspaceLocation.java,v 1.13 2004/05/17
- *          02:31:49 glongman Exp $
  */
 public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceLocation
 {

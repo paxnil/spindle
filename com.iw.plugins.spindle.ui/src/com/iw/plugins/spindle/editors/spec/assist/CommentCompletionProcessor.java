@@ -46,8 +46,6 @@ import com.iw.plugins.spindle.editors.assist.CompletionProposal;
  * Processor for completing comments
  * 
  * @author glongman@gmail.com
- * @version $Id: CommentCompletionProcessor.java,v 1.1 2003/11/21 17:41:23
- *          glongman Exp $
  */
 public class CommentCompletionProcessor extends AbstractContentAssistProcessor
 {

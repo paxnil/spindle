@@ -40,8 +40,6 @@ import com.iw.plugins.spindle.ui.wizards.NewTapestryElementWizard;
  * Base class for actions that ewill launch a Tapestry wizard
  * 
  * @author glongman@gmail.com
- * @version $Id: AbstractTapestryResourceWizardAction.java,v 1.1 2003/10/29
- *          12:33:56 glongman Exp $
  */
 public abstract class AbstractTapestryResourceWizardAction
     extends

@@ -59,8 +59,6 @@ import com.iw.plugins.spindle.Images;
  * declaration from a template to its specification
  * 
  * @author glongman@gmail.com
- * @version $Id: MoveImplicitPreviewPage.java,v 1.2 2004/01/09 18:41:42 glongman
- *          Exp $
  */
 public class MoveImplicitPreviewPage extends WizardPage
 {

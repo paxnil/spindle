@@ -51,8 +51,6 @@ import com.iw.plugins.spindle.core.util.Assert;
  * Eclipse 3.0
  * 
  * @author cse
- * @version $Id: XMLContentFormatter.java,v 1.1.4.1 2004/06/10 16:48:19 glongman
- *                     Exp $
  */
 public class XMLContentFormatter
 {

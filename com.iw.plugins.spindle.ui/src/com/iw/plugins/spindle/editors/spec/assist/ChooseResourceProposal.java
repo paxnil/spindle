@@ -43,8 +43,6 @@ import com.iw.plugins.spindle.editors.spec.SpecEditor;
  * Proposal that gets its value from the user!
  * 
  * @author glongman@gmail.com
- * @version $Id: ChooseResourceProposal.java,v 1.2 2004/05/05 19:26:51 glongman
- *          Exp $
  */
 public class ChooseResourceProposal implements ICompletionProposal
 {

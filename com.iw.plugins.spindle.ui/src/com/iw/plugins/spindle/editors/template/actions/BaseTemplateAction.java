@@ -37,8 +37,6 @@ import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
  * Base class for spec actions that need the xml partitioning.
  * 
  * @author glongman@gmail.com
- * @version $Id: BaseTemplateAction.java,v 1.4.2.1 2004/06/22 12:23:46 glongman
- *          Exp $
  */
 public abstract class BaseTemplateAction extends BaseEditorAction
 {

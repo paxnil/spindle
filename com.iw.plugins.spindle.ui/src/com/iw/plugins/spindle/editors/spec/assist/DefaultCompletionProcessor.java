@@ -53,8 +53,6 @@ import com.iw.plugins.spindle.editors.assist.usertemplates.UserTemplateCompletio
  * Processor for default content type
  * 
  * @author glongman@gmail.com
- * @version $Id: DefaultCompletionProcessor.java,v 1.9.2.2 2004/06/22 12:23:18
- *                     glongman Exp $
  */
 public class DefaultCompletionProcessor extends SpecCompletionProcessor
 {

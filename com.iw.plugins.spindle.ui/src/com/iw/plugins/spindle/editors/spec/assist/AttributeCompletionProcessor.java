@@ -70,8 +70,6 @@ import com.iw.plugins.spindle.editors.spec.SpecEditor;
  * Content assist inside of attribute values
  * 
  * @author glongman@gmail.com
- * @version $Id: AttributeCompletionProcessor.java,v 1.14.2.2 2004/06/22
- *          12:23:18 glongman Exp $
  */
 public class AttributeCompletionProcessor extends SpecCompletionProcessor
 {

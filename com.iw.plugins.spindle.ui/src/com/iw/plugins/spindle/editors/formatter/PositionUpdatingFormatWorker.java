@@ -46,8 +46,6 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * changed by GL to use a custom document partitioner.
  * 
  * @author cse
- * @version $Id: XMLFormattingStrategy.java,v 1.5 2004/05/16 05:14:03 glongman
- *                     Exp $
  */
 public abstract class PositionUpdatingFormatWorker extends FormatWorker
 {

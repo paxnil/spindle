@@ -32,8 +32,6 @@ import net.sf.solareclipse.xml.ui.text.IXMLSyntaxConstants;
  * Extend xml syntax constants to include jwcid attibute name
  * 
  * @author glongman@gmail.com
- * @version $Id: ITemplateSyntaxConstants.java,v 1.1 2003/09/04 07:44:55
- *          glongman Exp $
  */
 public interface ITemplateSyntaxConstants extends IXMLSyntaxConstants
 {

@@ -38,8 +38,6 @@ import com.iw.plugins.spindle.core.builder.TapestryBuilder;
  * Acceptor that will accept/reject things based on the flags set in it.
  * 
  * @author glongman@gmail.com
- * @version $Id: AbstractTapestrySearchAcceptor.java,v 1.3 2003/08/14 19:11:48
- *          glongman Exp $
  */
 public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
 {

@@ -36,8 +36,6 @@ import org.eclipse.swt.graphics.Image;
  * Label and Image provider for IStorage objects that are tapestry artifacts
  * 
  * @author glongman@gmail.com
- * @version $Id: StorageLabelProvider.java,v 1.1 2003/10/29 12:33:58 glongman
- *          Exp $
  */
 public class StorageLabelProvider implements ILabelProvider
 {

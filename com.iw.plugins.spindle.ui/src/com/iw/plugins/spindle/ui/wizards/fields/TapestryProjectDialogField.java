@@ -62,8 +62,6 @@ import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
  * A dialog that allows a user to choose a Tapestry project from the workspace.
  * 
  * @author glongman@gmail.com
- * @version $Id: TapestryProjectDialogField.java,v 1.3 2003/11/06 22:06:39
- *                     glongman Exp $
  */
 public class TapestryProjectDialogField extends StringButtonField
 {

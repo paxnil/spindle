@@ -35,8 +35,6 @@ import com.iw.plugins.spindle.core.util.Assert;
  * Resolver for Component Specifications
  * 
  * @author glongman@gmail.com
- * @version $Id: PageSpecificationResolver.java,v 1.1 2003/08/14 19:11:47
- *                     glongman Exp $
  */
 
 public class PageSpecificationResolver

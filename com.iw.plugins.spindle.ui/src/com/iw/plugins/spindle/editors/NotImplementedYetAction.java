@@ -35,8 +35,6 @@ import com.iw.plugins.spindle.UIPlugin;
  * Place holder Action while development is underway.
  * 
  * @author glongman@gmail.com
- * @version $Id: NotImplementedYetAction.java,v 1.1 2003/11/06 22:06:37 glongman
- *          Exp $
  */
 public class NotImplementedYetAction extends Action
 {

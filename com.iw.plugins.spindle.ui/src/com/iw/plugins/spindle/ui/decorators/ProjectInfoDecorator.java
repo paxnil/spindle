@@ -47,8 +47,6 @@ import com.iw.plugins.spindle.core.util.Markers;
  * Decorator that indicates extra info about Tapestry projects
  * 
  * @author glongman@gmail.com
- * @version $Id: ProjectInfoDecorator.java,v 1.2 2004/04/28 16:53:41 glongman
- *          Exp $
  */
 public class ProjectInfoDecorator extends AbstractDecorator
     implements

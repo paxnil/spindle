@@ -38,8 +38,6 @@ import org.eclipse.core.runtime.CoreException;
  * Abstract base class for root locations
  * 
  * @author glongman@gmail.com
- * @version $Id: AbstractRootLocation.java,v 1.2 2003/08/08 12:48:35 glongman
- *          Exp $
  */
 public abstract class AbstractRootLocation implements IResourceWorkspaceLocation
 {

@@ -33,8 +33,6 @@ import org.eclipse.ui.IEditorInput;
  * Action to Jump from a class file editor to a related tapestry template (if one exists)
  * 
  * @author glongman@gmail.com
- * @version $Id: ClassFileEditorJumpToTemplateDelegate.java,v 1.1 2004/05/06
- *          17:21:16 glongman Exp $
  */
 public class ClassFileEditorJumpToTemplateDelegate extends CUEditorJumpToTemplateDelegate
 {

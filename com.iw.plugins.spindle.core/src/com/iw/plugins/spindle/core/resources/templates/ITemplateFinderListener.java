@@ -33,8 +33,6 @@ package com.iw.plugins.spindle.core.resources.templates;
  * Used by the builders to record template extensions in thier state objects
  * 
  * @author glongman@gmail.com
- * @version $Id: ITemplateFinderListener.java,v 1.1 2003/06/26 12:32:40 glongman
- *          Exp $
  */
 public interface ITemplateFinderListener
 {

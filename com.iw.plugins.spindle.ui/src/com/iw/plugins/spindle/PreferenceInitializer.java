@@ -42,8 +42,6 @@ import com.iw.plugins.spindle.ui.wizards.NewTapComponentWizardPage;
  * Preference Initializer for the Spindle UI
  * 
  * @author glongman@gmail.com
- * @version $Id: PreferenceInitializer.java,v 1.1 2004/06/05 04:21:44 glongman
- *                     Exp $
  */
 public class PreferenceInitializer extends AbstractPreferenceInitializer
     implements

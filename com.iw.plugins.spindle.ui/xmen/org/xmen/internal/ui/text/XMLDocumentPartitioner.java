@@ -41,8 +41,6 @@ import com.iw.plugins.spindle.core.util.Assert;
  * XMLDocumentPartitioner modded version to create node positions
  * 
  * @author glongman@gmail.com
- * @version $Id: XMLDocumentPartitioner.java,v 1.2.2.2 2004/06/22 12:25:19
- *                     glongman Exp $
  */
 public class XMLDocumentPartitioner
     implements

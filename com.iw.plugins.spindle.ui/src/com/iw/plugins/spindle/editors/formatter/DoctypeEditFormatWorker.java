@@ -41,8 +41,6 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * (leaving them in a state where slave formatters can do thier work!).
  * 
  * @author glongman@gmail.com
- * @version $Id: DoctypeEditFormatWorker.java,v 1.1.2.1 2004/07/13 21:50:10
- *                     glongman Exp $
  */
 public class DoctypeEditFormatWorker extends FormatWorker
 {

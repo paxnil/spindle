@@ -56,7 +56,6 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * Open an interesting thing, if possible.
  * 
  * @author glongman@gmail.com
- * @version $Id$
  */
 public class OpenDeclarationAction extends BaseTemplateAction
 {

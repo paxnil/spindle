@@ -79,7 +79,6 @@ import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
  * Base class for editor actions
  * 
  * @author glongman@gmail.com
- * @version $Id$
  */
 public abstract class BaseEditorAction extends Action implements IEditorActionDelegate
 {

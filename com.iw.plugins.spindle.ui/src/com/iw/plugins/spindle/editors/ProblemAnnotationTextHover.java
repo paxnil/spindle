@@ -42,8 +42,6 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
  * Text Hover for Editor annotations
  * 
  * @author glongman@gmail.com
- * @version $Id: ProblemAnnotationTextHover.java,v 1.2 2003/10/29 12:33:58
- *          glongman Exp $
  */
 public class ProblemAnnotationTextHover extends DefaultTextHover
 {

@@ -43,8 +43,6 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
  * not take into account any sub namespaces.
  * 
  * @author glongman@gmail.com
- * @version $Id: NamespaceResourceLookup.java,v 1.7 2003/11/17 18:47:04 glongman
- *          Exp $
  */
 public class NamespaceResourceLookup
 {

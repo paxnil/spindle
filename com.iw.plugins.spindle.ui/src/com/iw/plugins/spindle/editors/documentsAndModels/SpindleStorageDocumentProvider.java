@@ -34,8 +34,6 @@ import org.xmen.internal.ui.text.XMLReconciler;
  * Document provider for xml files that have a model
  * 
  * @author glongman@gmail.com
- * @version $Id: FileDocumentModelProvider.java,v 1.1.2.1 2004/06/22 12:13:52
- *                     glongman Exp $
  */
 public  class SpindleStorageDocumentProvider extends StorageDocumentProvider
 {

@@ -43,8 +43,6 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * (leaving them in a state where slave formatters can do thier work!).
  * 
  * @author glongman@gmail.com
- * @version $Id: StartTagEditFormatWorker.java,v 1.1.2.2 2004/07/14 21:15:48
- *                     glongman Exp $
  */
 public class StartTagEditFormatWorker extends FormatWorker
 {

@@ -72,8 +72,6 @@ import com.iw.plugins.spindle.editors.template.assist.TemplateTapestryAccess;
  * component specification.
  * 
  * @author glongman@gmail.com
- * @version $Id: MoveImplicitToSpecWizard.java,v 1.4.2.1 2004/06/22 12:24:44
- *          glongman Exp $
  */
 public class MoveImplicitToSpecWizard extends Wizard
 {

@@ -54,8 +54,6 @@ import com.wutka.dtd.DTDSequence;
  * Helper class for accessing DTD information
  * 
  * @author glongman@gmail.com
- * @version $Id: DTDProposalGenerator.java,v 1.2 2003/12/13 14:43:12 glongman
- *                     Exp $
  */
 public class DTDAccess
 {

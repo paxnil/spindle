@@ -34,8 +34,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
  * A structured selection for DoubleClicks
  * 
  * @author glongman@gmail.com
- * @version $Id: DoubleClickSelection.java,v 1.1 2003/11/21 17:41:23 glongman
- *          Exp $
  */
 public class DoubleClickSelection extends StructuredSelection
 {

@@ -43,7 +43,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
-import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -76,7 +75,6 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -689,7 +687,7 @@ public class SpecEditor extends Editor
             SpecificationValidator validator;
             try
             {
-              validator = new SpecificationValidator(project, false);
+              validator = new SpecificationValidator(project);// TODO perfrom deferred?, false);
               reconcileResult = doReconcile(getDocumentProvider()
                   .getDocument(input)
                   .get(), spec, validator);

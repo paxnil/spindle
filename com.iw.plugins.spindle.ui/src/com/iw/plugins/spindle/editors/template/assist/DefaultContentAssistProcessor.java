@@ -48,8 +48,6 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
  * Content assist inside of Tags (but not attributes)
  * 
  * @author glongman@gmail.com
- * @version $Id: DefaultContentAssistProcessor.java,v 1.2.2.2 2004/06/22
- *                     12:23:59 glongman Exp $
  */
 public class DefaultContentAssistProcessor extends TemplateContentAssistProcessor
 {

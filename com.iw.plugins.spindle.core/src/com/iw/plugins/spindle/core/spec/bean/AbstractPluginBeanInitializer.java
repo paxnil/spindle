@@ -35,8 +35,6 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
  * Base class for PluginBeanInitializers
  * 
  * @author glongman@gmail.com
- * @version $Id: AbstractPluginBeanInitializer.java,v 1.5 2004/05/17 02:31:48
- *          glongman Exp $
  */
 public class AbstractPluginBeanInitializer extends BaseSpecification
     implements

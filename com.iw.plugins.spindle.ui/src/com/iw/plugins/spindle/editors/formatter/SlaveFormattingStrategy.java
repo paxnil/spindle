@@ -45,8 +45,6 @@ import com.iw.plugins.spindle.UIPlugin;
  * fPrefs aren't set to wrap long lines.
  * 
  * @author glongman@gmail.com
- * @version $Id: MasterFormattingStrategy.java,v 1.1.2.1 2004/07/11 04:33:42
- *                     glongman Exp $
  */
 public class SlaveFormattingStrategy extends ContextBasedFormattingStrategy
     implements

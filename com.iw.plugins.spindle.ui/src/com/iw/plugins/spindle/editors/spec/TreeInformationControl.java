@@ -76,8 +76,6 @@ import com.iw.plugins.spindle.core.spec.IIdentifiable;
  * TODO Add Type comment
  * 
  * @author glongman@gmail.com
- * @version $Id: TreeInformationControl.java,v 1.2 2004/05/05 19:29:32 glongman
- *          Exp $
  */
 public abstract class TreeInformationControl
     implements

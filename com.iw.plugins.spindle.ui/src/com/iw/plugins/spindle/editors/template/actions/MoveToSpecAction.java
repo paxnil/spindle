@@ -65,8 +65,6 @@ import com.iw.plugins.spindle.ui.wizards.source.MoveImplicitToSpecWizard;
  * Move an implictly declared component from the template to the specification
  * 
  * @author glongman@gmail.com
- * @version $Id: MoveToSpecAction.java,v 1.2.2.1 2004/06/22 12:23:46 glongman
- *          Exp $
  */
 public class MoveToSpecAction extends BaseTemplateAction
 {
