@@ -108,12 +108,13 @@ import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
+import com.iw.plugins.spindle.editors.spec.outline.MultiPageContentOutline;
 
 /**
  * Editor for Tapestry Spec files
  * 
  * @author glongman@intelligentworks.com
- * 
+ *  
  */
 public class SpecEditor extends Editor
 {
@@ -132,7 +133,6 @@ public class SpecEditor extends Editor
   public SpecEditor()
   {
     super();
-    fOutline = new MultiPageContentOutline(this);
   }
 
   public Object getInformationControlInput()
@@ -349,6 +349,7 @@ public class SpecEditor extends Editor
    */
   public IContentOutlinePage createContentOutlinePage(IEditorInput input)
   {
+    fOutline = new MultiPageContentOutline(this, input);
     return fOutline;
   }
 
@@ -367,7 +368,7 @@ public class SpecEditor extends Editor
 
   /*
    * @see org.eclipse.ui.texteditor.AbstractTextEditor#createSourceViewer(Composite,
-   *      IVerticalRuler, int)
+   *              IVerticalRuler, int)
    */
   protected ISourceViewer createSourceViewer(
       Composite parent,
@@ -453,7 +454,7 @@ public class SpecEditor extends Editor
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.editors.ISelfReconcilingEditor#reconcile(com.iw.plugins.spindle.core.parser.IProblemCollector,
-   *      org.eclipse.core.runtime.IProgressMonitor)
+   *              org.eclipse.core.runtime.IProgressMonitor)
    */
   public void reconcile(IProblemCollector collector, IProgressMonitor monitor)
   {
@@ -727,7 +728,7 @@ public class SpecEditor extends Editor
               e.printStackTrace();
             } catch (CoreException e)
             {
-               e.printStackTrace();
+              e.printStackTrace();
             }
           }
 
@@ -942,12 +943,11 @@ public class SpecEditor extends Editor
       menu.appendToGroup(NAV_GROUP, moreNav);
     menu
         .insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
-    if (!UIPlugin.isEclipse3())
-    {
-      MenuManager sourceMenu = new MenuManager("Source");
-      sourceMenu.add(getAction("Format"));
-      menu.appendToGroup(SOURCE_GROUP, sourceMenu);
-    }
+
+    MenuManager sourceMenu = new MenuManager("Source");
+    sourceMenu.add(getAction("Format"));
+    menu.appendToGroup(SOURCE_GROUP, sourceMenu);
+
   }
 
   public static class SpecEditorInformationProvider
