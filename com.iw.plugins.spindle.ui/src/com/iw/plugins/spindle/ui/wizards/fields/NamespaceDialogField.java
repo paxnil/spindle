@@ -140,6 +140,8 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
 
                 //find all the ILibrarySpecs in the namespace that are in the workbench (i.e. not in jars)
                 List subTargets = collectValidNamespaces(projectNamespace, new ArrayList());
+                //there may be circular references...
+                List alreadySeen = new ArrayList();
 
                 for (Iterator iter = subTargets.iterator(); iter.hasNext();)
                 {
@@ -153,8 +155,9 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
                         throw e;
                     }
                     IStorage storage = ((IResourceWorkspaceLocation) element.getSpecificationLocation()).getStorage();
-                    if (storage != null)
+                    if (storage != null && !alreadySeen.contains(storage))
                     {
+                        alreadySeen.add(storage);
                         libNames.add(storage.getName());
                         fValidNamespaces.add(element);
                     }
