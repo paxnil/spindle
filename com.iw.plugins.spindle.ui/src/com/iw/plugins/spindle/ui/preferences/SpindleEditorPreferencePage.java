@@ -82,7 +82,7 @@ public class SpindleEditorPreferencePage extends PreferencePage
   {
     super(UIPlugin.getString("preference-editor-title"), Images
         .getImageDescriptor("applicationDialog.gif"));
-  
+
   }
 
   /**
@@ -124,7 +124,7 @@ public class SpindleEditorPreferencePage extends PreferencePage
         .getDefault()
         .getPreferenceStore());
     fAutoActivateContentAssist.load();
-    fAutoActivateContentAssist.setPropertyChangeListener(this);  
+    fAutoActivateContentAssist.setPropertyChangeListener(this);
 
     fOfferXHTML = new RadioGroupFieldEditor(OFFER_XHTML, UIPlugin
         .getString("preference-offer-xhtml-proposals"), 4, OFFER_XHTML_OPTIONS, group);
@@ -133,6 +133,27 @@ public class SpindleEditorPreferencePage extends PreferencePage
     fOfferXHTML.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
     fOfferXHTML.load();
     fOfferXHTML.setPropertyChangeListener(this);
+
+    int heightHint = convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
+
+    Label spacer = new Label(top, SWT.NULL);
+    spacer.setText(" ");
+    GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+    data.horizontalSpan = 2;
+    data.heightHint = heightHint;
+    spacer.setLayoutData(data);
+
+    Label message = new Label(top, SWT.NULL);
+    message.setText("Spindle Editors respond to changes on page: ");
+    data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+    data.horizontalSpan = 2;
+    message.setLayoutData(data);
+    
+    Label message2 = new Label(top, SWT.NULL);
+    message2.setText("  Workbench -> Editors -> Text Editor ");
+    data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+    data.horizontalSpan = 2;
+    message2.setLayoutData(data);
 
     return top;
   }
