@@ -70,7 +70,7 @@ public abstract class SpindleFormOutlinePage extends FormOutlinePage {
   }
 
   public void selectionChanged(Object item) {
-    SpindleFormPage page = (SpindleFormPage)formPage.getEditor().getCurrentPage();
+  	IPDEEditorPage page = formPage.getEditor().getCurrentPage();    
     SpindleFormPage newPage = (SpindleFormPage)getParentPage(item);
     if (newPage != page) {
       formPage.getEditor().showPage(newPage);

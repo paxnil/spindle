@@ -6,7 +6,8 @@
     <classpathentry exported="true" kind="lib" path="org.apache.crimson.jar"/>
     <classpathentry exported="true" kind="lib" path="javax.servlet.jar"/>
     <classpathentry exported="true" kind="lib" path="iw_tapestry.jar"/>
-    <classpathentry exported="true" kind="lib" path="com.primix.tapestry-2.0.1.jar"/>
+    <classpathentry exported="true" kind="lib"
+        path="com.primix.tapestry-2.0.1.jar" rootpath="src" sourcepath="Q:/ETC/tapestry/Tapestry-2.0.1/src/com.primix.tapestry-src.jar"/>
     <classpathentry kind="src" path="/org.eclipse.ui"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.ui"/>
     <classpathentry kind="src" path="/org.eclipse.core.runtime"/>
