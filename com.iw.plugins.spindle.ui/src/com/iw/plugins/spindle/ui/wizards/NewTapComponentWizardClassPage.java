@@ -49,6 +49,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -77,6 +78,21 @@ import com.iw.plugins.spindle.ui.wizards.fields.SuperClassDialogField;
 public class NewTapComponentWizardClassPage extends TapestryWizardPage
 {
 
+    class RadioField extends CheckBoxField
+    {
+
+        public RadioField(String label)
+        {
+            super(label);
+        }
+
+        public Button getCheckBoxControl(Composite parent, int modifier)
+        {
+            // TODO Auto-generated method stub
+            return super.getCheckBoxControl(parent, SWT.RADIO);
+        }
+    }
+
     String PAGE_NAME;
 
     private static int LABEL_WIDTH = 64;
@@ -102,7 +118,6 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage
 
     private IType finalSpecClass;
     private IFile fGeneratedJavaFile = null;
-
 
     IDialogFieldChangedListener listener = new FieldEventsAdapter();
 
@@ -135,14 +150,14 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage
 
         this.setDescription(UIPlugin.getString(PAGE_NAME + ".description"));
 
-        fChooseClass = new CheckBoxField(UIPlugin.getString(CHOOSECLASS));
+        fChooseClass = new RadioField(UIPlugin.getString(CHOOSECLASS));
         fChooseClass.addListener(listener);
 
         fChooseSpecClassDialogField = createChooseSpecClassField(SPEC_CLASS);
         connect(fChooseSpecClassDialogField);
         fChooseSpecClassDialogField.addListener(listener);
 
-        fNewClass = new CheckBoxField(UIPlugin.getString(NEWCLASS));
+        fNewClass = new RadioField(UIPlugin.getString(NEWCLASS));
         fNewClass.addListener(listener);
 
         fChooseContainer = new ContainerDialogField(CONTAINER, root, LABEL_WIDTH);
@@ -175,7 +190,6 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage
 
         IRunnableContext context = (IRunnableContext) getWizard().getContainer();
 
-       
         fChooseSpecClassDialogField.init(jelem == null ? null : jelem.getJavaProject(), context);
         fChooseSpecClassDialogField.setTextValue(fDefaultSpecClass);
 
@@ -230,7 +244,7 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage
      */
     public void createControl(Composite parent)
     {
-        Composite composite = new Composite(parent, SWT.NONE);
+        Composite composite = new Composite(parent, SWT.NO_RADIO_GROUP);
 
         FormLayout layout = new FormLayout();
         layout.marginWidth = 4;
@@ -359,11 +373,12 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage
                     fMakeAbstractField.getCheckBoxValue(),
                     null,
                     monitor);
-              fGeneratedJavaFile = factory.getGeneratedFile();
+            fGeneratedJavaFile = factory.getGeneratedFile();
         }
     }
-    
-    public IFile getGeneratedJavaFile() {
+
+    public IFile getGeneratedJavaFile()
+    {
         return fGeneratedJavaFile;
     }
 
