@@ -66,11 +66,9 @@ public class TypeDialogCellEditor extends EditableDialogCellEditor {
     IJavaProject jproject = root.getJavaProject();
     IJavaSearchScope result = null;
     IType hrootElement = null;
-    System.out.println("hierarchyRoot=" + hierarchyRoot);
     try {
       if (hierarchyRoot != null) {
         hrootElement = Utils.findType(jproject, hierarchyRoot);
-        System.out.println("hrootElement=" + hrootElement);
       }
       if (hrootElement != null) {
         result = SearchEngine.createHierarchyScope(hrootElement);
@@ -80,7 +78,6 @@ public class TypeDialogCellEditor extends EditableDialogCellEditor {
       jmex.printStackTrace();
     }
     if (result == null) {
-      System.out.println("building default scope");
       IJavaElement[] elements = new IJavaElement[] { jproject };
       result = SearchEngine.createJavaSearchScope(elements);
     }

@@ -30,6 +30,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.*;
 import java.util.*;
 
+import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.util.Indenter;
 import com.primix.tapestry.spec.ApplicationSpecification;
 import com.primix.tapestry.spec.PageSpecification;
@@ -229,7 +230,7 @@ public class PluginApplicationSpecification
     writer.println("<!DOCTYPE application ");
     writer.println("      PUBLIC \"-//Howard Ship//Tapestry Specification 1.1//EN\"");
     writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
-    writer.println("<!-- written by Spindle, an Eclipse Plugin for Tapestry -->");
+    writer.println(MessageUtil.getString("TAPESTRY.xmlComment"));
 
     writer.println();
     writer.print("<application name=\"");

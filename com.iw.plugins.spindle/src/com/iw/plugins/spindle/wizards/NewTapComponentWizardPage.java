@@ -80,6 +80,7 @@ public class NewTapComponentWizardPage extends NewTapestryElementWizardPage {
   public static final String P_ADD_TO_APPLICATION = "new.component.default.add.to.application";
   public static final String P_ENABLE_ADD_TO_APPLICATION = "new.component.default.add.to.application.enabled";
   public static final String P_GENERATE_HTML = "new.component.generate.html";
+  public static final String P_HTML_TO_GENERATE = "new.component.html.to.generate";
 
   String PAGE_NAME;
 
@@ -105,6 +106,7 @@ public class NewTapComponentWizardPage extends NewTapestryElementWizardPage {
     pstore.setDefault(P_ADD_TO_APPLICATION, "");
     pstore.setDefault(P_ENABLE_ADD_TO_APPLICATION, false);
     pstore.setDefault(P_GENERATE_HTML, true);
+    pstore.setDefault(P_HTML_TO_GENERATE,MessageUtil.getString("TAPESTRY.xmlComment")+MessageUtil.getString("TAPESTRY.genHTMLSource"));
   }
 
   /**
@@ -390,8 +392,16 @@ public class NewTapComponentWizardPage extends NewTapestryElementWizardPage {
       pack.save(new SubProgressMonitor(monitor, 1), true);
     }
     monitor.worked(1);
-
-    InputStream contents = new ByteArrayInputStream(MessageUtil.getString(PAGE_NAME + ".genHTMLSource").getBytes());
+	IPreferenceStore pstore = TapestryPlugin.getDefault().getPreferenceStore();
+	String source = pstore.getString(P_HTML_TO_GENERATE);
+	String comment = MessageUtil.getString("TAPESTRY.xmlComment");
+	if (source == null) {
+		source = comment+MessageUtil.getString("TAPESTRY.genHTMLSource");
+	}
+	if (!source.trim().startsWith(comment)) {
+		source = comment + source;
+	}		
+    InputStream contents = new ByteArrayInputStream(source.getBytes());
     file1.create(contents, false, new SubProgressMonitor(monitor, 1));
     monitor.worked(1);
     monitor.done();
@@ -425,7 +435,6 @@ public class NewTapComponentWizardPage extends NewTapestryElementWizardPage {
     public void dialogFieldChanged(DialogField field) {
       updateStatus();
       if (field == fAutoAddLabel) {
-      	System.out.println("Boo");
       }
     }
     /**

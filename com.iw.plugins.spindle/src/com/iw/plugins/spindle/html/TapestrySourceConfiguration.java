@@ -30,9 +30,12 @@ import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedDamagerRepairer;
+import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.pde.internal.ui.editor.text.NonRuleBasedDamagerRepairer;
 
 import com.iw.plugins.spindle.ui.text.CommentScanner;
 import com.iw.plugins.spindle.ui.text.DefaultScanner;
@@ -42,7 +45,7 @@ import com.iw.plugins.spindle.ui.text.JWCIDTagScanner;
 import com.iw.plugins.spindle.ui.text.JWCTagScanner;
 import com.iw.plugins.spindle.ui.text.TagAttributeScanner;
 
-public class TapestrySourceConfiguration extends SourceViewerConfiguration {
+public class TapestrySourceConfiguration extends SourceViewerConfiguration implements IColorConstants {
 
   private JWCTagScanner jwcTagScanner;
   private JWCIDTagScanner jwcidTagScanner;
@@ -68,23 +71,11 @@ public class TapestrySourceConfiguration extends SourceViewerConfiguration {
     return super.getDoubleClickStrategy(sourceViewer, contentType);
   }
 
-  protected CommentScanner getCommentScanner() {
-    if (commentScanner == null) {
-      commentScanner = new CommentScanner(colorManager);
-    }
-    return commentScanner;
-  }
-
-  protected DefaultScanner getDefaultScanner() {
-    if (defaultScanner == null) {
-      defaultScanner = new DefaultScanner(colorManager);
-    }
-    return defaultScanner;
-  }
-
   protected TagAttributeScanner getTagScanner() {
     if (tagScanner == null) {
       tagScanner = new TagAttributeScanner(colorManager);
+      tagScanner.setDefaultReturnToken(new Token(
+      	new TextAttribute(colorManager.getColor(P_TAG))));
     }
     return tagScanner;
   }
@@ -92,6 +83,8 @@ public class TapestrySourceConfiguration extends SourceViewerConfiguration {
   protected JWCIDTagScanner getJWCIDTagScanner() {
     if (jwcidTagScanner == null) {
       jwcidTagScanner = new JWCIDTagScanner(colorManager);
+      jwcidTagScanner.setDefaultReturnToken(new Token(
+      	new TextAttribute(colorManager.getColor(P_TAG))));
     }
     return jwcidTagScanner;
   }
@@ -99,47 +92,43 @@ public class TapestrySourceConfiguration extends SourceViewerConfiguration {
   protected JWCTagScanner getJWCTagScanner() {
     if (jwcTagScanner == null) {
       jwcTagScanner = new JWCTagScanner(colorManager);
+      jwcTagScanner.setDefaultReturnToken(new Token(
+      	new TextAttribute(colorManager.getColor(P_TAG))));
     }
     return jwcTagScanner;
   }  
-
+  
   public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
     PresentationReconciler reconciler = new PresentationReconciler();
 
-    RuleBasedDamagerRepairer dr = 
-      new RuleBasedDamagerRepairer(
-        getDefaultScanner(),
-        new TextAttribute(colorManager.getColor(IColorConstants.P_DEFAULT)));
+    NonRuleBasedDamagerRepairer dr = 
+      new NonRuleBasedDamagerRepairer(new TextAttribute(colorManager.getColor(P_DEFAULT)));
     reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
     reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
-
-    dr =
-      new RuleBasedDamagerRepairer(
-        getJWCTagScanner(),
-        new TextAttribute(colorManager.getColor(IColorConstants.P_TAG)));
-    reconciler.setDamager(dr, TapestryPartitionScanner.JWC_TAG);
-    reconciler.setRepairer(dr, TapestryPartitionScanner.JWC_TAG);
     
-    dr =
-      new RuleBasedDamagerRepairer(
-        getJWCIDTagScanner(),
-        new TextAttribute(colorManager.getColor(IColorConstants.P_TAG)));
-    reconciler.setDamager(dr, TapestryPartitionScanner.JWCID_TAG);
-    reconciler.setRepairer(dr, TapestryPartitionScanner.JWCID_TAG);
-
-    dr =
-      new RuleBasedDamagerRepairer(
-        getTagScanner(),
-        new TextAttribute(colorManager.getColor(IColorConstants.P_TAG)));
-    reconciler.setDamager(dr, TapestryPartitionScanner.HTML_TAG);
-    reconciler.setRepairer(dr, TapestryPartitionScanner.HTML_TAG);
-
-    dr =
-      new RuleBasedDamagerRepairer(
-        null,
-        new TextAttribute(colorManager.getColor(IColorConstants.P_XML_COMMENT)));
+     dr =
+      new NonRuleBasedDamagerRepairer(
+        new TextAttribute(colorManager.getColor(P_XML_COMMENT)));
     reconciler.setDamager(dr, TapestryPartitionScanner.HTML_COMMENT);
     reconciler.setRepairer(dr, TapestryPartitionScanner.HTML_COMMENT);
+
+    DefaultDamagerRepairer ddr =
+      new DefaultDamagerRepairer(
+        getJWCTagScanner());
+    reconciler.setDamager(ddr, TapestryPartitionScanner.JWC_TAG);
+    reconciler.setRepairer(ddr, TapestryPartitionScanner.JWC_TAG);
+    
+    ddr =
+      new DefaultDamagerRepairer(
+        getJWCIDTagScanner());
+    reconciler.setDamager(ddr, TapestryPartitionScanner.JWCID_TAG);
+    reconciler.setRepairer(ddr, TapestryPartitionScanner.JWCID_TAG);
+
+    ddr =
+      new DefaultDamagerRepairer(
+        getTagScanner());
+    reconciler.setDamager(ddr, TapestryPartitionScanner.HTML_TAG);
+    reconciler.setRepairer(ddr, TapestryPartitionScanner.HTML_TAG);
 
     return reconciler;
   }

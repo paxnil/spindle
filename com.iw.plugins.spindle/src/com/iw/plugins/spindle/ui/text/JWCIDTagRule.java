@@ -28,19 +28,20 @@ package com.iw.plugins.spindle.ui.text;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.MultiLineRule;
+import org.eclipse.jface.text.rules.PatternRule;
 import org.eclipse.jface.text.rules.Token;
 
-public class JWCIDTagRule extends MultiLineRule {
+public class JWCIDTagRule extends PatternRule { 
 
   protected char[] jwcStart;
   protected char[] jwcEnd;
 
   public JWCIDTagRule(IToken token) {
-    this(token, (char) 0);
+    this(token, (char) 0); 
   }
 
   public JWCIDTagRule(IToken token, char escapeChar) {
-    super("<", ">", token, escapeChar);
+    super("<", ">", token, escapeChar, false);
     jwcStart = "jwcid=\"".toCharArray();
     jwcEnd = "\"".toCharArray();
   }

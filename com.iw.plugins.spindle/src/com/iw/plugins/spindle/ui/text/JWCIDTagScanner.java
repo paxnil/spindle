@@ -33,18 +33,22 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
+import org.eclipse.swt.graphics.Color;
 
 public class JWCIDTagScanner extends RuleBasedScanner {
 
+
   public JWCIDTagScanner(ISpindleColorManager manager) {
+  	Color color = manager.getColor(IColorConstants.P_JWCID);
     IToken jwcid = new Token(new TextAttribute(manager.getColor(IColorConstants.P_JWCID)));
     IToken string = new Token(new TextAttribute(manager.getColor(IColorConstants.P_STRING)));
 
     setRules( 
     	new IRule [] {
-    		new SingleLineRule("jwcid=\"", "\"", jwcid, '\\'),
+    		
     		new SingleLineRule("\"", "\"", string, '\\'),
     		new SingleLineRule("'", "'", string, '\\'),
+    		new SingleLineRule("jwcid=\"", "\"", jwcid, '\\'),
     		new WhitespaceRule(new WhitespaceDetector())   		
     	}
     );
