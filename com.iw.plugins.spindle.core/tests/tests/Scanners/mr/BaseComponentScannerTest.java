@@ -24,39 +24,49 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import tests.Parser.ParserTests;
-import tests.TapestryDOMParser.AllTapestryDOMParserTests;
-import tests.TapestryPullParser.AllTapestryPullParserTests;
-import tests.multirun.MRTests;
-import tests.util.AllUtilTests;
+package tests.Scanners.mr;
+
+import org.apache.tapestry.spec.SpecFactory;
+
+import tests.Parser.mr.MRBaseParserTest;
+
+import com.iw.plugins.spindle.core.scanning.BaseValidator;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.spec.TapestryPluginSpecFactory;
 
 /**
- *  RUNS ALL THE TESTS!
+ *  TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class AllTests
+public class BaseComponentScannerTest extends MRBaseParserTest
 {
-
-    public static void main(String[] args)
+    protected MockComponentScanner scanner;
+    protected SpecFactory factory;
+    protected IScannerValidator validator;
+    /**
+     * 
+     */
+    protected BaseComponentScannerTest()
     {
-        junit.textui.TestRunner.run(AllTests.class);
+        super();
     }
 
-    public static Test suite()
+    /**
+     * @param arg0
+     */
+    protected BaseComponentScannerTest(String arg0)
     {
-        TestSuite suite = new TestSuite("Test for eveything");
-        //$JUnit-BEGIN$
-        suite.addTest(AllTapestryPullParserTests.suite());
-        suite.addTest(AllTapestryDOMParserTests.suite());
-        suite.addTest(AllUtilTests.suite());
-        suite.addTest(MRTests.suite());
-        suite.addTest(ParserTests.suite());
-        
-        //$JUnit-END$
-        return suite;
+        super(arg0);
     }
+
+    public void setUp() throws Exception
+    {
+        super.setUp();
+        factory = new TapestryPluginSpecFactory();
+        validator = new BaseValidator();
+        scanner = new MockComponentScanner(parser, factory, validator);
+    }
+
 }

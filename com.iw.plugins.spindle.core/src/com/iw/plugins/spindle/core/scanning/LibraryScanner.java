@@ -28,12 +28,12 @@ package com.iw.plugins.spindle.core.scanning;
 
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceResolver;
-import org.apache.tapestry.Tapestry;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.w3c.dom.Node;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
 
@@ -99,7 +99,7 @@ public class LibraryScanner extends SpecificationScanner
 
             if (isElement(node, "service"))
             {
-                processService(specification, node);
+                scanService(specification, node);
                 continue;
             }
 
@@ -169,7 +169,7 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "type"),
-                Tapestry.getString("SpecificationParser.unknown-static-value-type", type));
+            TapestryCore.getTapestryString("SpecificationParser.unknown-static-value-type", type));
         } else
         {
             try
@@ -242,7 +242,7 @@ public class LibraryScanner extends SpecificationScanner
                 addProblem(
                     IProblem.ERROR,
                     getAttributeSourceLocation(node, "id"),
-                    Tapestry.getString("SpecificationParser.framework-library-id-is-reserved", INamespace.FRAMEWORK_NAMESPACE));
+                TapestryCore.getTapestryString("SpecificationParser.framework-library-id-is-reserved", INamespace.FRAMEWORK_NAMESPACE));
             }
 
             String specificationPath = getAttribute(node, "specification-path");
@@ -271,7 +271,7 @@ public class LibraryScanner extends SpecificationScanner
         }
     }
 
-    protected void processService(ILibrarySpecification spec, Node node) throws ScannerException
+    protected void scanService(ILibrarySpecification spec, Node node) throws ScannerException
     {
         String name = getAttribute(node, "name", true);
 

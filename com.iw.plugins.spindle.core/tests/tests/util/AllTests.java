@@ -35,12 +35,12 @@ import junit.framework.TestSuite;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class AllUtilTests
+public class AllTests
 {
     
     public static void main(String[] args)
     {
-        junit.textui.TestRunner.run(AllUtilTests.class);
+        junit.textui.TestRunner.run(AllTests.class);
     }
 
     public static Test suite()

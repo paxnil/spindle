@@ -73,7 +73,7 @@ public class BasicParserDOMTest extends TestCase
     {
         for (int i = 0; i < problems.length; i++)
         {
-            System.err.println(getClass().getName()+":"+getName() + " " +problems[i]);
+            System.err.println(getClass().getName() + ":" + getName() + " " + problems[i]);
         }
     }
 
@@ -92,6 +92,7 @@ public class BasicParserDOMTest extends TestCase
         }
         assertNotNull(node);
         assertTrue(parser.getProblems().length == 0);
+        assertNull(parser.getPublicId());
     }
 
     public void testINVALID()
@@ -110,6 +111,8 @@ public class BasicParserDOMTest extends TestCase
         IProblem[] problems = parser.getProblems();
         assertTrue(problems.length == 1);
         printProblems(problems);
+        assertNull(parser.getPublicId());
+
     }
 
     public void testMalformedProlog()
@@ -128,12 +131,14 @@ public class BasicParserDOMTest extends TestCase
         IProblem[] problems = parser.getProblems();
         assertTrue(problems.length == 1);
         printProblems(problems);
+        assertNull(parser.getPublicId());
+
     }
-    
+
     public void testMalformedContent()
     {
         Parser parser = new Parser(false);
-        final String MALFORMED =  PROLOG + "<dog test='poo'>Hello, world!<dog>\n";
+        final String MALFORMED = PROLOG + "<dog test='poo'>Hello, world!<dog>\n";
         Node node = null;
         try
         {
@@ -146,6 +151,29 @@ public class BasicParserDOMTest extends TestCase
         IProblem[] problems = parser.getProblems();
         assertTrue(problems.length == 1);
         printProblems(problems);
+        assertNull(parser.getPublicId());
+
+    }
+
+    public void testString()
+    {
+        Parser parser = new Parser(false);
+        parser.setDoValidation(false);
+        final String content = "<private-asset name='poo' path='moo'/>";
+        Node node = null;
+        try
+        {
+            node = parser.parse(content);
+        } catch (IOException e)
+        {
+            fail("IOException: " + e.getMessage());
+        }
+        assertNotNull(node);
+        IProblem[] problems = parser.getProblems();
+        assertTrue(problems.length == 0);
+        printProblems(problems);
+        assertNull(parser.getPublicId());
+
     }
 
     public static void main(String[] args)

@@ -84,7 +84,7 @@ public class TapestryArtifact implements ITapestryArtifact
      */
     public String getResourceString(String key)
     {
-        return TapestryCore.getResourceString(key);
+        return TapestryCore.getString(key);
     }
 
     /**

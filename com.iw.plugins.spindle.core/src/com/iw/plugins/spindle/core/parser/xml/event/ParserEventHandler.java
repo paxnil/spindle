@@ -81,7 +81,7 @@ public class ParserEventHandler
             currentAttribute.setEndValues(lineNumber, columnNumber);
         } else
         {
-            System.err.println("ParserEventHandler.attributeEnd called but current attr is null!");
+            System.err.print("peh:");
         }
     }
 

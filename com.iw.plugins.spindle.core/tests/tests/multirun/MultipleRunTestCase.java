@@ -43,6 +43,8 @@ public class MultipleRunTestCase extends TestCase
 {
 
     protected String runIdentifier;
+    private long startTime;
+
 
     public MultipleRunTestCase()
     {
@@ -244,6 +246,25 @@ public class MultipleRunTestCase extends TestCase
     protected void m_fail()
     {
         m_fail(null);
+    }
+
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#setUp()
+     */
+    protected void setUp() throws Exception
+    {        
+        super.setUp();
+        startTime = System.currentTimeMillis();
+    }
+
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#tearDown()
+     */
+    protected void tearDown() throws Exception
+    {
+        long finished = System.currentTimeMillis();
+        System.out.println(runIdentifier+" "+ getClass().getName()+":"+ getName() + " elapsed = "+(finished - startTime));
+        super.tearDown();
     }
 
 }

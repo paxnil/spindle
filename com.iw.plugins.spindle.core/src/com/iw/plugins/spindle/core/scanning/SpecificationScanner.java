@@ -29,15 +29,14 @@ package com.iw.plugins.spindle.core.scanning;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.tapestry.Tapestry;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.Direction;
 import org.apache.tapestry.spec.SpecFactory;
 import org.apache.tapestry.util.IPropertyHolder;
 import org.w3c.dom.Node;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.IProblem;
-import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
  *  Scanner for building Tapestry Specs
@@ -61,7 +60,7 @@ public abstract class SpecificationScanner extends AbstractScanner
             Object result = conversionMap.get(value.toLowerCase());
 
             if (result == null || !(result instanceof Boolean))
-                throw new ScannerException(Tapestry.getString("SpecificationParser.fail-convert-boolean", value));
+                throw new ScannerException(TapestryCore.getTapestryString("SpecificationParser.fail-convert-boolean", value));
 
             return result;
         }
@@ -76,7 +75,7 @@ public abstract class SpecificationScanner extends AbstractScanner
                 return new Integer(value);
             } catch (NumberFormatException ex)
             {
-                throw new ScannerException(Tapestry.getString("SpecificationParser.fail-convert-int", value), ex);
+                throw new ScannerException(TapestryCore.getTapestryString("SpecificationParser.fail-convert-int", value), ex);
             }
         }
     }
@@ -90,7 +89,7 @@ public abstract class SpecificationScanner extends AbstractScanner
                 return new Long(value);
             } catch (NumberFormatException ex)
             {
-                throw new ScannerException(Tapestry.getString("SpecificationParser.fail-convert-long", value), ex);
+                throw new ScannerException(TapestryCore.getTapestryString("SpecificationParser.fail-convert-long", value), ex);
             }
         }
     }
@@ -104,7 +103,7 @@ public abstract class SpecificationScanner extends AbstractScanner
                 return new Double(value);
             } catch (NumberFormatException ex)
             {
-                throw new ScannerException(Tapestry.getString("SpecificationParser.fail-convert-double", value), ex);
+                throw new ScannerException(TapestryCore.getTapestryString("SpecificationParser.fail-convert-double", value), ex);
             }
         }
     }
@@ -168,14 +167,16 @@ public abstract class SpecificationScanner extends AbstractScanner
     {
         String name = getAttribute(node, "name", true);
 
-        if (name == null) {
+        if (name == null)
+        {
             name = getNextDummyString();
         }
-        
-        if (holder.getPropertyNames().contains(name)) {
-            addProblem(IProblem.WARNING, getAttributeSourceLocation(node, "name"), "duplicate definition of property: "+name);            
+
+        if (holder.getPropertyNames().contains(name))
+        {
+            addProblem(IProblem.WARNING, getAttributeSourceLocation(node, "name"), "duplicate definition of property: " + name);
         }
-        
+
         // Starting in DTD 1.4, the value may be specified
         // as an attribute.  Only if that is null do we
         // extract the node's value.
@@ -232,8 +233,6 @@ public abstract class SpecificationScanner extends AbstractScanner
         return specificationFactory;
     }
 
-   
-
     /** 
      *  Used with many elements that allow a value to be specified as either
      *  an attribute, or as wrapped character data.  This handles that case,
@@ -244,27 +243,25 @@ public abstract class SpecificationScanner extends AbstractScanner
     protected String getExtendedAttribute(Node node, String attributeName, boolean required) throws ScannerException
     {
 
-        int DTDVersion = XMLUtil.getDTDVersion(parser.getPublicId());
         String attributeValue = getAttribute(node, attributeName);
-        boolean nullAttributeValue = Tapestry.isNull(attributeValue);
-        boolean nullBodyValue = true;
-        String bodyValue = null;
-        if (DTDVersion >= XMLUtil.DTD_1_4)
-        {
-            bodyValue = getValue(node);
-            nullBodyValue = Tapestry.isNull(bodyValue);
-        }
+        boolean nullAttributeValue = TapestryCore.isNull(attributeValue);
+        String bodyValue = getValue(node);
+        boolean nullBodyValue = TapestryCore.isNull(bodyValue);
 
         if (!nullAttributeValue && !nullBodyValue)
             throw new ScannerException(
-                Tapestry.getString("SpecificationParser.no-attribute-and-body", attributeName, node.getNodeName()));
+                TapestryCore.getTapestryString("SpecificationParser.no-attribute-and-body", attributeName, node.getNodeName()));
 
         if (required && nullAttributeValue && nullBodyValue)
             throw new ScannerException(
-                Tapestry.getString("SpecificationParser.required-extended-attribute", node.getNodeName(), attributeName));
+                TapestryCore.getTapestryString(
+                    "SpecificationParser.required-extended-attribute",
+                    node.getNodeName(),
+                    attributeName));
 
         if (nullAttributeValue)
             return bodyValue;
 
         return attributeValue;
-    }    }
+    }
+}

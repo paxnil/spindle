@@ -24,9 +24,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package tests.Parser;
+package tests.Parser.mr;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import org.w3c.dom.Node;
 
@@ -34,6 +35,7 @@ import tests.multirun.MultipleRunTestCase;
 
 import com.iw.plugins.spindle.core.parser.*;
 import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
  *  Base class for running Parser Tests multiple run
@@ -46,8 +48,7 @@ import com.iw.plugins.spindle.core.parser.Parser;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-/*package*/
-class MRBaseParserTest extends MultipleRunTestCase
+public class MRBaseParserTest extends MultipleRunTestCase
 {
 
     protected Parser parser;
@@ -55,6 +56,7 @@ class MRBaseParserTest extends MultipleRunTestCase
     public static final String DOM = "DOM";
 
     public static final String PULL = "PULL";
+
     /**
      * 
      */
@@ -114,6 +116,54 @@ class MRBaseParserTest extends MultipleRunTestCase
         } catch (ParserRuntimeException e)
         {}
         return rootNode;
+    }
+
+    protected String getDTDPreamble(int DTDVersion, String rootNode)
+    {
+        String publicId = XMLUtil.getPublicId(DTDVersion);
+        StringBuffer buffer = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
+        buffer.append("<!DOCTYPE ");
+        buffer.append(rootNode);
+        buffer.append(" \n");
+        buffer.append("PUBLIC \"");
+        buffer.append(publicId);
+        buffer.append("\"\n");
+        buffer.append(" \"http://ignored\">\n");
+        return buffer.toString();
+    }
+    
+    protected String getXMLDocument(int DTDVersion, String rootNode, String content) {
+        return getDTDPreamble(DTDVersion, rootNode)+content;
+    }
+
+    protected void basicCheckProblems(IProblem [] problems, int expectedCount) {
+        PrintStream stream = problems.length == expectedCount ? System.out : System.err;
+        printProblems(problems, stream);
+        m_assertEquals(expectedCount, problems.length);
+    }
+    protected void printProblems(IProblem[] problems, PrintStream stream)
+    {
+        for (int i = 0; i < problems.length; i++)
+        {
+            stream.println(runIdentifier + ":" + getClass().getName() + ":" + getName() + " " + problems[i]);
+        }
+    }
+
+    protected Node parseToRootNode(String content, int expectedParserProblems)
+    {
+        Node node = null;
+        try
+        {
+            node = parser.parse(content);
+        
+            IProblem[] parserProblems = parser.getProblems();
+            basicCheckProblems(parserProblems, expectedParserProblems);
+            m_assertNotNull(node);
+        } catch (IOException e)
+        {
+            m_fail("failed to parse, IOException: " + e.getMessage());
+        }
+        return node;
     }
 
 }

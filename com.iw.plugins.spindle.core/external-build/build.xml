@@ -1,0 +1,105 @@
+<project name="builder" default="init" basedir=".">
+<!-- this is an antfile to build the project OUTSIDE OF ECLIPSE! -->
+
+<taskdef resource="clovertasks"/>
+
+<target name="with.clover">
+   <clover-setup initString="/coverage.db"/>
+</target>
+
+<target name="clover.swing" depends="with.clover">
+   <clover-view/>
+</target>
+
+<target name="clover.html" depends="with.clover">
+   <clover-report>
+      <current outfile="${reports.dir}/clover_html">
+         <format type="html"/> 
+      </current>	 
+   </clover-report>
+</target>
+
+
+<target name="init">
+	<loadproperties srcFile="build.properties"/>
+	<property name="classes.dir" value="${build.dir}/classes"/>
+	<property name="src" value="${basedir}/../src"/>
+	<property name="src.tests" value="${basedir}/../tests"/>	
+	<property name="reports.dir" value="${build.dir}/reports"/>
+	<property name="reports.dir.html" value="${reports.dir}/html"/>
+	<property name="doc.api.dir" value="${build.dir}/api"/>
+	<path id="classpath">
+		<!-- a fileset including *all* the jars under the plugins directory -->
+		<fileset dir="${plugins}">
+	 		<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="${basedir}/..">
+		   <include name="*.jar"/>
+		</fileset>
+	</path>
+	<property name="classpath" refid="classpath"/>
+</target>
+
+<target name="prepare" depends="init">
+	<mkdir dir="${build.dir}"/>
+	<mkdir dir="${classes.dir}"/>
+</target>
+
+<target name="clean" depends="init">
+ <delete dir="${build.dir}" verbose="true"/>
+</target>
+
+<target name="compile" depends="prepare">
+	<javac 	srcdir="${src}"
+			destdir="${classes.dir}"
+			classpath="${classpath}"
+			debug="true"/>			
+</target>
+
+<target name="compile-tests" depends="compile">
+	<javac 	srcdir="${src.tests}"
+			destdir="${classes.dir}"
+			classpath="${classpath}"
+			debug="true"/>	
+    <copy todir="${classes.dir}/tests">
+    	<fileset dir="${src.tests}">
+    		<include name="testdata/**/*.*"/>
+    	</fileset>
+    </copy> 
+</target>
+
+<target name="test" depends="compile-tests">
+	<mkdir dir="${reports.dir}"/>
+	<junit failureproperty="testsFailed" fork="true" printsummary="true" filtertrace="off">
+		<classpath>
+			<pathelement path="${classpath}"/>
+			<pathelement path="${classes.dir}"/>
+			<pathelement path="${ant.home}/lib/clover.jar"/>
+		</classpath>
+		<formatter type="xml"/>
+		<test toDir="${reports.dir}" name="CoreTestSuite"/>
+		<test toDir="${reports.dir}" name="tests.TapestryPullParser.SimplePullParserTests"/>
+			
+	</junit>
+	<!--<junitreport toDir="${reports.dir}">
+		<fileset dir="${reports.dir}">
+			<include name="**/TEST-*.xml"/>
+		</fileset>
+		<report format="frames" toDir="${reports.dir.html}"/>
+	</junitreport>
+	-->
+</target>
+
+<target name="javadoc" depends="test" unless="testsFailed">
+	<javadoc 	packagenames="com.iw.plugins.spindle.core.*"
+				sourcepath="${src}"
+				classpath="${classpath}"
+				destdir="${doc.api.dir}"
+				author="true" version="true" use="true"
+				windowtitle="Spindle Core Docs">
+				<bottom><![CDATA[<em>Copyright &copy; 2003, Intellgent Works Inc.</em></div>]]></bottom>
+				<link href="http://spindle.sf.net/plugins/core/docs/api"/>
+	</javadoc>
+</target>
+
+</project>

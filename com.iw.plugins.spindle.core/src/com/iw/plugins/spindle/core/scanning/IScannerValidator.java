@@ -30,6 +30,7 @@ import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 
+import com.iw.plugins.spindle.core.parser.IProblemCollector;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
 
@@ -42,6 +43,8 @@ import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
 public interface IScannerValidator
 {
 
+    public void setProblemCollector(IProblemCollector collector);
+    
     public void validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException;
     
     public void validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location) throws ScannerException;

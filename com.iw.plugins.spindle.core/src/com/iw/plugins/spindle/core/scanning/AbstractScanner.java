@@ -60,19 +60,19 @@ import com.iw.plugins.spindle.core.util.Assert;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class AbstractScanner implements IScannerValidator, IProblemCollector
+public abstract class AbstractScanner implements IProblemCollector
 {
 
     private Object resultObject;
 
-    private List problems;
-    private IScannerValidator validator;
+    protected List problems = new ArrayList();
+    protected IScannerValidator validator;
     protected Parser parser;
 
     public final Object scan(final Parser parser, IScannerValidator validator, Node node) throws ScannerException
     {
         Assert.isNotNull(node);
-        problems = null;
+        problems.clear();
         this.parser = parser;
         if (validator == null)
         {
@@ -110,10 +110,6 @@ public abstract class AbstractScanner implements IScannerValidator, IProblemColl
 
     public void addProblem(IProblem problem)
     {
-        if (problems == null)
-        {
-            problems = new ArrayList();
-        }
 
         problems.add(problem);
     }
@@ -132,11 +128,7 @@ public abstract class AbstractScanner implements IScannerValidator, IProblemColl
 
     public IProblem[] getProblems()
     {
-        if (problems == null)
-        {
-            return (IProblem[]) problems.toArray(new IProblem[problems.size()]);
-        }
-        return null;
+        return (IProblem[]) problems.toArray(new IProblem[problems.size()]);
     }
 
     public boolean isElement(Node node, String elementName)
@@ -181,7 +173,7 @@ public abstract class AbstractScanner implements IScannerValidator, IProblemColl
                 result = attributeNode.getNodeValue();
             }
         }
-        if (result == null && returnDummyIfNull)
+        if ((result == null || "".equals(result.trim()))&& returnDummyIfNull)
         {
             result = getNextDummyString();
         }
@@ -274,28 +266,28 @@ public abstract class AbstractScanner implements IScannerValidator, IProblemColl
         return result;
     }
 
-    public void validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException
+    protected void validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException
     {
         validator.validatePattern(value, pattern, errorKey, severity);
     }
 
-    public void validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location)
+    protected void validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location)
         throws ScannerException
     {
         validator.validatePattern(value, pattern, errorKey, severity, location);
     }
 
-    public void validateExpression(String expression, int severity) throws ScannerException
+    protected void validateExpression(String expression, int severity) throws ScannerException
     {
         validator.validateExpression(expression, severity);
     }
 
-    public void validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException
+    protected void validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException
     {
         validator.validateExpression(expression, severity, location);
     }
 
-    public void validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
+    protected void validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
     {
         validator.validateTypeName(fullyQualifiedType, severity);
     }
@@ -303,23 +295,33 @@ public abstract class AbstractScanner implements IScannerValidator, IProblemColl
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
      */
-    public void validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
+    protected void validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
     {
         validator.validateTypeName(fullyQualifiedType, severity, location);
     }
-    
-    public void validateContainedComponent(IComponentSpecification specification, IContainedComponent component, ISourceLocationInfo sourceLocation) throws ScannerException {
+
+    protected void validateContainedComponent(
+        IComponentSpecification specification,
+        IContainedComponent component,
+        ISourceLocationInfo sourceLocation)
+        throws ScannerException
+    {
         validator.validateContainedComponent(specification, component, sourceLocation);
     }
-    
-    public void validateAsset(IComponentSpecification specification, IAssetSpecification asset, ISourceLocationInfo sourceLocation) throws ScannerException {
+
+    protected void validateAsset(
+        IComponentSpecification specification,
+        IAssetSpecification asset,
+        ISourceLocationInfo sourceLocation)
+        throws ScannerException
+    {
         validator.validateAsset(specification, asset, sourceLocation);
     }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#getNextDummyString()
      */
-    public String getNextDummyString()
+    protected String getNextDummyString()
     {
         return validator.getDummyStringPrefix();
     }
@@ -327,7 +329,7 @@ public abstract class AbstractScanner implements IScannerValidator, IProblemColl
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#getDummyStringPrefix()
      */
-    public String getDummyStringPrefix()
+    protected String getDummyStringPrefix()
     {
         return validator.getDummyStringPrefix();
     }

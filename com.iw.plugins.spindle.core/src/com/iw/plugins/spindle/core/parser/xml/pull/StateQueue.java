@@ -83,7 +83,7 @@ class StateQueue
             store = newQueue;
         }
         State state = store[tail++];
-        state.repopulate(eventType, parser);
+        //state.repopulate(eventType, parser);
         return state;
     }
 

@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.core;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -47,6 +48,9 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 public class TapestryCore extends AbstractUIPlugin
 {
 
+    private static ResourceBundle TapestryStrings;
+    private static ResourceBundle SpindleCoreStrings;
+
     public static final String PLUGIN_ID = "com.iw.plugins.spindle.core";
     public static final String NATURE_ID = PLUGIN_ID + ".tapestrynature";
     public static final String BUILDER_ID = PLUGIN_ID + ".tapestrybuilder";
@@ -54,7 +58,6 @@ public class TapestryCore extends AbstractUIPlugin
     //The shared instance.
     private static TapestryCore plugin;
     //Resource bundle.
-    private ResourceBundle resourceBundle;
 
     /**
      * The constructor.
@@ -64,13 +67,11 @@ public class TapestryCore extends AbstractUIPlugin
         super(descriptor);
         plugin = this;
         try
+        {} catch (MissingResourceException x)
         {
-            resourceBundle = ResourceBundle.getBundle("com.iw.plugins.spindle.core.resources");
-        } catch (MissingResourceException x)
-        {
-            resourceBundle = null;
+            SpindleCoreStrings = null;
         }
-    } 
+    }
 
     /**
      * Returns the shared instance.
@@ -86,30 +87,6 @@ public class TapestryCore extends AbstractUIPlugin
     public static IWorkspace getWorkspace()
     {
         return ResourcesPlugin.getWorkspace();
-    }
-
-    /**
-     * Returns the string from the plugin's resource bundle,
-     * or 'key' if not found.
-     */
-    public static String getResourceString(String key)
-    {
-        ResourceBundle bundle = TapestryCore.getDefault().getResourceBundle();
-        try
-        {
-            return bundle.getString(key);
-        } catch (MissingResourceException e)
-        {
-            return key;
-        }
-    }
-
-    /**
-     * Returns the plugin's resource bundle,
-     */
-    public ResourceBundle getResourceBundle()
-    {
-        return resourceBundle;
     }
 
     static public void log(String msg)
@@ -136,6 +113,7 @@ public class TapestryCore extends AbstractUIPlugin
             new Status(IStatus.ERROR, TapestryCore.getDefault().getDescriptor().getUniqueIdentifier(), IStatus.ERROR, msg, null);
         log.log(status);
     }
+
     public static void addNatureToProject(IProject project, String natureId) throws CoreException
     {
         IProject proj = project.getProject(); // Needed if project is a IJavaProject
@@ -188,6 +166,83 @@ public class TapestryCore extends AbstractUIPlugin
             description.setNatureIds(newNatures);
             proj.setDescription(description, null);
         }
+    }
+
+    public static String getString(String key, Object[] args)
+    {
+        if (SpindleCoreStrings == null)
+            SpindleCoreStrings = ResourceBundle.getBundle("com.iw.plugins.spindle.core.resources");
+
+        String pattern = SpindleCoreStrings.getString(key);
+
+        if (args == null)
+            return pattern;
+
+        return MessageFormat.format(pattern, args);
+    }
+
+    public static String getString(String key)
+    {
+        return getString(key, null);
+    }
+
+    public static String getString(String key, Object arg)
+    {
+        return getString(key, new Object[] { arg });
+    }
+
+    public static String getString(String key, Object arg1, Object arg2)
+    {
+        return getString(key, new Object[] { arg1, arg2 });
+    }
+
+    public static String getString(String key, Object arg1, Object arg2, Object arg3)
+    {
+        return getString(key, new Object[] { arg1, arg2, arg3 });
+    }
+
+    public static String getTapestryString(String key, Object[] args)
+    {
+        if (TapestryStrings == null)
+            TapestryStrings = ResourceBundle.getBundle("org.apache.tapestry.TapestryStrings");
+
+        String pattern = TapestryStrings.getString(key);
+
+        if (args == null)
+            return pattern;
+
+        return MessageFormat.format(pattern, args);
+    }
+
+    public static String getTapestryString(String key)
+    {
+        return getTapestryString(key, null);
+    }
+
+    public static String getTapestryString(String key, Object arg)
+    {
+        return getTapestryString(key, new Object[] { arg });
+    }
+
+    public static String getTapestryString(String key, Object arg1, Object arg2)
+    {
+        return getTapestryString(key, new Object[] { arg1, arg2 });
+    }
+
+    public static String getTapestryString(String key, Object arg1, Object arg2, Object arg3)
+    {
+        return getTapestryString(key, new Object[] { arg1, arg2, arg3 });
+    }
+
+    public static boolean isNull(String value)
+    {
+        if (value == null)
+            return true;
+
+        if (value.length() == 0)
+            return true;
+
+        return value.trim().length() == 0;
     }
 
 }

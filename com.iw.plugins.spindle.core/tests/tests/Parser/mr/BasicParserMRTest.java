@@ -24,13 +24,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package tests.Parser;
+package tests.Parser.mr;
 
 import java.io.IOException;
 
 import org.w3c.dom.Node;
-
-import com.iw.plugins.spindle.core.parser.IProblem;
 
 /**
  *  Basic Sanity Test for Parser
@@ -66,14 +64,6 @@ public class BasicParserMRTest extends MRBaseParserTest
         super(name);
     }
 
-    private void printProblems(IProblem[] problems)
-    {
-        for (int i = 0; i < problems.length; i++)
-        {
-            System.err.println(runIdentifier+ ":"+getClass().getName()+":"+getName() + " " +problems[i]);
-        }
-    }
-
     public void testVALID()
     {
         final String VALID = PROLOG + "<dog test='poo'>Hello, world!</dog>\n";
@@ -101,9 +91,7 @@ public class BasicParserMRTest extends MRBaseParserTest
             fail("IOException: " + e.getMessage());
         }
         assertNotNull(node);
-        IProblem[] problems = parser.getProblems();
-        assertTrue(problems.length == 1);
-        printProblems(problems);
+        basicCheckProblems(parser.getProblems(), 1);
     }
 
     public void testMalformedProlog()
@@ -118,9 +106,7 @@ public class BasicParserMRTest extends MRBaseParserTest
             fail("IOException: " + e.getMessage());
         }
         assertNull(node);
-        IProblem[] problems = parser.getProblems();
-        assertTrue(problems.length == 1);
-        printProblems(problems);
+        basicCheckProblems(parser.getProblems(), 1);
     }
     
     public void testMalformedContent()
@@ -135,9 +121,7 @@ public class BasicParserMRTest extends MRBaseParserTest
             fail("IOException: " + e.getMessage());
         }
         assertNull(node);
-        IProblem[] problems = parser.getProblems();
-        assertTrue(problems.length == 1);
-        printProblems(problems);
+        basicCheckProblems(parser.getProblems(), 1);
     }
 
     public static void main(String[] args)

@@ -24,30 +24,35 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package tests.Parser;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- *  RUNS ALL THE PARSER TESTS - including the Multiple Run ones
+ *  RUNS ALL THE TESTS!
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class ParserTests
+public class CoreTestSuite
 {
 
     public static void main(String[] args)
-     {}
+    {
+        junit.textui.TestRunner.run(CoreTestSuite.class);
+    }
 
-     public static Test suite()
-     {
-         TestSuite suite = new TestSuite("Test for tests.Parser");
-         //$JUnit-BEGIN$
-         suite.addTest(new TestSuite(BasicParserDOMTest.class));
-         suite.addTest(AllMRTests.suite());   
-         //$JUnit-END$
-         return suite;
-     }
+    public static Test suite()
+    {
+        TestSuite suite = new TestSuite("Test for eveything");
+        //$JUnit-BEGIN$
+        suite.addTest(tests.TapestryPullParser.AllTests.suite());
+        suite.addTest(tests.TapestryDOMParser.AllTests.suite());
+        suite.addTest(tests.util.AllTests.suite());
+        suite.addTest(tests.multirun.AllTests.suite());
+        suite.addTest(tests.Parser.AllTests.suite());
+        suite.addTest(tests.Scanners.AllTests.suite());
+        
+        //$JUnit-END$
+        return suite;
+    }
 }

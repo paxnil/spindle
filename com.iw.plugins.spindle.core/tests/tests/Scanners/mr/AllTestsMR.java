@@ -24,30 +24,44 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package tests.multirun;
+package tests.Scanners.mr;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import tests.multirun.sanity.MRSanityTests;
+import tests.multirun.MultipleRunTestSuite;
 
 /**
- *  Lets make sure the multirun works!
+ *  Add MR test suites here.
+ * 
+ *  Runs all the MR tests in this package
+ * 
+ *  The goal is to have all the tests run with CURRENT_RUN set to ALL_RUNS.
+ * 
+ *  DOM_ONLY is for use while the Pull parser is still broken
+ *  
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class MRTests
+public class AllTestsMR
 {
+    public static final String DOM = "DOM";
+    public static final String PULL = "PULL";
+    public static final String[] ALL_RUNS = new String[] { DOM, PULL };
+    public static final String[] DOM_ONLY = new String[] { DOM };
+    public static final String [] CURRENT_RUN = DOM_ONLY;
+    
 
     public static void main(String[] args)
     {}
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("Test for tests.Parser");
+        TestSuite suite = new TestSuite("MRTest for tests.Scanner");
         //$JUnit-BEGIN$
-        suite.addTest(new TestSuite(MRSanityTests.class));
-        //suite.addTest(new TestSuite(SimpleDOMParserTests.class));     
+        suite.addTest(new MultipleRunTestSuite(TestComponentScanAssetMR.class, CURRENT_RUN));
+        suite.addTest(new MultipleRunTestSuite(TestComponentScanBindingMR.class, CURRENT_RUN));
+        suite.addTest(new MultipleRunTestSuite(TestComponentScanSetPropertyMR.class, CURRENT_RUN));
         //$JUnit-END$
         return suite;
     }

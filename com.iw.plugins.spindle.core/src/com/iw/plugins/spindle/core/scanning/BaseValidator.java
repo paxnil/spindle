@@ -39,11 +39,11 @@ import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
 import org.apache.tapestry.ApplicationRuntimeException;
-import org.apache.tapestry.Tapestry;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.IProblemCollector;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
@@ -59,7 +59,7 @@ public class BaseValidator implements IScannerValidator
 
     private static final ISourceLocation DefaultLocation = new SLocation();
 
-    public static final String DefaultDummyString = "~dummy<>";
+    public static final String DefaultDummyString = "1~dummy<>";
 
     /** 
      * 
@@ -107,7 +107,27 @@ public class BaseValidator implements IScannerValidator
      */
     public void validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
     {
-        // do nothing
+        Object type = findType(fullyQualifiedType);
+        if (type == null)
+        {
+            String message = TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType);
+            if (problemCollector == null)
+            {
+                throw new ScannerException(message);
+            } else
+            {
+                problemCollector.addProblem(severity, location, message);
+            }
+        }
+    }
+    
+    /**
+     * Base Implementation always passes!
+     * @param fullyQualifiedName
+     * @return
+     */
+    protected Object findType(String fullyQualifiedName) {
+        return this;
     }
 
     public void validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException
@@ -140,11 +160,12 @@ public class BaseValidator implements IScannerValidator
         if (matcher.matches(value, compiled))
             return;
 
-        String message = Tapestry.getString(errorKey, value);
+        String message = TapestryCore.getTapestryString(errorKey, value);
         if (problemCollector == null)
         {
             throw new ScannerException(message);
-        } else {
+        } else
+        {
             problemCollector.addProblem(severity, location, message);
         }
     }
@@ -174,18 +195,19 @@ public class BaseValidator implements IScannerValidator
             }
         }
     }
-    
+
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateContainedComponent(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.spec.IContainedComponent)
      */
-    public void validateContainedComponent(IComponentSpecification specification, IContainedComponent component, ISourceLocationInfo info)
+    public void validateContainedComponent(
+        IComponentSpecification specification,
+        IContainedComponent component,
+        ISourceLocationInfo info)
         throws ScannerException
     {
         return;
 
     }
-    
-    
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateAsset(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.IAsset, com.iw.plugins.spindle.core.parser.ISourceLocationInfo)
@@ -246,8 +268,8 @@ public class BaseValidator implements IScannerValidator
 
     static class SLocation implements ISourceLocation
     { /* (non-Javadoc)
-                      * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
-                      */
+                            * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
+                            */
         public int getCharEnd()
         {
             // TODO Auto-generated method stub
@@ -270,6 +292,5 @@ public class BaseValidator implements IScannerValidator
             return 0;
         }
     }
-
 
 }

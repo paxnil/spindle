@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package tests.Parser;
+package tests.Parser.mr;
 
 import tests.multirun.MultipleRunTestSuite;
 import junit.framework.Test;
@@ -43,7 +43,7 @@ import junit.framework.TestSuite;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class AllMRTests
+public class AllTestsMR
 {
     public static final String[] ALL_RUNS = new String[] { MRBaseParserTest.DOM, MRBaseParserTest.PULL };
     public static final String[] DOM_ONLY = new String[] { MRBaseParserTest.DOM };

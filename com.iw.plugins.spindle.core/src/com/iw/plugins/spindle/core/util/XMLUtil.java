@@ -460,7 +460,7 @@ public class XMLUtil
                 break;
         }
         
-        writer.println(TapestryCore.getResourceString("TAPESTRY.xmlComment"));
+        writer.println(TapestryCore.getString("TAPESTRY.xmlComment"));
     }
 
     public static void writeLibraryServices(Map serviceMap, PrintWriter writer, int indent)

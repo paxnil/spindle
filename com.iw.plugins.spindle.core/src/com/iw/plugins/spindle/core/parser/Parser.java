@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.w3c.dom.DocumentType;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -58,6 +59,8 @@ import com.iw.plugins.spindle.core.util.Files;
 /**
  * The xml parser used in the builds.
  * can be used to dom-parse or pull-parse XML content
+ * 
+ * Validates by default
  *
  * @version $Id$
  * @author glongman@intelligentworks.com
@@ -75,6 +78,8 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     private TapestryPullParser pullParser = null;
     private ArrayList collectedProblems = new ArrayList();
 
+    private boolean doValidation = true;
+
     public Parser()
     {
         this(false);
@@ -85,6 +90,27 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         this.usePullParser = usePullParser;
         TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID, "Tapestry_1_3.dtd");
         TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_1_4_PUBLIC_ID, "Tapestry_1_4.dtd");
+    }
+
+    /**
+         * @return
+         */
+    public boolean isDoValidation()
+    {
+        return doValidation;
+    }
+
+    /**
+     * Can only be called before the first parse!
+     * @param b
+     */
+    public void setDoValidation(boolean b)
+    {
+        if (domParser != null || pullParser != null)
+        {
+            throw new IllegalStateException("can only set validation flag before the first parse!");
+        }
+        doValidation = b;
     }
 
     private IDocument getEclipseDocument(String content)
@@ -101,7 +127,10 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     {
         if (xmlDocument != null)
         {
-            return xmlDocument.getDoctype().getPublicId();
+            DocumentType type = xmlDocument.getDoctype();
+            if (type != null) {
+                return type.getPublicId();
+            }
         }
         // TODO handle this in pull parser case!
         return null;
@@ -119,11 +148,14 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             pullParseConfiguration.setErrorHandler(this);
             pullParseConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
             pullParseConfiguration.setFeature("http://apache.org/xml/features/dom/include-ignorable-whitespace", false);
-            pullParseConfiguration.setFeature("http://xml.org/sax/features/validation", true);
+            pullParseConfiguration.setFeature("http://xml.org/sax/features/validation", doValidation);
             pullParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
-            pullParseConfiguration.setProperty(
-                "http://apache.org/xml/properties/internal/grammar-pool",
-                TapestryParserConfiguration.GRAMMAR_POOL);
+            if (doValidation)
+            {
+                pullParseConfiguration.setProperty(
+                    "http://apache.org/xml/properties/internal/grammar-pool",
+                    TapestryParserConfiguration.GRAMMAR_POOL);
+            }
         }
     }
 
@@ -140,11 +172,14 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             domParseConfiguration.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
             domParseConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
             domParseConfiguration.setFeature("http://apache.org/xml/features/dom/include-ignorable-whitespace", false);
-            domParseConfiguration.setFeature("http://xml.org/sax/features/validation", true);
+            domParseConfiguration.setFeature("http://xml.org/sax/features/validation", doValidation);
             domParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
-            domParseConfiguration.setProperty(
-                "http://apache.org/xml/properties/internal/grammar-pool",
-                TapestryParserConfiguration.GRAMMAR_POOL);
+            if (doValidation)
+            {
+                domParseConfiguration.setProperty(
+                    "http://apache.org/xml/properties/internal/grammar-pool",
+                    TapestryParserConfiguration.GRAMMAR_POOL);
+            }
 
         }
     }
@@ -188,7 +223,8 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         {
             // this could happen while scanning the prolog
             createFatalProblem(e1, IProblem.ERROR);
-        } catch (Exception e1) {
+        } catch (Exception e1)
+        {
             //ignore
         }
         return null;
@@ -285,16 +321,17 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             collectedProblems.add(problem);
         }
     }
-    
-    public void addProblem(int severity, ISourceLocation location, String message) {
+
+    public void addProblem(int severity, ISourceLocation location, String message)
+    {
         addProblem(
-             new DefaultProblem(
-                 ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
-                 severity,
-                 message,
-                 location.getLineNumber(),
-                 location.getCharStart(),
-                 location.getCharEnd()));
+            new DefaultProblem(
+                ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+                severity,
+                message,
+                location.getLineNumber(),
+                location.getCharStart(),
+                location.getCharEnd()));
     }
 
     public IProblem[] getProblems()

@@ -35,7 +35,7 @@ import junit.framework.TestSuite;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class AllTapestryPullParserTests {
+public class AllTests {
 
   public static void main(String[] args) {
   }

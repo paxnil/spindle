@@ -111,15 +111,15 @@ public class CorePropertyPage extends PropertyPage
                 Path selected = (Path) selection;
                 if (!selected.segment(0).equals(project.getName()))
                 {
-                    return TapestryCore.getResourceString(WRONG_PROJECT);
+                    return TapestryCore.getString(WRONG_PROJECT);
                 }
                 if (isOnOutputPath(jproject, selected))
                 {
-                    return TapestryCore.getResourceString(OUTPUT_FOLDER_ERROR);
+                    return TapestryCore.getString(OUTPUT_FOLDER_ERROR);
                 }
                 if (isOnSourcePath(jproject, selected))
                 {
-                    return TapestryCore.getResourceString(SOURCE_PATH_ERROR);
+                    return TapestryCore.getString(SOURCE_PATH_ERROR);
                 }
                 return null;
             } catch (CoreException e)
@@ -194,7 +194,7 @@ public class CorePropertyPage extends PropertyPage
         composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         isTapestryProjectCheck = new Button(composite, SWT.CHECK | SWT.LEFT);
-        isTapestryProjectCheck.setText(TapestryCore.getResourceString(IS_TAPESTRY_PROJECT));
+        isTapestryProjectCheck.setText(TapestryCore.getString(IS_TAPESTRY_PROJECT));
         isTapestryProjectCheck.setEnabled(true);
 
         try
@@ -226,9 +226,9 @@ public class CorePropertyPage extends PropertyPage
         composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         Label description = new Label(composite, SWT.NULL | SWT.WRAP);
-        description.setText(TapestryCore.getResourceString(IGNORE1));
+        description.setText(TapestryCore.getString(IGNORE1));
         description = new Label(composite, SWT.NULL);
-        description.setText(TapestryCore.getResourceString(IGNORE2));
+        description.setText(TapestryCore.getString(IGNORE2));
 
         Composite fieldGroup = new Composite(composite, SWT.NONE);
         layout = new GridLayout();
@@ -237,7 +237,7 @@ public class CorePropertyPage extends PropertyPage
         fieldGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         Label appRootLabel = new Label(fieldGroup, SWT.NONE);
-        appRootLabel.setText(TapestryCore.getResourceString(APP_ROOT));
+        appRootLabel.setText(TapestryCore.getString(APP_ROOT));
         appRootLabel.setEnabled(true);
 
         appRoot = new Text(fieldGroup, SWT.BORDER);
@@ -250,7 +250,7 @@ public class CorePropertyPage extends PropertyPage
         appRoot.setEnabled(true);
 
         Button browseButton = new Button(fieldGroup, SWT.PUSH);
-        browseButton.setText(TapestryCore.getResourceString(BROWSE_BUTTON_LABEL));
+        browseButton.setText(TapestryCore.getString(BROWSE_BUTTON_LABEL));
         browseButton.addSelectionListener(new SelectionAdapter()
         {
             public void widgetSelected(SelectionEvent evt)
@@ -266,7 +266,7 @@ public class CorePropertyPage extends PropertyPage
         browseButton.setEnabled(true);
 
         Label contextRootLabel = new Label(fieldGroup, SWT.NONE);
-        contextRootLabel.setText(TapestryCore.getResourceString(CONTEXT_ROOT));
+        contextRootLabel.setText(TapestryCore.getString(CONTEXT_ROOT));
         contextRootLabel.setEnabled(true);
 
         webContextRoot = new Text(fieldGroup, SWT.BORDER);
@@ -279,7 +279,7 @@ public class CorePropertyPage extends PropertyPage
         webContextRoot.setEnabled(true);
 
         browseButton = new Button(fieldGroup, SWT.PUSH);
-        browseButton.setText(TapestryCore.getResourceString(BROWSE_BUTTON_LABEL));
+        browseButton.setText(TapestryCore.getString(BROWSE_BUTTON_LABEL));
         browseButton.addSelectionListener(new SelectionAdapter()
         {
             public void widgetSelected(SelectionEvent evt)
