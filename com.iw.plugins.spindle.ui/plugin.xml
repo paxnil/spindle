@@ -18,7 +18,6 @@
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="com.iw.plugins.spindle.core" export="true"/>
       <import plugin="org.eclipse.jdt.ui"/>
-      <import plugin="org.eclipse.search"/>
       <import plugin="net.sf.solareclipse.ui"/>
       <import plugin="net.sf.solareclipse.xml.ui"/>
       <import plugin="org.eclipse.jdt.launching"/>
