@@ -120,6 +120,12 @@
             class="com.iw.plugins.spindle.ui.preferences.SpindleEditorPreferencePage"
             id="SpindleEditorPreferences">
       </page>
+      <page
+            name="Formatter"
+            category="SpindlePreferences"
+            class="com.iw.plugins.spindle.ui.preferences.SpindleFormatterPreferencePage"
+            id="SpindleFormatterPreferences">
+      </page>
    </extension>
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">

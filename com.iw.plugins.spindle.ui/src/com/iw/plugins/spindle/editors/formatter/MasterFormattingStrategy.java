@@ -56,18 +56,15 @@ public class MasterFormattingStrategy extends ContextBasedFormattingStrategy
   /** access to the preferences store * */
   private FormattingPreferences prefs;
 
-  private int indent = -1;
-
   public MasterFormattingStrategy()
   {
     this.prefs = new FormattingPreferences();
   }
 
-  public MasterFormattingStrategy(FormattingPreferences prefs, int indent)
+  public MasterFormattingStrategy(FormattingPreferences prefs)
   {
     Assert.isNotNull(prefs);
     this.prefs = prefs;
-    this.indent = indent;
   }
 
   /*

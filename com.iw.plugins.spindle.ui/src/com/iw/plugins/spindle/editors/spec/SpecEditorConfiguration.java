@@ -45,7 +45,6 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.IContentFormatter;
-import org.eclipse.jface.text.formatter.MultiPassContentFormatter;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
@@ -57,18 +56,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.xmen.internal.ui.text.ITypeConstants;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
 import com.iw.plugins.spindle.editors.DefaultDoubleClickStrategy;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.formatter.DoctypeEditFormatWorker;
 import com.iw.plugins.spindle.editors.formatter.FormattingPreferences;
-import com.iw.plugins.spindle.editors.formatter.MasterFormattingStrategy;
-import com.iw.plugins.spindle.editors.formatter.SlaveFormattingStrategy;
-import com.iw.plugins.spindle.editors.formatter.StartTagEditFormatWorker;
 import com.iw.plugins.spindle.editors.spec.assist.AttributeCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.TagCompletionProcessor;
@@ -76,6 +69,7 @@ import com.iw.plugins.spindle.editors.util.CDATACompletionProcessor;
 import com.iw.plugins.spindle.editors.util.CommentCompletionProcessor;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DeclCompletionProcessor;
+import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
  * SourceViewerConfiguration for the TemplateEditor
@@ -83,11 +77,9 @@ import com.iw.plugins.spindle.editors.util.DeclCompletionProcessor;
  * @author glongman@intelligentworks.com
  *  
  */
-public class SpecConfiguration extends BaseSourceConfiguration
+public class SpecEditorConfiguration extends BasicSpecConfiguration
 {
   public static final boolean DEBUG = false;
-
-  private XMLTextTools fTextTools;
 
   private ITextDoubleClickStrategy fDefaultDoubleClick;
   private ITextDoubleClickStrategy dcsSimple;
@@ -98,11 +90,11 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * @param colorManager
    * @param editor
    */
-  public SpecConfiguration(XMLTextTools tools, Editor editor,
+  public SpecEditorConfiguration(XMLTextTools tools, Editor editor,
       IPreferenceStore preferenceStore)
   {
-    super(editor, preferenceStore);
-    fTextTools = tools;
+    super(tools, editor, preferenceStore);
+   
     fDefaultDoubleClick = new DefaultDoubleClickStrategy();
     dcsSimple = new SimpleDoubleClickStrategy();
     dcsTag = new TagDoubleClickStrategy();
@@ -138,107 +130,14 @@ public class SpecConfiguration extends BaseSourceConfiguration
     return fDefaultDoubleClick;
   }
 
-  /*
-   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getConfiguredContentTypes(ISourceViewer)
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getContentFormatter(org.eclipse.jface.text.source.ISourceViewer)
    */
-  public String[] getConfiguredContentTypes(ISourceViewer sourceViewer)
-  {
-    return new String[]{IDocument.DEFAULT_CONTENT_TYPE, XMLPartitionScanner.XML_PI,
-        XMLPartitionScanner.XML_COMMENT, XMLPartitionScanner.XML_DECL,
-        XMLPartitionScanner.XML_TAG, XMLPartitionScanner.XML_ATTRIBUTE,
-        XMLPartitionScanner.XML_CDATA, XMLPartitionScanner.DTD_INTERNAL,
-        XMLPartitionScanner.DTD_INTERNAL_PI, XMLPartitionScanner.DTD_INTERNAL_COMMENT,
-        XMLPartitionScanner.DTD_INTERNAL_DECL,};
-  }
-
-  //TODO fix
   public IContentFormatter getContentFormatter(ISourceViewer sourceViewer)
   {
-
-    MultiPassContentFormatter formatter = new MultiPassContentFormatter(
-        XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY,
-        IDocument.DEFAULT_CONTENT_TYPE);
-
-    formatter.setMasterStrategy(new MasterFormattingStrategy());    
-
-    formatter.setSlaveStrategy(new SlaveFormattingStrategy(
-        new FormattingPreferences(),
-        new String[]{ITypeConstants.TAG},
-        new StartTagEditFormatWorker()), ITypeConstants.TAG);
-    
-    formatter.setSlaveStrategy(new SlaveFormattingStrategy(
-        new FormattingPreferences(),
-        new String[]{ITypeConstants.EMPTYTAG},
-        new StartTagEditFormatWorker()), ITypeConstants.EMPTYTAG);
-    
-    formatter.setSlaveStrategy(new SlaveFormattingStrategy(
-        new FormattingPreferences(),
-        new String[]{ITypeConstants.DECL},
-        new DoctypeEditFormatWorker()), ITypeConstants.DECL);
-
-    return formatter;
+    return UIUtils.createXMLContentFormatter(new FormattingPreferences());
   }
 
-  /*
-   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getPresentationReconciler(ISourceViewer)
-   */
-  public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer)
-  {
-    PresentationReconciler reconciler = new PresentationReconciler();
-
-    DefaultDamagerRepairer dr;
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLTextScanner());
-    reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
-    reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getDTDTextScanner());
-    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL);
-    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLPIScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_PI);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_PI);
-    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
-    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLCommentScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_COMMENT);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_COMMENT);
-    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
-    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLDeclScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_DECL);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_DECL);
-    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
-    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLTagScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_TAG);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_TAG);
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLAttributeScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLCDATAScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_CDATA);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_CDATA);
-
-    reconciler.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-
-    return reconciler;
-  }
   /*
    * (non-Javadoc)
    * 

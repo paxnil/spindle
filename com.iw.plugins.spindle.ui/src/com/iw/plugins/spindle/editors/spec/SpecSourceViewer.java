@@ -11,6 +11,7 @@ package com.iw.plugins.spindle.editors.spec;
 
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.source.IOverviewRuler;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -80,6 +81,8 @@ public class SpecSourceViewer extends SourceViewer
       return fStructurePresenter != null;
     if (operation == OPEN_ASSET_CHOOSER)
       return true;
+    if (operation == ISourceViewer.FORMAT && getSelectedRange().y != 0)
+      return false;
     return super.canDoOperation(operation);
   }
 
@@ -89,21 +92,21 @@ public class SpecSourceViewer extends SourceViewer
   public void configure(SourceViewerConfiguration configuration)
   {
     super.configure(configuration);
-    if (configuration instanceof SpecConfiguration)
+    if (configuration instanceof SpecEditorConfiguration)
     {
-      fOutlinePresenter = ((SpecConfiguration) configuration)
+      fOutlinePresenter = ((SpecEditorConfiguration) configuration)
           .getXMLOutlinePresenter(this);
       fOutlinePresenter.install(this);
     }
-    if (configuration instanceof SpecConfiguration)
+    if (configuration instanceof SpecEditorConfiguration)
     {
-      fStructurePresenter = ((SpecConfiguration) configuration)
+      fStructurePresenter = ((SpecEditorConfiguration) configuration)
           .getStructureOutlinePresenter(this);
       fStructurePresenter.install(this);
     }
-    if (configuration instanceof SpecConfiguration)
+    if (configuration instanceof SpecEditorConfiguration)
     {
-      fChooseAssetPresenter = ((SpecConfiguration) configuration)
+      fChooseAssetPresenter = ((SpecEditorConfiguration) configuration)
           .getAssetChooserPresenter(this);
       fChooseAssetPresenter.install(this);
     }

@@ -107,7 +107,8 @@ public class XMLNode extends TypedPosition
   private XMLNode correspondingNode = null;
   private IDocument document = null;
   public String publicId; //valid only for the root node
-  public String rootNodeId; //valid only for the root node
+  public String rootNodeId; //valid only for the root
+                                                    // node
 
   /**
    * @param offset
@@ -218,7 +219,8 @@ public class XMLNode extends TypedPosition
   {
     for (int i = 0; i < children.size(); i++)
     {
-      if (((XMLNode) children.get(i)).getOffset() > childArtifact.getOffset()) {
+      if (((XMLNode) children.get(i)).getOffset() > childArtifact.getOffset())
+      {
         children.add(i, childArtifact);
         break;
       }
@@ -707,7 +709,9 @@ public class XMLNode extends TypedPosition
       endLength = 2;
     } else if (ITypeConstants.DECL.equals(getType()))
     {
-      startLength = 2;
+//      if ("!DOCTYPE".equals(getName()))
+//        return getDoctypeAttributes();
+      startLength =1;
       endLength = 1;
     } else if (ITypeConstants.TAG.equals(getType()))
     {
@@ -732,7 +736,7 @@ public class XMLNode extends TypedPosition
     }
 
     String name = getName();
-    int initial = name == null ? 0 : content.indexOf(name)+name.length() ;
+    int initial = name == null ? 0 : content.indexOf(name) + name.length();
 
     for (int i = startLength + initial; i < content.length() - endLength; i++)
     {
@@ -753,8 +757,11 @@ public class XMLNode extends TypedPosition
           } else if (state == SINGLEQUOTE)
           {
             break;
-          } else
+          } else if (state != ATTR)
           {
+            start = i;
+            state = DOUBLEQUOTE;
+          } else {
             state = DOUBLEQUOTE;
           }
           break;
@@ -771,8 +778,11 @@ public class XMLNode extends TypedPosition
           } else if (state == DOUBLEQUOTE)
           {
             break;
-          } else
+          } else  if (state != ATTR)
           {
+            start = i;
+            state = SINGLEQUOTE;
+          } else {
             state = SINGLEQUOTE;
           }
           break;
@@ -840,6 +850,43 @@ public class XMLNode extends TypedPosition
 
     return attrs;
   }
+
+//  /**
+//   * @return
+//   */
+//  private List getDoctypeAttributes(String content)
+//  {
+//       
+//    ArrayList attrs = new ArrayList();
+//    try
+//    {
+//      content = document.get(getOffset(), getLength());
+//    } catch (BadLocationException e)
+//    {
+//      UIPlugin.log(e);
+//      return attrs;
+//    }
+//    int initial = content.indexOf("!DOCTYPE") + "!DOCTYPE".length() + 1;
+//    int state = TAG;
+//    int start = -1;
+//    for (int i = initial; i < content.length() - 1; i++)
+//    {
+//      char c = content.charAt(i);
+//      switch (c)
+//      {
+//        case '"' :
+//          if (state == DOUBLEQUOTE || state == SINGLEQUOTE) {
+//            attrs.add(new XMLNode(
+//                getOffset() + start,
+//                i - start + 1,
+//                ITypeConstants.ATTR,
+//                document));
+//            start = -1;
+//            state = TAG;
+//          } 
+//    }
+//    return null;
+//  }
 
   public Map getAttributesMap()
   {

@@ -51,7 +51,7 @@ import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: SpecCompletionProcessor.java,v 1.9.2.1 2004/06/10 16:48:20
- *          glongman Exp $
+ *                     glongman Exp $
  */
 public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 {
@@ -71,8 +71,8 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 
     fDTD = null;
 
-    IXMLModelProvider modelProvider = (IXMLModelProvider) fEditor.getDocumentProvider();
-    XMLReconciler model = modelProvider.getModel(fEditor.getEditorInput());
+    IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+    XMLReconciler model = modelProvider.getModel(document);
 
     if (model != null)
       fDTD = DOMValidator.getDTD(model.getPublicId());
@@ -146,7 +146,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
   {
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
     boolean useTabs = store.getBoolean(UIPlugin.PLUGIN_ID
-          + ".FORMATTER_USE_TABS_TO_INDENT");
+        + ".FORMATTER_USE_TABS_TO_INDENT");
     int tabSize = store.getInt(UIPlugin.PLUGIN_ID + ".EDITOR_DISPLAY_TAB_WIDTH");
     StringWriter swriter = new StringWriter();
     IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);

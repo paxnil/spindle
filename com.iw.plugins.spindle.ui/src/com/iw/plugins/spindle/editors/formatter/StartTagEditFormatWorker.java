@@ -100,16 +100,20 @@ public class StartTagEditFormatWorker extends FormatWorker
       int totalLength = fInitialIndent + walker.totalLength;
 
       List attrs = node.getAttributes();
-
-      if (attrs.size() < 2 || !fPreferences.wrapLongTags()
-          || totalLength <= fPreferences.getMaximumLineWidth())
+//criteria for splitting a line...
+// A - Prefs call for splitting
+// B - the tag is too long
+// C - the tag has 2 or more attrs
+      
+      boolean shouldSplit = fPreferences.wrapLongTags() && totalLength > fPreferences.getMaximumLineWidth() && attrs.size() >= 2;
+      if (shouldSplit)
       {
         //format - no line splitting
-        formatNoLineSplit(walker, result);
+        formatWithSplits(walker, result);
       } else
       {
-        //format with line spliting
-        formatWithSplits(walker, result);
+        //format with line spliting       
+        formatNoLineSplit(walker, result);
       }
 
       return result;

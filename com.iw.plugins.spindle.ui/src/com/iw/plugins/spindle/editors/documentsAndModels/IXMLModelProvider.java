@@ -25,7 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.documentsAndModels;
 
-import org.eclipse.ui.IEditorInput;
+import org.eclipse.jface.text.IDocument;
 import org.xmen.internal.ui.text.XMLReconciler;
 
 /**
@@ -43,12 +43,12 @@ public interface IXMLModelProvider
    * 
    * @return the model for the input in question
    */
-  XMLReconciler getModel(IEditorInput input);
+  XMLReconciler getModel(IDocument  document);
 
   /**
    * Hint that the model for an input should recreate itself at the next
    * opportunity.
    */
-  void resetModel(IEditorInput input);
+  void resetModel(IDocument document);
 
 }

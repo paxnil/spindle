@@ -25,75 +25,89 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.documentsAndModels;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.filebuffers.IDocumentSetupParticipant;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.IDocumentPartitionerExtension2;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
+import org.eclipse.jface.text.source.IAnnotationModel;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.internal.ui.text.XMLReconciler;
 
+import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
- * Document provider for xml files that have a model
+ * BaseDocumentSetupParticipant TODO add something here
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: FileDocumentModelProvider.java,v 1.1.2.1 2004/06/22 12:13:52
- *                     glongman Exp $
+ * @version $Id$
  */
-public abstract class FileDocumentModelProvider extends FileDocumentProvider
-    implements
-      IXMLModelProvider
+public abstract class BaseDocumentSetupParticipant implements IXMLModelProvider
 {
-  private Map fModelMap = new HashMap();
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider#getModel(org.eclipse.ui.IEditorInput)
-   */
-  public XMLReconciler getModel(IEditorInput input)
+  private static Map MODEL_MAP = Collections.synchronizedMap(new HashMap());
+
+  static void addModel(IDocument document, XMLReconciler model)
   {
-    IDocument document = getDocument(input);
-    if (document == null)
-      return null;
+    Assert.isTrue(!MODEL_MAP.containsKey(document));
+    MODEL_MAP.put(document, model);
+  }
 
-    return (XMLReconciler) fModelMap.get(document);
+  public static XMLReconciler removeModel(IDocument document) 
+  {
+    XMLReconciler model = (XMLReconciler) MODEL_MAP.remove(document);
+    if (model != null)
+    {
+      model.dispose();     
+    }
+    return model;
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider#resetModel(org.eclipse.ui.IEditorInput)
+   * @see com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider#getModel(org.eclipse.jface.text.IDocument)
    */
-  public void resetModel(IEditorInput input)
+  public XMLReconciler getModel(IDocument document)
   {
-    XMLReconciler model = getModel(input);
+    return (XMLReconciler) MODEL_MAP.get(document);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider#resetModel(org.eclipse.jface.text.IDocument)
+   */
+  public void resetModel(IDocument document)
+  {
+    XMLReconciler model = getModel(document);
     if (model != null)
       model.reset();
-
   }
 
-  protected IDocument createDocument(Object element) throws CoreException
+  /**
+   * Setup the document with syntax coloring and XML partitioning. A
+   * XMLReconciler model for the document is created and returned. But not
+   * stored anywhere.
+   * 
+   * @param document the document to setup
+   * @return the model created.
+   */
+  public XMLReconciler setup(IDocument document)
   {
-    IDocument document = super.createDocument(element);
-
-    if (document != null)
-    {
-      XMLReconciler model = new XMLReconciler();
-      model.setDocument(document);
-      document.addDocumentListener(model);
-      fModelMap.put(document, model);
-      TextUtilities.addDocumentPartitioners(document, createParitionerMap());
-    }
-    return document;
+    XMLReconciler model = new XMLReconciler();
+    model.setDocument(document);
+    document.addDocumentListener(model);
+    TextUtilities.addDocumentPartitioners(document, createParitionerMap());
+    model.setDocument(document);
+    return model;
   }
 
   private Map createParitionerMap()
@@ -119,23 +133,7 @@ public abstract class FileDocumentModelProvider extends FileDocumentProvider
   }
 
   protected abstract IDocumentPartitioner getSyntaxPartitioner();
+  
+  protected abstract IAnnotationModel createAnnotationModel(Object element) throws CoreException;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#disposeElementInfo(java.lang.Object,
-   *              org.eclipse.ui.texteditor.AbstractDocumentProvider.ElementInfo)
-   */
-  protected void disposeElementInfo(Object element, ElementInfo info)
-  {
-    XMLReconciler model = (XMLReconciler) fModelMap.remove(info.fDocument);
-    if (model != null)
-    {
-      model.dispose();
-      info.fDocument.removeDocumentListener(model);
-      XMLDocumentPartitioner.removeListener(model);
-    }
-    super.disposeElementInfo(element, info);
-
-  }
 }

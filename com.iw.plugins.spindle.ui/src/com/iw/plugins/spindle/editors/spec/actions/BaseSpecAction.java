@@ -44,7 +44,7 @@ import com.wutka.dtd.DTD;
  * Base class for spec actions that need the xml partitioning.
  * 
  * @author glongman@intelligentworks.com
- * 
+ *  
  */
 public abstract class BaseSpecAction extends BaseEditorAction
 {
@@ -58,7 +58,7 @@ public abstract class BaseSpecAction extends BaseEditorAction
 
   public BaseSpecAction()
   {
-    super();   
+    super();
   }
 
   public BaseSpecAction(String text)
@@ -100,10 +100,9 @@ public abstract class BaseSpecAction extends BaseEditorAction
       if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
         return;
 
-      if (!(documentProvider instanceof IXMLModelProvider))
-        return;
+      IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
 
-      XMLReconciler model = ((IXMLModelProvider) documentProvider).getModel(editorInput);
+      XMLReconciler model = (modelProvider).getModel(fDocument);
       if (model == null)
         return;
 

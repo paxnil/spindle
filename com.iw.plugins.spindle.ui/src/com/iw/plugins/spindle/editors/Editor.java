@@ -172,7 +172,9 @@ public abstract class Editor extends AbstractDecoratedTextEditor
 
     Action action = new TextOperationAction(
         UIPlugin.getDefault().getResourceBundle(),
-        "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
+        "Format.",
+        this,
+        ISourceViewer.FORMAT);
     //Hook the action to the format command (plugin.xml)
     action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.format");
     setAction("Format", action);

@@ -715,6 +715,7 @@ public class XMLReconciler implements IDocumentListener, XMLDocumentPartitioner.
   public void dispose()
   {
     fDocument.removeDocumentListener(this);
+    XMLDocumentPartitioner.removeListener(this);
     fDocument = null;
   }
 

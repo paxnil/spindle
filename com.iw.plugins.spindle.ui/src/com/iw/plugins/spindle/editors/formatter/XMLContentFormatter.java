@@ -199,7 +199,7 @@ public class XMLContentFormatter
         setOffset(position);
       } else
       {
-        setLength(getLength() == 0 ? 0 : position - getOffset() + 1);
+        setLength(getLength() == 0 ? 0 : Math.max(0,position - getOffset() + 1));
       }
     }
 

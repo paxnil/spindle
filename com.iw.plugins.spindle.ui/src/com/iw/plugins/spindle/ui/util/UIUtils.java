@@ -32,6 +32,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.formatter.IContentFormatter;
+import org.eclipse.jface.text.formatter.MultiPassContentFormatter;
 import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
@@ -50,6 +52,11 @@ import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.editors.formatter.DoctypeEditFormatWorker;
+import com.iw.plugins.spindle.editors.formatter.FormattingPreferences;
+import com.iw.plugins.spindle.editors.formatter.MasterFormattingStrategy;
+import com.iw.plugins.spindle.editors.formatter.SlaveFormattingStrategy;
+import com.iw.plugins.spindle.editors.formatter.StartTagEditFormatWorker;
 import com.iw.plugins.spindle.editors.formatter.XMLContentFormatter;
 
 /**
@@ -191,11 +198,11 @@ public class UIUtils
    */
   public static void XMLFormatDocument(IDocument document)
   {
-//    XMLContentFormatter formatter = new XMLContentFormatter(
-//        new XMLFormattingStrategy(),
-//        new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY },
-//        UIPlugin.getDefault().getPreferenceStore());
-//    formatter.format(document, new Region(0, document.getLength()));
+    //    XMLContentFormatter formatter = new XMLContentFormatter(
+    //        new XMLFormattingStrategy(),
+    //        new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY },
+    //        UIPlugin.getDefault().getPreferenceStore());
+    //    formatter.format(document, new Region(0, document.getLength()));
   }
 
   /**
@@ -245,6 +252,33 @@ public class UIUtils
     formData.right = new FormAttachment(100, 0);
     separator.setLayoutData(formData);
     return separator;
+  }
+
+  public static IContentFormatter createXMLContentFormatter(
+      FormattingPreferences preferences)
+  {
+    MultiPassContentFormatter formatter = new MultiPassContentFormatter(
+        XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY,
+        IDocument.DEFAULT_CONTENT_TYPE);
+
+    formatter.setMasterStrategy(new MasterFormattingStrategy(preferences));
+
+    formatter.setSlaveStrategy(new SlaveFormattingStrategy(
+        preferences,
+        new String[]{ITypeConstants.TAG},
+        new StartTagEditFormatWorker()), ITypeConstants.TAG);
+
+    formatter.setSlaveStrategy(new SlaveFormattingStrategy(
+        preferences,
+        new String[]{ITypeConstants.EMPTYTAG},
+        new StartTagEditFormatWorker()), ITypeConstants.EMPTYTAG);
+
+    formatter.setSlaveStrategy(new SlaveFormattingStrategy(
+        preferences,
+        new String[]{ITypeConstants.DECL},
+        new DoctypeEditFormatWorker()), ITypeConstants.DECL);
+
+    return formatter;
   }
 
 }

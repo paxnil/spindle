@@ -15,16 +15,15 @@
  *
  * The Initial Developer of the Original Code is
  * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Portions created by the Initial Developer are Copyright (C) 2004
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * 
  *  glongman@intelligentworks.com
- *  phraktle@imapmail.org
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editors.template;
+package com.iw.plugins.spindle.editors.documentsAndModels;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocumentPartitioner;
@@ -32,35 +31,40 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IFileEditorInput;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.documentsAndModels.FileDocumentModelProvider;
+import com.iw.plugins.spindle.editors.template.TemplateAnnotationModel;
 
 /**
- * Document provider for templates that come from files
- *  
+ * TemplateDocumentSetupParticipant adds setup for syntax coloring and
+ * annotations
+ * 
+ * @author glongman@intelligentworks.com
+ * @version $Id$
  */
-public class TemplateFileDocumentProvider extends FileDocumentModelProvider
+public class TemplateDocumentSetupParticipant extends BaseDocumentSetupParticipant
 {
 
-  /* (non-Javadoc)
-   * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createAnnotationModel(java.lang.Object)
-   */
-  protected IAnnotationModel createAnnotationModel(Object element) throws CoreException
-  {
-    if (element instanceof IFileEditorInput)
-    {
-      return new TemplateAnnotationModel((IFileEditorInput) element);
-    }
-
-    return super.createAnnotationModel(element);
-  }
-  
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.documentsAndModels.StorageDocumentModelProvider#getSyntaxPartitioner()
+   * @see com.iw.plugins.spindle.editors.documentsAndModels.BaseDocumentSetupParticipant#getSyntaxPartitioner()
    */
   protected IDocumentPartitioner getSyntaxPartitioner()
   {
     return UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
   }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.documentsAndModels.BaseDocumentSetupParticipant#createAnnotationModel(java.lang.Object)
+   */
+  protected IAnnotationModel createAnnotationModel(Object element) throws CoreException
+  {
+
+    if (element instanceof IFileEditorInput)
+      return new TemplateAnnotationModel((IFileEditorInput) element);
+
+    return null;
+  }
+
 }

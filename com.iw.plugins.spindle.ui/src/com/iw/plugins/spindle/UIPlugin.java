@@ -63,6 +63,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.editors.text.FileDocumentProvider;
+import org.eclipse.ui.editors.text.StorageDocumentProvider;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -73,10 +75,11 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.SharedTextColors;
-import com.iw.plugins.spindle.editors.spec.SpecFileDocumentProvider;
-import com.iw.plugins.spindle.editors.spec.SpecStorageDocumentProvider;
-import com.iw.plugins.spindle.editors.template.TemplateFileDocumentProvider;
-import com.iw.plugins.spindle.editors.template.TemplateStorageDocumentProvider;
+import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
+import com.iw.plugins.spindle.editors.documentsAndModels.SpecDocumentSetupParticipant;
+import com.iw.plugins.spindle.editors.documentsAndModels.SpindleFileDocumentProvider;
+import com.iw.plugins.spindle.editors.documentsAndModels.SpindleStorageDocumentProvider;
+import com.iw.plugins.spindle.editors.documentsAndModels.TemplateDocumentSetupParticipant;
 import com.iw.plugins.spindle.editors.template.TemplateTextTools;
 import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 import com.iw.plugins.spindle.ui.util.Revealer;
@@ -291,23 +294,22 @@ public class UIPlugin extends AbstractUIPlugin
   private static UIPlugin plugin;
 
   /** shared document provider for Templates that come from files * */
-  private TemplateFileDocumentProvider fTemplateFileDocumentProvider;
+  private SpindleFileDocumentProvider fTemplateFileDocumentProvider;
 
   /** shared document provider for Template that don't come from files (ie jars) * */
-  private TemplateStorageDocumentProvider fTemplateStorageDocumentProvider;
+  private SpindleStorageDocumentProvider fTemplateStorageDocumentProvider;
 
   /** shared document provider for Specifications that come from files * */
-  private SpecFileDocumentProvider fSpecFileDocumentProvider;
+  private SpindleFileDocumentProvider fSpecFileDocumentProvider;
 
-  /**
-   * shared document provider for Specifications that don't come from files (ie
-   * jars) *
-   */
-  private SpecStorageDocumentProvider fSpecStorageDocumentProvider;
+  /** shared document provider for Specifications that come jars */
+  private SpindleStorageDocumentProvider fSpecStorageDocumentProvider;
 
   private TemplateTextTools fTemplatelTextTools;
 
   private ILabelProvider fStorageLableProvider;
+  
+  private IXMLModelProvider fModelProvider = new SpecDocumentSetupParticipant();
 
   /**
    * these are shared colors not specific to any one editor used mostly for the
@@ -371,34 +373,35 @@ public class UIPlugin extends AbstractUIPlugin
     return plugin;
   }
 
-  public synchronized TemplateFileDocumentProvider getTemplateFileDocumentProvider()
+  public synchronized FileDocumentProvider getTemplateFileDocumentProvider()
   {
-    if (fTemplateFileDocumentProvider == null)
-      fTemplateFileDocumentProvider = new TemplateFileDocumentProvider();
+    if (fTemplateFileDocumentProvider == null) {
+      fTemplateFileDocumentProvider = new SpindleFileDocumentProvider(new TemplateDocumentSetupParticipant());
+    }
 
     return fTemplateFileDocumentProvider;
   }
 
-  public synchronized TemplateStorageDocumentProvider getTemplateStorageDocumentProvider()
+  public synchronized StorageDocumentProvider getTemplateStorageDocumentProvider()
   {
     if (fTemplateStorageDocumentProvider == null)
-      fTemplateStorageDocumentProvider = new TemplateStorageDocumentProvider();
+      fTemplateStorageDocumentProvider =new SpindleStorageDocumentProvider(new TemplateDocumentSetupParticipant());
 
     return fTemplateStorageDocumentProvider;
   }
 
-  public synchronized SpecFileDocumentProvider getSpecFileDocumentProvider()
+  public synchronized FileDocumentProvider getSpecFileDocumentProvider()
   {
     if (fSpecFileDocumentProvider == null)
-      fSpecFileDocumentProvider = new SpecFileDocumentProvider();
+      fSpecFileDocumentProvider = new SpindleFileDocumentProvider(new SpecDocumentSetupParticipant());
 
     return fSpecFileDocumentProvider;
   }
 
-  public synchronized SpecStorageDocumentProvider getSpecStorageDocumentProvider()
+  public synchronized StorageDocumentProvider getSpecStorageDocumentProvider()
   {
     if (fSpecStorageDocumentProvider == null)
-      fSpecStorageDocumentProvider = new SpecStorageDocumentProvider();
+      fSpecStorageDocumentProvider = new SpindleStorageDocumentProvider(new SpecDocumentSetupParticipant());
 
     return fSpecStorageDocumentProvider;
   }
@@ -501,6 +504,11 @@ public class UIPlugin extends AbstractUIPlugin
       fStorageLableProvider = new StorageLabelProvider();
 
     return fStorageLableProvider;
+  }
+
+  public IXMLModelProvider getXMLModelProvider()
+  {    
+    return fModelProvider;
   }
 
 }

@@ -162,7 +162,7 @@ public abstract class FormatWorker
 
       int i = data.length() - 1;
       for (; i >= 0 && data.charAt(i) <= ' '; i--);
-      if (i > 0 && i < data.length())
+      if (i > 0 && i < data.length() - 1)
       {
         i += 1;
         int newEnd = offset + i;

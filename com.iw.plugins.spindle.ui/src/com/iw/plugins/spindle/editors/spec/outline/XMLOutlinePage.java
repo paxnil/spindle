@@ -82,32 +82,29 @@ public class XMLOutlinePage extends ContentOutlinePage implements XMLModelListen
   private void connect(IEditorInput input)
   {
 
-    IDocumentProvider provider = null;
-    if (input instanceof IFileEditorInput)
-    {
-      provider = UIPlugin.getDefault().getSpecFileDocumentProvider();
-    } else
-    {
-      provider = UIPlugin.getDefault().getSpecStorageDocumentProvider();
-    }
+    IDocumentProvider provider = fEditor.getDocumentProvider();
+
     //force creation of the document & the model.
     IDocument document = provider.getDocument(input);
-    XMLReconciler model = ((IXMLModelProvider) provider).getModel(input);
+    IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+    XMLReconciler model = (modelProvider).getModel(document);
     if (model != null)
     {
       fRoot = model.getRoot();
       model.addListener(this);
     }
   }
-  
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.xmen.internal.ui.text.XMLModelListener#modelChanged(org.xmen.internal.ui.text.XMLReconciler)
    */
   public void modelChanged(XMLReconciler reconciler)
   {
-     setInput(reconciler.getRoot());
+    setInput(reconciler.getRoot());
   }
-  
+
   private void disconnect()
   {
     IEditorInput input = fEditor.getEditorInput();
@@ -119,7 +116,9 @@ public class XMLOutlinePage extends ContentOutlinePage implements XMLModelListen
     {
       provider = UIPlugin.getDefault().getSpecStorageDocumentProvider();
     }
-    XMLReconciler model = ((IXMLModelProvider) provider).getModel(input);
+    IDocument document = provider.getDocument(input);
+    IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+    XMLReconciler model = modelProvider.getModel(document);
     if (model != null)
     {
       model.removeListener(this);
@@ -155,13 +154,17 @@ public class XMLOutlinePage extends ContentOutlinePage implements XMLModelListen
 
   public void setInput(final Object input)
   {
-    if (input == null)
+
+    if (fTree == null || fTree.isDisposed())
       return;
 
     fRoot = (XMLNode) input;
 
-    if (fTree == null || fTree.isDisposed())
+    if (fRoot == null)
+    {
+      treeViewer.setInput(null);
       return;
+    }
 
     Display d = fTree.getDisplay();
     d.asyncExec(new Runnable()

@@ -160,9 +160,15 @@ public class MasterFormatWorker extends PositionUpdatingFormatWorker
           fLineInfos.add(info);
         } else if (fPreferences.preserveBlankLines() && !alreadyKept)
         {
-          writeLine("", fInitialIndent, fIndentLevel, buffer);
+          int off = writeLine("", fInitialIndent, fIndentLevel, buffer);
+          info.setWriteOffset(off);
+          fLineInfos.add(info);
           //                    buffer.append(fLineDelimiter);
           alreadyKept = true;
+        } else {
+          int off = writeEmpty(buffer);
+          info.setWriteOffset(off);
+          fLineInfos.add(info);
         }
       }
     }
@@ -180,7 +186,8 @@ public class MasterFormatWorker extends PositionUpdatingFormatWorker
   {
     LineWalker lineWalker = new LineWalker(fDocument, tposition, fPositions);
 
-    if (lineWalker.isMultiline() && (fPreferences.wrapLongTags() || collapseAlways))
+   if (lineWalker.isMultiline() && (fPreferences.wrapLongTags() || collapseAlways))
+//      if (false)
     {
       formatMultiLineStartTag(lineWalker, buffer);
       return;

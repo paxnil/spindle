@@ -47,6 +47,7 @@ import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
@@ -105,6 +106,7 @@ import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.IReconcileWorker;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
+import com.iw.plugins.spindle.editors.documentsAndModels.SpecDocumentSetupParticipant;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
@@ -363,7 +365,7 @@ public class SpecEditor extends Editor
     if (input instanceof IFileEditorInput)
       return UIPlugin.getDefault().getSpecFileDocumentProvider();
 
-    return new SpecStorageDocumentProvider();
+    return UIPlugin.getDefault().getSpecStorageDocumentProvider();
   }
 
   /*
@@ -398,7 +400,7 @@ public class SpecEditor extends Editor
    */
   protected SourceViewerConfiguration createSourceViewerConfiguration()
   {
-    return new SpecConfiguration(UIPlugin.getDefault().getXMLTextTools(), this, UIPlugin
+    return new SpecEditorConfiguration(UIPlugin.getDefault().getXMLTextTools(), this, UIPlugin
         .getDefault()
         .getPreferenceStore());
   }
@@ -1006,11 +1008,11 @@ public class SpecEditor extends Editor
         return fEditor.getReconciledSpec();
 
       IDocumentProvider documentProvider = fEditor.getDocumentProvider();
-      if (!(documentProvider instanceof IXMLModelProvider))
-        return null;
+      IDocument document = documentProvider.getDocument(fEditor.getEditorInput());
 
-      XMLReconciler model = ((IXMLModelProvider) documentProvider).getModel(fEditor
-          .getEditorInput());
+      IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+
+      XMLReconciler model = modelProvider.getModel(document);
       if (model == null)
         return null;
 

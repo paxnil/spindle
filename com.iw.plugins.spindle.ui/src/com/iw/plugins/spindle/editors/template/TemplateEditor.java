@@ -76,6 +76,7 @@ import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
+import com.iw.plugins.spindle.editors.documentsAndModels.BaseDocumentSetupParticipant;
 import com.iw.plugins.spindle.editors.template.actions.MoveToSpecAction;
 import com.iw.plugins.spindle.editors.template.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.template.actions.ShowInPackageExplorerAction;
@@ -241,11 +242,11 @@ public class TemplateEditor extends Editor
    * @see com.iw.plugins.spindle.editors.Editor#createDocumentProvider(org.eclipse.ui.IEditorInput)
    */
   protected IDocumentProvider createDocumentProvider(IEditorInput input)
-  {
+  {    
     if (input instanceof IFileEditorInput)
       return UIPlugin.getDefault().getTemplateFileDocumentProvider();
 
-    return UIPlugin.getDefault().getSpecStorageDocumentProvider();
+    return UIPlugin.getDefault().getTemplateStorageDocumentProvider();
   }
 
   /*
