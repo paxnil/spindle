@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- default platform documentation stylesheets -->
+<style>@import url("book.css");</style>
+<!-- default schema documentation stylesheets -->
+<style>@import url("schema.css");</style>
+</HEAD>
+<BODY>
+<H1><CENTER>Web Context Locator</CENTER></H1>
+<p></p>
+<h6 class=CaptionFigColumn id=header>Identifier: </h6>com.iw.plugins.spindle.core.webContextLocator<p></p>
+<h6 class=CaptionFigColumn id=header>Since: </h6>Spindle 3.1.19
+<p></p>
+
+<p>
+<h6 class=CaptionFigColumn id=header>Description: </h6><p>Plugins can contribute implemtations of IProjectMetaLocator keyed on a nature id. Thus, projects that have a nature can provide web project meta information.
+</p><p> Spindle will defer writing its own metadata file (.tapestryplugin) if it finds a contribution that supplies the information it needs. This is to avoid duplication of information and to avoid the possiblity of metadatum files getting out of sync.</p>
+<p>Note that the first contribution that supplies a valid result wins</p></p>
+<p><h6 class=CaptionFigColumn id=header>Configuration Markup:</h6></p>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.metadataLocator">metadataLocator</a>+)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.metadataLocator">metadataLocator</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST metadataLocator</p>
+<p class=code id=dtdAttlist>natureId&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>locator&nbsp;&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>natureId</b> - The id of the contribution defining a project nature.</li>
+<li><b>locator</b> - a class that implements <code>com.iw.plugins.spindle.core.IProjectMetadataLocator</code></li>
+</ul>
+<br><h6 class=CaptionFigColumn id=header>Examples: </h6><extension
+  point="com.iw.plugins.spindle.core.projectMetaDataLocator"
+  id="myPlugin.locator"
+  name="%projectMetaLocator"
+  >
+  <metadataLocator 
+     natureId="myplugin.nature"
+     locator="myplugin.Locator"/>
+</extension>
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>Supplied Implementation: </h6>There is no supplied implementation. See inteface  com.iw.plugins.spindle.core.IProjectMetadataLocator.
+<p></p>
+
+<br>
+<p class=note id=copyright>
+Copyright (C) 2005 Geoffrey Longman
+<p></p>
+
+</p>
+</BODY>
+</HTML>

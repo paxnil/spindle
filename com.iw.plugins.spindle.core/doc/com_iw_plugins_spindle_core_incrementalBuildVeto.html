@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- default platform documentation stylesheets -->
+<style>@import url("book.css");</style>
+<!-- default schema documentation stylesheets -->
+<style>@import url("schema.css");</style>
+</HEAD>
+<BODY>
+<H1><CENTER>Option to veto an incremental build</CENTER></H1>
+<p></p>
+<h6 class=CaptionFigColumn id=header>Identifier: </h6>com.iw.plugins.spindle.core.incrementalBuildVeto<p></p>
+<h6 class=CaptionFigColumn id=header>Since: </h6>Spindle 3.1.9
+<p></p>
+
+<p>
+<h6 class=CaptionFigColumn id=header>Description: </h6><p>Developers can register a veto on incremental builds. The canonical example of when this might be needed is when special runtime classes are being used so that scripts in other launguages are being used to act as Page or Component classes.
+</p><p>
+Basicly the veto works like this. A developer registers a file extension string. When an incemental build is started, the resource change set will be checked for files with this extension that have changed. If this is the case, the incremental build will not occur. Rather a full build will be initiated instead.
+</p><p>
+ Change in this case means a create, delete, move or a rename (to or from). Change delta's that indicate that the only the file's content has changed are ignored.
+ </p><p>
+ Spindle will ignore contributions that try to register veto for the following extensions:
+ <ul>
+ <li>application</li>
+ <li>library</li>
+ <li>jwc</li>
+ <li>page</li>
+ <li>html</li>
+ </ul>
+ </p><p>
+ As well, even if you register the extension "xml", web.xml is not considered.
+ </p><p> 
+This point is to be considered temporary until full index/refactoring is implemented. At that point this extension will no longer be needed and any contributions will be ignored.
+</p>
+Last point, every contribution to this extension will slow down the build. Use sparingly.</p>
+<p><h6 class=CaptionFigColumn id=header>Configuration Markup:</h6></p>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.veto">veto</a>+)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.veto">veto</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST veto</p>
+<p class=code id=dtdAttlist>extension&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>extension</b> - When a file in the project that has this extension changes, an incremental build is vetoed and a Full Build is required. Don't include the 'dot' character.</li>
+<li><b>id</b> - </li>
+<li><b>name</b> - Give a user friendly name. Eventually, users will be able to enable/disable vetoes.</li>
+</ul>
+<br><h6 class=CaptionFigColumn id=header>Examples: </h6>TBD
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>API Information: </h6>Not Applicable
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>Supplied Implementation: </h6>Not Applicable
+<p></p>
+
+<br>
+<p class=note id=copyright>
+2004 Intelligent Works Incorporated.
+<p></p>
+
+</p>
+</BODY>
+</HTML>

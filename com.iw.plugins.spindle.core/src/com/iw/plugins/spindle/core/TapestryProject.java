@@ -199,11 +199,11 @@ public class TapestryProject implements IProjectNature
     this.setProject(javaProject.getProject());
   }
 
-  static public void addTapestryNature(IJavaProject project)
+  static public void addTapestryNature(IJavaProject project, boolean forceOrder)
   {
     try
     {
-      TapestryCore.addNatureToProject(project.getProject(), TapestryCore.NATURE_ID);
+      TapestryCore.addNatureToProject(project.getProject(), TapestryCore.NATURE_ID, forceOrder);
     } catch (CoreException ex)
     {
       TapestryCore.log(ex.getMessage());

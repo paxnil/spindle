@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- default platform documentation stylesheets -->
+<style>@import url("book.css");</style>
+<!-- default schema documentation stylesheets -->
+<style>@import url("schema.css");</style>
+</HEAD>
+<BODY>
+<H1><CENTER>Component Type Resolvers</CENTER></H1>
+<p></p>
+<h6 class=CaptionFigColumn id=header>Identifier: </h6>com.iw.plugins.spindle.core.componentTypeResolver<p></p>
+<h6 class=CaptionFigColumn id=header>Since: </h6>Spindle 3.1.9
+<p></p>
+
+<p>
+<h6 class=CaptionFigColumn id=header>Description: </h6><p>Tapestry allows page/component "classes" to be in languages other than Java. Some implementations use a base class that in turn invokes code in some other language. This extension gives developers the opportunity to override the default (Java type only) resolution with thier own. Contributed extensions can resolve any file in the project (or in a project jar file) to be the "class" for a particular page or component.
+</p><p>
+Last point, every contribution to this extension will slow down the build. Use sparingly.</p>
+<p><h6 class=CaptionFigColumn id=header>Configuration Markup:</h6></p>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.resolver">resolver</a>+)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.resolver">resolver</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST resolver</p>
+<p class=code id=dtdAttlist>class&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>class</b> - a type that implements com.iw.plugins.spindle.core.extensions.IComponentTypeResolver</li>
+<li><b>id</b> - </li>
+<li><b>name</b> - </li>
+</ul>
+<br><h6 class=CaptionFigColumn id=header>Examples: </h6>[Enter extension point usage example here.]
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>API Information: </h6>See com.iw.plugins.spindle.core.extensions.IComponentTypeResourceResolver
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>Supplied Implementation: </h6>Each contributed class is instantiated once and reused.
+<p></p>
+
+<br>
+<p class=note id=copyright>
+Copyright 2004, Intelligent Works Incorporated.
+<p></p>
+
+</p>
+</BODY>
+</HTML>

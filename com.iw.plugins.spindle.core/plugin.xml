@@ -4,7 +4,7 @@
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
    version="0.1.18"
-   provider-name="Intelligent Works Inc."
+   provider-name="Geoffrey Longman"
    class="com.iw.plugins.spindle.core.TapestryCore">
 
    <runtime>
@@ -69,6 +69,7 @@
    <extension-point id="componentTypeResolver" name="Component Type Resolvers" schema="schema/componentTypeResolver.exsd"/>
    <extension-point id="incrementalBuildVeto" name="Option to veto an incremental build" schema="schema/incrementalBuildVeto.exsd"/>
    <extension-point id="beanSpecificationValidators" name="Contributed Validators for Tapestry Bean Specs" schema="schema/beanSpecificationValidators.exsd"/>
+   <extension-point id="projectMetaDataLocator" name="Web Project Metadata Locator" schema="schema/projectMetaDataLocator.exsd"/>
 
    <extension
          point="org.eclipse.team.core.fileTypes">

@@ -742,7 +742,7 @@ public class ProjectPropertyPage extends PropertyPage
         if (fIsTapestryProjectCheck.getSelection())
         {
           if (getTapestryProject() == null)
-            TapestryProject.addTapestryNature(getJavaProject());
+            TapestryProject.addTapestryNature(getJavaProject(), true);
           TapestryProject prj = getTapestryProject();
 
           String projectName = prj.getProject().getName();

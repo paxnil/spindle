@@ -3,7 +3,7 @@
       id="com.iw.features.spindle"
       label="Spindle 3, an Eclipse Plugin for Tapestry"
       version="3.1.18"
-      provider-name="Intelligent Works Inc"
+      provider-name="Geoffrey Longman"
       image="spindle.gif">
 
    <description url="http://spindle.sourceforge.net">
@@ -12,7 +12,7 @@ Tapestry Web Components (http://jakarta.apache.org/tapestry).
    </description>
 
    <copyright>
-      Copyright 2004 Geoff Longman, Don Cuthbertson
+      Copyright 2004 Geoffrey Longman
 All Rights Reserved
    </copyright>
 
