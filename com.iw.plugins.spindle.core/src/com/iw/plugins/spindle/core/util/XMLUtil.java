@@ -1045,7 +1045,7 @@ public class XMLUtil
       indenter.println("<web-app xmlns=\"http://java.sun.com/xml/ns/j2ee\"");
       indenter.printlnIndented(
           1,
-          "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+          "xmlns:xsi=\"http://www.w3.org/TR/xmlschema-1/\"");
       indenter
           .printIndented(
               1,

@@ -342,7 +342,9 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
     data.horizontalSpan = 1;
     //    data.horizontalAlignment= GridData.FILL;
     data.grabExcessHorizontalSpace = false;
-    data.heightHint = SWTUtil.getButtonHeightHint(browseSpecClassButton);
+    
+    
+//    data.heightHint = SWTUtil.getButtonHeightHint(browseSpecClassButton);
     data.widthHint = SWTUtil.getButtonWidthHint(browseSpecClassButton);
     browseSpecClassButton.setLayoutData(data);
 
