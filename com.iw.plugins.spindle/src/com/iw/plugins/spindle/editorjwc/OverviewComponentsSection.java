@@ -45,22 +45,32 @@ public class OverviewComponentsSection extends BasicLinksSection {
    * Constructor for OverviewComponentsSection
    */
   public OverviewComponentsSection(SpindleFormPage page) {
-    super(page, "Components", "This section describes the components used in this component");
+    super(page, "Components", "This section lists any Contained Components ");
   }
 
   public void update(boolean removePrevious) {
     if (removePrevious) {
+    	
       removeAll();
+      
     }
     TapestryComponentModel model = (TapestryComponentModel) getModel();
     PluginComponentSpecification spec = model.getComponentSpecification();
     Iterator i = new TreeSet(spec.getComponentIds()).iterator();
     while (i.hasNext()) {
+    	
       String name = (String) i.next();
       Image image = null;
-      if (spec.getComponent(name).getType().endsWith(".jwc")) {
+      if (spec.getComponent(name).getCopyOf() != null) {
+
+        image = TapestryImages.getSharedImage("componentCopyOf16.gif");
+        
+      } else if (spec.getComponent(name).getType().endsWith(".jwc")) {
+      	
         image = TapestryImages.getSharedImage("component16.gif");
+        
       } else {
+      	
         image = TapestryImages.getSharedImage("componentAlias16.gif");
       }
       String value = name + "  type = " + spec.getComponent(name).getType();
@@ -69,22 +79,31 @@ public class OverviewComponentsSection extends BasicLinksSection {
     super.update(removePrevious);
   }
 
-  protected SpindleFormPage getMorePage() {
-    return (SpindleFormPage)getFormPage().getEditor().getPage(JWCMultipageEditor.COMPONENTS);
+  protected SpindleFormPage getGotoPage() {
+    return (SpindleFormPage) getFormPage().getEditor().getPage(JWCMultipageEditor.COMPONENTS);
   }
 
   public void modelChanged(IModelChangedEvent event) {
     super.modelChanged(event);
     if (!updateNeeded) {
-      if (event.getChangeType() == IModelChangedEvent.CHANGE) {
+
+      if (event.getChangeType() == IModelChangedEvent.WORLD_CHANGED) {
+
+        updateNeeded = true;
+
+      } else if (event.getChangeType() == IModelChangedEvent.CHANGE) {
+
         updateNeeded = event.getChangedProperty().equals("components");
+
       }
+
+      update();
     }
   }
 
   protected class ComponentsHyperLinkAdapter extends HyperLinkAdapter {
     public void linkActivated(Control parent) {
-      final SpindleFormPage targetPage = getMorePage();
+      final SpindleFormPage targetPage = getGotoPage();
       if (targetPage == null) {
         return;
       }

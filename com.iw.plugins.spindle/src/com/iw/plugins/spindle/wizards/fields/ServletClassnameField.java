@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.util.SpindleStatus;
 
 /**
  * @author GWL
@@ -73,7 +73,7 @@ public class ServletClassnameField extends AbstractNameField {
    * @see AbstractNameField#nameChanged()
    */
   protected IStatus nameChanged() {
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
     String current = getTextValue();
     if (current == null || "".equals(current)) {
       status.setError("");

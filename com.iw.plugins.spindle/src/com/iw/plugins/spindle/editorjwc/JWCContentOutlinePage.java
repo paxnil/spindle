@@ -31,30 +31,32 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.pde.internal.ui.editor.FormOutlinePage.BasicContentProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.editorjwc.beans.BeansFormPage;
+import com.iw.plugins.spindle.editorjwc.components.ComponentsFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormOutlinePage;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
-import com.iw.plugins.spindle.editors.SpindleFormOutlinePage.Holder;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 
-public class ComponentFormOutlinePage extends SpindleFormOutlinePage {
+public class JWCContentOutlinePage extends SpindleFormOutlinePage {
 
   Image containedComponentImage;
   Image componentAliasImage;
+  Image copyOfImage;
   Image beanImage;
 
   /**
    * Constructor for TapestryFormOutlinePage
    */
-  public ComponentFormOutlinePage(SpindleFormPage page) {
+  public JWCContentOutlinePage(SpindleFormPage page) {
     super(page);
     containedComponentImage = TapestryImages.getSharedImage("component16.gif");
     componentAliasImage = TapestryImages.getSharedImage("componentAlias16.gif");
+    copyOfImage = TapestryImages.getSharedImage("componentCopyOf16.gif");
     beanImage = TapestryImages.getSharedImage("bean.gif");
   }
 
@@ -75,6 +77,12 @@ public class ComponentFormOutlinePage extends SpindleFormOutlinePage {
     SpindleFormPage page = (SpindleFormPage) holder.page;
     if ("Components".equals(page.getTitle())) {
       PluginContainedComponent component = (PluginContainedComponent) holder.element;
+      
+      if (component.getCopyOf() != null) {
+      	
+      	return copyOfImage;
+      	
+      }
       String type = component.getType();
       if (type != null && component.getType().endsWith(".jwc")) { 
         return containedComponentImage;

@@ -27,7 +27,6 @@ package com.iw.plugins.spindle.editors;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.pde.internal.ui.editor.XMLConfiguration;
 import org.eclipse.pde.internal.ui.editor.text.ColorManager;
 import org.eclipse.pde.internal.ui.editor.text.IColorManager;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -38,7 +37,7 @@ public class XMLEditorPage extends TapestrySourcePage {
 
   public XMLEditorPage(SpindleMultipageEditor editor) {
     super(editor);
-    setSourceViewerConfiguration(new XMLConfiguration(colorManager));
+    setSourceViewerConfiguration(new SpindleXMLConfiguration(colorManager));
   }
 
   public IContentOutlinePage createContentOutlinePage() {

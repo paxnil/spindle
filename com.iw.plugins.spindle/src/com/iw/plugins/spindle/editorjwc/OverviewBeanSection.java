@@ -45,7 +45,7 @@ public class OverviewBeanSection extends BasicLinksSection {
    * Constructor for OverviewParametersSection
    */
   public OverviewBeanSection(SpindleFormPage page) {
-    super(page, "Beans", "This section describes the beans used by this component");
+    super(page, "Beans", "This section lists any Beans");
   }
   public void update(boolean removePrevious) {
     if (removePrevious) {
@@ -68,13 +68,13 @@ public class OverviewBeanSection extends BasicLinksSection {
     super.update(removePrevious);
   }
 
-  protected SpindleFormPage getMorePage() {
+  protected SpindleFormPage getGotoPage() {
     return (SpindleFormPage)getFormPage().getEditor().getPage(JWCMultipageEditor.BEANS);
   }
 
   protected class BeansHyperLinkAdapter extends HyperLinkAdapter {
     public void linkActivated(Control parent) {
-      final IPDEEditorPage targetPage = getMorePage();
+      final IPDEEditorPage targetPage = getGotoPage();
       if (targetPage == null) {
         return;
       }

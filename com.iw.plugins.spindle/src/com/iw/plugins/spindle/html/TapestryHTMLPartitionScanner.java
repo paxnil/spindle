@@ -27,19 +27,24 @@ package com.iw.plugins.spindle.html;
 
 import java.util.ArrayList;
 
-import com.iw.plugins.spindle.ui.text.*;
+import org.eclipse.jface.text.rules.IRule;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.MultiLineRule;
+import org.eclipse.jface.text.rules.RuleBasedScanner;
+import org.eclipse.jface.text.rules.Token;
 
-import org.eclipse.jface.text.rules.*;
+import com.iw.plugins.spindle.ui.text.JWCIDTagRule;
+import com.iw.plugins.spindle.ui.text.TagRule;
 
 
-public class TapestryPartitionScanner extends RuleBasedScanner {
+public class TapestryHTMLPartitionScanner extends RuleBasedScanner {
 
   public final static String HTML_COMMENT = "__html_comment";
   public final static String JWCID_TAG = "__jwcid_tag";
   public final static String JWC_TAG = "__jwc_tag";
   public final static String HTML_TAG = "__html_tag";
 
-  public TapestryPartitionScanner() {
+  public TapestryHTMLPartitionScanner() {
 
 	ArrayList rules = new ArrayList();
 

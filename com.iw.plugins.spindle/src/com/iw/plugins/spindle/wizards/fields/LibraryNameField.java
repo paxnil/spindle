@@ -23,6 +23,9 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
+
+
+
 package com.iw.plugins.spindle.wizards.fields;
 
 import org.eclipse.core.resources.IContainer;
@@ -35,31 +38,31 @@ import org.eclipse.jdt.core.JavaModelException;
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.util.SpindleStatus;
 
-
-
-
-
-public class ApplicationNameField extends AbstractNameField  {
-
-
-  
+/**
+ * @author gwl
+ * @version $Id$
+ *
+ * Copyright 2002, Intelligent Work Inc.
+ * All Rights Reserved.
+ */
+public class LibraryNameField extends ApplicationNameField {
 
   /**
-   * Constructor for ApplicationNameField.
+   * Constructor for LIbraryNameField.
    * @param fieldName
    * @param labelWidth
    */
-  public ApplicationNameField(String fieldName, int labelWidth) {
+  public LibraryNameField(String fieldName, int labelWidth) {
     super(fieldName, labelWidth);
   }
 
   /**
-   * Constructor for ApplicationNameField
+   * Constructor for LIbraryNameField.
+   * @param fieldName
    */
-  public ApplicationNameField(String fieldName) {
+  public LibraryNameField(String fieldName) {
     super(fieldName);
-  }   
-
+  }
 
   protected IStatus nameChanged() {
     SpindleStatus status = new SpindleStatus();
@@ -73,24 +76,27 @@ public class ApplicationNameField extends AbstractNameField  {
       return status;
     }
 
-
     IStatus val = JavaConventions.validateJavaTypeName(appname);
     if (!val.isOK()) {
       if (val.getSeverity() == IStatus.ERROR) {
-        status.setError(MessageUtil.getFormattedString(fieldName + ".error.InvalidAppName", val.getMessage()));
+        status.setError(
+          MessageUtil.getFormattedString(fieldName + ".error.InvalidName", val.getMessage()));
         return status;
       } else if (val.getSeverity() == IStatus.WARNING) {
         status.setWarning(
-          MessageUtil.getFormattedString(fieldName + ".warning.AppNameDiscouraged", val.getMessage()));
+          MessageUtil.getFormattedString(
+            fieldName + ".warning.NameDiscouraged",
+            val.getMessage()));
         return status;
       }
     }
     if (packageField != null && packageField.getPackageFragment() != null) {
       try {
         IContainer folder = (IContainer) packageField.getPackageFragment().getUnderlyingResource();
-        IFile file = folder.getFile(new Path(appname + ".application"));
+        IFile file = folder.getFile(new Path(appname + ".library"));
         if (file.exists()) {
-          status.setError(MessageUtil.getFormattedString(fieldName + ".error.AppAlreadyExists", appname));
+          status.setError(
+            MessageUtil.getFormattedString(fieldName + ".error.AlreadyExists", appname));
         }
       } catch (JavaModelException e) {
         // do nothing
@@ -100,17 +106,12 @@ public class ApplicationNameField extends AbstractNameField  {
     if (Character.isLowerCase(first)) {
       status.setWarning(
         MessageUtil.getFormattedString(
-          fieldName + ".warning.AppNameDiscouraged",
+          fieldName + ".warning.NameDiscouraged",
           "first character is lowercase"));
     }
-   
+
     return status;
 
-
   }
-
-
- 
-
 
 }

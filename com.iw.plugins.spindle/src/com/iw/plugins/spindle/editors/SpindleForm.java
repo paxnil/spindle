@@ -22,7 +22,11 @@
  * 
  *  glongman@intelligentworks.com
  *
- * ***** END LICENSE BLOCK ***** */package com.iw.plugins.spindle.editors;
+ * ***** END LICENSE BLOCK ***** */
+package com.iw.plugins.spindle.editors;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.swt.widgets.Control;
 
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 
@@ -45,7 +49,7 @@ public class SpindleForm extends EditorForm {
    * @see Form#commitChanges(boolean)
    */
   public void commitChanges(boolean onSave) {
-    super.commitChanges(onSave);   
+    super.commitChanges(onSave);
   }
 
   /**
@@ -54,16 +58,17 @@ public class SpindleForm extends EditorForm {
    * @see Form#initialize(Object)
    */
   public void initialize(Object model) {
-  	BaseTapestryModel tmodel = (BaseTapestryModel)model;
-  	if (tmodel.isLoaded()) {
-    	super.initialize(model);
-    	hasBeenInitialized = true;
-  	}
+    BaseTapestryModel tmodel = (BaseTapestryModel) model;
+    if (tmodel.isLoaded()) {
+      super.initialize(model);
+      hasBeenInitialized = true;
+    }
   }
-  public boolean hasBeenInitialized() {
-  	return hasBeenInitialized;
+
+  public boolean hasBeenInitialized() {
+    return hasBeenInitialized;
   }
-  
+
   /**
    * If an update call comes, check to see if the form has been initialized.
    * It might not have been if there were parse errors when the editor opened.
@@ -71,17 +76,39 @@ public class SpindleForm extends EditorForm {
    * If this instance was initialized, call super.update()
    * @see Form#update()
    */
-  public void update() {  	
-  	if (hasBeenInitialized) {
-    	super.update();
-    	return;
-  	} 
-	BaseTapestryModel model = (BaseTapestryModel)getPage().getModel();
-	if (model.isLoaded()) {
-		initialize(model);
-		hasBeenInitialized = true;
-	}
+  public void update() {
+    if (hasBeenInitialized) {
+      super.update();
+      return;
+    }
+    BaseTapestryModel model = (BaseTapestryModel) getPage().getModel();
+    if (model.isLoaded()) {
+      initialize(model);
+      hasBeenInitialized = true;
+    }
+  }
+
+  /**
+   * Intended to be overridden by subclasses.
+   * 
+   */
+  public void fillContextMenu(IMenuManager mng) {
+    // do nothing
+  }
+
+  /**
+   * @see org.eclipse.update.ui.forms.internal.IForm#setFocus()
+   */
+  public void setFocus() {
+  	
+  	Control thisControl = getControl();
+  	if (!thisControl.isVisible()) {
+  	
+  		super.setFocus();
+  	}
+  	
+  	
+    
   }
 
 }
-

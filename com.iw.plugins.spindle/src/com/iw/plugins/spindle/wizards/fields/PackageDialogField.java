@@ -37,9 +37,9 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.StringButtonDefaultField;
-import com.iw.plugins.spindle.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.StringButtonDefaultField;
+import com.iw.plugins.spindle.util.SpindleStatus;
 
 public class PackageDialogField extends StringButtonDefaultField {
 
@@ -105,7 +105,7 @@ public class PackageDialogField extends StringButtonDefaultField {
   }
 
   public IStatus packageChanged() {
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
     checkButtonEnabled();
     String packName = getTextValue();
     if (!"".equals(packName)) {
@@ -117,6 +117,10 @@ public class PackageDialogField extends StringButtonDefaultField {
         status.setWarning(MessageUtil.getFormattedString(name + ".warning.DiscouragedPackageName", val.getMessage()));
         // continue
       }
+    } else {
+    	
+    	status.setError("Using the default package is not allowed. Choose (or enter) a package");
+    	return status;
     }
 
     IPackageFragmentRoot root;

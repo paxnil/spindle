@@ -24,12 +24,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.update.ui.forms.internal.AbstractSectionForm;
 
 public class DocumentationFormPage extends SpindleFormPage {
@@ -50,10 +50,6 @@ public class DocumentationFormPage extends SpindleFormPage {
    */
   public IContentOutlinePage createContentOutlinePage() {
     return null;
-  }
-
-  public IPropertySheetPage createPropertySheetPage() {
-    return new SpindlePropertySheet();
   }
 
   protected class DocumentationForm extends SpindleForm {
@@ -106,6 +102,12 @@ public class DocumentationFormPage extends SpindleFormPage {
         ((Composite)getControl()).layout(true);
       }
     }
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.editors.SpindleFormPage#fillContextMenu(IMenuManager)
+   */
+  public void fillContextMenu(IMenuManager mng) {
   }
 
 }

@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -44,10 +43,9 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.DialogFieldStatus;
-import com.iw.plugins.spindle.dialogfields.StringButtonField;
-import com.iw.plugins.spindle.util.Utils;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
+import com.iw.plugins.spindle.util.SpindleStatus;
 
 public class TypeDialogField extends StringButtonField {
 
@@ -110,7 +108,7 @@ public class TypeDialogField extends StringButtonField {
   protected IStatus typeChanged() {
     IPackageFragmentRoot root = packageChooser.getContainer().getPackageFragmentRoot();
     chosenType = null;
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
     String typeName = getTextValue();
     if ("".equals(typeName)) {
       status.setError(MessageUtil.getString(name + ".error.EnterTypeName"));
@@ -146,7 +144,7 @@ public class TypeDialogField extends StringButtonField {
     IType hrootElement = null;
     try {
       if (hierarchyRoot != null) {
-        hrootElement = Utils.findType(jproject, hierarchyRoot);
+        hrootElement = jproject.findType(hierarchyRoot);
       }
       if (hrootElement != null) {
         result = SearchEngine.createHierarchyScope(hrootElement);
@@ -199,16 +197,16 @@ public class TypeDialogField extends StringButtonField {
       String packName = currPack.getElementName();
       // search in own package
       if (!currPack.isDefaultPackage()) {
-        type = Utils.findType(jproject, packName, typeName);
+      	type = jproject.findType(packName, typeName);        
       }
       // search in java.lang
       if (type == null && !"java.lang".equals(packName)) {
-        type = Utils.findType(jproject, "java.lang", typeName);
+        type = jproject.findType("java.lang", typeName);
       }
     }
     // search fully qualified
     if (type == null) {
-      type = Utils.findType(jproject, typeName);
+      type = jproject.findType(typeName);
     }
     //}
     return type;

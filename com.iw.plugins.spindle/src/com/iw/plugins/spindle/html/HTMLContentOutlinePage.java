@@ -21,31 +21,29 @@
  * Contributor(s):
  * 
  *  glongman@intelligentworks.com
+ *  phraktle@imapmail.org
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.html;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -58,11 +56,11 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
@@ -73,20 +71,28 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
-
+import com.iw.plugins.spindle.editorjwc.JWCMultipageEditor;
+import com.iw.plugins.spindle.editorjwc.components.ComponentsFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.ui.ChooseComponentDialog;
+import com.iw.plugins.spindle.ui.ChooseFromNamespaceDialog;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.util.StringSorter;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public class HTMLContentOutlinePage
-  extends ContentOutlinePage
-  implements IDocumentPartitioningListener, IDocumentListener {
+/**
+ * @author gwl
+ * @version $Id$
+ *
+ * Copyright 2002, Intelligent Works Inc.
+ * All Rights Reserved.
+ */
+public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocumentPartitioningListener, IDocumentListener {
 
   IDocument document;
   IFile documentFile = null;
@@ -94,8 +100,8 @@ public class HTMLContentOutlinePage
   ContentProvider contentProvider = new ContentProvider();
 
   private CreateContainedComponentAction createAction = new CreateContainedComponentAction();
-  private ContainedComponentAlreadyExistsAction alreadyHasAction =
-    new ContainedComponentAlreadyExistsAction();
+
+  private OpenComponentAction openAction = new OpenComponentAction();
 
   /**
    * Constructor for HTMLOutlinePage
@@ -121,7 +127,6 @@ public class HTMLContentOutlinePage
     TreeViewer viewer = getTreeViewer();
     viewer.setContentProvider(contentProvider);
     viewer.setLabelProvider(new LabelProvider());
-    viewer.setSorter(new Sorter());
     MenuManager popupMenuManager = new MenuManager();
     IMenuListener listener = new IMenuListener() {
       public void menuAboutToShow(IMenuManager mng) {
@@ -133,20 +138,36 @@ public class HTMLContentOutlinePage
     popupMenuManager.addMenuListener(listener);
     Menu menu = popupMenuManager.createContextMenu(treeControl);
     treeControl.setMenu(menu);
+
+    registerToolbarActions();
+
     viewer.setInput("Go!");
+  }
+
+  private void registerToolbarActions() {
+
+    IToolBarManager toolBarManager = getSite().getActionBars().getToolBarManager();
+    if (toolBarManager != null) {
+
+      Action action = new AlphabeticalSortingAction();
+      toolBarManager.add(action);
+
+    }
   }
 
   /**
    * @see IDocumentPartitioningListener#documentPartitioningChanged(IDocument)
    */
   public void documentPartitioningChanged(IDocument document) {
-    getTreeViewer().setInput(new Long(System.currentTimeMillis()));
+    if (getTreeViewer() != null) {
+      getTreeViewer().setInput(new Long(System.currentTimeMillis()));
+    }
   }
 
   public void selectionChanged(SelectionChangedEvent event) {
     IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-    ITypedRegion region = (ITypedRegion) selection.getFirstElement();
-    if (region != null) {
+    if (selection.size() == 1) {
+      ITypedRegion region = (ITypedRegion) selection.getFirstElement();
       fireSelectionChanged(new StructuredSelection(new Object[] { findJWCID(region)}));
     }
   }
@@ -173,9 +194,12 @@ public class HTMLContentOutlinePage
 
     if (model == null) { // not found in an editor!
 
-      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
-      mgr.connect(file, consumer, writeable);
-      model = (TapestryComponentModel) mgr.getEditableModel(file, consumer);
+      try {
+        TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(file);
+        mgr.connect(file, consumer, writeable);
+        model = (TapestryComponentModel) mgr.getEditableModel(file, consumer);
+      } catch (CoreException e) {
+      }
 
     }
 
@@ -186,53 +210,117 @@ public class HTMLContentOutlinePage
     TreeViewer viewer = (TreeViewer) getTreeViewer();
     IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 
-    String selectedJwcid = null;
+    IFile file = Utils.findRelatedComponent(documentFile);
 
-    if (selection != null && selection.size() > 0) {
-      ILabelProvider provider = (ILabelProvider) viewer.getLabelProvider();
-      selectedJwcid = provider.getText(selection.getFirstElement());
-      if (selectedJwcid.startsWith("$")) {
-        return;
+    IStructuredSelection canCreateSelection = filterSelection(file, selection);
+
+    if (canCreateSelection.isEmpty() && selection.size() == 1) {
+    	
+      ILabelProvider provider = (ILabelProvider)getTreeViewer().getLabelProvider();
+    	
+      openAction.configure(file, provider.getText(selection.getFirstElement()));
+      manager.add(openAction);
+
+    } else {
+
+      createAction.configure(file, canCreateSelection);
+      manager.add(createAction);
+    }
+
+  }
+
+  private IStructuredSelection filterSelection(IFile file, IStructuredSelection selection) {
+
+    if (selection == null || selection.isEmpty()) {
+      return selection;
+    }
+
+    if (file == null) {
+
+      return StructuredSelection.EMPTY;
+    }
+
+    TapestryComponentModel model = getComponentModel(file);
+
+    if (model == null || !model.isLoaded()) {
+
+      return StructuredSelection.EMPTY;
+
+    }
+
+    ILabelProvider provider = (ILabelProvider) getTreeViewer().getLabelProvider();
+
+    List collected = new ArrayList();
+
+    for (Iterator iter = selection.iterator(); iter.hasNext();) {
+      ITypedRegion element = (ITypedRegion) iter.next();
+      String jwcId = provider.getText(element);
+      if (jwcId.startsWith("$")) {
+        continue;
+      }
+
+      if (alreadyHasJWCID(jwcId, file)) {
+        continue;
+      }
+      collected.add(jwcId);
+
+    }
+
+    return new StructuredSelection(collected);
+
+  }
+
+  private boolean alreadyHasJWCID(String jwcid, IFile componentResource) {
+
+    if (jwcid == null || "".equals(jwcid.trim()) || componentResource == null) {
+
+      return false;
+
+    }
+
+    TapestryComponentModel model = getComponentModel(componentResource);
+
+    return alreadyHasJWCID(jwcid, model);
+
+  }
+
+  private boolean alreadyHasJWCID(String jwcid, TapestryComponentModel model) {
+    if (model != null) {
+
+      PluginComponentSpecification spec = (PluginComponentSpecification) model.getComponentSpecification();
+
+      if (spec != null) {
+        return spec.getComponent(jwcid) != null;
       }
     }
-    IFile file = findRelatedComponent();
-    TapestryComponentModel model =
-      (TapestryComponentModel) TapestryPlugin.getTapestryModelManager().getReadOnlyModel(file);
-    boolean canCreate = (model != null);
-    if (canCreate) {
 
-      PluginComponentSpecification spec =
-        (PluginComponentSpecification) model.getComponentSpecification();
+    return false;
+  }
 
-      canCreate = (spec != null && spec.getComponent(selectedJwcid) == null);
-      if (canCreate) {
+  private TapestryComponentModel getComponentModel(IFile file) {
 
-        createAction.configure(file, selectedJwcid);
-        manager.add(createAction);
+    try {
+      TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(file);
+
+      IEditorPart part = Utils.getEditorFor(file);
+
+      if (part != null && part instanceof SpindleMultipageEditor) {
+
+        return (TapestryComponentModel) ((SpindleMultipageEditor) part).getModel();
 
       } else {
 
-        alreadyHasAction.configure(selectedJwcid);
-        manager.add(alreadyHasAction);
+        return (TapestryComponentModel) mgr.getReadOnlyModel(file);
+
       }
+    } catch (CoreException e) {
+
+      return null;
     }
 
   }
 
-  private IFile findRelatedComponent() {
-    if (documentFile != null) {
-
-      IContainer parent = documentFile.getParent();
-      String name = documentFile.getFullPath().removeFileExtension().lastSegment();
-      String jwcName = name + ".jwc";
-      IFile componentResource = (IFile) parent.findMember(jwcName);
-      if (componentResource != null && componentResource.exists()) {
-        return componentResource;
-      }
-    }
-    return null;
-  }
-
+  
   private String getJWCID(ITypedRegion region) {
     try {
       Position p = findJWCID(region);
@@ -252,9 +340,9 @@ public class HTMLContentOutlinePage
     Position result = new Position(region.getOffset(), region.getLength());
     String type = region.getType();
     String start = null;
-    if (TapestryPartitionScanner.JWCID_TAG.equals(type)) {
+    if (TapestryHTMLPartitionScanner.JWCID_TAG.equals(type)) {
       start = "jwcid=\"";
-    } else if (TapestryPartitionScanner.JWC_TAG.equals(type)) {
+    } else if (TapestryHTMLPartitionScanner.JWC_TAG.equals(type)) {
       start = "id=\"";
     }
     if (start != null) {
@@ -348,8 +436,7 @@ public class HTMLContentOutlinePage
         }
         for (int i = 0; i < partitions.length; i++) {
           String type = partitions[i].getType();
-          if (type.equals(TapestryPartitionScanner.JWC_TAG)
-            || type.equals(TapestryPartitionScanner.JWCID_TAG)) {
+          if (type.equals(TapestryHTMLPartitionScanner.JWC_TAG) || type.equals(TapestryHTMLPartitionScanner.JWCID_TAG)) {
             if (findJWCID(partitions[i]) != null) {
 
               if (!oldContents.contains(partitions[i])) {
@@ -384,6 +471,7 @@ public class HTMLContentOutlinePage
   }
 
   protected class LabelProvider implements ILabelProvider {
+    Image notCreatedImage = TapestryImages.getSharedImage("property16.gif");
     Image jwcImage = TapestryImages.getSharedImage("component16.gif");
     /**
      * Constructor for LabelProvider
@@ -395,8 +483,22 @@ public class HTMLContentOutlinePage
     /**
     * @see ILabelProvider#getImage(Object)
     */
-    public Image getImage(Object arg0) {
-      return jwcImage;
+    public Image getImage(Object element) {
+
+      String jwcid = null;
+
+      try {
+        jwcid = getJWCID((ITypedRegion) element);
+      } catch (Exception e) {
+      }
+
+      if (jwcid != null && alreadyHasJWCID(jwcid, Utils.findRelatedComponent(documentFile))) {
+
+        return jwcImage;
+
+      }
+
+      return notCreatedImage;
     }
 
     /**
@@ -440,38 +542,62 @@ public class HTMLContentOutlinePage
 
   }
 
-  protected class Sorter extends StringSorter {
+  protected class AlphabeticalSorter extends StringSorter {
 
-    protected Sorter() {
+    protected AlphabeticalSorter() {
       super();
     }
 
     public int compare(Viewer viewer, Object e1, Object e2) {
       LabelProvider provider = (LabelProvider) getTreeViewer().getLabelProvider();
-      return super.compare(viewer, provider.getText(e1), provider.getText(e2));
+
+      String s1 = stripDollars(provider.getText(e1));
+      String s2 = stripDollars(provider.getText(e2));
+
+      return super.compare(viewer, s1, s2);
+    }
+
+    private String stripDollars(String string) {
+
+      string = string.trim();
+
+      if (string.indexOf("$") >= 0) {
+        if (string.startsWith("$")) {
+          string = string.substring(1);
+        }
+        if (string.endsWith("$")) {
+          string = string.substring(0, string.length() - 2);
+        }
+      }
+      return string;
+
     }
   }
 
   class CreateContainedComponentAction extends Action {
 
     IFile modelFile;
-    String jwcid;
+    List jwcids;
 
     public CreateContainedComponentAction() {
       super();
       setToolTipText("create a contained component in the related .jwc file with the selected name");
     }
 
-    public void configure(IFile model, String jwcid) {
+    public void configure(IFile model, IStructuredSelection selection) {
       this.modelFile = model;
-      this.jwcid = jwcid;
+      this.jwcids = selection.toList();
 
-      setText(
-        "create '"
-          + jwcid
-          + "' in '"
-          + documentFile.getFullPath().removeFileExtension().lastSegment()
-          + ".jwc'");
+      if (jwcids.size() == 1) {
+        String id = (String) jwcids.get(0);
+
+        setText("create '" + id + "' in '" + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc'");
+
+      } else {
+
+        setText("create multiple components in '" + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc'");
+      }
+
     }
 
     public void run() {
@@ -488,6 +614,8 @@ public class HTMLContentOutlinePage
         if (editor != null) {
           editor.parseForProblems();
         }
+
+        getTreeViewer().setInput("dummy");
 
       } catch (ClassCastException e) {
         MessageDialog.openError(
@@ -523,21 +651,32 @@ public class HTMLContentOutlinePage
       if (chosen == null) {
         return;
       }
-      Utils.createContainedComponentIn(jwcid, chosen, model);
+
+      for (Iterator iter = jwcids.iterator(); iter.hasNext();) {
+        String element = (String) iter.next();
+        Utils.createContainedComponentIn(element, chosen, model);
+
+      }
+
       if (targetEditor == null) {
+
         TapestryPlugin.openTapestryEditor(model.getUnderlyingStorage());
       }
-      //    } catch (Exception e) {
-      //      e.printStackTrace();
-      //      TapestryPlugin.getDefault().logException(e);
-      //    }
+
     }
 
     private void createInWorkspace() {
+      TapestryComponentModel foundModel = null;
       String consumer = "CreateContainedComponentInWorkspace";
-      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+      TapestryProjectModelManager mgr = null;
+      try {
+        mgr = TapestryPlugin.getTapestryModelManager(modelFile);
+        foundModel = getTargetModel(modelFile, consumer, true);
 
-      final TapestryComponentModel model = getTargetModel(modelFile, consumer, true);
+      } catch (CoreException e) {
+      }
+
+      final TapestryComponentModel model = foundModel;
       if (model == null) {
         return;
       }
@@ -546,7 +685,11 @@ public class HTMLContentOutlinePage
 
       if (chosen != null) {
 
-        Utils.createContainedComponentIn(jwcid, chosen, model);
+        for (Iterator iter = jwcids.iterator(); iter.hasNext();) {
+          String element = (String) iter.next();
+          Utils.createContainedComponentIn(element, chosen, model);
+
+        }
 
         try {
 
@@ -558,14 +701,13 @@ public class HTMLContentOutlinePage
             }
           }).execute(new NullProgressMonitor());
 
-          TapestryPlugin.openTapestryEditor(modelFile);
 
         } catch (CoreException e) {
         }
 
       }
 
-      if (model != null) {
+      if (mgr != null && model != null) {
         mgr.disconnect(modelFile, consumer);
       }
 
@@ -573,19 +715,33 @@ public class HTMLContentOutlinePage
 
     private String chooseTargetFor(TapestryComponentModel model) {
       String chosen = null;
-      IJavaProject jproject =
-        TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
-      ChooseComponentDialog dialog =
-        new ChooseComponentDialog(
+      ITapestryProject tproject;
+
+      try {
+
+        tproject = TapestryPlugin.getDefault().getTapestryProjectFor(model.getUnderlyingStorage());
+      } catch (CoreException e) {
+
+        ErrorDialog.openError(
           getTreeViewer().getControl().getShell(),
-          jproject,
+          "Spindle project error",
+          "Can't find the Tapestry project",
+          e.getStatus());
+
+        return null;
+      }
+      ChooseFromNamespaceDialog dialog =
+        new ChooseFromNamespaceDialog(
+          getTreeViewer().getControl().getShell(),
+          tproject,
           "Create in " + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc",
           "Choose the Contained Component to create",
-          true,
           TapestryLookup.ACCEPT_COMPONENTS);
+
       dialog.create();
       if (dialog.open() == dialog.OK) {
-        chosen = dialog.getResultComponent();
+
+        chosen = dialog.getResultPath();
 
       }
       return chosen;
@@ -599,31 +755,95 @@ public class HTMLContentOutlinePage
           IStatus.OK,
           "Abort, target component has parse errors",
           null);
-      ErrorDialog.openError(
-        TapestryPlugin.getDefault().getActiveWorkbenchShell(),
-        null,
-        null,
-        status);
+
+      ErrorDialog.openError(TapestryPlugin.getDefault().getActiveWorkbenchShell(), null, null, status);
 
     }
   }
 
-  class ContainedComponentAlreadyExistsAction extends Action {
 
-    public ContainedComponentAlreadyExistsAction() {
+  /**
+   * @author phraktle@imapmail.org    
+   */
+  class OpenComponentAction extends Action {
+
+    IFile modelFile;
+    String jwcid;
+
+    public OpenComponentAction() {
       super();
+      setToolTipText("Open component definition");
     }
 
-    public void configure(String jwcid) {
-      setText(
-        "'"
-          + jwcid
-          + "' already exists in "
-          + documentFile.getFullPath().removeFileExtension().lastSegment()
-          + ".jwc");
+    public void configure(IFile model, String jwcid) {
+      this.modelFile = model;
+      this.jwcid = jwcid;
+      setText("Jump to: " + jwcid);
+      setEnabled(model == null);
     }
 
-    public void run() { /* do nothing*/
+    public void run() {
+      IEditorPart editor = Utils.getEditorFor(modelFile);
+      if (editor != null) {
+        TapestryPlugin.getDefault().getActivePage().bringToTop(editor);
+      } else {
+        TapestryPlugin.openTapestryEditor(modelFile);
+      }
+
+      JWCMultipageEditor jwc = (JWCMultipageEditor) Utils.getEditorFor(modelFile);
+
+      if (jwc != null) {
+
+        ITapestryModel model = (ITapestryModel) jwc.getModel();
+
+        if (!model.isLoaded()) {
+
+          jwc.showPage(jwc.SOURCE_PAGE);
+
+        } else {
+
+          // had to change this from SpindleFormPage as the source page is not a SpindleFormPage!
+          IPDEEditorPage currentPage = (IPDEEditorPage) jwc.getCurrentPage();
+          ComponentsFormPage desiredPage = (ComponentsFormPage) jwc.getPage(jwc.COMPONENTS);
+
+          if (currentPage != desiredPage) {
+            jwc.showPage(jwc.COMPONENTS);
+          }
+          desiredPage.openTo(this.jwcid);
+        }
+      }
     }
   }
+
+  class AlphabeticalSortingAction extends Action {
+
+    private AlphabeticalSorter alphaSorter = new AlphabeticalSorter();
+
+    public AlphabeticalSortingAction() {
+      super();
+      setText("Sort alphabetically");
+      setToolTipText("Toggle alphabetical sorting");
+      setImageDescriptor(TapestryImages.getImageDescriptor("alphab_sort_co.gif"));
+
+      IPreferenceStore store = TapestryPlugin.getDefault().getPreferenceStore();
+
+      boolean checked = store.getBoolean("AlphabeticalSorting.isChecked");
+      valueChanged(checked, false);
+    }
+
+    public void run() {
+      valueChanged(isChecked(), true);
+    }
+
+    private void valueChanged(boolean on, boolean store) {
+      setChecked(on);
+      TreeViewer viewer = getTreeViewer();
+      viewer.setSorter(on ? alphaSorter : null);
+      documentChanged(null);
+
+      if (store)
+        TapestryPlugin.getDefault().getPreferenceStore().setValue("AlphabeticalSorting.isChecked", on);
+    }
+  };
+
 }

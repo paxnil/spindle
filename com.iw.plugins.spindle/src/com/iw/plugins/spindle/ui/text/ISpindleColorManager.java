@@ -26,8 +26,7 @@
 package com.iw.plugins.spindle.ui.text;
 
 
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
+
 
 /**
  * @author administrator

@@ -30,11 +30,11 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -56,8 +56,9 @@ import org.eclipse.swt.widgets.Text;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.AbstractDialog;
-import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
+import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class ChooseComponentDialog extends AbstractDialog {
@@ -82,19 +83,28 @@ public class ChooseComponentDialog extends AbstractDialog {
     */
   public ChooseComponentDialog(
     Shell shell,
-    IJavaProject project,
+    ITapestryProject project,
     String windowTitle,
     String description) {
+    	
     super(shell);
+    Assert.isNotNull(project);
     updateWindowTitle(windowTitle);
     updateMessage(description);
-    configure(project);
+    try {
+    	
+      lookup = project.getLookup();
+      
+    } catch (CoreException e) {
+    	
+      TapestryPlugin.getDefault().logException(e);
+    }
 
   }
   
   public ChooseComponentDialog(
     Shell shell,
-    IJavaProject project,
+    ITapestryProject project,
     String windowTitle,
     String description,
     int acceptFlags
@@ -134,6 +144,8 @@ public class ChooseComponentDialog extends AbstractDialog {
    * Constructor for ChooseComponentControl
    */
   protected Composite createAreaContents(Composite parent) {
+  	
+  	
     Composite container = new Composite(parent, SWT.NONE);
     GridData data = null;
     GridLayout layout = new GridLayout();
@@ -153,17 +165,6 @@ public class ChooseComponentDialog extends AbstractDialog {
     }
 
     return container;
-  }
-
-  public void configure(IJavaProject project) {
-    lookup = new TapestryLookup();
-    try {
-      lookup.configure(project);
-    } catch (JavaModelException jmex) {
-      TapestryPlugin.getDefault().logException(jmex);
-      lookup = null;
-    }
-
   }
 
   protected void scan() {
@@ -345,7 +346,7 @@ public class ChooseComponentDialog extends AbstractDialog {
     return resultComponent;
   }
 
-  protected class ScanCollector implements ITapestryLookupRequestor {
+  protected class ScanCollector implements ILookupRequestor {
 
     Map results;
 

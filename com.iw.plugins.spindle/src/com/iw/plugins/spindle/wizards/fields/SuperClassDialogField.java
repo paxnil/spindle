@@ -34,7 +34,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 
 public class SuperClassDialogField extends TypeDialogField {
@@ -80,7 +80,7 @@ public class SuperClassDialogField extends TypeDialogField {
   }
 
   protected IStatus typeChanged() {
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
     IPackageFragmentRoot root = packageChooser.getContainer().getPackageFragmentRoot();
     //    enableButton(root != null);
     if (root == null) {

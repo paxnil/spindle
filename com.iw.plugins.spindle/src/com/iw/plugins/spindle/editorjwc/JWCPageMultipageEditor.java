@@ -25,30 +25,36 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorjwc;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.graphics.Image;
 
-import com.iw.plugins.spindle.ui.ChooseFromListDialog;
+import com.iw.plugins.spindle.MessageUtil;
+import com.iw.plugins.spindle.TapestryImages;
 
-import net.sf.tapestry.bean.FieldBeanInitializer;
-import net.sf.tapestry.bean.PropertyBeanInitializer;
-import net.sf.tapestry.bean.StaticBeanInitializer;
+//Commented out Dependency Page until replacement available
 
-public class ChooseBeanInitializerDialog extends ChooseFromListDialog {
+public class JWCPageMultipageEditor extends JWCMultipageEditor { 
 
-  public ChooseBeanInitializerDialog(Shell shell) {
-  super(
-      shell,
-      new String[] { "Property", "Static", "Field"},
-      new Object[] { PropertyBeanInitializer.class, StaticBeanInitializer.class, FieldBeanInitializer.class},
-      "Choose Bean Initializer Type");
+
+  /**
+   * Constructor for TapestryMultipageEditor
+   */
+  public JWCPageMultipageEditor() {
+    super();
+  }
+  
+  protected String getValidExtension() {
+  	
+  	return MessageUtil.getString("JWCPageMultipageEditor.ValidContentType");
+  	
   }
 
-
-  public Class getSelectedIntializerClass() {
-  	Object selected = getSelectedResult();
-  	if (selected != null) {
-  		return (Class)selected;
-  	}
-  	return null;   
+  
+  
+  /**
+   * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()
+   */
+  public Image getDefaultHeadingImage() {
+    return TapestryImages.getSharedImage("page_banner.gif");
   }
+
 }

@@ -36,16 +36,14 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.dialogfields.DialogField;
-import com.iw.plugins.spindle.dialogfields.StringButtonField;
-import com.iw.plugins.spindle.dialogfields.DialogFieldStatus;
-import com.iw.plugins.spindle.util.Utils;
+import com.iw.plugins.spindle.ui.dialogfields.DialogField;
+import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
+import com.iw.plugins.spindle.util.SpindleStatus;
 
 public class RawTypeDialogField extends StringButtonField {
 
@@ -81,7 +79,7 @@ public class RawTypeDialogField extends StringButtonField {
     super.init(context);
     this.jproject = jproject;
     try {
-      requiredType = Utils.findType(jproject, hierarchyRoot);
+      requiredType = resolveTypeName( hierarchyRoot);
     } catch (JavaModelException e) {
       TapestryPlugin.getDefault().logException(e);
     }
@@ -112,7 +110,7 @@ public class RawTypeDialogField extends StringButtonField {
   protected IStatus typeChanged() {
     //IPackageFragmentRoot root = packageChooser.getContainer().getPackageFragmentRoot();
     chosenType = null;
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
     String typeName = getTextValue();
     if ("".equals(typeName)) {
       status.setError(MessageUtil.getString(name + ".error.EnterTypeName"));
@@ -155,7 +153,7 @@ public class RawTypeDialogField extends StringButtonField {
     IType hrootElement = null;
     try {
       if (hierarchyRoot != null) {
-        hrootElement = Utils.findType(jproject, hierarchyRoot);
+        hrootElement = resolveTypeName( hierarchyRoot);
       }
       if (hrootElement != null) {
         result = SearchEngine.createHierarchyScope(hrootElement);
@@ -194,7 +192,7 @@ public class RawTypeDialogField extends StringButtonField {
   }
 
   protected IType resolveTypeName(String typeName) throws JavaModelException {
-    return Utils.findType(jproject, typeName);
+    return jproject.findType( typeName);
   }
 
   public IType getType() {

@@ -23,18 +23,24 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
- package com.iw.plugins.spindle.editors;
+package com.iw.plugins.spindle.editors;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.pde.internal.ui.editor.FormOutlinePage;
 import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
-import org.eclipse.pde.internal.ui.editor.FormOutlinePage.BasicLabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Tree;
 
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 
@@ -45,6 +51,51 @@ public abstract class SpindleFormOutlinePage extends FormOutlinePage {
    */
   public SpindleFormOutlinePage(SpindleFormPage page) {
     super(page);
+  }
+
+  public void createControl(Composite parent) {
+
+    super.createControl(parent);
+
+    Tree tree = (Tree) getControl();
+
+    if (tree != null) {
+
+      MenuManager popupMenuManager = new MenuManager();
+      IMenuListener listener = new IMenuListener() {
+        public void menuAboutToShow(IMenuManager mng) {
+          fillContextMenu(mng);
+        }
+      };
+      popupMenuManager.setRemoveAllWhenShown(true);
+      popupMenuManager.addMenuListener(listener);
+      Menu menu = popupMenuManager.createContextMenu(tree);
+      tree.setMenu(menu);
+
+    }
+  }
+
+  /**
+   * Method fillContextMenu.
+   * @param mng
+   */
+  private void fillContextMenu(IMenuManager mng) {
+
+    IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
+
+    if (!selection.isEmpty()) {
+
+      Object item = selection.getFirstElement();
+      if (item instanceof Holder) {
+        SpindleFormPage page = (SpindleFormPage) getParentPage(item);
+        if (page != null) {
+
+          page.fillContextMenu(mng);
+
+        }
+      }
+    }
+
   }
 
   protected ILabelProvider createLabelProvider() {
@@ -95,8 +146,8 @@ public abstract class SpindleFormOutlinePage extends FormOutlinePage {
   }
 
   public void selectionChanged(Object item) {
-  	IPDEEditorPage page = formPage.getEditor().getCurrentPage();    
-    SpindleFormPage newPage = (SpindleFormPage)getParentPage(item);
+    IPDEEditorPage page = formPage.getEditor().getCurrentPage();
+    SpindleFormPage newPage = (SpindleFormPage) getParentPage(item);
     if (newPage != page) {
       formPage.getEditor().showPage(newPage);
     }
@@ -138,5 +189,4 @@ public abstract class SpindleFormOutlinePage extends FormOutlinePage {
     }
   }
 
- 
 }

@@ -25,8 +25,8 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorjwc;
 
-import net.sf.tapestry.parse.SpecificationParser;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -39,6 +39,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.pde.core.IEditable;
@@ -67,23 +68,24 @@ import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.util.Utils;
+import com.iw.plugins.spindle.spec.XMLUtil;
+import com.iw.plugins.spindle.ui.ToolTipHandler;
+import com.iw.plugins.spindle.util.HierarchyScope;
 
 public class OverviewGeneralSection extends SpindleFormSection implements IModelChangedListener {
 
-  
   private Text dtdText;
   private Text pathText;
   private FormEntry componentClassText;
-  private Label bodyLabel;
-  private Label informalsLabel;
-  private FormCheckbox allowBody;
-  private FormCheckbox allowInformalParameters;
+  private Label bodyLabel = null;
+  private Label informalsLabel = null;
+  private FormCheckbox allowBody = null;
+  private FormCheckbox allowInformalParameters = null;
   private boolean updateNeeded;
+  private ToolTipHandler tooltipHandler;
   private ChooseSpecClassAction chooseComponentSpecAction = new ChooseSpecClassAction();
   private ChoosePageSpecClassAction choosePageSpecAction = new ChoosePageSpecClassAction();
   private OpenSpecClassAction openSpecClassAction = new OpenSpecClassAction();
-  
 
   /**
    * Constructor for TapistryAppGeneralSestion
@@ -91,7 +93,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
   public OverviewGeneralSection(SpindleFormPage page) {
     super(page);
     setHeaderText("General Information");
-    setDescription("This section describes general information about this component");
+    setDescription("This section describes general information");
   }
 
   public void initialize(Object input) {
@@ -108,10 +110,19 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
   public void dispose() {
     dtdText.dispose();
     pathText.dispose();
-    bodyLabel.dispose();
-    informalsLabel.dispose();
-    allowBody.getControl().dispose();
-    allowInformalParameters.getControl().dispose();
+
+    if (allowBody != null) {
+
+      bodyLabel.dispose();
+      allowBody.getControl().dispose();
+    }
+
+    if (allowInformalParameters != null) {
+
+      informalsLabel.dispose();
+      allowInformalParameters.getControl().dispose();
+    }
+
     ((BaseTapestryModel) getFormPage().getModel()).removeModelChangedListener(this);
     super.dispose();
   }
@@ -136,29 +147,30 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     if (!model.isEditable()) {
       name += "  (READ ONLY)";
     }
-    
-    String dtdVersion = spec.getDTDVersion();
-    if (dtdVersion == null) {
-    	dtdVersion = "Unknown DTD or pre 1.1 DTD";
-    } else if ("1.1".equals(dtdVersion)) {
-    	dtdVersion = SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID;
-    } else if ("1.2".equals(dtdVersion)) {
-    	dtdVersion = SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID;
-    }
-    
-    dtdText.setText(dtdVersion);
-    
-    getFormPage().getForm().setHeadingText(name);
-    ((SpindleMultipageEditor) getFormPage().getEditor()).updateTitle();
-    pathText.setText(path);
-    componentClassText.setValue(spec.getComponentClassName(), true);
-    allowBody.setValue(spec.getAllowBody(), true);
-    allowInformalParameters.setValue(spec.getAllowInformalParameters(), true);
 
+    dtdText.setText(spec.getPublicId());
     boolean editable = model.isEditable();
+
+    getFormPage().getForm().setHeadingText(name);
+
+    ((SpindleMultipageEditor) getFormPage().getEditor()).updateTitle();
+
+    pathText.setText(path);
+
+    componentClassText.setValue(spec.getComponentClassName(), true);
     componentClassText.getControl().setEditable(editable);
-    allowBody.getControl().setEnabled(editable);
-    allowInformalParameters.getControl().setEnabled(editable);
+
+    if (allowBody != null) {
+
+      allowBody.setValue(spec.getAllowBody(), true);
+      allowBody.getControl().setEnabled(editable);
+    }
+
+    if (allowInformalParameters != null) {
+
+      allowInformalParameters.setValue(spec.getAllowInformalParameters(), true);
+      allowInformalParameters.getControl().setEnabled(editable);
+    }
 
     updateNeeded = false;
   }
@@ -166,7 +178,10 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
   /**
    * @see FormSection#createClient(Composite, FormWidgetFactory)
    */
-  public Composite createClient(Composite parent, FormWidgetFactory factory) {
+  public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
+  	
+  	tooltipHandler = new ToolTipHandler(parent.getShell());
+  	
     Composite container = factory.createComposite(parent);
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;
@@ -181,13 +196,15 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     dtdText.setText("-//Howard Ship//Tapestry Specification 1.2//EN");
     dtdText.setEnabled(false);
 
-    labelName = "Component Path";
+    labelName = "Path";
     pathText = createText(container, labelName, factory);
     pathText.setEnabled(false);
 
     labelName = "Specification Class";
     Text text = createText(container, labelName, factory);
     componentClassText = new FormEntry(text);
+    text.setData("TIP_TEXT", "right-click for class options");
+    tooltipHandler.activateHoverHelp(text);
     componentClassText.addFormTextListener(new IFormTextListener() {
       //called on commit	
       public void textValueChanged(FormEntry text) {
@@ -209,62 +226,97 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     Menu menu = popupMenuManager.createContextMenu(componentClassText.getControl());
     componentClassText.getControl().setMenu(menu);
 
-    labelName = "Allow Body";
-    bodyLabel = factory.createLabel(container, labelName);
-    allowBody = new FormCheckbox(container, null);
-    allowBody.addFormCheckboxListener(new IFormCheckboxListener() {
-      public void booleanValueChanged(FormCheckbox box) {
-        model.getComponentSpecification().setAllowBody(box.getValue());
-      }
+    PluginComponentSpecification componentSpec =
+      (PluginComponentSpecification) model.getComponentSpecification();
 
-      public void valueDirty(FormCheckbox box) {
-        forceDirty();
-      }
-    });
-    ((Button) allowBody.getControl()).setBackground(factory.getBackgroundColor());
+    boolean isPage = componentSpec == null ? false : componentSpec.isPageSpecification();
 
-    labelName = "Allow Informal Paramters";
-    informalsLabel = factory.createLabel(container, labelName);
-    allowInformalParameters = new FormCheckbox(container, null);
-    allowInformalParameters.addFormCheckboxListener(new IFormCheckboxListener() {
-      //called on commit
-      public void booleanValueChanged(FormCheckbox box) {
-        model.getComponentSpecification().setAllowInformalParameters(box.getValue());
-      }
+    if (!isPage) {
 
-      public void valueDirty(FormCheckbox box) {
-        forceDirty();
-      }
-    });
-    ((Button) allowInformalParameters.getControl()).setBackground(factory.getBackgroundColor());
+      labelName = "Allow Body";
+      bodyLabel = factory.createLabel(container, labelName);
+      allowBody = new FormCheckbox(container, null);
+      allowBody.addFormCheckboxListener(new IFormCheckboxListener() {
+        public void booleanValueChanged(FormCheckbox box) {
+          model.getComponentSpecification().setAllowBody(box.getValue());
+        }
+
+        public void valueDirty(FormCheckbox box) {
+          forceDirty();
+        }
+      });
+      ((Button) allowBody.getControl()).setBackground(factory.getBackgroundColor());
+
+      labelName = "Allow Informal Parameters";
+      informalsLabel = factory.createLabel(container, labelName);
+      allowInformalParameters = new FormCheckbox(container, null);
+      allowInformalParameters.addFormCheckboxListener(new IFormCheckboxListener() {
+        //called on commit
+        public void booleanValueChanged(FormCheckbox box) {
+          model.getComponentSpecification().setAllowInformalParameters(box.getValue());
+        }
+
+        public void valueDirty(FormCheckbox box) {
+          forceDirty();
+        }
+      });
+      ((Button) allowInformalParameters.getControl()).setBackground(factory.getBackgroundColor());
+
+    }
 
     factory.paintBordersFor(container);
     return container;
   }
-  
- protected void fillContextMenu(IMenuManager manager) {
+
+  protected void fillContextMenu(IMenuManager manager) {
     String engineClass = componentClassText.getValue();
     openSpecClassAction.setEnabled(engineClass != null && !"".equals(engineClass.trim()));
     TapestryComponentModel model = (TapestryComponentModel) getFormPage().getModel();
     chooseComponentSpecAction.setEnabled(model.isEditable());
 
-    manager.add(openSpecClassAction);
-    manager.add(chooseComponentSpecAction);
-    manager.add(choosePageSpecAction);
-  }  
+    int DTDVersion = XMLUtil.getDTDVersion(model.getPublicId());
 
-  private boolean checkEngineClass(String value) {
-    return true;
+    manager.add(openSpecClassAction);
+
+    if (allowBody != null) {
+
+      manager.add(chooseComponentSpecAction);
+
+      if (DTDVersion < XMLUtil.DTD_1_3) {
+
+        manager.add(choosePageSpecAction);
+      }
+
+    } else {
+
+      manager.add(choosePageSpecAction);
+
+    }
+
   }
 
   public boolean isDirty() {
-    return componentClassText.isDirty() || allowBody.isDirty() || allowInformalParameters.isDirty();
+
+    boolean result = componentClassText.isDirty();
+
+    if (!result && allowBody != null) {
+
+      result = allowBody.isDirty();
+    }
+
+    if (!result && allowInformalParameters != null) {
+
+      result = allowInformalParameters.isDirty();
+    }
+    return result;
   }
 
   private void forceDirty() {
     setDirty(true);
     IModel model = (IModel) getFormPage().getModel();
+
     if (model instanceof IEditable) {
+
       IEditable editable = (IEditable) model;
       editable.setDirty(true);
       getFormPage().getEditor().fireSaveNeeded();
@@ -273,16 +325,26 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
 
   public void commitChanges(boolean onSave) {
     componentClassText.commit();
-    allowBody.commit();
-    allowInformalParameters.commit();
+
+    if (allowBody != null) {
+
+      allowBody.commit();
+
+    }
+    if (allowInformalParameters != null) {
+
+      allowInformalParameters.commit();
+
+    }
   }
 
   public void modelChanged(IModelChangedEvent event) {
     if (event.getChangeType() == IModelChangedEvent.WORLD_CHANGED) {
+
       updateNeeded = true;
     }
   }
-  
+
   class OpenSpecClassAction extends Action {
 
     /**
@@ -298,21 +360,25 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     * @see Action#run()
     */
     public void run() {
-      String engineClass = componentClassText.getValue();
+      String componentClass = componentClassText.getValue();
       ITapestryModel model = (ITapestryModel) getFormPage().getModel();
-      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
       try {
-        IType type = Utils.findType(jproject, engineClass);
+        IJavaProject jproject =
+          TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
+        IType type = jproject.findType(componentClass);
         JavaUI.openInEditor(type);
       } catch (Exception e) {
-      	MessageDialog.openError(componentClassText.getControl().getShell(), "Error opening editor", "could not open an editor for "+engineClass);      
+        MessageDialog.openError(
+          componentClassText.getControl().getShell(),
+          "Error opening editor",
+          "could not open an editor for " + componentClass);
       }
     }
   }
 
   public class ChooseSpecClassAction extends Action {
 
-	protected String hierarchyRoot;
+    protected String hierarchyRoot;
     /**
      * Constructor for NewPropertyAction
      */
@@ -335,13 +401,14 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
 
     protected IType chooseType(String title, String message) {
       ITapestryModel model = (ITapestryModel) getFormPage().getModel();
-      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
-      if (jproject == null) {
-        return null;
-      }
-      IJavaSearchScope scope = createSearchScope(jproject);
       Shell shell = componentClassText.getControl().getShell();
       try {
+        IJavaProject jproject =
+          TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
+        if (jproject == null) {
+          return null;
+        }
+        IJavaSearchScope scope = createSearchScope(jproject);
 
         SelectionDialog dialog =
           JavaUI.createTypeDialog(
@@ -351,14 +418,15 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
             IJavaElementSearchConstants.CONSIDER_CLASSES,
             false);
 
-        dialog.setTitle(title);       
-        dialog.setMessage(hierarchyRoot == null ? message : message + " (implements " + hierarchyRoot + ")");
+        dialog.setTitle(title);
+        dialog.setMessage(
+          hierarchyRoot == null ? message : message + " (implements " + hierarchyRoot + ")");
 
         if (dialog.open() == dialog.OK) {
           return (IType) dialog.getResult()[0]; //FirstResult();
         }
-      } catch (JavaModelException jmex) {
-        TapestryPlugin.getDefault().logException(jmex);
+      } catch (CoreException jmex) {
+        ErrorDialog.openError(shell, "Spindle error", "unable to continue", jmex.getStatus());
       }
       return null;
     }
@@ -369,10 +437,13 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
       IType hrootElement = null;
       try {
         if (hierarchyRoot != null) {
-          hrootElement = Utils.findType(jproject, hierarchyRoot);
+          hrootElement = jproject.findType(hierarchyRoot);
         }
         if (hrootElement != null) {
-          result = SearchEngine.createHierarchyScope(hrootElement);
+//          result = SearchEngine.createHierarchyScope(hrootElement);
+// note, this is a kludge to work around bug 
+//[ 621849 ] Class selection dlg searches workspace        	
+          result = new HierarchyScope(hrootElement, jproject);
         }
       } catch (JavaModelException jmex) {
         //ignore
@@ -386,7 +457,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     }
 
   }
-  
+
   public class ChoosePageSpecClassAction extends ChooseSpecClassAction {
 
     /**
@@ -398,8 +469,8 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
       setToolTipText("choose page spec class");
       hierarchyRoot = "net.sf.tapestry.IPage";
     }
-    
-     /**
+
+    /**
     * @see Action#run()
     */
     public void run() {
@@ -408,7 +479,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
         componentClassText.setValue(newSpec.getFullyQualifiedName());
       }
     }
-    
+
   }
 
 }
