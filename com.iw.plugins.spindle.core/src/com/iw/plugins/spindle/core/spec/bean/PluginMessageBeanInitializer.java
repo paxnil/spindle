@@ -26,6 +26,11 @@
 
 package com.iw.plugins.spindle.core.spec.bean;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 
 /**
@@ -50,6 +55,32 @@ public class PluginMessageBeanInitializer extends AbstractPluginBeanInitializer
     public void setKey(String value)
     {
         setValue(value);
+    }
+
+    public void validate(Object parent, IScannerValidator validator)
+    {
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+        try
+        {
+            super.validate(parent, validator);
+
+            String key = getKey();
+            if (key != null)
+            {
+                if (key.trim().length() == 0)
+                {
+                    validator.addProblem(
+                        IProblem.ERROR,
+                        sourceInfo.getAttributeSourceLocation("key"),
+                        "key must not be empty");
+                }
+            }
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
     }
 
 }

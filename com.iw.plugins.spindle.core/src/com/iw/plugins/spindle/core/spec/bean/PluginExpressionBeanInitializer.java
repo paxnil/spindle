@@ -26,6 +26,11 @@
 
 package com.iw.plugins.spindle.core.spec.bean;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 
 /**
@@ -36,6 +41,8 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
  */
 public class PluginExpressionBeanInitializer extends AbstractPluginBeanInitializer
 {
+
+    private boolean declaredValueIsFromAttribute;
 
     public PluginExpressionBeanInitializer()
     {
@@ -50,6 +57,43 @@ public class PluginExpressionBeanInitializer extends AbstractPluginBeanInitializ
     public void setExpression(String value)
     {
         setValue(value);
+    }
+
+    public void validate(Object parent, IScannerValidator validator)
+    {
+        try
+        {
+            super.validate(parent, validator);
+
+            ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+            String expression = getExpression();
+
+            if (expression != null)
+            {
+                validator.validateExpression(
+                    expression,
+                    IProblem.ERROR,
+                    isDeclaredValueIsFromAttribute()
+                        ? sourceInfo.getAttributeSourceLocation("expression")
+                        : sourceInfo.getContentSourceLocation());
+            }
+
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isDeclaredValueIsFromAttribute()
+    {
+        return declaredValueIsFromAttribute;
+    }
+
+    public void setDeclaredValueIsFromAttribute(boolean b)
+    {
+        declaredValueIsFromAttribute = b;
     }
 
 }
