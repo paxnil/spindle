@@ -40,13 +40,13 @@ import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  *  Processor for default declType type - only works to insert comments within the
@@ -72,16 +72,16 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
         IDocument document = viewer.getDocument();
-        DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
+        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
 
         if (tag == null)
             return NoProposals;
 
         String tagName = tag.getName();
 
-        if (tag.getType() == DocumentArtifactPartitioner.ENDTAG)
+        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
         {
-            DocumentArtifact parentTag = tag.getCorrespondingNode();
+            XMLNode parentTag = tag.getCorrespondingNode();
             String parentName = parentTag != null ? parentTag.getName() : null;
             if (parentName == null || parentName.equals(tagName))
                 return NoSuggestions;
@@ -99,7 +99,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
                     {
                         char c = document.getChar(replacementOffset + replacementLength);
                         if (Character.isWhitespace(c))
-                        break;
+                            break;
                     }
                 }
             } catch (BadLocationException e)
@@ -112,7 +112,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
                  new CompletionProposal(
                     "</" + parentName + ">",
                     replacementOffset,
-                   replacementLength,
+                    replacementLength,
                     new Point(parentName.length() + 3, 0),
                     Images.getSharedImage("bullet.gif"),
                     null,
@@ -120,23 +120,26 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
                     null)};
 
         }
+        int baseState = tag.getStateAt(documentOffset);
+        if (baseState == XMLNode.IN_TERMINATOR)
+            return NoProposals;
+
         if (tag.getOffset() + tag.getLength() == documentOffset)
             tag = tag.getNextArtifact();
 
         boolean atStart =
-            tag.getType() == DocumentArtifactPartitioner.ENDTAG
+            tag.getType() == XMLDocumentPartitioner.ENDTAG
                 ? tag.getOffset() + 2 == documentOffset
                 : tag.getOffset() == documentOffset;
 
-        int baseState = tag.getStateAt(documentOffset);
-        if ((tag.getType() == DocumentArtifactPartitioner.ENDTAG && !atStart)
-            || baseState == DocumentArtifact.IN_TERMINATOR)
+        if ((tag.getType() == XMLDocumentPartitioner.ENDTAG && !atStart))
             return NoSuggestions;
+
 
         boolean addLeadingSpace = false;
         List proposals = new ArrayList();
 
-        if (baseState == DocumentArtifact.TAG)
+        if (baseState == XMLNode.TAG)
         {
             if (atStart || (tag.getAttributes().isEmpty() && !tag.isTerminated()))
             {
@@ -198,7 +201,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
             addLeadingSpace = true;
 
-        } else if (baseState == DocumentArtifact.ATT_VALUE)
+        } else if (baseState == XMLNode.ATT_VALUE)
         {
             return new ICompletionProposal[] {
                  new CompletionProposal(
@@ -209,15 +212,15 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         } else
         {
             //ensure that we are in a legal position to insert. ie. not inside another attribute name!
-            addLeadingSpace = baseState == DocumentArtifact.AFTER_ATT_VALUE;
+            addLeadingSpace = baseState == XMLNode.AFTER_ATT_VALUE;
         }
 
         Map attrmap = tag.getAttributesMap();
 
-        DocumentArtifact existingAttr = tag.getAttributeAt(documentOffset);
+        XMLNode existingAttr = tag.getAttributeAt(documentOffset);
         if (existingAttr != null)
         {
-            if (baseState != DocumentArtifact.AFTER_ATT_VALUE
+            if (baseState != XMLNode.AFTER_ATT_VALUE
                 && existingAttr != null
                 && existingAttr.getOffset() < documentOffset)
             {
@@ -249,7 +252,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
      */
     private void computeAttributeNameReplacements(
         int documentOffset,
-        DocumentArtifact existingAttribute,
+        XMLNode existingAttribute,
         String tagName,
         Set existingAttributeNames,
         List proposals)
@@ -361,12 +364,12 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
     public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
     {
 
-        DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
+        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
         int baseState = tag.getStateAt(documentOffset);
         String name = null;
-        if (tag.getType() == DocumentArtifactPartitioner.ENDTAG)
+        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
         {
-            DocumentArtifact start = tag.getCorrespondingNode();
+            XMLNode start = tag.getCorrespondingNode();
             if (start != null)
                 name = start.getName();
         } else

@@ -53,10 +53,10 @@ import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class TagContentAssistProcessor extends ContentAssistProcessor
+public class DefaultContentAssistProcessor extends ContentAssistProcessor
 {
 
-    public TagContentAssistProcessor(TemplateEditor editor)
+    public DefaultContentAssistProcessor(TemplateEditor editor)
     {
         super(editor);
     }
@@ -68,11 +68,11 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
     {
         XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
         int baseState = tag.getStateAt(documentOffset);
-        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
+        if (tag.getType() != XMLDocumentPartitioner.TAG && tag.getType() != XMLDocumentPartitioner.EMPTYTAG)
             return NoProposals;
-        
-        if (baseState == XMLNode.IN_TERMINATOR)
-            return NoProposals;    
+                    
+        if (tag.isTerminated() && documentOffset == tag.getOffset() + tag.getLength())
+            return NoProposals;
 
         boolean addLeadingSpace = false;
         if (baseState == XMLNode.TAG)

@@ -29,11 +29,11 @@ package com.iw.plugins.spindle.editors.template.actions;
 import org.apache.tapestry.INamespace;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  *  Base class for spec actions that need the xml partitioning.
@@ -44,8 +44,8 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 public abstract class BaseTemplateAction extends BaseEditorAction
 {
 
-    protected DocumentArtifact fArtifact;
-    protected DocumentArtifactPartitioner fPartitioner;
+    protected XMLNode fArtifact;
+    protected XMLDocumentPartitioner fPartitioner;
     protected INamespace fNamespace;
     protected INamespace fFrameworkNamespace;
 
@@ -55,7 +55,7 @@ public abstract class BaseTemplateAction extends BaseEditorAction
     {
         super();
         fPartitioner =
-            new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
+            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
     }
 
     public BaseTemplateAction(String text)

@@ -49,11 +49,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  *  TODO Add Type comment
@@ -78,9 +78,9 @@ public class SpecificationOutlinePage extends ContentOutlinePage
         }
         public Object[] getChildren(Object obj)
         {
-            if (obj instanceof DocumentArtifact)
+            if (obj instanceof XMLNode)
             {
-                Object[] result = ((DocumentArtifact) obj).getChildren(obj);
+                Object[] result = ((XMLNode) obj).getChildren(obj);
                 addAll(result);
                 return result;
             }
@@ -95,7 +95,7 @@ public class SpecificationOutlinePage extends ContentOutlinePage
         {
             if (obj == fRoot)
                 return null;
-            return ((DocumentArtifact) obj).getParent();
+            return ((XMLNode) obj).getParent();
         }
         public void dispose()
         {}
@@ -110,7 +110,7 @@ public class SpecificationOutlinePage extends ContentOutlinePage
                 fFlatChildren = elements;
                 fCorresponders = new Object[elements.length];
                 for (int i = 0; i < elements.length; i++)
-                    fCorresponders[i] = ((DocumentArtifact) elements[i]).getCorrespondingNode();
+                    fCorresponders[i] = ((XMLNode) elements[i]).getCorrespondingNode();
                 return;
             }
 
@@ -122,7 +122,7 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             for (int i = 0; i < elements.length; i++)
             {
                 expandedCorresponders[fCorresponders.length + i] =
-                    ((DocumentArtifact) elements[i]).getCorrespondingNode();
+                    ((XMLNode) elements[i]).getCorrespondingNode();
             }
 
             fFlatChildren = expandedFlat;
@@ -131,8 +131,8 @@ public class SpecificationOutlinePage extends ContentOutlinePage
         }
         public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
         {
-            fFlatChildren = new DocumentArtifact[0];
-            fCorresponders = new DocumentArtifact[0];
+            fFlatChildren = new XMLNode[0];
+            fCorresponders = new XMLNode[0];
         }
 
     }
@@ -141,20 +141,20 @@ public class SpecificationOutlinePage extends ContentOutlinePage
     {
         public String getText(Object obj)
         {
-            if (obj instanceof DocumentArtifact)
+            if (obj instanceof XMLNode)
             {
-                DocumentArtifact artifact = (DocumentArtifact) obj;
+                XMLNode artifact = (XMLNode) obj;
                 String type = artifact.getType();
 
-                if (type == DocumentArtifactPartitioner.TAG
-                    || type == DocumentArtifactPartitioner.EMPTYTAG
-                    || type == DocumentArtifactPartitioner.DECL)
+                if (type == XMLDocumentPartitioner.TAG
+                    || type == XMLDocumentPartitioner.EMPTYTAG
+                    || type == XMLDocumentPartitioner.DECL)
                 {
                     String name = artifact.getName();
                     return name == null ? "" : name;
                 }
 
-                if (type == DocumentArtifactPartitioner.ATTR)
+                if (type == XMLDocumentPartitioner.ATTR)
                 {
                     String name = artifact.getName();
                     String attrvalue = artifact.getAttributeValue();
@@ -163,13 +163,13 @@ public class SpecificationOutlinePage extends ContentOutlinePage
                         + StringUtils.abbreviate(attrvalue == null ? "" : attrvalue, 50);
                 }
 
-                if (type == DocumentArtifactPartitioner.COMMENT)
+                if (type == XMLDocumentPartitioner.COMMENT)
                     return "COMMENT" + StringUtils.abbreviate(artifact.getContent().trim(), 50);
 
-                if (type == DocumentArtifactPartitioner.TEXT)
+                if (type == XMLDocumentPartitioner.TEXT)
                     return StringUtils.abbreviate(artifact.getContent().trim(), 50);
 
-                if (type == DocumentArtifactPartitioner.PI)
+                if (type == XMLDocumentPartitioner.PI)
                     return StringUtils.abbreviate(artifact.getContent().trim(), 50);
             }
 
@@ -177,11 +177,11 @@ public class SpecificationOutlinePage extends ContentOutlinePage
         }
         public Image getImage(Object obj)
         {
-            if (obj instanceof DocumentArtifact)
+            if (obj instanceof XMLNode)
             {
-                DocumentArtifact artifact = (DocumentArtifact) obj;
+                XMLNode artifact = (XMLNode) obj;
                 String type = artifact.getType();
-                if (type == DocumentArtifactPartitioner.DECL)
+                if (type == XMLDocumentPartitioner.DECL)
                 {
 
                     if (artifact.getParent().getType().equals("/"))
@@ -191,22 +191,22 @@ public class SpecificationOutlinePage extends ContentOutlinePage
 
                 }
 
-                if (type == DocumentArtifactPartitioner.TAG)
+                if (type == XMLDocumentPartitioner.TAG)
                     return Images.getSharedImage("tag16.gif");
 
-                if (type == DocumentArtifactPartitioner.EMPTYTAG)
+                if (type == XMLDocumentPartitioner.EMPTYTAG)
                     return Images.getSharedImage("empty16.gif");
 
-                if (type == DocumentArtifactPartitioner.ATTR)
+                if (type == XMLDocumentPartitioner.ATTR)
                     return Images.getSharedImage("bullet.gif");
 
-                if (type == DocumentArtifactPartitioner.COMMENT)
+                if (type == XMLDocumentPartitioner.COMMENT)
                     return Images.getSharedImage("comment16.gif");
 
-                if (type == DocumentArtifactPartitioner.TEXT)
+                if (type == XMLDocumentPartitioner.TEXT)
                     return Images.getSharedImage("text16.gif");
 
-                if (type == DocumentArtifactPartitioner.PI)
+                if (type == XMLDocumentPartitioner.PI)
                     return Images.getSharedImage("pi16.gif");
             }
             return null;
@@ -232,11 +232,11 @@ public class SpecificationOutlinePage extends ContentOutlinePage
         //        public Color getForeground(Object element)
         //        {
         //
-        //            if (element instanceof DocumentArtifact)
+        //            if (element instanceof XMLNode)
         //            {
-        //                DocumentArtifact artifact = (DocumentArtifact) element;
+        //                XMLNode artifact = (XMLNode) element;
         //                String type = artifact.getType();
-        //                if (type == DocumentArtifactPartitioner.DECL)
+        //                if (type == XMLDocumentPartitioner.DECL)
         //                {
         //
         //                    if (artifact.getParent().getType().equals("/"))
@@ -246,19 +246,19 @@ public class SpecificationOutlinePage extends ContentOutlinePage
         //
         //                }
         //
-        //                if (type == DocumentArtifactPartitioner.TAG)
+        //                if (type == XMLDocumentPartitioner.TAG)
         //                    return getColor(IXMLSyntaxConstants.XML_TAG);
         //
-        //                if (type == DocumentArtifactPartitioner.EMPTYTAG)
+        //                if (type == XMLDocumentPartitioner.EMPTYTAG)
         //                    return getColor(IXMLSyntaxConstants.XML_TAG);
         //
-        //                if (type == DocumentArtifactPartitioner.ATTR)
+        //                if (type == XMLDocumentPartitioner.ATTR)
         //                    return getColor(IXMLSyntaxConstants.XML_ATT_VALUE);
         //
-        //                if (type == DocumentArtifactPartitioner.COMMENT)
+        //                if (type == XMLDocumentPartitioner.COMMENT)
         //                    return getColor(IXMLSyntaxConstants.XML_COMMENT);
         //
-        //                if (type == DocumentArtifactPartitioner.PI)
+        //                if (type == XMLDocumentPartitioner.PI)
         //                    return getColor(IXMLSyntaxConstants.XML_PI);
         //            }
         //            return fTree.getForeground();
@@ -269,9 +269,9 @@ public class SpecificationOutlinePage extends ContentOutlinePage
     private SpecEditor fEditor;
     private Tree fTree;
     private TreeViewer treeViewer;
-    private DocumentArtifact fRoot;
-    private Object[] fFlatChildren = new DocumentArtifact[0];
-    private Object[] fCorresponders = new DocumentArtifact[0];
+    private XMLNode fRoot;
+    private Object[] fFlatChildren = new XMLNode[0];
+    private Object[] fCorresponders = new XMLNode[0];
     private IPreferenceStore fPreferences;
     private IPropertyChangeListener fPreferenceStoreListener = new IPropertyChangeListener()
     {
@@ -316,7 +316,7 @@ public class SpecificationOutlinePage extends ContentOutlinePage
         super.dispose();
     }
 
-    public void setRoot(final DocumentArtifact artifact)
+    public void setRoot(final XMLNode artifact)
     {
         fRoot = artifact;
         Display d = null;

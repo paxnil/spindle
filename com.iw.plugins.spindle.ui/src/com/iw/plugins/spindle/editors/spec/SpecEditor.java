@@ -71,6 +71,8 @@ import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.update.ui.forms.internal.IFormPage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -98,8 +100,6 @@ import com.iw.plugins.spindle.editors.multi.IMultiPage;
 import com.iw.plugins.spindle.editors.multi.MultiPageSpecEditor;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  *  Editor for Tapestry Spec files
@@ -166,11 +166,11 @@ public class SpecEditor extends Editor implements IMultiPage
 
     public void openTo(Object obj)
     {
-        if (obj instanceof DocumentArtifact)
+        if (obj instanceof XMLNode)
         {
-            DocumentArtifact artifact = (DocumentArtifact) obj;
+            XMLNode artifact = (XMLNode) obj;
             String type = artifact.getType();
-            if (type == DocumentArtifactPartitioner.ATTR)
+            if (type == XMLDocumentPartitioner.ATTR)
             {
                 IRegion valueRegion = artifact.getAttributeValueRegion();
                 if (valueRegion != null)
@@ -188,11 +188,11 @@ public class SpecEditor extends Editor implements IMultiPage
 
     public void highlight(Object obj)
     {
-        if (obj instanceof DocumentArtifact)
+        if (obj instanceof XMLNode)
         {
-            DocumentArtifact artifact = (DocumentArtifact) obj;
+            XMLNode artifact = (XMLNode) obj;
             String type = artifact.getType();
-            if (type == DocumentArtifactPartitioner.ATTR)
+            if (type == XMLDocumentPartitioner.ATTR)
             {
                 IRegion valueRegion = artifact.getAttributeValueRegion();
                 if (valueRegion != null)
@@ -201,14 +201,25 @@ public class SpecEditor extends Editor implements IMultiPage
                     return;
                 }
             }
-            if (artifact.getType() == DocumentArtifactPartitioner.TAG)
+            if (artifact.getType() == XMLDocumentPartitioner.TAG)
             {
-                DocumentArtifact corr = artifact.getCorrespondingNode();
+                XMLNode corr = artifact.getCorrespondingNode();
                 if (corr != null)
                 {
                     int start = artifact.getOffset();
                     int endStart = corr.getOffset();
                     setHighlightRange(start, endStart - start + corr.getLength(), false);
+                    return;
+                }
+            }
+            if (type == XMLDocumentPartitioner.ENDTAG)
+            {
+                XMLNode corr = artifact.getCorrespondingNode();
+                if (corr != null)
+                {
+                    int start = corr.getOffset();
+                    int endStart = artifact.getOffset();
+                    setHighlightRange(start, endStart - start + artifact.getLength(), false);
                     return;
                 }
             }
@@ -356,13 +367,13 @@ public class SpecEditor extends Editor implements IMultiPage
         //        (() fOutline.setSpec(fReconciledSpec));
     }
 
-    DocumentArtifactPartitioner fOutlinePartitioner;
+    XMLDocumentPartitioner fOutlinePartitioner;
 
     private void reconcileOutline()
     {
         if (fOutlinePartitioner == null)
             fOutlinePartitioner =
-                new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
+                new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
         try
         {
             IDocument document = getDocumentProvider().getDocument(getEditorInput());
@@ -375,7 +386,7 @@ public class SpecEditor extends Editor implements IMultiPage
                 fOutlinePartitioner.connect(document);
                 try
                 {
-                    ((SpecificationOutlinePage) fOutline).setRoot(DocumentArtifact.createTree(document, -1));
+                    ((SpecificationOutlinePage) fOutline).setRoot(XMLNode.createTree(document, -1));
                 } catch (BadLocationException e)
                 {
                     // do nothing

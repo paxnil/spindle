@@ -35,12 +35,12 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 
 /**
  *  Processor for completing comments
@@ -82,7 +82,7 @@ public class CommentCompletionProcessor extends ContentAssistProcessor
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
         IDocument document = viewer.getDocument();
-        DocumentArtifact comment = DocumentArtifact.getArtifactAt(document, documentOffset);
+        XMLNode comment = XMLNode.getArtifactAt(document, documentOffset);
         String to = comment.getContentTo(documentOffset, false);
         if (to.length() < 4)
         {

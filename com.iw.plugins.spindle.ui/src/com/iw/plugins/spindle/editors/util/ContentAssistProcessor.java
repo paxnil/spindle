@@ -38,6 +38,8 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.xmen.internal.ui.text.*;
+import org.xmen.xml.*;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
@@ -60,13 +62,13 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
 
     protected Editor fEditor;
     protected IPreferenceStore fPreferenceStore = UIPlugin.getDefault().getPreferenceStore();
-    protected DocumentArtifactPartitioner fAssistParititioner;
+    protected XMLDocumentPartitioner fAssistParititioner;
     protected boolean fDoingContextInformation = false;
 
     public ContentAssistProcessor(Editor editor)
     {
         this.fEditor = editor;
-        fAssistParititioner = new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
+        fAssistParititioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
     }
 
     protected void startCompute()
@@ -166,7 +168,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
 
     protected String getJwcid(Map attributeMap)
     {
-        DocumentArtifact jwcidArt = (DocumentArtifact) attributeMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
+        XMLNode jwcidArt = (XMLNode) attributeMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
         if (jwcidArt != null)
             return jwcidArt.getAttributeValue();
 

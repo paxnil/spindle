@@ -1,30 +1,15 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
- *
- * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 Jens Lukowski and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
  * 
- *  glongman@intelligentworks.com
- *
- * ***** END LICENSE BLOCK ***** */
-
-package com.iw.plugins.spindle.editors.util;
+ * Contributors:
+ *    Jens Lukowski - initial API and implementation
+ *    Geoff Longman - heavily modified for Spindle
+ *******************************************************************************/
+package org.xmen.internal.ui.text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,16 +32,17 @@ import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
+import org.xmen.xml.*;
 
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
  *  Complimentary paritioner. Pust postitions in a custom category.
  * 
- * @author glongman@intelligentworks.com
+ * @author Jens Lukowski (dark_angel@users.sourceforge.net )
  * @version $Id$
  */
-public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocumentPartitionerExtension
+public class XMLDocumentPartitioner implements IDocumentPartitioner, IDocumentPartitionerExtension
 {
     public static final String TAG = "TAG";
     public static final String TEXT = "TEXT";
@@ -73,8 +59,8 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
     public static RuleBasedPartitionScanner SCANNER;
 
     static {
-        DocumentArtifactPartitioner.SCANNER = new RuleBasedPartitionScanner();
-        DocumentArtifactPartitioner.SCANNER.setPredicateRules(new IPredicateRule[] { new DocumentArtifactRule()});
+        XMLDocumentPartitioner.SCANNER = new RuleBasedPartitionScanner();
+        XMLDocumentPartitioner.SCANNER.setPredicateRules(new IPredicateRule[] { new XMLTagsRule()});
     }
 
     public static final String CONTENT_TYPES_CATEGORY = "__artifacts_category";
@@ -88,11 +74,11 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
     protected int fDeleteOffset;
     protected String fCategory;
 
-    public DocumentArtifactPartitioner( IPartitionTokenScanner scanner, String legalContentTypes[]) {
+    public XMLDocumentPartitioner( IPartitionTokenScanner scanner, String legalContentTypes[]) {
         this(CONTENT_TYPES_CATEGORY, scanner, legalContentTypes);
     }
     
-    public DocumentArtifactPartitioner(String useCategory,IPartitionTokenScanner scanner, String legalContentTypes[])
+    public XMLDocumentPartitioner(String useCategory,IPartitionTokenScanner scanner, String legalContentTypes[])
     {
         fCategory = useCategory;
         fPositionUpdater = new DefaultPositionUpdater(fCategory);
@@ -124,7 +110,7 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
                 if (isSupportedContentType(contentType))
                 {
                     TypedPosition p =
-                        new DocumentArtifact(
+                        new XMLNode(
                             fScanner.getTokenOffset(),
                             fScanner.getTokenLength(),
                             contentType,
@@ -286,7 +272,7 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
                         {
                             d.addPosition(
                             fCategory,
-                                new DocumentArtifact(start, length, contentType, fDocument));
+                                new XMLNode(start, length, contentType, fDocument));
                             rememberRegion(start, length);
                         } catch (BadLocationException e1)
                         {

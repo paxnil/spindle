@@ -28,8 +28,8 @@ package com.iw.plugins.spindle.editors;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.TypedPosition;
+import org.xmen.xml.XMLNode;
 
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 
 /**
  * Helper class which has the ability to walk over the artifacts in the underlying 
@@ -70,7 +70,7 @@ class TypedPositionWalker
         if (fNextIndex > fEndIndex)
             return null;
 
-        DocumentArtifact artifact = (DocumentArtifact) fTypedPositions[fNextIndex];
+        XMLNode artifact = (XMLNode) fTypedPositions[fNextIndex];
         fLastIndex = fNextIndex;
         fNextIndex += 1;
         return artifact;
@@ -84,7 +84,7 @@ class TypedPositionWalker
         if (fLastIndex == 0)
             return null;
 
-        DocumentArtifact artifact = (DocumentArtifact) fTypedPositions[fNextIndex];
+        XMLNode artifact = (XMLNode) fTypedPositions[fNextIndex];
         fLastIndex = fNextIndex;
         fNextIndex -= 1;
         return artifact;

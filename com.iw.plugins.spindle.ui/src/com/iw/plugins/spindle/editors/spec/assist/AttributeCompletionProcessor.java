@@ -59,6 +59,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.SelectionDialog;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
@@ -68,8 +70,6 @@ import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  *  Content assist inside of attribute values
@@ -93,7 +93,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
     private boolean fIsAttributeTerminated;
 
-    private DocumentArtifact fTag;
+    private XMLNode fTag;
 
     private SpecTapestryAccess fAssistHelper;
 
@@ -110,14 +110,14 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         try
         {
             fDocumentOffset = documentOffset;
-            fTag = DocumentArtifact.getArtifactAt(viewer.getDocument(), fDocumentOffset);
+            fTag = XMLNode.getArtifactAt(viewer.getDocument(), fDocumentOffset);
             fTagName = fTag.getName();
             String type = fTag.getType();
             if (fTagName == null
-                || (type != DocumentArtifactPartitioner.TAG && type != DocumentArtifactPartitioner.EMPTYTAG))
+                || (type != XMLDocumentPartitioner.TAG && type != XMLDocumentPartitioner.EMPTYTAG))
                 return NoProposals;
 
-            DocumentArtifact attribute = fTag.getAttributeAt(fDocumentOffset);
+            XMLNode attribute = fTag.getAttributeAt(fDocumentOffset);
             fAttributeName = attribute.getName();
 
             if (fAttributeName == null)
@@ -125,7 +125,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
             int state = attribute.getStateAt(documentOffset);
 
-            if (state == DocumentArtifact.TAG)
+            if (state == XMLNode.TAG)
                 return NoProposals;
 
             fValueLocation = null;
@@ -212,13 +212,13 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             {
                 return NoInformation;
             }
-            fTag = DocumentArtifact.getArtifactAt(viewer.getDocument(), fDocumentOffset);
+            fTag = XMLNode.getArtifactAt(viewer.getDocument(), fDocumentOffset);
             fTagName = fTag.getName();
 
             if (fTagName == null)
                 return NoInformation;
 
-            DocumentArtifact attribute = fTag.getAttributeAt(fDocumentOffset);
+            XMLNode attribute = fTag.getAttributeAt(fDocumentOffset);
 
             if (attribute != null)
             {
@@ -382,7 +382,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         // need to determine:
         // 1. the component type
         // 2. the parameter names already in use
-        DocumentArtifact parent = fTag.getParent();
+        XMLNode parent = fTag.getParent();
         String parentName;
 
         // locate the spec for the contained component
@@ -392,7 +392,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             if (parentName != null && parentName.equals("component"))
             {
                 Map attrs = parent.getAttributesMap();
-                DocumentArtifact typeAttribute = (DocumentArtifact) attrs.get("type");
+                XMLNode typeAttribute = (XMLNode) attrs.get("type");
                 if (typeAttribute != null)
                 {
                     String typeValue = typeAttribute.getAttributeValue();
@@ -420,9 +420,9 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         Set existingParameterNames = new HashSet();
         for (Iterator iter = children.iterator(); iter.hasNext();)
         {
-            DocumentArtifact child = (DocumentArtifact) iter.next();
+            XMLNode child = (XMLNode) iter.next();
             String childType = child.getType();
-            if ((childType != DocumentArtifactPartitioner.TAG && childType != DocumentArtifactPartitioner.EMPTYTAG)
+            if ((childType != XMLDocumentPartitioner.TAG && childType != XMLDocumentPartitioner.EMPTYTAG)
                 || child.equals(fTag))
                 continue;
 
@@ -439,7 +439,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
                 continue;
             }
             Map childParms = child.getAttributesMap();
-            DocumentArtifact nameAttr = (DocumentArtifact) childParms.get("name");
+            XMLNode nameAttr = (XMLNode) childParms.get("name");
             if (nameAttr == null)
                 continue;
 

@@ -38,10 +38,10 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  * 
@@ -348,8 +348,8 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
     private int fIndentLevel;
     private int[] fPositions;
     private List fLineInfos;
-    private DocumentArtifactPartitioner fPartitioner;
-    private DocumentArtifact fRoot;
+    private XMLDocumentPartitioner fPartitioner;
+    private XMLNode fRoot;
     private TypedPosition[] fDocumentPositions;
 
     /* (non-Javadoc)
@@ -371,9 +371,9 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
             fLineInfos = new ArrayList();
 
             fPartitioner =
-                new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
+                new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
             fPartitioner.connect(fDocument);
-            fRoot = DocumentArtifact.createTree(fDocument, -1); //TODO may not need this!
+            fRoot = XMLNode.createTree(fDocument, -1); //TODO may not need this!
             computeTypedPositions();
 
             return doFormat(length);
@@ -411,8 +411,8 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
 
         try
         {
-            Position[] positions = fDocument.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
-            Arrays.sort(positions, DocumentArtifact.COMPARATOR);
+            Position[] positions = fDocument.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
+            Arrays.sort(positions, XMLNode.COMPARATOR);
             fDocumentPositions = new TypedPosition[positions.length];
             System.arraycopy(positions, 0, fDocumentPositions, 0, positions.length);
         } catch (BadPositionCategoryException e)
@@ -435,13 +435,13 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
         for (TypedPosition tposition = walker.previous(); tposition != null; tposition = walker.previous())
         {
             String type = tposition.getType();
-            if (type == DocumentArtifactPartitioner.TAG || type == DocumentArtifactPartitioner.EMPTYTAG)
+            if (type == XMLDocumentPartitioner.TAG || type == XMLDocumentPartitioner.EMPTYTAG)
             {
                 fInitialIndent = getIndent(tposition.getOffset());
-                if (type != DocumentArtifactPartitioner.EMPTYTAG)
+                if (type != XMLDocumentPartitioner.EMPTYTAG)
                     fIndentLevel++;
                 break;
-            } else if (type == DocumentArtifactPartitioner.ENDTAG)
+            } else if (type == XMLDocumentPartitioner.ENDTAG)
             {
                 fInitialIndent = getIndent(tposition.getOffset());
                 break;
@@ -456,19 +456,19 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
         while (tposition != null)
         {
             String type = tposition.getType();
-            if (type == DocumentArtifactPartitioner.TAG || type == DocumentArtifactPartitioner.EMPTYTAG)
+            if (type == XMLDocumentPartitioner.TAG || type == XMLDocumentPartitioner.EMPTYTAG)
             {
                 formatStartTag(tposition, buffer);
-                if (type == DocumentArtifactPartitioner.TAG)
+                if (type == XMLDocumentPartitioner.TAG)
                     fIndentLevel++;
-            } else if (type == DocumentArtifactPartitioner.ENDTAG)
+            } else if (type == XMLDocumentPartitioner.ENDTAG)
             {
                 if (fIndentLevel > 0)
                     fIndentLevel--;
                 formatDefault(tposition, buffer);
-            } else if (type == DocumentArtifactPartitioner.DECL)
+            } else if (type == XMLDocumentPartitioner.DECL)
             {
-                DocumentArtifact artifact = (DocumentArtifact)tposition;
+                XMLNode artifact = (XMLNode)tposition;
                 String content = artifact.getContent();
                 if (content.indexOf("DOCTYPE") >=0) {
                     formatStartTag(tposition, buffer);
@@ -476,10 +476,10 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
                     formatCDATA(tposition, buffer);
                 }
                    
-            } else if (type == DocumentArtifactPartitioner.COMMENT)
+            } else if (type == XMLDocumentPartitioner.COMMENT)
             {
                 formatDefault(tposition, buffer);
-            } else if (type == DocumentArtifactPartitioner.TEXT || type == DocumentArtifactPartitioner.PI)
+            } else if (type == XMLDocumentPartitioner.TEXT || type == XMLDocumentPartitioner.PI)
             {
                 formatDefault(tposition, buffer);
             }

@@ -8,6 +8,7 @@
 
    <runtime>
       <library name="spindle_ui.jar"/>
+      <library name="xmen.jar"/>
    </runtime>
    <requires>
       <import plugin="com.iw.plugins.spindle.core"/>

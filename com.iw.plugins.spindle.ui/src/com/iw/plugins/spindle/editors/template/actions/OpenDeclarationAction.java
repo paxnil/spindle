@@ -41,12 +41,12 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.editors.template.assist.TemplateTapestryAccess;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
@@ -71,26 +71,26 @@ public class OpenDeclarationAction extends BaseTemplateAction
 
     protected void doRun()
     {
-        DocumentArtifact artifact = DocumentArtifact.getArtifactAt(fDocument, fDocumentOffset);
+        XMLNode artifact = XMLNode.getArtifactAt(fDocument, fDocumentOffset);
         if (artifact == null)
             return;
         String type = artifact.getType();
-        if (type == DocumentArtifactPartitioner.TEXT
-            || type == DocumentArtifactPartitioner.COMMENT
-            || type == DocumentArtifactPartitioner.PI
-            || type == DocumentArtifactPartitioner.DECL
-            || type == DocumentArtifactPartitioner.ENDTAG)
+        if (type == XMLDocumentPartitioner.TEXT
+            || type == XMLDocumentPartitioner.COMMENT
+            || type == XMLDocumentPartitioner.PI
+            || type == XMLDocumentPartitioner.DECL
+            || type == XMLDocumentPartitioner.ENDTAG)
         {
             return;
         }
 
-        DocumentArtifact attrAtOffset = artifact.getAttributeAt(fDocumentOffset);
+        XMLNode attrAtOffset = artifact.getAttributeAt(fDocumentOffset);
         if (attrAtOffset == null)
             return;
 
         Map attrs = artifact.getAttributesMap();
 
-        DocumentArtifact jwcidAttribute = (DocumentArtifact) attrs.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
+        XMLNode jwcidAttribute = (XMLNode) attrs.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
 
         if (jwcidAttribute == null)
             return;
@@ -207,18 +207,18 @@ public class OpenDeclarationAction extends BaseTemplateAction
     private void reveal(AbstractTextEditor editor, String elementName, String attrName, String attrValue)
     {
         IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
-        DocumentArtifactPartitioner partitioner =
-            new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
+        XMLDocumentPartitioner partitioner =
+            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
         try
         {
-            DocumentArtifact reveal = null;
+            XMLNode reveal = null;
             partitioner.connect(document);
             Position[] pos = null;
             pos = document.getPositions(partitioner.getPositionCategory());
             for (int i = 0; i < pos.length; i++)
             {
-                DocumentArtifact artifact = (DocumentArtifact) pos[i];
-                if (artifact.getType() == DocumentArtifactPartitioner.ENDTAG)
+                XMLNode artifact = (XMLNode) pos[i];
+                if (artifact.getType() == XMLDocumentPartitioner.ENDTAG)
                     continue;
                 String name = artifact.getName();
                 if (name == null)
@@ -228,7 +228,7 @@ public class OpenDeclarationAction extends BaseTemplateAction
                     continue;
 
                 Map attributesMap = artifact.getAttributesMap();
-                DocumentArtifact attribute = (DocumentArtifact) attributesMap.get(attrName);
+                XMLNode attribute = (XMLNode) attributesMap.get(attrName);
                 if (attribute == null)
                     continue;
 

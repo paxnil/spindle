@@ -1,29 +1,15 @@
-package com.iw.plugins.spindle.editors.util;
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
- *
- * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 Jens Lukowski and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
  * 
- *  glongman@intelligentworks.com
- *
- * ***** END LICENSE BLOCK ***** */
+ * Contributors:
+ *    Jens Lukowski - initial API and implementation
+ *    Geoff Longman - heavily modified for Spindle
+ *******************************************************************************/
+package org.xmen.xml;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,24 +28,25 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TypedPosition;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
- *  Produced by the DocumentArtifactPartitioner.
+ *  Produced by the XMLDocumentPartitioner.
  *  Represents an xml artifact in the document.
  * 
- * @author glongman@intelligentworks.com
+ * @author Jens Lukowski (dark_angel@users.sourceforge.net )
  * @version $Id$
  */
-public class DocumentArtifact extends TypedPosition implements Comparable
+public class XMLNode extends TypedPosition implements Comparable
 {
     public static final Comparator COMPARATOR = new Comparator()
     {
         public int compare(Object o1, Object o2)
         {
-            int offset1 = ((DocumentArtifact) o1).getOffset();
-            int offset2 = ((DocumentArtifact) o2).getOffset();
+            int offset1 = ((XMLNode) o1).getOffset();
+            int offset2 = ((XMLNode) o2).getOffset();
             return (offset1 > offset2) ? 1 : ((offset1 < offset2) ? -1 : 0);
         }
     };
@@ -77,22 +64,21 @@ public class DocumentArtifact extends TypedPosition implements Comparable
 
     static {
         TERMINATORS = new HashMap();
-        TERMINATORS.put(DocumentArtifactPartitioner.TAG, ">");
-        TERMINATORS.put(DocumentArtifactPartitioner.ATTR, "");
-        TERMINATORS.put(DocumentArtifactPartitioner.TEXT, "");
-        TERMINATORS.put(DocumentArtifactPartitioner.PI, "?>");
-        TERMINATORS.put(DocumentArtifactPartitioner.DECL, ">");
-        TERMINATORS.put(DocumentArtifactPartitioner.ENDTAG, ">");
-        TERMINATORS.put(DocumentArtifactPartitioner.COMMENT, "-->");
-        TERMINATORS.put(DocumentArtifactPartitioner.EMPTYTAG, "/>");
+        TERMINATORS.put(XMLDocumentPartitioner.TAG, ">");
+        TERMINATORS.put(XMLDocumentPartitioner.ATTR, "");
+        TERMINATORS.put(XMLDocumentPartitioner.TEXT, "");
+        TERMINATORS.put(XMLDocumentPartitioner.PI, "?>");
+        TERMINATORS.put(XMLDocumentPartitioner.DECL, ">");
+        TERMINATORS.put(XMLDocumentPartitioner.ENDTAG, ">");
+        TERMINATORS.put(XMLDocumentPartitioner.COMMENT, "-->");
+        TERMINATORS.put(XMLDocumentPartitioner.EMPTYTAG, "/>");
     }
 
-    public static synchronized DocumentArtifact createTree(IDocument document, int stopOffset)
-        throws BadLocationException
+    public static synchronized XMLNode createTree(IDocument document, int stopOffset) throws BadLocationException
     {
-        return createTree(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY, document, stopOffset);
+        return createTree(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY, document, stopOffset);
     }
-    public static synchronized DocumentArtifact createTree(String postionCategory, IDocument document, int stopOffset)
+    public static synchronized XMLNode createTree(String postionCategory, IDocument document, int stopOffset)
         throws BadLocationException
     {
         Position[] pos = null;
@@ -106,18 +92,18 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         }
         Arrays.sort(pos, COMPARATOR);
 
-        DocumentArtifact root = new DocumentArtifact(0, 0, "/", document);
+        XMLNode root = new XMLNode(0, 0, "/", document);
         root.fPos = pos;
         root.fParent = null;
-        DocumentArtifact parent = root;
+        XMLNode parent = root;
         for (int i = 0; i < pos.length; i++)
         {
-            DocumentArtifact node = (DocumentArtifact) pos[i];
+            XMLNode node = (XMLNode) pos[i];
 
             String type = node.getType();
-            if (type != DocumentArtifactPartitioner.ENDTAG)
+            if (type != XMLDocumentPartitioner.ENDTAG)
             {
-                if (root.fPublicId == null && type == DocumentArtifactPartitioner.DECL)
+                if (root.fPublicId == null && type == XMLDocumentPartitioner.DECL)
                 {
                     root.fPublicId = node.readPublicId();
                     root.fRootNodeId = node.getRootNodeId();
@@ -125,10 +111,10 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                 node.setParent(parent);
             }
 
-            if (type == DocumentArtifactPartitioner.TAG)
+            if (type == XMLDocumentPartitioner.TAG)
                 parent = node;
 
-            if (type == DocumentArtifactPartitioner.ENDTAG)
+            if (type == XMLDocumentPartitioner.ENDTAG)
             {
                 node.setParent(parent.fParent);
                 node.fCorrespondingNode = parent;
@@ -139,12 +125,12 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         return root;
     }
 
-    public static DocumentArtifact getArtifactAt(IDocument doc, int offset)
+    public static XMLNode getArtifactAt(IDocument doc, int offset)
     {
-        return getArtifactAt(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY, doc, offset);
+        return getArtifactAt(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY, doc, offset);
     }
 
-    public static DocumentArtifact getArtifactAt(String positionCategory, IDocument doc, int offset)
+    public static XMLNode getArtifactAt(String positionCategory, IDocument doc, int offset)
     {
         try
         {
@@ -152,7 +138,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
             for (int i = 0; i < pos.length; i++)
             {
                 if (offset >= pos[i].getOffset() && offset <= pos[i].getOffset() + pos[i].getLength())
-                    return (DocumentArtifact) pos[i];
+                    return (XMLNode) pos[i];
             }
         } catch (BadPositionCategoryException e)
         {
@@ -162,27 +148,27 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     }
 
     protected IDocument fDocument = null;
-    protected DocumentArtifact fParent;
+    protected XMLNode fParent;
     private List children = new ArrayList();
-    protected DocumentArtifact fCorrespondingNode;
+    protected XMLNode fCorrespondingNode;
     public String fPublicId; // only available in the root artifact
     public String fRootNodeId; // only available in the root artifact
     private Position[] fPos; // valid only in a root after a tree is built.
 
-    public DocumentArtifact(int offset, int length, String type, IDocument document)
+    public XMLNode(int offset, int length, String type, IDocument document)
     {
         super(offset, length, type);
         this.fDocument = document;
     }
 
-    public DocumentArtifact get(int documentOffset)
+    public XMLNode get(int documentOffset)
     {
         if (fPos != null)
         {
             for (int i = 0; i < fPos.length; i++)
             {
                 if (fPos[i].offset <= documentOffset && documentOffset < fPos[i].offset + fPos[i].length)
-                    return (DocumentArtifact) fPos[i];
+                    return (XMLNode) fPos[i];
             }
 
         }
@@ -323,10 +309,10 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         if (this == obj)
             return 0;
 
-        if (!(obj instanceof DocumentArtifact))
+        if (!(obj instanceof XMLNode))
             return 0;
 
-        DocumentArtifact other = (DocumentArtifact) obj;
+        XMLNode other = (XMLNode) obj;
         return (getOffset() > other.getOffset()) ? 1 : ((getOffset() < other.getOffset()) ? -1 : 0);
     }
 
@@ -335,21 +321,21 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         String name = "unknown";
 
         String type = getType();
-        if (type.equals(DocumentArtifactPartitioner.TEXT))
+        if (type.equals(XMLDocumentPartitioner.TEXT))
         {
             name = "#TEXT";
-        } else if (type.equals(DocumentArtifactPartitioner.COMMENT))
+        } else if (type.equals(XMLDocumentPartitioner.COMMENT))
         {
             name = "#COMMENT";
-        } else if (getType().equals(DocumentArtifactPartitioner.ATTR))
+        } else if (getType().equals(XMLDocumentPartitioner.ATTR))
         {
             name = getAttributeName();
         } else if (
-            type.equals(DocumentArtifactPartitioner.TAG)
-                || type.equals(DocumentArtifactPartitioner.EMPTYTAG)
-                || type.equals(DocumentArtifactPartitioner.ENDTAG)
-                || type.equals(DocumentArtifactPartitioner.PI)
-                || type.equals(DocumentArtifactPartitioner.DECL))
+            type.equals(XMLDocumentPartitioner.TAG)
+                || type.equals(XMLDocumentPartitioner.EMPTYTAG)
+                || type.equals(XMLDocumentPartitioner.ENDTAG)
+                || type.equals(XMLDocumentPartitioner.PI)
+                || type.equals(XMLDocumentPartitioner.DECL))
         {
             name = getTagName();
         }
@@ -362,10 +348,10 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         if (getLength() == 0)
             return true;
         String type = getType();
-        if (type.equals(DocumentArtifactPartitioner.TEXT))
+        if (type.equals(XMLDocumentPartitioner.TEXT))
             return true;
 
-        if (type.equals(DocumentArtifactPartitioner.ATTR))
+        if (type.equals(XMLDocumentPartitioner.ATTR))
             return true;
 
         String terminator = (String) TERMINATORS.get(type);
@@ -498,12 +484,12 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         return null;
     }
 
-    public DocumentArtifact getAttributeAt(int offset)
+    public XMLNode getAttributeAt(int offset)
     {
         List attrs = getAttributes();
         for (Iterator it = attrs.iterator(); it.hasNext();)
         {
-            DocumentArtifact artifact = (DocumentArtifact) it.next();
+            XMLNode artifact = (XMLNode) it.next();
             if (artifact.getOffset() <= offset && offset <= artifact.getOffset() + artifact.getLength())
                 return artifact;
         }
@@ -515,7 +501,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         Map result = new HashMap();
         for (Iterator iter = getAttributes().iterator(); iter.hasNext();)
         {
-            DocumentArtifact attr = (DocumentArtifact) iter.next();
+            XMLNode attr = (XMLNode) iter.next();
             result.put(attr.getName().toLowerCase(), attr);
         }
         return result;
@@ -529,19 +515,19 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         int start = -1;
         int startLength = 0;
         int endLength = 0;
-        if (DocumentArtifactPartitioner.PI.equals(getType()))
+        if (XMLDocumentPartitioner.PI.equals(getType()))
         {
             startLength = 2;
             endLength = 2;
-        } else if (DocumentArtifactPartitioner.DECL.equals(getType()))
+        } else if (XMLDocumentPartitioner.DECL.equals(getType()))
         {
             startLength = 2;
             endLength = 1;
-        } else if (DocumentArtifactPartitioner.TAG.equals(getType()))
+        } else if (XMLDocumentPartitioner.TAG.equals(getType()))
         {
             startLength = 1;
             endLength = 1;
-        } else if (DocumentArtifactPartitioner.EMPTYTAG.equals(getType()))
+        } else if (XMLDocumentPartitioner.EMPTYTAG.equals(getType()))
         {
             startLength = 1;
             endLength = 2;
@@ -572,11 +558,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                     if (state == DOUBLEQUOTE)
                     {
                         attrs.add(
-                            new DocumentArtifact(
-                                getOffset() + start,
-                                i - start + 1,
-                                DocumentArtifactPartitioner.ATTR,
-                                fDocument));
+                            new XMLNode(getOffset() + start, i - start + 1, XMLDocumentPartitioner.ATTR, fDocument));
                         start = -1;
                         state = TAG;
                     } else if (state == SINGLEQUOTE)
@@ -591,11 +573,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                     if (state == SINGLEQUOTE)
                     {
                         attrs.add(
-                            new DocumentArtifact(
-                                getOffset() + start,
-                                i - start + 1,
-                                DocumentArtifactPartitioner.ATTR,
-                                fDocument));
+                            new XMLNode(getOffset() + start, i - start + 1, XMLDocumentPartitioner.ATTR, fDocument));
                         start = -1;
                         state = TAG;
                     } else if (state == DOUBLEQUOTE)
@@ -642,10 +620,10 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                         {
 
                             attrs.add(
-                                new DocumentArtifact(
+                                new XMLNode(
                                     getOffset() + start,
                                     i - start + 1,
-                                    DocumentArtifactPartitioner.ATTR,
+                                    XMLDocumentPartitioner.ATTR,
                                     fDocument));
                             start = -1;
                             state = TAG;
@@ -658,18 +636,15 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         if (start != -1)
         {
             attrs.add(
-                new DocumentArtifact(
+                new XMLNode(
                     getOffset() + start,
-                    content.length()
-                        - startLength
-                        - start
-                        - (!getType().equals(DocumentArtifactPartitioner.TAG) ? 1 : 0),
-                    DocumentArtifactPartitioner.ATTR,
+                    content.length() - startLength - start - (!getType().equals(XMLDocumentPartitioner.TAG) ? 1 : 0),
+                    XMLDocumentPartitioner.ATTR,
                     fDocument));
         }
         for (Iterator iter = attrs.iterator(); iter.hasNext();)
         {
-            DocumentArtifact attr = (DocumentArtifact) iter.next();
+            XMLNode attr = (XMLNode) iter.next();
             attr.length = StringUtils.stripEnd(attr.getContent(), null).length();
         }
 
@@ -824,27 +799,27 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                 return Integer.toString(state);
         }
     } /**
-                                                                                                                                                                                                                                        * @return
-                                                                                                                                                                                                                                        */
-    public DocumentArtifact getCorrespondingNode()
+                                                                                                                                                                                                                                              * @return
+                                                                                                                                                                                                                                              */
+    public XMLNode getCorrespondingNode()
     {
         return fCorrespondingNode;
     } /**
-                                                                                                                                                                                                                                            * @return
-                                                                                                                                                                                                                                            */
-    public DocumentArtifact getParent()
+                                                                                                                                                                                                                                                  * @return
+                                                                                                                                                                                                                                                  */
+    public XMLNode getParent()
     {
         return fParent;
     } /**
-                                                                                                                                                                                                                                            * @param artifact
-                                                                                                                                                                                                                                            */
-    public void setCorrespondingNode(DocumentArtifact artifact)
+                                                                                                                                                                                                                                                  * @param artifact
+                                                                                                                                                                                                                                                  */
+    public void setCorrespondingNode(XMLNode artifact)
     {
         fCorrespondingNode = artifact;
     } /**
-                                                                                                                                                                                                                                            * @param artifact
-                                                                                                                                                                                                                                            */
-    public void setParent(DocumentArtifact artifact)
+                                                                                                                                                                                                                                                  * @param artifact
+                                                                                                                                                                                                                                                  */
+    public void setParent(XMLNode artifact)
     {
         fParent = artifact;
         if (fParent != null && !fParent.getChildren().contains(this))
@@ -852,11 +827,11 @@ public class DocumentArtifact extends TypedPosition implements Comparable
 
     }
 
-    public synchronized void addChild(DocumentArtifact childArtifact)
+    public synchronized void addChild(XMLNode childArtifact)
     {
         for (int i = 0; i < children.size(); i++)
         {
-            if (((DocumentArtifact) children.get(i)).getOffset() > childArtifact.getOffset())
+            if (((XMLNode) children.get(i)).getOffset() > childArtifact.getOffset())
                 children.add(i, childArtifact);
 
         }
@@ -871,30 +846,30 @@ public class DocumentArtifact extends TypedPosition implements Comparable
 
     public Object[] getChildren(Object obj)
     {
-        if (obj instanceof DocumentArtifact)
+        if (obj instanceof XMLNode)
         {
             List result = new ArrayList();
 
-            DocumentArtifact artifact = (DocumentArtifact) obj;
+            XMLNode artifact = (XMLNode) obj;
             for (Iterator it = artifact.getChildren().iterator(); it.hasNext();)
             {
-                DocumentArtifact child = (DocumentArtifact) it.next();
+                XMLNode child = (XMLNode) it.next();
                 String childType = child.getType();
-                if (childType == DocumentArtifactPartitioner.ENDTAG
-                    || (childType == DocumentArtifactPartitioner.TEXT && child.containsOnlyWhitespace()))
+                if (childType == XMLDocumentPartitioner.ENDTAG
+                    || (childType == XMLDocumentPartitioner.TEXT && child.containsOnlyWhitespace()))
                     continue;
                 result.add(child);
 
             }
 
             String type = artifact.getType();
-            if (type == DocumentArtifactPartitioner.TAG || type == DocumentArtifactPartitioner.EMPTYTAG)
+            if (type == XMLDocumentPartitioner.TAG || type == XMLDocumentPartitioner.EMPTYTAG)
             {
                 result.addAll(0, artifact.getAttributes());
-            } else if (type == DocumentArtifactPartitioner.DECL)
+            } else if (type == XMLDocumentPartitioner.DECL)
             {}
 
-            return result.toArray(new DocumentArtifact[0]);
+            return result.toArray(new XMLNode[0]);
         }
 
         return null;
@@ -906,19 +881,19 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     }
 
     //    // Tags only - if you have an end tag - pass its corresponding tag
-    //    public DocumentArtifact findLastChild()
+    //    public XMLNode findLastChild()
     //    {
     //        if (fParent == null)
     //            throw new IllegalStateException("create tree first");
     //
     //        String type = getType();
-    //        if (type == DocumentArtifactPartitioner.TAG)
+    //        if (type == XMLDocumentPartitioner.TAG)
     //            return null;
     //
     //        Position[] pos = null;
     //        try
     //        {
-    //            pos = fDocument.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
+    //            pos = fDocument.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
     //        } catch (BadPositionCategoryException e)
     //        {
     //            e.printStackTrace();
@@ -928,17 +903,17 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     //        int index = 0;
     //        while (pos[index] != this)
     //            index++;
-    //        DocumentArtifact result = null;
-    //        DocumentArtifact next = null;
+    //        XMLNode result = null;
+    //        XMLNode next = null;
     //        if (index > 0 && index < pos.length)
     //        {
     //            for (int i = index + 1; i < pos.length; i++)
     //            {
-    //                next = (DocumentArtifact) pos[i];
+    //                next = (XMLNode) pos[i];
     //                if (next.getParent() == fParent)
     //                    break;
-    //                if (next.getType() != DocumentArtifactPartitioner.TAG
-    //                    || next.getType() != DocumentArtifactPartitioner.EMPTYTAG
+    //                if (next.getType() != XMLDocumentPartitioner.TAG
+    //                    || next.getType() != XMLDocumentPartitioner.EMPTYTAG
     //                    || next.getParent() != this)
     //                    continue;
     //                result = next;
@@ -948,7 +923,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     //        return result;
     //    }
 
-    public DocumentArtifact getPreviousSibling()
+    public XMLNode getPreviousSibling()
     {
         if (fParent == null)
             throw new IllegalStateException("create tree first");
@@ -956,7 +931,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         String myType = getType();
         if (fParent.getType().equals("/"))
             return null;
-        if (myType.equals(DocumentArtifactPartitioner.ENDTAG))
+        if (myType.equals(XMLDocumentPartitioner.ENDTAG))
         {
             if (fCorrespondingNode != null)
             {
@@ -967,7 +942,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
             }
         }
 
-        DocumentArtifact candidate = getPreviousArtifact();
+        XMLNode candidate = getPreviousArtifact();
         if (candidate == null)
             return null;
         if (candidate.fParent == fParent)
@@ -975,12 +950,12 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         return null;
     }
 
-    public DocumentArtifact getPreviousArtifact()
+    public XMLNode getPreviousArtifact()
     {
         return getArtifactAt(fDocument, getOffset() - 1);
     }
 
-    public DocumentArtifact getNextArtifact()
+    public XMLNode getNextArtifact()
     {
         return getArtifactAt(fDocument, getOffset() + getLength() + 1);
     }
@@ -988,14 +963,14 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     /** may be the prev sibling or the parent
      *  TODO remove 
      */
-    public DocumentArtifact getPreviousSiblingTag(String allowed)
+    public XMLNode getPreviousSiblingTag(String allowed)
     {
         if (fParent == null || fParent.getType().equals("/") || allowed == null)
             return null;
         Position[] pos = null;
         try
         {
-            pos = fDocument.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
+            pos = fDocument.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
         } catch (BadPositionCategoryException e)
         {
             e.printStackTrace();
@@ -1007,17 +982,17 @@ public class DocumentArtifact extends TypedPosition implements Comparable
             index++;
         if (index > 0)
         {
-            DocumentArtifact result = null;
+            XMLNode result = null;
             for (int i = index - 1; i >= 0; i--)
             {
-                result = (DocumentArtifact) pos[i];
+                result = (XMLNode) pos[i];
                 if (result == fParent)
                     return null;
                 String type = result.getType();
                 if (result.getParent() != fParent
-                    || (type.equals(DocumentArtifactPartitioner.TEXT)
-                        || type.equals(DocumentArtifactPartitioner.COMMENT)
-                        || type.equals(DocumentArtifactPartitioner.DECL)))
+                    || (type.equals(XMLDocumentPartitioner.TEXT)
+                        || type.equals(XMLDocumentPartitioner.COMMENT)
+                        || type.equals(XMLDocumentPartitioner.DECL)))
                 {
                     continue;
                 }
@@ -1025,9 +1000,9 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                 String name = result.getName();
                 if (name == null)
                     continue;
-                if (type.equals(DocumentArtifactPartitioner.ENDTAG))
+                if (type.equals(XMLDocumentPartitioner.ENDTAG))
                 {
-                    DocumentArtifact corresponding = result.getCorrespondingNode();
+                    XMLNode corresponding = result.getCorrespondingNode();
                     if (allowed.indexOf(corresponding.getName().toLowerCase()) >= 0)
                         return corresponding;
                 } else if (allowed.indexOf(name) >= 0)

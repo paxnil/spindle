@@ -1,30 +1,15 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
- *
- * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 Jens Lukowski and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
  * 
- *  glongman@intelligentworks.com
- *
- * ***** END LICENSE BLOCK ***** */
-
-package com.iw.plugins.spindle.editors.util;
+ * Contributors:
+ *    Jens Lukowski - initial API and implementation
+ *    Geoff Longman - heavily modified for Spindle
+ *******************************************************************************/
+package org.xmen.internal.ui.text;
 
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IPredicateRule;
@@ -32,21 +17,21 @@ import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 
 /**
- *  Rule for producing DocumentArtifactss
+ *  Rule for producing XMLNodes
  * 
- * @author glongman@intelligentworks.com
+ * @author Jens Lukowski (dark_angel@users.sourceforge.net )
  * @version $Id$
  */
-public class DocumentArtifactRule implements IPredicateRule
+public class XMLTagsRule implements IPredicateRule
 {
 
-    public static final IToken TAG = new Token(DocumentArtifactPartitioner.TAG);
-    public static final IToken ENDTAG = new Token(DocumentArtifactPartitioner.ENDTAG);
-    public static final IToken TEXT = new Token(DocumentArtifactPartitioner.TEXT);
-    public static final IToken PI = new Token(DocumentArtifactPartitioner.PI);
-    public static final IToken DECLARATION = new Token(DocumentArtifactPartitioner.DECL);
-    public static final IToken COMMENT = new Token(DocumentArtifactPartitioner.COMMENT);
-    public static final IToken EMPTYTAG = new Token(DocumentArtifactPartitioner.EMPTYTAG);
+    public static final IToken TAG = new Token(XMLDocumentPartitioner.TAG);
+    public static final IToken ENDTAG = new Token(XMLDocumentPartitioner.ENDTAG);
+    public static final IToken TEXT = new Token(XMLDocumentPartitioner.TEXT);
+    public static final IToken PI = new Token(XMLDocumentPartitioner.PI);
+    public static final IToken DECLARATION = new Token(XMLDocumentPartitioner.DECL);
+    public static final IToken COMMENT = new Token(XMLDocumentPartitioner.COMMENT);
+    public static final IToken EMPTYTAG = new Token(XMLDocumentPartitioner.EMPTYTAG);
 
     /* (non-Javadoc)
      * @see org.eclipse.jface.text.rules.IRule#evaluate(org.eclipse.jface.text.rules.ICharacterScanner)

@@ -40,6 +40,8 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -50,8 +52,6 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.spec.assist.SpecTapestryAccess;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
@@ -74,16 +74,16 @@ public class OpenDeclarationAction extends BaseSpecAction
 
     protected void doRun()
     {
-        DocumentArtifact artifact = DocumentArtifact.getArtifactAt(fDocument, fDocumentOffset);
+        XMLNode artifact = XMLNode.getArtifactAt(fDocument, fDocumentOffset);
         String type = artifact.getType();
-        if (type == DocumentArtifactPartitioner.TEXT
-            || type == DocumentArtifactPartitioner.COMMENT
-            || type == DocumentArtifactPartitioner.PI
-            || type == DocumentArtifactPartitioner.DECL)
+        if (type == XMLDocumentPartitioner.TEXT
+            || type == XMLDocumentPartitioner.COMMENT
+            || type == XMLDocumentPartitioner.PI
+            || type == XMLDocumentPartitioner.DECL)
         {
             return;
         }
-        if (type == DocumentArtifactPartitioner.ENDTAG)
+        if (type == XMLDocumentPartitioner.ENDTAG)
             artifact = artifact.getCorrespondingNode();
 
         if (artifact == null)
@@ -103,7 +103,7 @@ public class OpenDeclarationAction extends BaseSpecAction
             || name.equals("string-binding")
             || name.equals("field-binding"))
         {
-            DocumentArtifact parent = artifact.getParent();
+            XMLNode parent = artifact.getParent();
             String parentName = parent.getName();
             if (parentName == null)
                 return;
@@ -176,9 +176,9 @@ public class OpenDeclarationAction extends BaseSpecAction
      * @param artifact
      * @param string
      */
-    private void handleLibraryLookup(DocumentArtifact artifact)
+    private void handleLibraryLookup(XMLNode artifact)
     {
-        DocumentArtifact attribute = artifact.getAttributeAt(fDocumentOffset);
+        XMLNode attribute = artifact.getAttributeAt(fDocumentOffset);
         if (attribute == null)
             return;
 
@@ -222,9 +222,9 @@ public class OpenDeclarationAction extends BaseSpecAction
     /**
      * @param artifact
      */
-    private void handlePrivateAsset(DocumentArtifact artifact)
+    private void handlePrivateAsset(XMLNode artifact)
     {
-        DocumentArtifact attribute = artifact.getAttributeAt(fDocumentOffset);
+        XMLNode attribute = artifact.getAttributeAt(fDocumentOffset);
         if (attribute == null)
             return;
 
@@ -269,9 +269,9 @@ public class OpenDeclarationAction extends BaseSpecAction
     /**
      * @param artifact
      */
-    private void handleContextAsset(DocumentArtifact artifact)
+    private void handleContextAsset(XMLNode artifact)
     {
-        DocumentArtifact attribute = artifact.getAttributeAt(fDocumentOffset);
+        XMLNode attribute = artifact.getAttributeAt(fDocumentOffset);
         if (attribute == null)
             return;
 
@@ -306,9 +306,9 @@ public class OpenDeclarationAction extends BaseSpecAction
         }
     }
 
-    private void handleRelativeLookup(DocumentArtifact artifact, String attrName)
+    private void handleRelativeLookup(XMLNode artifact, String attrName)
     {
-        DocumentArtifact attribute = artifact.getAttributeAt(fDocumentOffset);
+        XMLNode attribute = artifact.getAttributeAt(fDocumentOffset);
         if (attribute == null)
             return;
 
@@ -343,7 +343,7 @@ public class OpenDeclarationAction extends BaseSpecAction
     /**
      * @param artifact
      */
-    private void handleComponentLookup(DocumentArtifact artifact)
+    private void handleComponentLookup(XMLNode artifact)
     {
 
         SpecTapestryAccess access = null;
@@ -359,7 +359,7 @@ public class OpenDeclarationAction extends BaseSpecAction
             return;
 
         // first try and resolve the component...
-        DocumentArtifact attribute = artifact.getAttributeAt(fDocumentOffset);
+        XMLNode attribute = artifact.getAttributeAt(fDocumentOffset);
         if (attribute == null)
             return;
 
@@ -387,14 +387,14 @@ public class OpenDeclarationAction extends BaseSpecAction
 
     }
 
-    private void handleComponentBinding(DocumentArtifact parent, DocumentArtifact binding)
+    private void handleComponentBinding(XMLNode parent, XMLNode binding)
     {
         try
         {
             SpecTapestryAccess access = new SpecTapestryAccess(fEditor);
             // first try and resolve the component...
             Map attrMap = parent.getAttributesMap();
-            DocumentArtifact typeAttribute = (DocumentArtifact) attrMap.get("type");
+            XMLNode typeAttribute = (XMLNode) attrMap.get("type");
             if (typeAttribute == null)
                 return;
 
@@ -408,7 +408,7 @@ public class OpenDeclarationAction extends BaseSpecAction
                 return;
 
             Map bindingAttrs = binding.getAttributesMap();
-            DocumentArtifact nameAttribute = (DocumentArtifact) bindingAttrs.get("name");
+            XMLNode nameAttribute = (XMLNode) bindingAttrs.get("name");
             if (nameAttribute == null)
                 return;
 
@@ -431,9 +431,9 @@ public class OpenDeclarationAction extends BaseSpecAction
 
     }
 
-    private void handleTypeLookup(DocumentArtifact artifact, String attrName)
+    private void handleTypeLookup(XMLNode artifact, String attrName)
     {
-        DocumentArtifact attribute = artifact.getAttributeAt(fDocumentOffset);
+        XMLNode attribute = artifact.getAttributeAt(fDocumentOffset);
         if (attribute == null)
             return;
 
@@ -488,18 +488,18 @@ public class OpenDeclarationAction extends BaseSpecAction
     private void revealParameter(AbstractTextEditor editor, String parameterName)
     {
         IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
-        DocumentArtifactPartitioner partitioner =
-            new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
+        XMLDocumentPartitioner partitioner =
+            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
         try
         {
-            DocumentArtifact reveal = null;
+            XMLNode reveal = null;
             partitioner.connect(document);
             Position[] pos = null;
             pos = document.getPositions(partitioner.getPositionCategory());
             for (int i = 0; i < pos.length; i++)
             {
-                DocumentArtifact artifact = (DocumentArtifact) pos[i];
-                if (artifact.getType() == DocumentArtifactPartitioner.ENDTAG)
+                XMLNode artifact = (XMLNode) pos[i];
+                if (artifact.getType() == XMLDocumentPartitioner.ENDTAG)
                     continue;
                 String name = artifact.getName();
                 if (name == null)
@@ -509,7 +509,7 @@ public class OpenDeclarationAction extends BaseSpecAction
                     continue;
 
                 Map attributesMap = artifact.getAttributesMap();
-                DocumentArtifact attribute = (DocumentArtifact) attributesMap.get("name");
+                XMLNode attribute = (XMLNode) attributesMap.get("name");
                 if (attribute == null)
                     continue;
 

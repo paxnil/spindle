@@ -40,6 +40,7 @@ import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
@@ -47,7 +48,6 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.template.TemplatePartitionScanner;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 
 /**
  *  Content assist inside of jwcid attributes
@@ -76,11 +76,11 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
      */
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
-        if (tag.getStateAt(documentOffset) == DocumentArtifact.ATT_VALUE)
+        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
+        if (tag.getStateAt(documentOffset) == XMLNode.ATT_VALUE)
             return NoProposals;
         Map attributeMap = tag.getAttributesMap();
-        DocumentArtifact jwcidAttr = (DocumentArtifact) attributeMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
+        XMLNode jwcidAttr = (XMLNode) attributeMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
 
         fAssistHelper = null;
         try
@@ -253,8 +253,8 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
                 if (!partitions[i].getType().equals(TemplatePartitionScanner.TAPESTRY_JWCID_ATTRIBUTE))
                     continue;
 
-                DocumentArtifact tag = DocumentArtifact.getArtifactAt(document, partitions[i].getOffset());
-                DocumentArtifact attr = tag.getAttributeAt(partitions[i].getOffset());
+                XMLNode tag = XMLNode.getArtifactAt(document, partitions[i].getOffset());
+                XMLNode attr = tag.getAttributeAt(partitions[i].getOffset());
                 String temp = attr.getAttributeValue().trim();
                 int tempAt = temp.indexOf('@');
                 if (tempAt > 0)
@@ -327,9 +327,9 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
      */
     public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
     {
-        DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
+        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
         Map attributeMap = tag.getAttributesMap();
-        DocumentArtifact jwcidAttr = (DocumentArtifact) attributeMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
+        XMLNode jwcidAttr = (XMLNode) attributeMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
         String attributeValue = jwcidAttr.getAttributeValue();
         fAssistHelper = null;
         try

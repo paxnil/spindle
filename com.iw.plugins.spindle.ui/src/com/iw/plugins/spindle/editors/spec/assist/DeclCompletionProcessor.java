@@ -29,9 +29,9 @@ package com.iw.plugins.spindle.editors.spec.assist;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 
 /**
  *  Processor for default declType type - only works to insert comments within the
@@ -57,8 +57,8 @@ public class DeclCompletionProcessor extends SpecCompletionProcessor
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
         IDocument document = viewer.getDocument();
-        DocumentArtifact artifact = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
-        DocumentArtifact parent = artifact.getParent();
+        XMLNode artifact = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
+        XMLNode parent = artifact.getParent();
         if (parent.getType() == "/")
         {
             return NoProposals;

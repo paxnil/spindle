@@ -36,11 +36,11 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  *  Auto indent strategy sensitive to XML tags
@@ -53,8 +53,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
     private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
     private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
 
-    private DocumentArtifactPartitioner fPartitioner =
-        new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
+    private XMLDocumentPartitioner fPartitioner =
+        new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
 
     private TypedPosition[] fTypedPositions;
     private IPreferenceStore fPreferences;
@@ -85,7 +85,7 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
                 connect(document);
                 TypedPositionWalker walker = new TypedPositionWalker(fTypedPositions, offset);
 
-                DocumentArtifact artifact = (DocumentArtifact) walker.previous();
+                XMLNode artifact = (XMLNode) walker.previous();
                 if (artifact == null)
                 {
                     super.customizeDocumentCommand(document, command);
@@ -96,16 +96,16 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
                     boolean inside =
                         offset <= artifact.getOffset() && offset < artifact.getOffset() + artifact.getLength();
 
-                    if (inside && type != DocumentArtifactPartitioner.TEXT)
+                    if (inside && type != XMLDocumentPartitioner.TEXT)
                     {
                         doIndent(command, getIndent(document, artifact.getOffset()), 1);
 
-                    } else if (type == DocumentArtifactPartitioner.TEXT)
+                    } else if (type == XMLDocumentPartitioner.TEXT)
                     {
                         do
                         {
-                            artifact = (DocumentArtifact) walker.previous();
-                        } while (artifact != null && artifact.getType() == DocumentArtifactPartitioner.TEXT);
+                            artifact = (XMLNode) walker.previous();
+                        } while (artifact != null && artifact.getType() == XMLDocumentPartitioner.TEXT);
                     }
 
                     if (artifact == null)
@@ -113,7 +113,7 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
                         super.customizeDocumentCommand(document, command);
                     } else
                     {
-                        if (type == DocumentArtifactPartitioner.TAG)
+                        if (type == XMLDocumentPartitioner.TAG)
                             doIndent(command, getIndent(document, artifact.getOffset()), 1);
                         else
                             doIndent(command, getIndent(document, artifact.getOffset()), 0);
@@ -160,10 +160,10 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
     {
         fPartitioner.connect(d);
         Position[] pos = d.getPositions(fPartitioner.getPositionCategory());
-        Arrays.sort(pos, DocumentArtifact.COMPARATOR);
+        Arrays.sort(pos, XMLNode.COMPARATOR);
         fTypedPositions = new TypedPosition[pos.length];
         System.arraycopy(pos, 0, fTypedPositions, 0, pos.length);
-        DocumentArtifact.createTree(d, -1);
+        XMLNode.createTree(d, -1);
     }
 
     private void disconnect()

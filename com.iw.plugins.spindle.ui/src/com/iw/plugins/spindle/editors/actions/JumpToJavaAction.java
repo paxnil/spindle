@@ -35,12 +35,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.text.BadLocationException;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  * Jump from spec/template editors to associated java files
@@ -97,13 +97,13 @@ public class JumpToJavaAction extends BaseJumpAction
         try
         {
             attachPartitioner();
-            DocumentArtifact root = DocumentArtifact.createTree(getDocument(), -1);
+            XMLNode root = XMLNode.createTree(getDocument(), -1);
             List children = root.getChildren();
             for (Iterator iter = children.iterator(); iter.hasNext();)
             {
-                DocumentArtifact child = (DocumentArtifact) iter.next();
+                XMLNode child = (XMLNode) iter.next();
                 String type = child.getType();
-                if (type == DocumentArtifactPartitioner.TAG || type == DocumentArtifactPartitioner.EMPTYTAG)
+                if (type == XMLDocumentPartitioner.TAG || type == XMLDocumentPartitioner.EMPTYTAG)
                 {
                     String name = child.getName();
                     if (name == null)
@@ -113,7 +113,7 @@ public class JumpToJavaAction extends BaseJumpAction
                     if (name.equals("component-specification") || name.equals("page-specification"))
                     {
                         attrMap = child.getAttributesMap();
-                        DocumentArtifact attribute = (DocumentArtifact) attrMap.get("class");
+                        XMLNode attribute = (XMLNode) attrMap.get("class");
                         if (attribute != null)
                         {
                             String attrValue = attribute.getAttributeValue();
@@ -124,7 +124,7 @@ public class JumpToJavaAction extends BaseJumpAction
                     } else if (name.equals("application"))
                     {
                         attrMap = child.getAttributesMap();
-                        DocumentArtifact attribute = (DocumentArtifact) attrMap.get("engine-class");
+                        XMLNode attribute = (XMLNode) attrMap.get("engine-class");
                         if (attribute != null)
                         {
                             String attrValue = attribute.getAttributeValue();

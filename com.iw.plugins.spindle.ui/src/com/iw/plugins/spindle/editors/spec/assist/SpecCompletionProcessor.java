@@ -40,6 +40,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
@@ -47,7 +48,6 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.wutka.dtd.DTD;
 
 /**
@@ -59,10 +59,10 @@ import com.wutka.dtd.DTD;
 public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 {
 
-    protected static List findRawNewTagProposals(DTD dtd, DocumentArtifact artifact, int documentOffset)
+    protected static List findRawNewTagProposals(DTD dtd, XMLNode artifact, int documentOffset)
     {
-        DocumentArtifact parent = artifact.getParent();
-        DocumentArtifact previousSibling = null;
+        XMLNode parent = artifact.getParent();
+        XMLNode previousSibling = null;
 
         if (parent != null && !parent.getType().equals("/"))
         {
@@ -102,7 +102,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
     protected String fDeclaredRootElementName;
     protected String fPublicId;
     protected DTD fDTD;
-    protected DocumentArtifact fArtifact;
+    protected XMLNode fArtifact;
 
     public SpecCompletionProcessor(Editor editor)
     {
@@ -130,7 +130,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 
             try
             {
-                DocumentArtifact root = DocumentArtifact.createTree(document, -1);
+                XMLNode root = XMLNode.createTree(document, -1);
                 fPublicId = root.fPublicId;
                 fDeclaredRootElementName = root.fRootNodeId;
                 fDTD = DOMValidator.getDTD(fPublicId);
@@ -167,7 +167,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 
             try
             {
-                DocumentArtifact root = DocumentArtifact.createTree(document, -1);
+                XMLNode root = XMLNode.createTree(document, -1);
                 fPublicId = root.fPublicId;
                 fDeclaredRootElementName = root.fRootNodeId;
                 fDTD = DOMValidator.getDTD(fPublicId);

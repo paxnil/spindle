@@ -48,6 +48,9 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -55,6 +58,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
@@ -85,6 +90,7 @@ public class TemplateEditor extends Editor
 
     private TemplateScanner fScanner = new TemplateScanner();
     private IScannerValidator fValidator = new BaseValidator();
+    private HighlightUpdater fHighlightUpdater;
 
     public TemplateEditor()
     {
@@ -155,6 +161,15 @@ public class TemplateEditor extends Editor
         //        menu.appendToGroup(HTML_GROUP, templateMenu);
         //        addAction(menu, HTML_GROUP, SAVE_HTML_TEMPLATE);
         //        addAction(menu, HTML_GROUP, REVERT_HTML_TEMPLATE);
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+     */
+    public void createPartControl(Composite parent)
+    {
+        super.createPartControl(parent);
+        fHighlightUpdater = new HighlightUpdater();
     }
 
     /* (non-Javadoc)
@@ -249,6 +264,28 @@ public class TemplateEditor extends Editor
             collector.endCollecting();
         }
     }
+    /*
+        * @see AbstractTextEditor#handleCursorPositionChanged()
+        */
+    protected void handleCursorPositionChanged()
+    {
+        super.handleCursorPositionChanged();
+        if (fHighlightUpdater != null)
+            fHighlightUpdater.post(getCaretOffset());
+    }
+
+    private void setHighlight(final int offset)
+    {
+        Display d = Display.getCurrent();
+        if (d == null)
+            return;
+
+        d.asyncExec(new Runnable()
+        {
+            public void run()
+            {}
+        });
+    }
 
     /* (non-Javadoc)
       * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
@@ -334,7 +371,104 @@ public class TemplateEditor extends Editor
             IStructuredSelection selection = (IStructuredSelection) event.getSelection();
             Position position = (Position) selection.getFirstElement();
             selectAndReveal(position.getOffset(), position.getLength());
+            fHighlightUpdater.post(position.getOffset());
         }
     }
+
+    /**
+     * "Smart" runnable for updating the highlight range.
+     */
+    class HighlightUpdater implements Runnable
+    {
+
+        /** Has the runnable already been posted? */
+        private boolean fPosted = false;
+        private int fOffset;
+        private XMLDocumentPartitioner fHighlightPartitioner;
+
+        public HighlightUpdater()
+        {}
+
+        /*
+         * @see Runnable#run()
+         */
+        public void run()
+        {
+            if (fHighlightPartitioner == null)
+                fHighlightPartitioner =
+                    new XMLDocumentPartitioner(
+                        XMLDocumentPartitioner.SCANNER,
+                        XMLDocumentPartitioner.TYPES);
+
+            IDocument document = getDocumentProvider().getDocument(getEditorInput());
+
+            try
+            {
+                fHighlightPartitioner.connect(document);
+                XMLNode.createTree(document, -1);
+                XMLNode artifact = XMLNode.getArtifactAt(document, fOffset);
+                if (artifact == null)
+                    return;
+
+                String type = artifact.getType();
+                if (type == XMLDocumentPartitioner.TAG)
+                {
+                    XMLNode corr = artifact.getCorrespondingNode();
+                    if (corr != null)
+                    {
+                        int start = artifact.getOffset();
+                        int endStart = corr.getOffset();
+                        setHighlightRange(start, endStart - start + corr.getLength(), false);
+                        return;
+                    }
+                }
+                if (type == XMLDocumentPartitioner.ENDTAG)
+                {
+                    XMLNode corr = artifact.getCorrespondingNode();
+                    if (corr != null)
+                    {
+                        int start = corr.getOffset();
+                        int endStart = artifact.getOffset();
+                        setHighlightRange(start, endStart - start + artifact.getLength(), false);
+                        return;
+                    }
+                }
+                setHighlightRange(artifact.getOffset(), artifact.getLength(), false);
+
+            } catch (Exception e)
+            {
+                UIPlugin.log(e);
+            } finally
+            {
+                fPosted = false;
+                try
+                {
+                    fHighlightPartitioner.disconnect();
+                } catch (Exception e)
+                {
+                    UIPlugin.log(e);
+                }
+            }
+
+        }
+
+        /**
+         * Posts this runnable into the event queue.
+         */
+        public void post(int offset)
+        {
+            if (fPosted)
+                return;
+
+            fOffset = offset;
+
+            Shell shell = getSite().getShell();
+            if (shell != null & !shell.isDisposed())
+            {
+                fPosted = true;
+                shell.getDisplay().asyncExec(this);
+            }
+        }
+    };
 
 }

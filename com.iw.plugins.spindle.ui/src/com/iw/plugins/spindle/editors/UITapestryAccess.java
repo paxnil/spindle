@@ -186,9 +186,7 @@ public abstract class UITapestryAccess
     {
         List result = new ArrayList();
 
-        ILibrarySpecification libSpec = currentNamespace.getSpecification();
-
-        List types = libSpec.getComponentTypes();
+         List types = currentNamespace.getComponentTypes();
 
         Map applicationTypes = new HashMap();
 
@@ -200,9 +198,8 @@ public abstract class UITapestryAccess
         }
 
         if (framework != null)
-        {
-            libSpec = framework.getSpecification();
-            types = libSpec.getComponentTypes();
+        {            
+            types = framework.getComponentTypes();
             for (Iterator iter = types.iterator(); iter.hasNext();)
             {
                 String typeId = (String) iter.next();

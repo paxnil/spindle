@@ -33,12 +33,12 @@ import java.util.List;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
 /**
  *  Processor for default content type
@@ -59,12 +59,12 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
      */
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        DocumentArtifact artifact = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
+        XMLNode artifact = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
         if (artifact.getOffset() + artifact.getLength() == documentOffset)
             artifact = artifact.getNextArtifact();
 
-        DocumentArtifact nextArtifact = artifact.getNextArtifact();
-        if (nextArtifact.getType() != DocumentArtifactPartitioner.ENDTAG)
+        XMLNode nextArtifact = artifact.getNextArtifact();
+        if (nextArtifact.getType() != XMLDocumentPartitioner.ENDTAG)
             artifact = nextArtifact;
 
         List proposals = new ArrayList();
@@ -94,11 +94,11 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
      */
     private ICompletionProposal computeEndTagProposal(ITextViewer viewer, int documentOffset)
     {
-        DocumentArtifact artifact = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
-        DocumentArtifact parentArtifact = artifact.getParent();
+        XMLNode artifact = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
+        XMLNode parentArtifact = artifact.getParent();
         if (parentArtifact == null
             || parentArtifact.getType().equals("/")
-            || parentArtifact.getType() != DocumentArtifactPartitioner.TAG)
+            || parentArtifact.getType() != XMLDocumentPartitioner.TAG)
             return null;
 
         String parentName = parentArtifact.getName();
@@ -106,7 +106,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
             return null;
         ;
 
-        DocumentArtifact corr = parentArtifact.getCorrespondingNode();
+        XMLNode corr = parentArtifact.getCorrespondingNode();
         String corrName = null;
         if (corr != null)
             corrName = corr.getName();

@@ -33,10 +33,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 import com.iw.plugins.spindle.ui.util.WrappedImageDescriptor;
 
 /**
@@ -103,7 +103,7 @@ public abstract class BaseJumpAction extends BaseEditorAction
     }
 
    
-    private DocumentArtifactPartitioner fPartitioner = null;
+    private XMLDocumentPartitioner fPartitioner = null;
     private IDocument fDocument = null;
     /**
      * 
@@ -175,7 +175,7 @@ public abstract class BaseJumpAction extends BaseEditorAction
     {
         Assert.isTrue(fPartitioner == null);
         fPartitioner =
-            new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
+            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
         fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
         fPartitioner.connect(fDocument);
     }

@@ -32,12 +32,12 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 
 /**
  *  Content assist inside of Tags (but not attributes)
@@ -60,12 +60,12 @@ public class AttributeContentAssistProcessor extends ContentAssistProcessor
      */
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
-        DocumentArtifact attribute = tag.getAttributeAt(documentOffset);
+        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
+        XMLNode attribute = tag.getAttributeAt(documentOffset);
 
         int state = attribute.getStateAt(documentOffset);
 
-        if (state == DocumentArtifact.TAG)
+        if (state == XMLNode.TAG)
             return NoProposals;
 
         Point valueLocation = null;

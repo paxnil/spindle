@@ -51,6 +51,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
 import com.iw.plugins.spindle.editors.template.assist.AttributeContentAssistProcessor;
+import com.iw.plugins.spindle.editors.template.assist.DefaultContentAssistProcessor;
 import com.iw.plugins.spindle.editors.template.assist.JWCIDContentAssistProcessor;
 import com.iw.plugins.spindle.editors.template.assist.TagContentAssistProcessor;
 
@@ -236,10 +237,13 @@ public class TemplateConfiguration extends BaseSourceConfiguration
             new AttributeContentAssistProcessor((TemplateEditor) getEditor());
         JWCIDContentAssistProcessor contentAssistForJWCID =
             new JWCIDContentAssistProcessor((TemplateEditor) getEditor());
+        DefaultContentAssistProcessor contentAssistForDefault =
+            new DefaultContentAssistProcessor((TemplateEditor) getEditor());
 
         assistant.setContentAssistProcessor(contentAssistForTag, TemplatePartitionScanner.XML_TAG);
         assistant.setContentAssistProcessor(contentAssistForAttribute, TemplatePartitionScanner.XML_ATTRIBUTE);
         assistant.setContentAssistProcessor(contentAssistForJWCID, TemplatePartitionScanner.TAPESTRY_JWCID_ATTRIBUTE);
+        assistant.setContentAssistProcessor(contentAssistForDefault, IDocument.DEFAULT_CONTENT_TYPE);
         assistant.enableAutoActivation(true);
         assistant.enableAutoInsert(false);
         assistant.setProposalSelectorBackground(

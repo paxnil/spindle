@@ -30,12 +30,12 @@ import org.apache.tapestry.INamespace;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 import com.wutka.dtd.DTD;
 
 /**
@@ -50,7 +50,7 @@ public abstract class BaseSpecAction extends BaseEditorAction
     protected String fDeclaredRootElementName;
     protected String fPublicId;
     protected DTD fDTD;
-    protected DocumentArtifactPartitioner fPartitioner;
+    protected XMLDocumentPartitioner fPartitioner;
     protected INamespace fNamespace;
  
     protected IDocument fDocument;
@@ -59,7 +59,7 @@ public abstract class BaseSpecAction extends BaseEditorAction
     {
         super();
         fPartitioner =
-            new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
+            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
     }
 
     public BaseSpecAction(String text)
@@ -101,7 +101,7 @@ public abstract class BaseSpecAction extends BaseEditorAction
 
             try
             {
-                DocumentArtifact root = DocumentArtifact.createTree(fDocument, -1);
+                XMLNode root = XMLNode.createTree(fDocument, -1);
                 fPublicId = root.fPublicId;
                 fDeclaredRootElementName = root.fRootNodeId;
                 fDTD = DOMValidator.getDTD(fPublicId);
