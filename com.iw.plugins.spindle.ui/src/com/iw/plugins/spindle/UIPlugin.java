@@ -13,9 +13,12 @@ import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import com.iw.plugins.spindle.ui.util.Revealer;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -90,8 +93,49 @@ public class UIPlugin extends AbstractUIPlugin
     {
         super(descriptor);
         plugin = this;
+        setupRevealer();
     }
 
+    private void setupRevealer()
+    {
+        if (getActiveWorkbenchShell() == null)
+        {
+            setUpDeferredRevealer();
+
+        } else
+        {
+            Revealer.start();
+        }
+
+    }
+
+    private IWindowListener RevealerTrigger = new IWindowListener()
+    {
+        public void windowActivated(IWorkbenchWindow window)
+        {
+            Revealer.start();
+            tearDownDeferredRevealer();
+        }
+
+        public void windowDeactivated(IWorkbenchWindow window)
+        {}
+
+        public void windowClosed(IWorkbenchWindow window)
+        {}
+
+        public void windowOpened(IWorkbenchWindow window)
+        {}
+    };
+
+    private void setUpDeferredRevealer()
+    {
+        getWorkbench().addWindowListener(RevealerTrigger);
+    }
+
+    private void tearDownDeferredRevealer()
+    {
+        getWorkbench().removeWindowListener(RevealerTrigger);
+    }
     /**
      * Returns the shared instance.
      */

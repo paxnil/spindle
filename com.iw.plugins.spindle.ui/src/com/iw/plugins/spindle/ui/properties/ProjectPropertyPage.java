@@ -83,7 +83,7 @@ public class ProjectPropertyPage extends PropertyPage
 
     abstract class Validator implements ISelectionValidator
     {
-        protected boolean isOnOutputPath(IJavaProject project, Path candidate)
+        protected boolean isOnOutputPath(IJavaProject project, IPath candidate)
         {
             try
             {
@@ -93,7 +93,7 @@ public class ProjectPropertyPage extends PropertyPage
             {}
             return false;
         }
-        protected boolean isOnSourcePath(IJavaProject project, Path candidate)
+        protected boolean isOnSourcePath(IJavaProject project, IPath candidate)
         {
             try
             {
@@ -140,8 +140,9 @@ public class ProjectPropertyPage extends PropertyPage
             {
                 IJavaProject jproject = getJavaProject();
                 IProject project = (IProject) jproject.getAdapter(IProject.class);
-                Path selected = (Path) selection;
-                if (!selected.segment(0).equals(project.getName()))
+                Path selected = (Path) selection;                              
+                
+                if (!project.getFolder(selected).exists())
                 {
                     return UIPlugin.getString("property-page-wrong-project");
                 }
@@ -160,6 +161,47 @@ public class ProjectPropertyPage extends PropertyPage
             }
         }
     }
+    
+    class DialogContextValidator extends Validator
+        {
+            public String isValidString(String value)
+            {
+                return isValid(new Path(value));
+            }
+
+            public String isValid(Object selection)
+            {
+                try
+                {
+                    IPath selected = (IPath) selection;                              
+                    IWorkspaceRoot root = UIPlugin.getWorkspace().getRoot();
+                                        
+                    IProject selectedProject = root.getProject(selected.segment(0));
+                    
+                    IJavaProject jproject = getJavaProject();
+                    IProject project = (IProject) jproject.getAdapter(IProject.class);
+                
+                    if (!project.equals(selectedProject))
+                    {
+                        return UIPlugin.getString("property-page-wrong-project");
+                    }
+                    
+                    selected = (IPath)selected.removeFirstSegments(0);
+                    if (isOnOutputPath(jproject, selected))
+                    {
+                        return UIPlugin.getString("property-page-output-folder");
+                    }
+                    if (isOnSourcePath(jproject, selected))
+                    {
+                        return UIPlugin.getString("property-page-no-source-path");
+                    }
+                    return null;
+                } catch (CoreException e)
+                {
+                    return "error occured!";
+                }
+            }
+        }
 
     private static final String PROJECT_TYPE_PROPERTY = TapestryCore.PLUGIN_ID + ".project-type";
     private static final String CONTEXT_ROOT_PROPERTY = TapestryCore.PLUGIN_ID + ".context-root";
@@ -179,6 +221,7 @@ public class ProjectPropertyPage extends PropertyPage
     private Button fBrowseLibrarySpecification;
 
     private ApplicationContextValidator fContextValidator = new ApplicationContextValidator();
+    private DialogContextValidator fDialogContextValidator = new DialogContextValidator();
 
     /**
      * Constructor for SamplePropertyPage.
@@ -449,7 +492,7 @@ public class ProjectPropertyPage extends PropertyPage
                     setErrorMessage(badApp);
                     return false;
                 }
-                return fContextValidator.isValid(wcroot) == null;
+                break;
 
             case TapestryProject.LIBRARY_PROJECT_TYPE :
                 String libFile = fLibrarySpec.getText();
@@ -495,7 +538,7 @@ public class ProjectPropertyPage extends PropertyPage
     {
         IContainer project = (IContainer) getElement().getAdapter(IContainer.class);
         ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(), project, true, "");
-        dialog.setValidator(fContextValidator);
+        dialog.setValidator(fDialogContextValidator);
         dialog.showClosedProjects(false);
         if (dialog.open() == ContainerSelectionDialog.OK)
         {
