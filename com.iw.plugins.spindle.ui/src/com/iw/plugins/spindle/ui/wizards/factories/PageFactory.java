@@ -43,6 +43,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.resources.ContextResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
@@ -72,8 +73,14 @@ public class PageFactory
     {
         monitor.beginTask(UIPlugin.getString("ApplicationFactory.operationdesc", componentName), 3);
         String fileName = componentName + ".page";
+        IContainer container = null;
         IFile namespaceFile = (IFile) namespaceLocation.getStorage();
-        IContainer container = (IContainer) namespaceFile.getParent();
+        if (namespaceLocation.getName().length() == 0 && namespaceLocation.isWorkspaceResource()) {
+            //we might be using a stand-in application - in the workspace
+            container = ((ContextResourceWorkspaceLocation)namespaceLocation).getContainer();
+        } else {
+            container = (IContainer) namespaceFile.getParent();
+        }
         IFile newFile = container.getFile(new Path("/" + fileName));
 
         monitor.worked(1);
