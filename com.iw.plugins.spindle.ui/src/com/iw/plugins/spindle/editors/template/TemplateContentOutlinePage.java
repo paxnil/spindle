@@ -414,8 +414,8 @@ public class TemplateContentOutlinePage
         public AlphabeticalSortingAction()
         {
             super();
-            setText("Sort alphabetically");
-            setToolTipText("Toggle alphabetical sorting");
+            setText(UIPlugin.getString("template-content-outline-sort"));
+            setToolTipText(UIPlugin.getString("template-content-outline-sort-toggle"));
             setImageDescriptor(Images.getImageDescriptor("alphab_sort_co.gif"));
 
             IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();

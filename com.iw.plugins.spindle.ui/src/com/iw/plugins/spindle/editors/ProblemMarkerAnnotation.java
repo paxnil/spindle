@@ -149,6 +149,7 @@ public class ProblemMarkerAnnotation extends MarkerAnnotation implements IProble
             annotation.addOverlaid(this);
     }
 
+
     public boolean hasOverlay()
     {
         return fOverlay != null;

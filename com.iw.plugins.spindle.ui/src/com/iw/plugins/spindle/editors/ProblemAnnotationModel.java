@@ -132,13 +132,13 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
 
     protected IFileEditorInput fInput;
     protected List fCollectedProblems;
-    private List fGeneratedAnnotations;
-    private IProgressMonitor fProgressMonitor;
+    protected List fGeneratedAnnotations;
+    protected IProgressMonitor fProgressMonitor;
     private boolean fIsActive = false;
 
     private ReverseMap fReverseMap = new ReverseMap();
-    private List fPreviouslyOverlaid = null;
-    private List fCurrentlyOverlaid = new ArrayList();
+    protected List fPreviouslyOverlaid = null;
+    protected List fCurrentlyOverlaid = new ArrayList();
 
     public ProblemAnnotationModel(IFileEditorInput input)
     {
@@ -246,7 +246,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
             fireModelChanged(new AnnotationModelEvent(this));
     }
 
-    private void removeMarkerOverlays(boolean isCanceled)
+    protected void removeMarkerOverlays(boolean isCanceled)
     {
         if (isCanceled)
         {
@@ -280,7 +280,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
         }
     }
 
-    private void overlayMarkers(Position position, ProblemAnnotation problemAnnotation)
+    protected void overlayMarkers(Position position, ProblemAnnotation problemAnnotation)
     {
         Object value = getAnnotations(position);
         if (value instanceof List)
@@ -297,7 +297,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     /**
      * Tells this annotation model to collect temporary problems from now on.
      */
-    private void startCollectingProblems()
+    protected void startCollectingProblems()
     {
         fCollectedProblems = new ArrayList();
         fGeneratedAnnotations = new ArrayList();
@@ -306,7 +306,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     /**
      * Tells this annotation model to no longer collect temporary problems.
      */
-    private void stopCollectingProblems()
+    protected void stopCollectingProblems()
     {
         if (fGeneratedAnnotations != null)
         {
@@ -446,8 +446,9 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
      */
     public IProblem[] getProblems()
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (fCollectedProblems == null)
+            return new IProblem[0];
+        return (IProblem [])fCollectedProblems.toArray(new IProblem[fCollectedProblems.size()]);
     }
 
 };

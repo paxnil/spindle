@@ -31,6 +31,8 @@ import com.iw.plugins.spindle.editors.template.TemplateStorageDocumentProvider;
 /**
  *  Document provider for specs that come out of Jar files
  * 
+ *  Users should not instantiate. Rather call UIPlugin.getDefault().getSpecStorageDocumentProvider()
+ * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */

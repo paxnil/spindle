@@ -35,6 +35,8 @@ import com.iw.plugins.spindle.editors.template.TemplateFileDocumentProvider;
 /**
  *  Document provider for Tapestry Specs that come from workbench files
  * 
+ *  Users should not instantiate. Rather call UIPlugin.getDefault().getSpecFileDocumentProvider()
+ * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */

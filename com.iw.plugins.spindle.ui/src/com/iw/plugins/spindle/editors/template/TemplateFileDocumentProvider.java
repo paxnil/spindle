@@ -26,22 +26,20 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.template;
 
-import net.sf.solareclipse.editor.I18NDocumentProvider;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.editors.text.FileDocumentProvider;
 
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
  * Document provider for templates that come from files
  * 
- * @author Igor Malinin
  */
-public class TemplateFileDocumentProvider extends I18NDocumentProvider
+public class TemplateFileDocumentProvider extends FileDocumentProvider
 {
     /*
      * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createDocument(Object)

@@ -61,6 +61,10 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.editors.SharedTextColors;
+import com.iw.plugins.spindle.editors.spec.SpecFileDocumentProvider;
+import com.iw.plugins.spindle.editors.spec.SpecStorageDocumentProvider;
+import com.iw.plugins.spindle.editors.template.TemplateFileDocumentProvider;
+import com.iw.plugins.spindle.editors.template.TemplateStorageDocumentProvider;
 import com.iw.plugins.spindle.editors.template.TemplateTextTools;
 import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 import com.iw.plugins.spindle.ui.util.Revealer;
@@ -106,8 +110,6 @@ public class UIPlugin extends AbstractUIPlugin
             return "!" + key + "!";
         }
     }
-    //The shared instance.
-    private static UIPlugin plugin;
 
     static public void log(String msg)
     {
@@ -173,6 +175,21 @@ public class UIPlugin extends AbstractUIPlugin
         return null;
     }
 
+    //The shared instance.
+    private static UIPlugin plugin;
+
+    /** shared document provider for Templates that come from files **/
+    private TemplateFileDocumentProvider fTemplateFileDocumentProvider;
+
+    /** shared document provider for Template that don't come from files (ie jars) **/
+    private TemplateStorageDocumentProvider fTemplateStorageDocumentProvider;
+
+    /** shared document provider for Specifications that come from files **/
+    private SpecFileDocumentProvider fSpecFileDocumentProvider;
+
+    /** shared document provider for Specifications that don't come from files (ie jars) **/
+    private SpecStorageDocumentProvider fSpecStorageDocumentProvider;
+
     private TemplateTextTools fTemplatelTextTools;
 
     /** 
@@ -180,7 +197,7 @@ public class UIPlugin extends AbstractUIPlugin
      * used mostly for the Annotations. 
      */
     private ISharedTextColors fSharedTextColors;
-    
+
     /**
      * The constructor.
      */
@@ -237,6 +254,38 @@ public class UIPlugin extends AbstractUIPlugin
     public static UIPlugin getDefault()
     {
         return plugin;
+    }
+
+    public synchronized TemplateFileDocumentProvider getTemplateFileDocumentProvider()
+    {
+        if (fTemplateFileDocumentProvider == null)
+            fTemplateFileDocumentProvider = new TemplateFileDocumentProvider();
+
+        return fTemplateFileDocumentProvider;
+    }
+
+    public synchronized TemplateStorageDocumentProvider getTemplateStorageDocumentProvider()
+    {
+        if (fTemplateStorageDocumentProvider == null)
+            fTemplateStorageDocumentProvider = new TemplateStorageDocumentProvider();
+
+        return fTemplateStorageDocumentProvider;
+    }
+
+    public synchronized SpecFileDocumentProvider getSpecFileDocumentProvider()
+    {
+        if (fSpecFileDocumentProvider == null)
+            fSpecFileDocumentProvider = new SpecFileDocumentProvider();
+
+        return fSpecFileDocumentProvider;
+    }
+
+    public synchronized SpecStorageDocumentProvider getSpecStorageDocumentProvider()
+    {
+        if (fSpecStorageDocumentProvider == null)
+            fSpecStorageDocumentProvider = new SpecStorageDocumentProvider();
+
+        return fSpecStorageDocumentProvider;
     }
 
     /**
@@ -322,11 +371,12 @@ public class UIPlugin extends AbstractUIPlugin
 
         return fTemplatelTextTools;
     }
-    
+
     /**
      * Returns instance of text tools for Tapestry spec files.
      */
-    public XMLTextTools getXMLTextTools() {
+    public XMLTextTools getXMLTextTools()
+    {
         return XMLPlugin.getDefault().getXMLTextTools();
     }
 

@@ -77,7 +77,7 @@ public class TemplateEditor extends Editor
     public TemplateEditor()
     {
         super();
-       
+
     }
 
     protected boolean affectsTextPresentation(PropertyChangeEvent event)
@@ -120,9 +120,9 @@ public class TemplateEditor extends Editor
     protected IDocumentProvider createDocumentProvider(IEditorInput input)
     {
         if (input instanceof IFileEditorInput)
-            return new TemplateFileDocumentProvider();
+            return UIPlugin.getDefault().getTemplateFileDocumentProvider();
 
-        return new TemplateStorageDocumentProvider();
+        return UIPlugin.getDefault().getSpecStorageDocumentProvider();
     }
 
     /* (non-Javadoc)

@@ -124,7 +124,7 @@ public class SpecEditor extends Editor
     protected IDocumentProvider createDocumentProvider(IEditorInput input)
     {
         if (input instanceof IFileEditorInput)
-            return new SpecFileDocumentProvider();
+            return UIPlugin.getDefault().getSpecFileDocumentProvider();
 
         return new SpecStorageDocumentProvider();
     }
@@ -257,7 +257,7 @@ public class SpecEditor extends Editor
             }
             collector.endCollecting();
             System.err.println("fatal?" + fParser.getHasFatalErrors());
-            if (fParser.getHasFatalErrors())
+            if (fParser.getProblems().length > 0)
                 return null;
             return result;
         }
