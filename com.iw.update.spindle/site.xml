@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/com.iw.features.spindle_3.0.0.alpha1.jar" id="com.iw.features.spindle" version="3.0.0.alpha1"/>
+</site>

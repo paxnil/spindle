@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.iw.features.spindle"
+      label="com.iw.features.spindle"
+      version="3.0.0.alpha1"
+      provider-name="Intelligent Works Inc">
+
+   <copyright>
+      Copyright 2003 Intelligent Works Incorporated
+All Rights Reserved
+   </copyright>
+
+   <license url="http://www.mozilla.org/MPL/MPL-1.0.html">
+      /* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an &quot;AS IS&quot; basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is &quot;Spindle, an Eclipse Plugin for Tapestry&quot;.
+ *
+ * The Initial Developer of the Original Code is
+ * Intelligent Works Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2002
+ * the Initial Developer. All Rights Reserved.
+ *
+ *
+ * ***** END LICENSE BLOCK ***** */
+   </license>
+
+   <url>
+      <update label="Spindle 3.0 Updates" url="http://data.intelligentworks.com"/>
+   </url>
+
+   <requires>
+      <import plugin="org.eclipse.core.resources" version="2.1.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.core" version="2.1.0" match="compatible"/>
+      <import plugin="org.eclipse.ui" version="2.1.0" match="compatible"/>
+      <import plugin="org.apache.xerces" version="4.0.7" match="compatible"/>
+      <import plugin="org.eclipse.jdt.ui" version="2.1.0" match="compatible"/>
+      <import plugin="org.eclipse.search" version="2.1.0" match="compatible"/>
+   </requires>
+
+   <plugin
+         id="com.iw.plugins.spindle.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.1"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.1"/>
+
+   <plugin
+         id="net.sf.solareclipse.ui"
+         download-size="0"
+         install-size="0"
+         version="0.4.0.spindle-dep"/>
+
+   <plugin
+         id="net.sf.solareclipse.xml.ui"
+         download-size="0"
+         install-size="0"
+         version="0.4.0.spindle-dep"/>
+
+</feature>
