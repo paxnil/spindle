@@ -161,7 +161,7 @@ public class WebXMLScanner extends AbstractScanner
     {
         IType found = fBuilder.fTapestryBuilder.getType(className);
         fBuilder.typeChecked(className, found);
-        
+
         if (found == null)
             addProblem(IProblem.ERROR, location, TapestryCore.getTapestryString("unable-to-resolve-class", className));
 
@@ -186,10 +186,9 @@ public class WebXMLScanner extends AbstractScanner
             }
         }
     }
-    
-    protected void cleanup() {
-       
-    }
+
+    protected void cleanup()
+    {}
 
     protected IResourceWorkspaceLocation getApplicationLocation(ServletInfo info, String path)
     {
@@ -229,18 +228,42 @@ public class WebXMLScanner extends AbstractScanner
         return null;
     }
 
-    private String getApplicationPathFromServlet(IType servletType)
+    private String getApplicationPathFromServlet(IType servletType) throws ScannerException
     {
         String result = null;
+
         try
         {
             IMethod pathMethod = servletType.getMethod("getApplicationSpecificationPath", new String[0]);
             if (pathMethod != null)
             {
                 String methodSource = pathMethod.getSource();
-                if (methodSource != null && !"".equals(methodSource.trim()))
+                if (methodSource == null)
                 {
+                    if (servletType.isBinary())
+                        throw new ScannerException(
+                            TapestryCore.getString(
+                                "builder-error-servlet-subclass-is-binary-attach-source",
+                                servletType.getFullyQualifiedName()));
+
+                } else if (methodSource.trim().length() > 0)
+                {
+                    if (servletType.isBinary())
+                    {
+                        int signatureIndex = methodSource.indexOf("public String getApplicationSpecificationPath");
+                        if (signatureIndex > 0)
+                        {
+                            int start = methodSource.indexOf('{', signatureIndex);
+                            int end = methodSource.indexOf('}', start);
+                            methodSource = methodSource.substring(start, end);
+                        } else
+                        {
+                            return null;
+                        }
+                    }
+
                     int start = methodSource.indexOf("return");
+
                     methodSource = methodSource.substring(start);
                     int first = methodSource.indexOf("\"");
                     int last = methodSource.lastIndexOf("\"");
@@ -250,7 +273,10 @@ public class WebXMLScanner extends AbstractScanner
                 }
             }
         } catch (JavaModelException e)
-        {}
+        {
+            TapestryCore.log(e);
+        }
+
         return result;
     }
 
@@ -373,28 +399,33 @@ public class WebXMLScanner extends AbstractScanner
         if (!fBuilder.fTapestryServletType.equals(servletType))
         {
             newInfo.isServletSubclass = true; // its a subclass
-            String path = getApplicationPathFromServlet(servletType);
-            if (path != null)
+            String path = null;
+            try
             {
-
-                try
-                {
-                    location = getApplicationLocation(newInfo, path);
-                    checkApplicationLocation(location);
-                } catch (ScannerException e)
-                {
-                    addProblem(
-                        IMarker.SEVERITY_ERROR,
-                        nodeLocation,
-                        TapestryCore.getString(
-                            "web-xml-ignore-invalid-application-path",
-                            servletType.getElementName(),
-                            path.toString()));
-
-                    return false;
-                }
-
+                path = getApplicationPathFromServlet(servletType);
+            } catch (ScannerException e1)
+            {
+                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, e1.getMessage());
+                return false;
             }
+
+            try
+            {
+                location = getApplicationLocation(newInfo, path);
+                checkApplicationLocation(location);
+            } catch (ScannerException e)
+            {
+                addProblem(
+                    IMarker.SEVERITY_ERROR,
+                    nodeLocation,
+                    TapestryCore.getString(
+                        "web-xml-ignore-invalid-application-path",
+                        servletType.getElementName(),
+                        path.toString()));
+
+                return false;
+            }
+
         } else
         {
             try
