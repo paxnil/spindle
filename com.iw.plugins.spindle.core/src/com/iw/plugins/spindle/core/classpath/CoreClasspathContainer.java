@@ -102,8 +102,11 @@ public class CoreClasspathContainer implements IClasspathContainer
 
             if (jarName.equals("core.jar"))
                 continue;
-                
+
             if (jarName.equals("javax.servlet.jar"))
+                continue;
+
+            if (jarName.equals("dtdparser.jar"))
                 continue;
 
             try
@@ -129,8 +132,8 @@ public class CoreClasspathContainer implements IClasspathContainer
                         ClasspathEntry.CPE_LIBRARY,
                         new Path(libUrl.getFile()),
                         new Path[] {},
-                sourceAttachmentPath,
-                sourceAttachmentRootPath,
+                        sourceAttachmentPath,
+                        sourceAttachmentRootPath,
                         null,
                         false));
             } catch (MalformedURLException e)

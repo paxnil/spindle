@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
-   version="0.0.2"
+   version="0.0.5"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.core.TapestryCore">
 
@@ -37,7 +37,7 @@
       <library name="javax.servlet.jar">
          <export name="*"/>
       </library>
-      <library name="ognl-2.5.1.jar">
+      <library name="ognl-2.6.3.jar">
          <export name="*"/>
       </library>
       <library name="tapestry-3.0-beta-2.jar">
@@ -54,10 +54,10 @@
       </library>
    </runtime>
    <requires>
-      <import plugin="org.eclipse.core.resources" export="true" version="2.1.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jdt.core" export="true" version="2.1.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ui" export="true" version="2.1.0" match="greaterOrEqual"/>
-      <import plugin="org.apache.xerces" export="true" version="4.0.7" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.resources" export="true"/>
+      <import plugin="org.eclipse.jdt.core" export="true"/>
+      <import plugin="org.eclipse.ui" export="true"/>
+      <import plugin="org.apache.xerces" export="true"/>
    </requires>
 
 

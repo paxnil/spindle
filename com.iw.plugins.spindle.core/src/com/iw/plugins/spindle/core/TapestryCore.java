@@ -284,6 +284,9 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
 
     private static void fireCoreListenerEvent()
     {
+        if (CoreListeners == null)
+            return;
+            
         for (Iterator iter = CoreListeners.iterator(); iter.hasNext();)
         {
             ICoreListener listener = (ICoreListener) iter.next();

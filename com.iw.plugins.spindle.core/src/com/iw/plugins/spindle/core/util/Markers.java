@@ -34,7 +34,8 @@ import org.eclipse.core.runtime.CoreException;
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.source.*;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
 
 /**
  * Marker utililties
