@@ -41,7 +41,6 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.util.Utils;
 
 /**
  * Copyright 2002 Intelligent Works Inc.

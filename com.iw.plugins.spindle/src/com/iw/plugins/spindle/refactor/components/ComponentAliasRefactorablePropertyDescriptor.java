@@ -28,20 +28,14 @@ package com.iw.plugins.spindle.refactor.components;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
-import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.DialogCellEditor;
-import com.iw.plugins.spindle.ui.PublicStaticFieldSelectionDialog;
 import com.iw.plugins.spindle.ui.ToolTipHandler;
 
 /**

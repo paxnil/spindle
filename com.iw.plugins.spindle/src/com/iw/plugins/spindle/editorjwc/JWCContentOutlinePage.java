@@ -34,7 +34,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.TapestryImages;
-import com.iw.plugins.spindle.editorjwc.beans.*;
+import com.iw.plugins.spindle.editorjwc.beans.BeansFormPage;
 import com.iw.plugins.spindle.editorjwc.components.ComponentsFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormOutlinePage;
 import com.iw.plugins.spindle.editors.SpindleFormPage;

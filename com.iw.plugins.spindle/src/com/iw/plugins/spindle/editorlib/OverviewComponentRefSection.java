@@ -37,8 +37,6 @@ import com.iw.plugins.spindle.editors.BasicLinksSection;
 import com.iw.plugins.spindle.editors.HyperLinkAdapter;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
-import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 
 public class OverviewComponentRefSection extends BasicLinksSection {
 

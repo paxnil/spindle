@@ -30,7 +30,6 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -41,9 +40,7 @@ import net.sf.tapestry.bean.FieldBeanInitializer;
 import net.sf.tapestry.bean.PropertyBeanInitializer;
 import net.sf.tapestry.bean.StaticBeanInitializer;
 import net.sf.tapestry.bean.StringBeanInitializer;
-
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -66,7 +63,6 @@ import org.eclipse.swt.widgets.TableColumn;
 
 import com.iw.plugins.spindle.spec.XMLUtil;
 import com.iw.plugins.spindle.ui.ChooseFromListDialog;
-import com.iw.plugins.spindle.util.Utils;
 
 public class ChooseBeanInitializerDialog extends ChooseFromListDialog {
 

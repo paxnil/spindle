@@ -26,7 +26,6 @@
 package com.iw.plugins.spindle.editorjwc.components;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -37,10 +36,7 @@ import org.eclipse.update.ui.forms.internal.FormSection;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.BaseBindingsEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
-import com.iw.plugins.spindle.model.ModelUtils;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.IBindingHolder;
 import com.iw.plugins.spindle.spec.PluginBindingSpecification;
@@ -48,7 +44,6 @@ import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.spec.PluginParameterSpecification;
 import com.iw.plugins.spindle.spec.XMLUtil;
-import com.iw.plugins.spindle.ui.ComponentAliasParameterViewer;
 import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 

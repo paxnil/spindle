@@ -65,7 +65,6 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
-import com.iw.plugins.spindle.util.Utils;
 
 public class PublicStaticFieldSelectionDialog extends AbstractDialog {
 

@@ -54,9 +54,7 @@ import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginBeanSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.ui.EmptySelection;
 import com.iw.plugins.spindle.ui.OpenClassAction;
-import com.iw.plugins.spindle.util.Utils;
 
 public class BeanSelectionSection
   extends AbstractPropertySheetEditorSection

@@ -4,39 +4,21 @@ import java.util.ArrayList;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
-import org
-  .eclipse
-  .core
-  .resources
-  .IResourceChangeListener;
+import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
-import org
-  .eclipse
-  .core
-  .resources
-  .IResourceDeltaVisitor;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.LabelProvider;
-import org
-  .eclipse
-  .jface
-  .viewers
-  .LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com
-  .iw
-  .plugins
-  .spindle
-  .model
-  .manager
-  .TapestryProjectModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.TapestryProject;
 import com.iw.plugins.spindle.spec.XMLUtil;
 

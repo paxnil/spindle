@@ -31,25 +31,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeFormatter;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -57,8 +52,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -69,7 +64,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.internal.SaveAllAction;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
 import com.iw.plugins.spindle.TapestryPlugin;
@@ -603,40 +597,157 @@ public class Utils {
     return contents;
   }
 
+  // works for pages and components
+  public static IFile findRelatedComponent(IFile templateFile) {
+
+    String componentName = extractComponentName(templateFile);
+
+    try {
+      if (componentName != null) {
+
+        IFolder parent = (IFolder) templateFile.getParent();
+
+        IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(templateFile);
+
+        IPackageFragment fragment = (IPackageFragment) JavaCore.create(parent);
+
+        if (fragment != null) {
+
+          if (fragment.isDefaultPackage()) {
+
+            IResource[] resources = parent.members();
+            for (int i = 0; i < resources.length; i++) {
+
+              if (isComponentMatch(componentName, resources[i])) {
+                return (IFile) resources[i];
+              }
+            }
+          } else {
+
+            IPackageFragment[] allEqivalent = findAllEquivalentFragments(fragment);
+
+            for (int i = 0; i < allEqivalent.length; i++) {
+
+              Object[] children = allEqivalent[i].getNonJavaResources();
+              for (int j = 0; j < children.length; j++) {
+                if (children[j] instanceof IResource && isComponentMatch(componentName, (IResource) children[j])) {
+                  return (IFile) children[j];
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (JavaModelException e) {
+    } catch (CoreException e) {
+    }
+    return null;
+  }
+
+  private static boolean isComponentMatch(String componentName, IResource resource) {
+    IPath path = resource.getFullPath();
+    String extension = path.getFileExtension();
+    if (extension == null || "".equals(extension)) {
+      return false;
+    }
+    String name = path.removeFileExtension().lastSegment();
+    return componentName.equals(name) && ("jwc".equals(extension) || "page".equals(extension));
+  }
+
+  private static String extractComponentName(IFile file) {
+
+    String name = file.getFullPath().removeFileExtension().lastSegment();
+
+    String languageCode = extractFirstLocalizationCode(name);
+
+    if (languageCode == null) {
+
+      return name;
+
+    }
+
+    if (languageCodes == null) {
+
+      buildLanguageCodes();
+
+    }
+
+    if (!languageCodes.contains(languageCode)) {
+
+      return name;
+    }
+
+    return name.substring(0, name.indexOf(languageCode) - 1);
+
+  }
+
   // find any templates for the supplied file
-  public static List findTemplatesFor(IFile movedFrom) {
+  // works for jwc or page files
+  public static List findTemplatesFor(IFile componentResource) {
 
     ArrayList templates = new ArrayList();
-    IContainer parent = movedFrom.getParent();
-    String fileName = movedFrom.getFullPath().removeFileExtension().lastSegment();
+    IFolder parent = (IFolder) componentResource.getParent();
+
+    String fileName = componentResource.getFullPath().removeFileExtension().lastSegment();
     try {
 
-      IResource[] members = parent.members();
+      IJavaProject project = TapestryPlugin.getDefault().getJavaProjectFor(componentResource);
 
-      for (int i = 0; i < members.length; i++) {
+      IPackageFragment fragment = (IPackageFragment) JavaCore.create(parent);
 
-        IPath memberPath = members[i].getFullPath();
-        String extension = memberPath.getFileExtension();
+      if (fragment == null) {
+        return templates;
+      }
 
-        if ("html".equals(extension) || "htm".equals(extension)) {
+      if (fragment.isDefaultPackage()) {
 
-          IResource member = parent.findMember(memberPath.lastSegment());
+        // Currently, PackageFragment does not return non java resources
+        // from the default package, so we just look in the folder.
 
-          String memberName = memberPath.removeFileExtension().lastSegment();
-
-          if (member != null && member instanceof IFile && templateMatchLocalization(fileName, memberName)) {
-
-            templates.add(member);
-
+        IResource[] resources = parent.members();
+        for (int i = 0; i < resources.length; i++) {
+          if (isValidTemplate(fileName, resources[i])) {
+            templates.add(resources[i]);
           }
 
         }
 
+      } else {
+
+        IPackageFragment[] allEqivalent = findAllEquivalentFragments(fragment);
+
+        for (int i = 0; i < allEqivalent.length; i++) {
+          Object[] children = allEqivalent[i].getNonJavaResources();
+          for (int j = 0; j < children.length; j++) {
+
+            if (children[j] instanceof IResource && isValidTemplate(fileName, (IResource) children[j])) {
+              templates.add((IResource) children[j]);
+            }
+
+          }
+        }
+
       }
+
     } catch (CoreException e) {
     }
 
     return templates;
+  }
+
+  public static boolean isValidTemplate(String componentName, IResource possibleTemplate) {
+
+    IPath memberPath = possibleTemplate.getFullPath();
+    String extension = memberPath.getFileExtension();
+
+    if ("html".equals(extension) || "htm".equals(extension)) {
+
+      String memberName = memberPath.removeFileExtension().lastSegment();
+
+      return templateMatchLocalization(componentName, memberName);
+
+    }
+    return false;
   }
 
   private static boolean templateMatchLocalization(String fileName, String memberName) {
@@ -647,28 +758,7 @@ public class Utils {
 
     } else if (memberName.startsWith(fileName + '_')) {
 
-      int firstUnderscore = memberName.indexOf('_');
-      int secondUnderscore = firstUnderscore + 3;
-
-      String languageString = null;
-
-      if (secondUnderscore < memberName.length()) {
-
-        char next = memberName.charAt(secondUnderscore);
-
-        if (next != '_') {
-
-          return false;
-
-        }
-
-        languageString = memberName.substring(firstUnderscore + 1, secondUnderscore);
-
-      } else {
-
-        languageString = memberName.substring(firstUnderscore + 1);
-
-      }
+      String languageString = extractFirstLocalizationCode(memberName);
 
       if (languageCodes == null) {
 
@@ -681,6 +771,35 @@ public class Utils {
     }
 
     return false;
+  }
+
+  private static String extractFirstLocalizationCode(String candidate) {
+
+    int firstUnderscore = candidate.indexOf('_');
+    int secondUnderscore = firstUnderscore + 3;
+
+    String languageString = null;
+
+    if (secondUnderscore < candidate.length()) {
+
+      char next = candidate.charAt(secondUnderscore);
+
+      if (next != '_') {
+
+        return null;
+
+      }
+
+      languageString = candidate.substring(firstUnderscore + 1, secondUnderscore);
+
+    } else {
+
+      languageString = candidate.substring(firstUnderscore + 1);
+
+    }
+
+    return languageString;
+
   }
 
   private static List languageCodes = null;
@@ -750,4 +869,20 @@ public class Utils {
 
   }
 
+  public static IPackageFragment[] findAllEquivalentFragments(IPackageFragment fragment) throws JavaModelException {
+
+    IJavaProject jproject = fragment.getJavaProject();
+    IPackageFragment[] allFragments = jproject.getPackageFragments();
+    ArrayList result = new ArrayList();
+    for (int i = 0; i < allFragments.length; i++) {
+      if (allFragments[i].isDefaultPackage()) {
+      	continue;
+      }
+      if (allFragments[i].getElementName().equals(fragment.getElementName())) {
+        result.add(allFragments[i]);
+      }
+    }
+    return (IPackageFragment[]) result.toArray(new IPackageFragment[result.size()]);
+
+  }
 }

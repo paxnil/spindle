@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import com.iw.plugins.spindle.TapestryImages;
-import com.iw.plugins.spindle.ui.*;
+import com.iw.plugins.spindle.ui.SectionWidget;
 import com.iw.plugins.spindle.ui.migrate.MigrationContext;
 
 /**

@@ -54,7 +54,6 @@ import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
-import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.descriptors.WorkspaceStoragePropertyDescriptor;
 import com.iw.plugins.spindle.util.SpindleStatus;

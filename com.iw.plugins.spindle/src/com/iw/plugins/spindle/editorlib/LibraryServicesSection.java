@@ -59,7 +59,6 @@ import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.descriptors.TypeDialogPropertyDescriptor;
 
 public class LibraryServicesSection

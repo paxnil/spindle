@@ -34,7 +34,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 
-import com.iw.plugins.spindle.util.*;
+import com.iw.plugins.spindle.util.SpindleStatus;
 
 
 /**

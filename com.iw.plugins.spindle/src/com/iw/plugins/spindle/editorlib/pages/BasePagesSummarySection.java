@@ -39,7 +39,6 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -55,7 +54,6 @@ import com.iw.plugins.spindle.editors.SummarySourceViewer;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.IIdentifiable;
-import com.iw.plugins.spindle.ui.SectionWidget;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public abstract class BasePagesSummarySection extends SpindleFormSection implements IResourceChangeListener {

@@ -37,14 +37,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.ui.actions.RenameAction;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
 
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.model.TapestryLibraryModel;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.spec.XMLUtil;
 import com.iw.plugins.spindle.util.Indenter;
 import com.iw.plugins.spindle.util.Utils;

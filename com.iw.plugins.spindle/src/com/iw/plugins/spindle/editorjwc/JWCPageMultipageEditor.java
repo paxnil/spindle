@@ -26,7 +26,6 @@
 package com.iw.plugins.spindle.editorjwc;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorInput;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;

@@ -37,8 +37,6 @@ import net.sf.tapestry.bean.StaticBeanInitializer;
 import net.sf.tapestry.bean.StringBeanInitializer;
 import net.sf.tapestry.spec.BeanLifecycle;
 import net.sf.tapestry.spec.BeanSpecification;
-
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;

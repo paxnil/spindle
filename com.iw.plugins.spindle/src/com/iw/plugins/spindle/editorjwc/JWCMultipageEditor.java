@@ -28,15 +28,13 @@ package com.iw.plugins.spindle.editorjwc;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorInput;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
-import com.iw.plugins.spindle.editorjwc.beans.*;
-import com.iw.plugins.spindle.editorjwc.components.*;
+import com.iw.plugins.spindle.editorjwc.beans.BeansFormPage;
+import com.iw.plugins.spindle.editorjwc.components.ComponentsFormPage;
 import com.iw.plugins.spindle.editors.DocumentationFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
-import com.iw.plugins.spindle.editors.XMLEditorPage;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 
 //Commented out Dependency Page until replacement available

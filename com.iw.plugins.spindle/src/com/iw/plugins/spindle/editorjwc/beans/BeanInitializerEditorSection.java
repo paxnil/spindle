@@ -38,7 +38,6 @@ import net.sf.tapestry.bean.IBeanInitializer;
 import net.sf.tapestry.bean.PropertyBeanInitializer;
 import net.sf.tapestry.bean.StaticBeanInitializer;
 import net.sf.tapestry.bean.StringBeanInitializer;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.Action;
@@ -49,8 +48,6 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.pde.core.IModelChangedEvent;
@@ -59,11 +56,6 @@ import org.eclipse.update.ui.forms.internal.FormSection;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.spec.bean.PluginExpressionBeanInitializer;
-import com.iw.plugins.spindle.spec.bean.PluginFieldBeanInitializer;
-import com.iw.plugins.spindle.spec.bean.PluginPropertyBeanInitializer;
-import com.iw.plugins.spindle.spec.bean.PluginStaticBeanInitializer;
-import com.iw.plugins.spindle.spec.bean.PluginStringBeanInitializer;
 import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
@@ -72,6 +64,11 @@ import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.PluginBeanSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.XMLUtil;
+import com.iw.plugins.spindle.spec.bean.PluginExpressionBeanInitializer;
+import com.iw.plugins.spindle.spec.bean.PluginFieldBeanInitializer;
+import com.iw.plugins.spindle.spec.bean.PluginPropertyBeanInitializer;
+import com.iw.plugins.spindle.spec.bean.PluginStaticBeanInitializer;
+import com.iw.plugins.spindle.spec.bean.PluginStringBeanInitializer;
 import com.iw.plugins.spindle.ui.EmptySelection;
 
 public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSection {

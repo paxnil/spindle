@@ -2,12 +2,10 @@ package com.iw.plugins.spindle.util;
 
 import java.text.MessageFormat;
 
+import net.sf.tapestry.parse.SpecificationParser;
+import net.sf.tapestry.util.xml.InvalidStringException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-
-import net.sf.tapestry.parse.SpecificationParser;
-import net.sf.tapestry.util.xml.DocumentParseException;
-import net.sf.tapestry.util.xml.InvalidStringException;
 
 /**
  * @author gwl

@@ -25,7 +25,6 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorlib;
 
-import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.graphics.Image;
 
@@ -38,7 +37,6 @@ import com.iw.plugins.spindle.editors.SpindleFormOutlinePage;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
-import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
 
 public class LibraryContentOutlinePage extends SpindleFormOutlinePage {
 

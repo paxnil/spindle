@@ -40,7 +40,7 @@ import com.iw.plugins.spindle.spec.PluginBeanSpecification;
 /**
  * @author GWL
  * @version $Id$
- * @deprecated
+ * 
  * Copryright 2002, Intelligent Works Inc.
  * All Rights Reserved
  */

@@ -25,7 +25,6 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorjwc;
 
-import net.sf.tapestry.parse.SpecificationParser;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
@@ -50,7 +49,6 @@ import org.eclipse.pde.core.IModelChangedListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -73,7 +71,6 @@ import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.XMLUtil;
 import com.iw.plugins.spindle.ui.ToolTipHandler;
 import com.iw.plugins.spindle.util.HierarchyScope;
-import com.iw.plugins.spindle.util.Utils;
 
 public class OverviewGeneralSection extends SpindleFormSection implements IModelChangedListener {
 

@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.swt.widgets.Composite;
@@ -42,7 +41,6 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.util.HierarchyScope;
-import com.iw.plugins.spindle.util.Utils;
 
 public class TypeDialogCellEditor extends DialogCellEditor {
 

@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import net.sf.tapestry.spec.ComponentSpecification;
 import net.sf.tapestry.spec.Direction;
 import net.sf.tapestry.spec.ParameterSpecification;
-
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;

@@ -30,8 +30,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
 import org.eclipse.swt.graphics.Image;

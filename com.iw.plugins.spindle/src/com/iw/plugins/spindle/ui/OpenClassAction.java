@@ -20,42 +20,55 @@ import com.iw.plugins.spindle.util.Utils;
  */
 public class OpenClassAction extends Action {
 
-    IType javaType;
+  IType javaType;
 
-    public OpenClassAction(IStorage jwcOrPageStorage) {
+  public OpenClassAction(IStorage jwcOrPageStorage) {
 
-      this.javaType = Utils.findComponentClass(jwcOrPageStorage);
-      setEnabled(false);
-      if (javaType != null) {
-        setEnabled(true);
-        setText(javaType.getElementName());
+    this.javaType = Utils.findComponentClass(jwcOrPageStorage);
+    setEnabled(false);
+    if (javaType != null) {
+      setEnabled(true);
+      String name = javaType.getElementName();
+      if (javaType.isBinary()) {
+        name += ".class";
+      } else {
+        name += ".java";
       }
-
-    }
-    public OpenClassAction(IType javaType) {
-      this.javaType = javaType;
-      setText(javaType.getElementName());
+      setText(name);
     }
 
-    public void run() {
-
-      if (javaType == null) {
-
-        return;
-
-      }
-
-      try {
-        IEditorPart javaEditor = JavaUI.openInEditor(javaType);
-      } catch (CoreException e) {
-
-        ErrorDialog.openError(
-          TapestryPlugin.getDefault().getActiveWorkbenchShell(),
-          "Workbench Error",
-          "could not open" + javaType.getElementName(),
-          e.getStatus());
-
-      }
-
-    }
   }
+  public OpenClassAction(IType javaType) {
+    this.javaType = javaType;
+    String name = javaType.getElementName();
+    if (javaType.isBinary()) {
+      name += ".class";
+    } else {
+      name += ".java";
+    }
+    setText(name);
+
+  }
+
+  public void run() {
+
+    if (javaType == null) {
+
+      return;
+
+    }
+
+    try {
+      IEditorPart javaEditor = JavaUI.openInEditor(javaType);
+    } catch (CoreException e) {
+
+      ErrorDialog.openError(
+        TapestryPlugin.getDefault().getActiveWorkbenchShell(),
+        "Workbench Error",
+        "could not open" + javaType.getElementName(),
+        e.getStatus());
+
+    }
+
+  }
+}

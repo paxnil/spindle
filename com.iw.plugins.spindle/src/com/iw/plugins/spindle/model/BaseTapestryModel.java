@@ -35,7 +35,6 @@ import java.util.Map;
 
 import net.sf.tapestry.util.IPropertyHolder;
 import net.sf.tapestry.util.xml.DocumentParseException;
-import net.sf.tapestry.util.xml.InvalidStringException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;

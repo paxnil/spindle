@@ -34,7 +34,6 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.update.ui.forms.internal.AbstractSectionForm;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.editors.PropertyEditableSection;
 import com.iw.plugins.spindle.editors.SpindleForm;
 import com.iw.plugins.spindle.editors.SpindleFormPage;

@@ -41,7 +41,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
-import org.eclipse.ui.part.EditorPart;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 

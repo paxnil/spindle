@@ -27,17 +27,15 @@ package com.iw.plugins.spindle.editorlib;
 
 import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IEditorInput;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.editorlib.components.ComponentsFormPage;
-import com.iw.plugins.spindle.editorlib.extensions.*;
+import com.iw.plugins.spindle.editorlib.extensions.ExtensionsFormPage;
 import com.iw.plugins.spindle.editorlib.pages.LibraryPagesFormPage;
 import com.iw.plugins.spindle.editors.DocumentationFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
-import com.iw.plugins.spindle.editors.XMLEditorPage;
 
 //Commented out Dependency Page until replacement available
 public class LibraryMultipageEditor extends SpindleMultipageEditor {
