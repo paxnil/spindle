@@ -52,25 +52,25 @@ import com.iw.plugins.spindle.core.util.PropertyFiringSet;
  */
 public class PluginComponentSpecification extends BaseSpecLocatable implements IComponentSpecification
 {
-    private String componentClassName;
+    private String fComponentClassName;
 
     /** @since 1.0.9 **/
 
-    private String description;
+    private String fDescription;
 
     /**
      *  Keyed on component id, value is {@link IContainedComponent}.
      *
      **/
 
-    protected Map components;
+    protected Map fComponents;
 
     /**
      *  Keyed on asset name, value is {@link IAssetSpecification}.
      *
      **/
 
-    protected Map assets;
+    protected Map fAssets;
 
     /**
      *  Defines all formal parameters.  Keyed on parameter name, value is
@@ -78,7 +78,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      *
      **/
 
-    protected Map parameters;
+    protected Map fParameters;
 
     /**
      *  Defines all helper beans.  Keyed on name, value is {@link IBeanSpecification}.
@@ -86,7 +86,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      *  @since 1.0.4
      **/
 
-    protected Map beans;
+    protected Map fBeans;
 
     /**
      *  The names of all reserved informal parameter names (as lower-case).  This
@@ -97,21 +97,21 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      *
      **/
 
-    protected Set reservedParameterNames;
+    protected Set fReservedParameterNames;
 
     /**
      *  Is the component allowed to have a body (that is, wrap other elements?).
      *
      **/
 
-    private boolean allowBody = true;
+    private boolean fAllowBody = true;
 
     /**
      *  Is the component allow to have informal parameter specified.
      *
      **/
 
-    private boolean allowInformalParameters = true;
+    private boolean fAllowInformalParameters = true;
 
     /**
      *  The XML Public Id used when the page or component specification was read
@@ -121,7 +121,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      * 
      **/
 
-    private String publicId;
+    private String fPublicId;
 
     /**
      *  Indicates that the specification is for a page, not a component.
@@ -130,8 +130,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      * 
      **/
 
-    private boolean pageSpecification;
-
+    private boolean fPageSpecification;
 
     /**
      *  A Map of {@link IPropertySpecification} keyed on the name
@@ -141,10 +140,10 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      * 
      **/
 
-    private Map propertySpecifications;
-    
-    private INamespace namespace;
-    
+    private Map fPropertySpecifications;
+
+    private INamespace fNamespace;
+
     public PluginComponentSpecification()
     {
         super(BasePropertyHolder.COMPONENT_SPEC);
@@ -155,27 +154,24 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void addAsset(String name, IAssetSpecification asset)
     {
-        if (assets == null)
-        {
-            assets = new IIdentifiableMap(this, "assets");
-        }
+        if (fAssets == null)
+            fAssets = new IIdentifiableMap(this, "assets");
 
-        assets.put(name, asset);
+        fAssets.put(name, asset);
 
     }
 
     public void removeAsset(String name)
     {
-        remove(assets, name);
+        remove(fAssets, name);
     }
 
     public void setAsset(String name, IAssetSpecification asset)
     {
-        if (assets == null)
-        {
-            assets = new IIdentifiableMap(this, "assets");
-        }
-        assets.put(name, asset);
+        if (fAssets == null)
+            fAssets = new IIdentifiableMap(this, "assets");
+
+        fAssets.put(name, asset);
     }
 
     /* (non-Javadoc)
@@ -183,27 +179,23 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void addComponent(String id, IContainedComponent component)
     {
-        if (components == null)
-        {
-            components = new IIdentifiableMap(this, "components");
-        }
+        if (fComponents == null)
+            fComponents = new IIdentifiableMap(this, "components");
 
-        components.put(id, component);
+        fComponents.put(id, component);
     }
 
     public void removeComponent(String type)
     {
-        remove(components, type);
+        remove(fComponents, type);
     }
 
     public void setComponent(String id, IContainedComponent component)
     {
-        if (components == null)
-        {
-            components = new IIdentifiableMap(this, "components");
-        }
+        if (fComponents == null)
+            fComponents = new IIdentifiableMap(this, "components");
 
-        components.put(id, component);
+        fComponents.put(id, component);
     }
 
     /* (non-Javadoc)
@@ -211,12 +203,10 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void addParameter(String name, IParameterSpecification spec)
     {
-        if (parameters == null)
-        {
-            parameters = new IIdentifiableMap(this, "parameters");
-        }
+        if (fParameters == null)
+            fParameters = new IIdentifiableMap(this, "parameters");
 
-        parameters.put(name, spec);
+        fParameters.put(name, spec);
     }
 
     /* (non-Javadoc)
@@ -224,7 +214,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public boolean getAllowBody()
     {
-        return allowBody;
+        return fAllowBody;
     }
 
     /* (non-Javadoc)
@@ -232,7 +222,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public boolean getAllowInformalParameters()
     {
-        return allowInformalParameters;
+        return fAllowInformalParameters;
     }
 
     /* (non-Javadoc)
@@ -240,23 +230,23 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public IAssetSpecification getAsset(String name)
     {
-        return (IAssetSpecification)get(assets, name);
+        return (IAssetSpecification) get(fAssets, name);
     }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#getAssetNames()
      */
     public List getAssetNames()
-    {        
-        return keys(assets);
+    {
+        return keys(fAssets);
     }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#getComponent(java.lang.String)
      */
     public IContainedComponent getComponent(String id)
-    {       
-        return (IContainedComponent)keys(components);
+    {
+        return (IContainedComponent) keys(fComponents);
     }
 
     /* (non-Javadoc)
@@ -264,23 +254,23 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public String getComponentClassName()
     {
-        return componentClassName;
+        return fComponentClassName;
     }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#getComponentIds()
      */
     public List getComponentIds()
-    {        
-        return keys(components);
+    {
+        return keys(fComponents);
     }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#getParameter(java.lang.String)
      */
     public IParameterSpecification getParameter(String name)
-    {        
-        return (IParameterSpecification)get(parameters,name);
+    {
+        return (IParameterSpecification) get(fParameters, name);
     }
 
     /* (non-Javadoc)
@@ -288,7 +278,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public List getParameterNames()
     {
-        return keys(parameters);
+        return keys(fParameters);
     }
 
     /* (non-Javadoc)
@@ -296,9 +286,9 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void setAllowBody(boolean value)
     {
-        boolean old = allowBody;
-        allowBody = value;
-        firePropertyChange("allowBody", old, allowBody);
+        boolean old = fAllowBody;
+        fAllowBody = value;
+        firePropertyChange("allowBody", old, fAllowBody);
     }
 
     /* (non-Javadoc)
@@ -306,9 +296,9 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void setAllowInformalParameters(boolean value)
     {
-        boolean old = allowInformalParameters;
-        allowInformalParameters = value;
-        firePropertyChange("allowInformalParameters", old, allowInformalParameters);
+        boolean old = fAllowInformalParameters;
+        fAllowInformalParameters = value;
+        firePropertyChange("allowInformalParameters", old, fAllowInformalParameters);
     }
 
     /* (non-Javadoc)
@@ -316,9 +306,9 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void setComponentClassName(String value)
     {
-        String old = componentClassName;
-        componentClassName = value;
-        firePropertyChange("componentClassName", old, componentClassName);
+        String old = fComponentClassName;
+        fComponentClassName = value;
+        firePropertyChange("componentClassName", old, fComponentClassName);
     }
 
     /* (non-Javadoc)
@@ -326,26 +316,23 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void addBeanSpecification(String name, IBeanSpecification specification)
     {
-        if (beans == null)
-        {
-            beans = new IIdentifiableMap(this, "beans");
-        }
+        if (fBeans == null)
+            fBeans = new IIdentifiableMap(this, "beans");
 
-        parameters.put(name, specification);
+        fParameters.put(name, specification);
     }
-    
-    public void removeBeanSpecification(String name) {
-        remove(beans, name);
+
+    public void removeBeanSpecification(String name)
+    {
+        remove(fBeans, name);
     }
-    
+
     public void setBeanSpecification(String name, IBeanSpecification specification)
     {
-        if (beans == null)
-        {
-            beans = new IIdentifiableMap(this, "beans");
-        }
+        if (fBeans == null)
+            fBeans = new IIdentifiableMap(this, "beans");
 
-        parameters.put(name, specification);
+        fParameters.put(name, specification);
     }
 
     /* (non-Javadoc)
@@ -353,7 +340,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public IBeanSpecification getBeanSpecification(String name)
     {
-        return (IBeanSpecification)get(beans, name);
+        return (IBeanSpecification) get(fBeans, name);
     }
 
     /* (non-Javadoc)
@@ -361,7 +348,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public Collection getBeanNames()
     {
-        return keys(beans);
+        return keys(fBeans);
     }
 
     /* (non-Javadoc)
@@ -369,12 +356,10 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void addReservedParameterName(String value)
     {
-        if (reservedParameterNames == null)
-        {
-            reservedParameterNames = new PropertyFiringSet(this, "reservedParameters");
-        }
+        if (fReservedParameterNames == null)
+            fReservedParameterNames = new PropertyFiringSet(this, "reservedParameters");
 
-        reservedParameterNames.add(value);
+        fReservedParameterNames.add(value);
     }
 
     /* (non-Javadoc)
@@ -382,16 +367,17 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public boolean isReservedParameterName(String value)
     {
-        if (reservedParameterNames != null) {
-            return reservedParameterNames.contains(value);
-        }
+        if (fReservedParameterNames != null)
+            return fReservedParameterNames.contains(value);
+
         return false;
     }
-    
-    public boolean removeReservedParameterName(String value) {
-        if (reservedParameterNames != null) {
-            return remove(reservedParameterNames, value);
-        }
+
+    public boolean removeReservedParameterName(String value)
+    {
+        if (fReservedParameterNames != null)
+            return remove(fReservedParameterNames, value);
+
         return false;
     }
 
@@ -399,8 +385,8 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      * @see org.apache.tapestry.spec.IComponentSpecification#getDescription()
      */
     public String getDescription()
-    {        
-        return description;
+    {
+        return fDescription;
     }
 
     /* (non-Javadoc)
@@ -408,9 +394,9 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void setDescription(String description)
     {
-        String old = this.description;
-        this.description = description;
-        firePropertyChange("description", old, this.description);
+        String old = fDescription;
+        fDescription = description;
+        firePropertyChange("description", old, this.fDescription);
     }
 
     /* (non-Javadoc)
@@ -418,7 +404,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public String getPublicId()
     {
-        return publicId;
+        return fPublicId;
     }
 
     /* (non-Javadoc)
@@ -426,10 +412,9 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void setPublicId(String publicId)
     {
-        String old = this.publicId;
-        this.publicId = publicId;
-        firePropertyChange("publicId", old, this.publicId);
-
+        String old = fPublicId;
+        fPublicId = publicId;
+        firePropertyChange("publicId", old, this.fPublicId);
     }
 
     /* (non-Javadoc)
@@ -437,7 +422,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public boolean isPageSpecification()
     {
-        return pageSpecification;
+        return fPageSpecification;
     }
 
     /* (non-Javadoc)
@@ -445,40 +430,37 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public void setPageSpecification(boolean pageSpecification)
     {
-        this.pageSpecification = pageSpecification;
-        //no property change firing needed. This valiue
+        this.fPageSpecification = pageSpecification;
+        //no property change firing needed. This value
         //is immutable once set
-
     }
 
-  
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#addPropertySpecification(org.apache.tapestry.spec.IPropertySpecification)
      */
     public void addPropertySpecification(IPropertySpecification spec)
     {
-        if (propertySpecifications == null) {
-            propertySpecifications = new PropertyFiringMap(this, "tapestryProperties");
-        }
-        
+        if (fPropertySpecifications == null)
+            fPropertySpecifications = new PropertyFiringMap(this, "tapestryProperties");
+
         String name = spec.getName();
-        
-        propertySpecifications.put(name, spec);
+
+        fPropertySpecifications.put(name, spec);
     }
-    
-    public void removePropertSpecification(String name){
-        remove(propertySpecifications, name);
+
+    public void removePropertSpecification(String name)
+    {
+        remove(fPropertySpecifications, name);
     }
-    
+
     public void setPropertySpecification(IPropertySpecification spec)
     {
-        if (propertySpecifications == null) {
-            propertySpecifications = new PropertyFiringMap(this, "tapestryProperties");
-        }
-        
+        if (fPropertySpecifications == null)
+            fPropertySpecifications = new PropertyFiringMap(this, "tapestryProperties");
+
         String name = spec.getName();
-        
-        propertySpecifications.put(name, spec);
+
+        fPropertySpecifications.put(name, spec);
     }
 
     /* (non-Javadoc)
@@ -486,31 +468,29 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      */
     public List getPropertySpecificationNames()
     {
-        
-        return keys(propertySpecifications);
+        return keys(fPropertySpecifications);
     }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#getPropertySpecification(java.lang.String)
      */
     public IPropertySpecification getPropertySpecification(String name)
-    {       
-        return (IPropertySpecification)get(propertySpecifications, name);
+    {
+        return (IPropertySpecification) get(fPropertySpecifications, name);
     }
 
-    
     public INamespace getNamespace()
     {
-        return namespace;
+        return fNamespace;
     }
 
-    
     public void setNamespace(INamespace namespace)
     {
-        this.namespace = namespace;
+        this.fNamespace = namespace;
     }
-    
-    public List getTemplateLocations() {
+
+    public List getTemplateLocations()
+    {
         //TODO implement getTemplateLocations()
         return Collections.EMPTY_LIST;
     }

@@ -39,7 +39,7 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
 public class PluginFieldBeanInitializer extends AbstractPluginBeanInitializer implements IBeanInitializer
 {
 
-    private String fieldName;
+    private String fFieldName;
 
     public PluginFieldBeanInitializer()
     {

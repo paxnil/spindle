@@ -40,7 +40,6 @@ public class PluginStringBeanInitializer extends AbstractPluginBeanInitializer
     public PluginStringBeanInitializer()
     {
         super(BaseSpecification.STRING_BEAN_INIT);
-
     }
 
     public String getKey()

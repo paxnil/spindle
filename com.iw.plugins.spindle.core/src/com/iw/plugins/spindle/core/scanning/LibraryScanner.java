@@ -67,11 +67,14 @@ public class LibraryScanner extends SpecificationScanner
         scanLibrarySpecification(rootNode, specification, null);
     }
 
-    protected void scanLibrarySpecification(Node rootNode, ILibrarySpecification specification, IResourceResolver resolver)
+    protected void scanLibrarySpecification(
+        Node rootNode,
+        ILibrarySpecification specification,
+        IResourceResolver resolver)
         throws ScannerException
     {
-        specification.setPublicId(parser.getPublicId());
-        specification.setSpecificationLocation(location);
+        specification.setPublicId(fParser.getPublicId());
+        specification.setSpecificationLocation(fResourceLocation);
         //   TODO figure out ResourceResolver
         //        specification.setResourceResolver(resolver);
 
@@ -262,14 +265,12 @@ public class LibraryScanner extends SpecificationScanner
             getAttributeSourceLocation(node, "id"));
 
         if (id.equals(INamespace.FRAMEWORK_NAMESPACE))
-        {
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "id"),
                 TapestryCore.getTapestryString(
                     "SpecificationParser.framework-library-id-is-reserved",
                     INamespace.FRAMEWORK_NAMESPACE));
-        }
 
         String specificationPath = getAttribute(node, "specification-path");
 
@@ -296,12 +297,10 @@ public class LibraryScanner extends SpecificationScanner
                 getAttributeSourceLocation(node, "name"));
 
         if (valid && specification.getPageNames().contains(name))
-        {
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"),
                 TapestryCore.getTapestryString("LibrarySpecification.duplicate-page-name", name));
-        }
 
         String specificationPath = getAttribute(node, "specification-path");
 

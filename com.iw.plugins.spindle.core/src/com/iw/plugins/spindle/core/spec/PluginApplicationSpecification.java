@@ -36,8 +36,8 @@ import org.apache.tapestry.spec.IApplicationSpecification;
  */
 public class PluginApplicationSpecification extends PluginLibrarySpecification implements IApplicationSpecification
 {
-    private String name;
-    private String engineClassName;
+    private String fName;
+    private String fEngineClassName;
 
     public PluginApplicationSpecification()
     {
@@ -49,16 +49,16 @@ public class PluginApplicationSpecification extends PluginLibrarySpecification i
      */
     public String getName()
     {
-        return name;
+        return fName;
     }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IApplicationSpecification#setEngineClassName(java.lang.String)
      */
     public void setEngineClassName(String value)
-    {       
-        String old = engineClassName;
-        this.engineClassName = value;
+    {
+        String old = fEngineClassName;
+        this.fEngineClassName = value;
         firePropertyChange("engineClassName", old, value);
     }
 
@@ -66,8 +66,8 @@ public class PluginApplicationSpecification extends PluginLibrarySpecification i
      * @see org.apache.tapestry.spec.IApplicationSpecification#getEngineClassName()
      */
     public String getEngineClassName()
-    {        
-        return engineClassName;
+    {
+        return fEngineClassName;
     }
 
     /* (non-Javadoc)
@@ -75,8 +75,8 @@ public class PluginApplicationSpecification extends PluginLibrarySpecification i
      */
     public void setName(String name)
     {
-        String old = this.name;
-        this.name = name;
+        String old = this.fName;
+        this.fName = name;
         firePropertyChange("name", old, name);
     }
 

@@ -55,9 +55,8 @@ public class NodeAccess
             PullParserNode ppnode = (PullParserNode) node;
             Map attrs = ppnode.getKludgeAttributes();
             if (attrs != null)
-            {
                 result = (String) attrs.get(attributeName);
-            }
+
         } else
         {
             NamedNodeMap map = node.getAttributes();
@@ -67,9 +66,7 @@ public class NodeAccess
                 Node attributeNode = map.getNamedItem(attributeName);
 
                 if (attributeNode != null)
-                {
                     result = attributeNode.getNodeValue();
-                }
             }
         }
         return result;
@@ -88,16 +85,12 @@ public class NodeAccess
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
         {
             if (child.getNodeType() == Node.TEXT_NODE)
-            {
                 buffer.append(child.getNodeValue());
-            }
         }
 
         String result = buffer.toString().trim();
         if (result == null || "".equals(result))
-        {
             return null;
-        }
 
         return result;
     }
@@ -105,9 +98,8 @@ public class NodeAccess
     public static boolean isElement(Node node, String elementName)
     {
         if (node.getNodeType() != Node.ELEMENT_NODE)
-        {
             return false;
-        }
+
         return node.getNodeName().equals(elementName);
 
     }
@@ -124,7 +116,6 @@ public class NodeAccess
         {
             DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
             result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.PLUGIN_ID);
-
         }
         return result;
     }

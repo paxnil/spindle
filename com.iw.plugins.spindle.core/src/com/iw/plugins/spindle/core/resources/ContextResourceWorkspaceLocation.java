@@ -68,7 +68,7 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
 
     private IContainer getContainer()
     {
-        return ((ContextRootLocation) root).getContainer(this);
+        return ((ContextRootLocation) fRoot).getContainer(this);
     }
 
     /* (non-Javadoc)
@@ -78,9 +78,8 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
     {
         IContainer container = getContainer();
         if (container != null && getName() != null)
-        {
             return (IStorage) container.getFile(new Path(getName()));
-        }
+
         return null;
     }
 
@@ -108,9 +107,7 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
     {
         IStorage storage = getStorage();
         if (storage != null)
-        {
             return storage.getContents();
-        }
 
         return null;
     }
@@ -129,11 +126,10 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
         HashCodeBuilder builder = new HashCodeBuilder(5589, 1117);
 
         builder.append(getPath());
-        builder.append(root);
+        builder.append(fRoot);
 
         return builder.toHashCode();
     }
-
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)
@@ -147,13 +143,10 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
             for (int i = 0; i < members.length; i++)
             {
                 if (members[i] instanceof IContainer)
-                {
                     continue;
-                }
+
                 if (!requestor.accept((IResourceWorkspaceLocation) getRelativeLocation(members[i].getName())))
-                {
                     break;
-                }
             }
         }
     }
@@ -163,6 +156,6 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
      */
     public ISearch getSearch() throws CoreException
     {
-        return root.getSearch();
+        return fRoot.getSearch();
     }
 }

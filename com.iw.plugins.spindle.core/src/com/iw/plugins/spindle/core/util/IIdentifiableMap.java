@@ -71,7 +71,7 @@ public class IIdentifiableMap extends PropertyFiringMap
 
     private void hookIdentifiable(String identifier, IIdentifiable identifiable)
     {
-        identifiable.setParent(parent);
+        identifiable.setParent(fParent);
         identifiable.setIdentifier(identifier);
     }
 
@@ -99,7 +99,7 @@ public class IIdentifiableMap extends PropertyFiringMap
      */
     public void clear()
     {
-        for (Iterator iter = values.iterator(); iter.hasNext();)
+        for (Iterator iter = fValues.iterator(); iter.hasNext();)
         {
             unhookIdentifiable((IIdentifiable) iter.next());
         }

@@ -43,9 +43,9 @@ import com.iw.plugins.spindle.core.util.IIdentifiableMap;
 public class PluginExtensionSpecification extends BasePropertyHolder implements IExtensionSpecification
 {
 
-    private String className;
-    protected Map configuration;
-    private boolean immediate;
+    private String fClassName;
+    protected Map fConfiguration;
+    private boolean fImmediate;
     /**
      * @param type
      */
@@ -59,7 +59,7 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
      */
     public String getClassName()
     {
-        return className;
+        return fClassName;
     }
 
     /* (non-Javadoc)
@@ -67,7 +67,7 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
      */
     public void setClassName(String className)
     {
-        this.className = className;
+        this.fClassName = className;
         firePropertyChange("className", null, className);
     }
 
@@ -76,28 +76,24 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
      */
     public void addConfiguration(String propertyName, Object value)
     {
-        if (configuration == null)
-        {
-            configuration = new IIdentifiableMap(this, "configration");
-        }
+        if (fConfiguration == null)
+            fConfiguration = new IIdentifiableMap(this, "configration");
 
         PluginExtensionConfiguration newConfig = new PluginExtensionConfiguration(propertyName, value);
-        configuration.put(propertyName, newConfig);
+        fConfiguration.put(propertyName, newConfig);
     }
 
     public void removeConfiguration(String propertyName)
     {
-        remove(configuration, propertyName);
+        remove(fConfiguration, propertyName);
     }
 
     public void setConfiguration(String propertyName, PluginExtensionConfiguration config)
     {
-        if (configuration == null)
-        {
-            configuration = new IIdentifiableMap(this, "configuration");
-        }
+        if (fConfiguration == null)
+            fConfiguration = new IIdentifiableMap(this, "configuration");
 
-        configuration.put(propertyName, config);
+        fConfiguration.put(propertyName, config);
     }
 
     /* (non-Javadoc)
@@ -105,10 +101,9 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
      */
     public Map getConfiguration()
     {
-        if (configuration != null)
-        {
-            return Collections.unmodifiableMap(configuration);
-        }
+        if (fConfiguration != null)
+            return Collections.unmodifiableMap(fConfiguration);
+
         return Collections.EMPTY_MAP;
     }
 
@@ -126,7 +121,7 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
      */
     public boolean isImmediate()
     {
-        return immediate;
+        return fImmediate;
     }
 
     /* (non-Javadoc)
@@ -134,9 +129,8 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
      */
     public void setImmediate(boolean immediate)
     {
-        boolean old = this.immediate;
-        this.immediate = immediate;
-        firePropertyChange("immediate", old,immediate);
+        boolean old = fImmediate;
+        fImmediate = immediate;
+        firePropertyChange("immediate", old, immediate);
     }
-
 }

@@ -48,20 +48,20 @@ import com.iw.plugins.spindle.core.util.Assert;
  */
 public class BuilderValidator extends BaseValidator
 {
-    Build build;
-    ICoreNamespace framework;
+    Build fBuild;
+    ICoreNamespace fFramework;
 
     public BuilderValidator(Build build)
     {
         super();
-        this.build = build;
+        this.fBuild = build;
     }
 
     public BuilderValidator(Build build, ICoreNamespace framework)
     {
         this(build);
         Assert.isNotNull(framework);
-        this.framework = framework;
+        this.fFramework = framework;
     }
 
     /* (non-Javadoc)
@@ -69,7 +69,7 @@ public class BuilderValidator extends BaseValidator
      */
     protected Object findType(String fullyQualifiedName)
     {
-        return build.tapestryBuilder.getType(fullyQualifiedName);
+        return fBuild.fTapestryBuilder.getType(fullyQualifiedName);
     }
 
     /* (non-Javadoc)
@@ -87,10 +87,8 @@ public class BuilderValidator extends BaseValidator
         IComponentSpecification containedSpecification;
 
         if (TapestryCore.isNull(type))
-        {
             // already caught by the scanner
             return true;
-        }
 
         int colonx = type.indexOf(':');
 
@@ -105,21 +103,20 @@ public class BuilderValidator extends BaseValidator
             containedSpecification = use_namespace.getComponentSpecification(type);
             if (containedSpecification == null)
             {
-                if (build != null)
+                if (fBuild != null)
                 {
                     //check to see if its not built yet
                     String path = use_namespace.getSpecification().getComponentSpecificationPath(type);
                     if (!TapestryCore.isNull(path))
-                    {
                         // build it
                         containedSpecification = null; //TODO build it
-                    }
+
                 }
                 // must check again - it might've got built
                 if (containedSpecification != null)
                 {
                     // look in the framework namespace
-                    use_namespace = framework;
+                    use_namespace = fFramework;
                     containedSpecification = use_namespace.getComponentSpecification(type);
                 }
             }

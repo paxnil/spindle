@@ -42,28 +42,28 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
     private static final int CHAR_START = 1;
     private static final int CHAR_END = 2;
 
-    private int sourceStartLine = 0;
-    private int sourceCharStart = 0;
-    private int sourceCharEnd = 0;
-    private int sourceEndLine = 0;
+    private int fSourceStartLine = 0;
+    private int fSourceCharStart = 0;
+    private int fSourceCharEnd = 0;
+    private int fSourceEndLine = 0;
 
-    private int startTagStartLine = 0;
-    private int startTagCharStart = 0;
-    private int startTagCharEnd = 0;
-    private int startTagEndLine = 0;
+    private int fStartTagStartLine = 0;
+    private int fStartTagCharStart = 0;
+    private int fStartTagCharEnd = 0;
+    private int fStartTagEndLine = 0;
 
-    private int endTagStartLine = 0;
-    private int endTagCharStart = 0;
-    private int endTagCharEnd = 0;
-    private int endTagEndLine = 0;
+    private int fEndTagStartLine = 0;
+    private int fEndTagCharStart = 0;
+    private int fEndTagCharEnd = 0;
+    private int fEndTagEndLine = 0;
 
-    private int contentsStartLine = 0;
-    private int contentsCharStart = 0;
-    private int contentsCharEnd = 0;
+    private int fContentsStartLine = 0;
+    private int fContentsCharStart = 0;
+    private int fContentsCharEnd = 0;
     
-    private int locationColumnNumber;
-    private int locationLineNumber;
-    private IResourceLocation resourceLocation;
+    private int fLocationColumnNumber;
+    private int fLocationLineNumber;
+    private IResourceLocation fResourceLocation;
 
     private Map attributes;
 
@@ -79,13 +79,13 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
 
     public boolean isEmptyTag()
     {
-        return contentsStartLine < 1;
+        return fContentsStartLine < 1;
     }
 
     /** return a location for the element - includes all wrapped by it**/
     public ISourceLocation getSourceLocation()
     {
-        return new SourceLocation(sourceStartLine, sourceCharStart, sourceCharEnd);
+        return new SourceLocation(fSourceStartLine, fSourceCharStart, fSourceCharEnd);
     }
 
     /** return a location for all wrapped by the element**/
@@ -103,19 +103,19 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
     {
         if (!isEmptyTag())
         {
-            return new SourceLocation(contentsStartLine, contentsCharStart, contentsCharEnd);
+            return new SourceLocation(fContentsStartLine, fContentsCharStart, fContentsCharEnd);
         }
         return null;
     }
 
     public ISourceLocation getStartTagSourceLocation()
     {
-        return new SourceLocation(startTagStartLine, startTagCharStart, startTagCharEnd);
+        return new SourceLocation(fStartTagStartLine, fStartTagCharStart, fStartTagCharEnd);
     }
 
     public ISourceLocation getEndTagSourceLocation()
     {
-        return new SourceLocation(endTagStartLine, endTagCharStart, endTagCharEnd);
+        return new SourceLocation(fEndTagStartLine, fEndTagCharStart, fEndTagCharEnd);
     }
 
     public ISourceLocation getAttributeSourceLocation(String rawname)
@@ -133,22 +133,22 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
 
     public int getStartTagStartLine()
     {
-        return startTagStartLine;
+        return fStartTagStartLine;
     }
 
     public int getStartTagEndLine()
     {
-        return startTagEndLine;
+        return fStartTagEndLine;
     }
 
     public int getEndTagStartLine()
     {
-        return endTagStartLine;
+        return fEndTagStartLine;
     }
 
     public int getEndTagEndLine()
     {
-        return endTagEndLine;
+        return fEndTagEndLine;
     }
 
     private Map getAttributes()
@@ -168,49 +168,49 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
         
         boolean isEmpty = endTag == null;
 
-        locationLineNumber = startTag.getBeginLineNumber();
+        fLocationLineNumber = startTag.getBeginLineNumber();
         
-        locationColumnNumber = startTag.getBeginColumnNumber();
-        int column = resolver.getColumnOffset(locationLineNumber, locationColumnNumber);
+        fLocationColumnNumber = startTag.getBeginColumnNumber();
+        int column = resolver.getColumnOffset(fLocationLineNumber, fLocationColumnNumber);
 
-        startTagStartLine = sourceStartLine = locationLineNumber;
-        startTagCharStart = sourceCharStart = column;
+        fStartTagStartLine = fSourceStartLine = fLocationLineNumber;
+        fStartTagCharStart = fSourceCharStart = column;
 
         int line = startTag.getEndLineNumber();
         column = resolver.getColumnOffset(line, startTag.getEndColumnNumber());
 
-        startTagEndLine = line;
-        startTagCharEnd = column;
+        fStartTagEndLine = line;
+        fStartTagCharEnd = column;
 
         if (endTag == null)
         {
 
-            contentsStartLine = contentsCharStart = contentsCharEnd = -1;
+            fContentsStartLine = fContentsCharStart = fContentsCharEnd = -1;
 
-            endTagStartLine = sourceEndLine = startTagStartLine;
-            endTagCharStart = startTagCharStart;
-            endTagEndLine = sourceEndLine = startTagEndLine;
-            endTagCharEnd = sourceCharEnd = startTagCharEnd;
+            fEndTagStartLine = fSourceEndLine = fStartTagStartLine;
+            fEndTagCharStart = fStartTagCharStart;
+            fEndTagEndLine = fSourceEndLine = fStartTagEndLine;
+            fEndTagCharEnd = fSourceCharEnd = fStartTagCharEnd;
 
         } else
         {
 
-            contentsStartLine = startTagStartLine;
-            contentsCharStart = startTagCharEnd;
+            fContentsStartLine = fStartTagStartLine;
+            fContentsCharStart = fStartTagCharEnd;
 
             line = endTag.getBeginLineNumber();
             column = resolver.getColumnOffset(line, endTag.getBeginColumnNumber());
 
-            endTagStartLine = line;
-            endTagCharStart = column;
+            fEndTagStartLine = line;
+            fEndTagCharStart = column;
 
             line = endTag.getEndLineNumber();
             column = resolver.getColumnOffset(line, endTag.getEndColumnNumber());
 
-            endTagEndLine = line;
-            endTagCharEnd = column;
+            fEndTagEndLine = line;
+            fEndTagCharEnd = column;
 
-            contentsCharEnd = endTagCharStart;
+            fContentsCharEnd = fEndTagCharStart;
         }
 
         Map attributeMap = eventInfo.getAttributeMap();
@@ -283,7 +283,7 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
      */
     public int getColumnNumber()
     {
-        return locationColumnNumber;
+        return fLocationColumnNumber;
     }
 
     /* (non-Javadoc)
@@ -291,7 +291,7 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
      */
     public int getLineNumber()
     {
-        return locationLineNumber;
+        return fLocationLineNumber;
     }
 
     /* (non-Javadoc)
@@ -299,11 +299,11 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
      */
     public IResourceLocation getResourceLocation()
     {
-        return resourceLocation;
+        return fResourceLocation;
     }
     
     public void setResourceLocation(IResourceLocation location) {
-        this.resourceLocation = location;
+        this.fResourceLocation = location;
     }
     
     

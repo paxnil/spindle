@@ -52,8 +52,7 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
  */
 public class NamespaceResourceLookup
 {
-    
-    
+
     /**
     * Accept flag for specifying .jwc files.
     */
@@ -64,13 +63,13 @@ public class NamespaceResourceLookup
      */
     public int ACCEPT_PAGE = 0x00000002;
 
-    private List locations;
-    private ResourceAcceptor acceptor;
+    private List fLocations;
+    private ResourceAcceptor fAcceptor;
 
     public void configure(PluginLibrarySpecification specification)
     {
-        locations = new ArrayList();
-        locations.add(specification.getSpecificationLocation());
+        fLocations = new ArrayList();
+        fLocations.add(specification.getSpecificationLocation());
     }
 
     public void configure(
@@ -78,47 +77,45 @@ public class NamespaceResourceLookup
         IResourceWorkspaceLocation contextRoot,
         String servletName)
     {
-        locations = new ArrayList();
+        fLocations = new ArrayList();
         IResourceWorkspaceLocation base = (IResourceWorkspaceLocation) specification.getSpecificationLocation();
         if (base.isOnClasspath())
         {
-            locations.add(base);
-            locations.add(contextRoot);
+            fLocations.add(base);
+            fLocations.add(contextRoot);
         } else
         {
-            locations.add(base);
+            fLocations.add(base);
             if (servletName != null)
             {
-                locations.add(contextRoot.getRelativeLocation("/WEB-INF/" + servletName));
+                fLocations.add(contextRoot.getRelativeLocation("/WEB-INF/" + servletName));
             }
-            locations.add(contextRoot.getRelativeLocation("/WEB_INF/"));
-            locations.add(contextRoot);
+            fLocations.add(contextRoot.getRelativeLocation("/WEB_INF/"));
+            fLocations.add(contextRoot);
         }
     }
 
     public IResourceWorkspaceLocation[] find(String name, boolean exactMatch, int acceptFlags)
     {
-        if (locations == null)
-        {
+        if (fLocations == null)
             throw new Error("not initialized");
-        }
-        if (acceptor == null)
-        {
-            acceptor = new ResourceAcceptor();
-        }
+
+        if (fAcceptor == null)
+            fAcceptor = new ResourceAcceptor();
+
         try
         {
-            acceptor.reset(name, exactMatch, acceptFlags);
-            for (Iterator iter = locations.iterator(); iter.hasNext();)
+            fAcceptor.reset(name, exactMatch, acceptFlags);
+            for (Iterator iter = fLocations.iterator(); iter.hasNext();)
             {
                 IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
-                location.lookup(acceptor);
+                location.lookup(fAcceptor);
             }
         } catch (CoreException e)
         {
             TapestryCore.log(e);
         }
-        return acceptor.getResults();
+        return fAcceptor.getResults();
     }
 
     class ResourceAcceptor implements IResourceLocationAcceptor
@@ -190,9 +187,8 @@ public class NamespaceResourceLookup
                 }
             }
             if (match)
-            {
                 results.add(location);
-            }
+
             return true;
         }
 

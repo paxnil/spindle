@@ -37,7 +37,7 @@ import org.apache.tapestry.IResourceLocation;
 public abstract class BaseSpecLocatable extends BasePropertyHolder
 {
 
-    IResourceLocation specificationLocation;
+    IResourceLocation fSpecificationLocation;
 
     public BaseSpecLocatable(int type)
     {
@@ -49,7 +49,7 @@ public abstract class BaseSpecLocatable extends BasePropertyHolder
      */
     public IResourceLocation getSpecificationLocation()
     {
-        return specificationLocation;
+        return fSpecificationLocation;
     }
 
     /**
@@ -57,7 +57,7 @@ public abstract class BaseSpecLocatable extends BasePropertyHolder
      */
     public void setSpecificationLocation(IResourceLocation location)
     {
-        this.specificationLocation = location;
+        this.fSpecificationLocation = location;
     }
 
 }

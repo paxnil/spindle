@@ -67,8 +67,8 @@ public class PluginExtensionConfiguration extends BaseSpecification
 
     }
 
-    public Object valueObject;
-    public Class type;
+    public Object fValueObject;
+    public Class fType;
 
     public PluginExtensionConfiguration()
     {
@@ -81,8 +81,8 @@ public class PluginExtensionConfiguration extends BaseSpecification
     public PluginExtensionConfiguration(String propertyName, Object value)
     {
         this();
-        this.valueObject = value;
-        this.type = value.getClass();
+        fValueObject = value;
+        fType = value.getClass();
     }
 
     private Class checkType(String newType)
@@ -94,34 +94,22 @@ public class PluginExtensionConfiguration extends BaseSpecification
     {
 
         if (type == value.getClass())
-        {
             return value;
-        }
 
         if (type == String.class)
-        {
             return value.toString();
-        }
 
         if (type == Boolean.class)
-        {
             return convertToBoolean(value);
-        }
 
         if (type == Double.class)
-        {
             return convertToDouble(value);
-        }
 
         if (type == Long.class)
-        {
             return convertToLong(value);
-        }
 
         if (type == Integer.class)
-        {
             return convertToInteger(value);
-        }
 
         return value;
     }
@@ -130,9 +118,7 @@ public class PluginExtensionConfiguration extends BaseSpecification
     {
         Class clazz = value.getClass();
         if (clazz == Boolean.class)
-        {
             return (Boolean) value;
-        }
 
         if (value instanceof Number)
         {
@@ -149,13 +135,11 @@ public class PluginExtensionConfiguration extends BaseSpecification
         {
             String svalue = (String) value;
             if (svalue.equalsIgnoreCase("true") || svalue.equalsIgnoreCase("yes"))
-            {
                 return Boolean.TRUE;
-            }
+
             if (svalue.equalsIgnoreCase("false") || svalue.equalsIgnoreCase("no"))
-            {
                 return Boolean.FALSE;
-            }
+
             return new Boolean(svalue != null && !"".equals(svalue));
         }
         return Boolean.TRUE;
@@ -165,24 +149,20 @@ public class PluginExtensionConfiguration extends BaseSpecification
     {
         Class clazz = value.getClass();
         if (clazz == Long.class)
-        {
             return (Long) value;
-        }
 
         if (clazz == Boolean.class)
         {
             boolean flag = ((Boolean) value).booleanValue();
 
             if (flag)
-            {
                 return trueL;
-            }
+
             return falseL;
         }
         if (value instanceof Number)
-        {
             return new Long(((Number) value).longValue());
-        }
+
         if (clazz == String.class)
         {
             try
@@ -199,17 +179,14 @@ public class PluginExtensionConfiguration extends BaseSpecification
     {
         Class clazz = value.getClass();
         if (clazz == Double.class)
-        {
             return (Double) value;
-        }
 
         if (clazz == Boolean.class)
         {
             boolean flag = ((Boolean) value).booleanValue();
             if (flag)
-            {
                 return trueD;
-            }
+
             return falseD;
         }
 
@@ -233,24 +210,18 @@ public class PluginExtensionConfiguration extends BaseSpecification
     {
         Class clazz = value.getClass();
         if (clazz == Integer.class)
-        {
             return (Integer) value;
-        }
 
         if (clazz == Boolean.class)
         {
-            boolean flag = ((Boolean) value).booleanValue();
-            if (flag)
-            {
+            if (((Boolean) value).booleanValue())
                 return trueI;
-            }
+
             return falseI;
         }
 
         if (value instanceof Number)
-        {
             return new Integer(((Number) value).intValue());
-        }
 
         if (clazz == String.class)
         {
@@ -259,7 +230,6 @@ public class PluginExtensionConfiguration extends BaseSpecification
                 return new Integer((String) value);
             } catch (NumberFormatException e)
             {}
-
         }
         return falseI;
     }

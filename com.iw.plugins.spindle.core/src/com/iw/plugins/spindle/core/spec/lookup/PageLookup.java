@@ -45,9 +45,7 @@ public class PageLookup extends AbstractLookup
         IComponentSpecification result = null;
 
         if (libraryId != null)
-        {
             useNamespace = (ICoreNamespace) useNamespace.getChildNamespace(libraryId);
-        }
 
         result = useNamespace.getPageSpecification(pageName);
 
@@ -55,9 +53,8 @@ public class PageLookup extends AbstractLookup
         {
             useNamespace = getFrameworkNamespace();
             if (useNamespace != null)
-            {
                 return getFrameworkNamespace().getPageSpecification(pageName);
-            }
+
         }
         return result;
     }

@@ -104,9 +104,9 @@ public class PullParserNode implements Node
         return new PullParserNode(parser, "#text", PullParserNode.TEXT_NODE, parentNode, value);
     }
 
-    private boolean complete;
-    private boolean empty;
-    private TapestryPullParser parser;
+    private boolean fComplete;
+    private boolean fEmpty;
+    private TapestryPullParser fParser;
 
     /**
      * Name will be:
@@ -116,7 +116,7 @@ public class PullParserNode implements Node
      * ELEMENT_NODE    the name of the element (tag name)
      * TEXT_NODE       "#text"
      */
-    protected String nodeName;
+    protected String fNodeName;
 
     /**
      * One of:
@@ -128,7 +128,7 @@ public class PullParserNode implements Node
      * But we only care about the above two.
      *  
      */
-    protected short nodeType;
+    protected short fNodeType;
 
     /**
      * Value will be:
@@ -138,33 +138,33 @@ public class PullParserNode implements Node
      * ELEMENT_NODE    null!
      * TEXT_NODE       The content of the text node
      */
-    protected String nodeValue;
+    protected String fNodeValue;
 
     /** parent node **/
-    protected PullParserNode parentNode;
+    protected PullParserNode fParentNode;
 
     /** first child **/
-    protected PullParserNode firstChild;
+    protected PullParserNode fFirstChild;
 
     /** Previous sibling. */
-    protected PullParserNode previousSibling;
+    protected PullParserNode fPreviousSibling;
 
     /** Next sibling. */
-    protected PullParserNode nextSibling;
+    protected PullParserNode fNextSibling;
 
-    protected ISourceLocationInfo sourceInfo;
+    protected ISourceLocationInfo fSourceInfo;
 
-    protected Map attributes;
+    protected Map fAttributes;
 
     /** private constructor - use the static create methods instead **/
     private PullParserNode(TapestryPullParser parser, String nodeName, short nodeType, PullParserNode parentNode)
     {
         Assert.isTrue(nodeType == ELEMENT_NODE || nodeType == TEXT_NODE, "invalid node type");
-        this.parser = parser;
-        this.nodeName = nodeName;
-        this.nodeType = nodeType;
-        this.parentNode = parentNode;
-        this.complete = false;
+        this.fParser = parser;
+        this.fNodeName = nodeName;
+        this.fNodeType = nodeType;
+        this.fParentNode = parentNode;
+        this.fComplete = false;
     }
     /** private constructor - use the static create methods instead **/
     public PullParserNode(
@@ -186,27 +186,27 @@ public class PullParserNode implements Node
         String value)
     {
         this(parser, nodeName, nodeType, parentNode);
-        this.nodeValue = value;
+        this.fNodeValue = value;
     }
     /**
      * @param attributes
      */
     private void createAttributes(XMLAttributes xmlAttributes)
     {
-        if (attributes != null)
+        if (fAttributes != null)
         {
             throw new RuntimeException("PPN already has attributes!");
         }
         int length = xmlAttributes.getLength();
         if (length > 0)
         {
-            attributes = new HashMap();
+            fAttributes = new HashMap();
             QName qname = new QName();
             for (int i = 0; i < length; i++)
             {
                 xmlAttributes.getName(i, qname);
                 String value = xmlAttributes.getValue(i);
-                attributes.put(qname.rawname, value);
+                fAttributes.put(qname.rawname, value);
             }
         }
 
@@ -220,12 +220,12 @@ public class PullParserNode implements Node
     protected void completed()
     {
         System.err.println("PPNode.complete called on: " + getNodeName());
-        this.complete = true;
+        this.fComplete = true;
     }
 
     protected void setEmpty()
     {
-        this.empty = true;
+        this.fEmpty = true;
     }
 
     /**
@@ -236,7 +236,7 @@ public class PullParserNode implements Node
      */
     private void bumpParser()
     {
-        parser.bump();
+        fParser.bump();
     }
 
     /* (non-Javadoc)
@@ -244,7 +244,7 @@ public class PullParserNode implements Node
      */
     public String getNodeName()
     {
-        return nodeName;
+        return fNodeName;
     }
 
     /* (non-Javadoc)
@@ -252,7 +252,7 @@ public class PullParserNode implements Node
      */
     public String getNodeValue() throws DOMException
     {
-        return nodeValue;
+        return fNodeValue;
     }
 
     /* (non-Javadoc)
@@ -268,7 +268,7 @@ public class PullParserNode implements Node
      */
     public short getNodeType()
     {
-        return nodeType;
+        return fNodeType;
     }
 
     /* (non-Javadoc)
@@ -276,7 +276,7 @@ public class PullParserNode implements Node
      */
     public Node getParentNode()
     {
-        return parentNode;
+        return fParentNode;
     }
 
     /* (non-Javadoc)
@@ -292,24 +292,24 @@ public class PullParserNode implements Node
      */
     public Node getFirstChild()
     {
-        if (!complete && !empty)
+        if (!fComplete && !fEmpty)
         {
-            while (!complete)
+            while (!fComplete)
             {
-                parser.bump();
-                if (firstChild != null)
+                fParser.bump();
+                if (fFirstChild != null)
                 {
                     break;
                 }
             }
         }
-        return firstChild;
+        return fFirstChild;
 
     }
 
     protected void setFirstChild(PullParserNode node)
     {
-        this.firstChild = node;
+        this.fFirstChild = node;
     }
 
     /* (non-Javadoc)
@@ -317,9 +317,9 @@ public class PullParserNode implements Node
      */
     public Node getLastChild()
     {
-        if (!complete && !empty)
+        if (!fComplete && !fEmpty)
         {
-            while (!complete)
+            while (!fComplete)
             {
                 bumpParser();
             }
@@ -338,12 +338,12 @@ public class PullParserNode implements Node
      */
     public Node getPreviousSibling()
     {
-        return previousSibling;
+        return fPreviousSibling;
     }
 
     protected void setPreviousSibling(PullParserNode node)
     {
-        this.previousSibling = node;
+        this.fPreviousSibling = node;
     }
 
     /* (non-Javadoc)
@@ -353,45 +353,45 @@ public class PullParserNode implements Node
     {
         System.out.println("PPNode.getNextSibling called on: " + getNodeName());
 
-        if (nextSibling == null)
+        if (fNextSibling == null)
         {
-            if (!complete)
+            if (!fComplete)
             {
-                while (!complete)
+                while (!fComplete)
                 {
                     bumpParser();
-                    if (nextSibling != null)
+                    if (fNextSibling != null)
                     {
                         break;
                     }
                 }
-            } else if (empty)
+            } else if (fEmpty)
             {
-                while (!parentNode.complete)
+                while (!fParentNode.fComplete)
                 {
                     bumpParser();
-                    if (nextSibling != null)
+                    if (fNextSibling != null)
                     {
                         break;
                     }
                 }
             }
         }
-        return nextSibling;
+        return fNextSibling;
     }
 
     protected void setNextSibling(PullParserNode node)
     {
-        this.nextSibling = node;
+        this.fNextSibling = node;
     }
 
     public Map getKludgeAttributes()
     {
-        if (attributes == null)
+        if (fAttributes == null)
         {
             return Collections.EMPTY_MAP;
         }
-        return attributes;
+        return fAttributes;
     }
 
     /* (non-Javadoc)
@@ -447,7 +447,7 @@ public class PullParserNode implements Node
      */
     public boolean hasChildNodes()
     {
-        return firstChild != null;
+        return fFirstChild != null;
     }
 
     /* (non-Javadoc)
@@ -511,7 +511,7 @@ public class PullParserNode implements Node
      */
     public boolean hasAttributes()
     {
-        return attributes != null;
+        return fAttributes != null;
     }
 
     /**
@@ -519,7 +519,7 @@ public class PullParserNode implements Node
      */
     public ISourceLocationInfo getSourceLocationInfo()
     {
-        return sourceInfo;
+        return fSourceInfo;
     }
 
 }

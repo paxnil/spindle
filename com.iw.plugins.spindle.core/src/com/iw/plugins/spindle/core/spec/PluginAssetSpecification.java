@@ -38,8 +38,8 @@ import org.apache.tapestry.spec.IAssetSpecification;
 public class PluginAssetSpecification extends BasePropertyHolder implements IAssetSpecification
 {
 
-    private String path;
-    private AssetType type;
+    private String fPath;
+    private AssetType fAssetType;
 
     /**
      * @param type
@@ -53,8 +53,8 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
     public PluginAssetSpecification(AssetType type, String path)
     {
         this();
-        this.type = type;
-        this.path = path;
+        this.fAssetType = type;
+        this.fPath = path;
     }
 
     /* (non-Javadoc)
@@ -62,7 +62,7 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
      */
     public String getPath()
     {
-        return path;
+        return fPath;
     }
 
     /* (non-Javadoc)
@@ -70,7 +70,7 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
      */
     public AssetType getType()
     {
-        return type;
+        return fAssetType;
     }
 
     /* (non-Javadoc)
@@ -78,7 +78,7 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
      */
     public void setPath(String path)
     {
-        this.path = path;
+        this.fPath = path;
         firePropertyChange("path", null, path);
     }
 
@@ -87,8 +87,8 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
      */
     public void setType(AssetType type)
     {
-        this.type = type;
-        firePropertyChange("type", null, path);
+        this.fAssetType = type;
+        firePropertyChange("type", null, fPath);
     }
 
 }

@@ -109,15 +109,14 @@ public class Files
 
     public static String readPropertyInXMLFile(IFile file, String property) throws IOException
     {
-        if (!file.exists()) {
+        if (!file.exists())
             return null;
-        }
+
         String content = readTextFile(file);
         int startTagIdx = content.indexOf("<" + property + ">");
         if (startTagIdx < 0)
-        {
             return null;
-        }
+
         int endTagIdx = content.indexOf("</" + property + ">");
         return content.substring(startTagIdx + property.length() + 2, endTagIdx);
     }

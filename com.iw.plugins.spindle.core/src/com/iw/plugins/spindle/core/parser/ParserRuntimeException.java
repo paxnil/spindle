@@ -50,17 +50,17 @@ public class ParserRuntimeException extends XMLParseException
     static class XMLLocatorWrapper implements XMLLocator
     {
         
-        private XMLParseException wrapped;
+        private XMLParseException fWrapped;
         
         public XMLLocatorWrapper(XMLParseException exception) {
-            this.wrapped = exception;
+            this.fWrapped = exception;
         }
         /* (non-Javadoc)
         * @see org.apache.xerces.xni.XMLLocator#getColumnNumber()
         */
         public int getColumnNumber()
         {
-            return wrapped.getColumnNumber();
+            return fWrapped.getColumnNumber();
         }
 
         /* (non-Javadoc)
@@ -68,7 +68,7 @@ public class ParserRuntimeException extends XMLParseException
          */
         public int getLineNumber()
         {
-             return wrapped.getLineNumber();
+             return fWrapped.getLineNumber();
         }
 
         /* (non-Javadoc)
@@ -76,7 +76,7 @@ public class ParserRuntimeException extends XMLParseException
          */
         public String getBaseSystemId()
         {
-            return wrapped.getBaseSystemId();
+            return fWrapped.getBaseSystemId();
         }
 
         /* (non-Javadoc)
@@ -84,7 +84,7 @@ public class ParserRuntimeException extends XMLParseException
          */
         public String getExpandedSystemId()
         {
-            return wrapped.getExpandedSystemId();
+            return fWrapped.getExpandedSystemId();
         }
 
         /* (non-Javadoc)
@@ -92,7 +92,7 @@ public class ParserRuntimeException extends XMLParseException
          */
         public String getLiteralSystemId()
         {
-            return wrapped.getLiteralSystemId();
+            return fWrapped.getLiteralSystemId();
         }
 
         /* (non-Javadoc)
@@ -100,7 +100,7 @@ public class ParserRuntimeException extends XMLParseException
          */
         public String getPublicId()
         {
-            return wrapped.getPublicId();
+            return fWrapped.getPublicId();
         }
         
        

@@ -46,12 +46,12 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
 public class ContextRootLocation extends AbstractRootLocation
 {
 
-    IFolder rootFolder;
-    ContextSearch search;
+    IFolder fRootFolder;
+    ContextSearch fSearch;
 
     public ContextRootLocation(IFolder folder)
     {
-        rootFolder = folder;
+        fRootFolder = folder;
     }
 
     /* (non-Javadoc)
@@ -59,7 +59,7 @@ public class ContextRootLocation extends AbstractRootLocation
      */
     public boolean exists()
     {
-        return rootFolder.exists();
+        return fRootFolder.exists();
     }
 
     /* (non-Javadoc)
@@ -72,7 +72,7 @@ public class ContextRootLocation extends AbstractRootLocation
 
     public IContainer getContainer()
     {
-        return rootFolder;
+        return fRootFolder;
     }
 
     /* (non-Javadoc)
@@ -80,7 +80,7 @@ public class ContextRootLocation extends AbstractRootLocation
      */
     public IProject getProject()
     {
-        return rootFolder.getProject();
+        return fRootFolder.getProject();
     }
 
     public IResourceWorkspaceLocation getRelativeLocation(IResource resource)
@@ -108,43 +108,37 @@ public class ContextRootLocation extends AbstractRootLocation
 
     public void lookup(IResourceLocationAcceptor requestor) throws CoreException
     {
-        IResource[] members = rootFolder.members(false);
+        IResource[] members = fRootFolder.members(false);
         for (int i = 0; i < members.length; i++)
         {
             if (members[i] instanceof IContainer)
-            {
                 continue;
-            }
+
             if (!requestor.accept((IResourceWorkspaceLocation) getRelativeLocation(members[i].getName())))
-            {
                 break;
-            }
         }
     }
 
     public String findRelativePath(IResource resource)
     {
-        IPath rootPath = rootFolder.getFullPath();
+        IPath rootPath = fRootFolder.getFullPath();
         IPath resourcePath = resource.getFullPath();
         if (!rootPath.isPrefixOf(resourcePath))
-        {
             throw new RuntimeException("not relative to this root!");
-        }
+
         IPath resultPath = resourcePath.removeFirstSegments(rootPath.segmentCount()).makeAbsolute();
         if (resource instanceof IContainer && resultPath.segmentCount() > 0)
-        {
             resultPath = resultPath.addTrailingSeparator();
-        }
+
         return resultPath.toString();
     }
 
     protected IContainer getContainer(ContextResourceWorkspaceLocation location)
     {
-        IFolder folder = rootFolder.getFolder(location.getPath());
+        IFolder folder = fRootFolder.getFolder(location.getPath());
         if (folder != null && folder.exists())
-        {
             return folder;
-        }
+
         return null;
     }
 
@@ -153,12 +147,12 @@ public class ContextRootLocation extends AbstractRootLocation
      */
     public ISearch getSearch() throws CoreException
     {
-        if (search == null)
+        if (fSearch == null)
         {
-            search = new ContextSearch();
-            search.configure(rootFolder);
+            fSearch = new ContextSearch();
+            fSearch.configure(fRootFolder);
         }
-        return search;
+        return fSearch;
     }
 
     /* (non-Javadoc)
@@ -171,7 +165,7 @@ public class ContextRootLocation extends AbstractRootLocation
 
     public String toString()
     {
-        return "ctx(" + rootFolder.getFullPath() + ")/";
+        return "ctx(" + fRootFolder.getFullPath() + ")/";
     }
 
 }

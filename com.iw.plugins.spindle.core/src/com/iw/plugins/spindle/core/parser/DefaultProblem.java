@@ -28,7 +28,6 @@ package com.iw.plugins.spindle.core.parser;
 
 import org.eclipse.core.resources.IMarker;
 
-
 /**
  *  Default impl of IProblem
  * 
@@ -38,48 +37,49 @@ import org.eclipse.core.resources.IMarker;
 public class DefaultProblem implements IProblem
 {
 
-    private int charEnd;
+    private int fCharEnd;
 
-    private int charStart;
+    private int fCharStart;
 
-    private int lineNumber;
+    private int fLineNumber;
 
-    private String message;
+    private String fMessage;
 
-    private int severity;
+    private int fSeverity;
 
-    private String type;
+    private String fType;
 
     /**
      * 
      */
     public DefaultProblem(String type, int severity, String message, int lineNumber, int charStart, int charEnd)
     {
-        this.type = type;
-        this.severity = severity;
-        this.message = message;
-        this.lineNumber = lineNumber;
-        this.charStart = charStart;
-        this.charEnd = charEnd;
+        this.fType = type;
+        this.fSeverity = severity;
+        this.fMessage = message;
+        this.fLineNumber = lineNumber;
+        this.fCharStart = charStart;
+        this.fCharEnd = charEnd;
     }
-    
-    public String toString() {
+
+    public String toString()
+    {
         String name = getClass().getName();
         int index = name.lastIndexOf(".");
-        if (index > 0) {
+        if (index > 0)
             name = name.substring(index + 1);
-        }
+
         StringBuffer buffer = new StringBuffer(name);
         buffer.append("[");
-        switch (getSeverity())
+        switch (fSeverity)
         {
             case IMarker.SEVERITY_ERROR :
                 buffer.append("ERROR");
                 break;
-            case IMarker.SEVERITY_WARNING:
+            case IMarker.SEVERITY_WARNING :
                 buffer.append("WARNING");
                 break;
-            case IMarker.SEVERITY_INFO:
+            case IMarker.SEVERITY_INFO :
                 buffer.append("INFO");
                 break;
 
@@ -88,11 +88,14 @@ public class DefaultProblem implements IProblem
                 break;
         }
         buffer.append(", ");
-        buffer.append("L=");buffer.append(getLineNumber());
+        buffer.append("L=");
+        buffer.append(getLineNumber());
         buffer.append(", ");
-        buffer.append("CS=");buffer.append(getCharStart());
+        buffer.append("CS=");
+        buffer.append(getCharStart());
         buffer.append(", ");
-        buffer.append("CE=");buffer.append(getCharEnd());
+        buffer.append("CE=");
+        buffer.append(getCharEnd());
         buffer.append(", ");
         buffer.append(getMessage());
         buffer.append("]");
@@ -104,7 +107,7 @@ public class DefaultProblem implements IProblem
      */
     public int getCharEnd()
     {
-        return charEnd;
+        return fCharEnd;
     }
 
     /* (non-Javadoc)
@@ -112,7 +115,7 @@ public class DefaultProblem implements IProblem
      */
     public int getCharStart()
     {
-        return charStart;
+        return fCharStart;
     }
 
     /* (non-Javadoc)
@@ -120,7 +123,7 @@ public class DefaultProblem implements IProblem
      */
     public int getLineNumber()
     {
-        return lineNumber;
+        return fLineNumber;
     }
 
     /* (non-Javadoc)
@@ -128,7 +131,7 @@ public class DefaultProblem implements IProblem
      */
     public String getMessage()
     {
-        return message;
+        return fMessage;
     }
 
     /* (non-Javadoc)
@@ -136,7 +139,7 @@ public class DefaultProblem implements IProblem
      */
     public int getSeverity()
     {
-        return severity;
+        return fSeverity;
     }
 
     /* (non-Javadoc)
@@ -144,7 +147,7 @@ public class DefaultProblem implements IProblem
      */
     public String getType()
     {
-        return type;
+        return fType;
     }
 
 }

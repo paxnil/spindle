@@ -47,12 +47,12 @@ import org.apache.xerces.xni.parser.XMLInputSource;
 public class TapestryEntityResolver implements XMLEntityResolver
 {
 
-    static private Map entities = new HashMap();
+    static private Map Entities = new HashMap();
 
     static public void register(String publicId, String entityPath)
     {
 
-        entities.put(publicId, entityPath);
+        Entities.put(publicId, entityPath);
 
     }
 
@@ -65,7 +65,7 @@ public class TapestryEntityResolver implements XMLEntityResolver
 
         String entityPath = null;
 
-        entityPath = (String) entities.get(publicId);
+        entityPath = (String) Entities.get(publicId);
 
         if (entityPath != null)
         {

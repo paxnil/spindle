@@ -72,11 +72,11 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
      */
     public static final int ACCEPT_ANY = 0x00000100;
 
-    private List seekExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
+    private List fSeekExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
 
-    private List results = new ArrayList();
+    private List fResults = new ArrayList();
 
-    private int acceptFlags;
+    private int fAcceptFlags;
 
     public AbstractTapestrySearchAcceptor(int acceptFlags)
     {
@@ -85,50 +85,42 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
 
     public void reset()
     {
-        results.clear();
+        fResults.clear();
     }
 
     public void reset(int flags)
     {
         reset();
-        this.acceptFlags = flags;
+        this.fAcceptFlags = flags;
     }
 
     protected boolean acceptAsTapestry(IStorage storage)
     {
         String extension = storage.getFullPath().getFileExtension();
-        if (!seekExtensions.contains(extension))
-        {
+        if (!fSeekExtensions.contains(extension))
             return false;
-        }
-        if ((acceptFlags & ACCEPT_ANY) != 0)
-        {
+
+        if ((fAcceptFlags & ACCEPT_ANY) != 0)
             return true;
-        }
-        if ("jwc".equals(extension) && (acceptFlags & ACCEPT_COMPONENTS) == 0)
-        {
+
+        if ("jwc".equals(extension) && (fAcceptFlags & ACCEPT_COMPONENTS) == 0)
             return false;
-        }
-        if ("application".equals(extension) && (acceptFlags & ACCEPT_APPLICATIONS) == 0)
-        {
+
+        if ("application".equals(extension) && (fAcceptFlags & ACCEPT_APPLICATIONS) == 0)
             return false;
-        }
-        if ("html".equals(extension) && (acceptFlags & ACCEPT_HTML) == 0)
-        {
+
+        if ("html".equals(extension) && (fAcceptFlags & ACCEPT_HTML) == 0)
             return false;
-        }
-        if ("library".equals(extension) && (acceptFlags & ACCEPT_LIBRARIES) == 0)
-        {
+
+        if ("library".equals(extension) && (fAcceptFlags & ACCEPT_LIBRARIES) == 0)
             return false;
-        }
-        if ("page".equals(extension) && (acceptFlags & ACCEPT_PAGES) == 0)
-        {
+
+        if ("page".equals(extension) && (fAcceptFlags & ACCEPT_PAGES) == 0)
             return false;
-        }
-        if ("script".equals(extension) && (acceptFlags & ACCEPT_SCRIPT) == 0)
-        {
+
+        if ("script".equals(extension) && (fAcceptFlags & ACCEPT_SCRIPT) == 0)
             return false;
-        }
+
         return true;
     }
 
@@ -138,9 +130,8 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
     public final boolean accept(Object parent, IStorage storage)
     {
         if (!acceptAsTapestry(storage))
-        {
             return true; // continue the search
-        }
+
         return acceptTapestry(parent, storage);
     }
 

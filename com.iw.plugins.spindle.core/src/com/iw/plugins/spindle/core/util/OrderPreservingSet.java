@@ -42,18 +42,18 @@ import java.util.Set;
 public class OrderPreservingSet implements Set
 {
 
-    List store;
+    List fStore;
 
     public OrderPreservingSet()
     {
         super();
-        store = new ArrayList();
+        fStore = new ArrayList();
     }
 
     public OrderPreservingSet(Collection c)
     {
         this();
-        store.addAll(c);
+        fStore.addAll(c);
     }
 
     /* (non-Javadoc)
@@ -61,13 +61,11 @@ public class OrderPreservingSet implements Set
      */
     public boolean add(Object arg0)
     {
-        if (store.contains(arg0))
-        {
+        if (fStore.contains(arg0))
             return false;
-        }
 
         Assert.isNotNull(arg0);
-        store.add(arg0);
+        fStore.add(arg0);
         return true;
     }
 
@@ -90,7 +88,7 @@ public class OrderPreservingSet implements Set
      */
     public void clear()
     {
-        store.clear();
+        fStore.clear();
     }
 
     /* (non-Javadoc)
@@ -98,7 +96,7 @@ public class OrderPreservingSet implements Set
      */
     public boolean contains(Object arg0)
     {
-        return store.contains(arg0);
+        return fStore.contains(arg0);
     }
 
     /* (non-Javadoc)
@@ -112,7 +110,7 @@ public class OrderPreservingSet implements Set
         for (Iterator iter = arg0.iterator(); iter.hasNext();)
         {
             Object element = iter.next();
-            if (store.contains(element))
+            if (fStore.contains(element))
                 found++;
         }
         return expected == found;
@@ -123,7 +121,7 @@ public class OrderPreservingSet implements Set
      */
     public boolean isEmpty()
     {
-        return store.isEmpty();
+        return fStore.isEmpty();
     }
 
     /* (non-Javadoc)
@@ -131,7 +129,7 @@ public class OrderPreservingSet implements Set
      */
     public Iterator iterator()
     {
-        return Collections.unmodifiableList(store).iterator();
+        return Collections.unmodifiableList(fStore).iterator();
     }
 
     /* (non-Javadoc)
@@ -139,7 +137,7 @@ public class OrderPreservingSet implements Set
      */
     public boolean remove(Object arg0)
     {
-        return store.remove(arg0);
+        return fStore.remove(arg0);
     }
 
     /* (non-Javadoc)
@@ -152,7 +150,7 @@ public class OrderPreservingSet implements Set
         for (Iterator iter = arg0.iterator(); iter.hasNext();)
         {
             Object element = iter.next();
-            changed = store.remove(element)|| changed;
+            changed = fStore.remove(element) || changed;
         }
         return changed;
     }
@@ -164,17 +162,17 @@ public class OrderPreservingSet implements Set
     {
         Assert.isNotNull(collection);
         boolean changed = false;
-        List copy = new ArrayList(store);
+        List copy = new ArrayList(fStore);
         for (int i = 0; i < copy.size(); i++)
         {
             Object element = (Object) copy.get(i);
             if (!collection.contains(element))
             {
-                store.remove(element);
+                fStore.remove(element);
                 changed = true;
             }
         }
-        
+
         return changed;
     }
 
@@ -183,7 +181,7 @@ public class OrderPreservingSet implements Set
      */
     public int size()
     {
-        return store.size();
+        return fStore.size();
     }
 
     /* (non-Javadoc)
@@ -191,7 +189,7 @@ public class OrderPreservingSet implements Set
      */
     public Object[] toArray()
     {
-        return store.toArray();
+        return fStore.toArray();
     }
 
     /* (non-Javadoc)
@@ -200,7 +198,7 @@ public class OrderPreservingSet implements Set
     public Object[] toArray(Object[] arg0)
     {
         Assert.isNotNull(arg0);
-        return store.toArray(arg0);
+        return fStore.toArray(arg0);
     }
 
 }

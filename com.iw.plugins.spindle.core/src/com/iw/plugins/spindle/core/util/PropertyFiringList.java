@@ -45,39 +45,39 @@ import java.util.ListIterator;
 public class PropertyFiringList implements List
 {
 
-    private ArrayList store = new ArrayList();
+    private ArrayList fStore = new ArrayList();
 
-    protected Object parent;
-    private String propertyName;
+    protected Object fParent;
+    private String fPropertyName;
 
-    private PropertyChangeSupport propertySupport;
+    private PropertyChangeSupport fPropertySupport;
 
     public PropertyFiringList(Object parent, String propertyName) {
          super();
          Assert.isNotNull(parent);
          Assert.isNotNull(propertyName);        
-         propertySupport = new PropertyChangeSupport(this);
-         this.propertyName = propertyName;
-         this.parent = parent;       
+         fPropertySupport = new PropertyChangeSupport(this);
+         this.fPropertyName = propertyName;
+         this.fParent = parent;       
      }
 
      public PropertyFiringList(PropertyChangeListener parent, String propertyName)
      {
          this((Object)parent, propertyName);
-         propertySupport.addPropertyChangeListener(parent);
+         fPropertySupport.addPropertyChangeListener(parent);
      }
 
      private void firePropertyChange(Object oldValue, Object newValue)
      {
-         propertySupport.firePropertyChange(new PropertyChangeEvent(parent, propertyName, oldValue, newValue));
+         fPropertySupport.firePropertyChange(new PropertyChangeEvent(fParent, fPropertyName, oldValue, newValue));
      }
     
      public void addPropertyChangeListener(PropertyChangeListener listener) {
-         propertySupport.addPropertyChangeListener(listener);        
+         fPropertySupport.addPropertyChangeListener(listener);        
      }
     
      public void removePropertyChangeListener(PropertyChangeListener listener) {
-         propertySupport.removePropertyChangeListener(listener);
+         fPropertySupport.removePropertyChangeListener(listener);
      }
 
     /* (non-Javadoc)
@@ -85,7 +85,7 @@ public class PropertyFiringList implements List
      */
     public void add(int arg0, Object arg1)
     {
-        store.add(arg0, arg1);
+        fStore.add(arg0, arg1);
         firePropertyChange(null, arg1);
     }
 
@@ -94,7 +94,7 @@ public class PropertyFiringList implements List
      */
     public boolean add(Object arg0)
     {
-        boolean result = store.add(arg0);
+        boolean result = fStore.add(arg0);
         if (result)
         {
             firePropertyChange(null, arg0);
@@ -107,7 +107,7 @@ public class PropertyFiringList implements List
      */
     public boolean addAll(Collection arg0)
     {
-        boolean result = store.addAll(arg0);
+        boolean result = fStore.addAll(arg0);
         if (result)
         {
             firePropertyChange(null, this);
@@ -120,7 +120,7 @@ public class PropertyFiringList implements List
      */
     public boolean addAll(int arg0, Collection arg1)
     {
-        boolean result = store.addAll(arg0, arg1);
+        boolean result = fStore.addAll(arg0, arg1);
         if (result)
         {
             firePropertyChange(null, this);
@@ -133,12 +133,12 @@ public class PropertyFiringList implements List
      */
     public void clear()
     {
-        List old = Collections.unmodifiableList((List)store.clone());
-        boolean fire = !store.isEmpty();
-        store.clear();
+        List old = Collections.unmodifiableList((List)fStore.clone());
+        boolean fire = !fStore.isEmpty();
+        fStore.clear();
         if (fire)
         {
-            firePropertyChange(old, Collections.unmodifiableList(store));
+            firePropertyChange(old, Collections.unmodifiableList(fStore));
         }
     }
 
@@ -147,7 +147,7 @@ public class PropertyFiringList implements List
      */
     public boolean contains(Object arg0)
     {
-        return store.contains(arg0);
+        return fStore.contains(arg0);
     }
 
     /* (non-Javadoc)
@@ -155,7 +155,7 @@ public class PropertyFiringList implements List
      */
     public boolean containsAll(Collection arg0)
     {
-        return store.containsAll(arg0);
+        return fStore.containsAll(arg0);
     }
 
     /* (non-Javadoc)
@@ -163,7 +163,7 @@ public class PropertyFiringList implements List
      */
     public Object get(int arg0)
     {
-        return store.get(arg0);
+        return fStore.get(arg0);
     }
 
     /* (non-Javadoc)
@@ -171,7 +171,7 @@ public class PropertyFiringList implements List
      */
     public int indexOf(Object arg0)
     {
-        return store.indexOf(arg0);
+        return fStore.indexOf(arg0);
     }
 
     /* (non-Javadoc)
@@ -179,7 +179,7 @@ public class PropertyFiringList implements List
      */
     public boolean isEmpty()
     {
-        return store.isEmpty();
+        return fStore.isEmpty();
     }
 
     /* (non-Javadoc)
@@ -187,7 +187,7 @@ public class PropertyFiringList implements List
      */
     public Iterator iterator()
     {
-        return store.iterator();
+        return fStore.iterator();
     }
 
     /* (non-Javadoc)
@@ -195,7 +195,7 @@ public class PropertyFiringList implements List
      */
     public int lastIndexOf(Object arg0)
     {
-        return store.lastIndexOf(arg0);
+        return fStore.lastIndexOf(arg0);
     }
 
     /* (non-Javadoc)
@@ -203,7 +203,7 @@ public class PropertyFiringList implements List
      */
     public ListIterator listIterator()
     {
-        return store.listIterator();
+        return fStore.listIterator();
     }
 
     /* (non-Javadoc)
@@ -211,7 +211,7 @@ public class PropertyFiringList implements List
      */
     public ListIterator listIterator(int arg0)
     {
-        return store.listIterator(arg0);
+        return fStore.listIterator(arg0);
     }
 
     /* (non-Javadoc)
@@ -219,7 +219,7 @@ public class PropertyFiringList implements List
      */
     public Object remove(int arg0)
     {
-        Object result = store.remove(arg0);
+        Object result = fStore.remove(arg0);
         if (result != null)
         {
             firePropertyChange(result, null);
@@ -233,7 +233,7 @@ public class PropertyFiringList implements List
      */
     public boolean remove(Object arg0)
     {
-        boolean result = store.remove(arg0);
+        boolean result = fStore.remove(arg0);
         if (result)
         {
             firePropertyChange(arg0, null);
@@ -246,7 +246,7 @@ public class PropertyFiringList implements List
      */
     public boolean removeAll(Collection arg0)
     {
-        boolean result = store.removeAll(arg0);
+        boolean result = fStore.removeAll(arg0);
         if (result)
         {
             firePropertyChange(null, this);
@@ -259,7 +259,7 @@ public class PropertyFiringList implements List
      */
     public boolean retainAll(Collection arg0)
     {
-        boolean result = store.retainAll(arg0);
+        boolean result = fStore.retainAll(arg0);
         if (result)
         {
             firePropertyChange(null, this);
@@ -272,7 +272,7 @@ public class PropertyFiringList implements List
      */
     public Object set(int arg0, Object arg1)
     {
-        Object result = store.set(arg0,arg1);
+        Object result = fStore.set(arg0,arg1);
         if (result != null)
         {
             firePropertyChange(result, arg1);
@@ -286,7 +286,7 @@ public class PropertyFiringList implements List
      */
     public int size()
     {
-        return store.size();
+        return fStore.size();
     }
 
     /* (non-Javadoc)
@@ -294,7 +294,7 @@ public class PropertyFiringList implements List
      */
     public List subList(int arg0, int arg1)
     {
-        return store.subList(arg0,arg1);
+        return fStore.subList(arg0,arg1);
     }
 
     /* (non-Javadoc)
@@ -302,7 +302,7 @@ public class PropertyFiringList implements List
      */
     public Object[] toArray()
     {
-        return store.toArray();
+        return fStore.toArray();
     }
 
     /* (non-Javadoc)
@@ -310,7 +310,7 @@ public class PropertyFiringList implements List
      */
     public Object[] toArray(Object[] arg0)
     {
-        return store.toArray(arg0);
+        return fStore.toArray(arg0);
     }
 
 }

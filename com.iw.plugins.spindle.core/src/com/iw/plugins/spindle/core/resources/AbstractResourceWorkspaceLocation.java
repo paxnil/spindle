@@ -40,21 +40,21 @@ import org.eclipse.core.runtime.Path;
 public abstract class AbstractResourceWorkspaceLocation implements IResourceWorkspaceLocation
 {
 
-    private String path;
-    private String name;
-    protected AbstractRootLocation root;
+    private String fPath;
+    private String fName;
+    protected AbstractRootLocation fRoot;
 
     protected AbstractResourceWorkspaceLocation(AbstractRootLocation root, String path)
     {
-        this.root = root;
+        this.fRoot = root;
         Path p = new Path(path);
-        this.path = p.removeLastSegments(1).addTrailingSeparator().makeRelative().toString();
-        this.name = p.lastSegment();
+        this.fPath = p.removeLastSegments(1).addTrailingSeparator().makeRelative().toString();
+        this.fName = p.lastSegment();
     }
 
     public String getName()
     {
-        return name;
+        return fName;
     }
 
     public IResourceLocation getRelativeLocation(String name)
@@ -63,28 +63,26 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
         {
             if (name.startsWith("/"))
             {
-                if (name.equals(path))
+                if (name.equals(fPath))
                 {
                     return this;
                 } else
                 {
-                    return root.getRelativeLocation(name);
+                    return fRoot.getRelativeLocation(name);
                 }
             }
 
             if (name.equals(getName()))
-            {
                 return this;
-            }
 
-            return root.getRelativeLocation(getPath()+name);
+            return fRoot.getRelativeLocation(getPath() + name);
         }
         return null;
     }
 
     public String getPath()
     {
-        return path;
+        return fPath;
     }
 
     /**
@@ -92,7 +90,6 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
      *  same class, and the paths are equal.
      * 
      **/
-
     public boolean equals(Object obj)
     {
         if (obj == null)
@@ -100,8 +97,8 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
 
         if (obj.getClass().equals(getClass()))
         {
-            AbstractResourceWorkspaceLocation other = (AbstractResourceWorkspaceLocation) obj;            
-            return this.root.equals(other.root) && this.path.equals(other.path) && this.name.equals(other.name);            
+            AbstractResourceWorkspaceLocation other = (AbstractResourceWorkspaceLocation) obj;
+            return this.fRoot.equals(other.fRoot) && this.fPath.equals(other.fPath) && this.fName.equals(other.fName);
         }
 
         return false;
@@ -123,15 +120,16 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
      */
     public boolean isOnClasspath()
     {
-        return root.isOnClasspath();
+        return fRoot.isOnClasspath();
     }
-    
-    public String toString() {
+
+    public String toString()
+    {
         StringBuffer buffer = new StringBuffer();
-        buffer.append(root.toString());
+        buffer.append(fRoot.toString());
         buffer.append(":");
-        buffer.append(path);
-        buffer.append(name);
+        buffer.append(fPath);
+        buffer.append(fName);
         return buffer.toString();
     }
 

@@ -69,14 +69,14 @@ public class TapestryProject implements IProjectNature
     /**
      * The platform project this <code>TapestryProject</code> is based on
      */
-    protected IProject project;
-    protected IJavaProject javaProject;
+    protected IProject fProject;
+    protected IJavaProject fJavaProject;
 
-    protected IFolder webContextFolder;
-    protected String librarySpecPath;
+    protected IFolder fWebContextFolder;
+    protected String fLibrarySpecPath;
 
-    protected int projectType;
-    protected String webContext;
+    protected int fProjectType;
+    protected String fWebContext;
 
     /** needed for project nature creation **/
     public TapestryProject()
@@ -90,7 +90,7 @@ public class TapestryProject implements IProjectNature
      */
     public IProject getProject()
     {
-        return project;
+        return fProject;
     }
 
     /**
@@ -99,7 +99,7 @@ public class TapestryProject implements IProjectNature
      */
     public void setProject(IProject project)
     {
-        this.project = project;
+        this.fProject = project;
     }
 
     /*
@@ -142,9 +142,7 @@ public class TapestryProject implements IProjectNature
                 {
                     IPath rootpath = roots[i].getUnderlyingResource().getFullPath();
                     if (pathCheck(rootpath, candidate))
-                    {
                         return true;
-                    }
                 }
 
             }
@@ -158,13 +156,11 @@ public class TapestryProject implements IProjectNature
     private boolean pathCheck(IPath existing, IPath candidate)
     {
         if (existing.equals(candidate))
-        {
             return true;
-        }
+
         if (candidate.segmentCount() < existing.segmentCount())
-        {
             return false;
-        }
+
         return existing.matchingFirstSegments(candidate) == existing.segmentCount();
     }
 
@@ -175,7 +171,7 @@ public class TapestryProject implements IProjectNature
 
     public void setJavaProject(IJavaProject javaProject)
     {
-        this.javaProject = javaProject;
+        this.fJavaProject = javaProject;
         this.setProject(javaProject.getProject());
     }
 
@@ -198,9 +194,7 @@ public class TapestryProject implements IProjectNature
 
             File properties = project.getProject().getLocation().append(PROPERTIES_FILENAME).toFile();
             if (properties.exists())
-            {
                 properties.delete();
-            }
 
             Markers.removeProblemsForProject(project.getProject());
 
@@ -260,9 +254,7 @@ public class TapestryProject implements IProjectNature
         }
 
         if (result == null)
-        {
             result = "";
-        }
 
         return result;
     }
@@ -271,19 +263,17 @@ public class TapestryProject implements IProjectNature
     {
         String result = readProperty(key);
         if (result == null || result.trim().length() == 0)
-        {
             return 0;
-        }
+
         if (result != null)
-        {
             return new Integer(result).intValue();
-        }
+
         return -1;
     }
 
     public void setProjectType(int projectType)
     {
-        this.projectType = projectType;
+        this.fProjectType = projectType;
     }
 
     public int getProjectType()
@@ -306,42 +296,42 @@ public class TapestryProject implements IProjectNature
      */
     public void setWebContext(String context)
     {
-        this.webContext = context;
-        webContextFolder = null;
+        this.fWebContext = context;
+        fWebContextFolder = null;
     }
 
     public String getLibrarySpecPath()
     {
         String path = this.readProperty(KEY_LIBRARY);
         if ("NOT_SPECIFIED".equals(path))
-        {
             return "";
-        }
+
         return path;
     }
 
     public void setLibrarySpecPath(String librarySpecPath)
     {
-        this.librarySpecPath = librarySpecPath;
+        this.fLibrarySpecPath = librarySpecPath;
     }
 
     public void saveProperties()
     {
-        boolean isApplicationProject = APPLICATION_PROJECT_TYPE == projectType;
+        boolean isApplicationProject = APPLICATION_PROJECT_TYPE == fProjectType;
         try
         {
             StringBuffer fileContent = new StringBuffer();
             fileContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
             fileContent.append("<tapestry-project-properties>\n");
-            fileContent.append("    <project-type>" + projectType + "</project-type>\n");
+            fileContent.append("    <project-type>" + fProjectType + "</project-type>\n");
             if (isApplicationProject)
             {
-                fileContent.append("    <context-root>" + (webContext != null ? webContext : "") + "</context-root>\n");
+                fileContent.append(
+                    "    <context-root>" + (fWebContext != null ? fWebContext : "") + "</context-root>\n");
             } else
             {
                 fileContent.append(
                     "    <library-spec>"
-                        + (librarySpecPath != null ? librarySpecPath : "NOT_SPECIFIED")
+                        + (fLibrarySpecPath != null ? fLibrarySpecPath : "NOT_SPECIFIED")
                         + "</library-spec>\n");
             }
             fileContent.append("</tapestry-project-properties>\n");
@@ -354,19 +344,18 @@ public class TapestryProject implements IProjectNature
 
     public IFolder getWebContextFolder()
     {
-        if (webContextFolder == null)
-        {
+        if (fWebContextFolder == null)
             return initWebContextFolder();
-        }
-        return webContextFolder;
+
+        return fWebContextFolder;
     }
 
     public IResourceWorkspaceLocation getWebContextLocation()
     {
         IFolder folder = getWebContextFolder();
-        if (folder == null || !folder.exists()) {
+        if (folder == null || !folder.exists())
             return null;
-        }
+
         return new ContextRootLocation(folder);
     }
 
@@ -378,9 +367,9 @@ public class TapestryProject implements IProjectNature
             result = initFolder(this.getWebContext(), false);
         } catch (CoreException e)
         {
-            this.webContext = "/";
+            this.fWebContext = "/";
         }
-        webContextFolder = result;
+        fWebContextFolder = result;
         return result;
     }
 
@@ -412,15 +401,13 @@ public class TapestryProject implements IProjectNature
             String each = tokenizer.nextToken();
             if (folder == null)
             {
-                folder = project.getFolder(each);
+                folder = fProject.getFolder(each);
             } else
             {
                 folder = folder.getFolder(each);
             }
             if (create)
-            {
                 this.createFolder(folder);
-            }
         }
 
         return folder;
@@ -433,7 +420,6 @@ public class TapestryProject implements IProjectNature
 
         if (javaCommand == null)
         {
-
             ICommand command = description.newCommand();
             command.setBuilderName(builderID);
             setTapestryCommand(description, command);
@@ -464,9 +450,8 @@ public class TapestryProject implements IProjectNature
         for (int i = 0; i < commands.length; ++i)
         {
             if (commands[i].getBuilderName().equals(TapestryCore.BUILDER_ID))
-            {
                 return commands[i];
-            }
+
         }
         return null;
     }

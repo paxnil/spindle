@@ -46,7 +46,7 @@ public class MockLibraryScanner extends LibraryScanner
 
     public void resetForTestingOnly()
     {
-        problems.clear();
+        fProblems.clear();
     }
 
     /* (non-Javadoc)

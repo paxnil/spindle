@@ -60,9 +60,7 @@ public class ComponentLookup extends AbstractLookup
         IComponentSpecification result = null;
 
         if (libraryId != null)
-        {
             useNamespace = (ICoreNamespace) useNamespace.getChildNamespace(libraryId);
-        }
 
         result = useNamespace.getComponentSpecification(type);
 
@@ -70,9 +68,8 @@ public class ComponentLookup extends AbstractLookup
         {
             useNamespace = getFrameworkNamespace();
             if (useNamespace != null)
-            {
                 return getFrameworkNamespace().getComponentSpecification(type);
-            }
+
         }
         return result;
     }

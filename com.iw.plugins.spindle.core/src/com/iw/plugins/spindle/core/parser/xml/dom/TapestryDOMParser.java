@@ -39,7 +39,7 @@ import com.iw.plugins.spindle.core.parser.xml.event.ElementXMLEventInfo;
 public class TapestryDOMParser extends DOMParser
 {
 
-    ISourceLocationResolver resolver;
+    ISourceLocationResolver fResolver;
 
     /**
      * Constructor for MyDOMParser.
@@ -60,7 +60,7 @@ public class TapestryDOMParser extends DOMParser
 
     public void setSourceResolver(ISourceLocationResolver resolver)
     {
-        this.resolver = resolver;
+        fResolver = resolver;
     }
 
     /**
@@ -71,9 +71,9 @@ public class TapestryDOMParser extends DOMParser
         ElementXMLEventInfo eventInfo = (ElementXMLEventInfo) augs.getItem(TapestryDOMParserConfiguration.AUGMENTATIONS);
         if (eventInfo != null && fDocument != null)
         {
-            if (resolver != null)
+            if (fResolver != null)
             {
-                ElementSourceLocationInfo resolvedInfo = new ElementSourceLocationInfo(eventInfo, resolver);
+                ElementSourceLocationInfo resolvedInfo = new ElementSourceLocationInfo(eventInfo, fResolver);
                 fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID, resolvedInfo, null);
             } else
             {

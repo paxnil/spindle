@@ -66,39 +66,38 @@ public class BaseSpecification implements IIdentifiable, PropertyChangeListener,
     public static final int STATIC_BEAN_INIT = 22;
     public static final int STRING_BEAN_INIT = 23;
 
-    private String identifier;
-    private Object parent;
+    private String fIdentifier;
+    private Object fParent;
+    protected ILocation fILocation;
 
-    private PropertyChangeSupport propertySupport;
-    private int type = -1;
+    private PropertyChangeSupport fPropertySupport;
+    private int fSpecificationType = -1;
 
     public BaseSpecification(int type)
     {
         super();
-        propertySupport = new PropertyChangeSupport(this);
+        fPropertySupport = new PropertyChangeSupport(this);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener)
     {
         if (listener != this)
-        {
-            propertySupport.addPropertyChangeListener(listener);
-        }
+            fPropertySupport.addPropertyChangeListener(listener);
     }
 
     public void firePropertyChange(String property, boolean oldValue, boolean newValue)
     {
-        propertySupport.firePropertyChange(property, oldValue, newValue);
+        fPropertySupport.firePropertyChange(property, oldValue, newValue);
     }
 
     public void firePropertyChange(String property, int oldValue, int newValue)
     {
-        propertySupport.firePropertyChange(property, oldValue, newValue);
+        fPropertySupport.firePropertyChange(property, oldValue, newValue);
     }
 
     public void firePropertyChange(String property, Object oldValue, Object newValue)
     {
-        propertySupport.firePropertyChange(property, oldValue, newValue);
+        fPropertySupport.firePropertyChange(property, oldValue, newValue);
     }
 
     protected Object get(Map map, Object key)
@@ -114,7 +113,7 @@ public class BaseSpecification implements IIdentifiable, PropertyChangeListener,
      */
     public String getIdentifier()
     {
-        return identifier;
+        return fIdentifier;
     }
 
     /* (non-Javadoc)
@@ -122,12 +121,12 @@ public class BaseSpecification implements IIdentifiable, PropertyChangeListener,
      */
     public Object getParent()
     {
-        return parent;
+        return fParent;
     }
 
     public int getSpecificationType()
     {
-        return type;
+        return fSpecificationType;
     }
 
     protected List keys(Map map)
@@ -150,9 +149,10 @@ public class BaseSpecification implements IIdentifiable, PropertyChangeListener,
     {
         if (evt.getSource() == this)
         {
-            propertySupport.firePropertyChange(evt);
-        } else {
-            propertySupport.firePropertyChange(new PropertyChangeEvent(this, getIdentifier(), null, this));
+            fPropertySupport.firePropertyChange(evt);
+        } else
+        {
+            fPropertySupport.firePropertyChange(new PropertyChangeEvent(this, getIdentifier(), null, this));
         }
 
     }
@@ -160,32 +160,28 @@ public class BaseSpecification implements IIdentifiable, PropertyChangeListener,
     protected void remove(Map map, Object key)
     {
         if (map != null)
-        {
             map.remove(key);
-        }
     }
 
     protected boolean remove(Set set, Object obj)
     {
         if (set != null)
-        {
             return set.remove(obj);
-        }
+
         return false;
     }
 
     protected boolean remove(List list, Object obj)
     {
         if (list != null)
-        {
             return list.remove(obj);
-        }
+
         return false;
     }
 
     public void removePropertyChangeListener(PropertyChangeListener listener)
     {
-        propertySupport.removePropertyChangeListener(listener);
+        fPropertySupport.removePropertyChangeListener(listener);
     }
 
     /* (non-Javadoc)
@@ -193,8 +189,7 @@ public class BaseSpecification implements IIdentifiable, PropertyChangeListener,
      */
     public void setIdentifier(String id)
     {
-        this.identifier = id;
-
+        this.fIdentifier = id;
     }
 
     /* (non-Javadoc)
@@ -202,21 +197,17 @@ public class BaseSpecification implements IIdentifiable, PropertyChangeListener,
      */
     public void setParent(Object parent)
     {
-        this.parent = parent;
-
+        this.fParent = parent;
     }
 
-    protected ILocation location;
     public ILocation getLocation()
     {
-
-        return location;
+        return fILocation;
     }
 
     public void setLocation(ILocation location)
     {
-        this.location = location;
-
+        this.fILocation = location;
     }
 
 }

@@ -44,36 +44,35 @@ import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 public class ContextSearch implements ISearch
 {
 
-    private Visitor visitor;
+    private Visitor fVisitor;
 
-    protected IPackageFragmentRoot[] packageFragmentRoots = null;
+    protected IPackageFragmentRoot[] fPackageFragmentRoots = null;
 
-    protected HashMap packageFragments;
+    protected HashMap fPackageFragments;
 
-    protected IContainer rootContainer;
+    protected IContainer fRootContainer;
 
-    private boolean initialized = false;
+    private boolean fInitialized = false;
 
     public ContextSearch()
     {}
 
     public void configure(Object root) throws CoreException
     {
-        this.rootContainer = (IContainer) root;
-        visitor = new Visitor();
-        initialized = true;
+        this.fRootContainer = (IContainer) root;
+        fVisitor = new Visitor();
+        fInitialized = true;
     }
 
     public void search(ISearchAcceptor acceptor)
     {
-        if (!initialized)
-        {
+        if (!fInitialized)
             throw new Error("not initialized");
-        }
-        visitor.setAcceptor(acceptor);
+
+        fVisitor.setAcceptor(acceptor);
         try
         {
-            rootContainer.accept(visitor);
+            fRootContainer.accept(fVisitor);
         } catch (CoreException e)
         {
             TapestryCore.log(e);
@@ -97,11 +96,9 @@ public class ContextSearch implements ISearch
         {
             if (resource instanceof IFile)
             {
-                boolean keepGoing = acceptor.accept(resource.getParent(), (IStorage) resource); 
-                if (!keepGoing) 
-                {
+                boolean keepGoing = acceptor.accept(resource.getParent(), (IStorage) resource);
+                if (!keepGoing)
                     throw new StopSearchingException();
-                }
             }
             return true;
         }

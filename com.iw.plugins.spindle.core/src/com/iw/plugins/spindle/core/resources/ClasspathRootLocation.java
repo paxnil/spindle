@@ -55,12 +55,12 @@ import com.iw.plugins.spindle.core.resources.search.*;
 public class ClasspathRootLocation extends AbstractRootLocation
 {
 
-    IJavaProject javaProject;
-    ClasspathSearch search;
+    IJavaProject fJavaProject;
+    ClasspathSearch fSearch;
 
     public ClasspathRootLocation(IJavaProject project)
     {
-        javaProject = project;
+        fJavaProject = project;
     }
 
     /* (non-Javadoc)
@@ -68,7 +68,7 @@ public class ClasspathRootLocation extends AbstractRootLocation
      */
     public boolean exists()
     {
-        return javaProject.exists();
+        return fJavaProject.exists();
     }
 
     /* (non-Javadoc)
@@ -89,7 +89,7 @@ public class ClasspathRootLocation extends AbstractRootLocation
      */
     public IProject getProject()
     {
-        return javaProject.getProject();
+        return fJavaProject.getProject();
     }
 
     protected String toPackageName(String path)
@@ -97,13 +97,11 @@ public class ClasspathRootLocation extends AbstractRootLocation
         if (path != null)
         {
             if (path.startsWith("/"))
-            {
                 path = path.substring(1, path.length());
-            }
+
             if (path.endsWith("/"))
-            {
                 path = path.substring(0, path.length() - 1);
-            }
+
             return path.replace('/', '.');
         }
         return null;
@@ -165,9 +163,8 @@ public class ClasspathRootLocation extends AbstractRootLocation
             fragment = findPackageFragment(storage);
         }
         if (fragment != null)
-        {
             result = fragment.getElementName().replace('.', '/') + "/";
-        }
+
         return result;
     }
 
@@ -187,18 +184,17 @@ public class ClasspathRootLocation extends AbstractRootLocation
             {
                 nonJavaResources = fragments[i].getNonJavaResources();
             } catch (JavaModelException e)
-            {}
-            if (nonJavaResources == null)
             {
-                continue;
+                TapestryCore.log(e);
             }
+            if (nonJavaResources == null)
+                continue;
+
             for (int j = 0; j < nonJavaResources.length; j++)
             {
                 IStorage storage = (IStorage) nonJavaResources[j];
                 if (!requestor.accept(fragments[i], storage))
-                {
                     return;
-                }
             }
         }
     }
@@ -207,9 +203,8 @@ public class ClasspathRootLocation extends AbstractRootLocation
     {
         String name = location.getName();
         if (name == null)
-        {
             return null;
-        }
+
         StorageAcceptor acceptor = new StorageAcceptor(name);
         find(toPackageName(location.getPath()), name, acceptor);
         return acceptor.getResult();
@@ -243,9 +238,8 @@ public class ClasspathRootLocation extends AbstractRootLocation
     {
         String name = location.getName();
         if (name == null)
-        {
             return null;
-        }
+
         FragmentAcceptor acceptor = new FragmentAcceptor(name);
         find(toPackageName(location.getPath()), name, acceptor);
         return acceptor.getResult();
@@ -280,14 +274,13 @@ public class ClasspathRootLocation extends AbstractRootLocation
         List fragments = new ArrayList();
         try
         {
-            IPackageFragmentRoot[] roots = javaProject.getAllPackageFragmentRoots();
+            IPackageFragmentRoot[] roots = fJavaProject.getAllPackageFragmentRoots();
             for (int i = 0; i < roots.length; i++)
             {
                 IPackageFragment frag = roots[i].getPackageFragment(packageName);
                 if (frag != null && frag.exists())
-                {
                     fragments.add(frag);
-                }
+
             }
         } catch (JavaModelException e)
         {
@@ -301,12 +294,12 @@ public class ClasspathRootLocation extends AbstractRootLocation
      */
     public ISearch getSearch() throws CoreException
     {
-        if (search == null)
+        if (fSearch == null)
         {
-            search = new ClasspathSearch();
-            search.configure(javaProject);
+            fSearch = new ClasspathSearch();
+            fSearch.configure(fJavaProject);
         }
-        return search;
+        return fSearch;
     }
 
     /* (non-Javadoc)
@@ -316,10 +309,10 @@ public class ClasspathRootLocation extends AbstractRootLocation
     {
         return true;
     }
-    
-    public String toString() {
-        return "cp("+javaProject.getProject().getName()+")/";
+
+    public String toString()
+    {
+        return "cp(" + fJavaProject.getProject().getName() + ")/";
     }
-    
 
 }

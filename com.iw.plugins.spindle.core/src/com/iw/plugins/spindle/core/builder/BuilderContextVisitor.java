@@ -50,43 +50,42 @@ public class BuilderContextVisitor implements IResourceVisitor
 
     static private List knownExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
 
-    ArrayList collector;
-    FullBuild build;
-    private IFolder contextLocation;
-    private IFolder outputLocation;
-    private TapestryProject tapestryProject;
-    private boolean contextSeen;
+    private List fCollector;
+    private FullBuild fBuild;
+    private IFolder fContextLocation;
+    private IFolder fOutputLocation;
+    private TapestryProject fTapestryProject;
+    private boolean fContextSeen;
 
     public BuilderContextVisitor(FullBuild build, ArrayList collector)
     {
-        this.collector = collector;
-        this.build = build;
-        this.tapestryProject = build.tapestryBuilder.tapestryProject;
-        this.contextLocation = (IFolder) build.tapestryBuilder.contextRoot.getContainer();
+        this.fCollector = collector;
+        this.fBuild = build;
+        this.fTapestryProject = build.fTapestryBuilder.fTapestryProject;
+        this.fContextLocation = (IFolder) build.fTapestryBuilder.fContextRoot.getContainer();
         try
         {
-            IPath out = build.javaProject.getOutputLocation();
+            IPath out = build.fJavaProject.getOutputLocation();
             IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-            outputLocation = root.getFolder(out);
+            fOutputLocation = root.getFolder(out);
         } catch (JavaModelException e)
         {
             TapestryCore.log(e);
         }
-        contextSeen = false;
+        fContextSeen = false;
     }
 
     private boolean isOnContextPath(IResource resource)
     {
         IResource temp = resource;
-        while (temp != tapestryProject.getProject() && !temp.equals(contextLocation))
+        while (temp != fTapestryProject.getProject() && !temp.equals(fContextLocation))
         {
-            if (temp.equals(outputLocation))
-            {
+            if (temp.equals(fOutputLocation))
                 return false;
-            }
+
             temp = temp.getParent();
         }
-        return temp.equals(contextLocation);
+        return temp.equals(fContextLocation);
     }
 
     private boolean isOnClasspath(IFolder folder)
@@ -97,44 +96,36 @@ public class BuilderContextVisitor implements IResourceVisitor
     public boolean visit(IResource resource) throws CoreException
     {
         if (resource instanceof IProject)
-        {
             return true;
-        }
+
         if (resource instanceof IFolder)
         {
-            if (resource.equals(contextLocation))
-            {
+            if (resource.equals(fContextLocation))
                 return true;
-            }
+
             if (isOnContextPath(resource))
-            {
                 return true;
-            }
+
             if (isOnClasspath((IFolder) resource))
-            {
                 return false;
-            }
-            if (resource.equals(outputLocation))
-            {
+
+            if (resource.equals(fOutputLocation))
                 return false;
-            }
+
             IFolder folder = (IFolder) resource;
-            if (folder.getFullPath().segmentCount() >= contextLocation.getFullPath().segmentCount())
-            {
+            if (folder.getFullPath().segmentCount() >= fContextLocation.getFullPath().segmentCount())
                 return false;
-            }
 
         } else if (resource instanceof IFile)
         {
             if (!isOnContextPath(resource))
-            {
                 return false;
-            }
+
             String extension = resource.getFileExtension();
             if (knownExtensions.contains(extension))
             {
-                IResourceLocation location = build.tapestryBuilder.contextRoot.getRelativeLocation(resource);
-                collector.add(location);
+                IResourceLocation location = fBuild.fTapestryBuilder.fContextRoot.getRelativeLocation(resource);
+                fCollector.add(location);
                 debug(location, true);
             }
         }
@@ -144,9 +135,7 @@ public class BuilderContextVisitor implements IResourceVisitor
     protected void debug(IResourceLocation location, boolean included)
     {
         if (TapestryBuilder.DEBUG)
-        {
             System.out.println(location);
-        }
     }
 
 }

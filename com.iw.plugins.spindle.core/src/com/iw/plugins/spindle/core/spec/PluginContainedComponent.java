@@ -43,11 +43,11 @@ import com.iw.plugins.spindle.core.util.PropertyFiringMap;
 public class PluginContainedComponent extends BasePropertyHolder implements IContainedComponent
 {
 
-    private String type;
+    private String fType;
 
-    private String copyOf;
+    private String fCopyOf;
 
-    protected Map bindings;
+    protected Map fBindings;
 
     /**
      * @param type
@@ -62,7 +62,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public IBindingSpecification getBinding(String name)
     {
-        return (IBindingSpecification)get(bindings, name);
+        return (IBindingSpecification) get(fBindings, name);
     }
 
     /* (non-Javadoc)
@@ -70,7 +70,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public Collection getBindingNames()
     {
-        return keys(bindings);
+        return keys(fBindings);
     }
 
     /* (non-Javadoc)
@@ -78,7 +78,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public String getType()
     {
-        return type;
+        return fType;
     }
 
     /* (non-Javadoc)
@@ -86,25 +86,25 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public void setBinding(String name, IBindingSpecification spec)
     {
-       if (bindings == null){
-           bindings = new PropertyFiringMap(this, "bindings");
-       }
-       
-       bindings.put(name, spec);
+        if (fBindings == null)
+            fBindings = new PropertyFiringMap(this, "bindings");
+
+        fBindings.put(name, spec);
     }
-    
-    public void removeBinding(String name) {
-        remove(bindings, name);
+
+    public void removeBinding(String name)
+    {
+        remove(fBindings, name);
     }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IContainedComponent#setType(java.lang.String)
      */
     public void setType(String value)
-    {   
-        String old = this.type;
-        this.type = value;
-        firePropertyChange("type", old, this.type);
+    {
+        String old = fType;
+        fType = value;
+        firePropertyChange("type", old, this.fType);
 
     }
 
@@ -113,9 +113,9 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public void setCopyOf(String id)
     {
-       String old = this.copyOf;
-       this.copyOf = id;
-       firePropertyChange("copyOf", old, this.copyOf);
+        String old = fCopyOf;
+        fCopyOf = id;
+        firePropertyChange("copyOf", old, this.fCopyOf);
     }
 
     /* (non-Javadoc)
@@ -123,7 +123,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public String getCopyOf()
     {
-        return copyOf;
+        return fCopyOf;
     }
 
     /* (non-Javadoc)
@@ -131,7 +131,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public boolean getInheritInformalParameters()
     {
-        // TODO Auto-generated method stub
+        // TODO whaaaa?
         return false;
     }
 
@@ -140,7 +140,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public void setInheritInformalParameters(boolean value)
     {
-        // TODO Auto-generated method stub
+        // TODO whaaaa?
 
     }
 

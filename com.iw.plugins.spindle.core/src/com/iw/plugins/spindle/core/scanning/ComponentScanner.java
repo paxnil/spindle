@@ -57,15 +57,15 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
  */
 public class ComponentScanner extends SpecificationScanner
 {
-    boolean isPageSpec;
+    boolean fIsPageSpec;
 
     /* Don't need to throw an exception or add a problem here, the Parser will already have caught this
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(
      */
     protected Object beforeScan(Node rootNode) throws ScannerException
     {
-        isPageSpec = isElement(rootNode, "page-specification");
-        if (!(isPageSpec || isElement(rootNode, "component-specification")))
+        fIsPageSpec = isElement(rootNode, "page-specification");
+        if (!(fIsPageSpec || isElement(rootNode, "component-specification")))
         {
             return null;
         }
@@ -79,15 +79,15 @@ public class ComponentScanner extends SpecificationScanner
     {
         IComponentSpecification specification = (IComponentSpecification) resultObject;
 
-        specification.setPublicId(parser.getPublicId());
-        specification.setSpecificationLocation(location);
+        specification.setPublicId(fParser.getPublicId());
+        specification.setSpecificationLocation(fResourceLocation);
 
         // Only components specify these two attributes.
 
         specification.setAllowBody(getBooleanAttribute(rootNode, "allow-body"));
         specification.setAllowInformalParameters(getBooleanAttribute(rootNode, "allow-informal-parameters"));
 
-        scanComponentSpecification(rootNode, specification, isPageSpec);
+        scanComponentSpecification(rootNode, specification, fIsPageSpec);
     }
 
     protected void scanAsset(IComponentSpecification specification, Node node, AssetType type, String attributeName)
@@ -100,16 +100,12 @@ public class ComponentScanner extends SpecificationScanner
         // it is not, technically, a valid asset name).
 
         if (!validateName.equals(ITemplateSource.TEMPLATE_ASSET_NAME))
-        {
-
             validatePattern(
                 validateName,
                 SpecificationParser.ASSET_NAME_PATTERN,
                 "SpecificationParser.invalid-asset-name",
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"));
-
-        }
 
         String value = getAttribute(node, attributeName);
         IAssetSpecification asset = specificationFactory.createAssetSpecification();
@@ -144,12 +140,7 @@ public class ComponentScanner extends SpecificationScanner
             IProblem.ERROR,
             getAttributeSourceLocation(node, "name"));
 
-        String className = getAttribute(node, "class");
-
-        if (className == null)
-        {
-            className = getNextDummyString();
-        }
+        String className = getAttribute(node, "class", true);
 
         validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
 
@@ -320,7 +311,7 @@ public class ComponentScanner extends SpecificationScanner
 
                 if (isElement(child, "field-binding"))
                 {
-                    if (XMLUtil.getDTDVersion(parser.getPublicId()) < XMLUtil.DTD_1_4)
+                    if (XMLUtil.getDTDVersion(fParser.getPublicId()) < XMLUtil.DTD_1_4)
                     {
                         scanBinding(c, child, BindingType.FIELD, "field-name");
                     } else
@@ -491,12 +482,7 @@ public class ComponentScanner extends SpecificationScanner
         location.setResourceLocation(specification.getSpecificationLocation());
         param.setLocation(location);
 
-        String name = getAttribute(node, "name");
-
-        if (name == null)
-        {
-            name = getNextDummyString();
-        }
+        String name = getAttribute(node, "name", true);
 
         validatePattern(
             name,
@@ -547,10 +533,7 @@ public class ComponentScanner extends SpecificationScanner
 
         Node child = node.getFirstChild();
         if (child != null && isElement(child, "description"))
-        {
             param.setDescription(getValue(child));
-        }
-
     }
 
     /** @since 2.4 **/

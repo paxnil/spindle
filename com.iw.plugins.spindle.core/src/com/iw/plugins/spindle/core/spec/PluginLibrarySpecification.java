@@ -50,46 +50,46 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      *  Map of component alias to component specification path.
      * 
      **/
-    private Map components;
+    private Map fComponents;
 
-    private String description;
-    
+    private String fDescription;
+
     /**
      *  Map of extension name to {@link IExtensionSpecification}.
      * 
      **/
 
-    private Map extensions;
+    private Map fExtensions;
 
     /**
      *  Map of library id to library specification path.
      * 
      **/
 
-    private Map libraries;
+    private Map fLibraries;
 
     /**
      *  Map of page name to page specification path.
      * 
      **/
 
-    private Map pages;
-
-    private IResourceResolver resolver;
+    private Map fPages;
 
     /**
      *  Map of service name to service class name.
      * 
      **/
 
-    private Map services;
+    private Map fServices;
 
     /**
      *  Resource resolver TODO not used yet.
      * 
      **/
 
-    private String publicId;
+    private IResourceResolver fResourceResolver;
+
+    private String fPublicId;
 
     /**
      *  Map of extension name to Object for instantiated extensions.
@@ -100,8 +100,8 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
     {
         super(BaseSpecification.LIBRARY_SPEC);
     }
-    
-    protected  PluginLibrarySpecification(int type)
+
+    protected PluginLibrarySpecification(int type)
     {
         super(type);
     }
@@ -111,12 +111,10 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void addExtensionSpecification(String name, IExtensionSpecification extension)
     {
-        if (extensions == null)
-        {
-            extensions = new IIdentifiableMap(this, "extensions");
-        }
+        if (fExtensions == null)
+            fExtensions = new IIdentifiableMap(this, "extensions");
 
-        extensions.put(name, extension);
+        fExtensions.put(name, extension);
     }
 
     /* (non-Javadoc)
@@ -130,10 +128,9 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
 
     public Map getComponents()
     {
-        if (components != null)
-        {
-            return Collections.unmodifiableMap(components);
-        }
+        if (fComponents != null)
+            return Collections.unmodifiableMap(fComponents);
+
         return Collections.EMPTY_MAP;
     }
 
@@ -142,7 +139,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public String getComponentSpecificationPath(String type)
     {
-        return (String) get(components, type);
+        return (String) get(fComponents, type);
     }
 
     /* (non-Javadoc)
@@ -150,7 +147,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public List getComponentTypes()
     {
-        return keys(components);
+        return keys(fComponents);
     }
 
     /* (non-Javadoc)
@@ -158,7 +155,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public String getDescription()
     {
-        return description;
+        return fDescription;
     }
 
     /* (non-Javadoc)
@@ -184,15 +181,14 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public List getExtensionNames()
     {
-        return keys(extensions);
+        return keys(fExtensions);
     }
 
     public Map getExtensions()
     {
-        if (extensions != null)
-        {
-            return Collections.unmodifiableMap(extensions);
-        }
+        if (fExtensions != null)
+            return Collections.unmodifiableMap(fExtensions);
+
         return Collections.EMPTY_MAP;
     }
 
@@ -201,7 +197,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public IExtensionSpecification getExtensionSpecification(String name)
     {
-        return (IExtensionSpecification) get(extensions, name);
+        return (IExtensionSpecification) get(fExtensions, name);
     }
 
     /* (non-Javadoc)
@@ -209,18 +205,17 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public Map getExtensionSpecifications()
     {
-        if (extensions == null)
+        if (fExtensions == null)
             return Collections.EMPTY_MAP;
 
-        return Collections.unmodifiableMap(extensions);
+        return Collections.unmodifiableMap(fExtensions);
     }
 
     public Map getLibraries()
     {
-        if (libraries != null)
-        {
-            return Collections.unmodifiableMap(libraries);
-        }
+        if (fLibraries != null)
+            return Collections.unmodifiableMap(fLibraries);
+
         return Collections.EMPTY_MAP;
     }
 
@@ -229,7 +224,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public List getLibraryIds()
     {
-        return keys(libraries);
+        return keys(fLibraries);
     }
 
     /* (non-Javadoc)
@@ -237,24 +232,22 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public String getLibrarySpecificationPath(String id)
     {
-        return (String) get(libraries, id);
+        return (String) get(fLibraries, id);
     }
 
-   
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.ILibrarySpecification#getPageNames()
      */
     public List getPageNames()
     {
-        return keys(pages);
+        return keys(fPages);
     }
 
     public Map getPages()
     {
-        if (pages != null)
-        {
-            return Collections.unmodifiableMap(pages);
-        }
+        if (fPages != null)
+            return Collections.unmodifiableMap(fPages);
+
         return Collections.EMPTY_MAP;
     }
 
@@ -263,7 +256,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public String getPageSpecificationPath(String name)
     {
-        return (String) get(pages, name);
+        return (String) get(fPages, name);
     }
 
     /* (non-Javadoc)
@@ -271,7 +264,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public String getPublicId()
     {
-        return publicId;
+        return fPublicId;
     }
 
     /* (non-Javadoc)
@@ -279,7 +272,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public IResourceResolver getResourceResolver()
     {
-        return resolver;
+        return fResourceResolver;
     }
 
     /* (non-Javadoc)
@@ -287,7 +280,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public String getServiceClassName(String name)
     {
-        return (String) get(services, name);
+        return (String) get(fServices, name);
     }
 
     /* (non-Javadoc)
@@ -295,19 +288,16 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public List getServiceNames()
     {
-        return keys(services);
+        return keys(fServices);
     }
 
     public Map getServices()
     {
-        if (services != null)
-        {
-            return Collections.unmodifiableMap(services);
-        }
+        if (fServices != null)
+            return Collections.unmodifiableMap(fServices);
+
         return Collections.EMPTY_MAP;
     }
-
-   
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.ILibrarySpecification#instantiateImmediateExtensions()
@@ -319,22 +309,22 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
 
     public void removeComponentSpecificationPath(String type)
     {
-        remove(components, type);
+        remove(fComponents, type);
     }
 
     public void removeExtensionSpecification(String name)
     {
-        remove(extensions, name);
+        remove(fExtensions, name);
     }
 
     public void removeLibrarySpecificationPath(String name)
     {
-        remove(libraries, name);
+        remove(fLibraries, name);
     }
 
     public void removePageSepcificationPath(String name)
     {
-        remove(pages, name);
+        remove(fPages, name);
     }
 
     /* (non-Javadoc)
@@ -342,12 +332,10 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void setComponentSpecificationPath(String type, String path)
     {
-        if (components == null)
-        {
-            components = new PropertyFiringMap(this, "components");
-        }
+        if (fComponents == null)
+            fComponents = new PropertyFiringMap(this, "components");
 
-        components.put(type, path);
+        fComponents.put(type, path);
 
     }
 
@@ -356,7 +344,9 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void setDescription(String description)
     {
-        this.description = description;
+        String old = fDescription;
+        fDescription = description;
+        firePropertyChange("description", old, fDescription);
 
     }
 
@@ -365,26 +355,21 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void setLibrarySpecificationPath(String id, String path)
     {
-        if (libraries == null)
-        {
-            libraries = new PropertyFiringMap(this, "libraries");
-        }
+        if (fLibraries == null)
+            fLibraries = new PropertyFiringMap(this, "libraries");
 
-        libraries.put(id, path);
+        fLibraries.put(id, path);
     }
 
-  
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.ILibrarySpecification#setPageSpecificationPath(java.lang.String, java.lang.String)
      */
     public void setPageSpecificationPath(String name, String path)
     {
-        if (pages == null)
-        {
-            pages = new PropertyFiringMap(this, "pages");
-        }
+        if (fPages == null)
+            fPages = new PropertyFiringMap(this, "pages");
 
-        pages.put(name, path);
+        fPages.put(name, path);
     }
 
     /* (non-Javadoc)
@@ -392,7 +377,9 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void setPublicId(String value)
     {
-        publicId = value;
+        String old = fPublicId;
+        fPublicId = value;
+        firePropertyChange("publicId", old, fPublicId);
     }
 
     /* (non-Javadoc)
@@ -400,7 +387,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void setResourceResolver(IResourceResolver resolver)
     {
-        this.resolver = resolver;
+        this.fResourceResolver = resolver;
     }
 
     /* (non-Javadoc)
@@ -408,13 +395,10 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      */
     public void setServiceClassName(String name, String className)
     {
-        if (services == null)
-        {
-            services = new PropertyFiringMap(this, "services");
-        }
+        if (fServices == null)
+            fServices = new PropertyFiringMap(this, "services");
 
-        services.put(name, className);
+        fServices.put(name, className);
     }
 
-   
 }

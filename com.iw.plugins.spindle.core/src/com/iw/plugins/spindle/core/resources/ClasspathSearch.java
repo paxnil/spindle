@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryModelException;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
@@ -50,23 +51,23 @@ import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 public class ClasspathSearch implements ISearch
 {
 
-    protected IPackageFragmentRoot[] packageFragmentRoots = null;
+    protected IPackageFragmentRoot[] fPackageFragmentRoots = null;
 
-    protected HashMap packageFragments;
+    protected HashMap fPackageFragments;
 
-    protected IJavaProject jproject;
-    protected TapestryProject tproject;
+    protected IJavaProject fJavaProject;
+    protected TapestryProject fTapestryProject;
 
-    private boolean initialized = false;
+    private boolean fInitialized = false;
 
     public ClasspathSearch()
     {}
 
     public void configure(Object root) throws CoreException
     {
-        this.jproject = (IJavaProject) root;
+        this.fJavaProject = (IJavaProject) root;
         configureClasspath();
-        initialized = true;
+        fInitialized = true;
     }
 
     /* pull the classpath info we need from the JavaModel */
@@ -74,24 +75,24 @@ public class ClasspathSearch implements ISearch
     {
         try
         {
-            packageFragmentRoots = jproject.getAllPackageFragmentRoots();
-            packageFragments = new HashMap();
-            IPackageFragment[] frags = getPackageFragmentsInRoots(packageFragmentRoots, jproject);
+            fPackageFragmentRoots = fJavaProject.getAllPackageFragmentRoots();
+            fPackageFragments = new HashMap();
+            IPackageFragment[] frags = getPackageFragmentsInRoots(fPackageFragmentRoots, fJavaProject);
             for (int i = 0; i < frags.length; i++)
             {
                 IPackageFragment fragment = frags[i];
-                IPackageFragment[] entry = (IPackageFragment[]) packageFragments.get(fragment.getElementName());
+                IPackageFragment[] entry = (IPackageFragment[]) fPackageFragments.get(fragment.getElementName());
                 if (entry == null)
                 {
                     entry = new IPackageFragment[1];
                     entry[0] = fragment;
-                    packageFragments.put(fragment.getElementName(), entry);
+                    fPackageFragments.put(fragment.getElementName(), entry);
                 } else
                 {
                     IPackageFragment[] copy = new IPackageFragment[entry.length + 1];
                     System.arraycopy(entry, 0, copy, 0, entry.length);
                     copy[entry.length] = fragment;
-                    packageFragments.put(fragment.getElementName(), copy);
+                    fPackageFragments.put(fragment.getElementName(), copy);
                 }
             }
         } catch (JavaModelException e)
@@ -117,15 +118,11 @@ public class ClasspathSearch implements ISearch
                 if (children[0].getParent().getParent().equals(project))
                 {
                     for (int j = 0; j < length; j++)
-                    {
                         frags.add(children[j]);
-                    }
                 } else
                 {
                     for (int j = 0; j < length; j++)
-                    {
                         frags.add(root.getPackageFragment(children[j].getElementName()));
-                    }
                 }
             } catch (JavaModelException e)
             {
@@ -139,15 +136,15 @@ public class ClasspathSearch implements ISearch
 
     public void search(ISearchAcceptor acceptor)
     {
-        if (!initialized)
+        if (!fInitialized)
         {
             throw new Error("not initialized");
         }
-        int count = packageFragmentRoots.length;
+        int count = fPackageFragmentRoots.length;
         for (int i = 0; i < count; i++)
         {
 
-            IPackageFragmentRoot root = packageFragmentRoots[i];
+            IPackageFragmentRoot root = fPackageFragmentRoots[i];
             IJavaElement[] packages = null;
             try
             {
@@ -162,9 +159,7 @@ public class ClasspathSearch implements ISearch
                 {
                     boolean keepGoing = searchInPackage((IPackageFragment) packages[j], acceptor);
                     if (!keepGoing)
-                    {
                         return;
-                    }
                 }
             }
         }
@@ -173,10 +168,9 @@ public class ClasspathSearch implements ISearch
     protected boolean searchInPackage(IPackageFragment pkg, ISearchAcceptor acceptor)
     {
 
-        if (!initialized)
-        {
+        if (!fInitialized)
             throw new Error("not initialized");
-        }
+
         boolean keepGoing = true;
 
         IPackageFragmentRoot root = (IPackageFragmentRoot) pkg.getParent();
@@ -197,7 +191,9 @@ public class ClasspathSearch implements ISearch
                     return keepGoing;
             }
         } catch (JavaModelException e)
-        {}
+        {
+            TapestryCore.log(e);
+        }
         return keepGoing;
     }
 
@@ -226,7 +222,6 @@ public class ClasspathSearch implements ISearch
             }
 
             keepGoing = requestor.accept(pkg, (IStorage) jarFile);
-
         }
         return keepGoing;
     }
@@ -245,13 +240,11 @@ public class ClasspathSearch implements ISearch
             return false; // the package is not present
         }
         if (files == null)
-        {
             return false;
-        }
+
         int length = files.length;
         for (int i = 0; i < length; i++)
         {
-
             IFile file = null;
             try
             {
@@ -289,13 +282,10 @@ public class ClasspathSearch implements ISearch
                 for (int i = 0; i < members.length; i++)
                 {
                     if (members[i] instanceof IFile)
-                    {
                         resultList.add(members[i]);
-                    }
-                    result = resultList.toArray();
                 }
+                result = resultList.toArray();
             }
-
         }
         return result;
     }

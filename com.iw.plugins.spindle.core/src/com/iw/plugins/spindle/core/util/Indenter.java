@@ -47,13 +47,11 @@ public class Indenter
     private static void writeIndent(PrintWriter writer, int indent)
     {
         if (indent <= 0)
-        {
             return;
-        }
+
         for (int i = 0; i < indent; i++)
-        {
             writer.print(Indent);
-        }
+
     }
 
 }

@@ -28,22 +28,22 @@ package com.iw.plugins.spindle.core.parser;
 public class SourceLocation implements ISourceLocation
 {
 
-    private int lineNumber;
-    private int charStart;
-    private int charEnd;
+    private int fLineNumber;
+    private int fCharStart;
+    private int fCharEnd;
 
     SourceLocation(int lineNumber, int charStart, int charEnd)
     {
-        this.lineNumber = lineNumber;
-        this.charStart = charStart;
-        this.charEnd = charEnd;
+        this.fLineNumber = lineNumber;
+        this.fCharStart = charStart;
+        this.fCharEnd = charEnd;
     }
     /**
      * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getStartLine()
      */
     public int getLineNumber()
     {
-        return lineNumber;
+        return fLineNumber;
     }
 
     /**
@@ -51,7 +51,7 @@ public class SourceLocation implements ISourceLocation
      */
     public int getCharStart()
     {
-        return charStart;
+        return fCharStart;
     }
 
     /**
@@ -59,17 +59,17 @@ public class SourceLocation implements ISourceLocation
      */
     public int getCharEnd()
     {
-        return charEnd;
+        return fCharEnd;
     }
 
     public String toString()
     {
         StringBuffer buffer = new StringBuffer("line:charStart:charEnd[");
-        buffer.append(lineNumber);
+        buffer.append(fLineNumber);
         buffer.append(", ");
-        buffer.append(charStart);
+        buffer.append(fCharStart);
         buffer.append(", ");
-        buffer.append(charEnd);
+        buffer.append(fCharEnd);
         buffer.append("]");
         return buffer.toString();
     }

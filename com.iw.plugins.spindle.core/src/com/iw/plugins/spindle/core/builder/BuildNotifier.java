@@ -40,22 +40,22 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 public class BuildNotifier
 {
 
-    protected IProgressMonitor monitor;
-    protected boolean cancelling;
-    protected float percentComplete;
-    protected float processingProgress;
-    protected int workDone;
-    protected int totalWork;
-    protected String previousSubtask;
-    protected IProject currentProject;
+    protected IProgressMonitor fMonitor;
+    protected boolean fCancelling;
+    protected float fPercentComplete;
+    protected float fProcessingProgress;
+    protected int fWorkDone;
+    protected int fTotalWork;
+    protected String fPreviousSubtask;
+    protected IProject fCurrentProject;
 
     public BuildNotifier(IProgressMonitor monitor, IProject currentProject)
     {
-        this.monitor = monitor;
-        this.cancelling = false;
-        this.workDone = 0;
-        this.totalWork = 1000000;
-        this.currentProject = currentProject;
+        this.fMonitor = monitor;
+        this.fCancelling = false;
+        this.fWorkDone = 0;
+        this.fTotalWork = 1000000;
+        this.fCurrentProject = currentProject;
     }
 
     public void aboutToProcess(IResource resource)
@@ -86,30 +86,27 @@ public class BuildNotifier
     private void processed(String message)
     {
         subTask("processing" + message);
-        updateProgressDelta(processingProgress);
+        updateProgressDelta(fProcessingProgress);
         checkCancel();
     }
 
     public void setProcessingProgressPer(float progress)
     {
-        this.processingProgress = progress;
+        this.fProcessingProgress = progress;
     }
 
     public void begin()
     {
-        if (monitor != null)
-        {
-            monitor.beginTask("", totalWork);
-        }
-        this.previousSubtask = null;
+        if (fMonitor != null)
+            fMonitor.beginTask("", fTotalWork);
+
+        this.fPreviousSubtask = null;
     }
 
     public void checkCancel()
     {
-        if (monitor != null && monitor.isCanceled())
-        {
+        if (fMonitor != null && fMonitor.isCanceled())
             throw new OperationCanceledException();
-        }
     }
 
     /**
@@ -119,37 +116,34 @@ public class BuildNotifier
     {
         updateProgress(1.0f);
         subTask("Tapestry Builder is finished");
-        if (monitor != null)
-        {
-            monitor.done();
-        }
-        this.previousSubtask = null;
+        if (fMonitor != null)
+            fMonitor.done();
+
+        this.fPreviousSubtask = null;
     }
 
     public void updateProgress(float percentComplete)
     {
-        if (percentComplete > this.percentComplete)
+        if (percentComplete > this.fPercentComplete)
         {
-            this.percentComplete = Math.min(percentComplete, 1.0f);
-            int work = Math.round(this.percentComplete * this.totalWork);
-            if (work > this.workDone)
+            this.fPercentComplete = Math.min(percentComplete, 1.0f);
+            int work = Math.round(this.fPercentComplete * this.fTotalWork);
+            if (work > this.fWorkDone)
             {
-                if (monitor != null)
-                {
-                    monitor.worked(work - this.workDone);
-                }
+                if (fMonitor != null)
+                    fMonitor.worked(work - this.fWorkDone);
+
                 if (TapestryBuilder.DEBUG)
-                {
-                    System.out.println(java.text.NumberFormat.getPercentInstance().format(this.percentComplete));
-                }
-                this.workDone = work;
+                    System.out.println(java.text.NumberFormat.getPercentInstance().format(this.fPercentComplete));
+
+                this.fWorkDone = work;
             }
         }
     }
 
     public void updateProgressDelta(float percentWorked)
     {
-        updateProgress(percentComplete + percentWorked);
+        updateProgress(fPercentComplete + percentWorked);
     }
 
     public void subTask(String message)
@@ -157,15 +151,13 @@ public class BuildNotifier
         //	String pm = problemsMessage();
         //	String msg = pm.length() == 0 ? message : pm + " " + message; //$NON-NLS-1$
 
-        if (message.equals(this.previousSubtask))
+        if (message.equals(this.fPreviousSubtask))
             return; // avoid refreshing with same one
         //if (JavaBuilder.DEBUG) System.out.println(msg);
-        if (monitor != null)
-        {
-            monitor.subTask(message);
-        }
+        if (fMonitor != null)
+            fMonitor.subTask(message);
 
-        this.previousSubtask = message;
+        this.fPreviousSubtask = message;
     }
 
 }

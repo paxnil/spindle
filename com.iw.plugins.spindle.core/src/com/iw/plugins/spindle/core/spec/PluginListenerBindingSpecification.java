@@ -33,11 +33,13 @@ import org.apache.tapestry.spec.IListenerBindingSpecification;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class PluginListenerBindingSpecification extends PluginBindingSpecfication implements IListenerBindingSpecification
+public class PluginListenerBindingSpecification
+    extends PluginBindingSpecfication
+    implements IListenerBindingSpecification
 {
 
-    private String language;
-    private String script;
+    private String fLanguage;
+    private String fScript;
 
     public PluginListenerBindingSpecification()
     {
@@ -49,7 +51,7 @@ public class PluginListenerBindingSpecification extends PluginBindingSpecficatio
      */
     public String getLanguage()
     {
-        return language;
+        return fLanguage;
     }
 
     /* (non-Javadoc)
@@ -65,9 +67,9 @@ public class PluginListenerBindingSpecification extends PluginBindingSpecficatio
      */
     public void setLanguage(String language)
     {
-        String old = this.language;
-        this.language = language;
-        firePropertyChange("language", old, this.language);
+        String old = fLanguage;
+        fLanguage = language;
+        firePropertyChange("language", old, this.fLanguage);
     }
 
     public void setScript(String value)

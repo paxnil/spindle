@@ -63,33 +63,32 @@ import com.iw.plugins.spindle.core.util.Assert;
 public abstract class AbstractScanner implements IProblemCollector
 {
 
-    private Object resultObject;
+    private Object fResultObject;
 
-    protected List problems = new ArrayList();
-    protected IScannerValidator validator;
-    protected Parser parser;
+    protected List fProblems = new ArrayList();
+    protected IScannerValidator fValidator;
+    protected Parser fParser;
 
     public final Object scan(final Parser parser, IScannerValidator validator, Node node) throws ScannerException
     {
         Assert.isNotNull(node);
-        problems.clear();
-        this.parser = parser;
+        fProblems.clear();
+        this.fParser = parser;
         if (validator == null)
         {
-            this.validator = new BaseValidator();
+            this.fValidator = new BaseValidator();
         } else
         {
-            this.validator = validator;
+            this.fValidator = validator;
         }
-        this.validator.setProblemCollector(this);
-        resultObject = beforeScan(node);
-        if (resultObject == null)
-        {
+        this.fValidator.setProblemCollector(this);
+        fResultObject = beforeScan(node);
+        if (fResultObject == null)
             return null;
-        }
+
         try
         {
-            doScan(resultObject, node);
+            doScan(fResultObject, node);
 
         } catch (ParserRuntimeException e)
         {
@@ -97,7 +96,7 @@ public abstract class AbstractScanner implements IProblemCollector
             // this could only happen when pull parsing!
             e.printStackTrace();
         }
-        return afterScan(resultObject);
+        return afterScan(fResultObject);
     }
 
     protected abstract void doScan(Object resultObject, Node rootNode) throws ScannerException;
@@ -112,7 +111,7 @@ public abstract class AbstractScanner implements IProblemCollector
     public void addProblem(IProblem problem)
     {
 
-        problems.add(problem);
+        fProblems.add(problem);
     }
 
     public void addProblem(int severity, ISourceLocation location, String message)
@@ -129,12 +128,12 @@ public abstract class AbstractScanner implements IProblemCollector
 
     public IProblem[] getProblems()
     {
-        return (IProblem[]) problems.toArray(new IProblem[problems.size()]);
+        return (IProblem[]) fProblems.toArray(new IProblem[fProblems.size()]);
     }
 
     public boolean isElement(Node node, String elementName)
     {
-       return NodeAccess.isElement(node, elementName);
+        return NodeAccess.isElement(node, elementName);
     }
 
     public String getValue(Node node)
@@ -145,9 +144,8 @@ public abstract class AbstractScanner implements IProblemCollector
     protected boolean isDummyString(String value)
     {
         if (value != null)
-        {
-            return value.startsWith(validator.getDummyStringPrefix());
-        }
+            return value.startsWith(fValidator.getDummyStringPrefix());
+
         return false;
     }
 
@@ -165,9 +163,8 @@ public abstract class AbstractScanner implements IProblemCollector
     {
         String result = NodeAccess.getAttribute(node, attributeName);
         if (TapestryCore.isNull(result) && returnDummyIfNull)
-        {
             result = getNextDummyString();
-        }
+
         return result;
     }
 
@@ -208,10 +205,8 @@ public abstract class AbstractScanner implements IProblemCollector
         ISourceLocationInfo info = getSourceLocationInfo(node);
         ISourceLocation result = null;
         if (info != null)
-        {
             result = info.getStartTagSourceLocation();
 
-        }
         return result;
     }
 
@@ -248,7 +243,7 @@ public abstract class AbstractScanner implements IProblemCollector
     protected boolean validatePattern(String value, String pattern, String errorKey, int severity)
         throws ScannerException
     {
-        return validator.validatePattern(value, pattern, errorKey, severity);
+        return fValidator.validatePattern(value, pattern, errorKey, severity);
     }
 
     protected boolean validatePattern(
@@ -259,23 +254,23 @@ public abstract class AbstractScanner implements IProblemCollector
         ISourceLocation location)
         throws ScannerException
     {
-        return validator.validatePattern(value, pattern, errorKey, severity, location);
+        return fValidator.validatePattern(value, pattern, errorKey, severity, location);
     }
 
     protected boolean validateExpression(String expression, int severity) throws ScannerException
     {
-        return validator.validateExpression(expression, severity);
+        return fValidator.validateExpression(expression, severity);
     }
 
     protected boolean validateExpression(String expression, int severity, ISourceLocation location)
         throws ScannerException
     {
-        return validator.validateExpression(expression, severity, location);
+        return fValidator.validateExpression(expression, severity, location);
     }
 
     protected boolean validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
     {
-        return validator.validateTypeName(fullyQualifiedType, severity);
+        return fValidator.validateTypeName(fullyQualifiedType, severity);
     }
 
     /* (non-Javadoc)
@@ -284,7 +279,7 @@ public abstract class AbstractScanner implements IProblemCollector
     protected boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location)
         throws ScannerException
     {
-        return validator.validateTypeName(fullyQualifiedType, severity, location);
+        return fValidator.validateTypeName(fullyQualifiedType, severity, location);
     }
 
     protected boolean validateResourceLocation(
@@ -294,7 +289,7 @@ public abstract class AbstractScanner implements IProblemCollector
         ISourceLocation source)
         throws ScannerException
     {
-        return validator.validateResourceLocation(location, relativePath, errorKey, source);
+        return fValidator.validateResourceLocation(location, relativePath, errorKey, source);
 
     }
 
@@ -304,7 +299,7 @@ public abstract class AbstractScanner implements IProblemCollector
         ISourceLocationInfo sourceLocation)
         throws ScannerException
     {
-        return validator.validateContainedComponent(specification, component, sourceLocation);
+        return fValidator.validateContainedComponent(specification, component, sourceLocation);
     }
 
     protected boolean validateAsset(
@@ -313,7 +308,7 @@ public abstract class AbstractScanner implements IProblemCollector
         ISourceLocationInfo sourceLocation)
         throws ScannerException
     {
-        return validator.validateAsset(specification, asset, sourceLocation);
+        return fValidator.validateAsset(specification, asset, sourceLocation);
     }
 
     /* (non-Javadoc)
@@ -321,7 +316,7 @@ public abstract class AbstractScanner implements IProblemCollector
      */
     protected String getNextDummyString()
     {
-        return validator.getDummyStringPrefix();
+        return fValidator.getDummyStringPrefix();
     }
 
     /* (non-Javadoc)
@@ -329,7 +324,7 @@ public abstract class AbstractScanner implements IProblemCollector
      */
     protected String getDummyStringPrefix()
     {
-        return validator.getDummyStringPrefix();
+        return fValidator.getDummyStringPrefix();
     }
 
 }

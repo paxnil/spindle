@@ -48,24 +48,20 @@ import com.iw.plugins.spindle.core.parser.IProblem;
 public abstract class SpecificationScanner extends AbstractScanner
 {
 
-    protected IResourceLocation location;
-
-   
+    protected IResourceLocation fResourceLocation;
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#afterScan(java.lang.Object)
      */
     protected Object afterScan(Object scanResults) throws ScannerException
     {
-        location = null;
+        fResourceLocation = null;
         return super.afterScan(scanResults);
     }
 
-    
-
     public void setResourceLocation(IResourceLocation location)
     {
-        this.location = location;
+        this.fResourceLocation = location;
     }
 
     protected interface IConverter
@@ -81,7 +77,8 @@ public abstract class SpecificationScanner extends AbstractScanner
             Object result = conversionMap.get(value.toLowerCase());
 
             if (result == null || !(result instanceof Boolean))
-                throw new ScannerException(TapestryCore.getTapestryString("SpecificationParser.fail-convert-boolean", value));
+                throw new ScannerException(
+                    TapestryCore.getTapestryString("SpecificationParser.fail-convert-boolean", value));
 
             return result;
         }
@@ -96,7 +93,9 @@ public abstract class SpecificationScanner extends AbstractScanner
                 return new Integer(value);
             } catch (NumberFormatException ex)
             {
-                throw new ScannerException(TapestryCore.getTapestryString("SpecificationParser.fail-convert-int", value), ex);
+                throw new ScannerException(
+                    TapestryCore.getTapestryString("SpecificationParser.fail-convert-int", value),
+                    ex);
             }
         }
     }
@@ -110,7 +109,9 @@ public abstract class SpecificationScanner extends AbstractScanner
                 return new Long(value);
             } catch (NumberFormatException ex)
             {
-                throw new ScannerException(TapestryCore.getTapestryString("SpecificationParser.fail-convert-long", value), ex);
+                throw new ScannerException(
+                    TapestryCore.getTapestryString("SpecificationParser.fail-convert-long", value),
+                    ex);
             }
         }
     }
@@ -124,7 +125,9 @@ public abstract class SpecificationScanner extends AbstractScanner
                 return new Double(value);
             } catch (NumberFormatException ex)
             {
-                throw new ScannerException(TapestryCore.getTapestryString("SpecificationParser.fail-convert-double", value), ex);
+                throw new ScannerException(
+                    TapestryCore.getTapestryString("SpecificationParser.fail-convert-double", value),
+                    ex);
             }
         }
     }
@@ -188,15 +191,11 @@ public abstract class SpecificationScanner extends AbstractScanner
     {
         String name = getAttribute(node, "name", true);
 
-        if (name == null)
-        {
-            name = getNextDummyString();
-        }
-
         if (holder.getPropertyNames().contains(name))
-        {
-            addProblem(IProblem.WARNING, getAttributeSourceLocation(node, "name"), "duplicate definition of property: " + name);
-        }
+            addProblem(
+                IProblem.WARNING,
+                getAttributeSourceLocation(node, "name"),
+                "duplicate definition of property: " + name);
 
         // Starting in DTD 1.4, the value may be specified
         // as an attribute.  Only if that is null do we
@@ -271,7 +270,10 @@ public abstract class SpecificationScanner extends AbstractScanner
 
         if (!nullAttributeValue && !nullBodyValue)
             throw new ScannerException(
-                TapestryCore.getTapestryString("SpecificationParser.no-attribute-and-body", attributeName, node.getNodeName()));
+                TapestryCore.getTapestryString(
+                    "SpecificationParser.no-attribute-and-body",
+                    attributeName,
+                    node.getNodeName()));
 
         if (required && nullAttributeValue && nullBodyValue)
             throw new ScannerException(

@@ -37,18 +37,17 @@ import org.apache.tapestry.spec.IParameterSpecification;
  */
 public class PluginParameterSpecification extends BaseSpecification implements IParameterSpecification
 {
-    private boolean required = false;
-    private String type;
+    private boolean fRequired = false;
+    private String fType;
 
     /** @since 1.0.9 **/
-    private String description;
+    private String fDescription;
 
     /** @since 2.0.3 **/
-    private String propertyName;
+    private String fPropertyName;
 
-    private Direction direction = Direction.CUSTOM;
+    private Direction fDirection = Direction.CUSTOM;
 
-  
     public PluginParameterSpecification()
     {
         super(BaseSpecification.PARAMETER_SPEC);
@@ -59,7 +58,7 @@ public class PluginParameterSpecification extends BaseSpecification implements I
      */
     public String getType()
     {
-        return type;
+        return fType;
     }
 
     /* (non-Javadoc)
@@ -67,7 +66,7 @@ public class PluginParameterSpecification extends BaseSpecification implements I
      */
     public boolean isRequired()
     {
-        return required;
+        return fRequired;
     }
 
     /* (non-Javadoc)
@@ -75,9 +74,9 @@ public class PluginParameterSpecification extends BaseSpecification implements I
      */
     public void setRequired(boolean value)
     {
-        boolean old = this.required;
-        this.required = value;
-        firePropertyChange("required", old, this.required);
+        boolean old = fRequired;
+        fRequired = value;
+        firePropertyChange("required", old, fRequired);
     }
 
     /* (non-Javadoc)
@@ -85,9 +84,9 @@ public class PluginParameterSpecification extends BaseSpecification implements I
      */
     public void setType(String value)
     {
-        String old = this.type;
-        this.type = value;
-        firePropertyChange("type", old, this.type);
+        String old = fType;
+        fType = value;
+        firePropertyChange("type", old, fType);
     }
 
     /* (non-Javadoc)
@@ -95,7 +94,7 @@ public class PluginParameterSpecification extends BaseSpecification implements I
      */
     public String getDescription()
     {
-        return description;
+        return fDescription;
     }
 
     /* (non-Javadoc)
@@ -103,9 +102,9 @@ public class PluginParameterSpecification extends BaseSpecification implements I
      */
     public void setDescription(String description)
     {
-        String old = this.description;
-        this.description = description;
-        firePropertyChange("description", old, this.description);
+        String old = fDescription;
+        fDescription = description;
+        firePropertyChange("description", old, fDescription);
     }
 
     /* (non-Javadoc)
@@ -113,9 +112,9 @@ public class PluginParameterSpecification extends BaseSpecification implements I
      */
     public void setPropertyName(String propertyName)
     {
-        String old = this.propertyName;
-        this.propertyName = propertyName;
-        firePropertyChange("propertyName", old, this.propertyName);
+        String old = fPropertyName;
+        fPropertyName = propertyName;
+        firePropertyChange("propertyName", old, fPropertyName);
     }
 
     /* (non-Javadoc)
@@ -123,7 +122,7 @@ public class PluginParameterSpecification extends BaseSpecification implements I
      */
     public String getPropertyName()
     {
-         return propertyName;
+        return fPropertyName;
     }
 
     /* (non-Javadoc)
@@ -131,7 +130,7 @@ public class PluginParameterSpecification extends BaseSpecification implements I
      */
     public Direction getDirection()
     {
-        return direction;
+        return fDirection;
     }
 
     /* (non-Javadoc)
@@ -139,9 +138,9 @@ public class PluginParameterSpecification extends BaseSpecification implements I
      */
     public void setDirection(Direction direction)
     {
-        Direction old = this.direction;
-        this.direction = direction;
-        firePropertyChange("direction", old, this.direction);
+        Direction old = fDirection;
+        fDirection = direction;
+        firePropertyChange("direction", old, fDirection);
     }
 
 }

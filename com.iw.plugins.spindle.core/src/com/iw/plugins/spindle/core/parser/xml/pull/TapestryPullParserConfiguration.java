@@ -29,11 +29,10 @@ package com.iw.plugins.spindle.core.parser.xml.pull;
 import java.io.IOException;
 
 import org.apache.xerces.xni.XNIException;
-import org.apache.xerces.xni.grammars.XMLGrammarPool;
 import org.apache.xerces.xni.parser.XMLParseException;
 
 import com.iw.plugins.spindle.core.parser.ParserRuntimeException;
-import com.iw.plugins.spindle.core.parser.xml.dom.*;
+import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
 
 /**
  *  A configuration used by TapestryPullParser
@@ -43,16 +42,11 @@ import com.iw.plugins.spindle.core.parser.xml.dom.*;
  */
 public class TapestryPullParserConfiguration extends TapestryDOMParserConfiguration
 {
-    private boolean stopParsing = false;
+    private boolean fStopParsing = false;
 
     public TapestryPullParserConfiguration()
     {
         super();
-    }
-
-    public TapestryPullParserConfiguration(XMLGrammarPool grammarPool)
-    {
-        super(grammarPool);
     }
 
     public boolean parse() throws ParserRuntimeException, IOException
@@ -72,9 +66,9 @@ public class TapestryPullParserConfiguration extends TapestryDOMParserConfigurat
     public boolean parse(boolean complete) throws XNIException, IOException
     {
         boolean more = super.parse(complete);
-        if (!more || stopParsing)
+        if (!more || fStopParsing)
         {
-            stopParsing = false;
+            fStopParsing = false;
             return more;
         }
         return parse(complete);
@@ -83,8 +77,9 @@ public class TapestryPullParserConfiguration extends TapestryDOMParserConfigurat
 
     public void stopParsing()
     {
-        System.err.println("stopParsing called!");
-        stopParsing = true;
+        if (TapestryPullParser.Debug)
+            System.err.println("stopParsing called!");
+        fStopParsing = true;
     }
 
 }

@@ -58,25 +58,25 @@ import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
  */
 public class NamespaceResolver
 {
-    private String applicationNameFromWebXML;
+    private String fApplicationNameFromWebXML;
 
-    private Build build;
+    private Build fBuild;
 
-    private ICoreNamespace resultNamespace;
-    private ICoreNamespace frameworkNamespace;
-    private IResourceWorkspaceLocation specLocation;
-    private String namespaceId;
+    private ICoreNamespace fResultNamespace;
+    private ICoreNamespace fFrameworkNamespace;
+    private IResourceWorkspaceLocation fSpecLocation;
+    private String fNamespaceId;
 
-    private Map jwcFiles;
-    private ICoreNamespace temporaryNamespace;
+    private Map fJwcFiles;
+    private ICoreNamespace fTemporaryNamespace;
 
     // a stack of the components being resolved
     // its an error for a component to be in the stack more than 
     // once!
-    private Stack componentStack = new Stack();
+    private Stack fComponentStack = new Stack();
 
-    private boolean working;
-    private boolean resolvingFramework;
+    private boolean fWorking;
+    private boolean fResolvingFramework;
 
     /**
      * 
@@ -139,16 +139,16 @@ public class NamespaceResolver
     public NamespaceResolver(Build build)
     {
         super();
-        this.build = build;
+        this.fBuild = build;
     }
 
     public ICoreNamespace resolveFrameworkNamespace()
     {
         IResourceWorkspaceLocation frameworkLocation =
-            (IResourceWorkspaceLocation) build.tapestryBuilder.classpathRoot.getRelativeLocation(
+            (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot.getRelativeLocation(
                 "/org/apache/tapestry/Framework.library");
         resolve(null, ICoreNamespace.FRAMEWORK_NAMESPACE, frameworkLocation);
-        return resultNamespace;
+        return fResultNamespace;
     }
 
     public ICoreNamespace resolveApplicationNamespace(
@@ -157,9 +157,9 @@ public class NamespaceResolver
         String appNameFromWebXML)
     {
         reset();
-        this.applicationNameFromWebXML = appNameFromWebXML;
+        this.fApplicationNameFromWebXML = appNameFromWebXML;
         resolve(framework, null, location);
-        return resultNamespace;
+        return fResultNamespace;
     }
 
     public ICoreNamespace resolveLibrary(
@@ -169,65 +169,63 @@ public class NamespaceResolver
     {
         reset();
         resolve(framework, libraryId, location);
-        return resultNamespace;
+        return fResultNamespace;
     }
 
     protected ICoreNamespace resolve(ICoreNamespace framework, String namespaceId, IResourceWorkspaceLocation location)
     {
-        this.frameworkNamespace = framework;
-        this.namespaceId = namespaceId;
-        this.specLocation = location;
+        this.fFrameworkNamespace = framework;
+        this.fNamespaceId = namespaceId;
+        this.fSpecLocation = location;
         doResolve();
-        return resultNamespace;
+        return fResultNamespace;
     }
 
     protected void reset()
     {
-        componentStack.clear();
-        this.frameworkNamespace = null;
-        this.namespaceId = null;
-        this.specLocation = null;
-        this.applicationNameFromWebXML = null;
-        this.resolvingFramework = false;
-        this.working = false;
-        this.jwcFiles = null;
+        fComponentStack.clear();
+        this.fFrameworkNamespace = null;
+        this.fNamespaceId = null;
+        this.fSpecLocation = null;
+        this.fApplicationNameFromWebXML = null;
+        this.fResolvingFramework = false;
+        this.fWorking = false;
+        this.fJwcFiles = null;
     }
 
     protected void doResolve()
     {
-        if (working)
+        if (fWorking)
         {
             throw new RuntimeException("can't call resolve while resolving!");
         }
 
         try
         {
-            working = true;
-            componentStack.clear();
-            resultNamespace = build.createNamespace(namespaceId, specLocation);
-            if (resultNamespace != null)
+            fWorking = true;
+            fComponentStack.clear();
+            fResultNamespace = fBuild.createNamespace(fNamespaceId, fSpecLocation);
+            if (fResultNamespace != null)
             {
-                resultNamespace.getComponentLookup(frameworkNamespace);
-                resultNamespace.getPageLookup(frameworkNamespace);
-                if (applicationNameFromWebXML != null)
-                {
-                    resultNamespace.setAppNameFromWebXML(applicationNameFromWebXML);
-                }
+                fResultNamespace.getComponentLookup(fFrameworkNamespace);
+                fResultNamespace.getPageLookup(fFrameworkNamespace);
+                if (fApplicationNameFromWebXML != null)
+                    fResultNamespace.setAppNameFromWebXML(fApplicationNameFromWebXML);
 
                 NamespaceResourceLookup lookup = new NamespaceResourceLookup();
-                if (resultNamespace.isApplicationNamespace())
+                if (fResultNamespace.isApplicationNamespace())
                 {
                     lookup.configure(
-                        (PluginApplicationSpecification) resultNamespace.getSpecification(),
-                        build.tapestryBuilder.contextRoot,
-                        applicationNameFromWebXML);
+                        (PluginApplicationSpecification) fResultNamespace.getSpecification(),
+                        fBuild.fTapestryBuilder.fContextRoot,
+                        fApplicationNameFromWebXML);
                 } else
                 {
-                    lookup.configure((PluginLibrarySpecification) resultNamespace.getSpecification());
+                    lookup.configure((PluginLibrarySpecification) fResultNamespace.getSpecification());
                 }
-                
-                resultNamespace.setResourceLookup(lookup);
-                temporaryNamespace = new TemporaryNamespace();
+
+                fResultNamespace.setResourceLookup(lookup);
+                fTemporaryNamespace = new TemporaryNamespace();
                 resolveChildNamespaces();
                 resolveComponents();
                 List definitelyNotSpeclessPages = getAllComponentTemplates();
@@ -235,7 +233,7 @@ public class NamespaceResolver
             }
         } finally
         {
-            working = false;
+            fWorking = false;
         }
 
     }
@@ -243,44 +241,42 @@ public class NamespaceResolver
     private List getAllComponentTemplates()
     {
         List result = new ArrayList();
-        for (Iterator iter = resultNamespace.getComponentTypes().iterator(); iter.hasNext();)
+        for (Iterator iter = fResultNamespace.getComponentTypes().iterator(); iter.hasNext();)
         {
             String type = (String) iter.next();
             PluginComponentSpecification spec =
-                (PluginComponentSpecification) resultNamespace.getComponentSpecification(type);
+                (PluginComponentSpecification) fResultNamespace.getComponentSpecification(type);
             result.addAll(spec.getTemplateLocations());
         }
         return result;
     }
 
     /**
-     * resolve/build all the child namespaces declare in the library specification
+     * resolve/build all the child namespaces declared in the library specification
      */
     private void resolveChildNamespaces()
     {
-        ILibrarySpecification spec = resultNamespace.getSpecification();
+        ILibrarySpecification spec = fResultNamespace.getSpecification();
         List ids = spec.getLibraryIds();
         if (!ids.isEmpty())
         {
-            NamespaceResolver childResolver = new NamespaceResolver(build);
+            NamespaceResolver childResolver = new NamespaceResolver(fBuild);
             for (Iterator iter = ids.iterator(); iter.hasNext();)
             {
                 String libraryId = (String) iter.next();
-                if (resultNamespace.getChildNamespace(libraryId) == null)
-                {
+                if (fResultNamespace.getChildNamespace(libraryId) == null)
                     continue;
-                }
+
                 IResourceWorkspaceLocation libLocation =
-                    (IResourceWorkspaceLocation) build.tapestryBuilder.classpathRoot.getRelativeLocation(
+                    (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot.getRelativeLocation(
                         spec.getLibrarySpecificationPath(libraryId));
-                if (specLocation.exists())
+                if (fSpecLocation.exists())
                 {
                     ICoreNamespace childNamespace =
-                        childResolver.resolveLibrary(frameworkNamespace, libraryId, libLocation);
+                        childResolver.resolveLibrary(fFrameworkNamespace, libraryId, libLocation);
+
                     if (childNamespace != null)
-                    {
-                        resultNamespace.installChildNamespace(libraryId, childNamespace);
-                    }
+                        fResultNamespace.installChildNamespace(libraryId, childNamespace);
                 }
             }
         }
@@ -291,11 +287,11 @@ public class NamespaceResolver
      */
     private void resolveComponents()
     {
-        jwcFiles = getAllJWCFilesForNamespace();
-        for (Iterator iter = jwcFiles.keySet().iterator(); iter.hasNext();)
+        fJwcFiles = getAllJWCFilesForNamespace();
+        for (Iterator iter = fJwcFiles.keySet().iterator(); iter.hasNext();)
         {
             String name = (String) iter.next();
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) jwcFiles.get(name);
+            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fJwcFiles.get(name);
             resolveComponent(name, location);
         }
     }
@@ -309,35 +305,32 @@ public class NamespaceResolver
      */
     private IComponentSpecification resolveComponent(String name, IResourceWorkspaceLocation location)
     {
-        IComponentSpecification result = resultNamespace.getComponentSpecification(name);
+        IComponentSpecification result = fResultNamespace.getComponentSpecification(name);
         if (result != null || location == null)
-        {
             return result;
-        }
 
         result = null;
 
-        if (componentStack.contains(location))
-        {
+        if (fComponentStack.contains(location))
             throw new RuntimeException("poo");
-        }
-        componentStack.push(location);
-        result = build.resolveIComponentSpecification(temporaryNamespace, location);
+
+        fComponentStack.push(location);
+        result = fBuild.resolveIComponentSpecification(fTemporaryNamespace, location);
         if (result != null)
         {
-            resultNamespace.installComponentSpecification(name, result);
-            ((PluginComponentSpecification) result).setNamespace(resultNamespace);
+            fResultNamespace.installComponentSpecification(name, result);
+            ((PluginComponentSpecification) result).setNamespace(fResultNamespace);
         }
-        componentStack.pop();
+        fComponentStack.pop();
         return result;
     }
 
     private Map getAllJWCFilesForNamespace()
     {
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) resultNamespace.getSpecificationLocation();
+        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
 
         Map result = new HashMap();
-        ILibrarySpecification spec = resultNamespace.getSpecification();
+        ILibrarySpecification spec = fResultNamespace.getSpecification();
 
         // pull the ones that are defined in the spec.
         for (Iterator iter = spec.getComponentTypes().iterator(); iter.hasNext();)
@@ -346,8 +339,8 @@ public class NamespaceResolver
             IResourceLocation specLoc = location.getRelativeLocation(spec.getComponentSpecificationPath(type));
             result.put(type, specLoc);
         }
-        
-        NamespaceResourceLookup lookup = resultNamespace.getResourceLookup();
+
+        NamespaceResourceLookup lookup = fResultNamespace.getResourceLookup();
         List jwcs = new ArrayList(Arrays.asList(lookup.find("*", false, lookup.ACCEPT_JWC)));
 
         // remaining typed by thier filename
@@ -386,7 +379,7 @@ public class NamespaceResolver
         */
         public String constructQualifiedName(String name)
         {
-            return resultNamespace.constructQualifiedName(name);
+            return fResultNamespace.constructQualifiedName(name);
         }
 
         /* (non-Javadoc)
@@ -394,7 +387,7 @@ public class NamespaceResolver
          */
         public boolean containsComponentType(String type)
         {
-            return resultNamespace.containsComponentType(type);
+            return fResultNamespace.containsComponentType(type);
         }
 
         /* (non-Javadoc)
@@ -402,7 +395,7 @@ public class NamespaceResolver
          */
         public boolean containsPage(String name)
         {
-            return resultNamespace.containsPage(name);
+            return fResultNamespace.containsPage(name);
         }
 
         /* (non-Javadoc)
@@ -410,7 +403,7 @@ public class NamespaceResolver
          */
         public INamespace deinstallChildNamespace(String id)
         {
-            return resultNamespace.deinstallChildNamespace(id);
+            return fResultNamespace.deinstallChildNamespace(id);
         }
 
         /* (non-Javadoc)
@@ -418,7 +411,7 @@ public class NamespaceResolver
          */
         public IComponentSpecification deinstallComponentSpecification(String type)
         {
-            return resultNamespace.deinstallComponentSpecification(type);
+            return fResultNamespace.deinstallComponentSpecification(type);
         }
 
         /* (non-Javadoc)
@@ -426,7 +419,7 @@ public class NamespaceResolver
          */
         public IComponentSpecification deinstallPageSpecification(String pageName)
         {
-            return resultNamespace.deinstallPageSpecification(pageName);
+            return fResultNamespace.deinstallPageSpecification(pageName);
         }
 
         /* (non-Javadoc)
@@ -434,7 +427,7 @@ public class NamespaceResolver
          */
         public List getChildIds()
         {
-            return resultNamespace.getChildIds();
+            return fResultNamespace.getChildIds();
         }
 
         /* (non-Javadoc)
@@ -442,7 +435,7 @@ public class NamespaceResolver
          */
         public INamespace getChildNamespace(String id)
         {
-            return resultNamespace.getChildNamespace(id);
+            return fResultNamespace.getChildNamespace(id);
         }
 
         /* 
@@ -454,13 +447,11 @@ public class NamespaceResolver
          */
         public IComponentSpecification getComponentSpecification(String type)
         {
-            IComponentSpecification specification = getComponentLookup(frameworkNamespace).lookupSpecification(type);
+            IComponentSpecification specification = getComponentLookup(fFrameworkNamespace).lookupSpecification(type);
             if (specification == null && type.indexOf(':') < 0)
             {
-                if (jwcFiles.containsKey(type))
-                {
-                    specification = resolveComponent(type, (IResourceWorkspaceLocation) jwcFiles.get(type));
-                }
+                if (fJwcFiles.containsKey(type))
+                    specification = resolveComponent(type, (IResourceWorkspaceLocation) fJwcFiles.get(type));
             }
             return specification;
         }
@@ -470,7 +461,7 @@ public class NamespaceResolver
          */
         public List getComponentTypes()
         {
-            return resultNamespace.getComponentTypes();
+            return fResultNamespace.getComponentTypes();
         }
 
         /* (non-Javadoc)
@@ -478,7 +469,7 @@ public class NamespaceResolver
          */
         public String getExtendedId()
         {
-            return resultNamespace.getExtendedId();
+            return fResultNamespace.getExtendedId();
         }
 
         /* (non-Javadoc)
@@ -486,7 +477,7 @@ public class NamespaceResolver
          */
         public String getId()
         {
-            return resultNamespace.getId();
+            return fResultNamespace.getId();
         }
 
         /* (non-Javadoc)
@@ -494,7 +485,7 @@ public class NamespaceResolver
          */
         public ILocation getLocation()
         {
-            return resultNamespace.getLocation();
+            return fResultNamespace.getLocation();
         }
 
         /* (non-Javadoc)
@@ -502,7 +493,7 @@ public class NamespaceResolver
          */
         public String getNamespaceId()
         {
-            return resultNamespace.getId();
+            return fResultNamespace.getId();
         }
 
         /* (non-Javadoc)
@@ -510,7 +501,7 @@ public class NamespaceResolver
          */
         public List getPageNames()
         {
-            return resultNamespace.getPageNames();
+            return fResultNamespace.getPageNames();
         }
 
         /* (non-Javadoc)
@@ -519,7 +510,7 @@ public class NamespaceResolver
         public IComponentSpecification getPageSpecification(String pageName)
         {
             //TODO may not need to build it
-            IComponentSpecification specification = getPageLookup(frameworkNamespace).lookupSpecification(pageName);
+            IComponentSpecification specification = getPageLookup(fFrameworkNamespace).lookupSpecification(pageName);
             return specification;
         }
 
@@ -528,7 +519,7 @@ public class NamespaceResolver
          */
         public INamespace getParentNamespace()
         {
-            return resultNamespace.getParentNamespace();
+            return fResultNamespace.getParentNamespace();
         }
 
         /* (non-Javadoc)
@@ -536,7 +527,7 @@ public class NamespaceResolver
          */
         public String getServiceClassName(String id)
         {
-            return resultNamespace.getServiceClassName(id);
+            return fResultNamespace.getServiceClassName(id);
         }
 
         /* (non-Javadoc)
@@ -544,7 +535,7 @@ public class NamespaceResolver
          */
         public List getServiceNames()
         {
-            return resultNamespace.getServiceNames();
+            return fResultNamespace.getServiceNames();
         }
 
         /* (non-Javadoc)
@@ -552,7 +543,7 @@ public class NamespaceResolver
          */
         public ILibrarySpecification getSpecification()
         {
-            return resultNamespace.getSpecification();
+            return fResultNamespace.getSpecification();
         }
 
         /* (non-Javadoc)
@@ -560,7 +551,7 @@ public class NamespaceResolver
          */
         public IResourceLocation getSpecificationLocation()
         {
-            return resultNamespace.getSpecificationLocation();
+            return fResultNamespace.getSpecificationLocation();
         }
 
         /* (non-Javadoc)
@@ -568,7 +559,7 @@ public class NamespaceResolver
          */
         public void installChildNamespace(String id, INamespace child)
         {
-            resultNamespace.installChildNamespace(id, child);
+            fResultNamespace.installChildNamespace(id, child);
         }
 
         /* (non-Javadoc)
@@ -576,7 +567,7 @@ public class NamespaceResolver
          */
         public void installComponentSpecification(String type, IComponentSpecification spec)
         {
-            resultNamespace.installComponentSpecification(type, spec);
+            fResultNamespace.installComponentSpecification(type, spec);
         }
 
         /* (non-Javadoc)
@@ -584,7 +575,7 @@ public class NamespaceResolver
          */
         public void installPageSpecification(String pageName, IComponentSpecification spec)
         {
-            resultNamespace.installPageSpecification(pageName, spec);
+            fResultNamespace.installPageSpecification(pageName, spec);
         }
 
         /* (non-Javadoc)
@@ -593,7 +584,7 @@ public class NamespaceResolver
         public boolean isApplicationNamespace()
         {
 
-            return resultNamespace.isApplicationNamespace();
+            return fResultNamespace.isApplicationNamespace();
         }
 
         /* (non-Javadoc)
@@ -601,7 +592,7 @@ public class NamespaceResolver
          */
         public void setParentNamespace(ICoreNamespace parent)
         {
-            resultNamespace.setParentNamespace(parent);
+            fResultNamespace.setParentNamespace(parent);
         }
 
         /* (non-Javadoc)
@@ -609,7 +600,7 @@ public class NamespaceResolver
          */
         public ComponentLookup getComponentLookup(ICoreNamespace framework)
         {
-            return resultNamespace.getComponentLookup(framework);
+            return fResultNamespace.getComponentLookup(framework);
         }
 
         /* (non-Javadoc)
@@ -617,7 +608,7 @@ public class NamespaceResolver
          */
         public PageLookup getPageLookup(ICoreNamespace framework)
         {
-            return resultNamespace.getPageLookup(framework);
+            return fResultNamespace.getPageLookup(framework);
         }
 
         /* (non-Javadoc)
@@ -625,7 +616,7 @@ public class NamespaceResolver
          */
         public void setAppNameFromWebXML(String name)
         {
-            resultNamespace.setAppNameFromWebXML(name);
+            fResultNamespace.setAppNameFromWebXML(name);
         }
 
         /* (non-Javadoc)
@@ -633,7 +624,7 @@ public class NamespaceResolver
          */
         public void setResourceLookup(NamespaceResourceLookup lookup)
         {
-            resultNamespace.setResourceLookup(lookup);
+            fResultNamespace.setResourceLookup(lookup);
         }
 
         /* (non-Javadoc)
@@ -641,7 +632,7 @@ public class NamespaceResolver
          */
         public NamespaceResourceLookup getResourceLookup()
         {
-            return resultNamespace.getResourceLookup();
+            return fResultNamespace.getResourceLookup();
         }
 
     }

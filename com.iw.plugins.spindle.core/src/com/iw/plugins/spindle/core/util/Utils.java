@@ -54,10 +54,10 @@ public class Utils
             IType[] superClasses = hierarchy.getAllSupertypes(candidate);
             for (int i = 0; i < superClasses.length; i++)
             {
-                if (superClasses[i].equals(baseType))
-                {
-                    match = true;
-                }
+                match = superClasses[i].equals(baseType);
+                if (match)
+                    break;
+
             }
         }
         return match;
@@ -69,9 +69,8 @@ public class Utils
         {
             IResourceWorkspaceLocation use_loc = (IResourceWorkspaceLocation) loc;
             if (!use_loc.exists())
-            {
                 return null;
-            }
+
             return (IResource) use_loc.getStorage();
         } catch (RuntimeException e)
         {

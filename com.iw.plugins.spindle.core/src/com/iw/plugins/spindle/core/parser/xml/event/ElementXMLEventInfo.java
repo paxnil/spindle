@@ -28,34 +28,29 @@ package com.iw.plugins.spindle.core.parser.xml.event;
 import java.util.HashMap;
 import java.util.Map;
 
-
-public class ElementXMLEventInfo 
+public class ElementXMLEventInfo
 {
 
-    private Map attributeMap;
-    SimpleXMLEventInfo startTagLocation;
-    SimpleXMLEventInfo endTagLocation;
+    private Map fAttributeMap;
+    SimpleXMLEventInfo fStartTagLocation;
+    SimpleXMLEventInfo fEndTagLocation;
 
     public Map getAttributeMap()
     {
-        if (attributeMap == null)
-        {
-            attributeMap = new HashMap();
-        }
-        return attributeMap;
+        if (fAttributeMap == null)
+            fAttributeMap = new HashMap();
+
+        return fAttributeMap;
     }
 
     public SimpleXMLEventInfo getEndTagLocation()
     {
-        return endTagLocation;
+        return fEndTagLocation;
     }
 
     public SimpleXMLEventInfo getStartTagLocation()
     {
-        return startTagLocation;
+        return fStartTagLocation;
     }
-
-    
-    
 
 }

@@ -66,24 +66,20 @@ public class IncrementalApplicationBuild extends Build implements IIncrementalBu
      */
     public boolean canIncrementalBuild(IResourceDelta projectDelta)
     {
-        IResourceWorkspaceLocation contextRoot = tapestryBuilder.contextRoot;
+        IResourceWorkspaceLocation contextRoot = fTapestryBuilder.fContextRoot;
         if (!contextRoot.exists())
-        {
             return false;
-        }
+
         IResourceWorkspaceLocation webXML =
-            (IResourceWorkspaceLocation) tapestryBuilder.contextRoot.getRelativeLocation("WEB-INF/web.xml");
+            (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot.getRelativeLocation("WEB-INF/web.xml");
         if (!webXML.exists())
-        {
             return false;
-        }
+
         IResource resource = (IResource) webXML.getStorage();
         IResourceDelta webXMLDelta = projectDelta.findMember(resource.getProjectRelativePath());
         if (webXMLDelta != null)
-        {
             return false;
-        }
-        
+
         // TODO incremental not implemented - force full build for now
         return false;
     }

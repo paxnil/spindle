@@ -41,9 +41,9 @@ import com.iw.plugins.spindle.core.util.PropertyFiringMap;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class BasePropertyHolder extends BaseSpecification implements IPropertyHolder 
+public class BasePropertyHolder extends BaseSpecification implements IPropertyHolder
 {
-    Map properties;
+    Map fProperties;
 
     /**
      * 
@@ -59,10 +59,10 @@ public class BasePropertyHolder extends BaseSpecification implements IPropertyHo
      */
     public List getPropertyNames()
     {
-        if (properties == null)
+        if (fProperties == null)
             return Collections.EMPTY_LIST;
 
-        List result = new ArrayList(properties.keySet());
+        List result = new ArrayList(fProperties.keySet());
 
         return result;
     }
@@ -78,10 +78,10 @@ public class BasePropertyHolder extends BaseSpecification implements IPropertyHo
             return;
         }
 
-        if (properties == null)
-            properties = new PropertyFiringMap(this, "properties");
+        if (fProperties == null)
+            fProperties = new PropertyFiringMap(this, "properties");
 
-        properties.put(name, value);
+        fProperties.put(name, value);
     }
 
     /* (non-Javadoc)
@@ -89,11 +89,8 @@ public class BasePropertyHolder extends BaseSpecification implements IPropertyHo
      */
     public void removeProperty(String name)
     {
-        if (properties != null)
-        {
-            properties.remove(name);
-        }
-
+        if (fProperties != null)
+            fProperties.remove(name);
     }
 
     /* (non-Javadoc)
@@ -101,12 +98,9 @@ public class BasePropertyHolder extends BaseSpecification implements IPropertyHo
      */
     public String getProperty(String name)
     {
-        if (properties == null)
-        {
+        if (fProperties == null)
             return null;
-        }
 
-        return (String) properties.get(name);
+        return (String) fProperties.get(name);
     }
-
 }

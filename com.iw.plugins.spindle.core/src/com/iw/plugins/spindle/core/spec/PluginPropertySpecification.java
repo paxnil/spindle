@@ -37,10 +37,10 @@ import org.apache.tapestry.spec.IPropertySpecification;
 public class PluginPropertySpecification extends BaseSpecification implements IPropertySpecification
 {
 
-    private String _name;
-    private String _type = "java.lang.Object";
-    private boolean _persistent;
-    private String _initialValue;
+    private String fName;
+    private String fType = "java.lang.Object";
+    private boolean fPersistent;
+    private String fInitialValue;
 
     public PluginPropertySpecification()
     {
@@ -52,7 +52,7 @@ public class PluginPropertySpecification extends BaseSpecification implements IP
      */
     public String getInitialValue()
     {
-        return _initialValue;
+        return fInitialValue;
     }
 
     /* (non-Javadoc)
@@ -60,7 +60,7 @@ public class PluginPropertySpecification extends BaseSpecification implements IP
      */
     public String getName()
     {
-        return _name;
+        return fName;
     }
 
     /* (non-Javadoc)
@@ -68,7 +68,7 @@ public class PluginPropertySpecification extends BaseSpecification implements IP
      */
     public boolean isPersistent()
     {
-        return _persistent;
+        return fPersistent;
     }
 
     /* (non-Javadoc)
@@ -76,7 +76,7 @@ public class PluginPropertySpecification extends BaseSpecification implements IP
      */
     public String getType()
     {
-        return _type;
+        return fType;
     }
 
     /* (non-Javadoc)
@@ -84,9 +84,9 @@ public class PluginPropertySpecification extends BaseSpecification implements IP
      */
     public void setInitialValue(String initialValue)
     {
-        String old = this._initialValue;
-        this._initialValue = initialValue;
-        firePropertyChange("initialValue", old, this._initialValue);
+        String old = fInitialValue;
+        fInitialValue = initialValue;
+        firePropertyChange("initialValue", old, fInitialValue);
     }
 
     /* (non-Javadoc)
@@ -94,9 +94,9 @@ public class PluginPropertySpecification extends BaseSpecification implements IP
      */
     public void setName(String name)
     {
-        String old = this._name;
-        this._name = name;
-        firePropertyChange("name", old, this._name);
+        String old = fName;
+        fName = name;
+        firePropertyChange("name", old, fName);
     }
 
     /* (non-Javadoc)
@@ -104,9 +104,9 @@ public class PluginPropertySpecification extends BaseSpecification implements IP
      */
     public void setPersistent(boolean persistant)
     {
-        boolean old = this._persistent;
-        this._persistent = persistant;
-        firePropertyChange("persistant", old, this._persistent);
+        boolean old = fPersistent;
+        fPersistent = persistant;
+        firePropertyChange("persistant", old, fPersistent);
     }
 
     /* (non-Javadoc)
@@ -114,9 +114,9 @@ public class PluginPropertySpecification extends BaseSpecification implements IP
      */
     public void setType(String type)
     {
-        String old = this._type;
-        this._type = type;
-        firePropertyChange("type", old, this._type);
+        String old = fType;
+        fType = type;
+        firePropertyChange("type", old, fType);
     }
 
 }

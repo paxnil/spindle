@@ -43,14 +43,14 @@ import java.util.Set;
 public class OrderPreservingMap implements Map
 {
 
-    List keys;
-    List values;
+    List fKeys;
+    List fValues;
 
     public OrderPreservingMap()
     {
         super();
-        keys = new ArrayList();
-        values = new ArrayList();
+        fKeys = new ArrayList();
+        fValues = new ArrayList();
     }
 
     /* (non-Javadoc)
@@ -58,8 +58,8 @@ public class OrderPreservingMap implements Map
      */
     public void clear()
     {
-        keys.clear();
-        values.clear();
+        fKeys.clear();
+        fValues.clear();
     }
 
     /* (non-Javadoc)
@@ -67,7 +67,7 @@ public class OrderPreservingMap implements Map
      */
     public boolean containsKey(Object key)
     {
-        return keys.contains(key);
+        return fKeys.contains(key);
     }
 
     /* (non-Javadoc)
@@ -76,7 +76,7 @@ public class OrderPreservingMap implements Map
     public boolean containsValue(Object value)
     {
 
-        return values.contains(value);
+        return fValues.contains(value);
     }
 
     /* (non-Javadoc)
@@ -95,9 +95,8 @@ public class OrderPreservingMap implements Map
     {
         int index = getKeyIndex(key);
         if (index >= 0)
-        {
-            return values.get(index);
-        }
+            return fValues.get(index);
+
         return null;
     }
 
@@ -106,7 +105,7 @@ public class OrderPreservingMap implements Map
      */
     public boolean isEmpty()
     {
-        return keys.isEmpty();
+        return fKeys.isEmpty();
     }
 
     /* (non-Javadoc)
@@ -115,7 +114,7 @@ public class OrderPreservingMap implements Map
     public Set keySet()
     {
 
-        return Collections.unmodifiableSet(new OrderPreservingSet(keys));
+        return Collections.unmodifiableSet(new OrderPreservingSet(fKeys));
     }
 
     /* (non-Javadoc)
@@ -133,13 +132,13 @@ public class OrderPreservingMap implements Map
                 return internalRemove(index);
             } else
             {
-                values.set(index, value);
+                fValues.set(index, value);
             }
         } else
         {
             Assert.isNotNull(value);
-            keys.add(key);
-            values.add(value);
+            fKeys.add(key);
+            fValues.add(value);
 
         }
         return value;
@@ -166,9 +165,8 @@ public class OrderPreservingMap implements Map
     {
         int index = getKeyIndex(key);
         if (index >= 0)
-        {
             return internalRemove(index);
-        }
+
         return null;
     }
 
@@ -177,7 +175,7 @@ public class OrderPreservingMap implements Map
      */
     public int size()
     {
-        return keys.size();
+        return fKeys.size();
     }
 
     /* (non-Javadoc)
@@ -185,18 +183,18 @@ public class OrderPreservingMap implements Map
      */
     public Collection values()
     {
-        return Collections.unmodifiableCollection(values);
+        return Collections.unmodifiableCollection(fValues);
     }
 
     private Object internalRemove(int index)
     {
-        keys.remove(index);
-        return values.remove(index);
+        fKeys.remove(index);
+        return fValues.remove(index);
     }
 
     protected int getKeyIndex(Object key)
     {
-        return keys.indexOf(key);
+        return fKeys.indexOf(key);
     }
 
 }

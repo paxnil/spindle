@@ -42,7 +42,7 @@ public class PluginStaticBeanInitializer extends AbstractPluginBeanInitializer
      */
     public PluginStaticBeanInitializer()
     {
-        super(BaseSpecification.FIELD_BEAN_INIT);
+        super(BaseSpecification.STATIC_BEAN_INIT);
     }
 
 }

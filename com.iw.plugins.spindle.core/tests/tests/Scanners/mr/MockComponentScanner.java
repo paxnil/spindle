@@ -49,15 +49,15 @@ public class MockComponentScanner extends ComponentScanner
 {   
     
     public void resetForTestingOnly() {
-       problems.clear(); 
+       fProblems.clear(); 
     }
 
     public MockComponentScanner(Parser theParser, SpecFactory factory, IScannerValidator aValidator) {
         super();
-        parser = theParser;
+        fParser = theParser;
         specificationFactory = factory;
-        validator = aValidator;
-        validator.setProblemCollector(this);        
+        fValidator = aValidator;
+        fValidator.setProblemCollector(this);        
     }
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.ComponentScanner#scanAsset(org.apache.tapestry.spec.IComponentSpecification, org.w3c.dom.Node, org.apache.tapestry.spec.AssetType, java.lang.String)

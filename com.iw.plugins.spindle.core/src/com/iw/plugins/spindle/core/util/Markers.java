@@ -51,12 +51,9 @@ public class Markers
     public static void addTapestryProblemMarkersToResource(IResource resource, IProblem[] problems)
     {
         if (problems.length > 0)
-        {
             for (int i = 0; i < problems.length; i++)
-            {
                 addTapestryProblemMarkerToResource(resource, problems[i]);
-            }
-        }
+
     }
 
     public static void addTapestryProblemMarkerToResource(IResource resource, IProblem problem)
@@ -66,7 +63,12 @@ public class Markers
             IMarker marker = resource.createMarker(problem.getType());
 
             marker.setAttributes(
-                new String[] { IMarker.MESSAGE, IMarker.SEVERITY, IMarker.LINE_NUMBER, IMarker.CHAR_START, IMarker.CHAR_END },
+                new String[] {
+                    IMarker.MESSAGE,
+                    IMarker.SEVERITY,
+                    IMarker.LINE_NUMBER,
+                    IMarker.CHAR_START,
+                    IMarker.CHAR_END },
                 new Object[] {
                     problem.getMessage(),
                     new Integer(problem.getSeverity()),
@@ -80,7 +82,11 @@ public class Markers
 
     }
 
-    public static void addTapestryProblemMarkerToResource(IResource resource, String message, int severity, ISourceLocation source)
+    public static void addTapestryProblemMarkerToResource(
+        IResource resource,
+        String message,
+        int severity,
+        ISourceLocation source)
     {
 
         addTapestryProblemMarkerToResource(
@@ -146,7 +152,12 @@ public class Markers
             IMarker marker = resource.createMarker(markerTag);
 
             marker.setAttributes(
-                new String[] { IMarker.MESSAGE, IMarker.SEVERITY, IMarker.LINE_NUMBER, IMarker.CHAR_START, IMarker.CHAR_END },
+                new String[] {
+                    IMarker.MESSAGE,
+                    IMarker.SEVERITY,
+                    IMarker.LINE_NUMBER,
+                    IMarker.CHAR_START,
+                    IMarker.CHAR_END },
                 new Object[] { message, severity, lineNumber, charStart, charEnd });
         } catch (CoreException e)
         {
@@ -187,8 +198,9 @@ public class Markers
     {
         try
         {
-            if (iProject != null && iProject.exists()) {
-            
+            if (iProject != null && iProject.exists())
+            {
+
                 iProject.deleteMarkers(Markers.TAPESTRY_MARKER_TAG, false, IResource.DEPTH_INFINITE);
                 iProject.deleteMarkers(Markers.TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
                 iProject.deleteMarkers(Markers.TAPESTRY_BUILBROKEN_TAG, false, IResource.DEPTH_ZERO);

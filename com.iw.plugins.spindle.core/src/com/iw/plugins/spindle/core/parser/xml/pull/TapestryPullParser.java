@@ -34,9 +34,10 @@ import com.iw.plugins.spindle.core.util.Assert;
  */
 public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHandler
 {
+    static public boolean Debug = true;
 
     /* a fast stack, not threadsafe! */
-    class NodeStack extends ArrayList
+    static private class NodeStack extends ArrayList
     {
         private int last = -1;
 
@@ -98,25 +99,22 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     }
 
     /** need this so that the parser can stop itself **/
-    private TapestryPullParserConfiguration configuration;
+    private TapestryPullParserConfiguration fConfiguration;
 
     /** preserve the current state of the parse **/
-    private NodeStack parseStack = new NodeStack();
+    private NodeStack fParseStack = new NodeStack();
 
-    private ISourceLocationResolver resolver;
-
-    /* debug flag, set to false when this code goes into production! */
-    private boolean debug = true;
+    private ISourceLocationResolver fResolver;
 
     /* various flags*/
-    private boolean documentStarted;
-    private boolean dtdIsDone = false;
-    private boolean rootElementSeen;
-    private boolean documentIsDone;
+    private boolean fDocumentStarted;
+    private boolean fDtdIsDone = false;
+    private boolean fRootElementSeen;
+    private boolean fDocumentIsDone;
 
-    private String publicId;
-    private PullParserNode rootElement;
-    private PullParserNode lastCompletedElement;
+    private String fPublicId;
+    private PullParserNode fRootElement;
+    private PullParserNode fLastCompletedElement;
 
     /**
      * @param config
@@ -125,7 +123,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     {
         super(config);
         Assert.isLegal(config instanceof XMLPullParserConfiguration);
-        this.configuration = (TapestryPullParserConfiguration) config;
+        fConfiguration = (TapestryPullParserConfiguration) config;
     }
 
     /* 
@@ -136,11 +134,11 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     protected void reset() throws XNIException
     {
         super.reset();
-        documentStarted = false;
-        rootElementSeen = false;
-        rootElement = null;
-        documentIsDone = false;
-        parseStack.clear();
+        fDocumentStarted = false;
+        fRootElementSeen = false;
+        fRootElement = null;
+        fDocumentIsDone = false;
+        fParseStack.reset();
     }
 
     private void checkSanity() throws RuntimeException
@@ -161,12 +159,10 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
      */
     public void setSourceResolver(ISourceLocationResolver resolver)
     {
-        this.resolver = resolver;
+        this.fResolver = resolver;
     }
 
     /**
-     * 
-     * 
      * Internal method to bump the parser.
      * 
      * Usually called by instances of PullParserNode
@@ -181,8 +177,9 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         checkSanity();
         try
         {
-            System.err.println("pp bump");
-            return configuration.parse();
+            if (Debug)
+                System.err.println("pp bump");
+            return fConfiguration.parse();
         } catch (IOException e)
         {
             throw new XNIException(e.getMessage());
@@ -197,29 +194,28 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
      * @see org.apache.xerces.xni.XMLDocumentHandler#characters(org.apache.xerces.xni.XMLString, org.apache.xerces.xni.Augmentations)
      */
     public void characters(XMLString text, Augmentations augs) throws XNIException
-    {        
+    {
         super.characters(text, augs);
-        System.out.println("characters: " + text);
-        if (!rootElementSeen) {
+        if (Debug)
+            System.out.println("characters: " + text);
+        if (!fRootElementSeen)
             // do nothing
             return;
-        }
-        
-        
-        PullParserNode parent = parseStack.peek();
+
+        PullParserNode parent = fParseStack.peek();
         PullParserNode temp = PullParserNode.createTextNode(this, parent, text.toString());
-        if (parent.firstChild == null)
+        if (parent.fFirstChild == null)
         {
             parent.setFirstChild(temp);
 
         } else
         {
-            temp.setPreviousSibling(lastCompletedElement);
-            lastCompletedElement.setNextSibling(temp);
+            temp.setPreviousSibling(fLastCompletedElement);
+            fLastCompletedElement.setNextSibling(temp);
         }
         temp.completed();
         temp.setEmpty();
-        lastCompletedElement = temp;
+        fLastCompletedElement = temp;
     }
 
     /* (non-Javadoc)
@@ -230,8 +226,10 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     {
 
         super.doctypeDecl(rootElement, publicId, systemId, augs);
-        this.publicId = publicId;
-        System.out.println("doctype decl: [root|publicId|systemId] " + rootElement + "|" + publicId + "|" + systemId);
+        this.fPublicId = publicId;
+        if (Debug)
+            System.out.println(
+                "doctype decl: [root|publicId|systemId] " + rootElement + "|" + publicId + "|" + systemId);
     }
 
     /* (non-Javadoc)
@@ -239,10 +237,10 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
      */
     public void emptyElement(QName element, XMLAttributes attributes, Augmentations augs) throws XNIException
     {
-        // TODO Auto-generated method stub
         super.emptyElement(element, attributes, augs);
-        System.out.println("emptyElement: " + element.rawname);
-        lastCompletedElement.setEmpty();
+        if (Debug)
+            System.out.println("emptyElement: " + element.rawname);
+        fLastCompletedElement.setEmpty();
 
     }
 
@@ -252,8 +250,9 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     public void endDocument(Augmentations augs) throws XNIException
     {
         super.endDocument(augs);
-        documentIsDone = true;
-        System.out.println("endDocument: ");
+        fDocumentIsDone = true;
+        if (Debug)
+            System.out.println("endDocument: ");
     }
 
     /* (non-Javadoc)
@@ -261,25 +260,22 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
      */
     public void endElement(QName element, Augmentations augs) throws XNIException
     {
-        // TODO Auto-generated method stub
-
         // find the last one, finish him up, pop off the stack
         super.endElement(element, augs);
-        System.out.println("endElement: " + element.rawname);
-        parseStack.dump(System.err);
+        if (Debug)
+            System.out.println("endElement: " + element.rawname);
+        fParseStack.dump(System.err);
 
-        lastCompletedElement = parseStack.pop();
-        if (lastCompletedElement != null)
-        {
-            lastCompletedElement.completed();
-        }
+        fLastCompletedElement = fParseStack.pop();
+        if (fLastCompletedElement != null)
+            fLastCompletedElement.completed();
+
         //we don't want to stop parsing if the only
         // element left on the stack is root!
-        if (parseStack.peek() != rootElement)
-        {
-            configuration.stopParsing();
-        }
-        parseStack.dump(System.err);
+        if (fParseStack.peek() != fRootElement)
+            fConfiguration.stopParsing();
+
+        fParseStack.dump(System.err);
     }
 
     /* (non-Javadoc)
@@ -289,8 +285,9 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     {
         super.startDocument(locator, encoding, augs);
         reset();
-        documentStarted = true;
-        System.out.println("startDocument: ");
+        fDocumentStarted = true;
+        if (Debug)
+            System.out.println("startDocument: ");
     }
 
     /* (non-Javadoc)
@@ -299,39 +296,40 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     public void startElement(QName element, XMLAttributes attributes, Augmentations augs) throws XNIException
     {
         super.startElement(element, attributes, augs);
-        System.out.println("startElement: " + element.rawname);
-        parseStack.dump(System.err);
-        if (!dtdIsDone)
-        {} else if (!rootElementSeen)
+        if (Debug)
+            System.out.println("startElement: " + element.rawname);
+        fParseStack.dump(System.err);
+        if (!fDtdIsDone)
+        {} else if (!fRootElementSeen)
         {
 
-            rootElementSeen = true;
+            fRootElementSeen = true;
             // minor change, we need to save a reference to the root node!
-            rootElement = PullParserNode.createElementNode(this, null, element.rawname, attributes);
-            parseStack.push(rootElement);
+            fRootElement = PullParserNode.createElementNode(this, null, element.rawname, attributes);
+            fParseStack.push(fRootElement);
         } else
         {
-            PullParserNode parent = parseStack.peek();
+            PullParserNode parent = fParseStack.peek();
             PullParserNode temp = PullParserNode.createElementNode(this, parent, element.rawname, attributes);
-            if (parent.firstChild == null)
+            if (parent.fFirstChild == null)
             {
                 parent.setFirstChild(temp);
 
             } else
             {
-                temp.setPreviousSibling(lastCompletedElement);
-                lastCompletedElement.setNextSibling(temp);
+                temp.setPreviousSibling(fLastCompletedElement);
+                fLastCompletedElement.setNextSibling(temp);
             }
-            parseStack.push(temp);
+            fParseStack.push(temp);
 
         }
-        configuration.stopParsing();
+        fConfiguration.stopParsing();
         int length = attributes.getLength();
         for (int i = 0; i < length; i++)
         {
             System.out.println("\t\t" + attributes.getQName(i) + "='" + attributes.getNonNormalizedValue(i) + "'");
         }
-        parseStack.dump(System.err);
+        fParseStack.dump(System.err);
     }
 
     /* (non-Javadoc)
@@ -339,354 +337,54 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
      */
     public void xmlDecl(String version, String encoding, String standalone, Augmentations augs) throws XNIException
     {
-        // TODO Auto-generated method stub
         super.xmlDecl(version, encoding, standalone, augs);
-        System.out.println("xmlDecl : [version|encoding|standalone] " + version + "|" + encoding + "|" + standalone);
+        if (Debug)
+            System.out.println(
+                "xmlDecl : [version|encoding|standalone] " + version + "|" + encoding + "|" + standalone);
 
     }
-
-    //    /* ********************************************************** 
-    //     *  END OF  org.apache.xerces.xni.XMLDocumentHandler Stuff      
-    //     * **********************************************************/
-    //
-    //    /* **************************************** 
-    //     *    org.w3c.dom.Node Stuff      
-    //     * ****************************************/
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#appendChild(org.w3c.dom.Node)
-    //     */
-    //    public Node appendChild(Node arg0) throws DOMException
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#cloneNode(boolean)
-    //     */
-    //    public Node cloneNode(boolean arg0)
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getAttributes()
-    //     */
-    //    public NamedNodeMap getAttributes()
-    //    {
-    //        checkSanity(false);
-    //        return seenStates.peek().getAttributes();
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getChildNodes()
-    //     */
-    //    public NodeList getChildNodes()
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getFirstChild()
-    //     */
-    //    public Node getFirstChild()
-    //    {
-    //        checkSanity(false);
-    //        State current = seenStates.peek();
-    //        next();
-    //        if (documentIsDone || current.isComplete())
-    //        {
-    //            return null;
-    //        }
-    //        return this;
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getLastChild()
-    //     */
-    //    public Node getLastChild()
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getLocalName()
-    //     */
-    //    public String getLocalName()
-    //    {
-    //        checkSanity(false);
-    //        return seenStates.peek().getLocalName();
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getNamespaceURI()
-    //     */
-    //    public String getNamespaceURI()
-    //    {
-    //        checkSanity(false);
-    //        return seenStates.peek().getNamespaceURI();
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getNextSibling()
-    //     */
-    //    public Node getNextSibling()
-    //    {
-    //        checkSanity(false);
-    //        State current = seenStates.peek();
-    //        if (!current.isComplete())
-    //        {
-    //            while (!current.isComplete())
-    //            {
-    //                next();
-    //            }
-    //        }
-    //        if (documentIsDone)
-    //        {
-    //            return null;
-    //        }
-    //        return this;
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getNodeName()
-    //     */
-    //    public String getNodeName()
-    //    {
-    //        checkSanity(false);
-    //        return seenStates.peek().getNodeName();
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getNodeType()
-    //     */
-    //    public short getNodeType()
-    //    {
-    //        checkSanity(false);
-    //        return seenStates.peek().getNodeType();
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getNodeValue()
-    //     */
-    //    public String getNodeValue() throws DOMException
-    //    {
-    //        checkSanity(false);
-    //        return seenStates.peek().getNodeValue();
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getOwnerDocument()
-    //     */
-    //    public Document getOwnerDocument()
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getParentNode()
-    //     */
-    //    public Node getParentNode()
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getPrefix()
-    //     */
-    //    public String getPrefix()
-    //    {
-    //        checkSanity(false);
-    //        return seenStates.peek().getPrefix();
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#getPreviousSibling()
-    //     */
-    //    public Node getPreviousSibling()
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#hasAttributes()
-    //     */
-    //    public boolean hasAttributes()
-    //    {
-    //        checkSanity(false);
-    //        return seenStates.peek().hasAttributes();
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#hasChildNodes()
-    //     */
-    //    public boolean hasChildNodes()
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#insertBefore(org.w3c.dom.Node, org.w3c.dom.Node)
-    //     */
-    //    public Node insertBefore(Node arg0, Node arg1) throws DOMException
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#isSupported(java.lang.String, java.lang.String)
-    //     */
-    //    public boolean isSupported(String arg0, String arg1)
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#normalize()
-    //     */
-    //    public void normalize()
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#removeChild(org.w3c.dom.Node)
-    //     */
-    //    public Node removeChild(Node arg0) throws DOMException
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#replaceChild(org.w3c.dom.Node, org.w3c.dom.Node)
-    //     */
-    //    public Node replaceChild(Node arg0, Node arg1) throws DOMException
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#setNodeValue(java.lang.String)
-    //     */
-    //    public void setNodeValue(String arg0) throws DOMException
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.w3c.dom.Node#setPrefix(java.lang.String)
-    //     */
-    //    public void setPrefix(String arg0) throws DOMException
-    //    {
-    //        throw new IllegalStateException("not supported");
-    //    }
-    //
-    //    /* **************************************** 
-    //     *   END OF org.w3c.dom.Node Stuff      
-    //     * ****************************************/
-    //
-    //    /* **************************************** 
-    //     *    XML Error Handler Stuff      
-    //     * ****************************************/
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.apache.xerces.xni.parser.XMLErrorHandler#error(java.lang.String, java.lang.String, org.apache.xerces.xni.parser.XMLParseException)
-    //     */
-    //    public void error(String domain, String key, XMLParseException exception) throws XNIException
-    //    {
-    //        // TODO Auto-generated method stub
-    //        System.err.println("error");
-    //        exception.printStackTrace(System.err);
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.apache.xerces.xni.parser.XMLErrorHandler#fatalError(java.lang.String, java.lang.String, org.apache.xerces.xni.parser.XMLParseException)
-    //     */
-    //    public void fatalError(String domain, String key, XMLParseException exception) throws XNIException
-    //    {
-    //        System.err.println("fatalError");
-    //        exception.printStackTrace(System.err);
-    //        throw new ParserRuntimeException(exception);
-    //
-    //    }
-    //
-    //    /* (non-Javadoc)
-    //     * @see org.apache.xerces.xni.parser.XMLErrorHandler#warning(java.lang.String, java.lang.String, org.apache.xerces.xni.parser.XMLParseException)
-    //     */
-    //    public void warning(String domain, String key, XMLParseException exception) throws XNIException
-    //    {
-    //        System.err.println("fatalError");
-    //        exception.printStackTrace(System.err);
-    //        throw exception;
-    //
-    //    }
-    //
-    //
-    //
-    //    /* **************************************** 
-    //     *    END of XML Error Handler Stuff      
-    //     * ****************************************/
 
     /* (non-Javadoc)
      * @see org.apache.xerces.xni.parser.XMLErrorHandler#error(java.lang.String, java.lang.String, org.apache.xerces.xni.parser.XMLParseException)
      */
     public void error(String arg0, String arg1, XMLParseException arg2) throws XNIException
-    {
-        // TODO Auto-generated method stub
-
-    }
+    {}
 
     /* (non-Javadoc)
      * @see org.apache.xerces.xni.parser.XMLErrorHandler#fatalError(java.lang.String, java.lang.String, org.apache.xerces.xni.parser.XMLParseException)
      */
     public void fatalError(String arg0, String arg1, XMLParseException arg2) throws XNIException
-    {
-        // TODO Auto-generated method stub
-
-    }
+    {}
 
     /* (non-Javadoc)
      * @see org.apache.xerces.xni.parser.XMLErrorHandler#warning(java.lang.String, java.lang.String, org.apache.xerces.xni.parser.XMLParseException)
      */
     public void warning(String arg0, String arg1, XMLParseException arg2) throws XNIException
-    {
-        // TODO Auto-generated method stub
-
-    }
+    {}
 
     /* (non-Javadoc)
      * @see org.apache.xerces.xni.XMLDTDHandler#endDTD(org.apache.xerces.xni.Augmentations)
      */
     public void endDTD(Augmentations arg0) throws XNIException
     {
-        dtdIsDone = true;
+        fDtdIsDone = true;
         super.endDTD(arg0);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.xerces.xni.XMLDTDHandler#startDTD(org.apache.xerces.xni.XMLLocator, org.apache.xerces.xni.Augmentations)
-     */
-    public void startDTD(XMLLocator arg0, Augmentations arg1) throws XNIException
-    {
-        // TODO Auto-generated method stub
-        super.startDTD(arg0, arg1);
-    }
-
     /**
-     * @return
+     * @return String the public id of the DTD
      */
     public String getPublicId()
     {
-        return publicId;
+        return fPublicId;
     }
 
     /**
-     * @return
+     * @return Node the root node of the document
      */
     public Node getRootNode()
     {
-
-        return rootElement;
+        return fRootElement;
     }
 
 }

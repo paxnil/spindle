@@ -40,70 +40,72 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 public abstract class AbstractLookup
 {
 
-    private ICoreNamespace frameworkNamespace;
+    private ICoreNamespace fFrameworkNamespace;
 
-    private ICoreNamespace namespace;
+    private ICoreNamespace fNamespace;
 
-    private IResourceWorkspaceLocation rootLocation;
+    private IResourceWorkspaceLocation fRootLocation;
 
-    private IResourceWorkspaceLocation webInfLocation;
+    private IResourceWorkspaceLocation fWebInfLocation;
 
-    private IResourceWorkspaceLocation webInfAppLocation;
+    private IResourceWorkspaceLocation fWebInfAppLocation;
 
     public void configure(ICoreNamespace namespace, ICoreNamespace frameworkNamespace)
     {
-        this.namespace = namespace;
-        this.rootLocation = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
-        webInfLocation = null;
-        webInfAppLocation = null;
+        this.fNamespace = namespace;
+        this.fRootLocation = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
+        fWebInfLocation = null;
+        fWebInfAppLocation = null;
     }
 
     public void configure(ICoreNamespace namespace, ICoreNamespace frameworkNamespace, String appNameFromWebXML)
     {
-        this.namespace = namespace;
-        this.rootLocation = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
-        webInfLocation = (IResourceWorkspaceLocation) rootLocation.getRelativeLocation("WEB-INF");
-        webInfAppLocation = (IResourceWorkspaceLocation) webInfLocation.getRelativeLocation(appNameFromWebXML);
+        this.fNamespace = namespace;
+        this.fRootLocation = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
+        fWebInfLocation = (IResourceWorkspaceLocation) fRootLocation.getRelativeLocation("WEB-INF");
+        fWebInfAppLocation = (IResourceWorkspaceLocation) fWebInfLocation.getRelativeLocation(appNameFromWebXML);
     }
 
     protected IResourceWorkspaceLocation getRootLocation()
     {
-        return rootLocation;
+        return fRootLocation;
     }
     protected IResourceWorkspaceLocation getWebInfLocation()
     {
-        return webInfLocation;
+        return fWebInfLocation;
     }
 
     protected IResourceWorkspaceLocation getWebInfAppLocation()
     {
-        return webInfAppLocation;
+        return fWebInfAppLocation;
     }
 
     protected ICoreNamespace getNamespace()
     {
-        return namespace;
+        return fNamespace;
     }
-    
-    protected ICoreNamespace getFrameworkNamespace() {
-        return frameworkNamespace;
+
+    protected ICoreNamespace getFrameworkNamespace()
+    {
+        return fFrameworkNamespace;
     }
 
     public IComponentSpecification lookupSpecification(String name)
     {
         int colonx = name.indexOf(':');
-    
+
         if (colonx > 0)
         {
             String libraryId = name.substring(0, colonx);
             String simpleType = name.substring(colonx + 1);
-    
+
             return lookupSpecification(libraryId, simpleType);
         } else
+        {
             return lookupSpecification(null, name);
+        }
     }
-    
-   
+
     protected abstract IComponentSpecification lookupSpecification(String libraryId, String type);
 
 }

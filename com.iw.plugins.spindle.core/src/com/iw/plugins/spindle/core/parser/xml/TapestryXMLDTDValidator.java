@@ -45,9 +45,9 @@ import org.apache.xerces.xni.parser.XMLConfigurationException;
 public class TapestryXMLDTDValidator extends XMLDTDValidator
 {
 
-    private boolean seenRootElement;
-    private String publicId;
-    private XMLGrammarPoolImpl grammarPool;
+    private boolean fSeenRootElement;
+    private String fPublicId;
+    private XMLGrammarPoolImpl fGrammarPool;
     /**
      * 
      */
@@ -59,9 +59,10 @@ public class TapestryXMLDTDValidator extends XMLDTDValidator
     /* (non-Javadoc)
      * @see org.apache.xerces.xni.XMLDocumentHandler#doctypeDecl(java.lang.String, java.lang.String, java.lang.String, org.apache.xerces.xni.Augmentations)
      */
-    public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs) throws XNIException
+    public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs)
+        throws XNIException
     {
-        this.publicId = publicId;
+        this.fPublicId = publicId;
         super.doctypeDecl(rootElement, publicId, systemId, augs);
     }
 
@@ -72,13 +73,11 @@ public class TapestryXMLDTDValidator extends XMLDTDValidator
      */
     protected void handleStartElement(QName element, XMLAttributes attributes) throws XNIException
     {
-        if (!seenRootElement)
+        if (!fSeenRootElement)
         {
-            seenRootElement = true;
+            fSeenRootElement = true;
             if (fDTDGrammar == null)
-            {
-                fDTDGrammar = getGrammar(publicId);
-            }
+                fDTDGrammar = getGrammar(fPublicId);
         }
         super.handleStartElement(element, attributes);
 
@@ -90,10 +89,9 @@ public class TapestryXMLDTDValidator extends XMLDTDValidator
      */
     private DTDGrammar getGrammar(String publicId)
     {
-        if (grammarPool != null && publicId != null)
-        {
-            return (DTDGrammar) grammarPool.getGrammar(publicId);
-        }
+        if (fGrammarPool != null && publicId != null)
+            return (DTDGrammar) fGrammarPool.getGrammar(publicId);
+
         return null;
     }
 
@@ -106,7 +104,7 @@ public class TapestryXMLDTDValidator extends XMLDTDValidator
         super.setProperty(propertyId, value);
         if (propertyId.equals(XMLDTDValidator.GRAMMAR_POOL))
         {
-            grammarPool = (XMLGrammarPoolImpl) value;
+            fGrammarPool = (XMLGrammarPoolImpl) value;
         }
     }
 
@@ -115,15 +113,16 @@ public class TapestryXMLDTDValidator extends XMLDTDValidator
      */
     public void reset(XMLComponentManager componentManager) throws XMLConfigurationException
     {
-        if (grammarPool == null) {
-            grammarPool = (XMLGrammarPoolImpl)componentManager.getProperty("http://apache.org/xml/properties/internal/grammar-pool");
-        }
-        if (grammarPool != null && fDTDGrammar != null)
-        {
-            grammarPool.putGrammar(publicId, fDTDGrammar);
-        }
-        seenRootElement = false;
-        publicId = null;
+        if (fGrammarPool == null)
+            fGrammarPool =
+                (XMLGrammarPoolImpl) componentManager.getProperty(
+                    "http://apache.org/xml/properties/internal/grammar-pool");
+
+        if (fGrammarPool != null && fDTDGrammar != null)
+            fGrammarPool.putGrammar(fPublicId, fDTDGrammar);
+
+        fSeenRootElement = false;
+        fPublicId = null;
         super.reset(componentManager);
     }
 

@@ -66,13 +66,11 @@ public class XMLUtil
     {
 
         if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID))
-        {
             return DTD_1_3;
-        }
+
         if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_4_PUBLIC_ID))
-        {
             return DTD_1_4;
-        }
+
         return UNKNOWN_DTD;
     }
 
@@ -150,7 +148,10 @@ public class XMLUtil
         writer.println();
     }
 
-    public static void writeApplicationSpecification(PrintWriter writer, PluginApplicationSpecification application, int indent)
+    public static void writeApplicationSpecification(
+        PrintWriter writer,
+        PluginApplicationSpecification application,
+        int indent)
     {
 
         XMLUtil.writeXMLHeader(application.getPublicId(), "application", writer);
@@ -179,10 +180,10 @@ public class XMLUtil
         Indenter.printIndented(writer, indent, "<configure property-name=\"");
         writer.print(config.getIdentifier());
         writer.print("\" type=\"");
-        writer.print(config.classToString.get(config.type));
+        writer.print(config.classToString.get(config.fType));
         writer.println("\">");
 
-        Indenter.printlnIndented(writer, indent + 1, config.valueObject.toString());
+        Indenter.printlnIndented(writer, indent + 1, config.fValueObject.toString());
 
         Indenter.printlnIndented(writer, indent, "</configure>");
 
@@ -198,9 +199,7 @@ public class XMLUtil
         writer.print("\"");
 
         if (spec.isImmediate())
-        {
             writer.print(" immediate=\"yes\"");
-        }
 
         List propertyNames = spec.getPropertyNames();
         Map configurations = spec.getConfiguration();
@@ -214,9 +213,8 @@ public class XMLUtil
             writer.println(">");
 
             if (hasProperties)
-            {
                 writeProperties(spec, writer, indent + 1, false);
-            }
+
             if (hasConfiguration)
             {
                 if (configurations != null && !configurations.isEmpty())
@@ -224,7 +222,8 @@ public class XMLUtil
                     for (Iterator iter = configurations.keySet().iterator(); iter.hasNext();)
                     {
                         String propertyName = (String) iter.next();
-                        PluginExtensionConfiguration config = (PluginExtensionConfiguration) configurations.get(propertyName);
+                        PluginExtensionConfiguration config =
+                            (PluginExtensionConfiguration) configurations.get(propertyName);
                         writeExtensionConfiguration(writer, config, indent + 1);
                     }
                 }
@@ -247,9 +246,8 @@ public class XMLUtil
         if (description != null && !"".equals(description.trim()))
         {
             if (nextLine)
-            {
                 writer.println();
-            }
+
             boolean tooLong = description.length() > 40;
             boolean singleLine = description.indexOf("\r") <= 0 && description.indexOf("\n") <= 0;
             Indenter.printIndented(writer, indent, "<description>");
@@ -300,15 +298,18 @@ public class XMLUtil
         writeProperties(propertyHolder, writer, indent, true);
     }
 
-    public static void writeProperties(IPropertyHolder propertyHolder, PrintWriter writer, int indent, boolean nextLine)
+    public static void writeProperties(
+        IPropertyHolder propertyHolder,
+        PrintWriter writer,
+        int indent,
+        boolean nextLine)
     {
         Collection properties = propertyHolder.getPropertyNames();
         if (properties != null)
         {
             if (nextLine)
-            {
                 writer.println();
-            }
+
             Iterator propertyNames = new TreeSet(properties).iterator();
             while (propertyNames.hasNext())
             {
@@ -325,10 +326,7 @@ public class XMLUtil
 
             Iterator pageNames = new TreeSet(pageMap.keySet()).iterator();
             if (pageNames.hasNext())
-            {
-
                 writer.println();
-            }
 
             while (pageNames.hasNext())
             {
@@ -351,10 +349,8 @@ public class XMLUtil
 
             Iterator componentAliases = new TreeSet(componentMap.keySet()).iterator();
             if (componentAliases.hasNext())
-            {
-
                 writer.println();
-            }
+
             while (componentAliases.hasNext())
             {
 
@@ -375,11 +371,8 @@ public class XMLUtil
 
             Iterator libraryNames = new TreeSet(libraryMap.keySet()).iterator();
             if (libraryNames.hasNext())
-            {
-
                 writer.println();
 
-            }
             while (libraryNames.hasNext())
             {
 
@@ -446,20 +439,20 @@ public class XMLUtil
             case XMLUtil.DTD_1_2 :
                 writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
                 break;
-                
+
             case XMLUtil.DTD_1_3 :
                 writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd\">");
                 break;
-                
+
             case XMLUtil.DTD_1_4 :
                 writer.println("      \"http://jakarta.apache.org/tapestry/dtd/Tapestry_1_4.dtd\">");
                 break;
-                
+
             default :
                 Assert.isTrue(false, "unknown DTD: " + publicId);
                 break;
         }
-        
+
         writer.println(TapestryCore.getString("TAPESTRY.xmlComment"));
     }
 
@@ -469,9 +462,8 @@ public class XMLUtil
         {
             Iterator serviceNames = new TreeSet(serviceMap.keySet()).iterator();
             if (serviceNames.hasNext())
-            {
                 writer.println();
-            }
+
             while (serviceNames.hasNext())
             {
                 String serviceName = (String) serviceNames.next();

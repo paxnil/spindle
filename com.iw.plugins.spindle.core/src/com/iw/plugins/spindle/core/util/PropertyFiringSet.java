@@ -39,35 +39,35 @@ import java.util.Collection;
  */
 public class PropertyFiringSet extends OrderPreservingSet
 {
-    protected Object parent;
-    private String propertyName;
+    protected Object fParent;
+    private String fPropertyName;
 
-    private PropertyChangeSupport propertySupport;
+    private PropertyChangeSupport fPropertySupport;
 
     public PropertyFiringSet(Object parent, String propertyName)
     {
         super();
         Assert.isNotNull(parent);
         Assert.isNotNull(propertyName);
-        propertySupport = new PropertyChangeSupport(this);
-        this.propertyName = propertyName;
-        this.parent = parent;
+        fPropertySupport = new PropertyChangeSupport(this);
+        this.fPropertyName = propertyName;
+        this.fParent = parent;
     }
 
     public PropertyFiringSet(PropertyChangeListener parent, String propertyName)
     {
         this((Object) parent, propertyName);
-        propertySupport.addPropertyChangeListener(parent);
+        fPropertySupport.addPropertyChangeListener(parent);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener)
     {
-        propertySupport.addPropertyChangeListener(listener);
+        fPropertySupport.addPropertyChangeListener(listener);
     }
 
     public void removePropertyChangeListener(PropertyChangeListener listener)
     {
-        propertySupport.removePropertyChangeListener(listener);
+        fPropertySupport.removePropertyChangeListener(listener);
     }
 
     /* (non-Javadoc)
@@ -77,9 +77,8 @@ public class PropertyFiringSet extends OrderPreservingSet
     {
         boolean result = super.add(arg0);
         if (result)
-        {
             firePropertyChange(null, arg0);
-        }
+
         return result;
     }
 
@@ -90,9 +89,7 @@ public class PropertyFiringSet extends OrderPreservingSet
     {
         boolean result = super.addAll(arg0);
         if (result)
-        {
             firePropertyChange(this, this);
-        }
 
         return result;
     }
@@ -108,7 +105,7 @@ public class PropertyFiringSet extends OrderPreservingSet
 
     private void firePropertyChange(Object oldValue, Object newValue)
     {
-        propertySupport.firePropertyChange(new PropertyChangeEvent(parent, propertyName, oldValue, newValue));
+        fPropertySupport.firePropertyChange(new PropertyChangeEvent(fParent, fPropertyName, oldValue, newValue));
     }
 
     /* (non-Javadoc)
@@ -118,9 +115,7 @@ public class PropertyFiringSet extends OrderPreservingSet
     {
         boolean result = super.remove(arg0);
         if (result)
-        {
             firePropertyChange(arg0, null);
-        }
 
         return result;
     }
@@ -132,9 +127,7 @@ public class PropertyFiringSet extends OrderPreservingSet
     {
         boolean result = super.removeAll(arg0);
         if (result)
-        {
             firePropertyChange(this, this);
-        }
 
         return result;
     }
@@ -146,9 +139,7 @@ public class PropertyFiringSet extends OrderPreservingSet
     {
         boolean result = super.retainAll(arg0);
         if (result)
-        {
             firePropertyChange(this, this);
-        }
 
         return result;
     }

@@ -55,9 +55,8 @@ public final class Assert
     {
         // succeed as quickly as possible
         if (expression)
-        {
             return true;
-        }
+
         return isLegal(expression, "");
     }
     /**
@@ -79,9 +78,8 @@ public final class Assert
     {
         // succeed as quickly as possible
         if (object != null)
-        {
             return;
-        }
+
         isNotNull(object, "");
     }
     /**
@@ -102,9 +100,8 @@ public final class Assert
     public static boolean isTrue(boolean expression)
     {
         if (expression)
-        {
             return true;
-        }
+
         return isTrue(expression, "");
     }
     /**

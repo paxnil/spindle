@@ -55,10 +55,10 @@ import com.iw.plugins.spindle.core.scanning.ScannerException;
 public class WebXMLScanner extends AbstractScanner
 {
 
-    protected FullBuild builder;
-    protected IJavaProject javaProject;
-    protected ArrayList servletNames;
-    protected ArrayList seenServletNames;
+    protected FullBuild fBuilder;
+    protected IJavaProject fJavaProject;
+    protected ArrayList fServletNames;
+    protected ArrayList fSeenServletNames;
 
     /**
      * Constructor for WebXMLProcessor.
@@ -66,19 +66,19 @@ public class WebXMLScanner extends AbstractScanner
     public WebXMLScanner(FullBuild fullBuilder)
     {
         super();
-        this.builder = fullBuilder;
-        this.javaProject = builder.javaProject;
+        this.fBuilder = fullBuilder;
+        this.fJavaProject = fBuilder.fJavaProject;
     }
 
     public FullBuild.ServletInfo[] scanServletInformation(Node webxml) throws ScannerException
     {
-        List result = (List) scan(builder.parser, null, webxml);
+        List result = (List) scan(fBuilder.fParser, null, webxml);
         return (FullBuild.ServletInfo[]) result.toArray(new FullBuild.ServletInfo[result.size()]);
     }
 
     public Object beforeScan(Node node)
     {
-        seenServletNames = new ArrayList();
+        fSeenServletNames = new ArrayList();
         return new ArrayList(11);
     }
 
@@ -87,27 +87,34 @@ public class WebXMLScanner extends AbstractScanner
         IPath ws_path = new Path(location.getPath());
         String extension = ws_path.getFileExtension();
         if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
-        {
             throw new ScannerException(TapestryCore.getString("web-xml-wrong-file-extension", location.toString()));
-        }
 
         if (location.getStorage() == null)
-        {
-            throw new ScannerException(TapestryCore.getString("web-xml-ignore-application-path-not-found", location.toString()));
-        }
+            throw new ScannerException(
+                TapestryCore.getString("web-xml-ignore-application-path-not-found", location.toString()));
+
     }
 
-    protected void checkApplicationServletPathParam(String value, FullBuild.ServletInfo currentInfo, ISourceLocation location)
+    protected void checkApplicationServletPathParam(
+        String value,
+        FullBuild.ServletInfo currentInfo,
+        ISourceLocation location)
     {
         if (currentInfo.isServletSubclass && currentInfo.applicationSpecLocation != null)
         {
-            addProblem(IProblem.WARNING, location, TapestryCore.getString("web-xml-application-path-param-but-servlet-defines"));
+            addProblem(
+                IProblem.WARNING,
+                location,
+                TapestryCore.getString("web-xml-application-path-param-but-servlet-defines"));
             return;
         }
         IResourceWorkspaceLocation ws_location = getApplicationLocation(value);
         if (ws_location.getStorage() == null)
         {
-            addProblem(IProblem.ERROR, location, TapestryCore.getString("web-xml-ignore-application-path-not-found", value));
+            addProblem(
+                IProblem.ERROR,
+                location,
+                TapestryCore.getString("web-xml-ignore-application-path-not-found", value));
             return;
         }
         currentInfo.applicationSpecLocation = ws_location;
@@ -117,25 +124,23 @@ public class WebXMLScanner extends AbstractScanner
     {
         boolean match = false;
         if (superclass.equals(candidate))
-        {
             return match;
-        }
+
         try
         {
             if (candidate.isInterface())
-            {
                 addProblem(IProblem.ERROR, location, "web-xml-must-be-class-not-interface");
-            }
+
             ITypeHierarchy hierarchy = candidate.newSupertypeHierarchy(null);
             if (hierarchy.exists())
             {
                 IType[] superClasses = hierarchy.getAllSupertypes(candidate);
                 for (int i = 0; i < superClasses.length; i++)
                 {
-                    if (superClasses[i].equals(superclass))
-                    {
-                        match = true;
-                    }
+                    match = superClasses[i].equals(superclass);
+                    if (match)
+                        break;
+
                 }
             }
         } catch (JavaModelException e)
@@ -144,22 +149,20 @@ public class WebXMLScanner extends AbstractScanner
             e.printStackTrace();
         }
         if (!match)
-        {
             addProblem(IProblem.ERROR, location, "web-xml-does-not-subclass");
-        }
+
         return match;
     }
 
     protected IType checkJavaType(String className, ISourceLocation location)
     {
-        IType found = builder.tapestryBuilder.getType(className);
+        IType found = fBuilder.fTapestryBuilder.getType(className);
         if (found == null)
-        {
             addProblem(
                 IProblem.ERROR,
                 location,
                 TapestryCore.getTapestryString(TapestryBuilder.TAPESTRY_CLASS_NOT_FOUND, className));
-        }
+
         return found;
     }
 
@@ -175,9 +178,8 @@ public class WebXMLScanner extends AbstractScanner
             {
                 FullBuild.ServletInfo info = getServletInfo(node);
                 if (info != null && info.applicationSpecLocation != null)
-                {
                     infos.add(info);
-                }
+
             }
         }
     }
@@ -185,16 +187,16 @@ public class WebXMLScanner extends AbstractScanner
     protected IResourceWorkspaceLocation getApplicationLocation(String path)
     {
         if (path == null)
-        {
             return null;
-        }
+
         IPath ws_path = new Path(path);
         IResourceWorkspaceLocation location =
-            (IResourceWorkspaceLocation) builder.tapestryBuilder.classpathRoot.getRelativeLocation(path.toString());
+            (IResourceWorkspaceLocation) fBuilder.fTapestryBuilder.fClasspathRoot.getRelativeLocation(path.toString());
         if (!location.exists())
-        {
-            location = (IResourceWorkspaceLocation) builder.tapestryBuilder.contextRoot.getRelativeLocation(path.toString());
-        }
+            location =
+                (IResourceWorkspaceLocation) fBuilder.fTapestryBuilder.fContextRoot.getRelativeLocation(
+                    path.toString());
+
         return location;
     }
 
@@ -214,44 +216,39 @@ public class WebXMLScanner extends AbstractScanner
                     int first = methodSource.indexOf("\"");
                     int last = methodSource.lastIndexOf("\"");
                     if (first >= 0 && last > first)
-                    {
                         result = new Path(methodSource.substring(first + 1, last));
-                    }
+
                 }
             }
         } catch (JavaModelException e)
-        {
-        }
+        {}
         return result;
     }
 
     protected FullBuild.ServletInfo getServletInfo(Node servletNode)
     {
-        FullBuild.ServletInfo newInfo = builder.new ServletInfo();
+        FullBuild.ServletInfo newInfo = fBuilder.new ServletInfo();
         for (Node node = servletNode.getFirstChild(); node != null; node = node.getNextSibling())
         {
             if (isElement(node, "servlet-name"))
             {
                 if (!scanServletName(node, newInfo))
-                {
                     return null;
-                }
+
             }
             if (isElement(node, "servlet-class"))
             {
                 if (!scanServletClass(node, newInfo))
-                {
                     return null;
-                }
+
             }
             if (isElement(node, "init-param"))
             {
                 try
                 {
                     if (!scanInitParam(node, newInfo))
-                    {
                         return null;
-                    }
+
                 } catch (ScannerException e)
                 {
                     TapestryCore.log(e.getMessage());
@@ -269,14 +266,9 @@ public class WebXMLScanner extends AbstractScanner
 
     private boolean isTapestryServlet(IType candidate, ISourceLocation location)
     {
-        if (candidate != null)
-        {
-            if (!candidate.equals(builder.tapestryServletType))
-            {
-                return checkJavaSubclassOfImplements(builder.tapestryServletType, candidate, location);
-            }
+        if (candidate != null && !candidate.equals(fBuilder.fTapestryServletType))
+            return checkJavaSubclassOfImplements(fBuilder.fTapestryServletType, candidate, location);
 
-        }
         return false;
     }
 
@@ -308,17 +300,15 @@ public class WebXMLScanner extends AbstractScanner
                 value = getValue(node);
                 valueLoc = getBestGuessSourceLocation(node, true);
                 if (value == null)
-                {
                     addProblem(IProblem.ERROR, valueLoc, TapestryCore.getString("web-xml-init-param-null-value"));
-                }
+
             }
         }
         if (key != null && value != null)
         {
             if (TapestryBuilder.APP_SPEC_PATH_PARAM.equals(key))
-            {
                 checkApplicationServletPathParam(value, currentInfo, valueLoc);
-            }
+
             currentInfo.parameters.put(key, value);
 
         }
@@ -338,14 +328,13 @@ public class WebXMLScanner extends AbstractScanner
 
         IType servletType = checkJavaType(newInfo.classname, nodeLocation);
         if (servletType == null)
-        {
             return false;
-        }
+
         if (!isTapestryServlet(servletType, nodeLocation))
         {
             return false;
 
-        } else if (!builder.tapestryServletType.equals(servletType))
+        } else if (!fBuilder.fTapestryServletType.equals(servletType))
         {
             newInfo.isServletSubclass = true; // its a subclass
             IPath path = getApplicationPathFromServlet(servletType);
@@ -380,11 +369,14 @@ public class WebXMLScanner extends AbstractScanner
         ISourceLocation bestGuessSourceLocation = getBestGuessSourceLocation(node, true);
         if (newInfo.name == null || "".equals(newInfo.name.trim()))
         {
-            addProblem(IProblem.WARNING, bestGuessSourceLocation, TapestryCore.getString("web-xml-servlet-has-null-name"));
+            addProblem(
+                IProblem.WARNING,
+                bestGuessSourceLocation,
+                TapestryCore.getString("web-xml-servlet-has-null-name"));
             return false;
 
         }
-        if (seenServletNames.contains(newInfo.name))
+        if (fSeenServletNames.contains(newInfo.name))
         {
             addProblem(
                 IProblem.WARNING,
@@ -393,14 +385,13 @@ public class WebXMLScanner extends AbstractScanner
             return false;
         } else
         {
-            seenServletNames.add(newInfo.name);
+            fSeenServletNames.add(newInfo.name);
         }
 
-        if (servletNames == null)
-        {
-            servletNames = new ArrayList(11);
-        }
-        if (servletNames.contains(newInfo.name))
+        if (fServletNames == null)
+            fServletNames = new ArrayList(11);
+
+        if (fServletNames.contains(newInfo.name))
         {
             String message = TapestryCore.getString("web-xml-servlet-duplicate-name", newInfo.name);
             addProblem(IProblem.WARNING, bestGuessSourceLocation, message);

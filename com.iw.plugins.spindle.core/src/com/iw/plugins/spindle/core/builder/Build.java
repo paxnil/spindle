@@ -59,20 +59,20 @@ public abstract class Build implements IBuild
 {
 
     private static final Parser BUILD_PARSER = new Parser();
-    protected IJavaProject javaProject;
-    protected State newState;
-    protected BuildNotifier notifier;
-    protected Parser parser;
-    protected TapestryBuilder tapestryBuilder;
-    protected ICoreNamespace framework;
+    protected IJavaProject fJavaProject;
+    protected State fNewState;
+    protected BuildNotifier fNotifier;
+    protected Parser fParser;
+    protected TapestryBuilder fTapestryBuilder;
+    protected ICoreNamespace fFramework;
 
     public Build(TapestryBuilder builder)
     {
-        tapestryBuilder = builder;
-        newState = new State(builder);
-        this.notifier = builder.notifier;
-        this.javaProject = builder.javaProject;
-        this.parser = BUILD_PARSER;
+        fTapestryBuilder = builder;
+        fNewState = new State(builder);
+        this.fNotifier = builder.fNotifier;
+        this.fJavaProject = builder.fJavaProject;
+        this.fParser = BUILD_PARSER;
     }
 
     protected ICoreNamespace createNamespace(String id, IResourceWorkspaceLocation location)
@@ -89,9 +89,8 @@ public abstract class Build implements IBuild
             lib = parseLibrary(location);
         }
         if (lib != null)
-        {
             result = new CoreNamespace(id, lib);
-        }
+
         return result;
     }
 
@@ -106,7 +105,7 @@ public abstract class Build implements IBuild
                 scanner.setResourceLocation(location);
                 scanner.setFactory(TapestryCore.getSpecificationFactory());
                 IApplicationSpecification result =
-                    (IApplicationSpecification) scanner.scan(parser, new BuilderValidator(this), node);
+                    (IApplicationSpecification) scanner.scan(fParser, new BuilderValidator(this), node);
                 IResource res = Utils.toResource(location);
                 if (res != null)
                 {
@@ -268,7 +267,7 @@ public abstract class Build implements IBuild
         Node result = null;
         try
         {
-            result = parser.parse(storage);
+            result = fParser.parse(storage);
 
         } catch (CoreException e)
         {
@@ -282,16 +281,14 @@ public abstract class Build implements IBuild
 
         if (storage.getAdapter(IResource.class) != null)
         {
-            Markers.addTapestryProblemMarkersToResource(((IResource) storage), parser.getProblems());
+            Markers.addTapestryProblemMarkersToResource(((IResource) storage), fParser.getProblems());
         } else
         {
-            TapestryCore.logProblems(storage, parser.getProblems());
+            TapestryCore.logProblems(storage, fParser.getProblems());
         }
 
-        if (parser.getHasFatalErrors())
-        {
+        if (fParser.getHasFatalErrors())
             return null;
-        }
 
         return result;
     }
@@ -310,14 +307,11 @@ public abstract class Build implements IBuild
                 location =
                     (IResourceWorkspaceLocation) namespaceSpec.getSpecificationLocation().getRelativeLocation(specPath);
                 if (!location.exists())
-                {
                     return null;
-                }
+
             }
             if (location == null)
-            {
                 location = null; // find page using any funny rules!
-            }
 
             result = resolveIComponentSpecification(namespace, location);
 
@@ -356,10 +350,10 @@ public abstract class Build implements IBuild
                         {
                             result =
                                 (IComponentSpecification) scanner.scan(
-                                    parser,
+                                    fParser,
                                     new BuilderValidator(this, namespace),
                                     node);
-                            ((PluginComponentSpecification)result).setNamespace(namespace);
+                            ((PluginComponentSpecification) result).setNamespace(namespace);
                         } catch (ScannerException e1)
                         {
                             e1.printStackTrace();
@@ -401,14 +395,12 @@ public abstract class Build implements IBuild
                 location =
                     (IResourceWorkspaceLocation) namespaceSpec.getSpecificationLocation().getRelativeLocation(specPath);
                 if (!location.exists())
-                {
                     return null;
-                }
+
             }
             if (location == null)
-            {
                 location = null; // find page using any funny rules!
-            }
+
             result = resolveIComponentSpecification(namespace, location);
         }
         if (result != null)

@@ -42,18 +42,18 @@ import com.iw.plugins.spindle.core.util.PropertyFiringList;
  */
 public class PluginBeanSpecification extends BasePropertyHolder implements IBeanSpecification
 {
-    protected String className;
-    protected BeanLifecycle lifecycle;
+    protected String fClassName;
+    protected BeanLifecycle fLifecycle;
 
     /** @since 1.0.9 **/
-    private String description;
+    private String fDescription;
 
     /**
      *  A List of {@link IBeanInitializer}.
      *
      **/
 
-    protected List initializers;
+    protected List fInitializers;
     /**
      * @param type
      */
@@ -65,8 +65,8 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
     public PluginBeanSpecification(String className, BeanLifecycle lifecycle)
     {
         this();
-        this.className = className;
-        this.lifecycle = lifecycle;
+        fClassName = className;
+        fLifecycle = lifecycle;
     }
 
     /* (non-Javadoc)
@@ -74,7 +74,7 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
      */
     public String getClassName()
     {
-        return className;
+        return fClassName;
     }
 
     /* (non-Javadoc)
@@ -82,7 +82,7 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
      */
     public BeanLifecycle getLifecycle()
     {
-        return lifecycle;
+        return fLifecycle;
     }
 
     /* (non-Javadoc)
@@ -90,25 +90,23 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
      */
     public void addInitializer(IBeanInitializer initializer)
     {
-        if (initializers == null)
-        {
-            initializers = new PropertyFiringList(this, "initializers");
-        }
+        if (fInitializers == null)
+            fInitializers = new PropertyFiringList(this, "initializers");
 
-        initializers.add(initializer);
+        fInitializers.add(initializer);
     }
-    
-    public void removeInitializer(IBeanInitializer initializer){
-        remove(initializers, initializer);
+
+    public void removeInitializer(IBeanInitializer initializer)
+    {
+        remove(fInitializers, initializer);
     }
-    
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IBeanSpecification#getInitializers()
      */
     public List getInitializers()
     {
-        return initializers;
+        return fInitializers;
     }
 
     /* (non-Javadoc)
@@ -116,7 +114,7 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
      */
     public String getDescription()
     {
-        return description;
+        return fDescription;
     }
 
     /* (non-Javadoc)
@@ -124,9 +122,9 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
      */
     public void setDescription(String desc)
     {
-        String old = this.description;
-        this.description = desc;
-        firePropertyChange("description", old, this.description);
+        String old = fDescription;
+        fDescription = desc;
+        firePropertyChange("description", old, this.fDescription);
     }
 
     /* (non-Javadoc)
@@ -134,9 +132,9 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
      */
     public void setClassName(String className)
     {
-        String old = this.className;
-        this.className = className;
-        firePropertyChange("className", old, this.className);
+        String old = fClassName;
+        this.fClassName = className;
+        firePropertyChange("className", old, this.fClassName);
     }
 
     /* (non-Javadoc)
@@ -144,9 +142,9 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
      */
     public void setLifecycle(BeanLifecycle lifecycle)
     {
-        BeanLifecycle old = this.lifecycle;
-        this.lifecycle = lifecycle;
-        firePropertyChange("lifecycle", old, this.lifecycle);
+        BeanLifecycle old = this.fLifecycle;
+        fLifecycle = lifecycle;
+        firePropertyChange("lifecycle", old, this.fLifecycle);
     }
 
 }

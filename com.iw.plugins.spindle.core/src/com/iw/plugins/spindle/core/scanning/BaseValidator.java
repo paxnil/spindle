@@ -62,8 +62,8 @@ public class BaseValidator implements IScannerValidator
 
     static class SLocation implements ISourceLocation
     { /* (non-Javadoc)
-                         * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
-                         */
+                            * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
+                            */
         public int getCharEnd()
         {
             return 1;
@@ -86,7 +86,7 @@ public class BaseValidator implements IScannerValidator
 
     public static final String DefaultDummyString = "1~dummy<>";
 
-    private static final ISourceLocation DefaultLocation = new SLocation();
+    private static final ISourceLocation DefaultSourceLocation = new SLocation();
 
     /** 
      * 
@@ -95,9 +95,9 @@ public class BaseValidator implements IScannerValidator
      * 
      **/
 
-    protected Map compiledPatterns;
+    protected Map fCompiledPatterns;
 
-    protected String dummyString = DefaultDummyString;
+    protected String fDummyString = DefaultDummyString;
 
     /** 
      * 
@@ -105,7 +105,7 @@ public class BaseValidator implements IScannerValidator
      * 
      **/
 
-    protected PatternMatcher matcher;
+    protected PatternMatcher fMatcher;
 
     /** 
      * 
@@ -115,8 +115,8 @@ public class BaseValidator implements IScannerValidator
      * 
      **/
 
-    protected PatternCompiler patternCompiler;
-    protected IProblemCollector problemCollector;
+    protected PatternCompiler fPatternCompiler;
+    protected IProblemCollector fProblemCollector;
 
     /**
      * 
@@ -124,7 +124,6 @@ public class BaseValidator implements IScannerValidator
     public BaseValidator()
     {
         super();
-
     }
 
     /** 
@@ -135,12 +134,12 @@ public class BaseValidator implements IScannerValidator
 
     protected Pattern compilePattern(String pattern)
     {
-        if (patternCompiler == null)
-            patternCompiler = new Perl5Compiler();
+        if (fPatternCompiler == null)
+            fPatternCompiler = new Perl5Compiler();
 
         try
         {
-            return patternCompiler.compile(pattern, Perl5Compiler.SINGLELINE_MASK);
+            return fPatternCompiler.compile(pattern, Perl5Compiler.SINGLELINE_MASK);
         } catch (MalformedPatternException ex)
         {
 
@@ -163,7 +162,7 @@ public class BaseValidator implements IScannerValidator
      */
     public String getDummyStringPrefix()
     {
-        return dummyString;
+        return fDummyString;
     }
 
     /* (non-Javadoc)
@@ -171,17 +170,17 @@ public class BaseValidator implements IScannerValidator
      */
     public String getNextDummyString()
     {
-        return dummyString + System.currentTimeMillis();
+        return fDummyString + System.currentTimeMillis();
     }
 
     public IProblemCollector getProblemCollector()
     {
-        return problemCollector;
+        return fProblemCollector;
     }
 
     public void setProblemCollector(IProblemCollector collector)
     {
-        problemCollector = collector;
+        fProblemCollector = collector;
     }
 
     /* (non-Javadoc)
@@ -194,7 +193,6 @@ public class BaseValidator implements IScannerValidator
         throws ScannerException
     {
         return true;
-
     }
 
     /* (non-Javadoc)
@@ -207,17 +205,17 @@ public class BaseValidator implements IScannerValidator
         throws ScannerException
     {
         return true;
-
     }
 
     public boolean validateExpression(String expression, int severity) throws ScannerException
     {
-        return validateExpression(expression, severity, DefaultLocation);
+        return validateExpression(expression, severity, DefaultSourceLocation);
     }
 
-    public boolean validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException
+    public boolean validateExpression(String expression, int severity, ISourceLocation location)
+        throws ScannerException
     {
-        if (!expression.startsWith(dummyString))
+        if (!expression.startsWith(fDummyString))
         {
             try
             {
@@ -233,43 +231,46 @@ public class BaseValidator implements IScannerValidator
 
     protected void reportProblem(int severity, ISourceLocation location, String message) throws ScannerException
     {
-        if (problemCollector == null)
+        if (fProblemCollector == null)
         {
             throw new ScannerException(message);
         } else
         {
-            problemCollector.addProblem(severity, (location == null ? DefaultLocation : location), message);
-
+            fProblemCollector.addProblem(severity, (location == null ? DefaultSourceLocation : location), message);
         }
     }
 
     public boolean validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException
     {
-        return validatePattern(value, pattern, errorKey, severity, DefaultLocation);
+        return validatePattern(value, pattern, errorKey, severity, DefaultSourceLocation);
     }
 
-    public boolean validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location)
+    public boolean validatePattern(
+        String value,
+        String pattern,
+        String errorKey,
+        int severity,
+        ISourceLocation location)
         throws ScannerException
     {
-        if (!value.startsWith(dummyString))
+        if (!value.startsWith(fDummyString))
         {
+            if (fCompiledPatterns == null)
+                fCompiledPatterns = new HashMap();
 
-            if (compiledPatterns == null)
-                compiledPatterns = new HashMap();
-
-            Pattern compiled = (Pattern) compiledPatterns.get(pattern);
+            Pattern compiled = (Pattern) fCompiledPatterns.get(pattern);
 
             if (compiled == null)
             {
                 compiled = compilePattern(pattern);
 
-                compiledPatterns.put(pattern, compiled);
+                fCompiledPatterns.put(pattern, compiled);
             }
 
-            if (matcher == null)
-                matcher = new Perl5Matcher();
+            if (fMatcher == null)
+                fMatcher = new Perl5Matcher();
 
-            if (!matcher.matches(value, compiled))
+            if (!fMatcher.matches(value, compiled))
             {
                 reportProblem(severity, location, TapestryCore.getTapestryString(errorKey, value));
                 return false;
@@ -301,20 +302,23 @@ public class BaseValidator implements IScannerValidator
 
     public boolean validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
     {
-        return validateTypeName(fullyQualifiedType, severity, DefaultLocation);
+        return validateTypeName(fullyQualifiedType, severity, DefaultSourceLocation);
     }
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
      */
-    public boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
+    public boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location)
+        throws ScannerException
     {
         Object type = findType(fullyQualifiedType);
         if (type == null)
         {
-            reportProblem(severity, location, TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType));
+            reportProblem(
+                severity,
+                location,
+                TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType));
             return false;
         }
         return true;
     }
-
 }

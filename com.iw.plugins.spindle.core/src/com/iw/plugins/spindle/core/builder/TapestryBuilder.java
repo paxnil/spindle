@@ -109,17 +109,17 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
     public static boolean DEBUG = true;
 
-    IProject currentProject;
-    IJavaProject javaProject;
-    TapestryProject tapestryProject;
-    IWorkspaceRoot workspaceRoot;
-    ContextRootLocation contextRoot;
-    ClasspathRootLocation classpathRoot;
-    int projectType;
+    IProject fCurrentProject;
+    IJavaProject fJavaProject;
+    TapestryProject fTapestryProject;
+    IWorkspaceRoot fWorkspaceRoot;
+    ContextRootLocation fContextRoot;
+    ClasspathRootLocation fClasspathRoot;
+    int fProjectType;
 
-    private IBuild build;
+    private IBuild fBuild;
 
-    BuildNotifier notifier;
+    BuildNotifier fNotifier;
 
     public static State readState(DataInputStream in) throws IOException
     {
@@ -144,21 +144,19 @@ public class TapestryBuilder extends IncrementalProjectBuilder
      */
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException
     {
-        this.currentProject = getProject();
-        if (currentProject == null || !currentProject.isAccessible())
-        {
+        this.fCurrentProject = getProject();
+        if (fCurrentProject == null || !fCurrentProject.isAccessible())
             return new IProject[0];
-        }
 
-        if (true)
+        if (DEBUG)
             System.out.println(
-                "\nStarting build of " + currentProject.getName() + " @ " + new Date(System.currentTimeMillis()));
-        this.notifier = new BuildNotifier(monitor, currentProject);
-        notifier.begin();
+                "\nStarting build of " + fCurrentProject.getName() + " @ " + new Date(System.currentTimeMillis()));
+        this.fNotifier = new BuildNotifier(monitor, fCurrentProject);
+        fNotifier.begin();
         boolean ok = false;
         try
         {
-            notifier.checkCancel();
+            fNotifier.checkCancel();
             initializeBuilder();
 
             if (isWorthBuilding())
@@ -234,13 +232,13 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             if (!ok)
                 // If the build failed, clear the previously built state, forcing a full build next time.
                 clearLastState();
-            notifier.done();
+            fNotifier.done();
             cleanup();
         }
         IProject[] requiredProjects = getRequiredProjects(true);
         if (DEBUG)
             System.out.println(
-                "Finished build of " + currentProject.getName() + " @ " + new Date(System.currentTimeMillis()));
+                "Finished build of " + fCurrentProject.getName() + " @ " + new Date(System.currentTimeMillis()));
         return requiredProjects;
     }
 
@@ -249,21 +247,20 @@ public class TapestryBuilder extends IncrementalProjectBuilder
      */
     private void cleanup()
     {
-        if (build != null)
-        {
-            build.cleanUp();
-        }
+        if (fBuild != null)
+            fBuild.cleanUp();
+
     }
 
     private IProject[] getRequiredProjects(boolean includeBinaryPrerequisites)
     {
-        if (javaProject == null || workspaceRoot == null)
+        if (fJavaProject == null || fWorkspaceRoot == null)
             return new IProject[0];
 
         ArrayList projects = new ArrayList();
         try
         {
-            IClasspathEntry[] entries = ((JavaProject) javaProject).getExpandedClasspath(true);
+            IClasspathEntry[] entries = ((JavaProject) fJavaProject).getExpandedClasspath(true);
             for (int i = 0, length = entries.length; i < length; i++)
             {
                 IClasspathEntry entry = JavaCore.getResolvedClasspathEntry(entries[i]);
@@ -273,17 +270,14 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                     IProject p = null;
                     if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT)
                     {
-                        IProject workspaceProject = workspaceRoot.getProject(path.lastSegment());
+                        IProject workspaceProject = fWorkspaceRoot.getProject(path.lastSegment());
                         if (workspaceProject.hasNature(TapestryCore.NATURE_ID))
-                        {
                             p = workspaceProject;
-                        }
 
                     }
                     if (p != null && !projects.contains(p))
-                    {
                         projects.add(p);
-                    }
+
                 }
             }
         } catch (CoreException e)
@@ -314,11 +308,11 @@ public class TapestryBuilder extends IncrementalProjectBuilder
      */
     private void buildAll() throws BuilderException
     {
-        int type = tapestryProject.getProjectType();
+        int type = fTapestryProject.getProjectType();
         switch (type)
         {
             case TapestryProject.APPLICATION_PROJECT_TYPE :
-                build = new FullBuild(this);
+                fBuild = new FullBuild(this);
                 break;
 
             case TapestryProject.LIBRARY_PROJECT_TYPE :
@@ -326,15 +320,14 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             default :
                 break;
         }
-        if (build != null)
-        {
-            build.build();
-        }
+        if (fBuild != null)
+            fBuild.build();
+
     }
 
     private void buildIncremental() throws BuilderException
     {
-        int type = tapestryProject.getProjectType();
+        int type = fTapestryProject.getProjectType();
         IIncrementalBuild inc = null;
         switch (type)
         {
@@ -348,9 +341,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             default :
                 break;
         }
-        if (inc != null && inc.canIncrementalBuild(getDelta(tapestryProject.getProject())))
+        if (inc != null && inc.canIncrementalBuild(getDelta(fTapestryProject.getProject())))
         {
-            build = inc;
+            fBuild = inc;
             inc.build();
         } else
         {
@@ -365,7 +358,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     private boolean isWorthBuilding()
     {
 
-        if (javaProject == null)
+        if (fJavaProject == null)
         {
             Markers.removeProblemsForProject(getProject());
             Markers.addBuildBrokenProblemMarkerToResource(getProject(), TapestryCore.getString(NON_JAVA_PROJECTS));
@@ -374,7 +367,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
         try
         {
-            IResource resource = javaProject.getUnderlyingResource();
+            IResource resource = fJavaProject.getUnderlyingResource();
             IMarker[] jprojectMarkers = new IMarker[0];
             if (resource != null && resource.exists())
                 jprojectMarkers =
@@ -394,21 +387,21 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
         try
         {
-            IPath outputPath = javaProject.getOutputLocation();
-            IPath projectPath = javaProject.getPath();
+            IPath outputPath = fJavaProject.getOutputLocation();
+            IPath projectPath = fJavaProject.getPath();
             if (projectPath.equals(outputPath))
             {
-                Markers.removeProblemsFor(currentProject);
+                Markers.removeProblemsFor(fCurrentProject);
                 Markers.addBuildBrokenProblemMarkerToResource(
-                    currentProject,
+                    fCurrentProject,
                     TapestryCore.getString(ABORT_INVALID_OUTPUT_LOCATION, outputPath.toString()));
                 return false;
             }
         } catch (JavaModelException e1)
         {
-            Markers.removeProblemsFor(currentProject);
+            Markers.removeProblemsFor(fCurrentProject);
             Markers.addBuildBrokenProblemMarkerToResource(
-                currentProject,
+                fCurrentProject,
                 TapestryCore.getString(ABORT_NO_OUTPUT_LOCATION));
             return false;
         }
@@ -422,9 +415,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             {
                 if (DEBUG)
                     System.out.println(TapestryCore.getString(ABORT_PREREQ_NOT_BUILT, p.getName()));
-                Markers.removeProblemsFor(currentProject); // make this the only problem for this project
+                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
                 Markers.addBuildBrokenProblemMarkerToResource(
-                    currentProject,
+                    fCurrentProject,
                     TapestryCore.getString(ABORT_PREREQ_NOT_BUILT, p.getName()));
 
                 return false;
@@ -435,41 +428,41 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         {
             Markers.removeProblemsForProject(getProject());
             Markers.addBuildBrokenProblemMarkerToResource(
-                currentProject,
+                fCurrentProject,
                 TapestryCore.getString(TapestryBuilder.TAPESTRY_JAR_MISSING));
             return false;
         }
 
-        int projectType = tapestryProject.getProjectType();
+        int projectType = fTapestryProject.getProjectType();
 
         if (projectType == TapestryProject.APPLICATION_PROJECT_TYPE)
         {
-            if (contextRoot == null || !contextRoot.exists())
+            if (fContextRoot == null || !fContextRoot.exists())
             {
-                Markers.removeProblemsFor(currentProject); // make this the only problem for this project
-                Markers.addBuildBrokenProblemMarkerToResource(currentProject, TapestryCore.getString(MISSING_CONTEXT));
+                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
+                Markers.addBuildBrokenProblemMarkerToResource(fCurrentProject, TapestryCore.getString(MISSING_CONTEXT));
                 return false;
             }
 
             IResourceWorkspaceLocation webXML =
-                (IResourceWorkspaceLocation) contextRoot.getRelativeLocation("WEB-INF/web.xml");
+                (IResourceWorkspaceLocation) fContextRoot.getRelativeLocation("WEB-INF/web.xml");
             if (!webXML.exists())
             {
-                Markers.removeProblemsFor(currentProject); // make this the only problem for this project
+                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
                 Markers.addBuildBrokenProblemMarkerToResource(
-                    currentProject,
+                    fCurrentProject,
                     TapestryCore.getString(ABORT_MISSING_WEB_XML, webXML.toString()));
                 return false;
             }
         } else if (projectType == TapestryProject.LIBRARY_PROJECT_TYPE)
         {
             IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-            IFile librarySpec = root.getFile(new Path(tapestryProject.getLibrarySpecPath()));
+            IFile librarySpec = root.getFile(new Path(fTapestryProject.getLibrarySpecPath()));
             if (librarySpec == null || !librarySpec.exists())
             {
-                Markers.removeProblemsFor(currentProject); // make this the only problem for this project
+                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
                 Markers.addBuildBrokenProblemMarkerToResource(
-                    currentProject,
+                    fCurrentProject,
                     TapestryCore.getString(ABORT_MISSING_LIBRARY_SPEC, librarySpec.getFullPath()));
                 return false;
             }
@@ -491,16 +484,16 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
             if (fragment == null || isBinaryPackage)
             {
-                Markers.removeProblemsFor(currentProject); // make this the only problem for this project
+                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
                 Markers.addBuildBrokenProblemMarkerToResource(
-                    currentProject,
+                    fCurrentProject,
                     TapestryCore.getString(ABORT_LIBRARY_SPEC_NOT_ON_SOURCE_PATH, librarySpec.getFullPath()));
                 return false;
-            } else if (!fragment.getJavaProject().equals(javaProject))
+            } else if (!fragment.getJavaProject().equals(fJavaProject))
             {
-                Markers.removeProblemsFor(currentProject); // make this the only problem for this project
+                Markers.removeProblemsFor(fCurrentProject); // make this the only problem for this project
                 Markers.addBuildBrokenProblemMarkerToResource(
-                    currentProject,
+                    fCurrentProject,
                     TapestryCore.getString(ABORT_LIBRARY_SPEC_IN_WRONG_PROJECT, librarySpec.getFullPath()));
                 return false;
             }
@@ -518,16 +511,16 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
         try
         {
-            javaProject = (IJavaProject) currentProject.getNature(JavaCore.NATURE_ID);
-            classpathRoot = new ClasspathRootLocation(javaProject);
+            fJavaProject = (IJavaProject) fCurrentProject.getNature(JavaCore.NATURE_ID);
+            fClasspathRoot = new ClasspathRootLocation(fJavaProject);
         } catch (CoreException e)
         {
             TapestryCore.log(e);
         }
         try
         {
-            tapestryProject = (TapestryProject) currentProject.getNature(TapestryCore.NATURE_ID);
-            contextRoot = new ContextRootLocation(tapestryProject.getWebContextFolder());
+            fTapestryProject = (TapestryProject) fCurrentProject.getNature(TapestryCore.NATURE_ID);
+            fContextRoot = new ContextRootLocation(fTapestryProject.getWebContextFolder());
         } catch (CoreException e)
         {
             TapestryCore.log(e);
@@ -539,7 +532,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     {
         try
         {
-            return javaProject.findType(fullyQualifiedName);
+            return fJavaProject.findType(fullyQualifiedName);
         } catch (JavaModelException e)
         {
             return null;

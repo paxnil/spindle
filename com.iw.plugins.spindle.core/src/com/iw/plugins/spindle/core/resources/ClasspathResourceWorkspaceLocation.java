@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 
 /**
@@ -70,7 +71,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public IStorage getStorage()
     {
-        return ((ClasspathRootLocation) root).findStorage(this);
+        return ((ClasspathRootLocation) fRoot).findStorage(this);
     }
 
     /* (non-Javadoc)
@@ -91,7 +92,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public IProject getProject()
     {
-        IPackageFragment fragment = ((ClasspathRootLocation) root).findExactPackageFragment(this);
+        IPackageFragment fragment = ((ClasspathRootLocation) fRoot).findExactPackageFragment(this);
         return fragment == null ? null : fragment.getJavaProject().getProject();
     }
 
@@ -102,9 +103,8 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
     {
         IStorage storage = getStorage();
         if (storage != null)
-        {
             return storage.getContents();
-        }
+
         return null;
     }
 
@@ -122,7 +122,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
         HashCodeBuilder builder = new HashCodeBuilder(5591, 1009);
 
         builder.append(getPath());
-        builder.append(root);
+        builder.append(fRoot);
 
         return builder.toHashCode();
     }
@@ -132,8 +132,8 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public void lookup(IResourceLocationAcceptor requestor) throws CoreException
     {
-        String packageName = ((ClasspathRootLocation) root).toPackageName(getPath());
-        IPackageFragment[] fragments = ((ClasspathRootLocation) root).getAllPackageFragments(packageName);
+        String packageName = ((ClasspathRootLocation) fRoot).toPackageName(getPath());
+        IPackageFragment[] fragments = ((ClasspathRootLocation) fRoot).getAllPackageFragments(packageName);
         for (int i = 0; i < fragments.length; i++)
         {
             Object[] nonJavaResources = null;
@@ -141,22 +141,21 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
             {
                 nonJavaResources = fragments[i].getNonJavaResources();
             } catch (JavaModelException e)
-            {}
-            if (nonJavaResources == null)
             {
-                continue;
+                TapestryCore.log(e);
             }
+            if (nonJavaResources == null)
+                continue;
+
             for (int j = 0; j < nonJavaResources.length; j++)
             {
                 IStorage storage = (IStorage) nonJavaResources[j];
                 IResourceWorkspaceLocation loc =
                     new ClasspathResourceWorkspaceLocation(
-                        ((ClasspathRootLocation) root),
+                        ((ClasspathRootLocation) fRoot),
                         getPath() + storage.getName());
                 if (!requestor.accept(loc))
-                {
                     break;
-                }
             }
         }
     }
@@ -166,7 +165,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public ISearch getSearch() throws CoreException
     {
-        return root.getSearch();
+        return fRoot.getSearch();
     }
 
 }

@@ -38,26 +38,25 @@ import org.apache.tapestry.spec.IBindingSpecification;
 public class PluginBindingSpecfication extends BaseSpecification implements IBindingSpecification
 {
 
-    private BindingType type;
-    private String value;
+    private BindingType fBindingType;
+    private String fValue;
 
     public PluginBindingSpecfication()
     {
         super(BaseSpecification.BINDING_SPEC);
     }
 
-   
     protected PluginBindingSpecfication(int type)
     {
         super(type);
-    }    
+    }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IBindingSpecification#getType()
      */
     public BindingType getType()
     {
-        return type;
+        return fBindingType;
     }
 
     /* (non-Javadoc)
@@ -65,7 +64,7 @@ public class PluginBindingSpecfication extends BaseSpecification implements IBin
      */
     public String getValue()
     {
-        return value;
+        return fValue;
     }
 
     /* (non-Javadoc)
@@ -73,9 +72,9 @@ public class PluginBindingSpecfication extends BaseSpecification implements IBin
      */
     public void setType(BindingType type)
     {
-        BindingType old = this.type;
-        this.type = type;
-        firePropertyChange("bindingType", old, this.type);
+        BindingType old = fBindingType;
+        fBindingType = type;
+        firePropertyChange("bindingType", old, this.fBindingType);
     }
 
     /* (non-Javadoc)
@@ -83,8 +82,8 @@ public class PluginBindingSpecfication extends BaseSpecification implements IBin
      */
     public void setValue(String value)
     {
-        String old = this.value;
-        this.value = value;
-        firePropertyChange("value", old, this.value);
+        String old = fValue;
+        fValue = value;
+        firePropertyChange("value", old, this.fValue);
     }
 }

@@ -77,11 +77,10 @@ public class TapestryDOMParserConfiguration extends StandardParserConfiguration
     }
 
     /* (non-Javadoc)
-    	* @see com.iw.plugins.spindle.core.parser.xml.StandardParserConfiguration#createDTDValidator()
-    	*/
+     * @see com.iw.plugins.spindle.core.parser.xml.StandardParserConfiguration#createDTDValidator()
+     */
     protected XMLDTDValidator createDTDValidator()
     {
-        // TODO Auto-generated method stub
         return new TapestryXMLDTDValidator();
     }
 
