@@ -88,6 +88,8 @@ public class ContextRootLocation extends AbstractRootLocation
 
     public IResourceWorkspaceLocation getRelativeLocation(IResource resource)
     {
+        if (findRelativePath(resource) == null)
+            return null;
         return new ContextResourceWorkspaceLocation(this, resource);
     }
 
@@ -127,7 +129,7 @@ public class ContextRootLocation extends AbstractRootLocation
         IPath rootPath = fRootFolder.getFullPath();
         IPath resourcePath = resource.getFullPath();
         if (!rootPath.isPrefixOf(resourcePath))
-            throw new RuntimeException("not relative to this root!");
+            return null;
 
         IPath resultPath = resourcePath.removeFirstSegments(rootPath.segmentCount()).makeAbsolute();
         if (resource instanceof IContainer && resultPath.segmentCount() > 0)

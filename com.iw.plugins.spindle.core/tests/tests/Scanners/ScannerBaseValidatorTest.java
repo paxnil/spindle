@@ -606,7 +606,20 @@ public class ScannerBaseValidatorTest extends TestCase
          */
         public void addProblem(int severity, ISourceLocation location, String message)
         {
-            problems.add(new DefaultProblem("poo", severity, message, location.getLineNumber(), location.getCharStart(), location.getCharEnd()));
+            problems.add(
+                new DefaultProblem(
+                    "poo",
+                    severity,
+                    message,
+                    location.getLineNumber(),
+                    location.getCharStart(),
+                    location.getCharEnd()));
+
+        }
+
+        public void addSourceProblem(int severity, ISourceLocation location, String message)
+        {
+            addProblem(severity, location, message);
 
         }
 

@@ -32,7 +32,7 @@ import java.util.Map;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.SourceLocation;
 
-public class TagEventInfo
+public class TagEventInfo 
 {
 
     private Map fAttributeMap;

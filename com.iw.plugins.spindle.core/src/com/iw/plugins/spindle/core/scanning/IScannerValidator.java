@@ -204,4 +204,8 @@ public interface IScannerValidator
     public void addListener(IScannerValidatorListener listener);
     
     public void removeListener(IScannerValidatorListener listener);
+    
+    
+    
+   
 }

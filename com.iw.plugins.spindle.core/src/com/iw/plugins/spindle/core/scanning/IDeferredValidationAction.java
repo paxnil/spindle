@@ -1,4 +1,3 @@
-package com.iw.plugins.spindle.core;
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -25,16 +24,17 @@ package com.iw.plugins.spindle.core;
  *
  * ***** END LICENSE BLOCK ***** */
 
+package com.iw.plugins.spindle.core.scanning;
+
+import com.iw.plugins.spindle.core.parser.IProblemCollector;
+
 /**
- * handy spot to store the ids of Tapestry marker types
+ *  A validation that can be executed later
  * 
- * @version $Id$
  * @author glongman@intelligentworks.com
+ * @version $Id$
  */
-public interface ITapestryMarker
+public interface IDeferredValidationAction
 {
-    static public final String TAPESTRY_PROBLEM_MARKER = TapestryCore.PLUGIN_ID + ".problemmarker";
-    static public final String TAPESTRY_SOURCE_PROBLEM_MARKER = TapestryCore.PLUGIN_ID + ".problemmarker.source";
-    static public final String TAPESTRY_FATAL_PROBLEM_MARKER = TapestryCore.PLUGIN_ID + ".fatalproblemmarker";
-    static public final String TAPESTRY_BUILDBROKEN_MARKER = TapestryCore.PLUGIN_ID + ".buildBroken";
+    public void execute(IProblemCollector collector);
 }

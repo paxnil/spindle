@@ -3,6 +3,18 @@
 
 <taskdef resource="clovertasks"/>
 
+<target name="do">
+ <copy todir="C:/downloads/spindle">
+ 	<fileset dir="../buildRelease">
+ 		<include name="*.jar"/>
+    </fileset>
+ </copy>
+ <copy todir="C:/downloads/spindle">
+ 	<fileset dir="../../com.iw.plugins.spindle.ui/buildRelease">
+ 		<include name="*.jar"/>
+    </fileset>
+ </copy>
+</target>
 <target name="with.clover" depends="init">
    <clover-setup initString="${clover.db}"/>   		
 </target>

@@ -37,5 +37,5 @@ import org.eclipse.core.runtime.CoreException;
 public interface IBuild
 {
     public void build() throws BuilderException, CoreException;
-    public void cleanUp();    
+    public void cleanUp();
 }

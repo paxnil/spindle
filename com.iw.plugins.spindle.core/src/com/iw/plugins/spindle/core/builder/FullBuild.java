@@ -31,8 +31,8 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IType;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -52,7 +52,6 @@ import com.iw.plugins.spindle.core.util.Markers;
 public class FullBuild extends Build
 {
 
-    protected IType fTapestryServletType;
     protected ServletInfo fApplicationServlet;
     protected Map fInfoCache;
     /**
@@ -61,34 +60,43 @@ public class FullBuild extends Build
     public FullBuild(TapestryBuilder builder)
     {
         super(builder);
-        fTapestryServletType =
-            builder.getType(TapestryCore.getString(TapestryBuilder.STRING_KEY + "applicationServletClassname"));
+    }
 
+    // used only by incremental subclasses
+    protected FullBuild(TapestryBuilder builder, IResourceDelta projectDelta)
+    {
+        super(builder, projectDelta);
     }
 
     /**
-	 * Use the parser to find declared applications in web.xml
-	 * @param parser
-	 * @throws CoreException
-	 */
-	protected void preBuild(Parser parser) throws CoreException {
-		findDeclaredApplication(parser);
-	}
-	
-	/**
-	 * Resolve the Tapesty framework namespace
-	 */
-	protected void resolveFramework() {
-		fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace();
-	}
-	
-	/**
-	 * Resolve the application namespace
-	 *
-	 */
-	protected void doBuild() {
-		fApplicationNamespace = fNSResolver.resolveApplicationNamespace(fFrameworkNamespace, fApplicationServlet);
-	}
+     * Use the parser to find declared applications in web.xml
+     * @param parser
+     * @throws CoreException
+     */
+    protected void preBuild(Parser parser) throws CoreException
+    {
+        findDeclaredApplication(parser);
+    }
+
+    /**
+     * Resolve the Tapesty framework namespace
+     */
+    protected void resolveFramework()
+    {
+        IResourceWorkspaceLocation frameworkLocation =
+                    (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot.getRelativeLocation(
+                        "/org/apache/tapestry/Framework.library");
+        fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace(frameworkLocation);
+    }
+
+    /**
+     * Resolve the application namespace
+     *
+     */
+    protected void doBuild()
+    {
+        fApplicationNamespace = fNSResolver.resolveApplicationNamespace(fFrameworkNamespace, fApplicationServlet);
+    }
 
     public void saveState()
     {
@@ -98,6 +106,8 @@ public class FullBuild extends Build
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
+        newState.fApplicationServlet = fApplicationServlet;
+        newState.fPrimaryNamespace = fApplicationNamespace;
 
         // save the processed binary libraries
         saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
@@ -126,7 +136,7 @@ public class FullBuild extends Build
 
     protected NamespaceResolver getNamespaceResolver(Parser parser)
     {
-        return new NamespaceResolver(this, parser, false);
+        return new NamespaceResolver(this, parser);
     }
 
     public void cleanUp()
@@ -149,7 +159,7 @@ public class FullBuild extends Build
                 wxmlElement = parseToNode(parser, webXML);
             } catch (IOException e1)
             {
-                TapestryCore.log(e1);               
+                TapestryCore.log(e1);
             }
             if (wxmlElement == null)
                 throw new BuilderException("Tapestry Build failed: could not parse web.xml");
@@ -194,7 +204,5 @@ public class FullBuild extends Build
         }
 
     }
-
-
 
 }

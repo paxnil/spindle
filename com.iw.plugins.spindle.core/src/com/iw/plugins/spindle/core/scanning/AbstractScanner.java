@@ -61,14 +61,13 @@ import com.iw.plugins.spindle.core.util.Assert;
 public abstract class AbstractScanner implements IProblemCollector
 {
 
-    private Object fResultObject;
-
     protected List fProblems = new ArrayList();
     protected IScannerValidator fValidator;
 
     public Object scan(Object source, IScannerValidator validator) throws ScannerException
     {
         Assert.isNotNull(source);
+        Object resultObject = null;
         fProblems.clear();
         if (validator == null)
         {
@@ -78,13 +77,13 @@ public abstract class AbstractScanner implements IProblemCollector
             this.fValidator = validator;
         }
         this.fValidator.setProblemCollector(this);
-        fResultObject = beforeScan(source);
-        if (fResultObject == null)
+        resultObject = beforeScan(source);
+        if (resultObject == null)
             return null;
 
         try
         {
-            doScan(source, fResultObject);
+            doScan(source, resultObject);
 
         } catch (ParserRuntimeException e)
         {
@@ -92,12 +91,17 @@ public abstract class AbstractScanner implements IProblemCollector
             // this could only happen when pull parsing!
             e.printStackTrace();
         }
-        return afterScan(fResultObject);
+
+        cleanup();
+
+        return afterScan(resultObject);
     }
 
     protected abstract void doScan(Object source, Object resultObject) throws ScannerException;
 
     protected abstract Object beforeScan(Object source) throws ScannerException;
+
+    protected abstract void cleanup();
 
     protected Object afterScan(Object scanResults) throws ScannerException
     {
@@ -110,6 +114,18 @@ public abstract class AbstractScanner implements IProblemCollector
         fProblems.add(problem);
     }
 
+    public void addSourceProblem(int severity, ISourceLocation location, String message)
+    {
+        addProblem(
+            new DefaultProblem(
+                ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER,
+                severity,
+                message,
+                location.getLineNumber(),
+                location.getCharStart(),
+                location.getCharEnd()));
+    }
+
     public void addProblem(int severity, ISourceLocation location, String message)
     {
         addProblem(
@@ -120,6 +136,15 @@ public abstract class AbstractScanner implements IProblemCollector
                 location.getLineNumber(),
                 location.getCharStart(),
                 location.getCharEnd()));
+    }
+
+    public void addProblems(IProblem[] problems)
+    {
+        if (problems != null)
+            for (int i = 0; i < problems.length; i++)
+            {
+                addProblem(problems[i]);
+            }
     }
 
     public IProblem[] getProblems()
@@ -188,7 +213,7 @@ public abstract class AbstractScanner implements IProblemCollector
     protected ISourceLocation getBestGuessSourceLocation(Node node, boolean forNodeContent)
     {
         ISourceLocationInfo info = getSourceLocationInfo(node);
-        
+
         if (info != null)
         {
             if (forNodeContent)
@@ -290,7 +315,11 @@ public abstract class AbstractScanner implements IProblemCollector
         return fValidator.validateTypeName(fullyQualifiedType, severity, location);
     }
 
-    protected boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path, String errorKey, ISourceLocation source)
+    protected boolean validateLibraryResourceLocation(
+        IResourceLocation specLocation,
+        String path,
+        String errorKey,
+        ISourceLocation source)
         throws ScannerException
     {
         return fValidator.validateLibraryResourceLocation(specLocation, path, errorKey, source);

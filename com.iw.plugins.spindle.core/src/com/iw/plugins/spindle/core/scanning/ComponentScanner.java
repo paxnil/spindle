@@ -103,7 +103,7 @@ public class ComponentScanner extends SpecificationScanner
         scanComponentSpecification(rootNode, specification, fIsPageSpec);
         scanForTemplates(specification);
     }
-
+    
     public void setNamespace(INamespace namespace)
     {
         fNamespace = namespace;
@@ -552,7 +552,7 @@ public class ComponentScanner extends SpecificationScanner
                 scanPropertySpecification(specification, node);
                 continue;
             }
-        }
+        }        
     }
 
     protected void scanListenerBinding(IContainedComponent component, Node node) throws ScannerException

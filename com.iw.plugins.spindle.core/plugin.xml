@@ -55,7 +55,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-             class="com.iw.plugins.spindle.core.TapestryProject">
+               class="com.iw.plugins.spindle.core.TapestryProject">
          </run>
       </runtime>
       <requires-nature
@@ -102,6 +102,20 @@
    </extension>
    <extension
          id="fatalproblemmarker"
+         name="Tapestry Build Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
+         id="problemmarker.source"
          name="Tapestry Build Problem"
          point="org.eclipse.core.resources.markers">
       <super

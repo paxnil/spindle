@@ -78,6 +78,11 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
 
     private int fAcceptFlags;
 
+    public AbstractTapestrySearchAcceptor()
+    {
+        reset(ACCEPT_ANY);
+    }
+    
     public AbstractTapestrySearchAcceptor(int acceptFlags)
     {
         reset(acceptFlags);

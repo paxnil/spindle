@@ -169,6 +169,16 @@ public class BuilderValidator extends BaseValidator
         }
         validateContainedComponentBindings(specification, containedSpecification, component, info);
 
+        // if the contained is a framework component, extra validation might occur at the end of the
+        // entire build!
+        FrameworkComponentValidator.validate(
+            (IResourceWorkspaceLocation)specification.getSpecificationLocation(),
+            ((PluginComponentSpecification) specification).getNamespace(),
+            type,
+            containedSpecification, 
+            component,
+            info);
+
         return true;
     }
 

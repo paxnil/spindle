@@ -34,6 +34,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 
+import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /**
@@ -51,6 +52,7 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
  */
 public class State
 {
+
     public static byte VERSION = 0x0001;
 
     String fProjectName;
@@ -71,6 +73,13 @@ public class State
     
     // list of known template extensions
     List fSeenTemplateExtensions;
+    
+    // the results of parsing web.xml
+    ServletInfo fApplicationServlet;
+    
+    // the main namespace result of the last build.
+    ICoreNamespace fPrimaryNamespace;
+
 
     /**
      * Constructor for State.
@@ -109,6 +118,8 @@ public class State
             fLastKnownClasspath,
             0,
             lastState.fLastKnownClasspath.length);
+        fApplicationServlet = lastState.fApplicationServlet;
+        fPrimaryNamespace = lastState.fPrimaryNamespace;
 
     }
 

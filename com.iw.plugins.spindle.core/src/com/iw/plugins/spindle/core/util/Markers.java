@@ -49,6 +49,7 @@ public class Markers
     public static final String TAPESTRY_MARKER_TAG = ITapestryMarker.TAPESTRY_PROBLEM_MARKER;
     public static final String TAPESTRY_BUILBROKEN_TAG = ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER;
     public static final String TAPESTRY_FATAL = ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER;
+    public static final String TAPESTRY_SOURCE = ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER;
 
     /**
          * Method addBuildBrokenProblemMarkerToResource.
@@ -248,6 +249,7 @@ public class Markers
                 iProject.deleteMarkers(Markers.TAPESTRY_MARKER_TAG, false, IResource.DEPTH_INFINITE);
                 iProject.deleteMarkers(Markers.TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
                 iProject.deleteMarkers(Markers.TAPESTRY_BUILBROKEN_TAG, false, IResource.DEPTH_ZERO);
+                iProject.deleteMarkers(Markers.TAPESTRY_SOURCE, false, IResource.DEPTH_INFINITE);
             }
         } catch (CoreException e)
         {} // assume there were no problems

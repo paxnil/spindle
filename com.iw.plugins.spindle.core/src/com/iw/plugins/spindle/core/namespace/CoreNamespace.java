@@ -64,6 +64,7 @@ public class CoreNamespace implements ICoreNamespace
     private ComponentLookup fComponentLookup;
     private PageLookup fPageLookup;
     private ComponentSpecificationResolver fComponentResolver;
+    private PageSpecificationResolver fPageResolver;
 
     private String fAppNameFromWebXML;
 
@@ -455,6 +456,22 @@ public class CoreNamespace implements ICoreNamespace
     public String toString()
     {
         return "Namepace(" + fId + "): " + getSpecificationLocation().toString();
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#getPageResolver()
+     */
+    public PageSpecificationResolver getPageResolver()
+    {
+        return fPageResolver;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#setPageResolver(com.iw.plugins.spindle.core.namespace.PageSpecificationResolver)
+     */
+    public void setPageResolver(PageSpecificationResolver resolver)
+    {
+        fPageResolver = resolver;
     }
 
 }

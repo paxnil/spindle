@@ -41,7 +41,6 @@ import org.apache.oro.text.regex.PatternCompiler;
 import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
-import org.apache.tapestry.ApplicationRuntimeException;
 import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -92,6 +91,8 @@ public class BaseValidator implements IScannerValidator
         }
 
     }
+
+    private List fDeferred;
 
     public static final String DefaultDummyString = "1~dummy<>";
 
@@ -187,7 +188,7 @@ public class BaseValidator implements IScannerValidator
         } catch (MalformedPatternException ex)
         {
 
-            throw new ApplicationRuntimeException(ex);
+            throw new Error(ex);
         }
     }
 
@@ -394,5 +395,7 @@ public class BaseValidator implements IScannerValidator
         }
         return true;
     }
+
+   
 
 }

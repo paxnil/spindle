@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.builder;
 
-import org.eclipse.core.resources.IResourceDelta;
 
 /**
  *  Common Question asked of all kinds of Incremental Builders
@@ -41,19 +40,17 @@ public interface IIncrementalBuild extends IBuild
      * <p>
      * Answering false prompts a Full Build
      * 
-     * @param delta the current IResourceDelta for the project
      * @return true if an incremental build is indicated, false otherwise.
      */
-    public boolean canIncrementalBuild(IResourceDelta projectDelta);
+    public boolean canIncrementalBuild();
     
     /**
      * A question asked of Incremental Builds by the TapestryBuilder.
      * <p>
      * Answering false prompts aborts an incremental build
      * 
-     * @param delta the current IResourceDelta for the project
      * @return true if an build is indicated, false otherwise.
      */
-    public boolean needsIncrementalBuild(IResourceDelta projectDelta);
+    public boolean needsIncrementalBuild();
 
 }

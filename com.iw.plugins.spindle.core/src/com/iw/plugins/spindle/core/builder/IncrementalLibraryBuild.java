@@ -40,21 +40,23 @@ import com.iw.plugins.spindle.core.parser.Parser;
 public class IncrementalLibraryBuild extends LibraryBuild implements IIncrementalBuild
 {
 
+    protected IResourceDelta fProjectDelta;
     /**
      * Constructor for IncrementalBuilder.
      * @param builder
      */
-    public IncrementalLibraryBuild(TapestryBuilder builder)
+    public IncrementalLibraryBuild(TapestryBuilder builder, IResourceDelta projectDelta)
     {
         super(builder);
+        fProjectDelta = projectDelta;
     }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild(org.eclipse.core.resources.IResourceDelta)
      */
-    public boolean canIncrementalBuild(IResourceDelta projectDelta)
+    public boolean canIncrementalBuild()
     {
-        if (super.canIncrementalBuild(projectDelta))
+        if (super.canIncrementalBuild())
         {}
         return false;
 
@@ -65,9 +67,9 @@ public class IncrementalLibraryBuild extends LibraryBuild implements IIncrementa
      */
     protected NamespaceResolver getNamespaceResolver(Parser parser)
     {
-        return new NamespaceResolver(this, parser, true);
+        return new NamespaceResolver(this, parser);
     }
-    
+
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.builder.FullBuild#saveState()
      */
@@ -83,6 +85,5 @@ public class IncrementalLibraryBuild extends LibraryBuild implements IIncrementa
             fTapestryBuilder.fCurrentProject,
             newState);
     }
-
 
 }

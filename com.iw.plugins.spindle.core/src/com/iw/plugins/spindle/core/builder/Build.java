@@ -120,8 +120,8 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         {
             super();
         }
-    }
-    
+    }      
+
     protected ICoreNamespace fApplicationNamespace;
     protected BuilderQueue fBuildQueue;
 
@@ -142,9 +142,16 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
     //    protected Parser fParser;
     protected TapestryBuilder fTapestryBuilder;
     protected BuilderValidator fValidator;
+    protected IResourceDelta fProjectDelta = null;
+    
+    protected IType fTapestryServletType;
+
 
     public Build(TapestryBuilder builder)
     {
+        fTapestryServletType =
+            builder.getType(TapestryCore.getString(TapestryBuilder.STRING_KEY + "applicationServletClassname"));
+
         fTapestryBuilder = builder;
         fNewState = new State(builder);
         fBuildQueue = new BuilderQueue();
@@ -158,6 +165,12 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fProcessedLocations = new HashMap();
         fSeenTemplateExtensions = new ArrayList();
         TapestryArtifactManager.getTapestryArtifactManager().addTemplateFinderListener(this);
+    }
+
+    public Build(TapestryBuilder builder, IResourceDelta delta)
+    {
+        this(builder);
+        fProjectDelta = delta;
     }
 
     public void build() throws BuilderException, CoreException
@@ -192,14 +205,17 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         }
         saveState();
     }
-    
+
     protected abstract void saveState();
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild(org.eclipse.core.resources.IResourceDelta)
      */
-    public boolean canIncrementalBuild(IResourceDelta projectDelta)
+    public boolean canIncrementalBuild()
     {
+        if (fProjectDelta == null)
+            return false;
+
         fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
         if (fLastState == null || fLastState.fBuildNumber < 0 || fLastState.fVersion != State.VERSION)
             return false;
@@ -227,6 +243,15 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fMissingTypes.clear();
         fProcessedLocations.clear();
         fSeenTemplateExtensions.clear();
+        fApplicationNamespace = null;
+        fFrameworkNamespace = null;
+        fComponentScanner = null;
+        fBuildQueue = null;
+        fNotifier = null;
+        fTapestryBuilder = null;
+        fValidator = new BuilderValidator(this);
+        fValidator.removeListener(this);
+        fProcessedLocations.clear();
         TapestryArtifactManager.getTapestryArtifactManager().removeTemplateFinderListener(this);
     }
 
@@ -366,15 +391,17 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      * that an incremental build is indicated (i.e. web.xml has not changed,
      * last build did not fail, etc).
      */
-    public boolean needsIncrementalBuild(IResourceDelta projectDelta)
+    public boolean needsIncrementalBuild()
     {
+        if (fProjectDelta == null)
+            return false;
         fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
         final List knownTapestryExtensions = Arrays.asList(fTapestryBuilder.KnownExtensions);
 
         // check for java files that changed, or have been added
         try
         {
-            projectDelta.accept(new IResourceDeltaVisitor()
+            fProjectDelta.accept(new IResourceDeltaVisitor()
             {
                 public boolean visit(IResourceDelta delta) throws CoreException
                 {
@@ -450,19 +477,25 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 //                scanner.setPublicId(fParser.getPublicId());
 
                 IApplicationSpecification result = (IApplicationSpecification) scanner.scan(node, fValidator);
-                
-                Markers.recordProblems((IResourceWorkspaceLocation)location, scanner.getProblems());
-                
+
+                Markers.recordProblems((IResourceWorkspaceLocation) location, scanner.getProblems());
+
                 return result;
             }
         } catch (IOException e)
         {
+            //TODO remove
+            e.printStackTrace();
             TapestryCore.log(e);
         } catch (CoreException e)
         {
+            //TODO remove
+            e.printStackTrace();
             TapestryCore.log(e);
         } catch (ScannerException e)
         {
+            //TODO remove
+            e.printStackTrace();
             TapestryCore.log(e);
         }
         return null;
@@ -494,19 +527,25 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 ILibrarySpecification result = (ILibrarySpecification) scanner.scan(node, fValidator);
                 if (result != null)
                     fProcessedLocations.put(location, result);
-                    
+
                 Markers.recordProblems((IResourceWorkspaceLocation) location, scanner.getProblems());
-                
+
                 return result;
             }
         } catch (IOException e)
         {
+            //TODO remove
+            e.printStackTrace();
             TapestryCore.log(e);
         } catch (CoreException e)
         {
+            //TODO remove
+            e.printStackTrace();
             TapestryCore.log(e);
         } catch (ScannerException e)
         {
+            //TODO remove
+            e.printStackTrace();
             TapestryCore.log(e);
         }
         return null;
@@ -538,6 +577,8 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 fProcessedLocations.put(location, null);
             } catch (ScannerException e)
             {
+                //TODO remove
+                e.printStackTrace();
                 TapestryCore.log(e);
             } finally
             {
@@ -587,16 +628,20 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
         } catch (CoreException e)
         {
+            //TODO remove
+            e.printStackTrace();
             TapestryCore.log(e);
             throw e;
         } catch (IOException e)
         {
+            //TODO remove
+            e.printStackTrace();
             TapestryCore.log(e);
             throw e;
         }
-        
+
         Markers.recordProblems(storage, parser.getProblems());
-        
+
         if (parser.getHasFatalErrors())
             //        if (fParser.getHasFatalErrors())
             return null;
@@ -621,6 +666,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         Parser parser,
         ICoreNamespace namespace,
         IResourceWorkspaceLocation location)
+    
     {
         // to avoid double parsing specs that are accessible
         // by multiple means in Tapestry
@@ -646,7 +692,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                             IScannerValidator useValidator = new BuilderValidator(this, namespace);
                             useValidator.addListener(this);
                             result = (IComponentSpecification) fComponentScanner.scan(node, useValidator);
-                        } catch (ScannerException e1)
+                        } catch (Exception e1)
                         {
                             e1.printStackTrace();
                         }
@@ -658,9 +704,9 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                         fComponentScanner.scanForTemplates(dummy);
                         result = dummy;
                     }
-                    
+
                     Markers.recordProblems(location, fComponentScanner.getProblems());
-                    
+
                 } catch (IOException e)
                 {
                     e.printStackTrace();

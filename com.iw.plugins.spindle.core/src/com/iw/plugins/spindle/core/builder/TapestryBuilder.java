@@ -30,6 +30,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
@@ -87,6 +89,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
     public static boolean DEBUG = true;
 
+    //TODO this is really ugly, but I need this fast.
+    public static List fDeferredActions = new ArrayList();
+
     public static State readState(DataInputStream in) throws IOException
     {
         return State.read(in);
@@ -125,7 +130,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException
     {
         fCurrentProject = getProject();
-        Markers.removeBuildProblemsForProject(fCurrentProject);
+        Markers.removeProblemsForProject(fCurrentProject);
         if (fCurrentProject == null || !fCurrentProject.isAccessible())
             return new IProject[0];
 
@@ -149,6 +154,11 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 } else
                 {
                     buildIncremental();
+                }
+                for (Iterator iter = fDeferredActions.iterator(); iter.hasNext();)
+                {
+                    IBuildAction action = (IBuildAction) iter.next();
+                    action.run();
                 }
                 ok = true;
             }
@@ -194,6 +204,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 // If the build failed, clear the previously built state, forcing a full build next time.
                 clearLastState();
             fNotifier.done();
+            fDeferredActions.clear();
             cleanup();
         }
         IProject[] requiredProjects = getRequiredProjects(true);
@@ -298,14 +309,15 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
         int type = fTapestryProject.getProjectType();
         IIncrementalBuild inc = null;
+        IResourceDelta delta = getDelta(fTapestryProject.getProject());
         switch (type)
         {
             case TapestryProject.APPLICATION_PROJECT_TYPE :
-                inc = new IncrementalApplicationBuild(this);
+                inc = new IncrementalApplicationBuild(this, delta);
                 break;
 
             case TapestryProject.LIBRARY_PROJECT_TYPE :
-                inc = new IncrementalLibraryBuild(this);
+                inc = new IncrementalLibraryBuild(this, delta);
 
             default :
                 break;
@@ -313,10 +325,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         if (inc == null)
             throw new Error("no builder!");
 
-        IResourceDelta delta = getDelta(fTapestryProject.getProject());
-        if (inc.canIncrementalBuild(delta))
+        if (inc.canIncrementalBuild())
         {
-            if (!inc.needsIncrementalBuild(delta))
+            if (!inc.needsIncrementalBuild())
                 return;
 
             fBuild = inc;
@@ -324,6 +335,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 System.out.println("Incremental Tapestry build");
 
             fNotifier.subTask(TapestryCore.getString(TapestryBuilder.STRING_KEY + "incremental-build-starting"));
+            // TODO shouldn't do this for a true incremental build!
             Markers.removeProblemsForProject(fCurrentProject);
             inc.build();
         } else

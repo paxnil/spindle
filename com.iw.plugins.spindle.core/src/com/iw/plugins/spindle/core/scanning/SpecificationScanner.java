@@ -352,4 +352,11 @@ public abstract class SpecificationScanner extends AbstractScanner
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#cleanup()
+     */
+    protected void cleanup()
+    {       
+    }
+
 }

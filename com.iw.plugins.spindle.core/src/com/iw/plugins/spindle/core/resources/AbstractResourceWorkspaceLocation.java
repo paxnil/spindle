@@ -40,6 +40,8 @@ import org.eclipse.core.runtime.Path;
  */
 public abstract class AbstractResourceWorkspaceLocation implements IResourceWorkspaceLocation
 {
+    
+   
 
     private String fPath;
     private String fName;

@@ -185,6 +185,10 @@ public class WebXMLScanner extends AbstractScanner
             }
         }
     }
+    
+    protected void cleanup() {
+       
+    }
 
     protected IResourceWorkspaceLocation getApplicationLocation(ServletInfo info, String path)
     {

@@ -56,6 +56,7 @@ import org.apache.tapestry.spec.SpecFactory;
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.FrameworkComponentValidator;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.IProblem;
@@ -96,6 +97,7 @@ public class TemplateScanner extends AbstractScanner
     private ITemplateParserDelegate fParserDelegate = new ScannerDelegate();
     private List fSeenIds = new ArrayList();
     private SpecFactory fSpecificationFactory;
+    private IResourceWorkspaceLocation fTemplateLocation;
 
     public void scanTemplate(
         PluginComponentSpecification spec,
@@ -105,6 +107,7 @@ public class TemplateScanner extends AbstractScanner
     {
         Assert.isNotNull(spec);
         Assert.isNotNull(spec.getNamespace());
+        fTemplateLocation = (IResourceWorkspaceLocation)templateLocation;
         fComponentSpec = spec;
         fNamespace = (ICoreNamespace) spec.getNamespace();
         fParser = new CoreTemplateParser();
@@ -120,11 +123,11 @@ public class TemplateScanner extends AbstractScanner
      */
     protected void doScan(Object source, Object resultObject) throws ScannerException
     {
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) source;
+        
         char[] data = null;
         try
         {
-            InputStream in = location.getContents();
+            InputStream in = fTemplateLocation.getContents();
             data = Files.readFileToString(in, null).toCharArray();
         } catch (CoreException e)
         {
@@ -142,7 +145,7 @@ public class TemplateScanner extends AbstractScanner
 
         try
         {
-            parseResults = fParser.parse(data, fParserDelegate, location);
+            parseResults = fParser.parse(data, fParserDelegate, fTemplateLocation);
         } catch (TemplateParseException e1)
         {
             // should never happen
@@ -267,6 +270,15 @@ public class TemplateScanner extends AbstractScanner
                 validateImplicitStaticBinding(bspec, containedSpecification, location);
 
         }
+
+        
+        FrameworkComponentValidator.validate(
+                fTemplateLocation,
+                fComponentSpec.getNamespace(),
+                token.getComponentType(),
+                containedSpecification,
+                contained,
+                token.getEventInfo());
 
     }
 
@@ -862,6 +874,12 @@ public class TemplateScanner extends AbstractScanner
         {
             return fComponentSpec.getComponent(componentId) != null;
         }
+
+    }
+
+    protected void cleanup()
+    {
+        // do nothing
 
     }
 

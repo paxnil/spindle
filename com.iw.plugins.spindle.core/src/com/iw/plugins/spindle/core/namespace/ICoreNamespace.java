@@ -65,5 +65,9 @@ public interface ICoreNamespace extends INamespace
     public ComponentSpecificationResolver getComponentResolver();
     
     public void setComponentResolver(ComponentSpecificationResolver resolver);
+    
+    public PageSpecificationResolver getPageResolver();
+    
+    public void setPageResolver(PageSpecificationResolver resolver);
 
 }

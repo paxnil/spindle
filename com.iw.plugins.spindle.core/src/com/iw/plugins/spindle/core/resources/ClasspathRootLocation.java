@@ -114,6 +114,8 @@ public class ClasspathRootLocation extends AbstractRootLocation
 
     public IResourceWorkspaceLocation getRelativeLocation(IStorage storage)
     {
+        if (findRelativePath(storage) == null)
+            return null;
         return new ClasspathResourceWorkspaceLocation(this, storage);
     }
 

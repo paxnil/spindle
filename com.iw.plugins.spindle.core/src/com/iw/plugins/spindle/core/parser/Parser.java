@@ -323,9 +323,15 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
     }
 
-    public void addProblem(int severity, ISourceLocation location, String message, boolean survivor) {
-        // we ignore survivor flaf in the parser
-        addProblem(severity, location, message);
+    public void addSourceProblem(int severity, ISourceLocation location, String message) {
+        addProblem(
+            new DefaultProblem(
+                ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER,
+                severity,
+                message,
+                location.getLineNumber(),
+                location.getCharStart(),
+                location.getCharEnd()));
     }
 
 
@@ -356,7 +362,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
 
     private IProblem createProblem(XMLParseException parseException, int severity)
     {
-        return createProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, parseException, severity);
+        return createProblem(ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER, parseException, severity);
     }
 
     private IProblem createProblem(String type, XMLParseException ex, int severity)
