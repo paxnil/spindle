@@ -30,7 +30,7 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.w3c.dom.Document;
 
@@ -59,12 +59,6 @@ public class FullBuild extends Build
         super(builder);
     }
 
-    // used only by incremental subclasses
-    protected FullBuild(TapestryBuilder builder, IResourceDelta projectDelta)
-    {
-        super(builder, projectDelta);
-    }
-
     /**
      * Use the parser to find declared applications in web.xml
      * @param parser
@@ -72,27 +66,40 @@ public class FullBuild extends Build
      */
     protected void preBuild() throws CoreException
     {
+        setDependencyListener(new BuilderDependencyListener());
         findDeclaredApplication();
+    }
+
+    protected void postBuild()
+    {
+        BuilderDependencyListener listener = (BuilderDependencyListener) getDependencyListener();
+        if (fTapestryBuilder.DEBUG)
+        {
+            listener.dump();
+        }
     }
 
     /**
      * Resolve the Tapesty framework namespace
      */
-    protected void resolveFramework()
+    protected void resolveFramework(Parser parser)
     {
         IResourceWorkspaceLocation frameworkLocation =
             (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot.getRelativeLocation(
                 "/org/apache/tapestry/Framework.library");
-        fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace(frameworkLocation);
+        FrameworkResolver resolver = new FrameworkResolver(this, parser, frameworkLocation);
+        fFrameworkNamespace = resolver.resolve();
+        //        fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace(frameworkLocation);
     }
 
     /**
      * Resolve the application namespace
      *
      */
-    protected void doBuild()
+    protected void doBuild(Parser parser)
     {
-        fApplicationNamespace = fNSResolver.resolveApplicationNamespace(fFrameworkNamespace, fApplicationServlet);
+        ApplicationResolver resolver = new ApplicationResolver(this, parser, fFrameworkNamespace, fApplicationServlet);
+        fApplicationNamespace = resolver.resolve();
     }
 
     public void saveState()
@@ -103,11 +110,13 @@ public class FullBuild extends Build
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
         newState.fTemplateMap = fTemplateMap;
-        newState.fSpecificationMap = fSpecificationMap;
+        newState.fFileSpecificationMap = fFileSpecificationMap;
+        newState.fBinarySpecificationMap= fBinarySpecificationMap;
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
         newState.fApplicationServlet = fApplicationServlet;
         newState.fPrimaryNamespace = fApplicationNamespace;
         newState.fFrameworkNamespace = fFrameworkNamespace;
+        newState.fCleanTemplates = fCleanTemplates;
 
         // save the processed binary libraries
         saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
@@ -118,30 +127,23 @@ public class FullBuild extends Build
 
     protected void saveBinaryLibraries(ICoreNamespace framework, ICoreNamespace namespace, State state)
     {
-        IResourceWorkspaceLocation frameworkLoc = (IResourceWorkspaceLocation) framework.getSpecificationLocation();
-        if (frameworkLoc.isBinary())
-            state.fBinaryNamespaces.put(frameworkLoc, framework);
+        saveBinaryLibraries(framework, state);
+        saveBinaryLibraries(namespace, state);
+    }
+
+    private void saveBinaryLibraries(ICoreNamespace namespace, State state)
+    {
+        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
+        if (location.isBinary())
+            state.fBinaryNamespaces.put(location, namespace);
 
         for (Iterator iter = namespace.getChildIds().iterator(); iter.hasNext();)
         {
             String id = (String) iter.next();
             ICoreNamespace child = (ICoreNamespace) namespace.getChildNamespace(id);
             if (child != null)
-            {
-                IResourceWorkspaceLocation childLocation =
-                    (IResourceWorkspaceLocation) child.getSpecificationLocation();
-                if (childLocation.isBinary())
-                {
-                    state.fBinaryNamespaces.put(childLocation, child);
-                }
-            }
-
+                saveBinaryLibraries(child, state);
         }
-    }
-
-    protected NamespaceResolver getNamespaceResolver(Parser parser)
-    {
-        return new NamespaceResolver(this, parser);
     }
 
     public void cleanUp()
@@ -159,15 +161,16 @@ public class FullBuild extends Build
 
         IResourceWorkspaceLocation webXML =
             (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot.getRelativeLocation("WEB-INF/web.xml");
+        IStorage storage = webXML.getStorage();
         //        IFile webXML = tapestryBuilder.contextRoot.getFile("WEB-INF/web.xml");
-        if (webXML.exists())
+        if (storage != null)
         {
             Document wxmlElement = null;
             try
             {
                 fTapestryBuilder.fNotifier.subTask(
                     TapestryCore.getString(TapestryBuilder.STRING_KEY + "scanning", webXML.toString()));
-                wxmlElement = parseToDocument(servletParser, webXML, null);
+                wxmlElement = parseToDocument(servletParser, storage, webXML, null);
             } catch (IOException e1)
             {
                 TapestryCore.log(e1);

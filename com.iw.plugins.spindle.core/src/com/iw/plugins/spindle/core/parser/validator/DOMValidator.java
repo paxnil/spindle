@@ -424,7 +424,7 @@ public class DOMValidator implements IProblemCollector
 
     private void recordErrorOnTagName(Node node, String errorMessage)
     {
-        addProblem(IProblem.ERROR, getNodeSourceInfo(node).getTagNameLocation(), errorMessage);
+        addProblem(IProblem.ERROR, getNodeSourceInfo(node).getTagNameLocation(), errorMessage, false);
     }
 
     /**
@@ -436,7 +436,7 @@ public class DOMValidator implements IProblemCollector
     {
         ISourceLocationInfo sourceInfo = getNodeSourceInfo(node);
         ISourceLocation attributeLocation = sourceInfo.getAttributeSourceLocation(attrName);
-        addProblem(IProblem.ERROR, attributeLocation, errorMessage);
+        addProblem(IProblem.ERROR, attributeLocation, errorMessage, false);
     }
 
     /**
@@ -445,7 +445,7 @@ public class DOMValidator implements IProblemCollector
      */
     private void recordTagNameProblem(String elementName, Node node, String message)
     {
-        addProblem(IProblem.ERROR, getTagNameLocation(elementName, node), message);
+        addProblem(IProblem.ERROR, getTagNameLocation(elementName, node), message, false);
     }
 
     /**
@@ -454,7 +454,8 @@ public class DOMValidator implements IProblemCollector
      */
     private void reportDocumentError(String message)
     {
-        addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR, message, 1, -1, -1));
+        addProblem(
+            new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR, message, 1, -1, -1, false));
     }
 
     private ISourceLocation getTagNameLocation(String name, Node node)
@@ -717,7 +718,7 @@ public class DOMValidator implements IProblemCollector
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(int, com.iw.plugins.spindle.core.source.ISourceLocation, java.lang.String)
      */
-    public void addProblem(int severity, ISourceLocation location, String message)
+    public void addProblem(int severity, ISourceLocation location, String message, boolean isTemporary)
     {
         fProblems.add(
             new DefaultProblem(
@@ -726,7 +727,8 @@ public class DOMValidator implements IProblemCollector
                 message,
                 location.getLineNumber(),
                 location.getCharStart(),
-                location.getCharEnd()));
+                location.getCharEnd(),
+                isTemporary));
     }
 
     /* (non-Javadoc)

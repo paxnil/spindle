@@ -221,7 +221,7 @@ public class TemplateFinder
             if (contextRoot != null)
                 templateLocation = (IResourceWorkspaceLocation) contextRoot.getRelativeLocation(templatePath);
 
-            if (templateLocation == null || !templateLocation.exists())
+            if (templateLocation == null || templateLocation.getStorage() == null)
             {
                 addProblem(
                     IProblem.ERROR,
@@ -234,7 +234,7 @@ public class TemplateFinder
         {
             templateLocation =
                 (IResourceWorkspaceLocation) specification.getSpecificationLocation().getRelativeLocation(templatePath);
-            if (templateLocation == null || !templateLocation.exists())
+            if (templateLocation == null || templateLocation.getStorage() == null)
             {
                 addProblem(
                     IProblem.ERROR,
@@ -260,14 +260,11 @@ public class TemplateFinder
 
     private void find(IResourceWorkspaceLocation location) throws CoreException
     {
-        if (location == null || !location.exists())
-            return;
-
         // need to ensure the base template exists.
         // if it does we look for localized versions of it!
         IResourceWorkspaceLocation baseLocation =
             (IResourceWorkspaceLocation) location.getRelativeLocation(fTemplateBaseName + "." + fExtension);
-        if (baseLocation.exists())
+        if (baseLocation.getStorage() != null)
         {
             fAcceptor.configure(fTemplateBaseName, fExtension);
             location.lookup(fAcceptor);
@@ -278,7 +275,7 @@ public class TemplateFinder
     private void addProblem(int severity, ISourceLocation location, String message)
     {
         if (fProblemCollector != null)
-            fProblemCollector.addProblem(severity, location, message);
+            fProblemCollector.addProblem(severity, location, message, true);
 
     }
 

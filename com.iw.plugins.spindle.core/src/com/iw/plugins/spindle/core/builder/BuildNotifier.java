@@ -25,6 +25,7 @@ package com.iw.plugins.spindle.core.builder;
  *
  * ***** END LICENSE BLOCK ***** */
 
+import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -78,7 +79,7 @@ public class BuildNotifier
         processed(resource.getName());
     }
 
-    public void processed(IResourceWorkspaceLocation descriptor)
+    public void processed(IResourceLocation descriptor)
     {
         processed(descriptor.getName());
     }

@@ -48,6 +48,8 @@ import org.apache.tapestry.spec.IContainedComponent;
 import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.Build;
+import com.iw.plugins.spindle.core.builder.IDependencyListener;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
@@ -164,7 +166,13 @@ public class BaseValidator implements IScannerValidator
             fListeners.remove(listener);
     }
 
-    protected void fireTypeCheck(String fullyQulaifiedName, IType result)
+    /**
+     *  Notify listeners that a type check occured.
+     * 
+     * @param fullyQulaifiedName the name of the type
+     * @param result the resolved IType, if any
+     */
+    protected void fireTypeDependency(IResourceWorkspaceLocation dependant, String fullyQualifiedName, IType result)
     {
         if (fListeners == null)
             return;
@@ -172,8 +180,13 @@ public class BaseValidator implements IScannerValidator
         for (Iterator iter = fListeners.iterator(); iter.hasNext();)
         {
             IScannerValidatorListener listener = (IScannerValidatorListener) iter.next();
-            listener.typeChecked(fullyQulaifiedName, result);
+            listener.typeChecked(fullyQualifiedName, result); //TODO remove eventually
         }
+
+        IDependencyListener depListener = Build.getDependencyListener();
+        if (depListener != null && fullyQualifiedName != null && fullyQualifiedName.trim().length() > 0)
+            depListener.foundTypeDependency(dependant, fullyQualifiedName);
+
     }
 
     /** 
@@ -181,7 +194,6 @@ public class BaseValidator implements IScannerValidator
      *  Returns a pattern compiled for single line matching
      * 
      **/
-
     protected Pattern compilePattern(String pattern)
     {
         if (fPatternCompiler == null)
@@ -202,7 +214,7 @@ public class BaseValidator implements IScannerValidator
      * @param fullyQualifiedName
      * @return
      */
-    public Object findType(String fullyQualifiedName)
+    public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
     {
         return this;
     }
@@ -272,21 +284,26 @@ public class BaseValidator implements IScannerValidator
                 Ognl.parseExpression(expression);
             } catch (OgnlException e)
             {
-                reportProblem(severity, location, e.getMessage());
+                addProblem(severity, location, e.getMessage(), false);
                 return false;
             }
         }
         return true;
     }
 
-    protected void reportProblem(int severity, ISourceLocation location, String message) throws ScannerException
+    public void addProblem(int severity, ISourceLocation location, String message, boolean isTemporary)
+        throws ScannerException
     {
         if (fProblemCollector == null)
         {
-            throw new ScannerException(message);
+            throw new ScannerException(message, isTemporary);
         } else
         {
-            fProblemCollector.addProblem(severity, (location == null ? DefaultSourceLocation : location), message);
+            fProblemCollector.addProblem(
+                severity,
+                (location == null ? DefaultSourceLocation : location),
+                message,
+                isTemporary);
         }
     }
 
@@ -326,12 +343,12 @@ public class BaseValidator implements IScannerValidator
 
             if (!fMatcher.matches(value, compiled))
             {
-                reportProblem(severity, location, TapestryCore.getTapestryString(errorKey, value));
+                addProblem(severity, location, TapestryCore.getTapestryString(errorKey, value), false);
                 return false;
             }
             return true;
         }
-        reportProblem(severity, location, TapestryCore.getTapestryString(errorKey, "null value"));
+        addProblem(severity, location, TapestryCore.getTapestryString(errorKey, "null value"), false);
         return false;
     }
 
@@ -376,7 +393,7 @@ public class BaseValidator implements IScannerValidator
         {
             IResourceWorkspaceLocation relative =
                 (IResourceWorkspaceLocation) location.getRelativeLocation(relativePath);
-            reportProblem(IProblem.ERROR, source, TapestryCore.getString(errorKey, relative.toString()));
+            addProblem(IProblem.ERROR, source, TapestryCore.getString(errorKey, relative.toString()), true);
             return false;
         }
         return true;
@@ -386,27 +403,33 @@ public class BaseValidator implements IScannerValidator
     {
         IResourceWorkspaceLocation real = (IResourceWorkspaceLocation) location;
         IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) real.getRelativeLocation(relativePath);
-        return relative.exists();
+        return relative.getStorage() != null;
     }
 
-    public boolean validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
+    public boolean validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType, int severity)
+        throws ScannerException
     {
-        return validateTypeName(fullyQualifiedType, severity, DefaultSourceLocation);
+        return validateTypeName(dependant, fullyQualifiedType, severity, DefaultSourceLocation);
     }
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
      */
-    public boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location)
+    public boolean validateTypeName(
+        IResourceWorkspaceLocation dependant,
+        String fullyQualifiedType,
+        int severity,
+        ISourceLocation location)
         throws ScannerException
     {
 
-        Object type = findType(fullyQualifiedType);
+        Object type = findType(dependant, fullyQualifiedType);
         if (type == null)
         {
-            reportProblem(
+            addProblem(
                 severity,
                 location,
-                TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType));
+                TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType),
+                true);
             return false;
         }
         return true;

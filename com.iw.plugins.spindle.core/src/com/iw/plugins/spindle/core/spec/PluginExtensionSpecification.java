@@ -26,16 +26,28 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.spec.IExtensionSpecification;
+import org.apache.tapestry.spec.ILibrarySpecification;
 
-import com.iw.plugins.spindle.core.util.IIdentifiableMap;
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Tapestry Extensions for Spindle
+ * 
+ *  TODO complete transformation away from strict Tapestry interface adherence.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -45,6 +57,7 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
 
     private String fClassName;
     protected Map fConfiguration;
+    private List fRawConfigurations;
     private boolean fImmediate;
     /**
      * @param type
@@ -68,7 +81,6 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
     public void setClassName(String className)
     {
         this.fClassName = className;
-        firePropertyChange("className", null, className);
     }
 
     /* (non-Javadoc)
@@ -76,27 +88,35 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
      */
     public void addConfiguration(String propertyName, Object value)
     {
+        checkInternalCall("PluginExtensionSpecification.addConfiguration may not be called by external client code");
         if (fConfiguration == null)
-            fConfiguration = new IIdentifiableMap(this, "configration");
+            fConfiguration = new HashMap();
 
-        PluginExtensionConfiguration newConfig = new PluginExtensionConfiguration(propertyName, value);
-        fConfiguration.put(propertyName, newConfig);
+        if (!fConfiguration.containsKey(propertyName))
+            fConfiguration.put(propertyName, value);
     }
 
-    public void removeConfiguration(String propertyName)
+    public void addConfiguration(PluginExtensionConfiguration configuration)
     {
-        remove(fConfiguration, propertyName);
-    }
+        if (fRawConfigurations == null)
+            fRawConfigurations = new ArrayList();
 
-    public void setConfiguration(String propertyName, PluginExtensionConfiguration config)
-    {
-        if (fConfiguration == null)
-            fConfiguration = new IIdentifiableMap(this, "configuration");
+        fRawConfigurations.add(configuration);
+        configuration.setParent(this);
 
-        fConfiguration.put(propertyName, config);
+        beginInternalCall("calling Tapestry addConfiguration");
+        try
+        {
+            addConfiguration(configuration.getIdentifier(), configuration);
+        } finally
+        {
+
+            endInternalCall();
+        }
     }
 
     /* (non-Javadoc)
+     * 
      * @see org.apache.tapestry.spec.IExtensionSpecification#getConfiguration()
      */
     public Map getConfiguration()
@@ -105,6 +125,30 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
             return Collections.unmodifiableMap(fConfiguration);
 
         return Collections.EMPTY_MAP;
+
+    }
+
+    public List getConfigurationObjects()
+    {
+        if (fRawConfigurations != null)
+            return Collections.unmodifiableList(fRawConfigurations);
+
+        return Collections.EMPTY_LIST;
+    }
+
+    public boolean containsConfiguration(String propertyName)
+    {
+        if (fRawConfigurations == null)
+            return false;
+
+        for (int i = 0; i < fRawConfigurations.size(); i++)
+        {
+            PluginExtensionConfiguration config = (PluginExtensionConfiguration) fRawConfigurations.get(i);
+            if (config.getIdentifier().equals(propertyName))
+                return true;
+        }
+        return false;
+
     }
 
     /* (non-Javadoc)
@@ -128,10 +172,52 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
      */
     public void setImmediate(boolean immediate)
     {
-        boolean old = fImmediate;
         fImmediate = immediate;
-        firePropertyChange("immediate", old, immediate);
     }
 
-   
+    /**
+      *  Revalidate this declaration. Note that validating the existence of the value is only possible
+      *  during a parse/scan cycle. But that's ok 'cuz those kinds of problems
+      *  would have already been caught.
+      * 
+      * @param parent the object holding this
+      * @param validator a validator helper
+      */
+
+    public void validate(Object parent, IScannerValidator validator)
+    {
+        ILibrarySpecification library = (ILibrarySpecification) parent;
+
+        validateSelf(parent, validator);
+
+        for (Iterator iter = getConfigurationObjects().iterator(); iter.hasNext();)
+        {
+            PluginExtensionConfiguration element = (PluginExtensionConfiguration) iter.next();
+            element.validate(this, validator);
+        }
+
+    }
+
+    public void validateSelf(Object parent, IScannerValidator validator)
+    {
+        ILibrarySpecification library = (ILibrarySpecification) parent;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        try
+        {
+
+            validator.validateTypeName(
+                (IResourceWorkspaceLocation) library.getSpecificationLocation(),
+                fClassName,
+                IProblem.ERROR,
+                sourceInfo.getAttributeSourceLocation("class"));
+
+        } catch (ScannerException e)
+        {
+             TapestryCore.log(e);
+        }
+
+    }
+
 }

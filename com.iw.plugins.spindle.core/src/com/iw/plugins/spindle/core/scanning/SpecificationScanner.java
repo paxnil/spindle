@@ -36,12 +36,14 @@ import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.Direction;
 import org.apache.tapestry.spec.SpecFactory;
 import org.apache.tapestry.util.IPropertyHolder;
+import org.eclipse.core.resources.IStorage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
 import com.iw.plugins.spindle.core.spec.PluginPropertyDeclaration;
 import com.iw.plugins.spindle.core.util.Assert;
@@ -60,9 +62,10 @@ public abstract class SpecificationScanner extends AbstractScanner
 {
 
     protected IResourceLocation fResourceLocation;
+    protected IStorage fStorage;
     protected String fPublicId;
     protected Node fRootNode;
-
+    
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#beforeScan(java.lang.Object)
      */
@@ -75,7 +78,7 @@ public abstract class SpecificationScanner extends AbstractScanner
         fPublicId = W3CAccess.getPublicId(document);
         if (fPublicId == null || !checkPublicId())
         {
-            throw new ScannerException(TapestryCore.getString(XMLUtil.SPEC_DTD_ERROR_KEY));
+            throw new ScannerException(TapestryCore.getString(XMLUtil.SPEC_DTD_ERROR_KEY), false);
         }
         fRootNode = document.getDocumentElement();
         return document;
@@ -133,9 +136,10 @@ public abstract class SpecificationScanner extends AbstractScanner
         return super.afterScan(scanResults);
     }
 
-    public void setResourceLocation(IResourceLocation location)
+    public void setResourceInformation(IStorage storage, IResourceLocation location)
     {
-        this.fResourceLocation = location;
+        fStorage = storage;
+        fResourceLocation = location;        
     }
 
     protected void setPublicId(String publicId)
@@ -143,27 +147,28 @@ public abstract class SpecificationScanner extends AbstractScanner
         fPublicId = publicId;
     }
 
-    protected interface IConverter
+    public static interface IConverter
     {
         public Object convert(String value) throws ScannerException;
     }
 
-    protected static class BooleanConverter implements IConverter
+    public static class BooleanConverter implements IConverter
     
     {
         public Object convert(String value) throws ScannerException
         {
-            Object result = conversionMap.get(value.toLowerCase());
+            Object result = TYPE_CONVERSION_MAP.get(value.toLowerCase());
 
             if (result == null || !(result instanceof Boolean))
                 throw new ScannerException(
-                    TapestryCore.getTapestryString("SpecificationParser.fail-convert-boolean", value));
+                    TapestryCore.getTapestryString("SpecificationParser.fail-convert-boolean", value),
+                    false);
 
             return result;
         }
     }
 
-    protected static class IntConverter implements IConverter
+    public static class IntConverter implements IConverter
     {
         public Object convert(String value) throws ScannerException
         {
@@ -174,12 +179,13 @@ public abstract class SpecificationScanner extends AbstractScanner
             {
                 throw new ScannerException(
                     TapestryCore.getTapestryString("SpecificationParser.fail-convert-int", value),
-                    ex);
+                    ex,
+                    false);
             }
         }
     }
 
-    protected static class LongConverter implements IConverter
+    public static class LongConverter implements IConverter
     {
         public Object convert(String value) throws ScannerException
         {
@@ -190,12 +196,13 @@ public abstract class SpecificationScanner extends AbstractScanner
             {
                 throw new ScannerException(
                     TapestryCore.getTapestryString("SpecificationParser.fail-convert-long", value),
-                    ex);
+                    ex,
+                    false);
             }
         }
     }
 
-    protected static class DoubleConverter implements IConverter
+    public static class DoubleConverter implements IConverter
     {
         public Object convert(String value) throws ScannerException
         {
@@ -206,12 +213,13 @@ public abstract class SpecificationScanner extends AbstractScanner
             {
                 throw new ScannerException(
                     TapestryCore.getTapestryString("SpecificationParser.fail-convert-double", value),
-                    ex);
+                    ex,
+                    false);
             }
         }
     }
 
-    protected static class StringConverter implements IConverter
+    public static class StringConverter implements IConverter
     {
         public Object convert(String value)
         {
@@ -226,9 +234,9 @@ public abstract class SpecificationScanner extends AbstractScanner
      *  since the keys are unique.
      * 
      **/
-    protected static final Map conversionMap = new HashMap();
+    public static final Map TYPE_CONVERSION_MAP = new HashMap();
 
-    protected static final List typeList = new ArrayList();
+    public static final List TYPE_LIST = new ArrayList();
 
     // Identify all the different acceptible values.
     // We continue to sneak by with a single map because
@@ -238,89 +246,106 @@ public abstract class SpecificationScanner extends AbstractScanner
 
     static {
 
-        conversionMap.put("true", Boolean.TRUE);
-        conversionMap.put("t", Boolean.TRUE);
-        conversionMap.put("1", Boolean.TRUE);
-        conversionMap.put("y", Boolean.TRUE);
-        conversionMap.put("yes", Boolean.TRUE);
-        conversionMap.put("on", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("true", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("t", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("1", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("y", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("yes", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("on", Boolean.TRUE);
 
-        conversionMap.put("false", Boolean.FALSE);
-        conversionMap.put("f", Boolean.FALSE);
-        conversionMap.put("0", Boolean.FALSE);
-        conversionMap.put("off", Boolean.FALSE);
-        conversionMap.put("no", Boolean.FALSE);
-        conversionMap.put("n", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("false", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("f", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("0", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("off", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("no", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("n", Boolean.FALSE);
 
-        conversionMap.put("none", BeanLifecycle.NONE);
-        conversionMap.put("request", BeanLifecycle.REQUEST);
-        conversionMap.put("page", BeanLifecycle.PAGE);
-        conversionMap.put("render", BeanLifecycle.RENDER);
+        TYPE_CONVERSION_MAP.put("none", BeanLifecycle.NONE);
+        TYPE_CONVERSION_MAP.put("request", BeanLifecycle.REQUEST);
+        TYPE_CONVERSION_MAP.put("page", BeanLifecycle.PAGE);
+        TYPE_CONVERSION_MAP.put("render", BeanLifecycle.RENDER);
 
-        conversionMap.put("boolean", new BooleanConverter());
-        conversionMap.put("int", new IntConverter());
-        conversionMap.put("double", new DoubleConverter());
-        conversionMap.put("String", new StringConverter());
-        conversionMap.put("long", new LongConverter());
+        TYPE_CONVERSION_MAP.put("boolean", new BooleanConverter());
+        TYPE_CONVERSION_MAP.put("int", new IntConverter());
+        TYPE_CONVERSION_MAP.put("double", new DoubleConverter());
+        TYPE_CONVERSION_MAP.put("String", new StringConverter());
+        TYPE_CONVERSION_MAP.put("long", new LongConverter());
 
-        conversionMap.put("in", Direction.IN);
-        conversionMap.put("form", Direction.FORM);
-        conversionMap.put("custom", Direction.CUSTOM);
+        TYPE_CONVERSION_MAP.put("in", Direction.IN);
+        TYPE_CONVERSION_MAP.put("form", Direction.FORM);
+        TYPE_CONVERSION_MAP.put("custom", Direction.CUSTOM);
 
-        typeList.add("boolean");
-        typeList.add("boolean[]");
+        TYPE_LIST.add("boolean");
+        TYPE_LIST.add("boolean[]");
 
-        typeList.add("short");
-        typeList.add("short[]");
+        TYPE_LIST.add("short");
+        TYPE_LIST.add("short[]");
 
-        typeList.add("int");
-        typeList.add("int[]");
+        TYPE_LIST.add("int");
+        TYPE_LIST.add("int[]");
 
-        typeList.add("long");
-        typeList.add("long[]");
+        TYPE_LIST.add("long");
+        TYPE_LIST.add("long[]");
 
-        typeList.add("float");
-        typeList.add("float[]");
+        TYPE_LIST.add("float");
+        TYPE_LIST.add("float[]");
 
-        typeList.add("double");
-        typeList.add("double[]");
+        TYPE_LIST.add("double");
+        TYPE_LIST.add("double[]");
 
-        typeList.add("char");
-        typeList.add("char[]");
+        TYPE_LIST.add("char");
+        TYPE_LIST.add("char[]");
 
-        typeList.add("byte");
-        typeList.add("byte[]");
+        TYPE_LIST.add("byte");
+        TYPE_LIST.add("byte[]");
 
-        typeList.add("java.lang.Object");
-        typeList.add("java.lang.Object[]");
+        TYPE_LIST.add("java.lang.Object");
+        TYPE_LIST.add("java.lang.Object[]");
 
-        typeList.add("java.lang.String");
-        typeList.add("java.lang.String[]");
+        TYPE_LIST.add("java.lang.String");
+        TYPE_LIST.add("java.lang.String[]");
     }
 
-    protected void scanProperty(IPluginPropertyHolder holder, Node node)
+    protected void scanProperty(IPluginPropertyHolder holder, Node node) throws ScannerException
     {
-        String name = getAttribute(node, "name", true);
+        String name = getAttribute(node, "name", false);
 
-        if (holder.getPropertyNames().contains(name))
+        if (holder.getProperty(name) != null)
+        {
             addProblem(
                 IProblem.WARNING,
                 getAttributeSourceLocation(node, "name"),
-                "duplicate definition of property: " + name);
+                "duplicate definition of property: " + name,
+                false);
+        }
 
-        // Starting in DTD 1.4, the value may be specified
-        // as an attribute.  Only if that is null do we
-        // extract the node's value.
+        //      must be done now - not revalidatable
+        ExtendedAttributeResult result = null;
         String value = null;
         try
         {
-            value = getExtendedAttribute(node, "value", true).value;
+            result = getExtendedAttribute(node, "value", true);
+            value = result.value;
         } catch (ScannerException e)
         {
-            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());
+            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false);
         }
-        holder.setProperty(name, value);
-        PluginPropertyDeclaration declaration = new PluginPropertyDeclaration(name, value, getSourceLocationInfo(node));
+
+        PluginPropertyDeclaration declaration = new PluginPropertyDeclaration(name, value);
+        declaration.setLocation(getSourceLocationInfo(node));
+        declaration.setValueIsFromAttribute(result == null ? false : result.fromAttribute);
+
+        if (value != null && value.trim().length() == 0)
+        {
+            addProblem(
+                IProblem.WARNING,
+                result.fromAttribute
+                    ? getAttributeSourceLocation(node, "value")
+                    : getBestGuessSourceLocation(node, true),
+                "missing value of property: " + name,
+                false);
+        }
+
         holder.addPropertyDeclaration(declaration);
     }
 
@@ -330,7 +355,7 @@ public abstract class SpecificationScanner extends AbstractScanner
      * 
      **/
 
-    protected void scanPropertiesInNode(IPropertyHolder holder, Node node)
+    protected void scanPropertiesInNode(IPropertyHolder holder, Node node) throws ScannerException
     {
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
         {
@@ -386,14 +411,19 @@ public abstract class SpecificationScanner extends AbstractScanner
                 TapestryCore.getTapestryString(
                     "SpecificationParser.no-attribute-and-body",
                     attributeName,
-                    node.getNodeName()));
+                    node.getNodeName()),
+                getNodeBodySourceLocation(node),
+                false);
 
         if (required && nullAttributeValue && nullBodyValue)
             throw new ScannerException(
                 TapestryCore.getTapestryString(
                     "SpecificationParser.required-extended-attribute",
                     node.getNodeName(),
-                    attributeName));
+                    attributeName),
+                getNodeStartSourceLocation(node),
+                false);
+
         ExtendedAttributeResult result = new ExtendedAttributeResult();
         if (nullAttributeValue)
         {
@@ -413,6 +443,27 @@ public abstract class SpecificationScanner extends AbstractScanner
     {
         public String value;
         public boolean fromAttribute;
+    }
+
+    static public class ExtendedAttributeException extends ScannerException
+    {
+
+        static public int ERROR_ATTR = 0;
+        static public int ERROR_BODY = 1;
+        static public int ERROR_BOTH = 2;
+
+        public int errorType;
+
+        /**
+         * @param message
+         * @param location
+         */
+        public ExtendedAttributeException(int errorType, String message, ISourceLocation location)
+        {
+            super(message, location, false);
+            this.errorType = errorType;
+        }
+
     }
 
     /* (non-Javadoc)

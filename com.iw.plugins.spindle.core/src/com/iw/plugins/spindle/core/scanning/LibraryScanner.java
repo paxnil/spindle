@@ -40,6 +40,8 @@ import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
 import com.iw.plugins.spindle.core.spec.PluginComponentTypeDeclaration;
 import com.iw.plugins.spindle.core.spec.PluginDescriptionDeclaration;
 import com.iw.plugins.spindle.core.spec.PluginEngineServiceDeclaration;
+import com.iw.plugins.spindle.core.spec.PluginExtensionConfiguration;
+import com.iw.plugins.spindle.core.spec.PluginExtensionSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibraryDeclaration;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.spec.PluginPageDeclaration;
@@ -82,7 +84,10 @@ public class LibraryScanner extends SpecificationScanner
         ILibrarySpecification specification = (ILibrarySpecification) resultObject;
         specification.setPublicId(fPublicId);
         specification.setSpecificationLocation(fResourceLocation);
+        specification.setLocation(getSourceLocationInfo(fRootNode));
         String rootName = fRootNode.getNodeName();
+
+        // this check can only be done during a parse/scan
         if (!rootName.equals("library-specification"))
         {
             addProblem(
@@ -91,7 +96,7 @@ public class LibraryScanner extends SpecificationScanner
                 TapestryCore.getTapestryString(
                     "AbstractDocumentParser.incorrect-document-type",
                     "library-specification",
-                    rootName));
+                    rootName), false);
             return;
         }
         scanLibrarySpecification(fRootNode, specification, null);
@@ -124,7 +129,7 @@ public class LibraryScanner extends SpecificationScanner
 
             if (isElement(node, "property"))
             {
-                scanProperty((IPluginPropertyHolder)specification, node);
+                scanProperty((IPluginPropertyHolder) specification, node);
                 continue;
             }
 
@@ -162,114 +167,114 @@ public class LibraryScanner extends SpecificationScanner
     {
         String type = getAttribute(node, "type", true);
 
-        boolean valid =
-            validatePattern(
-                type,
-                SpecificationParser.COMPONENT_ALIAS_PATTERN,
-                "SpecificationParser.invalid-component-type",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "type"));
+        // validate here - the error status can only change if the file changed
+        validatePattern(
+            type,
+            SpecificationParser.COMPONENT_ALIAS_PATTERN,
+            "SpecificationParser.invalid-component-type",
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "type"));
 
-        if (valid && specification.getComponentTypes().contains(type))
+        if (specification.getComponentTypes().contains(type))
         {
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "type"),
-                TapestryCore.getTapestryString("LibrarySpecification.duplicate-component-alias", type));
+                TapestryCore.getTapestryString("LibrarySpecification.duplicate-component-alias", type), false);
         }
 
         String path = getAttribute(node, "specification-path");
 
-        validateResourceLocation(
-            specification.getSpecificationLocation(),
-            path,
-            "scan-library-missing-component",
-            getAttributeSourceLocation(node, "specification-path"));
-
         PluginComponentTypeDeclaration declaration =
             new PluginComponentTypeDeclaration(type, path, getSourceLocationInfo(node));
+
+        declaration.validate(specification, fValidator);
+
         ((PluginLibrarySpecification) specification).addComponentTypeDeclaration(declaration);
-        specification.setComponentSpecificationPath(type, path);
+
     }
     /** @since 2.2 **/
 
     protected void scanConfigure(IExtensionSpecification spec, Node node) throws ScannerException
     {
-        String propertyName = getAttribute(node, "property-name", true);
-        String type = getAttribute(node, "type");
+        String propertyName = getAttribute(node, "property-name", false);
 
+        // validate here - the error status can only change if the file changed
         validatePattern(
             propertyName,
             SpecificationParser.PROPERTY_NAME_PATTERN,
             "SpecificationParser.invalid-property-name",
             IProblem.ERROR,
-            getNodeStartSourceLocation(node));
+            getAttributeSourceLocation(node, "property-name"));
 
-        String value = null;
-        try
-        {
-            value = getExtendedAttribute(node, "value", true).value;
-        } catch (ScannerException e)
-        {
-            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e.getMessage());
-        }
+        String type = getAttribute(node, "type");
 
-        IConverter converter = (IConverter) SpecificationScanner.conversionMap.get(type);
-        Object objectValue = null;
-
-        if (converter == null)
+        if (spec.getConfiguration().containsKey(propertyName))
         {
             addProblem(
                 IProblem.ERROR,
-                getAttributeSourceLocation(node, "type"),
-                TapestryCore.getTapestryString("SpecificationParser.unknown-static-value-type", type));
-        } else
-        {
-            try
-            {
-                objectValue = converter.convert(value);
-            } catch (ScannerException e2)
-            {
-                addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), e2.getMessage());
-            }
+                getAttributeSourceLocation(node, "property-name"),
+                TapestryCore.getTapestryString("ExtensionSpecification.duplicate-property", "extension", propertyName), false);
         }
 
-        spec.addConfiguration(propertyName, objectValue);
+        // must be done now - not revalidatable
+        ExtendedAttributeResult result = null;
+        String value = null;
+        try
+        {
+            result = getExtendedAttribute(node, "value", true);
+            value = result.value;
+        } catch (ScannerException e)
+        {
+            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false);
+        }
+
+        PluginExtensionConfiguration configuration =
+            new PluginExtensionConfiguration(propertyName, value, type, getSourceLocationInfo(node));
+
+        configuration.setDeclaredValueIsFromAttribute(result == null ? true : result.fromAttribute);
+
+        configuration.validate(spec, fValidator);
+
+        ((PluginExtensionSpecification) spec).addConfiguration(configuration);
+
     }
 
     protected void scanExtension(ILibrarySpecification specification, Node node) throws ScannerException
     {
         String name = getAttribute(node, "name", true);
-        String className = getAttribute(node, "class");
 
-        validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
+        validatePattern(
+            name,
+            SpecificationParser.EXTENSION_NAME_PATTERN,
+            "SpecificationParser.invalid-extension-name",
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "name"));
+
+        String className = getAttribute(node, "class");
 
         boolean immediate = getBooleanAttribute(node, "immediate");
 
-        boolean valid =
-            validatePattern(
-                name,
-                SpecificationParser.EXTENSION_NAME_PATTERN,
-                "SpecificationParser.invalid-extension-name",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"));
-
-        if (valid && specification.getExtensionNames().contains(name))
+        if (specification.getExtensionNames().contains(name))
         {
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"),
-                TapestryCore.getTapestryString("LibrarySpecification.duplicate-extension-name", name));
+                TapestryCore.getTapestryString("LibrarySpecification.duplicate-extension-name", name), false);
         }
 
-        IExtensionSpecification exSpec = fSpecificationFactory.createExtensionSpecification();
+        PluginExtensionSpecification exSpec =
+            (PluginExtensionSpecification) fSpecificationFactory.createExtensionSpecification();
 
+        exSpec.setIdentifier(name);
         exSpec.setClassName(className);
         exSpec.setImmediate(immediate);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResourceLocation(specification.getSpecificationLocation());
         exSpec.setLocation(location);
+
+        exSpec.validateSelf(specification, fValidator);
 
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
         {
@@ -281,19 +286,19 @@ public class LibraryScanner extends SpecificationScanner
 
             if (isElement(child, "property"))
             {
-                scanProperty((IPluginPropertyHolder)exSpec, child);
+                scanProperty((IPluginPropertyHolder) exSpec, child);
                 continue;
             }
         }
 
-        specification.addExtensionSpecification(name, exSpec);
+        ((PluginLibrarySpecification) specification).addExtension(exSpec);
     }
+
     protected void scanLibrary(ILibrarySpecification specification, Node node) throws ScannerException
     {
         String id = getAttribute(node, "id", false);
 
-        if (id == null)
-            return;
+        String specificationPath = getAttribute(node, "specification-path", true);
 
         validatePattern(
             id,
@@ -308,79 +313,74 @@ public class LibraryScanner extends SpecificationScanner
                 getAttributeSourceLocation(node, "id"),
                 TapestryCore.getTapestryString(
                     "SpecificationParser.framework-library-id-is-reserved",
-                    INamespace.FRAMEWORK_NAMESPACE));
-
-        String specificationPath = getAttribute(node, "specification-path", true);
-
-        if (specificationPath.startsWith(getDummyStringPrefix()))
-        {
-            addProblem(IProblem.ERROR, getAttributeSourceLocation(node, "specification-path"), "blank value");
-        } else
-        {
-            boolean validLibLoc =
-                validateLibraryResourceLocation(
-                    specification.getSpecificationLocation(),
-                    specificationPath,
-                    "scan-library-missing-library",
-                    getAttributeSourceLocation(node, "specification-path"));
-        }
+                    INamespace.FRAMEWORK_NAMESPACE), false);
 
         PluginLibraryDeclaration declaration =
             new PluginLibraryDeclaration(id, specificationPath, getSourceLocationInfo(node));
+
         ((PluginLibrarySpecification) specification).addLibraryDeclaration(declaration);
-        specification.setLibrarySpecificationPath(id, specificationPath);
+
+        declaration.validate(specification, fValidator);
 
     }
 
     protected void scanPage(ILibrarySpecification specification, Node node) throws ScannerException
     {
-        String name = getAttribute(node, "name", true);
+        String name = getAttribute(node, "name", false);
 
-        boolean valid =
-            validatePattern(
-                name,
-                SpecificationParser.PAGE_NAME_PATTERN,
-                "SpecificationParser.invalid-page-name",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"));
+        validatePattern(
+            name,
+            SpecificationParser.PAGE_NAME_PATTERN,
+            "SpecificationParser.invalid-page-name",
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "name"));
 
-        if (valid && specification.getPageNames().contains(name))
+        //must be validated here
+        if (specification.getPageNames().contains(name))
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"),
-                TapestryCore.getTapestryString("LibrarySpecification.duplicate-page-name", name));
+                TapestryCore.getTapestryString("LibrarySpecification.duplicate-page-name", name), false);
 
         String specificationPath = getAttribute(node, "specification-path");
 
-        validateResourceLocation(
-            specification.getSpecificationLocation(),
-            specificationPath,
-            "scan-library-missing-page",
-            getAttributeSourceLocation(node, "specification-path"));
-
         PluginPageDeclaration declaration =
             new PluginPageDeclaration(name, specificationPath, getSourceLocationInfo(node));
+
+        declaration.validate(specification, fValidator);
+
         ((PluginLibrarySpecification) specification).addPageDeclaration(declaration);
-        specification.setPageSpecificationPath(name, specificationPath);
 
     }
 
     protected void scanService(ILibrarySpecification spec, Node node) throws ScannerException
     {
-        String name = getAttribute(node, "name", true);
+        String name = getAttribute(node, "name", false);
 
         validatePattern(
             name,
-            SpecificationParser.SERVICE_NAME_PATTERN,
-            "SpecificationParser.invalid-service-name",
+            SpecificationParser.PAGE_NAME_PATTERN,
+            "SpecificationParser.invalid-page-name",
             IProblem.ERROR,
             getAttributeSourceLocation(node, "name"));
 
         String className = getAttribute(node, "class");
-        validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
-        spec.setServiceClassName(name, className);
+
+        //must be done here
+
+        if (spec.getServiceNames().contains(name))
+        {
+            addProblem(
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "name"),
+                TapestryCore.getTapestryString("LibrarySpecification.duplicate-service-name", name), false);
+        }
+
         PluginEngineServiceDeclaration declaration =
             new PluginEngineServiceDeclaration(name, className, getSourceLocationInfo(node));
+
+        declaration.validate(spec, fValidator);
+
         ((PluginLibrarySpecification) spec).addEngineServiceDeclaration(declaration);
     }
 

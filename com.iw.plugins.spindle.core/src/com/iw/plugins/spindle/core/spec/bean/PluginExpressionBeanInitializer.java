@@ -37,6 +37,7 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
 public class PluginExpressionBeanInitializer extends AbstractPluginBeanInitializer
 {
 
+
     public PluginExpressionBeanInitializer()
     {
         super(BaseSpecification.EXPRESSION_BEAN_INIT);
@@ -51,5 +52,7 @@ public class PluginExpressionBeanInitializer extends AbstractPluginBeanInitializ
     {
         setValue(value);
     }
+
+   
 
 }

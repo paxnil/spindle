@@ -35,7 +35,6 @@ import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
 
 /**
  * Marker utililties
@@ -49,7 +48,7 @@ public class Markers
     public static final String TAPESTRY_MARKER_TAG = ITapestryMarker.TAPESTRY_PROBLEM_MARKER;
     public static final String TAPESTRY_BUILBROKEN_TAG = ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER;
     public static final String TAPESTRY_FATAL = ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER;
-    public static final String TAPESTRY_SOURCE = ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER;
+    //    public static final String TAPESTRY_SOURCE = ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER;
 
     /**
          * Method addBuildBrokenProblemMarkerToResource.
@@ -113,13 +112,16 @@ public class Markers
                     IMarker.SEVERITY,
                     IMarker.LINE_NUMBER,
                     IMarker.CHAR_START,
-                    IMarker.CHAR_END },
+                    IMarker.CHAR_END,
+                    ITapestryMarker.TEMPORARY_FLAG },
                 new Object[] {
                     problem.getMessage(),
                     new Integer(problem.getSeverity()),
                     new Integer(problem.getLineNumber()),
                     new Integer(problem.getCharStart()),
-                    new Integer(problem.getCharEnd())});
+                    new Integer(problem.getCharEnd()),
+                    new Boolean(problem.isTemporary())});
+
         } catch (CoreException e)
         {
             TapestryCore.log(e);
@@ -127,22 +129,22 @@ public class Markers
 
     }
 
-    public static void addTapestryProblemMarkerToResource(
-        IResource resource,
-        String message,
-        int severity,
-        ISourceLocation source)
-    {
-
-        addTapestryProblemMarkerToResource(
-            resource,
-            message,
-            severity,
-            source.getLineNumber(),
-            source.getCharStart(),
-            source.getCharEnd());
-
-    }
+    //    public static void addTapestryProblemMarkerToResource(
+    //        IResource resource,
+    //        String message,
+    //        int severity,
+    //        ISourceLocation source)
+    //    {
+    //
+    //        addTapestryProblemMarkerToResource(
+    //            resource,
+    //            message,
+    //            severity,
+    //            source.getLineNumber(),
+    //            source.getCharStart(),
+    //            source.getCharEnd());
+    //
+    //    }
 
     public static void addTapestryProblemMarkerToResource(
         IResource resource,
@@ -183,7 +185,7 @@ public class Markers
             new Integer(charEnd));
     }
 
-    public static void addProblemMarkerToResource(
+    private static void addProblemMarkerToResource(
         IResource resource,
         String markerTag,
         String message,
@@ -235,17 +237,17 @@ public class Markers
         {} // assume there are no problems
         return new IMarker[0];
     }
-    
+
     public static IMarker[] getFatalProblemsFor(IResource resource)
+    {
+        try
         {
-            try
-            {
-                if (resource != null && resource.exists())
-                    return resource.findMarkers(TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
-            } catch (CoreException e)
-            {} // assume there are no problems
-            return new IMarker[0];
-        }
+            if (resource != null && resource.exists())
+                return resource.findMarkers(TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
+        } catch (CoreException e)
+        {} // assume there are no problems
+        return new IMarker[0];
+    }
 
     public static void removeProblemsFor(IResource resource)
     {
@@ -274,7 +276,7 @@ public class Markers
                 iProject.deleteMarkers(Markers.TAPESTRY_MARKER_TAG, false, IResource.DEPTH_INFINITE);
                 iProject.deleteMarkers(Markers.TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
                 iProject.deleteMarkers(Markers.TAPESTRY_BUILBROKEN_TAG, false, IResource.DEPTH_ZERO);
-                iProject.deleteMarkers(Markers.TAPESTRY_SOURCE, false, IResource.DEPTH_INFINITE);
+                //                iProject.deleteMarkers(Markers.TAPESTRY_SOURCE, false, IResource.DEPTH_INFINITE);
             }
         } catch (CoreException e)
         {} // assume there were no problems
@@ -289,11 +291,30 @@ public class Markers
         {
             if (iProject != null && iProject.exists())
             {
-
                 iProject.deleteMarkers(Markers.TAPESTRY_BUILBROKEN_TAG, false, IResource.DEPTH_ZERO);
             }
         } catch (CoreException e)
         {} // assume there were no problems
+
+    }
+
+    public static void removeTemporaryProblemsForResource(IResource resource)
+    {
+        IMarker[] markers = getProblemsFor(resource);
+        for (int i = 0; i < markers.length; i++)
+        {
+            if (markers[i].getAttribute(ITapestryMarker.TEMPORARY_FLAG, false))
+            {
+                try
+                {
+                    markers[i].delete();
+                } catch (CoreException e)
+                {
+                    TapestryCore.log(e);
+                }
+            }
+
+        }
 
     }
 

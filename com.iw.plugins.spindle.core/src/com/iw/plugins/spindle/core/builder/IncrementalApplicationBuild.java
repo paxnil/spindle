@@ -1,6 +1,10 @@
 package com.iw.plugins.spindle.core.builder;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.tapestry.IResourceLocation;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -8,9 +12,16 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.CoreUtils;
 
@@ -48,6 +59,9 @@ import com.iw.plugins.spindle.core.util.CoreUtils;
  * 
  * Other than that its the same as a full build.
  * 
+ *  Not Used anymore
+ * @see com.iw.plugins.spindle.core.builder.IncrementalProjectBuild
+ * 
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
@@ -57,24 +71,132 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
     public static int MOVED_OR_SYNCHED_OR_CHANGED_TYPE =
         IResourceDelta.MOVED_FROM | IResourceDelta.MOVED_TO | IResourceDelta.SYNC | IResourceDelta.TYPE;
 
+    protected IResourceDelta fProjectDelta = null;
+
     /**
      * Constructor for IncrementalBuilder.
      * @param builder
      */
     public IncrementalApplicationBuild(TapestryBuilder builder, IResourceDelta projectDelta)
     {
-        super(builder, projectDelta);
+        super(builder);
+        fProjectDelta = projectDelta;
+    }
+
+    /**
+     * Basic incremental build check.
+     * called by sub implementations in IncrementalBuild classes before thier own checks.
+     * <p>
+     * An incremental build is possible if:
+     * <ul>
+     * <li>a file recognized as a Tapestry template was changed, added, or deleted</li>
+     * <li>a java type referenced by a Tapestry file was changed, added, or deleted</li>
+     * <li>a Tapestry xml file was changed, added, or deleted</li>
+     * </ul>
+     * Note that before this method is called it has already been determined
+     * that an incremental build is indicated (i.e. web.xml has not changed,
+     * last build did not fail, etc).
+     */
+    public boolean needsIncrementalBuild()
+    {
+        if (fProjectDelta == null)
+            return false;
+        fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
+        final List knownTapestryExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
+
+        // check for java files that changed, or have been added
+        try
+        {
+            fProjectDelta.accept(new IResourceDeltaVisitor()
+            {
+                public boolean visit(IResourceDelta delta) throws CoreException
+                {
+                    IResource resource = delta.getResource();
+
+                    if (resource instanceof IContainer)
+                        return true;
+
+                    IPath path = resource.getFullPath();
+                    String extension = path.getFileExtension();
+
+                    if (fLastState.fSeenTemplateExtensions.contains(extension))
+                        throw new NeedToBuildException();
+
+                    if (fLastState.fJavaDependencies.contains(resource) || knownTapestryExtensions.contains(extension))
+                    {
+                        throw new NeedToBuildException();
+                    } else
+                    {
+
+                        if (!"java".equals(extension))
+                            return true;
+
+                        String name = path.removeFileExtension().lastSegment();
+                        IContainer container = resource.getParent();
+                        IJavaElement element = (IJavaElement) JavaCore.create((IFolder) container);
+                        if (element == null)
+                            return true;
+                        if (element instanceof IPackageFragmentRoot && fLastState.fMissingJavaTypes.contains(name))
+                        {
+                            throw new NeedToBuildException();
+                        } else if (
+                            fLastState.fMissingJavaTypes.contains(
+                                ((IPackageFragment) element).getElementName() + "." + name))
+                        {
+                            throw new NeedToBuildException();
+                        }
+
+                    }
+                    return true;
+                }
+            });
+        } catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        } catch (NeedToBuildException e)
+        {
+            return true;
+        }
+        return false;
+
+    }
+
+    /**
+        * An exception used to break out of a resource delta scan if an incremental build is
+        * indicated.
+        * 
+        * @see #needsIncrementalBuild(IResourceDelta)
+        */
+    private static class NeedToBuildException extends RuntimeException
+    {
+        public NeedToBuildException()
+        {
+            super();
+        }
     }
 
     /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild(org.eclipse.core.resources.IResourceDelta)
+     * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild()
      */
     public boolean canIncrementalBuild()
     {
-        if (!super.canIncrementalBuild())
+        if (fProjectDelta == null)
             return false;
 
-        IResourceWorkspaceLocation contextRoot = fTapestryBuilder.fContextRoot;
+        fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
+        if (fLastState == null || fLastState.fBuildNumber < 0 || fLastState.fVersion != State.VERSION)
+            return false;
+
+        IResourceWorkspaceLocation frameworkLocation =
+            (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot.getRelativeLocation(
+                "/org/apache/tapestry/Framework.library");
+        if (!fLastState.fBinaryNamespaces.containsKey(frameworkLocation))
+            return false;
+
+        if (hasClasspathChanged())
+            return false;
+
+        ContextRootLocation contextRoot = fTapestryBuilder.fContextRoot;
         if (contextRoot != null)
         {
             if (!contextRoot.equals(fLastState.fContextRoot))
@@ -94,13 +216,14 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
             IResourceWorkspaceLocation webXML =
                 (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot.getRelativeLocation("WEB-INF/web.xml");
 
-            if (!webXML.exists())
+            IResource resource = (IResource) webXML.getStorage();
+            if (resource == null)
             {
                 if (TapestryBuilder.DEBUG)
                     System.out.println("inc build abort - web.xml does not exist" + webXML);
                 return false;
             }
-            IResource resource = (IResource) webXML.getStorage();
+            
             IResourceDelta webXMLDelta = fProjectDelta.findMember(resource.getProjectRelativePath());
 
             if (webXMLDelta != null)
@@ -121,6 +244,19 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
         }
 
         return true;
+    }
+
+    protected boolean hasClasspathChanged()
+    {
+        IClasspathEntry[] currentEntries = fTapestryBuilder.fClasspath;
+
+        if (currentEntries.length != fLastState.fLastKnownClasspath.length)
+            return true;
+
+        List old = Arrays.asList(fLastState.fLastKnownClasspath);
+        List current = Arrays.asList(currentEntries);
+
+        return !current.containsAll(old);
     }
 
     private boolean needFullBuildDueToAppSpecChange()
@@ -236,9 +372,10 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
         newState.fTemplateMap = fTemplateMap;
-        newState.fSpecificationMap = fSpecificationMap;
+        newState.fFileSpecificationMap = fFileSpecificationMap;
         newState.fPrimaryNamespace = fApplicationNamespace;
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
+        newState.fCleanTemplates = fCleanTemplates;
 
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
             fTapestryBuilder.fCurrentProject,

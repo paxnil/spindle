@@ -26,13 +26,19 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.tapestry.bean.IBeanInitializer;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.IBeanSpecification;
 
-import com.iw.plugins.spindle.core.util.PropertyFiringList;
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Spindle aware concrete implementation of IBeanSpecification
@@ -91,7 +97,7 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
     public void addInitializer(IBeanInitializer initializer)
     {
         if (fInitializers == null)
-            fInitializers = new PropertyFiringList(this, "initializers");
+            fInitializers = new ArrayList();
 
         fInitializers.add(initializer);
     }
@@ -122,9 +128,7 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
      */
     public void setDescription(String desc)
     {
-        String old = fDescription;
         fDescription = desc;
-        firePropertyChange("description", old, this.fDescription);
     }
 
     /* (non-Javadoc)
@@ -132,9 +136,7 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
      */
     public void setClassName(String className)
     {
-        String old = fClassName;
         this.fClassName = className;
-        firePropertyChange("className", old, this.fClassName);
     }
 
     /* (non-Javadoc)
@@ -142,11 +144,29 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
      */
     public void setLifecycle(BeanLifecycle lifecycle)
     {
-        BeanLifecycle old = this.fLifecycle;
         fLifecycle = lifecycle;
-        firePropertyChange("lifecycle", old, this.fLifecycle);
     }
 
- 
+    public void validate(Object parent, IScannerValidator validator) 
+    {
+
+        PluginComponentSpecification component = (PluginComponentSpecification) parent;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+      try
+        {
+              validator.validateTypeName(
+                    (IResourceWorkspaceLocation) component.getSpecificationLocation(),
+                    fClassName,
+                    IProblem.ERROR,
+                    sourceInfo.getAttributeSourceLocation("class"));
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+
+    }
 
 }

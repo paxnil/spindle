@@ -39,8 +39,8 @@ import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.spec.IPropertySpecification;
 import org.apache.tapestry.spec.SpecFactory;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.spec.bean.PluginExpressionBeanInitializer;
-import com.iw.plugins.spindle.core.spec.bean.PluginFieldBeanInitializer;
 import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
 
 public class TapestryCoreSpecFactory extends SpecFactory
@@ -118,7 +118,8 @@ public class TapestryCoreSpecFactory extends SpecFactory
 
     public IBeanInitializer createFieldBeanInitializer()
     {
-        return new PluginFieldBeanInitializer();
+         TapestryCore.log(new Throwable().fillInStackTrace());
+         return null;
     }
 
     /* (non-Javadoc)

@@ -26,10 +26,11 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.ILocation;
 
 /**
  *  Record <property> tags in a document
+ * 
+ *  These can only be validated at the time the document is parsed/scanned.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -38,27 +39,44 @@ public class PluginPropertyDeclaration extends BaseSpecification
 {
     String fKey;
     String fValue;
+    boolean fValueIsFromAttribute;
 
-    public PluginPropertyDeclaration(String key, String value, ILocation location)
+    public PluginPropertyDeclaration(String key, String value)
     {
         super(BaseSpecification.PROPERTY_DECLARATION);
-        fKey = key;
+        setKey(key);
         fValue = value;
-        setLocation(location);
-    }
-    
-    public String getIdentifier() {
-        return getKey();
     }
 
     public String getKey()
     {
-        return fKey;
+        return getIdentifier();
+    }
+
+    public void setKey(String key)
+    {
+        setIdentifier(key);
     }
 
     public String getValue()
     {
         return fValue;
+    }
+
+    /**
+     * @return
+     */
+    public boolean isValueIsFromAttribute()
+    {
+        return fValueIsFromAttribute;
+    }
+
+    /**
+     * @param b
+     */
+    public void setValueIsFromAttribute(boolean flag)
+    {
+        fValueIsFromAttribute = flag;
     }
 
 }

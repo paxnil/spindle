@@ -32,12 +32,18 @@ import org.eclipse.jdt.core.IType;
  *  Listener interface for classes that are interested in things the
  *  Validators find/don't find.
  * 
- *  Right now it handles only Type checks
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public interface IScannerValidatorListener
 {
-    public void typeChecked(String fullyQualifiedName, IType result);
+    /**
+     * @deprecated use recordTypeDependency
+     *  @param fullyQualifiedName the fully qualified name of a type defined in a Tapestry artifact
+     *  @param result the IType the fullyQualifiedName resolved to, if any
+     */
+    void typeChecked(String fullyQualifiedName, IType result);
+
+
 }

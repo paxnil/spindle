@@ -40,9 +40,7 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
 public class AbstractPluginBeanInitializer extends BaseSpecification implements IBeanInitializer
 {
 
-    private String fPropertyName;
     private String fValue;
-
     protected AbstractPluginBeanInitializer(int type)
     {
         super(type);
@@ -62,14 +60,12 @@ public class AbstractPluginBeanInitializer extends BaseSpecification implements 
      */
     public String getPropertyName()
     {
-        return fPropertyName;
+        return getIdentifier();
     }
 
     public void setPropertyName(String name)
     {
-        String old = fPropertyName;
-        fPropertyName = name;
-        firePropertyChange("propertyName", old, fPropertyName);
+        setIdentifier(name);
     }
 
     public String getValue()
@@ -79,11 +75,7 @@ public class AbstractPluginBeanInitializer extends BaseSpecification implements 
 
     public void setValue(String value)
     {
-        String old = fValue;
         fValue = value;
-        firePropertyChange("value", old, fValue);
     }
-
-   
 
 }

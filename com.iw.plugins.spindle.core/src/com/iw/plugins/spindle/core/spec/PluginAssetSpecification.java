@@ -28,6 +28,12 @@ package com.iw.plugins.spindle.core.spec;
 
 import org.apache.tapestry.spec.AssetType;
 import org.apache.tapestry.spec.IAssetSpecification;
+import org.apache.tapestry.spec.IComponentSpecification;
+
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Spindle's implementation of IAssetSpecification
@@ -49,7 +55,6 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
         super(BaseSpecification.ASSET_SPEC);
     }
 
-   
     public PluginAssetSpecification(AssetType type, String path)
     {
         this();
@@ -79,8 +84,7 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
     public void setPath(String path)
     {
         this.fPath = path;
-        firePropertyChange("path", null, path);
-    }
+     }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IAssetSpecification#setType(org.apache.tapestry.spec.AssetType)
@@ -88,7 +92,23 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
     public void setType(AssetType type)
     {
         this.fAssetType = type;
-        firePropertyChange("type", null, fPath);
     }
 
+    public void validate(Object parent, IScannerValidator validator)
+    {
+
+        IComponentSpecification component = (IComponentSpecification) parent;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+        
+        try
+        {           
+            validator.validateAsset(component, this, sourceInfo);
+
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+    }
 }

@@ -269,11 +269,11 @@ public class ClasspathSearch implements ISearch
     private Object[] getSourcePackageResources(IPackageFragment pkg) throws CoreException
     {
         Object[] result = new Object[0];
-        if (!pkg.isDefaultPackage())
-        {
-            result = pkg.getNonJavaResources();
-        } else
-        {
+//        if (!pkg.isDefaultPackage())
+//        {
+//            result = pkg.getNonJavaResources();
+//        } else
+//        {
             IContainer container = (IContainer) pkg.getUnderlyingResource();
             if (container != null && container.exists())
             {
@@ -286,7 +286,7 @@ public class ClasspathSearch implements ISearch
                 }
                 result = resultList.toArray();
             }
-        }
+//        }
         return result;
     }
     class JarEntryAcceptor implements ISearchAcceptor

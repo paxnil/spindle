@@ -28,6 +28,17 @@ package com.iw.plugins.spindle.core.spec;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.tapestry.ILocation;
+import org.apache.tapestry.spec.IExtensionSpecification;
+
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.scanning.SpecificationScanner;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+
 /**
  * @author gwl
  * @version $Id$
@@ -70,19 +81,31 @@ public class PluginExtensionConfiguration extends DescribableSpecification
     public Object fValueObject;
     public Class fType;
 
-    public PluginExtensionConfiguration()
-    {
-        super(BaseSpecification.EXTENSION_CONFIGURATION);
-    }
+    private String fDeclaredType;
+    private String fDeclaredValue;
+    private boolean fDeclaredValueIsFromAttribute;
 
     /**
      * Constructor for PluginExtensionConfiguration.
      */
     public PluginExtensionConfiguration(String propertyName, Object value)
     {
-        this();
+        super(BaseSpecification.EXTENSION_CONFIGURATION);
+        setIdentifier(propertyName);
         fValueObject = value;
-        fType = value.getClass();
+        fType = value == null ? null : value.getClass();
+    }
+
+    public PluginExtensionConfiguration(
+        String propertyName,
+        String declaredValue,
+        String declaredType,
+        ILocation location)
+    {
+        this(propertyName, null);
+        fDeclaredType = declaredType;
+        fDeclaredValue = declaredValue;
+        setLocation(location);
     }
 
     private Class checkType(String newType)
@@ -234,6 +257,80 @@ public class PluginExtensionConfiguration extends DescribableSpecification
         return falseI;
     }
 
-   
+    /**
+      *  Revalidate this declaration. Note that validating the existence of the value is only possible
+      *  during a parse/scan cycle. But that's ok 'cuz those kinds of problems
+      *  would have already been caught.
+      * 
+      * @param parent the object holding this
+      * @param validator a validator helper
+      */
+
+    public void validate(Object parent, IScannerValidator validator)
+    {
+
+        IExtensionSpecification extension = (IExtensionSpecification) parent;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        try
+        {
+
+            if (fDeclaredType != null)
+            {
+                SpecificationScanner.IConverter converter =
+                    (SpecificationScanner.IConverter) SpecificationScanner.TYPE_CONVERSION_MAP.get(fDeclaredType);
+                Object objectValue = null;
+
+                if (converter == null)
+                {
+                    validator.addProblem(
+                        IProblem.ERROR,
+                        sourceInfo.getAttributeSourceLocation("type"),
+                        TapestryCore.getTapestryString("SpecificationParser.unknown-static-value-type", fDeclaredType),
+                        true);
+                } else if (fDeclaredValue != null)
+                {
+                    try
+                    {
+                        objectValue = converter.convert(fDeclaredValue);
+                    } catch (ScannerException e2)
+                    {
+                        ISourceLocation problemLocation = null;
+
+                        if (fDeclaredValueIsFromAttribute)
+                        {
+                            problemLocation = sourceInfo.getAttributeSourceLocation("value");
+                        } else
+                        {
+                            problemLocation = sourceInfo.getContentSourceLocation();
+                        }
+                        validator.addProblem(IProblem.ERROR, problemLocation, e2.getMessage(), true);
+                    }
+                }
+            }
+
+        } catch (ScannerException e)
+        {
+             TapestryCore.log(e);
+        }
+
+    }
+
+    /**
+     * @return
+     */
+    public boolean isDeclaredValueIsFromAttribute()
+    {
+        return fDeclaredValueIsFromAttribute;
+    }
+
+    /**
+     * @param b
+     */
+    public void setDeclaredValueIsFromAttribute(boolean b)
+    {
+        fDeclaredValueIsFromAttribute = b;
+    }
 
 }

@@ -27,6 +27,12 @@
 package com.iw.plugins.spindle.core.spec;
 
 import org.apache.tapestry.ILocation;
+import org.apache.tapestry.spec.ILibrarySpecification;
+
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Record <component> tags in a document
@@ -37,20 +43,19 @@ import org.apache.tapestry.ILocation;
 public class PluginComponentTypeDeclaration extends DescribableSpecification
 {
 
-    String fId;
     String fResourcePath;
 
     public PluginComponentTypeDeclaration(String id, String resourcePath, ILocation location)
     {
         super(BaseSpecification.COMPONENT_TYPE_DECLARATION);
-        fId = id;
+        setIdentifier(id);
         fResourcePath = resourcePath;
         setLocation(location);
     }
 
     public String getId()
     {
-        return fId;
+        return getIdentifier();
     }
 
     public String getResourcePath()
@@ -58,12 +63,34 @@ public class PluginComponentTypeDeclaration extends DescribableSpecification
         return fResourcePath;
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.IIdentifiable#getIdentifier()
+    /**
+     *  Revalidate this declaration. Note that some validations, like duplicate ids, are
+     *  only possible during a parse/scan cycle. But that's ok 'cuz those kinds of problems
+     *  would have already been caught.
+     * 
+     * @param parent the object holding this
+     * @param validator a validator helper
      */
-    public String getIdentifier()
+    public void validate(Object parent, IScannerValidator validator)
     {
-        return getId();
+        ISourceLocationInfo info = (ISourceLocationInfo) getLocation();
+
+        try
+        {
+            
+            ILibrarySpecification parentLib = (ILibrarySpecification) parent;
+
+            validator.validateResourceLocation(
+                parentLib.getSpecificationLocation(),
+                fResourcePath,
+                "scan-library-missing-component",
+                info.getAttributeSourceLocation("specification-path"));
+
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+        }
+
     }
 
 }

@@ -72,9 +72,7 @@ public class PluginBindingSpecification extends DescribableSpecification impleme
      */
     public void setType(BindingType type)
     {
-        BindingType old = fBindingType;
         fBindingType = type;
-        firePropertyChange("bindingType", old, this.fBindingType);
     }
 
     /* (non-Javadoc)
@@ -82,10 +80,7 @@ public class PluginBindingSpecification extends DescribableSpecification impleme
      */
     public void setValue(String value)
     {
-        String old = fValue;
         fValue = value;
-        firePropertyChange("value", old, this.fValue);
     }
 
-   
 }

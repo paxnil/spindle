@@ -39,7 +39,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.util.Assert;
 
@@ -220,8 +219,6 @@ public class PullParserNode implements Node
      */
     protected void completed()
     {
-        if (TapestryBuilder.DEBUG)
-            System.err.println("PPNode.complete called on: " + getNodeName());
         this.fComplete = true;
     }
 

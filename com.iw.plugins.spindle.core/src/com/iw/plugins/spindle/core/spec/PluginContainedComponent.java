@@ -26,13 +26,21 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.spec.IBindingSpecification;
+import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 
-import com.iw.plugins.spindle.core.util.PropertyFiringMap;
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Spindle aware concrete implementation of IContainedComponent
@@ -50,6 +58,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
     private boolean fInheritInformalParameters;
 
     protected Map fBindings;
+    private List fDeclaredBindings;
 
     /**
      * @param type
@@ -80,6 +89,20 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public String getType()
     {
+        if (fType != null && fCopyOf != null)
+            return "";
+
+        if (fCopyOf != null)
+        {
+            IComponentSpecification spec = (IComponentSpecification) getParent();
+            IContainedComponent parentComponent = spec.getComponent(fCopyOf);
+
+            if (parentComponent == null)
+                return "";
+
+            return parentComponent.getType();
+        }
+
         return fType;
     }
 
@@ -89,16 +112,20 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
     public void setBinding(String name, IBindingSpecification spec)
     {
         if (fBindings == null)
-            fBindings = new PropertyFiringMap(this, "bindings");
+        {
+            fBindings = new HashMap();
+            fDeclaredBindings = new ArrayList();
+        }
+
         PluginBindingSpecification pluginSpec = (PluginBindingSpecification) spec;
+
         pluginSpec.setIdentifier(name);
         pluginSpec.setParent(this);
-        fBindings.put(name, spec);
-    }
-    
-    public void removeBinding(String name)
-    {
-        remove(fBindings, name);
+
+        fDeclaredBindings.add(spec);
+
+        if (!fBindings.containsKey(name))
+            fBindings.put(name, spec);
     }
 
     /* (non-Javadoc)
@@ -106,10 +133,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public void setType(String value)
     {
-        String old = fType;
         fType = value;
-        firePropertyChange("type", old, this.fType);
-
     }
 
     /* (non-Javadoc)
@@ -117,9 +141,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public void setCopyOf(String id)
     {
-        String old = fCopyOf;
         fCopyOf = id;
-        firePropertyChange("copyOf", old, this.fCopyOf);
     }
 
     /* (non-Javadoc)
@@ -135,7 +157,7 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
      */
     public boolean getInheritInformalParameters()
     {
-         return fInheritInformalParameters;
+        return fInheritInformalParameters;
     }
 
     /* (non-Javadoc)
@@ -146,6 +168,37 @@ public class PluginContainedComponent extends BasePropertyHolder implements ICon
         fInheritInformalParameters = value;
     }
 
-  
+    public void validate(Object parent, IScannerValidator validator)
+    {
+
+        PluginComponentSpecification spec = (PluginComponentSpecification) parent;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        String id = getIdentifier();
+
+        try
+        {
+            if (fCopyOf == null)
+            {
+                validator.validateContainedComponent(spec, this, sourceInfo);
+            }
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * @return List of bindings as declared in the XML source.
+     */
+    public List getDeclaredBindings()
+    {
+        if (fDeclaredBindings == null)
+            return Collections.EMPTY_LIST;
+
+        return Collections.unmodifiableList(fDeclaredBindings);
+    }
 
 }

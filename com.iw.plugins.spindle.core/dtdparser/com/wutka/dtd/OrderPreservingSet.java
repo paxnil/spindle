@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.util;
+package com.wutka.dtd;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +32,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import com.iw.plugins.spindle.core.util.Assert;
 
 /**
  *  A Set that preserves the order things are added

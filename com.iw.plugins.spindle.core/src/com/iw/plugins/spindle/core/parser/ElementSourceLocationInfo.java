@@ -244,7 +244,7 @@ public class ElementSourceLocationInfo implements ISourceLocationInfo
         {
 
             fContentsStartLine = fStartTagStartLine;
-            fContentsCharStart = fStartTagCharEnd;
+            fContentsCharStart = fStartTagCharEnd + 1;
 
             line = endTag.getBeginLineNumber();
             column = resolver.getColumnOffset(line, endTag.getBeginColumnNumber());

@@ -31,6 +31,7 @@ import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
@@ -44,7 +45,6 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 public interface IScannerValidator
 {
 
-    
     /**
      * Scanners may choose to represent null values with dummy strings.
      * 
@@ -75,7 +75,10 @@ public interface IScannerValidator
      * @return true iff the asset being validated is completely valid.
      * @throws ScannerException optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateAsset(IComponentSpecification specification, IAssetSpecification asset, ISourceLocationInfo sourceLocation)
+    public boolean validateAsset(
+        IComponentSpecification specification,
+        IAssetSpecification asset,
+        ISourceLocationInfo sourceLocation)
         throws ScannerException;
 
     /**
@@ -117,7 +120,8 @@ public interface IScannerValidator
      * @return true iff the expression being validated is completely valid.
      * @throws ScannerException optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException;
+    public boolean validateExpression(String expression, int severity, ISourceLocation location)
+        throws ScannerException;
 
     /**
      * 
@@ -130,7 +134,8 @@ public interface IScannerValidator
      * @return true iff the value matches the pattern
      * @throws ScannerException optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException;
+    public boolean validatePattern(String value, String pattern, String errorKey, int severity)
+        throws ScannerException;
 
     /**
      * A Scanner calls this method to verify that a perl pattern matches the supplied value
@@ -143,7 +148,12 @@ public interface IScannerValidator
      * @return true iff the value matches the pattern
      * @throws ScannerException optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location)
+    public boolean validatePattern(
+        String value,
+        String pattern,
+        String errorKey,
+        int severity,
+        ISourceLocation location)
         throws ScannerException;
 
     /**
@@ -157,10 +167,13 @@ public interface IScannerValidator
      * @return true iff the resource exists
      * @throws ScannerException optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateResourceLocation(IResourceLocation location, String relativePath, String errorKey, ISourceLocation source)
+    public boolean validateResourceLocation(
+        IResourceLocation location,
+        String relativePath,
+        String errorKey,
+        ISourceLocation source)
         throws ScannerException;
-        
-        
+
     /**
      * A Scanner calls this to determine if the location of a Tapestry library exists in the project
      * 
@@ -176,36 +189,55 @@ public interface IScannerValidator
      * @return true iff the resource exists
      * @throws ScannerException optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path, String errorKey, ISourceLocation source) throws ScannerException;
-        
+    public boolean validateLibraryResourceLocation(
+        IResourceLocation specLocation,
+        String path,
+        String errorKey,
+        ISourceLocation source)
+        throws ScannerException;
+
     /**
      * A Scanner calls this method to determine if a type exists in the project
      * 
+     * @param dependant the resource that depends on this type
      * @param fullyQualifiedType
      * @param severity the severity to use when reporting problems
      * @return true iff the type exists in the project
      * @throws ScannerException optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateTypeName(String fullyQualifiedType, int severity) throws ScannerException;
+    public boolean validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType, int severity)
+        throws ScannerException;
 
     /**
      * A Scanner calls this method to determine if a type exists in the project
      * 
+     * @param dependant the resource that depends on this type
      * @param fullyQualifiedType
      * @param severity the severity to use when reporting problems
      * @param location the source location information to be used in problem reporting
      * @return true iff the type exists in the project
      * @throws ScannerException optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException;
+    public boolean validateTypeName(
+        IResourceWorkspaceLocation dependant,
+        String fullyQualifiedType,
+        int severity,
+        ISourceLocation location)
+        throws ScannerException;
 
-    public Object findType(String fullyQualifiedName);
-    
+    public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName);
+
     public void addListener(IScannerValidatorListener listener);
-    
+
     public void removeListener(IScannerValidatorListener listener);
-    
-    
-    
-   
+
+    /**
+     *  Allow users record ad hoc problems
+     * @param severity
+     * @param sourceLocation the location in the source code
+     * @param message a String describing the problem 
+     * @param isTemporary flag indicating that the problem is temporary.
+     */
+    public void addProblem(int severity, ISourceLocation sourceLocation, String message, boolean isTemporary) throws ScannerException;
+
 }

@@ -90,7 +90,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         if (!TapestryCore.hasTapestryNature(project))
             return;
 
-        fProjectBuildStates.put(project, state);
+        setProjectState(project, state);
     }
 
     public void clearBuildState(IProject project)
@@ -111,19 +111,36 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         if (!TapestryCore.hasTapestryNature(project))
             return null;
 
-        Object state = fProjectBuildStates.get(project);
+        Object state = getProjectState(project);
         if (state == null && buildIfRequired)
         {
             try
             {
                 buildStateIfPossible(project, context);
-                state = fProjectBuildStates.get(project);
+                state = getProjectState(project);
             } catch (CoreException e)
             {
                 TapestryCore.log(e);
             }
         }
         return state;
+    }
+
+    // the fsking hashcode on IProjects is never the same twice!
+
+    private Object getProjectState(IProject project)
+    {
+        return fProjectBuildStates.get(project.getFullPath());
+    }
+
+    private void setProjectState(IProject project, Object state)
+    {
+        fProjectBuildStates.put(project.getFullPath(), state);
+    }
+
+    private void removeProjectState(IProject project)
+    {
+        fProjectBuildStates.remove(project.getFullPath());
     }
 
     /**
@@ -250,7 +267,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
     {
         State state = (State) getLastBuildState(project, buildIfRequired);
         if (state != null)
-            return state.fSpecificationMap;
+            return state.getSpecificationMap();
         return null;
     }
 
@@ -295,25 +312,30 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         if (buildState == null)
             return Collections.EMPTY_LIST;
         List result = new ArrayList();
-        for (Iterator iter = buildState.fSpecificationMap.keySet().iterator(); iter.hasNext();)
+        Map specMap = buildState.getSpecificationMap();
+        for (Iterator iter = specMap.keySet().iterator(); iter.hasNext();)
         {
             Object key = iter.next();
-            BaseSpecification spec = (BaseSpecification) buildState.fSpecificationMap.get(key);
-            switch (spec.getSpecificationType())
+            BaseSpecification spec = (BaseSpecification) specMap.get(key);
+            if (spec != null)
             {
-                case BaseSpecification.APPLICATION_SPEC :
-                    String engineSpec = ((IApplicationSpecification) spec).getEngineClassName();
-                    if (engineSpec != null && engineSpec.equals(fullyQualifiedTypeName))
-                        result.add(spec);
-                    break;
-                case BaseSpecification.COMPONENT_SPEC :
-                    String componentSpec = ((IComponentSpecification) spec).getComponentClassName();
-                    if (componentSpec != null && componentSpec.equals(fullyQualifiedTypeName))
-                        result.add(spec);
-                    break;
 
-                default :
-                    break;
+                switch (spec.getSpecificationType())
+                {
+                    case BaseSpecification.APPLICATION_SPEC :
+                        String engineSpec = ((IApplicationSpecification) spec).getEngineClassName();
+                        if (engineSpec != null && engineSpec.equals(fullyQualifiedTypeName))
+                            result.add(spec);
+                        break;
+                    case BaseSpecification.COMPONENT_SPEC :
+                        String componentSpec = ((IComponentSpecification) spec).getComponentClassName();
+                        if (componentSpec != null && componentSpec.equals(fullyQualifiedTypeName))
+                            result.add(spec);
+                        break;
+
+                    default :
+                        break;
+                }
             }
         }
         return result;

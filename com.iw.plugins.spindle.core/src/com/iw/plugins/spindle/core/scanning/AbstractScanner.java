@@ -37,6 +37,7 @@ import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
@@ -94,14 +95,14 @@ public abstract class AbstractScanner implements IProblemCollector
                 // this could only happen when pull parsing!
                 TapestryCore.log(e);
                 if (e instanceof RuntimeException)
-                    throw (RuntimeException)e;
+                    throw (RuntimeException) e;
             }
             return afterScan(resultObject);
         } catch (RuntimeException e)
         {
             TapestryCore.log(e);
             throw e;
-        
+
         } finally
         {
             cleanup();
@@ -146,7 +147,7 @@ public abstract class AbstractScanner implements IProblemCollector
         }
     }
 
-    public void addProblem(int severity, ISourceLocation location, String message)
+    public void addProblem(int severity, ISourceLocation location, String message, boolean isTemporary)
     {
         addProblem(
             new DefaultProblem(
@@ -155,7 +156,7 @@ public abstract class AbstractScanner implements IProblemCollector
                 message,
                 location.getLineNumber(),
                 location.getCharStart(),
-                location.getCharEnd()));
+                location.getCharEnd(), isTemporary));
     }
 
     public void addProblems(IProblem[] problems)
@@ -221,7 +222,7 @@ public abstract class AbstractScanner implements IProblemCollector
                 addProblem(
                     IProblem.WARNING,
                     getAttributeSourceLocation(node, attributeName),
-                    "warning, attribute value is null!");
+                    "warning, attribute value is null!", false);
         }
 
         return result;
@@ -280,6 +281,18 @@ public abstract class AbstractScanner implements IProblemCollector
         return result;
     }
 
+    protected ISourceLocation getNodeBodySourceLocation(Node node)
+    {
+        ISourceLocationInfo info = getSourceLocationInfo(node);
+        ISourceLocation result = null;
+
+        if (info != null)
+        {
+            result = info.getContentSourceLocation();
+        }
+        return result;
+    }
+
     protected ISourceLocation getAttributeSourceLocation(Node node, String rawname)
     {
         ISourceLocationInfo info = getSourceLocationInfo(node);
@@ -323,18 +336,20 @@ public abstract class AbstractScanner implements IProblemCollector
         return fValidator.validateExpression(expression, severity, location);
     }
 
-    protected boolean validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
-    {
-        return fValidator.validateTypeName(fullyQualifiedType, severity);
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
-     */
-    protected boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location)
+    protected boolean validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType, int severity)
         throws ScannerException
     {
-        return fValidator.validateTypeName(fullyQualifiedType, severity, location);
+        return fValidator.validateTypeName(dependant, fullyQualifiedType, severity);
+    }
+
+    protected boolean validateTypeName(
+        IResourceWorkspaceLocation dependant,
+        String fullyQualifiedType,
+        int severity,
+        ISourceLocation location)
+        throws ScannerException
+    {
+        return fValidator.validateTypeName(dependant, fullyQualifiedType, severity, location);
     }
 
     protected boolean validateLibraryResourceLocation(

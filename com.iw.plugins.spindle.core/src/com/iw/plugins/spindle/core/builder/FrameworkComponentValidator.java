@@ -199,7 +199,8 @@ public class FrameworkComponentValidator
                                     TapestryCore.getTapestryString("Namespace.no-such-page", value, namespaceId),
                                     location.getLineNumber(),
                                     location.getCharStart(),
-                                    location.getCharEnd()));
+                                    location.getCharEnd(),
+                                    true));
                         } else
                         {
                             StringWriter swriter = new StringWriter();
@@ -260,7 +261,7 @@ public class FrameworkComponentValidator
                         {
                             ISourceLocationInfo bindingInfo = (ISourceLocationInfo) scriptBinding.getLocation();
                             location = bindingInfo.getAttributeSourceLocation("value");
-                            if (location == null )
+                            if (location == null)
                                 location = bindingInfo.getContentSourceLocation();
                         }
 
@@ -275,7 +276,8 @@ public class FrameworkComponentValidator
                                     "Unable to find script: " + scriptLocation.toString(),
                                     location.getLineNumber(),
                                     location.getCharStart(),
-                                    location.getCharEnd()));
+                                    location.getCharEnd(),
+                                    true));
                         } else
                         {
                             StringWriter swriter = new StringWriter();

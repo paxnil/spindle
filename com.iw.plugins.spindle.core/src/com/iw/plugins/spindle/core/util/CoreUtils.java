@@ -151,13 +151,11 @@ public class CoreUtils
      */
     public static IResource toResource(IResourceLocation loc)
     {
+        if (loc == null)
+            return null;
         try
         {
-            IResourceWorkspaceLocation use_loc = (IResourceWorkspaceLocation) loc;
-            if (!use_loc.exists())
-                return null;
-
-            return (IResource) use_loc.getStorage();
+            return (IResource) ((IResourceWorkspaceLocation) loc).getStorage();
         } catch (RuntimeException e)
         {
             return null;

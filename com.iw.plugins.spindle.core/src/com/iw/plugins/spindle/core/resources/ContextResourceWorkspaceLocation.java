@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.core.resources;
 
 import java.io.InputStream;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IContainer;
@@ -38,7 +39,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
-import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 
 /**
@@ -61,25 +62,6 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
         this(root, root.findRelativePath(resource));
     }
 
-    public boolean exists()
-    {
-        IContainer container = getContainer();
-        if (container == null || !container.exists())
-            return false;
-
-        IStorage storage = getStorage();
-
-        if (storage != null)
-        {
-            return ((IResource) storage).exists();
-        } else if (TapestryCore.isNull(getName()))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
     public IContainer getContainer()
     {
         return ((ContextRootLocation) fRoot).getContainer(this);
@@ -90,22 +72,32 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
      */
     public IStorage getStorage()
     {
+
+        //if we are in a build, the storages get cached for speed.
+        Map cache = TapestryBuilder.getStorageCache();
+
+        if (cache != null && cache.containsKey(this))
+            return (IStorage) cache.get(this);
+
+        IStorage result = null;
         IContainer container = getContainer();
         if (container != null && getName() != null)
         {
             IStorage storage = (IStorage) container.getFile(new Path(getName()));
             IResource resource = (IResource) storage.getAdapter(IResource.class);
             if (resource != null && resource.exists())
-                return storage;
+                result = storage;
         }
 
-        return null;
+        if (cache != null)
+            cache.put(this, result);
+
+        return result;
     }
 
-    
     public IResource getResource()
     {
-       IContainer container = getContainer();
+        IContainer container = getContainer();
         if (container != null && getName() != null)
         {
             IResource resource = container.findMember(new Path(getName()));

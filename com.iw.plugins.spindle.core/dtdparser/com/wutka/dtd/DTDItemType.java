@@ -26,7 +26,7 @@
 
 package com.wutka.dtd;
 
-import org.apache.commons.lang.enum.Enum;
+import org.apache.commons.lang.enums.Enum;
 
 /**
  *  An easy way to determine the type of a DTDContainer

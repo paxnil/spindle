@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *  TODO Add Type comment
+ *  Specification types that can have description tags
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -62,10 +62,8 @@ public class DescribableSpecification extends BaseSpecification implements IPlug
 
     public void setDescription(String description)
     {
-        String old = fDescription;
         fDescription = description;
-        firePropertyChange("description", old, fDescription);
-    }
+     }
 
     public void addDescriptionDeclaration(PluginDescriptionDeclaration decl)
     {

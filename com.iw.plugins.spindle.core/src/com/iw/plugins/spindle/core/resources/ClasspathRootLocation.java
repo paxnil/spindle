@@ -29,6 +29,7 @@ package com.iw.plugins.spindle.core.resources;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IContainer;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
@@ -66,6 +68,10 @@ public class ClasspathRootLocation extends AbstractRootLocation
     public ClasspathRootLocation(IJavaProject project)
     {
         fJavaProject = project;
+    }
+    
+    public IJavaProject getJavaProject() {
+        return fJavaProject;
     }
 
     /* (non-Javadoc)
@@ -215,9 +221,27 @@ public class ClasspathRootLocation extends AbstractRootLocation
                     }
                 } else
                 {
-                    nonJavaResources = fragments[i].getNonJavaResources();
+                    if (fragments[i].isReadOnly())
+                    {
+                        //TODO - is this the correct check for a package in a jar file?
+                        nonJavaResources = fragments[i].getNonJavaResources();
+                    } else
+                    {
+                        IContainer container = (IContainer) fragments[i].getUnderlyingResource();
+                        if (container != null && container.exists())
+                        {
+                            IResource[] members = container.members(false);
+                            ArrayList resultList = new ArrayList();
+                            for (int j = 0; j < members.length; j++)
+                            {
+                                if (members[j] instanceof IFile)
+                                    resultList.add(members[j]);
+                            }
+                            nonJavaResources = resultList.toArray();
+                        }
+                    }
                 }
-            } catch (JavaModelException e)
+            } catch (CoreException e)
             {
                 TapestryCore.log(e);
             }
@@ -271,6 +295,8 @@ public class ClasspathRootLocation extends AbstractRootLocation
         {
             if (storage.getName().equals(searchName))
             {
+                if (storage instanceof IResource && !((IResource) storage).exists())
+                    return true;
                 searchResult = storage;
                 return false; //stop the search
             }
@@ -315,6 +341,11 @@ public class ClasspathRootLocation extends AbstractRootLocation
 
     public IPackageFragment[] getAllPackageFragments(String packageName)
     {
+        Map cache = TapestryBuilder.getPackageCache();
+
+        if (cache != null && cache.containsKey(packageName))
+            return (IPackageFragment[]) cache.get(packageName);
+
         List fragments = new ArrayList();
         try
         {
@@ -330,8 +361,16 @@ public class ClasspathRootLocation extends AbstractRootLocation
         {
             TapestryCore.log(e);
         }
-        return (IPackageFragment[]) fragments.toArray(new IPackageFragment[fragments.size()]);
+
+        IPackageFragment[] result = (IPackageFragment[]) fragments.toArray(new IPackageFragment[fragments.size()]);
+
+        if (cache != null)
+            cache.put(packageName, result);
+
+        return result;
     }
+    
+  
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getSearch()

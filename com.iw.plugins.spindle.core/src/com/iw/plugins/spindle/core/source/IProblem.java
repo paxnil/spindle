@@ -105,4 +105,10 @@ public interface IProblem
      * Used when converting IProblems into Markers
      */
     public String getType();
+    
+    /**
+     *  Indicates if this problem is temporary (or in other words revalidatable)
+     * @return true iff this problem is temporary
+     */
+    public boolean isTemporary();
 }
