@@ -81,7 +81,7 @@ public class BasicParserMRTest extends MRBaseParserTest
 
     public void testINVALID()
     {
-       final String INVALID = PROLOG + "<dog invalid='poo'>Hello, world!</dog>\n";
+        final String INVALID = PROLOG + "<dog invalid='poo'>Hello, world!</dog>\n";
         Node node = null;
         try
         {
@@ -108,15 +108,15 @@ public class BasicParserMRTest extends MRBaseParserTest
         m_assertNull(node);
         basicCheckProblems(parser.getProblems(), 1);
     }
-    
+
     public void testMalformedContent()
     {
-        final String MALFORMED =  PROLOG + "<dog test='poo'>Hello, world!<dog>\n";
+        final String MALFORMED = PROLOG + "<dog test='poo'>Hello, world!<dog>\n";
         Node node = null;
         try
         {
             node = parseAll(MALFORMED);
-            
+
         } catch (IOException e)
         {
             m_fail("IOException: " + e.getMessage());

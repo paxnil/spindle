@@ -15,7 +15,7 @@
         <!ELEMENT mouse EMPTY> 
    ]>
    
-<animals >
+<animals>
 	<moose>
 		Bullwinkle
 	</moose>

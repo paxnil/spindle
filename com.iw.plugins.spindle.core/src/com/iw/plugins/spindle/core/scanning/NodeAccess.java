@@ -89,7 +89,7 @@ public class NodeAccess
         {
             if (child.getNodeType() == Node.TEXT_NODE)
             {
-                buffer.append(node.getNodeValue());
+                buffer.append(child.getNodeValue());
             }
         }
 

@@ -197,9 +197,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
      * @see org.apache.xerces.xni.XMLDocumentHandler#characters(org.apache.xerces.xni.XMLString, org.apache.xerces.xni.Augmentations)
      */
     public void characters(XMLString text, Augmentations augs) throws XNIException
-    {
-       
-        
+    {        
         super.characters(text, augs);
         System.out.println("characters: " + text);
         if (!rootElementSeen) {
@@ -220,6 +218,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
             lastCompletedElement.setNextSibling(temp);
         }
         temp.completed();
+        temp.setEmpty();
         lastCompletedElement = temp;
     }
 

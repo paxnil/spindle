@@ -128,29 +128,16 @@ public class MRBaseParserTest extends MultipleRunTestCase
         {
             return node;
         }
-        Node result = null;
+        
         try
         {
-            Node nextNode = node.getFirstChild();
-            if (nextNode == null)
-            {
-                result = node;
-            } else
-            {
-
-                result = nextNode;
-                while (nextNode != null)
-                {
-                    nextNode = nextNode.getNextSibling();
-                    result = nextNode;
-                }
-            }
+            for (Node nextNode = node.getFirstChild(); nextNode != null; nextNode = nextNode.getNextSibling());           
 
         } catch (ParserRuntimeException e)
         {
-            result = null;
+            return null;
         }
-        return result;
+        return node;
     }
 
     protected String getDTDPreamble(int DTDVersion, String rootNode)
