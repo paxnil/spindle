@@ -641,7 +641,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         IStorage storage = use_loc.getStorage();
         if (storage != null)
         {
-            return parseToNode(parser, storage);
+            return parseToDocument(parser, storage);
         } else
         {
             throw new IOException(TapestryCore.getString("core-resource-does-not-exist", location));
@@ -655,7 +655,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      * If the IStorage is really a resource in the workspace, the problems are
      * recorded as resource markers. Otherwise, the problem is logged. 
      */
-    protected Document parseToNode(Parser parser, IStorage storage) throws IOException, CoreException
+    protected Document parseToDocument(Parser parser, IStorage storage) throws IOException, CoreException
     {
         Document result = null;
         try
@@ -735,6 +735,9 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                         {
                             useValidator.removeListener(this);
                         }
+                        
+                        Markers.recordProblems(location, fComponentScanner.getProblems());
+
                     } else
                     {
                         PluginComponentSpecification dummy = new PluginComponentSpecification();
@@ -746,7 +749,6 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
                     fSpecificationMap.put(location.getStorage(), result);
 
-                    Markers.recordProblems(location, fComponentScanner.getProblems());
 
                 } catch (IOException e)
                 {

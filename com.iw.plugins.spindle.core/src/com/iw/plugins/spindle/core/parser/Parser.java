@@ -320,6 +320,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
         return result;
     }
+        
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.source.ISourceLocationResolver#getTagNameLocation(com.iw.plugins.spindle.core.source.ISourceLocation)
@@ -384,24 +385,30 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
 
     private IProblem createFatalProblem(XMLParseException parseException, int severity)
     {
-        return createProblem(ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER, parseException, severity);
+        return createParserProblem(ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER, parseException, severity);
     }
 
-    private IProblem createProblem(XMLParseException parseException, int severity)
+    private IProblem createErrorProblem(XMLParseException parseException, int severity)
     {
-        return createProblem(ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER, parseException, severity);
+        return createParserProblem(ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER, parseException, severity);
     }
 
-    private IProblem createProblem(String type, XMLParseException ex, int severity)
+    private IProblem createParserProblem(String type, XMLParseException ex, int severity)
     {
 
-        int lineNumber = ex.getLineNumber();
-        int columnNumber = ex.getColumnNumber();
-        int charStart = 0;
-        int charEnd = 0;
+        int lineNumber = ex.getLineNumber() - 1;
+        int charStart = -1;
+        int charEnd = -1;
 
-        charStart = getColumnOffset(lineNumber, columnNumber);
-        charEnd = charStart + 1;
+        try
+        {
+            charStart = fEclipseDocument.getLineOffset(lineNumber);
+            charEnd = charStart + fEclipseDocument.getLineLength(lineNumber) - 1;
+        } catch (BadLocationException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         return new DefaultProblem(type, severity, ex.getMessage(), lineNumber, charStart, charEnd);
     }
@@ -413,7 +420,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
      */
     public void error(String domain, String key, XMLParseException exception) throws XNIException
     {
-        addProblem(createProblem(exception, IMarker.SEVERITY_ERROR));
+        addProblem(createErrorProblem(exception, IMarker.SEVERITY_ERROR));
     }
 
     /**
@@ -430,7 +437,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
      */
     public void warning(String domain, String key, XMLParseException exception) throws XNIException
     {
-        addProblem(createProblem(exception, IMarker.SEVERITY_WARNING));
+        addProblem(createErrorProblem(exception, IMarker.SEVERITY_WARNING));
     }
 
     ///*** END OF XMLErrorHandler for DOM && PULL Parsing **

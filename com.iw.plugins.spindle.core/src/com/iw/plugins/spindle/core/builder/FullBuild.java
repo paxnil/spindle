@@ -126,10 +126,10 @@ public class FullBuild extends Build
         {
             String id = (String) iter.next();
             ICoreNamespace child = (ICoreNamespace) namespace.getChildNamespace(id);
-            IResourceWorkspaceLocation libraryLocation = (IResourceWorkspaceLocation) child.getSpecificationLocation();
-            if (libraryLocation.isBinary())
+            IResourceWorkspaceLocation childLocation = (IResourceWorkspaceLocation) child.getSpecificationLocation();
+            if (childLocation.isBinary())
             {
-                state.fBinaryNamespaces.put(libraryLocation, namespace);
+                state.fBinaryNamespaces.put(childLocation, child);
             }
         }
     }

@@ -14,6 +14,17 @@
  		<include name="*.jar"/>
     </fileset>
  </copy>
+  <copy todir="C:/downloads/spindle">
+ 	<fileset dir="../../net.sf.solareclipse.ui/buildRelease">
+ 		<include name="*.jar"/>
+    </fileset>
+ </copy>
+  <copy todir="C:/downloads/spindle">
+ 	<fileset dir="../../net.sf.solareclipse.xml.ui/buildRelease">
+ 		<include name="*.jar"/>
+    </fileset>
+ </copy>
+ 
 </target>
 <target name="with.clover" depends="init">
    <clover-setup initString="${clover.db}"/>   		

@@ -12,25 +12,25 @@ public class DTDEnumeration implements DTDOutput
 {
     protected Vector items;
 
-/** Creates a new enumeration */
+    /** Creates a new enumeration */
     public DTDEnumeration()
     {
         items = new Vector();
     }
 
-/** Adds a new value to the list of values */
+    /** Adds a new value to the list of values */
     public void add(String item)
     {
         items.addElement(item);
     }
 
-/** Removes a value from the list of values */
+    /** Removes a value from the list of values */
     public void remove(String item)
     {
         items.removeElement(item);
     }
 
-/** Returns the values as an array */
+    /** Returns the values as an array */
     public String[] getItems()
     {
         String[] retval = new String[items.size()];
@@ -39,15 +39,14 @@ public class DTDEnumeration implements DTDOutput
         return retval;
     }
 
-/** Returns the values as a vector (not a clone!) */
+    /** Returns the values as a vector (not a clone!) */
     public Vector getItemsVec()
     {
         return items;
     }
 
-/** Writes out a declaration for this enumeration */
-    public void write(PrintWriter out)
-        throws IOException
+    /** Writes out a declaration for this enumeration */
+    public void write(PrintWriter out) throws IOException
     {
         out.print("( ");
         Enumeration e = getItemsVec().elements();
@@ -55,7 +54,8 @@ public class DTDEnumeration implements DTDOutput
         boolean isFirst = true;
         while (e.hasMoreElements())
         {
-            if (!isFirst) out.print(" | ");
+            if (!isFirst)
+                out.print(" | ");
             isFirst = false;
 
             out.print(e.nextElement());
@@ -65,35 +65,54 @@ public class DTDEnumeration implements DTDOutput
 
     public boolean equals(Object ob)
     {
-        if (ob == this) return true;
-        if (!(ob instanceof DTDEnumeration)) return false;
+        if (ob == this)
+            return true;
+        if (!(ob instanceof DTDEnumeration))
+            return false;
 
         DTDEnumeration other = (DTDEnumeration) ob;
         return items.equals(other.items);
     }
 
-/** Returns the items in the enumeration */
-    public String[] getItem() { return getItems(); }
+    /** Returns the items in the enumeration */
+    public String[] getItem()
+    {
+        return getItems();
+    }
 
-/** Sets the items in the enumeration */
+    /** Sets the items in the enumeration */
     public void setItem(String[] newItems)
     {
         items = new Vector(newItems.length);
-        for (int i=0; i < newItems.length; i++)
+        for (int i = 0; i < newItems.length; i++)
         {
             items.addElement(newItems[i]);
         }
     }
 
-/** Stores an item in the enumeration */
+    /** Stores an item in the enumeration */
     public void setItem(String item, int i)
     {
         items.setElementAt(item, i);
     }
 
-/** Retrieves an item from the enumeration */
+    /** Retrieves an item from the enumeration */
     public String getItem(int i)
     {
         return (String) items.elementAt(i);
+    }
+
+    public String toString()
+    {
+        StringWriter stw = new StringWriter();
+        PrintWriter writer = new PrintWriter(stw);
+        try
+        {
+            write(writer);
+        } catch (IOException e)
+        {
+            return super.toString();
+        }
+        return stw.toString();
     }
 }

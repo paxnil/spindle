@@ -236,8 +236,8 @@ public class NamespaceResolver
         } else
         {
             fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation);
+            doResolve();
         }
-        doResolve();
         return fResultNamespace;
     }
 
