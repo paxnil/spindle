@@ -34,6 +34,7 @@ import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
+import org.apache.xerces.xni.parser.XMLInputSource;
 import org.apache.xerces.xni.parser.XMLParseException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;
@@ -145,22 +146,21 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         Assert.isTrue(usePullParser, "can't pull parse, I'm set to dom parse!");
         if (pullParser == null)
         {
-            if (doValidation)
-            {
-                pullParseConfiguration = new TapestryPullParserConfiguration(TapestryDOMParserConfiguration.GRAMMAR_POOL);
 
-            } else
-            {
-                pullParseConfiguration = new TapestryPullParserConfiguration();
-            }
+            pullParseConfiguration = new TapestryPullParserConfiguration();
             pullParser = new TapestryPullParser(pullParseConfiguration);
             pullParser.setSourceResolver(this);
             pullParseConfiguration.setDocumentHandler(pullParser);
             pullParseConfiguration.setErrorHandler(this);
             pullParseConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
-            pullParseConfiguration.setFeature("http://apache.org/xml/features/dom/include-ignorable-whitespace", false);
             pullParseConfiguration.setFeature("http://xml.org/sax/features/validation", doValidation);
             pullParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
+            if (doValidation)
+            {
+                pullParseConfiguration.setProperty(
+                    "http://apache.org/xml/properties/internal/grammar-pool",
+                    TapestryDOMParserConfiguration.GRAMMAR_POOL);
+            }
 
         }
     }
@@ -225,6 +225,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         {
 
             checkPullParser();
+            pullParseConfiguration.setInputSource(new XMLInputSource(null, "", null, reader, null));
             pullParseConfiguration.parse();
             if (!hasFatalErrors)
             {
@@ -237,7 +238,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             createFatalProblem(e1, IProblem.ERROR);
         } catch (Exception e1)
         {
-            //ignore
+            e1.printStackTrace();
         }
         return result;
     }
@@ -391,7 +392,6 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     {
         hasFatalErrors = true;
         addProblem(createFatalProblem(exception, IMarker.SEVERITY_ERROR));
-        TapestryCore.log(exception);
     }
 
     /**

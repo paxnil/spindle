@@ -59,7 +59,7 @@ public class TapestryCore extends AbstractUIPlugin
     public static final String PLUGIN_ID = "com.iw.plugins.spindle.core";
     public static final String NATURE_ID = PLUGIN_ID + ".tapestrynature";
     public static final String BUILDER_ID = PLUGIN_ID + ".tapestrybuilder";
-    
+
     /**
      * SpecFactory instance used by the Scanners
      */
@@ -101,7 +101,12 @@ public class TapestryCore extends AbstractUIPlugin
 
     static public void log(String msg)
     {
-        ILog log = TapestryCore.getDefault().getLog();
+        TapestryCore core = getDefault();
+        if (core == null)
+        {
+            System.err.println("TapestryCore log: "+msg);
+        }
+        ILog log = core.getLog();
         Status status =
             new Status(
                 IStatus.ERROR,
@@ -114,13 +119,24 @@ public class TapestryCore extends AbstractUIPlugin
 
     static public void log(Exception ex)
     {
-        ILog log = TapestryCore.getDefault().getLog();
+        TapestryCore core = getDefault();
+        if (core == null)
+        {
+            System.err.println("TapestryCore log exception");
+            ex.printStackTrace(System.err);
+        }
+        ILog log = core.getLog();
         StringWriter stringWriter = new StringWriter();
         ex.printStackTrace(new PrintWriter(stringWriter));
         String msg = stringWriter.getBuffer().toString();
 
         Status status =
-            new Status(IStatus.ERROR, TapestryCore.getDefault().getDescriptor().getUniqueIdentifier(), IStatus.ERROR, msg, null);
+            new Status(
+                IStatus.ERROR,
+                TapestryCore.getDefault().getDescriptor().getUniqueIdentifier(),
+                IStatus.ERROR,
+                msg,
+                null);
         log.log(status);
     }
 
@@ -172,7 +188,12 @@ public class TapestryCore extends AbstractUIPlugin
         {
             String[] newNatures = new String[prevNatures.length - 1];
             System.arraycopy(prevNatures, 0, newNatures, 0, natureIndex);
-            System.arraycopy(prevNatures, natureIndex + 1, newNatures, natureIndex, prevNatures.length - (natureIndex + 1));
+            System.arraycopy(
+                prevNatures,
+                natureIndex + 1,
+                newNatures,
+                natureIndex,
+                prevNatures.length - (natureIndex + 1));
             description.setNatureIds(newNatures);
             proj.setDescription(description, null);
         }
@@ -262,10 +283,11 @@ public class TapestryCore extends AbstractUIPlugin
             return true;
 
         return value.trim().length() == 0;
-    }  
-    
-    public static void logProblem(IStorage storage, IProblem problem) {
-        log(getString("core-non-resource-problem", storage.toString(), problem.toString()));        
+    }
+
+    public static void logProblem(IStorage storage, IProblem problem)
+    {
+        log(getString("core-non-resource-problem", storage.toString(), problem.toString()));
     }
 
     /**
@@ -274,12 +296,13 @@ public class TapestryCore extends AbstractUIPlugin
      */
     public static void logProblems(IStorage storage, IProblem[] problems)
     {
-        if (problems != null) {
+        if (problems != null)
+        {
             for (int i = 0; i < problems.length; i++)
             {
-                logProblem(storage, problems[i]);                
+                logProblem(storage, problems[i]);
             }
-        }        
+        }
     }
 
     /**
@@ -287,7 +310,8 @@ public class TapestryCore extends AbstractUIPlugin
      */
     public static SpecFactory getSpecificationFactory()
     {
-        if (SPEC_FACTORY == null) {
+        if (SPEC_FACTORY == null)
+        {
             SPEC_FACTORY = new TapestryCoreSpecFactory();
         }
         return SPEC_FACTORY;

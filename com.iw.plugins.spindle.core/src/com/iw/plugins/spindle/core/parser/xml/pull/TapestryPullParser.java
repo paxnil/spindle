@@ -7,6 +7,7 @@
 package com.iw.plugins.spindle.core.parser.xml.pull;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 import org.apache.xerces.parsers.XMLDocumentParser;
@@ -59,6 +60,10 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
 
         public final PullParserNode peek()
         {
+            if (last < 0)
+            {
+                return null;
+            }
             return (PullParserNode) super.get(last);
         }
 
@@ -70,6 +75,25 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         {
             super.clear();
             last = -1;
+        }
+
+        public void dump(PrintStream stream)
+        {
+            StringBuffer buffer = new StringBuffer();
+            buffer.append("NodeStack<");
+            if (last < 0)
+            {
+                buffer.append("empty");
+            } else
+            {
+                for (int i = 0; i <= last; i++)
+                {
+                    PullParserNode node = (PullParserNode) super.get(i);
+                    buffer.append("Node(" + node.getNodeName() + ")");
+                }
+            }
+            buffer.append(">");
+            stream.println(buffer.toString());
         }
     }
 
@@ -180,7 +204,8 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     /* (non-Javadoc)
      * @see org.apache.xerces.xni.XMLDocumentHandler#doctypeDecl(java.lang.String, java.lang.String, java.lang.String, org.apache.xerces.xni.Augmentations)
      */
-    public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs) throws XNIException
+    public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs)
+        throws XNIException
     {
 
         super.doctypeDecl(rootElement, publicId, systemId, augs);
@@ -219,17 +244,20 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         // find the last one, finish him up, pop off the stack
         super.endElement(element, augs);
         System.out.println("endElement: " + element.rawname);
-        configuration.stopParsing();
+        parseStack.dump(System.err);
+        
         lastCompletedElement = parseStack.pop();
         if (lastCompletedElement != null)
         {
             lastCompletedElement.completed();
         }
-        //check to see if the only element left is the root
-        if (parseStack.peek() == rootElement)
+        //we don't want to stop parsing if the only
+        // element left on the stack is root!
+        if (parseStack.peek() != rootElement)
         {
-            //            bump();
+            configuration.stopParsing();
         }
+        parseStack.dump(System.err);
     }
 
     /* (non-Javadoc)
@@ -248,6 +276,8 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     public void startElement(QName element, XMLAttributes attributes, Augmentations augs) throws XNIException
     {
         super.startElement(element, attributes, augs);
+        System.out.println("startElement: " + element.rawname);
+        parseStack.dump(System.err);
         if (!dtdIsDone)
         {} else if (!rootElementSeen)
         {
@@ -273,12 +303,12 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
 
         }
         configuration.stopParsing();
-        System.out.println("startElement: " + element.rawname);
         int length = attributes.getLength();
         for (int i = 0; i < length; i++)
         {
             System.out.println("\t\t" + attributes.getQName(i) + "='" + attributes.getNonNormalizedValue(i) + "'");
         }
+        parseStack.dump(System.err);
     }
 
     /* (non-Javadoc)

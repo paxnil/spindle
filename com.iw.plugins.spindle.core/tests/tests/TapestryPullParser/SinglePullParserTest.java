@@ -53,7 +53,6 @@ public class SinglePullParserTest extends ConfiguredPullParserBase
     public SinglePullParserTest(String arg0)
     {
         super(arg0);
-
     }
 
     public void testSimpleValidationSuccess() throws Exception

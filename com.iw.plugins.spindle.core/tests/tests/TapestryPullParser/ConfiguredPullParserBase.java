@@ -67,7 +67,9 @@ public class ConfiguredPullParserBase extends PullParserBase
         pullParseConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
         pullParseConfiguration.setFeature("http://xml.org/sax/features/validation", true);
         pullParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
-        pullParseConfiguration.setProperty("http://apache.org/xml/properties/internal/grammar-pool", new XMLGrammarPoolImpl());
+        pullParseConfiguration.setProperty(
+            "http://apache.org/xml/properties/internal/grammar-pool",
+            new XMLGrammarPoolImpl());
     }
 
     protected void parseAll(final String content) throws XMLConfigurationException, IOException, XMLParseException
@@ -86,17 +88,11 @@ public class ConfiguredPullParserBase extends PullParserBase
         System.err.println("Starting!\n");
         pullParseConfiguration.parse();
         Node node = pullParser.getRootNode();
-        boolean stop = false;
         node = node.getFirstChild();
-        while (node != null)
-        {
+        while (node != null) {
             node = node.getNextSibling();
-            if (node == null)
-            {
-                break;
-            }
         }
-//        pullParseConfiguration.parse();
+           
     }
 
 }

@@ -47,7 +47,9 @@ public class AllTestsMR
 {
     public static final String[] ALL_RUNS = new String[] { MRBaseParserTest.DOM, MRBaseParserTest.PULL };
     public static final String[] DOM_ONLY = new String[] { MRBaseParserTest.DOM };
-    public static final String[] CURRENT_RUN = DOM_ONLY;
+    public static final String[] PULL_ONLY = new String[] {MRBaseParserTest.PULL};
+    
+    public static final String[] CURRENT_RUN = PULL_ONLY;
     
 
     public static void main(String[] args)

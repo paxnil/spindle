@@ -70,13 +70,13 @@ public class BasicParserMRTest extends MRBaseParserTest
         Node node = null;
         try
         {
-            node = parseAll(VALID);
+            node = parseToNode(VALID);
         } catch (IOException e)
         {
-            fail("IOException: " + e.getMessage());
+            m_fail("IOException: " + e.getMessage());
         }
-        assertNotNull(node);
-        assertTrue(parser.getProblems().length == 0);
+        m_assertNotNull(node);
+        m_assertTrue(parser.getProblems().length == 0);
     }
 
     public void testINVALID()
@@ -85,12 +85,12 @@ public class BasicParserMRTest extends MRBaseParserTest
         Node node = null;
         try
         {
-            node = parseAll(INVALID);
+            node = parseToNode(INVALID);
         } catch (IOException e)
         {
-            fail("IOException: " + e.getMessage());
+            m_fail("IOException: " + e.getMessage());
         }
-        assertNotNull(node);
+        m_assertNotNull(node);
         basicCheckProblems(parser.getProblems(), 1);
     }
 
@@ -100,12 +100,12 @@ public class BasicParserMRTest extends MRBaseParserTest
         Node node = null;
         try
         {
-            node = parseAll(MALFORMED);
+            node = parseToNode(MALFORMED);
         } catch (IOException e)
         {
-            fail("IOException: " + e.getMessage());
+            m_fail("IOException: " + e.getMessage());
         }
-        assertNull(node);
+        m_assertNull(node);
         basicCheckProblems(parser.getProblems(), 1);
     }
     
@@ -115,12 +115,12 @@ public class BasicParserMRTest extends MRBaseParserTest
         Node node = null;
         try
         {
-            node = parseAll(MALFORMED);
+            node = parseToNode(MALFORMED);
         } catch (IOException e)
         {
-            fail("IOException: " + e.getMessage());
+            m_fail("IOException: " + e.getMessage());
         }
-        assertNull(node);
+        m_assertNull(node);
         basicCheckProblems(parser.getProblems(), 1);
     }
 
