@@ -25,9 +25,13 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors;
 
+import net.sf.solareclipse.xml.internal.ui.text.XMLPartitionScanner;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.DefaultAutoIndentStrategy;
 import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.IAutoIndentStrategy;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
@@ -39,6 +43,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.PreferenceConstants;
+import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.ui.util.ToolTipHandler;
 
 public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
@@ -46,6 +51,7 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
 
     protected Editor fEditor;
     protected IPreferenceStore fPreferenceStore;
+    private String[] fIndentPrefixes;
 
     public BaseSourceConfiguration(Editor editor, IPreferenceStore preferenceStore)
     {
@@ -96,7 +102,7 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
         {
             public IInformationControl createInformationControl(Shell parent)
             {
-                return new DefaultInformationControl(parent, SWT.NONE, new ToolTipHandler.TooltipPresenter());                
+                return new DefaultInformationControl(parent, SWT.NONE, new ToolTipHandler.TooltipPresenter());
             }
         };
     }
@@ -106,7 +112,36 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
      */
     public int getTabWidth(ISourceViewer sourceViewer)
     {
-       return fPreferenceStore.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+        return fPreferenceStore.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAutoIndentStrategy(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
+     */
+    public IAutoIndentStrategy getAutoIndentStrategy(ISourceViewer sourceViewer, String contentType)
+    {
+        if (contentType == XMLPartitionScanner.XML_COMMENT || contentType == XMLPartitionScanner.XML_CDATA)
+            return new DefaultAutoIndentStrategy();
+        return new XMLAutoIndentStrategy(UIPlugin.getDefault().getPreferenceStore());
+    }
+
+    /* (non-Javadoc)
+         * Method declared on SourceViewerConfiguration
+         */
+    public String[] getIndentPrefixes(ISourceViewer sourceViewer, String contentType)
+    {
+        if (contentType == XMLPartitionScanner.XML_COMMENT || contentType == XMLPartitionScanner.XML_CDATA)
+            return super.getIndentPrefixes(sourceViewer, contentType);
+            
+        if (fIndentPrefixes == null)
+        {
+            int spaces = fPreferenceStore.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+            StringBuffer buf = new StringBuffer();
+            for (int i = 0; i < spaces; i++)
+                buf.append(' ');
+            fIndentPrefixes = new String[] { "\t", buf.toString()};
+        }
+        return fIndentPrefixes;
     }
 
 }

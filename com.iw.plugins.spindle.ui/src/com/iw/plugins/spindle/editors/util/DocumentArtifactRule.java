@@ -91,7 +91,7 @@ public class DocumentArtifactRule implements IPredicateRule
                         {
                             c = scanner.read();
                             result = COMMENT;
-                            c = scanTo(scanner, "-->", '\0', true);
+                            c = scanTo(scanner, "-->", '\0', false);
                         } else
                         {
                             c = scanTo(scanner, ">", '"', true);

@@ -56,83 +56,6 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStrategy
 {
     /**
-     * Helper class which has the ability to walk over the artifacts in the underlying 
-     * document in both directions (forward and backwards).
-     */
-    private static class PartitionWalker
-    {
-        private boolean modeForward;
-        private TypedPosition[] fDocumentArtifacts;
-        private int fLastIndex, fNextIndex, fEndIndex;
-
-        /**
-         * create an instance to walk forward for a given length starting at the given offset
-         */
-        PartitionWalker(TypedPosition[] documentArtifacts, int offset, int length) throws BadLocationException
-        {
-            modeForward = true;
-            fDocumentArtifacts = documentArtifacts;
-            fNextIndex = fLastIndex = getArtifactIndexAt(offset);
-            fEndIndex = getArtifactIndexAt(offset + length);
-        }
-
-        /**
-         * create an instance to walk only backward until the document start, starting at the given offset
-         */
-        PartitionWalker(TypedPosition[] documentArtifacts, int offset) throws BadLocationException
-        {
-            modeForward = false;
-            fDocumentArtifacts = documentArtifacts;
-            fLastIndex = fNextIndex = getArtifactIndexAt(offset);
-        }
-
-        public TypedPosition next() throws BadLocationException
-        {
-            if (!modeForward)
-                throw new UnsupportedOperationException("calling next on backward walker not allowed");
-
-            if (fNextIndex > fEndIndex)
-                return null;
-
-            DocumentArtifact artifact = (DocumentArtifact) fDocumentArtifacts[fNextIndex];
-            fLastIndex = fNextIndex;
-            fNextIndex += 1;
-            return artifact;
-        }
-
-        public TypedPosition previous() throws BadLocationException
-        {
-            if (modeForward)
-                throw new UnsupportedOperationException("calling previous on forward walker not allowed");
-
-            if (fLastIndex == 0)
-                return null;
-
-            DocumentArtifact artifact = (DocumentArtifact) fDocumentArtifacts[fNextIndex];
-            fLastIndex = fNextIndex;
-            fNextIndex -= 1;
-            return artifact;
-        }
-
-        /**
-            * get the index of  DocumentArtifact found at the offset
-            * @param offset
-            * @return the DocumentArtifact found at the offset
-            * @throws BadLocationException
-            */
-        private int getArtifactIndexAt(int offset) throws BadLocationException
-        {
-            for (int i = 0; i < fDocumentArtifacts.length; i++)
-            {
-                if (offset >= fDocumentArtifacts[i].getOffset()
-                    && offset <= fDocumentArtifacts[i].getOffset() + fDocumentArtifacts[i].getLength())
-                    return i;
-            }
-            throw new BadLocationException();
-        }
-    }
-
-    /**
      * line info struct administered by LineWalker
      */
     private static class LineInfo
@@ -507,7 +430,7 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
     private String doFormat(int length) throws BadLocationException
     {
         //determine the enclosing element and the appropriate indent
-        PartitionWalker walker = new PartitionWalker(fDocumentPositions, fOffset);
+        TypedPositionWalker walker = new TypedPositionWalker(fDocumentPositions, fOffset);
 
         for (TypedPosition tposition = walker.previous(); tposition != null; tposition = walker.previous())
         {
@@ -526,7 +449,7 @@ public class XMLFormattingStrategy implements XMLContentFormatter.FormattingStra
         }
 
         //walk through the partitions and format
-        walker = new PartitionWalker(fDocumentPositions, fOffset, length);
+        walker = new TypedPositionWalker(fDocumentPositions, fOffset, length);
         StringBuffer buffer = new StringBuffer();
 
         TypedPosition tposition = walker.next();

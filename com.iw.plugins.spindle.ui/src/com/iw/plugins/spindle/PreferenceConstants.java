@@ -106,12 +106,14 @@ public class PreferenceConstants
         UIPlugin.PLUGIN_ID + ".EDITOR_UNKNOWN_INDICATION_COLOR";
 
     public static final String EDITOR_DISPLAY_TAB_WIDTH = UIPlugin.PLUGIN_ID + ".EDITOR_DISPLAY_TAB_WIDTH";
+    
+    public static final String EDITOR_USE_SMART_INDENT = UIPlugin.PLUGIN_ID + ".EDITOR_USE_SMART_INDENT";
 
     public static final String FORMATTER_PRESERVE_BLANK_LINES = UIPlugin.PLUGIN_ID + ".FORMATTER_PRESERVE_BLANK_LINES";
 
     public static final String FORMATTER_USE_TABS_TO_INDENT = UIPlugin.PLUGIN_ID + ".FORMATTER_USE_TABS_TO_INDENT";
 
-    public static void initializeDefaultValues(IPreferenceStore store)
+   public static void initializeDefaultValues(IPreferenceStore store)
     {
 
         store.setDefault(EDITOR_OVERVIEW_RULER, true);
@@ -165,6 +167,7 @@ public class PreferenceConstants
         setDefault(store, ITemplateSyntaxConstants.TAPESTRY_ATT_VALUE, "0,64,128", ITextStylePreferences.STYLE_BOLD);
         
         store.setDefault(EDITOR_DISPLAY_TAB_WIDTH,  4);
+        store.setDefault(EDITOR_USE_SMART_INDENT, true);
         store.setDefault(FORMATTER_PRESERVE_BLANK_LINES,  true);
         store.setDefault(FORMATTER_USE_TABS_TO_INDENT,  false);
        
