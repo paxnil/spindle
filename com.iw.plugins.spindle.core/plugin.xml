@@ -3,7 +3,7 @@
 <plugin
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
-   version="0.1.16"
+   version="0.1.17"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.core.TapestryCore">
 
@@ -38,7 +38,7 @@
       <library name="lib/ext/commons-fileupload-1.0.jar">
          <export name="*"/>
       </library>
-      <library name="lib/ext/commons-lang-cvs-HEAD.jar">
+      <library name="lib/spindle/commons-lang-cvs-HEAD.jar">
          <export name="*"/>
       </library>
       <library name="lib/ext/commons-logging-1.0.2.jar">

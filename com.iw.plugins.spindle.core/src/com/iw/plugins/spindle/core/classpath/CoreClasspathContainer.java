@@ -46,197 +46,232 @@ import org.osgi.framework.Constants;
 import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
- * Tapestry library container - resolves a classpath container variable to the
- * Tapestry Libraries.
+ * Tapestry library container - resolves a classpath container variable to the Tapestry Libraries.
  * 
  * @author glongman@intelligentworks.com
  */
 public class CoreClasspathContainer implements IClasspathContainer
 {
 
-  /**
-   * Container path used to resolve to this Container
-   */
-  private IPath fPath = null;
+    /**
+     * Container path used to resolve to this Container
+     */
+    private IPath fPath = null;
 
-  /**
-   * Cache of Tapestry classpath entries per VM install.
-   */
-  private static IClasspathEntry[] fClasspathEntries = null;
+    /**
+     * Cache of Tapestry classpath entries per VM install.
+     */
+    private static IClasspathEntry[] fClasspathEntries = null;
 
-  /**
-   * Returns the classpath entries associated with the given VM.
-   * 
-   * @param plugin
-   * @return classpath entries
-   */
-  private static IClasspathEntry[] getClasspathEntries(TapestryCore plugin)
-  {
-    if (fClasspathEntries == null)
-      fClasspathEntries = computeClasspathEntries(plugin.getBundle());
-
-    return fClasspathEntries;
-  }
-
-  /**
-   * Computes the Tapestry framework classpath entries associated with the core
-   * plugin bundle.
-   * 
-   * @param bundle the Bundle associated with the plugin object.
-   * @return an array of classpath entries.
-   */
-  private static IClasspathEntry[] computeClasspathEntries(Bundle bundle)
-  {
-    List entries = new ArrayList();
-
-    URL installUrl = bundle.getEntry("/");
-
-    try
+    /**
+     * Returns the classpath entries associated with the given VM.
+     * 
+     * @param plugin
+     * @return classpath entries
+     */
+    private static IClasspathEntry[] getClasspathEntries(TapestryCore plugin)
     {
-      ManifestElement[] elements = ManifestElement.parseHeader(
-          Constants.BUNDLE_CLASSPATH,
-          (String) bundle.getHeaders().get(Constants.BUNDLE_CLASSPATH));
+        if (fClasspathEntries == null)
+            fClasspathEntries = computeClasspathEntries(plugin.getBundle());
 
-      for (int i = 0; i < elements.length; i++)
-      {
-        String jarName = elements[i].getValue();
+        return fClasspathEntries;
+    }
 
-        if (jarName.equals("core.jar"))
-          continue;
+    /**
+     * Computes the Tapestry framework classpath entries associated with the core plugin bundle.
+     * 
+     * @param bundle
+     *            the Bundle associated with the plugin object.
+     * @return an array of classpath entries.
+     */
+    private static IClasspathEntry[] computeClasspathEntries(Bundle bundle)
+    {
+        List entries = new ArrayList();
 
-        if (jarName.endsWith("javax.servlet.jar"))
-          continue;
+        URL installUrl = bundle.getEntry("/");
 
-        if (jarName.equals("dtdparser.jar"))
-          continue;
-
-        IPath tempPath = new Path(jarName);
-        String trueJarName = tempPath.lastSegment();
         try
         {
-          IPath sourceAttachmentPath = null;
-          IPath sourceAttachmentRootPath = null;
-          if (trueJarName.startsWith("tapestry-3"))
-          {
-            sourceAttachmentPath = getSourceAttachmentPath(installUrl, "tapestry-src.jar");
-          } else if (trueJarName.startsWith("tapestry-contrib"))
-          {
-            sourceAttachmentPath = getSourceAttachmentPath(
-                installUrl,
-                "tapestry-contrib-src.jar");
-          } else
-          {
+            ManifestElement[] elements = ManifestElement.parseHeader(
+                    Constants.BUNDLE_CLASSPATH,
+                    (String) bundle.getHeaders().get(Constants.BUNDLE_CLASSPATH));
 
-            int index = trueJarName.lastIndexOf('-');
-            String attachment = trueJarName.substring(0, index) + "-src.jar";
-            sourceAttachmentPath = getSourceAttachmentPath(installUrl, attachment);
-          }
+            for (int i = 0; i < elements.length; i++)
+            {
+                String jarName = elements[i].getValue();
 
-          if (sourceAttachmentPath != null)
-            sourceAttachmentRootPath = new Path("/");
+                if (jarName.equals("core.jar"))
+                    continue;
 
-          URL libUrl = new URL(installUrl, jarName);
-          libUrl = Platform.resolve(libUrl);
+                if (jarName.endsWith("javax.servlet.jar"))
+                    continue;
 
-          entries.add(JavaCore.newLibraryEntry(
-              new Path(libUrl.getFile()),
-              sourceAttachmentPath,
-              sourceAttachmentRootPath,
-              false));
+                if (jarName.equals("dtdparser.jar"))
+                    continue;
 
-        } catch (MalformedURLException e)
+                if (jarName.indexOf("commons-lang") > 0)
+                    continue;
+
+                IPath tempPath = new Path(jarName);
+                String trueJarName = tempPath.lastSegment();
+                try
+                {
+                    IPath sourceAttachmentPath = null;
+                    IPath sourceAttachmentRootPath = null;
+                    if (trueJarName.startsWith("tapestry-3"))
+                    {
+                        sourceAttachmentPath = getSourceAttachmentPath(
+                                installUrl,
+                                "tapestry-src.jar");
+                    }
+                    else if (trueJarName.startsWith("tapestry-contrib"))
+                    {
+                        sourceAttachmentPath = getSourceAttachmentPath(
+                                installUrl,
+                                "tapestry-contrib-src.jar");
+                    }
+                    else
+                    {
+
+                        int index = trueJarName.lastIndexOf('-');
+                        String attachment = trueJarName.substring(0, index) + "-src.jar";
+                        sourceAttachmentPath = getSourceAttachmentPath(installUrl, attachment);
+                    }
+
+                    if (sourceAttachmentPath != null)
+                        sourceAttachmentRootPath = new Path("/");
+
+                    URL libUrl = new URL(installUrl, jarName);
+                    libUrl = Platform.resolve(libUrl);
+
+                    entries.add(JavaCore.newLibraryEntry(
+                            new Path(libUrl.getFile()),
+                            sourceAttachmentPath,
+                            sourceAttachmentRootPath,
+                            false));
+
+                }
+                catch (MalformedURLException e)
+                {
+                    TapestryCore.log(e);
+                }
+                catch (IOException e)
+                {
+                    TapestryCore.log(e);
+                }
+
+            }
+
+            //FIXING Bug [ 1144151 ] Spindle 3.1.16 using commons-lang-cvs-HEAD.jar??
+
+            try
+            {
+                URL commonsLang = new URL(installUrl, "lib/ext/commons-lang-1.0.jar");
+                commonsLang = Platform.resolve(commonsLang);
+                entries.add(JavaCore.newLibraryEntry(
+                        new Path(commonsLang.getFile()),
+                        null,
+                        null,
+                        false));
+            }
+            catch (MalformedURLException e1)
+            {
+                TapestryCore.log(e1);
+            }
+            catch (IOException e1)
+            {
+                TapestryCore.log(e1);
+            }
+
+        }
+        catch (BundleException e)
         {
-          TapestryCore.log(e);
-        } catch (IOException e)
-        {
-          TapestryCore.log(e);
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
-      }
-
-    } catch (BundleException e)
-    {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+        return (IClasspathEntry[]) entries.toArray(new IClasspathEntry[entries.size()]);
     }
 
-    return (IClasspathEntry[]) entries.toArray(new IClasspathEntry[entries.size()]);
-  }
+    /**
+     * Locate the path of a jar containing the source code for a named library. The location is
+     * relative to the plugin install directory.
+     * 
+     * @param installUrl
+     *            the URL for the plugin install
+     * @param srcJar
+     *            the name of the expected src jar
+     * @return a path to the source jar or null if no such jar is found.
+     */
+    private static IPath getSourceAttachmentPath(URL installUrl, String srcJar)
+    {
 
-  /**
-   * Locate the path of a jar containing the source code for a named library.
-   * The location is relative to the plugin install directory.
-   * 
-   * @param installUrl the URL for the plugin install
-   * @param srcJar the name of the expected src jar
-   * @return a path to the source jar or null if no such jar is found.
-   */
-  private static IPath getSourceAttachmentPath(URL installUrl, String srcJar)
-  {
-    
-    IPath path = new Path(srcJar);
-    srcJar = path.lastSegment();
-    URL temp;
-    try
-    {
-      temp = new URL(installUrl, "libsrc/" + srcJar);
-    } catch (MalformedURLException e1)
-    {
-      return null;
+        IPath path = new Path(srcJar);
+        srcJar = path.lastSegment();
+        URL temp;
+        try
+        {
+            temp = new URL(installUrl, "libsrc/" + srcJar);
+        }
+        catch (MalformedURLException e1)
+        {
+            return null;
+        }
+        try
+        {
+            temp = Platform.resolve(temp);
+            Path result = new Path(temp.getFile());
+            return result;
+
+        }
+        catch (IOException e)
+        {
+            // Do nothing
+        }
+        return null;
     }
-    try
-    {
-      temp = Platform.resolve(temp);
-      Path result = new Path(temp.getFile());
-      return result;
 
-    } catch (IOException e)
+    /**
+     * Constructs a Tapestry classpath container
+     * 
+     * @param path
+     *            container path used to resolve this container
+     */
+    public CoreClasspathContainer(IPath path)
     {
-      // Do nothing
+        fPath = path;
     }
-    return null;
-  }
 
-  /**
-   * Constructs a Tapestry classpath container
-   * 
-   * @param path container path used to resolve this container
-   */
-  public CoreClasspathContainer(IPath path)
-  {
-    fPath = path;
-  }
+    /**
+     * @see IClasspathContainer#getClasspathEntries()
+     */
+    public IClasspathEntry[] getClasspathEntries()
+    {
+        return getClasspathEntries(TapestryCore.getDefault());
+    }
 
-  /**
-   * @see IClasspathContainer#getClasspathEntries()
-   */
-  public IClasspathEntry[] getClasspathEntries()
-  {
-    return getClasspathEntries(TapestryCore.getDefault());
-  }
+    /**
+     * @see IClasspathContainer#getDescription()
+     */
+    public String getDescription()
+    {
+        return TapestryCore.getString("core-classpath-container-label");
+    }
 
-  /**
-   * @see IClasspathContainer#getDescription()
-   */
-  public String getDescription()
-  {
-    return TapestryCore.getString("core-classpath-container-label");
-  }
+    /**
+     * @see IClasspathContainer#getKind()
+     */
+    public int getKind()
+    {
+        return IClasspathContainer.K_APPLICATION;
+    }
 
-  /**
-   * @see IClasspathContainer#getKind()
-   */
-  public int getKind()
-  {
-    return IClasspathContainer.K_APPLICATION;
-  }
-
-  /**
-   * @see IClasspathContainer#getPath()
-   */
-  public IPath getPath()
-  {
-    return fPath;
-  }
+    /**
+     * @see IClasspathContainer#getPath()
+     */
+    public IPath getPath()
+    {
+        return fPath;
+    }
 
 }
