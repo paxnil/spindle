@@ -334,6 +334,8 @@ public class DTDAccess
             String defaultValue = dtdattr.getDefaultValue();
             if (defaultValue == null)
               defaultValue = internalGetTapestryDefaultValue(dtd, elementName, attrName);
+            if (defaultValue == null)
+                defaultValue = "";
             if (dtdattr.decl == DTDDecl.REQUIRED)
               required.add(attrName);
             // find allowed and default values (if any)

@@ -577,7 +577,7 @@ public class ProposalFactory
       info.attributeName = attrName;
       String defaultValue = DTDAccess
           .getDefaultAttributeValue(dtd, elementName, attrName);
-      info.defaultValue = defaultValue.length() == 0 ? null : defaultValue;
+      info.defaultValue = defaultValue == null || defaultValue.length() == 0 ? null : defaultValue;
       if (info.defaultValue == null)
         info.defaultValue = DTDAccess.getTapestryDefaultValue(dtd, elementName, attrName);
 
