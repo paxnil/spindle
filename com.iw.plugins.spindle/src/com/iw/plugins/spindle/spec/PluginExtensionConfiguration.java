@@ -56,39 +56,39 @@ public class PluginExtensionConfiguration implements IIdentifiable, IPropertySou
 
   private IPropertyDescriptor[] booleanTypeDescriptors =
     new IPropertyDescriptor[] {
-      new TextPropertyDescriptor("property", "Property Name"),
+      new TextPropertyDescriptor("propertyName", "Property Name"),
       new ComboBoxPropertyDescriptor("type", "Type", typeNames, false),
       new CheckboxPropertyDescriptor("value", "Value")};
 
   private IPropertyDescriptor[] otherTypeDescriptors =
     new IPropertyDescriptor[] {
-      new TextPropertyDescriptor("property", "Property Name"),
+      new TextPropertyDescriptor("propertyName", "Property Name"),
       new ComboBoxPropertyDescriptor("type", "Type", typeNames, false),
       new TextPropertyDescriptor("value", "Value")};
 
-  static final private Map valueTypeLookup;
-  static final private Map stringTypeLookup;
+  static final private Map classToString;
+  static final private Map stringToClass;
 
   static {
 
-    valueTypeLookup = new HashMap();
-    valueTypeLookup.put(String.class, "string");
-    valueTypeLookup.put(Boolean.class, "boolean");
-    valueTypeLookup.put(Integer.class, "int");
-    valueTypeLookup.put(Double.class, "double");
-    valueTypeLookup.put(Long.class, "long");
+    classToString = new HashMap();
+    classToString.put(String.class, "string");
+    classToString.put(Boolean.class, "boolean");
+    classToString.put(Integer.class, "int");
+    classToString.put(Double.class, "double");
+    classToString.put(Long.class, "long");
 
-    stringTypeLookup = new HashMap();
-    stringTypeLookup.put("string", String.class);
-    stringTypeLookup.put("boolean", Boolean.class);
-    stringTypeLookup.put("int", Integer.class);
-    stringTypeLookup.put("double", Double.class);
-    stringTypeLookup.put("long", Long.class);
+    stringToClass = new HashMap();
+    stringToClass.put("string", String.class);
+    stringToClass.put("boolean", Boolean.class);
+    stringToClass.put("int", Integer.class);
+    stringToClass.put("double", Double.class);
+    stringToClass.put("long", Long.class);
 
   }
 
   String identifier;
-  Object value;
+  Object valueObject;
   Class type;
   PluginExtensionSpecification parent;
 
@@ -97,8 +97,8 @@ public class PluginExtensionConfiguration implements IIdentifiable, IPropertySou
    */
   public PluginExtensionConfiguration(String propertyName, Object value) {
     this.identifier = propertyName;
-    this.value = value;
-    this.type = (Class) valueTypeLookup.get(value.getClass());
+    this.valueObject = value;
+    this.type = value.getClass();
   }
 
   /**
@@ -139,12 +139,12 @@ public class PluginExtensionConfiguration implements IIdentifiable, IPropertySou
     Indenter.printIndented(writer, indent, "<configure property-name=\"");
     writer.print(identifier);
     writer.print("\" type=\"");
-    writer.print(valueTypeLookup.get(value));
+    writer.print(classToString.get(type));
     writer.println("\">");
 
-    Indenter.printlnIndented(writer, indent + 1, value.toString());
+    Indenter.printlnIndented(writer, indent + 1, valueObject.toString());
 
-    Indenter.printIndented(writer, indent, "</configure>");
+    Indenter.printlnIndented(writer, indent, "</configure>");
 
   }
 
@@ -179,14 +179,30 @@ public class PluginExtensionConfiguration implements IIdentifiable, IPropertySou
     }
 
     if ("type".equals(id)) {
-
-      return stringTypeLookup.get(type);
+    	
+      Map lookup = stringToClass;
+    	
+      String foundType = (String) classToString.get(type);
+      
+      for (int i = 0; i < typeNames.length; i++) {
+        
+        if (foundType.equals(typeNames[i])) {
+        	
+        	return new Integer(i);
+        }
+      }
 
     }
 
     if ("value".equals(id)) {
+    	
+      if (Boolean.class == type) {
+      	
+      	return (Boolean)valueObject;
+      	
+      }
 
-      return value.toString();
+      return valueObject.toString();
 
     }
     return null;
@@ -228,18 +244,18 @@ public class PluginExtensionConfiguration implements IIdentifiable, IPropertySou
     		newName = newName + i++;
     		
     	}
-    	
+    	parent.removeConfiguration(oldName);
     	parent.addConfiguration(newName, value);  
 
     }
 
     if ("type".equals(id)) {
     	
-    	String chosenType = (String)value;
+    	String chosenType = typeNames[((Integer)value).intValue()];
     	
     	Class newClass = checkType(chosenType);
     	
-    	this.value = convertValue(newClass, value);
+    	this.valueObject = convertValue(newClass, valueObject);
     	
     	type = newClass;      
 
@@ -247,7 +263,7 @@ public class PluginExtensionConfiguration implements IIdentifiable, IPropertySou
 
     if ("value".equals(id)) {
     	
-    	this.value = convertValue(type, (String)value);
+    	this.valueObject = convertValue(type, value);
 
     }
     
@@ -257,15 +273,7 @@ public class PluginExtensionConfiguration implements IIdentifiable, IPropertySou
   
   private Class checkType(String newType) {
   	
-  	Class clazz = (Class)stringTypeLookup.get(newType);
-  	
-  	if (clazz != type) {
-  	
-  	   return clazz;
-  	   
-    } 
-    
-    return type;
+  	return (Class)stringToClass.get(newType);
   	
   }
 

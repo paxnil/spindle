@@ -36,6 +36,7 @@ public class ComboBoxPropertyDescriptor extends PropertyDescriptor {
 
   private String[] values;
   private boolean editable;
+  private ILabelProvider provider = new LabelProvider();
 
   public ComboBoxPropertyDescriptor(
     Object id,
@@ -44,9 +45,23 @@ public class ComboBoxPropertyDescriptor extends PropertyDescriptor {
     boolean editable) {
     super(id, displayName);
     values = valuesArray;
-    setLabelProvider(new ILabelProvider() {
+    setLabelProvider(provider);
+  }
+
+  public CellEditor createPropertyEditor(Composite parent) {
+    CellEditor editor =
+      new com.iw.plugins.spindle.ui.ComboBoxCellEditor(parent, values, editable);
+    if (getValidator() != null)
+      editor.setValidator(getValidator());
+    return editor;
+  }
+  
+  class LabelProvider implements ILabelProvider {
       public String getText(Object element) {
-        return values[((Integer) element).intValue()];
+      	int index = ((Integer) element).intValue();
+      	String [] lookup = values;
+      	String result = lookup[index];
+        return result;
       }
       public Image getImage(Object element) {
         return null;
@@ -60,15 +75,6 @@ public class ComboBoxPropertyDescriptor extends PropertyDescriptor {
       }
       public void removeListener(ILabelProviderListener listener) {
       }
-    });
-  }
-
-  public CellEditor createPropertyEditor(Composite parent) {
-    CellEditor editor =
-      new com.iw.plugins.spindle.ui.ComboBoxCellEditor(parent, values, editable);
-    if (getValidator() != null)
-      editor.setValidator(getValidator());
-    return editor;
-  }
+    }
 
 }

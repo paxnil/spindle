@@ -305,7 +305,7 @@ public class PropertyEditableSection
      * @see com.iw.plugins.spindle.spec.IIdentifiable#getParent()
      */
     public Object getParent() {
-      return (IPropertyHolder) getFormPage().getModel();
+      return parent;
     }
 
     /**

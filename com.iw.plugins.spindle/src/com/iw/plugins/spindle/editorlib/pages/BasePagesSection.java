@@ -120,11 +120,11 @@ public abstract class BasePagesSection
   public void update(BaseTapestryModel model) {
     holderArray.removeAll(holderArray);
 
-    IPluginLibrarySpecification appSpec = getSpec();
+    IPluginLibrarySpecification libSpec = getSpec();
 
     IPluginLibrarySpecification defaultSpec = TapestryModelManager.getDefaultLibrary().getSpecification();
 
-    List ids = appSpec.getPageNames();
+    List ids = libSpec.getPageNames();
     ArrayList defaultIds = (ArrayList) ((ArrayList) defaultSpec.getPageNames()).clone();
 
     defaultIds.removeAll(ids);
@@ -134,7 +134,7 @@ public abstract class BasePagesSection
       String defaultName = (String) iter.next();
       String path = defaultSpec.getPageSpecificationPath(defaultName);
 
-      holderArray.add(new DefaultPageHolder(defaultName, path, appSpec));
+      holderArray.add(new DefaultPageHolder(defaultName, path, libSpec));
 
     }
 
@@ -143,9 +143,9 @@ public abstract class BasePagesSection
     while (iter.hasNext()) {
 
       String name = (String) iter.next();
-      String path = appSpec.getPageSpecificationPath(name);
+      String path = libSpec.getPageSpecificationPath(name);
 
-      holderArray.add(new PageHolder(name, path, appSpec));
+      holderArray.add(new PageHolder(name, path, libSpec));
     }
 
     setInput(holderArray);

@@ -295,7 +295,6 @@ public class LibraryApplicationHelper {
 
       PluginExtensionSpecification pluginSpec = (PluginExtensionSpecification) extensions.get(name);
       extensions.remove(name);
-      pluginSpec.setParent(null);
       pluginSpec.removePropertyChangeListener(parent);
 
       propertySupport.firePropertyChange("extensions", null, extensions);

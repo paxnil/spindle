@@ -73,12 +73,12 @@ public class PluginExtensionSpecification
   public void removePropertyChangeListener(PropertyChangeListener listener) {
     propertySupport.removePropertyChangeListener(listener);
   }
-  
+
   public void configurationChanged() {
-  	
-  	propertySupport.firePropertyChange("configration", null, null);
-  	
-  } 	
+
+    propertySupport.firePropertyChange("configration", null, null);
+
+  }
 
   public void setProperty(String name, String value) {
 
@@ -100,18 +100,42 @@ public class PluginExtensionSpecification
    * @see net.sf.tapestry.spec.ExtensionSpecification#addConfiguration(String, Object)
    */
   public void addConfiguration(String propertyName, Object value) {
-    super.addConfiguration(propertyName, value);
+    if (_configuration == null) {
+      _configuration = new HashMap(7);
+    }
+
+    PluginExtensionConfiguration newConfig = new PluginExtensionConfiguration(propertyName, value);
+    newConfig.setParent(this);
+    _configuration.put(propertyName, newConfig);
+
+    propertySupport.firePropertyChange("configuration", null, _configuration);
   }
 
   public void removeConfiguration(String propertyName) {
 
-    Map configuration = getConfiguration();
+    if (_configuration == null && _configuration.containsKey(propertyName)) {
 
-    if (configuration == null && configuration.containsKey(propertyName)) {
-
-      configuration.remove(propertyName);
-      propertySupport.firePropertyChange("configuration", null, configuration);
+      PluginExtensionConfiguration config =
+        (PluginExtensionConfiguration) _configuration.get(propertyName);
+      config.setParent(null);
+      _configuration.remove(propertyName);
+      propertySupport.firePropertyChange("configuration", null, _configuration);
     }
+  }
+
+  public void setConfiguration(String propertyName, PluginExtensionSpecification config) {
+
+    if (_configuration == null) {
+
+      _configuration = new HashMap(7);
+
+    }
+
+    _configuration.put(propertyName, config);
+    config.setParent(this);
+
+    propertySupport.firePropertyChange("configuration", null, _configuration);
+
   }
 
   /**
@@ -245,6 +269,7 @@ public class PluginExtensionSpecification
       }
 
       this.identifier = newName;
+      parent.removeExtensionSpecification(oldName);
       parent.setExtensionSpecification(this.identifier, this);
 
     } else if ("class".equals(key)) {
@@ -271,7 +296,7 @@ public class PluginExtensionSpecification
         PluginExtensionConfiguration config =
           (PluginExtensionConfiguration) configurations.get(propertyName);
 
-        config.write(writer, indent + 1);
+        config.write(writer, indent);
 
       }
 
