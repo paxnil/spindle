@@ -54,8 +54,10 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IWindowListener;
@@ -63,6 +65,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.StorageDocumentProvider;
 import org.eclipse.ui.ide.IDE;
@@ -284,7 +287,9 @@ public class UIPlugin extends AbstractUIPlugin
           return IDE.openEditor(UIPlugin.getDefault().getActivePage(), ((IFile) storage));
         } else
         {
-          editorId = (String) EDITOR_ID_LOOKUP.get("html");
+          IEditorRegistry editorReg = PlatformUI.getWorkbench().getEditorRegistry();
+          IEditorDescriptor desc = editorReg.getDefaultEditor(storage.getName());
+          editorId = desc.getId();
         }
       }
 
