@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.0.31"
+   version="0.0.32"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -19,7 +19,8 @@
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.update.ui.forms"/>
-      <import plugin="org.eclipse.jface.text"/>      
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.compare"/>
    </requires>
 
 
@@ -300,7 +301,7 @@
             scope="com.iw.plugins.spindle.ui.editor.commands"
             command="com.iw.plugins.spindle.ui.editor.xml.open.structure"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>      
+      </keyBinding>
 <!-- the key binding -->
       <keyBinding
             string="Ctrl+Shift+F"

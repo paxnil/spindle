@@ -31,6 +31,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
@@ -39,6 +41,7 @@ import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CommentCompletionProcessor;
@@ -63,7 +66,8 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
      */
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        XMLNode node = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
+        IDocument document = viewer.getDocument();
+        XMLNode node = XMLNode.getArtifactAt(document, documentOffset);
         XMLNode nextNode = node;
         XMLNode parentNode = null;
         // The cursor could be at the very end of the document!
@@ -84,11 +88,32 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
         List rawProposals = DTDProposalGenerator.findRawNewTagProposals(fDTD, node, documentOffset);
         if (rawProposals != null && !rawProposals.isEmpty())
         {
+            int offset = documentOffset;
+            int length = 0;
+
+            try
+            {
+                int lineNumber = document.getLineOfOffset(documentOffset);
+                int lineStart = document.getLineOffset(lineNumber);
+                for (int i = documentOffset - 1; i >= lineStart; i--)
+                {
+                    char c = document.getChar(i);
+                    if (Character.isJavaIdentifierPart(c))
+                        length++;
+                    else
+                        break;
+                }
+                if (length > 0)
+                    offset = documentOffset - length;
+            } catch (BadLocationException e)
+            {
+                UIPlugin.log(e);
+            }
             for (Iterator iterator = rawProposals.iterator(); iterator.hasNext();)
             {
                 CompletionProposal p = (CompletionProposal) iterator.next();
-                p.setReplacementOffset(documentOffset);
-                p.setReplacementLength(0);
+                p.setReplacementOffset(offset);
+                p.setReplacementLength(length);
                 proposals.add(p);
             }
         }
@@ -188,7 +213,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
       * @param documentOffset
       * @return
       */
-    public static  ICompletionProposal computeEndTagProposal(ITextViewer viewer, int documentOffset)
+    public static ICompletionProposal computeEndTagProposal(ITextViewer viewer, int documentOffset)
     {
         XMLNode artifact = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
         if (artifact.getType() == XMLDocumentPartitioner.TAG && artifact.getName() != null)

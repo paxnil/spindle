@@ -223,7 +223,10 @@ public class SpecConfiguration extends BaseSourceConfiguration
      */
     public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType)
     {
-        if (DEBUG)
+        if (getEditor() == null)
+           return super.getTextHover(sourceViewer, contentType);
+           
+       if (DEBUG)
         {
             return new ITextHover()
             {
@@ -251,6 +254,9 @@ public class SpecConfiguration extends BaseSourceConfiguration
 
     public IContentAssistant getContentAssistant(ISourceViewer sourceViewer)
     {
+        if (getEditor() == null)
+            return super.getContentAssistant(sourceViewer);
+            
         ContentAssistant assistant = getEditor().getContentAssistant();
         ContentAssistProcessor tagProcessor = new TagCompletionProcessor(fEditor);
         ContentAssistProcessor commentProcessor = new CommentCompletionProcessor(fEditor);
@@ -285,6 +291,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
      */
     private IInformationControlCreator getXMLOutlinePresenterControlCreator(ISourceViewer sourceViewer)
     {
+
         return new IInformationControlCreator()
         {
             public IInformationControl createInformationControl(Shell parent)

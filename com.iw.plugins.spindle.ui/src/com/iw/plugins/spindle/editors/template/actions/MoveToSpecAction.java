@@ -35,6 +35,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -42,6 +43,7 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.texteditor.ITextEditor;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
@@ -51,6 +53,7 @@ import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Markers;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.template.TemplatePartitionScanner;
 import com.iw.plugins.spindle.ui.util.UIUtils;
@@ -73,6 +76,7 @@ public class MoveToSpecAction extends BaseTemplateAction
     private int fOffset;
     private XMLNode fNode;
     private List fAttributeList;
+    private ITextEditor fRelatedSpecEditor;
 
     public MoveToSpecAction()
     {
@@ -87,6 +91,7 @@ public class MoveToSpecAction extends BaseTemplateAction
     {
         if (fEditor.isEditable())
         {
+            // ensure the template has a related specification
             fRelatedSpec = (PluginComponentSpecification) fEditor.getSpecification();
             if (fRelatedSpec != null)
             {
@@ -119,8 +124,15 @@ public class MoveToSpecAction extends BaseTemplateAction
     {
         fNode = null;
         fAttributeList = null;
-        if (!checkNode())
+        IStatus status = checkNode();
+        if (!status.isOK())
+        {
+            MessageDialog.openError(
+                UIPlugin.getDefault().getActiveWorkbenchShell(),
+                "Aborting Operation",
+                status.getMessage());
             return;
+        }
 
         IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fRelatedSpec.getSpecificationLocation();
         IStorage storage = location.getStorage();
@@ -133,11 +145,20 @@ public class MoveToSpecAction extends BaseTemplateAction
             MessageDialog.openInformation(
                 UIPlugin.getDefault().getActiveWorkbenchShell(),
                 "Aborting Operation",
-                location.getName() + " is not editable. ");
+                location.getName() + " is not an editable resource. ");
             return;
         }
 
         file = (IFile) storage;
+
+        if (file.isReadOnly())
+        {
+            MessageDialog.openInformation(
+                UIPlugin.getDefault().getActiveWorkbenchShell(),
+                "Aborting Operation",
+                location.getName() + " is read only. ");
+            return;
+        }
 
         IEditorPart editor = UIUtils.getEditorFor(location);
         if (editor != null)
@@ -174,6 +195,10 @@ public class MoveToSpecAction extends BaseTemplateAction
                 "could not obtain specification object for '" + location.getName() + "'. ");
             return;
         }
+
+        if (editor != null && editor instanceof ITextEditor)
+            fRelatedSpecEditor = (ITextEditor) editor;
+
         disconnect();
         launchWizard(UIPlugin.getDefault().getActiveWorkbenchShell());
     }
@@ -181,36 +206,49 @@ public class MoveToSpecAction extends BaseTemplateAction
     private void launchWizard(Shell shell)
     {
         MoveImplicitToSpecWizard wizard =
-            new MoveImplicitToSpecWizard((TemplateEditor) fEditor, fNode, fAttributeList, null, fRelatedSpec);
+            new MoveImplicitToSpecWizard((TemplateEditor) fEditor, fNode, fAttributeList, fRelatedSpecEditor, fRelatedSpec);
         WizardDialog dialog = new ResizableWizardDialog(shell, wizard);
         PixelConverter converter = new PixelConverter(shell);
-        dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(110), converter.convertHeightInCharsToPixels(25));
+        dialog.setMinimumPageSize(
+            converter.convertWidthInCharsToPixels(110),
+            converter.convertHeightInCharsToPixels(25));
         dialog.open();
     }
 
     /**
-     * @return
+     * check that the tag (at the caret offset) in the template is complete and valid for the purpose of this operation.
+     * <p>
+     * Tag must be:
+     * <ul>
+     * <li>an open tag or an empty tag</li>
+     * <li>properly terminated</li>
+     * <li>tag must be named</li>
+     * <li>the attributes of the tag must be parseable</li>
+     * <li>no duplicate attribute names</li>
+     * <li>all attributes must be properly terminated</li>
+      * </ul>
+      * @return true iff the conditions are met (i.e  the operation can proceed).
      */
-    private boolean checkNode()
+    private IStatus checkNode()
     {
-        String message = null;
+        SpindleStatus status = new SpindleStatus();
         fNode = XMLNode.getArtifactAt(fDocument, fOffset);
         if (fNode == null
             || (fNode.getType() != XMLDocumentPartitioner.TAG && fNode.getType() != XMLDocumentPartitioner.EMPTYTAG))
         {
-            message = "invalid selection at cursor position.";
+            status.setError("invalid selection at cursor position.");
         } else if (!fNode.isTerminated())
         {
-            message = "tag at cursor postion is not properly terminated.";
+            status.setError("tag at cursor postion is not properly terminated.");
         } else if (fNode.getName() == null)
         {
-            message = "tag at cursor does not have a name";
+            status.setError("tag at cursor does not have a name");
         } else
         {
             fAttributeList = fNode.getAttributes();
             if (fAttributeList.isEmpty())
             {
-                message = "unable to extract attributes from tag at cursor position.";
+                status.setError("unable to extract attributes from tag at cursor position.");
             } else
             {
                 Set seenNames = new HashSet();
@@ -220,41 +258,38 @@ public class MoveToSpecAction extends BaseTemplateAction
                     String name = attribute.getName();
                     if (seenNames.contains(name))
                     {
-                        message = "attribute name'" + name + " occurs more than once.";
+                        status.setError("attribute name'" + name + " occurs more than once.");
                         break;
                     }
                     seenNames.add(name);
                     if (!attribute.isTerminated())
                     {
-                        message = "attribute '" + name + "  is not properly terminated.";
+                        status.setError("attribute '" + name + "  is not properly terminated.");
                         break;
                     }
                     String content = attribute.getAttributeValue();
                     if (content == null)
                     {
-                        message = "unable to obtain a value for '" + name + "'. Ensure the tag is well formed";
+                        status.setError("unable to obtain a value for '" + name + "'. Ensure the tag is well formed");
                         break;
                     }
                     if (content.length() == 0)
                     {
-                        message = "attributes can't be empty (" + name + ").";
+                        status.setError("attributes can't be empty (" + name + ").");
                         break;
                     }
                     if (content.indexOf('<') >= 0)
                     {
-                        message =
-                            "attribute '" + name + "' may not be properly terminated, or contain unescaped characters.";
+                        status.setError(
+                            "attribute '"
+                                + name
+                                + "' may not be properly terminated, or contain unescaped characters.");
                         break;
                     }
                 }
             }
         }
-        if (message != null)
-        {
-            MessageDialog.openError(UIPlugin.getDefault().getActiveWorkbenchShell(), "Aborting Operation", message);
-            return false;
-        }
-        return true;
+        return status;
     }
 
 }

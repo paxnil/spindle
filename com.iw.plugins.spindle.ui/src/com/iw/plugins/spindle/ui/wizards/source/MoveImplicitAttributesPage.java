@@ -82,7 +82,7 @@ import com.iw.plugins.spindle.ui.widgets.SectionWidget;
  * Copyright 2003, Intelligent Works Inc.
  * All Rights Reserved.
  */
-public class MoveAttributesPage extends WizardPage
+public class MoveImplicitAttributesPage extends WizardPage
 {
 
     private IComponentSpecification fContainerSpec;
@@ -98,6 +98,7 @@ public class MoveAttributesPage extends WizardPage
     private Button fUpButton;
     private Button fDownButton;
 
+    private ArrayList fAllAttributes = new ArrayList();
     private ArrayList fAttributesThatStay = new ArrayList();
     private ArrayList fAttributesThatMove = new ArrayList();
 
@@ -105,7 +106,7 @@ public class MoveAttributesPage extends WizardPage
 
     private Status fCurrentStatus;
 
-    public MoveAttributesPage(String pageName)
+    public MoveImplicitAttributesPage(String pageName)
     {
         super(pageName);
         this.setImageDescriptor(Images.getImageDescriptor("applicationDialog.gif"));
@@ -116,7 +117,7 @@ public class MoveAttributesPage extends WizardPage
             public void dialogFieldChanged(DialogField field)
             {
                 if (field == fTemplateComponentId)
-                    statusChanged(componentIdChanged(fTemplateComponentId.getTextValue()));
+                    updateStatus();
             }
             public void dialogFieldButtonPressed(DialogField field)
             {}
@@ -150,6 +151,9 @@ public class MoveAttributesPage extends WizardPage
                 fAttributesThatMove.add(node);
             else
                 fAttributesThatStay.add(node);
+
+            fAllAttributes.add(fAttributesThatStay);
+            fAllAttributes.add(fAttributesThatMove);
         }
         fPublicId = publicId;
     }
@@ -157,7 +161,7 @@ public class MoveAttributesPage extends WizardPage
     /**
      * @param string
      */
-    protected Status componentIdChanged(String newValue)
+    protected Status getComponentIdStatus(String newValue)
     {
         Status status = new Status(fTemplateComponentId);
         if (newValue == null || newValue.trim().length() == 0)
@@ -191,48 +195,32 @@ public class MoveAttributesPage extends WizardPage
         return status;
     }
 
-    protected Status toMoveChanged()
+    protected Status getToMoveStatus()
     {
         Status status = new Status(fAttributesThatMove);
-        if (fAttributesThatMove.isEmpty())
-            status.setError("Must choose at least one attribute to move.");
+        if (fAttributesThatMove.isEmpty() && !fAllAttributes.isEmpty())
+            status.setWarning("No attributes will move!");
 
         return status;
     }
 
-    private void statusChanged(Status status)
+    private void updateStatus()
     {
-        boolean currentlyOk = fCurrentStatus.isOK();
-        Object newStatusOwner = status.getOwner();
-        if (status.isOK())
+        Status idStatus = getComponentIdStatus(fTemplateComponentId.getTextValue());
+        Status toMoveStatus = getToMoveStatus();
+        setErrorMessage(null);
+        setMessage(null);
+        if (!idStatus.isOK())
         {
-            if (status.getOwner().equals(fCurrentStatus.getOwner()))
-            {
-                setErrorMessage(null);
-                fCurrentStatus = status;
-                setPageComplete(true);
-                //better check to see if anyone is still at status error!
-                Status otherStatus = null;
-                if (newStatusOwner.equals(fTemplateComponentId))
-                {
-                    otherStatus = toMoveChanged();
-                } else
-                {
-                    otherStatus = componentIdChanged(fTemplateComponentId.getTextValue());
-                }
-                if (!otherStatus.isOK())
-                    statusChanged(otherStatus);
-            }
-        } else
+            setErrorMessage(idStatus.getMessage());
+            fCurrentStatus = idStatus;
+        } else if (!toMoveStatus.isOK())
         {
-            setErrorMessage(status.getMessage());
-            fCurrentStatus = status;
-            setPageComplete(false);
+            setMessage(toMoveStatus.getMessage(), toMoveStatus.getSeverity());
+            fCurrentStatus = toMoveStatus;
         }
+        setPageComplete(!fCurrentStatus.isError());
     }
-
-    private void templateComponentIdStatusChanged(IStatus status)
-    {}
 
     public String getTemplateComponentId()
     {
@@ -506,21 +494,23 @@ public class MoveAttributesPage extends WizardPage
      */
     protected void handleUpDownChange(ISelection selection, boolean up)
     {
-//        if (up && !canMoveUp(selection))
-//        {
-//            return;
-//        } else if (!up && !canMoveDown(selection))
-//        {
-//            return;
-//        }
+        //        if (up && !canMoveUp(selection))
+        //        {
+        //            return;
+        //        } else if (!up && !canMoveDown(selection))
+        //        {
+        //            return;
+        //        }
         IStructuredSelection structured = (IStructuredSelection) selection;
         Object moving = structured.getFirstElement();
         int index = fAttributesThatMove.indexOf(moving);
-        if (up) {
-            Object above = fAttributesThatMove.get(index - 1);            
+        if (up)
+        {
+            Object above = fAttributesThatMove.get(index - 1);
             fAttributesThatMove.set(index - 1, moving);
-            fAttributesThatMove.set(index, above);        
-        } else {
+            fAttributesThatMove.set(index, above);
+        } else
+        {
             Object below = fAttributesThatMove.remove(index + 1);
             fAttributesThatMove.add(index, below);
         }
@@ -572,7 +562,7 @@ public class MoveAttributesPage extends WizardPage
             toViewer.setSelection(selection);
         }
         updateButtonsEnabled();
-        statusChanged(toMoveChanged());
+        updateStatus();
     }
 
     class AttributesThatStaySection extends SectionWidget
@@ -713,7 +703,7 @@ public class MoveAttributesPage extends WizardPage
 
             Table table = new Table(rightColumn, SWT.MULTI | SWT.BORDER);
             gd = new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL);
-            gd.widthHint = MoveAttributesPage.this.convertWidthInCharsToPixels(30);
+            gd.widthHint = MoveImplicitAttributesPage.this.convertWidthInCharsToPixels(30);
             table.setLayoutData(gd);
             fAttributesThatMoveViewer = new TableViewer(table);
 

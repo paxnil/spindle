@@ -26,33 +26,45 @@
 
 package com.iw.plugins.spindle.ui.wizards.source;
 
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.tapestry.ILocationHolder;
 import org.apache.tapestry.parse.TemplateParser;
 import org.apache.tapestry.spec.BindingType;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.PluginBindingSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginContainedComponent;
+import com.iw.plugins.spindle.core.util.IndentingWriter;
+import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.template.assist.TemplateTapestryAccess;
 
@@ -65,13 +77,21 @@ import com.iw.plugins.spindle.editors.template.assist.TemplateTapestryAccess;
  */
 public class MoveImplicitToSpecWizard extends Wizard
 {
+
+    private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
+    private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
+
+    // info for formatting
+    private boolean fUseTabIndent;
+    private int fTabSpaces;
+
     // info for the template operations
     private TemplateEditor fTemplateEditor;
     private XMLNode fImplicitNode;
     private List fAttributeList;
 
     //info for the spec operations
-    private ITextEditor fTextEditor;
+    private ITextEditor fSpecEditor;
 
     //the implicit component
     private IComponentSpecification fImplicitComponent;
@@ -79,30 +99,48 @@ public class MoveImplicitToSpecWizard extends Wizard
     private String fSimpleId;
     private String fFullType;
 
-    private PluginComponentSpecification fBuildStateComponent;
+    private PluginComponentSpecification fRelatedSpec;
 
-    private MoveAttributesPage fMovePage;
+    private MoveImplicitAttributesPage fMovePage;
+    private MoveImplicitPreviewPage fPreviewPage;
+
+    // A document provider used iff the related spec is not
+    // open in an editor
+    private IDocumentProvider fSpecProvider;
+    private IEditorInput fSpecFileInput;
+    private IAnnotationModel fSpecAnnotationModel;
+
+    //the original and proposed modified spec text
+    private IDocument fOriginalSpecDocument;
+    private IDocument fModifiedSpecDocument;
+
+    //the original and proposed modified template text
+    private IDocument fOriginalTemplateDocument;
+    private IDocument fModifiedTemplateDocument;
+
+    private ModifyDocumentCommand fSpecCommand;
+    private ModifyDocumentCommand fTemplateCommand;
 
     public MoveImplicitToSpecWizard(
         TemplateEditor templateEditor,
         XMLNode sourceNode,
         List sourceAttributes,
-        PluginComponentSpecification buildStateComponent)
+        PluginComponentSpecification relatedSpec)
     {
-        this(templateEditor, sourceNode, sourceAttributes, null, buildStateComponent);
+        this(templateEditor, sourceNode, sourceAttributes, null, relatedSpec);
     }
 
     public MoveImplicitToSpecWizard(
         TemplateEditor templateEditor,
         XMLNode sourceNode,
         List sourceAttributes,
-        ITextEditor targetEditor,
-        PluginComponentSpecification buildStateComponent)
+        ITextEditor specEditor,
+        PluginComponentSpecification relatedSpec)
     {
         super();
         setWindowTitle("Move implicit component from template to specification");
         setNeedsProgressMonitor(true);
-        init(templateEditor, sourceNode, sourceAttributes, targetEditor, buildStateComponent);
+        init(templateEditor, sourceNode, sourceAttributes, specEditor, relatedSpec);
 
     }
 
@@ -113,11 +151,14 @@ public class MoveImplicitToSpecWizard extends Wizard
         ITextEditor targetEditor,
         PluginComponentSpecification buildStateComponent)
     {
+        IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+        fUseTabIndent = store.getBoolean(FORMATTER_USE_TABS_TO_INDENT);
+        fTabSpaces = store.getInt(EDITOR_DISPLAY_TAB_WIDTH);
         fTemplateEditor = templateEditor;
         fImplicitNode = sourceNode;
         fAttributeList = sourceAttributes;
-        fTextEditor = targetEditor;
-        fBuildStateComponent = buildStateComponent;
+        fSpecEditor = targetEditor;
+        fRelatedSpec = buildStateComponent;
         TemplateTapestryAccess access = new TemplateTapestryAccess(templateEditor);
         String jwcid = null;
         for (Iterator iter = sourceAttributes.iterator(); iter.hasNext();)
@@ -133,6 +174,36 @@ public class MoveImplicitToSpecWizard extends Wizard
         fSimpleId = access.getSimpleId();
         fFullType = access.getFullType();
         fImplicitComponent = access.getResolvedComponent();
+        initializeDocuments();
+    }
+
+    private void initializeDocuments()
+    {
+        if (fSpecEditor != null)
+        {
+            fOriginalSpecDocument = fSpecEditor.getDocumentProvider().getDocument(fSpecEditor.getEditorInput());
+        } else
+        {
+            fSpecProvider = UIPlugin.getDefault().getSpecFileDocumentProvider();
+            try
+            {
+                IResourceWorkspaceLocation location =
+                    (IResourceWorkspaceLocation) fRelatedSpec.getSpecificationLocation();
+                IFile file = (IFile) location.getStorage();
+                fSpecFileInput = new FileEditorInput(file);
+                fSpecProvider.connect(fSpecFileInput);
+                fOriginalSpecDocument = fSpecProvider.getDocument(fSpecFileInput);
+                fSpecAnnotationModel = fSpecProvider.getAnnotationModel(fSpecFileInput);
+                fSpecAnnotationModel.connect(fOriginalSpecDocument);
+            } catch (CoreException e)
+            {
+                UIPlugin.log(e);
+            }
+        }
+        fModifiedSpecDocument = new Document();
+
+        fOriginalTemplateDocument = fTemplateEditor.getDocumentProvider().getDocument(fTemplateEditor.getEditorInput());
+        fModifiedTemplateDocument = new Document();
     }
 
     /* (non-Javadoc)
@@ -140,14 +211,17 @@ public class MoveImplicitToSpecWizard extends Wizard
      */
     public void addPages()
     {
-        fMovePage = new MoveAttributesPage("Fiddle with attributes");
+        fMovePage = new MoveImplicitAttributesPage("Fiddle with attributes");
         fMovePage.init(
-            fBuildStateComponent,
+            fRelatedSpec,
             fSimpleId,
             fAttributeList,
-            fBuildStateComponent.getPublicId(),
+            fRelatedSpec.getPublicId(),
             fImplicitComponent != null ? fImplicitComponent.getParameterNames() : Collections.EMPTY_LIST);
         addPage(fMovePage);
+
+        fPreviewPage = new MoveImplicitPreviewPage("Preview", this);
+        addPage(fPreviewPage);
     }
 
     /* (non-Javadoc)
@@ -164,41 +238,110 @@ public class MoveImplicitToSpecWizard extends Wizard
         } catch (InterruptedException e)
         {
             UIPlugin.log(e);
+        } finally
+        {
+            cleanup();
         }
         return true;
     }
-    private void doFinish()
+
+    private void cleanup()
+    {
+        if (fSpecFileInput != null)
+        {
+            fSpecProvider.disconnect(fSpecFileInput);
+            fSpecAnnotationModel.disconnect(fOriginalSpecDocument);
+        }
+    }
+
+    /* (non-Javadoc)
+       * @see org.eclipse.jface.wizard.IWizard#performCancel()
+       */
+    public boolean performCancel()
+    {
+        cleanup();
+
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.wizard.IWizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
+     */
+    public IWizardPage getNextPage(IWizardPage page)
+    {
+        IWizardPage nextPage = super.getNextPage(page);
+        if (nextPage != null && nextPage == fPreviewPage)
+        {
+            performModifications();
+            fPreviewPage.refresh();
+        }
+        return nextPage;
+    }
+
+    /**
+     *  called when moving from the first page to the preview page.
+     *  Generates the modified documents for preview.
+     */
+    private void performModifications()
     {
         String id = fMovePage.getTemplateComponentId().trim();
         List moving = fMovePage.getAttributesThatMove();
         List staying = fMovePage.getAttributesThatStay();
+        fSpecCommand = computeSpecModification(id, moving);
 
-        PluginContainedComponent resultContained = createNewContainedComponent(moving);
-        FileDocumentProvider provider = null;
-        IDocument document = null;
+        fModifiedSpecDocument = new Document();
+        String unmodified = fOriginalSpecDocument.get();
+        StringWriter writer = new StringWriter();
+        fModifiedSpecDocument.set(unmodified);
         try
         {
-            if (fTextEditor != null)
+            fSpecCommand.execute(fModifiedSpecDocument);
+            fModifiedSpecDocument.set(fModifiedSpecDocument.get());
+        } catch (BadLocationException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            UIPlugin.log(e);
+        }
+
+        fTemplateCommand = computeTemplateModification(id, staying);
+        fModifiedTemplateDocument = new Document();
+        fModifiedTemplateDocument.set(fOriginalTemplateDocument.get());
+        try
+        {
+            fTemplateCommand.execute(fModifiedTemplateDocument);
+            fModifiedTemplateDocument.set(fModifiedTemplateDocument.get());
+        } catch (BadLocationException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+            UIPlugin.log(e1);
+        }
+    }
+
+    private void doFinish(IProgressMonitor monitor)
+    {
+        try
+        {
+            fSpecCommand.execute(fOriginalSpecDocument);
+            if (fSpecEditor != null)
             {
-                provider = (FileDocumentProvider) fTextEditor.getDocumentProvider();
-                document = provider.getDocument(fTextEditor.getEditorInput());
+                fSpecEditor.doSave(monitor);
             } else
             {
-                IFile file =
-                    (IFile) ((IResourceWorkspaceLocation) fBuildStateComponent.getSpecificationLocation()).getStorage();
-                provider = UIPlugin.getDefault().getSpecFileDocumentProvider();
-                provider.connect(this);
-                document = provider.getDocument(new FileEditorInput(file));
+                fSpecProvider.saveDocument(monitor, fSpecFileInput, fOriginalSpecDocument, true);
             }
-            int offset = findInsertOffset();
-
+            fTemplateCommand.execute(fOriginalTemplateDocument);
         } catch (CoreException e)
+        {
+            UIPlugin.log(e);
+        } catch (BadLocationException e)
         {
             UIPlugin.log(e);
         } finally
         {
-            if (fTextEditor == null)
-                provider.disconnect(this);
+            if (fSpecProvider != null)
+                fSpecProvider.disconnect(fSpecFileInput);
         }
     }
 
@@ -208,27 +351,204 @@ public class MoveImplicitToSpecWizard extends Wizard
         {
             public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
             {
-                doFinish();
+                doFinish(monitor);
             }
         };
     }
 
     /**
+     *  Find the place to insert a new ContainedComponent.
+     * <p>
+     * In general, the new contained component is inserted after the last occurance of 'something'. 
+     * If there are no 'somethings' in the spec, then we want to insert the new contained component as the
+     * first child of the root node.
+     * <p>The 'somethings' (in order of search)...
+     * <ul>
+     * <li>Already existing Contained Components</li>
+     * <li>PropertySpecifications</li>
+     * <li>Property Declarations</li>
+     * <li>Parameter Specifications (won't be any if this component is a page!)</li>
+     * <li>Descriptions</li>
+     * </ul> 
+     * 
      * @return
      */
-    private int findInsertOffset()
+    private ModifyDocumentCommand computeSpecModification(String componentId, List templateAttributesThatMove)
     {
-        List componentIds = fBuildStateComponent.getComponentIds();
-        if (componentIds.isEmpty())
-            return -1; //TODO handle insert new!
-        List containedComponents = new ArrayList();
-        for (Iterator iter = containedComponents.iterator(); iter.hasNext();)
-        {
-            String id = (String) iter.next();
-            containedComponents.add(fBuildStateComponent.getComponent(id));
-        }
-        return 0;
+        PluginContainedComponent newContainedComponent = createNewContainedComponent(templateAttributesThatMove);
 
+        ILocationHolder found = fRelatedSpec;
+        //check for existing ContainedComponents
+        List componentIds = fRelatedSpec.getComponentIds();
+
+        if (!componentIds.isEmpty())
+        {
+            found = (ILocationHolder) fRelatedSpec.getComponent((String) componentIds.get(componentIds.size() - 1));
+        } else
+        {
+            List propertySpecs = fRelatedSpec.getPropertySpecificationNames();
+            if (!propertySpecs.isEmpty())
+            {
+                found =
+                    (ILocationHolder) fRelatedSpec.getPropertySpecification(
+                        (String) propertySpecs.get(propertySpecs.size() - 1));
+            } else
+            {
+                List propertyDecls = fRelatedSpec.getPropertyDeclarations();
+                if (!propertyDecls.isEmpty())
+                {
+                    found = (ILocationHolder) propertyDecls.get(propertyDecls.size() - 1);
+                } else
+                {
+                    List parameterDecls = fRelatedSpec.getParameterNames();
+                    if (!parameterDecls.isEmpty())
+                    {
+                        found =
+                            (ILocationHolder) fRelatedSpec.getParameter(
+                                (String) parameterDecls.get(parameterDecls.size() - 1));
+                    } else
+                    {
+                        List descriptionDecls = fRelatedSpec.getDescriptionDeclarations();
+                        if (!descriptionDecls.isEmpty())
+                        {
+                            found = (ILocationHolder) descriptionDecls.get(descriptionDecls.size() - 1);
+                        }
+                    }
+                }
+            }
+        }
+
+        ModifyDocumentCommand result = new ModifyDocumentCommand();
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) found.getLocation();
+        boolean emptyTag = sourceInfo.isEmptyTag();
+        int initialIndent = 0;
+        ISourceLocation startLocation = sourceInfo.getStartTagSourceLocation();
+        result.offset = startLocation.getCharEnd();
+        result.length = 0;
+
+        if (found != fRelatedSpec)
+        {
+            initialIndent = getIndent(fOriginalSpecDocument, startLocation.getCharStart());
+            result.text = computeNewContainedComponentString(initialIndent, 0, componentId, newContainedComponent);
+            if (!emptyTag)
+            {
+                ISourceLocation endLocation = sourceInfo.getEndTagSourceLocation();
+                result.offset = endLocation.getCharEnd();
+            }
+
+        } else
+        {
+            //here is the case where we want to insert the new ContainedComponent right after
+            // the root node.
+            if (emptyTag)
+            {
+                //here we have to rewrite the root tag as a non empty tag!
+                result.offset = startLocation.getCharStart();
+                result.length = fOriginalSpecDocument.getLength() - result.offset;
+                PluginComponentSpecification rewriteSpec = new PluginComponentSpecification(fRelatedSpec);
+                rewriteSpec.addComponent(componentId, newContainedComponent);
+                result.text = computeComponentSpecString(rewriteSpec);
+            } else
+            {
+                //no rewrite, we just need to insert.
+                result.text = computeNewContainedComponentString(initialIndent, 1, componentId, newContainedComponent);
+            }
+        }
+        return result;
+    }
+
+    private String computeNewContainedComponentString(
+        int initialIndent,
+        int indent,
+        String id,
+        PluginContainedComponent newComponent)
+    {
+        StringWriter swriter = new StringWriter();
+        String lineDelimiter = getLineDelimiter(fOriginalSpecDocument);
+        XMLUtil.writeContainedComponent(
+            newComponent,
+            id,
+            new IndentingWriter(swriter, true, fUseTabIndent, fTabSpaces, initialIndent, lineDelimiter),
+            indent,
+            fRelatedSpec.getPublicId());
+        return swriter.toString();
+    }
+
+    private String computeComponentSpecString(PluginComponentSpecification rewriteComponent)
+    {
+        StringWriter swriter = new StringWriter();
+        String lineDelimiter = getLineDelimiter(fOriginalSpecDocument);
+        XMLUtil.writeComponentSpecification(
+            new IndentingWriter(swriter, true, fUseTabIndent, fTabSpaces, 0, lineDelimiter),
+            rewriteComponent,
+            0,
+            false);
+        return swriter.toString();
+    }
+
+    /**
+        * Returns the indentation of the line of the given offset.
+        *
+        *@param document the document
+        * @param offset the offset
+        * @return the indentation of the line of the offset
+        */
+    private int getIndent(IDocument document, int offset)
+    {
+        try
+        {
+            int start = document.getLineOfOffset(offset);
+            start = document.getLineOffset(start);
+
+            int count = 0;
+            for (int i = start; i < document.getLength(); ++i)
+            {
+                char c = document.getChar(i);
+                if ('\t' == c)
+                    count += fTabSpaces;
+                else if (' ' == c)
+                    count++;
+                else
+                    break;
+            }
+            return count;
+        } catch (BadLocationException x)
+        {
+            return 0;
+        }
+    }
+
+    /**
+    * Embodies the policy which line delimiter to use when inserting into
+    * a document.<br>
+    * <em>Copied from org.eclipse.jdt.internal.corext.codemanipulation.StubUtility</em>
+    */
+    private String getLineDelimiter(IDocument document)
+    {
+        String lineDelim = null;
+        try
+        {
+            lineDelim = document.getLineDelimiter(0);
+        } catch (BadLocationException e)
+        {}
+        if (lineDelim == null)
+        {
+            String systemDelimiter = System.getProperty("line.separator", "\n");
+            String[] lineDelims = document.getLegalLineDelimiters();
+            for (int i = 0; i < lineDelims.length; i++)
+            {
+                if (lineDelims[i].equals(systemDelimiter))
+                {
+                    lineDelim = systemDelimiter;
+                    break;
+                }
+            }
+            if (lineDelim == null)
+            {
+                lineDelim = lineDelims.length > 0 ? lineDelims[0] : systemDelimiter;
+            }
+        }
+        return lineDelim;
     }
 
     private PluginContainedComponent createNewContainedComponent(List moving)
@@ -262,10 +582,8 @@ public class MoveImplicitToSpecWizard extends Wizard
         return component;
     }
 
-    private void rewriteTemplateTag(String id, List staying)
+    private ModifyDocumentCommand computeTemplateModification(String id, List staying)
     {
-        IDocument templateDocument =
-            fTemplateEditor.getDocumentProvider().getDocument(fTemplateEditor.getEditorInput());
         StringBuffer buffer = new StringBuffer("<");
         buffer.append(fImplicitNode.getName());
         buffer.append(" jwcid=\"");
@@ -288,12 +606,72 @@ public class MoveImplicitToSpecWizard extends Wizard
         else
             buffer.append("/>");
 
-        try
+        ModifyDocumentCommand result = new ModifyDocumentCommand();
+        result.offset = fImplicitNode.getOffset();
+        result.length = fImplicitNode.getLength();
+        result.text = buffer.toString();
+
+        return result;
+    }
+
+    /**
+     * @return the modified XML spec document (may be null)
+     */
+    public IDocument getModifiedSpecDocument()
+    {
+        return fModifiedSpecDocument;
+    }
+
+    /**
+     * @return the modified template document (may be null)
+     */
+    public IDocument getModifiedTemplateDocument()
+    {
+        return fModifiedTemplateDocument;
+    }
+
+    /**
+     * @return the original (unmodified) XML spec document
+     */
+    public IDocument getOriginalSpecDocument()
+    {
+        return fOriginalSpecDocument;
+    }
+
+    /**
+     * @return the original (unmodified) XML spec document
+     */
+    public IDocument getOriginalTemplateDocument()
+    {
+        return fOriginalTemplateDocument;
+    }
+
+    public IStorage getTemplateStorage()
+    {
+        return fTemplateEditor.getStorage();
+    }
+
+    public IStorage getSpecStorage()
+    {
+        if (fSpecEditor != null)
         {
-            templateDocument.replace(fImplicitNode.getOffset(), fImplicitNode.getLength(), buffer.toString());
-        } catch (BadLocationException e)
+            return (IStorage) fSpecEditor.getEditorInput().getAdapter(IFile.class);
+        } else
         {
-            UIPlugin.log(e);
+            return (IStorage) fSpecFileInput.getAdapter(IFile.class);
+        }
+    }
+
+    class ModifyDocumentCommand
+    {
+        int offset;
+        int length;
+        String text;
+
+        void execute(IDocument document) throws BadLocationException
+        {
+
+            document.replace(offset, length, text);
         }
     }
 
