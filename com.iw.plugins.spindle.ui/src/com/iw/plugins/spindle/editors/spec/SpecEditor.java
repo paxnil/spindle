@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.internal.core.JarEntryFile;
+import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -49,8 +50,14 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.information.IInformationProvider;
+import org.eclipse.jface.text.information.IInformationProviderExtension;
+import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -62,10 +69,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
@@ -99,6 +108,7 @@ import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.IReconcileWorker;
+import com.iw.plugins.spindle.editors.ProblemAnnotationType;
 import com.iw.plugins.spindle.editors.multi.IMultiPage;
 import com.iw.plugins.spindle.editors.multi.MultiPageSpecEditor;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
@@ -186,7 +196,7 @@ public class SpecEditor extends Editor implements IMultiPage
             highlight(obj);
         } else if (obj instanceof ILocatable)
         {
-            ISourceLocationInfo info = (ISourceLocationInfo) ((ILocatable) obj).getLocation(); 
+            ISourceLocationInfo info = (ISourceLocationInfo) ((ILocatable) obj).getLocation();
             ISourceLocation startTagLocation = info.getStartTagSourceLocation();
             selectAndReveal(startTagLocation.getCharStart(), startTagLocation.getLength());
             setHighlightRange(info.getOffset(), info.getLength(), true);
@@ -272,6 +282,11 @@ public class SpecEditor extends Editor implements IMultiPage
         return null;
     }
 
+    public Object getReconciledSpec()
+    {
+        return fReconciledSpec;
+    }
+
     /* (non-Javadoc)
      * @see org.eclipse.ui.texteditor.AbstractTextEditor#doSetInput(org.eclipse.ui.IEditorInput)
      */
@@ -319,6 +334,24 @@ public class SpecEditor extends Editor implements IMultiPage
         return new SpecStorageDocumentProvider();
     }
 
+    protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles)
+    {
+        ISharedTextColors sharedColors = UIPlugin.getDefault().getSharedTextColors();
+        fOverviewRuler = new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);
+        fOverviewRuler.addHeaderAnnotationType(ProblemAnnotationType.WARNING);
+        fOverviewRuler.addHeaderAnnotationType(ProblemAnnotationType.ERROR);
+
+        ISourceViewer viewer =
+            new SpecSourceViewer(parent, verticalRuler, fOverviewRuler, isOverviewRulerVisible(), styles);
+
+        fSourceViewerDecorationSupport =
+            new SourceViewerDecorationSupport(viewer, fOverviewRuler, fAnnotationAccess, sharedColors);
+
+        configureSourceViewerDecorationSupport();
+
+        return viewer;
+    }
+
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.editors.Editor#createSourceViewerConfiguration()
      */
@@ -345,6 +378,15 @@ public class SpecEditor extends Editor implements IMultiPage
         action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
         markAsStateDependentAction(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, true);
         setAction("ContentAssistProposal", action);
+
+        action = new TextOperationAction(UIPlugin.getResourceBundle(), "ShowOutline.", this, SpecSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
+        action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.xml.show.outline");
+        setAction("com.iw.plugins.spindle.ui.editor.xml.show.outline", action);
+        
+        action = new TextOperationAction(UIPlugin.getResourceBundle(), "ShowStructure.", this, SpecSourceViewer.OPEN_STRUCTURE, true); //$NON-NLS-1$
+        action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.xml.open.structure");
+        setAction("com.iw.plugins.spindle.ui.editor.xml.open.structure", action);
+
         OpenDeclarationAction openDeclaration = new OpenDeclarationAction();
         openDeclaration.setActiveEditor(this);
         setAction(OpenDeclarationAction.ACTION_ID, openDeclaration);
@@ -913,5 +955,84 @@ public class SpecEditor extends Editor implements IMultiPage
         if (fMultiPageEditor != null)
             return fMultiPageEditor.getCurrentMultiPage() == this;
         return true;
+    }
+
+    public static class SpecEditorInformationProvider implements IInformationProvider, IInformationProviderExtension
+    {
+        private SpecEditor fEditor;
+        private boolean fUseReconcileResults;
+        private XMLDocumentPartitioner fPartitioner;
+
+        public SpecEditorInformationProvider(IEditorPart editor)
+        {
+            fUseReconcileResults = false;
+            fEditor = (SpecEditor) editor;
+        }
+
+        public SpecEditorInformationProvider(IEditorPart editor, boolean useReconcileResults)
+        {
+            this(editor);
+            fUseReconcileResults = useReconcileResults;
+        }
+
+        /*
+         * @see IInformationProvider#getSubject(ITextViewer, int)
+         */
+        public IRegion getSubject(ITextViewer textViewer, int offset)
+        {
+            if (textViewer != null && fEditor != null)
+            {
+                IRegion region = JavaWordFinder.findWord(textViewer.getDocument(), offset);
+                if (region != null)
+                    return region;
+                else
+                    return new Region(offset, 0);
+            }
+            return null;
+        }
+
+        /*
+         * @see IInformationProvider#getInformation(ITextViewer, IRegion)
+         */
+        public String getInformation(ITextViewer textViewer, IRegion subject)
+        {
+            return getInformation2(textViewer, subject).toString();
+        }
+
+        /*
+         * @see IInformationProviderExtension#getElement(ITextViewer, IRegion)
+         */
+        public Object getInformation2(ITextViewer textViewer, IRegion subject)
+        {
+            if (fEditor == null)
+                return null;
+
+            if (fUseReconcileResults)
+                return fEditor.getReconciledSpec();
+
+            if (fPartitioner == null)
+                fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+            IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+            if (document == null)
+                return null;
+            try
+            {
+                fPartitioner.connect(document);
+                return XMLNode.createTree(document, -1);
+            } catch (Exception e)
+            {
+                UIPlugin.log(e);
+                return null;
+            } finally
+            {
+                try
+                {
+                    fPartitioner.disconnect();
+                } catch (RuntimeException e)
+                {
+                    UIPlugin.log(e);
+                }
+            }
+        }
     }
 }

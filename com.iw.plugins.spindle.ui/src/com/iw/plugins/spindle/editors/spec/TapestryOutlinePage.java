@@ -245,7 +245,7 @@ public class TapestryOutlinePage extends ContentOutlinePage
     public void setSelection(ISelection selection)
     {}
 
-    public class ContentProvider implements ITreeContentProvider
+    public static class ContentProvider implements ITreeContentProvider
     {
         BaseSpecification specification;
 
@@ -277,6 +277,9 @@ public class TapestryOutlinePage extends ContentOutlinePage
         }
         private Object[] getArtifacts()
         {
+            if (specification == null)
+                return new Object[0];
+                
             List results = new ArrayList();
             switch (specification.getSpecificationType())
             {
@@ -332,7 +335,7 @@ public class TapestryOutlinePage extends ContentOutlinePage
         }
     }
 
-    public class BasicLabelProvider extends LabelProvider
+    public static class BasicLabelProvider extends LabelProvider
     {
         public String getText(Object obj)
         {
@@ -392,7 +395,7 @@ public class TapestryOutlinePage extends ContentOutlinePage
         }
     }
 
-    class BaseSorter extends ViewerSorter
+    public static class BaseSorter extends ViewerSorter
     {
         protected boolean useCategorySort = true;
 
@@ -457,7 +460,7 @@ public class TapestryOutlinePage extends ContentOutlinePage
     }
 
     // Sorter based on document location
-    class DefaultSorter extends BaseSorter
+    public static class DefaultSorter extends BaseSorter
     {
 
         public int compare(Viewer viewer, Object e1, Object e2)
@@ -479,7 +482,7 @@ public class TapestryOutlinePage extends ContentOutlinePage
 
     //Sorts alphabetically.
     //Optionally, category sorting is applied before the alpha sort
-    class AlphaCategorySorter extends BaseSorter
+    public static class  AlphaCategorySorter extends BaseSorter
     {
         public AlphaCategorySorter()
         {

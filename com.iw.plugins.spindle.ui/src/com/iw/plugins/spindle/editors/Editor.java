@@ -375,7 +375,7 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
         return store.getBoolean(Editor.OVERVIEW_RULER);
     }
 
-    protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles)
+    protected  ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles)
     {
         ISharedTextColors sharedColors = UIPlugin.getDefault().getSharedTextColors();
         fOverviewRuler = new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);

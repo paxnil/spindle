@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.0.28"
+   version="0.0.29"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -276,6 +276,30 @@
             category="jump"
             id="com.iw.plugins.spindle.ui.editor.commands.jump.template">
       </command>
+      <command
+            name="Show Outline"
+            description="Show an outline of the XML (if possible)"
+            category="source"
+            id="com.iw.plugins.spindle.ui.editor.xml.show.outline">
+      </command>
+      <keyBinding
+            string="Ctrl+O"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.xml.show.outline"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <command
+            name="Open Structure"
+            description="Open the structure of a Tapestry spec (if possible)"
+            category="source"
+            id="com.iw.plugins.spindle.ui.editor.xml.open.structure">
+      </command>
+      <keyBinding
+            string="Ctrl+F3"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.xml.open.structure"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>      
 <!-- the key binding -->
       <keyBinding
             string="Ctrl+Shift+F"

@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.editors.spec;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -35,23 +34,21 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
-import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
+import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
+
 
 /**
  *  TODO Add Type comment
@@ -62,7 +59,8 @@ import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
 public class XMLOutlinePage extends ContentOutlinePage
 {
 
-    public class BasicContentProvider implements ITreeContentProvider
+    
+    public class OutlineContentProvider implements ITreeContentProvider
     {
         public Object[] getElements(Object obj)
         {
@@ -130,83 +128,6 @@ public class XMLOutlinePage extends ContentOutlinePage
         {
             fFlatChildren = new XMLNode[0];
             fCorresponders = new XMLNode[0];
-        }
-
-    }
-
-    public class BasicLabelProvider extends LabelProvider //implements IColorProvider
-    {
-        public String getText(Object obj)
-        {
-            if (obj instanceof XMLNode)
-            {
-                XMLNode artifact = (XMLNode) obj;
-                String type = artifact.getType();
-
-                if (type == XMLDocumentPartitioner.TAG
-                    || type == XMLDocumentPartitioner.EMPTYTAG
-                    || type == XMLDocumentPartitioner.DECL)
-                {
-                    String name = artifact.getName();
-                    return name == null ? "" : name;
-                }
-
-                if (type == XMLDocumentPartitioner.ATTR)
-                {
-                    String name = artifact.getName();
-                    String attrvalue = artifact.getAttributeValue();
-                    return (name == null ? "" : name)
-                        + " = "
-                        + StringUtils.abbreviate(attrvalue == null ? "" : attrvalue, 50);
-                }
-
-                if (type == XMLDocumentPartitioner.COMMENT)
-                    return "COMMENT" + StringUtils.abbreviate(artifact.getContent().trim(), 50);
-
-                if (type == XMLDocumentPartitioner.TEXT)
-                    return StringUtils.abbreviate(artifact.getContent().trim(), 50);
-
-                if (type == XMLDocumentPartitioner.PI)
-                    return StringUtils.abbreviate(artifact.getContent().trim(), 50);
-            }
-
-            return obj.toString();
-        }
-        public Image getImage(Object obj)
-        {
-            if (obj instanceof XMLNode)
-            {
-                XMLNode artifact = (XMLNode) obj;
-                String type = artifact.getType();
-                if (type == XMLDocumentPartitioner.DECL)
-                {
-
-                    if (artifact.getParent().getType().equals("/"))
-                        return Images.getSharedImage("decl16.gif");
-
-                    return Images.getSharedImage("cdata16.gif");
-
-                }
-
-                if (type == XMLDocumentPartitioner.TAG)
-                    return Images.getSharedImage("tag16.gif");
-
-                if (type == XMLDocumentPartitioner.EMPTYTAG)
-                    return Images.getSharedImage("empty16.gif");
-
-                if (type == XMLDocumentPartitioner.ATTR)
-                    return Images.getSharedImage("bullet.gif");
-
-                if (type == XMLDocumentPartitioner.COMMENT)
-                    return Images.getSharedImage("comment16.gif");
-
-                if (type == XMLDocumentPartitioner.TEXT)
-                    return Images.getSharedImage("text16.gif");
-
-                if (type == XMLDocumentPartitioner.PI)
-                    return Images.getSharedImage("pi16.gif");
-            }
-            return null;
         }
 
     }
@@ -281,12 +202,12 @@ public class XMLOutlinePage extends ContentOutlinePage
 
     protected ITreeContentProvider createContentProvider()
     {
-        return new BasicContentProvider();
+        return new OutlineContentProvider();
     }
 
     protected ILabelProvider createLabelProvider()
     {
-        return new BasicLabelProvider();
+        return new XMLNodeLabelProvider();
     }
 
     public Control getControl()
