@@ -25,9 +25,13 @@ package com.iw.plugins.spindle.core.util;
  *
  * ***** END LICENSE BLOCK ***** */
 
+import org.apache.tapestry.IResourceLocation;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /**
  * A Utility class
@@ -41,7 +45,7 @@ public class Utils
     public static boolean extendsType(IType candidate, IType baseType) throws JavaModelException
     {
         Assert.isNotNull(candidate);
-        Assert.isNotNull(baseType);        
+        Assert.isNotNull(baseType);
 
         boolean match = false;
         ITypeHierarchy hierarchy = candidate.newSupertypeHierarchy(null);
@@ -57,6 +61,22 @@ public class Utils
             }
         }
         return match;
+    }
+
+    public static IResource toResource(IResourceLocation loc)
+    {
+        try
+        {
+            IResourceWorkspaceLocation use_loc = (IResourceWorkspaceLocation) loc;
+            if (!use_loc.exists())
+            {
+                return null;
+            }
+            return (IResource) use_loc.getStorage();
+        } catch (RuntimeException e)
+        {
+            return null;
+        }
     }
 
 }

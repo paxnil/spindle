@@ -27,7 +27,6 @@
 package com.iw.plugins.spindle.core.scanning;
 
 import org.apache.tapestry.INamespace;
-import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IExtensionSpecification;
@@ -72,7 +71,7 @@ public class LibraryScanner extends SpecificationScanner
         throws ScannerException
     {
         specification.setPublicId(parser.getPublicId());
-        specification.setSpecificationLocation(specification.getSpecificationLocation());
+        specification.setSpecificationLocation(location);
         //   TODO figure out ResourceResolver
         //        specification.setResourceResolver(resolver);
 
@@ -128,14 +127,29 @@ public class LibraryScanner extends SpecificationScanner
     {
         String type = getAttribute(node, "type", true);
 
-        validatePattern(
-            type,
-            SpecificationParser.COMPONENT_ALIAS_PATTERN,
-            "SpecificationParser.invalid-component-type",
-            IProblem.ERROR,
-            getAttributeSourceLocation(node, "name"));
+        boolean valid =
+            validatePattern(
+                type,
+                SpecificationParser.COMPONENT_ALIAS_PATTERN,
+                "SpecificationParser.invalid-component-type",
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "type"));
+
+        if (valid && specification.getComponentTypes().contains(type))
+        {
+            addProblem(
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "type"),
+                TapestryCore.getTapestryString("LibrarySpecification.duplicate-component-alias", type));
+        }
 
         String path = getAttribute(node, "specification-path");
+
+        validateResourceLocation(
+            specification.getSpecificationLocation(),
+            path,
+            "scan-library-missing-component",
+            getAttributeSourceLocation(node, "specification-path"));
 
         specification.setComponentSpecificationPath(type, path);
     }
@@ -189,14 +203,21 @@ public class LibraryScanner extends SpecificationScanner
     {
         String name = getAttribute(node, "name", true);
         String className = getAttribute(node, "class");
+        
+        validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
+        
         boolean immediate = getBooleanAttribute(node, "immediate");
 
-        validatePattern(
+        boolean valid = validatePattern(
             name,
             SpecificationParser.EXTENSION_NAME_PATTERN,
             "SpecificationParser.invalid-extension-name",
             IProblem.ERROR,
             getAttributeSourceLocation(node, "name"));
+            
+        if (valid && specification.getExtensionNames().contains(name)) {
+            addProblem(IProblem.ERROR, getAttributeSourceLocation(node, "name"), TapestryCore.getTapestryString("LibrarySpecification.duplicate-extension-name", name));            
+        }
 
         IExtensionSpecification exSpec = specificationFactory.createExtensionSpecification();
 
@@ -226,48 +247,64 @@ public class LibraryScanner extends SpecificationScanner
     }
     protected void scanLibrary(ILibrarySpecification specification, Node node) throws ScannerException
     {
-        String id = getAttribute(node, "id");
+        String id = getAttribute(node, "id", true);
 
-        if (id != null)
+        validatePattern(
+            id,
+            SpecificationParser.LIBRARY_ID_PATTERN,
+            "SpecificationParser.invalid-library-id",
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "id"));
+
+        if (id.equals(INamespace.FRAMEWORK_NAMESPACE))
         {
-
-            validatePattern(
-                id,
-                SpecificationParser.LIBRARY_ID_PATTERN,
-                "SpecificationParser.invalid-library-id",
+            addProblem(
                 IProblem.ERROR,
-                getAttributeSourceLocation(node, "id"));
-
-            if (id.equals(INamespace.FRAMEWORK_NAMESPACE))
-            {
-                addProblem(
-                    IProblem.ERROR,
-                    getAttributeSourceLocation(node, "id"),
-                    TapestryCore.getTapestryString(
-                        "SpecificationParser.framework-library-id-is-reserved",
-                        INamespace.FRAMEWORK_NAMESPACE));
-            }
-
-            String specificationPath = getAttribute(node, "specification-path");
-
-            specification.setLibrarySpecificationPath(id, specificationPath);
+                getAttributeSourceLocation(node, "id"),
+                TapestryCore.getTapestryString(
+                    "SpecificationParser.framework-library-id-is-reserved",
+                    INamespace.FRAMEWORK_NAMESPACE));
         }
+
+        String specificationPath = getAttribute(node, "specification-path");
+
+        validateResourceLocation(
+            specification.getSpecificationLocation(),
+            specificationPath,
+            "scan-library-missing-library",
+            getAttributeSourceLocation(node, "specification-path"));
+
+        specification.setLibrarySpecificationPath(id, specificationPath);
+
     }
 
     protected void scanPage(ILibrarySpecification specification, Node node) throws ScannerException
     {
         String name = getAttribute(node, "name", true);
 
-        validatePattern(
-            name,
-            SpecificationParser.PAGE_NAME_PATTERN,
-            "SpecificationParser.invalid-page-name",
-            IProblem.ERROR,
-            getAttributeSourceLocation(node, "name"));
+        boolean valid =
+            validatePattern(
+                name,
+                SpecificationParser.PAGE_NAME_PATTERN,
+                "SpecificationParser.invalid-page-name",
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "name"));
+
+        if (valid && specification.getPageNames().contains(name))
+        {
+            addProblem(
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "name"),
+                TapestryCore.getTapestryString("LibrarySpecification.duplicate-page-name", name));
+        }
 
         String specificationPath = getAttribute(node, "specification-path");
-        
-        validateResourceLocation(specification.getSpecificationLocation(), specificationPath);
+
+        validateResourceLocation(
+            specification.getSpecificationLocation(),
+            specificationPath,
+            "scan-library-missing-page",
+            getAttributeSourceLocation(node, "specification-path"));
 
         specification.setPageSpecificationPath(name, specificationPath);
 

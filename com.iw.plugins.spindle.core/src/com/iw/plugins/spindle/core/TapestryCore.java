@@ -31,6 +31,7 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.apache.tapestry.spec.SpecFactory;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IStorage;
@@ -44,6 +45,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.iw.plugins.spindle.core.parser.IProblem;
+import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -57,6 +59,11 @@ public class TapestryCore extends AbstractUIPlugin
     public static final String PLUGIN_ID = "com.iw.plugins.spindle.core";
     public static final String NATURE_ID = PLUGIN_ID + ".tapestrynature";
     public static final String BUILDER_ID = PLUGIN_ID + ".tapestrybuilder";
+    
+    /**
+     * SpecFactory instance used by the Scanners
+     */
+    private static SpecFactory SPEC_FACTORY;
 
     //The shared instance.
     private static TapestryCore plugin;
@@ -273,6 +280,17 @@ public class TapestryCore extends AbstractUIPlugin
                 logProblem(storage, problems[i]);                
             }
         }        
+    }
+
+    /**
+     * @return
+     */
+    public static SpecFactory getSpecificationFactory()
+    {
+        if (SPEC_FACTORY == null) {
+            SPEC_FACTORY = new TapestryCoreSpecFactory();
+        }
+        return SPEC_FACTORY;
     }
 
 }

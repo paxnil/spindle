@@ -223,10 +223,10 @@ public class ElementSourceLocationInfo implements  ISourceLocationInfo
                 SimpleXMLEventInfo info = (SimpleXMLEventInfo) attributeMap.get(rawname);
                 data = new int[3];
                 line = info.getBeginLineNumber();
-                column = info.getEndColumnNumber();
+                column = info.getBeginColumnNumber();
                 data[LINE] = line;
                 data[CHAR_START] = resolver.getColumnOffset(line, column);
-                line = info.getEndLineNumber();
+                line = info.getEndLineNumber(); 
                 column = info.getEndColumnNumber();
                 data[CHAR_END] = resolver.getColumnOffset(line, column);
                 getAttributes().put(rawname, data);

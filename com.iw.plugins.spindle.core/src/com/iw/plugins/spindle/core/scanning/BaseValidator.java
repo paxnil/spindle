@@ -61,9 +61,9 @@ public class BaseValidator implements IScannerValidator
 {
 
     static class SLocation implements ISourceLocation
-    { /* (non-Javadoc)
-             * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
-             */
+    {   /* (non-Javadoc)
+         * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
+         */
         public int getCharEnd()
         {
             return 1;
@@ -187,32 +187,35 @@ public class BaseValidator implements IScannerValidator
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateAsset(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.IAsset, com.iw.plugins.spindle.core.parser.ISourceLocationInfo)
      */
-    public void validateAsset(IComponentSpecification specification, IAssetSpecification asset, ISourceLocationInfo sourceLocation)
+    public boolean validateAsset(
+        IComponentSpecification specification,
+        IAssetSpecification asset,
+        ISourceLocationInfo sourceLocation)
         throws ScannerException
     {
-        return;
+        return true;
 
     }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateContainedComponent(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.spec.IContainedComponent)
      */
-    public void validateContainedComponent(
+    public boolean validateContainedComponent(
         IComponentSpecification specification,
         IContainedComponent component,
         ISourceLocationInfo info)
         throws ScannerException
     {
-        return;
+        return true;
 
     }
 
-    public void validateExpression(String expression, int severity) throws ScannerException
+    public boolean validateExpression(String expression, int severity) throws ScannerException
     {
-        validateExpression(expression, severity, DefaultLocation);
+        return validateExpression(expression, severity, DefaultLocation);
     }
 
-    public void validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException
+    public boolean validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException
     {
         if (!expression.startsWith(dummyString))
         {
@@ -227,56 +230,65 @@ public class BaseValidator implements IScannerValidator
                 } else
                 {
                     problemCollector.addProblem(severity, (location == null ? DefaultLocation : location), e.getMessage());
+                    return false;
                 }
 
             }
         }
+        return true;
     }
 
-    public void validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException
+    public boolean validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException
     {
-        validatePattern(value, pattern, errorKey, severity, DefaultLocation);
+        return validatePattern(value, pattern, errorKey, severity, DefaultLocation);
     }
 
-    public void validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location)
+    public boolean validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location)
         throws ScannerException
     {
-        if (value.startsWith(dummyString))
+        if (!value.startsWith(dummyString))
         {
-            return;
+
+            if (compiledPatterns == null)
+                compiledPatterns = new HashMap();
+
+            Pattern compiled = (Pattern) compiledPatterns.get(pattern);
+
+            if (compiled == null)
+            {
+                compiled = compilePattern(pattern);
+
+                compiledPatterns.put(pattern, compiled);
+            }
+
+            if (matcher == null)
+                matcher = new Perl5Matcher();
+
+            if (!matcher.matches(value, compiled))
+            {
+
+                String message = TapestryCore.getTapestryString(errorKey, value);
+                if (problemCollector == null)
+                {
+                    throw new ScannerException(message);
+                } else
+                {
+                    problemCollector.addProblem(severity, location, message);
+                    return false;
+                }
+            }
         }
-        if (compiledPatterns == null)
-            compiledPatterns = new HashMap();
-
-        Pattern compiled = (Pattern) compiledPatterns.get(pattern);
-
-        if (compiled == null)
-        {
-            compiled = compilePattern(pattern);
-
-            compiledPatterns.put(pattern, compiled);
-        }
-
-        if (matcher == null)
-            matcher = new Perl5Matcher();
-
-        if (matcher.matches(value, compiled))
-            return;
-
-        String message = TapestryCore.getTapestryString(errorKey, value);
-        if (problemCollector == null)
-        {
-            throw new ScannerException(message);
-        } else
-        {
-            problemCollector.addProblem(severity, location, message);
-        }
+        return true;
     }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(org.apache.tapestry.IResourceLocation, java.lang.String)
      */
-    public void validateResourceLocation(IResourceLocation location, String relativePath, String errorKey, ISourceLocation source)
+    public boolean validateResourceLocation(
+        IResourceLocation location,
+        String relativePath,
+        String errorKey,
+        ISourceLocation source)
         throws ScannerException
     {
         IResourceWorkspaceLocation real = (IResourceWorkspaceLocation) location;
@@ -284,25 +296,27 @@ public class BaseValidator implements IScannerValidator
 
         if (!relative.exists())
         {
-            String message = TapestryCore.getString("validate-could-not-find-resource", relative.toString());
+            String message = TapestryCore.getString(errorKey, relative.toString());
             if (problemCollector == null)
             {
                 throw new ScannerException(message);
             } else
             {
                 problemCollector.addProblem(IProblem.ERROR, source, message);
+                return false;
             }
         }
+        return true;
     }
-    
-    public void validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
+
+    public boolean validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
     {
-        validateTypeName(fullyQualifiedType, severity, DefaultLocation);
+        return validateTypeName(fullyQualifiedType, severity, DefaultLocation);
     }
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
      */
-    public void validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
+    public boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
     {
         Object type = findType(fullyQualifiedType);
         if (type == null)
@@ -314,8 +328,10 @@ public class BaseValidator implements IScannerValidator
             } else
             {
                 problemCollector.addProblem(severity, location, message);
+                return false;
             }
         }
+        return true;
     }
 
 }

@@ -43,29 +43,35 @@ import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
  */
 public interface IScannerValidator
 {
-    
+
     public String getDummyStringPrefix();
-    
+
     public String getNextDummyString();
 
     public void setProblemCollector(IProblemCollector collector);
-    
-    public void validateAsset(IComponentSpecification specification, IAssetSpecification asset, ISourceLocationInfo sourceLocation) throws ScannerException;
-    
-    public void validateContainedComponent(IComponentSpecification specification, IContainedComponent component, ISourceLocationInfo node) throws ScannerException;
-    
-    public void validateExpression(String expression, int severity) throws ScannerException;
-    
-    public void validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException;
-    
-    public void validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException;
-    
-    public void validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location) throws ScannerException;
 
-    public void validateResourceLocation(IResourceLocation location, String relativePath); 
-    
-    public void validateTypeName(String fullyQualifiedType, int severity) throws ScannerException;
-    
-    public void validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException;
+    public boolean validateAsset(IComponentSpecification specification, IAssetSpecification asset, ISourceLocationInfo sourceLocation)
+        throws ScannerException;
+
+    public boolean validateContainedComponent(
+        IComponentSpecification specification,
+        IContainedComponent component,
+        ISourceLocationInfo node)
+        throws ScannerException;
+
+    public boolean validateExpression(String expression, int severity) throws ScannerException;
+
+    public boolean validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException;
+
+    public boolean validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException;
+
+    public boolean validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location)
+        throws ScannerException;
+
+    public boolean validateResourceLocation(IResourceLocation location, String relativePath, String errorKey, ISourceLocation source)
+        throws ScannerException;
+    public boolean validateTypeName(String fullyQualifiedType, int severity) throws ScannerException;
+
+    public boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException;
 
 }

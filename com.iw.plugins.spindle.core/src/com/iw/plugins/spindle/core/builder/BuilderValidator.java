@@ -24,49 +24,34 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package tests.Scanners.mr;
-
-import org.apache.tapestry.spec.SpecFactory;
-
-import tests.Parser.mr.MRBaseParserTest;
+package com.iw.plugins.spindle.core.builder;
 
 import com.iw.plugins.spindle.core.scanning.BaseValidator;
-import com.iw.plugins.spindle.core.scanning.IScannerValidator;
-import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
 
 /**
- *  TODO Add Type comment
+ *  A validator that knows about the project
+ *  <p>
+ *  i.e. it can resolve type names in the project buildpath
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class BaseComponentScannerTest extends MRBaseParserTest
+public class BuilderValidator extends BaseValidator
 {
-    protected MockComponentScanner scanner;
-    protected SpecFactory factory;
-    protected IScannerValidator validator;
-    /**
-     * 
-     */
-    protected BaseComponentScannerTest()
+    TapestryBuilder builder;
+
+    public BuilderValidator(TapestryBuilder builder)
     {
         super();
+        this.builder = builder;
     }
 
-    /**
-     * @param arg0
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.BaseValidator#findType(java.lang.String)
      */
-    protected BaseComponentScannerTest(String arg0)
+    protected Object findType(String fullyQualifiedName)
     {
-        super(arg0);
-    }
-
-    public void setUp() throws Exception
-    {
-        super.setUp();
-        factory = new TapestryCoreSpecFactory();
-        validator = new BaseValidator();
-        scanner = new MockComponentScanner(parser, factory, validator);
+        return builder.getType(fullyQualifiedName);
     }
 
 }

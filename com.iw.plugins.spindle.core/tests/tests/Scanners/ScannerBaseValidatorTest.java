@@ -44,7 +44,7 @@ import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.scanning.BaseValidator;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
-import com.iw.plugins.spindle.core.spec.TapestryPluginSpecFactory;
+import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
 
 /**
  *  TESTs for the BaseValidator
@@ -496,7 +496,7 @@ public class ScannerBaseValidatorTest extends TestCase
     public void testValidateAsset()
     {
         BaseValidator validator = new BaseValidator();
-        doValidateAsset(validator, new TapestryPluginSpecFactory());
+        doValidateAsset(validator, new TapestryCoreSpecFactory());
         doValidateAsset(validator, new SpecFactory());
     }
 
@@ -526,7 +526,7 @@ public class ScannerBaseValidatorTest extends TestCase
     public void testValidateContainedComponent()
     {
         BaseValidator validator = new BaseValidator();
-        doValidateContainedComponent(validator, new TapestryPluginSpecFactory());
+        doValidateContainedComponent(validator, new TapestryCoreSpecFactory());
         doValidateContainedComponent(validator, new SpecFactory());
     }
 

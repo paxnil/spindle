@@ -82,6 +82,7 @@ public abstract class AbstractScanner implements IProblemCollector
         {
             this.validator = validator;
         }
+        this.validator.setProblemCollector(this);
         resultObject = beforeScan(node);
         if (resultObject == null)
         {
@@ -267,65 +268,67 @@ public abstract class AbstractScanner implements IProblemCollector
         return result;
     }
 
-    protected void validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException
+    protected boolean validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException
     {
-        validator.validatePattern(value, pattern, errorKey, severity);
+        return validator.validatePattern(value, pattern, errorKey, severity);
     }
 
-    protected void validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location)
+    protected boolean validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location)
         throws ScannerException
     {
-        validator.validatePattern(value, pattern, errorKey, severity, location);
+        return validator.validatePattern(value, pattern, errorKey, severity, location);
     }
 
-    protected void validateExpression(String expression, int severity) throws ScannerException
+    protected boolean validateExpression(String expression, int severity) throws ScannerException
     {
-        validator.validateExpression(expression, severity);
+        return validator.validateExpression(expression, severity);
     }
 
-    protected void validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException
+    protected boolean validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException
     {
-        validator.validateExpression(expression, severity, location);
+        return validator.validateExpression(expression, severity, location);
     }
 
-    protected void validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
+    protected boolean validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
     {
-        validator.validateTypeName(fullyQualifiedType, severity);
+        return validator.validateTypeName(fullyQualifiedType, severity);
     }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
      */
-    protected void validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
+    protected boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
     {
-        validator.validateTypeName(fullyQualifiedType, severity, location);
+        return validator.validateTypeName(fullyQualifiedType, severity, location);
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(org.apache.tapestry.IResourceLocation, java.lang.String)
-     */
-    protected void validateResourceLocation(IResourceLocation location, String relativePath) throws ScannerException
+    protected boolean validateResourceLocation(
+        IResourceLocation location,
+        String relativePath,
+        String errorKey,
+        ISourceLocation source)
+        throws ScannerException
     {
-        validator.validateResourceLocation(location, relativePath );
+        return validator.validateResourceLocation(location, relativePath, errorKey, source);
 
     }
 
-    protected void validateContainedComponent(
+    protected boolean validateContainedComponent(
         IComponentSpecification specification,
         IContainedComponent component,
         ISourceLocationInfo sourceLocation)
         throws ScannerException
     {
-        validator.validateContainedComponent(specification, component, sourceLocation);
+        return validator.validateContainedComponent(specification, component, sourceLocation);
     }
 
-    protected void validateAsset(
+    protected boolean validateAsset(
         IComponentSpecification specification,
         IAssetSpecification asset,
         ISourceLocationInfo sourceLocation)
         throws ScannerException
     {
-        validator.validateAsset(specification, asset, sourceLocation);
+        return validator.validateAsset(specification, asset, sourceLocation);
     }
 
     /* (non-Javadoc)

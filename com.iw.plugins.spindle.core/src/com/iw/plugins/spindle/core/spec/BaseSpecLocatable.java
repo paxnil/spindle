@@ -24,49 +24,40 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package tests.Scanners.mr;
+package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.spec.SpecFactory;
-
-import tests.Parser.mr.MRBaseParserTest;
-
-import com.iw.plugins.spindle.core.scanning.BaseValidator;
-import com.iw.plugins.spindle.core.scanning.IScannerValidator;
-import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
+import org.apache.tapestry.IResourceLocation;
 
 /**
- *  TODO Add Type comment
+ *  Superclass for Top level spec classes
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class BaseComponentScannerTest extends MRBaseParserTest
+public abstract class BaseSpecLocatable extends BasePropertyHolder
 {
-    protected MockComponentScanner scanner;
-    protected SpecFactory factory;
-    protected IScannerValidator validator;
-    /**
-     * 
-     */
-    protected BaseComponentScannerTest()
+
+    IResourceLocation specificationLocation;
+
+    public BaseSpecLocatable(int type)
     {
-        super();
+        super(type);
     }
 
     /**
-     * @param arg0
+     * @return
      */
-    protected BaseComponentScannerTest(String arg0)
+    public IResourceLocation getSpecificationLocation()
     {
-        super(arg0);
+        return specificationLocation;
     }
 
-    public void setUp() throws Exception
+    /**
+     * @param location
+     */
+    public void setSpecificationLocation(IResourceLocation location)
     {
-        super.setUp();
-        factory = new TapestryCoreSpecFactory();
-        validator = new BaseValidator();
-        scanner = new MockComponentScanner(parser, factory, validator);
+        this.specificationLocation = location;
     }
 
 }

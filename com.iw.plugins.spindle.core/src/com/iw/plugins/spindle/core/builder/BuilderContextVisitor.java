@@ -63,7 +63,7 @@ public class BuilderContextVisitor implements IResourceVisitor
         this.collector = collector;
         this.build = build;
         this.tapestryProject = build.tapestryBuilder.tapestryProject;
-        this.contextLocation = build.tapestryBuilder.contextRoot;
+        this.contextLocation = (IFolder) build.tapestryBuilder.contextRoot.getContainer();
         try
         {
             IPath out = build.javaProject.getOutputLocation();
@@ -81,7 +81,8 @@ public class BuilderContextVisitor implements IResourceVisitor
         IResource temp = resource;
         while (temp != tapestryProject.getProject() && !temp.equals(contextLocation))
         {
-            if (temp.equals(outputLocation)) {
+            if (temp.equals(outputLocation))
+            {
                 return false;
             }
             temp = temp.getParent();
@@ -102,27 +103,32 @@ public class BuilderContextVisitor implements IResourceVisitor
         }
         if (resource instanceof IFolder)
         {
-            if (resource.equals(contextLocation)) {
+            if (resource.equals(contextLocation))
+            {
                 return true;
             }
-            if (isOnContextPath(resource)) {
+            if (isOnContextPath(resource))
+            {
                 return true;
             }
-            if (isOnClasspath((IFolder)resource)) {
+            if (isOnClasspath((IFolder) resource))
+            {
                 return false;
             }
-            if (resource.equals(outputLocation)) {
+            if (resource.equals(outputLocation))
+            {
                 return false;
             }
-            IFolder folder = (IFolder)resource;
-            if (folder.getFullPath().segmentCount() >= contextLocation.getFullPath().segmentCount()){
+            IFolder folder = (IFolder) resource;
+            if (folder.getFullPath().segmentCount() >= contextLocation.getFullPath().segmentCount())
+            {
                 return false;
             }
-            
-  
+
         } else if (resource instanceof IFile)
         {
-            if (!isOnContextPath(resource)) {
+            if (!isOnContextPath(resource))
+            {
                 return false;
             }
             String extension = resource.getFileExtension();

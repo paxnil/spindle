@@ -29,6 +29,7 @@ package com.iw.plugins.spindle.core.scanning;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.Direction;
 import org.apache.tapestry.spec.SpecFactory;
@@ -46,6 +47,26 @@ import com.iw.plugins.spindle.core.parser.IProblem;
  */
 public abstract class SpecificationScanner extends AbstractScanner
 {
+
+    protected IResourceLocation location;
+
+   
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#afterScan(java.lang.Object)
+     */
+    protected Object afterScan(Object scanResults) throws ScannerException
+    {
+        location = null;
+        return super.afterScan(scanResults);
+    }
+
+    
+
+    public void setResourceLocation(IResourceLocation location)
+    {
+        this.location = location;
+    }
 
     protected interface IConverter
     {
@@ -264,4 +285,5 @@ public abstract class SpecificationScanner extends AbstractScanner
 
         return attributeValue;
     }
+
 }

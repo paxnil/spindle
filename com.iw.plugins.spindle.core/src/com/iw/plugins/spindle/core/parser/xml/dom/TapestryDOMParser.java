@@ -89,21 +89,21 @@ public class TapestryDOMParser extends DOMParser
     /**
      * @see org.apache.xerces.xni.XMLDocumentHandler#emptyElement(QName, XMLAttributes, Augmentations)
      */
-    public void emptyElement(QName element, XMLAttributes attributes, Augmentations augs) throws XNIException
-    {
-        ElementXMLEventInfo eventInfo = (ElementXMLEventInfo) augs.getItem(TapestryParserConfiguration.AUGMENTATIONS);
-        if (eventInfo != null)
-        {
-            if (resolver != null)
-            {
-                ElementSourceLocationInfo resolvedInfo = new ElementSourceLocationInfo(eventInfo, resolver);
-                fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID, resolvedInfo, null);
-            } else
-            {
-                fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID, eventInfo, null);
-            }
-        }
-        super.emptyElement(element, attributes, augs);
-    }
+//    public void emptyElement(QName element, XMLAttributes attributes, Augmentations augs) throws XNIException
+//    {
+//        ElementXMLEventInfo eventInfo = (ElementXMLEventInfo) augs.getItem(TapestryParserConfiguration.AUGMENTATIONS);
+//        if (eventInfo != null)
+//        {
+//            if (resolver != null)
+//            {
+//                ElementSourceLocationInfo resolvedInfo = new ElementSourceLocationInfo(eventInfo, resolver);
+//                fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID, resolvedInfo, null);
+//            } else
+//            {
+//                fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID, eventInfo, null);
+//            }
+//        }
+//        super.emptyElement(element, attributes, augs);
+//    }
 
 }

@@ -69,9 +69,12 @@ public class ParserEventHandler
 
     public void attributeBegin(String rawname, int lineNumber, int columnNumber)
     {
-        currentAttribute = new SimpleXMLEventInfo();
-        currentAttribute.setBeginValues(lineNumber, columnNumber);
-        peekCurrent().getAttributeMap().put(rawname, currentAttribute);
+        if (!stack.isEmpty())
+        {
+            currentAttribute = new SimpleXMLEventInfo();
+            currentAttribute.setBeginValues(lineNumber, columnNumber);
+            peekCurrent().getAttributeMap().put(rawname, currentAttribute);
+        }
     }
 
     public void attributeEnd(int lineNumber, int columnNumber)
@@ -84,6 +87,21 @@ public class ParserEventHandler
             System.err.print("peh:");
         }
     }
+    
+    /**
+     * 
+     */
+    public void emptyAttribute()
+    {
+        if (currentAttribute != null)
+        {
+            currentAttribute.setEndValues(currentAttribute.getBeginLineNumber(), currentAttribute.getBeginColumnNumber()+1);
+        } else
+        {
+            System.err.print("peh2:");
+        }
+        
+    }
 
     public ElementXMLEventInfo popCurrent()
     {
@@ -94,5 +112,7 @@ public class ParserEventHandler
     {
         return (ElementXMLEventInfo) stack.peek();
     }
+
+
 
 }

@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBeanSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -49,7 +48,7 @@ import com.iw.plugins.spindle.core.util.PropertyFiringSet;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class PluginComponentSpecification extends BasePropertyHolder implements IComponentSpecification
+public class PluginComponentSpecification extends BaseSpecLocatable implements IComponentSpecification
 {
     private String componentClassName;
 
@@ -131,14 +130,6 @@ public class PluginComponentSpecification extends BasePropertyHolder implements 
 
     private boolean pageSpecification;
 
-    /**
-     *  The location from which the specification was obtained.
-     * 
-     *  @since 2.4
-     * 
-     **/
-
-    private IResourceLocation specificationLocation;
 
     /**
      *  A Map of {@link IPropertySpecification} keyed on the name
@@ -452,24 +443,7 @@ public class PluginComponentSpecification extends BasePropertyHolder implements 
 
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IComponentSpecification#getSpecificationLocation()
-     */
-    public IResourceLocation getSpecificationLocation()
-    {
-        return specificationLocation;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IComponentSpecification#setSpecificationLocation(org.apache.tapestry.IResourceLocation)
-     */
-    public void setSpecificationLocation(IResourceLocation specificationLocation)
-    {
-        this.specificationLocation = specificationLocation;
-        //no property change firing needed. This valiue
-        //is immutable once set
-    }
-
+  
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#addPropertySpecification(org.apache.tapestry.spec.IPropertySpecification)
      */

@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
+import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -93,6 +93,7 @@ public class FullBuild extends Build
             {
                 throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_ONE_SERVLET_ONLY));
             }
+//            goofTest();
             notifier.updateProgressDelta(0.1f);
 
             notifier.subTask(TapestryCore.getString(TapestryBuilder.LOCATING_ARTIFACTS));
@@ -116,6 +117,18 @@ public class FullBuild extends Build
         {
             TapestryCore.log(e);
         }
+    }
+
+    /**
+     * 
+     */
+    private void goofTest()
+    {
+       IResourceLocation goof = tapestryBuilder.classpathRoot.getRelativeLocation("com/Framework.library");
+       parseLibrary(goof);
+       goof = tapestryBuilder.contextRoot.getRelativeLocation("com/ExampleLayout.application");
+       parseApplication(goof);
+        
     }
 
     /**
@@ -177,13 +190,15 @@ public class FullBuild extends Build
 
     protected void findDeclaredApplications()
     {
-        IFile webXML = tapestryBuilder.contextRoot.getFile("WEB-INF/web.xml");
-        if (webXML != null && webXML.exists())
+        IResourceWorkspaceLocation webXML =
+            (IResourceWorkspaceLocation) tapestryBuilder.contextRoot.getRelativeLocation("WEB-INF/web.xml");
+        //        IFile webXML = tapestryBuilder.contextRoot.getFile("WEB-INF/web.xml");
+        if (webXML.exists())
         {
             Node wxmlElement = null;
             try
             {
-                tapestryBuilder.notifier.subTask(TapestryCore.getString(TapestryBuilder.SCANNING, webXML.getFullPath().toString()));
+                tapestryBuilder.notifier.subTask(TapestryCore.getString(TapestryBuilder.SCANNING, webXML.toString()));
                 wxmlElement = parseToNode(webXML);
             } catch (IOException e1)
             {
@@ -204,7 +219,8 @@ public class FullBuild extends Build
             {
                 WebXMLScanner wscanner = new WebXMLScanner(this);
                 servletInfos = wscanner.scanServletInformation(wxmlElement);
-                Markers.addTapestryProblemMarkersToResource(webXML, wscanner.getProblems());
+                IResource resource = (IResource)webXML.getStorage();
+                Markers.addTapestryProblemMarkersToResource(resource, wscanner.getProblems());
             } catch (ScannerException e)
             {
                 TapestryCore.log(e);

@@ -119,7 +119,7 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
      */
     public URL getResourceURL()
     {
-        throw new Error("no implemented, yet");
+        throw new Error("not implemented, yet");
     }
 
 }

@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -44,7 +43,7 @@ import com.iw.plugins.spindle.core.util.PropertyFiringMap;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class PluginLibrarySpecification extends BasePropertyHolder implements ILibrarySpecification
+public class PluginLibrarySpecification extends BaseSpecLocatable implements ILibrarySpecification
 {
 
     /**
@@ -54,7 +53,7 @@ public class PluginLibrarySpecification extends BasePropertyHolder implements IL
     private Map components;
 
     private String description;
-
+    
     /**
      *  Map of extension name to {@link IExtensionSpecification}.
      * 
@@ -308,14 +307,7 @@ public class PluginLibrarySpecification extends BasePropertyHolder implements IL
         return Collections.EMPTY_MAP;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.ILibrarySpecification#getSpecificationLocation()
-     */
-    public IResourceLocation getSpecificationLocation()
-    {
-        // TODO not used
-        return null;
-    }
+   
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.ILibrarySpecification#instantiateImmediateExtensions()
@@ -424,13 +416,5 @@ public class PluginLibrarySpecification extends BasePropertyHolder implements IL
         services.put(name, className);
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.ILibrarySpecification#setSpecificationLocation(org.apache.tapestry.IResourceLocation)
-     */
-    public void setSpecificationLocation(IResourceLocation specificationLocation)
-    {
-        // TODO not used
-
-    }
-
+   
 }

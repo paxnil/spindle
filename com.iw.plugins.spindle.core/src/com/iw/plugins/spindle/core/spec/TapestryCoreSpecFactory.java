@@ -43,13 +43,13 @@ import com.iw.plugins.spindle.core.spec.bean.PluginExpressionBeanInitializer;
 import com.iw.plugins.spindle.core.spec.bean.PluginFieldBeanInitializer;
 import com.iw.plugins.spindle.core.spec.bean.PluginStringBeanInitializer;
 
-public class TapestryPluginSpecFactory extends SpecFactory
+public class TapestryCoreSpecFactory extends SpecFactory
 {
 
     /**
      * Constructor for TapestryPluginFactory
      */
-    public TapestryPluginSpecFactory()
+    public TapestryCoreSpecFactory()
     {
         super();
     }

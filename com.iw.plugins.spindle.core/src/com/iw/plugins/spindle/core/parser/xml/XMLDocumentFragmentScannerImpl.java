@@ -836,8 +836,6 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner implements XMLDoc
         if (DEBUG_CONTENT_SCANNING)
             System.out.println(">>> scanAttribute()");
 
-        //       System.out.print("Starting attribute at line: " + fBeginLineNumber + " column: " + fBeginColumnNumber);
-
         // name
         if (fNamespaces)
         {
@@ -847,11 +845,6 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner implements XMLDoc
             String name = fEntityScanner.scanName();
             fAttributeQName.setValues(null, name, name, null);
         }
-
-        fEventHandler.attributeBegin(
-            fAttributeQName.rawname,
-            fEntityManager.fCurrentEntity.lineNumber,
-            fEntityManager.fCurrentEntity.columnNumber - 1);
 
         // equals
         fEntityScanner.skipSpaces();

@@ -56,6 +56,8 @@ import org.eclipse.jdt.internal.core.JavaProject;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.RootLocation;
 import com.iw.plugins.spindle.core.util.Markers;
 
 /**
@@ -102,7 +104,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     IJavaProject javaProject;
     TapestryProject tapestryProject;
     IWorkspaceRoot workspaceRoot;
-    IFolder contextRoot;
+    RootLocation contextRoot;
+    RootLocation classpathRoot;
     int projectType;
 
     private IBuild build;
@@ -432,13 +435,13 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 return false;
             }
 
-            IFile webXML = contextRoot.getFile("WEB-INF/web.xml");
-            if (webXML == null || !webXML.exists())
+            IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation)contextRoot.getRelativeLocation("WEB-INF/web.xml");
+            if (!webXML.exists())
             {
                 Markers.removeProblemsFor(currentProject); // make this the only problem for this project
                 Markers.addBuildBrokenProblemMarkerToResource(
                     currentProject,
-                    TapestryCore.getString(ABORT_MISSING_WEB_XML, webXML.getFullPath()));
+                    TapestryCore.getString(ABORT_MISSING_WEB_XML, webXML.toString()));
                 return false;
             }
         } else if (projectType == TapestryProject.LIBRARY_PROJECT_TYPE)
@@ -499,6 +502,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         try
         {
             javaProject = (IJavaProject) currentProject.getNature(JavaCore.NATURE_ID);
+            classpathRoot = new RootLocation(javaProject);
         } catch (CoreException e)
         {
             TapestryCore.log(e);
@@ -506,8 +510,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         try
         {
             tapestryProject = (TapestryProject) currentProject.getNature(TapestryCore.NATURE_ID);
-            contextRoot = tapestryProject.getWebContextFolder();
-
+            contextRoot = new RootLocation(tapestryProject.getWebContextFolder());
         } catch (CoreException e)
         {
             TapestryCore.log(e);

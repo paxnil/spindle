@@ -1,8 +1,9 @@
 package com.iw.plugins.spindle.core.builder;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
+
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
@@ -65,22 +66,26 @@ public class IncrementalApplicationBuild extends Build implements IIncrementalBu
      */
     public boolean canIncrementalBuild(IResourceDelta projectDelta)
     {
-        IFolder contextRoot = tapestryBuilder.contextRoot;
-        if (contextRoot == null || !contextRoot.exists())
+        IResourceWorkspaceLocation contextRoot = tapestryBuilder.contextRoot;
+        if (!contextRoot.exists())
         {
             return false;
         }
-        IFile webXML = contextRoot.getFile("WEB-INF/web.xml");
-        if (webXML == null || !webXML.exists())
+        IResourceWorkspaceLocation webXML =
+            (IResourceWorkspaceLocation) tapestryBuilder.contextRoot.getRelativeLocation("WEB-INF/web.xml");
+        if (!webXML.exists())
         {
             return false;
         }
-        IResourceDelta webXMLDelta = projectDelta.findMember(webXML.getProjectRelativePath());
+        IResource resource = (IResource) webXML.getStorage();
+        IResourceDelta webXMLDelta = projectDelta.findMember(resource.getProjectRelativePath());
         if (webXMLDelta != null)
         {
             return false;
         }
-        return true;
+        
+        // TODO incremental not implemented - force full build for now
+        return false;
     }
 
 }

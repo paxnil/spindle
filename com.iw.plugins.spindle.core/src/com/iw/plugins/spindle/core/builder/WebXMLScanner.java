@@ -42,8 +42,6 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.FullBuild.ServletInfo;
 import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
-import com.iw.plugins.spindle.core.resources.ClasspathResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.resources.ContextResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.AbstractScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
@@ -191,11 +189,11 @@ public class WebXMLScanner extends AbstractScanner
             return null;
         }
         IPath ws_path = new Path(path);
-        IResourceWorkspaceLocation location = new ClasspathResourceWorkspaceLocation(builder.javaProject, path.toString());
-        if (location.getStorage() == null)
+        IResourceWorkspaceLocation location =
+            (IResourceWorkspaceLocation) builder.tapestryBuilder.classpathRoot.getRelativeLocation(path.toString());
+        if (!location.exists())
         {
-            location = new ContextResourceWorkspaceLocation(builder.tapestryBuilder.contextRoot, path.toString());
-
+            location = (IResourceWorkspaceLocation) builder.tapestryBuilder.contextRoot.getRelativeLocation(path.toString());
         }
         return location;
     }
@@ -223,7 +221,6 @@ public class WebXMLScanner extends AbstractScanner
             }
         } catch (JavaModelException e)
         {
-            TapestryCore.log(e);
         }
         return result;
     }

@@ -101,7 +101,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
 
                 for (int j = 0; j < contents.length; j++)
                 {
-                    IStorage storage = (IStorage) contents[i];
+                    IStorage storage = (IStorage) contents[j];
                     if (storage.getName().equals(getName()))
                     {
                         fragment = fragments[i];

@@ -27,6 +27,8 @@ package com.iw.plugins.spindle.core.builder;
 
 import java.io.IOException;
 
+import org.apache.tapestry.IResourceLocation;
+import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -42,9 +44,11 @@ import org.w3c.dom.Node;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.scanning.ApplicationScanner;
 import com.iw.plugins.spindle.core.scanning.LibraryScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.util.Markers;
+import com.iw.plugins.spindle.core.util.Utils;
 /**
  * Abstract base class for full and incremental builds
  * 
@@ -70,9 +74,10 @@ public abstract class Build implements IBuild
         this.parser = BUILD_PARSER;
     }
 
-    protected Node parseToNode(IResourceWorkspaceLocation location) throws IOException, CoreException
+    protected Node parseToNode(IResourceLocation location) throws IOException, CoreException
     {
-        IStorage storage = location.getStorage();
+        IResourceWorkspaceLocation use_loc = (IResourceWorkspaceLocation) location;
+        IStorage storage = use_loc.getStorage();
         if (storage != null)
         {
             return parseToNode(storage);
@@ -105,6 +110,11 @@ public abstract class Build implements IBuild
         } else
         {
             TapestryCore.logProblems(storage, parser.getProblems());
+        }
+
+        if (parser.getHasFatalErrors())
+        {
+            return null;
         }
 
         return result;
@@ -192,13 +202,64 @@ public abstract class Build implements IBuild
         return null;
     }
 
-    protected ILibrarySpecification parseLibrary(IResourceWorkspaceLocation location)
+    protected ILibrarySpecification parseLibrary(IResourceLocation location)
     {
         try
         {
             Node node = parseToNode(location);
-            LibraryScanner scanner = new LibraryScanner();
-            return (ILibrarySpecification)scanner.scan(BUILD_PARSER, null, node);
+            if (node != null)
+            {
+                LibraryScanner scanner = new LibraryScanner();
+                scanner.setResourceLocation(location);
+                scanner.setFactory(TapestryCore.getSpecificationFactory());
+                ILibrarySpecification result =
+                    (ILibrarySpecification) scanner.scan(BUILD_PARSER, new BuilderValidator(tapestryBuilder), node);
+                IResource res = Utils.toResource(location);
+                if (res != null)
+                {
+                    Markers.addTapestryProblemMarkersToResource(res, scanner.getProblems());
+                } else
+                {
+                    TapestryCore.logProblems(((IResourceWorkspaceLocation) location).getStorage(), scanner.getProblems());
+                }
+            }
+        } catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (CoreException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ScannerException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    protected IApplicationSpecification parseApplication(IResourceLocation location)
+    {
+        try
+        {
+            Node node = parseToNode(location);
+            if (node != null)
+            {
+                ApplicationScanner scanner = new ApplicationScanner();
+                scanner.setResourceLocation(location);
+                scanner.setFactory(TapestryCore.getSpecificationFactory());
+                IApplicationSpecification result =
+                    (IApplicationSpecification) scanner.scan(BUILD_PARSER, new BuilderValidator(tapestryBuilder), node);
+                IResource res = Utils.toResource(location);
+                if (res != null)
+                {
+                    Markers.addTapestryProblemMarkersToResource(res, scanner.getProblems());
+                } else
+                {
+                    TapestryCore.logProblems(((IResourceWorkspaceLocation) location).getStorage(), scanner.getProblems());
+                }
+            }
         } catch (IOException e)
         {
             // TODO Auto-generated catch block

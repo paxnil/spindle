@@ -30,6 +30,9 @@ import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.w3c.dom.Node;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.parser.IProblem;
+
 /**
  *  Scanner that turns a node tree into a ILibrarySpecification
  * 
@@ -44,7 +47,7 @@ public class ApplicationScanner extends LibraryScanner
      */
     protected Object beforeScan(Node rootNode) throws ScannerException
     {
-        if (!isElement(rootNode, "library-specification"))
+        if (!isElement(rootNode, "application"))
         {
             return null;
         }
@@ -68,6 +71,10 @@ public class ApplicationScanner extends LibraryScanner
     {
 
         specification.setName(getAttribute(rootNode, "name"));
+        String engineClass = getAttribute(rootNode, "engine-class");
+        if (!TapestryCore.isNull(engineClass)) {        
+            validateTypeName(engineClass, IProblem.ERROR, getAttributeSourceLocation(rootNode, "engine-class"));
+        }
         specification.setEngineClassName(getAttribute(rootNode, "engine-class"));
 
         scanLibrarySpecification(rootNode, specification, resolver);

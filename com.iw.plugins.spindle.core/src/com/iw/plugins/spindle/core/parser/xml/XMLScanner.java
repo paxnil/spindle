@@ -766,6 +766,10 @@ public abstract class XMLScanner implements XMLComponent
             reportFatalError("OpenQuoteExpected", new Object[] { atName });
         }
 
+        // TODO lksjdlsjdlskjdlksjds        
+
+        fEventHandler.attributeBegin(atName, fEntityScanner.getLineNumber(), fEntityScanner.getColumnNumber() + 1);
+
         fEntityScanner.scanChar();
         int entityDepth = fEntityDepth;
 
@@ -776,12 +780,11 @@ public abstract class XMLScanner implements XMLComponent
         }
 
         // end of unmunged attribute here
-        fEventHandler.attributeEnd(fEntityManager.fCurrentEntity.lineNumber, fEntityManager.fCurrentEntity.columnNumber - 1);
-        //        System.out.println(
-        //            "Ends attribute at line: "
-        //                + fEndLineNumber
-        //                + " column: "
-        //                + fEndColumnNumber);
+        if (value.length == 0) {
+            fEventHandler.emptyAttribute();
+        } else {
+            fEventHandler.attributeEnd(fEntityScanner.getLineNumber(), fEntityScanner.getColumnNumber());
+        }
 
         fStringBuffer2.clear();
         fStringBuffer2.append(value);
