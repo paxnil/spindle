@@ -68,6 +68,7 @@ public class PullParserNode implements Node
 {
 
     /**
+     *  Create a new Element node
      * 
      * @param parser the parser in use
      * @param parentNode the parent, null if its the root node
