@@ -61,7 +61,7 @@ public class DefinePagesComponentsPage extends WizardPage {
     this.setImageDescriptor(
       ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
     this.setDescription(
-      "If listed, Spindle can't tell those below are pages or components. You need to make the distinction.");
+      "If listed, Spindle can't tell if those below are pages or components. You need to make the distinction.");
 
     this.context = context;
 
@@ -111,7 +111,7 @@ public class DefinePagesComponentsPage extends WizardPage {
     pageViewer.setInput(pageList);
     updateButtonsEnabled();
     
-    return actuals.isEmpty();
+    return !actuals.isEmpty();
 
   } /**
          * @see org.eclipse.jface.dialogs.IDialogPage#createControl(Composite)
@@ -121,6 +121,7 @@ public class DefinePagesComponentsPage extends WizardPage {
     Composite container = new Composite(parent, SWT.NULL);
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;
+    layout.makeColumnsEqualWidth = true;
     container.setLayout(layout);
     GridData gd;
     Composite leftColumn = new Composite(container, SWT.NULL);

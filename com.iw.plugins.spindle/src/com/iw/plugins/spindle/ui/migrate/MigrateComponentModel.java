@@ -110,11 +110,16 @@ public class MigrateComponentModel extends MigrationWorkUnit {
         // need to convert to a page!
 
         IPath newPath = storagePath.uptoSegment(storagePath.segmentCount() - 1);
-        newPath.append(filename + ".page");
+        newPath = newPath.append(filename + ".page");
 
         setNewPath(newPath.toString());
 
         lib.setPageSpecificationPath(foundPage, fragmentPath + filename + ".page");
+        
+        TapestryComponentModel cmodel = (TapestryComponentModel)sourceModel;
+        PluginComponentSpecification spec = (PluginComponentSpecification)cmodel.getComponentSpecification();
+        spec.setPageSpecification(true);
+        
 
       }
 
@@ -137,8 +142,10 @@ public class MigrateComponentModel extends MigrationWorkUnit {
     List containedComponents = componentSpec.getComponentIds();
 
     for (Iterator iter = containedComponents.iterator(); iter.hasNext();) {
+    	
+      String id = (String)iter.next();
 
-      PluginContainedComponent element = (PluginContainedComponent) iter.next();
+      PluginContainedComponent element = (PluginContainedComponent) componentSpec.getComponent(id);
 
       if (element.getCopyOf() != null) {
 

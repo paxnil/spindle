@@ -1,11 +1,15 @@
 package com.iw.plugins.spindle.ui.migrate;
 
+import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.ui.actions.RenameAction;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
@@ -38,6 +42,8 @@ public abstract class MigrationWorkUnit implements IMigrationConstraints, IModel
   private boolean dirty = false;
 
   private int requiredPublicId;
+  
+  private boolean committed = false;
 
   /**
    * Constructor for MigrationWorkUnit.
@@ -104,9 +110,9 @@ public abstract class MigrationWorkUnit implements IMigrationConstraints, IModel
     }
   }
 
-  public void commitMigration(IProgressMonitor monitor) {
+  public void commitMigration(IProgressMonitor monitor) throws CoreException {
 
-    if (dirty) {
+    if (dirty && !committed) {
 
       if (newPath == null || "".equals(newPath)) {
 
@@ -121,13 +127,25 @@ public abstract class MigrationWorkUnit implements IMigrationConstraints, IModel
 
   }
 
-  private void normalCommit(IProgressMonitor monitor) {
+  private void normalCommit(IProgressMonitor monitor) throws CoreException {
+  	
+    IFile sourceFile = (IFile) sourceModel.getUnderlyingStorage();
+    
+    ByteArrayInputStream source = new ByteArrayInputStream(sourceModel.toXML().getBytes());
+    
+    sourceFile.setContents(source, true, true, monitor);
 
   }
 
-  private void nameChangeCommit(IProgressMonitor monitor) {
+  private void nameChangeCommit(IProgressMonitor monitor) throws CoreException {
 
     normalCommit(monitor);
+    
+    IFile sourceFile = (IFile) sourceModel.getUnderlyingStorage();
+    
+    IPath renamedPath = new Path(newPath);
+    
+    sourceFile.move(renamedPath, true, monitor);
 
   }
 
@@ -309,6 +327,14 @@ public abstract class MigrationWorkUnit implements IMigrationConstraints, IModel
    */
   public void setRequiredPublicId(int requiredPublicId) {
     this.requiredPublicId = requiredPublicId;
+  }
+
+  /**
+   * Returns the committed.
+   * @return boolean
+   */
+  public boolean isCommitted() {
+    return committed;
   }
 
 }

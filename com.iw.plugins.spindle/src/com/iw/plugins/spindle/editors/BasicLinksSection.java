@@ -182,6 +182,7 @@ public abstract class BasicLinksSection extends SpindleFormSection implements IM
       linksParent.redraw();
     }
     updateNeeded = false;
+    reflow();
   }
   
   

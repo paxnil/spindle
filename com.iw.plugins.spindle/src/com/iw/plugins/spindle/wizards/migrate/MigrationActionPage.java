@@ -59,8 +59,7 @@ public class MigrationActionPage
   MigrationContext context;
   MigrationActionChooserWidget chooser;
 
-  boolean isComplete = true;
-
+  boolean showUndefinedPage;
   /**
    * Constructor for ConversionWelcomePage.
    * @param name
@@ -177,7 +176,7 @@ public class MigrationActionPage
    * @see org.eclipse.jface.wizard.IWizardPage#canFlipToNextPage()
    */
   public boolean canFlipToNextPage() {
-    return isPageComplete();
+    return isPageComplete() && showUndefinedPage;
   }
 
   List selectionChangeListeners = new ArrayList();
@@ -211,6 +210,24 @@ public class MigrationActionPage
    * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(ISelection)
    */
   public void setSelection(ISelection selection) {
+  }
+
+ 
+
+  /**
+   * Returns the showUndefinedPage.
+   * @return boolean
+   */
+  public boolean getShowUndefinedPage() {
+    return showUndefinedPage;
+  }
+
+  /**
+   * Sets the showUndefinedPage.
+   * @param showUndefinedPage The showUndefinedPage to set
+   */
+  public void setShowUndefinedPage(boolean showUndefinedPage) {
+    this.showUndefinedPage = showUndefinedPage;
   }
 
 }

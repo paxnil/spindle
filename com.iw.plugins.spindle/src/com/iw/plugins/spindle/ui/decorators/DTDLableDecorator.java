@@ -19,15 +19,14 @@ import org.eclipse.swt.widgets.Display;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
+import com.iw.plugins.spindle.project.TapestryProject;
 import com.iw.plugins.spindle.spec.XMLUtil;
 
 /**
- * @author administrator
+ * @author GWL
+ * @version $Id$
  *
- * To change this generated comment edit the template variable "typecomment":
- * Window>Preferences>Java>Templates.
- * To enable and disable the creation of type comments go to
- * Window>Preferences>Java>Code Generation.
  */
 public class DTDLableDecorator
   extends LabelProvider
@@ -43,20 +42,27 @@ public class DTDLableDecorator
   }
 
   private ITapestryModel getTapestryModel(Object element) {
-    IStorage resource = null;
+    IStorage storage = null;
     try {
-      resource = (IStorage) element;
+      storage = (IStorage) element;
     } catch (Exception e) {
       if (element instanceof IAdaptable) {
-        resource = (IStorage) ((IAdaptable) element).getAdapter(IStorage.class);
+        storage = (IStorage) ((IAdaptable) element).getAdapter(IStorage.class);
       }
     }
     try {
 
-      if (resource != null) {
+      if (storage != null) {
 
-        TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(resource);
-        return mgr.getReadOnlyModel(resource);
+        TapestryProject tproject =
+          (TapestryProject) TapestryPlugin.getDefault().getTapestryProjectFor(storage);
+
+        if (tproject != null && tproject.getProject().isOpen()) {
+
+          TapestryProjectModelManager mgr = tproject.getModelManager();
+          return mgr.getReadOnlyModel(storage, true);
+
+        }
 
       }
 
@@ -93,24 +99,22 @@ public class DTDLableDecorator
         return "?";
     }
 
-  } /**
-         * @see org.eclipse.jface.viewers.ILabelDecorator#decorateImage(Image, Object)
-         * we return null here as we are not decorating images (yet)
-         */
+  } 
+  
   public Image decorateImage(Image image, Object element) {
     return null;
-  } /**
-         * @see org.eclipse.jface.viewers.ILabelDecorator#decorateText(String, Object)
-         */
+  } 
+  
+  
   public String decorateText(String text, Object element) {
     ITapestryModel model = getTapestryModel(element);
     if (model != null) {
       return text + " (DTD " + getDTDString(model) + ")";
     }
     return null;
-  } /**
-         * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
-         */
+  }
+  
+  
   public void resourceChanged(IResourceChangeEvent event) {
     //first collect the label change events
     final IResource[] affectedResources = processDelta(event.getDelta());
@@ -127,33 +131,33 @@ public class DTDLableDecorator
   protected IResource[] processDelta(IResourceDelta delta) {
     final ArrayList affectedResources = new ArrayList();
     try {
-    	
+
       delta.accept(new IResourceDeltaVisitor() {
-      	
+
         public boolean visit(IResourceDelta delta) throws CoreException {
-        	
+
           IResource resource = delta.getResource(); //skip workspace root
           boolean result = true;
-          
+
           if (resource.getType() == IResource.ROOT) {
-          	
+
             return true;
-            
+
           } //don't care about deletions
           if (delta.getKind() == IResourceDelta.REMOVED) {
-          	
+
             return false;
-            
+
           }
           IStorage storage = null;
           try {
-          	
+
             storage = (IStorage) resource;
-            
+
           } catch (Exception e) {
-          	
+
             if (resource instanceof IAdaptable) {
-            	
+
               storage = (IStorage) ((IAdaptable) resource).getAdapter(IStorage.class);
             }
           }
@@ -161,15 +165,15 @@ public class DTDLableDecorator
 
             ITapestryModel model = getTapestryModel(resource);
             if (model != null) {
-            	
+
               if (model.isLoaded()) {
-              	
+
                 model.reload();
-                
+
               } else {
-              	
+
                 model.load();
-                
+
               }
               affectedResources.add(resource);
               result = false;

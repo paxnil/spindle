@@ -135,14 +135,14 @@ public class TapestryLookup implements ILookupAcceptor {
     frags.toArray(fragments);
     return fragments;
   }
-  
-  public IStorage [] findComponent(String tapestryPath) {
-  	
-  	return findComponent(tapestryPath, ACCEPT_COMPONENTS);
-  	
+
+  public IStorage[] findComponent(String tapestryPath) {
+
+    return findComponent(tapestryPath, ACCEPT_COMPONENTS);
+
   }
 
-  public IStorage [] findComponent(String tapestryPath, int acceptFlags) {
+  public IStorage[] findComponent(String tapestryPath, int acceptFlags) {
     if (!initialized) {
       throw new Error("not initialized");
     }
@@ -150,6 +150,17 @@ public class TapestryLookup implements ILookupAcceptor {
     StorageOnlyRequest request = new StorageOnlyRequest();
     findAll(tapestryPath, false, acceptFlags, request);
     return request.getResults();
+  }
+
+  public IStorage findDefaultLibrary() {
+    if (!initialized) {
+      throw new Error("not initialized");
+    }
+    int acceptFlags = (ACCEPT_LIBRARIES | FULL_TAPESTRY_PATH);
+    StorageOnlyRequest request = new StorageOnlyRequest();
+    findAll("/net/sf/tapestry/Framework.library", false, acceptFlags, request);
+    return request.getResults()[0];
+
   }
 
   /**
@@ -581,7 +592,7 @@ public class TapestryLookup implements ILookupAcceptor {
         try {
 
           IProject thisProject = jproject.getProject();
-          IProject resourceProject = ((IResource)s).getProject();
+          IProject resourceProject = ((IResource) s).getProject();
 
           if (!thisProject.equals(resourceProject)
             || !resourceProject.hasNature(TapestryPlugin.NATURE_ID)) {

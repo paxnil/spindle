@@ -37,6 +37,7 @@ import com.iw.plugins.spindle.editorlib.pages.LibraryPagesFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormOutlinePage;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
 
 public class LibraryContentOutlinePage extends SpindleFormOutlinePage {
@@ -95,7 +96,7 @@ public class LibraryContentOutlinePage extends SpindleFormOutlinePage {
     public Object[] getChildren(Object parent) {
     	
       TapestryLibraryModel model = (TapestryLibraryModel) formPage.getModel();
-      PluginLibrarySpecification spec = (PluginLibrarySpecification) model.getSpecification();
+      IPluginLibrarySpecification spec = (IPluginLibrarySpecification) model.getSpecification();
       if (spec != null) {
       	
         if (parent instanceof ComponentsFormPage) {

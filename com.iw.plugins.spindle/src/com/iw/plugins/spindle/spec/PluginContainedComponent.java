@@ -58,6 +58,14 @@ public class PluginContainedComponent
   public PluginContainedComponent() {
     propertySupport = new PropertyChangeSupport(this);
   }
+  
+   /**
+   * Method getDTDVersion.
+   * @return String
+   */
+  public int getDTDVersion() {
+    return XMLUtil.getDTDVersion(parent.getPublicId());
+  }
 
   public void setBinding(String name, BindingSpecification spec) {
     if (bindings == null) {
@@ -310,5 +318,7 @@ public class PluginContainedComponent
 
     return result;
   }
+
+ 
 
 }

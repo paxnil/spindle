@@ -72,8 +72,6 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
 
   private BindingEditorLabelProvider labelProvider = new BindingEditorLabelProvider();
 
-
-
   /**
    * Constructor for ParameterEditorSection
    */
@@ -87,13 +85,11 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
     setUseToolTips(false);
   }
 
-
-
   public void initialize(Object object) {
     super.initialize(object);
     BaseTapestryModel model = (BaseTapestryModel) object;
     if (!model.isEditable()) {
-    	
+
       newInheritedAction.setEnabled(false);
       newBindingAction.setEnabled(false);
       newFieldAction.setEnabled(false);
@@ -101,7 +97,7 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
       newStringAction.setEnabled(false);
     }
     if (DTDVersion < XMLUtil.DTD_1_2) {
-    	
+
       newStringAction.setEnabled(false);
     }
   }
@@ -109,7 +105,7 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
   public void sectionChanged(FormSection source, int changeType, Object changeObject) {
     // this can only come from the ComponentSelectionSection and it can only be
     // that a new PluginContainedComponent was selected!
-    selectedComponent = (IBindingHolder) changeObject;    
+    selectedComponent = (IBindingHolder) changeObject;
     updateNeeded = true;
     update();
   }
@@ -166,11 +162,11 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
     pAction.setEnabled(((IModel) getFormPage().getModel()).isEditable());
     manager.add(pAction);
   }
-  
-  protected ChooseBindingTypeDialog getDialog() {  	
-  	
-  	return new ChooseBindingTypeDialog(newButton.getShell(), DTDVersion >= XMLUtil.DTD_1_2);
- 
+
+  protected ChooseBindingTypeDialog getDialog() {
+
+    return new ChooseBindingTypeDialog(newButton.getShell(), DTDVersion >= XMLUtil.DTD_1_2);
+
   }
 
   protected Set getExistingBindingParameters() {
@@ -184,7 +180,7 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
     }
 
     return result;
-  }  
+  }
 
   public class BindingEditorLabelProvider extends AbstractIdentifiableLabelProvider {
 
@@ -203,6 +199,14 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
       String identifier = spec.getIdentifier();
 
       if (type == BindingType.DYNAMIC) {
+
+        int DTDVersion = XMLUtil.getDTDVersion(getModel().getPublicId());
+
+        if (DTDVersion >= XMLUtil.DTD_1_3) {
+
+          return identifier + " expression = " + spec.getValue();
+
+        }
         return identifier + " property-path = " + spec.getValue();
       }
 
@@ -224,8 +228,6 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
 
       return null;
     }
-
-  
 
     public Image getImage(Object object) {
 
@@ -249,7 +251,6 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
       return null;
     }
 
-  
   }
 
   class DeleteBindingAction extends Action {
@@ -295,8 +296,6 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
 
   }
 
-
-
   protected class NewBindingButtonAction extends Action {
 
     /**
@@ -305,7 +304,7 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
     public NewBindingButtonAction() {
       super();
       setText("New");
-    }   
+    }
 
     /**
      * Constructor for NewBindingButtonAction.
@@ -329,21 +328,21 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
       }
 
       dialog.create();
-      
+
       if (dialog.open() == dialog.OK) {
-      	
+
         BindingType chosen = dialog.getSelectedBindingType();
         List chosenParamterNames = dialog.getParameterNames();
-        
+
         if (chosenParamterNames.isEmpty()) {
-        	
+
           createBinding(chosen);
         } else {
-        	
+
           Iterator newNames = chosenParamterNames.iterator();
-          
+
           while (newNames.hasNext()) {
-          	
+
             createBinding(chosen, (String) newNames.next());
           }
         }

@@ -26,7 +26,6 @@
 package com.iw.plugins.spindle.spec;
 
 import net.sf.tapestry.bean.IBeanInitializer;
-import net.sf.tapestry.spec.ApplicationSpecification;
 import net.sf.tapestry.spec.AssetSpecification;
 import net.sf.tapestry.spec.AssetType;
 import net.sf.tapestry.spec.BeanLifecycle;
@@ -41,6 +40,7 @@ import net.sf.tapestry.spec.ILibrarySpecification;
 import net.sf.tapestry.spec.ParameterSpecification;
 import net.sf.tapestry.spec.SpecFactory;
 
+import com.iw.plugins.spindle.spec.bean.PluginExpressionBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginFieldBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginPropertyBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginStaticBeanInitializer;
@@ -115,7 +115,14 @@ public class TapestryPluginSpecFactory extends SpecFactory {
    * @see net.sf.tapestry.spec.SpecFactory#createStringBeanInitializer(String, String)
    */
   public IBeanInitializer createStringBeanInitializer(String propertyName, String key) {
-    return super.createStringBeanInitializer(propertyName, key);
+    return new PluginStaticBeanInitializer(propertyName, key);
+  }
+
+  /**
+   * @see net.sf.tapestry.spec.SpecFactory#createExpressionBeanInitializer(String, String)
+   */
+  public IBeanInitializer createExpressionBeanInitializer(String propertyName, String expression) {
+    return new PluginExpressionBeanInitializer(propertyName, expression);
   }
 
 }

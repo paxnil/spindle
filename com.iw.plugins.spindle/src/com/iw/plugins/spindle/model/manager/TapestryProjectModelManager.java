@@ -356,15 +356,33 @@ public class TapestryProjectModelManager
     return true;
   }
 
+  public ITapestryModel getReadOnlyModel(Object element) {
+
+    return getReadOnlyModel(element, false);
+
+  }
+
   /**
    * will never return an editable model
    */
-  public ITapestryModel getReadOnlyModel(Object element) {
+  public ITapestryModel getReadOnlyModel(Object element, boolean force) {
 
     initializeProjectTapestryModels();
 
     ModelInfo info = (ModelInfo) models.get(element);
     ITapestryModel result = null;
+
+    if (info == null && force) {
+
+      ITapestryModel possible = createModel(element);
+      if (possible != null) {
+
+        addModel(possible);
+        info = (ModelInfo) models.get(element);
+
+      }
+
+    }
 
     if (info != null) {
 
@@ -653,7 +671,7 @@ public class TapestryProjectModelManager
     monitor.done();
   }
 
-  class Collector implements ILookupRequestor {
+  public class Collector implements ILookupRequestor {
     ArrayList result;
     public boolean isCancelled() {
       return false;
@@ -943,8 +961,8 @@ public class TapestryProjectModelManager
       if (project.isOpen() == false)
         return false;
 
-//      if (!project.equals(this.project))
-//        return false;
+      //      if (!project.equals(this.project))
+      //        return false;
       return hasRootObject(model);
     }
     return true;
@@ -998,7 +1016,7 @@ public class TapestryProjectModelManager
    */
   public List getAllModels(Object element) {
     initializeProjectTapestryModels();
-    return (List) ((ArrayList)allModels).clone();
+    return (List) ((ArrayList) allModels).clone();
   }
 
   public List getAllModels(Object element, String extension) {
@@ -1058,18 +1076,15 @@ public class TapestryProjectModelManager
     return (ITapestryModel[]) models.toArray(new ITapestryModel[models.size()]);
   }
 
-  //  /**
-  //   * Method modelExists.
-  //   * @param targetStorage
-  //   * @return boolean
-  //   */
-  //  public boolean modelExists(Object element) {
-  //    return models.get(element) != null;
-  //  }
-
   public TapestryLibraryModel getDefaultLibrary() {
 
     return defaultLibrary;
+
+  }
+
+  public void setDefaultLibrary(TapestryLibraryModel model) {
+
+    defaultLibrary = model;
 
   }
 
@@ -1109,10 +1124,8 @@ public class TapestryProjectModelManager
 
     }
 
-    return result; 
+    return result;
   }
-
-  
 
   public List getAllComponentModelsDefinedIn(TapestryLibraryModel model, TapestryLookup lookup) {
 
@@ -1125,8 +1138,6 @@ public class TapestryProjectModelManager
 
         ITapestryModel foundModel = getReadOnlyModel(found[0]);
         if (foundModel != null && !result.contains(foundModel)) {
-        	
-        	
 
           result.add(foundModel);
         }

@@ -141,6 +141,11 @@ public class BeanSummarySection extends SpindleFormSection {
       if (value == BeanLifecycle.REQUEST) {
         return "REQUEST";
       }
+      
+      if (value == BeanLifecycle.RENDER) {
+      	
+      	return "RENDER";
+      }
     }
     return "";
   }

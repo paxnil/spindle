@@ -240,7 +240,7 @@ public abstract class BasePagesSummarySection
       specText.setValue(specificationPath, false);
 
       if (specificationPath == null
-        || !(specificationPath.endsWith(".jwc") || specificationPath.endsWith("page"))) {
+        || !(specificationPath.endsWith(".jwc") || specificationPath.endsWith(".page"))) {
 
         resolveFailed(specificationPath);
         return;
@@ -264,9 +264,16 @@ public abstract class BasePagesSummarySection
         resolveFailed(specificationPath);
 
       }
-      IStorage[] found = lookup.findPage(specificationPath);
+      
+      IStorage[] found = lookup.findComponent(specificationPath);
+      
+      if (found == null || found.length == 0) {
+      	
+      	found = lookup.findPage(specificationPath);
+      	
+      }
 
-      if (found.length != 1) {
+      if (found == null || found.length != 1) {
 
         resolveFailed(specificationPath);
         return;

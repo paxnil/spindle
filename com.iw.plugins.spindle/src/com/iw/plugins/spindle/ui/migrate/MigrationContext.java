@@ -106,7 +106,7 @@ public class MigrationContext implements IMigrationConstraints {
     migrators.clear();
 
     MigrateLibraryModel libMigrator = new MigrateLibraryModel(this, requiredPublicId);
-
+    
     registerMigatorFor(contextModel.getUnderlyingStorage(), libMigrator);
 
     libMigrator.configure();

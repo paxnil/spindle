@@ -27,16 +27,25 @@ package com.iw.plugins.spindle.editorjwc.beans;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
+import net.sf.tapestry.bean.ExpressionBeanInitializer;
 import net.sf.tapestry.bean.FieldBeanInitializer;
 import net.sf.tapestry.bean.IBeanInitializer;
 import net.sf.tapestry.bean.PropertyBeanInitializer;
 import net.sf.tapestry.bean.StaticBeanInitializer;
+import net.sf.tapestry.bean.StringBeanInitializer;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -49,15 +58,20 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.update.ui.forms.internal.FormSection;
 
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.spec.bean.PluginExpressionBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginFieldBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginPropertyBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginStaticBeanInitializer;
+import com.iw.plugins.spindle.spec.bean.PluginStringBeanInitializer;
 import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.PluginBeanSpecification;
+import com.iw.plugins.spindle.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.spec.XMLUtil;
 import com.iw.plugins.spindle.ui.EmptySelection;
 
 public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSection {
@@ -67,6 +81,8 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
   private NewPropertyInitializerAction newPropertyAction = new NewPropertyInitializerAction();
   private NewStaticInitializerAction newStaticAction = new NewStaticInitializerAction();
   private NewFieldInitializerAction newFieldAction = new NewFieldInitializerAction();
+  private NewStringInitializerAction newStringAction = new NewStringInitializerAction();
+  private NewExpressionInitializerAction newExpressionAction = new NewExpressionInitializerAction();
 
   private PluginBeanSpecification selectedBean;
 
@@ -80,6 +96,20 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     setDeleteAction(deleteAction);
     setHeaderText("Initializers");
     setDescription("This section allows one to edit selected beans's initializers");
+  }
+
+  private int getSelectedDTD() {
+
+    if (selectedBean == null) {
+
+      return XMLUtil.UNKNOWN_DTD;
+
+    }
+
+    PluginComponentSpecification cspec = (PluginComponentSpecification) selectedBean.getParent();
+
+    return XMLUtil.getDTDVersion(cspec.getPublicId());
+
   }
 
   public void initialize(Object object) {
@@ -96,6 +126,8 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
       newPropertyAction.setEnabled(false);
       newStaticAction.setEnabled(false);
       newFieldAction.setEnabled(false);
+      newExpressionAction.setEnabled(false);
+      newStringAction.setEnabled(false);
     }
   }
 
@@ -158,9 +190,27 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     ISelection selection = getSelection();
     final Object object = ((IStructuredSelection) selection).getFirstElement();
     MenuManager submenu = new MenuManager("New");
-    submenu.add(newPropertyAction);
-    submenu.add(newStaticAction);
-    submenu.add(newFieldAction);
+    int DTDVersion = getSelectedDTD();
+
+    if (DTDVersion == XMLUtil.UNKNOWN_DTD) {
+
+      return;
+
+    }
+
+    if (DTDVersion < XMLUtil.DTD_1_3) {
+
+      submenu.add(newPropertyAction);
+      submenu.add(newStaticAction);
+      submenu.add(newFieldAction);
+
+    } else {
+
+      submenu.add(newExpressionAction);
+      submenu.add(newStringAction);
+
+    }
+
     manager.add(submenu);
 
     if (object != null) {
@@ -178,6 +228,8 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     private Image staticImage = TapestryImages.getSharedImage("bean-static-init.gif");
     private Image propertyImage = TapestryImages.getSharedImage("bean-property-init.gif");
     private Image fieldImage = TapestryImages.getSharedImage("bean-property-init.gif");
+    private Image expressionImage = TapestryImages.getSharedImage("bean-expression-init.gif");
+    private Image stringImage = TapestryImages.getSharedImage("bean-string-init.gif");
 
     public String getText(Object object) {
       return object.toString();
@@ -187,14 +239,31 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
 
       IBeanInitializer initer = (IBeanInitializer) object;
       if (initer instanceof PluginStaticBeanInitializer) {
+
         return staticImage;
+
       }
       if (initer instanceof PluginPropertyBeanInitializer) {
+
         return propertyImage;
+
       }
       if (initer instanceof PluginFieldBeanInitializer) {
+
         return fieldImage;
+
       }
+      if (initer instanceof PluginExpressionBeanInitializer) {
+
+        return expressionImage;
+
+      }
+      if (initer instanceof PluginStringBeanInitializer) {
+
+        return stringImage;
+
+      }
+
       return null;
     }
 
@@ -255,28 +324,83 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     }
 
     public void run() {
+
+      if (selectedBean == null) {
+
+        return;
+
+      }
+
       updateSelection = true;
-      ChooseBeanInitializerDialog dialog = new ChooseBeanInitializerDialog(newButton.getShell());
-      dialog.create();
 
-      if (dialog.open() == dialog.OK) {
+      int DTDVersion = getSelectedDTD();
 
-        Class chosen = dialog.getSelectedIntializerClass();
+      Set existing = new HashSet();
 
-        if (chosen == PropertyBeanInitializer.class) {
+      List initializers = selectedBean.getInitializers();
 
-          newPropertyAction.run();
-        } else if (chosen == StaticBeanInitializer.class) {
+      if (initializers != null) {
 
-          newStaticAction.run();
+        for (Iterator iter = selectedBean.getInitializers().iterator(); iter.hasNext();) {
+
+          IBeanInitializer element = (IBeanInitializer) iter.next();
+          existing.add(element.getPropertyName());
         }
-        if (chosen == FieldBeanInitializer.class) {
+      }
 
-          newFieldAction.run();
+      try {
+
+        IJavaProject project = TapestryPlugin.getDefault().getJavaProjectFor(getModel());
+
+        ChooseBeanInitializerDialog dialog =
+          new ChooseBeanInitializerDialog(
+            newButton.getShell(),
+            DTDVersion,
+            project,
+            selectedBean.getClassName(),
+            existing);
+
+        dialog.create();
+
+        if (dialog.open() == dialog.OK) {
+
+          Class chosen = dialog.getSelectedIntializerClass();
+          List chosenProperties = dialog.getPropertyNames();
+
+          if (chosen == PropertyBeanInitializer.class) {
+
+            newPropertyAction.run(chosenProperties);
+          } else if (chosen == StaticBeanInitializer.class) {
+
+            newStaticAction.run(chosenProperties);
+
+          } else if (chosen == FieldBeanInitializer.class) {
+
+            newFieldAction.run(chosenProperties);
+
+          } else if (chosen == StringBeanInitializer.class) {
+
+            newStringAction.run(chosenProperties);
+
+          } else if (chosen == ExpressionBeanInitializer.class) {
+
+            newExpressionAction.run(chosenProperties);
+
+          }
+
         }
+      } catch (CoreException e) {
+
+        ErrorDialog.openError(
+          newButton.getShell(),
+          "Spindle Error",
+          "unable to open dialog",
+          e.getStatus());
+
       }
       updateSelection = false;
     }
+
   }
 
   protected abstract class BaseNewInitializerAction extends Action {
@@ -285,16 +409,43 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
       super();
     }
 
-    /**
-    * @see Action#run()
-    */
     public void run() {
+
+      run((String) null);
+
+    }
+
+    public void run(List propertyNames) {
+
+      if (propertyNames == null || propertyNames.isEmpty()) {
+
+        run();
+
+      } else {
+
+        for (Iterator iter = propertyNames.iterator(); iter.hasNext();) {
+          run((String) iter.next());
+
+        }
+
+      }
+
+    }
+
+    public void run(String propertyName) {
       if (selectedBean == null) {
         return;
       }
       PluginBeanSpecification bean = selectedBean;
 
       String newName = "property";
+
+      if (propertyName != null) {
+
+        newName = propertyName;
+
+      }
+
       if (bean.alreadyHasInitializer(newName)) {
         int counter = 0;
         while (bean.alreadyHasInitializer(newName + counter)) {
@@ -325,6 +476,36 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     public IBeanInitializer getNewInitializerFor(String propertyName) {
       Object value = "fill in value";
       return new PluginStaticBeanInitializer(propertyName, value);
+    }
+  }
+
+  class NewStringInitializerAction extends BaseNewInitializerAction {
+    protected NewStringInitializerAction() {
+      super();
+      setText("String Initializer");
+      setImageDescriptor(
+        ImageDescriptor.createFromURL(TapestryImages.getImageURL("bean-string-init.gif")));
+
+    }
+
+    public IBeanInitializer getNewInitializerFor(String propertyName) {
+      String value = "fill in key";
+      return new PluginStringBeanInitializer(propertyName, value);
+    }
+  }
+
+  class NewExpressionInitializerAction extends BaseNewInitializerAction {
+    protected NewExpressionInitializerAction() {
+      super();
+      setText("Expression Initializer");
+      setImageDescriptor(
+        ImageDescriptor.createFromURL(TapestryImages.getImageURL("bean-expression-init.gif")));
+
+    }
+
+    public IBeanInitializer getNewInitializerFor(String propertyName) {
+      String value = "fill in expression";
+      return new PluginExpressionBeanInitializer(propertyName, value);
     }
   }
 

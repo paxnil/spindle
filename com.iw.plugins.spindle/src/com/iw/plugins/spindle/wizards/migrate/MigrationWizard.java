@@ -1,5 +1,6 @@
 package com.iw.plugins.spindle.wizards.migrate;
 
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,14 +12,17 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
+import org.omg.CORBA.portable.InvokeHandler;
 
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.spec.XMLUtil;
@@ -39,7 +43,6 @@ public class MigrationWizard extends Wizard {
   MigrationWelcomePage welcomePage;
   MigrationScopePage scopePage;
   MigrationActionPage actionPage;
-  UndefinedComponentsDescriptionPage undefinedWarningPage;
   DefinePagesComponentsPage definePage;
 
   private boolean canFinish = true;
@@ -50,6 +53,7 @@ public class MigrationWizard extends Wizard {
     super();
     this.context = context;
     setWindowTitle(context.getDescription());
+    setNeedsProgressMonitor(true);
   }
 
   protected boolean doFinish(IRunnableWithProgress runnable) {
@@ -63,6 +67,8 @@ public class MigrationWizard extends Wizard {
       //			ExceptionHandler.handle(e, shell, title, message);
       return false;
     } catch (InterruptedException e) {
+    	
+      e.printStackTrace();
       return false;
     }
     return true;
@@ -103,11 +109,14 @@ public class MigrationWizard extends Wizard {
       convertToNewPages);
 
     migrators.add(0, libraryWorker);
+       
 
     return doFinish(new IRunnableWithProgress() {
 
       public void run(IProgressMonitor monitor)
         throws InvocationTargetException, InterruptedException {
+        	
+        monitor.beginTask("Performing Migration", migrators.size() * 2);
 
         for (Iterator iter = migrators.iterator(); iter.hasNext();) {
           MigrationWorkUnit worker = (MigrationWorkUnit) iter.next();
@@ -115,6 +124,7 @@ public class MigrationWizard extends Wizard {
           try {
 
             worker.migrate();
+            monitor.worked(1);
 
           } catch (CoreException e) {
 
@@ -126,12 +136,20 @@ public class MigrationWizard extends Wizard {
         for (Iterator iter = migrators.iterator(); iter.hasNext();) {
           MigrationWorkUnit worker = (MigrationWorkUnit) iter.next();
 
-          worker.commitMigration(monitor);
+          try {
+            worker.commitMigration(monitor);
+            monitor.worked(1);
+          } catch (CoreException e) {
+          	
+          	throw new InvocationTargetException(e);
+          }
 
         }
 
       }
     });
+    
+
   }
 
   private void createMigratorsForUndefined(
@@ -180,9 +198,9 @@ public class MigrationWizard extends Wizard {
 
       Map.Entry entry = (Map.Entry) iter.next();
 
-      MigrationWorkUnit worker = (MigrationWorkUnit) entry;
+      MigrationWorkUnit worker = (MigrationWorkUnit) entry.getValue();
 
-      if (libraryWorker == worker) {
+      if (libraryWorker != worker) {
 
         migrators.add(worker);
 
@@ -301,21 +319,50 @@ public class MigrationWizard extends Wizard {
     return actuals;
   }
 
-  private void contextChanged() {
+  private void setContext() {
+
+    context.reset();
 
     IStructuredSelection scope = (IStructuredSelection) scopePage.getSelection();
-    context.setScope(scope.toList());
+    List scopeList = new ArrayList(scope.toList());
+    scopeList.add(context.getContextModel().getUnderlyingStorage());
+    context.setScope(scopeList);
 
     IStructuredSelection constraints = (IStructuredSelection) actionPage.getSelection();
+    List chosenContraints = constraints.toList();
+
+    boolean migratingPages = chosenContraints.contains(new Integer(context.MIGRATE_UPGRADE_PAGES));
     context.setConstraints(constraints.toArray());
+
+    boolean scopeContainsUndefined = definePage.setUndefined(collectUndefined());
+
+    if (migratingPages && scopeContainsUndefined) {
+
+      canFinish = false;
+      actionPage.setShowUndefinedPage(true);
+
+    } else {
+
+      canFinish = true;
+      actionPage.setShowUndefinedPage(false);
+
+    }
 
     context.constructMigrators();
 
-    canFinish = definePage.setUndefined(collectUndefined());
-    
-    getContainer().updateButtons();
+  }
 
-    context.reset();
+  private void contextChanged() {
+
+    setContext();
+
+    IWizardPage currentPage = getContainer().getCurrentPage();
+
+    if (currentPage != null) {
+
+      getContainer().updateButtons();
+
+    }
 
   }
 
@@ -326,19 +373,9 @@ public class MigrationWizard extends Wizard {
     welcomePage = new MigrationWelcomePage("welcome", context);
     addPage(welcomePage);
     scopePage = new MigrationScopePage("scope", context);
-    scopePage.addSelectionChangedListener(new ISelectionChangedListener() {
-      public void selectionChanged(SelectionChangedEvent event) {
-        contextChanged();
-      }
-    });
+
     addPage(scopePage);
     actionPage = new MigrationActionPage("actions", context);
-    actionPage.addSelectionChangedListener(new ISelectionChangedListener() {
-      public void selectionChanged(SelectionChangedEvent event) {
-        contextChanged();
-      }
-    });
-
     addPage(actionPage);
     //    undefinedWarningPage = new UndefinedComponentsDescriptionPage("warning", context);
     //    addPage(undefinedWarningPage);
@@ -356,13 +393,12 @@ public class MigrationWizard extends Wizard {
     if (nextPage == definePage) {
 
       canFinish = true;
+
       getContainer().updateButtons();
 
     }
     return nextPage;
   }
-
-
 
   /**
    * @see org.eclipse.jface.wizard.IWizard#canFinish()
@@ -370,6 +406,26 @@ public class MigrationWizard extends Wizard {
   public boolean canFinish() {
     boolean result = super.canFinish();
     return result & canFinish;
+  }
+
+  /**
+   * @see org.eclipse.jface.wizard.IWizard#createPageControls(Composite)
+   */
+  public void createPageControls(Composite pageContainer) {
+    super.createPageControls(pageContainer);
+    setContext();
+    canFinish = true;
+    scopePage.addSelectionChangedListener(new ISelectionChangedListener() {
+      public void selectionChanged(SelectionChangedEvent event) {
+        contextChanged();
+      }
+    });
+    actionPage.addSelectionChangedListener(new ISelectionChangedListener() {
+      public void selectionChanged(SelectionChangedEvent event) {
+        contextChanged();
+      }
+    });
+
   }
 
 }

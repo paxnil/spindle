@@ -603,13 +603,12 @@ public class HTMLContentOutlinePage
           tproject,
           "Create in " + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc",
           "Choose the Contained Component to create",
-          true,
           TapestryLookup.ACCEPT_COMPONENTS);
 
       dialog.create();
       if (dialog.open() == dialog.OK) {
 
-        chosen = dialog.getResultComponent();
+        chosen = dialog.getResultPath();
 
       }
       return chosen;

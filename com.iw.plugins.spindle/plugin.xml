@@ -28,6 +28,9 @@
       <library name="jakarta-oro-2.0.6.jar">
          <export name="*"/>
       </library>
+      <library name="ognl-2.1.2.jar">
+         <export name="*"/>
+      </library>
    </runtime>
    <requires>
       <import plugin="org.apache.xerces"/>
@@ -143,7 +146,7 @@
             objectClass="org.eclipse.core.resources.IStorage"
             adaptable="true"
             label="Spindle DTD Decorator"
-            state="true"
+            state="false"
             class="com.iw.plugins.spindle.ui.decorators.DTDLableDecorator"
             id="com.iw.plugins.spindle.DTDVersionDecorator">
          <description>
@@ -151,8 +154,7 @@
          </description>
       </decorator>
    </extension>
-   
-      <extension
+   <extension
          point="org.eclipse.ui.decorators">
       <decorator
             objectClass="org.eclipse.jdt.core.IJavaProject"
@@ -203,7 +205,7 @@
             contributorClass="com.iw.plugins.spindle.html.TapestryHTMLEditorContributor"
             class="com.iw.plugins.spindle.html.TapestryHTMLEditor"
             id="com.iw.plugins.spindle.editors.html">
-      </editor>     
+      </editor>
       <editor
             name="Spindle Editor for Tapestry Libraries"
             default="true"
@@ -295,7 +297,7 @@
                menubarPath="org.eclipse.ui.popupMenus.project.menu1/group1"
                enablesFor="1"
                id="com.iw.plugins.spindle.project.popupMenus.project.migrateToTapestryDTD13">
-          </action>
+         </action>
          <action
                label="Convert to Tapestry Project"
                icon="icons/full/application16_dark.gif"
@@ -304,7 +306,6 @@
                enablesFor="1"
                id="com.iw.plugins.spindle.project.popupMenus.project.convertToTapestryProject">
          </action>
-          
       </objectContribution>
       <objectContribution
             objectClass="org.eclipse.core.resources.IFile"
@@ -354,10 +355,12 @@
             class="com.iw.plugins.spindle.model.manager.LibraryManagerDelegate">
       </manager>
    </extension>
-   <extension point="org.eclipse.core.resources.moveDeleteHook" id="MoveDeleteHook">
-	 <moveDeleteHook class="com.iw.plugins.spindle.change.MoveDeleteManager"/>
+   <extension
+         id="MoveDeleteHook"
+         point="org.eclipse.core.resources.moveDeleteHook">
+      <moveDeleteHook
+            class="com.iw.plugins.spindle.change.MoveDeleteManager">
+      </moveDeleteHook>
    </extension>
-
-
 
 </plugin>

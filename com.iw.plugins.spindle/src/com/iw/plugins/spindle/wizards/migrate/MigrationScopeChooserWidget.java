@@ -83,14 +83,6 @@ public class MigrationScopeChooserWidget extends Viewer implements ICheckStateLi
     TreeContentProvider treeProvider = new TreeContentProvider();
     ListContentProvider listProvider = new ListContentProvider();
 
-    //    Tree tree = new Tree(container, SWT.NULL);
-    //    tree.setLayoutData(new GridData(GridData.FILL_BOTH));
-    //
-    //    TreeViewer viewer = new TreeViewer(tree);
-    //    viewer.setContentProvider(treeProvider);
-    //    viewer.setLabelProvider(labelProvider);
-    //    viewer.setInput(rootObject);
-
     widget =
       new CheckboxTreeAndList(
         container,
@@ -101,7 +93,15 @@ public class MigrationScopeChooserWidget extends Viewer implements ICheckStateLi
         labelProvider,
         style,
         width,
-        height);
+        height) {
+
+      public void buttonPressed(int buttonType) {
+        super.buttonPressed(buttonType);
+        fireSelectionChanged(
+          new SelectionChangedEvent(MigrationScopeChooserWidget.this, getSelection()));
+      }
+
+    };
 
     this.control = container;
 
@@ -110,6 +110,7 @@ public class MigrationScopeChooserWidget extends Viewer implements ICheckStateLi
     widget.setAllSelections(true);
 
     widget.addCheckStateListener(this);
+    widget.expandAll();
 
     return control;
 
@@ -135,7 +136,7 @@ public class MigrationScopeChooserWidget extends Viewer implements ICheckStateLi
    */
   public ISelection getSelection() {
 
-    Iterator iterator = widget.getAllCheckedListItems();
+    Iterator iterator = widget.getAllCheckedListItems().iterator();
 
     if (!iterator.hasNext()) {
 
@@ -162,10 +163,9 @@ public class MigrationScopeChooserWidget extends Viewer implements ICheckStateLi
     if (!selected.isEmpty()) {
 
       Object[] rootChildren = rootObject.getChildren();
-      ProjectNode pnode = (ProjectNode)rootChildren[0];
-      Object [] projectStorages = pnode.getListContents();
-      
-      
+      ProjectNode pnode = (ProjectNode) rootChildren[0];
+      Object[] projectStorages = pnode.getListContents();
+
       if (projectStorages.length != 0) {
 
         for (int i = 0; i < projectStorages.length; i++) {

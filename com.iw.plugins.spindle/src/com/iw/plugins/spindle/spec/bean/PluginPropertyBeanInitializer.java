@@ -29,7 +29,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import net.sf.tapestry.bean.PropertyBeanInitializer;
-import net.sf.tapestry.util.prop.PropertyHelper;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
@@ -61,8 +60,8 @@ public class PluginPropertyBeanInitializer
   }
   
 
-  public String[] getPropertyPath() {
-    return _propertyPath;
+  public String getPropertyPath() {
+    return _expression;
   }
 
   public String getOriginalPropertyPath() {
@@ -70,7 +69,7 @@ public class PluginPropertyBeanInitializer
   }
 
   public void setPropertyPath(String path) {
-    _propertyPath = PropertyHelper.splitPropertyPath(path);
+    _expression = path;
     originalPropertyPath = path;
     propertySupport.firePropertyChange("propertyPath", null, path);
   }
@@ -202,5 +201,6 @@ public class PluginPropertyBeanInitializer
 
     this.parent = (PluginBeanSpecification) parent;
   }
+
 
 }

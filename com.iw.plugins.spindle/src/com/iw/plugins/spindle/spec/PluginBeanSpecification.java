@@ -32,18 +32,22 @@ import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Iterator;
 
+import net.sf.tapestry.bean.ExpressionBeanInitializer;
 import net.sf.tapestry.bean.IBeanInitializer;
 import net.sf.tapestry.bean.PropertyBeanInitializer;
 import net.sf.tapestry.bean.StaticBeanInitializer;
+import net.sf.tapestry.bean.StringBeanInitializer;
 import net.sf.tapestry.spec.BeanLifecycle;
 import net.sf.tapestry.spec.BeanSpecification;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
+import com.iw.plugins.spindle.spec.bean.PluginExpressionBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginFieldBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginPropertyBeanInitializer;
 import com.iw.plugins.spindle.spec.bean.PluginStaticBeanInitializer;
+import com.iw.plugins.spindle.spec.bean.PluginStringBeanInitializer;
 import com.iw.plugins.spindle.ui.descriptors.ComboBoxPropertyDescriptor;
 import com.iw.plugins.spindle.ui.descriptors.TypeDialogPropertyDescriptor;
 import com.iw.plugins.spindle.util.Indenter;
@@ -62,6 +66,16 @@ public class PluginBeanSpecification
   public PluginBeanSpecification(String className, BeanLifecycle lifecycle) {
     super(className, lifecycle);
     propertySupport = new PropertyChangeSupport(this);
+  }
+
+  private int getParentDTDVersion() {
+
+    PluginComponentSpecification cspec = (PluginComponentSpecification) parent;
+
+    int DTDVersion = XMLUtil.getDTDVersion(cspec.getPublicId());
+
+    return DTDVersion;
+
   }
 
   public boolean alreadyHasInitializer(String propertyName) {
@@ -131,47 +145,51 @@ public class PluginBeanSpecification
     Indenter.printIndented(writer, indent, "<bean name=\"" + name);
     writer.print("\" class=\"" + getClassName());
     writer.print("\" lifecycle=\"");
-    
+
     if (getLifecycle().equals(BeanLifecycle.NONE)) {
-    	
+
       writer.print("none\"");
-      
+
     } else if (getLifecycle().equals(BeanLifecycle.PAGE)) {
-    	
+
       writer.print("page\"");
-      
+
     } else if (getLifecycle().equals(BeanLifecycle.REQUEST)) {
-    	
+
       writer.print("request\"");
-      
+
+    } else if (getLifecycle().equals(BeanLifecycle.RENDER)) {
+
+      writer.print("render\"");
+
     }
     String description = getDescription();
     Collection inits = getInitializers();
-    
+
     boolean writeableDescription = description != null && !"".equals(description.trim());
     boolean writeableInitializers = inits != null && !inits.isEmpty();
-    
+
     if (writeableDescription || writeableInitializers) {
-    	
+
       writer.println(">");
-      
+
       if (writeableDescription) {
-      	
+
         XMLUtil.writeDescription(writer, indent + 1, description.trim(), false);
       }
-      
+
       if (writeableInitializers) {
-      	
+
         Iterator initializers = inits.iterator();
-        
+
         while (initializers.hasNext()) {
-        	
+
           IBeanInitializer initer = (IBeanInitializer) initializers.next();
           write(initer, writer, indent + 1);
         }
       }
     } else {
-    	
+
       writer.println("/>");
       return;
     }
@@ -180,9 +198,28 @@ public class PluginBeanSpecification
   }
 
   public void write(IBeanInitializer initializer, PrintWriter writer, int indent) {
+    PluginComponentSpecification cspec = (PluginComponentSpecification) parent;
+
+    int DTDVersion = getParentDTDVersion();
+
+    if (DTDVersion < XMLUtil.DTD_1_3) {
+
+      writePre13(initializer, writer, indent);
+
+    } else {
+
+      write13(initializer, writer, indent);
+
+    }
+
+  }
+
+  public void writePre13(IBeanInitializer initializer, PrintWriter writer, int indent) {
     Indenter.printIndented(writer, indent, "<set-property name=\"" + initializer.getPropertyName());
     writer.println("\">");
-    if (initializer instanceof PropertyBeanInitializer) {
+
+    if (initializer instanceof PluginPropertyBeanInitializer) {
+
       Indenter.printIndented(
         writer,
         indent + 1,
@@ -191,20 +228,85 @@ public class PluginBeanSpecification
       writer.println("\"/>");
 
     } else if (initializer instanceof StaticBeanInitializer) {
+
       StaticTypeValue StaticTypeValue =
         findStaticType(((PluginStaticBeanInitializer) initializer).getValue());
+
       Indenter.printIndented(writer, indent + 1, "<static-value type=\"" + StaticTypeValue.type);
       writer.println("\">");
       Indenter.printlnIndented(writer, indent + 2, StaticTypeValue.value);
       Indenter.printlnIndented(writer, indent + 1, "</static-value>");
+
     } else if (initializer instanceof PluginFieldBeanInitializer) {
+
       Indenter.printIndented(
         writer,
         indent + 1,
         "<field-value field-name=\"" + ((PluginFieldBeanInitializer) initializer).getFieldName());
       writer.println("\"/>");
+
     }
     Indenter.printlnIndented(writer, indent, "</set-property>");
+  }
+
+  public void write13(IBeanInitializer initializer, PrintWriter writer, int indent) {
+
+    if (initializer instanceof StringBeanInitializer) {
+      Indenter.printIndented(
+        writer,
+        indent,
+        "<set-string-property name=\"" + initializer.getPropertyName());
+      writer.print("\" key=\"");
+      writer.print(((PluginStringBeanInitializer) initializer).getKey());
+
+    } else {
+
+      Indenter.printIndented(
+        writer,
+        indent,
+        "<set-property name=\"" + initializer.getPropertyName());
+      writer.print("\" expression=\"");
+      
+      if (initializer instanceof PluginPropertyBeanInitializer) {
+      	
+        writer.print(((PluginPropertyBeanInitializer) initializer).getPropertyPath());
+
+      } else if (initializer instanceof PluginExpressionBeanInitializer) {
+
+        writer.print(((PluginExpressionBeanInitializer) initializer).getExpression());
+
+      } else if (initializer instanceof StaticBeanInitializer) {
+
+        StaticTypeValue svalue =
+          findStaticType(((PluginStaticBeanInitializer) initializer).getValue());
+
+        String OGNL = svalue.value;
+
+        if ("String".equals(svalue.type)) {
+
+          OGNL = "'" + OGNL + "'";
+        }
+
+        // convert to OGNL
+        writer.print(OGNL);
+
+      } else if (initializer instanceof PluginFieldBeanInitializer) {
+
+        String OGNL = ((PluginFieldBeanInitializer) initializer).getFieldName();
+        int index = OGNL.lastIndexOf(".");
+        if (index > 0) {
+
+          String clazz = OGNL.substring(0, index);
+          String field = OGNL.substring(index + 1);
+
+          OGNL = "@" + clazz + "@" + field;
+
+        }
+
+        writer.print(OGNL);
+      }
+    }
+    writer.println("\"/>");
   }
 
   private StaticTypeValue findStaticType(Object value) {
@@ -234,15 +336,17 @@ public class PluginBeanSpecification
   }
 
   private String buildPropertyPath(PluginPropertyBeanInitializer initializer) {
-    String[] path = initializer.getPropertyPath();
-    StringBuffer result = new StringBuffer();
-    for (int i = 0; i < path.length; i++) {
-      result.append(path[i]);
-      if (i < path.length - 1) {
-        result.append(".");
-      }
-    }
-    return result.toString();
+
+    return initializer.getPropertyPath();
+    //    String[] path = initializer.getPropertyPath();
+    //    StringBuffer result = new StringBuffer();
+    //    for (int i = 0; i < path.length; i++) {
+    //      result.append(path[i]);
+    //      if (i < path.length - 1) {
+    //        result.append(".");
+    //      }
+    //    }
+    //    return result.toString();
 
   }
 
@@ -308,15 +412,23 @@ public class PluginBeanSpecification
   }
 
   private BeanLifecycle[] lifecycles =
-    { BeanLifecycle.NONE, BeanLifecycle.PAGE, BeanLifecycle.REQUEST };
+    { BeanLifecycle.NONE, BeanLifecycle.PAGE, BeanLifecycle.REQUEST, BeanLifecycle.RENDER };
 
-  private String[] lifecycleLabels = { "None", "Page", "Request" };
+  private String[] lifecycleLabelsPre13 = { "None", "Page", "Request" };
 
-  private IPropertyDescriptor[] descriptors =
+  private IPropertyDescriptor[] descriptorsPre13 =
     {
       new TextPropertyDescriptor("name", "Name"),
       new TypeDialogPropertyDescriptor("class", "Class"),
-      new ComboBoxPropertyDescriptor("lifecycle", "Lifecycle", lifecycleLabels, false)};
+      new ComboBoxPropertyDescriptor("lifecycle", "Lifecycle", lifecycleLabelsPre13, false)};
+
+  private String[] lifecycleLabels13 = { "None", "Page", "Request", "Render" };
+
+  private IPropertyDescriptor[] descriptors13 =
+    {
+      new TextPropertyDescriptor("name", "Name"),
+      new TypeDialogPropertyDescriptor("class", "Class"),
+      new ComboBoxPropertyDescriptor("lifecycle", "Lifecycle", lifecycleLabels13, false)};
 
   public void resetPropertyValue(Object key) {
   }
@@ -397,7 +509,17 @@ public class PluginBeanSpecification
   }
 
   public IPropertyDescriptor[] getPropertyDescriptors() {
-    return descriptors;
+    int DTDVersion = getParentDTDVersion();
+
+    if (DTDVersion < XMLUtil.DTD_1_3) {
+
+      return descriptorsPre13;
+    } else {
+
+      return descriptors13;
+
+    }
+
   }
 
   public Object getEditableValue() {

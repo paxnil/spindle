@@ -64,6 +64,12 @@ public class PluginBindingSpecification
     return parent;
   }
 
+  public int getParentDTDVersion() {
+
+    return ((PluginContainedComponent) parent).getDTDVersion();
+
+  }
+
   /**
    * @see com.iw.plugins.spindle.spec.IPluginChildSpecification#setIdentifier()
    */
@@ -80,51 +86,58 @@ public class PluginBindingSpecification
     this.parent = (IBindingHolder) parent;
   }
 
-  public void write(String name, PrintWriter writer, int indent, String publicId) { 	
-    
-    boolean isDTD12OrBetter = XMLUtil.getDTDVersion(publicId) >= XMLUtil.DTD_1_2;
-    
+  public void write(String name, PrintWriter writer, int indent, String publicId) {
+
+    int currentDTD = XMLUtil.getDTDVersion(publicId);
+    boolean isDTD12OrBetter = currentDTD >= XMLUtil.DTD_1_2;
+    boolean isDTD13OrBetter = currentDTD >= XMLUtil.DTD_1_3;
+
     Indenter.printIndented(writer, indent, "<");
-    
+
     BindingType type = getType();
-    
+
     if (type.equals(BindingType.FIELD)) {
-    	
+
       writer.print("field-binding name=\"" + name);
       writer.print("\" field-name=\"");
-      
+
     } else if (type.equals(BindingType.INHERITED)) {
-    	
+
       writer.print("inherited-binding name=\"" + name);
       writer.print("\" parameter-name=\"");
-      
+
     } else if (type.equals(BindingType.STATIC)) {
-    	
+
       writer.print("static-binding name=\"" + name);
       writer.print("\">");
       writer.print(getValue());
       writer.println("</static-binding>");
-      
+      return;
+
     } else if (type.equals(BindingType.DYNAMIC)) {
-    	
+
       writer.print("binding name=\"" + name);
-      writer.print("\" property-path=\"");
-      
+
+      if (isDTD13OrBetter) {
+
+        writer.print("\" expression=\"");
+
+      } else {
+
+        writer.print("\" property-path=\"");
+
+      }
+
     } else if (isDTD12OrBetter && type.equals(BindingType.STRING)) {
-    	
+
       writer.print("string-binding name=\"" + name);
       writer.print("\" key=\"");
-      
+
     }
-    
+
     writer.print(getValue());
     writer.println("\"/>");
   }
-
-  private IPropertyDescriptor[] bindingDescriptors =
-    {
-      new TextPropertyDescriptor("name", "Name"),
-      new TextPropertyDescriptor("value", "Property Path")};
 
   private IPropertyDescriptor[] staticDescriptors =
     { new TextPropertyDescriptor("name", "Name"), new TextPropertyDescriptor("value", "Value")};
@@ -151,22 +164,46 @@ public class PluginBindingSpecification
    * @see org.eclipse.ui.views.properties.IPropertySource#getPropertyDescriptors()
    */
   public IPropertyDescriptor[] getPropertyDescriptors() {
+  	
     BindingType type = getType();
 
     if (type == BindingType.INHERITED) {
+    	
       return inheritDescriptors;
+      
     }
     if (type == BindingType.STATIC) {
+    	
       return staticDescriptors;
+      
     }
     if (type == BindingType.DYNAMIC) {
-      return bindingDescriptors;
+
+      if (getParentDTDVersion() < XMLUtil.DTD_1_3) {
+
+        return new IPropertyDescriptor[] {
+          new TextPropertyDescriptor("name", "Name"),
+          new TextPropertyDescriptor("value", "Property Path")};
+
+      } else {
+
+        return new IPropertyDescriptor[] {
+          new TextPropertyDescriptor("name", "Name"),
+          new TextPropertyDescriptor("value", "Expression")};
+
+      }
     }
+
     if (type == BindingType.FIELD) {
+    	
       return fieldDescriptors;
+      
     }
+
     if (type == BindingType.STRING) {
+    	
       return stringDescriptiors;
+      
     }
     return null;
   }
@@ -218,30 +255,30 @@ public class PluginBindingSpecification
    * @see org.eclipse.ui.views.properties.IPropertySource#setPropertyValue(Object, Object)
    */
   public void setPropertyValue(Object key, Object value) {
-  	 if ("name".equals(key)) {
-  	 	
-        String oldName = identifier;        
-        String newName = (String) value;
-        
-        if ("".equals(newName.trim())) {
-        	
-          newName = oldName;
-          
-        } else if (parent.getBinding(newName) != null) {
-        	
-          newName = "Copy of " + newName;
-          
-        }
-        
-        identifier = newName;
-        parent.removeBinding(oldName);
-        parent.setBinding(identifier, this);
-        
-      } else if ("value".equals(key)) {
-      	
-        setValue((String) value);
-        parent.setBinding(identifier, this);
+    if ("name".equals(key)) {
+
+      String oldName = identifier;
+      String newName = (String) value;
+
+      if ("".equals(newName.trim())) {
+
+        newName = oldName;
+
+      } else if (parent.getBinding(newName) != null) {
+
+        newName = "Copy of " + newName;
+
       }
+
+      identifier = newName;
+      parent.removeBinding(oldName);
+      parent.setBinding(identifier, this);
+
+    } else if ("value".equals(key)) {
+
+      setValue((String) value);
+      parent.setBinding(identifier, this);
+    }
   }
 
   /**
@@ -249,7 +286,7 @@ public class PluginBindingSpecification
    * @return PluginBindingSpecification
    */
   public PluginBindingSpecification deepCopy() {
-  	return new PluginBindingSpecification(getType(), getValue());
+    return new PluginBindingSpecification(getType(), getValue());
   }
 
 }

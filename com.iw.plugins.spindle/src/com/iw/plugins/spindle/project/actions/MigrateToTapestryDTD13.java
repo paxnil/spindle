@@ -144,41 +144,9 @@ public class MigrateToTapestryDTD13 extends AbstractTapestryProjectAction {
 
     }
 
-    MigrationWorkUnit[] workUnits = findDirtyWorkUnits(shell, tproject);
+    launchWizard(shell, tproject);
     
-    if (workUnits == null) {
-    	
-    	return;
-    	
-    }
-
-    if (workUnits.length == 0) {
-
-      MessageDialog.openInformation(shell, "Migration Results", "No files needed migration");
-      return;
-
-    } else {
-
-      //    try {
-      //
-      //      new ProgressMonitorDialog(shell).run(false, false, createRunnable());
-      //
-      //    } catch (InvocationTargetException e) {
-      //
-      //      MessageDialog.openError(
-      //        shell.getShell(),
-      //        "Migration Error",
-      //        "Could not complete the migration");
-      //
-      //      e.printStackTrace();
-      //      e.getTargetException().printStackTrace();
-      //      return;
-      //
-      //    } catch (InterruptedException e) {
-      //    }
-
-    }
-
+    
   }
 
   // return true iff the migration should continue
@@ -345,7 +313,7 @@ public class MigrateToTapestryDTD13 extends AbstractTapestryProjectAction {
 
   }
 
-  private MigrationWorkUnit[] findDirtyWorkUnits(Shell shell, ITapestryProject tproject) {
+  private void launchWizard(Shell shell, ITapestryProject tproject) {
   	
    try {
    	
@@ -358,7 +326,7 @@ public class MigrateToTapestryDTD13 extends AbstractTapestryProjectAction {
    	  
    	  if (dialog.open() != dialog.OK) {
    	  	
-   	  	return null;
+   	  	return;
    	  	
    	  }
 
@@ -368,7 +336,7 @@ public class MigrateToTapestryDTD13 extends AbstractTapestryProjectAction {
     	e.printStackTrace();
     }
    
-    return new MigrationWorkUnit[0];
+    
 
   }
 

@@ -104,6 +104,7 @@ public class MigrationScopePage extends WizardPage implements ISelectionProvider
   public void selectionChanged(SelectionChangedEvent event) {
 
     setPageComplete(!event.getSelection().isEmpty());
+    fireSelectionChanged();
 
   }
   
