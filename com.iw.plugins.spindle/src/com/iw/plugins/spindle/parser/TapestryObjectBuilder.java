@@ -1,5 +1,6 @@
 package com.iw.plugins.spindle.parser;
 
+import net.sf.tapestry.IResourceLocation;
 import net.sf.tapestry.spec.ComponentSpecification;
 import net.sf.tapestry.spec.IApplicationSpecification;
 import net.sf.tapestry.spec.ILibrarySpecification;
@@ -26,8 +27,10 @@ public class TapestryObjectBuilder extends net.sf.tapestry.parse.SpecificationPa
    *  @throws DocumentParseException if the document contains invalid data.
    *
    **/
-  public ComponentSpecification buildComponentSpecification(Document document)
+  public ComponentSpecification buildComponentSpecification(Document document, IResourceLocation location)
     throws DocumentParseException {
+    	
+    setResourceLocation(location);
 
     return convertComponentSpecification(document, false);
 
@@ -39,9 +42,11 @@ public class TapestryObjectBuilder extends net.sf.tapestry.parse.SpecificationPa
    *  @throws DocumentParseException if the document contains invalid data.
    *
    **/
-  public ComponentSpecification buildPageSpecification(Document document)
+  public ComponentSpecification buildPageSpecification(Document document, IResourceLocation location)
     throws DocumentParseException {
 
+    setResourceLocation(location);
+    
     return convertComponentSpecification(document, true);
 
   }
@@ -53,9 +58,11 @@ public class TapestryObjectBuilder extends net.sf.tapestry.parse.SpecificationPa
    *
    **/
 
-  public IApplicationSpecification buildApplicationSpecification(Document document)
+  public IApplicationSpecification buildApplicationSpecification(Document document, IResourceLocation location)
     throws DocumentParseException {
 
+    setResourceLocation(location);
+    
     return convertApplicationSpecification(document, null);
 
   }
@@ -67,9 +74,11 @@ public class TapestryObjectBuilder extends net.sf.tapestry.parse.SpecificationPa
    *
    **/
 
-  public ILibrarySpecification buildLibrarySpecification(Document document)
+  public ILibrarySpecification buildLibrarySpecification(Document document, IResourceLocation location)
     throws DocumentParseException {
 
+    setResourceLocation(location);
+    
     return convertLibrarySpecification(document, null);
 
   }

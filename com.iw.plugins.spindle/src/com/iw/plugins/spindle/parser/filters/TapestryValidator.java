@@ -19,6 +19,10 @@ import org.apache.xerces.xni.XMLAttributes;
 import org.apache.xerces.xni.XNIException;
 
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.parser.TapestryErrorReporter;
+import com.iw.plugins.spindle.parser.xml.TapestryEntityResolver;
+import com.iw.plugins.spindle.parser.xml.XMLEnityEventInfo;
+import com.iw.plugins.spindle.parser.xml.XMLScanner;
 import com.iw.plugins.spindle.spec.XMLUtil;
 
 /**
@@ -28,6 +32,10 @@ import com.iw.plugins.spindle.spec.XMLUtil;
  */
 
 public class TapestryValidator extends ErrorReportingFilter {
+
+  /** find the augementation info */
+  protected static final String AUGMENTATIONS =
+    "http://intelligentworks.com/xml/features/augmentations-location";
 
   /** validators for DTD versions */
   private static TValidator[] availableValidators;
@@ -81,13 +89,13 @@ public class TapestryValidator extends ErrorReportingFilter {
   protected IClassResolver classResolver;
 
   private TValidator validator;
-  
+
   public TapestryValidator() {
-  	if (availableValidators == null) {
-    availableValidators =
-      new TValidator[] { null, null, null, new DTD1_3Validator(), new DTD1_4Validator()};
-  		
-  	}
+    if (availableValidators == null) {
+      availableValidators =
+        new TValidator[] { null, null, null, new DTD1_3Validator(), new DTD1_4Validator()};
+
+    }
   }
 
   /**
@@ -134,6 +142,12 @@ public class TapestryValidator extends ErrorReportingFilter {
   }
 
   protected void reportError(String message, Augmentations augs) {
+    if (errorReporter != null && errorReporter instanceof TapestryErrorReporter) {
+
+      XMLEnityEventInfo info = (XMLEnityEventInfo) augs.getItem(AUGMENTATIONS);
+      ((TapestryErrorReporter) errorReporter).reportTapestryError(message, info);
+
+    }
   }
 
   private TValidator getValidator(String publicId) {
@@ -155,7 +169,9 @@ public class TapestryValidator extends ErrorReportingFilter {
           try {
             validateOGNLExpression(possibleOGNL);
           } catch (ExpressionSyntaxException syn) {
-            reportError(Tapestry.getString("OgnlUtils.unable-to-parse-expression", possibleOGNL), currentAttributes.getAugmentations(index));
+            reportError(
+              Tapestry.getString("OgnlUtils.unable-to-parse-expression", possibleOGNL),
+              currentAttributes.getAugmentations(index));
           } catch (OgnlException e) {
             TapestryPlugin.getDefault().logException(e);
           }

@@ -110,6 +110,8 @@ import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 
 public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModelProviderListener {
+	
+  static public final String MARKER_ID = TapestryPlugin.MARKER_ID;
 
   private ISpindleColorManager colorManager = new ColorManager();
   private HTMLContentOutlinePage outline = null;
@@ -314,7 +316,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
         map.put(IMarker.LINE_NUMBER, new Integer(line));
         map.put(IMarker.CHAR_START, new Integer(column));
         map.put(IMarker.CHAR_END, new Integer(column + 1));
-        MarkerUtilities.createMarker((IResource) storage, map, "com.iw.plugins.spindle.tapestryproblem");
+        MarkerUtilities.createMarker((IResource) storage, map, MARKER_ID);
       } catch (CoreException corex) {
       }
     }

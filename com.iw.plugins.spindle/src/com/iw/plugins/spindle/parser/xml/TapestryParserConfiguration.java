@@ -5,21 +5,14 @@ import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLDTDScanner;
 import org.apache.xerces.xni.parser.XMLDocumentScanner;
 
-/**
- * @author Administrator
- *
- * To change this generated comment edit the template variable "typecomment":
- * Window>Preferences>Java>Templates.
- * To enable and disable the creation of type comments go to
- * Window>Preferences>Java>Code Generation.
- */
-public class MyConfiguration extends StandardParserConfiguration
+
+public class TapestryParserConfiguration extends StandardParserConfiguration
 {
 
     /**
      * Constructor for MyConfiguration.
      */
-    public MyConfiguration()
+    public TapestryParserConfiguration()
     {
         super();
     }

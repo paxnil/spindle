@@ -2,30 +2,50 @@ package com.iw.plugins.spindle.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import net.sf.tapestry.IResourceLocation;
-import net.sf.tapestry.IResourceResolver;
+import net.sf.tapestry.Tapestry;
 import net.sf.tapestry.spec.ComponentSpecification;
 import net.sf.tapestry.spec.IApplicationSpecification;
 import net.sf.tapestry.spec.ILibrarySpecification;
 import net.sf.tapestry.util.xml.DocumentParseException;
-
+import org.apache.xerces.impl.XMLErrorReporter;
+import org.apache.xerces.util.MessageFormatter;
+import org.apache.xerces.xni.XMLLocator;
+import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.parser.XMLComponentManager;
+import org.apache.xerces.xni.parser.XMLConfigurationException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
-import com.iw.plugins.spindle.parser.xml.MyDOMParser;
+import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.parser.filters.TapestryValidator;
+import com.iw.plugins.spindle.parser.xml.TapestryDOMParser;
+import com.iw.plugins.spindle.parser.xml.TapestryParserConfiguration;
+import com.iw.plugins.spindle.parser.xml.XMLEnityEventInfo;
+import com.iw.plugins.spindle.util.SpindleMultiStatus;
 
 public class SpecificationParser {
 
-  private TapestryObjectBuilder builder = new TapestryObjectBuilder();
-  private MyDOMParser parser;
+  private TapestryErrorReporter reporter;
+  private TapestryDOMParser parser;
+  private TapestryObjectBuilder builder;
 
-  /**
-   * Constructor for TapestrySpecParser.
-   */
   public SpecificationParser() {
-    super();
+
+    reporter = new TapestryErrorReporter();
+    parser = new TapestryDOMParser(new SpecificationConfiguration());
+    builder = new TapestryObjectBuilder();
+
+  }
+
+  public IStatus getStatus() {
+    return reporter.getStatus();
   }
 
   /**
@@ -37,11 +57,13 @@ public class SpecificationParser {
   *
   **/
 
-  public ComponentSpecification parseComponentSpecification(InputStream stream)
+  public ComponentSpecification parseComponentSpecification(
+    InputStream stream,
+    IResourceLocation location)
     throws DocumentParseException {
-    Document document = parseToDocument(stream);
+    Document document = parseToDocument(stream, location);
 
-    return builder.buildComponentSpecification(document);
+    return builder.buildComponentSpecification(document, location);
 
   }
 
@@ -55,11 +77,13 @@ public class SpecificationParser {
    *
    **/
 
-  public ComponentSpecification parsePageSpecification(InputStream stream)
+  public ComponentSpecification parsePageSpecification(
+    InputStream stream,
+    IResourceLocation location)
     throws DocumentParseException {
-    Document document = parseToDocument(stream);
+    Document document = parseToDocument(stream, location);
 
-    return builder.buildPageSpecification(document);
+    return builder.buildPageSpecification(document, location);
 
   }
 
@@ -72,11 +96,13 @@ public class SpecificationParser {
    *
    **/
 
-  public IApplicationSpecification parseApplicationSpecification(InputStream stream)
+  public IApplicationSpecification parseApplicationSpecification(
+    InputStream stream,
+    IResourceLocation location)
     throws DocumentParseException {
-    Document document = parseToDocument(stream);
+    Document document = parseToDocument(stream, location);
 
-    return builder.buildApplicationSpecification(document);
+    return builder.buildApplicationSpecification(document, location);
 
   }
 
@@ -91,24 +117,95 @@ public class SpecificationParser {
    *
    **/
 
-  public ILibrarySpecification parseLibrarySpecification(InputStream stream)
+  public ILibrarySpecification parseLibrarySpecification(
+    InputStream stream,
+    IResourceLocation location)
     throws DocumentParseException {
-    Document document = parseToDocument(stream);
+    Document document = parseToDocument(stream, location);
 
-    return builder.buildLibrarySpecification(document);
+    return builder.buildLibrarySpecification(document, location);
 
   }
 
-  protected Document parseToDocument(InputStream stream) {
+  protected Document parseToDocument(InputStream stream, IResourceLocation location)
+    throws DocumentParseException {
     Document document;
 
     try {
       parser.parse(new InputSource(stream));
-    } catch (SAXException e) {
-    } catch (IOException e) {
+    } catch (SAXParseException ex) {
+      // This constructor captures the line number and column number
+
+      throw new DocumentParseException(
+        Tapestry.getString("AbstractDocumentParser.unable-to-parse", location, ex.getMessage()),
+        location,
+        ex);
+    } catch (SAXException ex) {
+      throw new DocumentParseException(
+        Tapestry.getString("AbstractDocumentParser.unable-to-parse", location, ex.getMessage()),
+        location,
+        ex);
+    } catch (IOException ex) {
+      throw new DocumentParseException(
+        Tapestry.getString("AbstractDocumentParser.unable-to-read", location, ex.getMessage()),
+        location,
+        ex);
     }
     document = parser.getDocument();
     return document;
+  }
+
+ 
+
+  protected class SpecificationConfiguration extends TapestryParserConfiguration {
+  	
+  	private TapestryValidator tapestryValidator = new TapestryValidator();
+
+    /**
+    * @see com.iw.plugins.spindle.parser.xml.StandardParserConfiguration#createErrorReporter()
+    */
+    protected XMLErrorReporter createErrorReporter() {
+      return reporter;
+    }
+
+    /**
+     * setup pipeline - schemas are not supported!
+     */
+    protected void configurePipeline() {
+    	
+      if (fDTDValidator != null) {
+        fScanner.setDocumentHandler(fDTDValidator);
+        fDTDValidator.setDocumentHandler(fNamespaceBinder);
+        fNamespaceBinder.setDocumentHandler(fDocumentHandler);
+      } else {
+        fScanner.setDocumentHandler(fNamespaceBinder);
+        fNamespaceBinder.setDocumentHandler(fDocumentHandler);
+      }
+
+      fLastComponent = fNamespaceBinder;
+
+      // setup dtd pipeline
+      if (fDTDScanner != null) {
+        if (fDTDValidator != null) {
+          fDTDScanner.setDTDHandler(fDTDValidator);
+          fDTDValidator.setDTDHandler(fDTDHandler);
+
+          fDTDScanner.setDTDContentModelHandler(fDTDValidator);
+          fDTDValidator.setDTDContentModelHandler(fDTDContentModelHandler);
+        } else {
+          fDTDScanner.setDTDHandler(fDTDHandler);
+          fDTDScanner.setDTDContentModelHandler(fDTDContentModelHandler);
+        }
+      }
+      
+      tapestryValidator.setErrorReporter(reporter);
+      
+      tapestryValidator.setDocumentSource(fLastComponent);
+      tapestryValidator.setDocumentHandler(fDocumentHandler);
+      
+      fLastComponent = tapestryValidator;
+    }
+
   }
 
 }

@@ -231,22 +231,10 @@
       <persistent
             value="false">
       </persistent>
-   </extension>
-   <extension
-         id="badwordproblem"
-         name="TapestryInvalidStringProblem"
-         point="org.eclipse.core.resources.markers">
-      <super
-            type="org.eclipse.core.resources.problemmarker">
-      </super>
-      <super
-            type="org.eclipse.core.resources.textmarker">
-      </super>
-      <attribute name="invalidString"/>
-      <attribute name="pattern"/>
-      <persistent
-            value="false">
-      </persistent>
+      
+      <attribute name="endLine"/>
+      <attribute name="endColumn"/>
+      
    </extension>
    <extension
          point="org.eclipse.ui.actionSets">

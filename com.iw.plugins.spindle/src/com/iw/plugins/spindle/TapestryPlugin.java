@@ -97,6 +97,10 @@ public class TapestryPlugin extends AbstractUIPlugin {
 
   static public final String ID_PLUGIN = "com.iw.plugins.spindle";
   static public final String NATURE_ID = ID_PLUGIN + ".project.TapestryProject";
+  static public final String MARKER_ID = ID_PLUGIN+".tapestryproblem";
+  static public final String MARKER_ENDLINE = "endLine";
+  static public final String MARKER_ENDCOLUMN = "endColumn";
+
 
   public static TapestryApplicationModel selectedApplication = null;
 

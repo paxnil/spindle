@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.sf.tapestry.IResourceLocation;
 import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.spec.AssetSpecification;
 import net.sf.tapestry.spec.BeanSpecification;
@@ -216,9 +217,9 @@ public class PluginComponentSpecification
     propertySupport.firePropertyChange("allowBody", old, value);
   }
 
-  public void setSpecificationResourcePath(String resourcePath) {
-    super.setSpecificationResourcePath(resourcePath);
-    propertySupport.firePropertyChange("specificationResourcePath", null, resourcePath);
+  public void setSpecificationResourcePath(IResourceLocation resourceLoc) {
+    super.setSpecificationLocation(resourceLoc);
+    propertySupport.firePropertyChange("specificationLocation", null, resourceLoc);
   }
 
   public void setProperty(String name, String value) {

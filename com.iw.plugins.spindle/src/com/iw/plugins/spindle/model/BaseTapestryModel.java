@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.tapestry.IResourceLocation;
 import net.sf.tapestry.util.IPropertyHolder;
 import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IFile;
@@ -40,21 +41,37 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.pde.core.IEditable;
 import org.eclipse.pde.core.ModelChangedEvent;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.parser.ParserStatus;
 import com.iw.plugins.spindle.project.ITapestryProject;
 
 public abstract class BaseTapestryModel
   extends AbstractModel
   implements IEditable, IPropertyHolder {
 
+  /** IStatus.OK IStatus.INFO IStatus.WARN IStatus.ERROR **/
+  static public final int[] MARKER_STATII =
+    {
+      IMarker.SEVERITY_INFO,
+      IMarker.SEVERITY_INFO,
+      IMarker.SEVERITY_WARNING,
+      IMarker.SEVERITY_ERROR };
+
+  static public final String MARKER_ID = TapestryPlugin.MARKER_ID;
+  static public final String MARKER_ENDLINE = TapestryPlugin.MARKER_ENDLINE;
+  static public final String MARKER_ENDCOLUMN = TapestryPlugin.MARKER_ENDCOLUMN;
+
   protected boolean editable = true;
   protected boolean dirty = false;
 
   private IStorage storageResource;
+
+  private IResourceLocation resourceLocation;
 
   /**
    * Constructor for BaseTapestryModel
@@ -135,25 +152,11 @@ public abstract class BaseTapestryModel
 
   protected void addProblemMarker(DocumentParseException exception) {
 
-//    if (exception instanceof InvalidStringException) {
-//
-//      InvalidStringException invalidEx = (InvalidStringException) exception;
-//
-//      addBadWordProblemMarker(
-//        invalidEx.getMessage(),
-//        IMarker.SEVERITY_ERROR,
-//        invalidEx.getInvalidString(),
-//        invalidEx.getPattern());
-//
-//    } else {
-
-      addProblemMarker(
-        exception.getMessage(),
-        exception.getLineNumber(),
-        Math.max(exception.getColumn(), 0),
-        IMarker.SEVERITY_ERROR);
-
-//    }
+    addProblemMarker(
+      exception.getMessage(),
+      exception.getLineNumber(),
+      Math.max(exception.getColumn(), 0),
+      IMarker.SEVERITY_ERROR);
 
   }
 
@@ -166,39 +169,74 @@ public abstract class BaseTapestryModel
         attributes.put(IMarker.MESSAGE, message);
         attributes.put(IMarker.SEVERITY, new Integer(severity));
         attributes.put(IMarker.LINE_NUMBER, new Integer(line));
-//        attributes.put(IMarker.CHAR_START, new Integer(column));
-//        attributes.put(IMarker.CHAR_END, new Integer(column + 1));
+        attributes.put(IMarker.CHAR_START, new Integer(column));
+        attributes.put(IMarker.CHAR_END, new Integer(column + 1));
         MarkerUtilities.createMarker(
           (IResource) storage,
           attributes,
-          "com.iw.plugins.spindle.tapestryproblem");
+          MARKER_ID);
       } catch (CoreException corex) {
       }
     }
 
   }
 
-  protected void addBadWordProblemMarker(String message, int severity, String badWord, String pattern) {
+  protected void addStatusMarker(IStatus status) {
 
+    if (!status.isMultiStatus()) {
+
+      if (status instanceof ParserStatus) {
+
+        addStatusMarker((ParserStatus) status);
+
+      } else {
+        int severity = MARKER_STATII[status.getSeverity()];
+        addProblemMarker(status.getMessage(), 1, 0, severity);
+      }
+
+    } else {
+
+      IStatus[] children = status.getChildren();
+      addStatusMarkers(status.getChildren());
+    }
+
+  }
+
+  private void addStatusMarkers(IStatus[] statii) {
+
+    if (statii != null) {
+
+      for (int i = 0; i < statii.length; i++) {
+        if (statii[i] instanceof ParserStatus) {
+          addStatusMarker((ParserStatus) statii[i]);
+        } else {
+          int severity = MARKER_STATII[statii[i].getSeverity()];
+          addProblemMarker(statii[i].getMessage(), 1, 0, severity);
+        }
+      }
+    }
+  }
+
+  private void addStatusMarker(ParserStatus status) {
     IStorage storage = getUnderlyingStorage();
     if (storage instanceof IResource) {
       try {
         Map attributes = new HashMap();
-        attributes.put(IMarker.MESSAGE, message);
-        attributes.put(IMarker.SEVERITY, new Integer(severity));
-        attributes.put(IMarker.LINE_NUMBER, new Integer(1));
-//        attributes.put(IMarker.CHAR_START, new Integer(0));
-//        attributes.put(IMarker.CHAR_END, new Integer(1));
-        attributes.put("invalidString", badWord);
-        attributes.put("pattern", pattern);
+        attributes.put(IMarker.MESSAGE, status.getMessage());
+        attributes.put(IMarker.SEVERITY, new Integer(MARKER_STATII[status.getSeverity()]));
+        attributes.put(IMarker.LINE_NUMBER, new Integer(status.getBeginLineNumber()));
+        int beginColumn = status.getBeginColumnNumber();
+        attributes.put(IMarker.CHAR_START, new Integer(beginColumn));
+        attributes.put(IMarker.CHAR_END, new Integer(beginColumn + 1));
+        attributes.put(MARKER_ENDLINE, new Integer(status.getEndLineNumber()));
+        attributes.put(MARKER_ENDCOLUMN, new Integer(status.getEndColumnNumber()));
         MarkerUtilities.createMarker(
           (IResource) storage,
           attributes,
-          "com.iw.plugins.spindle.badwordproblem");
+          MARKER_ID);
       } catch (CoreException corex) {
       }
     }
-
   }
 
   /**
@@ -282,6 +320,22 @@ public abstract class BaseTapestryModel
 
     return TapestryPlugin.getDefault().getTapestryProjectFor(getUnderlyingStorage());
 
+  }
+
+  /**
+   * Returns the resourceLocation.
+   * @return IResourceLocation
+   */
+  public IResourceLocation getResourceLocation() {
+    return resourceLocation;
+  }
+
+  /**
+   * Sets the resourceLocation.
+   * @param resourceLocation The resourceLocation to set
+   */
+  public void setResourceLocation(IResourceLocation resourceLocation) {
+    this.resourceLocation = resourceLocation;
   }
 
 }

@@ -4,14 +4,14 @@ import org.apache.xerces.impl.XMLErrorReporter;
 
 public class ErrorReportingFilter extends BaseDocumentFilter {
 
-  private XMLErrorReporter errorReporter;
+  protected XMLErrorReporter errorReporter;
 
-  public XMLErrorReporter getErrorHandler() {
+  public XMLErrorReporter getErrorReporter() {
     return errorReporter;
   }
 
-  public void setErrorHandler(XMLErrorReporter errorHandler) {
-    this.errorReporter = errorHandler;
+  public void setErrorReporter(XMLErrorReporter errorReporter) {
+    this.errorReporter = errorReporter;
   }
 
 }

@@ -181,7 +181,7 @@ public class TapestryLibraryModel extends BaseTapestryModel implements PropertyC
           SpecificationParser parser =
             (SpecificationParser) TapestryPlugin.getParserFor("application");
           librarySpecification =
-            (PluginLibrarySpecification) parser.parseLibrarySpecification(source);
+            (PluginLibrarySpecification) parser.parseLibrarySpecification(source, getResourceLocation());
 
           pluginSpec = (PluginLibrarySpecification) librarySpecification;
           pluginSpec.addPropertyChangeListener(TapestryLibraryModel.this);

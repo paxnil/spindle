@@ -35,11 +35,13 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.parser.SpecificationParser;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.util.SourceWriter;
+import com.iw.plugins.spindle.util.SpindleMultiStatus;
 
 public class TapestryApplicationModel
   extends TapestryLibraryModel
@@ -66,12 +68,16 @@ public class TapestryApplicationModel
           pluginSpec.removePropertyChangeListener(TapestryApplicationModel.this);
           pluginSpec.setParent(null);
         }
+
+        SpecificationParser parser =
+          (SpecificationParser) TapestryPlugin.getParserFor("application");
+
         try {
 
-          SpecificationParser parser =
-            (SpecificationParser) TapestryPlugin.getParserFor("application");
           librarySpecification =
-            (PluginApplicationSpecification) parser.parseApplicationSpecification(source);
+            (PluginApplicationSpecification) parser.parseApplicationSpecification(
+              source,
+              getResourceLocation());
 
           pluginSpec = (PluginApplicationSpecification) librarySpecification;
           pluginSpec.addPropertyChangeListener(TapestryApplicationModel.this);
@@ -81,7 +87,6 @@ public class TapestryApplicationModel
 
           pluginSpec.setIdentifier(getUnderlyingStorage().getName());
           pluginSpec.setParent(thisModel);
-          fireModelObjectChanged(librarySpecification, "applicationSpec");
 
         } catch (DocumentParseException dpex) {
 
@@ -89,6 +94,22 @@ public class TapestryApplicationModel
 
           loaded = false;
 
+        } finally {
+
+          IStatus status = parser.getStatus();
+
+          if (status.getSeverity() == status.ERROR) {
+
+            loaded = false;
+            librarySpecification = null;
+
+          } else if (loaded) {
+
+            fireModelObjectChanged(librarySpecification, "applicationSpec");
+
+          }
+
+          addStatusMarker(status);
         }
       }
     }, null);

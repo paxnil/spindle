@@ -96,13 +96,15 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
               (PluginComponentSpecification) TapestryPlugin
                 .getParser()
                 .parseComponentSpecification(
-                source);
+                source,
+                getResourceLocation());
 
           } else if (extension.equals("page")) {
 
             componentSpec =
               (PluginComponentSpecification) TapestryPlugin.getParser().parsePageSpecification(
-                source);
+                source,
+                getResourceLocation());
 
           }
           componentSpec.setIdentifier(element.getName());

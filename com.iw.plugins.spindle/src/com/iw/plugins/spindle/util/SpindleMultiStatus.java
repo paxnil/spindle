@@ -24,8 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.util;
 
 import java.util.ArrayList;
@@ -41,14 +39,14 @@ import org.eclipse.core.runtime.IStatus;
  * All Rights Reserved.
  */
 public class SpindleMultiStatus extends SpindleStatus {
-	
+
   private List subStatii = new ArrayList();
 
   /**
    * Constructor for SpindleMultiStatus.
    */
   public SpindleMultiStatus() {
-    super();
+    super(-1, null);
   }
 
   /**
@@ -64,17 +62,17 @@ public class SpindleMultiStatus extends SpindleStatus {
    * @see org.eclipse.core.runtime.IStatus#getChildren()
    */
   public IStatus[] getChildren() {
-  	
-    return (IStatus []) subStatii.toArray(new IStatus[subStatii.size()]);
-    
+
+    return (IStatus[]) subStatii.toArray(new IStatus[subStatii.size()]);
+
   }
-  
+
   public void addStatus(IStatus status) {
-  	
-  	if (!subStatii.contains(status)) {
-  		subStatii.add(status);
-  	}
-  	
+
+    if (!subStatii.contains(status)) {
+      subStatii.add(status);
+    }
+
   }
 
   /**
@@ -82,6 +80,28 @@ public class SpindleMultiStatus extends SpindleStatus {
    */
   public boolean isMultiStatus() {
     return true;
+  }
+
+  /**
+   * @see org.eclipse.core.runtime.IStatus#getSeverity()
+   */
+  public int getSeverity() {
+    int builtin = getSeverity();
+    if (getSeverity() >= 0) {
+      return builtin;
+    }
+    if (!subStatii.isEmpty()) {
+      IStatus max = null;
+      int size = subStatii.size();
+      if (size == 1) {
+        max = (IStatus) subStatii.get(0);
+      } else {
+        max = SpindleStatus.getMostSevere((IStatus[]) subStatii.toArray(new IStatus[size]));
+      }
+      return max.getSeverity();
+    } else {
+      return OK;
+    }
   }
 
 }

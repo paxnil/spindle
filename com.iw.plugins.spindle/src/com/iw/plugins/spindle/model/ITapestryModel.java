@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.model;
 
+import net.sf.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.pde.core.IEditable;
@@ -56,5 +57,10 @@ public interface ITapestryModel extends IModel, IEditable {
 
 
   public void setPublicId(String value);
+  
+  public void setResourceLocation(IResourceLocation location);
+  
+  public IResourceLocation getResourceLocation();
+  
 
 }
