@@ -198,7 +198,9 @@ public class PluginParameterSpecification
 
     } else if ("propertyName".equals(key)) {
 
-      setPropertyName((String) value);
+      String newPropertyName = (String) value;
+
+      setPropertyName("".equals(newPropertyName.trim()) ? null : newPropertyName);
 
     } else if ("type".equals(key)) {
 
@@ -235,12 +237,13 @@ public class PluginParameterSpecification
       }
     }
 
-    if (this.identifier.equals(oldName)) {
+    if (!this.identifier.equals(oldName)) {
 
       componentSpec.removeParameter(oldName);
+      componentSpec.setParameter(this.identifier, this);
 
     }
-    componentSpec.setParameter(this.identifier, this);
+
   }
 
   public boolean isPropertySet(Object key) {
@@ -260,7 +263,9 @@ public class PluginParameterSpecification
 
     } else if ("propertyName".equals(key)) {
 
-      return getPropertyName();
+      String propertyName = getPropertyName();
+
+      return propertyName == null ? "" : propertyName;
 
     } else if ("type".equals(key)) {
 

@@ -87,7 +87,7 @@ public class PluginApplicationSpecification
   public void removeProperty(String name) {
     String old = getProperty(name);
 
-    if (old == null) {
+    if (old != null) {
 
       super.removeProperty(name);
       propertySupport.firePropertyChange("properties", old, null);

@@ -154,7 +154,7 @@ public class PropertyEditableSection
       PropertyHolder holder = (PropertyHolder) getSelected();
       if (holder != null) {        
         String prev = findPrevious(holder.identifier);
-        externalPropertyHolder.setProperty(holder.identifier, null);
+        externalPropertyHolder.removeProperty(holder.identifier);
         holder.setParent(null);
         forceDirty();
         update();
