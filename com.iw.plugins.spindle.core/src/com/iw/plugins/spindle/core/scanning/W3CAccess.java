@@ -85,8 +85,8 @@ public class W3CAccess
     {
         StringBuffer buffer = new StringBuffer();
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
-        {
-            if (child.getNodeType() == Node.TEXT_NODE)
+        {   short type = child.getNodeType();
+            if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE)
                 buffer.append(child.getNodeValue());
         }
 

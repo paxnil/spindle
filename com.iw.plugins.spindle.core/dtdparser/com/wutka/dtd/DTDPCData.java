@@ -36,4 +36,12 @@ public class DTDPCData extends DTDItem
         return DTDItemType.DTD_PCDATA;
     }
 
+    /* (non-Javadoc)
+     * @see com.wutka.dtd.DTDItem#match(java.lang.String)
+     */
+    public boolean match(String match)
+    {
+         return false;
+    }
+
 }

@@ -105,7 +105,13 @@ public class DOMValidator implements IProblemCollector
             if (source == null)
                 throw new Error(errorMessage);
 
-            DTDS.put(publicId, new DTDParser(new InputStreamReader(source.getByteStream()), debug).parse());
+            DTDS.put(
+                publicId,
+                new DTDParser(
+                    new InputStreamReader(source.getByteStream()),
+                    SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID,
+                    debug)
+                    .parse());
 
             // TAP 3.0 DTD
 
@@ -117,7 +123,13 @@ public class DOMValidator implements IProblemCollector
             if (source == null)
                 throw new Error(errorMessage);
 
-            DTDS.put(publicId, new DTDParser(new InputStreamReader(source.getByteStream()), debug).parse());
+            DTDS.put(
+                publicId,
+                new DTDParser(
+                    new InputStreamReader(source.getByteStream()),
+                    SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID,
+                    debug)
+                    .parse());
 
         } catch (IOException e)
         {
@@ -125,11 +137,12 @@ public class DOMValidator implements IProblemCollector
             throw new Error(TapestryCore.getString("dom-validator-error-no-DTD-parse", e.getMessage()));
         }
     }
-    
-    public static DTD getDTD(String publicId) {
-        return (DTD)DTDS.get(publicId);
+
+    public static DTD getDTD(String publicId)
+    {
+        return (DTD) DTDS.get(publicId);
     }
-    
+
     private Document fXMLDocument;
     private String fRootElementName;
     private boolean fSeenRootElement;
@@ -367,7 +380,10 @@ public class DOMValidator implements IProblemCollector
             for (Iterator iter = sourceAttributeNames.iterator(); iter.hasNext();)
             {
                 String undeclaredName = (String) iter.next();
-                recordAttributeError(node, undeclaredName, TapestryCore.getString("dom-validator-undeclared-atttribute", undeclaredName, nodeName));
+                recordAttributeError(
+                    node,
+                    undeclaredName,
+                    TapestryCore.getString("dom-validator-undeclared-atttribute", undeclaredName, nodeName));
             }
         }
     }

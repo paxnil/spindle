@@ -31,6 +31,8 @@ public abstract class DTDItem implements DTDOutput, Cloneable
 
     /** Writes out a declaration for this item */
     public abstract void write(PrintWriter out) throws IOException;
+    
+    public abstract boolean match(String match);
 
     public boolean equals(Object ob)
     

@@ -238,7 +238,8 @@ class ContentAssistHelper
         pwriter.println();
         pwriter.println(description == null ? "no description available" : description);
         pwriter.println();
-        XMLUtil.writeParameter(name, parameterSpec, pwriter, 0, publicId);
+        if (publicId != null)
+            XMLUtil.writeParameter(name, parameterSpec, pwriter, 0, publicId);
 
         result.description = swriter.toString();
 

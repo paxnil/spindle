@@ -309,7 +309,12 @@ public class TemplatePartitionScanner implements IPartitionTokenScanner
                         else
                             break;
                     }
-                    fIsJWCIDTag = pos > 0 && toBeChecked.substring(0, pos + 1).endsWith(" jwcid");
+                    if (pos > 0) {
+                        toBeChecked = toBeChecked.substring(0, pos + 1);
+                        fIsJWCIDTag = toBeChecked.equals("jwcid") || toBeChecked.endsWith(" jwcid");
+                    }
+                    
+                    
 
                     fState = STATE_TAG;
                     return getToken(XML_TAG);

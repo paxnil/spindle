@@ -1,10 +1,29 @@
-/*
- * Created on 17.05.2003
- *
- * To change the template for this generated file go to
- * Window>Preferences>Java>Code Generation>Code and Comments
- */
 package com.iw.plugins.spindle.editors.util;
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
+ *
+ * The Initial Developer of the Original Code is
+ * Intelligent Works Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2003
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ * 
+ *  glongman@intelligentworks.com
+ *
+ * ***** END LICENSE BLOCK ***** */
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,13 +43,23 @@ import org.eclipse.jface.text.TypedPosition;
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
- * @author jll
- *
- * To change the template for this generated type comment go to
- * Window>Preferences>Java>Code Generation>Code and Comments
+ *  Produced by the DocumentArtifactPartitioner.
+ *  Represents an xml artifact in the document.
+ * 
+ * @author glongman@intelligentworks.com
+ * @version $Id$
  */
 public class DocumentArtifact extends TypedPosition implements Comparable
 {
+    private static final Comparator COMPARATOR = new Comparator()
+    {
+        public int compare(Object o1, Object o2)
+        {
+            int offset1 = ((DocumentArtifact) o1).getOffset();
+            int offset2 = ((DocumentArtifact) o2).getOffset();
+            return (offset1 > offset2) ? 1 : ((offset1 < offset2) ? -1 : 0);
+        }
+    };
     public static final int TAG = 0;
     public static final int ATTR = 1;
     public static final int DOUBLEQUOTE = 2;
@@ -39,6 +68,21 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     public static final int ATT_VALUE = 5;
     public static final int AFTER_ATTRIBUTE = 6;
     public static final int AFTER_ATT_VALUE = 7;
+    public static final int IN_TERMINATOR = 8;
+
+    static public final Map TERMINATORS;
+
+    static {
+        TERMINATORS = new HashMap();
+        TERMINATORS.put(DocumentArtifactPartitioner.TAG, ">");
+        TERMINATORS.put(DocumentArtifactPartitioner.ATTR, "");
+        TERMINATORS.put(DocumentArtifactPartitioner.TEXT, "");
+        TERMINATORS.put(DocumentArtifactPartitioner.PI, "?>");
+        TERMINATORS.put(DocumentArtifactPartitioner.DECL, ">");
+        TERMINATORS.put(DocumentArtifactPartitioner.ENDTAG, ">");
+        TERMINATORS.put(DocumentArtifactPartitioner.COMMENT, "-->");
+        TERMINATORS.put(DocumentArtifactPartitioner.EMPTYTAG, "/>");
+    }
 
     public static synchronized DocumentArtifact createTree(IDocument document, int stopOffset)
         throws BadLocationException
@@ -52,15 +96,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
             e.printStackTrace();
             return null;
         }
-        Arrays.sort(pos, new Comparator()
-        {
-            public int compare(Object o1, Object o2)
-            {
-                int offset1 = ((DocumentArtifact) o1).getOffset();
-                int offset2 = ((DocumentArtifact) o2).getOffset();
-                return (offset1 > offset2) ? 1 : ((offset1 < offset2) ? -1 : 0);
-            }
-        });
+        Arrays.sort(pos, COMPARATOR);
 
         DocumentArtifact root = new DocumentArtifact(0, 0, "/", document);
         root.fParent = null;
@@ -90,18 +126,6 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                 parent.fCorrespondingNode = node;
                 parent = parent.fParent;
             }
-        }
-        for (int i = 0; i < pos.length; i++)
-        {
-            DocumentArtifact node = (DocumentArtifact) pos[i];
-            DocumentArtifact p = node.getParent();
-            DocumentArtifact c = node.getCorrespondingNode();
-            System.out.println(
-                (node == null ? "null" : node.toString())
-                    + " p: "
-                    + (p == null ? "null" : p.toString())
-                    + "c= "
-                    + (c == null ? "null" : c.toString()));
         }
         return root;
     }
@@ -201,6 +225,10 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         String content = getContent();
         int start = -1;
         int end = -1;
+        int minLength = "<!DOCTYPE".length();
+        if (content.length() < minLength)
+            return "";
+
         content = content.substring("<!DOCTYPE".length());
         start = content.indexOf("PUBLIC");
         if (start >= 0)
@@ -224,6 +252,9 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         String content = getContent();
         int index = -1;
         int end = -1;
+        int minLength = "<!DOCTYPE".length();
+        if (content.length() < minLength)
+            return "";
         content = content.substring("<!DOCTYPE".length());
 
         index = content.indexOf("PUBLIC");
@@ -265,33 +296,49 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     {
         String name = "unknown";
 
-        if (getType().equals(DocumentArtifactPartitioner.TEXT))
+        String type = getType();
+        if (type.equals(DocumentArtifactPartitioner.TEXT))
         {
-            return "#TEXT";
-        } else if (getType().equals(DocumentArtifactPartitioner.TAG))
+            name = "#TEXT";
+        } else if (type.equals(DocumentArtifactPartitioner.COMMENT))
         {
-            return getTagName();
-        } else if (getType().equals(DocumentArtifactPartitioner.PI))
+            name = "#COMMENT";
+        } else if (
+            type.equals(DocumentArtifactPartitioner.TAG)
+                || type.equals(DocumentArtifactPartitioner.EMPTYTAG)
+                || type.equals(DocumentArtifactPartitioner.ATTR)
+                || type.equals(DocumentArtifactPartitioner.ENDTAG)
+                || type.equals(DocumentArtifactPartitioner.PI)
+                || type.equals(DocumentArtifactPartitioner.DECL))
         {
-            return getTagName();
-        } else if (getType().equals(DocumentArtifactPartitioner.ATTR))
-        {
-            return getAttributeName();
-        } else if (getType().equals(DocumentArtifactPartitioner.COMMENT))
-        {
-            return "#COMMENT";
-        } else if (getType().equals(DocumentArtifactPartitioner.DECL))
-        {
-            return getTagName();
-        } else if (getType().equals(DocumentArtifactPartitioner.ENDTAG))
-        {
-            return getTagName();
-        } else if (getType().equals(DocumentArtifactPartitioner.EMPTYTAG))
-        {
-            return getTagName();
+            name = getTagName();
         }
 
         return name;
+    }
+
+    public boolean isTerminated()
+    {
+        if (getLength() == 0)
+            return true;
+        String type = getType();
+        if (type.equals(DocumentArtifactPartitioner.TEXT))
+            return true;
+
+        if (type.equals(DocumentArtifactPartitioner.ATTR))
+            return true;
+
+        String terminator = (String) TERMINATORS.get(type);
+        int length = terminator.length();
+        try
+        {
+            return terminator.equals(fDocument.get(getOffset() + getLength() - length, length));
+
+        } catch (BadLocationException e)
+        {
+            // do nothing
+        }
+        return false;
     }
 
     private String getAttributeName()
@@ -322,7 +369,8 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     {
         String content = null;
         String name = null;
-
+        if (getLength() == 1)
+            return null;
         try
         {
             content = fDocument.get(getOffset(), getLength());
@@ -332,8 +380,9 @@ public class DocumentArtifact extends TypedPosition implements Comparable
             return null;
         }
 
-        StringTokenizer st = new StringTokenizer(content, " \t\n\r<>/");
-
+        if (Character.isWhitespace(content.charAt(1)))
+            return null;
+        StringTokenizer st = new StringTokenizer(content, "= \t\n\r<>/");
         if (st.hasMoreTokens())
         {
             name = st.nextToken();
@@ -351,12 +400,10 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     {
         String content = null;
         int index = 0;
-
         try
         {
             content = fDocument.get(getOffset(), getLength());
             index = content.indexOf("\"");
-
             if (index == -1)
             {
                 index = content.indexOf("'");
@@ -365,24 +412,22 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         {
             UIPlugin.log(e);
         }
-        
-        if (index < 0) {
+
+        if (index < 0)
+        {
             return null;
         }
 
         content = content.substring(index).trim();
-
         return content.substring(1, content.length() - 1);
     }
 
     public DocumentArtifact getAttributeAt(int offset)
     {
         List attrs = getAttributes();
-
         for (Iterator it = attrs.iterator(); it.hasNext();)
         {
             DocumentArtifact node = (DocumentArtifact) it.next();
-
             if (node.getOffset() <= offset && offset <= node.getOffset() + node.getLength())
             {
                 return node;
@@ -411,7 +456,6 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         int start = -1;
         int startLength = 0;
         int endLength = 0;
-
         if (DocumentArtifactPartitioner.PI.equals(getType()))
         {
             startLength = 2;
@@ -442,18 +486,13 @@ public class DocumentArtifact extends TypedPosition implements Comparable
             return attrs;
         }
 
-        if (getName() == null)
-        {
-            return attrs;
-        }
-
-        for (int i = startLength + getName().length(); i < content.length() - endLength; i++)
+        String name = getName();
+        int initial = name == null ? 0 : name.length();
+        for (int i = startLength + initial; i < content.length() - endLength; i++)
         {
             char c = content.charAt(i);
-
             switch (c)
-            {
-                //            case '=':
+            { //            case '=':
                 //                if (state == TAG) {
                 //                    state = ATTR_VALUE;
                 //                }
@@ -475,7 +514,6 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                         state = DOUBLEQUOTE;
                     }
                     break;
-
                 case '\'' :
                     if (state == SINGLEQUOTE)
                     {
@@ -492,7 +530,6 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                         state = SINGLEQUOTE;
                     }
                     break;
-
                 default :
                     if (!Character.isWhitespace(c))
                     {
@@ -518,7 +555,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                                     break;
                                 case '"' :
                                     break;
-                                case '\'':
+                                case '\'' :
                                     break;
                                 default :
                                     stop = true;
@@ -526,7 +563,6 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                             }
                             if (stop)
                                 break;
-
                         }
                         if (stop)
                         {
@@ -560,9 +596,8 @@ public class DocumentArtifact extends TypedPosition implements Comparable
 
     public int getStateAt(int offset)
     {
-        String content = null;
         int state = TAG;
-
+        String content = null;
         try
         {
             content = fDocument.get(getOffset(), offset - getOffset());
@@ -573,9 +608,15 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         }
 
         String name = getName();
-
         if (name == null)
             return TAG;
+
+        String type = getType();
+        if (type == "/")
+            return -1;
+
+        String terminator = (String) TERMINATORS.get(type);
+        int terminatorLength = terminator.length();
 
         for (int i = name.length(); i < content.length(); i++)
         {
@@ -588,7 +629,6 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                         state = ATT_VALUE;
                     }
                     break;
-
                 case '"' :
                     if (state == DOUBLEQUOTE)
                     {
@@ -598,7 +638,6 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                         state = DOUBLEQUOTE;
                     }
                     break;
-
                 case '\'' :
                     if (state == SINGLEQUOTE)
                     {
@@ -608,7 +647,6 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                         state = SINGLEQUOTE;
                     }
                     break;
-
                 default :
                     if (Character.isWhitespace(c))
                     {
@@ -617,15 +655,26 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                             case TAG :
                                 state = ATTRIBUTE;
                                 break;
-
                             case ATTR :
                                 state = AFTER_ATTRIBUTE;
                                 break;
-
                             case AFTER_ATT_VALUE :
                                 state = ATTRIBUTE;
                                 break;
-
+                        }
+                    } else if (terminatorLength > 0)
+                    {
+                        switch (state)
+                        {
+                            case IN_TERMINATOR :
+                                break;
+                            case DOUBLEQUOTE :
+                            case SINGLEQUOTE :
+                                break;
+                            default :
+                                if (c == terminator.charAt(0))
+                                    state = IN_TERMINATOR;
+                                break;
                         }
                     }
             }
@@ -681,41 +730,32 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                 return "AFTER_ATTRIBUTE";
             case AFTER_ATT_VALUE :
                 return "AFTER_ATT_VALUE";
-
             case ATTRIBUTE :
                 return "ATTRIBUTE";
             default :
                 return Integer.toString(state);
         }
-    }
-
-    /**
-     * @return
-     */
+    } /**
+                                                                         * @return
+                                                                         */
     public DocumentArtifact getCorrespondingNode()
     {
         return fCorrespondingNode;
-    }
-
-    /**
-     * @return
-     */
+    } /**
+                                                                             * @return
+                                                                             */
     public DocumentArtifact getParent()
     {
         return fParent;
-    }
-
-    /**
-     * @param artifact
-     */
+    } /**
+                                                                             * @param artifact
+                                                                             */
     public void setCorrespondingNode(DocumentArtifact artifact)
     {
         fCorrespondingNode = artifact;
-    }
-
-    /**
-     * @param artifact
-     */
+    } /**
+                                                                             * @param artifact
+                                                                             */
     public void setParent(DocumentArtifact artifact)
     {
         fParent = artifact;
@@ -731,7 +771,6 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         String myType = getType();
         if (fParent.getType().equals("/"))
             return null;
-
         if (myType.equals(DocumentArtifactPartitioner.ENDTAG))
         {
             if (fCorrespondingNode != null)
@@ -746,10 +785,8 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         DocumentArtifact candidate = getPreviousArtifact();
         if (candidate == null)
             return null;
-
         if (candidate.fParent == fParent)
             return candidate;
-
         return null;
     }
 
@@ -758,19 +795,61 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         return getArtifactAt(fDocument, getOffset() - 1);
     }
 
-    /** may be the prev sibling or the parent */
-    public DocumentArtifact getPreviousTag()
+    public DocumentArtifact getNextArtifact()
     {
-        DocumentArtifact root = this;
-        String type = root.getType();
-        if (type.equals(DocumentArtifactPartitioner.TEXT))
-        {
-            root = getPreviousArtifact();
-        }
-        DocumentArtifact candidate = root.getPreviousSibling();
-        if (candidate == null)
-            return root.fParent;
+        return getArtifactAt(fDocument, getOffset() + getLength() + 1);
+    }
 
-        return candidate;
+    /** may be the prev sibling or the parent */
+    public DocumentArtifact getPreviousSiblingTag(String allowed)
+    {
+        if (fParent == null || fParent.getType().equals("/") || allowed == null)
+            return null;
+        Position[] pos = null;
+        try
+        {
+            pos = fDocument.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
+        } catch (BadPositionCategoryException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+        Arrays.sort(pos, COMPARATOR);
+        int index = 0;
+        while (pos[index] != this)
+            index++;
+        if (index > 0)
+        {
+            DocumentArtifact result = null;
+            for (int i = index - 1; i >= 0; i--)
+            {
+                result = (DocumentArtifact) pos[i];
+                if (result == fParent)
+                    return null;
+                String type = result.getType();
+                if (result.getParent() != fParent
+                    || (type.equals(DocumentArtifactPartitioner.TEXT)
+                        || type.equals(DocumentArtifactPartitioner.COMMENT)
+                        || type.equals(DocumentArtifactPartitioner.DECL)))
+                {
+                    continue;
+                }
+
+                String name = result.getName();
+                if (name == null)
+                    continue;
+                if (type.equals(DocumentArtifactPartitioner.ENDTAG))
+                {
+                    DocumentArtifact corresponding = result.getCorrespondingNode();
+                    if (allowed.indexOf(corresponding.getName().toLowerCase()) >= 0)
+                        return corresponding;
+                } else if (allowed.indexOf(name) >= 0)
+                {
+                    return result;
+                }
+            }
+        }
+
+        return null;
     }
 }

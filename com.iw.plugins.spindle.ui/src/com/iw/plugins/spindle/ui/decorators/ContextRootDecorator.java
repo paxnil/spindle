@@ -92,20 +92,26 @@ public class ContextRootDecorator
     private boolean onContextPath(IContainer container, IContainer projectWebContextRoot)
     {
 
-        IPath containerPath = container.getFullPath();
-        IPath contextPath = projectWebContextRoot.getFullPath();
-        int containerLength = containerPath.segmentCount();
-        int contextLength = contextPath.segmentCount();
-        if (containerLength < contextLength)
+        try
         {
-            IContainer parent = projectWebContextRoot.getParent();
-            do
+            IPath containerPath = container.getFullPath();
+            IPath contextPath = projectWebContextRoot.getFullPath();
+            int containerLength = containerPath.segmentCount();
+            int contextLength = contextPath.segmentCount();
+            if (containerLength < contextLength)
             {
-                if (parent.equals(container))
-                    return true;
-
-                parent = parent.getParent();
-            } while (parent != null);
+                IContainer parent = projectWebContextRoot.getParent();
+                do
+                {
+                    if (parent.equals(container))
+                        return true;
+            
+                    parent = parent.getParent();
+                } while (parent != null);
+            }
+        } catch (RuntimeException e)
+        {
+            return false;
         }
         return false;
     }

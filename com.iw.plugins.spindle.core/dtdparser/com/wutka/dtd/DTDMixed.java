@@ -53,5 +53,15 @@ public class DTDMixed extends DTDContainer
     {
         return DTDItemType.DTD_MIXED;
     }
+    
+    
+
+    /* (non-Javadoc)
+     * @see com.wutka.dtd.DTDItem#match(java.lang.String)
+     */
+    public boolean match(String match)
+    {
+        throw new Error("not supported");
+    }
 
 }

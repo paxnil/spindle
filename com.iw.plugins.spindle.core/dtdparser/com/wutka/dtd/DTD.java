@@ -30,10 +30,13 @@ public class DTD implements DTDOutput
 /** Contains the element that is most likely the root element  or null
     if the root element can't be determined.  */
     public DTDElement rootElement;
+    
+    private String fPublicId;
 
 /** Creates a new DTD */
-    public DTD()
+    public DTD(String publicId)
     {
+        fPublicId = publicId;
         elements = new Hashtable();
         entities = new Hashtable();
         notations = new Hashtable();
@@ -117,4 +120,12 @@ public class DTD implements DTDOutput
 
         return results;
     }
+    /**
+     * @return
+     */
+    public String getPublicId()
+    {
+        return fPublicId;
+    }
+
 }

@@ -56,10 +56,13 @@ import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.spec.assist.CDATACompletionProposal;
 import com.iw.plugins.spindle.editors.spec.assist.CommentCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.DeclCompletionProcessor;
-import com.iw.plugins.spindle.editors.spec.assist.SpecCompletionProcessor;
+import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;
+import com.iw.plugins.spindle.editors.spec.assist.TagCompletionProcessor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
+
+
 
 /**
  *  SourceViewerConfiguration for the TemplateEditor
@@ -69,7 +72,7 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifact;
  */
 public class SpecConfiguration extends BaseSourceConfiguration
 {
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     private XMLTextTools fTextTools;
 
@@ -230,19 +233,17 @@ public class SpecConfiguration extends BaseSourceConfiguration
     public IContentAssistant getContentAssistant(ISourceViewer sourceViewer)
     {
         ContentAssistant assistant = getEditor().getContentAssistant();
-        SpecCompletionProcessor defaultProcessor = new SpecCompletionProcessor(fEditor)
-        {
-            protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
-            {
-                return NoProposals;
-            }
-        };
 
         ContentAssistProcessor commentProcessor = new CommentCompletionProcessor(fEditor);
         
         ContentAssistProcessor declProcessor = new DeclCompletionProcessor(fEditor);
         
         ContentAssistProcessor cdataProcessor = new CDATACompletionProposal(fEditor);
+        
+        ContentAssistProcessor defaultProcessor = new DefaultCompletionProcessor(fEditor);
+        
+        ContentAssistProcessor tagProcessor = new TagCompletionProcessor(fEditor);
+
         
         ContentAssistProcessor standard = new ContentAssistProcessor(fEditor)
         {
@@ -255,7 +256,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
                     root = DocumentArtifact.createTree(viewer.getDocument(), documentOffset);
                 } catch (BadLocationException e)
                 {
-                    // TODO Auto-generated catch block
+                    // TODO remove
                     e.printStackTrace();
                 }
                 DocumentArtifact prevSib = artifact.getPreviousSibling();
@@ -269,7 +270,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
         };
         
 
-        assistant.setContentAssistProcessor(standard, XMLPartitionScanner.XML_TAG);
+        assistant.setContentAssistProcessor(tagProcessor, XMLPartitionScanner.XML_TAG);
         assistant.setContentAssistProcessor(commentProcessor, XMLPartitionScanner.XML_COMMENT);
         assistant.setContentAssistProcessor(standard, XMLPartitionScanner.XML_ATTRIBUTE);
         assistant.setContentAssistProcessor(declProcessor, XMLPartitionScanner.XML_DECL);

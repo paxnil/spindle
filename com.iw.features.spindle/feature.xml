@@ -2,14 +2,14 @@
 <feature
       id="com.iw.features.spindle"
       label="com.iw.features.spindle"
-      version="3.0.10"
+      version="3.0.11"
       provider-name="Intelligent Works Inc"
       image="spindle.gif">
 
    <description url="http://spindle.sourceforge.net">
       Spindle 3.0 provides IDE support for Web Applications built with
 Tapestry Web Components (http://jakarat.apache.org/tapestry).
-release 3.0.10 includes bug fixes and hover help in the Template Editor
+release 3.0.11 includes bug fixes and rudimentary Content Assist in the Specification Editor
    </description>
 
    <copyright>
@@ -72,12 +72,12 @@ All Rights Reserved
          id="com.iw.plugins.spindle.core"
          download-size="0"
          install-size="0"
-         version="0.0.10"/>
+         version="0.0.11"/>
 
    <plugin
          id="com.iw.plugins.spindle.ui"
          download-size="0"
          install-size="0"
-         version="0.0.10"/>
+         version="0.0.11"/>
 
 </feature>

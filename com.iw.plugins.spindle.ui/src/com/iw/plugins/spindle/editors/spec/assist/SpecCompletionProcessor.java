@@ -28,17 +28,21 @@ package com.iw.plugins.spindle.editors.spec.assist;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
-import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.util.XMLUtil;
@@ -48,41 +52,64 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.wutka.dtd.DTD;
 
 /**
- *  TODO Add Type comment
+ *  Base class for context assist processors for Tapestry specss
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 {
-    public static ICompletionProposal getDefaultInsertCommentProposal(int replacementOffset, int replacementLength)
+
+    protected static List getRawNewTagProposals(DTD dtd, DocumentArtifact artifact, int documentOffset)
     {
-        return new CompletionProposal(
-            "<!--  -->",
-            replacementOffset,
-            replacementLength,
-            new Point(5, 0),
-            Images.getSharedImage("bullet.gif"),
-            "Insert comment",
-            null,
-            null);
+        DocumentArtifact parent = artifact.getParent();
+        DocumentArtifact previousSibling = null;
+
+
+        if (parent != null && !parent.getType().equals("/"))
+        {
+            boolean lookupPreviousSib = artifact.getCorrespondingNode() != parent;
+            String parentName = parent.getName();
+            if (parentName != null)
+            {
+                String parentAllowedContent = SpecAssistHelper.getAllowedElements(dtd, parentName);
+                if (parentAllowedContent != null)
+                {
+                    String sibName = null;
+                    if (lookupPreviousSib)
+                        previousSibling = artifact.getPreviousSiblingTag(parentAllowedContent);
+                    if (previousSibling != null)
+                        sibName = previousSibling.getName();
+                    List allowedChildren = SpecAssistHelper.getAllowedChildren(dtd, parentName, sibName, false);
+                    List result = new ArrayList();
+                    for (Iterator iter = allowedChildren.iterator(); iter.hasNext();)
+                    {
+                        String tagName = (String) iter.next();
+                        result.addAll(SpecAssistHelper.getNewElementCompletionProposals(dtd, tagName));
+
+                    }
+                    return result;
+                }
+            }
+        }
+        return Collections.EMPTY_LIST;
+
     }
 
-    protected String fRootElementName;
+    protected String fDeclaredRootElementName;
+    protected String fPublicId;
     protected DTD fDTD;
     protected DocumentArtifact fArtifact;
-    /**
-     * @param editor
-     */
+
     public SpecCompletionProcessor(AbstractTextEditor editor)
     {
         super(editor);
-        // TODO Auto-generated constructor stub
     }
 
     public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        fRootElementName = null;
+        fDeclaredRootElementName = null;
+        fPublicId = null;
         fDTD = null;
         fArtifact = null;
 
@@ -98,23 +125,55 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
             if (p.y > 0)
                 return NoProposals;
 
-            fRootElementName = null;
             try
             {
                 DocumentArtifact root = DocumentArtifact.createTree(document, -1);
-                String publicId = root.fPublicId;
-                fRootElementName = root.fRootNodeId;
-                fDTD = DOMValidator.getDTD(publicId);
+                fPublicId = root.fPublicId;
+                fDeclaredRootElementName = root.fRootNodeId;
+                fDTD = DOMValidator.getDTD(fPublicId);
 
             } catch (BadLocationException e)
             {
                 // do nothing
             }
 
-            if (fDTD == null || fRootElementName == null)
+            if (fDTD == null || fDeclaredRootElementName == null)
                 return NoProposals;
 
             return doComputeCompletionProposals(viewer, documentOffset);
+
+        } finally
+        {
+            fAssistParititioner.disconnect();
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
+     */
+    public IContextInformation[] computeInformation(ITextViewer viewer, int documentOffset)
+    {
+        try
+        {
+            IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+            fAssistParititioner.connect(document);
+
+            try
+            {
+                DocumentArtifact root = DocumentArtifact.createTree(document, -1);
+                fPublicId = root.fPublicId;
+                fDeclaredRootElementName = root.fRootNodeId;
+                fDTD = DOMValidator.getDTD(fPublicId);
+
+            } catch (BadLocationException e)
+            {
+                // do nothing
+            }
+
+            if (fDTD == null || fDeclaredRootElementName == null)
+                return NoInformation;
+
+            return doComputeContextInformation(viewer, documentOffset);
 
         } finally
         {

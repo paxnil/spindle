@@ -26,10 +26,15 @@
 
 package com.iw.plugins.spindle.editors.spec.assist;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
+import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 
 /**
@@ -41,13 +46,9 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 public class DefaultCompletionProcessor extends SpecCompletionProcessor
 {
 
-    /**
-     * @param editor
-     */
     public DefaultCompletionProcessor(AbstractTextEditor editor)
     {
         super(editor);
-        // TODO Auto-generated constructor stub
     }
 
     /* (non-Javadoc)
@@ -56,9 +57,25 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
         DocumentArtifact artifact = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
-        
-        
-        return null;
-    }
+        if (artifact.getOffset() + artifact.getLength() == documentOffset)
+            artifact = artifact.getNextArtifact();
 
+        artifact = artifact.getNextArtifact();
+
+        List proposals = new ArrayList();
+        proposals.add(SpecAssistHelper.getDefaultInsertCommentProposal(documentOffset, 0));
+
+        List rawProposals = getRawNewTagProposals(fDTD, artifact, documentOffset);
+        if (rawProposals != null && !rawProposals.isEmpty())
+        {
+            for (Iterator iterator = rawProposals.iterator(); iterator.hasNext();)
+            {
+                CompletionProposal p = (CompletionProposal) iterator.next();
+                p.setReplacementOffset(documentOffset);
+                p.setReplacementLength(0);
+                proposals.add(p);
+            }
+        }
+        return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+    }
 }

@@ -69,4 +69,12 @@ public class DTDName extends DTDItem
         return DTDItemType.DTD_NAME;
     }
 
+    /* (non-Javadoc)
+     * @see com.wutka.dtd.DTDItem#match(java.lang.String)
+     */
+    public boolean match(String match)
+    {        
+        return value.equals(match);
+    }
+
 }

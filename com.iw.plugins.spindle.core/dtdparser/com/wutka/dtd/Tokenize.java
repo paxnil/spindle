@@ -21,11 +21,11 @@ class Tokenize
 // If it looks like the filename may be a URL, use the URL class
             if (args[0].indexOf("://") > 0)
             {
-                parser = new DTDParser(new URL(args[0]), true);
+                parser = new DTDParser(new URL(args[0]), null, true);
             }
             else
             {
-                parser = new DTDParser(new File(args[0]), true);
+                parser = new DTDParser(new File(args[0]), null, true);
             }
 
 // Parse the DTD and ask the parser to guess the root element

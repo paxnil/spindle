@@ -104,8 +104,7 @@ public abstract class DTDContainer extends DTDItem
 
     public abstract void write(PrintWriter out) throws IOException;
 
-    public Object clone()
-    
+    public Object clone()    
     {
         try
         {

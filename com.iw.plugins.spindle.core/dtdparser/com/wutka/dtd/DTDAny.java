@@ -37,4 +37,9 @@ public class DTDAny extends DTDItem
         return DTDItemType.DTD_ANY;
     }
 
+    public boolean match(String match)
+    {
+        throw new Error("unsupported");
+    }
+
 }

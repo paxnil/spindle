@@ -15,100 +15,91 @@ public class DTDParser implements EntityExpansion
     protected DTD dtd;
     protected Object defaultLocation;
 
-/** Creates a parser that will read from the specified Reader object */
-    public DTDParser(Reader in)
+    /** Creates a parser that will read from the specified Reader object */
+    public DTDParser(Reader in, String publicId)
     {
         scanner = new Scanner(in, false, this);
-        dtd = new DTD();
+        dtd = new DTD(publicId);
     }
 
-/** Creates a parser that will read from the specified Reader object
- * @param in The input stream to read
- * @param trace True if the parser should print out tokens as it reads them
- *  (used for debugging the parser)
- */
-    public DTDParser(Reader in, boolean trace)
+    /** Creates a parser that will read from the specified Reader object
+     * @param in The input stream to read
+     * @param trace True if the parser should print out tokens as it reads them
+     *  (used for debugging the parser)
+     */
+    public DTDParser(Reader in, String publicId, boolean trace)
     {
         scanner = new Scanner(in, trace, this);
-        dtd = new DTD();
+        dtd = new DTD(publicId);
     }
 
-/** Creates a parser that will read from the specified File object */
-    public DTDParser(File in)
-        throws IOException
+    /** Creates a parser that will read from the specified File object */
+    public DTDParser(File in, String publicId) throws IOException
     {
         defaultLocation = in.getParentFile();
 
-        scanner = new Scanner(new BufferedReader(new FileReader(in)),
-            false, this);
-        dtd = new DTD();
+        scanner = new Scanner(new BufferedReader(new FileReader(in)), false, this);
+        dtd = new DTD(publicId);
     }
 
-/** Creates a parser that will read from the specified File object
- * @param in The file to read
- * @param trace True if the parser should print out tokens as it reads them
- *  (used for debugging the parser)
- */
-    public DTDParser(File in, boolean trace)
-        throws IOException
+    /** Creates a parser that will read from the specified File object
+     * @param in The file to read
+     * @param trace True if the parser should print out tokens as it reads them
+     *  (used for debugging the parser)
+     */
+    public DTDParser(File in, String publicId, boolean trace) throws IOException
     {
         defaultLocation = in.getParentFile();
 
-        scanner = new Scanner(new BufferedReader(new FileReader(in)),
-            trace, this);
-        dtd = new DTD();
+        scanner = new Scanner(new BufferedReader(new FileReader(in)), trace, this);
+        dtd = new DTD(publicId);
     }
 
-/** Creates a parser that will read from the specified URL object */
-    public DTDParser(URL in)
-        throws IOException
+    /** Creates a parser that will read from the specified URL object */
+    public DTDParser(URL in, String publicId) throws IOException
     {
-    //LAM: we need to set the defaultLocation to the directory where
-    //the dtd is found so that we don't run into problems parsing any
-    //relative external files referenced by the dtd.
+        //LAM: we need to set the defaultLocation to the directory where
+        //the dtd is found so that we don't run into problems parsing any
+        //relative external files referenced by the dtd.
         String file = in.getFile();
-        defaultLocation = new URL(in.getProtocol(), in.getHost(), in.getPort(), file.substring(0, file.lastIndexOf('/') + 1));
+        defaultLocation =
+            new URL(in.getProtocol(), in.getHost(), in.getPort(), file.substring(0, file.lastIndexOf('/') + 1));
 
-        scanner = new Scanner(new BufferedReader(
-            new InputStreamReader(in.openStream())), false, this);
-        dtd = new DTD();
+        scanner = new Scanner(new BufferedReader(new InputStreamReader(in.openStream())), false, this);
+        dtd = new DTD(publicId);
     }
 
-/** Creates a parser that will read from the specified URL object
- * @param in The URL to read
- * @param trace True if the parser should print out tokens as it reads them
- *  (used for debugging the parser)
- */
-    public DTDParser(URL in, boolean trace)
-        throws IOException
+    /** Creates a parser that will read from the specified URL object
+     * @param in The URL to read
+     * @param trace True if the parser should print out tokens as it reads them
+     *  (used for debugging the parser)
+     */
+    public DTDParser(URL in, String publicId, boolean trace) throws IOException
     {
-    //LAM: we need to set the defaultLocation to the directory where
-    //the dtd is found so that we don't run into problems parsing any
-    //relative external files referenced by the dtd.
+        //LAM: we need to set the defaultLocation to the directory where
+        //the dtd is found so that we don't run into problems parsing any
+        //relative external files referenced by the dtd.
         String file = in.getFile();
-        defaultLocation = new URL(in.getProtocol(), in.getHost(), in.getPort(), file.substring(0, file.lastIndexOf('/') + 1));
+        defaultLocation =
+            new URL(in.getProtocol(), in.getHost(), in.getPort(), file.substring(0, file.lastIndexOf('/') + 1));
 
-
-        scanner = new Scanner(new BufferedReader(
-            new InputStreamReader(in.openStream())), trace, this);
-        dtd = new DTD();
+        scanner = new Scanner(new BufferedReader(new InputStreamReader(in.openStream())), trace, this);
+        dtd = new DTD(publicId);
     }
 
-/** Parses the DTD file and returns a DTD object describing the DTD.
-    This invocation of parse does not try to guess the root element
-    (for efficiency reasons) */
-    public DTD parse()
-        throws IOException
+    /** Parses the DTD file and returns a DTD object describing the DTD.
+        This invocation of parse does not try to guess the root element
+        (for efficiency reasons) */
+    public DTD parse() throws IOException
     {
         return parse(false);
     }
 
-/** Parses the DTD file and returns a DTD object describing the DTD.
- * @param guessRootElement If true, tells the parser to try to guess the
-          root element of the document by process of elimination
- */
-    public DTD parse(boolean guessRootElement)
-        throws IOException
+    /** Parses the DTD file and returns a DTD object describing the DTD.
+     * @param guessRootElement If true, tells the parser to try to guess the
+              root element of the document by process of elimination
+     */
+    public DTD parse(boolean guessRootElement) throws IOException
     {
         Token token;
 
@@ -116,7 +107,8 @@ public class DTDParser implements EntityExpansion
         {
             token = scanner.peek();
 
-            if (token.type == Scanner.EOF) break;
+            if (token.type == Scanner.EOF)
+                break;
 
             parseTopLevelElement();
         }
@@ -137,10 +129,10 @@ public class DTDParser implements EntityExpansion
             while (e.hasMoreElements())
             {
                 DTDElement element = (DTDElement) e.nextElement();
-                if (!(element.content instanceof DTDContainer)) continue;
+                if (!(element.content instanceof DTDContainer))
+                    continue;
 
-                Enumeration items = ((DTDContainer) element.content).
-                    getItemsVec().  elements();
+                Enumeration items = ((DTDContainer) element.content).getItemsVec().elements();
 
                 while (items.hasMoreElements())
                 {
@@ -152,13 +144,11 @@ public class DTDParser implements EntityExpansion
             {
                 e = roots.elements();
                 dtd.rootElement = (DTDElement) e.nextElement();
-            }
-            else
+            } else
             {
                 dtd.rootElement = null;
             }
-        }
-        else
+        } else
         {
             dtd.rootElement = null;
         }
@@ -171,8 +161,7 @@ public class DTDParser implements EntityExpansion
         if (item instanceof DTDName)
         {
             h.remove(((DTDName) item).value);
-        }
-        else if (item instanceof DTDContainer)
+        } else if (item instanceof DTDContainer)
         {
             Enumeration e = ((DTDContainer) item).getItemsVec().elements();
 
@@ -183,12 +172,11 @@ public class DTDParser implements EntityExpansion
         }
     }
 
-    protected void parseTopLevelElement()
-        throws IOException
+    protected void parseTopLevelElement() throws IOException
     {
         Token token = scanner.get();
 
-// Is <? xxx ?> even valid in a DTD?  I'll ignore it just in case it's there
+        // Is <? xxx ?> even valid in a DTD?  I'll ignore it just in case it's there
         if (token.type == Scanner.LTQUES)
         {
             StringBuffer textBuffer = new StringBuffer();
@@ -206,45 +194,39 @@ public class DTDParser implements EntityExpansion
                 }
                 textBuffer.append('?');
             }
-            DTDProcessingInstruction instruct =
-                new DTDProcessingInstruction(textBuffer.toString());
+            DTDProcessingInstruction instruct = new DTDProcessingInstruction(textBuffer.toString());
 
             dtd.items.addElement(instruct);
 
             return;
-        }
-        else if (token.type == Scanner.CONDITIONAL)
+        } else if (token.type == Scanner.CONDITIONAL)
         {
             token = expect(Scanner.IDENTIFIER);
 
             if (token.value.equals("IGNORE"))
             {
                 scanner.skipConditional();
-            }
-            else
+            } else
             {
                 if (token.value.equals("INCLUDE"))
                 {
                     scanner.skipUntil('[');
-                }
-                else
+                } else
                 {
-                    throw new DTDParseException(scanner.getUriId(),
-                        "Invalid token in conditional: "+token.value,
-                        scanner.getLineNumber(), scanner.getColumn());
+                    throw new DTDParseException(
+                        scanner.getUriId(),
+                        "Invalid token in conditional: " + token.value,
+                        scanner.getLineNumber(),
+                        scanner.getColumn());
                 }
             }
-        }
-        else if (token.type == Scanner.ENDCONDITIONAL)
+        } else if (token.type == Scanner.ENDCONDITIONAL)
         {
             // Don't need to do anything for this token
-        }
-        else if (token.type == Scanner.COMMENT)
+        } else if (token.type == Scanner.COMMENT)
         {
-            dtd.items.addElement(
-                new DTDComment(token.value));
-        }
-        else if (token.type == Scanner.LTBANG)
+            dtd.items.addElement(new DTDComment(token.value));
+        } else if (token.type == Scanner.LTBANG)
         {
 
             token = expect(Scanner.IDENTIFIER);
@@ -252,38 +234,34 @@ public class DTDParser implements EntityExpansion
             if (token.value.equals("ELEMENT"))
             {
                 parseElement();
-            }
-            else if (token.value.equals("ATTLIST"))
+            } else if (token.value.equals("ATTLIST"))
             {
                 parseAttlist();
-            }
-            else if (token.value.equals("ENTITY"))
+            } else if (token.value.equals("ENTITY"))
             {
                 parseEntity();
-            }
-            else if (token.value.equals("NOTATION"))
+            } else if (token.value.equals("NOTATION"))
             {
                 parseNotation();
-            }
-            else
+            } else
             {
                 skipUntil(Scanner.GT);
             }
-        }
-        else
+        } else
         {
-// MAW Version 1.17
-// Previously, the parser would skip over unexpected tokens at the
-// upper level. Some invalid DTDs would still show up as valid.
-            throw new DTDParseException(scanner.getUriId(),
-                        "Unexpected token: "+ token.type.name+"("+token.value+")",
-                        scanner.getLineNumber(), scanner.getColumn());
+            // MAW Version 1.17
+            // Previously, the parser would skip over unexpected tokens at the
+            // upper level. Some invalid DTDs would still show up as valid.
+            throw new DTDParseException(
+                scanner.getUriId(),
+                "Unexpected token: " + token.type.name + "(" + token.value + ")",
+                scanner.getLineNumber(),
+                scanner.getColumn());
         }
 
     }
 
-    protected void skipUntil(TokenType stopToken)
-        throws IOException
+    protected void skipUntil(TokenType stopToken) throws IOException
     {
         Token token = scanner.get();
 
@@ -293,8 +271,7 @@ public class DTDParser implements EntityExpansion
         }
     }
 
-    protected Token expect(TokenType expected)
-        throws IOException
+    protected Token expect(TokenType expected) throws IOException
     {
         Token token = scanner.get();
 
@@ -302,24 +279,25 @@ public class DTDParser implements EntityExpansion
         {
             if (token.value == null)
             {
-                throw new DTDParseException(scanner.getUriId(),
-                            "Expected "+expected.name+" instead of "+token.type.name,
-                            scanner.getLineNumber(), scanner.getColumn());
-            }
-            else
+                throw new DTDParseException(
+                    scanner.getUriId(),
+                    "Expected " + expected.name + " instead of " + token.type.name,
+                    scanner.getLineNumber(),
+                    scanner.getColumn());
+            } else
             {
-                throw new DTDParseException(scanner.getUriId(),
-                            "Expected "+expected.name+
-                                " instead of "+ token.type.name+"("+token.value+")",
-                            scanner.getLineNumber(), scanner.getColumn());
+                throw new DTDParseException(
+                    scanner.getUriId(),
+                    "Expected " + expected.name + " instead of " + token.type.name + "(" + token.value + ")",
+                    scanner.getLineNumber(),
+                    scanner.getColumn());
             }
         }
 
         return token;
     }
 
-    protected void parseElement()
-        throws IOException
+    protected void parseElement() throws IOException
     {
         Token name = expect(Scanner.IDENTIFIER);
 
@@ -329,17 +307,18 @@ public class DTDParser implements EntityExpansion
         {
             element = new DTDElement(name.value);
             dtd.elements.put(element.name, element);
-        }
-        else if (element.content != null)
+        } else if (element.content != null)
         {
-// 070501 MAW: Since the ATTLIST tag can also cause an element to be created,
-// only throw this exception if the element has content defined, which
-// won't happen when you just create an ATTLIST. Thanks to
-// Jags Krishnamurthy of Object Edge for pointing out this problem - 
-// originally the parser would let you define an element more than once.
-            throw new DTDParseException(scanner.getUriId(),
-                "Found second definition of element: "+name.value,
-                        scanner.getLineNumber(), scanner.getColumn());
+            // 070501 MAW: Since the ATTLIST tag can also cause an element to be created,
+            // only throw this exception if the element has content defined, which
+            // won't happen when you just create an ATTLIST. Thanks to
+            // Jags Krishnamurthy of Object Edge for pointing out this problem - 
+            // originally the parser would let you define an element more than once.
+            throw new DTDParseException(
+                scanner.getUriId(),
+                "Found second definition of element: " + name.value,
+                scanner.getLineNumber(),
+                scanner.getColumn());
         }
 
         dtd.items.addElement(element);
@@ -348,8 +327,7 @@ public class DTDParser implements EntityExpansion
         expect(Scanner.GT);
     }
 
-    protected void parseContentSpec(Scanner scanner, DTDElement element)
-        throws IOException
+    protected void parseContentSpec(Scanner scanner, DTDElement element) throws IOException
     {
         Token token = scanner.get();
 
@@ -358,20 +336,18 @@ public class DTDParser implements EntityExpansion
             if (token.value.equals("EMPTY"))
             {
                 element.content = new DTDEmpty();
-            }
-            else if (token.value.equals("ANY"))
+            } else if (token.value.equals("ANY"))
             {
                 element.content = new DTDAny();
-            }
-            else
+            } else
             {
-                throw new DTDParseException(scanner.getUriId(),
-                    "Invalid token in entity content spec "+
-                        token.value,
-                        scanner.getLineNumber(), scanner.getColumn());
+                throw new DTDParseException(
+                    scanner.getUriId(),
+                    "Invalid token in entity content spec " + token.value,
+                    scanner.getLineNumber(),
+                    scanner.getColumn());
             }
-        }
-        else if (token.type == Scanner.LPAREN)
+        } else if (token.type == Scanner.LPAREN)
         {
             token = scanner.peek();
 
@@ -380,21 +356,18 @@ public class DTDParser implements EntityExpansion
                 if (token.value.equals("#PCDATA"))
                 {
                     parseMixed(element);
-                }
-                else
+                } else
                 {
                     parseChildren(element);
                 }
-            }
-            else if (token.type == Scanner.LPAREN)
+            } else if (token.type == Scanner.LPAREN)
             {
                 parseChildren(element);
             }
         }
     }
 
-    protected void parseMixed(DTDElement element)
-        throws IOException
+    protected void parseMixed(DTDElement element) throws IOException
     {
         // MAW Version 1.19
         // Keep track of whether the mixed is #PCDATA only
@@ -422,22 +395,23 @@ public class DTDParser implements EntityExpansion
                 {
                     scanner.get();
                     mixed.cardinal = DTDCardinal.ZEROMANY;
-                }
-                else
+                } else
                 {
                     if (!isPcdataOnly)
                     {
-                        throw new DTDParseException(scanner.getUriId(),
-                                        "Invalid token in Mixed content type, '*' required after (#PCDATA|xx ...): "+
-                                        token.type.name, scanner.getLineNumber(), scanner.getColumn());
+                        throw new DTDParseException(
+                            scanner.getUriId(),
+                            "Invalid token in Mixed content type, '*' required after (#PCDATA|xx ...): "
+                                + token.type.name,
+                            scanner.getLineNumber(),
+                            scanner.getColumn());
                     }
 
                     mixed.cardinal = DTDCardinal.NONE;
                 }
 
                 return;
-            }
-            else if (token.type == Scanner.PIPE)
+            } else if (token.type == Scanner.PIPE)
             {
                 token = scanner.get();
 
@@ -445,18 +419,18 @@ public class DTDParser implements EntityExpansion
 
                 // MAW Ver. 1.19
                 isPcdataOnly = false;
-            }
-            else
+            } else
             {
-                throw new DTDParseException(scanner.getUriId(),
-                                "Invalid token in Mixed content type: "+
-                                token.type.name, scanner.getLineNumber(), scanner.getColumn());
+                throw new DTDParseException(
+                    scanner.getUriId(),
+                    "Invalid token in Mixed content type: " + token.type.name,
+                    scanner.getLineNumber(),
+                    scanner.getColumn());
             }
         }
     }
 
-    protected void parseChildren(DTDElement element)
-        throws IOException
+    protected void parseChildren(DTDElement element) throws IOException
     {
         DTDContainer choiceSeq = parseChoiceSequence();
 
@@ -467,16 +441,13 @@ public class DTDParser implements EntityExpansion
         if (token.type == Scanner.QUES)
         {
             choiceSeq.cardinal = DTDCardinal.OPTIONAL;
-        }
-        else if (token.type == Scanner.ASTERISK)
+        } else if (token.type == Scanner.ASTERISK)
         {
             choiceSeq.cardinal = DTDCardinal.ZEROMANY;
-        }
-        else if (token.type == Scanner.PLUS)
+        } else if (token.type == Scanner.PLUS)
         {
             choiceSeq.cardinal = DTDCardinal.ONEMANY;
-        }
-        else
+        } else
         {
             choiceSeq.cardinal = DTDCardinal.NONE;
         }
@@ -484,8 +455,7 @@ public class DTDParser implements EntityExpansion
         element.content = choiceSeq;
     }
 
-    protected DTDContainer parseChoiceSequence()
-        throws IOException
+    protected DTDContainer parseChoiceSequence() throws IOException
     {
         TokenType separator = null;
 
@@ -497,14 +467,15 @@ public class DTDParser implements EntityExpansion
 
             Token token = scanner.get();
 
-            if ((token.type == Scanner.PIPE) ||
-                (token.type == Scanner.COMMA))
+            if ((token.type == Scanner.PIPE) || (token.type == Scanner.COMMA))
             {
                 if ((separator != null) && (separator != token.type))
                 {
-                    throw new DTDParseException(scanner.getUriId(),
+                    throw new DTDParseException(
+                        scanner.getUriId(),
                         "Can't mix separators in a choice/sequence",
-                        scanner.getLineNumber(), scanner.getColumn());
+                        scanner.getLineNumber(),
+                        scanner.getColumn());
                 }
                 separator = token.type;
 
@@ -513,15 +484,13 @@ public class DTDParser implements EntityExpansion
                     if (token.type == Scanner.PIPE)
                     {
                         cs = new DTDChoice();
-                    }
-                    else
+                    } else
                     {
                         cs = new DTDSequence();
                     }
                 }
                 cs.add(item);
-            }
-            else if (token.type == Scanner.RPAREN)
+            } else if (token.type == Scanner.RPAREN)
             {
                 if (cs == null)
                 {
@@ -529,18 +498,18 @@ public class DTDParser implements EntityExpansion
                 }
                 cs.add(item);
                 return cs;
-            }
-            else
+            } else
             {
-                throw new DTDParseException(scanner.getUriId(),
-                                "Found invalid token in sequence: "+
-                    token.type.name, scanner.getLineNumber(), scanner.getColumn());
+                throw new DTDParseException(
+                    scanner.getUriId(),
+                    "Found invalid token in sequence: " + token.type.name,
+                    scanner.getLineNumber(),
+                    scanner.getColumn());
             }
         }
     }
 
-    protected DTDItem parseCP()
-        throws IOException
+    protected DTDItem parseCP() throws IOException
     {
         Token token = scanner.get();
 
@@ -549,17 +518,16 @@ public class DTDParser implements EntityExpansion
         if (token.type == Scanner.IDENTIFIER)
         {
             item = new DTDName(token.value);
-        }
-        else if (token.type == Scanner.LPAREN)
+        } else if (token.type == Scanner.LPAREN)
         {
             item = parseChoiceSequence();
-        }
-        else
+        } else
         {
-            throw new DTDParseException(scanner.getUriId(),
-                            "Found invalid token in sequence: "+
-                            token.type.name, scanner.getLineNumber(),
-                            scanner.getColumn());
+            throw new DTDParseException(
+                scanner.getUriId(),
+                "Found invalid token in sequence: " + token.type.name,
+                scanner.getLineNumber(),
+                scanner.getColumn());
         }
 
         item.cardinal = parseCardinality();
@@ -567,8 +535,7 @@ public class DTDParser implements EntityExpansion
         return item;
     }
 
-    protected DTDCardinal parseCardinality()
-        throws IOException
+    protected DTDCardinal parseCardinality() throws IOException
     {
         Token token = scanner.peek();
 
@@ -576,25 +543,21 @@ public class DTDParser implements EntityExpansion
         {
             scanner.get();
             return DTDCardinal.OPTIONAL;
-        }
-        else if (token.type == Scanner.ASTERISK)
+        } else if (token.type == Scanner.ASTERISK)
         {
             scanner.get();
             return DTDCardinal.ZEROMANY;
-        }
-        else if (token.type == Scanner.PLUS)
+        } else if (token.type == Scanner.PLUS)
         {
             scanner.get();
             return DTDCardinal.ONEMANY;
-        }
-        else
+        } else
         {
             return DTDCardinal.NONE;
         }
     }
 
-    protected void parseAttlist()
-        throws IOException
+    protected void parseAttlist() throws IOException
     {
         Token token = expect(Scanner.IDENTIFIER);
 
@@ -617,17 +580,15 @@ public class DTDParser implements EntityExpansion
             parseAttdef(scanner, element, attlist);
             token = scanner.peek();
         }
-// MAW Version 1.17
-// Prior to this version, the parser didn't actually consume the > at the
-// end of the ATTLIST definition. Because the parser ignored unexpected tokens
-// at the top level, it was ignoring the >. In parsing DOCBOOK, however, there
-// were two unexpected tokens, bringing this error to light.
+        // MAW Version 1.17
+        // Prior to this version, the parser didn't actually consume the > at the
+        // end of the ATTLIST definition. Because the parser ignored unexpected tokens
+        // at the top level, it was ignoring the >. In parsing DOCBOOK, however, there
+        // were two unexpected tokens, bringing this error to light.
         expect(Scanner.GT);
     }
 
-    protected void parseAttdef(Scanner scanner, DTDElement element,
-        DTDAttlist attlist)
-        throws IOException
+    protected void parseAttdef(Scanner scanner, DTDElement element, DTDAttlist attlist) throws IOException
     {
         Token token = expect(Scanner.IDENTIFIER);
 
@@ -644,13 +605,11 @@ public class DTDParser implements EntityExpansion
             if (token.value.equals("NOTATION"))
             {
                 attr.type = parseNotationList();
-            }
-            else
+            } else
             {
                 attr.type = token.value;
             }
-        }
-        else if (token.type == Scanner.LPAREN)
+        } else if (token.type == Scanner.LPAREN)
         {
             attr.type = parseEnumeration();
         }
@@ -666,23 +625,21 @@ public class DTDParser implements EntityExpansion
 
                 token = scanner.get();
                 attr.defaultValue = token.value;
-            }
-            else if (token.value.equals("#REQUIRED"))
+            } else if (token.value.equals("#REQUIRED"))
             {
                 attr.decl = DTDDecl.REQUIRED;
-            }
-            else if (token.value.equals("#IMPLIED"))
+            } else if (token.value.equals("#IMPLIED"))
             {
                 attr.decl = DTDDecl.IMPLIED;
-            }
-            else
+            } else
             {
-                throw new DTDParseException(scanner.getUriId(),
-                    "Invalid token in attribute declaration: "+
-                    token.value, scanner.getLineNumber(), scanner.getColumn());
+                throw new DTDParseException(
+                    scanner.getUriId(),
+                    "Invalid token in attribute declaration: " + token.value,
+                    scanner.getLineNumber(),
+                    scanner.getColumn());
             }
-        }
-        else if (token.type == Scanner.STRING)
+        } else if (token.type == Scanner.STRING)
         {
             scanner.get();
             attr.decl = DTDDecl.VALUE;
@@ -690,17 +647,17 @@ public class DTDParser implements EntityExpansion
         }
     }
 
-    protected DTDNotationList parseNotationList()
-        throws IOException
+    protected DTDNotationList parseNotationList() throws IOException
     {
         DTDNotationList notation = new DTDNotationList();
 
         Token token = scanner.get();
         if (token.type != Scanner.LPAREN)
         {
-            throw new DTDParseException(scanner.getUriId(),
-                "Invalid token in notation: "+
-                token.type.name, scanner.getLineNumber(),
+            throw new DTDParseException(
+                scanner.getUriId(),
+                "Invalid token in notation: " + token.type.name,
+                scanner.getLineNumber(),
                 scanner.getColumn());
         }
 
@@ -710,10 +667,11 @@ public class DTDParser implements EntityExpansion
 
             if (token.type != Scanner.IDENTIFIER)
             {
-                throw new DTDParseException(scanner.getUriId(),
-                                "Invalid token in notation: "+
-                                token.type.name, scanner.getLineNumber(),
-                                scanner.getColumn());
+                throw new DTDParseException(
+                    scanner.getUriId(),
+                    "Invalid token in notation: " + token.type.name,
+                    scanner.getLineNumber(),
+                    scanner.getColumn());
             }
 
             notation.add(token.value);
@@ -724,20 +682,19 @@ public class DTDParser implements EntityExpansion
             {
                 scanner.get();
                 return notation;
-            }
-            else if (token.type != Scanner.PIPE)
+            } else if (token.type != Scanner.PIPE)
             {
-                throw new DTDParseException(scanner.getUriId(),
-                                "Invalid token in notation: "+
-                                token.type.name, scanner.getLineNumber(),
-                                scanner.getColumn());
+                throw new DTDParseException(
+                    scanner.getUriId(),
+                    "Invalid token in notation: " + token.type.name,
+                    scanner.getLineNumber(),
+                    scanner.getColumn());
             }
             scanner.get(); // eat the pipe
         }
     }
 
-    protected DTDEnumeration parseEnumeration()
-        throws IOException
+    protected DTDEnumeration parseEnumeration() throws IOException
     {
         DTDEnumeration enumeration = new DTDEnumeration();
 
@@ -745,13 +702,13 @@ public class DTDParser implements EntityExpansion
         {
             Token token = scanner.get();
 
-            if ((token.type != Scanner.IDENTIFIER) &&
-                (token.type != Scanner.NMTOKEN))
+            if ((token.type != Scanner.IDENTIFIER) && (token.type != Scanner.NMTOKEN))
             {
-                throw new DTDParseException(scanner.getUriId(),
-                                "Invalid token in enumeration: "+
-                                token.type.name, scanner.getLineNumber(),
-                                scanner.getColumn());
+                throw new DTDParseException(
+                    scanner.getUriId(),
+                    "Invalid token in enumeration: " + token.type.name,
+                    scanner.getLineNumber(),
+                    scanner.getColumn());
             }
 
             enumeration.add(token.value);
@@ -762,20 +719,19 @@ public class DTDParser implements EntityExpansion
             {
                 scanner.get();
                 return enumeration;
-            }
-            else if (token.type != Scanner.PIPE)
+            } else if (token.type != Scanner.PIPE)
             {
-                throw new DTDParseException(scanner.getUriId(),
-                                "Invalid token in enumeration: "+
-                                token.type.name, scanner.getLineNumber(),
-                                scanner.getColumn());
+                throw new DTDParseException(
+                    scanner.getUriId(),
+                    "Invalid token in enumeration: " + token.type.name,
+                    scanner.getLineNumber(),
+                    scanner.getColumn());
             }
             scanner.get(); // eat the pipe
         }
     }
 
-    protected void parseEntity()
-        throws IOException
+    protected void parseEntity() throws IOException
     {
         boolean isParsed = false;
 
@@ -785,12 +741,13 @@ public class DTDParser implements EntityExpansion
         {
             isParsed = true;
             name = expect(Scanner.IDENTIFIER);
-        }
-        else if (name.type != Scanner.IDENTIFIER)
+        } else if (name.type != Scanner.IDENTIFIER)
         {
-            throw new DTDParseException(scanner.getUriId(),
-                            "Invalid entity declaration",
-                            scanner.getLineNumber(), scanner.getColumn());
+            throw new DTDParseException(
+                scanner.getUriId(),
+                "Invalid entity declaration",
+                scanner.getLineNumber(),
+                scanner.getColumn());
         }
 
         DTDEntity entity = (DTDEntity) dtd.entities.get(name.value);
@@ -801,12 +758,11 @@ public class DTDParser implements EntityExpansion
         {
             entity = new DTDEntity(name.value, defaultLocation);
             dtd.entities.put(entity.name, entity);
-        }
-        else
+        } else
         {
-// 070501 MAW: If the entity already exists, create a dummy entity - this way
-// you keep the original definition.  Thanks to Jags Krishnamurthy of Object
-// Edge for pointing out this problem and for pointing out the solution
+            // 070501 MAW: If the entity already exists, create a dummy entity - this way
+            // you keep the original definition.  Thanks to Jags Krishnamurthy of Object
+            // Edge for pointing out this problem and for pointing out the solution
             entity = new DTDEntity(name.value, defaultLocation);
             skip = true;
         }
@@ -823,8 +779,7 @@ public class DTDParser implements EntityExpansion
         }
     }
 
-    protected void parseEntityDef(DTDEntity entity)
-        throws IOException
+    protected void parseEntityDef(DTDEntity entity) throws IOException
     {
         Token token = scanner.get();
 
@@ -837,8 +792,7 @@ public class DTDParser implements EntityExpansion
             {
                 entity.value = token.value;
             }
-        }
-        else if (token.type == Scanner.IDENTIFIER)
+        } else if (token.type == Scanner.IDENTIFIER)
         {
             if (token.value.equals("SYSTEM"))
             {
@@ -847,8 +801,7 @@ public class DTDParser implements EntityExpansion
 
                 sys.system = token.value;
                 entity.externalID = sys;
-            }
-            else if (token.value.equals("PUBLIC"))
+            } else if (token.value.equals("PUBLIC"))
             {
                 DTDPublic pub = new DTDPublic();
 
@@ -857,14 +810,14 @@ public class DTDParser implements EntityExpansion
                 token = expect(Scanner.STRING);
                 pub.system = token.value;
                 entity.externalID = pub;
-            }
-            else
+            } else
             {
-                throw new DTDParseException(scanner.getUriId(),
-                                "Invalid External ID specification",
-                                scanner.getLineNumber(), scanner.getColumn());
+                throw new DTDParseException(
+                    scanner.getUriId(),
+                    "Invalid External ID specification",
+                    scanner.getLineNumber(),
+                    scanner.getColumn());
             }
-
 
             // ISSUE: isParsed is set to TRUE if this is a Parameter Entity
             //     Reference (assuming this is because Parameter Entity
@@ -892,9 +845,11 @@ public class DTDParser implements EntityExpansion
                 {
                     if (!token.value.equals("NDATA"))
                     {
-                        throw new DTDParseException(scanner.getUriId(),
+                        throw new DTDParseException(
+                            scanner.getUriId(),
                             "Invalid NData declaration",
-                            scanner.getLineNumber(), scanner.getColumn());
+                            scanner.getLineNumber(),
+                            scanner.getColumn());
                     }
                     // CHANGE 2: Add call to scanner.get.
                     //      This gets "NDATA" IDENTIFIER.
@@ -905,19 +860,19 @@ public class DTDParser implements EntityExpansion
                     entity.ndata = token.value;
                 }
             }
-        }
-        else
+        } else
         {
-            throw new DTDParseException(scanner.getUriId(),
-                            "Invalid entity definition",
-                            scanner.getLineNumber(), scanner.getColumn());
+            throw new DTDParseException(
+                scanner.getUriId(),
+                "Invalid entity definition",
+                scanner.getLineNumber(),
+                scanner.getColumn());
         }
 
         expect(Scanner.GT);
     }
 
-    protected void parseNotation()
-        throws java.io.IOException
+    protected void parseNotation() throws java.io.IOException
     {
         DTDNotation notation = new DTDNotation();
 
@@ -937,8 +892,7 @@ public class DTDParser implements EntityExpansion
 
             sys.system = token.value;
             notation.externalID = sys;
-        }
-        else if (token.value.equals("PUBLIC"))
+        } else if (token.value.equals("PUBLIC"))
         {
             DTDPublic pub = new DTDPublic();
             token = expect(Scanner.STRING);
@@ -946,8 +900,8 @@ public class DTDParser implements EntityExpansion
             pub.pub = token.value;
             pub.system = null;
 
-// For <!NOTATION>, you can have PUBLIC PubidLiteral without
-// a SystemLiteral
+            // For <!NOTATION>, you can have PUBLIC PubidLiteral without
+            // a SystemLiteral
             token = scanner.peek();
             if (token.type == Scanner.STRING)
             {

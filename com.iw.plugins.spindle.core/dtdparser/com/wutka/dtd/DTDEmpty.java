@@ -36,4 +36,13 @@ public class DTDEmpty extends DTDItem
         return DTDItemType.DTD_EMPTY;
     }
 
+    /* (non-Javadoc)
+     * @see com.wutka.dtd.DTDItem#match(java.lang.String)
+     */
+    public boolean match(String match)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

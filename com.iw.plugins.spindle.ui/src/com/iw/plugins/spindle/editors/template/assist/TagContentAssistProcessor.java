@@ -202,9 +202,6 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
         HashSet existingAttributeNames,
         List proposals)
     {
-
-        Map found = new HashMap();
-
         try
         {
             ContentAssistHelper helper = new ContentAssistHelper((TemplateEditor) fEditor);

@@ -57,4 +57,18 @@ public class DTDChoice extends DTDContainer implements Cloneable
         return super.clone();
     }
 
+    /* (non-Javadoc)
+     * @see com.wutka.dtd.DTDItem#match(java.lang.String)
+     */
+    public boolean match(String match)
+    {
+        for (Iterator iter = getItemsVec().iterator(); iter.hasNext();)
+        {
+            DTDItem item = (DTDItem) iter.next();
+            if (item.match(match))
+                return true;
+        }
+        return false;
+    }
+
 }

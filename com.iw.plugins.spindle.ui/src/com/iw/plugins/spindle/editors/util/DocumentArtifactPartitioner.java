@@ -1,9 +1,29 @@
-/*
- * Created on 16.05.2003
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
  *
- * To change the template for this generated file go to
- * Window>Preferences>Java>Code Generation>Code and Comments
- */
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
+ *
+ * The Initial Developer of the Original Code is
+ * Intelligent Works Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2003
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ * 
+ *  glongman@intelligentworks.com
+ *
+ * ***** END LICENSE BLOCK ***** */
+
 package com.iw.plugins.spindle.editors.util;
 
 import java.util.ArrayList;
@@ -29,10 +49,10 @@ import org.eclipse.jface.text.rules.IToken;
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
- * @author jll
- *
- * To change the template for this generated type comment go to
- * Window>Preferences>Java>Code Generation>Code and Comments
+ *  Complimentary paritioner. Pust postitions in a custom category.
+ * 
+ * @author glongman@intelligentworks.com
+ * @version $Id$
  */
 public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocumentPartitionerExtension
 {
@@ -45,8 +65,9 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
     public static final String ATTR = "ATTR";
     public static final String EMPTYTAG = "EMPTYTAG";
 
-    public static final String[] TYPES = { IDocument.DEFAULT_CONTENT_TYPE, TAG, TEXT, PI, DECL, COMMENT, ENDTAG, EMPTYTAG };
-    
+    public static final String[] TYPES =
+        { IDocument.DEFAULT_CONTENT_TYPE, TAG, TEXT, PI, DECL, COMMENT, ENDTAG, EMPTYTAG };
+
     public static final String CONTENT_TYPES_CATEGORY = "__artifacts_category";
     protected IPartitionTokenScanner fScanner;
     protected String fLegalContentTypes[];
@@ -93,8 +114,8 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
                 }
             }
 
-        } catch (BadLocationException _ex)
-        {} catch (BadPositionCategoryException _ex)
+        } catch (BadLocationException e)
+        {} catch (BadPositionCategoryException e)
         {}
     }
 
@@ -103,7 +124,7 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
         try
         {
             fDocument.removePositionCategory(CONTENT_TYPES_CATEGORY);
-        } catch (BadPositionCategoryException _ex)
+        } catch (BadPositionCategoryException e)
         {}
     }
 
@@ -241,19 +262,18 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
                         first++;
                     } else
                     {
+
                         try
                         {
                             d.addPosition(
                                 CONTENT_TYPES_CATEGORY,
                                 new DocumentArtifact(start, length, contentType, fDocument));
                             rememberRegion(start, length);
-                        } catch (BadPositionCategoryException _ex)
+                        } catch (BadLocationException e1)
                         {
-                            // do nothing
-                        } catch (BadLocationException _ex)
-                        {
-                            // do nothing
+                            //do nothing
                         }
+
                     }
                     token = fScanner.nextToken();
                 }
@@ -270,13 +290,12 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
                 d.removePosition(CONTENT_TYPES_CATEGORY, p);
                 rememberRegion(((Position) (p)).offset, ((Position) (p)).length);
             }
-
-        } catch (BadPositionCategoryException _ex)
+        } catch (BadPositionCategoryException e1)
         {
-            // do nothing
-        } catch (BadLocationException _ex)
+            //do nothing
+        } catch (BadLocationException e1)
         {
-            // do nothing
+            //do nothing
         }
         return createRegion();
     }
@@ -294,10 +313,10 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
             if (index > 0)
                 index--;
             return (TypedPosition) category[index];
-        } catch (BadPositionCategoryException _ex)
+        } catch (BadPositionCategoryException e)
         {
             // do nothing
-        } catch (BadLocationException _ex)
+        } catch (BadLocationException e)
         {
             // do nothing
         }
@@ -350,10 +369,10 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
                 int endOffset = previous.getOffset() + previous.getLength();
                 return new TypedRegion(endOffset, fDocument.getLength() - endOffset, "__dftl_partition_content_type");
             }
-        } catch (BadPositionCategoryException _ex)
+        } catch (BadPositionCategoryException e)
         {
             // do nothing
-        } catch (BadLocationException _ex)
+        } catch (BadLocationException e)
         {
             // do nothing
         }
@@ -408,7 +427,7 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
             }
             if (list.isEmpty())
                 list.add(new TypedRegion(offset, length, "__dftl_partition_content_type"));
-        } catch (BadPositionCategoryException _ex)
+        } catch (BadPositionCategoryException e)
         {
             // do nothing
         }

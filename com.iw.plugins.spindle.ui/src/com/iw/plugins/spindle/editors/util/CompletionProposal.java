@@ -113,21 +113,21 @@ public class CompletionProposal implements ICompletionProposal
     }
 
     /** The string to be displayed in the completion proposal popup */
-    private String fDisplayString;
+    protected String fDisplayString;
     /** The replacement string */
-    private String fReplacementString;
+    protected String fReplacementString;
     /** The replacement offset */
-    private int fReplacementOffset;
+    protected int fReplacementOffset;
     /** The replacement length */
-    private int fReplacementLength;
+    protected int fReplacementLength;
     /** The cursor position after this proposal has been applied */
-    private Point fSelectionPoint;
+    protected Point fSelectionPoint;
     /** The image to be displayed in the completion proposal popup */
-    private Image fImage;
+    protected Image fImage;
     /** The context information of this proposal */
-    private IContextInformation fContextInformation;
+    protected IContextInformation fContextInformation;
     /** The additional info of this proposal */
-    private String fAdditionalProposalInfo;
+    protected String fAdditionalProposalInfo;
 
     protected int fYOrder = 0;
 
@@ -172,8 +172,6 @@ public class CompletionProposal implements ICompletionProposal
         String additionalProposalInfo)
     {
         Assert.isNotNull(replacementString);
-        Assert.isTrue(replacementOffset >= 0);
-        Assert.isTrue(replacementLength >= 0);
         Assert.isNotNull(selectionPoint);
         Assert.isTrue(selectionPoint.x >= 0 && selectionPoint.y >= 0);
 
@@ -211,8 +209,15 @@ public class CompletionProposal implements ICompletionProposal
      */
     public Point getSelection(IDocument document)
     {
-        fSelectionPoint.x += fReplacementOffset;
-        return fSelectionPoint;
+        try
+        {           
+            Point usePoint = new Point(fSelectionPoint.x + fReplacementOffset, fSelectionPoint.y);
+            return usePoint;
+        } finally
+        {
+            fReplacementOffset = -1;
+            fReplacementLength = -1;
+        }
     }
 
     /*
@@ -254,18 +259,21 @@ public class CompletionProposal implements ICompletionProposal
         return fAdditionalProposalInfo;
     }
 
-    static public class NullProposal implements ICompletionProposal
+    public void setReplacementOffset(int offset)
     {
-        private String fMessage;
-        private String fExtraInfo = null;
-        private int fOffset;
+        fReplacementOffset = offset;
+    }
 
+    public void setReplacementLength(int length)
+    {
+        fReplacementLength = length;
+    }
+
+    static public class NullProposal extends CompletionProposal
+    {
         public NullProposal(String message, String xtraInfo, int documentOffset)
         {
-            fMessage = message;
-            fExtraInfo = xtraInfo;
-            fOffset = documentOffset;
-
+            super("", documentOffset, 0, new Point(0, 0), null, message, null, xtraInfo);
         }
 
         public NullProposal(String message, int documentOffset)
@@ -277,46 +285,6 @@ public class CompletionProposal implements ICompletionProposal
         */
         public void apply(IDocument document)
         {}
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-         */
-        public String getAdditionalProposalInfo()
-        {
-            return fExtraInfo;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
-         */
-        public IContextInformation getContextInformation()
-        {
-            return null;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
-         */
-        public String getDisplayString()
-        {
-            return fMessage;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-         */
-        public Image getImage()
-        {
-            return null;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-         */
-        public Point getSelection(IDocument document)
-        {
-            return new Point(fOffset, 0);
-        }
 
     }
 
