@@ -75,9 +75,9 @@ public class MultiPageContentOutline
 
     private static final String SHOW_TAPESTRY_OUTLINE = UIPlugin.PLUGIN_ID + ".mpoutline.showTapestryOutline";
 
-    public static final void initializeDefaultPrefrences()
+    public static final void initializeDefaultPreferences(IPreferenceStore store)
     {
-        UIPlugin.getDefault().getPreferenceStore().setDefault(SHOW_TAPESTRY_OUTLINE, false);
+        store.setDefault(SHOW_TAPESTRY_OUTLINE, false);
     }
 
     private PageBook fPageBook;
@@ -161,7 +161,7 @@ public class MultiPageContentOutline
             {
                 if (fReconciledObject == null)
                 {
-                    fMessagePoster.postMessage("XML has parse errors");
+                    fMessagePoster.postMessage("Unable to resolve this outline. \n\nThere may be malformed XML, or the file can not be seen by Tapestry.");
                     fPageTurner.post(fMessagePage);
                 } else
                 {
@@ -408,9 +408,9 @@ public class MultiPageContentOutline
 
             createVerticalSpacer(top, 1);
 
-            fMessageLabel = new Label(top, SWT.NULL);
+            fMessageLabel = new Label(top, SWT.WRAP);
             fMessageLabel.setForeground(top.getDisplay().getSystemColor(SWT.COLOR_RED));
-            fMessageLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+            fMessageLabel.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL));
             fMessageLabel.setText(fSavedMessage == null ? "working..." : fSavedMessage);
         }
 
