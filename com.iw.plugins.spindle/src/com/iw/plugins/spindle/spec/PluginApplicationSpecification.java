@@ -228,8 +228,8 @@ public class PluginApplicationSpecification
     int indent = 0;
     writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     writer.println("<!DOCTYPE application ");
-    writer.println("      PUBLIC \"-//Howard Ship//Tapestry Specification 1.1//EN\"");
-    writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
+    writer.println("      PUBLIC \"-//Howard Ship//Tapestry Specification 1.2//EN\"");
+    writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
     writer.println(MessageUtil.getString("TAPESTRY.xmlComment"));
 
     writer.println();
