@@ -34,19 +34,17 @@ import com.iw.plugins.spindle.UIPlugin;
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
 public class XMLReconciler implements IDocumentListener
-{//IReconcilingStrategy, {
+{
   private IDocument document;
   private ArrayList storedPos;
   private ArrayList deleted;
   private ArrayList added;
-  //    private XMLOutlinePage op;
-  //    private XMLTable table;
-  //    private XMLTextEditor editor;
+
   private XMLNode root;
-  //    private Namespace dtdGrammar;
-  private Map namespaces;
   private boolean sendOnlyAdditions = false;
   private boolean firstTime = true;
+
+  private List listeners = new ArrayList();
 
   /**
    *  
@@ -59,6 +57,23 @@ public class XMLReconciler implements IDocumentListener
   public XMLReconciler()
   {
 
+  }
+
+  public void addListener(XMLModelListener listener)
+  {
+    if (!listeners.contains(listener))
+      listeners.add(listener);
+  }
+
+  public void removeListener(XMLModelListener listener)
+  {
+    listeners.remove(listener);
+  }
+
+  private void fireModelChanged()
+  {
+    for (Iterator iter = listeners.iterator(); iter.hasNext();)
+      ((XMLModelListener) iter.next()).modelChanged(this);
   }
 
   /*
@@ -278,7 +293,7 @@ public class XMLReconciler implements IDocumentListener
               if (n.getType().equals(ITypeConstants.DECL))
               {
 
-                //   TODO revisit if (n.getName().equals("!DOCTYPE")) {
+                //    if (n.getName().equals("!DOCTYPE")) {
                 //                                    String dtdLocation = n.getDTDLocation();
                 //                                    if (dtdLocation != null) {
                 //                                        dtdGrammar = new Namespace(null, null, dtdLocation,
@@ -315,7 +330,8 @@ public class XMLReconciler implements IDocumentListener
           }
         }
       }
-      //  TODO revisit if (op != null && op.getControl() != null &&
+      fireModelChanged();
+      // if (op != null && op.getControl() != null &&
       // !op.getControl().isDisposed() && op.getControl().isVisible()) {
       //                op.update(root);
       //            }

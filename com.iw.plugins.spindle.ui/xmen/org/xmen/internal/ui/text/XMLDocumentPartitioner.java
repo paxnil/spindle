@@ -359,6 +359,7 @@ public class XMLDocumentPartitioner
 
             rememberRegion(p.offset, p.length);
             d.removePosition(fPositionCategory, p);
+            p.delete();
             ++first;
 
           } else
@@ -407,6 +408,7 @@ public class XMLDocumentPartitioner
       {
         p = (TypedPosition) category[first++];
         d.removePosition(fPositionCategory, p);
+        p.delete();
         rememberRegion(p.offset, p.length);
       }
 
