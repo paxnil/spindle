@@ -42,7 +42,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class ProjectDecorator implements ILightweightLabelDecorator
+public class ProjectDecorator extends AbstractDecorator implements ILightweightLabelDecorator
 {
 
     public ProjectDecorator()

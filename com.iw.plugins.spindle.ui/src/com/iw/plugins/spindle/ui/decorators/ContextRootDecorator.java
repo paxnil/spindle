@@ -31,7 +31,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.IDecoration;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 
 import com.iw.plugins.spindle.Images;
@@ -44,7 +43,9 @@ import com.iw.plugins.spindle.core.TapestryProject;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class ContextRootDecorator implements ILightweightLabelDecorator
+public class ContextRootDecorator
+    extends AbstractDecorator
+    implements ILightweightLabelDecorator, TapestryCore.ICoreListener
 {
 
     public ContextRootDecorator()
@@ -85,12 +86,6 @@ public class ContextRootDecorator implements ILightweightLabelDecorator
     }
 
     /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.IBaseLabelProvider#addListener(org.eclipse.jface.viewers.ILabelProviderListener)
-     */
-    public void addListener(ILabelProviderListener listener)
-    {}
-
-    /* (non-Javadoc)
      * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
      */
     public void dispose()
@@ -105,11 +100,5 @@ public class ContextRootDecorator implements ILightweightLabelDecorator
     {
         return true;
     }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.IBaseLabelProvider#removeListener(org.eclipse.jface.viewers.ILabelProviderListener)
-     */
-    public void removeListener(ILabelProviderListener listener)
-    {}
 
 }
