@@ -42,7 +42,8 @@
                value="org.eclipse.jdt.core.javanature">
          </filter>
       </page>
-   </extension>
+   </extension>   
+   <!-- TODO remove no longer required
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
@@ -63,6 +64,7 @@
          </enablement>
       </decorator>
    </extension>
+   -->
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
@@ -136,7 +138,7 @@
       </category>
       <wizard
             name="Tapestry Web Project"
-            icon="./icons/basic/application16.gif"
+            icon="./icons/full/application16.gif"
             category="com.iw.plugins.spindle.ui.new"
             class="com.iw.plugins.spindle.ui.wizards.project.NewTapestryProjectWizard"
             project="true"
@@ -147,7 +149,7 @@
       </wizard>
       <wizard
             name="Tapestry Component"
-            icon="./icons/basic/component16.gif"
+            icon="./icons/full/component16.gif"
             category="com.iw.plugins.spindle.ui.new"
             class="com.iw.plugins.spindle.ui.wizards.NewTapComponentWizard"
             id="com.iw.plugins.spindle.ui.new_jwc_wizard">
@@ -157,7 +159,7 @@
       </wizard>
       <wizard
             name="Tapestry Page"
-            icon="./icons/basic/page16.gif"
+            icon="./icons/full/page16.gif"
             category="com.iw.plugins.spindle.ui.new"
             class="com.iw.plugins.spindle.ui.wizards.NewTapPageWizard"
             id="com.iw.plugins.spindle.ui.new_page_wizard">
@@ -171,7 +173,7 @@
       <editor
             name="Tapestry Template Editor"
             default="false"
-            icon="./icons/basic/html16.gif"
+            icon="./icons/full/html16.gif"
             extensions="htm,html"
             contributorClass="com.iw.plugins.spindle.editors.template.TemplateEditorContributor"
             class="com.iw.plugins.spindle.editors.template.TemplateEditor"
@@ -180,7 +182,7 @@
       <editor
             name="Tapestry Spec Editor"
             default="true"
-            icon="./icons/basic/application16.gif"
+            icon="./icons/full/application16.gif"
             extensions="application, page, jwc, library"
             contributorClass="com.iw.plugins.spindle.editors.spec.SpecEditorContributor"
             class="com.iw.plugins.spindle.editors.spec.SpecEditor"
