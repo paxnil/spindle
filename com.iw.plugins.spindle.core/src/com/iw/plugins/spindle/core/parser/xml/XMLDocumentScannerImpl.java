@@ -841,6 +841,7 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
                                 resourceIdentifier.setValues(fDoctypePublicId, fDoctypeSystemId, null, null);
                                 if (!isGrammerCached(fDoctypePublicId))
                                 {
+                                    
                                     // TODO short circuit DTD scanning if necessary
                                     XMLInputSource xmlInputSource = fEntityManager.resolveEntity(resourceIdentifier);
                                     fDTDScanner.setInputSource(xmlInputSource);

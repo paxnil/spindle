@@ -43,6 +43,7 @@ import org.w3c.dom.Node;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.search.AbstractTapestrySearchAcceptor;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
@@ -79,8 +80,9 @@ public class FullBuild extends Build
 
         try
         {
+            Parser parser = new Parser(false);
 
-            findDeclaredApplication();
+            findDeclaredApplication(parser);
 
             fNotifier.updateProgressDelta(0.1f);
 
@@ -88,7 +90,7 @@ public class FullBuild extends Build
 
             fBuildQueue.addAll(findAllTapestryArtifacts());
 
-            fNSResolver = getNamespaceResolver();
+            fNSResolver = getNamespaceResolver(parser);
 
             fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace();
 
@@ -118,7 +120,6 @@ public class FullBuild extends Build
     protected void saveState()
     {
         State newState = new State(fTapestryBuilder);
-        newState.fFrameworkNamespace = fFrameworkNamespace;
         newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
         newState.fLastKnownClasspath = fTapestryBuilder.fClasspath;
         newState.fJavaDependencies = fFoundTypes;
@@ -126,14 +127,18 @@ public class FullBuild extends Build
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
 
         // save the processed binary libraries
-        saveBinaryLibraries(fApplicationNamespace, newState);
+        saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
             fTapestryBuilder.fCurrentProject,
             newState);
     }
 
-    protected void saveBinaryLibraries(ICoreNamespace namespace, State state)
+    protected void saveBinaryLibraries(ICoreNamespace framework, ICoreNamespace namespace, State state)
     {
+        IResourceWorkspaceLocation frameworkLoc = (IResourceWorkspaceLocation) framework.getSpecificationLocation();
+        if (frameworkLoc.isBinary())
+            state.fBinaryNamespaces.put(frameworkLoc, framework);
+
         for (Iterator iter = namespace.getChildIds().iterator(); iter.hasNext();)
         {
             String id = (String) iter.next();
@@ -141,14 +146,15 @@ public class FullBuild extends Build
             IResourceWorkspaceLocation libraryLocation = (IResourceWorkspaceLocation) child.getSpecificationLocation();
             if (libraryLocation.isBinary())
             {
-                state.fBinaryNamespaces.put(libraryLocation, namespace);                
+                state.fBinaryNamespaces.put(libraryLocation, namespace);
             }
 
         }
     }
 
-    protected NamespaceResolver getNamespaceResolver() {
-        return new NamespaceResolver(this, false);
+    protected NamespaceResolver getNamespaceResolver(Parser parser)
+    {
+        return new NamespaceResolver(this, parser, false);
     }
 
     /**
@@ -232,7 +238,7 @@ public class FullBuild extends Build
         super.cleanUp();
     }
 
-    protected void findDeclaredApplication()
+    protected void findDeclaredApplication(Parser parser)
     {
         IResourceWorkspaceLocation webXML =
             (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot.getRelativeLocation("WEB-INF/web.xml");
@@ -244,7 +250,7 @@ public class FullBuild extends Build
             {
                 fTapestryBuilder.fNotifier.subTask(
                     TapestryCore.getString(TapestryBuilder.STRING_KEY + "scanning", webXML.toString()));
-                wxmlElement = parseToNode(webXML);
+                wxmlElement = parseToNode(parser, webXML);
             } catch (IOException e1)
             {
                 TapestryCore.log(e1);

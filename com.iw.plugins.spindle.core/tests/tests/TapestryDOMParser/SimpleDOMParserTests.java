@@ -67,7 +67,7 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
 
     protected final String GRAMMAR_POOL = Constants.XERCES_PROPERTY_PREFIX + Constants.XMLGRAMMAR_POOL_PROPERTY;
 
-    protected final String TAPESTRY_1_3_PUBLIC_ID = SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID;
+    protected final String TAPESTRY_3_0_PUBLIC_ID = SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID;
     /**
      * Constructor for SimplePullParser.
      * @param arg0
@@ -121,7 +121,7 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
 
     public void testTapestryEntityResolver() throws Exception
     {
-        TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID, "Tapestry_1_3.dtd");
+        TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, "Tapestry_3_0.dtd");
         final TapestryEntityResolver RESOLVER = new TapestryEntityResolver();
         // lets wrap the resolver so that the default fallback behaviour of xerces is short circuited
         XMLEntityResolver testResolver = new XMLEntityResolver()
@@ -148,12 +148,13 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
         {
             fail("resolver fail test: IOException " + e.getMessage());
         }
-        id.setPublicId(TAPESTRY_1_3_PUBLIC_ID);
+        id.setPublicId(TAPESTRY_3_0_PUBLIC_ID);
         try
         {
             testResolver.resolveEntity(id);
         } catch (XNIException e1)
         {
+            e1.printStackTrace(System.out);
             fail("resolver pass test: XNIException " + e1.getMessage());
         } catch (IOException e1)
         {
@@ -186,7 +187,7 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
     {
         XMLGrammarPoolImpl pool = (XMLGrammarPoolImpl) parserConfiguration.getProperty(GRAMMAR_POOL);
         assertNotNull("no pool configured!", pool);
-        assertNull("pool is not empty!", pool.getGrammar(TAPESTRY_1_3_PUBLIC_ID));
+        assertNull("pool is not empty!", pool.getGrammar(TAPESTRY_3_0_PUBLIC_ID));
 
         InputStream in = getClass().getResourceAsStream("/testdata/basicTapestryComponent.jwc");
         assertNotNull(in);
@@ -206,7 +207,7 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
             in.close();
         }
 
-        assertNull("pool shouldn't cache DTD until the parser is reset!", pool.getGrammar(TAPESTRY_1_3_PUBLIC_ID));
+        assertNull("pool shouldn't cache DTD until the parser is reset!", pool.getGrammar(TAPESTRY_3_0_PUBLIC_ID));
 
         // parseAll forces a reset, which triggers the caching
         Reader reader =
@@ -224,7 +225,7 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
         {
             reader.close();
         }
-        assertNotNull("pool didn't cache the DTD", pool.getGrammar(TAPESTRY_1_3_PUBLIC_ID));
+        assertNotNull("pool didn't cache the DTD", pool.getGrammar(TAPESTRY_3_0_PUBLIC_ID));
 
     }
 

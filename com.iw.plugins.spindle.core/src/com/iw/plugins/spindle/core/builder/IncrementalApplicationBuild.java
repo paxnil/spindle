@@ -4,6 +4,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /* ***** BEGIN LICENSE BLOCK *****
@@ -101,7 +102,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
-        saveBinaryLibraries(fApplicationNamespace, newState);
+        saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
             fTapestryBuilder.fCurrentProject,
             newState);
@@ -110,9 +111,9 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.builder.FullBuild#getNamespaceResolver()
      */
-    protected NamespaceResolver getNamespaceResolver()
+    protected NamespaceResolver getNamespaceResolver(Parser parser)
     {
-        return new NamespaceResolver(this, true);
+        return new NamespaceResolver(this, parser, true);
     }
 
 }

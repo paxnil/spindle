@@ -81,12 +81,12 @@ import com.iw.plugins.spindle.core.util.Utils;
 public abstract class Build implements IIncrementalBuild, IScannerValidatorListener, ITemplateFinderListener
 {
 
-    private static final Parser BUILD_PARSER = new Parser();
+//    private static final Parser BUILD_PARSER = new Parser();
     protected IJavaProject fJavaProject;
     protected State fNewState;
     protected BuildNotifier fNotifier;
     protected BuilderQueue fBuildQueue;
-    protected Parser fParser;
+//    protected Parser fParser;
     protected TapestryBuilder fTapestryBuilder;
     protected ICoreNamespace fFrameworkNamespace;
     protected ICoreNamespace fApplicationNamespace;
@@ -105,7 +105,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fBuildQueue = new BuilderQueue();
         fNotifier = builder.fNotifier;
         fJavaProject = builder.fJavaProject;
-        fParser = BUILD_PARSER;
+//        fParser = BUILD_PARSER;
         fValidator = new BuilderValidator(this);
         fValidator.addListener(this);
         fFoundTypes = new ArrayList();
@@ -124,7 +124,10 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         if (fLastState == null || fLastState.fBuildNumber < 0 || fLastState.fVersion != State.VERSION)
             return false;
 
-        if (fLastState.fFrameworkNamespace == null)
+        IResourceWorkspaceLocation frameworkLocation =
+            (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot.getRelativeLocation(
+                "/org/apache/tapestry/Framework.library");
+        if (!fLastState.fBinaryNamespaces.containsKey(frameworkLocation))
             return false;
 
         if (hasClasspathChanged())
@@ -213,7 +216,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         return !current.containsAll(old);
     }
 
-    protected ICoreNamespace createNamespace(String id, IResourceWorkspaceLocation location)
+    protected ICoreNamespace createNamespace(Parser parser, String id, IResourceWorkspaceLocation location)
     {
         ICoreNamespace result = null;
 
@@ -221,10 +224,10 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         String name = location.getName();
         if (name.endsWith(".application"))
         {
-            lib = parseApplication(location);
+            lib = parseApplication(parser, location);
         } else if (name.endsWith(".library"))
         {
-            lib = parseLibrary(location);
+            lib = parseLibrary(parser, location);
         }
         if (lib != null)
             result = new CoreNamespace(id, lib);
@@ -232,17 +235,19 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         return result;
     }
 
-    protected IApplicationSpecification parseApplication(IResourceLocation location)
+    protected IApplicationSpecification parseApplication(Parser parser, IResourceLocation location)
     {
         try
         {
-            Node node = parseToNode(location);
+            Node node = parseToNode(parser, location);
+//            Node node = parseToNode(location);
             if (node != null)
             {
                 ApplicationScanner scanner = new ApplicationScanner();
                 scanner.setResourceLocation(location);
                 scanner.setFactory(TapestryCore.getSpecificationFactory());
-                scanner.setPublicId(fParser.getPublicId());
+                scanner.setPublicId(parser.getPublicId());
+//                scanner.setPublicId(fParser.getPublicId());
 
                 IApplicationSpecification result = (IApplicationSpecification) scanner.scan(node, fValidator);
                 IResource res = Utils.toResource(location);
@@ -270,18 +275,26 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         return null;
     }
 
-    protected ILibrarySpecification parseLibrary(IResourceLocation location)
+    protected ILibrarySpecification parseLibrary(Parser parser, IResourceLocation location)
     {
+        if (fProcessedLocations.containsKey(location))
+            return (ILibrarySpecification) fProcessedLocations.get(location);
+
         try
         {
-            Node node = parseToNode(location);
+            Node node = parseToNode(parser, location);
+//            Node node = parseToNode(location);
             if (node != null)
             {
                 LibraryScanner scanner = new LibraryScanner();
                 scanner.setResourceLocation(location);
                 scanner.setFactory(TapestryCore.getSpecificationFactory());
-                scanner.setPublicId(fParser.getPublicId());
+//                scanner.setPublicId(fParser.getPublicId());
+                scanner.setPublicId(parser.getPublicId());
                 ILibrarySpecification result = (ILibrarySpecification) scanner.scan(node, fValidator);
+                if (result != null)
+                    fProcessedLocations.put(location, result);
+
                 IResource res = Utils.toResource(location);
                 if (res != null)
                 {
@@ -307,25 +320,26 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         return null;
     }
 
-    protected Node parseToNode(IResourceLocation location) throws IOException, CoreException
+    protected Node parseToNode(Parser parser, IResourceLocation location) throws IOException, CoreException
     {
         IResourceWorkspaceLocation use_loc = (IResourceWorkspaceLocation) location;
         IStorage storage = use_loc.getStorage();
         if (storage != null)
         {
-            return parseToNode(storage);
+            return parseToNode(parser, storage);
         } else
         {
             throw new IOException(TapestryCore.getString("core-resource-does-not-exist", location));
         }
     }
 
-    protected Node parseToNode(IStorage storage) throws IOException, CoreException
+    protected Node parseToNode(Parser parser, IStorage storage) throws IOException, CoreException
     {
         Node result = null;
         try
         {
-            result = fParser.parse(storage);
+//            result = fParser.parse(storage);
+            result = parser.parse(storage);
 
         } catch (CoreException e)
         {
@@ -339,13 +353,16 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
         if (storage.getAdapter(IResource.class) != null)
         {
-            Markers.addTapestryProblemMarkersToResource(((IResource) storage), fParser.getProblems());
+            Markers.addTapestryProblemMarkersToResource(((IResource) storage), parser.getProblems());
+//            Markers.addTapestryProblemMarkersToResource(((IResource) storage), fParser.getProblems());
         } else
         {
-            TapestryCore.logProblems(storage, fParser.getProblems());
+//            TapestryCore.logProblems(storage, fParser.getProblems());
+            TapestryCore.logProblems(storage, parser.getProblems());
         }
 
-        if (fParser.getHasFatalErrors())
+        if (parser.getHasFatalErrors())
+//        if (fParser.getHasFatalErrors())
             return null;
 
         return result;
@@ -354,6 +371,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
     private ComponentScanner fComponentScanner = new ComponentScanner();
 
     protected IComponentSpecification resolveIComponentSpecification(
+        Parser parser,
         ICoreNamespace namespace,
         IResourceWorkspaceLocation location)
     {
@@ -368,11 +386,11 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             {
                 try
                 {
-                    Node node = parseToNode(location);
+                    Node node = parseToNode(parser, location);
 
                     fComponentScanner.setResourceLocation(location);
                     fComponentScanner.setNamespace(namespace);
-                    fComponentScanner.setPublicId(fParser.getPublicId());
+                    fComponentScanner.setPublicId(parser.getPublicId());
                     fComponentScanner.setFactory(TapestryCore.getSpecificationFactory());
                     if (node != null)
                     {

@@ -53,6 +53,7 @@ import com.iw.plugins.spindle.core.parser.DefaultProblem;
 import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.IProblemCollector;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
+import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.TapestryResourceLocationAcceptor;
@@ -70,6 +71,11 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
  */
 public class NamespaceResolver
 {
+    /**
+     * The parser used to parse Tapestry xml files
+     */
+    private Parser fParser;
+
     /**
      *  collector for any problems not handled by the Build
      */
@@ -181,26 +187,29 @@ public class NamespaceResolver
      * </ul>
      * 
      */
-    public NamespaceResolver(Build build)
+    public NamespaceResolver(Build build, Parser parser)
     {
-        this(build, false);
+        this(build, parser, false);
     }
 
-    NamespaceResolver(Build build, boolean isIncrementalBuild)
+    NamespaceResolver(Build build, Parser parser, boolean isIncrementalBuild)
     {
         super();
         fBuild = build;
         fIsIncrementalBuild = isIncrementalBuild;
+        fParser = parser;
     }
 
     public ICoreNamespace resolveFrameworkNamespace()
     {
-        if (fIsIncrementalBuild)
-            return fBuild.fLastState.fFrameworkNamespace;
 
         IResourceWorkspaceLocation frameworkLocation =
             (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot.getRelativeLocation(
                 "/org/apache/tapestry/Framework.library");
+
+        if (fIsIncrementalBuild && fBuild.fLastState.fBinaryNamespaces.containsKey(frameworkLocation))
+            return (ICoreNamespace) fBuild.fLastState.fBinaryNamespaces.get(frameworkLocation);
+
         resolve(null, ICoreNamespace.FRAMEWORK_NAMESPACE, frameworkLocation);
         return fResultNamespace;
     }
@@ -217,9 +226,10 @@ public class NamespaceResolver
         String libraryId,
         IResourceWorkspaceLocation location)
     {
+        System.out.println("resolving Library ************" + location);
         if (fIsIncrementalBuild && fBuild.fLastState.fBinaryNamespaces.containsKey(location))
-            return (ICoreNamespace)fBuild.fLastState.fBinaryNamespaces.get(location);
-            
+            return (ICoreNamespace) fBuild.fLastState.fBinaryNamespaces.get(location);
+
         reset();
         resolve(framework, libraryId, location);
         return fResultNamespace;
@@ -230,7 +240,7 @@ public class NamespaceResolver
         this.fFrameworkNamespace = framework;
         this.fNamespaceId = namespaceId;
         this.fSpecLocation = location;
-        fResultNamespace = fBuild.createNamespace(fNamespaceId, fSpecLocation);
+        fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation);
         doResolve();
         return fResultNamespace;
     }
@@ -247,7 +257,7 @@ public class NamespaceResolver
                     "Tapestry Build failed: application spec does not exist: '" + fSpecLocation.toString() + "'");
             //TODO internationalize
 
-            fResultNamespace = fBuild.createNamespace(fNamespaceId, fSpecLocation);
+            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation);
         } else
         {
             fResultNamespace = createStandinApplicationNamespace(servlet);
@@ -282,13 +292,15 @@ public class NamespaceResolver
     protected void reset()
     {
         fComponentStack.clear();
-        this.fFrameworkNamespace = null;
-        this.fNamespaceId = null;
-        this.fSpecLocation = null;
-        this.fServlet = null;
-        this.fResolvingFramework = false;
-        this.fWorking = false;
-        this.fJwcFiles = null;
+        fFrameworkNamespace = null;
+        fNamespaceId = null;
+        fSpecLocation = null;
+        fServlet = null;
+        fResolvingFramework = false;
+        fWorking = false;
+        fJwcFiles = null;
+        fProblemCollector.reset();
+
     }
 
     protected void doResolve()
@@ -324,11 +336,30 @@ public class NamespaceResolver
                 }
 
                 fResultNamespace.setResourceLookup(lookup);
+
+                //set a special component resolver that will prompt recusive component/page resolution                
                 fResultNamespace.setComponentResolver(new BuilderComponentResolver(fFrameworkNamespace));
-                resolveChildNamespaces();
+
+                // Special case! can't resolve children of the framework
+                // until the framework is resolved!
+                if (!fResolvingFramework)
+                    resolveChildNamespaces();
+
                 resolveComponents();
                 Set definitelyNotSpeclessPages = getAllComponentTemplates();
                 resolvePages(definitelyNotSpeclessPages);
+
+                // now we can resolve the child libraries
+                // of the framework
+                if (fResolvingFramework)
+                {
+                    fFrameworkNamespace = fResultNamespace;
+                    resolveChildNamespaces();
+                }
+
+                //replace the special resolver with the normal one.               
+                fResultNamespace.setComponentResolver(
+                    new ComponentSpecificationResolver(fFrameworkNamespace, fResultNamespace));
             }
         } catch (Exception e)
         {
@@ -382,16 +413,29 @@ public class NamespaceResolver
         List ids = spec.getLibraryIds();
         if (!ids.isEmpty())
         {
-            NamespaceResolver childResolver = new NamespaceResolver(fBuild, fIsIncrementalBuild);
+            NamespaceResolver childResolver = new NamespaceResolver(fBuild, new Parser(false), fIsIncrementalBuild);
             for (Iterator iter = ids.iterator(); iter.hasNext();)
             {
                 String libraryId = (String) iter.next();
                 if (fResultNamespace.getChildNamespace(libraryId) != null)
                     continue;
 
-                IResourceWorkspaceLocation libLocation =
-                    (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot.getRelativeLocation(
-                        spec.getLibrarySpecificationPath(libraryId));
+                IResourceWorkspaceLocation namespaceLocation =
+                    (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
+
+                IResourceWorkspaceLocation libLocation;
+                if (namespaceLocation.isOnClasspath())
+                    libLocation =
+                        (IResourceWorkspaceLocation) namespaceLocation.getRelativeLocation(
+                            spec.getLibrarySpecificationPath(libraryId));
+                else
+                    libLocation =
+                        (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot.getRelativeLocation(
+                            spec.getLibrarySpecificationPath(libraryId));
+
+                //                                IResourceWorkspaceLocation libLocation =
+                //                                    (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot.getRelativeLocation(
+                //                                        spec.getLibrarySpecificationPath(libraryId));
                 if (libLocation.exists())
                 {
                     ICoreNamespace childNamespace =
@@ -399,6 +443,9 @@ public class NamespaceResolver
 
                     if (childNamespace != null)
                         fResultNamespace.installChildNamespace(libraryId, childNamespace);
+                } else if (fBuild.fTapestryBuilder.DEBUG)
+                {
+                    System.out.println("not found:" + libLocation);
                 }
             }
         }
@@ -435,10 +482,13 @@ public class NamespaceResolver
 
         // TODO handle this without a runtime exception!
         if (fComponentStack.contains(location))
+        {
+            new Throwable("CIRCULAR").printStackTrace();
             throw new RuntimeException("poo");
+        }
 
         fComponentStack.push(location);
-        result = fBuild.resolveIComponentSpecification(fResultNamespace, location);
+        result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location);
         if (result != null)
         {
             fResultNamespace.installComponentSpecification(name, result);
@@ -591,7 +641,7 @@ public class NamespaceResolver
                 }
                 return true;
             }
-            
+
             // not used
             public IResourceWorkspaceLocation[] getResults()
             {
@@ -608,7 +658,6 @@ public class NamespaceResolver
             TapestryCore.log(e);
         }
 
-        
         // need to filter out localized page templates. They will be picked up
         // again later.
         List filtered = TemplateFinder.filterTemplateList(speclessPages, fResultNamespace);
@@ -633,10 +682,12 @@ public class NamespaceResolver
         specification.setPageSpecification(true);
         specification.setSpecificationLocation(location);
         specification.setNamespace(fResultNamespace);
+
         ComponentScanner scanner = new ComponentScanner();
         scanner.scanForTemplates(specification);
+
         List templates = specification.getTemplateLocations();
-        fBuild.fBuildQueue.finished(templates);
+
         String name = location.getName();
         int dotx = name.lastIndexOf('.');
         if (dotx > 0)
@@ -645,6 +696,8 @@ public class NamespaceResolver
         }
         fResultNamespace.installPageSpecification(name, specification);
         fBuild.parseTemplates(specification);
+
+        fBuild.fBuildQueue.finished(templates);
     }
 
     /**
@@ -661,7 +714,7 @@ public class NamespaceResolver
 
         result = null;
 
-        result = fBuild.resolveIComponentSpecification(fResultNamespace, location);
+        result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location);
         if (result != null)
         {
             fResultNamespace.installPageSpecification(name, result);
@@ -680,41 +733,49 @@ public class NamespaceResolver
             super(framework, fResultNamespace);
         }
 
-        /* (non-Javadoc)
-         * @see com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver#resolve(org.apache.tapestry.INamespace, java.lang.String)
-         */
-        public IComponentSpecification resolve(String type)
-        {
-
-            IComponentSpecification result = null;
-            if (type.indexOf(':') < 0)
-            {
-                result = fResultNamespace.getComponentSpecification(type);
-                if (result == null && fJwcFiles.containsKey(type))
-                {
-                    result = resolveComponent(type, (IResourceWorkspaceLocation) fJwcFiles.get(type));
-                } else
-                {
-                    result = super.resolve(type);
-                }
-
-            } else
-            {
-                result = super.resolve(type);
-            }
-            return result;
-        }
+        //        /* (non-Javadoc)
+        //         * @see com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver#resolve(org.apache.tapestry.INamespace, java.lang.String)
+        //         */
+        //        public IComponentSpecification resolve(String type)
+        //        {
+        //            IComponentSpecification result = null;
+        //            if (type.indexOf(':') < 0)
+        //            {
+        //                result = fContainerNamespace.getComponentSpecification(type);
+        //                if (result == null && fJwcFiles.containsKey(type))
+        //                {
+        //                    result = resolveComponent(type, (IResourceWorkspaceLocation) fJwcFiles.get(type));
+        //                } else
+        //                {
+        //                    result = super.resolve(type);
+        //                }
+        //
+        //            } else
+        //            {
+        //                result = super.resolve(type);
+        //            }
+        //            return result;
+        //        }
 
         /* (non-Javadoc)
          * @see com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver#resolve(org.apache.tapestry.INamespace, java.lang.String, java.lang.String)
          */
-        public IComponentSpecification resolve(INamespace containerNamespace, String libraryId, String type)
+        public IComponentSpecification resolve(String libraryId, String type)
         {
-            if (libraryId == null || fResultNamespace.getId().equals(libraryId))
+            if (libraryId != null && !libraryId.equals(fContainerNamespace.getId()))
+                return super.resolve(libraryId, type);
+
+            IComponentSpecification result = null;
+            result = fContainerNamespace.getComponentSpecification(type);
+            if (result == null && fJwcFiles.containsKey(type))
             {
-                return resolve(type);
+                result = resolveComponent(type, (IResourceWorkspaceLocation) fJwcFiles.get(type));
             }
-            return super.resolve(libraryId, type);
+            
+            if (result == null)
+                result = resolveInFramework(type);
+                
+            return result;
         }
 
     }

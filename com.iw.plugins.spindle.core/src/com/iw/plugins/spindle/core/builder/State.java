@@ -29,13 +29,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /**
@@ -60,7 +58,6 @@ public class State
     String fLibraryLocation;
     byte fVersion = VERSION;
     int fBuildNumber;
-    ICoreNamespace fFrameworkNamespace;
     Map fBinaryNamespaces = new HashMap();
     IClasspathEntry[] fLastKnownClasspath;
     
@@ -104,13 +101,7 @@ public class State
         fContextRoot = lastState.fContextRoot;
         fLibraryLocation = lastState.fLibraryLocation;
         fBuildNumber = lastState.fBuildNumber + 1;
-        fFrameworkNamespace = lastState.fFrameworkNamespace;
-        fBinaryNamespaces.clear();
-        for (Iterator iter = lastState.fBinaryNamespaces.entrySet().iterator(); iter.hasNext();)
-        {
-            Map.Entry element = (Map.Entry) iter.next();
-            fBinaryNamespaces.put(element.getKey(), element.getValue());
-        }
+        fBinaryNamespaces.clear();       
         fLastKnownClasspath = new IClasspathEntry[lastState.fLastKnownClasspath.length];
         System.arraycopy(
             lastState.fLastKnownClasspath,

@@ -89,6 +89,8 @@ public class TapestryXMLDTDValidator extends XMLDTDValidator
      */
     private DTDGrammar getGrammar(String publicId)
     {
+        
+        
         if (fGrammarPool != null && publicId != null)
             return (DTDGrammar) fGrammarPool.getGrammar(publicId);
 
@@ -118,8 +120,11 @@ public class TapestryXMLDTDValidator extends XMLDTDValidator
                 (XMLGrammarPoolImpl) componentManager.getProperty(
                     "http://apache.org/xml/properties/internal/grammar-pool");
 
-        if (fGrammarPool != null && fDTDGrammar != null)
-            fGrammarPool.putGrammar(fPublicId, fDTDGrammar);
+        if (fPublicId != null)
+        {
+            if (fGrammarPool != null && fDTDGrammar != null && fGrammarPool.getGrammar(fPublicId) == null)
+                fGrammarPool.putGrammar(fPublicId, fDTDGrammar);
+        }
 
         fSeenRootElement = false;
         fPublicId = null;

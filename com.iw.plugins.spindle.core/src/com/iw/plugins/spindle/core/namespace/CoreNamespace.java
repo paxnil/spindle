@@ -166,6 +166,16 @@ public class CoreNamespace implements ICoreNamespace
      */
     public INamespace getChildNamespace(String id)
     {
+
+        if (fId != null)
+        {
+            if (fId.equals(id))
+                return this;
+        } else if (id == null)
+        {
+            return this;
+        }
+
         String firstId = id;
         String nextIds = null;
 
@@ -440,6 +450,11 @@ public class CoreNamespace implements ICoreNamespace
     public void setComponentResolver(ComponentSpecificationResolver resolver)
     {
         fComponentResolver = resolver;
+    }
+
+    public String toString()
+    {
+        return "Namepace(" + fId + "): " + getSpecificationLocation().toString();
     }
 
 }

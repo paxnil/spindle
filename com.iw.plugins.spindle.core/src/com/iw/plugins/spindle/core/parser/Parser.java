@@ -95,9 +95,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, "Tapestry_3_0.dtd");
     }
 
-    /**
-         * @return
-         */
+   
     public boolean isDoValidation()
     {
         return fDoValidation;
@@ -248,8 +246,9 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         {
             checkDomParser();
             fDomParser.parse(new InputSource(reader));
-        } catch (SAXException e)
+        } catch (Exception e)
         {
+            e.printStackTrace();
             // there was a fatal error - return null
             // all the exceptions are collected already because I am an XMLErrorHandler
             return null;
