@@ -653,16 +653,16 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         return null;
     }
 
-    /**
-     * @param file
-     * @return
-     */
-    public TapestryProject getTapestryProjectFor(IStorage storage)
-    {
-        if (storage == null)
-            return null;
-        return getTapestryProjectFor(getProjectFor(storage));
-    }
+//    /**
+//     * @param file
+//     * @return
+//     */
+//    public TapestryProject getTapestryProjectFor(IStorage storage)
+//    {
+//        if (storage == null)
+//            return null;
+//        return getTapestryProjectFor(getProjectFor(storage));
+//    }
 
     /**
      * @param file
@@ -677,7 +677,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
 
     }
 
-    public TapestryProject getTapestryProjectFor(IProject project)
+    private TapestryProject getTapestryProjectFor(IProject project)
     {
         if (project == null)
             return null;

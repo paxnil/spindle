@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -638,7 +639,7 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
 
     protected TapestryProject findTapestryProject(IFile file)
     {
-        TapestryProject tproject = TapestryCore.getDefault().getTapestryProjectFor(file);
+        TapestryProject tproject = (TapestryProject)file.getAdapter(TapestryProject.class);    
         return tproject;
     }
 

@@ -57,195 +57,199 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 public class JumpToJavaAction extends BaseJumpAction
 {
 
-  public JumpToJavaAction()
-  {
-    super();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.editors.actions.BaseJumpAction#doRun()
-   */
-  protected void doRun()
-  {
-    Object typeObject = findType();
-    if (typeObject == null)
-      return;
-    if (typeObject instanceof IType)
-      reveal((IType) typeObject);
-    else if (typeObject instanceof IStorage)
-      reveal((IStorage) typeObject);
-  }
-
-  // might be an IType, an IStorage, or null.
-  protected Object findType()
-  {
-    Object result;
-    if (fEditor instanceof TemplateEditor)
+    public JumpToJavaAction()
     {
-      result = getTypeFromTemplate();
-    } else
-    {
-      result = getTypeFromSpec();
+        super();
     }
-    return result;
-  }
 
-  private Object getTypeFromTemplate()
-  {
-    IComponentSpecification componentSpec = (IComponentSpecification) fEditor
-        .getSpecification();
-    if (componentSpec != null)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.editors.actions.BaseJumpAction#doRun()
+     */
+    protected void doRun()
     {
-      String typeName = componentSpec.getComponentClassName();
-      IType type = resolveType(typeName);
-      if (type != null)
-      {
-        ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
-        if (!resolver.canResolve(type))
-          return type;
-
-        if (!resolver.doResolve(
-            (IResourceWorkspaceLocation) componentSpec.getSpecificationLocation(),
-            componentSpec).isOK())
-          return null;
-
-        return resolver.getStorage();
-      }
+        Object typeObject = findType();
+        if (typeObject == null)
+            return;
+        if (typeObject instanceof IType)
+            reveal((IType) typeObject);
+        else if (typeObject instanceof IStorage)
+            reveal((IStorage) typeObject);
     }
-    return null;
-  }
-  private Object getTypeFromSpec()
-  {
 
-    XMLNode root = getRootNode();
-    if (root == null)
-      return null;
-
-    List children = root.getChildren();
-    for (Iterator iter = children.iterator(); iter.hasNext();)
+    // might be an IType, an IStorage, or null.
+    protected Object findType()
     {
-      XMLNode child = (XMLNode) iter.next();
-      String type = child.getType();
-      if (type == ITypeConstants.TAG || type == ITypeConstants.EMPTYTAG)
-      {
-        String name = child.getName();
-        if (name == null)
-          return null;
-        name = name.toLowerCase();
-        Map attrMap;
-        if (name.equals("component-specification") || name.equals("page-specification"))
+        Object result;
+        if (fEditor instanceof TemplateEditor)
         {
-          attrMap = child.getAttributesMap();
-          XMLNode attribute = (XMLNode) attrMap.get("class");
-          if (attribute != null)
-          {
-            String attrValue = attribute.getAttributeValue();
-            if (attrValue == null)
-              return null;
+            result = getTypeFromTemplate();
+        }
+        else
+        {
+            result = getTypeFromSpec();
+        }
+        return result;
+    }
 
-            IType javaType = resolveType(attrValue);
-            if (javaType != null)
+    private Object getTypeFromTemplate()
+    {
+        IComponentSpecification componentSpec = (IComponentSpecification) fEditor
+                .getSpecification();
+        if (componentSpec != null)
+        {
+            String typeName = componentSpec.getComponentClassName();
+            IType type = resolveType(typeName);
+            if (type != null)
             {
-              try
-              {
-                IStorage storage = ((IStorageEditorInput) fEditor.getEditorInput())
-                    .getStorage();
-
-                TapestryProject tproject = TapestryCore
-                    .getDefault()
-                    .getTapestryProjectFor(storage);
-
-                IResourceWorkspaceLocation specLocation;
-                if (storage instanceof IFile)
-                {
-                  specLocation = tproject.getWebContextLocation().getRelativeLocation(
-                      (IFile) storage);
-                } else
-                {
-                  specLocation = tproject.getClasspathRoot().getRelativeLocation(storage);
-                }
-
-                IComponentSpecification componentSpec = (IComponentSpecification) fEditor
-                    .getSpecification();
-
                 ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
-                if (!resolver.canResolve(javaType))
-                  return javaType;
+                if (!resolver.canResolve(type))
+                    return type;
 
-                if (!resolver.doResolve(specLocation, componentSpec).isOK())
-                  return javaType;
+                if (!resolver.doResolve(
+                        (IResourceWorkspaceLocation) componentSpec.getSpecificationLocation(),
+                        componentSpec).isOK())
+                    return null;
 
                 return resolver.getStorage();
-              } catch (CoreException e)
-              {
-                UIPlugin.log(e);
-              }
             }
-          }
-        } else if (name.equals("application"))
-        {
-          attrMap = child.getAttributesMap();
-          XMLNode attribute = (XMLNode) attrMap.get("engine-class");
-          if (attribute != null)
-          {
-            String attrValue = attribute.getAttributeValue();
-            if (attrValue != null)
-              return resolveType(attrValue);
-          }
         }
-      }
+        return null;
     }
-    return null;
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
-   */
-  public void editorContextMenuAboutToShow(IMenuManager menu)
-  {
-    Object typeObject = findType();
-    if (typeObject != null)
+    private Object getTypeFromSpec()
     {
-      if (typeObject instanceof IType)
-        menu.add(new MenuOpenTypeAction((IType) typeObject));
-      else if (typeObject instanceof IStorage)
-        menu.add(new MenuOpenTypeAction((IStorage) typeObject));
+
+        XMLNode root = getRootNode();
+        if (root == null)
+            return null;
+
+        List children = root.getChildren();
+        for (Iterator iter = children.iterator(); iter.hasNext();)
+        {
+            XMLNode child = (XMLNode) iter.next();
+            String type = child.getType();
+            if (type == ITypeConstants.TAG || type == ITypeConstants.EMPTYTAG)
+            {
+                String name = child.getName();
+                if (name == null)
+                    return null;
+                name = name.toLowerCase();
+                Map attrMap;
+                if (name.equals("component-specification") || name.equals("page-specification"))
+                {
+                    attrMap = child.getAttributesMap();
+                    XMLNode attribute = (XMLNode) attrMap.get("class");
+                    if (attribute != null)
+                    {
+                        String attrValue = attribute.getAttributeValue();
+                        if (attrValue == null)
+                            return null;
+
+                        IType javaType = resolveType(attrValue);
+                        if (javaType != null)
+                        {
+                            try
+                            {
+                                IStorage storage = ((IStorageEditorInput) fEditor.getEditorInput())
+                                        .getStorage();
+
+                                TapestryProject tproject = (TapestryProject) storage
+                                        .getAdapter(TapestryProject.class);
+
+                                IResourceWorkspaceLocation specLocation;
+                                if (storage instanceof IFile)
+                                {
+                                    specLocation = tproject.getWebContextLocation()
+                                            .getRelativeLocation((IFile) storage);
+                                }
+                                else
+                                {
+                                    specLocation = tproject.getClasspathRoot().getRelativeLocation(
+                                            storage);
+                                }
+
+                                IComponentSpecification componentSpec = (IComponentSpecification) fEditor
+                                        .getSpecification();
+
+                                ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
+                                if (!resolver.canResolve(javaType))
+                                    return javaType;
+
+                                if (!resolver.doResolve(specLocation, componentSpec).isOK())
+                                    return javaType;
+
+                                return resolver.getStorage();
+                            }
+                            catch (CoreException e)
+                            {
+                                UIPlugin.log(e);
+                            }
+                        }
+                    }
+                }
+                else if (name.equals("application"))
+                {
+                    attrMap = child.getAttributesMap();
+                    XMLNode attribute = (XMLNode) attrMap.get("engine-class");
+                    if (attribute != null)
+                    {
+                        String attrValue = attribute.getAttributeValue();
+                        if (attrValue != null)
+                            return resolveType(attrValue);
+                    }
+                }
+            }
+        }
+        return null;
     }
-  }
 
-  class MenuOpenTypeAction extends Action
-  {
-    Object typeObject;
-
-    public MenuOpenTypeAction(IType type)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+     */
+    public void editorContextMenuAboutToShow(IMenuManager menu)
     {
-      Assert.isNotNull(type);
-      this.typeObject = type;
-      setImageDescriptor(getImageDescriptorFor(BaseJumpAction.LABEL_PROVIDER
-          .getImage(type)));
-      setText(type.getFullyQualifiedName());
+        Object typeObject = findType();
+        if (typeObject != null)
+        {
+            if (typeObject instanceof IType)
+                menu.add(new MenuOpenTypeAction((IType) typeObject));
+            else if (typeObject instanceof IStorage)
+                menu.add(new MenuOpenTypeAction((IStorage) typeObject));
+        }
     }
 
-    public MenuOpenTypeAction(IStorage storage)
+    class MenuOpenTypeAction extends Action
     {
-      Assert.isNotNull(storage);
-      this.typeObject = storage;
-      setImageDescriptor(getImageDescriptorFor(BaseJumpAction.LABEL_PROVIDER
-          .getImage(storage)));
-      setText(storage.getFullPath().toString());
-    }
+        Object typeObject;
 
-    public void run()
-    {
-      if (typeObject instanceof IType)
-        reveal((IType) typeObject);
-      else if (typeObject instanceof IStorage)
-        reveal((IStorage) typeObject);
+        public MenuOpenTypeAction(IType type)
+        {
+            Assert.isNotNull(type);
+            this.typeObject = type;
+            setImageDescriptor(getImageDescriptorFor(BaseJumpAction.LABEL_PROVIDER.getImage(type)));
+            setText(type.getFullyQualifiedName());
+        }
+
+        public MenuOpenTypeAction(IStorage storage)
+        {
+            Assert.isNotNull(storage);
+            this.typeObject = storage;
+            setImageDescriptor(getImageDescriptorFor(BaseJumpAction.LABEL_PROVIDER
+                    .getImage(storage)));
+            setText(storage.getFullPath().toString());
+        }
+
+        public void run()
+        {
+            if (typeObject instanceof IType)
+                reveal((IType) typeObject);
+            else if (typeObject instanceof IStorage)
+                reveal((IStorage) typeObject);
+        }
     }
-  }
 
 }

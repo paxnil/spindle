@@ -42,7 +42,6 @@ import org.apache.tapestry.spec.IParameterSpecification;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
@@ -365,7 +364,7 @@ public abstract class UITapestryAccess
     fNamespace = editor.getNamespace();
     Assert.isLegal(fNamespace != null);
     IStorage storage = editor.getStorage();
-    IProject project = TapestryCore.getDefault().getProjectFor(storage);
+    IProject project = (IProject)storage.getAdapter(IProject.class);    
     setFrameworkNamespace((ICoreNamespace) TapestryArtifactManager
         .getTapestryArtifactManager()
         .getFrameworkNamespace(project));

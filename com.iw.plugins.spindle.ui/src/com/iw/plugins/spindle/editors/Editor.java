@@ -304,14 +304,7 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
   public Object getSpecification()
   {
     IStorage storage = getStorage();
-    IProject project = null;
-    if (storage instanceof IFile)
-    {
-      project = ((IFile) storage).getProject();
-    } else
-    {
-      project = TapestryCore.getDefault().getProjectFor(storage);
-    }
+    IProject project = (IProject)storage.getAdapter(IProject.class);    
     TapestryArtifactManager manager = TapestryArtifactManager
         .getTapestryArtifactManager();
     Map specs = manager.getSpecMap(project);

@@ -278,7 +278,7 @@ public class TemplateEditor extends Editor
     public Object getSpecification()
     {
         IStorage storage = getStorage();
-        IProject project = TapestryCore.getDefault().getProjectFor(storage);
+        IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map templates = manager.getTemplateMap(project);
         if (templates != null)

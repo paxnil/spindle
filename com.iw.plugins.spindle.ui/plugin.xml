@@ -641,6 +641,14 @@ the new Spindle
                name="code"/>
       </markerResolutionGenerator>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            class="com.iw.plugins.spindle.adapters.StorageEditorInputAdapterFactory"
+            adaptableType="org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput">
+         <adapter type="org.eclipse.core.resources.IStorage"/>
+      </factory>
+   </extension>
       
       
    

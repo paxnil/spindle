@@ -185,5 +185,24 @@
             id="com.iw.plugins.spindle.core.TAPESTRY_FRAMEWORK">
       </classpathContainerInitializer>
    </extension>
+   <extension         
+         name="Spindle Core Adapter Factories"
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="rg.eclipse.core.resources.IResource"
+            class="com.iw.plugins.spindle.core.adapters.ResourceToTapestryProjectAdapterFactory">
+         <adapter type="com.iw.plugins.spindle.core.TapestryProject"/>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.core.resources.IStorage"
+            class="com.iw.plugins.spindle.core.adapters.StorageToTapestryProjectAdapterFactory">
+         <adapter type="com.iw.plugins.spindle.core.TapestryProject"/>
+      </factory>
+       <factory
+            class="com.iw.plugins.spindle.core.adapters.StorageToProjectAdapterFactory"
+            adaptableType="org.eclipse.core.resources.IStorage">
+         <adapter type="org.eclipse.core.resources.IProject"/>
+      </factory>
+   </extension>
 
 </plugin>

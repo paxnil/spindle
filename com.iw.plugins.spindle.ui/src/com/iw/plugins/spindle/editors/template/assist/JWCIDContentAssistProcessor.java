@@ -89,13 +89,7 @@ public class JWCIDContentAssistProcessor extends TemplateContentAssistProcessor
     fAssistHelper = null;
     try
     {
-      fAssistHelper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-      //            IStorage storage = (IStorage)
-      // fEditor.getEditorInput().getAdapter(IStorage.class);
-      //            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-      //            fAssistHelper.setFrameworkNamespace(
-      //                (ICoreNamespace)
-      // TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+      fAssistHelper = new TemplateTapestryAccess((TemplateEditor) fEditor);     
       fAssistHelper.setJwcid(jwcidAttr.getAttributeValue());
     } catch (IllegalArgumentException e)
     {
@@ -348,13 +342,7 @@ public class JWCIDContentAssistProcessor extends TemplateContentAssistProcessor
     fAssistHelper = null;
     try
     {
-      fAssistHelper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-      //            IStorage storage = (IStorage)
-      // fEditor.getEditorInput().getAdapter(IStorage.class);
-      //            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-      //            fAssistHelper.setFrameworkNamespace(
-      //                (ICoreNamespace)
-      // TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+      fAssistHelper = new TemplateTapestryAccess((TemplateEditor) fEditor);      
       fAssistHelper.setJwcid(attributeValue);
     } catch (IllegalArgumentException e)
     {
