@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -39,7 +41,11 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
@@ -123,7 +129,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             }
 
             if (documentOffset > fValueLocation.x)
-                fMatchString = fAttributeValue.substring(0, documentOffset - fValueLocation.x);
+                fMatchString = fAttributeValue.substring(0, documentOffset - fValueLocation.x).toLowerCase();
 
         } catch (BadLocationException e)
         {
@@ -139,17 +145,28 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
         List proposals = new ArrayList(dtdAllowed);
 
-        if (proposals.isEmpty() && special != null)
+        proposals.addAll(computeTagAttrSpecificProposals());
+
+        if (proposals.isEmpty())
         {
-            proposals.add(getProposal(special));
-        } else
-        {
-            return NoSuggestions;
-        }
+            if (special != null)
+                proposals.add(getProposal(special));
+        } 
 
         Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
 
         return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+    }
+
+    /**
+     * @return
+     */
+    private List computeTagAttrSpecificProposals()
+    {
+        if ("component".equals(fTagName) && "type".equals(fAttributeName))
+            return computeComponentTypeProposals();
+
+        return Collections.EMPTY_LIST;
     }
 
     /**
@@ -182,85 +199,65 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
     private CompletionProposal getProposal(String value)
     {
+        return getProposal(value, null, null);
+    }
+
+    private CompletionProposal getProposal(String value, String displayName, String extraInfo)
+    {
         return new CompletionProposal(
             value,
             fValueLocation.x,
             fIsAttributeTerminated ? fAttributeValue.length() : fMatchString.length(),
             new Point(value.length(), 0),
             Images.getSharedImage("bullet.gif"),
+            displayName,
             null,
-            null,
-            null);
+            extraInfo);
     }
 
-//    /**
-//     * Compute proposals for converting a Message to a Dynamic or a Static binding;
-//     */
-//    private ICompletionProposal[] computeMessageProposals(
-//        int documentOffset,
-//        String attributeValue,
-//        Point valueLocation)
-//    {
-//        int delta = documentOffset - valueLocation.x;
-//
-//        ICompletionProposal[] result = new ICompletionProposal[2];
-//        result[0] =
-//            new CompletionProposal(
-//                "ognl:",
-//                valueLocation.x,
-//                8,
-//                delta <= 0 ? new Point(5, 0) : new Point(delta < 8 ? 5 : delta - 8 + 5, 0),
-//                Images.getSharedImage("bind-dynamic.gif"),
-//                "Change to dynamic binding",
-//                null,
-//                "change 'message' into 'ognl'");
-//        result[1] =
-//            new CompletionProposal(
-//                "",
-//                valueLocation.x,
-//                8,
-//                delta <= 0 ? new Point(0, 0) : new Point(delta < 8 ? 0 : delta - 8, 0),
-//                Images.getSharedImage("bind-static.gif"),
-//                "Change to static binding",
-//                null,
-//                "remove 'message:'");
-//
-//        return result;
-//    }
-//
-//    /**
-//     * Compute proposals for converting a Static to a Dynamic or a Message binding;
-//     */
-//    private ICompletionProposal[] computeStaticProposals(
-//        int documentOffset,
-//        String attributeValue,
-//        Point valueLocation)
-//    {
-//        int delta = documentOffset - valueLocation.x;
-//
-//        ICompletionProposal[] result = new ICompletionProposal[2];
-//        result[0] =
-//            new CompletionProposal(
-//                "ognl:",
-//                valueLocation.x,
-//                0,
-//                delta <= 0 ? new Point(5, 0) : new Point(delta + 5, 0),
-//                Images.getSharedImage("bind-dynamic.gif"),
-//                "Make dynamic binding",
-//                null,
-//                "prepend 'ognl:' to '" + attributeValue);
-//        result[1] =
-//            new CompletionProposal(
-//                "message:",
-//                valueLocation.x,
-//                0,
-//                delta <= 0 ? new Point(8, 0) : new Point(delta + 8, 0),
-//                Images.getSharedImage("bind-string.gif"),
-//                "Make message binding",
-//                null,
-//                "prepend 'message:' to '" + attributeValue);
-//
-//        return result;
-//    }
+    private List computeComponentTypeProposals()
+    {
+        SpecAssistHelper helper = null;
+        try
+        {
+            helper = new SpecAssistHelper(fEditor);
+            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
+            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+            helper.setFrameworkNamespace(
+                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+        } catch (IllegalArgumentException e1)
+        {
+            return Collections.EMPTY_LIST;
+        }
+
+        List proposals = new ArrayList();
+
+        UITapestryAccess.Result[] foundTopLevel = helper.getComponents();
+        for (int i = 0; i < foundTopLevel.length; i++)
+        {
+            boolean matches =
+                fMatchString == null ? true : foundTopLevel[i].name.toLowerCase().startsWith(fMatchString);
+            if (matches)
+            {
+                CompletionProposal proposal =
+                    getProposal(foundTopLevel[i].name, foundTopLevel[i].displayName, foundTopLevel[i].description);
+                proposal.setImage(Images.getSharedImage("bullet_pink.gif"));
+                proposals.add(proposal);
+            }
+        }
+        UITapestryAccess.Result[] foundChild = helper.getAllChildNamespaceComponents();
+        for (int i = 0; i < foundChild.length; i++)
+        {
+            boolean matches = fMatchString == null ? true : foundChild[i].name.toLowerCase().startsWith(fMatchString);
+            if (matches)
+            {
+                CompletionProposal proposal =
+                    getProposal(foundChild[i].name, foundChild[i].displayName, foundChild[i].description);
+                proposal.setImage(Images.getSharedImage("bullet_pink.gif"));
+                proposals.add(proposal);
+            }
+        }
+        return proposals;
+    }
 
 }

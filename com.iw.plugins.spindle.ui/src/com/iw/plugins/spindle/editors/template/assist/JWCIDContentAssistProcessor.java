@@ -47,6 +47,7 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+import com.iw.plugins.spindle.editors.*;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.template.TemplatePartitionScanner;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
@@ -68,7 +69,7 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
 
     private Point fValueLocation;
 
-    private ContentAssistHelper fAssistHelper;
+    private TemplateTapestryAccess fAssistHelper;
 
     public JWCIDContentAssistProcessor(TemplateEditor editor)
     {
@@ -89,12 +90,12 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
         fAssistHelper = null;
         try
         {
-            fAssistHelper = new ContentAssistHelper((TemplateEditor) fEditor);
+            fAssistHelper = new TemplateTapestryAccess((TemplateEditor) fEditor);
             IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
             IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            fAssistHelper.setJwcid(
-                jwcidAttr.getAttributeValue(),
+            fAssistHelper.setFrameworkNamespace(
                 (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+            fAssistHelper.setJwcid(jwcidAttr.getAttributeValue());
         } catch (IllegalArgumentException e)
         {
             return NoProposals;
@@ -182,7 +183,7 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
             }
         }
 
-        ContentAssistHelper.CAHelperResult[] foundTopLevel = fAssistHelper.getComponents();
+        UITapestryAccess.Result[] foundTopLevel = fAssistHelper.getComponents();
         for (int i = 0; i < foundTopLevel.length; i++)
         {
             boolean matches = matchString == null ? true : foundTopLevel[i].name.toLowerCase().startsWith(matchString);
@@ -202,7 +203,7 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
                         foundTopLevel[i].description));
             }
         }
-        ContentAssistHelper.CAHelperResult[] foundChild = fAssistHelper.getAllChildNamespaceComponents();
+        UITapestryAccess.Result[] foundChild = fAssistHelper.getAllChildNamespaceComponents();
         for (int i = 0; i < foundChild.length; i++)
         {
             boolean matches = matchString == null ? true : foundChild[i].name.toLowerCase().startsWith(matchString);
@@ -222,31 +223,6 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
                         foundChild[i].description));
             }
         }
-
-        //        ContentAssistHelper.CAHelperResult[] declaredLibraries = fAssistHelper.getChildNamespaceIds();
-        //        for (int i = 0; i < declaredLibraries.length; i++)
-        //        {
-        //
-        //            boolean matches = matchString == null ? true : foundChild[i].name.toLowerCase().startsWith(matchString);
-        //            if (matches)
-        //            {
-        //                int delta = declaredLibraries[i].name.length() - implicitLength;
-        //
-        //                CompletionProposal proposal =
-        //                    new CompletionProposal(
-        //                        declaredLibraries[i].name + ":",
-        //                        startOffset,
-        //                        implicitLength,
-        //                        new Point(declaredLibraries[i].name.length() + delta, 0),
-        //                        Images.getSharedImage("bullet_lib.gif"),
-        //                        null,
-        //                        null,
-        //                        declaredLibraries[i].description);
-        //
-        //                proposals.add(proposal);
-        //            }
-        //        }
-
         return proposals;
     }
 
@@ -302,11 +278,11 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
 
         int oldLength = fAtSign >= 0 ? fAtSign : fValueLocation.y;
         String oldValue = fAttributeValue.substring(0, oldLength);
-        
-        if (oldValue.length() > 0)
-        existing.add(oldValue);
 
-        ContentAssistHelper.CAHelperResult[] found = fAssistHelper.getSimpleIds();
+        if (oldValue.length() > 0)
+            existing.add(oldValue);
+
+        UITapestryAccess.Result[] found = fAssistHelper.getSimpleIds();
         for (int i = 0; i < found.length; i++)
         {
             if (existing.contains(found[i].name))
@@ -363,18 +339,18 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
         fAssistHelper = null;
         try
         {
-            fAssistHelper = new ContentAssistHelper((TemplateEditor) fEditor);
+            fAssistHelper = new TemplateTapestryAccess((TemplateEditor) fEditor);
             IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
             IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            fAssistHelper.setJwcid(
-                attributeValue,
+            fAssistHelper.setFrameworkNamespace(
                 (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+            fAssistHelper.setJwcid(attributeValue);
         } catch (IllegalArgumentException e)
         {
             return NoInformation;
         }
 
-        ContentAssistHelper.CAHelperResult result = fAssistHelper.getComponentContextInformation();
+        UITapestryAccess.Result result = fAssistHelper.getComponentContextInformation();
         if (result == null)
             return NoInformation;
 

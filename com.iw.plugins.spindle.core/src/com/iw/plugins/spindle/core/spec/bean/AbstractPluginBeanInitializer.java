@@ -27,6 +27,7 @@
 package com.iw.plugins.spindle.core.spec.bean;
 
 import org.apache.tapestry.IBeanProvider;
+import org.apache.tapestry.INamespace;
 import org.apache.tapestry.bean.IBeanInitializer;
 
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
@@ -82,6 +83,20 @@ public class AbstractPluginBeanInitializer extends BaseSpecification implements 
         String old = fValue;
         fValue = value;
         firePropertyChange("value", old, fValue);
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#setNamespace(org.apache.tapestry.INamespace)
+     */
+    public void setNamespace(INamespace ns)
+    {}
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#getNamespace()
+     */
+    public INamespace getNamespace()
+    {
+        return null;
     }
 
 }

@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -88,6 +89,8 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
      **/
 
     private IResourceResolver fResourceResolver;
+    
+    private INamespace fNamespace;
 
     private String fPublicId;
 
@@ -395,6 +398,22 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
             fServices = new PropertyFiringMap(this, "services");
 
         fServices.put(name, className);
+    }
+
+    /**
+     * @return
+     */
+    public INamespace getNamespace()
+    {
+        return fNamespace;
+    }
+
+    /**
+     * @param namespace
+     */
+    public void setNamespace(INamespace namespace)
+    {
+        this.fNamespace = namespace;
     }
 
 }

@@ -33,6 +33,7 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -41,6 +42,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -52,6 +54,7 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.scanning.ApplicationScanner;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;
@@ -63,6 +66,7 @@ import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
 import com.iw.plugins.spindle.core.scanning.W3CAccess;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
+import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
@@ -85,6 +89,56 @@ public class SpecEditor extends Editor
     public SpecEditor()
     {
         super();
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.Editor#getNamespace()
+     */
+    public ICoreNamespace getNamespace()
+    {
+        try
+        {
+            IEditorInput input = getEditorInput();
+            IStorage storage = ((IStorageEditorInput) input).getStorage();
+            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+            TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+            Map specs = manager.getSpecMap(project);
+            if (specs != null)
+            {
+                BaseSpecification bspec = (BaseSpecification) specs.get(storage);
+                if (bspec != null)
+                    return (ICoreNamespace) bspec.getNamespace();
+            }
+
+        } catch (CoreException e)
+        {
+            UIPlugin.log(e);
+        }
+        return null;
+    }
+
+    public IComponentSpecification getComponent()
+    {
+        try
+        {
+            IEditorInput input = getEditorInput();
+            IStorage storage = ((IStorageEditorInput) input).getStorage();
+            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+            TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+            Map specs = manager.getSpecMap(project);
+            if (specs != null)
+            {
+                return (IComponentSpecification) specs.get(storage);
+            }
+
+        } catch (CoreException e)
+        {
+            UIPlugin.log(e);
+        } catch (ClassCastException e)
+        {
+            // do nothing
+        }
+        return null;
     }
 
     /* (non-Javadoc)
@@ -266,7 +320,6 @@ public class SpecEditor extends Editor
                 result = fParser.parse(content);
             } catch (Exception e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 
@@ -401,8 +454,5 @@ public class SpecEditor extends Editor
             return spec instanceof IApplicationSpecification;
         }
     }
-
-   
-    
 
 }

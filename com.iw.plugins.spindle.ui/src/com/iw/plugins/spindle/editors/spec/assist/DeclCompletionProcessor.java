@@ -29,8 +29,8 @@ package com.iw.plugins.spindle.editors.spec.assist;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
+import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 
 /**
@@ -46,7 +46,7 @@ public class DeclCompletionProcessor extends SpecCompletionProcessor
     /**
      * @param editor
      */
-    public DeclCompletionProcessor(AbstractTextEditor editor)
+    public DeclCompletionProcessor(Editor editor)
     {
         super(editor);
     }

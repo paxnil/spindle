@@ -59,5 +59,7 @@ public abstract class BaseSpecLocatable extends BasePropertyHolder
     {
         this.fSpecificationLocation = location;
     }
+    
+   
 
 }

@@ -57,6 +57,7 @@ import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.scanning.BaseValidator;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
@@ -145,6 +146,15 @@ public class TemplateEditor extends Editor
     protected SourceViewerConfiguration createSourceViewerConfiguration()
     {
         return new TemplateConfiguration(UIPlugin.getDefault().getTemplateTextTools(), this);
+    }
+
+    public ICoreNamespace getNamespace()
+    {
+        PluginComponentSpecification spec = (PluginComponentSpecification) getComponent();
+        if (spec != null)
+            return (ICoreNamespace) spec.getNamespace();
+
+        return null;
     }
 
     public IComponentSpecification getComponent()
@@ -269,5 +279,4 @@ public class TemplateEditor extends Editor
         }
     }
 
-  
 }

@@ -26,6 +26,7 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.Direction;
 import org.apache.tapestry.spec.IParameterSpecification;
 
@@ -162,6 +163,20 @@ public class PluginParameterSpecification extends BaseSpecification implements I
         String old = fDefaultValue;
         fDefaultValue = defaultValue;
         firePropertyChange("defaultValue", old, fDefaultValue);
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#setNamespace(org.apache.tapestry.INamespace)
+     */
+    public void setNamespace(INamespace ns)
+    {}
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#getNamespace()
+     */
+    public INamespace getNamespace()
+    {
+        return null;
     }
 
 }

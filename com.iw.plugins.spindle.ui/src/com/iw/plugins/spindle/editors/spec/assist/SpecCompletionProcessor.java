@@ -41,11 +41,11 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.util.XMLUtil;
+import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
@@ -105,7 +105,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
     protected DTD fDTD;
     protected DocumentArtifact fArtifact;
 
-    public SpecCompletionProcessor(AbstractTextEditor editor)
+    public SpecCompletionProcessor(Editor editor)
     {
         super(editor);
     }

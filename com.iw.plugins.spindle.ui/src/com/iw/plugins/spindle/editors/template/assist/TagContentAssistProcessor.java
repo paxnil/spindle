@@ -45,6 +45,7 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+import com.iw.plugins.spindle.editors.*;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
@@ -203,13 +204,13 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
     {
         try
         {
-            ContentAssistHelper helper = new ContentAssistHelper((TemplateEditor) fEditor);
+            TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
             IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
             IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            helper.setJwcid(
-                jwcid,
+            helper.setFrameworkNamespace(
                 (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
-            ContentAssistHelper.CAHelperResult[] infos = helper.findParameters(null, existingAttributeNames);
+            helper.setJwcid(jwcid);
+            UITapestryAccess.Result[] infos = helper.findParameters(null, existingAttributeNames);
             for (int i = 0; i < infos.length; i++)
             {
                 CompletionProposal proposal =
@@ -256,10 +257,10 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
         try
         {
             // first get the matches
-            ContentAssistHelper helper = new ContentAssistHelper((TemplateEditor) fEditor);
+            TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
             helper.setJwcid(jwcid);
 
-            ContentAssistHelper.CAHelperResult[] infos = helper.findParameters(fragment, existingAttributeNames);
+            UITapestryAccess.Result[] infos = helper.findParameters(fragment, existingAttributeNames);
             for (int i = 0; i < infos.length; i++)
             {
                 CompletionProposal proposal;
@@ -308,7 +309,7 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
                 {
                     proposal =
                         new CompletionProposal(
-                            infos[i].name+"=\"\"",
+                            infos[i].name + "=\"\"",
                             replacementOffset,
                             replacementLength,
                             new Point(infos[i].name.length(), 0),
@@ -368,11 +369,11 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
 
         try
         {
-            ContentAssistHelper helper = new ContentAssistHelper((TemplateEditor) fEditor);
+            TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
             DocumentArtifact jwcidAttr = (DocumentArtifact) attrMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
             helper.setJwcid(jwcidAttr.getAttributeValue());
 
-            ContentAssistHelper.CAHelperResult result = helper.getParameterContextInformation(attr.getName());
+            UITapestryAccess.Result result = helper.getParameterContextInformation(attr.getName());
 
             if (result != null)
                 return new IContextInformation[] { new ContextInformation(result.displayName, result.description)};

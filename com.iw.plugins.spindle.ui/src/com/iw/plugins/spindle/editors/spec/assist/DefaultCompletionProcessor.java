@@ -32,8 +32,8 @@ import java.util.List;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
+import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
@@ -47,7 +47,7 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 public class DefaultCompletionProcessor extends SpecCompletionProcessor
 {
 
-    public DefaultCompletionProcessor(AbstractTextEditor editor)
+    public DefaultCompletionProcessor(Editor editor)
     {
         super(editor);
     }

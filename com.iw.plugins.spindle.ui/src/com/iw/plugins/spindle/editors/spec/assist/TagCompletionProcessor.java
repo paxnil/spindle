@@ -38,9 +38,9 @@ import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
@@ -58,7 +58,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
     /**
      * @param editor
      */
-    public TagCompletionProcessor(AbstractTextEditor editor)
+    public TagCompletionProcessor(Editor editor)
     {
         super(editor);
     }

@@ -38,6 +38,7 @@ import java.util.Set;
 import org.apache.tapestry.ILocatable;
 import org.apache.tapestry.ILocation;
 import org.apache.tapestry.ILocationHolder;
+import org.apache.tapestry.INamespace;
 
 /**
  *  Base class for all Spec classes.
@@ -45,7 +46,7 @@ import org.apache.tapestry.ILocationHolder;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class BaseSpecification implements IIdentifiable, PropertyChangeListener, ILocatable, ILocationHolder
+public abstract class BaseSpecification implements IIdentifiable, PropertyChangeListener, ILocatable, ILocationHolder
 {
 
     public static final int APPLICATION_SPEC = 0;
@@ -210,5 +211,9 @@ public class BaseSpecification implements IIdentifiable, PropertyChangeListener,
     {
         this.fILocation = location;
     }
+
+    public abstract INamespace getNamespace();
+
+    public abstract void setNamespace(INamespace ns);
 
 }

@@ -28,6 +28,8 @@ package com.iw.plugins.spindle.core.spec;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.tapestry.INamespace;
+
 /**
  * @author gwl
  * @version $Id$
@@ -232,6 +234,20 @@ public class PluginExtensionConfiguration extends BaseSpecification
             {}
         }
         return falseI;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#setNamespace(org.apache.tapestry.INamespace)
+     */
+    public void setNamespace(INamespace ns)
+    {}
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.spec.BaseSpecification#getNamespace()
+     */
+    public INamespace getNamespace()
+    {
+        return null;
     }
 
 }

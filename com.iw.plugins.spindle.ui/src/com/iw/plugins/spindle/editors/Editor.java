@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editors;
 
 import net.sf.solareclipse.xml.ui.XMLPlugin;
 
+import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -54,6 +55,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
 
 /**
@@ -157,7 +159,7 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
     protected IEditorInput fInput;
 
     protected IContentOutlinePage fOutline = null;
-    
+
     protected ContentAssistant fContentAssistant = new ContentAssistant();
 
     public Editor()
@@ -165,9 +167,9 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
         super();
         setSourceViewerConfiguration(createSourceViewerConfiguration());
         setPreferenceStore(
-           new PreferenceStoreWrapper(
-               UIPlugin.getDefault().getPreferenceStore(),
-               XMLPlugin.getDefault().getPreferenceStore()));
+            new PreferenceStoreWrapper(
+                UIPlugin.getDefault().getPreferenceStore(),
+                XMLPlugin.getDefault().getPreferenceStore()));
         setRangeIndicator(new DefaultRangeIndicator());
     }
 
@@ -185,20 +187,23 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
     {
         super.createPartControl(parent);
         fSourceViewerDecorationSupport.install(getPreferenceStore());
-        fReadyToReconcile = true;       
+        fReadyToReconcile = true;
     }
 
     protected void doSetInput(IEditorInput input) throws CoreException
     {
         super.doSetInput(input);
-        fInput = input;       
+        fInput = input;
         if (fOutline != null)
             fOutline.dispose();
         fOutline = createContentOutlinePage(input);
     }
-    
-    
-    
+
+    public abstract ICoreNamespace getNamespace();
+
+    /** may return null if not a 'componenty' thing. */
+    public abstract IComponentSpecification getComponent();
+
     protected void configureSourceViewerDecorationSupport()
     {
 
@@ -296,8 +301,9 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
     }
 
     public abstract IContentOutlinePage createContentOutlinePage(IEditorInput input);
-        
-    public ContentAssistant getContentAssistant() {
+
+    public ContentAssistant getContentAssistant()
+    {
         if (fContentAssistant == null)
             fContentAssistant = new ContentAssistant();
         return fContentAssistant;
@@ -316,8 +322,6 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
     protected abstract IDocumentProvider createDocumentProvider(IEditorInput input);
 
     protected abstract SourceViewerConfiguration createSourceViewerConfiguration();
-
-   
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.editors.ISelfReconcilingEditor#isReadyToReconcile()

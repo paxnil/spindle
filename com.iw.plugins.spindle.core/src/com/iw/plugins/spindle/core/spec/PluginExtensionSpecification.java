@@ -29,6 +29,7 @@ package com.iw.plugins.spindle.core.spec;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.spec.IExtensionSpecification;
 
@@ -131,5 +132,19 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
         boolean old = fImmediate;
         fImmediate = immediate;
         firePropertyChange("immediate", old, immediate);
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.spec.BasePropertyHolder#setNamespace(org.apache.tapestry.INamespace)
+     */
+    public void setNamespace(INamespace ns)
+    {}
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.spec.BasePropertyHolder#getNamespace()
+     */
+    public INamespace getNamespace()
+    {
+        return null;
     }
 }

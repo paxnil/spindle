@@ -40,9 +40,9 @@ import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.editors.Editor;
 
 /**
  *  Content Assist for Templates
@@ -66,12 +66,12 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
         SCANNER.setPredicateRules(new IPredicateRule[] { new DocumentArtifactRule()});
     }
 
-    protected AbstractTextEditor fEditor;
+    protected Editor fEditor;
     protected IPreferenceStore fPreferenceStore = UIPlugin.getDefault().getPreferenceStore();
     protected DocumentArtifactPartitioner fAssistParititioner;
     protected boolean fDoingContextInformation = false;
 
-    public ContentAssistProcessor(AbstractTextEditor editor)
+    public ContentAssistProcessor(Editor editor)
     {
         this.fEditor = editor;
         fAssistParititioner = new DocumentArtifactPartitioner(SCANNER, DocumentArtifactPartitioner.TYPES);

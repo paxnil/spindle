@@ -35,9 +35,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
@@ -71,7 +71,7 @@ public class CommentCompletionProcessor extends ContentAssistProcessor
     /**
      * @param editor
      */
-    public CommentCompletionProcessor(AbstractTextEditor editor)
+    public CommentCompletionProcessor(Editor editor)
     {
         super(editor);
     }

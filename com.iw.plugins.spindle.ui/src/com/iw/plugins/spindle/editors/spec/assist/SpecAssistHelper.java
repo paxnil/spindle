@@ -37,12 +37,15 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.util.MultiKey;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.wutka.dtd.DTD;
 import com.wutka.dtd.DTDAttribute;
@@ -60,7 +63,7 @@ import com.wutka.dtd.DTDSequence;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class SpecAssistHelper
+public class SpecAssistHelper extends UITapestryAccess
 {
     private static final String DEFAULT_NEW_ELEMENT_PROPOSAL = "DEFAULT_NEW_ELEMENT_PROPOSAL";
     private static final String OPTIONAL_NEW_ELEMENT_PROPOSAL = "OPTIONAL_NEW_ELEMENT_PROPOSAL";
@@ -620,5 +623,14 @@ public class SpecAssistHelper
                 null);
         proposal.setYOrder(99);
         return proposal;
+    }
+
+    // will be non null iff invoke by an editor working on
+    private IComponentSpecification fComponentSpecification;
+    
+    public SpecAssistHelper(Editor editor) throws IllegalArgumentException
+    {
+        super(editor);
+        fComponentSpecification = editor.getComponent();
     }
 }
