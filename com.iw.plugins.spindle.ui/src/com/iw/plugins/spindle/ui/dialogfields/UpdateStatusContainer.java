@@ -95,7 +95,7 @@ public class UpdateStatusContainer implements IDialogFieldChangedListener
         try
         {
           DialogField field = (DialogField) i.next();
-          if (!field.isEnabled())
+          if (!field.isEnabled() || !field.isVisible())
             continue;
           enabled.add(field);
         } catch (ClassCastException e)
