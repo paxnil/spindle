@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.editors.template;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
@@ -49,12 +49,12 @@ public class TemplateFileDocumentProvider extends FileDocumentProvider
         IDocument document = super.createDocument(element);
         if (document != null)
         {
-            IDocumentPartitioner partitioner = UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
+            DefaultPartitioner defaultPartitioner = UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
 
-            if (partitioner != null)
+            if (defaultPartitioner != null)
             {
-                partitioner.connect(document);
-                document.setDocumentPartitioner(partitioner);
+                defaultPartitioner.connect(document);
+                document.setDocumentPartitioner(defaultPartitioner);
             }
         }
 

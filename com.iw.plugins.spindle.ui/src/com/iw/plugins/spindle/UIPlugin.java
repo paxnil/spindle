@@ -79,6 +79,13 @@ public class UIPlugin extends AbstractUIPlugin
 
     private static ResourceBundle UIStrings;
 
+    public static ResourceBundle getResourceBundle()
+    {
+        if (UIStrings == null)
+            UIStrings = ResourceBundle.getBundle("com.iw.plugins.spindle.resources");
+        return UIStrings;
+    }
+
     public static String getString(String key)
     {
         return getString(key, null);
@@ -97,8 +104,8 @@ public class UIPlugin extends AbstractUIPlugin
     }
     public static String getString(String key, Object[] args)
     {
-        if (UIStrings == null)
-            UIStrings = ResourceBundle.getBundle("com.iw.plugins.spindle.resources");
+        getResourceBundle();
+
         try
         {
             String pattern = UIStrings.getString(key);
@@ -125,7 +132,7 @@ public class UIPlugin extends AbstractUIPlugin
         log.log(status);
     }
 
-    static public void log(Exception ex)
+    static public void log(Throwable ex)
     {
         ILog log = getDefault().getLog();
         StringWriter stringWriter = new StringWriter();

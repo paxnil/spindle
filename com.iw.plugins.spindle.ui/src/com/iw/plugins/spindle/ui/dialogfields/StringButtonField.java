@@ -52,18 +52,18 @@ public class StringButtonField extends StringField {
 
 	private Button fButtonControl;
 	
-	protected IRunnableContext fContextcontext;
+	protected IRunnableContext fRunnableContext;
 
 	public StringButtonField(String label) {
 		super(label);
 	}
 	
 	public void init(IRunnableContext context) {
-	  this.fContextcontext = context;
+	  this.fRunnableContext = context;
 	}
 	
 	protected IRunnableContext getRunnableContext() {
-	  return (fContextcontext == null ? new ProgressMonitorDialog(getShell()) : fContextcontext);
+	  return (fRunnableContext == null ? new ProgressMonitorDialog(getShell()) : fRunnableContext);
 	}
 
 	public StringButtonField(String label, int labelWidth) {

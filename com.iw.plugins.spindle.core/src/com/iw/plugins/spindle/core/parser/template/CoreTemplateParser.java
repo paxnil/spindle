@@ -53,6 +53,13 @@ import com.iw.plugins.spindle.core.source.SourceLocation;
  */
 public class CoreTemplateParser extends TemplateParser
 {
+    public static final String REMOVE_ID = "$remove$";
+    public static final String CONTENT_ID = "$content$";
+    public static final int IMPLICIT_ID_PATTERN_ID_GROUP = 1;
+    public static final int IMPLICIT_ID_PATTERN_TYPE_GROUP = 2;
+    public static final int IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP = 4;
+    public static final int IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP = 5;
+
 
     static class CoreTemplateTokenFactory extends TemplateTokenFactory
     {
@@ -143,7 +150,8 @@ public class CoreTemplateParser extends TemplateParser
 
     private ISourceLocation getSourceLocation(int line, int cursor, String message)
     {
-        if (message.startsWith("Tag")) {
+        if (message.startsWith("Tag"))
+        {
             return getJWCIDLocation();
         }
         ISourceLocation result = fEventHandler.getEventInfo().findLocation(cursor);
@@ -178,10 +186,11 @@ public class CoreTemplateParser extends TemplateParser
     protected void templateParseProblem(String message, ILocation location, int line, int cursor)
         throws TemplateParseException
     {
-        if (fProblemCollector != null) {
+        if (fProblemCollector != null)
+        {
             fProblemCollector.addProblem(IProblem.ERROR, getSourceLocation(line, cursor, message), message);
         }
-            
+
         super.templateParseProblem(message, location, line, cursor);
     }
 

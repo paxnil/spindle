@@ -34,10 +34,12 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -47,6 +49,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.iw.plugins.spindle.PreferenceConstants;
@@ -92,12 +96,21 @@ public class TemplateEditor extends Editor
     {
         super.createActions();
 
-        Action action = new SaveHTMLTemplateAction("Save current as template used by Tapestry Wizards");
+        IAction action = new SaveHTMLTemplateAction("Save current as template used by Tapestry Wizards");
         action.setActionDefinitionId(SAVE_HTML_TEMPLATE);
         setAction(SAVE_HTML_TEMPLATE, action);
         action = new RevertTemplateAction("Revert the saved template to the default value");
         action.setActionDefinitionId(REVERT_HTML_TEMPLATE);
         setAction(REVERT_HTML_TEMPLATE, action);
+
+        action =
+            new TextOperationAction(
+                UIPlugin.getResourceBundle(),
+                "ContentAssistProposal.",
+                this,
+                ISourceViewer.CONTENTASSIST_PROPOSALS);
+        action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+        setAction("ContentAssistProposal", action);
 
     }
 
@@ -133,6 +146,25 @@ public class TemplateEditor extends Editor
         return new TemplateConfiguration(UIPlugin.getDefault().getTemplateTextTools(), this);
     }
 
+    public IComponentSpecification getComponent()
+    {
+        try
+        {
+            IEditorInput input = getEditorInput();
+            IStorage storage = ((IStorageEditorInput) input).getStorage();
+            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+            TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+            Map templates = manager.getTemplateMap(project);
+            if (templates != null)
+                return (IComponentSpecification) templates.get(storage);
+
+        } catch (CoreException e)
+        {
+            UIPlugin.log(e);
+        }
+        return null;
+    }
+
     public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor)
     {
         boolean didReconcile = false;
@@ -165,25 +197,6 @@ public class TemplateEditor extends Editor
             collector.beginCollecting();
             collector.endCollecting();
         }
-    }
-
-    IComponentSpecification getComponent()
-    {
-        try
-        {
-            IEditorInput input = getEditorInput();
-            IStorage storage = ((IStorageEditorInput) input).getStorage();
-            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-            Map templates = manager.getTemplateMap(project);
-            if (templates != null)
-                return (IComponentSpecification) templates.get(storage);
-
-        } catch (CoreException e)
-        {
-            UIPlugin.log(e);
-        }
-        return null;
     }
 
     public class RevertTemplateAction extends Action

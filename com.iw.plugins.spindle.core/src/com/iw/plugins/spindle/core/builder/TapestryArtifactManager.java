@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 
@@ -94,7 +95,11 @@ public class TapestryArtifactManager implements ITemplateFinderListener
 
     public synchronized Object getLastBuildState(IProject project)
     {
+        return getLastBuildState(project, null);
+    }
 
+    public synchronized Object getLastBuildState(IProject project, IRunnableContext context)
+    {
         if (!TapestryCore.hasTapestryNature(project))
             return null;
 
@@ -103,7 +108,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         {
             try
             {
-                buildStateIfRequired(project);
+                buildStateIfRequired(project, context);
                 state = fProjectBuildStates.get(project);
             } catch (CoreException e)
             {
@@ -116,36 +121,52 @@ public class TapestryArtifactManager implements ITemplateFinderListener
     /**
      * 
      */
-    private void buildStateIfRequired(final IProject project) throws CoreException
+    private void buildStateIfRequired(final IProject project, IRunnableContext context) throws CoreException
     {
         // don't bother building if the last one was busted beyond saving!
         if (Markers.getBrokenBuildProblemsFor(project).length > 0)
             return;
 
-        Shell shell = TapestryCore.getDefault().getActiveWorkbenchShell();
-        if (shell != null && shell.getVisible())
+        IRunnableWithProgress runnable = new IRunnableWithProgress()
+        {
+            public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+            {
+                try
+                {
+                    project.build(
+                        IncrementalProjectBuilder.FULL_BUILD,
+                        TapestryCore.BUILDER_ID,
+                        new HashMap(),
+                        monitor);
+                } catch (CoreException e)
+                {
+                    TapestryCore.log(e);
+                }
+            }
+
+        };
+
+        if (context == null)
+        {
+            Shell shell = TapestryCore.getDefault().getActiveWorkbenchShell();
+            if (shell != null && shell.getVisible())
+            {
+                try
+                {
+                    context = new ProgressMonitorDialog(shell);
+
+                } catch (Exception e)
+                {
+                    TapestryCore.log(e);
+                }
+            }
+        }
+
+        if (context != null)
         {
             try
             {
-                ProgressMonitorDialog dialog = new ProgressMonitorDialog(shell);
-                dialog.run(false, false, new IRunnableWithProgress()
-                {
-                    public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
-                    {
-                        try
-                        {
-                            project.build(
-                                IncrementalProjectBuilder.FULL_BUILD,
-                                TapestryCore.BUILDER_ID,
-                                new HashMap(),
-                                monitor);
-                        } catch (CoreException e)
-                        {
-                            TapestryCore.log(e);
-                        }
-                    }
-
-                });
+                context.run(false, false, runnable);
 
             } catch (Exception e)
             {

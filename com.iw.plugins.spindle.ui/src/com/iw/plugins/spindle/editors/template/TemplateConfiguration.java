@@ -38,14 +38,20 @@ import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
+import com.iw.plugins.spindle.editors.template.assist.AttributeContentAssistProcessor;
+import com.iw.plugins.spindle.editors.template.assist.JWCIDContentAssistProcessor;
+import com.iw.plugins.spindle.editors.template.assist.TagContentAssistProcessor;
 
 /**
  *  SourceViewerConfiguration for the TemplateEditor
@@ -55,8 +61,8 @@ import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
  */
 public class TemplateConfiguration extends BaseSourceConfiguration
 {
-    public static final boolean DEBUG = false;
-
+    //TODO debug flag
+    public static final boolean DEBUG = true;
 
     private TemplateTextTools fTextTools;
 
@@ -69,7 +75,7 @@ public class TemplateConfiguration extends BaseSourceConfiguration
      * @param colorManager
      * @param editor
      */
-    public TemplateConfiguration(TemplateTextTools tools, AbstractTextEditor editor)
+    public TemplateConfiguration(TemplateTextTools tools, TemplateEditor editor)
     {
         super(editor);
         fTextTools = tools;
@@ -101,7 +107,6 @@ public class TemplateConfiguration extends BaseSourceConfiguration
 
         if (TemplatePartitionScanner.TAPESTRY_JWCID_ATTRIBUTE.equals(contentType))
             return dcsAttValue;
-        //TODO need a refined strategy for values like "id@Insert" or "@contrib.Table"
 
         if (contentType.startsWith(TemplatePartitionScanner.DTD_INTERNAL))
             return dcsSimple;
@@ -200,8 +205,6 @@ public class TemplateConfiguration extends BaseSourceConfiguration
     {
         if (DEBUG)
         {
-
-            // TODO Auto-generated method stub
             return new ITextHover()
             {
                 public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion)
@@ -210,7 +213,9 @@ public class TemplateConfiguration extends BaseSourceConfiguration
                     {
                         IDocumentProvider provider = getEditor().getDocumentProvider();
                         IDocument doc = provider.getDocument(getEditor().getEditorInput());
-                        return doc.getPartition(hoverRegion.getOffset()).getType();
+                        String result = doc.getPartition(hoverRegion.getOffset()).getType();
+
+                        return result;
                     } catch (BadLocationException e)
                     {
                         return "bad location: " + hoverRegion;
@@ -224,6 +229,25 @@ public class TemplateConfiguration extends BaseSourceConfiguration
             };
         }
         return super.getTextHover(sourceViewer, contentType);
+    }
+
+    public IContentAssistant getContentAssistant(ISourceViewer sourceViewer)
+    { 
+        ContentAssistant assistant = new ContentAssistant();
+        TagContentAssistProcessor contentAssistForTag = new TagContentAssistProcessor((TemplateEditor) getEditor());
+        AttributeContentAssistProcessor contentAssistForAttribute = new AttributeContentAssistProcessor((TemplateEditor) getEditor());
+        JWCIDContentAssistProcessor contentAssistForJWCID = new JWCIDContentAssistProcessor((TemplateEditor) getEditor());
+
+        assistant.setContentAssistProcessor(contentAssistForTag, TemplatePartitionScanner.XML_TAG);
+        assistant.setContentAssistProcessor(contentAssistForAttribute, TemplatePartitionScanner.XML_ATTRIBUTE);
+        assistant.setContentAssistProcessor(contentAssistForJWCID, TemplatePartitionScanner.TAPESTRY_JWCID_ATTRIBUTE);
+        assistant.enableAutoActivation(true);
+        assistant.enableAutoInsert(false);
+        assistant.setProposalSelectorBackground(UIPlugin.getDefault().getSharedTextColors().getColor(new RGB(254, 241, 233)));
+        assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+        assistant.install(sourceViewer);
+
+        return assistant;
     }
 
 }

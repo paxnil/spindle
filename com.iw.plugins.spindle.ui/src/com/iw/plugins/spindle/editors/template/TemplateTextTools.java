@@ -36,11 +36,10 @@ import net.sf.solareclipse.xml.internal.ui.text.TextScanner;
 import net.sf.solareclipse.xml.internal.ui.text.XMLCDATAScanner;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
-
 
 /**
  *  TextTools for Template Editors - extended to partition and syntax color
@@ -49,7 +48,7 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class TemplateTextTools extends AbstractTextTools 
+public class TemplateTextTools extends AbstractTextTools
 {
     /** Content types for Template editors */
     private static final String[] TYPES =
@@ -104,7 +103,7 @@ public class TemplateTextTools extends AbstractTextTools
 
     /** The XML comments scanner */
     private SingleTokenScanner fXmlCommentScanner;
-    
+
     /** JWCID attribute value scanner */
     private SingleTokenScanner fJwcidAttributeScanner;
 
@@ -134,13 +133,13 @@ public class TemplateTextTools extends AbstractTextTools
         fTemplateTagScanner = new TemplateTagScanner(tokens);
 
         fXmlAttributeScanner = new TextScanner(tokens, '&', ITemplateSyntaxConstants.XML_ATT_VALUE);
-        
+
         fJwcidAttributeScanner = new SingleTokenScanner(tokens, ITemplateSyntaxConstants.TAPESTRY_ATT_VALUE);
 
         fXmlCDATAScanner = new XMLCDATAScanner(tokens);
     }
 
-    public IDocumentPartitioner createXMLPartitioner()
+    public DefaultPartitioner createXMLPartitioner()
     {
         return new DocumentPartitioner(getTemplatePartitionScanner(), TYPES);
     }

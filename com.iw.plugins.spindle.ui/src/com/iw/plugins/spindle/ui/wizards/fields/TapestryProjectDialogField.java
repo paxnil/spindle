@@ -286,7 +286,7 @@ public class TapestryProjectDialogField extends StringButtonField
                 UIPlugin.log(e);
             }
 
-            State state = (State) TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(proj);
+            State state = (State) TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(proj, fRunnableContext);
             if (state == null)
             {
                 status.setError(UIPlugin.getString(fName + ".error.ProjectIsBroken2", str));

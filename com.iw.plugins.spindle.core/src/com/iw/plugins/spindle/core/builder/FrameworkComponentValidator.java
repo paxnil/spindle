@@ -39,6 +39,7 @@ import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.PageSpecificationResolver;
 import com.iw.plugins.spindle.core.parser.template.TagEventInfo;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.scanning.BaseValidator;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
@@ -77,13 +78,22 @@ public class FrameworkComponentValidator
 
         PluginComponentSpecification frameworkSpec = (PluginComponentSpecification) frameworkComponentSpecification;
         //check to see if we are really talking about a framework component.
-        if (TapestryCore.getTapestryString("Namespace.framework-namespace").equals(frameworkSpec.getNamespace().getNamespaceId()))
+        if (TapestryCore
+            .getTapestryString("Namespace.framework-namespace")
+            .equals(frameworkSpec.getNamespace().getNamespaceId()))
         {
-            //TODO clean this up
             if ("PageLink".equals(frameworkComponentName))
             {
                 TapestryBuilder.fDeferredActions.add(
                     new PageLinkComponentValidation(
+                        putProblemsResource,
+                        (ICoreNamespace) requestorNamespace,
+                        contained,
+                        sourceInfo));
+            } else if ("Script".equals(frameworkComponentName))
+            {
+                TapestryBuilder.fDeferredActions.add(
+                    new ScriptComponentValidation(
                         putProblemsResource,
                         (ICoreNamespace) requestorNamespace,
                         contained,
@@ -101,27 +111,29 @@ public class FrameworkComponentValidator
         Object fSourceInfo;
 
         public BaseAction(
-            IResource putPorblemsHere,
+            IResource putProblemsHere,
             ICoreNamespace requestorNamespace,
             IContainedComponent contained,
             Object sourceInfo)
         {
-            fPutProblemsHere = putPorblemsHere;
+            fPutProblemsHere = putProblemsHere;
             fReqNamespace = requestorNamespace;
             fContainedComponent = contained;
             fSourceInfo = sourceInfo;
 
         }
-        
-        protected boolean isTemplate() {
+
+        protected boolean isTemplate()
+        {
             return fSourceInfo instanceof TagEventInfo;
         }
-        
-        protected ISourceLocation getAttributeSourceLocation(String attrName) {
+
+        protected ISourceLocation getAttributeSourceLocation(String attrName)
+        {
             if (isTemplate())
-                return (ISourceLocation)((TagEventInfo)fSourceInfo).getAttributeMap().get(attrName);
-                
-            return ((ISourceLocationInfo)fSourceInfo).getAttributeSourceLocation(attrName);
+                return (ISourceLocation) ((TagEventInfo) fSourceInfo).getAttributeMap().get(attrName);
+
+            return ((ISourceLocationInfo) fSourceInfo).getAttributeSourceLocation(attrName);
         }
 
     }
@@ -130,12 +142,12 @@ public class FrameworkComponentValidator
     {
 
         public PageLinkComponentValidation(
-            IResource putPorblemsHere,
+            IResource putProblemsHere,
             ICoreNamespace requestorNamespace,
             IContainedComponent contained,
             Object sourceInfo)
         {
-            super(putPorblemsHere, requestorNamespace, contained, sourceInfo);
+            super(putProblemsHere, requestorNamespace, contained, sourceInfo);
         }
 
         public void run()
@@ -150,10 +162,12 @@ public class FrameworkComponentValidator
                     PageSpecificationResolver resolver = fReqNamespace.getPageResolver();
                     IComponentSpecification pageSpec = resolver.resolve(pageBinding.getValue());
                     ISourceLocation location;
-                    if (isTemplate()) {                    
+                    if (isTemplate())
+                    {
                         location = getAttributeSourceLocation("page");
-                    } else {
-                        ISourceLocationInfo bindingInfo = (ISourceLocationInfo)pageBinding.getLocation();
+                    } else
+                    {
+                        ISourceLocationInfo bindingInfo = (ISourceLocationInfo) pageBinding.getLocation();
                         location = bindingInfo.getAttributeSourceLocation("value");
                     }
                     if (pageSpec == null)
@@ -161,7 +175,7 @@ public class FrameworkComponentValidator
                         String namespaceId = fReqNamespace.getNamespaceId();
                         if (fReqNamespace.isApplicationNamespace())
                             namespaceId = "application namespace";
-                            
+
                         Markers.addTapestryProblemMarkerToResource(
                             fPutProblemsHere,
                             new DefaultProblem(
@@ -172,6 +186,61 @@ public class FrameworkComponentValidator
                                 location.getCharStart(),
                                 location.getCharEnd()));
                     }
+                }
+            }
+
+        }
+
+    }
+
+    static class ScriptComponentValidation extends BaseAction implements IBuildAction
+    {
+
+        public ScriptComponentValidation(
+            IResource putProblemsHere,
+            ICoreNamespace requestorNamespace,
+            IContainedComponent contained,
+            Object sourceInfo)
+        {
+            super(putProblemsHere, requestorNamespace, contained, sourceInfo);
+        }
+
+        public void run()
+        {
+            //look for static bindings for the 'script' parameter
+            IBindingSpecification pageBinding = fContainedComponent.getBinding("script");
+            if (pageBinding != null && pageBinding.getType() == BindingType.STATIC)
+            {
+                String value = pageBinding.getValue();
+                if (value != null && value.trim().length() > 0 && !value.startsWith(BaseValidator.DefaultDummyString))
+                {
+                    IResourceWorkspaceLocation namespaceLocation =
+                        (IResourceWorkspaceLocation) fReqNamespace.getSpecificationLocation();
+                    IResourceWorkspaceLocation scriptLocation =
+                        (IResourceWorkspaceLocation) namespaceLocation.getRelativeLocation(value);
+                    if (scriptLocation.getStorage() == null)
+                    {
+                        ISourceLocation location;
+                        if (isTemplate())
+                        {
+                            location = getAttributeSourceLocation("script");
+                        } else
+                        {
+                            ISourceLocationInfo bindingInfo = (ISourceLocationInfo) pageBinding.getLocation();
+                            location = bindingInfo.getAttributeSourceLocation("script");
+                        }
+
+                        Markers.addTapestryProblemMarkerToResource(
+                            fPutProblemsHere,
+                            new DefaultProblem(
+                                ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+                                IProblem.ERROR,
+                                "Unable to find script " + scriptLocation.toString(),
+                                location.getLineNumber(),
+                                location.getCharStart(),
+                                location.getCharEnd()));
+                    }
+
                 }
             }
 
