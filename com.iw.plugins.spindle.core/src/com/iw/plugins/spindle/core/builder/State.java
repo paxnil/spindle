@@ -132,7 +132,7 @@ public class State
         fLibraryLocation = lastState.fLibraryLocation;
         fBuildNumber = lastState.fBuildNumber + 1;
         fBinaryNamespaces = new HashMap(lastState.fBinaryNamespaces);
-        fBinarySpecificationMap = new HashMap(lastState.fBinaryNamespaces);
+        fBinarySpecificationMap = new HashMap(lastState.fBinarySpecificationMap);
         fLastKnownClasspath = new IClasspathEntry[lastState.fLastKnownClasspath.length];
         System.arraycopy(
             lastState.fLastKnownClasspath,
