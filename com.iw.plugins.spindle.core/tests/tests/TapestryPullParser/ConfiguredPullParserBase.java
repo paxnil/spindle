@@ -87,7 +87,7 @@ public class ConfiguredPullParserBase extends PullParserBase
         while (true)
         {
             System.err.println("BUMP!\n");
-            if (!pullParseConfiguration.parse(false))
+            if (!pullParseConfiguration.parse())
             {
                 break;
             }
