@@ -11,10 +11,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -56,24 +56,34 @@ public class WebXMLInspector {
 		return result;
 	}
 
-	public static Map getServlets(Document document) {
-		Map result = new HashMap();
-		int counter = 1;
+	public static Set getServletNames(Document document) {
+		Set result = new HashSet();		
 		List servletElements = document.getRootElement().getChildren("servlet");
 		for (Iterator iter = servletElements.iterator(); iter.hasNext();) {
 			Element servletElement = (Element) iter.next();
 
 			Element nameElement = servletElement.getChild("servlet-name");
 			String name = nameElement != null ? nameElement.getTextTrim()
-					: null;
+					: "";
+
+			if (name.length() > 0)
+				result.add(name);
+		}
+		return result;
+	}
+	
+	public static Set getServletTypes(Document document) {
+		Set result = new HashSet();		
+		List servletElements = document.getRootElement().getChildren("servlet");
+		for (Iterator iter = servletElements.iterator(); iter.hasNext();) {
+			Element servletElement = (Element) iter.next();
 
 			Element typeElement = servletElement.getChild("servlet-class");
-			String classname = typeElement != null ? typeElement.getTextTrim()
-					: null;
+			String type = typeElement != null ? typeElement.getTextTrim()
+					: "";
 
-			name = name == null || name.length() == 0 ? UNNAMED_SERVLET
-					+ (counter++) : name;
-			result.put(name, classname);
+			if (type.length() > 0)
+				result.add(type);
 		}
 		return result;
 	}
