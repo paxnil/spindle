@@ -29,7 +29,6 @@ package com.iw.plugins.spindle.core.namespace;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.core.runtime.CoreException;
 
