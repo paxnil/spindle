@@ -27,13 +27,11 @@
 package com.iw.plugins.spindle.core.scanning;
 
 import org.apache.tapestry.INamespace;
-import org.apache.tapestry.engine.ITemplateSource;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.AssetType;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.BindingType;
 import org.apache.tapestry.spec.Direction;
-import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBeanSpecification;
 import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -51,6 +49,7 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
+import com.iw.plugins.spindle.core.spec.PluginAssetSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginDescriptionDeclaration;
 import com.iw.plugins.spindle.core.spec.PluginReservedParameterDeclaration;
@@ -116,47 +115,24 @@ public class ComponentScanner extends SpecificationScanner
     protected void scanAsset(IComponentSpecification specification, Node node, AssetType type, String attributeName)
         throws ScannerException
     {
-        String name = getAttribute(node, "name", true);
-        String validateName = (name.startsWith(getDummyStringPrefix()) ? "" : name);
+        String name = getAttribute(node, "name", false);
 
-        if (specification.getAsset(name) != null)
-        {
+        String value = getAttribute(node, attributeName);
+        PluginAssetSpecification asset = (PluginAssetSpecification) fSpecificationFactory.createAssetSpecification();
 
-            addProblem(
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"),
-                TapestryCore.getTapestryString(
-                    "ComponentSpecification.duplicate-asset",
-                    specification.getSpecificationLocation().getName(),
-                    name));
+        asset.setType(type);
+        asset.setPath(value);
 
-        } else
-        {
+        ISourceLocationInfo location = getSourceLocationInfo(node);
+        location.setResourceLocation(specification.getSpecificationLocation());
+        asset.setLocation(location);
 
-            if (!validateName.equals(ITemplateSource.TEMPLATE_ASSET_NAME))
-                validatePattern(
-                    validateName,
-                    SpecificationParser.ASSET_NAME_PATTERN,
-                    "SpecificationParser.invalid-asset-name",
-                    IProblem.ERROR,
-                    getAttributeSourceLocation(node, "name"));
+        specification.addAsset(name, asset);
 
-            String value = getAttribute(node, attributeName);
-            IAssetSpecification asset = fSpecificationFactory.createAssetSpecification();
+        asset.validate(specification, fValidator);
 
-            asset.setType(type);
-            asset.setPath(value);
+        scanPropertiesInNode(asset, node);
 
-            ISourceLocationInfo location = getSourceLocationInfo(node);
-            location.setResourceLocation(specification.getSpecificationLocation());
-            asset.setLocation(location);
-
-            specification.addAsset(name, asset);
-
-            validateAsset(specification, asset, getSourceLocationInfo(node));
-
-            scanPropertiesInNode(asset, node);
-        }
     }
 
     /**
@@ -213,6 +189,7 @@ public class ComponentScanner extends SpecificationScanner
                 if (isElement(child, "description"))
                 {
                     bspec.setDescription(getValue(child));
+                   //TODO record description declaration
                     continue;
                 }
 
@@ -467,8 +444,8 @@ public class ComponentScanner extends SpecificationScanner
         throws ScannerException
     {
 
-//     TODO remove   ISourceLocationInfo location = getSourceLocationInfo(rootNode);
-//        specification.setLocation(location);
+        //     TODO remove   ISourceLocationInfo location = getSourceLocationInfo(rootNode);
+        //        specification.setLocation(location);
 
         //must be done here!
         String rootName = rootNode.getNodeName();
@@ -865,34 +842,13 @@ public class ComponentScanner extends SpecificationScanner
     {
         String name = getAttribute(node, "name", true);
 
-        if (name.startsWith(getDummyStringPrefix()))
-        {
-            addProblem(
-                IProblem.ERROR,
-                getNodeStartSourceLocation(node),
-                TapestryCore.getTapestryString("SpecificationParser.invalid-property-name", "not specified"));
-        } else
-        {
-
-            validatePattern(
-                name,
-                SpecificationParser.PROPERTY_NAME_PATTERN,
-                "SpecificationParser.invalid-property-name",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"));
-        }
-
+        //      must be done now - not revalidatable
+        ExtendedAttributeResult result = null;
         String expression = null;
         try
         {
-            ExtendedAttributeResult result = getExtendedAttribute(node, "expression", true);
+            result = getExtendedAttribute(node, "expression", true);
             expression = result.value;
-            ISourceLocation src =
-                result.fromAttribute
-                    ? getAttributeSourceLocation(node, "expression")
-                    : getBestGuessSourceLocation(node, true);
-            validateExpression(expression, IProblem.ERROR, src);
-
         } catch (ScannerException e)
         {
             addProblem(IProblem.ERROR, e.getLocation(), e.getMessage());
@@ -900,14 +856,19 @@ public class ComponentScanner extends SpecificationScanner
 
         PluginExpressionBeanInitializer iz =
             (PluginExpressionBeanInitializer) fSpecificationFactory.createExpressionBeanInitializer();
-        iz.setPropertyName(name);
+      
+        iz.setPropertyName(name);  
         iz.setExpression(expression);
+        iz.setDeclaredValueIsFromAttribute(result == null ? true : result.fromAttribute);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResourceLocation(spec.getLocation().getResourceLocation());
         iz.setLocation(location);
 
         spec.addInitializer(iz);
+
+        iz.validate(spec, fValidator);
+
     }
 
     /**
@@ -924,6 +885,7 @@ public class ComponentScanner extends SpecificationScanner
 
         PluginMessageBeanInitializer iz =
             (PluginMessageBeanInitializer) fSpecificationFactory.createMessageBeanInitializer();
+            
         iz.setPropertyName(name);
         iz.setKey(key);
 
@@ -932,6 +894,8 @@ public class ComponentScanner extends SpecificationScanner
         iz.setLocation(location);
 
         spec.addInitializer(iz);
+        
+        iz.validate(spec, fValidator);
     }
 
     private TemplateFinder fTemplateFinder = new TemplateFinder();
