@@ -22,7 +22,7 @@
   <tbody>
     <tr>
     <td>
-      <h1> Release <i>1.1beta4</i><br>
+      <h1> Release <i>1.1rc1</i><br>
       </h1>
       <h1> works only with Tapestry release 2.2-beta-2+<br>
       </h1>
@@ -61,13 +61,19 @@
       <h2> What's New </h2>
       <p> Installing Spindle has changed since 1.1beta3. You now need to un-archive the distro, the use Eclipse's Update Manager to perform the install. 
         Instructions are available <a href="#" target="http://spindle.sourceforge.net/install/">here</a></p>
+		
+      <p>The "New Tapestry Application" and "New Tapestry Library" wizards need to have the tapestry and servlet jars in the buildpath to complete properly. 
+        You should add those jars into the buildpath on the Java page of those wizards. If you forget, its not a problem as the wizards will add classpath 
+        entires that point to those jars delivered with Spindle. </p>
+      <p><em><strong>HOWEVER</strong>, it not good practice to leave those classpath entires pointing into the plugin directory. Replace the entries with 
+        references to jars outside the plugin at your earliest convenience.</em></p>
       <ol>
 	  <li> Added the following <a href="https://sourceforge.net/tracker/index.php?group_id=50321&amp;atid=459331">features</a></li>
 	  </ol>
       <ul>        
-        <li><a href="https://sourceforge.net/tracker/index.php?func=detail&aid=623730&group_id=50321&atid=459331">[ 623730 ] Use Eclipse Update Mgr to install Spindl</a></li>
-        <li><a href="https://sourceforge.net/tracker/index.php?func=detail&aid=622613&group_id=50321&atid=459331">[ 622613 ] Jump from .jwc to .html</a></li>
-        <li><a href="https://sourceforge.net/tracker/index.php?func=detail&aid=611570&group_id=50321&atid=459331">[ 611570 ] Add refactoring support</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=623856&group_id=50321&atid=459331">[ 623856 ] Separate the jwc/html view in comp summ</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=623846&group_id=50321&atid=459331">[ 623846 ] Open application file from project</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=623724&group_id=50321&atid=459331">[ 623724 ] Change Edit behaviour in app view</a></li>
       </ul>
       <ol>
         <li>Closed the following <a href="http://sourceforge.net/tracker/?group_id=50321&amp;atid=459328"> 
@@ -75,8 +81,10 @@
         </li>
       </ol>
       <ul>
-        <li><a href="https://sourceforge.net/tracker/index.php?func=detail&aid=621849&group_id=50321&atid=459328">[ 621849 ] Class selection dlg searches workspace</a></li>
-        <li><a href="https://sourceforge.net/tracker/index.php?func=detail&aid=619337&group_id=50321&atid=459328">[ 619337 ] SWT error when resizing binding window</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=624933&group_id=50321&atid=459328">[ 624933 ] Project colouring hides project status</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=624438&group_id=50321&atid=459328">[ 624438 ] Bug #618860 (duplicate)</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=624379&group_id=50321&atid=459328">[ 624379 ] no interfaces in param type selection</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=622400&group_id=50321&atid=459328">[ 622400 ] Binding editor does not show inherited..</a></li>
 
 
       </ul>
@@ -95,8 +103,7 @@
         <br>
         <a name="doc"></a> </p>
       <h2> Documentation </h2>
-      <p> &nbsp;this release of Spindle has many changes, for a summary of those 
-        changes and how to use this version of Spindle, see&nbsp; <a href="Spindle_1_1alpha_FAQ.html">Spindle 
+      <p> &nbsp;Spindle has changed a lot since 1.0.3. For a summary of those changes and how to use 1.1 builds of Spindle, see&nbsp; <a href="Spindle_1_1alpha_FAQ.html">Spindle 
         1.1alpha Overview</a><br>
         <br>
         .....................................................<br>
@@ -149,11 +156,9 @@
       Invoking the Spindle wizards is as easy as selecting a package, right clicking, 
       selecting <tt> New -&gt; Other -&gt; Spindle</tt> and the desired wizard.<br> 
       <br>
-      Quick access the wizards is available by customizing an Eclipse perspective 
-      with wizard actions on the main toolbar. In the Eclipse menu bar, select 
-      <tt>Perspective -&gt; Customize</tt> . Depending on the Eclipse build, you'll 
-      find <tt> Spindle Action Set</tt> from there. Select it and two Spindle 
-      wizard icons will appear in the main toolbar.<br> <br>
+      Quick access the wizards is available by customizing an Eclipse perspective with wizard actions on the main toolbar. In the Eclipse menu bar, select 
+      <tt>Perspective -&gt; Customize</tt> . You'll find <tt> Spindle Action Set</tt> from there. Select it and two Spindle wizard icons will appear in 
+      the main toolbar.<br> <br>
       In 
       <p><b>Eclipse R2.0 (SDK)</b></p>
       , the exact steps are: Window <tt>-&gt; Customize Perspective -&gt; Other 

@@ -24,8 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.ui.decorators;
 
 import java.util.ArrayList;
@@ -38,45 +36,49 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
-import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
+import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.project.ITapestryProject;
-import com.iw.plugins.spindle.ui.TapestryProjectImageDescriptor;
 
+public class TapestryProjectLableDecorator extends LabelProvider implements ILabelDecorator, IResourceChangeListener {
 
-public class TapestryProjectLableDecorator
-  extends LabelProvider
-  implements ILabelDecorator, IResourceChangeListener {
+  static public String TAP_PROJECT_IMAGE = TapestryPlugin.ID_PLUGIN + ".TAP+PROJECT_IMAGE";
 
-  private ImageDescriptorRegistry imageDescriptorRegistry;
+  private ImageDescriptorRegistry registry = new ImageDescriptorRegistry();
 
-  // these are shared, no need to dispose in this class
-  private Image applicationImage = TapestryImages.getSharedImage("tapestry_project16.gif");
-
-  /**
-   * Constructor for DTDLableDecorator.
-   */
   public TapestryProjectLableDecorator() {
 
-    imageDescriptorRegistry = new ImageDescriptorRegistry();
-
-    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(
-      this,
-      IResourceChangeEvent.POST_AUTO_BUILD);
+    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_AUTO_BUILD);
   }
 
-  public Image decorateImage(Image image, Object element) {
+  public Image decorateImage(Image image, Object obj) {
+//  	
+//  	return image;
+//  	
+//  }
+    if (shouldDecorateImage(obj)) {
+        ImageDescriptor baseImage = new WrappedImageDescriptor(image);
+        Rectangle bounds = image.getBounds();
+        return registry.get(new TapestryProjectImageDescriptor(baseImage, new Point(bounds.width, bounds.height)));
 
-    Image useDecorator = applicationImage;
+    }
+    return image;
+  }
+
+  public boolean shouldDecorateImage(Object element) {
 
     ITapestryProject tproject = null;
 
@@ -89,7 +91,7 @@ public class TapestryProjectLableDecorator
 
     if (tproject == null) {
 
-      return image;
+      return false;
 
     }
 
@@ -102,19 +104,13 @@ public class TapestryProjectLableDecorator
     } catch (CoreException e) {
 
     }
-    
+
     if (storage == null) {
-    	
-    	return null;
+
+      return false;
     }
 
-    return applicationImage;
-
-  }
-
-  public void dispose() {
-
-    imageDescriptorRegistry.dispose();
+    return true;
 
   }
 
@@ -189,8 +185,7 @@ public class TapestryProjectLableDecorator
 
           }
 
-          if (resource.getType() == IResource.PROJECT
-            && delta.getKind() != IResourceDelta.REMOVED) {
+          if (resource.getType() == IResource.PROJECT && delta.getKind() != IResourceDelta.REMOVED) {
 
             if (TapestryPlugin.getDefault().getTapestryProjectFor(resource) != null) {
 
@@ -202,7 +197,7 @@ public class TapestryProjectLableDecorator
         }
       });
     } catch (CoreException e) {
-      
+
     }
 
     //convert event list to array
@@ -215,4 +210,118 @@ public class TapestryProjectLableDecorator
     fireLabelProviderChanged(event);
 
   }
+
+  class WrappedImageDescriptor extends ImageDescriptor {
+
+    private Image wrappedImage;
+
+    public WrappedImageDescriptor(Image image) {
+      super();
+      wrappedImage = image;
+    }
+
+    public ImageData getImageData() {
+      return wrappedImage.getImageData();
+    }
+
+    public boolean equals(Object obj) {
+      return (obj != null)
+        && getClass().equals(obj.getClass())
+        && wrappedImage.equals(((WrappedImageDescriptor) obj).wrappedImage);
+    }
+
+    public int hashCode() {
+      return wrappedImage.hashCode();
+    }
+
+  }
+
+  class TapestryProjectImageDescriptor extends CompositeImageDescriptor {
+
+    private ImageDescriptor useBaseImage;
+    private Image tapestry_ovr = TapestryImages.getSharedImage("project_ovr.gif");
+    private Point finalSize;
+
+    /**
+     * 
+     * @param baseImage an image descriptor used as the base image
+     * @param size the size of the resulting image
+     */
+    public TapestryProjectImageDescriptor(ImageDescriptor baseImage, Point size) {
+      useBaseImage = baseImage;
+      Assert.isNotNull(useBaseImage);
+      finalSize = size;
+      Assert.isNotNull(finalSize);
+    }
+
+    /**
+     * Sets the size of the image created by calling <code>createImage()</code>.
+     * 
+     * @param size the size of the image returned from calling <code>createImage()</code>
+     * @see ImageDescriptor#createImage()
+     */
+    public void setImageSize(Point size) {
+      Assert.isNotNull(size);
+      Assert.isTrue(size.x >= 0 && size.y >= 0);
+      finalSize = size;
+    }
+
+    /**
+     * Returns the size of the image created by calling <code>createImage()</code>.
+     * 
+     * @return the size of the image created by calling <code>createImage()</code>
+     * @see ImageDescriptor#createImage()
+     */
+    public Point getImageSize() {
+      return new Point(finalSize.x, finalSize.y);
+    }
+
+    /* (non-Javadoc)
+     * Method declared in CompositeImageDescriptor
+     */
+    protected Point getSize() {
+      return finalSize;
+    }
+
+    /* (non-Javadoc)
+     * Method declared on Object.
+     */
+    public boolean equals(Object object) {
+      if (!TapestryProjectImageDescriptor.class.equals(object.getClass()))
+        return false;
+
+      TapestryProjectImageDescriptor other = (TapestryProjectImageDescriptor) object;
+      return (useBaseImage.equals(other.useBaseImage) && finalSize.equals(other.finalSize));
+    }
+
+    /* (non-Javadoc)
+     * Method declared on Object.
+     */
+    public int hashCode() {
+      return useBaseImage.hashCode() | finalSize.hashCode();
+    }
+
+    /* (non-Javadoc)
+     * Method declared in CompositeImageDescriptor
+     */
+    protected void drawCompositeImage(int width, int height) {
+      ImageData bg = useBaseImage.getImageData();
+      drawImage(bg, 0, 0);
+      drawTopRight();
+    }
+
+    private void drawTopRight() {
+      int x = getSize().x;
+      ImageData data = tapestry_ovr.getImageData();
+      x -= data.width;
+      drawImage(data, x, 0);
+    }
+
+  }
+  
+  public void dispose() {
+    super.dispose();
+    registry.dispose();
+  }
+
 }

@@ -145,7 +145,9 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
    * @see IDocumentPartitioningListener#documentPartitioningChanged(IDocument)
    */
   public void documentPartitioningChanged(IDocument document) {
-    getTreeViewer().setInput(new Long(System.currentTimeMillis()));
+  	if (getTreeViewer() != null) {
+    	getTreeViewer().setInput(new Long(System.currentTimeMillis()));
+  	}
   }
 
   public void selectionChanged(SelectionChangedEvent event) {
