@@ -33,9 +33,7 @@ import org.apache.xerces.xni.parser.XMLParseException;
  * Runtime exception thrown by PullParser when a fatal error occurs
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: ParserRuntimeException.java,v 1.2 2003/05/30 20:40:33 glongman
- *          Exp $
- */
+  */
 public class ParserRuntimeException extends XMLParseException
 {
 

@@ -57,8 +57,6 @@ import com.iw.plugins.spindle.core.util.Assert;
  * </p>
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: AbstractScanner.java,v 1.18.2.1 2004/06/22 12:10:10 glongman
- *          Exp $
  */
 public abstract class AbstractScanner implements IProblemCollector
 {

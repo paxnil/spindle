@@ -98,8 +98,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
  * @author Arnaud Le Hors, IBM
  * @author Eric Ye, IBM
  * 
- * @version $Id: XMLDocumentScannerImpl.java,v 1.15 2002/01/28 19:33:34 lehors
- *          Exp $
+ 
  */
 public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
 {

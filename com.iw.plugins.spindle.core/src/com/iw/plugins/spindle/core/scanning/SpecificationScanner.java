@@ -56,8 +56,6 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
  * This class handles some setup and validates the document by default.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: SpecificationScanner.java,v 1.13 2004/05/17 02:31:48 glongman
- *          Exp $
  */
 public abstract class SpecificationScanner extends AbstractScanner
 {

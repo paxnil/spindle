@@ -33,8 +33,7 @@ import org.apache.tapestry.spec.IBindingSpecification;
  * Spindle aware concrete implementation of IBindingSpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: PluginBindingSpecification.java,v 1.2 2004/05/17 02:31:49
- *          glongman Exp $
+
  */
 public class PluginBindingSpecification extends DescribableSpecification
     implements

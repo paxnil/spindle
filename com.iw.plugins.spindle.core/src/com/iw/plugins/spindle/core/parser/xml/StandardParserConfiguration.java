@@ -122,8 +122,7 @@ import org.apache.xerces.xni.parser.XMLPullParserConfiguration;
  * @author Arnaud Le Hors, IBM
  * @author Andy Clark, IBM
  * 
- * @version $Id: StandardParserConfiguration.java,v 1.18 2002/01/29 23:16:43
- *          sandygao Exp $
+ *  
  */
 public class StandardParserConfiguration extends BasicParserConfiguration
     implements
@@ -433,7 +432,7 @@ public class StandardParserConfiguration extends BasicParserConfiguration
    * @param locale The locale object to use for localization of messages.
    * 
    * @exception XNIException Thrown if the parser does not support the specified
-   *              locale.
+   *                            locale.
    */
   public void setLocale(Locale locale) throws XNIException
   {
@@ -453,7 +452,7 @@ public class StandardParserConfiguration extends BasicParserConfiguration
    * @param inputSource The document's input source.
    * 
    * @exception XMLConfigurationException Thrown if there is a configuration
-   *              error when initializing the parser.
+   *                            error when initializing the parser.
    * @exception IOException Thrown on I/O error.
    * 
    * @see #parse(boolean)
@@ -475,14 +474,14 @@ public class StandardParserConfiguration extends BasicParserConfiguration
    * Parses the document in a pull parsing fashion.
    * 
    * @param complete True if the pull parser should parse the remaining document
-   *          completely.
+   *                     completely.
    * 
    * @returns True if there is more document to parse.
    * 
    * @exception XNIException Any XNI exception, possibly wrapping another
-   *              exception.
+   *                            exception.
    * @exception IOException An IO exception from the parser, possibly from a
-   *              byte stream or character stream supplied by the parser.
+   *                            byte stream or character stream supplied by the parser.
    * 
    * @see #setInputSource
    */
@@ -702,8 +701,8 @@ public class StandardParserConfiguration extends BasicParserConfiguration
    * @param featureId The unique identifier (URI) of the feature.
    * 
    * @throws XMLConfigurationException Thrown for configuration error. In
-   *           general, components should only throw this exception if it is
-   *           <strong>really </strong> a critical error.
+   *                     general, components should only throw this exception if it is
+   *                     <strong>really </strong> a critical error.
    */
   protected void checkFeature(String featureId) throws XMLConfigurationException
   {
@@ -797,8 +796,8 @@ public class StandardParserConfiguration extends BasicParserConfiguration
    * @param propertyId The unique identifier (URI) of the property being set.
    * 
    * @throws XMLConfigurationException Thrown for configuration error. In
-   *           general, components should only throw this exception if it is
-   *           <strong>really </strong> a critical error.
+   *                     general, components should only throw this exception if it is
+   *                     <strong>really </strong> a critical error.
    */
   protected void checkProperty(String propertyId) throws XMLConfigurationException
   {

@@ -32,9 +32,7 @@ import com.iw.plugins.spindle.core.source.IProblemCollector;
  * A validation that can be executed later
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: IDeferredValidationAction.java,v 1.2 2003/09/15 01:13:33
- *          glongman Exp $
- */
+  */
 public interface IDeferredValidationAction
 {
   public void execute(IProblemCollector collector);

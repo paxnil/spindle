@@ -57,8 +57,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * Spindle aware concrete implementation of IComponentSpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: PluginComponentSpecification.java,v 1.12 2004/05/17 02:31:49
- *          glongman Exp $
+
  */
 public class PluginComponentSpecification extends BaseSpecLocatable
     implements

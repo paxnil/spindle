@@ -37,8 +37,6 @@ import org.apache.tapestry.parse.LocalizationToken;
  * @see TokenType#LOCALIZATION
  * 
  * @author Howard Lewis Ship
- * @version $Id: CoreLocalizationToken.java,v 1.1 2003/06/23 00:51:02 glongman
- *          Exp $
  * @since 3.0
  *  
  */

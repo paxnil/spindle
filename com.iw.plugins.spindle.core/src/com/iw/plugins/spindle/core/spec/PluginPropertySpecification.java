@@ -41,8 +41,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * Spindle aware concrete implementation of IPropertySpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: PluginPropertySpecification.java,v 1.5 2004/05/17 02:31:49
- *          glongman Exp $
+
  */
 public class PluginPropertySpecification extends DescribableSpecification
     implements

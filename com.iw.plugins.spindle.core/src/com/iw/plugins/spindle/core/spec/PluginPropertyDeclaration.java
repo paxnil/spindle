@@ -32,8 +32,7 @@ package com.iw.plugins.spindle.core.spec;
  * These can only be validated at the time the document is parsed/scanned.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: PluginPropertyDeclaration.java,v 1.2 2004/05/17 02:31:49
- *          glongman Exp $
+
  */
 public class PluginPropertyDeclaration extends BaseSpecification
 {

@@ -42,8 +42,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
  * Adds ability to use cached DTD Grammars
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: TapestryXMLDTDValidator.java,v 1.5 2003/07/06 18:35:41 glongman
- *          Exp $
+ 
  */
 public class TapestryXMLDTDValidator extends XMLDTDValidator
 {

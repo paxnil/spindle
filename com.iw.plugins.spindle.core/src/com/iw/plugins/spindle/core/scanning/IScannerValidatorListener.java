@@ -32,11 +32,8 @@ import org.eclipse.jdt.core.IType;
  * Listener interface for classes that are interested in things the Validators
  * find/don't find.
  * 
- * 
  * @author glongman@intelligentworks.com
- * @version $Id: IScannerValidatorListener.java,v 1.2 2004/05/17 02:31:48
- *          glongman Exp $
- */
+  */
 public interface IScannerValidatorListener
 {
   /**

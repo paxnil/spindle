@@ -112,8 +112,7 @@ import com.iw.plugins.spindle.core.parser.xml.dom.*;
  * 
  * @author Geoff Longman, Intelligent Works Inc.
  * 
- * @version $Id: XMLDocumentFragmentScannerImpl.java,v 1.10 2002/01/29 03:44:36
- *          lehors Exp $
+
  */
 public class XMLDocumentFragmentScannerImpl extends XMLScanner
     implements

@@ -65,8 +65,6 @@ import com.iw.plugins.spindle.core.util.Assert;
  * A completely functional validator for scanning Tapestry specs.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: SpecificationValidator.java,v 1.7 2004/05/28 15:23:47 glongman
- *          Exp $
  */
 public class SpecificationValidator extends BaseValidator
 {
@@ -582,9 +580,7 @@ public class SpecificationValidator extends BaseValidator
    * Note, one the cache Map is set, you can't change it.
    * 
    * @author glongman@intelligentworks.com
-   * @version $Id: SpecificationValidator.java,v 1.7 2004/05/28 15:23:47
-   *          glongman Exp $
-   */
+    */
   public static class TypeFinder
   {
     IJavaProject project;

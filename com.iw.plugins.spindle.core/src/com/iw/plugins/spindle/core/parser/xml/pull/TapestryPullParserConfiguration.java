@@ -38,9 +38,7 @@ import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration
  * A configuration used by TapestryPullParser
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: TapestryPullParserConfiguration.java,v 1.3 2003/05/30 20:40:34
- *          glongman Exp $
- */
+  */
 public class TapestryPullParserConfiguration extends TapestryDOMParserConfiguration
 {
   private boolean fStopParsing = false;
