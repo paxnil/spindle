@@ -578,9 +578,8 @@ public abstract class TreeInformationControl
      */
     public void setInput(Object information)
     {
-        fFilterText.setText("*");
-        fFilterText.selectAll();
-        if (information == null || information instanceof String)
+        fFilterText.setText("");
+         if (information == null || information instanceof String)
         {
             return;
         }
