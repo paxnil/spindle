@@ -46,6 +46,12 @@
    <feature url="features/com.iw.features.spindle_3.1.9.jar" id="com.iw.features.spindle" version="3.1.9">
       <category name="spindle_3_1_latest"/>
    </feature>
+   <feature url="features/com.iw.features.jettylauncher_1.2.0.jar" id="com.iw.features.jettylauncher" version="1.2.0">
+      <category name="jetty_launcher"/>
+   </feature>
+   <feature url="features/com.iw.features.jettylauncher_profile_1.2.0.jar" id="com.iw.features.jettylauncher_profile" version="1.2.0">
+      <category name="jetty_launcher"/>
+   </feature>
    <category-def name="spindle3_0_latest" label="Spindle 3.0 - latest unstable build - Eclipse 2.1.X">
       <description>
          Here are the latest unstable builds of Spindle 3.0 supporting Tapestry 3.0 (Eclipse 2.1.X)
