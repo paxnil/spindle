@@ -27,6 +27,7 @@ package com.iw.plugins.spindle;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +74,7 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
+import com.iw.plugins.spindle.project.TapestryProject;
 import com.iw.plugins.spindle.spec.TapestryPluginSpecFactory;
 import com.iw.plugins.spindle.ui.text.ColorManager;
 import com.iw.plugins.spindle.util.SpindleStatus;
@@ -185,9 +187,9 @@ public class TapestryPlugin extends AbstractUIPlugin {
       project = ((IJavaProject) element).getProject();
 
     } else if (element instanceof ITapestryModel) {
-    	
-      project = getProjectFor(((ITapestryModel)element).getUnderlyingStorage());
-      
+
+      project = getProjectFor(((ITapestryModel) element).getUnderlyingStorage());
+
     }
 
     if (project != null && project.isOpen() && project.hasNature(NATURE_ID)) {
@@ -236,6 +238,29 @@ public class TapestryPlugin extends AbstractUIPlugin {
     project.setDescription(description, monitor);
 
     return getTapestryProjectFor(jproject);
+
+  }
+
+  public void removeTapestryProjectNature(TapestryProject tproject, IProgressMonitor monitor) {
+
+    IProject project = tproject.getProject();
+
+    try {
+      if (project.exists() && project.isOpen() && project.hasNature(NATURE_ID)) {
+
+        IProjectDescription description = project.getDescription();
+
+        ArrayList natures = new ArrayList(Arrays.asList(description.getNatureIds()));
+        
+        natures.remove(NATURE_ID);
+        
+        description.setNatureIds((String [])natures.toArray(new String[natures.size()]));
+        
+        project.setDescription(description, monitor);
+
+      }
+    } catch (CoreException e) {
+    }
 
   }
 
@@ -383,9 +408,9 @@ public class TapestryPlugin extends AbstractUIPlugin {
     ErrorDialog.openError(getActiveWorkbenchShell(), null, null, status);
     ResourcesPlugin.getPlugin().getLog().log(status);
   } /** 
-           * Sets default preference values. These values will be used
-           * until some preferences are actually set using Preference dialog.
-           */
+            * Sets default preference values. These values will be used
+            * until some preferences are actually set using Preference dialog.
+            */
   protected void initializeDefaultPreferences(IPreferenceStore store) {
     ColorManager.initializeDefaults(store);
     NewTapComponentWizardPage.initializeDefaults(store);

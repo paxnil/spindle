@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.eclipse.core.internal.events.ResourceDelta;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
@@ -43,7 +44,10 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import com.iw.plugins.spindle.TapestryPlugin;
@@ -98,7 +102,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
       listener = new ProjectResourceChangeListener();
       ResourcesPlugin.getWorkspace().addResourceChangeListener(
         listener,
-        IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_CLOSE);
+        IResourceChangeEvent.POST_AUTO_BUILD | IResourceChangeEvent.PRE_CLOSE);
 
     }
   }
@@ -111,6 +115,8 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     if (listener != null) {
       ResourcesPlugin.getWorkspace().removeResourceChangeListener(listener);
     }
+
+    removeProperties();
   }
 
   /**
@@ -147,7 +153,9 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
   private void reset() {
 
-    modelManager.shutdown();
+    if (modelManager != null) {
+      modelManager.shutdown();
+    }
     modelManager = null;
     projectResource = null;
 
@@ -158,9 +166,11 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     MessageDialog.openInformation(
       TapestryPlugin.getDefault().getActiveWorkbenchShell(),
       "Spindle problem",
-      "you have deleted the Application or Library associated with project: "
+      "you have removed or improperly renamed the Application or Library associated with project: "
         + getProject().getName()
         + ".\nSpindle behaviour from this point on is undefined.");
+
+    TapestryPlugin.getDefault().removeTapestryProjectNature(this, new NullProgressMonitor());
 
   }
 
@@ -203,6 +213,23 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
   public void setProjectStorage(IStorage file) throws CoreException {
 
     projectResource = file;
+
+    TapestryLookup lookup = getLookup();
+    IPackageFragment fragment = null;
+    try {
+      fragment = lookup.findPackageFragment(file);
+    } catch (JavaModelException e) {
+    }
+
+    if (fragment == null) {
+
+      MessageDialog.openWarning(
+        TapestryPlugin.getDefault().getActiveWorkbenchShell(),
+        "Spindle Warning",
+        "The project Application/Library '"
+          + projectResource.getFullPath().toString()
+          + "'\nis located outside of the project classpath.\n You must move it back or Spindle will break.");
+    }
 
     try {
 
@@ -431,6 +458,21 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     }
   }
 
+  private void removeProperties() {
+
+    String filename = ".spindle";
+    IFile rscFile = getProject().getFile(filename);
+    // update the resource content
+    if (rscFile.exists()) {
+      try {
+
+        rscFile.delete(true, new NullProgressMonitor());
+
+      } catch (CoreException e) {
+      }
+    }
+  }
+
   public String readProperties() throws CoreException, IOException {
 
     String property = null;
@@ -465,7 +507,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
         }
 
-      } else if (event.getType() == IResourceChangeEvent.POST_CHANGE) {
+      } else if (event.getType() == IResourceChangeEvent.POST_AUTO_BUILD) {
 
         IProject project = getProject();
         IResourceDelta topLevelDelta = event.getDelta();
@@ -495,8 +537,6 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
       }
     }
 
-   
-
     /**
     * Method handleProjectResourcePresentCase.
     * @param delta
@@ -510,9 +550,15 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
       if (projectResource.equals(resource)) {
 
         int flags = delta.getFlags();
-        if ((flags & IResourceDelta.MOVED_TO) != 0) {
+        if (delta.getKind() == IResourceDelta.REMOVED && (flags & ResourceDelta.MOVED_TO) == 0) {
 
+          handleProjectStorageRemoved();
+
+        } else if ((flags & IResourceDelta.MOVED_TO) != 0) {
+
+          IPath movedFrom = delta.getMovedFromPath();
           IPath movedTo = delta.getMovedToPath();
+
           IResource newStorage = ResourcesPlugin.getWorkspace().getRoot().findMember(movedTo);
 
           if (!newStorage.getProject().equals(getProject())) {
@@ -521,17 +567,29 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
           } else {
 
-            try {
+            if (!checkNameStillValid(movedTo)) {
 
-              setProjectStorage((IStorage) newStorage);
+              handleProjectStorageRemoved();
+            } else {
 
-            } catch (CoreException e) {
+              try {
+
+                setProjectStorage((IStorage) newStorage);
+              } catch (CoreException e) {
+              }
             }
           }
 
         }
-
       }
+    }
+
+    private boolean checkNameStillValid(IPath newPath) {
+
+      String extension = newPath.getFileExtension();
+
+      return extension != null && ("application".equals(extension) || "library".equals(extension));
+
     }
   }
 }

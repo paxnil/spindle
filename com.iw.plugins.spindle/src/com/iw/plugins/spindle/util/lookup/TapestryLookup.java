@@ -493,11 +493,11 @@ public class TapestryLookup implements ILookupAcceptor {
     } catch (CoreException npe) {
       return false; // the package is not present
     }
-    
+
     if (files == null) {
-    	
-    	return false;
-    	
+
+      return false;
+
     }
     int length = files.length;
 
@@ -535,7 +535,7 @@ public class TapestryLookup implements ILookupAcceptor {
    */
   private Object[] getSourcePackageResources(IPackageFragment pkg) throws CoreException {
 
-    Object[] result = null;
+    Object[] result = new Object[0];   
 
     if (!pkg.isDefaultPackage()) {
 
@@ -545,20 +545,23 @@ public class TapestryLookup implements ILookupAcceptor {
 
       IContainer container = (IContainer) pkg.getUnderlyingResource();
 
-      IResource[] members = container.members(false);
+      if (container != null) {
 
-      ArrayList resultList = new ArrayList();
+        IResource[] members = container.members(false);
 
-      for (int i = 0; i < members.length; i++) {
+        ArrayList resultList = new ArrayList();
 
-        if (members[i] instanceof IFile) {
+        for (int i = 0; i < members.length; i++) {
 
-          resultList.add(members[i]);
+          if (members[i] instanceof IFile) {
+
+            resultList.add(members[i]);
+
+          }
+
+          result = resultList.toArray();
 
         }
-
-        result = resultList.toArray();
-
       }
 
     }
