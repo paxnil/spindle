@@ -87,6 +87,7 @@ public class PluginApplicationSpecification extends PluginLibrarySpecification i
     {
         ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
 
+       if (fEngineClassName != null ) {
         try
         {
             validator.validateTypeName(
@@ -100,7 +101,8 @@ public class PluginApplicationSpecification extends PluginLibrarySpecification i
             TapestryCore.log(e);
             e.printStackTrace();
         }
-    }
+       }
+   }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.spec.PluginLibrarySpecification#validate(com.iw.plugins.spindle.core.scanning.IScannerValidator)
