@@ -10,7 +10,7 @@
       <library name="core.jar">
          <export name="*"/>
       </library>
-      <library name="commons-digester-1.4.jar">
+      <library name="commons-digester-1.5.jar">
          <export name="*"/>
       </library>
       <library name="commons-logging-1.0.2.jar">
@@ -40,10 +40,10 @@
       <library name="ognl-2.6.3.jar">
          <export name="*"/>
       </library>
-      <library name="tapestry-3.0-beta-2.jar">
+      <library name="tapestry-3.0-beta-3.jar">
          <export name="*"/>
       </library>
-      <library name="tapestry-contrib-3.0-beta-2.jar">
+      <library name="tapestry-contrib-3.0-beta-3.jar">
          <export name="*"/>
       </library>
       <library name="bsf-2.3.0.jar">
