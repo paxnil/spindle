@@ -221,7 +221,8 @@ public class TemplateScanner extends AbstractScanner
 
     if (fSeenIds.contains(id))
     {
-      addProblem(IProblem.ERROR, getJWCIDLocation(token.getAttributesMap()), TapestryCore
+      // gork bug [ 996411 ] NullPointerException (3.1.4) - requires a change in the tapestry template parser!
+      addProblem(IProblem.ERROR, getJWCIDLocation(token.getEventInfo().getAttributeMap()), TapestryCore
           .getTapestryString(
               "BaseComponent.multiple-component-references",
               fComponentSpec.getSpecificationLocation().getName(),
