@@ -36,16 +36,16 @@ import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
  * i.e. it can resolve type names in the project buildpath
  * 
  * @author glongman@gmail.com
- * 
  */
 public class BuilderValidator extends SpecificationValidator
 {
 
-  public BuilderValidator(Build build, SpecificationValidator.TypeFinder finder,
-      boolean performDeferredValidations) throws CoreException
-  {
-    super(build.fTapestryBuilder.fTapestryProject, performDeferredValidations);
-    setTypeFinder(finder);
-  }
+    public BuilderValidator(Build build, SpecificationValidator.TypeFinder finder,
+            boolean performDeferredValidations) throws CoreException
+    {
+        super(build.fTapestryBuilder.fTapestryProject, build.fTapestryBuilder.fContextRoot,
+                build.fTapestryBuilder.fClasspathRoot);
+        setTypeFinder(finder);
+    }
 
 }
