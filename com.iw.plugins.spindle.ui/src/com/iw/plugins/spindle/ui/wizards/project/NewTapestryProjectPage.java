@@ -376,8 +376,8 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
       IProgressMonitor monitor) throws CoreException
   {
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
-    int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_TAB_CHAR);
+    int tabSize = store.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
     StringWriter swriter = new StringWriter();
     IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
 
@@ -409,8 +409,8 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     spec.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
     spec.addPageDeclaration(new PluginPageDeclaration("Home", "Home.page", null));
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
-    int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_TAB_CHAR);
+    int tabSize = store.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
     StringWriter swriter = new StringWriter();
     IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
     XMLUtil.writeApplicationSpecification(iwriter, spec, 0);
@@ -431,8 +431,8 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     homeSpec.setDescription("add a description");
     homeSpec.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
-    int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_TAB_CHAR);
+    int tabSize = store.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
     StringWriter swriter = new StringWriter();
     IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
     XMLUtil.writeSpecification(iwriter, homeSpec, 0);

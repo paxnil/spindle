@@ -54,7 +54,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  * Proposal that gets it contents from the user!
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class ChooseTypeProposal implements ICompletionProposal
 {

@@ -716,7 +716,7 @@ public class DTDProposalGenerator
     {
       if (parent.getType().equals("/"))
       {
-        String rootNode = parent.fRootNodeId;
+        String rootNode = parent.rootNodeId;
         if (rootNode != null)
           return internalGetNewElementCompletionProposals(dtd, rootNode);
 

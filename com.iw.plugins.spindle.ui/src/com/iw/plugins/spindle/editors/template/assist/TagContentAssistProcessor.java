@@ -39,7 +39,7 @@ import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
@@ -52,7 +52,7 @@ import com.iw.plugins.spindle.editors.util.CompletionProposal;
  * Content assist inside of Tags (but not attributes)
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: TagContentAssistProcessor.java,v 1.12 2004/06/10 15:50:46
+ * @version $Id: TagContentAssistProcessor.java,v 1.11.2.2 2004/06/22 12:23:59
  *          glongman Exp $
  */
 public class TagContentAssistProcessor extends TemplateContentAssistProcessor
@@ -76,8 +76,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
     XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
     String tagName = tag.getName();
     int baseState = tag.getStateAt(documentOffset);
-    if (tag.getType() != XMLDocumentPartitioner.TAG
-        && tag.getType() != XMLDocumentPartitioner.EMPTYTAG)
+    if (tag.getType() != ITypeConstants.TAG && tag.getType() != ITypeConstants.EMPTYTAG)
       return NoProposals;
 
     if (baseState == XMLNode.IN_TERMINATOR)
@@ -214,8 +213,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
       XMLNode tag,
       String tagName,
       int documentOffset)
-  {
-    // TODO Auto-generated method stub
+  {   
     return null;
   }
 
@@ -610,7 +608,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
   {
     XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
     int baseState = tag.getStateAt(documentOffset);
-    if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
+    if (tag.getType() == ITypeConstants.ENDTAG)
       return NoInformation;
 
     Map attrMap = tag.getAttributesMap();

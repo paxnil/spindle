@@ -27,7 +27,6 @@
 package com.iw.plugins.spindle.editors.util;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -36,8 +35,6 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
-import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
@@ -47,8 +44,8 @@ import com.wutka.dtd.DTD;
  * Content Assist for Templates
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: ContentAssistProcessor.java,v 1.8 2004/06/10 15:50:48 glongman
- *          Exp $
+ * @version $Id: ContentAssistProcessor.java,v 1.7.2.3 2004/06/22 12:24:20
+ *          glongman Exp $
  */
 public abstract class ContentAssistProcessor implements IContentAssistProcessor
 {
@@ -63,40 +60,17 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
   protected IPreferenceStore fPreferenceStore = UIPlugin
       .getDefault()
       .getPreferenceStore();
-  protected XMLDocumentPartitioner fAssistParititioner;
   protected boolean fDoingContextInformation = false;
   protected DTD fDTD;
 
   public ContentAssistProcessor(Editor editor)
   {
     this.fEditor = editor;
-    fAssistParititioner = new XMLDocumentPartitioner(
-        XMLDocumentPartitioner.SCANNER,
-        XMLDocumentPartitioner.TYPES);
   }
 
-  protected void connect(IDocument document) throws IllegalStateException
+  protected abstract void init(IDocument document) throws IllegalStateException;
   {
-    fAssistParititioner.connect(document);
-    try
-    {
-      XMLNode.createTree(document, -1);
-    } catch (BadLocationException e)
-    {
-      UIPlugin.log(e);
-      throw new IllegalStateException();
-    }
-  }
-
-  protected void disconnect()
-  {
-    try
-    {
-      fAssistParititioner.disconnect();
-    } catch (RuntimeException e)
-    {
-      UIPlugin.log(e);
-    }
+    // do nothing
   }
 
   public ICompletionProposal[] computeCompletionProposals(
@@ -109,7 +83,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
 
     try
     {
-      connect(document);
+      init(document);
       Point p = viewer.getSelectedRange();
       if (p.y > 0)
         return NoProposals;
@@ -123,9 +97,6 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
     {
       UIPlugin.log(e);
       throw e;
-    } finally
-    {
-      disconnect();
     }
   }
 
@@ -153,23 +124,15 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
     return NoInformation;
   }
 
-  /**
-   * @param viewer
-   * @param fDocumentOffset
-   * @return
-   */
   public IContextInformation[] computeInformation(ITextViewer viewer, int documentOffset)
   {
     try
     {
-      connect(viewer.getDocument());
+      init(viewer.getDocument());
       return doComputeContextInformation(viewer, documentOffset);
     } catch (IllegalStateException e)
     {
       return NoInformation;
-    } finally
-    {
-      disconnect();
     }
   }
 
@@ -207,8 +170,8 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
    * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
    */
   public String getErrorMessage()
-  { //TODO I10N
-    return "no completions available";
+  {
+    return UIPlugin.getString("noCompletions");
   }
 
   /*

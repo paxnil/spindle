@@ -51,7 +51,6 @@ import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
@@ -62,8 +61,7 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
 import com.iw.plugins.spindle.editors.DefaultDoubleClickStrategy;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.XMLContentFormatter;
-import com.iw.plugins.spindle.editors.XMLFormattingStrategy;
+import com.iw.plugins.spindle.editors.formatter.FormattingPreferences;
 import com.iw.plugins.spindle.editors.spec.assist.AttributeCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.TagCompletionProcessor;
@@ -71,18 +69,17 @@ import com.iw.plugins.spindle.editors.util.CDATACompletionProcessor;
 import com.iw.plugins.spindle.editors.util.CommentCompletionProcessor;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DeclCompletionProcessor;
+import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
  * SourceViewerConfiguration for the TemplateEditor
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ *  
  */
-public class SpecConfiguration extends BaseSourceConfiguration
+public class SpecEditorConfiguration extends BasicSpecConfiguration
 {
   public static final boolean DEBUG = false;
-
-  private XMLTextTools fTextTools;
 
   private ITextDoubleClickStrategy fDefaultDoubleClick;
   private ITextDoubleClickStrategy dcsSimple;
@@ -93,11 +90,11 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * @param colorManager
    * @param editor
    */
-  public SpecConfiguration(XMLTextTools tools, Editor editor,
+  public SpecEditorConfiguration(XMLTextTools tools, Editor editor,
       IPreferenceStore preferenceStore)
   {
-    super(editor, preferenceStore);
-    fTextTools = tools;
+    super(tools, editor, preferenceStore);
+   
     fDefaultDoubleClick = new DefaultDoubleClickStrategy();
     dcsSimple = new SimpleDoubleClickStrategy();
     dcsTag = new TagDoubleClickStrategy();
@@ -106,7 +103,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
 
   /*
    * @see SourceViewerConfiguration#getDoubleClickStrategy(ISourceViewer,
-   *      String)
+   *              String)
    */
   public ITextDoubleClickStrategy getDoubleClickStrategy(
       ISourceViewer sourceViewer,
@@ -133,92 +130,19 @@ public class SpecConfiguration extends BaseSourceConfiguration
     return fDefaultDoubleClick;
   }
 
-  /*
-   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getConfiguredContentTypes(ISourceViewer)
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getContentFormatter(org.eclipse.jface.text.source.ISourceViewer)
    */
-  public String[] getConfiguredContentTypes(ISourceViewer sourceViewer)
-  {
-    return new String[]{IDocument.DEFAULT_CONTENT_TYPE, XMLPartitionScanner.XML_PI,
-        XMLPartitionScanner.XML_COMMENT, XMLPartitionScanner.XML_DECL,
-        XMLPartitionScanner.XML_TAG, XMLPartitionScanner.XML_ATTRIBUTE,
-        XMLPartitionScanner.XML_CDATA, XMLPartitionScanner.DTD_INTERNAL,
-        XMLPartitionScanner.DTD_INTERNAL_PI, XMLPartitionScanner.DTD_INTERNAL_COMMENT,
-        XMLPartitionScanner.DTD_INTERNAL_DECL,};
-  }
-
   public IContentFormatter getContentFormatter(ISourceViewer sourceViewer)
   {
-    IContentFormatter formatter = new XMLContentFormatter(
-        new XMLFormattingStrategy(),
-        new String[]{DefaultPartitioner.CONTENT_TYPES_CATEGORY,},
-        UIPlugin.getDefault().getPreferenceStore());
-
-    return formatter;
+    return UIUtils.createXMLContentFormatter(new FormattingPreferences());
   }
 
-  /*
-   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getPresentationReconciler(ISourceViewer)
-   */
-  public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer)
-  {
-    PresentationReconciler reconciler = new PresentationReconciler();
-
-    DefaultDamagerRepairer dr;
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLTextScanner());
-    reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
-    reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getDTDTextScanner());
-    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL);
-    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLPIScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_PI);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_PI);
-    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
-    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLCommentScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_COMMENT);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_COMMENT);
-    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
-    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLDeclScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_DECL);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_DECL);
-    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
-    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLTagScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_TAG);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_TAG);
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLAttributeScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-
-    dr = new DefaultDamagerRepairer(fTextTools.getXMLCDATAScanner());
-
-    reconciler.setDamager(dr, XMLPartitionScanner.XML_CDATA);
-    reconciler.setRepairer(dr, XMLPartitionScanner.XML_CDATA);
-
-    return reconciler;
-  }
   /*
    * (non-Javadoc)
    * 
    * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTextHover(org.eclipse.jface.text.source.ISourceViewer,
-   *      java.lang.String)
+   *              java.lang.String)
    */
   public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType)
   {
@@ -291,7 +215,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * <code>XMLOutlineInformationControl</code> instances.
    * 
    * @param sourceViewer the source viewer to be configured by this
-   *          configuration
+   *                     configuration
    * @return an information control creator
    */
   private IInformationControlCreator getXMLOutlinePresenterControlCreator(
@@ -320,7 +244,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * <code>XMLOutlineInformationControl</code> instances.
    * 
    * @param sourceViewer the source viewer to be configured by this
-   *          configuration
+   *                     configuration
    * @return an information control creator
    */
   private IInformationControlCreator getStructureOutlinePresenterControlCreator(
@@ -348,7 +272,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * instances.
    * 
    * @param sourceViewer the source viewer to be configured by this
-   *          configuration
+   *                     configuration
    * @return an information control creator
    */
   private IInformationControlCreator getAssetChooserControlCreator(
@@ -374,7 +298,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * requested for the current cursor position.
    * 
    * @param sourceViewer the source viewer to be configured by this
-   *          configuration
+   *                     configuration
    * @return an information presenter
    */
   public IInformationPresenter getXMLOutlinePresenter(ISourceViewer sourceViewer)
@@ -401,7 +325,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * requested for the current cursor position.
    * 
    * @param sourceViewer the source viewer to be configured by this
-   *          configuration
+   *                     configuration
    * @return an information presenter
    */
   public IInformationPresenter getStructureOutlinePresenter(ISourceViewer sourceViewer)

@@ -65,7 +65,7 @@ import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
  * Reveals IStorages in the workbench as editors are selected
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class Revealer implements IWindowListener, IPageListener, IPartListener
 {

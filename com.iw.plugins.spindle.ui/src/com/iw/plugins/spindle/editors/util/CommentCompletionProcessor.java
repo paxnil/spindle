@@ -81,6 +81,16 @@ public class CommentCompletionProcessor extends ContentAssistProcessor
   /*
    * (non-Javadoc)
    * 
+   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect(org.eclipse.jface.text.IDocument)
+   */
+  protected void init(IDocument document) throws IllegalStateException
+  {
+    // do nothing
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
    *      int)
    */
@@ -133,7 +143,9 @@ public class CommentCompletionProcessor extends ContentAssistProcessor
    * 
    * <pre>
    * 
-   *   &lt;!--  --&gt;
+   *  
+   *    &lt;!--  --&gt;
+   *   
    *  
    * </pre>
    * 

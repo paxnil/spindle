@@ -48,7 +48,7 @@ import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
@@ -69,8 +69,8 @@ import com.iw.plugins.spindle.editors.util.CompletionProposal;
  * Content assist inside of attribute values
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: AttributeCompletionProcessor.java,v 1.16 2004/06/15 04:11:21
- *          glongman Exp $
+ * @version $Id: AttributeCompletionProcessor.java,v 1.14.2.2 2004/06/22
+ *          12:23:18 glongman Exp $
  */
 public class AttributeCompletionProcessor extends SpecCompletionProcessor
 {
@@ -114,7 +114,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
       fTagName = fTag.getName();
       String type = fTag.getType();
       if (fTagName == null
-          || (type != XMLDocumentPartitioner.TAG && type != XMLDocumentPartitioner.EMPTYTAG))
+          || (type != ITypeConstants.TAG && type != ITypeConstants.EMPTYTAG))
         return NoProposals;
 
       XMLNode attribute = fTag.getAttributeAt(fDocumentOffset);
@@ -466,7 +466,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     {
       XMLNode child = (XMLNode) iter.next();
       String childType = child.getType();
-      if ((childType != XMLDocumentPartitioner.TAG && childType != XMLDocumentPartitioner.EMPTYTAG)
+      if ((childType != ITypeConstants.TAG && childType != ITypeConstants.EMPTYTAG)
           || child.equals(fTag))
         continue;
 

@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.editors.formatter.XMLAutoIndentStrategy;
 import com.iw.plugins.spindle.ui.util.ToolTipHandler;
 
 public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
@@ -120,7 +121,7 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
    */
   public int getTabWidth(ISourceViewer sourceViewer)
   {
-    return fPreferenceStore.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    return fPreferenceStore.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
   }
 
   /*
@@ -150,7 +151,7 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
 
     if (fIndentPrefixes == null)
     {
-      int spaces = fPreferenceStore.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+      int spaces = fPreferenceStore.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
       StringBuffer buf = new StringBuffer();
       for (int i = 0; i < spaces; i++)
         buf.append(' ');

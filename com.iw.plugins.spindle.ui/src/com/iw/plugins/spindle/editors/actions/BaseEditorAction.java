@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
@@ -59,20 +60,23 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.xmen.internal.ui.text.XMLReconciler;
+import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 
 /**
  * Base class for editor actions
  * 
- * TODO fix.
- * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: BaseEditorAction.java,v 1.5.2.1 2004/06/10 16:48:22 glongman
+ *                     Exp $
  */
 public abstract class BaseEditorAction extends Action
 {
@@ -191,6 +195,18 @@ public abstract class BaseEditorAction extends Action
    */
   public void editorContextMenuAboutToShow(IMenuManager menu)
   {
+  }
+
+  protected XMLNode getRootNode()
+  {
+    IDocumentProvider documentProvider = fEditor.getDocumentProvider();
+    IDocument document = documentProvider.getDocument(fEditor.getEditorInput());
+    IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+
+    XMLReconciler model = modelProvider.getModel(document);
+    if (model == null)
+      return null;
+    return model.getRoot();
   }
 
   protected abstract class ChooseLocationPopup

@@ -24,15 +24,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors.spec;
+package com.iw.plugins.spindle.editors.spec.outline;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -42,7 +40,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -51,24 +48,25 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.IPageBookViewPage;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.IReconcileListener;
+import com.iw.plugins.spindle.editors.spec.SpecEditor;
 import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
 
 /**
  * Mulitpage content outline. Users can toggle between two
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: MultiPageContentOutline.java,v 1.2 2004/06/05 04:26:18 glongman
- *          Exp $
+ * @version $Id: MultiPageContentOutline.java,v 1.1.2.1 2004/06/10 16:48:20
+ *          glongman Exp $
  */
 public class MultiPageContentOutline
     implements
@@ -102,13 +100,13 @@ public class MultiPageContentOutline
   private IPageSite fSite;
   private MultiPageContentOutline.ToggleAction fToggleAction;
 
-  public MultiPageContentOutline(SpecEditor editor)
+  public MultiPageContentOutline(SpecEditor editor, IEditorInput input)
   {
     this.fEditor = editor;
     fToggleAction = new MultiPageContentOutline.ToggleAction(this);
     fSelectionProvider = editor.getSelectionProvider();
     fMessagePage = new MessagePage();
-    fXMLOutlinePage = new XMLOutlinePage(editor);
+    fXMLOutlinePage = new XMLOutlinePage(editor, input);
     fTapestryOutlinePage = new TapestryOutlinePage(editor);
     fCurrentPage = getInitialPage();
     fEditor.addReconcileListener(this);
@@ -146,17 +144,18 @@ public class MultiPageContentOutline
     fTapestryOutlinePage.init(site);
   }
 
-  public void setInput(Object obj)
-  {
-    if (obj instanceof XMLNode)
-    {
-      fXMLOutlinePage.setInput(obj);
-    } else
-    {
-      fTapestryOutlinePage.setInput(obj);
-    }
-
-  }
+  
+//  public void setInput(Object obj)
+//  {
+//    if (obj instanceof XMLNode)
+//    {
+//      fXMLOutlinePage.setInput(obj);
+//    } else
+//    {
+//      fTapestryOutlinePage.setInput(obj);
+//    }
+//
+//  }
 
   /*
    * (non-Javadoc)
@@ -206,20 +205,28 @@ public class MultiPageContentOutline
     fToggleAction.setEnabled(false);
   }
 
-  public void addFocusListener(org.eclipse.swt.events.FocusListener listener)
-  {
-  }
+  
+//  public void addFocusListener(org.eclipse.swt.events.FocusListener listener)
+//  {
+//  }
   public void addSelectionChangedListener(ISelectionChangedListener listener)
   {
     if (!fSelectionListeners.contains(listener))
       fSelectionListeners.add(listener);
   }
+  
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.part.IPage#createControl(org.eclipse.swt.widgets.Composite)
+   */
   public void createControl(Composite parent)
   {
     fPageBook = new PageBook(parent, SWT.NONE);
     if (fCurrentPage != null)
       setPageActive(fCurrentPage);
   }
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.part.IPage#dispose()
+   */
   public void dispose()
   {
     if (fPageBook != null && !fPageBook.isDisposed())
@@ -228,37 +235,45 @@ public class MultiPageContentOutline
     fDisposed = true;
   }
 
-  public boolean isDisposed()
-  {
-    return fDisposed;
-  }
+//  public boolean isDisposed()
+//  {
+//    return fDisposed;
+//  }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.part.IPage#getControl()
+   */
   public Control getControl()
   {
     return fPageBook;
   }
-  public PageBook getPagebook()
-  {
-    return fPageBook;
-  }
+//  public PageBook getPagebook()
+//  {
+//    return fPageBook;
+//  }
   public ISelection getSelection()
   {
     return fSelectionProvider.getSelection();
   }
-  public void makeContributions(
-      IMenuManager menuManager,
-      IToolBarManager toolBarManager,
-      IStatusLineManager statusLineManager)
-  {
-  }
-  public void removeFocusListener(FocusListener listener)
-  {
-  }
+ 
+//  public void makeContributions(
+//      IMenuManager menuManager,
+//      IToolBarManager toolBarManager,
+//      IStatusLineManager statusLineManager)
+//  {
+//  }
+//  public void removeFocusListener(FocusListener listener)
+//  {
+//  }
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+   */
   public void removeSelectionChangedListener(ISelectionChangedListener listener)
   {
     fSelectionListeners.remove(listener);
   }
 
+  
   private void fireSelectionChange(ISelectionProvider provider, ISelection selection)
   {
     SelectionChangedEvent evt = new SelectionChangedEvent(provider, selection);
@@ -268,6 +283,9 @@ public class MultiPageContentOutline
       listener.selectionChanged(evt);
     }
   }
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+   */
   public void selectionChanged(SelectionChangedEvent event)
   {
     ISelection selection = event.getSelection();
@@ -275,14 +293,23 @@ public class MultiPageContentOutline
       fEditor.openTo(((DoubleClickSelection) selection).getFirstElement());
     fireSelectionChange(event.getSelectionProvider(), selection);
   }
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.part.IPage#setActionBars(org.eclipse.ui.IActionBars)
+   */
   public void setActionBars(org.eclipse.ui.IActionBars actionBars)
   {
   }
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.part.IPage#setFocus()
+   */
   public void setFocus()
   {
     if (fCurrentPage != null)
       fCurrentPage.setFocus();
   }
+  /**
+   * @param page
+   */
   public void setPageActive(IContentOutlinePage page)
   {
 
@@ -335,14 +362,16 @@ public class MultiPageContentOutline
     bars.updateActionBars();
   }
 
-  /**
-   * Set the selection.
+  
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
    */
   public void setSelection(ISelection selection)
   {
     fXMLOutlinePage.setSelection(selection);
   }
 
+ 
   public void switchPages(boolean showTapestry)
   {
     if (showTapestry)

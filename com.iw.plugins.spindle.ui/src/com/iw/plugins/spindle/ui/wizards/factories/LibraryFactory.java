@@ -49,7 +49,7 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
  * @author gwl
- * @version $Id$
+ * 
  * 
  * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
  */
@@ -102,8 +102,8 @@ public class LibraryFactory
     PluginLibrarySpecification librarySpec = new PluginLibrarySpecification();
     librarySpec.setPublicId(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID);
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
-    int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_TAB_CHAR);
+    int tabSize = store.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
     StringWriter swriter = new StringWriter();
     IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
     XMLUtil.writeLibrarySpecification(iwriter, librarySpec, 0);

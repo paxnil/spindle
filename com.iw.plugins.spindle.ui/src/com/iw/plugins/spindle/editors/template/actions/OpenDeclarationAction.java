@@ -41,6 +41,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
@@ -53,8 +54,8 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * Open an interesting thing, if possible.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: OpenDeclarationAction.java,v 1.4 2004/04/28 16:53:51 glongman
- *          Exp $
+ * @version $Id: OpenDeclarationAction.java,v 1.4.2.2 2004/06/22 12:23:46
+ *          glongman Exp $
  */
 public class OpenDeclarationAction extends BaseTemplateAction
 {
@@ -65,8 +66,7 @@ public class OpenDeclarationAction extends BaseTemplateAction
   public OpenDeclarationAction()
   {
     super();
-    //      TODO I10N
-    setText("Open Declaration");
+    setText(UIPlugin.getString(ACTION_ID));
     setId(ACTION_ID);
   }
 
@@ -76,9 +76,9 @@ public class OpenDeclarationAction extends BaseTemplateAction
     if (artifact == null)
       return;
     String type = artifact.getType();
-    if (type == XMLDocumentPartitioner.TEXT || type == XMLDocumentPartitioner.COMMENT
-        || type == XMLDocumentPartitioner.PI || type == XMLDocumentPartitioner.DECL
-        || type == XMLDocumentPartitioner.ENDTAG)
+    if (type == ITypeConstants.TEXT || type == ITypeConstants.COMMENT
+        || type == ITypeConstants.PI || type == ITypeConstants.DECL
+        || type == ITypeConstants.ENDTAG)
     {
       return;
     }
@@ -217,19 +217,16 @@ public class OpenDeclarationAction extends BaseTemplateAction
     IDocument document = editor
         .getDocumentProvider()
         .getDocument(editor.getEditorInput());
-    XMLDocumentPartitioner partitioner = new XMLDocumentPartitioner(
-        XMLDocumentPartitioner.SCANNER,
-        XMLDocumentPartitioner.TYPES);
+
     try
     {
       XMLNode reveal = null;
-      partitioner.connect(document);
       Position[] pos = null;
-      pos = document.getPositions(partitioner.getPositionCategory());
+      pos = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
       for (int i = 0; i < pos.length; i++)
       {
         XMLNode artifact = (XMLNode) pos[i];
-        if (artifact.getType() == XMLDocumentPartitioner.ENDTAG)
+        if (artifact.getType() == ITypeConstants.ENDTAG)
           continue;
         String name = artifact.getName();
         if (name == null)
@@ -256,9 +253,6 @@ public class OpenDeclarationAction extends BaseTemplateAction
     } catch (Exception e)
     {
       UIPlugin.log(e);
-    } finally
-    {
-      partitioner.disconnect();
     }
   }
 

@@ -42,11 +42,12 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
 /**
- * TODO Add Type comment
+ * Base class for Template completion assist. Basicly here to set a flag if
+ * XHTML completions have been requested via the property page.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: TemplateContentAssistProcessor.java,v 1.1 2003/11/21 17:41:23
- *          glongman Exp $
+ * @version $Id: TemplateContentAssistProcessor.java,v 1.1.2.2 2004/06/22
+ *          12:23:59 glongman Exp $
  */
 public abstract class TemplateContentAssistProcessor extends ContentAssistProcessor
 {
@@ -65,10 +66,9 @@ public abstract class TemplateContentAssistProcessor extends ContentAssistProces
    * 
    * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect(org.eclipse.jface.text.IDocument)
    */
-  protected void connect(IDocument document) throws IllegalStateException
+  protected void init(IDocument document) throws IllegalStateException
   {
     fDTD = null;
-    super.connect(document);
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
     if (fHasHTMLExtension)
     {

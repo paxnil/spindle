@@ -35,7 +35,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  * Allows views to filter by type.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class TypeFilter extends ViewerFilter
 {

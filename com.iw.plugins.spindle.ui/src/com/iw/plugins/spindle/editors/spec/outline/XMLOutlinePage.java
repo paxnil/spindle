@@ -24,8 +24,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors.spec;
+package com.iw.plugins.spindle.editors.spec.outline;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -42,10 +43,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
+import org.xmen.internal.ui.text.XMLModelListener;
+import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
+import com.iw.plugins.spindle.editors.spec.SpecEditor;
 import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
 import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
 
@@ -53,85 +61,10 @@ import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
  * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ *  
  */
-public class XMLOutlinePage extends ContentOutlinePage
+public class XMLOutlinePage extends ContentOutlinePage implements XMLModelListener
 {
-
-  public class OutlineContentProvider implements ITreeContentProvider
-  {
-    public Object[] getElements(Object obj)
-    {
-      if (fRoot != null)
-      {
-        Object[] result = fRoot.getChildren(fRoot);
-        addAll(result);
-        return result;
-      }
-      return new Object[]{};
-    }
-    public Object[] getChildren(Object obj)
-    {
-      if (obj instanceof XMLNode)
-      {
-        Object[] result = ((XMLNode) obj).getChildren(obj);
-        addAll(result);
-        return result;
-      }
-
-      return new Object[0];
-    }
-    public boolean hasChildren(Object obj)
-    {
-      return getChildren(obj).length > 0;
-    }
-    public Object getParent(Object obj)
-    {
-      if (obj == fRoot)
-        return null;
-      return ((XMLNode) obj).getParent();
-    }
-    public void dispose()
-    {
-    }
-
-    private void addAll(Object[] elements)
-    {
-      if (elements == null || elements.length == 0)
-        return;
-
-      if (fFlatChildren.length == 0)
-      {
-        fFlatChildren = elements;
-        fCorresponders = new Object[elements.length];
-        for (int i = 0; i < elements.length; i++)
-          fCorresponders[i] = ((XMLNode) elements[i]).getCorrespondingNode();
-        return;
-      }
-
-      Object[] expandedFlat = new Object[fFlatChildren.length + elements.length];
-      System.arraycopy(fFlatChildren, 0, expandedFlat, 0, fFlatChildren.length);
-      System.arraycopy(elements, 0, expandedFlat, fFlatChildren.length, elements.length);
-      Object[] expandedCorresponders = new Object[fCorresponders.length + elements.length];
-      System
-          .arraycopy(fCorresponders, 0, expandedCorresponders, 0, fCorresponders.length);
-      for (int i = 0; i < elements.length; i++)
-      {
-        expandedCorresponders[fCorresponders.length + i] = ((XMLNode) elements[i])
-            .getCorrespondingNode();
-      }
-
-      fFlatChildren = expandedFlat;
-      fCorresponders = expandedCorresponders;
-
-    }
-    public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
-    {
-      fFlatChildren = new XMLNode[0];
-      fCorresponders = new XMLNode[0];
-    }
-
-  }
 
   private SpecEditor fEditor;
   private Tree fTree;
@@ -140,9 +73,56 @@ public class XMLOutlinePage extends ContentOutlinePage
   private Object[] fFlatChildren = new XMLNode[0];
   private Object[] fCorresponders = new XMLNode[0];
 
-  public XMLOutlinePage(SpecEditor editor)
+  public XMLOutlinePage(SpecEditor editor, IEditorInput input)
   {
     fEditor = editor;
+    connect(input);
+  }
+
+  private void connect(IEditorInput input)
+  {
+
+    IDocumentProvider provider = fEditor.getDocumentProvider();
+
+    //force creation of the document & the model.
+    IDocument document = provider.getDocument(input);
+    IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+    XMLReconciler model = (modelProvider).getModel(document);
+    if (model != null)
+    {
+      fRoot = model.getRoot();
+      model.addListener(this);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.xmen.internal.ui.text.XMLModelListener#modelChanged(org.xmen.internal.ui.text.XMLReconciler)
+   */
+  public void modelChanged(XMLReconciler reconciler)
+  {
+    setInput(reconciler.getRoot());
+  }
+
+  private void disconnect()
+  {
+    IEditorInput input = fEditor.getEditorInput();
+    IDocumentProvider provider = null;
+    if (input instanceof IFileEditorInput)
+    {
+      provider = UIPlugin.getDefault().getSpecFileDocumentProvider();
+    } else
+    {
+      provider = UIPlugin.getDefault().getSpecStorageDocumentProvider();
+    }
+    IDocument document = provider.getDocument(input);
+    IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+    XMLReconciler model = modelProvider.getModel(document);
+    if (model != null)
+    {
+      model.removeListener(this);
+    }
   }
 
   public void createControl(Composite parent)
@@ -168,18 +148,23 @@ public class XMLOutlinePage extends ContentOutlinePage
 
   public void dispose()
   {
+    disconnect();
     super.dispose();
   }
 
   public void setInput(final Object input)
   {
-    if (input == null)
+
+    if (fTree == null || fTree.isDisposed())
       return;
 
     fRoot = (XMLNode) input;
 
-    if (fTree == null || fTree.isDisposed())
+    if (fRoot == null)
+    {
+      treeViewer.setInput(null);
       return;
+    }
 
     Display d = fTree.getDisplay();
     d.asyncExec(new Runnable()
@@ -277,6 +262,81 @@ public class XMLOutlinePage extends ContentOutlinePage
         }
       }
       super.setSelection(selection);
+    }
+
+  }
+
+  public class OutlineContentProvider implements ITreeContentProvider
+  {
+    public Object[] getElements(Object obj)
+    {
+      if (fRoot != null)
+      {
+        Object[] result = fRoot.getChildren(fRoot);
+        addAll(result);
+        return result;
+      }
+      return new Object[]{};
+    }
+    public Object[] getChildren(Object obj)
+    {
+      if (obj instanceof XMLNode)
+      {
+        Object[] result = ((XMLNode) obj).getChildren(obj);
+        addAll(result);
+        return result;
+      }
+
+      return new Object[0];
+    }
+    public boolean hasChildren(Object obj)
+    {
+      return getChildren(obj).length > 0;
+    }
+    public Object getParent(Object obj)
+    {
+      if (obj == fRoot)
+        return null;
+      return ((XMLNode) obj).getParent();
+    }
+    public void dispose()
+    {
+    }
+
+    private void addAll(Object[] elements)
+    {
+      if (elements == null || elements.length == 0)
+        return;
+
+      if (fFlatChildren.length == 0)
+      {
+        fFlatChildren = elements;
+        fCorresponders = new Object[elements.length];
+        for (int i = 0; i < elements.length; i++)
+          fCorresponders[i] = ((XMLNode) elements[i]).getCorrespondingNode();
+        return;
+      }
+
+      Object[] expandedFlat = new Object[fFlatChildren.length + elements.length];
+      System.arraycopy(fFlatChildren, 0, expandedFlat, 0, fFlatChildren.length);
+      System.arraycopy(elements, 0, expandedFlat, fFlatChildren.length, elements.length);
+      Object[] expandedCorresponders = new Object[fCorresponders.length + elements.length];
+      System
+          .arraycopy(fCorresponders, 0, expandedCorresponders, 0, fCorresponders.length);
+      for (int i = 0; i < elements.length; i++)
+      {
+        expandedCorresponders[fCorresponders.length + i] = ((XMLNode) elements[i])
+            .getCorrespondingNode();
+      }
+
+      fFlatChildren = expandedFlat;
+      fCorresponders = expandedCorresponders;
+
+    }
+    public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
+    {
+      fFlatChildren = new XMLNode[0];
+      fCorresponders = new XMLNode[0];
     }
 
   }

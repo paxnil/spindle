@@ -34,11 +34,9 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.text.BadLocationException;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
-import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
@@ -46,7 +44,8 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
  * Jump from spec/template editors to associated java files
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: JumpToJavaAction.java,v 1.4.4.1 2004/06/22 12:13:30 glongman
+ *          Exp $
  */
 public class JumpToJavaAction extends BaseJumpAction
 {
@@ -97,52 +96,46 @@ public class JumpToJavaAction extends BaseJumpAction
 
   private IType getTypeFromSpec()
   {
-    try
-    {
-      attachPartitioner();
-      XMLNode root = XMLNode.createTree(getDocument(), -1);
-      List children = root.getChildren();
-      for (Iterator iter = children.iterator(); iter.hasNext();)
-      {
-        XMLNode child = (XMLNode) iter.next();
-        String type = child.getType();
-        if (type == XMLDocumentPartitioner.TAG || type == XMLDocumentPartitioner.EMPTYTAG)
-        {
-          String name = child.getName();
-          if (name == null)
-            return null;
-          name = name.toLowerCase();
-          Map attrMap;
-          if (name.equals("component-specification") || name.equals("page-specification"))
-          {
-            attrMap = child.getAttributesMap();
-            XMLNode attribute = (XMLNode) attrMap.get("class");
-            if (attribute != null)
-            {
-              String attrValue = attribute.getAttributeValue();
-              if (attrValue != null)
-                return resolveType(attrValue);
-            }
 
-          } else if (name.equals("application"))
+    XMLNode root = getRootNode();
+    if (root == null)
+      return null;
+
+    List children = root.getChildren();
+    for (Iterator iter = children.iterator(); iter.hasNext();)
+    {
+      XMLNode child = (XMLNode) iter.next();
+      String type = child.getType();
+      if (type == ITypeConstants.TAG || type == ITypeConstants.EMPTYTAG)
+      {
+        String name = child.getName();
+        if (name == null)
+          return null;
+        name = name.toLowerCase();
+        Map attrMap;
+        if (name.equals("component-specification") || name.equals("page-specification"))
+        {
+          attrMap = child.getAttributesMap();
+          XMLNode attribute = (XMLNode) attrMap.get("class");
+          if (attribute != null)
           {
-            attrMap = child.getAttributesMap();
-            XMLNode attribute = (XMLNode) attrMap.get("engine-class");
-            if (attribute != null)
-            {
-              String attrValue = attribute.getAttributeValue();
-              if (attrValue != null)
-                return resolveType(attrValue);
-            }
+            String attrValue = attribute.getAttributeValue();
+            if (attrValue != null)
+              return resolveType(attrValue);
+          }
+
+        } else if (name.equals("application"))
+        {
+          attrMap = child.getAttributesMap();
+          XMLNode attribute = (XMLNode) attrMap.get("engine-class");
+          if (attribute != null)
+          {
+            String attrValue = attribute.getAttributeValue();
+            if (attrValue != null)
+              return resolveType(attrValue);
           }
         }
       }
-    } catch (BadLocationException e)
-    {
-      UIPlugin.log(e);
-    } finally
-    {
-      detachPartitioner();
     }
     return null;
   }

@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors.spec;
+package com.iw.plugins.spindle.editors.spec.outline;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -70,13 +70,15 @@ import com.iw.plugins.spindle.core.spec.IIdentifiable;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.editors.spec.SpecEditor;
 import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
 
 /**
  * Outline view for Spec Editor that shows parse results only.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: TapestryOutlinePage.java,v 1.3.2.1 2004/06/10 16:48:20 glongman
+ *          Exp $
  */
 public class TapestryOutlinePage extends ContentOutlinePage
 {

@@ -41,7 +41,7 @@ import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
  * Text Hover for Editor annotations
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class DefaultTextHover implements ITextHover
 {
@@ -93,8 +93,7 @@ public class DefaultTextHover implements ITextHover
       }
 
     } catch (BadLocationException e)
-    {
-      // TODO Auto-generated catch block
+    {      
       e.printStackTrace();
     }
     return null;

@@ -37,7 +37,7 @@ import com.iw.plugins.spindle.editors.Editor;
  * the body of the XML
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: CDATACompletionProcessor.java,v 1.1 2003/11/21 17:41:23
+ * @version $Id: CDATACompletionProcessor.java,v 1.1.2.2 2004/06/22 12:24:20
  *          glongman Exp $
  */
 public class CDATACompletionProcessor extends ContentAssistProcessor
@@ -49,6 +49,16 @@ public class CDATACompletionProcessor extends ContentAssistProcessor
   public CDATACompletionProcessor(Editor editor)
   {
     super(editor);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect(org.eclipse.jface.text.IDocument)
+   */
+  protected void init(IDocument document) throws IllegalStateException
+  {    
+    // do nothing.
   }
 
   /*

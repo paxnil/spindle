@@ -63,10 +63,8 @@ public class RequiredSaveEditorAction
 
   public boolean save()
   {
-    return save(
-        "not saving all here will abort the current operation",
-        "Warning, listed files need to be saved before continuing"); // TODO
-                                                                     // I10N
+    return save(UIPlugin.getString("requiredSaveTitle"), UIPlugin
+        .getString("requiredSaveMessage"));
   }
 
   public boolean save(String title, String message)

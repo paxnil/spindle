@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.editors.spec;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Shell;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.editors.util.XMLNodeContentProvider;
@@ -38,7 +38,7 @@ import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
  * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: XMLOutlineInformationControl.java,v 1.3 2004/06/02 01:18:52
+ * @version $Id: XMLOutlineInformationControl.java,v 1.2.2.2 2004/06/22 12:22:52
  *          glongman Exp $
  */
 public class XMLOutlineInformationControl extends TreeInformationControl
@@ -50,7 +50,7 @@ public class XMLOutlineInformationControl extends TreeInformationControl
     {
       XMLNode node = (XMLNode) element;
 
-      if (node.getType() == XMLDocumentPartitioner.ATTR)
+      if (node.getType() == ITypeConstants.ATTR)
       {
         if (match(node.getAttributeValue()))
           return true;

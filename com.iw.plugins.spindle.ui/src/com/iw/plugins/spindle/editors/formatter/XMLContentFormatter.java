@@ -23,24 +23,22 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editors;
+package com.iw.plugins.spindle.editors.formatter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.formatter.IContentFormatter;
-import org.eclipse.jface.text.formatter.IFormattingStrategy;
+import org.eclipse.jface.text.TypedPosition;
+import org.eclipse.jface.text.rules.DefaultPartitioner;
 
-import com.iw.plugins.spindle.PreferenceConstants;
+import com.iw.plugins.spindle.core.util.Assert;
 
 /**
  * a formatter for XML content.
@@ -49,50 +47,38 @@ import com.iw.plugins.spindle.PreferenceConstants;
  * mode. Position management is basically copied from the original, formatting is delgeated to a
  * strategy object (not the org.eclipse.jface.text.formatter.IFormattingStrategy interface).</em>
  * 
+ * Modified again by GWL to work in the new Master/Slave formatting setup in
+ * Eclipse 3.0
+ * 
  * @author cse
- * @version $Id$
+ * @version $Id: XMLContentFormatter.java,v 1.1.4.1 2004/06/10 16:48:19 glongman
+ *                     Exp $
  */
-public class XMLContentFormatter implements IContentFormatter
+public class XMLContentFormatter
 {
-  public interface FormattingStrategy
-  {
-    /**
-     * Do the actual formatting. The document should not be modified by this
-     * method. Instead, the formatted string must be returned and will be used
-     * by the caller to replace the document text, after synchronizing
-     * positionings.
-     * 
-     * @param document the document containing the region to be formatted.
-     * @param offset the offset into the document
-     * @param length length of the region to format
-     * @param positions positions that must be maintained by the formatter
-     * @return the formatted string to be inserted in place of the selected
-     *         region
-     */
-    String format(IDocument document, int offset, int length, int[] positions);
-
-    /**
-     * determine whether empty lines should be preserved during formatting.
-     * 
-     * @param preserve true if lines should be preserved
-     */
-    public void setPreserveEmpty(boolean preserve);
-
-    /**
-     * determine the number of spaces to use if tabs are not used
-     * 
-     * @param spaces the number of spaces per tab
-     */
-    public void setTabSpaces(int spaces);
-
-    /**
-     * Determine whether indenting should be done by tabs. This will also
-     * replace any existing indents.
-     * 
-     * @param <code>true</code> if tabs should be used for indenting.
-     */
-    public void setUseTabIndent(boolean useTabs);
-  }
+//  public static interface FormatWorker
+//  {
+//    /**
+//     * Do the actual formatting. The document should not be modified by this
+//     * method. Instead, the formatted string must be returned and will be used
+//     * by the caller to replace the document text, after synchronizing
+//     * positionings.
+//     * 
+//     * @param prefs the formatter preferences
+//     * @param document the document containing the region to be formatted.
+//     * @param offset the offset into the document
+//     * @param length length of the region to format
+//     * @param positions positions that must be maintained by the formatter
+//     * @return the formatted string to be inserted in place of the selected
+//     *                 region
+//     */
+//    String format(
+//        FormattingPreferences prefs,
+//        IDocument document,
+//       TypedPosition position,
+//        int[] positions);
+//
+//  }
 
   /**
    * Defines a reference to either the offset or the end offset of a particular
@@ -113,10 +99,10 @@ public class XMLContentFormatter implements IContentFormatter
     /**
      * @param position the position to be referenced
      * @param refersToOffset <code>true</code> if position offset should be
-     *          referenced
+     *                     referenced
      * @param category the categpry the given position belongs to
      * @param isDuplicate whether this is a duplicate reference, if both offset
-     *          and length overlap
+     *                     and length overlap
      */
     protected PositionReference(Position position, boolean refersToOffset,
         String category, boolean isDuplicate)
@@ -154,7 +140,7 @@ public class XMLContentFormatter implements IContentFormatter
 
     /**
      * @return <code>true</code> if the offset of the position is referenced,
-     *         <code>false</code> otherwise
+     *                 <code>false</code> otherwise
      */
     protected boolean refersToOffset()
     {
@@ -213,7 +199,7 @@ public class XMLContentFormatter implements IContentFormatter
         setOffset(position);
       } else
       {
-        setLength(getLength() == 0 ? 0 : position - getOffset() + 1);
+        setLength(getLength() == 0 ? 0 : Math.max(0,position - getOffset() + 1));
       }
     }
 
@@ -295,53 +281,50 @@ public class XMLContentFormatter implements IContentFormatter
    */
   private List fOverlappingPositionReferences;
   /** The strategy used to do the actual formatting */
-  private FormattingStrategy fFormattingStrategy;
+  private FormatWorker fFormatWorker; 
   /** The store to pull formatting preferences from */
-  private IPreferenceStore fPreferenceStore;
+  private FormattingPreferences fFormattingPreferences;
   /** Display tab width - set on construction only */
-  private int fDisplayTabWidth;
 
   /**
    * @param partitioningCategories the position categories which are used to
-   *          manage the document's partitioning information and thus should be
-   *          ignored when this formatter updates positions
+   *                     manage the document's partitioning information and thus should be
+   *                     ignored when this formatter updates positions
    */
-  public XMLContentFormatter(FormattingStrategy formattingStrategy,
-      String[] partitioningCategories, IPreferenceStore store)
+  public XMLContentFormatter(FormatWorker formatWorker,
+      String[] partitioningCategories, FormattingPreferences formattingPreferences)
   {
+    Assert.isLegal(!formatWorker.usesEdits());
     fPartitionManagingCategories = partitioningCategories;
-    fFormattingStrategy = formattingStrategy;
-    fPreferenceStore = store;
-    fDisplayTabWidth = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    fFormatWorker = formatWorker;
+    fFormattingPreferences = formattingPreferences;
   }
 
-  /*
-   * @see IContentFormatter#format(IDocument, IRegion)
-   */
-  public void format(IDocument document, IRegion region)
+  public void format(IDocument document, TypedPosition partition)
   {
+
     try
     {
-      final int offset = region.getOffset();
-      int length = region.getLength();
 
-      final int[] positions = getAffectedPositions(document, offset, length);
+      final int[] positions = getAffectedPositions(
+          document,
+          partition.offset,
+          partition.length);
 
-      fFormattingStrategy.setPreserveEmpty(fPreferenceStore
-          .getBoolean(PreferenceConstants.FORMATTER_PRESERVE_BLANK_LINES));
-      fFormattingStrategy.setUseTabIndent(fPreferenceStore
-          .getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT));
-
-      String formatted = fFormattingStrategy.format(document, offset, length, positions);
+      String formatted = (String) fFormatWorker.format(
+          fFormattingPreferences,
+          document,
+          partition,
+          positions);
 
       if (formatted != null)
       {
         IPositionUpdater first = new RemoveAffectedPositions();
         document.insertPositionUpdater(first, 0);
-        IPositionUpdater last = new UpdateAffectedPositions(positions, offset);
+        IPositionUpdater last = new UpdateAffectedPositions(positions, partition.offset);
         document.addPositionUpdater(last);
 
-        document.replace(offset, length, formatted);
+        document.replace(partition.offset, partition.length, formatted);
 
         document.removePositionUpdater(first);
         document.removePositionUpdater(last);
@@ -350,17 +333,6 @@ public class XMLContentFormatter implements IContentFormatter
     {
       // should not happen
     }
-  }
-
-  /*
-   * We dont support/use formatting strategies, therefore this method returns
-   * <code> null </code>
-   * 
-   * @see IContentFormatter#getFormattingStrategy(String)
-   */
-  public IFormattingStrategy getFormattingStrategy(String contentType)
-  {
-    return null;
   }
 
   /**
@@ -479,7 +451,7 @@ public class XMLContentFormatter implements IContentFormatter
    * 
    * @param document the document to has been formatted
    * @param positions the adapted character positions to be used to update the
-   *          document positions
+   *                     document positions
    * @param offset the offset of the document region that has been formatted
    */
   private void updateAffectedPositions(IDocument document, int[] positions, int offset)
@@ -578,7 +550,7 @@ public class XMLContentFormatter implements IContentFormatter
    * @param category the position categroy
    * @param position the position that will be added
    * @return <code>true</code> if the position can be added,
-   *         <code>false</code> if it should be ignored
+   *                 <code>false</code> if it should be ignored
    */
   private boolean positionAboutToBeAdded(
       IDocument document,
@@ -614,8 +586,15 @@ public class XMLContentFormatter implements IContentFormatter
     {
       for (int i = 0; i < fPartitionManagingCategories.length; i++)
       {
-        if (fPartitionManagingCategories[i].equals(category))
+        String ignore = fPartitionManagingCategories[i];
+        if (ignore == DefaultPartitioner.CONTENT_TYPES_CATEGORY
+            && category.startsWith(ignore))
+        {
           return true;
+        } else if (ignore.equals(category))
+        {
+          return true;
+        }
       }
     }
     return false;

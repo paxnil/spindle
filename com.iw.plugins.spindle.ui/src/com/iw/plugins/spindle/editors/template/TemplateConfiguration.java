@@ -53,7 +53,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
-import com.iw.plugins.spindle.editors.XMLAutoIndentStrategy;
+import com.iw.plugins.spindle.editors.formatter.XMLAutoIndentStrategy;
 import com.iw.plugins.spindle.editors.template.assist.AttributeContentAssistProcessor;
 import com.iw.plugins.spindle.editors.template.assist.DefaultContentAssistProcessor;
 import com.iw.plugins.spindle.editors.template.assist.JWCIDContentAssistProcessor;
@@ -63,8 +63,8 @@ import com.iw.plugins.spindle.editors.template.assist.TagContentAssistProcessor;
  * SourceViewerConfiguration for the TemplateEditor
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: TemplateConfiguration.java,v 1.9 2004/05/05 19:30:02 glongman
- *          Exp $
+ * @version $Id: TemplateConfiguration.java,v 1.9.2.2 2004/06/22 12:23:34
+ *          glongman Exp $
  */
 public class TemplateConfiguration extends BaseSourceConfiguration
 {
@@ -196,6 +196,8 @@ public class TemplateConfiguration extends BaseSourceConfiguration
 
     reconciler.setDamager(dr, TemplatePartitionScanner.XML_CDATA);
     reconciler.setRepairer(dr, TemplatePartitionScanner.XML_CDATA);
+
+    reconciler.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
     return reconciler;
   }

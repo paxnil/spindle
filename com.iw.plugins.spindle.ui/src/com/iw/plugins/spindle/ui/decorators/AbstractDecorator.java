@@ -40,7 +40,8 @@ import com.iw.plugins.spindle.core.TapestryCore;
  * Base class for label decorators
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: AbstractDecorator.java,v 1.1.4.1 2004/06/10 16:48:19 glongman
+ *          Exp $
  */
 public abstract class AbstractDecorator
     implements

@@ -3,7 +3,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.1.2 "
+   version="0.1.3"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -18,7 +18,6 @@
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="com.iw.plugins.spindle.core" export="true"/>
       <import plugin="org.eclipse.jdt.ui"/>
-      <import plugin="org.eclipse.search"/>
       <import plugin="net.sf.solareclipse.ui"/>
       <import plugin="net.sf.solareclipse.xml.ui"/>
       <import plugin="org.eclipse.jdt.launching"/>
@@ -120,6 +119,12 @@
             category="SpindlePreferences"
             class="com.iw.plugins.spindle.ui.preferences.SpindleEditorPreferencePage"
             id="SpindleEditorPreferences">
+      </page>
+      <page
+            name="Formatter"
+            category="SpindlePreferences"
+            class="com.iw.plugins.spindle.ui.preferences.SpindleFormatterPreferencePage"
+            id="SpindleFormatterPreferences">
       </page>
    </extension>
    <extension

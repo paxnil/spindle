@@ -39,7 +39,7 @@ import org.apache.tapestry.parse.TemplateParser;
  * Perl expression matcher for implicit components found in Tapestry templates.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class ImplicitIdMatcher
 {

@@ -52,7 +52,7 @@ import com.iw.plugins.spindle.editors.util.CompletionProposal;
  * Content assist inside of jwcid attributes
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: JWCIDContentAssistProcessor.java,v 1.10 2004/06/10 15:50:46
+ * @version $Id: JWCIDContentAssistProcessor.java,v 1.9.2.1 2004/06/10 16:48:21
  *          glongman Exp $
  */
 public class JWCIDContentAssistProcessor extends TemplateContentAssistProcessor

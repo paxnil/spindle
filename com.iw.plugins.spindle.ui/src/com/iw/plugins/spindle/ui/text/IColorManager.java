@@ -34,7 +34,7 @@ import org.eclipse.swt.graphics.Color;
  * key
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface IColorManager extends ISharedTextColors
 {

@@ -30,7 +30,7 @@ package com.iw.plugins.spindle;
  * Preference constants used by Spindle
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ *  
  */
 public interface PreferenceConstants
 {
@@ -40,17 +40,22 @@ public interface PreferenceConstants
 
   String P_HTML_TO_GENERATE = UIPlugin.PLUGIN_ID + ".P_HTML_TO_GENERATE";
 
-  String EDITOR_DISPLAY_TAB_WIDTH = UIPlugin.PLUGIN_ID + ".EDITOR_DISPLAY_TAB_WIDTH";
-
   String EDITOR_USE_SMART_INDENT = UIPlugin.PLUGIN_ID + ".EDITOR_USE_SMART_INDENT";
+
+  String TEMPLATE_EDITOR_HTML_SHOW_XHTML = UIPlugin.PLUGIN_ID
+      + ".TEMPLATE_EDITOR_HTML_SHOW_XHTML_STRICT";
 
   String FORMATTER_PRESERVE_BLANK_LINES = UIPlugin.PLUGIN_ID
       + ".FORMATTER_PRESERVE_BLANK_LINES";
 
-  String FORMATTER_USE_TABS_TO_INDENT = UIPlugin.PLUGIN_ID
-      + ".FORMATTER_USE_TABS_TO_INDENT";
+  String FORMATTER_MAX_LINE_LENGTH = UIPlugin.PLUGIN_ID + ".FORMATTER_MAX_LINE_LENGTH";
 
-  String TEMPLATE_EDITOR_HTML_SHOW_XHTML = UIPlugin.PLUGIN_ID
-      + ".TEMPLATE_EDITOR_HTML_SHOW_XHTML_STRICT";
+  String FORMATTER_WRAP_LONG = UIPlugin.PLUGIN_ID + ".FORMATTER_WRAP_LONG";
+
+  String FORMATTER_ALIGN = UIPlugin.PLUGIN_ID + ".FORMATTER_ALIGN";
+
+  String FORMATTER_TAB_SIZE = UIPlugin.PLUGIN_ID + ".EDITOR_DISPLAY_TAB_WIDTH";
+
+  String FORMATTER_TAB_CHAR = UIPlugin.PLUGIN_ID + ".FORMATTER_USE_TABS_TO_INDENT";
 
 }

@@ -34,8 +34,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -172,8 +170,8 @@ public class PageFactory
     newSpec.setPublicId(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID);
     newSpec.setComponentClassName(qualifiedSpecClassname);
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
-    int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_TAB_CHAR);
+    int tabSize = store.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
     StringWriter swriter = new StringWriter();
     IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
     XMLUtil.writeComponentSpecification(iwriter, newSpec, 0);

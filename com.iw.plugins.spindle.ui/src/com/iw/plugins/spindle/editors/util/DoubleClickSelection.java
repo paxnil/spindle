@@ -31,7 +31,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 /**
- * TODO Add Type comment
+ * A structured selection for DoubleClicks
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: DoubleClickSelection.java,v 1.1 2003/11/21 17:41:23 glongman
@@ -46,8 +46,7 @@ public class DoubleClickSelection extends StructuredSelection
   public DoubleClickSelection()
   {
     super();
-    // TODO Auto-generated constructor stub
-  }
+   }
 
   /**
    * @param elements
@@ -55,7 +54,6 @@ public class DoubleClickSelection extends StructuredSelection
   public DoubleClickSelection(Object[] elements)
   {
     super(elements);
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -64,7 +62,6 @@ public class DoubleClickSelection extends StructuredSelection
   public DoubleClickSelection(Object element)
   {
     super(element);
-    // TODO Auto-generated constructor stub
   }
 
   /**
@@ -73,7 +70,6 @@ public class DoubleClickSelection extends StructuredSelection
   public DoubleClickSelection(List elements)
   {
     super(elements);
-    // TODO Auto-generated constructor stub
   }
 
 }

@@ -26,40 +26,26 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.template;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.ui.editors.text.StorageDocumentProvider;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.editors.documentsAndModels.StorageDocumentModelProvider;
 
 /**
- * HTML file document provider.
+ * HTML file document provider. TODO ditch
  * 
  * @author Igor Malinin
  */
-public class TemplateStorageDocumentProvider extends StorageDocumentProvider
+public class TemplateStorageDocumentProvider extends StorageDocumentModelProvider
 {
   /*
-   * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createDocument(Object)
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.documentsAndModels.StorageDocumentModelProvider#getSyntaxPartitioner()
    */
-  protected IDocument createDocument(Object element) throws CoreException
+  protected IDocumentPartitioner getSyntaxPartitioner()
   {
-    IDocument document = super.createDocument(element);
-    if (document != null)
-    {
-      IDocumentPartitioner partitioner = UIPlugin
-          .getDefault()
-          .getTemplateTextTools()
-          .createXMLPartitioner();
-
-      if (partitioner != null)
-      {
-        partitioner.connect(document);
-        document.setDocumentPartitioner(partitioner);
-      }
-    }
-
-    return document;
+    return UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
   }
+
 }

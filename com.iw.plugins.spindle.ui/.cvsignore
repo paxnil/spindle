@@ -2,4 +2,4 @@ bin
 buildRelease
 ui.jar
 spindle_ui.jar
-
+dev.properties

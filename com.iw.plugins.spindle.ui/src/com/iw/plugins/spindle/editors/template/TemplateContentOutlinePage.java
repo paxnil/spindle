@@ -36,12 +36,14 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.jface.text.IDocumentPartitioningListener;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -55,6 +57,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
@@ -70,7 +73,6 @@ import com.iw.plugins.spindle.ui.util.StringSorter;
  */
 public class TemplateContentOutlinePage extends ContentOutlinePage
     implements
-      IDocumentPartitioningListener,
       IDocumentListener
 {
 
@@ -88,7 +90,7 @@ public class TemplateContentOutlinePage extends ContentOutlinePage
   public void setDocument(IDocument document)
   {
     this.fDocument = document;
-    document.addDocumentPartitioningListener(this);
+    //        document.addDocumentPartitioningListener(this);
     document.addDocumentListener(this);
   }
 
@@ -132,16 +134,17 @@ public class TemplateContentOutlinePage extends ContentOutlinePage
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.text.IDocumentPartitioningListener#documentPartitioningChanged(org.eclipse.jface.text.IDocument)
-   */
-  public void documentPartitioningChanged(IDocument document)
-  {
-    if (getTreeViewer() != null)
-      getTreeViewer().setInput(new Long(System.currentTimeMillis()));
-  }
+  //    /* (non-Javadoc)
+  //     * @see
+  // org.eclipse.jface.text.IDocumentPartitioningListener#documentPartitioningChanged(org.eclipse.jface.text.IDocument)
+  //     */
+  //    public void documentPartitioningChanged(IDocument document)
+  //    {
+  //      if (getTreeViewer() != null)
+  //        getTreeViewer().setInput(new Long(System.currentTimeMillis()));
+  //    }
+  //    
+  //    
 
   /*
    * (non-Javadoc)
@@ -262,11 +265,19 @@ public class TemplateContentOutlinePage extends ContentOutlinePage
       contents.clear();
       if (fDocument != null)
       {
+        IDocumentExtension3 document = (IDocumentExtension3) fDocument;
         ITypedRegion[] partitions = null;
         try
         {
-          partitions = fDocument.computePartitioning(0, fDocument.getLength() - 1);
-        } catch (BadLocationException ex)
+          partitions = document.computePartitioning(
+              XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY,
+              0,
+              fDocument.getLength() - 1,
+              true);
+        } catch (BadPartitioningException ex)
+        {
+          return new Object[]{"error occured scanning source"};
+        } catch (BadLocationException e)
         {
           return new Object[]{"error occured scanning source"};
         }
@@ -291,7 +302,6 @@ public class TemplateContentOutlinePage extends ContentOutlinePage
       }
       return contents.toArray();
     }
-
     public void dispose()
     {
     }

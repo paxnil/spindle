@@ -27,45 +27,23 @@
 package com.iw.plugins.spindle.editors.template;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
+import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.editors.documentsAndModels.SpindleFileDocumentProvider;
 
 /**
  * Document provider for templates that come from files
  *  
  */
-public class TemplateFileDocumentProvider extends FileDocumentProvider
+public class TemplateFileDocumentProvider extends SpindleFileDocumentProvider
 {
-  /*
-   * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createDocument(Object)
+
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createAnnotationModel(java.lang.Object)
    */
-  protected IDocument createDocument(Object element) throws CoreException
-  {
-    IDocument document = super.createDocument(element);
-    if (document != null)
-    {
-      DefaultPartitioner defaultPartitioner = createParitioner();
-
-      if (defaultPartitioner != null)
-      {
-        defaultPartitioner.connect(document);
-        document.setDocumentPartitioner(defaultPartitioner);
-      }
-    }
-
-    return document;
-  }
-
-  protected DefaultPartitioner createParitioner()
-  {
-    return UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
-  }
-
   protected IAnnotationModel createAnnotationModel(Object element) throws CoreException
   {
     if (element instanceof IFileEditorInput)
@@ -74,5 +52,15 @@ public class TemplateFileDocumentProvider extends FileDocumentProvider
     }
 
     return super.createAnnotationModel(element);
+  }
+  
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.documentsAndModels.StorageDocumentModelProvider#getSyntaxPartitioner()
+   */
+  protected IDocumentPartitioner getSyntaxPartitioner()
+  {
+    return UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
   }
 }

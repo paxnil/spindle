@@ -36,7 +36,7 @@ import org.apache.tapestry.parse.TemplateParser;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
@@ -49,8 +49,8 @@ import com.iw.plugins.spindle.editors.util.CompletionProposal;
  * Content assist inside of Tags (but not attributes)
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: DefaultContentAssistProcessor.java,v 1.3 2004/06/10 15:50:47
- *          glongman Exp $
+ * @version $Id: DefaultContentAssistProcessor.java,v 1.2.2.2 2004/06/22
+ *          12:23:59 glongman Exp $
  */
 public class DefaultContentAssistProcessor extends TemplateContentAssistProcessor
 {
@@ -75,10 +75,10 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
 
     String type = tag.getType();
 
-    if (type == XMLDocumentPartitioner.TEXT)
+    if (type == ITypeConstants.TEXT)
       return computeTextProposals(viewer, documentOffset);
 
-    if (type != XMLDocumentPartitioner.TAG && type != XMLDocumentPartitioner.EMPTYTAG)
+    if (type != ITypeConstants.TAG && type != ITypeConstants.EMPTYTAG)
       return NoProposals;
 
     if (tag.isTerminated() && documentOffset == tag.getOffset() + tag.getLength())

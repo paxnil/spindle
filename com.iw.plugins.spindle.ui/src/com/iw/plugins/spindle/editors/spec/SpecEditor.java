@@ -47,7 +47,6 @@ import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -77,7 +76,9 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -104,15 +105,18 @@ import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.IReconcileWorker;
+import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
+import com.iw.plugins.spindle.editors.documentsAndModels.SpecDocumentSetupParticipant;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
+import com.iw.plugins.spindle.editors.spec.outline.MultiPageContentOutline;
 
 /**
  * Editor for Tapestry Spec files
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ *  
  */
 public class SpecEditor extends Editor
 {
@@ -131,7 +135,6 @@ public class SpecEditor extends Editor
   public SpecEditor()
   {
     super();
-    fOutline = new MultiPageContentOutline(this);
   }
 
   public Object getInformationControlInput()
@@ -167,6 +170,12 @@ public class SpecEditor extends Editor
   public void createPartControl(Composite parent)
   {
     super.createPartControl(parent);
+    
+    IStorage storage = getStorage();
+    IProject project = TapestryCore.getDefault().getProjectFor(storage);
+    TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+    Map specs = manager.getSpecMap(project);
+    
     Control[] children = parent.getChildren();
     fControl = children[children.length - 1];
 
@@ -202,7 +211,7 @@ public class SpecEditor extends Editor
     {
       XMLNode artifact = (XMLNode) obj;
       String type = artifact.getType();
-      if (type == XMLDocumentPartitioner.ATTR)
+      if (type == ITypeConstants.ATTR)
       {
         IRegion valueRegion = artifact.getAttributeValueRegion();
         if (valueRegion != null)
@@ -229,7 +238,7 @@ public class SpecEditor extends Editor
     {
       XMLNode artifact = (XMLNode) obj;
       String type = artifact.getType();
-      if (type == XMLDocumentPartitioner.ATTR)
+      if (type == ITypeConstants.ATTR)
       {
         IRegion valueRegion = artifact.getAttributeValueRegion();
         if (valueRegion != null)
@@ -238,7 +247,7 @@ public class SpecEditor extends Editor
           return;
         }
       }
-      if (artifact.getType() == XMLDocumentPartitioner.TAG)
+      if (artifact.getType() == ITypeConstants.TAG)
       {
         XMLNode corr = artifact.getCorrespondingNode();
         if (corr != null)
@@ -249,7 +258,7 @@ public class SpecEditor extends Editor
           return;
         }
       }
-      if (type == XMLDocumentPartitioner.ENDTAG)
+      if (type == ITypeConstants.ENDTAG)
       {
         XMLNode corr = artifact.getCorrespondingNode();
         if (corr != null)
@@ -348,6 +357,7 @@ public class SpecEditor extends Editor
    */
   public IContentOutlinePage createContentOutlinePage(IEditorInput input)
   {
+    fOutline = new MultiPageContentOutline(this, input);
     return fOutline;
   }
 
@@ -361,12 +371,12 @@ public class SpecEditor extends Editor
     if (input instanceof IFileEditorInput)
       return UIPlugin.getDefault().getSpecFileDocumentProvider();
 
-    return new SpecStorageDocumentProvider();
+    return UIPlugin.getDefault().getSpecStorageDocumentProvider();
   }
 
   /*
    * @see org.eclipse.ui.texteditor.AbstractTextEditor#createSourceViewer(Composite,
-   *      IVerticalRuler, int)
+   *              IVerticalRuler, int)
    */
   protected ISourceViewer createSourceViewer(
       Composite parent,
@@ -396,7 +406,7 @@ public class SpecEditor extends Editor
    */
   protected SourceViewerConfiguration createSourceViewerConfiguration()
   {
-    return new SpecConfiguration(UIPlugin.getDefault().getXMLTextTools(), this, UIPlugin
+    return new SpecEditorConfiguration(UIPlugin.getDefault().getXMLTextTools(), this, UIPlugin
         .getDefault()
         .getPreferenceStore());
   }
@@ -452,7 +462,7 @@ public class SpecEditor extends Editor
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.editors.ISelfReconcilingEditor#reconcile(com.iw.plugins.spindle.core.parser.IProblemCollector,
-   *      org.eclipse.core.runtime.IProgressMonitor)
+   *              org.eclipse.core.runtime.IProgressMonitor)
    */
   public void reconcile(IProblemCollector collector, IProgressMonitor monitor)
   {
@@ -470,39 +480,41 @@ public class SpecEditor extends Editor
 
   private void reconcileOutline()
   {
-    if (fOutlinePartitioner == null)
-      fOutlinePartitioner = new XMLDocumentPartitioner(
-          XMLDocumentPartitioner.SCANNER,
-          XMLDocumentPartitioner.TYPES);
-    try
-    {
-      IDocument document = getDocumentProvider().getDocument(getEditorInput());
-      if (document.getLength() == 0 || document.get().trim().length() == 0)
-      {
-        ((MultiPageContentOutline) fOutline).setInput(null);
-      } else
-      {
-
-        fOutlinePartitioner.connect(document);
-        try
-        {
-          ((MultiPageContentOutline) fOutline).setInput(XMLNode.createTree(document, -1));
-        } catch (BadLocationException e)
-        {
-          // do nothing
-        }
-      }
-      if (fUpdater != null)
-        fUpdater.post();
-
-    } catch (RuntimeException e)
-    {
-      UIPlugin.log(e);
-      throw e;
-    } finally
-    {
-      fOutlinePartitioner.disconnect();
-    }
+    //    if (fOutlinePartitioner == null)
+    //      fOutlinePartitioner = new
+    // XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
+    // XMLDocumentPartitioner.TYPES);
+    // TODO remove ? try
+    //    {
+    //      IDocument document = getDocumentProvider().getDocument(getEditorInput());
+    //      if (document.getLength() == 0 || document.get().trim().length() == 0)
+    //      {
+    //        ((MultiPageContentOutline) fOutline).setInput(null);
+    //      } else
+    //      {
+    //
+    //        // fOutlinePartitioner.connect(document);
+    //        try
+    //        {
+    //          ((MultiPageContentOutline)
+    // fOutline).setInput(XMLNode.createTree(document, -1));
+    //        } catch (BadLocationException e)
+    //        {
+    //          // do nothing
+    //        }
+    //      }
+    //      if (fUpdater != null)
+    //        fUpdater.post();
+    //
+    //    } catch (RuntimeException e)
+    //    {
+    //      UIPlugin.log(e);
+    //      throw e;
+    //    }
+    //    finally
+    //    {
+    //      fOutlinePartitioner.disconnect();
+    //    }
   }
   /**
    * return the Tapestry specification object obtained during the last build
@@ -724,7 +736,6 @@ public class SpecEditor extends Editor
               e.printStackTrace();
             } catch (CoreException e)
             {
-              // TODO Auto-generated catch block
               e.printStackTrace();
             }
           }
@@ -940,12 +951,11 @@ public class SpecEditor extends Editor
       menu.appendToGroup(NAV_GROUP, moreNav);
     menu
         .insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
-    if (!UIPlugin.isEclipse3())
-    {
-      MenuManager sourceMenu = new MenuManager("Source");
-      sourceMenu.add(getAction("Format"));
-      menu.appendToGroup(SOURCE_GROUP, sourceMenu);
-    }
+
+    MenuManager sourceMenu = new MenuManager("Source");
+    sourceMenu.add(getAction("Format"));
+    menu.appendToGroup(SOURCE_GROUP, sourceMenu);
+
   }
 
   public static class SpecEditorInformationProvider
@@ -955,7 +965,6 @@ public class SpecEditor extends Editor
   {
     private SpecEditor fEditor;
     private boolean fUseReconcileResults;
-    private XMLDocumentPartitioner fPartitioner;
 
     public SpecEditorInformationProvider(IEditorPart editor)
     {
@@ -1004,32 +1013,17 @@ public class SpecEditor extends Editor
       if (fUseReconcileResults)
         return fEditor.getReconciledSpec();
 
-      if (fPartitioner == null)
-        fPartitioner = new XMLDocumentPartitioner(
-            XMLDocumentPartitioner.SCANNER,
-            XMLDocumentPartitioner.TYPES);
-      IDocument document = fEditor.getDocumentProvider().getDocument(
-          fEditor.getEditorInput());
-      if (document == null)
+      IDocumentProvider documentProvider = fEditor.getDocumentProvider();
+      IDocument document = documentProvider.getDocument(fEditor.getEditorInput());
+
+      IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+
+      XMLReconciler model = modelProvider.getModel(document);
+      if (model == null)
         return null;
-      try
-      {
-        fPartitioner.connect(document);
-        return XMLNode.createTree(document, -1);
-      } catch (Exception e)
-      {
-        UIPlugin.log(e);
-        return null;
-      } finally
-      {
-        try
-        {
-          fPartitioner.disconnect();
-        } catch (RuntimeException e)
-        {
-          UIPlugin.log(e);
-        }
-      }
+
+      return model.getRoot();
+
     }
   }
 }

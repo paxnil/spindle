@@ -24,7 +24,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.editors;
+package com.iw.plugins.spindle.editors.formatter;
 
 import java.util.Arrays;
 
@@ -37,10 +37,10 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
-import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
@@ -48,34 +48,27 @@ import com.iw.plugins.spindle.UIPlugin;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: XMLAutoIndentStrategy.java,v 1.4 2003/11/21 17:41:23 glongman
- *          Exp $
+ *                     Exp $
  */
 public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
 {
-  private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
-  private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
-
-  private XMLDocumentPartitioner fPartitioner = new XMLDocumentPartitioner(
-      XMLDocumentPartitioner.SCANNER,
-      XMLDocumentPartitioner.TYPES);
 
   private TypedPosition[] fTypedPositions;
-  private IPreferenceStore fPreferences;
+  private FormattingPreferences fPrefs = new FormattingPreferences();
   private int fTabDisplayWidth;
 
   private DefaultLineTracker fLineTracker = new DefaultLineTracker();;
   public XMLAutoIndentStrategy(IPreferenceStore store)
   {
     super();
-    fPreferences = store;
-    fTabDisplayWidth = fPreferences.getInt(EDITOR_DISPLAY_TAB_WIDTH);
+    fTabDisplayWidth = fPrefs.getTabWidth();
   }
 
   /*
    * (non-Javadoc)
    * 
    * @see org.eclipse.jface.text.IAutoEditStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument,
-   *      org.eclipse.jface.text.DocumentCommand)
+   *              org.eclipse.jface.text.DocumentCommand)
    */
   public void customizeDocumentCommand(IDocument document, DocumentCommand command)
   {
@@ -90,7 +83,7 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
 
       try
       {
-        connect(document);
+        collectPositions(document);
         TypedPositionWalker walker = new TypedPositionWalker(fTypedPositions, offset);
 
         XMLNode artifact = (XMLNode) walker.previous();
@@ -105,18 +98,17 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
               && offset < artifact.getOffset() + artifact.getLength();
 
           String newType = null;
-          if (inside && type != XMLDocumentPartitioner.TEXT)
+          if (inside && type != ITypeConstants.TEXT)
           {
             doIndent(command, getIndent(document, artifact.getOffset()), 1);
 
-          } else if (type == XMLDocumentPartitioner.TEXT)
+          } else if (type == ITypeConstants.TEXT)
           {
             do
             {
               artifact = (XMLNode) walker.previous();
 
-            } while (artifact != null
-                && artifact.getType() == XMLDocumentPartitioner.TEXT);
+            } while (artifact != null && artifact.getType() == ITypeConstants.TEXT);
           }
 
           if (artifact == null)
@@ -125,10 +117,10 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
           } else
           {
             type = artifact.getType();
-            if (type == XMLDocumentPartitioner.TAG)
+            if (type == ITypeConstants.TAG)
             {
               doIndent(command, getIndent(document, artifact.getOffset()), 1);
-            } else if (type == XMLDocumentPartitioner.ENDTAG)
+            } else if (type == ITypeConstants.ENDTAG)
             {
               XMLNode corr = artifact.getCorrespondingNode();
               if (corr != null)
@@ -145,9 +137,6 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
       {
         UIPlugin.log(e);
         super.customizeDocumentCommand(document, command);
-      } finally
-      {
-        disconnect();
       }
     }
   }
@@ -161,7 +150,7 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
 
   private void doIndent(DocumentCommand command, int initialIndent, int additionalIndent)
   {
-    boolean useTabs = fPreferences.getBoolean(FORMATTER_USE_TABS_TO_INDENT);
+    boolean useTabs = !fPrefs.useSpacesInsteadOfTabs();
 
     StringBuffer buf = new StringBuffer(command.text);
 
@@ -185,26 +174,13 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
     return false;
   }
 
-  private void connect(IDocument d) throws BadLocationException,
+  private void collectPositions(IDocument d) throws BadLocationException,
       BadPositionCategoryException
   {
-    fPartitioner.connect(d);
-    Position[] pos = d.getPositions(fPartitioner.getPositionCategory());
+    Position[] pos = d.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
     Arrays.sort(pos, XMLNode.COMPARATOR);
     fTypedPositions = new TypedPosition[pos.length];
     System.arraycopy(pos, 0, fTypedPositions, 0, pos.length);
-    XMLNode.createTree(d, -1);
-  }
-
-  private void disconnect()
-  {
-    try
-    {
-      fPartitioner.disconnect();
-    } catch (Exception e)
-    {
-      UIPlugin.log(e);
-    }
   }
 
   /**

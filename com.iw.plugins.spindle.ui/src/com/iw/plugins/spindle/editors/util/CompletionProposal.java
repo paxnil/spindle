@@ -43,7 +43,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  * Base class for Completion Proposals
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class CompletionProposal implements ICompletionProposal
 {

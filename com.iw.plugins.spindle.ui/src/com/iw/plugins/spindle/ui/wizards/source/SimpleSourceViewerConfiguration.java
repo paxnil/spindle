@@ -45,7 +45,7 @@ import com.iw.plugins.spindle.UIPlugin;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: SimpleSourceViewerConfiguration.java,v 1.1 2004/01/02 20:00:15
- *          glongman Exp $
+ *                     glongman Exp $
  */
 public class SimpleSourceViewerConfiguration extends SourceViewerConfiguration
 {
@@ -121,7 +121,7 @@ public class SimpleSourceViewerConfiguration extends SourceViewerConfiguration
    */
   public int getTabWidth(ISourceViewer sourceViewer)
   {
-    return fPreferenceStore.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    return fPreferenceStore.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
   }
 
 }

@@ -27,7 +27,7 @@ package com.iw.plugins.spindle.editors.util;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
@@ -41,14 +41,14 @@ public class XMLNodeLabelProvider extends LabelProvider
       XMLNode artifact = (XMLNode) obj;
       String type = artifact.getType();
 
-      if (type == XMLDocumentPartitioner.TAG || type == XMLDocumentPartitioner.EMPTYTAG
-          || type == XMLDocumentPartitioner.DECL)
+      if (type == ITypeConstants.TAG || type == ITypeConstants.EMPTYTAG
+          || type == ITypeConstants.DECL)
       {
         String name = artifact.getName();
         return name == null ? "" : name;
       }
 
-      if (type == XMLDocumentPartitioner.ATTR)
+      if (type == ITypeConstants.ATTR)
       {
         String name = artifact.getName();
         String attrvalue = artifact.getAttributeValue();
@@ -56,13 +56,13 @@ public class XMLNodeLabelProvider extends LabelProvider
             + StringUtils.abbreviate(attrvalue == null ? "" : attrvalue, 50);
       }
 
-      if (type == XMLDocumentPartitioner.COMMENT)
+      if (type == ITypeConstants.COMMENT)
         return "COMMENT" + StringUtils.abbreviate(artifact.getContent().trim(), 50);
 
-      if (type == XMLDocumentPartitioner.TEXT)
+      if (type == ITypeConstants.TEXT)
         return StringUtils.abbreviate(artifact.getContent().trim(), 50);
 
-      if (type == XMLDocumentPartitioner.PI)
+      if (type == ITypeConstants.PI)
         return StringUtils.abbreviate(artifact.getContent().trim(), 50);
     }
 
@@ -74,7 +74,7 @@ public class XMLNodeLabelProvider extends LabelProvider
     {
       XMLNode artifact = (XMLNode) obj;
       String type = artifact.getType();
-      if (type == XMLDocumentPartitioner.DECL)
+      if (type == ITypeConstants.DECL)
       {
 
         if (artifact.getParent().getType().equals("/"))
@@ -84,22 +84,22 @@ public class XMLNodeLabelProvider extends LabelProvider
 
       }
 
-      if (type == XMLDocumentPartitioner.TAG)
+      if (type == ITypeConstants.TAG)
         return Images.getSharedImage("tag16.gif");
 
-      if (type == XMLDocumentPartitioner.EMPTYTAG)
+      if (type == ITypeConstants.EMPTYTAG)
         return Images.getSharedImage("empty16.gif");
 
-      if (type == XMLDocumentPartitioner.ATTR)
+      if (type == ITypeConstants.ATTR)
         return Images.getSharedImage("bullet.gif");
 
-      if (type == XMLDocumentPartitioner.COMMENT)
+      if (type == ITypeConstants.COMMENT)
         return Images.getSharedImage("comment16.gif");
 
-      if (type == XMLDocumentPartitioner.TEXT)
+      if (type == ITypeConstants.TEXT)
         return Images.getSharedImage("text16.gif");
 
-      if (type == XMLDocumentPartitioner.PI)
+      if (type == ITypeConstants.PI)
         return Images.getSharedImage("pi16.gif");
     }
     return null;

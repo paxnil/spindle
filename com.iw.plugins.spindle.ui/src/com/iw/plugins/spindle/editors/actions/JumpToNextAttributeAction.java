@@ -46,7 +46,7 @@ import com.iw.plugins.spindle.UIPlugin;
  * Jump to the next attribute in the document
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: JumpToNextAttributeAction.java,v 1.3 2004/06/10 15:50:48
+ * @version $Id: JumpToNextAttributeAction.java,v 1.2.2.2 2004/06/22 12:13:30
  *          glongman Exp $
  */
 public class JumpToNextAttributeAction extends BaseJumpAction
@@ -121,7 +121,6 @@ public class JumpToNextAttributeAction extends BaseJumpAction
 
   protected void buildRegionList(IDocument document)
   {
-    attachPartitioner();
 
     Position[] positions = null;
     try

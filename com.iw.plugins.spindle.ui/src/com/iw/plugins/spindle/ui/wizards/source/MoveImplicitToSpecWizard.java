@@ -51,7 +51,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.PreferenceConstants;
@@ -72,15 +72,15 @@ import com.iw.plugins.spindle.editors.template.assist.TemplateTapestryAccess;
  * component specification.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: MoveImplicitToSpecWizard.java,v 1.5 2004/06/15 04:11:22
+ * @version $Id: MoveImplicitToSpecWizard.java,v 1.4.2.1 2004/06/22 12:24:44
  *          glongman Exp $
  */
 public class MoveImplicitToSpecWizard extends Wizard
 {
 
-  private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
-  private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
-
+  private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_TAB_CHAR;
+  private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.FORMATTER_TAB_SIZE;
+  
   // info for formatting
   private boolean fUseTabIndent;
   private int fTabSpaces;
@@ -234,7 +234,6 @@ public class MoveImplicitToSpecWizard extends Wizard
     } catch (InvocationTargetException e)
     {
       UIPlugin.log(e);
-      UIPlugin.log(e.getCause());
     } catch (InterruptedException e)
     {
       UIPlugin.log(e);
@@ -639,7 +638,7 @@ public class MoveImplicitToSpecWizard extends Wizard
       }
     }
     String type = fImplicitNode.getType();
-    if (type == XMLDocumentPartitioner.TAG)
+    if (type == ITypeConstants.TAG)
       buffer.append(">");
     else
       buffer.append("/>");

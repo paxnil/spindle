@@ -82,7 +82,6 @@ public class ProjectInfoDecorator extends AbstractDecorator
       }
     } catch (CoreException e)
     {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
 

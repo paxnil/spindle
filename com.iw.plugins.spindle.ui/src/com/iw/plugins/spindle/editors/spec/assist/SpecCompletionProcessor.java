@@ -30,12 +30,11 @@ import java.io.StringWriter;
 
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
-import org.xmen.xml.XMLNode;
+import org.xmen.internal.ui.text.XMLReconciler;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
@@ -43,6 +42,7 @@ import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
@@ -50,8 +50,8 @@ import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
  * Base class for context assist processors for Tapestry specss
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: SpecCompletionProcessor.java,v 1.10 2004/06/10 15:50:48
- *          glongman Exp $
+ * @version $Id: SpecCompletionProcessor.java,v 1.9.2.1 2004/06/10 16:48:20
+ *                     glongman Exp $
  */
 public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 {
@@ -66,21 +66,16 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
    * 
    * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect()
    */
-  protected void connect(IDocument document) throws IllegalStateException
+  protected void init(IDocument document) throws IllegalStateException
   {
-    String publicId = null;
+
     fDTD = null;
 
-    super.connect(document);
-    try
-    {
-      XMLNode root = XMLNode.createTree(document, -1);
-      publicId = root.fPublicId;
-      fDTD = DOMValidator.getDTD(publicId);
-    } catch (BadLocationException e)
-    {
-      // do nothing
-    }
+    IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+    XMLReconciler model = modelProvider.getModel(document);
+
+    if (model != null)
+      fDTD = DOMValidator.getDTD(model.getPublicId());
 
     if (fDTD == null)
       throw new IllegalStateException();
@@ -150,8 +145,9 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
   private String getSkeletonSpecification(String extension)
   {
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
-    int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    boolean useTabs = store.getBoolean(UIPlugin.PLUGIN_ID
+        + ".FORMATTER_USE_TABS_TO_INDENT");
+    int tabSize = store.getInt(UIPlugin.PLUGIN_ID + ".EDITOR_DISPLAY_TAB_WIDTH");
     StringWriter swriter = new StringWriter();
     IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
     if ("jwc".equals(extension))

@@ -46,7 +46,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 
 /**
- * TODO Add Type comment
+ * Base class for actions that need to use the workbench selection
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: AbstractTapestryResourceAction.java,v 1.1 2003/10/29 12:33:56

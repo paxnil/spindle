@@ -29,7 +29,6 @@ package com.iw.plugins.spindle.editors.template.actions;
 import org.apache.tapestry.INamespace;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
@@ -38,24 +37,20 @@ import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
  * Base class for spec actions that need the xml partitioning.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: BaseTemplateAction.java,v 1.4.2.1 2004/06/22 12:23:46 glongman
+ *          Exp $
  */
 public abstract class BaseTemplateAction extends BaseEditorAction
 {
 
-  protected XMLDocumentPartitioner fPartitioner;
   protected INamespace fNamespace;
   protected INamespace fFrameworkNamespace;
-  protected boolean fConnected = false;
 
   protected IDocument fDocument;
 
   public BaseTemplateAction()
   {
     super();
-    fPartitioner = new XMLDocumentPartitioner(
-        XMLDocumentPartitioner.SCANNER,
-        XMLDocumentPartitioner.TYPES);
   }
 
   public BaseTemplateAction(String text)
@@ -73,15 +68,6 @@ public abstract class BaseTemplateAction extends BaseEditorAction
     super(text, style);
   }
 
-  protected final void disconnect()
-  {
-    if (fConnected)
-    {
-      fPartitioner.disconnect();
-      fConnected = false;
-    }
-  }
-
   public final void run()
   {
     super.run();
@@ -96,8 +82,6 @@ public abstract class BaseTemplateAction extends BaseEditorAction
     try
     {
       fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-      fPartitioner.connect(fDocument);
-      fConnected = true;
       if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
         return;
       doRun();
@@ -106,9 +90,6 @@ public abstract class BaseTemplateAction extends BaseEditorAction
     {
       UIPlugin.log(e);
       throw e;
-    } finally
-    {
-      disconnect();
     }
 
   }

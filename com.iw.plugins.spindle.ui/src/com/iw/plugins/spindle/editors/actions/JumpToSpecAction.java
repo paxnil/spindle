@@ -39,7 +39,7 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
  * Jump from spec/template editors to associated java files
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class JumpToSpecAction extends BaseJumpAction
 {

@@ -36,6 +36,7 @@ import net.sf.solareclipse.xml.internal.ui.text.TextScanner;
 import net.sf.solareclipse.xml.internal.ui.text.XMLCDATAScanner;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.ITokenScanner;
@@ -46,27 +47,28 @@ import org.eclipse.jface.text.rules.RuleBasedScanner;
  * tags.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: TemplateTextTools.java,v 1.2.4.2 2004/06/22 12:23:34 glongman
+ *          Exp $
  */
 public class TemplateTextTools extends AbstractTextTools
 {
   /** Content types for Template editors */
-  private static final String[] TYPES = {TemplatePartitionScanner.XML_PI,
+  private static final String[] TYPES = { TemplatePartitionScanner.XML_PI,
       TemplatePartitionScanner.XML_COMMENT, TemplatePartitionScanner.XML_DECL,
       TemplatePartitionScanner.XML_TAG, TemplatePartitionScanner.XML_ATTRIBUTE,
       TemplatePartitionScanner.XML_CDATA,
       TemplatePartitionScanner.TAPESTRY_JWCID_ATTRIBUTE,
       TemplatePartitionScanner.DTD_INTERNAL, TemplatePartitionScanner.DTD_INTERNAL_PI,
       TemplatePartitionScanner.DTD_INTERNAL_COMMENT,
-      TemplatePartitionScanner.DTD_INTERNAL_DECL,};
+      TemplatePartitionScanner.DTD_INTERNAL_DECL, };
 
-  private static final String[] TOKENS = {ITemplateSyntaxConstants.XML_DEFAULT,
+  private static final String[] TOKENS = { ITemplateSyntaxConstants.XML_DEFAULT,
       ITemplateSyntaxConstants.XML_TAG, ITemplateSyntaxConstants.XML_ATT_NAME,
       ITemplateSyntaxConstants.XML_ATT_VALUE, ITemplateSyntaxConstants.XML_ENTITY,
       ITemplateSyntaxConstants.XML_PI, ITemplateSyntaxConstants.XML_CDATA,
       ITemplateSyntaxConstants.XML_COMMENT, ITemplateSyntaxConstants.XML_DECL,
       ITemplateSyntaxConstants.TAPESTRY_ATT_NAME,
-      ITemplateSyntaxConstants.TAPESTRY_ATT_VALUE};
+      ITemplateSyntaxConstants.TAPESTRY_ATT_VALUE };
 
   /** The Template partitions scanner */
   private TemplatePartitionScanner fTemplatePartitionScanner;
@@ -97,6 +99,7 @@ public class TemplateTextTools extends AbstractTextTools
 
   /** The XML declarations scanner */
   private DeclScanner fXmlDeclScanner;
+
   /**
    * @param store
    */
@@ -136,14 +139,21 @@ public class TemplateTextTools extends AbstractTextTools
 
   public DefaultPartitioner createXMLPartitioner()
   {
-    return new DocumentPartitioner(getTemplatePartitionScanner(), TYPES);
+    return new DocumentPartitioner(getTemplatePartitionScanner(), TYPES)
+    {
+      public String[] getManagingPositionCategories()
+      {
+        return new String[] { IDocumentExtension3.DEFAULT_PARTITIONING };
+      }
+    };
   }
-
+  
   /*
    * (non-Javadoc)
    * 
    * @see net.sf.solareclipse.xml.ui.text.XMLTextTools#getTemplatePartitionScanner()
    */
+
   public IPartitionTokenScanner getTemplatePartitionScanner()
   {
     return fTemplatePartitionScanner;

@@ -30,13 +30,14 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
+import com.iw.plugins.spindle.editors.spec.outline.TapestryOutlinePage;
 
 /**
  * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: StructureOutlineInformationControl.java,v 1.3 2004/06/02
- *          01:18:52 glongman Exp $
+ * @version $Id: StructureOutlineInformationControl.java,v 1.2.2.1 2004/06/10
+ *          16:48:20 glongman Exp $
  */
 public class StructureOutlineInformationControl extends TreeInformationControl
 {

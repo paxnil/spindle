@@ -33,17 +33,16 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.ui.util.WrappedImageDescriptor;
 
 /**
- * TODO Add Type comment
+ * Base class for actions that cause a jump from one editor to another
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class BaseJumpAction extends BaseEditorAction
 {
@@ -102,7 +101,6 @@ public abstract class BaseJumpAction extends BaseEditorAction
     }
   }
 
-  private XMLDocumentPartitioner fPartitioner = null;
   protected IDocument fDocument = null;
   /**
    *  
@@ -147,39 +145,11 @@ public abstract class BaseJumpAction extends BaseEditorAction
     } catch (RuntimeException e)
     {
       UIPlugin.log(e);
-    } finally
-    {
-      detachPartitioner();
-    }
+    } 
   }
 
-  protected void detachPartitioner()
-  {
-    try
-    {
-      if (fPartitioner != null)
-        fPartitioner.disconnect();
-    } catch (RuntimeException e1)
-    {
-      UIPlugin.log(e1);
-    } finally
-    {
-      fPartitioner = null;
-      fDocument = null;
-    }
-  }
 
   protected abstract void doRun();
-
-  protected void attachPartitioner()
-  {
-    Assert.isTrue(fPartitioner == null);
-    fPartitioner = new XMLDocumentPartitioner(
-        XMLDocumentPartitioner.SCANNER,
-        XMLDocumentPartitioner.TYPES);
-    fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-    fPartitioner.connect(fDocument);
-  }
 
   protected IDocument getDocument()
   {

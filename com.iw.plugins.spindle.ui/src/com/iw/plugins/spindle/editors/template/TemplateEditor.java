@@ -60,7 +60,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.PreferenceConstants;
@@ -76,6 +76,7 @@ import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
+import com.iw.plugins.spindle.editors.documentsAndModels.BaseDocumentSetupParticipant;
 import com.iw.plugins.spindle.editors.template.actions.MoveToSpecAction;
 import com.iw.plugins.spindle.editors.template.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.template.actions.ShowInPackageExplorerAction;
@@ -231,7 +232,7 @@ public class TemplateEditor extends Editor
     IDocument document = getDocumentProvider().getDocument(input);
     result.setDocument(document);
 
-    result.addSelectionChangedListener(new OutlineSelectionListener());
+    //    FIXME result.addSelectionChangedListener(new OutlineSelectionListener());
     return result;
   }
 
@@ -241,11 +242,11 @@ public class TemplateEditor extends Editor
    * @see com.iw.plugins.spindle.editors.Editor#createDocumentProvider(org.eclipse.ui.IEditorInput)
    */
   protected IDocumentProvider createDocumentProvider(IEditorInput input)
-  {
+  {    
     if (input instanceof IFileEditorInput)
       return UIPlugin.getDefault().getTemplateFileDocumentProvider();
 
-    return UIPlugin.getDefault().getSpecStorageDocumentProvider();
+    return UIPlugin.getDefault().getTemplateStorageDocumentProvider();
   }
 
   /*
@@ -423,6 +424,13 @@ public class TemplateEditor extends Editor
 
   }
 
+  /**
+   * OutlineSelectionListener TODO add something here
+   * 
+   * @deprecated @author glongman@intelligentworks.com
+   * @version $Id: TemplateEditor.java,v 1.17.2.2 2004/06/22 12:23:34 glongman
+   *          Exp $
+   */
   protected class OutlineSelectionListener implements ISelectionChangedListener
   {
     public void selectionChanged(SelectionChangedEvent event)
@@ -443,7 +451,7 @@ public class TemplateEditor extends Editor
     /** Has the runnable already been posted? */
     private boolean fPosted = false;
     private int fOffset;
-    private XMLDocumentPartitioner fHighlightPartitioner;
+    //        private XMLDocumentPartitioner fHighlightPartitioner;
 
     public HighlightUpdater()
     {
@@ -454,23 +462,23 @@ public class TemplateEditor extends Editor
      */
     public void run()
     {
-      if (fHighlightPartitioner == null)
-        fHighlightPartitioner = new XMLDocumentPartitioner(
-            XMLDocumentPartitioner.SCANNER,
-            XMLDocumentPartitioner.TYPES);
+      //            if (fHighlightPartitioner == null)
+      //                fHighlightPartitioner =
+      //                    new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
+      // XMLDocumentPartitioner.TYPES);
 
       IDocument document = getDocumentProvider().getDocument(getEditorInput());
 
       try
       {
-        fHighlightPartitioner.connect(document);
-        XMLNode.createTree(document, -1);
+        //                fHighlightPartitioner.connect(document);
+        //                XMLNode.createTree(document, -1);
         XMLNode artifact = XMLNode.getArtifactAt(document, fOffset);
         if (artifact == null)
           return;
 
         String type = artifact.getType();
-        if (type == XMLDocumentPartitioner.TAG)
+        if (type == ITypeConstants.TAG)
         {
           XMLNode corr = artifact.getCorrespondingNode();
           if (corr != null)
@@ -481,7 +489,7 @@ public class TemplateEditor extends Editor
             return;
           }
         }
-        if (type == XMLDocumentPartitioner.ENDTAG)
+        if (type == ITypeConstants.ENDTAG)
         {
           XMLNode corr = artifact.getCorrespondingNode();
           if (corr != null)
@@ -500,13 +508,13 @@ public class TemplateEditor extends Editor
       } finally
       {
         fPosted = false;
-        try
-        {
-          fHighlightPartitioner.disconnect();
-        } catch (Exception e)
-        {
-          UIPlugin.log(e);
-        }
+        //                try
+        //                {
+        //                    fHighlightPartitioner.disconnect();
+        //                } catch (Exception e)
+        //                {
+        //                    UIPlugin.log(e);
+        //                }
       }
 
     }

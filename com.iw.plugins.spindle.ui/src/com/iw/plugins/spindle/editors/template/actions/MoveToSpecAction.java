@@ -44,7 +44,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -65,7 +65,8 @@ import com.iw.plugins.spindle.ui.wizards.source.MoveImplicitToSpecWizard;
  * Move an implictly declared component from the template to the specification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: MoveToSpecAction.java,v 1.2.2.1 2004/06/22 12:23:46 glongman
+ *          Exp $
  */
 public class MoveToSpecAction extends BaseTemplateAction
 {
@@ -205,7 +206,6 @@ public class MoveToSpecAction extends BaseTemplateAction
     if (editor != null && editor instanceof ITextEditor)
       fRelatedSpecEditor = (ITextEditor) editor;
 
-    disconnect();
     launchWizard(UIPlugin.getDefault().getActiveWorkbenchShell());
   }
 
@@ -245,7 +245,7 @@ public class MoveToSpecAction extends BaseTemplateAction
     SpindleStatus status = new SpindleStatus();
     fNode = XMLNode.getArtifactAt(fDocument, fOffset);
     if (fNode == null
-        || (fNode.getType() != XMLDocumentPartitioner.TAG && fNode.getType() != XMLDocumentPartitioner.EMPTYTAG))
+        || (fNode.getType() != ITypeConstants.TAG && fNode.getType() != ITypeConstants.EMPTYTAG))
     {
       status.setError("invalid selection at cursor position.");
     } else if (!fNode.isTerminated())
