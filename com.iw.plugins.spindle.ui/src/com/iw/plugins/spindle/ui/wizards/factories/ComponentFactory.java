@@ -41,6 +41,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.resources.ContextResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
@@ -76,8 +77,16 @@ public class ComponentFactory
         IProgressMonitor monitor)
         throws CoreException, InterruptedException
     {
-        IFile namespaceFile = (IFile) namespaceLocation.getStorage();
-        IContainer container = (IContainer) namespaceFile.getParent();
+        IContainer container = null;
+        if (namespaceLocation.getName().length() == 0 && namespaceLocation.isWorkspaceResource())
+        {
+            //we might be using a stand-in application - in the workspace
+            container = ((ContextResourceWorkspaceLocation) namespaceLocation).getContainer();
+        } else
+        {
+            IFile namespaceFile = (IFile) namespaceLocation.getStorage();
+            container = (IContainer) namespaceFile.getParent();
+        }
         return createComponent(container, componentName, specClass, monitor);
     }
 
@@ -89,10 +98,10 @@ public class ComponentFactory
         newSpec.setAllowInformalParameters(true);
         newSpec.setComponentClassName(qualifiedSpecClassname);
         IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-         boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
-         int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
-         StringWriter swriter = new StringWriter();
-         IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
+        boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
+        int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+        StringWriter swriter = new StringWriter();
+        IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
         XMLUtil.writeComponentSpecification(iwriter, newSpec, 0);
         iwriter.flush();
         return swriter.toString();
