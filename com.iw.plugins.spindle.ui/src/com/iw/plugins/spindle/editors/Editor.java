@@ -75,7 +75,7 @@ import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
  * Abstract base class for Editors.
  * 
  * @author glongman@intelligentworks.com
- * 
+ *  
  */
 public abstract class Editor extends AbstractDecoratedTextEditor
     implements
@@ -170,22 +170,18 @@ public abstract class Editor extends AbstractDecoratedTextEditor
   {
     super.createActions();
 
-    if (!UIPlugin.isEclipse3()) // Fix formatting!
-    {
-
-      Action action = new TextOperationAction(
-          UIPlugin.getDefault().getResourceBundle(),
-          "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
-      //Hook the action to the format command (plugin.xml)
-      action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.format");
-      setAction("Format", action);
-      // should be updated as the editor state changes
-      markAsStateDependentAction("Format", true);
-      // action depends on the state of editor selection
-      // in this case the format command is not called if there is
-      // a text selection in the editor
-      markAsSelectionDependentAction("Format", true);
-    }
+    Action action = new TextOperationAction(
+        UIPlugin.getDefault().getResourceBundle(),
+        "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
+    //Hook the action to the format command (plugin.xml)
+    action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.format");
+    setAction("Format", action);
+    // should be updated as the editor state changes
+    markAsStateDependentAction("Format", true);
+    // action depends on the state of editor selection
+    // in this case the format command is not called if there is
+    // a text selection in the editor
+    markAsSelectionDependentAction("Format", true);
 
     JumpToNextAttributeAction jumpNavNext = new JumpToNextAttributeAction(true);
     jumpNavNext.setActiveEditor(this);

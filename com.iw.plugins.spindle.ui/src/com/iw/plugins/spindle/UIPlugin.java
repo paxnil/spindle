@@ -46,7 +46,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.PluginVersionIdentifier;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.core.JarEntryFile;
@@ -67,8 +66,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
@@ -288,17 +285,6 @@ public class UIPlugin extends AbstractUIPlugin
       UIPlugin.log(piex);
     }
     return null;
-  }
-
-  //TODO remove when needed!
-  static public boolean isEclipse3()
-  {
-    ResourcesPlugin resP = ResourcesPlugin.getPlugin();
-    Bundle resourcesBundle = ResourcesPlugin.getPlugin().getBundle();
-
-    String version = (String) resourcesBundle.getHeaders().get(Constants.BUNDLE_VERSION);
-
-    return new PluginVersionIdentifier(version).getMajorComponent() == 3;
   }
 
   //The shared instance.
