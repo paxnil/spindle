@@ -304,4 +304,15 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
     }
   }
 
+  /**
+   * @see com.iw.plugins.spindle.model.ITapestryModel#getDTDVersion()
+   */
+  public String getDTDVersion() {
+  	PluginApplicationSpecification spec = getApplicationSpec();
+  	if (spec != null) {
+  		return spec.getDTDVersion();
+  	}
+    return null;
+  }
+
 }

@@ -36,5 +36,7 @@ public interface ITapestryModel extends IModel, IEditable {
   public IStorage getUnderlyingStorage();
   
   public void reload() throws CoreException;
+  
+  public String getDTDVersion();
 
 }

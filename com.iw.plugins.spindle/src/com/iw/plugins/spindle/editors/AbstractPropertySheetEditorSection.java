@@ -156,8 +156,8 @@ public abstract class AbstractPropertySheetEditorSection
     if (canUpdate()) {
       update();
     }
-    TapestryComponentModel tmodel = (TapestryComponentModel)model;
-    String DTDVersion = tmodel.getComponentSpecification().getDTDVersion();
+    
+    String DTDVersion = model.getDTDVersion();
     isDTD12 = DTDVersion != null && DTDVersion.equals("1.2");
     
     model.addModelChangedListener(this);

@@ -61,14 +61,7 @@ public class DTDLableDecorator extends LabelProvider implements ILabelDecorator,
     if (!model.isLoaded()) {
       return "undetermined";
     }
-    String DTDversion = null;
-    if (model.getClass() == TapestryComponentModel.class) {
-      PluginComponentSpecification spec = ((TapestryComponentModel) model).getComponentSpecification();
-      DTDversion = spec.getDTDVersion();
-    } else if (model.getClass() == TapestryApplicationModel.class) {
-      PluginApplicationSpecification spec = ((TapestryApplicationModel) model).getApplicationSpec();
-      DTDversion = spec.getDTDVersion();
-    }
+    String DTDversion = model.getDTDVersion();    
     if (DTDversion == null) {
       return "?";
     }

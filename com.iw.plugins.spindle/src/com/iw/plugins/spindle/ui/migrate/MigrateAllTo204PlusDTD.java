@@ -257,7 +257,6 @@ public class MigrateAllTo204PlusDTD extends Action implements IWorkbenchWindowAc
       	return false;
       }
       ITapestryModel model = manager.getModel(storage);
-      String DTDversion = null;
       if (model != null && model.isLoaded() && migrator.migrate(model)) {
         results.add(model);
       }

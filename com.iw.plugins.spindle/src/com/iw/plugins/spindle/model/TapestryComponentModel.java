@@ -282,5 +282,16 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
       getComponentSpecification().setProperty(name, value);
     }
   }
+  
+   /**
+   * @see com.iw.plugins.spindle.model.ITapestryModel#getDTDVersion()
+   */
+  public String getDTDVersion() {
+  	PluginComponentSpecification spec = getComponentSpecification();
+  	if (spec != null) {
+  		return spec.getDTDVersion();
+  	}
+    return null;
+  }
 
 }
