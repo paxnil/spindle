@@ -32,6 +32,9 @@
       <category name="spindle_3_1_old"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.1.6.jar" id="com.iw.features.spindle" version="3.1.6">
+      <category name="spindle_3_1_old"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.1.7.jar" id="com.iw.features.spindle" version="3.1.7">
       <category name="spindle_3_1_latest"/>
    </feature>
    <category-def name="spindle3_0_latest" label="Spindle 3.0 - latest unstable build - Eclipse 2.1.X">
