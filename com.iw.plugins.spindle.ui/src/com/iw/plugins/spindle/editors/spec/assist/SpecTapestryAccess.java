@@ -62,7 +62,7 @@ import com.wutka.dtd.DTDSequence;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class SpecAssistHelper extends UITapestryAccess
+public class SpecTapestryAccess extends UITapestryAccess
 {
     private static final String DEFAULT_NEW_ELEMENT_PROPOSAL = "DEFAULT_NEW_ELEMENT_PROPOSAL";
     private static final String OPTIONAL_NEW_ELEMENT_PROPOSAL = "OPTIONAL_NEW_ELEMENT_PROPOSAL";
@@ -600,7 +600,7 @@ public class SpecAssistHelper extends UITapestryAccess
         return proposal;
     } // will be non null iff invoke by an editor working on
     private IComponentSpecification fComponentSpecification;
-    public SpecAssistHelper(Editor editor) throws IllegalArgumentException
+    public SpecTapestryAccess(Editor editor) throws IllegalArgumentException
     {
         super(editor);
         fComponentSpecification = editor.getComponent();

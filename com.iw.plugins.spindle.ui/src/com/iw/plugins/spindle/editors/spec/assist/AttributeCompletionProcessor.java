@@ -36,6 +36,17 @@ import java.util.Set;
 
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.internal.core.search.JavaSearchScope;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -43,10 +54,16 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
@@ -61,6 +78,8 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
  */
 public class AttributeCompletionProcessor extends SpecCompletionProcessor
 {
+    private int fDocumentOffset;
+
     private String fTagName;
 
     private String fAttributeName;
@@ -75,7 +94,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
     private DocumentArtifact fTag;
 
-    private SpecAssistHelper fAssistHelper;
+    private SpecTapestryAccess fAssistHelper;
 
     public AttributeCompletionProcessor(Editor editor)
     {
@@ -87,82 +106,89 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
      */
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        fTag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
-        fTagName = fTag.getName();
-        String type = fTag.getType();
-        if (fTagName == null
-            || (type != DocumentArtifactPartitioner.TAG && type != DocumentArtifactPartitioner.EMPTYTAG))
-            return NoProposals;
-
-        DocumentArtifact attribute = fTag.getAttributeAt(documentOffset);
-        fAttributeName = attribute.getName();
-
-        if (fAttributeName == null)
-            return NoProposals;
-
-        int state = attribute.getStateAt(documentOffset);
-
-        if (state == DocumentArtifact.TAG)
-            return NoProposals;
-
-        fValueLocation = null;
-        fAttributeValue = null;
-        fMatchString = "";
         try
         {
-            IDocument document = viewer.getDocument();
-            ITypedRegion region = document.getPartition(documentOffset);
-            fValueLocation = new Point(region.getOffset() + 1, region.getLength() - 1);
-            int lastCharOffset = fValueLocation.x + fValueLocation.y - 1;
-            char last = viewer.getDocument().getChar(lastCharOffset);
-            fIsAttributeTerminated = last == '\'' || last == '"';
-            if (fIsAttributeTerminated)
+            fDocumentOffset = documentOffset;
+            fTag = DocumentArtifact.getArtifactAt(viewer.getDocument(), fDocumentOffset);
+            fTagName = fTag.getName();
+            String type = fTag.getType();
+            if (fTagName == null
+                || (type != DocumentArtifactPartitioner.TAG && type != DocumentArtifactPartitioner.EMPTYTAG))
+                return NoProposals;
+
+            DocumentArtifact attribute = fTag.getAttributeAt(fDocumentOffset);
+            fAttributeName = attribute.getName();
+
+            if (fAttributeName == null)
+                return NoProposals;
+
+            int state = attribute.getStateAt(documentOffset);
+
+            if (state == DocumentArtifact.TAG)
+                return NoProposals;
+
+            fValueLocation = null;
+            fAttributeValue = null;
+            fMatchString = "";
+            try
             {
-                fValueLocation.y -= 1;
-            }
-            fAttributeValue = document.get(fValueLocation.x, fValueLocation.y);
-            char[] chars = fAttributeValue.toCharArray();
-            int i = 0;
-            for (; i < chars.length; i++)
-            {
-                if (!Character.isWhitespace(chars[i]))
-                    break;
-            }
-            if (i > 0)
-            {
-                fValueLocation.x += i;
-                fValueLocation.y -= i;
+                IDocument document = viewer.getDocument();
+                ITypedRegion region = document.getPartition(fDocumentOffset);
+                fValueLocation = new Point(region.getOffset() + 1, region.getLength() - 1);
+                int lastCharOffset = fValueLocation.x + fValueLocation.y - 1;
+                char last = viewer.getDocument().getChar(lastCharOffset);
+                fIsAttributeTerminated = last == '\'' || last == '"';
+                if (fIsAttributeTerminated)
+                {
+                    fValueLocation.y -= 1;
+                }
                 fAttributeValue = document.get(fValueLocation.x, fValueLocation.y);
+                char[] chars = fAttributeValue.toCharArray();
+                int i = 0;
+                for (; i < chars.length; i++)
+                {
+                    if (!Character.isWhitespace(chars[i]))
+                        break;
+                }
+                if (i > 0)
+                {
+                    fValueLocation.x += i;
+                    fValueLocation.y -= i;
+                    fAttributeValue = document.get(fValueLocation.x, fValueLocation.y);
+                }
+
+                if (documentOffset > fValueLocation.x)
+                    fMatchString = fAttributeValue.substring(0, documentOffset - fValueLocation.x).toLowerCase();
+
+            } catch (BadLocationException e)
+            {
+                return NoProposals;
             }
 
-            if (documentOffset > fValueLocation.x)
-                fMatchString = fAttributeValue.substring(0, documentOffset - fValueLocation.x).toLowerCase();
+            List dtdAllowed = computeDTDAllowedProposals();
 
-        } catch (BadLocationException e)
+            String special = null;
+
+            if (dtdAllowed.isEmpty())
+                special = SpecTapestryAccess.getTapestryDefaultValue(fDTD, fTagName, fAttributeName);
+
+            List proposals = new ArrayList(dtdAllowed);
+
+            proposals.addAll(computeTagAttrSpecificProposals());
+
+            if (proposals.isEmpty())
+            {
+                if (special != null)
+                    proposals.add(getProposal(special));
+            }
+
+            Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
+
+            return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+        } finally
         {
-            return NoProposals;
+            fAssistHelper = null;
         }
-
-        List dtdAllowed = computeDTDAllowedProposals(0);
-
-        String special = null;
-
-        if (dtdAllowed.isEmpty())
-            special = SpecAssistHelper.getTapestryDefaultValue(fDTD, fTagName, fAttributeName);
-
-        List proposals = new ArrayList(dtdAllowed);
-
-        proposals.addAll(computeTagAttrSpecificProposals());
-
-        if (proposals.isEmpty())
-        {
-            if (special != null)
-                proposals.add(getProposal(special));
-        }
-
-        Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
-
-        return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
     }
 
     /* (non-Javadoc)
@@ -170,58 +196,65 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         */
     public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
     {
-        SpecAssistHelper helper;
         try
         {
-            helper = new SpecAssistHelper(fEditor);
-        } catch (IllegalArgumentException e)
-        {
-            return NoInformation;
-        }
-        fTag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
-        fTagName = fTag.getName();
-
-        if (fTagName == null)
-            return NoInformation;
-
-        DocumentArtifact attribute = fTag.getAttributeAt(documentOffset);
-
-        if (attribute != null)
-        {
-            fAttributeName = attribute.getName();
-            String value = attribute.getAttributeValue();
-
-            if (value != null)
+            fDocumentOffset = documentOffset;
+            SpecTapestryAccess helper;
+            try
             {
-                fAssistHelper = null;
-                try
-                {
-                    fAssistHelper = new SpecAssistHelper(fEditor);
-                } catch (IllegalArgumentException e1)
-                {
-                    return NoInformation;
-                }
-
-                if ("component".equals(fTagName) && "type".equals(fAttributeName))
-                    return computeComponentTypeInformation(value);
-
-                if ("binding".equals(fTagName) && "name".equals(fAttributeName))
-                    return computeBindingNameInformation(value);
-
-                if ("static-binding".equals(fTagName) && "name".equals(fAttributeName))
-                    return computeBindingNameInformation(value);
-
-                if ("message-binding".equals(fTagName) && "name".equals(fAttributeName))
-                    return computeBindingNameInformation(value);
-
-                if ("inherited-binding".equals(fTagName) && "name".equals(fAttributeName))
-                    return computeBindingNameInformation(value);
-
-                if ("listener-binding".equals(fTagName) && "name".equals(fAttributeName))
-                    return computeBindingNameInformation(value);
+                helper = new SpecTapestryAccess(fEditor);
+            } catch (IllegalArgumentException e)
+            {
+                return NoInformation;
             }
+            fTag = DocumentArtifact.getArtifactAt(viewer.getDocument(), fDocumentOffset);
+            fTagName = fTag.getName();
+
+            if (fTagName == null)
+                return NoInformation;
+
+            DocumentArtifact attribute = fTag.getAttributeAt(fDocumentOffset);
+
+            if (attribute != null)
+            {
+                fAttributeName = attribute.getName();
+                String value = attribute.getAttributeValue();
+
+                if (value != null)
+                {
+                    fAssistHelper = null;
+                    try
+                    {
+                        fAssistHelper = new SpecTapestryAccess(fEditor);
+                    } catch (IllegalArgumentException e1)
+                    {
+                        return NoInformation;
+                    }
+
+                    if ("component".equals(fTagName) && "type".equals(fAttributeName))
+                        return computeComponentTypeInformation(value);
+
+                    if ("binding".equals(fTagName) && "name".equals(fAttributeName))
+                        return computeBindingNameInformation(value);
+
+                    if ("static-binding".equals(fTagName) && "name".equals(fAttributeName))
+                        return computeBindingNameInformation(value);
+
+                    if ("message-binding".equals(fTagName) && "name".equals(fAttributeName))
+                        return computeBindingNameInformation(value);
+
+                    if ("inherited-binding".equals(fTagName) && "name".equals(fAttributeName))
+                        return computeBindingNameInformation(value);
+
+                    if ("listener-binding".equals(fTagName) && "name".equals(fAttributeName))
+                        return computeBindingNameInformation(value);
+                }
+            }
+            return NoInformation;
+        } finally
+        {
+            fAssistHelper = null;
         }
-        return NoInformation;
     }
 
     /**
@@ -231,15 +264,13 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     private IContextInformation[] computeComponentTypeInformation(String value)
     {
         IComponentSpecification resolved = fAssistHelper.resolveComponentType(value);
-        
+
         if (resolved == null)
             return NoInformation;
-            
-        
-        UITapestryAccess.Result info =
-            fAssistHelper.createComponentInformationResult(value, value, resolved);
-            
-        return new IContextInformation[] { new ContextInformation(value, info.description)};    
+
+        UITapestryAccess.Result info = fAssistHelper.createComponentInformationResult(value, value, resolved);
+
+        return new IContextInformation[] { new ContextInformation(value, info.description)};
     }
 
     /**
@@ -273,7 +304,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         fAssistHelper = null;
         try
         {
-            fAssistHelper = new SpecAssistHelper(fEditor);
+            fAssistHelper = new SpecTapestryAccess(fEditor);
         } catch (IllegalArgumentException e1)
         {
             return Collections.EMPTY_LIST;
@@ -295,6 +326,24 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
         if ("listener-binding".equals(fTagName) && "name".equals(fAttributeName))
             return computeBindingNameProposals();
+
+        if ("application".equals(fTagName) && "engine-class".equals(fAttributeName) && fIsAttributeTerminated)
+            return chooseJavaTypeNameProposals();
+
+        if ("bean".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
+            return chooseJavaTypeNameProposals();
+
+        if ("component-specification".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
+            return chooseJavaTypeNameProposals();
+
+        if ("page-specification".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
+            return chooseJavaTypeNameProposals();
+
+        if ("extension".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
+            return chooseJavaTypeNameProposals();
+
+        if ("service".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
+            return chooseJavaTypeNameProposals();
 
         return Collections.EMPTY_LIST;
     }
@@ -373,7 +422,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         }
 
         UITapestryAccess.Result[] parms =
-            SpecAssistHelper.findParameters(containedComponent, fMatchString, existingParameterNames);
+            SpecTapestryAccess.findParameters(containedComponent, fMatchString, existingParameterNames);
 
         List proposals = new ArrayList();
         for (int i = 0; i < parms.length; i++)
@@ -390,10 +439,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     /**
      * Compute proposals for converting a Dynamic to a Message or a Static binding
      */
-    private List computeDTDAllowedProposals(int documentOffset)
+    private List computeDTDAllowedProposals()
     {
-        List allowedValues = SpecAssistHelper.getAllowedAttributeValues(fDTD, fTagName, fAttributeName);
-        String defaultValue = SpecAssistHelper.getDefaultAttributeValue(fDTD, fTagName, fAttributeName);
+        List allowedValues = SpecTapestryAccess.getAllowedAttributeValues(fDTD, fTagName, fAttributeName);
+        String defaultValue = SpecTapestryAccess.getDefaultAttributeValue(fDTD, fTagName, fAttributeName);
 
         if (allowedValues == null || allowedValues.isEmpty())
             return Collections.EMPTY_LIST;
@@ -464,6 +513,156 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             }
         }
         return proposals;
+    }
+
+    /**
+     * @return
+     */
+    private List chooseJavaTypeNameProposals()
+    {
+        IJavaProject jproject = TapestryCore.getDefault().getJavaProjectFor(fEditor.getStorage());
+        if (jproject == null)
+            return Collections.EMPTY_LIST;
+
+        List result = new ArrayList();
+        result.add(new ChooseTypeProposal(jproject, fDocumentOffset, fValueLocation.x, fAttributeValue.length()));
+        return result;
+    }
+
+    class ChooseTypeProposal implements ICompletionProposal
+    {
+
+        protected IJavaProject jproject;
+        String chosenType;
+        int documentOffset;
+        int replacementOffset;
+        int replacementLength;
+
+        public ChooseTypeProposal(
+            IJavaProject project,
+            int documentOffset,
+            int replacementOffset,
+            int replacementLength)
+        {
+            Assert.isNotNull(project);
+            jproject = project;
+            this.documentOffset = documentOffset;
+            this.replacementOffset = replacementOffset;
+            this.replacementLength = replacementLength;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
+         */
+        public void apply(IDocument document)
+        {
+            chosenType = chooseType("Java Type Chooser");
+            if (chosenType != null)
+            {
+                if (chosenType.length() == 0)
+                {
+                    chosenType = null;
+                    return;
+                }
+
+                try
+                {
+                    document.replace(replacementOffset, replacementLength, chosenType);
+                } catch (BadLocationException x)
+                {
+                    // ignore
+                }
+
+            }
+
+        }
+
+        protected String chooseType(String title)
+        {
+
+            Shell shell = UIPlugin.getDefault().getActiveWorkbenchShell();
+            try
+            {
+
+                if (jproject == null)
+                {
+                    return null;
+                }
+                IJavaSearchScope scope = createSearchScope(jproject);
+
+                SelectionDialog dialog =
+                    JavaUI.createTypeDialog(
+                        shell,
+                        new ProgressMonitorDialog(shell),
+                        scope,
+                        IJavaElementSearchConstants.CONSIDER_CLASSES,
+                        false);
+
+                dialog.setTitle("Java Type Chooser");
+                dialog.setMessage("Choose Type");
+
+                if (dialog.open() == dialog.OK)
+                {
+                    IType chosen = (IType) dialog.getResult()[0];
+                    return chosen.getFullyQualifiedName(); //FirstResult();
+                }
+            } catch (CoreException jmex)
+            {
+                ErrorDialog.openError(shell, "Spindle error", "unable to continue", jmex.getStatus());
+            }
+            return null;
+        }
+
+        protected IJavaSearchScope createSearchScope(IJavaElement element) throws JavaModelException
+        {
+            JavaSearchScope scope = new JavaSearchScope();
+            scope.add(element);
+            return scope;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+         */
+        public String getAdditionalProposalInfo()
+        {
+            return "Note due to a know pre-existing bug in eclispe:\n\n [Bug 45193] hierarchy scope search only shows types that exist in jars\n\nThe search can't be limited to Tapestry types";
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
+         */
+        public IContextInformation getContextInformation()
+        {
+            return null;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
+         */
+        public String getDisplayString()
+        {
+            return "Choose Type Dialog";
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
+         */
+        public Image getImage()
+        {
+            return Images.getSharedImage("opentype.gif");
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
+         */
+        public Point getSelection(IDocument document)
+        {
+            if (chosenType == null)
+                return new Point(documentOffset, 0);
+
+            return new Point(replacementOffset + chosenType.length(), 0);
+        }
+
     }
 
 }

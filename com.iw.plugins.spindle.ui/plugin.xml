@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.0.15"
+   version="0.0.17"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -17,6 +17,7 @@
       <import plugin="net.sf.solareclipse.xml.ui"/>
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.update.ui.forms"/>
    </requires>
 
 
@@ -141,17 +142,7 @@
             contributorClass="com.iw.plugins.spindle.editors.spec.SpecEditorContributor"
             class="com.iw.plugins.spindle.editors.spec.SpecEditor"
             id="com.iw.plugins.spindle.ui.editors.spec">
-      </editor>
-      <editor
-            name="New Tapestry Spec Editor"
-            default="false"
-            icon="./icons/basic/application16.gif"
-            extensions="jwc"
-            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
-            class="com.iw.plugins.spindle.editors.neweditor.NewXMLEditor"
-            id="com.iw.plugins.spindle.ui.editors.spec.new_editor">
-      </editor>
-
+      </editor>     
    </extension>
    <!--
       <extension

@@ -108,7 +108,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
                     proposal.setReplacementLength(0);
                     proposals.add(proposal);
                 }
-                proposals.add(SpecAssistHelper.getDefaultInsertCommentProposal(documentOffset, 0));
+                proposals.add(SpecTapestryAccess.getDefaultInsertCommentProposal(documentOffset, 0));
                 return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 
             } else if (atStart || (tag.getAttributes().isEmpty() && !tag.isTerminated()))
@@ -164,6 +164,9 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
             } else if (!atStart && tagName != null && documentOffset < tag.getOffset() + tagName.length())
             {
                 return NoProposals;
+//                if (tagName.equals("binding") || tagName.equals("staticBinding") || tagName.equals("message-binding") || tagName.equals("string-binding")) {
+//                    
+//                }
             }
 
             addLeadingSpace = true;
@@ -239,11 +242,11 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         try
         {
-            List attrs = SpecAssistHelper.getAttributes(fDTD, tagName);
+            List attrs = SpecTapestryAccess.getAttributes(fDTD, tagName);
 
             if (!attrs.isEmpty())
             {
-                List requiredAttributes = SpecAssistHelper.getRequiredAttributes(fDTD, tagName);
+                List requiredAttributes = SpecTapestryAccess.getRequiredAttributes(fDTD, tagName);
                 for (Iterator iter = attrs.iterator(); iter.hasNext();)
                 {
                     String attrName = (String) iter.next();
@@ -300,11 +303,11 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         List proposals)
     {
 
-        List attrs = SpecAssistHelper.getAttributes(fDTD, tagName);
+        List attrs = SpecTapestryAccess.getAttributes(fDTD, tagName);
 
         if (!attrs.isEmpty())
         {
-            List requiredAttributes = SpecAssistHelper.getRequiredAttributes(fDTD, tagName);
+            List requiredAttributes = SpecTapestryAccess.getRequiredAttributes(fDTD, tagName);
             for (Iterator iter = attrs.iterator(); iter.hasNext();)
             {
                 String attrname = (String) iter.next();
@@ -347,7 +350,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
 
         if (documentOffset - tag.getOffset() <= name.length() + 1)
         {
-            String comment = SpecAssistHelper.getElementComment(fDTD, name);
+            String comment = SpecTapestryAccess.getElementComment(fDTD, name);
             return new IContextInformation[] {
                  new ContextInformation(name, comment.length() == 0 ? "No Information" : comment)};
         }

@@ -26,13 +26,20 @@
 package com.iw.plugins.spindle.editors;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
 
-public abstract class BaseSourceConfiguration extends SourceViewerConfiguration 
+import com.iw.plugins.spindle.ui.util.ToolTipHandler;
+
+public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
 {
 
     protected Editor fEditor;
@@ -54,13 +61,12 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
     {
         return fEditor;
     }
-    
+
     public IReconciler getReconciler(ISourceViewer sourceViewer)
     {
         if (getEditor() != null && getEditor().isEditable())
         {
-            Reconciler reconciler =
-                new Reconciler(getEditor(), new ReconcilingStrategy(getEditor()), false);
+            Reconciler reconciler = new Reconciler(getEditor(), new ReconcilingStrategy(getEditor()), false);
             reconciler.setProgressMonitor(new NullProgressMonitor());
             reconciler.setDelay(500);
             return reconciler;
@@ -73,7 +79,22 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
      */
     public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType)
     {
-        return new ProblemAnnotationTextHover((Editor)getEditor());
+        return new ProblemAnnotationTextHover((Editor) getEditor());
+    }
+
+    /*
+       * @see SourceViewerConfiguration#getInformationControlCreator(ISourceViewer)
+       * @since 2.0
+       */
+    public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer)
+    {
+        return new IInformationControlCreator()
+        {
+            public IInformationControl createInformationControl(Shell parent)
+            {
+                return new DefaultInformationControl(parent, SWT.NONE, new ToolTipHandler.TooltipPresenter());                
+            }
+        };
     }
 
 }

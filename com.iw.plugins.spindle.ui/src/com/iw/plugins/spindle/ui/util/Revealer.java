@@ -32,10 +32,17 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -51,6 +58,7 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.builder.TapestryBuilder;
+import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
 
 /**
  *  Reveals IStorages in the workbench as editors are selected
@@ -73,6 +81,10 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
     }
 
     public static void selectAndReveal(ISelection selection, IWorkbenchWindow window)
+    {
+        selectAndReveal(selection, window, null);
+    }
+    public static void selectAndReveal(ISelection selection, IWorkbenchWindow window, IJavaProject jproject)
     {
         // validate the input
         if (window == null || selection == null || selection.isEmpty())
@@ -97,7 +109,7 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
                 parts.add(refs[i].getPart(false));
         }
 
-        final ISelection useSelection = selection;
+        final ISelection useSelection = checkSelectionForJarEntryFile(selection, jproject);
         Iterator enum = parts.iterator();
         while (enum.hasNext())
         {
@@ -125,13 +137,64 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
         }
     }
 
+    /**
+     * @param useSelection
+     * @return
+     */
+    private static ISelection checkSelectionForJarEntryFile(ISelection useSelection, IJavaProject jproject)
+    {
+        if (useSelection.isEmpty() || !(useSelection instanceof IStructuredSelection))
+            return useSelection;
+
+        IStructuredSelection structured = (IStructuredSelection) useSelection;
+        Object first = structured.getFirstElement();
+        if (structured.size() > 1 || !(first instanceof JarEntryFile))
+            return useSelection;
+        IPackageFragment[] fragments = null;
+        try
+        {
+            if (jproject != null)
+            {
+                IPackageFragment frag = JarEntryFileUtil.getPackageFragment(jproject, (JarEntryFile) first);
+                if (frag != null)
+                    fragments = new IPackageFragment[] { frag };
+
+            } else
+            {
+                fragments =
+                    JarEntryFileUtil.getPackageFragments(
+                        ResourcesPlugin.getWorkspace().getRoot(),
+                        (JarEntryFile) first);
+            }
+            if (fragments.length != 1)
+                return useSelection;
+
+            //check to see if there is an IClassFile in the package
+            IJavaElement[] children = fragments[0].getChildren();
+            for (int i = 0; i < children.length; i++)
+            {
+                if (children[i].getElementType() != IJavaElement.CLASS_FILE)
+                    continue;
+
+                return new StructuredSelection(children[i]);
+            }
+
+            return new StructuredSelection(fragments[0]);
+
+        } catch (CoreException e)
+        {
+            UIPlugin.log(e);
+        }
+        return useSelection;
+    }
+
     private IWorkbenchWindow fCurrentWindow;
     private IWorkbenchPage fCurrentPage;
 
     private Revealer()
     {
         UIPlugin.getDefault().getWorkbench().addWindowListener(this);
-//        register(UIPlugin.getDefault().getActiveWorkbenchWindow());
+        //        register(UIPlugin.getDefault().getActiveWorkbenchWindow());
     }
 
     private void register(IWorkbenchWindow window)

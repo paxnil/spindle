@@ -78,7 +78,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
                 proposals.add(p);
             }
         }
-		proposals.add(SpecAssistHelper.getDefaultInsertCommentProposal(documentOffset, 0));
+		proposals.add(SpecTapestryAccess.getDefaultInsertCommentProposal(documentOffset, 0));
 
         return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
     }

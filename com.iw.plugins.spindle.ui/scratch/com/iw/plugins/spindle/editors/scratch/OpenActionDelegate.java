@@ -1,4 +1,4 @@
-package com.iw.plugins.spindle.editors.multi;
+package com.iw.plugins.spindle.editors.scratch;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;

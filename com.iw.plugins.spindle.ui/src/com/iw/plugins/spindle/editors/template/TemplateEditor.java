@@ -31,7 +31,6 @@ import java.util.Map;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -47,7 +46,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -65,6 +63,7 @@ import com.iw.plugins.spindle.core.scanning.TemplateScanner;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.IReconcileListener;
 
 /**
  * HTML Editor.
@@ -159,20 +158,13 @@ public class TemplateEditor extends Editor
 
     public IComponentSpecification getComponent()
     {
-        try
-        {
-            IEditorInput input = getEditorInput();
-            IStorage storage = ((IStorageEditorInput) input).getStorage();
-            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-            Map templates = manager.getTemplateMap(project);
-            if (templates != null)
-                return (IComponentSpecification) templates.get(storage);
+        IStorage storage = getStorage();
+        IProject project = TapestryCore.getDefault().getProjectFor(storage);
+        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+        Map templates = manager.getTemplateMap(project);
+        if (templates != null)
+            return (IComponentSpecification) templates.get(storage);
 
-        } catch (CoreException e)
-        {
-            UIPlugin.log(e);
-        }
         return null;
     }
 
@@ -208,6 +200,23 @@ public class TemplateEditor extends Editor
             collector.beginCollecting();
             collector.endCollecting();
         }
+    }
+
+    /* (non-Javadoc)
+      * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
+      */
+    public void addListener(IReconcileListener listener)
+    {
+        // ignore
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.IReconcileWorker#removeListener(com.iw.plugins.spindle.editors.IReconcileListener)
+     */
+    public void removeListener(IReconcileListener listener)
+    {
+        // ignore
     }
 
     public class RevertTemplateAction extends Action

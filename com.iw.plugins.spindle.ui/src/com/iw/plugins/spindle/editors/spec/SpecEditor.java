@@ -26,6 +26,9 @@
 
 package com.iw.plugins.spindle.editors.spec;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.spec.IApplicationSpecification;
@@ -37,11 +40,12 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -50,16 +54,19 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.eclipse.ui.views.properties.IPropertySheetPage;
+import org.eclipse.update.ui.forms.internal.IFormPage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -83,7 +90,12 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.ReconcileWorker;
+import com.iw.plugins.spindle.editors.IReconcileListener;
+import com.iw.plugins.spindle.editors.IReconcileWorker;
+import com.iw.plugins.spindle.editors.multi.IMultiPage;
+import com.iw.plugins.spindle.editors.multi.MultiPageSpecEditor;
+import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
+import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
@@ -94,15 +106,19 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class SpecEditor extends Editor
+public class SpecEditor extends Editor implements IMultiPage
 {
 
-    ReconcileWorker fReconciler = null;
-    IScannerValidator fValidator = null;
-    Parser fParser = new Parser();
-    Object fReconciledSpec;
-    ISelectionChangedListener fSelectionChangedListener;
-    OutlinePageSelectionUpdater fUpdater;
+    private IReconcileWorker fReconciler = null;
+    private IScannerValidator fValidator = null;
+    private Parser fParser = new Parser();
+    private Object fReconciledSpec;
+    private ISelectionChangedListener fSelectionChangedListener;
+    private OutlinePageSelectionUpdater fUpdater;
+    private List fReconcileListeners;
+    private Control fControl;
+    /** only here if this editor is embedded in a MultiPageSpecEditor */
+    private MultiPageSpecEditor fMultiPageEditor;
 
     public SpecEditor()
     {
@@ -116,6 +132,8 @@ public class SpecEditor extends Editor
     public void createPartControl(Composite parent)
     {
         super.createPartControl(parent);
+        Control[] children = parent.getChildren();
+        fControl = children[children.length - 1];
 
         fUpdater = new OutlinePageSelectionUpdater();
 
@@ -140,7 +158,7 @@ public class SpecEditor extends Editor
 
     }
 
-    private void openTo(Object obj)
+    public void openTo(Object obj)
     {
         if (obj instanceof DocumentArtifact)
         {
@@ -165,48 +183,32 @@ public class SpecEditor extends Editor
      */
     public ICoreNamespace getNamespace()
     {
-        try
-        {
-            IEditorInput input = getEditorInput();
-            IStorage storage = ((IStorageEditorInput) input).getStorage();
-            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-            Map specs = manager.getSpecMap(project);
-            if (specs != null)
-            {
-                BaseSpecification bspec = (BaseSpecification) specs.get(storage);
-                if (bspec != null)
-                    return (ICoreNamespace) bspec.getNamespace();
-            }
 
-        } catch (CoreException e)
+        IStorage storage = getStorage();
+        IProject project = TapestryCore.getDefault().getProjectFor(storage);
+        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+        Map specs = manager.getSpecMap(project);
+        if (specs != null)
         {
-            UIPlugin.log(e);
+            BaseSpecification bspec = (BaseSpecification) specs.get(storage);
+            if (bspec != null)
+                return (ICoreNamespace) bspec.getNamespace();
         }
+
         return null;
     }
 
     public IComponentSpecification getComponent()
     {
-        try
+        IStorage storage = getStorage();
+        IProject project = TapestryCore.getDefault().getProjectFor(storage);
+        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+        Map specs = manager.getSpecMap(project);
+        if (specs != null)
         {
-            IEditorInput input = getEditorInput();
-            IStorage storage = ((IStorageEditorInput) input).getStorage();
-            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-            Map specs = manager.getSpecMap(project);
-            if (specs != null)
-            {
-                return (IComponentSpecification) specs.get(storage);
-            }
-
-        } catch (CoreException e)
-        {
-            UIPlugin.log(e);
-        } catch (ClassCastException e)
-        {
-            // do nothing
+            return (IComponentSpecification) specs.get(storage);
         }
+
         return null;
     }
 
@@ -279,7 +281,12 @@ public class SpecEditor extends Editor
         action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
         markAsStateDependentAction(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, true);
         setAction("ContentAssistProposal", action);
-
+        OpenDeclarationAction openDeclaration = new OpenDeclarationAction();
+        openDeclaration.setActiveEditor(this);
+        setAction(OpenDeclarationAction.ACTION_ID, openDeclaration);
+        ShowInPackageExplorerAction showInPackage = new ShowInPackageExplorerAction();
+        showInPackage.setActiveEditor(this);
+        setAction(ShowInPackageExplorerAction.ACTION_ID, showInPackage);
     }
 
     /*
@@ -355,7 +362,40 @@ public class SpecEditor extends Editor
         return null;
     }
 
-    abstract class BaseWorker implements ReconcileWorker
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
+     */
+    public void addListener(IReconcileListener listener)
+    {
+        if (fReconcileListeners == null)
+            fReconcileListeners = new ArrayList();
+
+        if (!fReconcileListeners.contains(listener))
+            fReconcileListeners.add(listener);
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.IReconcileWorker#removeListener(com.iw.plugins.spindle.editors.IReconcileListener)
+     */
+    public void removeListener(IReconcileListener listener)
+    {
+        if (fReconcileListeners == null)
+            return;
+
+        fReconcileListeners.remove(listener);
+
+    }
+
+    private void fireReconciled()
+    {
+        for (Iterator iter = fReconcileListeners.iterator(); iter.hasNext();)
+        {
+            IReconcileListener listener = (IReconcileListener) iter.next();
+            listener.reconciled(fReconciledSpec);
+        }
+    }
+
+    abstract class BaseWorker implements IReconcileWorker
     {
         protected IProblemCollector collector;
         protected IProgressMonitor monitor;
@@ -387,6 +427,7 @@ public class SpecEditor extends Editor
             this.collector = problemCollector;
             this.monitor = progressMonitor == null ? new NullProgressMonitor() : progressMonitor;
             Object reconcileResult = null;
+            fReconciledSpec = null;
             boolean didReconcile = false;
             if (!isCancelled())
             {
@@ -415,6 +456,7 @@ public class SpecEditor extends Editor
                 }
             }
             fReconciledSpec = reconcileResult;
+            fireReconciled();
             // Inform the collector that no reconcile occured 
             if (!didReconcile)
             {
@@ -450,6 +492,23 @@ public class SpecEditor extends Editor
                 return null;
             return result;
         }
+        /* (non-Javadoc)
+         * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
+         */
+        public void addListener(IReconcileListener listener)
+        {
+            //ignore
+
+        }
+
+        /* (non-Javadoc)
+         * @see com.iw.plugins.spindle.editors.IReconcileWorker#removeListener(com.iw.plugins.spindle.editors.IReconcileListener)
+         */
+        public void removeListener(IReconcileListener listener)
+        {
+            //ignore
+        }
+
     }
 
     class ComponentReconciler extends BaseWorker
@@ -558,30 +617,13 @@ public class SpecEditor extends Editor
     */
     public void synchronizeOutlinePageSelection()
     {
-
-        ISourceViewer sourceViewer = getSourceViewer();
-        if (sourceViewer == null || fOutline == null)
+        int caret = getCaretOffset();
+        if (caret == -1)
             return;
-
-        StyledText styledText = sourceViewer.getTextWidget();
-        if (styledText == null)
-            return;
-
-        int caret = 0;
-        if (sourceViewer instanceof ITextViewerExtension3)
-        {
-            ITextViewerExtension3 extension = (ITextViewerExtension3) sourceViewer;
-            caret = extension.widgetOffset2ModelOffset(styledText.getCaretOffset());
-        } else
-        {            
-            int offset = sourceViewer.getVisibleRegion().getOffset();
-            caret = offset + styledText.getCaretOffset();
-        }
 
         fOutline.removeSelectionChangedListener(fSelectionChangedListener);
         ((SpecificationOutlinePage) fOutline).setSelection(new StructuredSelection(new Region(caret, 0)));
         fOutline.addSelectionChangedListener(fSelectionChangedListener);
-
     }
 
     /**
@@ -677,4 +719,121 @@ public class SpecEditor extends Editor
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#canPaste(org.eclipse.swt.dnd.Clipboard)
+     */
+    public boolean canPaste(Clipboard clipboard)
+    {
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#contextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+     */
+    public boolean contextMenuAboutToShow(IMenuManager manager)
+    {
+        editorContextMenuAboutToShow(manager);
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.ui.texteditor.AbstractTextEditor#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+     */
+    protected void editorContextMenuAboutToShow(IMenuManager menu)
+    {
+        super.editorContextMenuAboutToShow(menu);
+        menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
+        addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
+        addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#getContentOutlinePage()
+     */
+    public IContentOutlinePage getContentOutlinePage()
+    {
+        return fOutline;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#getPropertySheetPage()
+     */
+    public IPropertySheetPage getPropertySheetPage()
+    {
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#performGlobalAction(java.lang.String)
+     */
+    public boolean performGlobalAction(String id)
+    {
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#update()
+     */
+    public void update()
+    {
+        // do nothing
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.update.ui.forms.internal.IFormPage#becomesInvisible(org.eclipse.update.ui.forms.internal.IFormPage)
+     */
+    public boolean becomesInvisible(IFormPage newPage)
+    {
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.update.ui.forms.internal.IFormPage#becomesVisible(org.eclipse.update.ui.forms.internal.IFormPage)
+     */
+    public void becomesVisible(IFormPage previousPage)
+    {
+        //do nothing
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.update.ui.forms.internal.IFormPage#createControl(org.eclipse.swt.widgets.Composite)
+     */
+    public void createControl(Composite parent)
+    {
+        // do nothing
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.update.ui.forms.internal.IFormPage#getControl()
+     */
+    public Control getControl()
+    {
+        return fControl;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.update.ui.forms.internal.IFormPage#getLabel()
+     */
+    public String getLabel()
+    {
+        return UIPlugin.getString("multieditor-source-tab-label");
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.update.ui.forms.internal.IFormPage#isSource()
+     */
+    public boolean isSource()
+    {
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.update.ui.forms.internal.IFormPage#isVisible()
+     */
+    public boolean isVisible()
+    {
+        if (fMultiPageEditor != null)
+            return fMultiPageEditor.getCurrentMultiPage() == this;
+        return true;
+    }
 }

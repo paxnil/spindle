@@ -304,7 +304,7 @@ public class TemplateScanner extends AbstractScanner
                 token.getComponentType(),
                 containedSpecification,
                 contained,
-                token.getEventInfo());
+                token.getEventInfo(), containedSpecification.getPublicId());
 
     }
 

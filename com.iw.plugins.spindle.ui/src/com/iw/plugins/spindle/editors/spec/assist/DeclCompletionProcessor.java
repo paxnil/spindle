@@ -74,7 +74,7 @@ public class DeclCompletionProcessor extends SpecCompletionProcessor
                     break;
             }
         }
-        return new ICompletionProposal[] {SpecAssistHelper.getDefaultInsertCommentProposal(artifact.getOffset(), Math.max(2,index+1))};
+        return new ICompletionProposal[] {SpecTapestryAccess.getDefaultInsertCommentProposal(artifact.getOffset(), Math.max(2,index+1))};
     }
 
 }

@@ -30,9 +30,12 @@ import net.sf.solareclipse.xml.ui.XMLPlugin;
 
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.ISharedTextColors;
@@ -42,6 +45,7 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -64,7 +68,7 @@ import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class Editor extends StatusTextEditor implements IAdaptable, ReconcileWorker
+public abstract class Editor extends StatusTextEditor implements IAdaptable, IReconcileWorker
 {
 
     /** Preference key for highlighting current line */
@@ -144,6 +148,8 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
         PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
 
     protected final static String OVERVIEW_RULER = PreferenceConstants.EDITOR_OVERVIEW_RULER;
+    
+    protected final static String NAV_GROUP = UIPlugin.PLUGIN_ID+".navigationGroup";
 
     /** The annotation access */
     protected IAnnotationAccess fAnnotationAccess = new ProblemAnnotationAccess();
@@ -182,7 +188,7 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
         IProject project = UIPlugin.getDefault().getProjectFor(input);
         if (project != null)
             // force a build if necessary
-            TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(project);
+            TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(project, true);
         super.init(site, input);
     }
 
@@ -200,6 +206,14 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
         if (fOutline != null)
             fOutline.dispose();
         fOutline = createContentOutlinePage(input);
+    }
+    
+    public IStorage getStorage() {
+        IEditorInput input = getEditorInput();
+        if (input instanceof JarEntryEditorInput)
+            return ((JarEntryEditorInput)input).getStorage();
+            
+        return (IStorage)input.getAdapter(IStorage.class);
     }
 
     public abstract ICoreNamespace getNamespace();
@@ -332,6 +346,28 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
     public boolean isReadyToReconcile()
     {
         return fReadyToReconcile;
+    }
+
+    public int getCaretOffset()
+    {
+        ISourceViewer sourceViewer = getSourceViewer();
+        if (sourceViewer == null || fOutline == null)
+            return -1;
+    
+        StyledText styledText = sourceViewer.getTextWidget();
+        if (styledText == null)
+            return -1;
+        int caret = 0;
+        if (sourceViewer instanceof ITextViewerExtension3)
+        {
+            ITextViewerExtension3 extension = (ITextViewerExtension3) sourceViewer;
+            caret = extension.widgetOffset2ModelOffset(styledText.getCaretOffset());
+        } else
+        {
+            int offset = sourceViewer.getVisibleRegion().getOffset();
+            caret = offset + styledText.getCaretOffset();
+        }
+        return caret;
     }
 
 }

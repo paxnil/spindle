@@ -35,6 +35,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -43,9 +44,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JarEntryFile;
+import org.eclipse.jdt.internal.core.JavaModel;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.search.*;
+import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
 
 /**
  *  Used for the root of the Classpath
@@ -173,8 +177,21 @@ public class ClasspathRootLocation extends AbstractRootLocation
 
     private IPackageFragment findPackageFragment(IStorage storage)
     {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("not implemented yet");
+        if (storage instanceof IResource)
+        {
+            IContainer container = ((IResource) storage).getParent();
+            return (IPackageFragment) JavaCore.create(container);
+        } else if (storage instanceof JarEntryFile)
+        {
+            try
+            {
+                return JarEntryFileUtil.getPackageFragment(fJavaProject, (JarEntryFile) storage);
+            } catch (CoreException e)
+            {
+                TapestryCore.log(e);
+            }
+        }
+        return null;
     }
 
     public void find(String packageName, String filename, ISearchAcceptor requestor)

@@ -93,25 +93,25 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         fProjectBuildStates.remove(project);
     }
 
-    public synchronized Object getLastBuildState(IProject project)
+    public synchronized Object getLastBuildState(IProject project, boolean buildIfRequired)
     {
-        return getLastBuildState(project, null);
+        return getLastBuildState(project, buildIfRequired, null);
     }
 
-    public synchronized Object getLastBuildState(IProject project, IRunnableContext context)
+    public synchronized Object getLastBuildState(IProject project, boolean buildIfRequired, IRunnableContext context)
     {
         if (project == null)
             return null;
-            
+
         if (!TapestryCore.hasTapestryNature(project))
             return null;
 
         Object state = fProjectBuildStates.get(project);
-        if (state == null)
+        if (state == null && buildIfRequired)
         {
             try
             {
-                buildStateIfRequired(project, context);
+                buildStateIfPossible(project, context);
                 state = fProjectBuildStates.get(project);
             } catch (CoreException e)
             {
@@ -124,7 +124,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
     /**
      * 
      */
-    private void buildStateIfRequired(final IProject project, IRunnableContext context) throws CoreException
+    private void buildStateIfPossible(final IProject project, IRunnableContext context) throws CoreException
     {
         // don't bother building if the last one was busted beyond saving!
         if (Markers.getBrokenBuildProblemsFor(project).length > 0)
@@ -220,7 +220,12 @@ public class TapestryArtifactManager implements ITemplateFinderListener
 
     public Map getTemplateMap(IProject project)
     {
-        State state = (State) getLastBuildState(project);
+        return getTemplateMap(project, true);
+    }
+
+    public Map getTemplateMap(IProject project, boolean buildIfRequired)
+    {
+        State state = (State) getLastBuildState(project, buildIfRequired);
         if (state != null)
             return state.fTemplateMap;
         return null;
@@ -233,7 +238,12 @@ public class TapestryArtifactManager implements ITemplateFinderListener
 
     public Map getSpecMap(IProject project)
     {
-        State state = (State) getLastBuildState(project);
+        return getSpecMap(project, true);
+    }
+
+    public Map getSpecMap(IProject project, boolean buildIfRequired)
+    {
+        State state = (State) getLastBuildState(project, buildIfRequired);
         if (state != null)
             return state.fSpecificationMap;
         return null;
@@ -241,7 +251,12 @@ public class TapestryArtifactManager implements ITemplateFinderListener
 
     public INamespace getProjectNamespace(IProject project)
     {
-        State state = (State) getLastBuildState(project);
+        return getProjectNamespace(project, true);
+    }
+
+    public INamespace getProjectNamespace(IProject project, boolean buildIfRequired)
+    {
+        State state = (State) getLastBuildState(project, buildIfRequired);
         if (state != null)
             return state.fPrimaryNamespace;
         return null;
@@ -249,7 +264,12 @@ public class TapestryArtifactManager implements ITemplateFinderListener
 
     public INamespace getFrameworkNamespace(IProject project)
     {
-        State state = (State) getLastBuildState(project);
+        return getFrameworkNamespace(project, true);
+    }
+
+    public INamespace getFrameworkNamespace(IProject project, boolean buildIfRequired)
+    {
+        State state = (State) getLastBuildState(project, buildIfRequired);
         if (state != null)
             return state.fFrameworkNamespace;
         return null;

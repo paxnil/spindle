@@ -10,7 +10,7 @@
  *     Geoff Longman - changes to make subclassing easier
  *******************************************************************************/
 
-package com.iw.plugins.spindle.editors.multi;
+package com.iw.plugins.spindle.editors.scratch;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IProgressMonitor;

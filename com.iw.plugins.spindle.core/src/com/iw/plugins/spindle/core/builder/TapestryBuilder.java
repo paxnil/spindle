@@ -199,7 +199,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             //      IMarker marker = currentProject.createMarker(ProblemMarkerTag);
             //      marker.setAttribute(IMarker.MESSAGE, Util.bind("build.missingSourceFile", e.missingSourceFile)); //$NON-NLS-1$
             //      marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-
+        } catch (NullPointerException e) {
+            TapestryCore.log(e);
+            throw e;
         } finally
         {
             if (!ok)
@@ -267,7 +269,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
     State getLastState(IProject project)
     {
-        return (State) TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(fCurrentProject);
+        return (State) TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(fCurrentProject, false);
     }
 
     /**

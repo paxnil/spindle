@@ -2,7 +2,7 @@
  * (c) Copyright 2001 MyCorporation.
  * All Rights Reserved.
  */
-package com.iw.plugins.spindle.editors.multi;
+package com.iw.plugins.spindle.editors.scratch;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;

@@ -40,7 +40,6 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.ui.IEditorInput;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
@@ -71,7 +70,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
             String parentName = parent.getName();
             if (parentName != null)
             {
-                String parentAllowedContent = SpecAssistHelper.getAllowedElements(dtd, parentName);
+                String parentAllowedContent = SpecTapestryAccess.getAllowedElements(dtd, parentName);
                 if (parentAllowedContent != null)
                 {
                     String sibName = null;
@@ -89,12 +88,12 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 
     protected static List getRawNewTagProposals(DTD dtd, String parentName, String sibName)
     {
-        List allowedChildren = SpecAssistHelper.getAllowedChildren(dtd, parentName, sibName, false);
+        List allowedChildren = SpecTapestryAccess.getAllowedChildren(dtd, parentName, sibName, false);
         List result = new ArrayList();
         for (Iterator iter = allowedChildren.iterator(); iter.hasNext();)
         {
             String tagName = (String) iter.next();
-            result.addAll(SpecAssistHelper.getNewElementCompletionProposals(dtd, tagName));
+            result.addAll(SpecTapestryAccess.getNewElementCompletionProposals(dtd, tagName));
 
         }
         return result;
@@ -187,8 +186,8 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 
     private ICompletionProposal[] computeEmptyDocumentProposal(ITextViewer viewer, int documentOffset)
     {
-        IEditorInput input = fEditor.getEditorInput();
-        IStorage storage = (IStorage) input.getAdapter(IStorage.class);
+        
+        IStorage storage = fEditor.getStorage();
         String extension = storage.getFullPath().getFileExtension();
         if (extension == null || extension.length() == 0)
         {

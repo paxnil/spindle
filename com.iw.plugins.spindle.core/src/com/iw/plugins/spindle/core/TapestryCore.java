@@ -53,6 +53,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -286,7 +287,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
     {
         if (CoreListeners == null)
             return;
-            
+
         for (Iterator iter = CoreListeners.iterator(); iter.hasNext();)
         {
             ICoreListener listener = (ICoreListener) iter.next();
@@ -525,6 +526,11 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         } else if (obj instanceof IStorage)
         {
             project = getProjectFor((IStorage) obj);
+        } else if (obj instanceof IEditorInput)
+        {
+            //TODO warning - will always return null if its a JarEntryEditorInput!
+            //Use Editor.getStorage() if you can.            
+            project = getProjectFor((IStorage) ((IEditorInput) obj).getAdapter(IStorage.class));
         }
         if (project == null)
         {
@@ -548,6 +554,8 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
      */
     public TapestryProject getTapestryProjectFor(IStorage storage)
     {
+        if (storage == null)
+            return null;
         IProject project = getProjectFor(storage);
         if (project == null)
         {

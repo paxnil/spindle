@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
+ * Portions created by the Initial Developer are Copyright (C) 2002
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -23,22 +23,21 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
+package com.iw.plugins.spindle.editors.multi.lib;
 
-package com.iw.plugins.spindle.editors;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import com.iw.plugins.spindle.editors.AbstractAlertSection;
+import com.iw.plugins.spindle.editors.SpindleFormPage;
 
-import com.iw.plugins.spindle.core.source.IProblemCollector;
+public class OverviewAlertSection extends AbstractAlertSection {
 
-/**
- *  Called by Reconcilers on editors that perform thier own.
- * 
- * @author glongman@intelligentworks.com
- * @version $Id$
- */
-public interface ReconcileWorker
-{
-    public void reconcile(IProblemCollector collector, IProgressMonitor fProgressMonitor);
-    
-    public boolean isReadyToReconcile();
+  public OverviewAlertSection(SpindleFormPage page) {
+    super("TapistryLibAlert", page);
+  }
+
+  protected boolean checkReferences(Composite parent, FormWidgetFactory factory) {
+    return false;
+  }
 }

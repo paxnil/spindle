@@ -1,6 +1,8 @@
 package com.iw.plugins.spindle.editors.spec;
 
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.editors.text.TextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -20,24 +22,25 @@ public class SpecEditorContributor extends TextEditorActionContributor
     {
         super();
 
-        fContentAssistProposal =
-            new RetargetTextEditorAction(
-                UIPlugin.getDefault().getResourceBundle(),
-                "ContentAssistProposal.");
-        fContentAssistProposal.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-
     }
 
-    
+    public void init(IActionBars bars, IWorkbenchPage page)
+    {
+        createActions();
+        super.init(bars, page);
+    }
+
+    protected void createActions()
+    {
+        fContentAssistProposal =
+            new RetargetTextEditorAction(UIPlugin.getDefault().getResourceBundle(), "ContentAssistProposal.");
+        fContentAssistProposal.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+    }
+
     private void doSetActiveEditor(IEditorPart part)
     {
         super.setActiveEditor(part);
-
-        ITextEditor editor = null;
-        if (part instanceof ITextEditor)
-            editor = (ITextEditor) part;
-
-        fContentAssistProposal.setAction(getAction(editor, "ContentAssistProposal"));
+        fContentAssistProposal.setAction(getAction((ITextEditor) part, "ContentAssistProposal"));
     }
 
     /*

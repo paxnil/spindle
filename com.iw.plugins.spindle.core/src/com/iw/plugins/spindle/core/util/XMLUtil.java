@@ -671,6 +671,8 @@ public class XMLUtil
     {
 
         int currentDTD = XMLUtil.getDTDVersion(publicId);
+        if (currentDTD == XMLUtil.UNKNOWN_DTD)
+            currentDTD = XMLUtil.DTD_3_0;
         boolean isDTD13 = currentDTD == XMLUtil.DTD_1_3;
         boolean isDTD30OrBetter = currentDTD >= XMLUtil.DTD_3_0;
 

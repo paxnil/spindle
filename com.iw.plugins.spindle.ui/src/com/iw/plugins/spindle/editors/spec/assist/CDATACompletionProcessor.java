@@ -66,7 +66,7 @@ public class CDATACompletionProcessor extends SpecCompletionProcessor
         if (content.equals("<!-"))
         {
             return new ICompletionProposal[] {
-                 SpecAssistHelper.getDefaultInsertCommentProposal(artifact.getOffset(), 3)};
+                 SpecTapestryAccess.getDefaultInsertCommentProposal(artifact.getOffset(), 3)};
         }
         return NoProposals;
     }

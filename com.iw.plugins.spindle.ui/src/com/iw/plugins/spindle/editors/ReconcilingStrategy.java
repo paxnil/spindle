@@ -62,10 +62,10 @@ public class ReconcilingStrategy implements IReconcilingStrategy, IReconcilingSt
 
     private void reconcile()
     {
-        if (!(fEditor instanceof ReconcileWorker))
+        if (!(fEditor instanceof IReconcileWorker))
             return;
             
-        ReconcileWorker selfReconciler = (ReconcileWorker) fEditor;
+        IReconcileWorker selfReconciler = (IReconcileWorker) fEditor;
 
         if (!selfReconciler.isReadyToReconcile())
             return;

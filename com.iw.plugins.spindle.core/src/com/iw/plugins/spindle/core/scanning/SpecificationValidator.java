@@ -189,7 +189,7 @@ public class SpecificationValidator extends BaseValidator
             type,
             containedSpecification,
             component,
-            info);
+            info, containedSpecification.getPublicId());
 
         return true;
     }

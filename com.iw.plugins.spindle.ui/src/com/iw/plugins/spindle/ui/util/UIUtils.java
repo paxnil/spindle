@@ -30,12 +30,14 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
@@ -120,8 +122,15 @@ public class UIUtils
                     {
                         continue;
                     }
-
-                    IStorage editorStorage = (IStorage) editor.getEditorInput().getAdapter(IStorage.class);
+                    
+                    IEditorInput input = editor.getEditorInput();
+                    IStorage editorStorage;
+                    if (input instanceof JarEntryEditorInput) {
+                        editorStorage = ((JarEntryEditorInput)input).getStorage();
+                    } else {
+                        editorStorage = (IStorage) input.getAdapter(IStorage.class);
+                    }
+                                           
                     if (editorStorage != null)
                         return editor;
                 }

@@ -323,10 +323,11 @@ public abstract class UITapestryAccess
     {
         fNamespace = editor.getNamespace();
         Assert.isLegal(fNamespace != null);
-        IStorage storage = (IStorage) editor.getEditorInput().getAdapter(IStorage.class);
+        IStorage storage = editor.getStorage();
         IProject project = TapestryCore.getDefault().getProjectFor(storage);
         setFrameworkNamespace(
             (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+        Assert.isLegal(fFrameworkNamespace != null);
     }
 
     public ICoreNamespace getFrameworkNamespace()
