@@ -2,7 +2,7 @@
 <feature
       id="com.iw.features.spindle"
       label="Spindle 3, an Eclipse Plugin for Tapestry"
-      version="3.0.53"
+      version="3.1.0"
       provider-name="Intelligent Works Inc"
       image="spindle.gif">
 
@@ -46,13 +46,20 @@ All Rights Reserved
    </url>
 
    <requires>
-      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime" version="2.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.runtime.compatibility"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.apache.xerces" version="4.0.13" match="perfect"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.search"/>
       <import plugin="org.eclipse.jdt.launching"/>
+      <import plugin="org.eclipse.compare"/>
    </requires>
 
    <plugin
@@ -62,33 +69,33 @@ All Rights Reserved
          version="4.0.13"/>
 
    <plugin
-         id="net.sf.solareclipse.ui"
-         download-size="0"
-         install-size="0"
-         version="0.4.0.spindle-dep-4"/>
-
-   <plugin
-         id="net.sf.solareclipse.xml.ui"
-         download-size="0"
-         install-size="0"
-         version="0.4.0.spindle-dep-4"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.53"/>
-
-   <plugin
          id="com.iw.plugins.spindle.docs"
          download-size="0"
          install-size="0"
          version="0.0.2"/>
 
    <plugin
+         id="com.iw.plugins.spindle.core"
+         download-size="0"
+         install-size="0"
+         version="0.1.0"/>
+
+   <plugin
          id="com.iw.plugins.spindle.ui"
          download-size="0"
          install-size="0"
-         version="0.0.53"/>
+         version="0.1.0 "/>
+
+   <plugin
+         id="net.sf.solareclipse.ui"
+         download-size="0"
+         install-size="0"
+         version="0.4.0.spindle-dep-5"/>
+
+   <plugin
+         id="net.sf.solareclipse.xml.ui"
+         download-size="0"
+         install-size="0"
+         version="0.4.0.spindle-dep-5"/>
 
 </feature>

@@ -61,9 +61,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.internal.commands.Manager;
-import org.eclipse.ui.internal.commands.Sequence;
-import org.eclipse.ui.internal.commands.Stroke;
+
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -73,6 +71,8 @@ import com.iw.plugins.spindle.editors.Editor;
 
 /**
  * Base class for editor actions
+ * 
+ * TODO fix.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$

@@ -44,7 +44,7 @@ public class ProblemAnnotationAccess implements IAnnotationAccess {
         if (annotation instanceof IProblemAnnotation) {
             IProblemAnnotation tapAnnotation= (IProblemAnnotation) annotation;
             if (tapAnnotation.isRelevant())
-                return tapAnnotation.getAnnotationType();
+                return tapAnnotation.getType();
         }
         return null;
     }

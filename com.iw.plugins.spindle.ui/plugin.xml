@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.0.53"
+   version="0.1.0 "
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -11,6 +12,10 @@
       <library name="xmen.jar"/>
    </runtime>
    <requires>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.editors"/>
       <import plugin="com.iw.plugins.spindle.core" export="true"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.search"/>
@@ -20,6 +25,7 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.compare"/>
+      <import plugin="org.eclipse.core.runtime"/>
    </requires>
 
 
@@ -436,5 +442,40 @@ the new Spindle
          </action>
       </editorContribution>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+         name="com.iw.plugins.spindle.ui.error"
+         super="org.eclipse.ui.workbench.texteditor.error"
+         markerType="com.iw.plugins.spindle.core.problemmarker"
+         markerSeverity="2">
+      </type>
+      <type
+         name="com.iw.plugins.spindle.ui.warning"
+         super="org.eclipse.ui.workbench.texteditor.warning"
+         markerType="com.iw.plugins.spindle.core.problemmarker"
+         markerSeverity="1">
+      </type>
+      <type
+         name="com.iw.plugins.spindle.ui.info"
+         super="org.eclipse.ui.workbench.texteditor.info"
+         markerType="com.iw.plugins.spindle.core.problemmarker"
+         markerSeverity="0">
+      </type>
+   </extension>   
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="com.iw.plugins.spindle.ui.error"
+            annotationImageProvider="com.iw.plugins.spindle.editors.ProblemAnnotationImageProvider">
+      </specification>
+      <specification
+            annotationType="com.iw.plugins.spindle.ui.warning"
+            annotationImageProvider="com.iw.plugins.spindle.editors.ProblemAnnotationImageProvider">
+      </specification>
+      <specification
+            annotationType="com.iw.plugins.spindle.ui.info"
+            annotationImageProvider="com.iw.plugins.spindle.editors.ProblemAnnotationImageProvider">
+      </specification>
+      </extension>
 </plugin>

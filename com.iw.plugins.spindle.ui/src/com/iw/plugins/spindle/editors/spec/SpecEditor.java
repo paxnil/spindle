@@ -107,7 +107,7 @@ import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.IReconcileWorker;
-import com.iw.plugins.spindle.editors.ProblemAnnotationType;
+import com.iw.plugins.spindle.editors.ProblemMarkerAnnotation;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
@@ -360,8 +360,8 @@ public class SpecEditor extends Editor
     {
         ISharedTextColors sharedColors = UIPlugin.getDefault().getSharedTextColors();
         fOverviewRuler = new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);
-        fOverviewRuler.addHeaderAnnotationType(ProblemAnnotationType.WARNING);
-        fOverviewRuler.addHeaderAnnotationType(ProblemAnnotationType.ERROR);
+        fOverviewRuler.addHeaderAnnotationType(ProblemMarkerAnnotation.WARNING_ANNOTATION_TYPE);
+        fOverviewRuler.addHeaderAnnotationType(ProblemMarkerAnnotation.ERROR_ANNOTATION_TYPE);
 
         ISourceViewer viewer =
             new SpecSourceViewer(parent, verticalRuler, fOverviewRuler, isOverviewRulerVisible(), styles);
