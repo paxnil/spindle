@@ -122,8 +122,9 @@ public class TemplateScanner extends AbstractScanner
         scan(templateLocation, validator);
 
     }
-    
-    public boolean containsImplicitComponents() {
+
+    public boolean containsImplicitComponents()
+    {
         return fContainsImplicitComponents;
     }
 
@@ -194,8 +195,8 @@ public class TemplateScanner extends AbstractScanner
             {
                 scanOpenToken((CoreOpenToken) parseResults[i], result);
             }
-        }        
-        
+        }
+
     }
 
     private void scanOpenToken(CoreOpenToken token, List result) throws ScannerException
@@ -311,7 +312,8 @@ public class TemplateScanner extends AbstractScanner
         }
 
         if (fPerformDeferredValidations)
-            FrameworkComponentValidator.validate(
+            FrameworkComponentValidator.validateImplictComponent(
+                (IResourceWorkspaceLocation) fComponentSpec.getSpecificationLocation(),
                 fTemplateLocation,
                 fComponentSpec.getNamespace(),
                 token.getComponentType(),

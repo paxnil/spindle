@@ -54,10 +54,8 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension;
-import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -75,7 +73,6 @@ import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
-import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.w3c.dom.Document;
@@ -107,875 +104,893 @@ import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.IReconcileWorker;
-import com.iw.plugins.spindle.editors.ProblemAnnotationType;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
 
-
-
 /**
- *  Editor for Tapestry Spec files
+ * Editor for Tapestry Spec files
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class SpecEditor extends Editor 
+public class SpecEditor extends Editor
 {
 
-    private IReconcileWorker fReconciler = null;
-    private IScannerValidator fValidator = null;
-    private Parser fParser = new Parser();
-    private Object fReconciledSpec;
-    private ISelectionChangedListener fSelectionChangedListener;
-    private OutlinePageSelectionUpdater fUpdater;
-    private List fReconcileListeners;
-    private Control fControl;
+  private IReconcileWorker fReconciler = null;
+  private IScannerValidator fValidator = null;
+  private Parser fParser = new Parser();
+  private Object fReconciledSpec;
+  private ISelectionChangedListener fSelectionChangedListener;
+  private OutlinePageSelectionUpdater fUpdater;
+  private List fReconcileListeners;
+  private Control fControl;
 
-    private Object fInformationControlInput;
+  private Object fInformationControlInput;
 
+  public SpecEditor()
+  {
+    super();
+    fOutline = new MultiPageContentOutline(this);
+  }
 
-    public SpecEditor()
+  public Object getInformationControlInput()
+  {
+    return fInformationControlInput;
+  }
+
+  public void invokeAssetChooser(ChooseResourceProposal proposal)
+  {
+    try
     {
-        super();
-        fOutline = new MultiPageContentOutline(this);
+      fInformationControlInput = proposal;
+      SpecSourceViewer viewer = (SpecSourceViewer) getSourceViewer();
+
+      if (viewer.canDoOperation(SpecSourceViewer.OPEN_ASSET_CHOOSER))
+        viewer.doOperation(SpecSourceViewer.OPEN_ASSET_CHOOSER);
+
+    } catch (RuntimeException e)
+    {
+      UIPlugin.log(e);
+      throw e;
+    } finally
+    {
+      fInformationControlInput = null;
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+   */
+  public void createPartControl(Composite parent)
+  {
+    super.createPartControl(parent);
+    Control[] children = parent.getChildren();
+    fControl = children[children.length - 1];
+
+    fUpdater = new OutlinePageSelectionUpdater();
+
+    fSelectionChangedListener = new ISelectionChangedListener()
+    {
+      public void selectionChanged(SelectionChangedEvent event)
+      {
+        ISelection selection = event.getSelection();
+        if (!selection.isEmpty() && selection instanceof IStructuredSelection)
+        {
+          IStructuredSelection structured = (IStructuredSelection) selection;
+          Object first = structured.getFirstElement();
+          highlight(first);
+        }
+
+      }
+
+    };
+
+    if (fOutline != null)
+      fOutline.addSelectionChangedListener(fSelectionChangedListener);
+
+    // setup the outline view!
+    reconcileOutline();
+
+  }
+
+  public void openTo(Object obj)
+  {
+    if (obj instanceof XMLNode)
+    {
+      XMLNode artifact = (XMLNode) obj;
+      String type = artifact.getType();
+      if (type == XMLDocumentPartitioner.ATTR)
+      {
+        IRegion valueRegion = artifact.getAttributeValueRegion();
+        if (valueRegion != null)
+        {
+          selectAndReveal(valueRegion.getOffset(), valueRegion.getLength());
+        }
+      } else
+      {
+        selectAndReveal(artifact.getOffset(), artifact.getLength());
+      }
+      highlight(obj);
+    } else if (obj instanceof ILocatable)
+    {
+      ISourceLocationInfo info = (ISourceLocationInfo) ((ILocatable) obj).getLocation();
+      ISourceLocation startTagLocation = info.getStartTagSourceLocation();
+      selectAndReveal(startTagLocation.getCharStart(), startTagLocation.getLength());
+      setHighlightRange(info.getOffset(), info.getLength(), true);
+    }
+  }
+
+  public void highlight(Object obj)
+  {
+    if (obj instanceof XMLNode)
+    {
+      XMLNode artifact = (XMLNode) obj;
+      String type = artifact.getType();
+      if (type == XMLDocumentPartitioner.ATTR)
+      {
+        IRegion valueRegion = artifact.getAttributeValueRegion();
+        if (valueRegion != null)
+        {
+          setHighlightRange(valueRegion.getOffset(), valueRegion.getLength(), false);
+          return;
+        }
+      }
+      if (artifact.getType() == XMLDocumentPartitioner.TAG)
+      {
+        XMLNode corr = artifact.getCorrespondingNode();
+        if (corr != null)
+        {
+          int start = artifact.getOffset();
+          int endStart = corr.getOffset();
+          setHighlightRange(start, endStart - start + corr.getLength(), false);
+          return;
+        }
+      }
+      if (type == XMLDocumentPartitioner.ENDTAG)
+      {
+        XMLNode corr = artifact.getCorrespondingNode();
+        if (corr != null)
+        {
+          int start = corr.getOffset();
+          int endStart = artifact.getOffset();
+          setHighlightRange(start, endStart - start + artifact.getLength(), false);
+          return;
+        }
+      }
+      setHighlightRange(artifact.getOffset(), artifact.getLength(), false);
+    } else if (obj instanceof ILocatable)
+    {
+      ISourceLocationInfo info = (ISourceLocationInfo) ((ILocatable) obj).getLocation();
+      setHighlightRange(info.getOffset(), info.getLength(), false);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.Editor#getNamespace()
+   */
+  public ICoreNamespace getNamespace()
+  {
+
+    IStorage storage = getStorage();
+    IProject project = TapestryCore.getDefault().getProjectFor(storage);
+    TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+    Map specs = manager.getSpecMap(project);
+    if (specs != null)
+    {
+      BaseSpecLocatable bspec = (BaseSpecLocatable) specs.get(storage);
+      if (bspec != null)
+        return (ICoreNamespace) bspec.getNamespace();
     }
 
-    public Object getInformationControlInput()
+    return null;
+  }
+
+  public IComponentSpecification getComponent()
+  {
+    IStorage storage = getStorage();
+    IProject project = TapestryCore.getDefault().getProjectFor(storage);
+    TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+    Map specs = manager.getSpecMap(project);
+    if (specs != null)
     {
-        return fInformationControlInput;
+      return (IComponentSpecification) specs.get(storage);
     }
 
-    public void invokeAssetChooser(ChooseResourceProposal proposal)
+    return null;
+  }
+
+  public Object getReconciledSpec()
+  {
+    return fReconciledSpec;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.texteditor.AbstractTextEditor#doSetInput(org.eclipse.ui.IEditorInput)
+   */
+  protected void doSetInput(IEditorInput input) throws CoreException
+  {
+    fReconciler = null;
+    if (input instanceof IFileEditorInput)
     {
+      // only files have reconcilers
+      IFile file = ((IFileEditorInput) input).getFile();
+      String extension = file.getFullPath().getFileExtension();
+      if (extension == null)
+        return;
+      if ("application".equals(extension))
+      {
+        fReconciler = new ApplicationReconciler();
+      } else if ("jwc".equals(extension) || "page".equals(extension))
+      {
+        fReconciler = new ComponentReconciler();
+      } else if ("library".equals(extension))
+      {
+        fReconciler = new LibraryReconciler();
+      }
+
+    }
+    super.doSetInput(input);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.Editor#createContentOutlinePage(org.eclipse.ui.IEditorInput)
+   */
+  public IContentOutlinePage createContentOutlinePage(IEditorInput input)
+  {
+    return fOutline;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.Editor#createDocumentProvider(org.eclipse.ui.IEditorInput)
+   */
+  protected IDocumentProvider createDocumentProvider(IEditorInput input)
+  {
+    if (input instanceof IFileEditorInput)
+      return UIPlugin.getDefault().getSpecFileDocumentProvider();
+
+    return new SpecStorageDocumentProvider();
+  }
+
+  /*
+   * @see org.eclipse.ui.texteditor.AbstractTextEditor#createSourceViewer(Composite,
+   *      IVerticalRuler, int)
+   */
+  protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles)
+  {
+
+    fAnnotationAccess = createAnnotationAccess();
+    fOverviewRuler = createOverviewRuler(getSharedColors());
+
+    ISourceViewer viewer = new SpecSourceViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
+    // ensure decoration support has been created and configured.
+    getSourceViewerDecorationSupport(viewer);
+
+    return viewer;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.Editor#createSourceViewerConfiguration()
+   */
+  protected SourceViewerConfiguration createSourceViewerConfiguration()
+  {
+    return new SpecConfiguration(UIPlugin.getDefault().getXMLTextTools(), this, UIPlugin.getDefault().getPreferenceStore());
+  }
+
+  /**
+   * @see org.eclipse.ui.texteditor.AbstractTextEditor#createActions()
+   */
+  protected void createActions()
+  {
+    super.createActions();
+    IAction action = new TextOperationAction(UIPlugin.getResourceBundle(), "ContentAssistProposal.", this,
+        ISourceViewer.CONTENTASSIST_PROPOSALS);
+    action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+    markAsStateDependentAction(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, true);
+    setAction("ContentAssistProposal", action);
+
+    action = new TextOperationAction(UIPlugin.getResourceBundle(), "ShowOutline.", this, SpecSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
+    action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.xml.show.outline");
+    setAction("com.iw.plugins.spindle.ui.editor.xml.show.outline", action);
+
+    action = new TextOperationAction(UIPlugin.getResourceBundle(), "ShowStructure.", this, SpecSourceViewer.OPEN_STRUCTURE, true); //$NON-NLS-1$
+    action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.xml.open.structure");
+    setAction("com.iw.plugins.spindle.ui.editor.xml.open.structure", action);
+
+    OpenDeclarationAction openDeclaration = new OpenDeclarationAction();
+    openDeclaration.setActiveEditor(this);
+    setAction(OpenDeclarationAction.ACTION_ID, openDeclaration);
+    ShowInPackageExplorerAction showInPackage = new ShowInPackageExplorerAction();
+    showInPackage.setActiveEditor(this);
+    setAction(ShowInPackageExplorerAction.ACTION_ID, showInPackage);
+  }
+
+  /*
+   * @see AbstractTextEditor#handleCursorPositionChanged()
+   */
+  protected void handleCursorPositionChanged()
+  {
+    super.handleCursorPositionChanged();
+    if (fUpdater != null)
+      fUpdater.post();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.ISelfReconcilingEditor#reconcile(com.iw.plugins.spindle.core.parser.IProblemCollector,
+   *      org.eclipse.core.runtime.IProgressMonitor)
+   */
+  public void reconcile(IProblemCollector collector, IProgressMonitor monitor)
+  {
+    fReconciledSpec = null;
+
+    reconcileOutline();
+
+    if (fReconciler != null)
+    {
+      fReconciler.reconcile(collector, monitor);
+    }
+  }
+
+  XMLDocumentPartitioner fOutlinePartitioner;
+
+  private void reconcileOutline()
+  {
+    if (fOutlinePartitioner == null)
+      fOutlinePartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+    try
+    {
+      IDocument document = getDocumentProvider().getDocument(getEditorInput());
+      if (document.getLength() == 0 || document.get().trim().length() == 0)
+      {
+        ((MultiPageContentOutline) fOutline).setInput(null);
+      } else
+      {
+
+        fOutlinePartitioner.connect(document);
         try
         {
-            fInformationControlInput = proposal;
-            SpecSourceViewer viewer = (SpecSourceViewer) getSourceViewer();
-
-            if (viewer.canDoOperation(SpecSourceViewer.OPEN_ASSET_CHOOSER))
-                viewer.doOperation(SpecSourceViewer.OPEN_ASSET_CHOOSER);
-
-        } catch (RuntimeException e)
+          ((MultiPageContentOutline) fOutline).setInput(XMLNode.createTree(document, -1));
+        } catch (BadLocationException e)
         {
-            UIPlugin.log(e);
-            throw e;
-        } finally
-        {
-            fInformationControlInput = null;
+          // do nothing
         }
-    }
+      }
+      if (fUpdater != null)
+        fUpdater.post();
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
-     */
-    public void createPartControl(Composite parent)
+    } catch (RuntimeException e)
     {
-        super.createPartControl(parent);
-        Control[] children = parent.getChildren();
-        fControl = children[children.length - 1];
-
-        fUpdater = new OutlinePageSelectionUpdater();
-
-        fSelectionChangedListener = new ISelectionChangedListener()
-        {
-            public void selectionChanged(SelectionChangedEvent event)
-            {
-                ISelection selection = event.getSelection();
-                if (!selection.isEmpty() && selection instanceof IStructuredSelection)
-                {
-                    IStructuredSelection structured = (IStructuredSelection) selection;
-                    Object first = structured.getFirstElement();
-                    highlight(first);
-                }
-
-            }
-
-        };
-
-        if (fOutline != null)
-            fOutline.addSelectionChangedListener(fSelectionChangedListener);
-
-        // setup the outline view!
-        reconcileOutline();
-
-    }
-
-    public void openTo(Object obj)
+      UIPlugin.log(e);
+      throw e;
+    } finally
     {
-        if (obj instanceof XMLNode)
-        {
-            XMLNode artifact = (XMLNode) obj;
-            String type = artifact.getType();
-            if (type == XMLDocumentPartitioner.ATTR)
-            {
-                IRegion valueRegion = artifact.getAttributeValueRegion();
-                if (valueRegion != null)
-                {
-                    selectAndReveal(valueRegion.getOffset(), valueRegion.getLength());
-                }
-            } else
-            {
-                selectAndReveal(artifact.getOffset(), artifact.getLength());
-            }
-            highlight(obj);
-        } else if (obj instanceof ILocatable)
-        {
-            ISourceLocationInfo info = (ISourceLocationInfo) ((ILocatable) obj).getLocation();
-            ISourceLocation startTagLocation = info.getStartTagSourceLocation();
-            selectAndReveal(startTagLocation.getCharStart(), startTagLocation.getLength());
-            setHighlightRange(info.getOffset(), info.getLength(), true);
-        }
+      fOutlinePartitioner.disconnect();
     }
+  }
+  /**
+   * return the Tapestry specification object obtained during the last build
+   * note this method may trigger a build!
+   */
 
-    public void highlight(Object obj)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
+   */
+  public void addReconcileListener(IReconcileListener listener)
+  {
+    if (fReconcileListeners == null)
+      fReconcileListeners = new ArrayList();
+
+    if (!fReconcileListeners.contains(listener))
+      fReconcileListeners.add(listener);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.IReconcileWorker#removeListener(com.iw.plugins.spindle.editors.IReconcileListener)
+   */
+  public void removeReconcileListener(IReconcileListener listener)
+  {
+    if (fReconcileListeners == null)
+      return;
+
+    fReconcileListeners.remove(listener);
+
+  }
+
+  private void fireReconcileStarted()
+  {
+    for (Iterator iter = fReconcileListeners.iterator(); iter.hasNext();)
     {
-        if (obj instanceof XMLNode)
-        {
-            XMLNode artifact = (XMLNode) obj;
-            String type = artifact.getType();
-            if (type == XMLDocumentPartitioner.ATTR)
-            {
-                IRegion valueRegion = artifact.getAttributeValueRegion();
-                if (valueRegion != null)
-                {
-                    setHighlightRange(valueRegion.getOffset(), valueRegion.getLength(), false);
-                    return;
-                }
-            }
-            if (artifact.getType() == XMLDocumentPartitioner.TAG)
-            {
-                XMLNode corr = artifact.getCorrespondingNode();
-                if (corr != null)
-                {
-                    int start = artifact.getOffset();
-                    int endStart = corr.getOffset();
-                    setHighlightRange(start, endStart - start + corr.getLength(), false);
-                    return;
-                }
-            }
-            if (type == XMLDocumentPartitioner.ENDTAG)
-            {
-                XMLNode corr = artifact.getCorrespondingNode();
-                if (corr != null)
-                {
-                    int start = corr.getOffset();
-                    int endStart = artifact.getOffset();
-                    setHighlightRange(start, endStart - start + artifact.getLength(), false);
-                    return;
-                }
-            }
-            setHighlightRange(artifact.getOffset(), artifact.getLength(), false);
-        } else if (obj instanceof ILocatable)
-        {
-            ISourceLocationInfo info = (ISourceLocationInfo) ((ILocatable) obj).getLocation();
-            setHighlightRange(info.getOffset(), info.getLength(), false);
-        }
+      IReconcileListener listener = (IReconcileListener) iter.next();
+      listener.reconcileStarted();
     }
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.Editor#getNamespace()
-     */
-    public ICoreNamespace getNamespace()
+  private void fireReconciled(Object reconcileResult)
+  {
+    for (Iterator iter = fReconcileListeners.iterator(); iter.hasNext();)
     {
-
-        IStorage storage = getStorage();
-        IProject project = TapestryCore.getDefault().getProjectFor(storage);
-        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-        Map specs = manager.getSpecMap(project);
-        if (specs != null)
-        {
-            BaseSpecLocatable bspec = (BaseSpecLocatable) specs.get(storage);
-            if (bspec != null)
-                return (ICoreNamespace) bspec.getNamespace();
-        }
-
-        return null;
+      IReconcileListener listener = (IReconcileListener) iter.next();
+      listener.reconciled(reconcileResult);
     }
+  }
 
-    public IComponentSpecification getComponent()
-    {
-        IStorage storage = getStorage();
-        IProject project = TapestryCore.getDefault().getProjectFor(storage);
-        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
-        Map specs = manager.getSpecMap(project);
-        if (specs != null)
-        {
-            return (IComponentSpecification) specs.get(storage);
-        }
-
-        return null;
-    }
-
-    public Object getReconciledSpec()
-    {
-        return fReconciledSpec;
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.texteditor.AbstractTextEditor#doSetInput(org.eclipse.ui.IEditorInput)
-     */
-    protected void doSetInput(IEditorInput input) throws CoreException
-    {
-        fReconciler = null;
-        if (input instanceof IFileEditorInput)
-        {
-            // only files have reconcilers
-            IFile file = ((IFileEditorInput) input).getFile();
-            String extension = file.getFullPath().getFileExtension();
-            if (extension == null)
-                return;
-            if ("application".equals(extension))
-            {
-                fReconciler = new ApplicationReconciler();
-            } else if ("jwc".equals(extension) || "page".equals(extension))
-            {
-                fReconciler = new ComponentReconciler();
-            } else if ("library".equals(extension))
-            {
-                fReconciler = new LibraryReconciler();
-            }
-
-        }
-        super.doSetInput(input);
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.Editor#createContentOutlinePage(org.eclipse.ui.IEditorInput)
-     */
-    public IContentOutlinePage createContentOutlinePage(IEditorInput input)
-    {
-        return fOutline;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.Editor#createDocumentProvider(org.eclipse.ui.IEditorInput)
-     */
-    protected IDocumentProvider createDocumentProvider(IEditorInput input)
-    {
-        if (input instanceof IFileEditorInput)
-            return UIPlugin.getDefault().getSpecFileDocumentProvider();
-
-        return new SpecStorageDocumentProvider();
-    }
-
-    protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles)
-    {
-        ISharedTextColors sharedColors = UIPlugin.getDefault().getSharedTextColors();
-        fOverviewRuler = new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);
-        fOverviewRuler.addHeaderAnnotationType(ProblemAnnotationType.WARNING);
-        fOverviewRuler.addHeaderAnnotationType(ProblemAnnotationType.ERROR);
-
-        ISourceViewer viewer =
-            new SpecSourceViewer(parent, verticalRuler, fOverviewRuler, isOverviewRulerVisible(), styles);
-
-        fSourceViewerDecorationSupport =
-            new SourceViewerDecorationSupport(viewer, fOverviewRuler, fAnnotationAccess, sharedColors);
-
-        configureSourceViewerDecorationSupport();
-
-        return viewer;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.Editor#createSourceViewerConfiguration()
-     */
-    protected SourceViewerConfiguration createSourceViewerConfiguration()
-    {
-        return new SpecConfiguration(
-            UIPlugin.getDefault().getXMLTextTools(),
-            this,
-            UIPlugin.getDefault().getPreferenceStore());
-    }
+  abstract class BaseWorker implements IReconcileWorker
+  {
+    protected IProblemCollector collector;
+    protected IProgressMonitor monitor;
 
     /**
-     * @see org.eclipse.ui.texteditor.AbstractTextEditor#createActions()
+     *  
      */
-    protected void createActions()
+    public BaseWorker()
     {
-        super.createActions();
-        IAction action =
-            new TextOperationAction(
-                UIPlugin.getResourceBundle(),
-                "ContentAssistProposal.",
-                this,
-                ISourceViewer.CONTENTASSIST_PROPOSALS);
-        action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-        markAsStateDependentAction(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, true);
-        setAction("ContentAssistProposal", action);
-
-        action = new TextOperationAction(UIPlugin.getResourceBundle(), "ShowOutline.", this, SpecSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
-        action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.xml.show.outline");
-        setAction("com.iw.plugins.spindle.ui.editor.xml.show.outline", action);
-
-        action = new TextOperationAction(UIPlugin.getResourceBundle(), "ShowStructure.", this, SpecSourceViewer.OPEN_STRUCTURE, true); //$NON-NLS-1$
-        action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.xml.open.structure");
-        setAction("com.iw.plugins.spindle.ui.editor.xml.open.structure", action);
-
-        OpenDeclarationAction openDeclaration = new OpenDeclarationAction();
-        openDeclaration.setActiveEditor(this);
-        setAction(OpenDeclarationAction.ACTION_ID, openDeclaration);
-        ShowInPackageExplorerAction showInPackage = new ShowInPackageExplorerAction();
-        showInPackage.setActiveEditor(this);
-        setAction(ShowInPackageExplorerAction.ACTION_ID, showInPackage);
+      super();
     }
 
     /*
-     * @see AbstractTextEditor#handleCursorPositionChanged()
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.editors.ReconcileWorker#isReadyToReconcile()
      */
-    protected void handleCursorPositionChanged()
+    public boolean isReadyToReconcile()
     {
-        super.handleCursorPositionChanged();
-        if (fUpdater != null)
-            fUpdater.post();
+      return SpecEditor.this.isReadyToReconcile();
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.ISelfReconcilingEditor#reconcile(com.iw.plugins.spindle.core.parser.IProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
-     */
-    public void reconcile(IProblemCollector collector, IProgressMonitor monitor)
+    protected boolean isCancelled()
     {
-        fReconciledSpec = null;
-
-        reconcileOutline();
-
-        if (fReconciler != null)
-        {
-            fReconciler.reconcile(collector, monitor);
-        }
+      return monitor != null && monitor.isCanceled();
     }
 
-    XMLDocumentPartitioner fOutlinePartitioner;
-
-    private void reconcileOutline()
+    public final void reconcile(IProblemCollector problemCollector, IProgressMonitor progressMonitor)
     {
-        if (fOutlinePartitioner == null)
-            fOutlinePartitioner =
-                new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
-        try
-        {
-            IDocument document = getDocumentProvider().getDocument(getEditorInput());
-            if (document.getLength() == 0 || document.get().trim().length() == 0)
-            {
-                ((MultiPageContentOutline) fOutline).setInput(null);
-            } else
-            {
+      Assert.isNotNull(problemCollector);
+      fireReconcileStarted();
+      this.collector = problemCollector;
+      this.monitor = progressMonitor == null ? new NullProgressMonitor() : progressMonitor;
+      Object reconcileResult = null;
+      fReconciledSpec = null;
+      boolean didReconcile = false;
+      if (!isCancelled())
+      {
 
-                fOutlinePartitioner.connect(document);
-                try
-                {
-                    ((MultiPageContentOutline) fOutline).setInput(XMLNode.createTree(document, -1));
-                } catch (BadLocationException e)
-                {
-                    // do nothing
-                }
+        IEditorInput input = getEditorInput();
+        if ((input instanceof IFileEditorInput))
+        {
+          IFile file = ((IFileEditorInput) input).getFile();
+          TapestryProject project = TapestryCore.getDefault().getTapestryProjectFor(file);
+          Object spec = getSpecification();
+          if (project != null && spec != null)
+          {
+
+            SpecificationValidator validator;
+            try
+            {
+              validator = new SpecificationValidator(project, false);
+              reconcileResult = doReconcile(getDocumentProvider().getDocument(input).get(), spec, validator);
+            } catch (CoreException e)
+            {
+              UIPlugin.log(e);
             }
-            if (fUpdater != null)
-                fUpdater.post();
-
-        } catch (RuntimeException e)
-        {
-            UIPlugin.log(e);
-            throw e;
-        } finally
-        {
-            fOutlinePartitioner.disconnect();
+            didReconcile = true;
+          }
         }
+      }
+      fReconciledSpec = reconcileResult;
+      fireReconciled(reconcileResult);
+      // Inform the collector that no reconcile occured
+      if (!didReconcile)
+      {
+        problemCollector.beginCollecting();
+        problemCollector.endCollecting();
+      }
     }
-    /** 
-     * return the Tapestry specification object obtained during the last build 
-     * note this method may trigger a build!
-     */
+    /** return true iff a reconcile occured * */
+    protected abstract Object doReconcile(String content, Object spec, IScannerValidator validator);
 
-    /* (non-Javadoc)
+    protected Document parse(String content)
+    {
+      Assert.isNotNull(collector);
+      Document result = null;
+      try
+      {
+        result = fParser.parse(content);
+      } catch (Exception e)
+      {
+        e.printStackTrace();
+      }
+
+      collector.beginCollecting();
+      IProblem[] problems = fParser.getProblems();
+      for (int i = 0; i < problems.length; i++)
+      {
+        System.err.println(problems[i]);
+        collector.addProblem(problems[i]);
+      }
+      collector.endCollecting();
+      if (fParser.getProblems().length > 0)
+        return null;
+      return result;
+    }
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
      */
     public void addReconcileListener(IReconcileListener listener)
     {
-        if (fReconcileListeners == null)
-            fReconcileListeners = new ArrayList();
+      //ignore
 
-        if (!fReconcileListeners.contains(listener))
-            fReconcileListeners.add(listener);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.iw.plugins.spindle.editors.IReconcileWorker#removeListener(com.iw.plugins.spindle.editors.IReconcileListener)
      */
     public void removeReconcileListener(IReconcileListener listener)
     {
-        if (fReconcileListeners == null)
-            return;
-
-        fReconcileListeners.remove(listener);
-
+      //ignore
     }
 
-    private void fireReconcileStarted()
+  }
+
+  class ComponentReconciler extends BaseWorker
+  {
+    ComponentScanner scanner;
+
+    public ComponentReconciler()
     {
-        for (Iterator iter = fReconcileListeners.iterator(); iter.hasNext();)
-        {
-            IReconcileListener listener = (IReconcileListener) iter.next();
-            listener.reconcileStarted();
-        }
+      super();
+      scanner = new ComponentScanner();
+      scanner.setFactory(TapestryCore.getSpecificationFactory());
     }
 
-    private void fireReconciled(Object reconcileResult)
+    protected Object doReconcile(String content, Object spec, IScannerValidator validator)
     {
-        for (Iterator iter = fReconcileListeners.iterator(); iter.hasNext();)
+      if (spec instanceof IComponentSpecification)
+      {
+        PluginComponentSpecification useSpec = (PluginComponentSpecification) spec;
+        if (isCancelled())
+          return null;
+        Document document = parse(content);
+        if (isCancelled())
+          return null;
+        if (document != null)
         {
-            IReconcileListener listener = (IReconcileListener) iter.next();
-            listener.reconciled(reconcileResult);
-        }
-    }
-
-    abstract class BaseWorker implements IReconcileWorker
-    {
-        protected IProblemCollector collector;
-        protected IProgressMonitor monitor;
-
-        /**
-         * 
-         */
-        public BaseWorker()
-        {
-            super();
-        }
-
-        /* (non-Javadoc)
-         * @see com.iw.plugins.spindle.editors.ReconcileWorker#isReadyToReconcile()
-         */
-        public boolean isReadyToReconcile()
-        {
-            return SpecEditor.this.isReadyToReconcile();
-        }
-
-        protected boolean isCancelled()
-        {
-            return monitor != null && monitor.isCanceled();
-        }
-
-        public final void reconcile(IProblemCollector problemCollector, IProgressMonitor progressMonitor)
-        {
-            Assert.isNotNull(problemCollector);
-            fireReconcileStarted();
-            this.collector = problemCollector;
-            this.monitor = progressMonitor == null ? new NullProgressMonitor() : progressMonitor;
-            Object reconcileResult = null;
-            fReconciledSpec = null;
-            boolean didReconcile = false;
-            if (!isCancelled())
-            {
-
-                IEditorInput input = getEditorInput();
-                if ((input instanceof IFileEditorInput))
-                {
-                    IFile file = ((IFileEditorInput) input).getFile();
-                    TapestryProject project = TapestryCore.getDefault().getTapestryProjectFor(file);
-                    Object spec = getSpecification();
-                    if (project != null && spec != null)
-                    {
-
-                        SpecificationValidator validator;
-                        try
-                        {
-                            validator = new SpecificationValidator(project, false);
-                            reconcileResult =
-                                doReconcile(getDocumentProvider().getDocument(input).get(), spec, validator);
-                        } catch (CoreException e)
-                        {
-                            UIPlugin.log(e);
-                        }
-                        didReconcile = true;
-                    }
-                }
-            }
-            fReconciledSpec = reconcileResult;
-            fireReconciled(reconcileResult);
-            // Inform the collector that no reconcile occured 
-            if (!didReconcile)
-            {
-                problemCollector.beginCollecting();
-                problemCollector.endCollecting();
-            }
-        }
-        /** return true iff a reconcile occured **/
-        protected abstract Object doReconcile(String content, Object spec, IScannerValidator validator);
-
-        protected Document parse(String content)
-        {
-            Assert.isNotNull(collector);
-            Document result = null;
+          String publicId = W3CAccess.getPublicId(document);
+          if (publicId != null)
+          {
             try
             {
-                result = fParser.parse(content);
-            } catch (Exception e)
+              scanner.setNamespace(useSpec.getNamespace());
+              scanner.setExternalProblemCollector(collector);
+              scanner.setResourceInformation(((IStorageEditorInput) getEditorInput()).getStorage(), useSpec
+                  .getSpecificationLocation());
+              validator.setProblemCollector(scanner);
+
+              return scanner.scan(document, validator);
+            } catch (ScannerException e)
             {
-                e.printStackTrace();
-            }
-
-            collector.beginCollecting();
-            IProblem[] problems = fParser.getProblems();
-            for (int i = 0; i < problems.length; i++)
+              e.printStackTrace();
+            } catch (CoreException e)
             {
-                System.err.println(problems[i]);
-                collector.addProblem(problems[i]);
+              // TODO Auto-generated catch block
+              e.printStackTrace();
             }
-            collector.endCollecting();
-            if (fParser.getProblems().length > 0)
-                return null;
-            return result;
-        }
-        /* (non-Javadoc)
-         * @see com.iw.plugins.spindle.editors.IReconcileWorker#addListener(com.iw.plugins.spindle.editors.IReconcileListener)
-         */
-        public void addReconcileListener(IReconcileListener listener)
-        {
-            //ignore
+          }
 
         }
+      }
+      return null;
+    }
+  }
 
-        /* (non-Javadoc)
-         * @see com.iw.plugins.spindle.editors.IReconcileWorker#removeListener(com.iw.plugins.spindle.editors.IReconcileListener)
-         */
-        public void removeReconcileListener(IReconcileListener listener)
-        {
-            //ignore
-        }
+  class LibraryReconciler extends BaseWorker
+  {
+    LibraryScanner scanner;
 
+    public LibraryReconciler()
+    {
+      super();
+      scanner = new LibraryScanner();
+      scanner.setFactory(TapestryCore.getSpecificationFactory());
     }
 
-    class ComponentReconciler extends BaseWorker
+    protected boolean isSpecOk(Object spec)
     {
-        ComponentScanner scanner;
-
-        public ComponentReconciler()
-        {
-            super();
-            scanner = new ComponentScanner();
-            scanner.setFactory(TapestryCore.getSpecificationFactory());
-        }
-
-        protected Object doReconcile(String content, Object spec, IScannerValidator validator)
-        {
-            if (spec instanceof IComponentSpecification)
-            {
-                PluginComponentSpecification useSpec = (PluginComponentSpecification) spec;
-                if (isCancelled())
-                    return null;
-                Document document = parse(content);
-                if (isCancelled())
-                    return null;
-                if (document != null)
-                {
-                    String publicId = W3CAccess.getPublicId(document);
-                    if (publicId != null)
-                    {
-                        try
-                        {
-                            scanner.setNamespace(useSpec.getNamespace());
-                            scanner.setExternalProblemCollector(collector);
-                            scanner.setResourceInformation(
-                                ((IStorageEditorInput) getEditorInput()).getStorage(),
-                                useSpec.getSpecificationLocation());
-                            validator.setProblemCollector(scanner);
-
-                            return scanner.scan(document, validator);
-                        } catch (ScannerException e)
-                        {
-                            e.printStackTrace();
-                        } catch (CoreException e)
-                        {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                    }
-
-                }
-            }
-            return null;
-        }
+      return spec instanceof ILibrarySpecification;
     }
 
-    class LibraryReconciler extends BaseWorker
+    protected SpecificationScanner getInitializedScanner(ILibrarySpecification library)
     {
-        LibraryScanner scanner;
-
-        public LibraryReconciler()
+      scanner.setExternalProblemCollector(collector);
+      scanner.setResourceInformation(null, library.getSpecificationLocation());
+      String publicId = W3CAccess.getPublicId(fParser.getParsedDocument());
+      if (publicId == null)
+        return null;
+      return scanner;
+    }
+    protected Object doReconcile(String content, Object spec, IScannerValidator validator)
+    {
+      if (isSpecOk(spec))
+      {
+        if (isCancelled())
+          return null;
+        Node node = parse(content);
+        if (isCancelled())
+          return null;
+        if (node != null)
         {
-            super();
-            scanner = new LibraryScanner();
-            scanner.setFactory(TapestryCore.getSpecificationFactory());
-        }
-
-        protected boolean isSpecOk(Object spec)
-        {
-            return spec instanceof ILibrarySpecification;
-        }
-
-        protected SpecificationScanner getInitializedScanner(ILibrarySpecification library)
-        {
-            scanner.setExternalProblemCollector(collector);
-            scanner.setResourceInformation(null, library.getSpecificationLocation());
-            String publicId = W3CAccess.getPublicId(fParser.getParsedDocument());
-            if (publicId == null)
-                return null;
-            return scanner;
-        }
-        protected Object doReconcile(String content, Object spec, IScannerValidator validator)
-        {
-            if (isSpecOk(spec))
+          SpecificationScanner initializedScanner = getInitializedScanner((ILibrarySpecification) spec);
+          if (initializedScanner != null)
+          {
+            validator.setProblemCollector(initializedScanner);
+            try
             {
-                if (isCancelled())
-                    return null;
-                Node node = parse(content);
-                if (isCancelled())
-                    return null;
-                if (node != null)
-                {
-                    SpecificationScanner initializedScanner = getInitializedScanner((ILibrarySpecification) spec);
-                    if (initializedScanner != null)
-                    {
-                        validator.setProblemCollector(initializedScanner);
-                        try
-                        {
-                            return initializedScanner.scan(node, validator);
-                        } catch (ScannerException e)
-                        {
-                            // eat it
-                        }
-                    }
-                }
+              return initializedScanner.scan(node, validator);
+            } catch (ScannerException e)
+            {
+              // eat it
             }
-            return null;
+          }
         }
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Synchronizes the outliner selection with the actual cursor position in the
+   * editor.
+   */
+  public void synchronizeOutlinePageSelection()
+  {
+    int caret = getCaretOffset();
+    if (caret == -1)
+      return;
+    fOutline.setSelection(new StructuredSelection(new Region(caret, 0)));
+  }
+
+  /**
+   * "Smart" runnable for updating the outline page's selection.
+   */
+  class OutlinePageSelectionUpdater implements Runnable
+  {
+
+    /** Has the runnable already been posted? */
+    private boolean fPosted = false;
+
+    public OutlinePageSelectionUpdater()
+    {
+    }
+
+    /*
+     * @see Runnable#run()
+     */
+    public void run()
+    {
+      synchronizeOutlinePageSelection();
+      fPosted = false;
     }
 
     /**
-    * Synchronizes the outliner selection with the actual cursor
-    * position in the editor.
-    */
-    public void synchronizeOutlinePageSelection()
-    {
-        int caret = getCaretOffset();
-        if (caret == -1)
-            return;
-        fOutline.setSelection(new StructuredSelection(new Region(caret, 0)));
-    }
-
-    /**
-     * "Smart" runnable for updating the outline page's selection.
+     * Posts this runnable into the event queue.
      */
-    class OutlinePageSelectionUpdater implements Runnable
+    public void post()
     {
+      if (fPosted)
+        return;
 
-        /** Has the runnable already been posted? */
-        private boolean fPosted = false;
+      Shell shell = getSite().getShell();
+      if (shell != null & !shell.isDisposed())
+      {
+        fPosted = true;
+        shell.getDisplay().asyncExec(this);
+      }
+    }
+  };
 
-        public OutlinePageSelectionUpdater()
-        {}
+  class ApplicationReconciler extends BaseWorker
+  {
+    ApplicationScanner scanner;
 
-        /*
-         * @see Runnable#run()
-         */
-        public void run()
-        {
-            synchronizeOutlinePageSelection();
-            fPosted = false;
-        }
-
-        /**
-         * Posts this runnable into the event queue.
-         */
-        public void post()
-        {
-            if (fPosted)
-                return;
-
-            Shell shell = getSite().getShell();
-            if (shell != null & !shell.isDisposed())
-            {
-                fPosted = true;
-                shell.getDisplay().asyncExec(this);
-            }
-        }
-    };
-
-    class ApplicationReconciler extends BaseWorker
+    public ApplicationReconciler()
     {
-        ApplicationScanner scanner;
-
-        public ApplicationReconciler()
-        {
-            super();
-            scanner = new ApplicationScanner();
-            scanner.setFactory(TapestryCore.getSpecificationFactory());
-        }
-
-        protected boolean isSpecOk(Object spec)
-        {
-            return spec instanceof IApplicationSpecification;
-        }
-
-        protected SpecificationScanner getInitializedScanner(IApplicationSpecification application)
-        {
-            scanner.setExternalProblemCollector(collector);
-            scanner.setResourceInformation(null, application.getSpecificationLocation());
-            String publicId = W3CAccess.getPublicId(fParser.getParsedDocument());
-            if (publicId == null)
-                return null;
-            return scanner;
-        }
-
-        protected Object doReconcile(String content, Object spec, IScannerValidator validator)
-        {
-            if (isSpecOk(spec))
-            {
-                if (isCancelled())
-                    return null;
-                Node node = parse(content);
-                if (isCancelled())
-                    return null;
-                if (node != null)
-                {
-                    SpecificationScanner initializedScanner = getInitializedScanner((IApplicationSpecification) spec);
-                    if (initializedScanner != null)
-                    {
-                        validator.setProblemCollector(initializedScanner);
-                        try
-                        {
-                            return initializedScanner.scan(node, validator);
-                        } catch (ScannerException e)
-                        {
-                            // eat it
-                        }
-                    }
-                }
-            }
-            return null;
-        }
+      super();
+      scanner = new ApplicationScanner();
+      scanner.setFactory(TapestryCore.getSpecificationFactory());
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#canPaste(org.eclipse.swt.dnd.Clipboard)
-     */
-    public boolean canPaste(Clipboard clipboard)
+    protected boolean isSpecOk(Object spec)
     {
-        return true;
+      return spec instanceof IApplicationSpecification;
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#contextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
-     */
-    public boolean contextMenuAboutToShow(IMenuManager manager)
+    protected SpecificationScanner getInitializedScanner(IApplicationSpecification application)
     {
-        editorContextMenuAboutToShow(manager);
-        return true;
+      scanner.setExternalProblemCollector(collector);
+      scanner.setResourceInformation(null, application.getSpecificationLocation());
+      String publicId = W3CAccess.getPublicId(fParser.getParsedDocument());
+      if (publicId == null)
+        return null;
+      return scanner;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.texteditor.AbstractTextEditor#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
-     */
-    protected void editorContextMenuAboutToShow(IMenuManager menu)
+    protected Object doReconcile(String content, Object spec, IScannerValidator validator)
     {
-        super.editorContextMenuAboutToShow(menu);
-        menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
-        if (!(getStorage() instanceof JarEntryFile))
+      if (isSpecOk(spec))
+      {
+        if (isCancelled())
+          return null;
+        Node node = parse(content);
+        if (isCancelled())
+          return null;
+        if (node != null)
         {
-            addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
-            addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
-        }
-        MenuManager moreNav = new MenuManager("Jump");
-        for (int i = 0; i < fJumpActions.length; i++)
-        {
-            fJumpActions[i].editorContextMenuAboutToShow(moreNav);
-        }
-        if (!moreNav.isEmpty())
-            menu.appendToGroup(NAV_GROUP, moreNav);
-        menu.insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
-        MenuManager sourceMenu = new MenuManager("Source");
-        sourceMenu.add(getAction("Format"));
-        menu.appendToGroup(SOURCE_GROUP, sourceMenu);
-    }
-
- 
-
-    public static class SpecEditorInformationProvider implements IInformationProvider, IInformationProviderExtension
-    {
-        private SpecEditor fEditor;
-        private boolean fUseReconcileResults;
-        private XMLDocumentPartitioner fPartitioner;
-
-        public SpecEditorInformationProvider(IEditorPart editor)
-        {
-            fUseReconcileResults = false;
-            fEditor = (SpecEditor) editor;
-        }
-
-        public SpecEditorInformationProvider(IEditorPart editor, boolean useReconcileResults)
-        {
-            this(editor);
-            fUseReconcileResults = useReconcileResults;
-        }
-
-        /*
-         * @see IInformationProvider#getSubject(ITextViewer, int)
-         */
-        public IRegion getSubject(ITextViewer textViewer, int offset)
-        {
-            if (textViewer != null && fEditor != null)
-            {
-                IRegion region = JavaWordFinder.findWord(textViewer.getDocument(), offset);
-                if (region != null)
-                    return region;
-                else
-                    return new Region(offset, 0);
-            }
-            return null;
-        }
-
-        /*
-         * @see IInformationProvider#getInformation(ITextViewer, IRegion)
-         */
-        public String getInformation(ITextViewer textViewer, IRegion subject)
-        {
-            return getInformation2(textViewer, subject).toString();
-        }
-
-        /*
-         * @see IInformationProviderExtension#getElement(ITextViewer, IRegion)
-         */
-        public Object getInformation2(ITextViewer textViewer, IRegion subject)
-        {
-            if (fEditor == null)
-                return null;
-
-            if (fUseReconcileResults)
-                return fEditor.getReconciledSpec();
-
-            if (fPartitioner == null)
-                fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
-            IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-            if (document == null)
-                return null;
+          SpecificationScanner initializedScanner = getInitializedScanner((IApplicationSpecification) spec);
+          if (initializedScanner != null)
+          {
+            validator.setProblemCollector(initializedScanner);
             try
             {
-                fPartitioner.connect(document);
-                return XMLNode.createTree(document, -1);
-            } catch (Exception e)
+              return initializedScanner.scan(node, validator);
+            } catch (ScannerException e)
             {
-                UIPlugin.log(e);
-                return null;
-            } finally
-            {
-                try
-                {
-                    fPartitioner.disconnect();
-                } catch (RuntimeException e)
-                {
-                    UIPlugin.log(e);
-                }
+              // eat it
             }
+          }
         }
+      }
+      return null;
     }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#canPaste(org.eclipse.swt.dnd.Clipboard)
+   */
+  public boolean canPaste(Clipboard clipboard)
+  {
+    return true;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#contextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+   */
+  public boolean contextMenuAboutToShow(IMenuManager manager)
+  {
+    editorContextMenuAboutToShow(manager);
+    return true;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.texteditor.AbstractTextEditor#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+   */
+  protected void editorContextMenuAboutToShow(IMenuManager menu)
+  {
+    super.editorContextMenuAboutToShow(menu);
+    menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
+    if (!(getStorage() instanceof JarEntryFile))
+    {
+      addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
+      addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
+    }
+    MenuManager moreNav = new MenuManager("Jump");
+    for (int i = 0; i < fJumpActions.length; i++)
+    {
+      fJumpActions[i].editorContextMenuAboutToShow(moreNav);
+    }
+    if (!moreNav.isEmpty())
+      menu.appendToGroup(NAV_GROUP, moreNav);
+    menu.insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
+    if (!UIPlugin.isEclipse3())
+    {
+      MenuManager sourceMenu = new MenuManager("Source");
+      sourceMenu.add(getAction("Format"));
+      menu.appendToGroup(SOURCE_GROUP, sourceMenu);
+    }
+  }
+
+  public static class SpecEditorInformationProvider implements IInformationProvider, IInformationProviderExtension
+  {
+    private SpecEditor fEditor;
+    private boolean fUseReconcileResults;
+    private XMLDocumentPartitioner fPartitioner;
+
+    public SpecEditorInformationProvider(IEditorPart editor)
+    {
+      fUseReconcileResults = false;
+      fEditor = (SpecEditor) editor;
+    }
+
+    public SpecEditorInformationProvider(IEditorPart editor, boolean useReconcileResults)
+    {
+      this(editor);
+      fUseReconcileResults = useReconcileResults;
+    }
+
+    /*
+     * @see IInformationProvider#getSubject(ITextViewer, int)
+     */
+    public IRegion getSubject(ITextViewer textViewer, int offset)
+    {
+      if (textViewer != null && fEditor != null)
+      {
+        IRegion region = JavaWordFinder.findWord(textViewer.getDocument(), offset);
+        if (region != null)
+          return region;
+        else
+          return new Region(offset, 0);
+      }
+      return null;
+    }
+
+    /*
+     * @see IInformationProvider#getInformation(ITextViewer, IRegion)
+     */
+    public String getInformation(ITextViewer textViewer, IRegion subject)
+    {
+      return getInformation2(textViewer, subject).toString();
+    }
+
+    /*
+     * @see IInformationProviderExtension#getElement(ITextViewer, IRegion)
+     */
+    public Object getInformation2(ITextViewer textViewer, IRegion subject)
+    {
+      if (fEditor == null)
+        return null;
+
+      if (fUseReconcileResults)
+        return fEditor.getReconciledSpec();
+
+      if (fPartitioner == null)
+        fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+      IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+      if (document == null)
+        return null;
+      try
+      {
+        fPartitioner.connect(document);
+        return XMLNode.createTree(document, -1);
+      } catch (Exception e)
+      {
+        UIPlugin.log(e);
+        return null;
+      } finally
+      {
+        try
+        {
+          fPartitioner.disconnect();
+        } catch (RuntimeException e)
+        {
+          UIPlugin.log(e);
+        }
+      }
+    }
+  }
 }

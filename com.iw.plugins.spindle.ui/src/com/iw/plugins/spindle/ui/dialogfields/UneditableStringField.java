@@ -99,7 +99,7 @@ public class UneditableStringField extends DialogField {
     if (textControl != null && !textControl.isDisposed()) {
       textControl.setText(value);
       if (update) {
-        fireDialogChanged(this);
+        fireDialogButtonPressed(this);
       }
     }
   }

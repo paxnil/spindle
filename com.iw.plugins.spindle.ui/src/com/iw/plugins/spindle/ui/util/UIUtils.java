@@ -38,6 +38,12 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.rules.DefaultPartitioner;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -217,6 +223,52 @@ public class UIUtils
                 new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY },
                 UIPlugin.getDefault().getPreferenceStore());
         formatter.format(document, new Region(0, document.getLength()));
+    }
+
+    /**
+     * Used to layout controls vertically in a FormLayout. Sets the layout data.
+     * 
+     * @param toBeAdded the Control to be added
+     * @param parent the parent Control
+     * @param verticalOffset an int hint for spacing.
+     */
+    public static void addFormControl(Control toBeAdded, Control parent, int verticalOffset)
+    {
+      FormData formData = new FormData();
+      formData.top = new FormAttachment(parent, verticalOffset);
+      formData.left = new FormAttachment(0, 0);
+      formData.right = new FormAttachment(100, 0);
+      toBeAdded.setLayoutData(formData);
+    }
+
+    /**
+     * Used to layout controls vertically in a FormLayout. Sets the layout data.
+     * 
+     * @param toBeAdded the Control to be added
+     * @param parent the parent Control
+     */
+    public static void addFormControl(Control toBeAdded, Control parent)
+    {
+      addFormControl(toBeAdded, parent, 0);
+    }
+
+    /**
+     * Adds a new separator (next in vertical layout) in a composite that uses FormLayout
+     * @param container the container
+     * @param parent the parent Control we will place the separator after.
+     * @return the separator with correct layout data.
+     */
+    public static Control createFormSeparator(Composite container, Control parent)
+    {
+      Label separator = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
+      FormData formData = new FormData();
+      if (parent != null) {
+        formData.top = new FormAttachment(parent, 10);
+      }
+      formData.left = new FormAttachment(0, 0);
+      formData.right = new FormAttachment(100, 0);
+      separator.setLayoutData(formData);
+      return separator;
     }
 
 }

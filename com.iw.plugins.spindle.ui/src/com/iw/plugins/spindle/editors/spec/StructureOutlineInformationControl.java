@@ -79,7 +79,8 @@ public class StructureOutlineInformationControl extends TreeInformationControl
             fEditor.openTo(selected);
         } finally
         {
-            return true;
+            
         }
+        return true;
     }
 }

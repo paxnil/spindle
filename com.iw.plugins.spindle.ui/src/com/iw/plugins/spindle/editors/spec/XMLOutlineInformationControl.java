@@ -100,8 +100,9 @@ public class XMLOutlineInformationControl extends TreeInformationControl
             fEditor.openTo(selected);
         } finally
         {
-            return true;
+            //Do nothing
         }
+        return true;
     }
 
 }

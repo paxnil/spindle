@@ -10,12 +10,7 @@
 		<project>org.eclipse.jdt.core</project>
 		<project>org.eclipse.ui</project>
 	</projects>
-	<buildSpec>
-		<buildCommand>
-			<name>com.atlassw.tools.eclipse.checkstyle.CheckstyleBuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
+	<buildSpec>		
 		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>
 			<arguments>
@@ -34,7 +29,6 @@
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>org.eclipse.pde.PluginNature</nature>
-		<nature>com.atlassw.tools.eclipse.checkstyle.CheckstyleNature</nature>
+		<nature>org.eclipse.pde.PluginNature</nature>		
 	</natures>
 </projectDescription>

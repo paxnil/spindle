@@ -45,7 +45,9 @@ import com.iw.plugins.spindle.core.TapestryCore;
 public abstract class AbstractDecorator implements ILightweightLabelDecorator, TapestryCore.ICoreListener
 {
     public AbstractDecorator()
-    {}
+    {
+      TapestryCore.addCoreListener(this);
+    }
 
     protected List fLabelProviderListeners;
 

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.0.50"
+   version="0.1.0 "
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -11,7 +12,11 @@
       <library name="xmen.jar"/>
    </runtime>
    <requires>
-      <import plugin="com.iw.plugins.spindle.core"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="com.iw.plugins.spindle.core" export="true"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.search"/>
       <import plugin="net.sf.solareclipse.ui"/>
@@ -20,6 +25,7 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.compare"/>
+      <import plugin="org.eclipse.core.runtime"/>
    </requires>
 
 
@@ -30,13 +36,14 @@
             adaptable="true"
             name="Tapestry"
             class="com.iw.plugins.spindle.ui.properties.ProjectPropertyPage"
-            id="CorePropertyPage">
+            id="CorePropertyPage">         
          <filter
                name="nature"
                value="org.eclipse.jdt.core.javanature">
          </filter>
       </page>
-   </extension>
+   </extension>   
+   <!-- TODO remove no longer required
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
@@ -57,6 +64,7 @@
          </enablement>
       </decorator>
    </extension>
+   -->
    <extension
          point="org.eclipse.ui.decorators">
       <decorator
@@ -97,6 +105,10 @@
       </decorator>
    </extension>
    <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer class="com.iw.plugins.spindle.PreferenceInitializer"/>
+   </extension>
+   <extension
          point="org.eclipse.ui.preferencePages">
       <page
             name="Spindle 3"
@@ -126,7 +138,7 @@
       </category>
       <wizard
             name="Tapestry Web Project"
-            icon="./icons/basic/application16.gif"
+            icon="./icons/full/application16.gif"
             category="com.iw.plugins.spindle.ui.new"
             class="com.iw.plugins.spindle.ui.wizards.project.NewTapestryProjectWizard"
             project="true"
@@ -137,7 +149,7 @@
       </wizard>
       <wizard
             name="Tapestry Component"
-            icon="./icons/basic/component16.gif"
+            icon="./icons/full/component16.gif"
             category="com.iw.plugins.spindle.ui.new"
             class="com.iw.plugins.spindle.ui.wizards.NewTapComponentWizard"
             id="com.iw.plugins.spindle.ui.new_jwc_wizard">
@@ -147,7 +159,7 @@
       </wizard>
       <wizard
             name="Tapestry Page"
-            icon="./icons/basic/page16.gif"
+            icon="./icons/full/page16.gif"
             category="com.iw.plugins.spindle.ui.new"
             class="com.iw.plugins.spindle.ui.wizards.NewTapPageWizard"
             id="com.iw.plugins.spindle.ui.new_page_wizard">
@@ -161,7 +173,7 @@
       <editor
             name="Tapestry Template Editor"
             default="false"
-            icon="./icons/basic/html16.gif"
+            icon="./icons/full/html16.gif"
             extensions="htm,html"
             contributorClass="com.iw.plugins.spindle.editors.template.TemplateEditorContributor"
             class="com.iw.plugins.spindle.editors.template.TemplateEditor"
@@ -170,7 +182,7 @@
       <editor
             name="Tapestry Spec Editor"
             default="true"
-            icon="./icons/basic/application16.gif"
+            icon="./icons/full/application16.gif"
             extensions="application, page, jwc, library"
             contributorClass="com.iw.plugins.spindle.editors.spec.SpecEditorContributor"
             class="com.iw.plugins.spindle.editors.spec.SpecEditor"
@@ -263,15 +275,12 @@ the new Spindle
             id="com.iw.plugins.spindle.ui.editor.commands">
       </scope>
 <!-- define a format command that we will associate with the key binding Ctrl-Shift-F -->
-   
-      		
       <command
             name="Format"
             description="Format this file"
             category="org.eclipse.ui.category.textEditor"
             id="com.iw.plugins.spindle.ui.editor.commands.format">
       </command>
-     
       <command
             name="Next Attribute"
             description="Move right/down to the next attribute"
@@ -331,7 +340,7 @@ the new Spindle
             scope="com.iw.plugins.spindle.ui.editor.commands"
             command="com.iw.plugins.spindle.ui.editor.commands.jump.java"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>      
+      </keyBinding>
       <command
             name="Jump to Specification"
             description="Jump to the specification file (if possible)"
@@ -437,7 +446,43 @@ the new Spindle
                enablesFor="*"
                id="com.iw.plugins.spindle.editors.cu.jump.template">
          </action>
-      </editorContribution>      
+      </editorContribution>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+         name="com.iw.plugins.spindle.ui.error"
+         super="org.eclipse.ui.workbench.texteditor.error"
+         markerType="com.iw.plugins.spindle.core.problemmarker"
+         markerSeverity="2">
+      </type>
+      <type
+         name="com.iw.plugins.spindle.ui.warning"
+         super="org.eclipse.ui.workbench.texteditor.warning"
+         markerType="com.iw.plugins.spindle.core.problemmarker"
+         markerSeverity="1">
+      </type>
+      <type
+         name="com.iw.plugins.spindle.ui.info"
+         super="org.eclipse.ui.workbench.texteditor.info"
+         markerType="com.iw.plugins.spindle.core.problemmarker"
+         markerSeverity="0">
+      </type>
+   </extension>   
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="com.iw.plugins.spindle.ui.error"
+            annotationImageProvider="com.iw.plugins.spindle.editors.ProblemAnnotationImageProvider">
+      </specification>
+      <specification
+            annotationType="com.iw.plugins.spindle.ui.warning"
+            annotationImageProvider="com.iw.plugins.spindle.editors.ProblemAnnotationImageProvider">
+      </specification>
+      <specification
+            annotationType="com.iw.plugins.spindle.ui.info"
+            annotationImageProvider="com.iw.plugins.spindle.editors.ProblemAnnotationImageProvider">
+      </specification>
+      </extension>
+   
 </plugin>

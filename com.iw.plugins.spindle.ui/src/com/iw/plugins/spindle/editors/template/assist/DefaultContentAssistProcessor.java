@@ -349,7 +349,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
 
     /**
      * @param tag
-     * @param documentOffset
+     * @param fDocumentOffset
      * @return
      */
     private ICompletionProposal[] computeTextProposals(ITextViewer viewer, int documentOffset)
@@ -366,10 +366,10 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
     //    /* (non-Javadoc)
     //     * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer, int)
     //     */
-    //    public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
+    //    public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int fDocumentOffset)
     //    {
-    //        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
-    //        int baseState = tag.getStateAt(documentOffset);
+    //        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), fDocumentOffset);
+    //        int baseState = tag.getStateAt(fDocumentOffset);
     //        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
     //            return NoInformation;
     //
@@ -378,7 +378,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
     //        if (!attrMap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME))
     //            return NoInformation;
     //
-    //        XMLNode attr = tag.getAttributeAt(documentOffset);
+    //        XMLNode attr = tag.getAttributeAt(fDocumentOffset);
     //        if (attr == null || attr.getName().equalsIgnoreCase(TemplateParser.JWCID_ATTRIBUTE_NAME))
     //        {
     //            return NoInformation;

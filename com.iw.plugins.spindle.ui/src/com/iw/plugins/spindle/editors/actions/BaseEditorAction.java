@@ -28,8 +28,6 @@ package com.iw.plugins.spindle.editors.actions;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
@@ -61,9 +59,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.internal.commands.Manager;
-import org.eclipse.ui.internal.commands.Sequence;
-import org.eclipse.ui.internal.commands.Stroke;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -73,6 +68,8 @@ import com.iw.plugins.spindle.editors.Editor;
 
 /**
  * Base class for editor actions
+ * 
+ * TODO fix.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -381,54 +378,54 @@ public abstract class BaseEditorAction extends Action
 
                     boolean acceleratorForward = false;
                     boolean acceleratorBackward = false;
-
-                    if (commandForward != null)
-                    {
-                        Map commandMap = Manager.getInstance().getKeyMachine().getCommandMap();
-                        SortedSet sequenceSet = (SortedSet) commandMap.get(commandForward);
-
-                        if (sequenceSet != null)
-                        {
-                            Iterator iterator = sequenceSet.iterator();
-
-                            while (iterator.hasNext())
-                            {
-                                Sequence sequence = (Sequence) iterator.next();
-                                List strokes = sequence.getStrokes();
-                                int size = strokes.size();
-
-                                if (size > 0 && accelerator == ((Stroke) strokes.get(size - 1)).getValue())
-                                {
-                                    acceleratorForward = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if (commandBackward != null)
-                    {
-                        Map commandMap = Manager.getInstance().getKeyMachine().getCommandMap();
-                        SortedSet sequenceSet = (SortedSet) commandMap.get(commandBackward);
-
-                        if (sequenceSet != null)
-                        {
-                            Iterator iterator = sequenceSet.iterator();
-
-                            while (iterator.hasNext())
-                            {
-                                Sequence sequence = (Sequence) iterator.next();
-                                List strokes = sequence.getStrokes();
-                                int size = strokes.size();
-
-                                if (size > 0 && accelerator == ((Stroke) strokes.get(size - 1)).getValue())
-                                {
-                                    acceleratorBackward = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
+//TODO revisit
+//                    if (commandForward != null)
+//                    {
+//                        Map commandMap = Manager.getInstance().getKeyMachine().getCommandMap();
+//                        SortedSet sequenceSet = (SortedSet) commandMap.get(commandForward);
+//
+//                        if (sequenceSet != null)
+//                        {
+//                            Iterator iterator = sequenceSet.iterator();
+//
+//                            while (iterator.hasNext())
+//                            {
+//                                Sequence sequence = (Sequence) iterator.next();
+//                                List strokes = sequence.getStrokes();
+//                                int size = strokes.size();
+//
+//                                if (size > 0 && accelerator == ((Stroke) strokes.get(size - 1)).getValue())
+//                                {
+//                                    acceleratorForward = true;
+//                                    break;
+//                                }
+//                            }
+//                        }
+//                    }
+//
+//                    if (commandBackward != null)
+//                    {
+//                        Map commandMap = Manager.getInstance().getKeyMachine().getCommandMap();
+//                        SortedSet sequenceSet = (SortedSet) commandMap.get(commandBackward);
+//
+//                        if (sequenceSet != null)
+//                        {
+//                            Iterator iterator = sequenceSet.iterator();
+//
+//                            while (iterator.hasNext())
+//                            {
+//                                Sequence sequence = (Sequence) iterator.next();
+//                                List strokes = sequence.getStrokes();
+//                                int size = strokes.size();
+//
+//                                if (size > 0 && accelerator == ((Stroke) strokes.get(size - 1)).getValue())
+//                                {
+//                                    acceleratorBackward = true;
+//                                    break;
+//                                }
+//                            }
+//                        }
+//                    }
 
                     if (character == SWT.CR || character == SWT.LF)
                         ok(dialog, table);

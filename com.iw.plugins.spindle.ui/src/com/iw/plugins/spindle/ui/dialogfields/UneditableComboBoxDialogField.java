@@ -105,11 +105,11 @@ public class UneditableComboBoxDialogField extends DialogField {
       final DialogField field = this;
       combo.addSelectionListener(new SelectionListener() {
         public void widgetSelected(SelectionEvent event) {
-          fireDialogChanged(field);
+          fireDialogButtonPressed(field);
         }
 
         public void widgetDefaultSelected(SelectionEvent event) {
-          fireDialogChanged(field);
+          fireDialogButtonPressed(field);
         }
 
       });
@@ -139,7 +139,7 @@ public class UneditableComboBoxDialogField extends DialogField {
     if (combo != null && !combo.isDisposed()) {
       combo.select(index);
     } else {
-      fireDialogChanged(this);
+      fireDialogButtonPressed(this);
     }
   }
 

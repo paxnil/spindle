@@ -59,7 +59,7 @@ import com.iw.plugins.spindle.core.util.CoreUtils;
  * 
  * Other than that its the same as a full build.
  * 
- *  Not Used anymore
+ *  TODO Not Used anymore - to be removed
  * @see com.iw.plugins.spindle.core.builder.IncrementalProjectBuild
  * 
  * @version $Id$

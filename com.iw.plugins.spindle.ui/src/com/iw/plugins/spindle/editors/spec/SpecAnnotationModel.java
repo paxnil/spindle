@@ -31,10 +31,12 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.ui.IFileEditorInput;
 
+import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.editors.ProblemAnnotation;
@@ -187,7 +189,7 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
         fPreviouslyOverlaidParser = fCurrentlyOverlaidParser;
         fCurrentlyOverlaidParser = new ArrayList();
 
-        synchronized (fAnnotations)
+        synchronized (getAnnotationMap())
         {
             if (fGeneratedParserAnnotations.size() > 0)
             {
@@ -218,7 +220,13 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
                         ProblemAnnotation annotation = new ProblemAnnotation(problem);
                         overlayMarkers(position, annotation);
                         fGeneratedParserAnnotations.add(annotation);
-                        addAnnotation(annotation, position, false);
+                        try
+                        {
+                          addAnnotation(annotation, position, false);
+                        } catch (BadLocationException e1)
+                        {
+                          UIPlugin.log(e1);
+                        }
 
                         temporaryParserProblemsChanged = true;
                     }
@@ -250,7 +258,7 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
         fPreviouslyOverlaid = fCurrentlyOverlaid;
         fCurrentlyOverlaid = new ArrayList();
 
-        synchronized (fAnnotations)
+        synchronized (getAnnotationMap())
         {
             fGeneratedAnnotations.addAll(fGeneratedParserAnnotations);
 
@@ -283,7 +291,13 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
                         ProblemAnnotation annotation = new ProblemAnnotation(problem);
                         overlayMarkers(position, annotation);
                         fGeneratedAnnotations.add(annotation);
-                        addAnnotation(annotation, position, false);
+                        try
+                        {
+                          addAnnotation(annotation, position, false);
+                        } catch (BadLocationException e1)
+                        {
+                          UIPlugin.log(e1);
+                        }
 
                         temporaryProblemsChanged = true;
                     }

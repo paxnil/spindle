@@ -604,22 +604,22 @@ public class ProjectPropertyPage extends PropertyPage
 
     //    protected String chooseLibraryFile()
     //    {
-    //        IJavaProject jproject = null;
+    //        IJavaProject fJavaProject = null;
     //        try
     //        {
-    //            jproject = getJavaProject();
+    //            fJavaProject = getJavaProject();
     //        } catch (CoreException e)
     //        {
     //            UIPlugin.log(e);
     //        }
-    //        if (jproject == null)
+    //        if (fJavaProject == null)
     //        {
     //            return fLibrarySpec.getText();
     //        }
     //        LibrarySearchDialog dialog =
     //            new LibrarySearchDialog(
     //                getShell(),
-    //                jproject,
+    //                fJavaProject,
     //                UIPlugin.getString("property-page-library-dialog-window-title"),
     //                UIPlugin.getString("property-page-library-dialog-description"));
     //        if (dialog.open() == LibrarySearchDialog.OK)

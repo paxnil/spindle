@@ -1,6 +1,14 @@
 <project name="builder" default="init" basedir=".">
 <!-- this is an antfile to build the project OUTSIDE OF ECLIPSE! -->
 
+
+<!--
+
+   DONT USE THIS SCRIPT - ITS WOEFULLY OUT OF DATE
+   
+   TO BE REMOVED
+   
+-->
 <taskdef resource="clovertasks"/>
 
 <target name="do">

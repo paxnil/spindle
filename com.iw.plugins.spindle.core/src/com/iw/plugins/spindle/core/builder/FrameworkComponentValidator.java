@@ -67,7 +67,7 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
 public class FrameworkComponentValidator
 {
 
-    public static void validate(
+    public static void validateContainedComponent(
         IResourceWorkspaceLocation putErrorsHere,
         INamespace requestorNamespace,
         String frameworkComponentName,
@@ -99,6 +99,21 @@ public class FrameworkComponentValidator
 
             } else if ("Script".equals(frameworkComponentName))
             {
+
+                //                if (putErrorsHere.getName().endsWith("html")) {
+                //                    // its an specless page, need to get the Tapestry generated spec
+                //                    // in order to have valid location to base the script file lookup on.
+                //                    IProject project = putProblemsResource.getProject();
+                //                    TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+                //                    Map specMap = manager.getSpecMap(project);
+                //                    if (specMap == null)
+                //                        return;
+                //                     BaseSpecLocatable tapestryGeneratedSpec = (BaseSpecLocatable)specMap.get(putProblemsResource);
+                //                     if (tapestryGeneratedSpec == null)
+                //                        return;
+                //                     putErrorsHere = (IResourceWorkspaceLocation) tapestryGeneratedSpec.getSpecificationLocation();
+                //                }
+
                 TapestryBuilder.fDeferredActions.add(
                     new ScriptComponentValidation(
                         putErrorsHere,
@@ -107,6 +122,70 @@ public class FrameworkComponentValidator
                         contained,
                         sourceInfo,
                         publicId));
+            }
+        }
+
+    }
+
+    public static void validateImplictComponent(
+        IResourceWorkspaceLocation specificationLocation,
+        IResourceWorkspaceLocation putErrorsHere,
+        INamespace requestorNamespace,
+        String frameworkComponentName,
+        IComponentSpecification frameworkComponentSpecification,
+        IContainedComponent contained,
+        Object sourceInfo,
+        String publicId)
+    {
+        if ("PageLink".equals(frameworkComponentName))
+        {
+            validateContainedComponent(
+                putErrorsHere,
+                requestorNamespace,
+                frameworkComponentName,
+                frameworkComponentSpecification,
+                contained,
+                sourceInfo,
+                publicId);
+        } else
+        {
+           
+            IResource putProblemsResource = CoreUtils.toResource(putErrorsHere);
+            if (putProblemsResource == null)
+                return;
+
+            PluginComponentSpecification frameworkSpec = (PluginComponentSpecification) frameworkComponentSpecification;
+            //check to see if we are really talking about a framework component.
+            if (TapestryCore
+                .getTapestryString("Namespace.framework-namespace")
+                .equals(frameworkSpec.getNamespace().getNamespaceId()))
+            {
+                if ("Script".equals(frameworkComponentName))
+                {
+
+                    //                    if (putErrorsHere.getName().endsWith("html")) {
+                    //                        // its an specless page, need to get the Tapestry generated spec
+                    //                        // in order to have valid location to base the script file lookup on.
+                    //                        IProject project = putProblemsResource.getProject();
+                    //                        TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+                    //                        Map specMap = manager.getSpecMap(project);
+                    //                        if (specMap == null)
+                    //                            return;
+                    //                         BaseSpecLocatable tapestryGeneratedSpec = (BaseSpecLocatable)specMap.get(putProblemsResource);
+                    //                         if (tapestryGeneratedSpec == null)
+                    //                            return;
+                    //                         putErrorsHere = (IResourceWorkspaceLocation) tapestryGeneratedSpec.getSpecificationLocation();
+                    //                    }
+
+                    TapestryBuilder.fDeferredActions.add(
+                        new ScriptComponentValidation(
+                            specificationLocation,
+                            putProblemsResource,
+                            (ICoreNamespace) requestorNamespace,
+                            contained,
+                            sourceInfo,
+                            publicId));
+                }
             }
         }
 

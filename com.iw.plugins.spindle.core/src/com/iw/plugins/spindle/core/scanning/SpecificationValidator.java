@@ -200,7 +200,7 @@ public class SpecificationValidator extends BaseValidator
 
         // if the contained is a framework component, extra validation might occur at the end of the
         // entire build!
-        FrameworkComponentValidator.validate(
+        FrameworkComponentValidator.validateContainedComponent(
             (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
             ((PluginComponentSpecification) specification).getNamespace(),
             type,

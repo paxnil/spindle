@@ -130,14 +130,21 @@ public class DialogField implements IDialogFieldChangedListener {
   public void setLabelText(String labelText) {
     if (labelControl != null && !labelControl.isDisposed()) {
       labelControl.setText(labelText);
-      fireDialogChanged(this);
+      fireDialogButtonPressed(this);
     }
   }
-
-  protected void fireDialogChanged(DialogField field) {
+  
+  protected void fireDialogFieldChanged(DialogField field) {
     for (Iterator iterator = getListeners().iterator(); iterator.hasNext();) {
       IDialogFieldChangedListener element = (IDialogFieldChangedListener) iterator.next();
       element.dialogFieldChanged(field);
+    }
+  }
+
+  protected void fireDialogButtonPressed(DialogField field) {
+    for (Iterator iterator = getListeners().iterator(); iterator.hasNext();) {
+      IDialogFieldChangedListener element = (IDialogFieldChangedListener) iterator.next();
+      element.dialogFieldButtonPressed(field);
     }
   }
 

@@ -194,7 +194,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
     /**
      * @param tag
      * @param tagName
-     * @param documentOffset
+     * @param fDocumentOffset
      * @return
      */
     private ICompletionProposal[] computeStartTagProposals(XMLNode tag, String tagName, int documentOffset)

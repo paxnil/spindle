@@ -32,13 +32,11 @@ import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.GC;
+import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 
 import com.iw.plugins.spindle.core.source.IProblem;
 
@@ -48,128 +46,193 @@ import com.iw.plugins.spindle.core.source.IProblem;
 public class ProblemAnnotation extends Annotation implements IProblemAnnotation
 {
 
-    private List fOverlaids;
-    private IProblem fProblem;
-    private Image fImage;
-    private boolean fQuickFixImagesInitialized = false;
-    private ProblemAnnotationType fType;
+  /**
+   * The layer in which task problem annotations are located.
+   */
+  private static final int TASK_LAYER;
+  /**
+   * The layer in which info problem annotations are located.
+   */
+  private static final int INFO_LAYER;
+  /**
+   * The layer in which warning problem annotations representing are located.
+   */
+  private static final int WARNING_LAYER;
+  /**
+   * The layer in which error problem annotations representing are located.
+   */
+  private static final int ERROR_LAYER;
 
-    public ProblemAnnotation(IProblem problem)
+  static
+  {
+    AnnotationPreferenceLookup lookup = EditorsUI.getAnnotationPreferenceLookup();
+    TASK_LAYER = computeLayer(ProblemMarkerAnnotation.TASK_ANNOTATION_TYPE, lookup);
+    INFO_LAYER = computeLayer(ProblemMarkerAnnotation.INFO_ANNOTATION_TYPE, lookup);
+    WARNING_LAYER = computeLayer(ProblemMarkerAnnotation.WARNING_ANNOTATION_TYPE, lookup);
+    ERROR_LAYER = computeLayer(ProblemMarkerAnnotation.ERROR_ANNOTATION_TYPE, lookup);
+  }
+
+  private static int computeLayer(String annotationType, AnnotationPreferenceLookup lookup)
+  {
+    Annotation annotation = new Annotation(annotationType, false, null);
+    AnnotationPreference preference = lookup.getAnnotationPreference(annotation);
+    if (preference != null)
+      return preference.getPresentationLayer() + 1;
+    else
+      return IAnnotationAccessExtension.DEFAULT_LAYER + 1;
+  }
+
+  private List fOverlaids;
+  private IProblem fProblem;
+  private Image fImage;
+  private boolean fQuickFixImagesInitialized = false;
+
+  public ProblemAnnotation(IProblem problem)
+  {
+
+    fProblem = problem;
+    //        setLayer(MarkerAnnotation.PROBLEM_LAYER + 1);
+
+    int severity = fProblem.getSeverity();
+    switch (severity)
     {
+      case IMarker.SEVERITY_INFO :
+        setType(ProblemMarkerAnnotation.INFO_ANNOTATION_TYPE);
+        break;
+      case IMarker.SEVERITY_WARNING :
+        setType(ProblemMarkerAnnotation.WARNING_ANNOTATION_TYPE);
+        break;
+      case IMarker.SEVERITY_ERROR :
+        setType(ProblemMarkerAnnotation.ERROR_ANNOTATION_TYPE);
+        break;
 
-        fProblem = problem;
-        setLayer(MarkerAnnotation.PROBLEM_LAYER + 1);
-
-        if (fProblem.getSeverity() == IMarker.SEVERITY_WARNING)
-            fType = ProblemAnnotationType.WARNING;
-        else
-            fType = ProblemAnnotationType.ERROR;
+      default :
+        setType(ProblemMarkerAnnotation.TASK_ANNOTATION_TYPE);
+        break;
     }
+  }
 
-    private void initializeImages()
+  private void initializeImages()
+  {
+
+    // TODO remove // http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
+    //        if (!fQuickFixImagesInitialized)
+    //        {
+    //            if (indicateQuixFixableProblems() &&
+    // JavaCorrectionProcessor.hasCorrections(fProblem.getID()))
+    //            {
+    //                if (!fgQuickFixImagesInitialized)
+    //                {
+    //                    fgQuickFixImage =
+    // JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+    //                    fgQuickFixErrorImage =
+    // JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
+    //                    fgQuickFixImagesInitialized = true;
+    //                }
+    //                if (fType == AnnotationType.ERROR)
+    //                    fImage = fgQuickFixErrorImage;
+    //                else
+    //                    fImage = fgQuickFixImage;
+    //            }
+    //            fQuickFixImagesInitialized = true;
+    //        }
+  }
+
+  //    private boolean indicateQuixFixableProblems() TODO remove
+  //    {
+  //        return
+  // PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
+  //    }
+  //
+  /*
+   * @see Annotation#paint
+   */
+  //  public void paint(GC gc, Canvas canvas, Rectangle r)
+  //  {
+  //    initializeImages();
+  //    if (fImage != null)
+  //      ImageUtilities.drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.TOP);
+  //  }
+  //
+  //  public Image getImage(Display display)
+  //  {
+  //    initializeImages();
+  //    return fImage;
+  //  }
+  public String getMessage()
+  {
+    return fProblem.getMessage();
+  }
+
+  public boolean isTemporary()
+  {
+    return true;
+  }
+
+  public String[] getArguments()
+  {
+    return null;
+  }
+
+  public int getId()
+  {
+    return -1;
+  }
+
+  public boolean isProblem()
+  {
+    String type = getType();
+    return ProblemMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(type)
+        || ProblemMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(type);
+  }
+
+  public boolean isRelevant()
+  {
+    return true;
+  }
+
+  public boolean hasOverlay()
+  {
+    return false;
+  }
+
+  public IProblemAnnotation getOverlay()
+  {
+    return null;
+  }
+
+  public void addOverlaid(IProblemAnnotation annotation)
+  {
+    if (fOverlaids == null)
+      fOverlaids = new ArrayList(1);
+    fOverlaids.add(annotation);
+  }
+
+  public void removeOverlaid(IProblemAnnotation annotation)
+  {
+    if (fOverlaids != null)
     {
-        //        // http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
-        //        if (!fQuickFixImagesInitialized)
-        //        {
-        //            if (indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(fProblem.getID()))
-        //            {
-        //                if (!fgQuickFixImagesInitialized)
-        //                {
-        //                    fgQuickFixImage = JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
-        //                    fgQuickFixErrorImage = JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
-        //                    fgQuickFixImagesInitialized = true;
-        //                }
-        //                if (fType == AnnotationType.ERROR)
-        //                    fImage = fgQuickFixErrorImage;
-        //                else
-        //                    fImage = fgQuickFixImage;
-        //            }
-        //            fQuickFixImagesInitialized = true;
-        //        }
+      fOverlaids.remove(annotation);
+      if (fOverlaids.size() == 0)
+        fOverlaids = null;
     }
+  }
 
-//    private boolean indicateQuixFixableProblems()
-//    {
-//        return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CORRECTION_INDICATION);
-//    }
-//
-    /*
-     * @see Annotation#paint
-     */
-    public void paint(GC gc, Canvas canvas, Rectangle r)
-    {
-        initializeImages();
-        if (fImage != null)
-            drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.TOP);
-    }
+  public Iterator getOverlaidIterator()
+  {
+    if (fOverlaids != null)
+      return fOverlaids.iterator();
+    return null;
+  }
 
-    public Image getImage(Display display)
-    {
-        initializeImages();
-        return fImage;
-    }
-
-    public String getMessage()
-    {
-        return fProblem.getMessage();
-    }
-
-    public boolean isTemporary()
-    {
-        return true;
-    }
-
-    public String[] getArguments()
-    {
-        return null;
-    }
-
-    public int getId()
-    {
-        return -1;
-    }
-
-    public boolean isProblem()
-    {
-        return fType == ProblemAnnotationType.WARNING || fType == ProblemAnnotationType.ERROR;
-    }
-
-    public boolean isRelevant()
-    {
-        return true;
-    }
-
-    public boolean hasOverlay()
-    {
-        return false;
-    }
-
-    public void addOverlaid(IProblemAnnotation annotation)
-    {
-        if (fOverlaids == null)
-            fOverlaids = new ArrayList(1);
-        fOverlaids.add(annotation);
-    }
-
-    public void removeOverlaid(IProblemAnnotation annotation)
-    {
-        if (fOverlaids != null)
-        {
-            fOverlaids.remove(annotation);
-            if (fOverlaids.size() == 0)
-                fOverlaids = null;
-        }
-    }
-
-    public Iterator getOverlaidIterator()
-    {
-        if (fOverlaids != null)
-            return fOverlaids.iterator();
-        return null;
-    }
-
-    public ProblemAnnotationType getAnnotationType()
-    {
-        return fType;
-    }
+  //  /*
+  //   * (non-Javadoc)
+  //   *
+  //   * @see org.eclipse.jface.text.source.IAnnotationPresentation#getLayer()
+  //   */
+  //  public int getLayer()
+  //  {
+  //    // TODO Auto-generated method stub
+  //    return 0;
+  //  }
 };

@@ -222,7 +222,7 @@ public class JWCIDContentAssistProcessor extends TemplateContentAssistProcessor
 
     /**
      * @param document
-     * @param documentOffset
+     * @param fDocumentOffset
      * @return
      */
     private List computeSimpleIdProposals(IDocument document, int documentOffset)

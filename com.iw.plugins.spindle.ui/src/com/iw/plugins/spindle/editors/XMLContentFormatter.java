@@ -32,7 +32,6 @@ import java.util.List;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
-import org.eclipse.jface.text.ChildDocumentManager;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
@@ -554,23 +553,24 @@ public class XMLContentFormatter implements IContentFormatter
      */
     private boolean positionAboutToBeAdded(IDocument document, String category, Position position)
     {
-        if (ChildDocumentManager.CHILDDOCUMENTS.equals(category))
-        {
-            /* 
-             * We assume child document offsets to be at the beginning
-             * of a line. Because the formatter might have moved the
-             * position to be somewhere in the middle of a line we patch it here. 
-             */
-            try
-            {
-                int lineOffset = document.getLineInformationOfOffset(position.offset).getOffset();
-                position.setLength(position.length + position.offset - lineOffset);
-                position.setOffset(lineOffset);
-            } catch (BadLocationException x)
-            {
-                return false;
-            }
-        }
+      //TODO revisit postionAboutToBeAdded in TextViewer
+//        if (ProjectionDocument..equals(category))
+//        {
+//            /* 
+//             * We assume child document offsets to be at the beginning
+//             * of a line. Because the formatter might have moved the
+//             * position to be somewhere in the middle of a line we patch it here. 
+//             */
+//            try
+//            {
+//                int lineOffset = document.getLineInformationOfOffset(position.offset).getOffset();
+//                position.setLength(position.length + position.offset - lineOffset);
+//                position.setOffset(lineOffset);
+//            } catch (BadLocationException x)
+//            {
+//                return false;
+//            }
+//        }
         return true;
     }
 

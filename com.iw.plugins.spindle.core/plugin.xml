@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
 <plugin
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
-   version="0.0.50"
+   version="0.1.0"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.core.TapestryCore">
 
@@ -55,13 +56,46 @@
       <library name="commons-codec-1.2.jar"/>
    </runtime>
    <requires>
+      <import plugin="org.eclipse.ui.ide" export="true"/>
+      <import plugin="org.eclipse.ui.views" export="true"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor" export="true"/>
+      <import plugin="org.eclipse.ui.editors" export="true"/>
       <import plugin="org.eclipse.core.resources" export="true"/>
       <import plugin="org.eclipse.jdt.core" export="true"/>
       <import plugin="org.eclipse.ui" export="true"/>
       <import plugin="org.apache.xerces" export="true"/>
       <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.core.runtime"/>
    </requires>
 
+   <extension
+         point="org.eclipse.team.core.fileTypes">
+      <fileTypes
+            type="text"
+            extension="jwc">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="page">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="library">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="application">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="xml">
+      </fileTypes>
+   </extension>
+   
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer class="com.iw.plugins.spindle.core.PreferenceInitializer"/>
+   </extension>
 
    <extension
          point="org.eclipse.team.core.fileTypes">
@@ -96,6 +130,14 @@
       </requires-nature>
    </extension>
    <extension
+         point="org.eclipse.ui.ide.projectNatureImages">
+      <image
+            icon="icons/project_ovr.gif"
+            natureId="com.iw.plugins.spindle.core.tapestrynature"
+            id="com.iw.plugins.spindle.core.tapestryProjectNatureImage">
+      </image>
+   </extension>
+   <extension
          id="tapestrybuilder"
          name="Tapestry Project Builder"
          point="org.eclipse.core.resources.builders">
@@ -124,11 +166,8 @@
          name="Tapestry Build Problem"
          point="org.eclipse.core.resources.markers">
       <super
-            type="org.eclipse.core.resources.problemmarker">
-      </super>
-      <super
-            type="org.eclipse.core.resources.textmarker">
-      </super>
+            type="com.iw.plugins.spindle.core.problemmarker">
+      </super>     
       <persistent
             value="true">
       </persistent>
@@ -138,11 +177,9 @@
          name="Tapestry Build Problem"
          point="org.eclipse.core.resources.markers">
       <super
-            type="org.eclipse.core.resources.problemmarker">
+            type="com.iw.plugins.spindle.core.problemmarker">
       </super>
-      <super
-            type="org.eclipse.core.resources.textmarker">
-      </super>
+     
       <persistent
             value="true">
       </persistent>
@@ -152,11 +189,9 @@
          name="Tapestry Build Problem"
          point="org.eclipse.core.resources.markers">
       <super
-            type="org.eclipse.core.resources.problemmarker">
+            type="com.iw.plugins.spindle.core.problemmarker">
       </super>
-      <super
-            type="org.eclipse.core.resources.textmarker">
-      </super>
+      
       <persistent
             value="true">
       </persistent>

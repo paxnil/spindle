@@ -210,7 +210,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     }
 
     /**
-      * @param documentOffset
+      * @param fDocumentOffset
       * @return
       */
     public static ICompletionProposal computeEndTagProposal(ITextViewer viewer, int documentOffset)

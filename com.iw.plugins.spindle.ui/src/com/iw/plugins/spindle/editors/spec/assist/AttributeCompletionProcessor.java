@@ -343,35 +343,35 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             return computeBindingNameProposals();
 
         if ("application".equals(fTagName) && "engine-class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals(false);
+            return chooseJavaTypeNameProposals(false, "org.apache.tapestry.IEngine");
 
         if ("bean".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals(false);
+            return chooseJavaTypeNameProposals(false, null);
 
         if ("component-specification".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals(false);
+            return chooseJavaTypeNameProposals(false, "org.apache.tapestry.IComponent");
 
         if ("page-specification".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals(false);
+            return chooseJavaTypeNameProposals(false, "org.apache.tapestry.IPage");
 
         if ("extension".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals(false);
+            return chooseJavaTypeNameProposals(false, null);
 
         if ("service".equals(fTagName) && "class".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals(false);
+            return chooseJavaTypeNameProposals(false, "org.apache.tapestry.IEngineService");
 
         if ("property-specification".equals(fTagName) && "type".equals(fAttributeName) && fIsAttributeTerminated)
-            return chooseJavaTypeNameProposals(true);
+            return chooseJavaTypeNameProposals(true, null);
 
         if ("parameter".equals(fTagName) && fIsAttributeTerminated)
         {
             if (fDTD.getPublicId().equals(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID)
                 && "java-type".equals(fAttributeName))
             {
-                return chooseJavaTypeNameProposals(true);
+                return chooseJavaTypeNameProposals(true, null);
             } else if ("type".equals(fAttributeName))
             {
-                return chooseJavaTypeNameProposals(true);
+                return chooseJavaTypeNameProposals(true, null);
             }
         }
 
@@ -599,7 +599,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     /**
      * @return
      */
-    private List chooseJavaTypeNameProposals(boolean includeInterfaces)
+    private List chooseJavaTypeNameProposals(boolean includeInterfaces, String hierarchyRoot)
     {
         IJavaProject jproject = TapestryCore.getDefault().getJavaProjectFor(fEditor.getStorage());
         if (jproject == null)
@@ -609,6 +609,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         result.add(
             new ChooseTypeProposal(
                 jproject,
+                hierarchyRoot,
                 includeInterfaces,
                 fDocumentOffset,
                 fValueLocation.x,
@@ -773,145 +774,145 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         return result;
     }
 
-    public static class ChooseTypeProposal implements ICompletionProposal
-    {
-
-        protected IJavaProject jproject;
-        String chosenType;
-        boolean includeInterfaces;
-        int documentOffset;
-        int replacementOffset;
-        int replacementLength;
-
-        public ChooseTypeProposal(
-            IJavaProject project,
-            boolean includeInterfaces,
-            int documentOffset,
-            int replacementOffset,
-            int replacementLength)
-        {
-            Assert.isNotNull(project);
-            jproject = project;
-            this.includeInterfaces = includeInterfaces;
-            this.documentOffset = documentOffset;
-            this.replacementOffset = replacementOffset;
-            this.replacementLength = replacementLength;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
-         */
-        public void apply(IDocument document)
-        {
-            chosenType = chooseType("Java Type Chooser");
-            if (chosenType != null)
-            {
-                if (chosenType.length() == 0)
-                {
-                    chosenType = null;
-                    return;
-                }
-
-                try
-                {
-                    document.replace(replacementOffset, replacementLength, chosenType);
-                } catch (BadLocationException x)
-                {
-                    // ignore
-                }
-
-            }
-
-        }
-
-        protected String chooseType(String title)
-        {
-
-            Shell shell = UIPlugin.getDefault().getActiveWorkbenchShell();
-            try
-            {
-
-                if (jproject == null)
-                    return null;
-
-                IJavaSearchScope scope = createSearchScope(jproject);
-
-                SelectionDialog dialog =
-                    JavaUI.createTypeDialog(
-                        shell,
-                        new ProgressMonitorDialog(shell),
-                        scope,
-                        (includeInterfaces
-                            ? IJavaElementSearchConstants.CONSIDER_TYPES
-                            : IJavaElementSearchConstants.CONSIDER_CLASSES),
-                        false);
-
-                dialog.setTitle(includeInterfaces ? "Java Type Chooser" : "Java Class Chooser");
-                dialog.setMessage("Choose " + (includeInterfaces ? "Type" : "a Class"));
-
-                if (dialog.open() == dialog.OK)
-                {
-                    IType chosen = (IType) dialog.getResult()[0];
-                    return chosen.getFullyQualifiedName(); //FirstResult();
-                }
-            } catch (CoreException jmex)
-            {
-                ErrorDialog.openError(shell, "Spindle error", "unable to continue", jmex.getStatus());
-            }
-            return null;
-        }
-
-        protected IJavaSearchScope createSearchScope(IJavaElement element) throws JavaModelException
-        {
-            JavaSearchScope scope = new JavaSearchScope();
-            scope.add(element);
-            return scope;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-         */
-        public String getAdditionalProposalInfo()
-        {
-            return "Note due to a known pre-existing bug in eclispe:\n\n [Bug 45193] hierarchy scope search only shows types that exist in jars\n\nThe search can't be limited to Tapestry types";
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
-         */
-        public IContextInformation getContextInformation()
-        {
-            return null;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
-         */
-        public String getDisplayString()
-        {
-            return "Choose Type Dialog";
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-         */
-        public Image getImage()
-        {
-            return Images.getSharedImage("opentype.gif");
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-         */
-        public Point getSelection(IDocument document)
-        {
-            if (chosenType == null)
-                return new Point(documentOffset, 0);
-
-            return new Point(replacementOffset + chosenType.length(), 0);
-        }
-
-    }
+//    public static class ChooseTypeProposal implements ICompletionProposal
+//    {
+//
+//        protected IJavaProject jproject;
+//        String chosenType;
+//        boolean includeInterfaces;
+//        int documentOffset;
+//        int replacementOffset;
+//        int replacementLength;
+//
+//        public ChooseTypeProposal(
+//            IJavaProject project,
+//            boolean includeInterfaces,
+//            int documentOffset,
+//            int replacementOffset,
+//            int replacementLength)
+//        {
+//            Assert.isNotNull(project);
+//            jproject = project;
+//            this.includeInterfaces = includeInterfaces;
+//            this.documentOffset = documentOffset;
+//            this.replacementOffset = replacementOffset;
+//            this.replacementLength = replacementLength;
+//        }
+//
+//        /* (non-Javadoc)
+//         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
+//         */
+//        public void apply(IDocument document)
+//        {
+//            chosenType = chooseType("Java Type Chooser");
+//            if (chosenType != null)
+//            {
+//                if (chosenType.length() == 0)
+//                {
+//                    chosenType = null;
+//                    return;
+//                }
+//
+//                try
+//                {
+//                    document.replace(replacementOffset, replacementLength, chosenType);
+//                } catch (BadLocationException x)
+//                {
+//                    // ignore
+//                }
+//
+//            }
+//
+//        }
+//
+//        protected String chooseType(String title)
+//        {
+//
+//            Shell shell = UIPlugin.getDefault().getActiveWorkbenchShell();
+//            try
+//            {
+//
+//                if (jproject == null)
+//                    return null;
+//
+//                IJavaSearchScope scope = createSearchScope(jproject);
+//
+//                SelectionDialog dialog =
+//                    JavaUI.createTypeDialog(
+//                        shell,
+//                        new ProgressMonitorDialog(shell),
+//                        scope,
+//                        (includeInterfaces
+//                            ? IJavaElementSearchConstants.CONSIDER_TYPES
+//                            : IJavaElementSearchConstants.CONSIDER_CLASSES),
+//                        false);
+//
+//                dialog.setTitle(includeInterfaces ? "Java Type Chooser" : "Java Class Chooser");
+//                dialog.setMessage("Choose " + (includeInterfaces ? "Type" : "a Class"));
+//
+//                if (dialog.open() == dialog.OK)
+//                {
+//                    IType chosen = (IType) dialog.getResult()[0];
+//                    return chosen.getFullyQualifiedName(); //FirstResult();
+//                }
+//            } catch (CoreException jmex)
+//            {
+//                ErrorDialog.openError(shell, "Spindle error", "unable to continue", jmex.getStatus());
+//            }
+//            return null;
+//        }
+//
+//        protected IJavaSearchScope createSearchScope(IJavaElement element) throws JavaModelException
+//        {
+//            JavaSearchScope scope = new JavaSearchScope();
+//            scope.add(element);
+//            return scope;
+//        }
+//
+//        /* (non-Javadoc)
+//         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+//         */
+//        public String getAdditionalProposalInfo()
+//        {
+//            return "Note due to a known pre-existing bug in eclispe:\n\n [Bug 45193] hierarchy scope search only shows types that exist in jars\n\nThe search can't be limited to Tapestry types";
+//        }
+//
+//        /* (non-Javadoc)
+//         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
+//         */
+//        public IContextInformation getContextInformation()
+//        {
+//            return null;
+//        }
+//
+//        /* (non-Javadoc)
+//         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
+//         */
+//        public String getDisplayString()
+//        {
+//            return "Choose Type Dialog";
+//        }
+//
+//        /* (non-Javadoc)
+//         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
+//         */
+//        public Image getImage()
+//        {
+//            return Images.getSharedImage("opentype.gif");
+//        }
+//
+//        /* (non-Javadoc)
+//         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
+//         */
+//        public Point getSelection(IDocument document)
+//        {
+//            if (chosenType == null)
+//                return new Point(documentOffset, 0);
+//
+//            return new Point(replacementOffset + chosenType.length(), 0);
+//        }
+//
+//    }
 
     //    public static class ChooseResourceProposal implements ICompletionProposal
     //    {
@@ -921,14 +922,14 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     //
     //        String chosenAsset;
     //
-    //        int documentOffset;
+    //        int fDocumentOffset;
     //        int replacementOffset;
     //        int replacementLength;
     //
     //        public ChooseResourceProposal(
     //            SpecEditor specEditor,
     //            AbstractRootLocation rootObject,
-    //            int documentOffset,
+    //            int fDocumentOffset,
     //            int replacementOffset,
     //            int replacementLength)
     //        {
@@ -937,7 +938,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     //            editor = specEditor;
     //            root = rootObject;
     //
-    //            this.documentOffset = documentOffset;
+    //            this.fDocumentOffset = fDocumentOffset;
     //            this.replacementOffset = replacementOffset;
     //            this.replacementLength = replacementLength;
     //        }
@@ -1018,7 +1019,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     //        public Point getSelection(IDocument document)
     //        {
     //            if (chosenAsset == null)
-    //                return new Point(documentOffset, 0);
+    //                return new Point(fDocumentOffset, 0);
     //
     //            return new Point(replacementOffset + chosenAsset.length(), 0);
     //        }
