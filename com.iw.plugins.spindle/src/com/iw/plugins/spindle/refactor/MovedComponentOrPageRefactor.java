@@ -26,11 +26,14 @@
 package com.iw.plugins.spindle.refactor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -48,14 +51,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 
-import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.project.TapestryProject;
@@ -69,15 +69,19 @@ import com.iw.plugins.spindle.ui.TapestryStorageLabelProvider;
  * Copyright 2002, Intelligent Works Inc.
  * All Rights Reserved.
  */
-public class DeletedComponentOrPageRefactor
+public class MovedComponentOrPageRefactor
   implements IResourceChangeListener, IResourceDeltaVisitor {
 
   private TapestryProject project;
-  private List potentialModelDeletes;
+  private HashMap potentialModelMoves;
+  private HashMap templatesToBeMoved;
   private TapestryLibraryModel baseModel = null;
   private LibraryRefactorer refactorer = null;
+  private IResourceDelta topLevelDelta = null;
+  private List languageCodes = null;
+  private boolean hasAliases = false;
 
-  public DeletedComponentOrPageRefactor(TapestryProject project) {
+  public MovedComponentOrPageRefactor(TapestryProject project) {
     super();
     this.project = project;
   }
@@ -94,7 +98,7 @@ public class DeletedComponentOrPageRefactor
     }
 
     IProject thisProject = project.getProject();
-    IResourceDelta topLevelDelta = event.getDelta();
+    topLevelDelta = event.getDelta();
 
     if (topLevelDelta.getKind() == IResourceDelta.CHANGED) {
 
@@ -104,7 +108,9 @@ public class DeletedComponentOrPageRefactor
 
         IJavaProject jproject = null;
         IStorage projectStorage = null;
-        potentialModelDeletes = new ArrayList();
+        potentialModelMoves = new HashMap();
+        templatesToBeMoved = new HashMap();
+        hasAliases = false;
         refactorer = null;
 
         try {
@@ -112,8 +118,6 @@ public class DeletedComponentOrPageRefactor
           baseModel = (TapestryLibraryModel) project.getProjectModel();
           projectStorage = baseModel.getUnderlyingStorage();
 
-          //      refactorer =
-          //        new LibraryRefactorer(project, (TapestryLibraryModel) project.getProjectModel(), true);
           jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisProject);
 
         } catch (CoreException e) {
@@ -142,46 +146,102 @@ public class DeletedComponentOrPageRefactor
           }
 
         }
+        try {
 
-        HashMap confirmed = getUserConfirmed(findConfirmed());
+          HashMap confirmed = findConfirmed();
 
-        if (!confirmed.isEmpty()) {
+          if (!confirmed.isEmpty()) {
 
-          try {
+            if (hasAliases) {
 
-            getRefactorer();
+              // we must update the project App/Lib
 
-            IPluginLibrarySpecification refactorSpec = refactorer.getSpecification();
-
-            for (Iterator iter = confirmed.keySet().iterator(); iter.hasNext();) {
-
-              IFile element = (IFile) iter.next();
-              String alias = (String) confirmed.get(element);
-
-              String extension = element.getFileExtension();
-
-              if ("jwc".equals(extension)) {
-
-                refactorSpec.removeComponentSpecificationPath(alias);
-
-              } else {
-
-                refactorSpec.removePageSpecificationPath(alias);
-
-              }
+              updateProjectModel(confirmed);
 
             }
 
-            refactorer.commit(new NullProgressMonitor());
+            // now we move the templates (if there are any!)
+
+            moveTemplates(confirmed);
+
+          }
+        } catch (CoreException e) {
+
+          ErrorDialog.openError(
+            TapestryPlugin.getDefault().getActiveWorkbenchShell(),
+            "Spindle Refactor Error",
+            "can't continue",
+            e.getStatus());
+        }
+
+      }
+
+    }
+
+  }
+
+  private void moveTemplates(HashMap confirmed) {
+
+    for (Iterator iter = templatesToBeMoved.keySet().iterator(); iter.hasNext();) {
+      IFile oldFile = (IFile) iter.next();
+      IFile newFile = (IFile) confirmed.get(oldFile);
+
+      IPath newPath = newFile.getFullPath();
+      int segmentCount = newPath.segmentCount();
+
+      IPath newTemplatePath = null;
+
+      if (segmentCount > 1) {
+
+        newTemplatePath = newPath.removeLastSegments(1);
+        List templates = (List) templatesToBeMoved.get(oldFile);
+
+        for (Iterator iterator = templates.iterator(); iterator.hasNext();) {
+          IFile oldTemplate = (IFile) iterator.next();
+
+          IPath completeNewPath = newTemplatePath.append(oldTemplate.getName());
+
+          try {
+
+            oldTemplate.move(completeNewPath, true, true, null);
 
           } catch (CoreException e) {
-
-            ErrorDialog.openError(
-              TapestryPlugin.getDefault().getActiveWorkbenchShell(),
-              "Spindle Refactor Error",
-              "can't continue",
-              e.getStatus());
+            e.printStackTrace();
           }
+        }
+
+      }
+
+    }
+  }
+
+  private void updateProjectModel(HashMap confirmed) throws CoreException {
+
+    getRefactorer();
+
+    IPluginLibrarySpecification refactorSpec = refactorer.getSpecification();
+
+    for (Iterator iter = confirmed.keySet().iterator(); iter.hasNext();) {
+
+      IFile element = (IFile) iter.next();
+      String extension = element.getFileExtension();
+
+      String tapestryPath = getTapestryPath(element);
+
+      String alias = findAlias(tapestryPath, extension);
+
+      if (alias != null) {
+
+        IFile newFile = (IFile) confirmed.get(element);
+        String newTapestryPath = getTapestryPath(newFile);
+
+        if ("jwc".equals(extension)) {
+
+          refactorSpec.setComponentSpecificationPath(alias, newTapestryPath);
+
+        } else {
+
+          refactorSpec.setPageSpecificationPath(alias, newTapestryPath);
 
         }
 
@@ -189,6 +249,15 @@ public class DeletedComponentOrPageRefactor
 
     }
 
+    refactorer.commit(new NullProgressMonitor());
+  }
+
+  private void getRefactorer() throws CoreException {
+    if (refactorer == null) {
+
+      refactorer = new LibraryRefactorer(project, baseModel, true);
+
+    }
   }
 
   private HashMap getUserConfirmed(HashMap confirmed) {
@@ -275,12 +344,36 @@ public class DeletedComponentOrPageRefactor
 
   }
 
+  // we have a Hashmap containing all the .jwc's and .page files moved
+  // in this event.
+  //
+  // To remain in the list of potential moves:
+  //
+  // 1. The component/page must be defined in the project's app/lib
+  // 
+  // OR
+  //
+  // 2. The component/page must have templates
+  //
+  
+  // plus we filter out straight renames. ie. a move to the same folder.
+  // another refactor will handle those!
+
   private HashMap findConfirmed() {
     HashMap result = new HashMap();
 
-    for (Iterator iter = potentialModelDeletes.iterator(); iter.hasNext();) {
+    for (Iterator iter = potentialModelMoves.keySet().iterator(); iter.hasNext();) {
 
       IFile potential = (IFile) iter.next();
+      
+      IFile target = (IFile) potentialModelMoves.get(potential);
+      
+      if (potential.getParent().equals(target.getParent())) {
+      	
+      	// its not a move, but rather a renaming - discard
+      	continue;
+      	
+      }
 
       try {
 
@@ -288,20 +381,11 @@ public class DeletedComponentOrPageRefactor
 
         String extension = potential.getFileExtension();
 
-        String alias = null;
+        String alias = findAlias(tapestryPath, extension);
 
-        if ("jwc".equals(extension)) {
+        if (alias != null || templatesToBeMoved.containsKey(potential)) {
 
-          alias = baseModel.findComponentAlias(tapestryPath);
-
-        } else {
-
-          alias = baseModel.findPageName(tapestryPath);
-        }
-
-        if (alias != null) {
-
-          result.put(potential, alias);
+          result.put(potential, potentialModelMoves.get(potential));
 
         }
 
@@ -329,25 +413,22 @@ public class DeletedComponentOrPageRefactor
       alias = libModel.findPageName(tapestryPath);
     }
 
-    return alias;
-  }
+    if (alias != null && !hasAliases) {
 
-  private void getRefactorer() throws CoreException {
-    if (refactorer == null) {
-
-      refactorer = new LibraryRefactorer(project, baseModel, true);
+      hasAliases = true;
 
     }
+    return alias;
   }
 
   private String getTapestryPath(IResource potential) throws CoreException {
 
     IPackageFragment fragment = project.getLookup().findPackageFragment((IStorage) potential);
-
+    
     if ("".equals(fragment.getElementName())) {
-
-      return "/" + potential.getName();
-
+    	
+    	return "/"+potential.getName();
+    	
     }
 
     String tapestryPath =
@@ -386,15 +467,43 @@ public class DeletedComponentOrPageRefactor
 
     try {
 
-      IFile deltaFile = (IFile) delta.getResource();
-      String extension = deltaFile.getFullPath().getFileExtension();
+      IFile movedFrom = (IFile) delta.getResource();
+      String oldExtension = movedFrom.getFullPath().getFileExtension();
 
-      if (extension != null && ("jwc".equals(extension) || "page".equals(extension))) {
+      if (oldExtension != null && ("jwc".equals(oldExtension) || "page".equals(oldExtension))) {
 
         if (delta.getKind() == IResourceDelta.REMOVED
-          && (delta.getFlags() & IResourceDelta.MOVED_TO) == 0) {
+          && (delta.getFlags() & IResourceDelta.MOVED_TO) != 0) {
 
-          potentialModelDeletes.add(deltaFile);
+          IPath movedToPath = delta.getMovedToPath();
+
+          //ensure the new name has the same extension!
+
+          String newExtension = movedToPath.getFileExtension();
+
+          if (oldExtension.equals(newExtension)) {
+
+            IResourceDelta movedToDelta = topLevelDelta.findMember(movedToPath);
+            IResource movedTo = movedToDelta.getResource();
+
+            // ensure the new location is in the same project!
+            if (movedTo.getProject().equals(project.getProject())) {
+
+              try {
+
+                //now ensure the new location is still within the classpath!
+                IPackageFragment fragment =
+                  project.getLookup().findPackageFragment((IStorage) movedTo);
+                if (fragment != null) {
+
+                  potentialModelMoves.put(movedFrom, movedTo);
+                  findTemplatesFor(movedFrom);
+                }
+              } catch (CoreException e) {
+              }
+
+            }
+          }
 
         }
 
@@ -406,4 +515,103 @@ public class DeletedComponentOrPageRefactor
     return true;
   }
 
+  // find any templates for the supplied file
+  private void findTemplatesFor(IFile movedFrom) {
+
+    ArrayList templates = new ArrayList();
+    IContainer parent = movedFrom.getParent();
+    String fileName = movedFrom.getFullPath().removeFileExtension().lastSegment();
+    try {
+
+      IResource[] members = parent.members();
+
+      for (int i = 0; i < members.length; i++) {
+
+        IPath memberPath = members[i].getFullPath();
+        String extension = memberPath.getFileExtension();
+
+        if ("html".equals(extension) || "htm".equals(extension)) {
+
+          IResource member = parent.findMember(memberPath.lastSegment());
+
+          // ensure the template is not already being moved during this event
+
+          if (topLevelDelta.findMember(member.getFullPath()) != null) {
+
+            continue;
+
+          }
+
+          String memberName = memberPath.removeFileExtension().lastSegment();
+
+          if (member != null
+            && member instanceof IFile
+            && templateMatchLocalization(fileName, memberName)) {
+
+            templates.add(member);
+
+          }
+
+        }
+
+        if (!templates.isEmpty()) {
+
+          templatesToBeMoved.put(movedFrom, templates);
+
+        }
+
+      }
+    } catch (CoreException e) {
+    }
+  }
+
+  private boolean templateMatchLocalization(String fileName, String memberName) {
+
+    if (fileName.equals(memberName)) {
+
+      return true;
+
+    } else if (memberName.startsWith(fileName + '_')) {
+
+      int firstUnderscore = memberName.indexOf('_');
+      int secondUnderscore = firstUnderscore + 3;
+
+      String languageString = null;
+
+      if (secondUnderscore < memberName.length()) {
+
+        char next = memberName.charAt(secondUnderscore);
+
+        if (next != '_') {
+
+          return false;
+
+        }
+
+        languageString = memberName.substring(firstUnderscore + 1, secondUnderscore);
+
+      } else {
+
+        languageString = memberName.substring(firstUnderscore + 1);
+
+      }
+
+      if (languageCodes == null) {
+
+        buildLanguageCodes();
+
+      }
+
+      return languageCodes.contains(languageString);
+
+    }
+
+    return false;
+  }
+
+  private void buildLanguageCodes() {
+
+    languageCodes = Arrays.asList(Locale.getISOLanguages());
+
+  }
 }

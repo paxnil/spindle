@@ -70,6 +70,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
@@ -78,6 +79,7 @@ import com.iw.plugins.spindle.project.TapestryProject;
 import com.iw.plugins.spindle.spec.TapestryPluginSpecFactory;
 import com.iw.plugins.spindle.ui.text.ColorManager;
 import com.iw.plugins.spindle.util.SpindleStatus;
+import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 
@@ -251,11 +253,11 @@ public class TapestryPlugin extends AbstractUIPlugin {
         IProjectDescription description = project.getDescription();
 
         ArrayList natures = new ArrayList(Arrays.asList(description.getNatureIds()));
-        
+
         natures.remove(NATURE_ID);
-        
-        description.setNatureIds((String [])natures.toArray(new String[natures.size()]));
-        
+
+        description.setNatureIds((String[]) natures.toArray(new String[natures.size()]));
+
         project.setDescription(description, monitor);
 
       }
@@ -408,9 +410,9 @@ public class TapestryPlugin extends AbstractUIPlugin {
     ErrorDialog.openError(getActiveWorkbenchShell(), null, null, status);
     ResourcesPlugin.getPlugin().getLog().log(status);
   } /** 
-            * Sets default preference values. These values will be used
-            * until some preferences are actually set using Preference dialog.
-            */
+               * Sets default preference values. These values will be used
+               * until some preferences are actually set using Preference dialog.
+               */
   protected void initializeDefaultPreferences(IPreferenceStore store) {
     ColorManager.initializeDefaults(store);
     NewTapComponentWizardPage.initializeDefaults(store);
@@ -506,6 +508,35 @@ public class TapestryPlugin extends AbstractUIPlugin {
       }
     }
     return null;
+  }
+
+  public static boolean isInSpindleEditor(Object obj) {
+
+    IStorage storage = null;
+
+    if (obj instanceof ITapestryModel) {
+
+      storage = ((ITapestryModel) obj).getUnderlyingStorage();
+
+    } else if (obj instanceof IResource || obj instanceof IStorage) {
+
+      storage = (IStorage) obj;
+
+    }
+
+    if (storage == null) {
+
+      IEditorPart part = Utils.getEditorFor(storage);
+
+      if (part != null) {
+
+        return part instanceof SpindleMultipageEditor;
+
+      }
+
+    }
+
+    return false;
   }
 
 }

@@ -57,6 +57,8 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.refactor.DeletedComponentOrPageRefactor;
+import com.iw.plugins.spindle.refactor.MovedComponentOrPageRefactor;
+import com.iw.plugins.spindle.refactor.RenamedComponentOrPageRefactor;
 import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
@@ -122,6 +124,10 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
       listeners.add(new ProjectResourceChangeListener());
 
       listeners.add(new DeletedComponentOrPageRefactor(this));
+      
+      listeners.add(new RenamedComponentOrPageRefactor(this));
+      
+      listeners.add(new MovedComponentOrPageRefactor(this));
 
       for (Iterator iter = listeners.iterator(); iter.hasNext();) {
 
@@ -537,7 +543,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
         }
 
-      } else if (event.getType() == IResourceChangeEvent.POST_AUTO_BUILD) {
+      } else if (event.getType() == IResourceChangeEvent.PRE_AUTO_BUILD) {
 
         IProject project = getProject();
         IResourceDelta topLevelDelta = event.getDelta();
