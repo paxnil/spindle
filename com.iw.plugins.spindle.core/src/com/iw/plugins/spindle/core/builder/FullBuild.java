@@ -30,20 +30,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.util.CoreLookup;
 import com.iw.plugins.spindle.core.builder.util.ILookupRequestor;
-import com.iw.plugins.spindle.core.scanning.*;
+import com.iw.plugins.spindle.core.resources.ClasspathResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.util.Markers;
 
 /**
@@ -59,12 +62,7 @@ public class FullBuild extends Build
     protected Map knownValidServlets;
     protected Map infoCache;
 
-    BuilderQueue applicationQueue;
-    BuilderQueue libraryQueue;
-    BuilderQueue pageQueue;
-    BuilderQueue componentQueue;
-    BuilderQueue htmlQueue;
-    BuilderQueue scriptQueue;
+    BuilderQueue buildQueue;
 
     /**
      * Constructor for FullBuilder.
@@ -72,7 +70,7 @@ public class FullBuild extends Build
     public FullBuild(TapestryBuilder builder)
     {
         super(builder);
-        this.tapestryServletType = getType("org.apache.tapestry.ApplicationServlet");
+        this.tapestryServletType = getType(TapestryCore.getString(TapestryBuilder.APPLICATION_SERVLET_NAME));
 
     }
 
@@ -83,48 +81,37 @@ public class FullBuild extends Build
 
         try
         {
-            notifier.subTask("Tapestry builder starting");
-            Markers.removeProblemsFor(tapestryBuilder.currentProject);
+            notifier.subTask(TapestryCore.getString(TapestryBuilder.STARTING));
+            Markers.removeProblemsForProject(tapestryBuilder.currentProject);
 
             if (tapestryServletType == null)
             {
-                Markers.addTapestryProblemMarkerToResource(
+                Markers.addBuildBrokenProblemMarkerToResource(
                     tapestryBuilder.currentProject,
-                    "ignoring applications in project because '"
-                        + tapestryBuilder.currentProject.getName()
-                        + "', type 'org.apache.tapestry.ApplicationServlet' not found in project build path!",
-                    IMarker.SEVERITY_WARNING,
-                    0,
-                    0,
-                    0);
+                    TapestryCore.getString(TapestryBuilder.TAPESTRY_JAR_MISSING));
             } else
             {
                 findDeclaredApplications();
             }
             notifier.updateProgressDelta(0.1f);
 
-            notifier.subTask("locating Tapestry artifacts");
-            applicationQueue = new BuilderQueue();
-            libraryQueue = new BuilderQueue();
-            pageQueue = new BuilderQueue();
-            componentQueue = new BuilderQueue();
-            htmlQueue = new BuilderQueue();
-            scriptQueue = new BuilderQueue();
+            notifier.subTask(TapestryCore.getString(TapestryBuilder.LOCATING_ARTIFACTS));
+            buildQueue = new BuilderQueue();
 
-            List found = findAllTapestryArtifacts();
+            buildQueue.addAll(findAllTapestryArtifacts());
             notifier.updateProgressDelta(0.15f);
-            //      int total = getTotalWaitingCount();
-            int total = found.size();
-            if (total > 0)
+            if (buildQueue.hasWaiting())
             {
-                //        String[] allSourceFiles = new String[locations.size()];
-                //        locations.toArray(allSourceFiles);
-                //        String[] initialTypeNames = new String[typeNames.size()];
-                //        typeNames.toArray(initialTypeNames);
-                //
-                notifier.setProcessingProgressPer(0.75f / (total * 2));
+                notifier.setProcessingProgressPer(0.75f / buildQueue.getWaitingCount());
+                while (buildQueue.getWaitingCount() > 0)
+                {
 
+                    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) buildQueue.peekWaiting();
+                    notifier.processed(location);
+                    buildQueue.finished(location);
+                }
             }
+
         } catch (CoreException e)
         {
             TapestryCore.log(e);
@@ -139,31 +126,49 @@ public class FullBuild extends Build
      */
     protected List findAllTapestryArtifacts() throws CoreException
     {
-        CoreLookup lookup = new CoreLookup();
-        Set names = knownValidServlets.keySet();
-        String[] servletNames = (String[]) names.toArray(new String[names.size()]);
-        lookup.configure(tapestryBuilder.tapestryProject, servletNames);
-        lookup.findAll(new ArtifactCollector());
         ArrayList found = new ArrayList();
-        //    findAllArtifactsInProjectProper(found);
-        //    findAllArtifactsInBinaryClasspath(found);
+        findAllArtifactsInWebContext(found);
+        findAllArtifactsInClasspath(found);
         return found;
     }
 
     /**
      * Method findAllArtifactsInBinaryClasspath.
      */
-    private void findAllArtifactsInBinaryClasspath(ArrayList found)
-    {}
+    private void findAllArtifactsInClasspath(final ArrayList found)
+    {
+        CoreLookup lookup = new CoreLookup();
+        try
+        {
+            lookup.configure(tapestryBuilder.tapestryProject);
+            lookup.findAll(new ArtifactCollector()
+            {
+                public void accept(IStorage storage, Object parent)
+                {
+                    IResourceWorkspaceLocation location =
+                        new ClasspathResourceWorkspaceLocation((IPackageFragment) parent, storage);
+                    found.add(location);
+                    if (TapestryBuilder.DEBUG)
+                    {
+                        System.out.println(location);
+                    }
+                }
+            });
+        } catch (CoreException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Method findAllArtifactsInProjectProper.
      */
-    private void findAllArtifactsInProjectProper(ArrayList found)
+    private void findAllArtifactsInWebContext(ArrayList found)
     {
         try
         {
-            tapestryBuilder.getProject().accept(new BuilderResourceVisitor(this, found), IResource.DEPTH_INFINITE, false);
+            tapestryBuilder.getProject().accept(new BuilderContextVisitor(this, found), IResource.DEPTH_INFINITE, false);
         } catch (CoreException e)
         {
             TapestryCore.log(e);
@@ -173,25 +178,17 @@ public class FullBuild extends Build
     public void cleanUp()
     {}
 
-    protected int getTotalWaitingCount()
-    {
-        return applicationQueue.getWaitingCount()
-            + libraryQueue.getWaitingCount()
-            + pageQueue.getWaitingCount()
-            + componentQueue.getWaitingCount()
-            + htmlQueue.getWaitingCount()
-            + scriptQueue.getWaitingCount();
-    }
-
     protected void findDeclaredApplications()
     {
-        if (tapestryBuilder.webXML != null && tapestryBuilder.webXML.exists())
+
+        IFile webXML = tapestryBuilder.contextRoot.getFile("web.xml");
+        if (webXML != null && webXML.exists())
         {
             // TODO need to pull any IProblems out and make them into Markers!
             Node wxmlElement = null;
             try
             {
-                wxmlElement = parseToNode(tapestryBuilder.webXML);
+                wxmlElement = parseToNode(webXML);
             } catch (IOException e1)
             {
                 // TODO Auto-generated catch block
@@ -210,7 +207,7 @@ public class FullBuild extends Build
             {
                 WebXMLScanner wscanner = new WebXMLScanner(this);
                 servletInfos = wscanner.getServletInformation(wxmlElement);
-                Markers.addTapestryProblemMarkersToResource(tapestryBuilder.webXML, wscanner.getProblems());
+                Markers.addTapestryProblemMarkersToResource(webXML, wscanner.getProblems());
             } catch (ScannerException e)
             {
                 TapestryCore.log(e);
@@ -231,7 +228,7 @@ public class FullBuild extends Build
             {
                 Markers.addTapestryProblemMarkerToResource(
                     tapestryBuilder.getProject(),
-                    "Ignoring applications: " + definedWebRoot + " does not exist",
+                    TapestryCore.getString(TapestryBuilder.MISSING_CONTEXT, definedWebRoot),
                     IMarker.SEVERITY_WARNING,
                     0,
                     0,
@@ -241,7 +238,7 @@ public class FullBuild extends Build
 
     }
 
-    private final class ArtifactCollector implements ILookupRequestor
+    private abstract class ArtifactCollector implements ILookupRequestor
     {
         public boolean isCancelled()
         {
@@ -258,13 +255,7 @@ public class FullBuild extends Build
         {
             System.out.println(storage);
         }
-        /**
-         * @see com.iw.plugins.spindle.core.processing.ILookupRequestor#markBadLocation(IStorage, Object, ILookupRequestor, String)
-         */
-        public void markBadLocation(IStorage s, Object parent, ILookupRequestor requestor, String message)
-        {
-            System.err.println(s + " " + message);
-        }
+
     }
 
     public class ServletInfo

@@ -29,11 +29,7 @@ import org.eclipse.core.resources.IStorage;
 
 public interface ILookupRequestor
 {
-
     public boolean isCancelled();
 
     public void accept(IStorage storage, Object parent);
-
-    public void markBadLocation(IStorage s, Object parent, ILookupRequestor requestor, String message);
-
 }

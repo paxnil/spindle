@@ -36,7 +36,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -69,17 +68,20 @@ public class CoreLookup
      *  Accept flag for specifying HTML files
      */
     public int ACCEPT_HTML = 0x00000008;
-
+    /**
+     *  Accept flag for specifying page files
+     */
     public int ACCEPT_PAGES = 0x00000010;
-
+    /**
+     *  Accept flag for specifying script files
+     */
     public int ACCEPT_SCRIPT = 0x00000020;
-
+    /**
+     *  Accept flag for specifying any tapestry files
+     */
     public int ACCEPT_ANY = 0x00000100;
 
     protected IPackageFragmentRoot[] packageFragmentRoots = null;
-    protected IFolder applicationRoot = null;
-    protected IFolder servletContextRoot = null;
-    protected IFolder[] applicationContextRoots = null;
 
     protected HashMap packageFragments;
 
@@ -93,12 +95,11 @@ public class CoreLookup
     public CoreLookup()
     {}
 
-    public void configure(TapestryProject project, String[] knownServletNames) throws CoreException
+    public void configure(TapestryProject project) throws CoreException
     {
         this.tproject = project;
         this.jproject = project.getJavaProject();
         configureClasspath();
-        configureTapestry(knownServletNames);
         initialized = true;
     }
 
@@ -131,48 +132,6 @@ public class CoreLookup
         {
             throw new TapestryModelException(null);
         }
-    }
-
-    protected void configureTapestry(String[] knownServletNames) throws TapestryModelException
-    {
-        applicationRoot = tproject.getAppRootFolder();
-        if (applicationRoot != null && applicationRoot.exists())
-        {
-            IPath rootPath = applicationRoot.getFullPath();
-            if (tproject.isOnOutputPath(rootPath) || tproject.isOnOutputPath(rootPath))
-            {
-                applicationRoot = null;
-                throw new TapestryModelException(null);
-            }
-        }
-        servletContextRoot = tproject.getWebContextFolder();
-        if (servletContextRoot != null && servletContextRoot.exists())
-        {
-            IPath contextRootPath = servletContextRoot.getFullPath();
-            if (tproject.isOnOutputPath(contextRootPath) || tproject.isOnOutputPath(contextRootPath))
-            {
-                servletContextRoot = null;
-                throw new TapestryModelException(null);
-            }
-            ArrayList servletFolders = new ArrayList();
-            for (int i = 0; i < knownServletNames.length; i++)
-            {
-                if (knownServletNames[i] == null || "".equals(knownServletNames[i].trim()))
-                {
-                    throw new TapestryModelException(null);
-                }
-                IFolder servletFolder = servletContextRoot.getFolder(knownServletNames[i]);
-                if (servletFolder.exists())
-                {
-                    servletFolders.add(servletFolder);
-                }
-
-            }
-
-            applicationContextRoots = (IFolder[]) servletFolders.toArray(new IFolder[servletFolders.size()]);
-
-        }
-
     }
 
     private IPackageFragment[] getPackageFragmentsInRoots(IPackageFragmentRoot[] roots, IJavaProject project)
@@ -215,31 +174,6 @@ public class CoreLookup
     public void findAll(ILookupRequestor requestor)
     {
         findAllInClasspath(requestor, ACCEPT_ANY);
-        findAllInFolders(requestor);
-    }
-
-    public void findAllInFolders(ILookupRequestor requestor)
-    {
-        if (applicationRoot != null)
-        {
-            seekInFolder(applicationRoot, requestor, ACCEPT_HTML, false);
-        }
-        if (servletContextRoot != null)
-        {
-            seekInFolder(
-                servletContextRoot,
-                requestor,
-                ACCEPT_APPLICATIONS | ACCEPT_COMPONENTS | ACCEPT_PAGES | ACCEPT_HTML,
-                false);
-        }
-        for (int i = 0; i < applicationContextRoots.length; i++)
-        {
-            seekInFolder(
-                applicationContextRoots[i],
-                requestor,
-                ACCEPT_APPLICATIONS | ACCEPT_COMPONENTS | ACCEPT_PAGES | ACCEPT_HTML,
-                true);
-        }
     }
 
     public void findAllInClasspath(ILookupRequestor requestor, int flags)
@@ -461,42 +395,29 @@ public class CoreLookup
         }
         if ("jwc".equals(extension) && (acceptFlags & ACCEPT_COMPONENTS) == 0)
         {
-            markBadLocation(s, parent, requestor);
             return false;
         }
         if ("application".equals(extension) && (acceptFlags & ACCEPT_APPLICATIONS) == 0)
         {
-            markBadLocation(s, parent, requestor);
             return false;
         }
         if ("html".equals(extension) && (acceptFlags & ACCEPT_HTML) == 0)
         {
-            markBadLocation(s, parent, requestor);
             return false;
         }
         if ("library".equals(extension) && (acceptFlags & ACCEPT_LIBRARIES) == 0)
         {
-            markBadLocation(s, parent, requestor);
             return false;
         }
         if ("page".equals(extension) && (acceptFlags & ACCEPT_PAGES) == 0)
         {
-            markBadLocation(s, parent, requestor);
             return false;
         }
         if ("script".equals(extension) && (acceptFlags & ACCEPT_SCRIPT) == 0)
         {
-            markBadLocation(s, parent, requestor);
             return false;
         }
         return true;
-    }
-
-    private void markBadLocation(IStorage s, Object parent, ILookupRequestor requestor)
-    {
-        String extension = s.getFullPath().getFileExtension();
-        String message = extension + "files not allowed here.";
-        requestor.markBadLocation(s, parent, requestor, message);
     }
 
 }

@@ -44,9 +44,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -81,23 +83,33 @@ public class CorePropertyPage extends PropertyPage
     private static final String IGNORE2 = "property-page-ignore2";
     private static final String APP_ROOT = "property-page-appRoot";
     private static final String CONTEXT_ROOT = "property-page-contextRoot";
+    private static final String LIBRARY_SPEC = "property-page-project-library-spec";
     private static final String BROWSE_BUTTON_LABEL = "browse-button-label";
     private static final String WRONG_PROJECT = "property-page-wrong-project";
     private static final String OUTPUT_FOLDER_ERROR = "property-page-output-folder";
     private static final String SOURCE_PATH_ERROR = "property-page-source-path";
+    private static final String APP_TYPE = "property-page-project-type-application";
+    private static final int APP = 0;
+    ;
+    private static final String LIB_TYPE = "property-page-project-type-library";
+    private static final int LIB = 1;
 
     private static final String APP_ROOT_PROPERTY = TapestryCore.PLUGIN_ID + ".app-root";
     private static final String CONTEXT_ROOT_PROPERTY = TapestryCore.PLUGIN_ID + ".context-root";
+    private static final String LIBRARY_SPEC_PROPERTY = TapestryCore.PLUGIN_ID + ".library-spec";
 
     private static final int TEXT_FIELD_WIDTH = 30;
 
     private Text ownerText;
 
     private Button isTapestryProjectCheck;
-    private Button isLibraryProjectRadio;
-    private Button isApplicationProjectRadio;
+    private Combo projectTypeCombo;
+    private Label contextRootLabel;
     private Text webContextRoot;
-    private Text appRoot;
+    private Button browseContextRoot;
+    private Label librarySpecLabel;
+    private Text librarySpec;
+    private Button browseLibrarySpecification;
 
     private ISelectionValidator chooseValidator = new ISelectionValidator()
     {
@@ -189,7 +201,7 @@ public class CorePropertyPage extends PropertyPage
         Composite composite = createDefaultComposite(parent);
 
         GridLayout layout = new GridLayout();
-        layout.numColumns = 1;
+        layout.numColumns = 2;
         composite.setLayout(layout);
         composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
@@ -197,6 +209,18 @@ public class CorePropertyPage extends PropertyPage
         isTapestryProjectCheck.setText(TapestryCore.getString(IS_TAPESTRY_PROJECT));
         isTapestryProjectCheck.setEnabled(true);
 
+        isTapestryProjectCheck.addSelectionListener(new SelectionListener()
+        {
+            public void widgetSelected(SelectionEvent e)
+            {
+                checkEnabled();
+            }
+
+            public void widgetDefaultSelected(SelectionEvent e)
+            {
+                //do nothing
+            }
+        });
         try
         {
             isTapestryProjectCheck.setSelection(getJavaProject().getProject().hasNature(TapestryCore.NATURE_ID));
@@ -204,7 +228,44 @@ public class CorePropertyPage extends PropertyPage
         {
             TapestryCore.log(ex.getMessage());
         }
+        projectTypeCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        projectTypeCombo.setItems(new String[] { TapestryCore.getString(APP_TYPE), TapestryCore.getString(LIB_TYPE)});
+        projectTypeCombo.select(getProjectType());
+        projectTypeCombo.setEnabled(isTapestryProjectCheck.getSelection());
+        projectTypeCombo.addSelectionListener(new SelectionListener()
+        {
+            public void widgetSelected(SelectionEvent e)
+            {
+                checkEnabled();
+            }
 
+            public void widgetDefaultSelected(SelectionEvent e)
+            {
+                // do nothing
+            }
+        });
+    }
+
+    private void checkEnabled()
+    {
+        if (browseLibrarySpecification != null)
+        {
+            boolean canEnable = isTapestryProjectCheck.getSelection();
+
+            projectTypeCombo.setEnabled(canEnable);
+
+            boolean appSelected = projectTypeCombo.getSelectionIndex() == APP;
+            boolean libSelected = projectTypeCombo.getSelectionIndex() == LIB;
+            boolean showApp = appSelected && canEnable;
+            boolean showLib = libSelected && canEnable;
+
+            contextRootLabel.setEnabled(showApp);
+            webContextRoot.setEnabled(showApp);
+            browseContextRoot.setEnabled(showApp);
+            librarySpecLabel.setEnabled(showLib);
+            librarySpec.setEnabled(showLib);
+            browseLibrarySpecification.setEnabled(showLib);
+        }
     }
 
     private void addSeparator(Composite parent)
@@ -216,7 +277,7 @@ public class CorePropertyPage extends PropertyPage
         separator.setLayoutData(gridData);
     }
 
-    private void addSecondSection(Composite parent)
+    private void addApplicationSection(Composite parent)
     {
         Composite composite = createDefaultComposite(parent);
 
@@ -225,10 +286,7 @@ public class CorePropertyPage extends PropertyPage
         composite.setLayout(layout);
         composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        Label description = new Label(composite, SWT.NULL | SWT.WRAP);
-        description.setText(TapestryCore.getString(IGNORE1));
-        description = new Label(composite, SWT.NULL);
-        description.setText(TapestryCore.getString(IGNORE2));
+        boolean isEnabled = isTapestryProjectCheck.getSelection() && projectTypeCombo.getSelectionIndex() == APP;
 
         Composite fieldGroup = new Composite(composite, SWT.NONE);
         layout = new GridLayout();
@@ -236,51 +294,22 @@ public class CorePropertyPage extends PropertyPage
         fieldGroup.setLayout(layout);
         fieldGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        Label appRootLabel = new Label(fieldGroup, SWT.NONE);
-        appRootLabel.setText(TapestryCore.getString(APP_ROOT));
-        appRootLabel.setEnabled(true);
-
-        appRoot = new Text(fieldGroup, SWT.BORDER);
-        appRoot.setEditable(false);
-        appRoot.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-        GridData data = new GridData(GridData.FILL_HORIZONTAL);
-        data.widthHint = convertWidthInCharsToPixels(TEXT_FIELD_WIDTH);
-        appRoot.setLayoutData(data);
-        appRoot.setText(this.getAppRootLocation());
-        appRoot.setEnabled(true);
-
-        Button browseButton = new Button(fieldGroup, SWT.PUSH);
-        browseButton.setText(TapestryCore.getString(BROWSE_BUTTON_LABEL));
-        browseButton.addSelectionListener(new SelectionAdapter()
-        {
-            public void widgetSelected(SelectionEvent evt)
-            {
-                String newValue = chooseFolder();
-                if (newValue != null)
-                {
-                    appRoot.setText(newValue);
-                }
-            }
-        });
-
-        browseButton.setEnabled(true);
-
-        Label contextRootLabel = new Label(fieldGroup, SWT.NONE);
+        contextRootLabel = new Label(fieldGroup, SWT.NONE);
         contextRootLabel.setText(TapestryCore.getString(CONTEXT_ROOT));
         contextRootLabel.setEnabled(true);
 
         webContextRoot = new Text(fieldGroup, SWT.BORDER);
         webContextRoot.setEditable(false);
         webContextRoot.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-        data = new GridData(GridData.FILL_HORIZONTAL);
+        GridData data = new GridData(GridData.FILL_HORIZONTAL);
         data.widthHint = convertWidthInCharsToPixels(TEXT_FIELD_WIDTH);
         webContextRoot.setLayoutData(data);
         webContextRoot.setText(this.getContextRootLocation());
-        webContextRoot.setEnabled(true);
+        webContextRoot.setEnabled(isEnabled);
 
-        browseButton = new Button(fieldGroup, SWT.PUSH);
-        browseButton.setText(TapestryCore.getString(BROWSE_BUTTON_LABEL));
-        browseButton.addSelectionListener(new SelectionAdapter()
+        browseContextRoot = new Button(fieldGroup, SWT.PUSH);
+        browseContextRoot.setText(TapestryCore.getString(BROWSE_BUTTON_LABEL));
+        browseContextRoot.addSelectionListener(new SelectionAdapter()
         {
             public void widgetSelected(SelectionEvent evt)
             {
@@ -292,8 +321,55 @@ public class CorePropertyPage extends PropertyPage
             }
         });
 
-        browseButton.setEnabled(true);
+        browseContextRoot.setEnabled(isEnabled);
 
+    }
+
+    private void addLibrarySection(Composite parent)
+    {
+        Composite composite = createDefaultComposite(parent);
+
+        GridLayout layout = new GridLayout();
+        layout.numColumns = 1;
+        composite.setLayout(layout);
+        composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+        boolean isEnabled = isTapestryProjectCheck.getSelection() && projectTypeCombo.getSelectionIndex() == LIB;
+
+        Composite fieldGroup = new Composite(composite, SWT.NONE);
+        layout = new GridLayout();
+        layout.numColumns = 3;
+        fieldGroup.setLayout(layout);
+        fieldGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+        librarySpecLabel = new Label(fieldGroup, SWT.NONE);
+        librarySpecLabel.setText(TapestryCore.getString(LIBRARY_SPEC));
+        librarySpecLabel.setEnabled(true);
+
+        librarySpec = new Text(fieldGroup, SWT.BORDER);
+        librarySpec.setEditable(false);
+        librarySpec.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+        GridData data = new GridData(GridData.FILL_HORIZONTAL);
+        data.widthHint = convertWidthInCharsToPixels(TEXT_FIELD_WIDTH);
+        librarySpec.setLayoutData(data);
+        librarySpec.setText(this.getLibrarySpecLocation());
+        librarySpec.setEnabled(isEnabled);
+
+        browseLibrarySpecification = new Button(fieldGroup, SWT.PUSH);
+        browseLibrarySpecification.setText(TapestryCore.getString(BROWSE_BUTTON_LABEL));
+        browseLibrarySpecification.addSelectionListener(new SelectionAdapter()
+        {
+            public void widgetSelected(SelectionEvent evt)
+            {
+                //                String newValue = chooseFolder();
+                //                if (newValue != null)
+                //                {
+                //                    webContextRoot.setText(newValue);
+                //                }
+            }
+        });
+
+        browseLibrarySpecification.setEnabled(isEnabled);
     }
 
     protected String chooseFolder()
@@ -312,28 +388,28 @@ public class CorePropertyPage extends PropertyPage
         return null;
     }
 
-    protected String getAppRootLocation()
-    {
-        String result = "/";
-        try
-        {
-            QualifiedName key = new QualifiedName("", APP_ROOT_PROPERTY);
-            TapestryProject prj = getTapestryProject();
-            if (prj != null)
-            {
-                result = prj.getAppRoot();
-                if (result == null || "".equals(result.trim()))
-                {
-                    result = getPropertyFromWorkspace(key);
-                }
-            } else
-            {
-                result = getPropertyFromWorkspace(key);
-            }
-        } catch (CoreException ex)
-        {}
-        return result;
-    }
+    //    protected String getAppRootLocation()
+    //    {
+    //        String result = "/";
+    //        try
+    //        {
+    //            QualifiedName key = new QualifiedName("", APP_ROOT_PROPERTY);
+    //            TapestryProject prj = getTapestryProject();
+    //            if (prj != null)
+    //            {
+    //                result = prj.getAppRoot();
+    //                if (result == null || "".equals(result.trim()))
+    //                {
+    //                    result = getPropertyFromWorkspace(key);
+    //                }
+    //            } else
+    //            {
+    //                result = getPropertyFromWorkspace(key);
+    //            }
+    //        } catch (CoreException ex)
+    //        {}
+    //        return result;
+    //    }
 
     private String getPropertyFromWorkspace(QualifiedName key) throws CoreException
     {
@@ -345,9 +421,43 @@ public class CorePropertyPage extends PropertyPage
         return result;
     }
 
+    protected int getProjectType()
+    {
+        int result = APP;
+        try
+        {
+            QualifiedName key = new QualifiedName("", CONTEXT_ROOT_PROPERTY);
+            TapestryProject prj = getTapestryProject();
+            String type = null;
+            if (prj != null)
+            {
+                type = prj.getProjectType();
+
+                if (type == null || "".equals(type.trim()))
+                {
+                    type = getPropertyFromWorkspace(key);
+                }
+            } else
+            {
+                type = getPropertyFromWorkspace(key);
+            }
+            if (TapestryProject.APPLICATION_PROJECT.equals(type))
+            {
+                result = APP;
+            } else if (TapestryProject.LIBRARY_PROJECT.equals(type))
+            {
+                result = LIB;
+            }
+
+        } catch (CoreException ex)
+        {}
+        return result;
+
+    }
+
     protected String getContextRootLocation()
     {
-        String result = "/WEB-INF";
+        String result = "/context";
         try
         {
             QualifiedName key = new QualifiedName("", CONTEXT_ROOT_PROPERTY);
@@ -355,6 +465,30 @@ public class CorePropertyPage extends PropertyPage
             if (prj != null)
             {
                 result = prj.getWebContext();
+                if (result == null || "".equals(result.trim()))
+                {
+                    result = getPropertyFromWorkspace(key);
+                }
+            } else
+            {
+                result = getPropertyFromWorkspace(key);
+            }
+
+        } catch (CoreException ex)
+        {}
+        return result;
+    }
+
+    protected String getLibrarySpecLocation()
+    {
+        String result = "";
+        try
+        {
+            QualifiedName key = new QualifiedName("", LIBRARY_SPEC_PROPERTY);
+            TapestryProject prj = getTapestryProject();
+            if (prj != null)
+            {
+                result = prj.getLibrarySpecPath();
                 if (result == null || "".equals(result.trim()))
                 {
                     result = getPropertyFromWorkspace(key);
@@ -383,7 +517,9 @@ public class CorePropertyPage extends PropertyPage
 
         addFirstSection(composite);
         addSeparator(composite);
-        addSecondSection(composite);
+        addApplicationSection(composite);
+        addSeparator(composite);
+        addLibrarySection(composite);
         return composite;
     }
 
@@ -395,36 +531,42 @@ public class CorePropertyPage extends PropertyPage
 
     protected void performDefaults()
     {
-        // Populate the owner text field with the default value
-        appRoot.setText("/");
-        webContextRoot.setText("/WEB-INF");
+        webContextRoot.setText("/context");
     }
 
     public boolean performOk()
     {
-        // store the value in the owner text field
+        // store the values as properties
         try
         {
-            ((IResource) getElement()).setPersistentProperty(new QualifiedName("", APP_ROOT_PROPERTY), appRoot.getText());
-
             ((IResource) getElement()).setPersistentProperty(
                 new QualifiedName("", CONTEXT_ROOT_PROPERTY),
                 webContextRoot.getText());
+            ((IResource) getElement()).setPersistentProperty(new QualifiedName("", LIBRARY_SPEC_PROPERTY), librarySpec.getText());
         } catch (CoreException e)
         {}
+        // now configure/deconfigure the project
         try
         {
             if (isTapestryProjectCheck.getSelection())
             {
                 TapestryProject.addTapestryNature(getJavaProject());
                 TapestryProject prj = getTapestryProject();
-                String projectName = prj.getProject().getName();
-                String temp = appRoot.getText();
-                createFolderIfRequired(projectName + temp);
-                prj.setAppRoot(temp);
-                temp = webContextRoot.getText();
-                createFolderIfRequired(projectName + temp);
-                prj.setWebContext(temp);
+                switch (projectTypeCombo.getSelectionIndex())
+                {
+                    case APP :
+                        prj.setProjectType(TapestryProject.APPLICATION_PROJECT);
+                        String projectName = prj.getProject().getName();
+                        String temp = webContextRoot.getText();
+                        createFolderIfRequired(projectName + temp);
+                        prj.setWebContext(temp);
+                        break;
+
+                    case LIB :
+                        prj.setProjectType(TapestryProject.LIBRARY_PROJECT);
+                        prj.setLibrarySpecPath(librarySpec.getText());
+                        break;
+                }
                 prj.saveProperties();
             } else
             {
@@ -434,7 +576,6 @@ public class CorePropertyPage extends PropertyPage
         {
             TapestryCore.log(ex.getMessage());
         }
-
         return true;
     }
 

@@ -171,7 +171,9 @@ public class Markers
         try
         {
             if (resource != null && resource.exists())
+            {
                 resource.deleteMarkers(Markers.TAPESTRY_MARKER_TAG, false, IResource.DEPTH_INFINITE);
+            }
         } catch (CoreException e)
         {} // assume there were no problems
     }
@@ -184,8 +186,11 @@ public class Markers
     {
         try
         {
-            if (iProject != null && iProject.exists())
-                iProject.deleteMarkers(Markers.TAPESTRY_MARKER_TAG, false, IResource.DEPTH_ZERO);
+            if (iProject != null && iProject.exists()) {
+            
+                iProject.deleteMarkers(Markers.TAPESTRY_MARKER_TAG, false, IResource.DEPTH_INFINITE);
+                iProject.deleteMarkers(Markers.TAPESTRY_BUILBROKEN_TAG, false, IResource.DEPTH_ZERO);
+            }
         } catch (CoreException e)
         {} // assume there were no problems
     }

@@ -61,8 +61,19 @@ import com.iw.plugins.spindle.core.util.Markers;
 public class TapestryBuilder extends IncrementalProjectBuilder
 {
 
+    public static final String STRING_KEY = "builder-";
+    public static final String APPLICATION_SERVLET_NAME = STRING_KEY + "applicationServletClassname";
+    public static final String STARTING = STRING_KEY + "full-build-starting";
+    public static final String TAPESTRY_JAR_MISSING = STRING_KEY + "-tapestry-jar-missing";
+    public static final String LOCATING_ARTIFACTS = STRING_KEY + "-locating-artifacts";
+    public static final String MISSING_CONTEXT = STRING_KEY + "-missing-context";
+    public static final String NON_JAVA_PROJECTS = STRING_KEY + "-non-java-projects";
+    public static final String JAVA_BUILDER_FAILED = STRING_KEY + "-java-builder-failed";
+    public static final String ABORT_PREREQ_NOT_BUILT = STRING_KEY + "-abort-prereq-not-built";
+    public static final String ABORT_MISSING_WEB_XML = STRING_KEY + "-abort-missing-web-xml";
+
     public static final String APPLICATION_EXTENSION = "application";
-    public static final String COMPONENT_EXTENSION = "component";
+    public static final String COMPONENT_EXTENSION = "jwc";
     public static final String PAGE_EXTENSION = "page";
     public static final String TEMPLATE_EXTENSION = "html";
     public static final String SCRIPT_EXTENSION = "script";
@@ -70,15 +81,13 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         new String[] { APPLICATION_EXTENSION, COMPONENT_EXTENSION, PAGE_EXTENSION, TEMPLATE_EXTENSION, SCRIPT_EXTENSION };
     public static final String APP_SPEC_PATH_PARAM = "org.apache.tapestry.application-specification";
 
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
 
     IProject currentProject;
     IJavaProject javaProject;
     TapestryProject tapestryProject;
     IWorkspaceRoot workspaceRoot;
-    IFolder applicationRoot;
     IFolder contextRoot;
-    IFile webXML;
 
     BuildNotifier notifier;
 
@@ -191,9 +200,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             cleanup();
         }
         IProject[] requiredProjects = getRequiredProjects(true);
-        if (true)
-            System.out.println("Finished build of " + currentProject.getName() //$NON-NLS-1$
-            +" @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
+        if (DEBUG)
+            System.out.println("Finished build of " + currentProject.getName() + " @ " + new Date(System.currentTimeMillis()));
         return requiredProjects;
     }
 
@@ -275,7 +283,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         Markers.removeProblemsForProject(getProject());
         if (javaProject == null)
         {
-            Markers.addBuildBrokenProblemMarkerToResource(getProject(), "Tapestry build won't occur in non-java projects");
+            Markers.addBuildBrokenProblemMarkerToResource(getProject(), TapestryCore.getString(NON_JAVA_PROJECTS));
             return false;
         }
 
@@ -287,13 +295,13 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 jprojectMarkers = resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_ZERO);
             if (jprojectMarkers.length > 0)
             {
-                Markers.addBuildBrokenProblemMarkerToResource(
-                    getProject(),
-                    "Tapestry build did not occur because the java builder failed");
+                Markers.addBuildBrokenProblemMarkerToResource(getProject(), TapestryCore.getString(JAVA_BUILDER_FAILED));
                 return false;
             }
         } catch (CoreException e)
-        {} // assume there are no problems
+        {
+            // assume there are no Java builder problems 
+        }
 
         // make sure all prereq projects have valid build states... 
         IProject[] requiredProjects = getRequiredProjects(false);
@@ -303,18 +311,42 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             if (getLastState(p) == null)
             {
                 if (DEBUG)
-                    System.out.println("Aborted build because prereq project " + p.getName() + " was not built");
-
+                    System.out.println(TapestryCore.getString(ABORT_PREREQ_NOT_BUILT, p.getName()));
                 Markers.removeProblemsFor(currentProject); // make this the only problem for this project
                 Markers.addBuildBrokenProblemMarkerToResource(
                     currentProject,
-                    "tapestry build did not run becuase prereq project " + p.getName() + " was not built");
+                    TapestryCore.getString(ABORT_PREREQ_NOT_BUILT, p.getName()));
 
                 return false;
             }
         }
 
-        return tapestryProject != null;
+        String projectType = tapestryProject.getProjectType();
+
+        if (TapestryProject.APPLICATION_PROJECT.equals(projectType))
+        {
+            if (contextRoot == null || !contextRoot.exists())
+            {
+                Markers.removeProblemsFor(currentProject); // make this the only problem for this project
+                Markers.addBuildBrokenProblemMarkerToResource(currentProject, TapestryCore.getString(MISSING_CONTEXT));
+                return false;
+            }
+
+            IFile webXML = contextRoot.getFile("web.xml");
+            if (contextRoot == null || !contextRoot.exists())
+            {
+                Markers.removeProblemsFor(currentProject); // make this the only problem for this project
+                Markers.addBuildBrokenProblemMarkerToResource(
+                    currentProject,
+                    TapestryCore.getString(ABORT_MISSING_WEB_XML, contextRoot.getFullPath()));
+                return false;
+            }
+        } else if (TapestryProject.APPLICATION_PROJECT.equals(projectType))
+        {
+            // TODO handle library projects!
+        }
+
+        return true;
     }
 
     /**
@@ -333,12 +365,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         try
         {
             tapestryProject = (TapestryProject) currentProject.getNature(TapestryCore.NATURE_ID);
-            applicationRoot = tapestryProject.getAppRootFolder();
             contextRoot = tapestryProject.getWebContextFolder();
-            if (contextRoot != null)
-            {
-                webXML = (IFile) contextRoot.getFile("web.xml");
-            }
+
         } catch (CoreException e)
         {
             TapestryCore.log(e);

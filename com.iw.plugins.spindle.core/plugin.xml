@@ -28,7 +28,7 @@
             objectClass="org.eclipse.core.resources.IProject"
             adaptable="true"
             name="Tapestry"
-            class="com.iw.plugins.spindle.core.properties.CorePropertyPage"
+            class="com.iw.plugins.spindle.core.ui.properties.CorePropertyPage"
             id="CorePropertyPage">
          <filter
                name="nature"
@@ -55,7 +55,7 @@
          point="org.eclipse.core.resources.builders">
       <builder>
          <run
-               class="com.iw.plugins.spindle.core.TapestryBuilder">
+               class="com.iw.plugins.spindle.core.builder.TapestryBuilder">
          </run>
       </builder>
    </extension>

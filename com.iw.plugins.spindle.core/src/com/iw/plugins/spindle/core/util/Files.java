@@ -107,18 +107,6 @@ public class Files
         fw.close();
     }
 
-    //  public static boolean dirContainsFiles(File dir, String extension, boolean recursive) {
-    //    File[] files = dir.listFiles();
-    //    for (int i = 0; i < files.length; i++) {
-    //      if (files[i].isFile() && files[i].getName().endsWith(extension))
-    //        return true;
-    //      if (recursive && files[i].isDirectory())
-    //        return dirContainsFiles(files[i], extension, recursive);
-    //    }
-    //
-    //    return false;
-    //  }
-
     public static String readPropertyInXMLFile(IFile file, String property) throws IOException
     {
         String content = readTextFile(file);

@@ -30,7 +30,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import com.iw.plugins.spindle.core.resources.IResourceDescriptor;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 /**
  * Notifies users of the progress of a Build
  * 
@@ -63,7 +63,7 @@ public class BuildNotifier
         aboutToProcess(resource.getName());
     }
 
-    public void aboutToProcess(IResourceDescriptor descriptor)
+    public void aboutToProcess(IResourceWorkspaceLocation descriptor)
     {
         aboutToProcess(descriptor.getName());
     }
@@ -78,7 +78,7 @@ public class BuildNotifier
         processed(resource.getName());
     }
 
-    public void processed(IResourceDescriptor descriptor)
+    public void processed(IResourceWorkspaceLocation descriptor)
     {
         processed(descriptor.getName());
     }

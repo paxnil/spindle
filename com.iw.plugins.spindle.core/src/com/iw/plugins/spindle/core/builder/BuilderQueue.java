@@ -26,6 +26,7 @@ package com.iw.plugins.spindle.core.builder;
  * ***** END LICENSE BLOCK ***** */
 
 import java.util.ArrayList;
+import java.util.Collection;
 /**
  * Helper class used by the Full Build
  * 
@@ -66,6 +67,10 @@ public class BuilderQueue
             add(elements[i]);
         }
     }
+    
+    public void addAll(Collection elements) {
+        toBeProcessed.addAll(elements);
+    }
 
     public void clear()
     {
@@ -87,6 +92,14 @@ public class BuilderQueue
     public boolean isWaiting(Object element)
     {
         return toBeProcessed.contains(element);
+    }
+    
+    public Object peekWaiting() {
+        return toBeProcessed.get(0);
+    }
+    
+    public boolean hasWaiting() {
+        return !toBeProcessed.isEmpty();
     }
 
     public String toString()

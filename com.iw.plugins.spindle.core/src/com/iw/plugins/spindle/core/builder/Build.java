@@ -75,7 +75,7 @@ public abstract class Build
         Node result = null;
         try
         {
-            result = parser.parse(tapestryBuilder.webXML);
+            result = parser.parse(file);
         
         } catch (CoreException e)
         {
@@ -103,9 +103,9 @@ public abstract class Build
         }
     }
 
-    protected void markError(int severity, ISourceLocation location, String message)
+    protected void markError(IResource resource, int severity, ISourceLocation location, String message)
     {
-        Markers.addTapestryProblemMarkerToResource(((IResource) tapestryBuilder.webXML), message, severity, location);
+        Markers.addTapestryProblemMarkerToResource(resource, message, severity, location);
     }
 
     protected IStorage findInPackage(IPackageFragment pack, String filename)
