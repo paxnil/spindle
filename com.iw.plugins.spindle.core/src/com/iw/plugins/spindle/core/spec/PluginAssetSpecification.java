@@ -26,8 +26,17 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import org.apache.tapestry.engine.ITemplateSource;
+import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.AssetType;
 import org.apache.tapestry.spec.IAssetSpecification;
+import org.apache.tapestry.spec.IComponentSpecification;
+
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Spindle's implementation of IAssetSpecification
@@ -49,7 +58,6 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
         super(BaseSpecification.ASSET_SPEC);
     }
 
-   
     public PluginAssetSpecification(AssetType type, String path)
     {
         this();
@@ -91,4 +99,42 @@ public class PluginAssetSpecification extends BasePropertyHolder implements IAss
         firePropertyChange("type", null, fPath);
     }
 
+    public void validate(Object parent, IScannerValidator validator)
+    {
+
+        IComponentSpecification component = (IComponentSpecification) parent;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        String name = getIdentifier();
+
+        try
+        {
+            if (component.getAsset(name) != this)
+            {
+                validator.addProblem(
+                    IProblem.ERROR,
+                    sourceInfo.getAttributeSourceLocation("name"),
+                    TapestryCore.getTapestryString(
+                        "ComponentSpecification.duplicate-asset",
+                        component.getSpecificationLocation().getName(),
+                        name));
+            }
+
+            if (!name.equals(ITemplateSource.TEMPLATE_ASSET_NAME))
+                validator.validatePattern(
+                    name,
+                    SpecificationParser.ASSET_NAME_PATTERN,
+                    "SpecificationParser.invalid-asset-name",
+                    IProblem.ERROR,
+                    sourceInfo.getAttributeSourceLocation("name"));
+
+            validator.validateAsset(component, this, sourceInfo);
+
+        } catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+    }
 }

@@ -26,13 +26,12 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.tapestry.bean.IBeanInitializer;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.IBeanSpecification;
-
-import com.iw.plugins.spindle.core.util.PropertyFiringList;
 
 /**
  *  Spindle aware concrete implementation of IBeanSpecification
@@ -91,7 +90,7 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
     public void addInitializer(IBeanInitializer initializer)
     {
         if (fInitializers == null)
-            fInitializers = new PropertyFiringList(this, "initializers");
+            fInitializers = new ArrayList();
 
         fInitializers.add(initializer);
     }
@@ -146,7 +145,5 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
         fLifecycle = lifecycle;
         firePropertyChange("lifecycle", old, this.fLifecycle);
     }
-
- 
 
 }
