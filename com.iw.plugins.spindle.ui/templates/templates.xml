@@ -44,6 +44,8 @@
     
     <description>${description}</description>
     
+    <page name="Home" specification-path="${homePage}"/>
+    
     ${cursor}        
     
 </application>]]>

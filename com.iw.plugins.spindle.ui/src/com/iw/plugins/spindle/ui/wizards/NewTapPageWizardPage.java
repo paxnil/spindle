@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.text.templates.Template;
 
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.ui.wizards.factories.PageFactory;
@@ -42,7 +43,7 @@ public class NewTapPageWizardPage extends NewTapComponentWizardPage
     super(root, pageName);
   }
 
-  protected void createComponentResource(
+  protected void createSpecificationResource(
       IProgressMonitor monitor,
       final IType specClass,
       IFolder libLocation) throws CoreException, InterruptedException
@@ -51,14 +52,23 @@ public class NewTapPageWizardPage extends NewTapComponentWizardPage
     IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) useNamespace
         .getSpecificationLocation();
 
+    PageFactory factory = new PageFactory();
+    Template template = factory.getAllTemplates()[0];
+
     if (libLocation != null)
     {
-      fComponentFile = PageFactory.createPage(libLocation, fComponentNameDialogField
-          .getTextValue(), specClass, new SubProgressMonitor(monitor, 1));
+      fComponentFile = factory.createPage(
+          libLocation,
+          template,
+          fComponentNameDialogField.getTextValue(),
+          specClass.getFullyQualifiedName(),
+          new SubProgressMonitor(monitor, 1));
     } else
     {
-      fComponentFile = PageFactory.createPage(location, fComponentNameDialogField
-          .getTextValue(), specClass, new SubProgressMonitor(monitor, 1));
+      fComponentFile = factory.createPage(location, template, fComponentNameDialogField
+          .getTextValue(), specClass.getFullyQualifiedName(), new SubProgressMonitor(
+          monitor,
+          1));
     }
   }
 

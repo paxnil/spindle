@@ -25,54 +25,32 @@ package com.iw.plugins.spindle.ui.wizards.factories;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.StringWriter;
 
+import org.apache.tapestry.parse.SpecificationParser;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.templates.Template;
-import org.eclipse.jface.text.templates.TemplateContext;
-import org.eclipse.jface.text.templates.TemplateException;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jface.preference.IPreferenceStore;
 
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.resources.ContextResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
+import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.util.IndentingWriter;
+import com.iw.plugins.spindle.core.util.XMLUtil;
 
-public class ComponentFactory extends TemplateFactory
+public class ComponentFactory
 {
-
-  static private final String COMPONENT_CLASS = "componentClass";
-  static private final String DESCRIPTION = "description";
-
-  public ComponentFactory()
-  {
-    super(XMLFileContextType.COMPONENT_FILE_CONTEXT_TYPE);
-    addDefaultResolvers();
-    addXMLFileResolvers();
-    addResolver(new XMLFileContextType.AllowBody());
-    addResolver(new XMLFileContextType.AllowInformal());
-  }
-
-  public String getComponentContent(Template template, String qualifiedComponentClass) throws BadLocationException,
-      TemplateException
-  {
-    TemplateContext context = createTemplateContext();
-    context.setVariable(COMPONENT_CLASS, qualifiedComponentClass);
-    context.setVariable(DESCRIPTION, "add a description");
-
-    return getGeneratedContent(template, context, true);
-
-  }
-
-  public IFile createComponent(
+  public static IFile createComponent(
       IContainer container,
-      Template template,
       String componentName,
-      String qualifiedComponentClass,
+      IType specClass,
       IProgressMonitor monitor) throws CoreException, InterruptedException
   {
     monitor.beginTask(UIPlugin.getString(
@@ -83,30 +61,19 @@ public class ComponentFactory extends TemplateFactory
 
     monitor.worked(1);
 
-    InputStream contents;
-    try
-    {
-      contents = new ByteArrayInputStream(getComponentContent(
-          template,
-          qualifiedComponentClass).getBytes());
-    } catch (Exception e)
-    {
-      UIPlugin.log(e);
-      contents = new ByteArrayInputStream("\n\n\n\nan error occured. Check the log"
-          .getBytes());
-    }
+    String qualifiedSpecClassname = specClass.getFullyQualifiedName();
+    InputStream contents = new ByteArrayInputStream(getComponentContent(
+        qualifiedSpecClassname).getBytes());
     monitor.worked(1);
     newFile.create(contents, false, new SubProgressMonitor(monitor, 1));
     monitor.worked(1);
     monitor.done();
     return newFile;
   }
-  
-  public  IFile createComponent(
+  public static IFile createComponent(
       IResourceWorkspaceLocation namespaceLocation,
-      Template template,
       String componentName,
-      String specClass,
+      IType specClass,
       IProgressMonitor monitor) throws CoreException, InterruptedException
   {
     IContainer container = null;
@@ -120,7 +87,23 @@ public class ComponentFactory extends TemplateFactory
       IFile namespaceFile = (IFile) namespaceLocation.getStorage();
       container = (IContainer) namespaceFile.getParent();
     }
-    return createComponent(container, template, componentName, specClass, monitor);
+    return createComponent(container, componentName, specClass, monitor);
   }
 
+  static private String getComponentContent(String qualifiedSpecClassname)
+  {
+    PluginComponentSpecification newSpec = new PluginComponentSpecification();
+    newSpec.setPublicId(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID);
+    newSpec.setAllowBody(true);
+    newSpec.setAllowInformalParameters(true);
+    newSpec.setComponentClassName(qualifiedSpecClassname);
+    IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_TAB_CHAR);
+    int tabSize = store.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
+    StringWriter swriter = new StringWriter();
+    IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
+    XMLUtil.writeComponentSpecification(iwriter, newSpec, 0);
+    iwriter.flush();
+    return swriter.toString();
+  }
 }

@@ -23,8 +23,6 @@
  */
 package com.iw.plugins.spindle.ui.wizards;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.tapestry.INamespace;
@@ -47,6 +45,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -67,6 +66,7 @@ import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.wizards.factories.ComponentFactory;
+import com.iw.plugins.spindle.ui.wizards.factories.TapestryTemplateFactory;
 import com.iw.plugins.spindle.ui.wizards.fields.ComponentNameField;
 import com.iw.plugins.spindle.ui.wizards.fields.NamespaceDialogField;
 import com.iw.plugins.spindle.ui.wizards.fields.TapestryProjectDialogField;
@@ -259,7 +259,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
             monitor = new NullProgressMonitor();
           }
 
-          createComponentResource(monitor, useClass, useLibLocation);
+          createSpecificationResource(monitor, useClass, useLibLocation);
 
           if (fGenerateHTML.getCheckBoxValue())
           {
@@ -274,29 +274,20 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     };
   }
 
-  //    public void createComponentResource(IProgressMonitor monitor, IType
-  // specClass)
-  //        throws InterruptedException, CoreException
-  //    {
-  //        fComponentFile =
-  //                                ComponentFactory.createComponent(
-  //                                    location,
-  //                                    fComponentNameDialogField.getTextValue(),
-  //                                    useClass,
-  //                                    new SubProgressMonitor(monitor, 1));
-  //   TODO I can't recall why this is here! }
-
-  protected void createComponentResource(
+  protected void createSpecificationResource(
       IProgressMonitor monitor,
       final IType specClass,
       IFolder libLocation) throws CoreException, InterruptedException
   {
+    ComponentFactory factory = new ComponentFactory();
+    Template template = factory.getAllTemplates()[0];
     if (libLocation != null)
     {
-      fComponentFile = ComponentFactory.createComponent(
+      fComponentFile = factory.createComponent(
           libLocation,
+          template,
           fComponentNameDialogField.getTextValue(),
-          specClass,
+          specClass.getFullyQualifiedName(),
           new SubProgressMonitor(monitor, 1));
     } else
     {
@@ -308,18 +299,20 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
       {
         ContextResourceWorkspaceLocation ctxLoc = (ContextResourceWorkspaceLocation) location;
         IContainer container = (IContainer) ctxLoc.getResource();
-        fComponentFile = ComponentFactory.createComponent(
+        fComponentFile = factory.createComponent(
             container,
+            template,
             fComponentNameDialogField.getTextValue(),
-            specClass,
+            specClass.getFullyQualifiedName(),
             new SubProgressMonitor(monitor, 1));
       } else
       {
 
-        fComponentFile = ComponentFactory.createComponent(
+        fComponentFile = factory.createComponent(
             location,
+            template,
             fComponentNameDialogField.getTextValue(),
-            specClass,
+            specClass.getFullyQualifiedName(),
             new SubProgressMonitor(monitor, 1));
       }
     }
@@ -535,13 +528,13 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   public void createHTMLResource(IProgressMonitor monitor, IFolder libLocation) throws InterruptedException,
       CoreException
   {
-    monitor.beginTask("", 4);
 
-    String fileName = fComponentNameDialogField.getTextValue() + ".html";
     IResourceWorkspaceLocation namespaceLocation = (IResourceWorkspaceLocation) fNamespaceDialogField
         .getSelectedNamespace()
         .getSpecificationLocation();
+    
     IFile namespaceFile = (IFile) namespaceLocation.getStorage();
+    
     IContainer container = null;
     if (libLocation != null)
     {
@@ -554,30 +547,41 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     {
       container = (IContainer) namespaceFile.getParent();
     }
-    IFile newFile = container.getFile(new Path("/" + fileName));
 
-    if (newFile.exists())
-      return;
+    TapestryTemplateFactory factory = new TapestryTemplateFactory();
+    Template template = factory.getAllTemplates()[0];
 
-    monitor.worked(1);
+    fGeneratedHTMLFile = factory.createTapestryTemplate(
+        container,
+        template,
+        fComponentNameDialogField.getTextValue(),
+        "html",
+        monitor);
 
-    IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
-    String source = pstore.getString(P_HTML_TO_GENERATE);
-    String comment = UIPlugin.getString("TAPESTRY.xmlComment");
-    if (source == null)
-    {
-      source = comment + UIPlugin.getString("TAPESTRY.genHTMLSource");
-    }
-    if (!source.trim().startsWith(comment))
-    {
-      source = comment + source;
-    }
-    InputStream contents = new ByteArrayInputStream(source.getBytes());
-    monitor.worked(1);
-    newFile.create(contents, false, new SubProgressMonitor(monitor, 1));
-    monitor.worked(1);
-    monitor.done();
-    fGeneratedHTMLFile = newFile;
+    //    fGeneratedHTMLFile = container.getFile(new Path("/" + fileName));
+
+    //    if (newFile.exists())
+    //      return;
+    //
+    //    monitor.worked(1);
+    //
+    //    IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
+    //    String source = pstore.getString(P_HTML_TO_GENERATE);
+    //    String comment = UIPlugin.getString("TAPESTRY.xmlComment");
+    //    if (source == null)
+    //    {
+    //      source = comment + UIPlugin.getString("TAPESTRY.genHTMLSource");
+    //    }
+    //    if (!source.trim().startsWith(comment))
+    //    {
+    //      source = comment + source;
+    //    }
+    //    InputStream contents = new ByteArrayInputStream(source.getBytes());
+    //    monitor.worked(1);
+    //    newFile.create(contents, false, new SubProgressMonitor(monitor, 1));
+    //    monitor.worked(1);
+    //    monitor.done();
+    //    fGeneratedHTMLFile = newFile;
   }
 
   public IFile getGeneratedTemplate()
@@ -626,7 +630,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
     /**
      * @see IDialogFieldChangedListener#dialogFieldStatusChanged(IStatus,
-     *      DialogField)
+     *              DialogField)
      */
     public void dialogFieldStatusChanged(IStatus status, DialogField field)
     {

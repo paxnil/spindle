@@ -1,5 +1,5 @@
 /*******************************************************************************
- * ***** BEGIN LICENSE BLOCK Version: MPL 1.1
+ * BEGIN LICENSE BLOCK Version: MPL 1.1
  * 
  * The contents of this file are subject to the Mozilla Public License Version
  * 1.1 (the "License"); you may not use this file except in compliance with the
@@ -34,51 +34,36 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.templates.Template;
-import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateException;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.ContextResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 
-public class ComponentFactory extends TemplateFactory
+public class TapestryTemplateFactory extends TemplateFactory
 {
 
-  static private final String COMPONENT_CLASS = "componentClass";
-  static private final String DESCRIPTION = "description";
-
-  public ComponentFactory()
+  public TapestryTemplateFactory()
   {
-    super(XMLFileContextType.COMPONENT_FILE_CONTEXT_TYPE);
+    super(XMLFileContextType.TEMPLATE_FILE_CONTEXT_TYPE);
     addDefaultResolvers();
-    addXMLFileResolvers();
-    addResolver(new XMLFileContextType.AllowBody());
-    addResolver(new XMLFileContextType.AllowInformal());
   }
 
-  public String getComponentContent(Template template, String qualifiedComponentClass) throws BadLocationException,
+  public String getContent(Template template) throws BadLocationException,
       TemplateException
   {
-    TemplateContext context = createTemplateContext();
-    context.setVariable(COMPONENT_CLASS, qualifiedComponentClass);
-    context.setVariable(DESCRIPTION, "add a description");
-
-    return getGeneratedContent(template, context, true);
-
+    return getGeneratedContent(template, createTemplateContext(), true);
   }
 
-  public IFile createComponent(
+  public IFile createTapestryTemplate(
       IContainer container,
       Template template,
-      String componentName,
-      String qualifiedComponentClass,
+      String templateName,
+      String fileExtension,
       IProgressMonitor monitor) throws CoreException, InterruptedException
   {
-    monitor.beginTask(UIPlugin.getString(
-        "ApplicationFactory.operationdesc",
-        componentName), 3);
-    String fileName = componentName + ".jwc";
+    monitor.beginTask(UIPlugin
+        .getString("ApplicationFactory.operationdesc", templateName), 3);
+    String fileName = templateName + "." + fileExtension;
     IFile newFile = container.getFile(new Path("/" + fileName));
 
     monitor.worked(1);
@@ -86,9 +71,7 @@ public class ComponentFactory extends TemplateFactory
     InputStream contents;
     try
     {
-      contents = new ByteArrayInputStream(getComponentContent(
-          template,
-          qualifiedComponentClass).getBytes());
+      contents = new ByteArrayInputStream(getContent(template).getBytes());
     } catch (Exception e)
     {
       UIPlugin.log(e);
@@ -101,26 +84,4 @@ public class ComponentFactory extends TemplateFactory
     monitor.done();
     return newFile;
   }
-  
-  public  IFile createComponent(
-      IResourceWorkspaceLocation namespaceLocation,
-      Template template,
-      String componentName,
-      String specClass,
-      IProgressMonitor monitor) throws CoreException, InterruptedException
-  {
-    IContainer container = null;
-    if (namespaceLocation.getName().length() == 0
-        && namespaceLocation.isWorkspaceResource())
-    {
-      //we might be using a stand-in application - in the workspace
-      container = ((ContextResourceWorkspaceLocation) namespaceLocation).getContainer();
-    } else
-    {
-      IFile namespaceFile = (IFile) namespaceLocation.getStorage();
-      container = (IContainer) namespaceFile.getParent();
-    }
-    return createComponent(container, template, componentName, specClass, monitor);
-  }
-
 }
