@@ -31,5 +31,5 @@ public interface ISourceLocation
     public int getLineNumber();
     public int getCharStart();
     public int getCharEnd();
-
+    public boolean contains(int cursorPosition);
 }

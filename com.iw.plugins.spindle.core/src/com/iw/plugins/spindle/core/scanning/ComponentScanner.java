@@ -79,7 +79,7 @@ public class ComponentScanner extends SpecificationScanner
         {
             return null;
         }
-        return specificationFactory.createComponentSpecification();
+        return fSpecificationFactory.createComponentSpecification();
     }
 
     /* (non-Javadoc)
@@ -137,7 +137,7 @@ public class ComponentScanner extends SpecificationScanner
                     getAttributeSourceLocation(node, "name"));
 
             String value = getAttribute(node, attributeName);
-            IAssetSpecification asset = specificationFactory.createAssetSpecification();
+            IAssetSpecification asset = fSpecificationFactory.createAssetSpecification();
 
             asset.setType(type);
             asset.setPath(value);
@@ -188,7 +188,7 @@ public class ComponentScanner extends SpecificationScanner
 
             BeanLifecycle lifecycle = (BeanLifecycle) SpecificationScanner.conversionMap.get(lifecycleString);
 
-            IBeanSpecification bspec = specificationFactory.createBeanSpecification();
+            IBeanSpecification bspec = fSpecificationFactory.createBeanSpecification();
 
             bspec.setClassName(className);
             bspec.setLifecycle(lifecycle);
@@ -262,7 +262,7 @@ public class ComponentScanner extends SpecificationScanner
             value = getNextDummyString();
         }
 
-        IBindingSpecification binding = specificationFactory.createBindingSpecification();
+        IBindingSpecification binding = fSpecificationFactory.createBindingSpecification();
         binding.setType(type);
         binding.setValue(value);
 
@@ -320,7 +320,7 @@ public class ComponentScanner extends SpecificationScanner
                 if (copyOf != null)
                 {
 
-                    c = specificationFactory.createContainedComponent();
+                    c = fSpecificationFactory.createContainedComponent();
                     IContainedComponent parent = specification.getComponent(copyOf);
                     if (parent == null)
                     {
@@ -359,14 +359,14 @@ public class ComponentScanner extends SpecificationScanner
                             IProblem.ERROR,
                             getAttributeSourceLocation(node, "type"));
 
-                        c = specificationFactory.createContainedComponent();
+                        c = fSpecificationFactory.createContainedComponent();
                         c.setType(type);
                     }
                 }
 
                 if (c == null)
                 {
-                    c = specificationFactory.createContainedComponent();
+                    c = fSpecificationFactory.createContainedComponent();
                     c.setType(getNextDummyString());
                 }
 
@@ -562,7 +562,7 @@ public class ComponentScanner extends SpecificationScanner
 
         validateExpression(script, IProblem.ERROR, getBestGuessSourceLocation(node, true));
 
-        IListenerBindingSpecification binding = specificationFactory.createListenerBindingSpecification();
+        IListenerBindingSpecification binding = fSpecificationFactory.createListenerBindingSpecification();
 
         component.setBinding(name, binding);
         binding.setType(BindingType.LISTENER);
@@ -593,7 +593,7 @@ public class ComponentScanner extends SpecificationScanner
         } else
         {
 
-            IParameterSpecification param = specificationFactory.createParameterSpecification();
+            IParameterSpecification param = fSpecificationFactory.createParameterSpecification();
 
             ISourceLocationInfo location = getSourceLocationInfo(node);
             location.setResourceLocation(specification.getSpecificationLocation());
@@ -685,7 +685,7 @@ public class ComponentScanner extends SpecificationScanner
                     name));
         } else
         {
-            IPropertySpecification ps = specificationFactory.createPropertySpecification();
+            IPropertySpecification ps = fSpecificationFactory.createPropertySpecification();
 
             ISourceLocationInfo location = getSourceLocationInfo(node);
             location.setResourceLocation(spec.getSpecificationLocation());
@@ -795,7 +795,7 @@ public class ComponentScanner extends SpecificationScanner
         }
 
         PluginExpressionBeanInitializer iz =
-            (PluginExpressionBeanInitializer) specificationFactory.createExpressionBeanInitializer();
+            (PluginExpressionBeanInitializer) fSpecificationFactory.createExpressionBeanInitializer();
         iz.setPropertyName(name);
         iz.setExpression(expression);
 
@@ -819,7 +819,7 @@ public class ComponentScanner extends SpecificationScanner
         String key = getAttribute(node, "key");
 
         PluginMessageBeanInitializer iz =
-            (PluginMessageBeanInitializer) specificationFactory.createMessageBeanInitializer();
+            (PluginMessageBeanInitializer) fSpecificationFactory.createMessageBeanInitializer();
         iz.setPropertyName(name);
         iz.setKey(key);
 

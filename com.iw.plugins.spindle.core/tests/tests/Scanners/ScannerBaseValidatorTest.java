@@ -73,7 +73,6 @@ public class ScannerBaseValidatorTest extends TestCase
         dummyLocation = new DummySourceLocation();
     }
 
-    
     class TestProblem extends DefaultProblem
     {
 
@@ -98,7 +97,11 @@ public class ScannerBaseValidatorTest extends TestCase
         BaseValidator validator = new BaseValidator();
         try
         {
-            validator.validatePattern(valid, pattern, "SpecificationParser.framework-library-id-is-reserved", IProblem.ERROR);
+            validator.validatePattern(
+                valid,
+                pattern,
+                "SpecificationParser.framework-library-id-is-reserved",
+                IProblem.ERROR);
         } catch (ScannerException e)
         {
             fail("failed on valid");
@@ -117,7 +120,11 @@ public class ScannerBaseValidatorTest extends TestCase
         }
         try
         {
-            validator.validatePattern(invalid, pattern, "SpecificationParser.framework-library-id-is-reserved", IProblem.ERROR);
+            validator.validatePattern(
+                invalid,
+                pattern,
+                "SpecificationParser.framework-library-id-is-reserved",
+                IProblem.ERROR);
             fail("passed an invalid string");
         } catch (ScannerException e)
         {
@@ -139,7 +146,11 @@ public class ScannerBaseValidatorTest extends TestCase
         String dummy = validator.getNextDummyString();
         try
         {
-            validator.validatePattern(dummy, pattern, "SpecificationParser.framework-library-id-is-reserved", IProblem.ERROR);
+            validator.validatePattern(
+                dummy,
+                pattern,
+                "SpecificationParser.framework-library-id-is-reserved",
+                IProblem.ERROR);
         } catch (ScannerException e)
         {
             fail("failed on dummy, should have ignored it");
@@ -163,7 +174,11 @@ public class ScannerBaseValidatorTest extends TestCase
 
         try
         {
-            validator.validatePattern(valid, pattern, "SpecificationParser.framework-library-id-is-reserved", IProblem.ERROR);
+            validator.validatePattern(
+                valid,
+                pattern,
+                "SpecificationParser.framework-library-id-is-reserved",
+                IProblem.ERROR);
         } catch (ScannerException e)
         {
             fail("Should not have thrown exception");
@@ -187,7 +202,11 @@ public class ScannerBaseValidatorTest extends TestCase
         collector.clear();
         try
         {
-            validator.validatePattern(invalid, pattern, "SpecificationParser.framework-library-id-is-reserved", IProblem.ERROR);
+            validator.validatePattern(
+                invalid,
+                pattern,
+                "SpecificationParser.framework-library-id-is-reserved",
+                IProblem.ERROR);
         } catch (ScannerException e)
         {
             fail("Should not have thrown exception");
@@ -211,7 +230,11 @@ public class ScannerBaseValidatorTest extends TestCase
         String dummy2 = validator.getNextDummyString();
         try
         {
-            validator.validatePattern(dummy2, pattern, "SpecificationParser.framework-library-id-is-reserved", IProblem.ERROR);
+            validator.validatePattern(
+                dummy2,
+                pattern,
+                "SpecificationParser.framework-library-id-is-reserved",
+                IProblem.ERROR);
         } catch (ScannerException e)
         {
             fail("Should not have thrown exception");
@@ -518,7 +541,7 @@ public class ScannerBaseValidatorTest extends TestCase
         }
         assertTrue(collector.isEmpty());
     }
-    
+
     public void testValidateContainedComponent()
     {
         BaseValidator validator = new BaseValidator();
@@ -547,7 +570,7 @@ public class ScannerBaseValidatorTest extends TestCase
             fail("no exception expected");
         }
         assertTrue(collector.isEmpty());
-    }    
+    }
 
     class TestCollector implements IProblemCollector
     {
@@ -613,6 +636,13 @@ public class ScannerBaseValidatorTest extends TestCase
             return 0;
         }
 
-    }
+        /* (non-Javadoc)
+         * @see com.iw.plugins.spindle.core.parser.ISourceLocation#contains(int)
+         */
+        public boolean contains(int cursorPosition)
+        {
 
+            return cursorPosition == 0;
+        }
+    }
 }

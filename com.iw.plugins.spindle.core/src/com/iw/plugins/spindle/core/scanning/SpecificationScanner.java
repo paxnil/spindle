@@ -148,7 +148,7 @@ public abstract class SpecificationScanner extends AbstractScanner
         }
     }
 
-    protected SpecFactory specificationFactory;
+    protected SpecFactory fSpecificationFactory;
 
     /**
      *  We can share a single map for all the XML attribute to object conversions,
@@ -278,7 +278,7 @@ public abstract class SpecificationScanner extends AbstractScanner
 
     public void setFactory(SpecFactory factory)
     {
-        specificationFactory = factory;
+        fSpecificationFactory = factory;
     }
 
     /**
@@ -290,7 +290,7 @@ public abstract class SpecificationScanner extends AbstractScanner
 
     public SpecFactory getFactory()
     {
-        return specificationFactory;
+        return fSpecificationFactory;
     }
 
     /** 

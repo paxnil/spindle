@@ -29,7 +29,10 @@ package com.iw.plugins.spindle.core.scanning;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternMatcher;
@@ -37,21 +40,32 @@ import org.apache.tapestry.ApplicationRuntimeException;
 import org.apache.tapestry.ILocation;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceLocation;
+import org.apache.tapestry.parse.AttributeType;
 import org.apache.tapestry.parse.ITemplateParserDelegate;
+import org.apache.tapestry.parse.TemplateAttribute;
 import org.apache.tapestry.parse.TemplateParseException;
+import org.apache.tapestry.parse.TemplateParser;
 import org.apache.tapestry.parse.TemplateToken;
 import org.apache.tapestry.parse.TokenType;
+import org.apache.tapestry.spec.BindingType;
+import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
+import org.apache.tapestry.spec.IParameterSpecification;
+import org.apache.tapestry.spec.SpecFactory;
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+import com.iw.plugins.spindle.core.parser.IProblem;
+import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.template.CoreOpenToken;
 import com.iw.plugins.spindle.core.parser.template.CoreTemplateParser;
-
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.spec.PluginBindingSpecfication;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.Files;
 
@@ -80,6 +94,8 @@ public class TemplateScanner extends AbstractScanner
     private ICoreNamespace fNamespace;
     private CoreTemplateParser fParser;
     private ITemplateParserDelegate fParserDelegate = new ScannerDelegate();
+    private List fSeenIds = new ArrayList();
+    private SpecFactory fSpecificationFactory;
 
     public void scanTemplate(
         PluginComponentSpecification spec,
@@ -93,6 +109,7 @@ public class TemplateScanner extends AbstractScanner
         fNamespace = (ICoreNamespace) spec.getNamespace();
         fParser = new CoreTemplateParser();
         fParser.setProblemCollector(this);
+        fSeenIds.clear();
 
         scan(templateLocation, validator);
 
@@ -145,7 +162,584 @@ public class TemplateScanner extends AbstractScanner
     }
 
     private void scanOpenToken(CoreOpenToken token, List result) throws ScannerException
-    {}
+    {
+        String id = token.getId();
+        PluginContainedComponent component = null;
+        String componentType = token.getComponentType();
+
+        if (componentType == null)
+            component = (PluginContainedComponent) fComponentSpec.getComponent(id);
+        else
+            component = createImplicitComponent(token, id, componentType);
+
+        // Make sure the template contains each component only once.
+
+        if (fSeenIds.contains(id))
+        {
+            addProblem(
+                IProblem.ERROR,
+                getJWCIDLocation(token.getAttributesMap()),
+                TapestryCore.getTapestryString(
+                    "BaseComponent.multiple-component-references",
+                    fComponentSpec.getSpecificationLocation().getName(),
+                    id));
+            return;
+        }
+        fSeenIds.add(id);
+
+        if (componentType == null)
+        {
+            validateExplicitComponent(component, token);
+        } else
+        {
+            validateImplicitComponent(component, token);
+        }
+    }
+
+    private PluginContainedComponent createImplicitComponent(CoreOpenToken token, String id, String componentType)
+    {
+        PluginContainedComponent result = (PluginContainedComponent) fSpecificationFactory.createContainedComponent();
+        result.setIdentifier(id);
+        result.setType(componentType);
+
+        Map attributesMap = token.getAttributesMap();
+        for (Iterator iter = attributesMap.keySet().iterator(); iter.hasNext();)
+        {
+            String attrName = (String) iter.next();
+            TemplateAttribute attr = (TemplateAttribute) attributesMap.get(attrName);
+            result.setBinding(attrName, createImplicitBinding(attr));
+        }
+
+        return result;
+
+    }
+
+    private void validateImplicitComponent(PluginContainedComponent contained, CoreOpenToken token)
+        throws ScannerException
+    {
+        IComponentSpecification containedSpecification = resolveComponentType(token.getComponentType());
+
+        Collection bindingNames = contained.getBindingNames();
+        List required = findRequiredParameterNames(containedSpecification);
+        required.removeAll(bindingNames);
+        if (!required.isEmpty())
+        {
+            addProblem(
+                IProblem.ERROR,
+                token.getEventInfo().getStartTagLocation(),
+                TapestryCore.getTapestryString(
+                    "PageLoader.required-parameter-not-bound",
+                    required.toString(),
+                    containedSpecification.getSpecificationLocation().getName()));
+        }
+
+        Iterator i = bindingNames.iterator();
+
+        while (i.hasNext())
+        {
+            String name = (String) i.next();
+            PluginBindingSpecfication bspec = (PluginBindingSpecfication) contained.getBinding(name);
+            ISourceLocation location = getAttributeLocation(name, token.getAttributesMap());
+
+            BindingType bindingType = bspec.getType();
+
+            if (bindingType == BindingType.DYNAMIC)
+            {
+                validateImplicitExpressionBinding(bspec, containedSpecification, location);
+                continue;
+            }
+
+            if (bindingType == BindingType.STRING)
+            {
+                validateImplicitStringBinding(bspec, containedSpecification, location);
+                continue;
+            }
+
+            if (bindingType == BindingType.STATIC)
+                validateImplicitStaticBinding(bspec, containedSpecification, location);
+
+            //            //
+            //            //            ISourceLocationInfo bindingSrcInfo = token.getEventInfo()
+            //            //            ISourceLocation location =
+            //            //                name.startsWith(getDummyStringPrefix())
+            //            //                    ? bindingSrcInfo.getStartTagSourceLocation()
+            //            //                    : bindingSrcInfo.getAttributeSourceLocation("name");
+            //            //
+            //            //            name = name.startsWith(getDummyStringPrefix()) ? "'name not found'" : name;
+            //            //
+            //            //            // If not allowing informal parameters, check that each binding matches
+            //            //            // a formal parameter.
+            //            //
+            //            //            if (formalOnly && !isFormal)
+            //            //            {
+            //            //                reportProblem(
+            //            //                    IProblem.ERROR,
+            //            //                    location,
+            //            //                    TapestryCore.getTapestryString("PageLoader.formal-parameters-only", containedName, name));
+            //            //
+            //            //                continue;
+            //            //            }
+            //            //
+            //            //            // If an informal parameter that conflicts with a reserved name, then
+            //            //            // skip it.
+            //
+            //            if (!isFormal && containedSpecification.isReservedParameterName(name))
+            //            {
+            //
+            //                if (bindingType == BindingType.DYNAMIC)
+            //                {
+            //                    addProblem(
+            //                        IProblem.ERROR,
+            //                        location,
+            //                        TapestryCore.getTapestryString(
+            //                            "BaseComponent.template-expression-for-reserved-parameter",
+            //                            new Object[] {
+            //                                fComponentSpec.getSpecificationLocation().getName(),
+            //                                name,
+            //                                containedSpecification.getSpecificationLocation().getName(),
+            //                                name }));
+            //                } else
+            //                {
+            //                    addProblem(
+            //                        IProblem.WARNING,
+            //                        location,
+            //                        "ignoring binding '" + name + "'. trying to bind to reserved parameter.");
+            //                }
+            //                continue;
+            //            }
+
+        }
+
+    }
+
+    private void validateImplicitExpressionBinding(
+        PluginBindingSpecfication bspec,
+        IComponentSpecification containedSpecification,
+        ISourceLocation location)
+        throws ScannerException
+    {
+
+        if (!validateExpression(bspec.getValue(), IProblem.ERROR, location))
+            return;
+
+        IParameterSpecification parameter = containedSpecification.getParameter(bspec.getIdentifier());
+
+        boolean isFormal = parameter != null;
+
+        boolean isAllowInformalParameters = containedSpecification.getAllowInformalParameters();
+
+        if (isFormal && !isAllowInformalParameters)
+        {
+
+            addProblem(
+                IProblem.ERROR,
+                location,
+                TapestryCore.getString(
+                    "PageLoader.formal-parameters-only",
+                    containedSpecification.getSpecificationLocation().getName(),
+                    bspec.getIdentifier()));
+        }
+
+    }
+
+    private void validateImplicitStringBinding(
+        PluginBindingSpecfication bspec,
+        IComponentSpecification containedSpecification,
+        ISourceLocation location)
+    {
+        validateImplicitStaticBinding(bspec, containedSpecification, location);
+    }
+
+    private void validateImplicitStaticBinding(
+        PluginBindingSpecfication bspec,
+        IComponentSpecification containedSpecification,
+        ISourceLocation location)
+    {
+        IParameterSpecification parameter = containedSpecification.getParameter(bspec.getIdentifier());
+
+        boolean isFormal = parameter != null;
+
+        boolean isAllowInformalParameters = containedSpecification.getAllowInformalParameters();
+
+        if (isFormal)
+        {
+            String pType = parameter.getType();
+            if (pType != null)
+            {
+                boolean allowed = "String".equalsIgnoreCase(pType) || "java.lang.String".equals(pType);
+                if (!allowed)
+                    addProblem(
+                        IProblem.WARNING,
+                        location,
+                        "may not be able to assign the value of '" + bspec.getIdentifier() + "' to type '" + pType);
+                //TODO internationalize
+            }
+
+        } else
+        {
+            if (!isAllowInformalParameters)
+                addProblem(
+                    IProblem.ERROR,
+                    location,
+                    TapestryCore.getString(
+                        "PageLoader.formal-parameters-only",
+                        containedSpecification.getSpecificationLocation().getName(),
+                        bspec.getIdentifier()));
+        }
+
+    }
+
+    private IComponentSpecification resolveComponentType(String type)
+    {
+        ICoreNamespace namespace = (ICoreNamespace) fComponentSpec.getNamespace();
+        ComponentSpecificationResolver resolver = namespace.getComponentResolver();
+        IComponentSpecification containedSpecification = resolver.resolve(type);
+        return containedSpecification;
+    }
+
+    private List findRequiredParameterNames(IComponentSpecification spec)
+    {
+        List result = new ArrayList();
+        for (Iterator iter = spec.getParameterNames().iterator(); iter.hasNext();)
+        {
+            String name = (String) iter.next();
+            IParameterSpecification pspec = spec.getParameter(name);
+            if (pspec.isRequired())
+                result.add(name);
+        }
+        return result;
+    }
+
+    private IBindingSpecification createImplicitBinding(TemplateAttribute attr)
+    {
+        PluginBindingSpecfication result =
+            (PluginBindingSpecfication) fSpecificationFactory.createBindingSpecification();
+        result.setValue(attr.getValue());
+        if (attr.getType() == AttributeType.OGNL_EXPRESSION)
+        {
+            result.setType(BindingType.DYNAMIC);
+        } else if (attr.getType() == AttributeType.LOCALIZATION_KEY)
+        {
+            result.setType(BindingType.STRING);
+        } else if (attr.getType() == AttributeType.LITERAL)
+        {
+            result.setType(BindingType.STATIC);
+        }
+        return result;
+    }
+
+    /**
+     *  check bindings based on attributes in the template.
+     * 
+     *  this is for explicit components only!
+     * 
+     **/
+
+    private void validateExplicitComponent(PluginContainedComponent component, CoreOpenToken token)
+        throws ScannerException
+    {
+        IComponentSpecification spec = resolveComponentType(component.getType());
+
+        Map attributes = token.getAttributesMap();
+
+        if (attributes == null)
+            return;
+
+        Iterator i = attributes.entrySet().iterator();
+
+        while (i.hasNext())
+        {
+            Map.Entry entry = (Map.Entry) i.next();
+
+            String name = (String) entry.getKey();
+            TemplateAttribute attribute = (TemplateAttribute) entry.getValue();
+            AttributeType type = attribute.getType();
+            ISourceLocation location = getAttributeLocation(name, token.getAttributesMap());
+
+            if (type == AttributeType.OGNL_EXPRESSION)
+            {
+                validateExplicitExpressionBinding(component, spec, name, attribute.getValue(), location);
+                continue;
+            }
+
+            if (type == AttributeType.LOCALIZATION_KEY)
+            {
+                validateExplicitStringBinding(component, spec, name, attribute.getValue(), location);
+                continue;
+            }
+
+            if (type == AttributeType.LITERAL)
+                validateExplicitStaticBinding(component, spec, name, attribute.getValue(), location);
+        }
+    }
+
+    /**
+     *  Check a template expression binding, look for errors related
+     *  to reserved and informal parameters.
+     *
+     *  <p>It is an error to specify expression 
+     *  bindings in both the specification
+     *  and the template.
+     * 
+     **/
+
+    private void validateExplicitExpressionBinding(
+        PluginContainedComponent component,
+        IComponentSpecification spec,
+        String name,
+        String expression,
+        ISourceLocation location)
+        throws ScannerException
+    {
+
+        if (!validateExpression(expression, IProblem.ERROR, location))
+            return;
+
+        // If matches a formal parameter name, allow it to be set
+        // unless there's already a binding.
+
+        boolean isFormal = (spec.getParameter(name) != null);
+
+        if (isFormal)
+        {
+            if (component.getBinding(name) != null)
+                addProblem(
+                    IProblem.ERROR,
+                    location,
+                    TapestryCore.getTapestryString(
+                        "BaseComponent.dupe-template-expression",
+                        name,
+                        spec.getSpecificationLocation().getName(),
+                        fComponentSpec.getSpecificationLocation().getName()));
+
+            //            throw new ApplicationRuntimeException(
+            //                Tapestry.format(
+            //                    "BaseComponent.dupe-template-expression",
+            //                    name,
+            //                    component.getExtendedId(),
+            //                    _loadComponent.getExtendedId()),
+            //                component,
+            //                location,
+            //                null);
+        } else
+        {
+            if (!spec.getAllowInformalParameters())
+                addProblem(
+                    IProblem.ERROR,
+                    location,
+                    TapestryCore.getTapestryString(
+                        "BaseComponent.template-expression-for-informal-parameter",
+                        name,
+                        spec.getSpecificationLocation().getName(),
+                        fComponentSpec.getSpecificationLocation().getName()));
+
+            //            throw new ApplicationRuntimeException(
+            //                Tapestry.format(
+            //                    "BaseComponent.template-expression-for-informal-parameter",
+            //                    name,
+            //                    component.getExtendedId(),
+            //                    _loadComponent.getExtendedId()),
+            //                component,
+            //                location,
+            //                null);
+
+            // If the name is reserved (matches a formal parameter
+            // or reserved name, caselessly), then skip it.
+
+            if (spec.isReservedParameterName(name))
+                addProblem(
+                    IProblem.ERROR,
+                    location,
+                    TapestryCore.getTapestryString(
+                        "BaseComponent.template-expression-for-reserved-parameter",
+                        name,
+                        spec.getSpecificationLocation().getName(),
+                        fComponentSpec.getSpecificationLocation().getName()));
+
+            //            throw new ApplicationRuntimeException(
+            //                Tapestry.format(
+            //                    "BaseComponent.template-expression-for-reserved-parameter",
+            //                    name,
+            //                    component.getExtendedId(),
+            //                    _loadComponent.getExtendedId()),
+            //                component,
+            //                location,
+            //                null);
+        }
+    }
+
+    /**
+     *  Check a string binding, look for errors related
+     *  to reserved and informal parameters.
+     **/
+
+    private void validateExplicitStringBinding(
+        PluginContainedComponent component,
+        IComponentSpecification spec,
+        String name,
+        String localizationKey,
+        ISourceLocation location)
+    {
+        // If matches a formal parameter name, allow it to be set
+        // unless there's already a binding.
+
+        boolean isFormal = (spec.getParameter(name) != null);
+
+        if (isFormal)
+        {
+            if (component.getBinding(name) != null)
+                addProblem(
+                    IProblem.ERROR,
+                    location,
+                    TapestryCore.getTapestryString(
+                        "BaseComponent.dupe-string",
+                        name,
+                        spec.getSpecificationLocation().getName(),
+                        fComponentSpec.getSpecificationLocation().getName()));
+
+            //                throw new ApplicationRuntimeException(
+            //                    Tapestry.format(
+            //                        "BaseComponent.dupe-string",
+            //                        name,
+            //                        component.getExtendedId(),
+            //                        _loadComponent.getExtendedId()),
+            //                    component,
+            //                    location,
+            //                    null);
+        } else
+        {
+            if (!spec.getAllowInformalParameters())
+            {
+
+                addProblem(
+                    IProblem.ERROR,
+                    location,
+                    TapestryCore.getTapestryString(
+                        "BaseComponent.template-expression-for-informal-parameter",
+                        name,
+                        spec.getSpecificationLocation().getName(),
+                        fComponentSpec.getSpecificationLocation().getName()));
+
+                return;
+            }
+
+            //                throw new ApplicationRuntimeException(
+            //                    Tapestry.format(
+            //                        "BaseComponent.template-expression-for-informal-parameter",
+            //                        name,
+            //                        component.getExtendedId(),
+            //                        _loadComponent.getExtendedId()),
+            //                    component,
+            //                    location,
+            //                    null);
+
+            // If the name is reserved (matches a formal parameter
+            // or reserved name, caselessly), then skip it.
+
+            if (spec.isReservedParameterName(name))
+                addProblem(
+                    IProblem.ERROR,
+                    location,
+                    TapestryCore.getTapestryString(
+                        "BaseComponent.template-expression-for-reserved-parameter",
+                        name,
+                        spec.getSpecificationLocation().getName(),
+                        fComponentSpec.getSpecificationLocation().getName()));
+
+            //                throw new ApplicationRuntimeException(
+            //                    Tapestry.format(
+            //                        "BaseComponent.template-expression-for-reserved-parameter",
+            //                        name,
+            //                        component.getExtendedId(),
+            //                        _loadComponent.getExtendedId()),
+            //                    component,
+            //                    location,
+            //                    null);
+        }
+
+    }
+
+    /**
+     *  Check a static binding, look for errors related
+     *  to reserved and informal parameters.
+     * 
+     *  <p>
+     *  Static bindings that conflict with bindings in the
+     *  specification are warned.
+     * 
+     *  //TODO figure this out.
+     *
+     **/
+
+    private void validateExplicitStaticBinding(
+        PluginContainedComponent component,
+        IComponentSpecification spec,
+        String name,
+        String staticValue,
+        ISourceLocation location)
+    {
+
+        IBindingSpecification existing = component.getBinding(name);
+
+        if (existing != null)
+            return;
+
+        // If matches a formal parameter name, allow it to be set
+        // unless there's already a binding.
+
+        boolean isFormal = (spec.getParameter(name) != null);
+
+        if (!isFormal)
+        {
+            // Skip informal parameters if the component doesn't allow them.
+
+            if (!spec.getAllowInformalParameters())
+                return;
+
+            // If the name is reserved (matches a formal parameter
+            // or reserved name, caselessly), then skip it.
+
+            if (spec.isReservedParameterName(name))
+                return;
+        }
+
+    }
+
+    private ISourceLocation getJWCIDLocation(Map attributesLocations)
+    {
+        return getAttributeLocation(TemplateParser.JWCID_ATTRIBUTE_NAME, attributesLocations);
+    }
+
+    private ISourceLocation getAttributeLocation(String key, Map attributesLocations)
+    {
+
+        ISourceLocation result;
+        result = (ISourceLocation) findCaselessly(key, attributesLocations);
+        if (result == null)
+            result = BaseValidator.DefaultSourceLocation;
+        return result;
+    }
+
+    private Object findCaselessly(String key, Map map)
+    {
+        Object result = map.get(key);
+
+        if (result != null)
+            return result;
+
+        Iterator i = map.entrySet().iterator();
+        while (i.hasNext())
+        {
+            Map.Entry entry = (Map.Entry) i.next();
+
+            String entryKey = (String) entry.getKey();
+
+            if (entryKey.equalsIgnoreCase(key))
+                return entry.getValue();
+        }
+
+        return null;
+    }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#beforeScan(java.lang.Object)
@@ -153,6 +747,28 @@ public class TemplateScanner extends AbstractScanner
     protected Object beforeScan(Object source) throws ScannerException
     {
         return new ArrayList();
+    }
+
+    /**
+     *  Sets the SpecFactory which instantiates Tapestry spec objects.
+     * 
+     **/
+
+    public void setFactory(SpecFactory factory)
+    {
+        fSpecificationFactory = factory;
+    }
+
+    /**
+     *  Returns the current SpecFactory which instantiates Tapestry spec objects.
+     * 
+     *  @since 1.0.9
+     * 
+     **/
+
+    public SpecFactory getFactory()
+    {
+        return fSpecificationFactory;
     }
 
     private class ScannerDelegate implements ITemplateParserDelegate

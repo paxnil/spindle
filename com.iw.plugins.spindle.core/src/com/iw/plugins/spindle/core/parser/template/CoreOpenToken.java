@@ -54,5 +54,9 @@ public class CoreOpenToken extends OpenToken
 
         fEventInfo = eventInfo;
     }
+    
+    public TagEventInfo getEventInfo() {
+        return fEventInfo;
+    }
 
 }

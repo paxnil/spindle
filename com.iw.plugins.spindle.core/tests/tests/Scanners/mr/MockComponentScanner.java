@@ -53,7 +53,7 @@ public class MockComponentScanner extends ComponentScanner
 
     public MockComponentScanner( SpecFactory factory, IScannerValidator aValidator) {
         super();
-        specificationFactory = factory;
+        fSpecificationFactory = factory;
         fValidator = aValidator;
         fValidator.setProblemCollector(this);        
     }

@@ -26,6 +26,7 @@
 
 package com.iw.plugins.spindle.core.parser.template;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -121,6 +122,7 @@ public class CoreTemplateParser extends TemplateParser
             } catch (Exception e)
             {
                 //ignore, problems already recorded
+                e.printStackTrace();
             }
 
             List tokens = getTokens();
@@ -139,9 +141,24 @@ public class CoreTemplateParser extends TemplateParser
         fProblemCollector = collector;
     }
 
-    private ISourceLocation getSourceLocation(int line, int cursor)
+    private ISourceLocation getSourceLocation(int line, int cursor, String message)
     {
-        return new SourceLocation(line - 1, cursor - 1);
+        if (message.startsWith("Tag")) {
+            return getJWCIDLocation();
+        }
+        ISourceLocation result = fEventHandler.getEventInfo().findLocation(cursor);
+        if (result == null)
+            result = new SourceLocation(line, cursor);
+        return result;
+    }
+
+    private ISourceLocation getJWCIDLocation()
+    {
+        Map attrMap = fEventHandler.getEventInfo().getAttributeMap();
+        ISourceLocation result = (ISourceLocation) findCaselessly(TemplateParser.JWCID_ATTRIBUTE_NAME, attrMap);
+        if (result == null)
+            result = fEventHandler.getEventInfo().getStartTagLocation();
+        return result;
     }
 
     /* (non-Javadoc)
@@ -151,10 +168,7 @@ public class CoreTemplateParser extends TemplateParser
         throws ApplicationRuntimeException
     {
         if (fProblemCollector != null)
-            fProblemCollector.addProblem(
-                IProblem.ERROR,
-                getSourceLocation(line - 1, cursor - 1),
-                exception.getMessage());
+            fProblemCollector.addProblem(IProblem.ERROR, getJWCIDLocation(), exception.getMessage());
         super.templateParseProblem(exception, line, cursor);
     }
 
@@ -164,8 +178,10 @@ public class CoreTemplateParser extends TemplateParser
     protected void templateParseProblem(String message, ILocation location, int line, int cursor)
         throws TemplateParseException
     {
-        if (fProblemCollector != null)
-            fProblemCollector.addProblem(IProblem.ERROR, getSourceLocation(line - 1, cursor - 1), message);
+        if (fProblemCollector != null) {
+            fProblemCollector.addProblem(IProblem.ERROR, getSourceLocation(line, cursor, message), message);
+        }
+            
         super.templateParseProblem(message, location, line, cursor);
     }
 
@@ -174,7 +190,7 @@ public class CoreTemplateParser extends TemplateParser
      */
     protected void attributeBeginEvent(String attributeName, int startLine, int cursorPosition)
     {
-        fEventHandler.attributeBegin(attributeName, startLine - 1, cursorPosition);
+        fEventHandler.attributeBegin(attributeName, startLine, cursorPosition);
     }
 
     /* (non-Javadoc)
@@ -182,7 +198,7 @@ public class CoreTemplateParser extends TemplateParser
      */
     protected void attributeEndEvent(int cursorPosition)
     {
-        fEventHandler.attributeEnd(cursorPosition - 1);
+        fEventHandler.attributeEnd(cursorPosition);
     }
 
     /* (non-Javadoc)
@@ -190,7 +206,7 @@ public class CoreTemplateParser extends TemplateParser
      */
     protected void tagBeginEvent(int startLine, int cursorPosition)
     {
-        fEventHandler.tagBegin(startLine - 1, cursorPosition - 1);
+        fEventHandler.tagBegin(startLine, cursorPosition);
     }
 
     /* (non-Javadoc)
@@ -198,7 +214,28 @@ public class CoreTemplateParser extends TemplateParser
      */
     protected void tagEndEvent(int cursorPosition)
     {
-        fEventHandler.tagEnd(cursorPosition - 1);
+        fEventHandler.tagEnd(cursorPosition);
+    }
+
+    protected Object findCaselessly(String key, Map map)
+    {
+        Object result = map.get(key);
+
+        if (result != null)
+            return result;
+
+        Iterator i = map.entrySet().iterator();
+        while (i.hasNext())
+        {
+            Map.Entry entry = (Map.Entry) i.next();
+
+            String entryKey = (String) entry.getKey();
+
+            if (entryKey.equalsIgnoreCase(key))
+                return entry.getValue();
+        }
+
+        return null;
     }
 
 }

@@ -26,6 +26,7 @@ package com.iw.plugins.spindle.core.parser.template;
  * ***** END LICENSE BLOCK ***** */
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
@@ -48,6 +49,29 @@ public class TagEventInfo
     public ISourceLocation getStartTagLocation()
     {
         return fStartTagLocation;
+    }
+
+    /**
+     * @param cursor
+     * @return
+     */
+    public ISourceLocation findLocation(int cursorPosition)
+    {
+
+        if (fAttributeMap != null)
+        {
+            for (Iterator iter = fAttributeMap.keySet().iterator(); iter.hasNext();)
+            {
+                ISourceLocation attrLoc = (ISourceLocation) fAttributeMap.get(iter.next());
+                if (attrLoc.contains(cursorPosition))
+                    return attrLoc;
+
+            }
+        }
+        if (fStartTagLocation != null)
+            return fStartTagLocation;
+
+        return null;
     }
 
 }

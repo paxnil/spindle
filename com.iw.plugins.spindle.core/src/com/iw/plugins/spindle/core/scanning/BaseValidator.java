@@ -61,32 +61,32 @@ public class BaseValidator implements IScannerValidator
 {
 
     static class SLocation implements ISourceLocation
-    { /* (non-Javadoc)
-                                        * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
-                                        */
+    {
         public int getCharEnd()
         {
             return 1;
         }
-        /* (non-Javadoc)
-        * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharStart()
-        */
+
         public int getCharStart()
         {
             return 0;
         }
-        /* (non-Javadoc)
-        * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getLineNumber()
-        */
+
         public int getLineNumber()
         {
             return 1;
         }
+
+        public boolean contains(int cursorPosition)
+        {
+            return cursorPosition == 0 || cursorPosition == 1;
+        }
+
     }
 
     public static final String DefaultDummyString = "1~dummy<>";
 
-    private static final ISourceLocation DefaultSourceLocation = new SLocation();
+    public static final ISourceLocation DefaultSourceLocation = new SLocation();
 
     /** 
      * 
@@ -285,7 +285,11 @@ public class BaseValidator implements IScannerValidator
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(java.lang.String, java.lang.String, com.iw.plugins.spindle.core.parser.ISourceLocation)
      */
-    public boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path, String errorKey, ISourceLocation source)
+    public boolean validateLibraryResourceLocation(
+        IResourceLocation specLocation,
+        String path,
+        String errorKey,
+        ISourceLocation source)
         throws ScannerException
     {
         return true;
@@ -331,7 +335,7 @@ public class BaseValidator implements IScannerValidator
     public boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location)
         throws ScannerException
     {
-       
+
         Object type = findType(fullyQualifiedType);
         if (type == null)
         {

@@ -52,7 +52,7 @@ public class ApplicationScanner extends LibraryScanner
         {
             return null;
         }
-        return specificationFactory.createApplicationSpecification();
+        return fSpecificationFactory.createApplicationSpecification();
     }
 
     /* (non-Javadoc)

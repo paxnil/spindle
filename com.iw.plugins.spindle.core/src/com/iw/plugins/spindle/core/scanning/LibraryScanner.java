@@ -57,7 +57,7 @@ public class LibraryScanner extends SpecificationScanner
         {
             return null;
         }
-        return specificationFactory.createLibrarySpecification();
+        return fSpecificationFactory.createLibrarySpecification();
     }
 
     /* (non-Javadoc)
@@ -230,7 +230,7 @@ public class LibraryScanner extends SpecificationScanner
                 TapestryCore.getTapestryString("LibrarySpecification.duplicate-extension-name", name));
         }
 
-        IExtensionSpecification exSpec = specificationFactory.createExtensionSpecification();
+        IExtensionSpecification exSpec = fSpecificationFactory.createExtensionSpecification();
 
         exSpec.setClassName(className);
         exSpec.setImmediate(immediate);
