@@ -57,9 +57,6 @@
    </runtime>
    <requires>
       <import plugin="org.eclipse.ui.ide" export="true"/>
-      <import plugin="org.eclipse.ui.views" export="true"/>
-      <import plugin="org.eclipse.ui.workbench.texteditor" export="true"/>
-      <import plugin="org.eclipse.ui.editors" export="true"/>
       <import plugin="org.eclipse.core.resources" export="true"/>
       <import plugin="org.eclipse.jdt.core" export="true"/>
       <import plugin="org.eclipse.ui" export="true"/>
