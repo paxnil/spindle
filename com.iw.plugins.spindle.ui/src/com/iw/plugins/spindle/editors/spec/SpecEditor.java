@@ -42,6 +42,11 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
@@ -94,6 +99,32 @@ public class SpecEditor extends Editor
     public SpecEditor()
     {
         super();
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+     */
+    public void createPartControl(Composite parent)
+    {
+        super.createPartControl(parent);
+        fOutline.addSelectionChangedListener(new ISelectionChangedListener()
+        {
+            public void selectionChanged(SelectionChangedEvent event)
+            {
+                ISelection selection = event.getSelection();
+                if (!selection.isEmpty() && selection instanceof IStructuredSelection)
+                {
+                    IStructuredSelection structured = (IStructuredSelection) selection;
+                    Object first = structured.getFirstElement();
+                    if (first instanceof DocumentArtifact)
+                    {
+                        DocumentArtifact artifact = (DocumentArtifact) first;
+                        selectAndReveal(artifact.getOffset(), artifact.getLength());
+                    }
+                }
+
+            }
+        });
     }
 
     /* (non-Javadoc)
