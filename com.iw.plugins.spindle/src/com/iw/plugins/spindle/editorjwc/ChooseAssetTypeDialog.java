@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.editorjwc;
 import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.ui.ChooseFromListDialog;
-import com.primix.tapestry.spec.AssetType;
+import net.sf.tapestry.spec.AssetType;
 
 public class ChooseAssetTypeDialog extends ChooseFromListDialog {
 

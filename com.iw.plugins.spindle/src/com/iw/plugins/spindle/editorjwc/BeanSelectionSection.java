@@ -85,7 +85,7 @@ import com.iw.plugins.spindle.ui.EmptySelection;
 import com.iw.plugins.spindle.ui.TypeDialogPropertyDescriptor;
 import com.iw.plugins.spindle.util.JavaListSelectionProvider;
 import com.iw.plugins.spindle.util.StringSorter;
-import com.primix.tapestry.spec.BeanLifecycle;
+import net.sf.tapestry.spec.BeanLifecycle;
 
 public class BeanSelectionSection
   extends SpindleFormSection

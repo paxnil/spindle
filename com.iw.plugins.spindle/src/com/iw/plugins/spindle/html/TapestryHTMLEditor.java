@@ -76,9 +76,9 @@ import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.ui.ToolTipHandler;
 import com.iw.plugins.spindle.ui.text.*;
-import com.primix.tapestry.parse.ITemplateParserDelegate;
-import com.primix.tapestry.parse.TemplateParseException;
-import com.primix.tapestry.parse.TemplateParser;
+import net.sf.tapestry.parse.ITemplateParserDelegate;
+import net.sf.tapestry.parse.TemplateParseException;
+import net.sf.tapestry.parse.TemplateParser;
 
 public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
 

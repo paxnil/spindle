@@ -63,7 +63,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
 import com.iw.plugins.spindle.util.TapestryLookup;
-import com.primix.tapestry.util.xml.AbstractDocumentParser;
+import net.sf.tapestry.util.xml.AbstractDocumentParser;
 
 public class TapestryModelManager implements IModelProvider, IModelChangedListener {
 

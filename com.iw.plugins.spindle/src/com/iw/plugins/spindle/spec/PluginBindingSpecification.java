@@ -28,8 +28,8 @@ package com.iw.plugins.spindle.spec;
 import java.io.PrintWriter;
 
 import com.iw.plugins.spindle.util.Indenter;
-import com.primix.tapestry.spec.BindingSpecification;
-import com.primix.tapestry.spec.BindingType;
+import net.sf.tapestry.spec.BindingSpecification;
+import net.sf.tapestry.spec.BindingType;
 
 public class PluginBindingSpecification extends BindingSpecification {
 

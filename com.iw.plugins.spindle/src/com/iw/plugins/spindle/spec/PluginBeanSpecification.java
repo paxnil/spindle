@@ -36,11 +36,11 @@ import java.util.StringTokenizer;
 import com.iw.plugins.spindle.bean.PluginPropertyBeanInitializer;
 import com.iw.plugins.spindle.bean.PluginStaticBeanInitializer;
 import com.iw.plugins.spindle.util.Indenter;
-import com.primix.tapestry.bean.IBeanInitializer;
-import com.primix.tapestry.bean.PropertyBeanInitializer;
-import com.primix.tapestry.bean.StaticBeanInitializer;
-import com.primix.tapestry.spec.BeanLifecycle;
-import com.primix.tapestry.spec.BeanSpecification;
+import net.sf.tapestry.bean.IBeanInitializer;
+import net.sf.tapestry.bean.PropertyBeanInitializer;
+import net.sf.tapestry.bean.StaticBeanInitializer;
+import net.sf.tapestry.spec.BeanLifecycle;
+import net.sf.tapestry.spec.BeanSpecification;
 
 public class PluginBeanSpecification extends BeanSpecification implements PropertyChangeListener {
 

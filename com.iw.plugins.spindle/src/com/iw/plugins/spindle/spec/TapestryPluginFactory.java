@@ -27,8 +27,8 @@ package com.iw.plugins.spindle.spec;
 
 import com.iw.plugins.spindle.bean.PluginPropertyBeanInitializer;
 import com.iw.plugins.spindle.bean.PluginStaticBeanInitializer;
-import com.primix.tapestry.bean.IBeanInitializer;
-import com.primix.tapestry.spec.*;
+import net.sf.tapestry.bean.IBeanInitializer;
+import net.sf.tapestry.spec.*;
 
 public class TapestryPluginFactory extends SpecFactory {
 

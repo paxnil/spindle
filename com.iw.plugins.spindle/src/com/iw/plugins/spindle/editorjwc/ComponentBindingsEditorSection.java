@@ -74,7 +74,7 @@ import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 import com.iw.plugins.spindle.ui.TreeViewerWithToolTips;
 import com.iw.plugins.spindle.util.JavaListSelectionProvider;
-import com.primix.tapestry.spec.BindingType;
+import net.sf.tapestry.spec.BindingType;
 
 public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorSection {
 

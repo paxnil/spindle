@@ -30,7 +30,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.PrintWriter;
 
 import com.iw.plugins.spindle.util.Indenter;
-import com.primix.tapestry.spec.PageSpecification;
+import net.sf.tapestry.spec.PageSpecification;
 
 public class PluginPageSpecification extends PageSpecification {
   private PropertyChangeSupport propertySupport;

@@ -68,7 +68,7 @@ import com.iw.plugins.spindle.model.TapestryModelManager;
 import com.iw.plugins.spindle.spec.TapestryPluginFactory;
 import com.iw.plugins.spindle.util.TapestryLookup;
 import com.iw.plugins.spindle.util.Utils;
-import com.primix.tapestry.parse.SpecificationParser;
+import net.sf.tapestry.parse.SpecificationParser;
 
 /**
  * This is the top-level class of the Tapestry plugin tool.

@@ -30,7 +30,7 @@ import java.io.StringWriter;
 
 import com.iw.plugins.spindle.util.Indenter;
 import com.iw.plugins.spindle.util.SourceWriter;
-import com.primix.tapestry.spec.ParameterSpecification;
+import net.sf.tapestry.spec.ParameterSpecification;
 
 public class PluginParameterSpecification extends ParameterSpecification {
 	
@@ -73,11 +73,12 @@ public class PluginParameterSpecification extends ParameterSpecification {
     */
   }	
 	
-  // e.g. -- <parameter name="book" java-type="com.primix.vlib.ejb.Book" required="yes"/>
+  // e.g. -- <parameter name="book" java-type="net.sf.vlib.ejb.Book" required="yes"/>
   public void write(String name, PrintWriter writer, int indent) {
     Indenter.printIndented(writer, indent, "<parameter name=\"" + name);
     writer.print("\" java-type=\"" + getType());
     writer.print("\" required=\"" + (isRequired() ? "yes" : "no"));
+    writer.print("\" direction=\"" + getDirection().getEnumerationId().toLowerCase());
     String description = getDescription();
     if (description == null || "".equals(description.trim())) {
     	writer.println("\"/>");

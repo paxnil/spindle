@@ -2,17 +2,29 @@
 <plugin
    id="com.iw.plugins.spindle"
    name="Spindle, an Eclipse Plugin for Tapestry (tapestry.sourceforge.net)"
-   version="0.0.9"
+   version="1.0.0"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.TapestryPlugin">
 
    <runtime>
-      <library name="javax.xml.jaxp.jar"/>
-      <library name="log4j-core.jar"/>
-      <library name="org.apache.crimson.jar"/>
-      <library name="javax.servlet.jar"/>
-      <library name="iw_tapestry.jar"/>
-      <library name="com.primix.tapestry-2.0.1.jar"/>
+      <library name="javax.xml.jaxp.jar">
+         <export name="*"/>
+      </library>
+      <library name="log4j-core.jar">
+         <export name="*"/>
+      </library>
+      <library name="org.apache.crimson.jar">
+         <export name="*"/>
+      </library>
+      <library name="javax.servlet.jar">
+         <export name="*"/>
+      </library>
+      <library name="iw_tapestry.jar">
+         <export name="*"/>
+      </library>
+      <library name="net.sf.tapestry-2.0.4.jar">
+         <export name="*"/>
+      </library>
    </runtime>
    <requires>
       <import plugin="org.eclipse.ui"/>
@@ -21,6 +33,8 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.pde"/>
+      <import plugin="org.eclipse.pde.ui"/>
+      <import plugin="org.eclipse.pde.core"/>
       <import plugin="org.eclipse.update.ui.forms"/>
    </requires>
 
@@ -51,13 +65,23 @@
             Create a new Tapestry Component
          </description>
       </wizard>
+      <wizard
+            name="Tapestry Page"
+            icon="./icons/basic/page16.gif"
+            category="com.iw.plugins.spindle.new"
+            class="com.iw.plugins.spindle.wizards.NewTapPageWizard"
+            id="com.iw.plugins.spindle.new_page_wizard">
+         <description>
+            Create a new Tapestry Component
+         </description>
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
       <editor
             name="Spindle editor for Tapestry Applications"
             default="true"
-            icon="icons/basic/application16.gif"
+            icon="./icons/basic/application16.gif"
             filenames="*.application"
             contributorClass="com.iw.plugins.spindle.editorapp.APPMultipageEditorContributor"
             class="com.iw.plugins.spindle.editorapp.APPMultipageEditor"
@@ -104,7 +128,7 @@
             id="com.iw.spindle.actions.set">
          <action
                label="New Tapestry Application"
-               icon="icons/full/application16.jpg"
+               icon="icons/full/application16.gif"
                tooltip="Create a new Tapestry Application"
                class="com.iw.plugins.spindle.wizards.OpenTapestryApplicationWizard"
                toolbarPath="Normal/spindle"
@@ -117,6 +141,14 @@
                class="com.iw.plugins.spindle.wizards.OpenTapestryComponentWizard"
                toolbarPath="Normal/spindle"
                id="com.iw.spindle.actions.set.OpenTapestryComponentWizard">
+         </action>
+         <action
+               label="New Tapestry Page"
+               icon="icons/full/page16.gif"
+               tooltip="Create a new Tapestry Page"
+               class="com.iw.plugins.spindle.wizards.OpenTapestryPageWizard"
+               toolbarPath="Normal/spindle"
+               id="com.iw.spindle.actions.set.OpenTapestryPageWizard">
          </action>
       </actionSet>
    </extension>

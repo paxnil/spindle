@@ -34,9 +34,9 @@ import java.util.*;
 
 import com.iw.plugins.spindle.util.Indenter;
 import com.iw.plugins.spindle.util.SourceWriter;
-import com.primix.tapestry.spec.BeanSpecification;
-import com.primix.tapestry.spec.ComponentSpecification;
-import com.primix.tapestry.spec.ContainedComponent;
+import net.sf.tapestry.spec.BeanSpecification;
+import net.sf.tapestry.spec.ComponentSpecification;
+import net.sf.tapestry.spec.ContainedComponent;
 
 public class PluginComponentSpecification
   extends ComponentSpecification
@@ -236,8 +236,8 @@ public class PluginComponentSpecification
     int indent = 1;
     writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     writer.println("<!DOCTYPE specification ");
-    writer.println("      PUBLIC \"-//Howard Ship//Tapestry Specification 1.1//EN\"");
-    writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
+    writer.println("      PUBLIC \"-//Howard Ship//Tapestry Specification 1.2//EN\"");
+    writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
     writer.println("<!-- written by Spindle, an Eclipse Plugin for Tapestry -->");
     writer.println();
 

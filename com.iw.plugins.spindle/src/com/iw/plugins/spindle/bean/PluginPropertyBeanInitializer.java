@@ -29,8 +29,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import com.iw.plugins.spindle.spec.IPropertyChangeProvider;
-import com.primix.tapestry.bean.PropertyBeanInitializer;
-import com.primix.tapestry.util.prop.PropertyHelper;
+import net.sf.tapestry.bean.PropertyBeanInitializer;
+import net.sf.tapestry.util.prop.PropertyHelper;
 
 public class PluginPropertyBeanInitializer
   extends PropertyBeanInitializer

@@ -62,7 +62,7 @@ import com.iw.plugins.spindle.ui.ChooseFromListDialog;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 import com.iw.plugins.spindle.ui.TableViewerWithToolTips;
 import com.iw.plugins.spindle.ui.UneditableComboBox;
-import com.primix.tapestry.spec.BindingType;
+import net.sf.tapestry.spec.BindingType;
 
 public class ChooseBindingTypeDialog extends ChooseFromListDialog {
 

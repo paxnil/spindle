@@ -39,7 +39,7 @@ import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.ui.AliasSummarizer;
 import com.iw.plugins.spindle.util.Indenter;
-import com.primix.tapestry.spec.ContainedComponent;
+import net.sf.tapestry.spec.ContainedComponent;
 
 public class PluginContainedComponent extends ContainedComponent {
 
