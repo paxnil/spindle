@@ -48,6 +48,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IPluginRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -86,7 +87,7 @@ public class TapestryProjectModelManager
 
   //  static public boolean updateMarkers = true;  
 
-  protected HashMap models = new HashMap();
+  protected HashMap models = null;
   protected List listeners = new ArrayList();
   protected List allModels = null;
   protected HashMap modelDelegates;
@@ -601,6 +602,7 @@ public class TapestryProjectModelManager
       return;
     }
     allModels = new ArrayList();
+    models = new HashMap();
     if (project.isOpen()) {
 
       Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchShell();
@@ -669,8 +671,12 @@ public class TapestryProjectModelManager
 
       monitor.worked(1);
       IStorage storage = (IStorage) foundElements.next();
+      if (models.containsKey(storage)) {
+      	
+      	continue;
+      }
       ITapestryModel model = createModel(storage);
-      if (model != null) {
+      if (model != null ) {
 
         addModel(model);
 
@@ -837,11 +843,34 @@ public class TapestryProjectModelManager
 
   public void resourceChanged(IResourceChangeEvent event) {
     // No need to do anything if nobody has the models
-    if (allModels == null)
+    if (allModels == null) {
       return;
+    }
+    
+    IPath thisProjectPath = getProject().getFullPath();
+    IResourceDelta topLevelDelta = event.getDelta();
+    IResourceDelta thisProjectDelta = topLevelDelta.findMember(thisProjectPath);
+    if (thisProjectDelta == null) {
+    	
+    	// the event does not pertain to this project!
+    	return;
+    	
+    }
+    
 
     switch (event.getType()) {
       case IResourceChangeEvent.PRE_AUTO_BUILD :
+      
+ 		IPath classpath = thisProjectPath.append(".classpath");
+ 		IResourceDelta classpathDelta = topLevelDelta.findMember(classpath);
+ 		
+ 		if (classpathDelta != null && classpathChanged(classpathDelta)) {
+ 			
+ 			reset();
+ 			return;
+ 			
+ 		}
+ 		
         if (modelChanges == null)
           modelChanges = new ArrayList();
         handleResourceDelta(event.getDelta());
@@ -863,6 +892,18 @@ public class TapestryProjectModelManager
         break;
     }
   }
+
+  /**
+   * Method classpathChanged.
+   * @param classpathDelta
+   * @return boolean
+   */
+  private boolean classpathChanged(IResourceDelta classpathDelta) {
+  	int kind = classpathDelta.getKind();
+  	int flags = classpathDelta.getFlags();
+    return kind == IResourceDelta.CHANGED && (flags & IResourceDelta.CONTENT) != 0;
+  }
+
 
   private void processModelChanges() {
     if (modelChanges.size() == 0) {

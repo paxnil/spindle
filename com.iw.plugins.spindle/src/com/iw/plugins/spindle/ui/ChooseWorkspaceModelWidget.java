@@ -24,13 +24,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,6 +49,10 @@ import org.eclipse.jface.viewers.Viewer;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
+import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
@@ -74,11 +77,22 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
 
   private IPackageFragment resultPackage;
 
+  private Set libraryFilter;
+
   public ChooseWorkspaceModelWidget(IJavaProject project, int acceptFlags) {
-  	
+
+    this(project, acceptFlags, false);
+
+  }
+
+  public ChooseWorkspaceModelWidget(
+    IJavaProject project,
+    int acceptFlags,
+    boolean filterLibraries) {
+
     super();
 
-    configure(project);
+    configure(project, filterLibraries);
     this.acceptFlags = acceptFlags;
 
     setFilterLabel("Search:");
@@ -89,7 +103,8 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
     setUpperListContentProvider(new StorageContentProvider());
 
     setLowerListLabel("in package:");
-    setLowerListLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
+    setLowerListLabelProvider(
+      new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
     setLowerListContentProvider(new PackageContentProvider());
 
   }
@@ -144,18 +159,80 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
 
   }
 
-  public void configure(IJavaProject project) {
-    lookup = new TapestryLookup();
+  public void configure(IJavaProject project, boolean filterLibraries) {
+
     try {
 
-      lookup.configure(project);
+      ITapestryProject tproject = TapestryPlugin.getDefault().getTapestryProjectFor(project);
 
-    } catch (JavaModelException jmex) {
+      if (tproject != null) {
+
+        lookup = tproject.getLookup();
+
+        if (filterLibraries) {
+
+          configureFilter(tproject);
+
+        }
+
+      }
+
+    } catch (CoreException jmex) {
 
       TapestryPlugin.getDefault().logException(jmex);
-      lookup = null;
+      lookup = new TapestryLookup();
+
+      try {
+
+        lookup.configure(project);
+
+      } catch (JavaModelException e) {
+        lookup = null;
+      }
     }
 
+  }
+
+  private void configureFilter(ITapestryProject tproject) throws CoreException {
+    libraryFilter = new HashSet();
+
+    TapestryLibraryModel projectModel = (TapestryLibraryModel) tproject.getProjectModel();
+
+    TapestryProjectModelManager modelManager = tproject.getModelManager();
+
+    IPluginLibrarySpecification libSpec = projectModel.getSpecification();
+
+    for (Iterator ids = libSpec.getLibraryIds().iterator(); ids.hasNext();) {
+
+      String libraryPath = libSpec.getLibrarySpecificationPath((String) ids.next());
+
+      IStorage[] found = lookup.findLibrary(libraryPath);
+
+      for (int i = 0; i < found.length; i++) {
+
+        TapestryLibraryModel foundModel =
+          (TapestryLibraryModel) modelManager.getReadOnlyModel(found[i]);
+
+        if (foundModel != null && foundModel.isLoaded()) {
+
+          IPluginLibrarySpecification foundSpec = foundModel.getSpecification();
+
+          for (Iterator aliases = foundSpec.getComponentAliases().iterator(); aliases.hasNext();) {
+
+            libraryFilter.add(foundSpec.getComponentSpecificationPath((String) aliases.next()));
+
+          }
+
+          for (Iterator names = foundSpec.getPageNames().iterator(); names.hasNext();) {
+
+            libraryFilter.add(foundSpec.getPageSpecificationPath((String) names.next()));
+
+          }
+
+        }
+      }
+
+    }
   }
 
   public void dispose() {
@@ -181,22 +258,22 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
     return collector.getStorage(resultString, resultPackage);
 
   }
-  
+
   public String getResultPath() {
-  	
-  	String name = getResultStorage().getName();
-  	String path = "/";
-  	if ("".equals(resultPackage.getElementName())) {
-  		
-  		return  path+name;
-  		
-  	}
-  	
-  	path += resultPackage.getElementName().replace('.', '/');
-  	path += "/"+name;
-  	
-  	return path;
-  	
+
+    String name = getResultStorage().getName();
+    String path = "/";
+    if ("".equals(resultPackage.getElementName())) {
+
+      return path + name;
+
+    }
+
+    path += resultPackage.getElementName().replace('.', '/');
+    path += "/" + name;
+
+    return path;
+
   }
 
   class StorageContentProvider implements IStructuredContentProvider {
@@ -341,21 +418,22 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
       return packages.toArray();
     }
 
-    /**
-     * @see ITapestryLookupRequestor#isCancelled()
-     */
+
     public boolean isCancelled() {
       return false;
     }
 
-    /**
-     * @see ITapestryLookupRequestor#accept(IStorage, IPackageFragment)
-     */
     public boolean accept(IStorage storage, IPackageFragment fragment) {
 
       String name = storage.getName();
       Object storePackageFragment;
       String packageElementName;
+
+      if (libraryFilter != null && isInLibrary(storage, fragment)) {
+
+        return false;
+
+      }
 
       storages.add(storage);
 
@@ -385,6 +463,26 @@ public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
         packages.add(storePackageFragment);
       }
       return true;
+    }
+
+    private boolean isInLibrary(IStorage storage, IPackageFragment fragment) {
+
+      String tapestryPath;
+      String fragmentName = fragment.getElementName();
+      String name = storage.getName();
+
+      if ("".equals(fragmentName)) {
+
+        tapestryPath = "/" + name;
+
+      } else {
+
+        tapestryPath = "/" + fragmentName.replace('.', '/') + "/" + name;
+
+      }
+
+      return libraryFilter.contains(tapestryPath);
+
     }
 
   }

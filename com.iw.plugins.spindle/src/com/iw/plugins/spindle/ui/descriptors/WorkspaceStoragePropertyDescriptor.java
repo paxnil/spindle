@@ -102,7 +102,7 @@ public class WorkspaceStoragePropertyDescriptor
             project,
             dialogTitle,
             dialogDescription,
-            acceptFlags);
+            acceptFlags, false);
                     
                    
         if (dialog.open() == dialog.OK) {

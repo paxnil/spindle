@@ -341,7 +341,7 @@ public class ComponentAliasSection
             newButton.getShell(),
             TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage()),
             "Choose Component",
-            "Choose a Component to be aliased");
+            "Choose a Component to be aliased", true);
 
         dialog.create();
 

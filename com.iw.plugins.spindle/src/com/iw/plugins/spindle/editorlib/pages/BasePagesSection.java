@@ -257,7 +257,7 @@ public abstract class BasePagesSection
             TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage()),
             "Choose Page",
             "Choose the Page to be added",
-            TapestryLookup.ACCEPT_PAGES);
+            TapestryLookup.ACCEPT_PAGES, true);
 
         dialog.create();
         if (dialog.open() == dialog.OK) {

@@ -100,7 +100,7 @@ public class ChoosePageFromLibraryPropertyDescriptor extends PropertyDescriptor 
     ChooseWorkspaceModelDialog dialog =
     
       ChooseWorkspaceModelDialog.createPageModelDialog(cellEditorWindow.getShell(),
-      project, title, message);
+      project, title, message, true);
 
     if (dialog.open() == dialog.OK) {
       return dialog.getResultPath();

@@ -70,7 +70,8 @@ public class TapestryNamespaceLookup implements ILookupAcceptor {
     configure(library);
   }
 
-  private void configure(TapestryLibraryModel rootLibrary) throws CoreException {
+  private void configure(TapestryLibraryModel rootLibrary) throws CoreException {    
+    library.reload();
     Assert.isTrue(library.isLoaded());
     namespaces = getNamespaceFragments();
     workspace = TapestryPlugin.getDefault().getWorkspace();

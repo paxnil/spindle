@@ -60,7 +60,7 @@ public class ChooseWorkspaceModelDialog
         project,
         windowTitle,
         description,
-        TapestryLookup.ACCEPT_LIBRARIES);
+        TapestryLookup.ACCEPT_LIBRARIES, false);
 
     result.setTitleImageString("application48.gif");
 
@@ -79,7 +79,7 @@ public class ChooseWorkspaceModelDialog
         project,
         windowTitle,
         description,
-        TapestryLookup.ACCEPT_APPLICATIONS);
+        TapestryLookup.ACCEPT_APPLICATIONS, false);
 
     result.setTitleImageString("application48.gif");
 
@@ -99,7 +99,7 @@ public class ChooseWorkspaceModelDialog
         project,
         windowTitle,
         description,
-        TapestryLookup.ACCEPT_LIBRARIES | TapestryLookup.ACCEPT_APPLICATIONS);
+        TapestryLookup.ACCEPT_LIBRARIES | TapestryLookup.ACCEPT_APPLICATIONS, false);
 
     result.setTitleImageString("application48.gif");
 
@@ -119,7 +119,7 @@ public class ChooseWorkspaceModelDialog
         project,
         windowTitle,
         description,
-        TapestryLookup.ACCEPT_LIBRARIES | TapestryLookup.ACCEPT_APPLICATIONS | TapestryLookup.THIS_PROJECT_ONLY);
+        TapestryLookup.ACCEPT_LIBRARIES | TapestryLookup.ACCEPT_APPLICATIONS | TapestryLookup.THIS_PROJECT_ONLY, false);
 
     result.setTitleImageString("application48.gif");
 
@@ -131,7 +131,7 @@ public class ChooseWorkspaceModelDialog
     Shell shell,
     IJavaProject project,
     String windowTitle,
-    String description) {
+    String description, boolean filterLibraries) {
 
     ChooseWorkspaceModelDialog result =
       new ChooseWorkspaceModelDialog(
@@ -139,17 +139,19 @@ public class ChooseWorkspaceModelDialog
         project,
         windowTitle,
         description,
-        TapestryLookup.ACCEPT_COMPONENTS);
+        TapestryLookup.ACCEPT_COMPONENTS, filterLibraries);
     result.setTitleImageString("component48.gif");
 
     return result;
   }
+  
+ 
 
   static public ChooseWorkspaceModelDialog createPageModelDialog(
     Shell shell,
     IJavaProject project,
     String windowTitle,
-    String description) {
+    String description, boolean filterLibraries) {
 
     ChooseWorkspaceModelDialog result =
       new ChooseWorkspaceModelDialog(
@@ -157,7 +159,7 @@ public class ChooseWorkspaceModelDialog
         project,
         windowTitle,
         description,
-        TapestryLookup.ACCEPT_PAGES);
+        TapestryLookup.ACCEPT_PAGES, filterLibraries);
     result.setTitleImageString("component48.gif");
 
     return result;
@@ -171,12 +173,13 @@ public class ChooseWorkspaceModelDialog
     IJavaProject project,
     String windowTitle,
     String description,
-    int acceptFlags) {
+    int acceptFlags,
+    boolean filterLibraries) {
 
     super(shell);
     updateWindowTitle(windowTitle);
     updateMessage(description);
-    chooserWidget = new ChooseWorkspaceModelWidget(project, acceptFlags);
+    chooserWidget = new ChooseWorkspaceModelWidget(project, acceptFlags, filterLibraries);
 
     chooserWidget.addSelectionChangedListener(this);
     chooserWidget.addDoubleClickListener(this);
