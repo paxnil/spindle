@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <site> 
+    <description url="index.html">this Jetty Launcher Update Site contains feature and plug-in versions for Jetty launcher profiling extension plugin release @version@.</description>
+	<feature url="features/com.iw.features.jettylauncher_profile_@version@.jar" id="com.iw.plugins.jettylauncher_profile" version="@version@">
+ 	<category name="cat"/>
+	</feature>  
+    <archive url="archive/com.iw.plugins.jettylauncher_profile_@version@.jar" 
+		path="plugins/com.iw.plugins.jettylauncher_profile_@version@.jar"/>
+    <category-def label="Jetty Launcher (Profile) @version@" name="cat"> 
+      <description>This category contains the release files for Jetty Launcher profiler extension plugin @version@</description>
+    </category-def>
+  </site>

@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Jetty Web Quick Start</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<link rel="stylesheet" href="style/book.css" type="text/css"/>
+</head>
+
+<body>
+<h1>Jetty Web - integrated with <a href="http://eclipsecolorer.sourceforge.net">Eclipse Profiler Plugin<a></a></a></h1>
+<table width="750" border="0" cellspacing="4" cellpadding="0">
+  <tr>
+    <td width="750"><h2>To use this plugin, <a href="http://jetty.mortbay.org">Jetty</a> must be installed 
+        on your system </h2>
+		
+      <h2>To use this plugin, <a href="http://eclipsecolorer.sourceforge.net">Eclipse Profiler Plugin</a> 
+        must be <a href="http://sourceforge.net/project/showfiles.php?group_id=48823">installed</a> in Eclipse 2.1</h2>
+		<p> This product includes software developed by the Apache Software Foundation 
+        (<a href="http://www.apache.org/"> http://www.apache.org/</a>). </p>
+		
+		
+      <p>These docs are specific to using Jetty Web. To see the profiler plugin launch tabs embedded in 
+        the Jetty Launch configuation screen, go <a href="Profiling.html">here</a>. For detailed descriptions 
+        of all the excellent features provided by the Profiler Plugin, visit that plugins homepage <a href="http://eclipsecolorer.sourceforge.net">here<a></p>
+		
+		<ul>
+		<li><a href="#qs">Quick Start</a></li>
+		<li><a href="jettyxml.html">Using jetty.xml files</a></li>
+		<li><a href="jsp.html">JSPs, JMX, SSL and Jetty Web</a></li>
+		<li><a href="workdir.html">Launch Working Directory</a></li>
+		<li><a href="profiling.html">Profiling</a></li>
+		</ul>
+		<a name="qs"></a>
+      <h2>Quick Start</h2>
+      <p>Below is an example of a small web project that can be quickly launched with this plugin. Note 
+        that the plugin does require that the structure of the project take the form of a standard web 
+        application (i.e. context/WEB-INF, web.xml, etc, etc). </p>
+      <p>Although, it is not necessary to build a war file, or even build your classes into the WEB-INF/classes 
+        folder. The plugin will handle the classpath for you.</p>
+      <p>To begin, select<strong> Run-&gt;Run...</strong> from the toolbar...</p>
+      <p><img src="images/qs1.gif" width="652" height="522"></p>
+      <p>Select &quot;<strong>Jetty Web (Profile)</strong>&quot; and then click &quot;<strong>New</strong>&quot;. 
+        A new launch configuration will appear.</p>
+      <p>If one has not already done so in another Jetty Web launcher, one must choose the location for 
+        the Jetty installation.</p>
+      <p><img src="images/qs2.gif"></p>
+      <p>Clicking &quot;<strong>Browse</strong>&quot; next to the &quot;<strong>Jetty install directory</strong>&quot; field will allow 
+        one to choose.</p>
+      <p>Note that the plugin itself does not check that the chosen folder is valid. Although, of course 
+        Jetty will not launch if the jetty jars are not located below that folder in the standard locations 
+        (used Jetty 4.2.8).</p>
+      <p><img src="images/qs3.gif" width="326" height="315"></p>
+      <p>In this example the context root is in a folder called context, so we click &quot;<strong>Browse</strong>&quot; 
+        and pick it</p>
+      <p>.<img src="images/qs4.gif" width="350" height="457"></p>
+      <p>If your project is setup so that the project itself is the root, leave the context field in the 
+        launcher blank.</p>
+      <p>(This would be the case here if WEB-INF, etc were located directly below the project).</p>
+      <p>&nbsp;</p>
+      <p>Now just click &quot;<strong>Run</strong>&quot; and Jetty will start. You can check to see if 
+        Jetty is running, or kill Jetty by switching to the<strong> Debug Perspective</strong> as show 
+        below:</p>
+      <p><a href="images/qs5.gif"><img src="images/qs5.gif" width="542" height="481"></a></p>
+      <p>Open a browser and have a look. Our example started up nicely...</p>
+      <p><a href="images/qs6.gif"><img src="images/qs6.gif" width="267" height="207"></a>
+      <a href="images/qs7.gif"><img src="images/qs7.gif"  width="267" height="207"></a></p> 
+      <p>That's it to quickly getting Jetty up and running using this plugin.</p>
+      <h2>&nbsp; </h2>
+      </td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+<h2>&nbsp;</h2>
+<p>&nbsp;</p>
+</body>
+</html>
