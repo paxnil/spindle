@@ -32,6 +32,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
+
 public class ComboBoxPropertyDescriptor extends PropertyDescriptor {
 
   private String[] values;

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+    <jar path="Q:/eclipse/e202/workspace/com.iw.plugins.spindle/tapestry-2.4.jar"/>
+    <options overwrite="false" compress="true" exportErrors="true"
+        exportWarnings="true" saveDescription="true"
+        descriptionLocation="/com.iw.plugins.spindle/tapjar.jardesc"
+        useSourceFolders="false" buildIfNeeded="true"/>
+    <manifest manifestVersion="1.0" usesManifest="true"
+        reuseManifest="false" saveManifest="false"
+        generateManifest="true" manifestLocation="">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="false">
+        <javaElement handleIdentifier="=jakarta-tapestry/framework/src"/>
+    </selectedElements>
+</jardesc>

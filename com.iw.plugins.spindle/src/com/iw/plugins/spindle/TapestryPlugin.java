@@ -33,19 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.tapestry.Tapestry;
-import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.util.xml.AbstractDocumentParser;
-import org.apache.log4j.Category;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.Priority;
-import org.apache.oro.text.regex.MalformedPatternException;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.PatternCompiler;
-import org.apache.oro.text.regex.PatternMatcher;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -83,6 +71,7 @@ import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.parser.SpecificationParser;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.project.TapestryProject;
 import com.iw.plugins.spindle.refactor.RenamedComponentOrPageRefactor;
@@ -105,9 +94,6 @@ public class TapestryPlugin extends AbstractUIPlugin {
   private static SpecificationParser parser;
   private static TapestryProjectModelManager modelManager = null;
 
-  protected PatternCompiler _patternCompiler;
-  protected PatternMatcher _matcher;
-  protected Map _compiledPatterns;
 
   static public final String ID_PLUGIN = "com.iw.plugins.spindle";
   static public final String NATURE_ID = ID_PLUGIN + ".project.TapestryProject";
@@ -130,15 +116,14 @@ public class TapestryPlugin extends AbstractUIPlugin {
     if (instance == null)
       instance = this;
 
-    Category CAT = Category.getInstance(AbstractDocumentParser.class);
-    CAT.setPriority(Priority.DEBUG);
-    CAT.addAppender(new ConsoleAppender(new PatternLayout("%c{1} [%p] %m%n"), "System.out"));
+//    Category CAT = Category.getInstance(AbstractDocumentParser.class);
+//    CAT.setPriority(Priority.DEBUG);
+//    CAT.addAppender(new ConsoleAppender(new PatternLayout("%c{1} [%p] %m%n"), "System.out"));
 
   }
 
   static {
-    parser = new SpecificationParser();
-    parser.setFactory(new TapestryPluginSpecFactory());
+    parser = new SpecificationParser(); 
 
     String ID_PLUGIN = "com.iw.plugins.spindle";
     editorIdLookup = new HashMap();
@@ -151,7 +136,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
 
   }
 
-  static public void registerParser(String extension, AbstractDocumentParser parser) {
+  static public void registerParser(String extension, SpecificationParser parser) {
     parsers.put(extension, parser);
   }
 
@@ -171,8 +156,8 @@ public class TapestryPlugin extends AbstractUIPlugin {
 
   }
 
-  static public AbstractDocumentParser getParserFor(String extension) {
-    return (AbstractDocumentParser) parsers.get(extension);
+  static public SpecificationParser getParserFor(String extension) {
+    return (SpecificationParser) parsers.get(extension);
   }
 
   /**
@@ -567,42 +552,6 @@ public class TapestryPlugin extends AbstractUIPlugin {
     return false;
   }
 
-  //the following is ugly because its ripped off from Howard. added a reminder task to
-  // see if the validation stuff in AbstractSpecificationParser could be made available as static methods.
 
-  protected Pattern compilePattern(String pattern) throws CoreException {
-    if (_patternCompiler == null)
-      _patternCompiler = new Perl5Compiler();
-
-    try {
-      return _patternCompiler.compile(pattern, Perl5Compiler.SINGLELINE_MASK);
-    } catch (MalformedPatternException ex) {
-      throw new CoreException(new SpindleStatus(ex));
-    }
-  }
-
-  public IStatus validate(String value, String pattern, String errorKey) throws CoreException {
-
-    SpindleStatus result = new SpindleStatus();
-    if (_compiledPatterns == null)
-      _compiledPatterns = new HashMap();
-
-    Pattern compiled = (Pattern) _compiledPatterns.get(pattern);
-
-    if (compiled == null) {
-      compiled = compilePattern(pattern);
-
-      _compiledPatterns.put(pattern, compiled);
-    }
-
-    if (_matcher == null)
-      _matcher = new Perl5Matcher();
-
-    if (_matcher.matches(value, compiled))
-      return result;
-
-    result.setError(Tapestry.getString(errorKey, value));
-    return result;
-  }
 
 }

@@ -25,9 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui;
 
-import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;

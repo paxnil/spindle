@@ -32,7 +32,6 @@ import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 
-import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -42,6 +41,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.parser.SpecificationParser;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.util.SourceWriter;
@@ -87,7 +87,8 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
 
           String extension = element.getFullPath().getFileExtension();
 
-          SpecificationParser parser = (SpecificationParser) TapestryPlugin.getParserFor(extension);
+          SpecificationParser parser =
+            (SpecificationParser) TapestryPlugin.getParserFor(extension);
 
           if (extension.equals("jwc")) {
 
@@ -95,15 +96,13 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
               (PluginComponentSpecification) TapestryPlugin
                 .getParser()
                 .parseComponentSpecification(
-                source,
-                element.getName());
+                source);
 
           } else if (extension.equals("page")) {
 
             componentSpec =
               (PluginComponentSpecification) TapestryPlugin.getParser().parsePageSpecification(
-                source,
-                element.getName());
+                source);
 
           }
           componentSpec.setIdentifier(element.getName());
@@ -113,7 +112,7 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
           editable = !element.isReadOnly();
           fireModelObjectChanged(componentSpec, "componentSpec");
         } catch (DocumentParseException dpex) {
-        	
+
           addProblemMarker(dpex);
           loaded = false;
         }
@@ -182,7 +181,9 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
         Iterator containedComponentIds = componentSpec.getComponentIds().iterator();
         while (containedComponentIds.hasNext()) {
           String id = (String) containedComponentIds.next();
-          if (((PluginContainedComponent) componentSpec.getComponent(id)).getType().equals(name)) {
+          if (((PluginContainedComponent) componentSpec.getComponent(id))
+            .getType()
+            .equals(name)) {
             return true;
           }
         }

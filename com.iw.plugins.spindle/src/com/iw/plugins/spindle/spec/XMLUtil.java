@@ -51,39 +51,52 @@ import com.iw.plugins.spindle.util.Indenter;
  */
 public class XMLUtil {
 
+  public static final String TAPESTRY_DTD_1_1_PUBLIC_ID_DEPRECATED = "-//Howard Ship//Tapestry Specification 1.1//EN";
+  public static final String TAPESTRY_DTD_1_2_PUBLIC_ID_DEPRECATED = "-//Howard Lewis Ship//Tapestry Specification 1.2//EN";
+
   static public final int UNKNOWN_DTD = 0;
   static public final int DTD_1_1 = 1;
   static public final int DTD_1_2 = 2;
   static public final int DTD_1_3 = 3;
+  static public final int DTD_1_4 = 4;
 
   static public int getDTDVersion(String publicId) {
 
-    if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID)) {
+    if (publicId.equals(TAPESTRY_DTD_1_1_PUBLIC_ID_DEPRECATED)) {
       return DTD_1_1;
     }
-    if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID)) {
+    if (publicId.equals(TAPESTRY_DTD_1_2_PUBLIC_ID_DEPRECATED)) {
       return DTD_1_2;
     }
     if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID)) {
       return DTD_1_3;
     }
+    if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_4_PUBLIC_ID)) {
+    	return DTD_1_4;
+    }
     return UNKNOWN_DTD;
   }
-  
+
   static public String getPublicId(int DTDVersion) {
-  	
-  	switch (DTDVersion) {
-  		
-  		case DTD_1_1: return SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID;
-  		
-  		case DTD_1_2: return SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID;
-  		
-  		case DTD_1_3: return SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID;
-  		
-  	}
-  	
-  	return null;
-  	
+
+    switch (DTDVersion) {
+
+      case DTD_1_1 :
+        return TAPESTRY_DTD_1_1_PUBLIC_ID_DEPRECATED;
+
+      case DTD_1_2 :
+        return TAPESTRY_DTD_1_2_PUBLIC_ID_DEPRECATED;
+
+      case DTD_1_3 :
+        return SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID;
+        
+      case DTD_1_4 :
+      	return SpecificationParser.TAPESTRY_DTD_1_4_PUBLIC_ID;
+
+    }
+
+    return null;
+
   }
 
   public static void writeDescription(PrintWriter writer, int indent, String description) {
@@ -92,11 +105,7 @@ public class XMLUtil {
 
   }
 
-  public static void writeDescription(
-    PrintWriter writer,
-    int indent,
-    String description,
-    boolean nextLine) {
+  public static void writeDescription(PrintWriter writer, int indent, String description, boolean nextLine) {
 
     if (description != null && !"".equals(description.trim())) {
       if (nextLine) {
@@ -179,19 +188,12 @@ public class XMLUtil {
 
   }
 
-  public static void writeProperties(
-    IPropertyHolder propertyHolder,
-    PrintWriter writer,
-    int indent) {
+  public static void writeProperties(IPropertyHolder propertyHolder, PrintWriter writer, int indent) {
 
     writeProperties(propertyHolder, writer, indent, true);
   }
 
-  public static void writeProperties(
-    IPropertyHolder propertyHolder,
-    PrintWriter writer,
-    int indent,
-    boolean nextLine) {
+  public static void writeProperties(IPropertyHolder propertyHolder, PrintWriter writer, int indent, boolean nextLine) {
     Collection properties = propertyHolder.getPropertyNames();
     if (properties != null) {
       if (nextLine) {
@@ -270,8 +272,7 @@ public class XMLUtil {
   }
 
   static public void writeMultiLine(PrintWriter writer, String message) {
-    BufferedReader reader =
-      new BufferedReader(new InputStreamReader(new ByteArrayInputStream(message.getBytes())));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(message.getBytes())));
     try {
       String line = reader.readLine();
       while (line != null) {

@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -38,6 +37,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.parser.SpecificationParser;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.util.SourceWriter;
 
@@ -71,10 +71,7 @@ public class TapestryApplicationModel
           SpecificationParser parser =
             (SpecificationParser) TapestryPlugin.getParserFor("application");
           librarySpecification =
-            (PluginApplicationSpecification) parser.parseApplicationSpecification(
-              source,
-              getUnderlyingStorage().getName(),
-              null);
+            (PluginApplicationSpecification) parser.parseApplicationSpecification(source);
 
           pluginSpec = (PluginApplicationSpecification) librarySpecification;
           pluginSpec.addPropertyChangeListener(TapestryApplicationModel.this);

@@ -33,10 +33,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.pde.internal.ui.PDEPlugin;
-import org.eclipse.pde.internal.ui.PDEPluginImages;
-import org.eclipse.pde.internal.ui.editor.schema.ICloneablePropertySource;
 import org.eclipse.swt.custom.TableTree;
 import org.eclipse.swt.custom.TableTreeItem;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -45,7 +41,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.views.properties.IPropertySheetEntry;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.eclipse.ui.views.properties.PropertySheetPage;
+
+import com.iw.plugins.spindle.ui.propertysheet.PropertySheetPage;
 
 public class SpindlePropertySheet extends PropertySheetPage {
   public static final String CLONE_LABEL = "Clone";
@@ -96,12 +93,12 @@ public class SpindlePropertySheet extends PropertySheetPage {
     if (input instanceof IAdaptable) {
       source = (IPropertySource) ((IAdaptable) input).getAdapter(IPropertySource.class);
     }
-    if (source instanceof ICloneablePropertySource) {
-      Object newInput = ((ICloneablePropertySource) source).doClone();
-      if (newInput != null) {
-        selectionChanged(part, new StructuredSelection(newInput));
-      }
-    }
+//    if (source instanceof ICloneablePropertySource) {
+//      Object newInput = ((ICloneablePropertySource) source).doClone();
+//      if (newInput != null) {
+//        selectionChanged(part, new StructuredSelection(newInput));
+//      }
+//    }
   }
   public void makeContributions(
     IMenuManager menuManager,
@@ -113,16 +110,16 @@ public class SpindlePropertySheet extends PropertySheetPage {
 
   /** borrowing from PDE for now **/
   protected void makeActions() {
-    cloneAction = new Action(PDEPlugin.getResourceString(CLONE_LABEL)) {
-      public void run() {
-        handleClone();
-      }
-    };
-    cloneAction.setImageDescriptor(PDEPluginImages.DESC_CLONE_ATT);
-    cloneAction.setHoverImageDescriptor(PDEPluginImages.DESC_CLONE_ATT_HOVER);
-    cloneAction.setDisabledImageDescriptor(PDEPluginImages.DESC_CLONE_ATT_DISABLED);
-    cloneAction.setToolTipText(PDEPlugin.getResourceString(CLONE_TOOLTIP));
-    cloneAction.setEnabled(false);
+//    cloneAction = new Action(PDEPlugin.getResourceString(CLONE_LABEL)) {
+//      public void run() {
+//        handleClone();
+//      }
+//    };
+//    cloneAction.setImageDescriptor(PDEPluginImages.DESC_CLONE_ATT);
+//    cloneAction.setHoverImageDescriptor(PDEPluginImages.DESC_CLONE_ATT_HOVER);
+//    cloneAction.setDisabledImageDescriptor(PDEPluginImages.DESC_CLONE_ATT_DISABLED);
+//    cloneAction.setToolTipText(PDEPlugin.getResourceString(CLONE_TOOLTIP));
+//    cloneAction.setEnabled(false);
   }
   public void selectionChanged(IWorkbenchPart part, ISelection sel) {
     super.selectionChanged(part, sel);
@@ -143,9 +140,9 @@ public class SpindlePropertySheet extends PropertySheetPage {
     updateActions(source);
   }
   protected void updateActions(IPropertySource source) {
-    if (source instanceof ICloneablePropertySource) {
-      cloneAction.setEnabled(((ICloneablePropertySource) source).isCloneable());
-    } else
-      cloneAction.setEnabled(false);
+//    if (source instanceof ICloneablePropertySource) {
+//      cloneAction.setEnabled(((ICloneablePropertySource) source).isCloneable());
+//    } else
+//      cloneAction.setEnabled(false);
   }
 }

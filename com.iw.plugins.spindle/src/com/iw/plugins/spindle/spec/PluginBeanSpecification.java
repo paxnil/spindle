@@ -32,7 +32,6 @@ import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Iterator;
 
-import net.sf.tapestry.bean.ExpressionBeanInitializer;
 import net.sf.tapestry.bean.IBeanInitializer;
 import net.sf.tapestry.bean.StaticBeanInitializer;
 import net.sf.tapestry.bean.StringBeanInitializer;

@@ -3,6 +3,7 @@
 	<name>com.iw.plugins.spindle</name>
 	<comment></comment>
 	<projects>
+		<project>jakarta-tapestry</project>
 		<project>org.apache.xerces</project>
 		<project>org.eclipse.core.boot</project>
 		<project>org.eclipse.core.resources</project>
@@ -10,9 +11,6 @@
 		<project>org.eclipse.help</project>
 		<project>org.eclipse.jdt.core</project>
 		<project>org.eclipse.jdt.ui</project>
-		<project>org.eclipse.pde</project>
-		<project>org.eclipse.pde.core</project>
-		<project>org.eclipse.pde.ui</project>
 		<project>org.eclipse.ui</project>
 		<project>org.eclipse.update.ui.forms</project>
 	</projects>

@@ -33,7 +33,6 @@ import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.DefaultInformationControl.IInformationPresenter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Control;

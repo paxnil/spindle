@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
+
 import com.iw.plugins.spindle.ui.DocumentationCellEditor;
 
 public class DocumentationPropertyDescriptor extends PropertyDescriptor {

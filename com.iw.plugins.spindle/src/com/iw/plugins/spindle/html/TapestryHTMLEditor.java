@@ -36,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.tapestry.PageLoaderException;
 import net.sf.tapestry.parse.ITemplateParserDelegate;
 import net.sf.tapestry.parse.TemplateParseException;
 import net.sf.tapestry.parse.TemplateParser;
@@ -473,6 +474,13 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
       if (spec != null) {
         return spec.getComponent(componentId) != null;
       }
+      return true;
+    }
+
+    /**
+     * @see net.sf.tapestry.parse.ITemplateParserDelegate#getAllowBody(String, String)
+     */
+    public boolean getAllowBody(String libraryId, String type) throws PageLoaderException {
       return true;
     }
 

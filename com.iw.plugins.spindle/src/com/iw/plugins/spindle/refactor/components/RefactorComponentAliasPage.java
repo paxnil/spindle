@@ -29,6 +29,8 @@ package com.iw.plugins.spindle.refactor.components;
 import java.util.List;
 
 import net.sf.tapestry.parse.SpecificationParser;
+import net.sf.tapestry.util.xml.InvalidStringException;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -46,6 +48,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.parser.filters.StringValidator;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.dialogfields.StringField;
@@ -71,7 +74,11 @@ public class RefactorComponentAliasPage extends TapestryWizardPage {
    * Constructor for RefactorCompontentNamePage.
    * @param pageName
    */
-  public RefactorComponentAliasPage(String pageName, String oldName, boolean showButtons, List existingComponentAliases) {
+  public RefactorComponentAliasPage(
+    String pageName,
+    String oldName,
+    boolean showButtons,
+    List existingComponentAliases) {
     super(pageName);
     setTitle("Change Component Alias");
     setDescription("Specify a new alias for the selected Component");
@@ -79,8 +86,7 @@ public class RefactorComponentAliasPage extends TapestryWizardPage {
     this.showButtons = showButtons;
     this.existingComponentAliases = existingComponentAliases;
     existingComponentAliases.remove(oldName);
-    
-    
+
     this.setImageDescriptor(
       ImageDescriptor.createFromURL(TapestryImages.getImageURL("component32.gif")));
   }
@@ -120,7 +126,10 @@ public class RefactorComponentAliasPage extends TapestryWizardPage {
 
     if (showButtons) {
 
-      buttons = new CheckBoxField("update components using alias '" + oldName + "' as a component type", 200);
+      buttons =
+        new CheckBoxField(
+          "update components using alias '" + oldName + "' as a component type",
+          200);
 
       buttonsControl = buttons.getControl(container);
 
@@ -181,22 +190,15 @@ public class RefactorComponentAliasPage extends TapestryWizardPage {
 
     }
 
-    IStatus val = null;
     try {
-      val =
-        TapestryPlugin.getDefault().validate(
+
+      StringValidator.validate(
         currentValue,
-          SpecificationParser.COMPONENT_ALIAS_PATTERN,
-          
-          "SpecificationParser.invalid-component-alias");
-    } catch (CoreException e) {
-    }
-
-    if (val != null && !val.isOK()) {
-
-      setMessage(val.getMessage(), ERROR);
+        SpecificationParser.COMPONENT_ALIAS_PATTERN,
+        "SpecificationParser.invalid-component-alias");
+    } catch (InvalidStringException e) {
+      setMessage(e.getMessage(), ERROR);
       return;
-
     }
 
     if (existingComponentAliases.contains(currentValue.trim())) {
@@ -210,7 +212,7 @@ public class RefactorComponentAliasPage extends TapestryWizardPage {
       return;
     }
 
-    ((RefactorComponentAliasWizard)getWizard()).newNameChanged(currentValue);
+    ((RefactorComponentAliasWizard) getWizard()).newNameChanged(currentValue);
     setPageComplete(true);
 
   }
@@ -241,9 +243,9 @@ public class RefactorComponentAliasPage extends TapestryWizardPage {
   public void setVisible(boolean visible) {
     super.setVisible(visible);
     if (visible) {
-    	
-    	checkPageComplete(componentName.getTextControl(null));
-    	
+
+      checkPageComplete(componentName.getTextControl(null));
+
     }
   }
 

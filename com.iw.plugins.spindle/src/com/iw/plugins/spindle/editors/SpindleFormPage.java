@@ -28,7 +28,6 @@ package com.iw.plugins.spindle.editors;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.pde.internal.ui.editor.PDEFormPage;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.update.ui.forms.internal.IFormPage;
 
 import com.iw.plugins.spindle.model.BaseTapestryModel;
@@ -76,14 +75,14 @@ public abstract class SpindleFormPage extends PDEFormPage {
     return true;
   }
 
-  /**
-   * @see org.eclipse.pde.internal.ui.editor.PDEFormPage#createPropertySheetPage()
-   */
-  public IPropertySheetPage createPropertySheetPage() {
-  	
-    return new SpindlePropertySheet();
-    
-  }
+//  /**
+//   * @see org.eclipse.pde.internal.ui.editor.PDEFormPage#createPropertySheetPage()
+//   */
+//  public IPropertySheetPage createPropertySheetPage() {
+//  	
+//    return new SpindlePropertySheet();
+//    
+//  }
 
 
 
