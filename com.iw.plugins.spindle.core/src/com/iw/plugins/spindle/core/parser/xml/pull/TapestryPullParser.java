@@ -140,6 +140,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         rootElementSeen = false;
         rootElement = null;
         documentIsDone = false;
+        parseStack.clear();
     }
 
     private void checkSanity() throws RuntimeException
@@ -197,8 +198,29 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
      */
     public void characters(XMLString text, Augmentations augs) throws XNIException
     {
+       
+        
         super.characters(text, augs);
         System.out.println("characters: " + text);
+        if (!rootElementSeen) {
+            // do nothing
+            return;
+        }
+        
+        
+        PullParserNode parent = parseStack.peek();
+        PullParserNode temp = PullParserNode.createTextNode(this, parent, text.toString());
+        if (parent.firstChild == null)
+        {
+            parent.setFirstChild(temp);
+
+        } else
+        {
+            temp.setPreviousSibling(lastCompletedElement);
+            lastCompletedElement.setNextSibling(temp);
+        }
+        temp.completed();
+        lastCompletedElement = temp;
     }
 
     /* (non-Javadoc)
@@ -246,7 +268,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         super.endElement(element, augs);
         System.out.println("endElement: " + element.rawname);
         parseStack.dump(System.err);
-        
+
         lastCompletedElement = parseStack.pop();
         if (lastCompletedElement != null)
         {
@@ -267,6 +289,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     public void startDocument(XMLLocator locator, String encoding, Augmentations augs) throws XNIException
     {
         super.startDocument(locator, encoding, augs);
+        reset();
         documentStarted = true;
         System.out.println("startDocument: ");
     }
