@@ -120,7 +120,10 @@ public abstract class BaseSpecAction extends BaseEditorAction
                 return;
 
             doRun();
-
+        } catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+            throw e;
         } finally
         {
             fPartitioner.disconnect();

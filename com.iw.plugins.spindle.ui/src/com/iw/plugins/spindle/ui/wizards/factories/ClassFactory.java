@@ -149,6 +149,10 @@ public class ClassFactory
 
             cu.commit(false, new SubProgressMonitor(monitor, 1));
 
+        } catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+            throw e;
         } finally
         {
             if (createdWorkingCopy != null)

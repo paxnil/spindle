@@ -36,6 +36,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
@@ -213,6 +214,10 @@ public class CompletionProposal implements ICompletionProposal
         {           
             Point usePoint = new Point(fSelectionPoint.x + fReplacementOffset, fSelectionPoint.y);
             return usePoint;
+        } catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+            throw e;
         } finally
         {
             fReplacementOffset = -1;

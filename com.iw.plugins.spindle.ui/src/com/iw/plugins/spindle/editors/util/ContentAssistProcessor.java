@@ -95,6 +95,10 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
 
             return doComputeCompletionProposals(viewer, documentOffset);
 
+        } catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+            throw e;
         } finally
         {
             fAssistParititioner.disconnect();

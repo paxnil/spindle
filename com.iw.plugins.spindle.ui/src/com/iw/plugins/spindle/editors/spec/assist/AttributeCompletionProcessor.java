@@ -186,6 +186,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
 
             return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+        } catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+            throw e;
         } finally
         {
             fAssistHelper = null;
@@ -252,7 +256,11 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
                 }
             }
             return NoInformation;
-        } finally
+        } catch (RuntimeException e)
+       {
+           UIPlugin.log(e);
+           throw e;
+       } finally
         {
             fAssistHelper = null;
         }

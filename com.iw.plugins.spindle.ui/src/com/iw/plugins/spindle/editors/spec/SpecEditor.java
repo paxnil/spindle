@@ -380,6 +380,10 @@ public class SpecEditor extends Editor implements IMultiPage
             }
             fUpdater.post();
 
+        } catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+            throw e;
         } finally
         {
             fOutlinePartitioner.disconnect();
@@ -526,8 +530,7 @@ public class SpecEditor extends Editor implements IMultiPage
                 collector.addProblem(problems[i]);
             }
             collector.endCollecting();
-            System.err.println("fatal?" + fParser.getHasFatalErrors());
-            if (fParser.getProblems().length > 0)
+             if (fParser.getProblems().length > 0)
                 return null;
             return result;
         }

@@ -145,6 +145,10 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 
             return doComputeCompletionProposals(viewer, documentOffset);
 
+        } catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+            throw e;
         } finally
         {
             fAssistParititioner.disconnect();
@@ -178,6 +182,10 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 
             return doComputeContextInformation(viewer, documentOffset);
 
+        } catch (RuntimeException e)
+        {
+            UIPlugin.log(e);
+            throw e;
         } finally
         {
             fAssistParititioner.disconnect();
@@ -186,7 +194,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 
     private ICompletionProposal[] computeEmptyDocumentProposal(ITextViewer viewer, int documentOffset)
     {
-        
+
         IStorage storage = fEditor.getStorage();
         String extension = storage.getFullPath().getFileExtension();
         if (extension == null || extension.length() == 0)
