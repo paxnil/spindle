@@ -24,75 +24,104 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.ui.descriptors;
+package com.iw.plugins.spindle.refactor.components;
+
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.DialogCellEditor;
 import com.iw.plugins.spindle.ui.PublicStaticFieldSelectionDialog;
+import com.iw.plugins.spindle.ui.ToolTipHandler;
 
 /**
  * @version 	1.0
  * @author
  */
-public class FieldBindingPropertyDescriptor extends PropertyDescriptor {
+public class ComponentAliasRefactorablePropertyDescriptor extends PropertyDescriptor {
 
-  private ITapestryModel model;
+  ITapestryProject project;
+  List existingComponentAliases;
 
   /**
    * Constructor for FieldBindingPropertyDescriptor.
    * @param id
    * @param displayName
    */
-  public FieldBindingPropertyDescriptor(Object id, String displayName, ITapestryModel model) {
+  public ComponentAliasRefactorablePropertyDescriptor(
+    Object id,
+    String displayName,
+    ITapestryProject project,
+    List existingComponentAliases) {
     super(id, displayName);
-    this.model = model;
+    this.project = project;
+    this.existingComponentAliases = existingComponentAliases;
+
   }
 
   public CellEditor createPropertyEditor(Composite parent) {
 
-    return new FieldBindingCellEditor(parent);
+    return new ComponentNameCellEditor(parent);
   }
 
-  class FieldBindingCellEditor extends DialogCellEditor {
+  class ComponentNameCellEditor extends DialogCellEditor {
+
+    ToolTipHandler handler;
 
     /**
      * Constructor for TypeDialogCellEditor
      */
-    protected FieldBindingCellEditor(Composite parent) {
-      super(parent);
-    }   
+    protected ComponentNameCellEditor(Composite parent) {
+      super(parent, true);
+
+    }
 
     /**
      * @see DialogCellEditor#openDialogBox(Control)
      */
     protected Object openDialogBox(Control cellEditorWindow) {
-      Object value = getValue();
-      try {
-      	
-        IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
-        PublicStaticFieldSelectionDialog dialog = new PublicStaticFieldSelectionDialog(cellEditorWindow.getShell(), jproject, (String)value);
-        dialog.create();
-        
-        if (dialog.open() == dialog.OK) {
-        	
-          return dialog.getDialogResult();
-          
+      String value = (String) getValue();
+      if (value == null || "".equals(value.trim()) || "fill in value".equals(value.trim())) {
+
+        return value;
+
+      }
+
+      RefactorComponentAliasWizard wizard = RefactorComponentAliasWizard.createWizard(project, value, existingComponentAliases);
+
+      if (wizard != null) {
+
+        WizardDialog dialog = new WizardDialog(cellEditorWindow.getShell(), wizard);
+
+        if (dialog.open() != dialog.CANCEL) {
+
+          value = wizard.getNewName();
+
         }
-      } catch (CoreException e) {
-      	
-      	ErrorDialog.openError(cellEditorWindow.getShell(), "Spindle error", "can't continue", e.getStatus());
+
       }
 
       return value;
     }
+
+    protected Control createControl(Composite parent) {
+      Control result = super.createControl(parent);
+      handler = new ToolTipHandler(parent.getShell());
+      handler.activateHoverHelp(defaultText);
+      defaultText.setData("TIP_TEXT", "to refactor, use the button -->");
+      return result;
+    }
+
   }
+
 }

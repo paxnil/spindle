@@ -22,7 +22,7 @@
   <tbody>
     <tr>
     <td>
-      <h1> Release <i>1.1beta2</i><br>
+      <h1> Release <i>1.1beta3</i><br>
       </h1>
       <h1> works only with Tapestry release 2.2-beta-2+<br>
       </h1>
@@ -61,13 +61,10 @@
         <a name="whatsnew"></a></p>
       <h2> What's New </h2>
       <ol>
-        <li>Added elements of the following &nbsp;<a href="https://sourceforge.net/tracker/index.php?group_id=50321&amp;atid=459331"> 
-          features</a>:</li>
-      </ol>
-      <ul>
-        <li> No new features in this release</li>
-        <!-- <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=617246&group_id=50321&atid=459331">[ 
-          617246 ] Refactor option - rename library</a></li> -->
+	  <li> Added the following <a href="https://sourceforge.net/tracker/index.php?group_id=50321&amp;atid=459331">features</a></li>
+	  </ol>
+      <ul>        
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=622382&group_id=50321&atid=459331">[ 622382 ] navigate to component from html outline</a></li>
       </ul>
       <ol>
         <li>Closed the following <a href="http://sourceforge.net/tracker/?group_id=50321&amp;atid=459328"> 
@@ -75,10 +72,11 @@
         </li>
       </ol>
       <ul>
-        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=619358&group_id=50321&atid=459328">[ 619358 ] Possible error in list of avail params</a></li>
-        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=619355&group_id=50321&atid=459328">[ 619355 ] Duplicate paramter added to .jwc </a></li>
-        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=619345&group_id=50321&atid=459328">[ 619345 ] Cannot delete application property</a></li>
-        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=619294&group_id=50321&atid=459328">[ 619294 ] Edit button does not response</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=622272&group_id=50321&atid=459328">[ 622272 ] Renaming a bean produces a duplicate</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=621854&group_id=50321&atid=459328">[ 621854 ] 'Add Comp' button stops working</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=621513&group_id=50321&atid=459328">[ 621513 ] Expression values, in .jwc source</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=620770&group_id=50321&atid=459328">[ 620770 ] Error when converting project</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=618860&group_id=50321&atid=459328">[ 618860 ] 1.1alpha3 - NullPointerException</a></li>
 		
 
       </ul>
@@ -100,7 +98,7 @@
       <a name="contents"></a> <h2> Contents </h2>
       <p> The contents of the release are thus: </p>
       <ol>
-        <li> com.iw.plugins.spindle-1.1beta2.jar - The file one unjars into <tt>ECLIPSE_HOME/plugins</tt> 
+        <li> com.iw.plugins.spindle-1.1beta3.jar - The file one unjars into <tt>ECLIPSE_HOME/plugins</tt> 
           to install the plugin. Note that in this release, the src is included 
           in this file -&nbsp;see <a href="file:///Q:/eclipse2/workspace/com.iw.plugins.spindle/Readme.html#bulding"> 
           Building Spindle.</a></li>
@@ -133,49 +131,17 @@
       <p>Instructions:<br>
       </p>
       <ol>
-        <li>One should review how Eclipse interacts with CVS before trying to 
-          import the Spindle Project. &nbsp;Docs are easily found within Eclipse 
-          by browsing Help (Menu = Help-&gt;Help Contents).</li>
-        <li>The anonymous CVS&nbsp; information needed to fill out the New Repository 
-          Location Wizard can be found here: http://sourceforge.net/cvs/?group_id=50321</li>
-        <li>Once connected to cvs.spindle.sourceforge.net, you can browse the 
-          HEAD and any versions. The HEAD contains the latest version of the spindle 
-          code (it may be broken at any particular time). I have had problems 
-          with CVS-&gt;Eclipse integration in the past so I don't have a version 
-          in CVS for every release. &nbsp;No worries though as the CVS stuff in 
-          Eclipse 2.0 is rock solid.</li>
-        <li>Select the version of spindle (com.iw.plugins.spindle) you wish to 
-          import, right-click and select "Check out as project". You now have 
-          the project but it does not build.</li>
-        <li>To get Spindle to build:</li>
+        <li>One should review how Eclipse interacts with CVS before trying to import the Spindle Project. &nbsp;Docs are easily found within Eclipse by 
+          browsing Help (Menu = Help-&gt;Help Contents).</li>
+        <li>The anonymous CVS&nbsp; information needed to fill out the New Repository Location Wizard can be found <a href="http://sourceforge.net/cvs/?group_id=50321">here</a></li>
+        <li>Once connected to cvs.spindle.sourceforge.net, you can browse the HEAD and any versions. The HEAD contains the latest version of the spindle 
+          code (it may be broken at any particular time).<em><strong> Branch Spindle1_1Dev contains the 1.1 code</strong></em>. I have had problems with 
+          CVS-&gt;Eclipse integration in the past so I don't have a version in CVS for every release. &nbsp;No worries though as the CVS stuff in Eclipse 
+          2.0 is rock solid.</li>
+        <li>Select the version of spindle (com.iw.plugins.spindle) you wish to import, right-click and select "Check out as project". You now have the project 
+          but it does not build.</li>
+        <li>To get Spindle to build see <a href="http://tapestry.sourceforge.net/wiki/index.php/BuildingSpindle">BuildingSpindle</a> on the Tapestry <a href="#" target="http://tapestry.sourceforge.net/wiki">wiki</a></li>
       </ol>
-      <ul>
-        <li>To build the spindle project, you need to import &nbsp;the plugins 
-          it depends on as Java Projects</li>
-        <li>Activate File-&gt;Import-&gt;External Plugins and fragments, a wizard 
-          will appear. Click "Next"</li>
-        <li>Select "Choose from plugins in the runtime workbench". Click Next</li>
-        <li>Select the following plugins:</li>
-      </ul>
-      <ul>
-        <ul>
-          <li>org.eclipse.jdt.ui</li>
-          <li>org.eclipse.core.runtime</li>
-          <li>org.eclipse.jdt.core</li>
-          <li>org.eclipse.core.resources</li>
-          <li>org.eclipse.pde</li>
-          <li>org.eclipse.pde.ui</li>
-          <li>org.eclipse.pde.core</li>
-          <li>org.eclipse.update.ui.forms</li>
-        </ul>
-      </ul>
-      <ul>
-        <li>Click "Add Required Plugins"</li>
-        <li>Click "Finish", the wizard will create projects for each selected 
-          plugin. The Spindle project build path is already set to look for these 
-          projects</li>
-        <li>Running Spindle, select "Run-&gt;Run As-&gt;Runtime WorkBench</li>
-      </ul>
       <p> .....................................................<br>
         <br>
       </p>
@@ -188,7 +154,7 @@
       Assuming that you have and installed a working Spindle compatible build 
       of Eclipse (see above) into a directory, say <tt>C:\eclipse</tt> ...<br> 
       <br>
-      Simply unjar the file&nbsp; <tt>com.iw.plugins.spindle-1.1beta2.jar</tt> 
+      Simply unjar the file&nbsp; <tt>com.iw.plugins.spindle-1.1beta3.jar</tt> 
       into <tt> C:\eclipse\plugins</tt> and restart Eclipse. That's almost all 
       there is to it!<br> <br>
       Since Spindle is a plugin that adds IDE support to Tapestry, it only makes 
@@ -223,10 +189,8 @@
       <br>
       </a>&nbsp;.....................................................<br> <br> 
       <br> <a name="issues"></a> <h2> Known Issues </h2>
-      This is a first alpha release. It probably has a few bugs that have slipped 
-      thought the cracks.<br> <br>
-      The <a href="/Spindle_1_1alpha_FAQ.html">Migration Tool</a>&nbsp; works 
-      very well though.<br> <br>
+      Working but incomplete functionality has been added for refactoring see the refactoring feature request mentioned in What's New above.<br> <br>
+      <br>
       Pls log any issues you find <a href="http://sourceforge.net/tracker/?group_id=50321&amp;atid=459328"> 
       here</a><br> <br> <br> <br>
       .....................................................<br> <br> <br> <br> 
@@ -243,7 +207,7 @@
           </tr>
           <tr valign="Top" bgcolor="silver">
           <td valign="Top">
-            net.sf..tapestry.jar 
+            net.sf.tapestry.jar 
           </td>
           <td valign="Top">
             2.2 
@@ -290,7 +254,7 @@
             log4j-core.jar 
           </td>
           <td>
-            1.1.3 
+            1.2.6 
           </td>
           <td>
             <a href="LICENSE.log4j.txt"> Apache Software License, Version 1.1</a>
@@ -335,7 +299,7 @@
             ognl.jar<br> 
           </td>
           <td valign="Top">
-            2.1.2<br> 
+            2.1.4<br> 
           </td>
           <td valign="Top">
             <a href="LICENSE.ognl.txt">BSD ?<br>

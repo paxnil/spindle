@@ -43,18 +43,19 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Text;
 
-public abstract class EditableDialogCellEditor extends TextCellEditor {
+public abstract class DialogCellEditor extends TextCellEditor {
 
   private Composite editor;
 
   private Control contents;
 
-  private Text defaultText;
+  protected Text defaultText;
+  
 
   /**
    * The button.
    */
-  private Button button;
+  protected Button button;
 
   /**
    * Internal class for laying out the dialog.
@@ -83,9 +84,15 @@ public abstract class EditableDialogCellEditor extends TextCellEditor {
    * Creates a new dialog cell editor parented under the given control. 
    * @param parent the parent control
    */
-  protected EditableDialogCellEditor(Composite parent) {
-    super(parent);
+  protected DialogCellEditor(Composite parent) {
+    this(parent, false);
   }
+  
+  protected DialogCellEditor(Composite parent, boolean textEditable) {
+  	super(parent);
+  	defaultText.setEditable(textEditable);
+  }
+  	
   /**
    * Creates the button for this cell editor under the given parent control.   
    * @param parent the parent control
@@ -118,7 +125,7 @@ public abstract class EditableDialogCellEditor extends TextCellEditor {
     editor.setLayout(new DialogCellLayout());
 
     contents = createContents(editor);
-
+    
     button = createButton(editor);
     button.setFont(font);
 

@@ -21,6 +21,7 @@
  * Contributor(s):
  * 
  *  glongman@intelligentworks.com
+ *  phraktle@imapmail.org
  *
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.html;
@@ -56,6 +57,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
@@ -66,6 +68,9 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.editorjwc.JWCMultipageEditor;
+import com.iw.plugins.spindle.editorjwc.components.ComponentsFormPage;
+import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
@@ -78,9 +83,14 @@ import com.iw.plugins.spindle.util.StringSorter;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public class HTMLContentOutlinePage
-  extends ContentOutlinePage
-  implements IDocumentPartitioningListener, IDocumentListener {
+/**
+ * @author gwl
+ * @version $Id$
+ *
+ * Copyright 2002, Intelligent Works Inc.
+ * All Rights Reserved.
+ */
+public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocumentPartitioningListener, IDocumentListener {
 
   IDocument document;
   IFile documentFile = null;
@@ -88,8 +98,9 @@ public class HTMLContentOutlinePage
   ContentProvider contentProvider = new ContentProvider();
 
   private CreateContainedComponentAction createAction = new CreateContainedComponentAction();
-  private ContainedComponentAlreadyExistsAction alreadyHasAction =
-    new ContainedComponentAlreadyExistsAction();
+  private ContainedComponentAlreadyExistsAction alreadyHasAction = new ContainedComponentAlreadyExistsAction();
+
+  private OpenComponentAction openAction = new OpenComponentAction();
 
   /**
    * Constructor for HTMLOutlinePage
@@ -194,8 +205,7 @@ public class HTMLContentOutlinePage
     }
     IFile file = findRelatedComponent();
     TapestryComponentModel model = getComponentModel(file);
-   
-   
+
     boolean canCreate = (model != null);
     if (canCreate) {
 
@@ -205,26 +215,28 @@ public class HTMLContentOutlinePage
         createAction.configure(file, selectedJwcid);
         manager.add(createAction);
 
+      } else {
+        openAction.configure(file, selectedJwcid);
+        manager.add(openAction);
+
       }
     }
 
   }
 
   private boolean alreadyHasJWCID(String jwcid, IFile componentResource) {
-  	
-  	if (jwcid == null || "".equals(jwcid.trim()) || componentResource == null) {
-  		
-  		return false;
-  		
-  	}
+
+    if (jwcid == null || "".equals(jwcid.trim()) || componentResource == null) {
+
+      return false;
+
+    }
 
     TapestryComponentModel model = getComponentModel(componentResource);
-   
-   
+
     if (model != null) {
-    	
-      PluginComponentSpecification spec =
-        (PluginComponentSpecification) model.getComponentSpecification();
+
+      PluginComponentSpecification spec = (PluginComponentSpecification) model.getComponentSpecification();
 
       if (spec != null) {
         return spec.getComponent(jwcid) != null;
@@ -234,31 +246,29 @@ public class HTMLContentOutlinePage
     return false;
 
   }
-  
+
   private TapestryComponentModel getComponentModel(IFile file) {
-  	
-   try {
+
+    try {
       TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(file);
-      	
-      	IEditorPart part = Utils.getEditorFor(file);
-      	
-      	if (part != null && part instanceof SpindleMultipageEditor) {
-      		
-      		return (TapestryComponentModel)((SpindleMultipageEditor)part).getModel();
-      		
-      	} else {
-      		
-      		return (TapestryComponentModel)mgr.getReadOnlyModel(file);
-      	
-      	}
+
+      IEditorPart part = Utils.getEditorFor(file);
+
+      if (part != null && part instanceof SpindleMultipageEditor) {
+
+        return (TapestryComponentModel) ((SpindleMultipageEditor) part).getModel();
+
+      } else {
+
+        return (TapestryComponentModel) mgr.getReadOnlyModel(file);
+
+      }
     } catch (CoreException e) {
-    	
-    	return null;
+
+      return null;
     }
-  	
+
   }
-  		
-  		
 
   private IFile findRelatedComponent() {
     if (documentFile != null) {
@@ -400,8 +410,7 @@ public class HTMLContentOutlinePage
         }
         for (int i = 0; i < partitions.length; i++) {
           String type = partitions[i].getType();
-          if (type.equals(TapestryHTMLPartitionScanner.JWC_TAG)
-            || type.equals(TapestryHTMLPartitionScanner.JWCID_TAG)) {
+          if (type.equals(TapestryHTMLPartitionScanner.JWC_TAG) || type.equals(TapestryHTMLPartitionScanner.JWCID_TAG)) {
             if (findJWCID(partitions[i]) != null) {
 
               if (!oldContents.contains(partitions[i])) {
@@ -449,18 +458,18 @@ public class HTMLContentOutlinePage
     * @see ILabelProvider#getImage(Object)
     */
     public Image getImage(Object element) {
-    	
+
       String jwcid = null;
-    	
+
       try {
-        jwcid = getJWCID((ITypedRegion)element);
+        jwcid = getJWCID((ITypedRegion) element);
       } catch (Exception e) {
       }
-      
+
       if (jwcid != null && alreadyHasJWCID(jwcid, findRelatedComponent())) {
-      	
-      	return jwcImage;
-      	
+
+        return jwcImage;
+
       }
 
       return notCreatedImage;
@@ -533,12 +542,7 @@ public class HTMLContentOutlinePage
       this.modelFile = model;
       this.jwcid = jwcid;
 
-      setText(
-        "create '"
-          + jwcid
-          + "' in '"
-          + documentFile.getFullPath().removeFileExtension().lastSegment()
-          + ".jwc'");
+      setText("create '" + jwcid + "' in '" + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc'");
     }
 
     public void run() {
@@ -555,7 +559,7 @@ public class HTMLContentOutlinePage
         if (editor != null) {
           editor.parseForProblems();
         }
-        
+
         getTreeViewer().setInput("dummy");
 
       } catch (ClassCastException e) {
@@ -593,12 +597,12 @@ public class HTMLContentOutlinePage
         return;
       }
       Utils.createContainedComponentIn(jwcid, chosen, model);
-      
+
       if (targetEditor == null) {
-      	
+
         TapestryPlugin.openTapestryEditor(model.getUnderlyingStorage());
       }
-     
+
     }
 
     private void createInWorkspace() {
@@ -689,11 +693,7 @@ public class HTMLContentOutlinePage
           "Abort, target component has parse errors",
           null);
 
-      ErrorDialog.openError(
-        TapestryPlugin.getDefault().getActiveWorkbenchShell(),
-        null,
-        null,
-        status);
+      ErrorDialog.openError(TapestryPlugin.getDefault().getActiveWorkbenchShell(), null, null, status);
 
     }
   }
@@ -705,15 +705,63 @@ public class HTMLContentOutlinePage
     }
 
     public void configure(String jwcid) {
-      setText(
-        "'"
-          + jwcid
-          + "' already exists in "
-          + documentFile.getFullPath().removeFileExtension().lastSegment()
-          + ".jwc");
+      setText("'" + jwcid + "' already exists in " + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc");
     }
 
     public void run() { /* do nothing*/
     }
   }
+
+  /**
+   * @author phraktle@imapmail.org    
+   */
+  class OpenComponentAction extends Action {
+
+    IFile modelFile;
+    String jwcid;
+
+    public OpenComponentAction() {
+      super();
+      setToolTipText("Open component definition");
+    }
+
+    public void configure(IFile model, String jwcid) {
+      this.modelFile = model;
+      this.jwcid = jwcid;
+      setText("Open component " + jwcid);
+    }
+
+    public void run() {
+      IEditorPart editor = Utils.getEditorFor(modelFile);
+      if (editor != null) {
+        TapestryPlugin.getDefault().getActivePage().bringToTop(editor);
+      } else {
+        TapestryPlugin.openTapestryEditor(modelFile);
+      }
+
+      JWCMultipageEditor jwc = (JWCMultipageEditor) Utils.getEditorFor(modelFile);
+
+      if (jwc != null) {
+      	
+        ITapestryModel model = (ITapestryModel) jwc.getModel();
+
+        if (!model.isLoaded()) {
+        	
+           jwc.showPage(jwc.SOURCE_PAGE);
+
+        } else {
+        	
+          // had to change this from SpindleFormPage as the source page is not a SpindleFormPage!
+          IPDEEditorPage currentPage = (IPDEEditorPage) jwc.getCurrentPage();
+          ComponentsFormPage desiredPage = (ComponentsFormPage) jwc.getPage(jwc.COMPONENTS);
+          
+          if (currentPage != desiredPage) {
+            jwc.showPage(jwc.COMPONENTS);
+          }
+          desiredPage.openTo(this.jwcid);
+        }
+      }
+    }
+  }
+
 }

@@ -33,8 +33,8 @@ public class InvalidStringConverter {
 
   public static int getLineNumberForInvalidString(InvalidStringException e, IDocument document) {
   	
-  	return getLineNumberForInvalidString(e.getInvalidString(), e.getPattern(), document);
-  	
+//  	return getLineNumberForInvalidString(e.getInvalidString(), e.getPattern(), document);
+ 		return 1; 	
   }
 
   public static int getLineNumberForInvalidString(String invalid, String pattern, IDocument document) {

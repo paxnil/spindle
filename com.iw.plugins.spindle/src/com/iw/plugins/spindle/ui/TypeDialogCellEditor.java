@@ -43,7 +43,7 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.util.Utils;
 
-public class TypeDialogCellEditor extends EditableDialogCellEditor {
+public class TypeDialogCellEditor extends DialogCellEditor {
 
   private Label label;
   private IPackageFragmentRoot root;

@@ -36,7 +36,7 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
-import com.iw.plugins.spindle.ui.EditableDialogCellEditor;
+import com.iw.plugins.spindle.ui.DialogCellEditor;
 
 public class ChoosePageFromLibraryPropertyDescriptor extends PropertyDescriptor implements INeedsModelInitialization {
 
@@ -74,7 +74,7 @@ public class ChoosePageFromLibraryPropertyDescriptor extends PropertyDescriptor 
   }
 
   
-  class ChoosePageCellEditor extends EditableDialogCellEditor {
+  class ChoosePageCellEditor extends DialogCellEditor {
 
   private String title = "Page Chooser";
   private String message = "choose a page";

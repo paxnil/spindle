@@ -451,7 +451,7 @@ public class PluginBeanSpecification
         return;
       }
       this.identifier = newName;
-      parentSpec.removeComponent(oldName);
+      parentSpec.removeBeanSpecification(oldName);
 
     } else if ("class".equals(key)) {
 

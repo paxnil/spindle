@@ -37,7 +37,7 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
-import com.iw.plugins.spindle.ui.EditableDialogCellEditor;
+import com.iw.plugins.spindle.ui.DialogCellEditor;
 
 public class WorkspaceStoragePropertyDescriptor
   extends PropertyDescriptor
@@ -79,7 +79,7 @@ public class WorkspaceStoragePropertyDescriptor
     return new ChooseWorkspaceModelCellEditor(parent);
   }
 
-  class ChooseWorkspaceModelCellEditor extends EditableDialogCellEditor {
+  class ChooseWorkspaceModelCellEditor extends DialogCellEditor {
 
     /**
      * Constructor for ChooseWorkspaceModelCellEditor.

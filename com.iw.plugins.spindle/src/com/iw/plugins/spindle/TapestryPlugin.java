@@ -33,12 +33,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.tapestry.Tapestry;
 import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.util.xml.AbstractDocumentParser;
 import org.apache.log4j.Category;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.Priority;
+import org.apache.oro.text.regex.MalformedPatternException;
+import org.apache.oro.text.regex.Pattern;
+import org.apache.oro.text.regex.PatternCompiler;
+import org.apache.oro.text.regex.PatternMatcher;
+import org.apache.oro.text.regex.Perl5Compiler;
+import org.apache.oro.text.regex.Perl5Matcher;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -94,6 +101,10 @@ public class TapestryPlugin extends AbstractUIPlugin {
   private static TapestryPlugin instance;
   private static SpecificationParser parser;
   private static TapestryProjectModelManager modelManager = null;
+
+  protected PatternCompiler _patternCompiler;
+  protected PatternMatcher _matcher;
+  protected Map _compiledPatterns;
 
   static public final String ID_PLUGIN = "com.iw.plugins.spindle";
   static public final String NATURE_ID = ID_PLUGIN + ".project.TapestryProject";
@@ -202,8 +213,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
     if (result == null) {
 
       SpindleStatus status = new SpindleStatus();
-      status.setError(
-        project.getFullPath().toString() + " is not open or is not a Tapestry project");
+      status.setError(project.getFullPath().toString() + " is not open or is not a Tapestry project");
 
       throw new CoreException(status);
 
@@ -212,10 +222,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
     return result;
   }
 
-  public ITapestryProject addTapestryProjectNatureTo(
-    IJavaProject jproject,
-    IProgressMonitor monitor)
-    throws CoreException {
+  public ITapestryProject addTapestryProjectNatureTo(IJavaProject jproject, IProgressMonitor monitor) throws CoreException {
 
     IProject project = jproject.getProject();
 
@@ -344,8 +351,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
     return ResourcesPlugin.getWorkspace();
   }
 
-  public static synchronized TapestryProjectModelManager getTapestryModelManager(IStorage storage)
-    throws CoreException {
+  public static synchronized TapestryProjectModelManager getTapestryModelManager(IStorage storage) throws CoreException {
     ITapestryProject tproject = getDefault().getTapestryProjectFor(storage);
     return tproject.getModelManager();
   }
@@ -363,8 +369,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
     return result.toArray();
   }
 
-  protected void searchForTapestryElementsIn(IContainer container, List collect)
-    throws CoreException {
+  protected void searchForTapestryElementsIn(IContainer container, List collect) throws CoreException {
     IResource[] members = container.members(false);
     for (int i = 0; i < members.length; i++) {
       if (members[i] instanceof IFile) {
@@ -410,9 +415,9 @@ public class TapestryPlugin extends AbstractUIPlugin {
     ErrorDialog.openError(getActiveWorkbenchShell(), null, null, status);
     ResourcesPlugin.getPlugin().getLog().log(status);
   } /** 
-               * Sets default preference values. These values will be used
-               * until some preferences are actually set using Preference dialog.
-               */
+                   * Sets default preference values. These values will be used
+                   * until some preferences are actually set using Preference dialog.
+                   */
   protected void initializeDefaultPreferences(IPreferenceStore store) {
     ColorManager.initializeDefaults(store);
     NewTapComponentWizardPage.initializeDefaults(store);
@@ -537,6 +542,44 @@ public class TapestryPlugin extends AbstractUIPlugin {
     }
 
     return false;
+  }
+
+  //the following is ugly because its ripped off from Howard. added a reminder task to
+  // see if the validation stuff in AbstractSpecificationParser could be made available as static methods.
+
+  protected Pattern compilePattern(String pattern) throws CoreException {
+    if (_patternCompiler == null)
+      _patternCompiler = new Perl5Compiler();
+
+    try {
+      return _patternCompiler.compile(pattern, Perl5Compiler.SINGLELINE_MASK);
+    } catch (MalformedPatternException ex) {
+      throw new CoreException(new SpindleStatus(ex));
+    }
+  }
+
+  public IStatus validate(String value, String pattern, String errorKey) throws CoreException {
+  	
+  	SpindleStatus result = new SpindleStatus();
+    if (_compiledPatterns == null)
+      _compiledPatterns = new HashMap();
+
+    Pattern compiled = (Pattern) _compiledPatterns.get(pattern);
+
+    if (compiled == null) {
+      compiled = compilePattern(pattern);
+
+      _compiledPatterns.put(pattern, compiled);
+    }
+
+    if (_matcher == null)
+      _matcher = new Perl5Matcher();
+
+    if (_matcher.matches(value, compiled))
+      return result;
+
+	result.setError(Tapestry.getString(errorKey, value));
+	return result;
   }
 
 }

@@ -31,8 +31,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -64,6 +66,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.internal.SaveAllAction;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
 import com.iw.plugins.spindle.TapestryPlugin;
@@ -72,6 +75,7 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
+import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 
 /** 
  * A class to collect useful methods in. May move them elsewhere or, then again
@@ -225,7 +229,10 @@ public class Utils {
       }
     }
     return null;
+        
   }
+	 
+  
 
   //  public static List getApplicationsWithAlias(String alias) {
   //    ArrayList result = new ArrayList();
@@ -606,5 +613,8 @@ public class Utils {
 
     return contents;
   }
+  
+
+ 
 
 }

@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
-public class DocumentationCellEditor extends EditableDialogCellEditor {
+public class DocumentationCellEditor extends DialogCellEditor {
 
   private Label label;
   private String title;

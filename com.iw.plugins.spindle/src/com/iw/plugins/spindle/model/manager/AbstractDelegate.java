@@ -76,6 +76,10 @@ public abstract class AbstractDelegate implements ITapestryModelManagerDelegate 
   	}  	
   	
   }
+  
+  public void clear() {  	
+  	models.clear();
+  }
 
   /**
    * @see com.iw.plugins.spindle.model.manager.ITapestryModelManagerDelegate#removeModel(IModel)

@@ -27,6 +27,7 @@
 package com.iw.plugins.spindle.editorlib.components;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -53,7 +54,10 @@ import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
+import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.refactor.components.ComponentAliasRefactorablePropertyDescriptor;
+import com.iw.plugins.spindle.refactor.components.RefactorComponentAliasPage;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
@@ -203,8 +207,6 @@ public class ComponentAliasSection
     return true;
   }
 
- 
-
   protected class AliasHolder implements IIdentifiable, IPropertySource {
 
     private String identifier;
@@ -279,10 +281,39 @@ public class ComponentAliasSection
 
     public IPropertyDescriptor[] getPropertyDescriptors() {
 
+      IPropertyDescriptor nameDescriptor;
+
+      try {
+        nameDescriptor =
+          new ComponentAliasRefactorablePropertyDescriptor(
+            "name",
+            "Name",
+            TapestryPlugin.getDefault().getTapestryProjectFor(getModel()), 
+            getExistingComponentAliases());
+      } catch (CoreException e) {
+        nameDescriptor = new TextPropertyDescriptor("name", "Name");
+      }
+
       return new IPropertyDescriptor[] {
-        new TextPropertyDescriptor("name", "Name"),
+        nameDescriptor,
         new ComponentTypeDialogPropertyDescriptor("spec", "Spec", null, null)};
     }
+
+    /**
+     * Method getExistingComponentAliases.
+     */
+    private List getExistingComponentAliases() {
+    	
+    	TapestryLibraryModel model = (TapestryLibraryModel)getModel();
+    	IPluginLibrarySpecification spec = model.getSpecification();
+    	if (spec != null) {
+    		
+    		return spec.getComponentAliases();
+    	}
+    	
+    	return Collections.EMPTY_LIST;
+    }
+
 
     public Object getEditableValue() {
       return identifier;
@@ -341,7 +372,8 @@ public class ComponentAliasSection
             newButton.getShell(),
             TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage()),
             "Choose Component",
-            "Choose a Component to be aliased", true);
+            "Choose a Component to be aliased",
+            true);
 
         dialog.create();
 

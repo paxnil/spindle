@@ -125,9 +125,10 @@ public class StringField extends DialogField {
   public boolean setFocus() {
     if (textControl != null && !textControl.isDisposed()) {
       textControl.setFocus();
-      textControl.setSelection(0, textControl.getText().length());
+      textControl.selectAll();
     }
     return true;
   }
+  	
 
 }

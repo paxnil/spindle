@@ -70,6 +70,8 @@ public interface ITapestryModelManagerDelegate  {
   
   
   public void registerParserFor(String extension);
+  
+  public void clear();
   	
 
 

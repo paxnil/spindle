@@ -36,7 +36,7 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.util.lookup.TapestryNamespaceLookup;
 
-public class ComponentTypeDialogCellEditor extends EditableDialogCellEditor {
+public class ComponentTypeDialogCellEditor extends DialogCellEditor {
 
   private Label label;
   private ITapestryModel model;

@@ -121,7 +121,7 @@ public class PluginBindingSpecification
       if (isDTD13OrBetter) {
 
         writer.print("\" expression='");
-        writer.print(getValue());
+        writer.print(convert(getValue()));
         writer.println("'/>");
         return;
 
@@ -140,6 +140,43 @@ public class PluginBindingSpecification
 
     writer.print(getValue());
     writer.println("\"/>");
+  }
+
+  /**
+   * Method convert.
+   * @param string
+   * @return boolean
+   */
+  private String convert(String string) {
+    if (string == null && "".equals(string.trim())) {
+
+      return "";
+
+    }
+
+    StringBuffer buffer = new StringBuffer();
+    final char[] characters = string.toCharArray();
+    for (int i = 0; i < characters.length; i++) {
+      switch (characters[i]) {
+        case '<' :
+          buffer.append("&lt;");
+          break;
+
+        case '>' :
+          buffer.append("&gt;");
+          break;
+          
+        case '&' : 
+          buffer.append("&amp;");
+		  break;
+		  
+        default :
+          buffer.append(characters[i]);
+          break;
+      }
+
+    }
+    return buffer.toString();
   }
 
   private IPropertyDescriptor[] staticDescriptors =
@@ -167,18 +204,18 @@ public class PluginBindingSpecification
    * @see org.eclipse.ui.views.properties.IPropertySource#getPropertyDescriptors()
    */
   public IPropertyDescriptor[] getPropertyDescriptors() {
-  	
+
     BindingType type = getType();
 
     if (type == BindingType.INHERITED) {
-    	
+
       return inheritDescriptors;
-      
+
     }
     if (type == BindingType.STATIC) {
-    	
+
       return staticDescriptors;
-      
+
     }
     if (type == BindingType.DYNAMIC) {
 
@@ -198,15 +235,15 @@ public class PluginBindingSpecification
     }
 
     if (type == BindingType.FIELD) {
-    	
+
       return fieldDescriptors;
-      
+
     }
 
     if (type == BindingType.STRING) {
-    	
+
       return stringDescriptiors;
-      
+
     }
     return null;
   }

@@ -3,7 +3,6 @@
 	<name>com.iw.plugins.spindle</name>
 	<comment></comment>
 	<projects>
-		<project>Tapestry</project>
 		<project>org.apache.xerces</project>
 		<project>org.eclipse.core.boot</project>
 		<project>org.eclipse.core.resources</project>

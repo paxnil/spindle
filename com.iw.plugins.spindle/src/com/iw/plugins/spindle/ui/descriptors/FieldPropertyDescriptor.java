@@ -36,7 +36,7 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.ui.EditableDialogCellEditor;
+import com.iw.plugins.spindle.ui.DialogCellEditor;
 import com.iw.plugins.spindle.ui.PublicStaticFieldSelectionDialog;
 
 /**
@@ -71,7 +71,7 @@ public class FieldPropertyDescriptor
     return new FieldBindingCellEditor(parent);
   }
 
-  class FieldBindingCellEditor extends EditableDialogCellEditor {
+  class FieldBindingCellEditor extends DialogCellEditor {
 
     /**
      * Constructor for TypeDialogCellEditor

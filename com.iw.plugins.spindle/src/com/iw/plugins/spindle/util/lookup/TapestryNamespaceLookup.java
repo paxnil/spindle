@@ -65,7 +65,7 @@ public class TapestryNamespaceLookup implements ILookupAcceptor {
 
     library =
       (TapestryLibraryModel) project.getModelManager().getReadOnlyModel(
-        project.getProjectStorage());
+        project.getProjectStorage(), true);
 
     configure(library);
   }

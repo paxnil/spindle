@@ -140,66 +140,46 @@ public class TapestryLookup implements ILookupAcceptor {
 
   }
 
-  public IStorage[] findComponent(String tapestryPath, int acceptFlags) {
+  public IStorage[] findByTapestryPath(String tapestryPath, int acceptFlags) {
     if (!initialized) {
       throw new Error("not initialized");
     }
-    acceptFlags |= (ACCEPT_COMPONENTS | FULL_TAPESTRY_PATH);
+    acceptFlags |= FULL_TAPESTRY_PATH;
     StorageOnlyRequest request = new StorageOnlyRequest();
     findAll(tapestryPath, false, acceptFlags, request);
     return request.getResults();
+
+  }
+
+  public IStorage[] findComponent(String tapestryPath, int acceptFlags) {
+    acceptFlags |= ACCEPT_COMPONENTS;
+    return findByTapestryPath(tapestryPath, acceptFlags);
   }
 
   public IStorage findDefaultLibrary() {
-    if (!initialized) {
-      throw new Error("not initialized");
-    }
-    int acceptFlags = (ACCEPT_LIBRARIES | FULL_TAPESTRY_PATH);
-    StorageOnlyRequest request = new StorageOnlyRequest();
-    findAll("/net/sf/tapestry/Framework.library", false, acceptFlags, request);
-    return request.getResults()[0];
-
+    return findByTapestryPath(
+      "/net/sf/tapestry/Framework.library",
+      ACCEPT_LIBRARIES | FULL_TAPESTRY_PATH)[0];
   }
 
-  /**
-  * Method findPage.
-  * @param specificationPath
-  * @return IStorage[]
-  */
   public IStorage[] findPage(String tapestryPath) {
-    if (!initialized) {
-      throw new Error("not initialized");
-    }
-    StorageOnlyRequest request = new StorageOnlyRequest();
-    findAll(tapestryPath, false, ACCEPT_PAGES | FULL_TAPESTRY_PATH, request);
-    return request.getResults();
+    return findByTapestryPath(tapestryPath, ACCEPT_PAGES);
   }
 
   public IStorage[] findApplication(String tapestryPath) {
-    if (!initialized) {
-      throw new Error("not initialized");
-    }
-    StorageOnlyRequest request = new StorageOnlyRequest();
-    findAll(tapestryPath, false, ACCEPT_APPLICATIONS | FULL_TAPESTRY_PATH, request);
-    return request.getResults();
+    return findByTapestryPath(tapestryPath, ACCEPT_APPLICATIONS);
   }
 
   public IStorage[] findLibrary(String tapestryPath) {
-    if (!initialized) {
-      throw new Error("not initialized");
-    }
-    StorageOnlyRequest request = new StorageOnlyRequest();
-    findAll(tapestryPath, false, ACCEPT_LIBRARIES | FULL_TAPESTRY_PATH, request);
-    return request.getResults();
+    return findByTapestryPath(tapestryPath, ACCEPT_LIBRARIES);
   }
 
   public IStorage[] findHtmlFor(String tapestryPath) {
 
     String usePath = tapestryPath.substring(0, tapestryPath.lastIndexOf("."));
     usePath += ".html";
-    StorageOnlyRequest request = new StorageOnlyRequest();
-    findAll(usePath, false, ACCEPT_HTML | FULL_TAPESTRY_PATH, request);
-    return request.getResults();
+
+    return findByTapestryPath(usePath, ACCEPT_HTML);
   }
 
   public IResource findParentResource(IStorage storage) throws JavaModelException {
@@ -535,7 +515,7 @@ public class TapestryLookup implements ILookupAcceptor {
    */
   private Object[] getSourcePackageResources(IPackageFragment pkg) throws CoreException {
 
-    Object[] result = new Object[0];   
+    Object[] result = new Object[0];
 
     if (!pkg.isDefaultPackage()) {
 

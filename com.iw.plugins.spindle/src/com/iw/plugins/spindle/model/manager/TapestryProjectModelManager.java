@@ -80,8 +80,7 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
  * Copyright 2002, Intelligent Work Inc.
  * All Rights Reserved.
  */
-public class TapestryProjectModelManager
-  implements IResourceChangeListener, IResourceDeltaVisitor {
+public class TapestryProjectModelManager implements IResourceChangeListener, IResourceDeltaVisitor, IModelProviderListener {
 
   static private final String EXTENSION_ID = "modelManagers";
 
@@ -124,12 +123,14 @@ public class TapestryProjectModelManager
   public TapestryProjectModelManager(IProject project) {
     super();
     this.project = project;
+    addModelProviderListener(this);
+    
+    
 
   }
 
   public TapestryProjectModelManager(IProject project, String message) {
-    super();
-    this.project = project;
+    this(project);    
     this.message = message;
 
   }
@@ -193,8 +194,7 @@ public class TapestryProjectModelManager
                 (ITapestryModelManagerDelegate) elements[j].createExecutableExtension("class");
 
               if (modelDelegates.containsKey(extension)) {
-                throw new IllegalArgumentException(
-                  extension + " is already registered with a Spindle Model Delegate");
+                throw new IllegalArgumentException(extension + " is already registered with a Spindle Model Delegate");
               }
 
               modelDelegates.put(extension, delegate);
@@ -342,6 +342,7 @@ public class TapestryProjectModelManager
         // editable copy can go
         info.model.dispose();
         info.model = null;
+        info.consumer = null;
 
       }
       if (info.count == 0) {
@@ -361,8 +362,7 @@ public class TapestryProjectModelManager
   }
 
   public void fireModelsChanged(ITapestryModel[] models) {
-    ModelProviderEvent event =
-      new ModelProviderEvent(this, IModelProviderEvent.MODELS_CHANGED, null, null, models);
+    ModelProviderEvent event = new ModelProviderEvent(this, IModelProviderEvent.MODELS_CHANGED, null, null, models);
     fireModelProviderEvent(event);
   }
 
@@ -507,10 +507,7 @@ public class TapestryProjectModelManager
         model = createModel(file);
         addModel(model);
       } else {
-        try {
-          model.reload();
-        } catch (CoreException e) {
-        }
+        reloadModel(model);
       }
     } else {
 
@@ -523,7 +520,6 @@ public class TapestryProjectModelManager
         } else if (delta.getKind() == IResourceDelta.CHANGED) {
           if ((IResourceDelta.CONTENT & delta.getFlags()) != 0) {
             reloadModel(model);
-
           }
         }
       }
@@ -615,8 +611,7 @@ public class TapestryProjectModelManager
 
           window.run(false, false, new IRunnableWithProgress() {
 
-            public void run(IProgressMonitor monitor)
-              throws InvocationTargetException, InterruptedException {
+            public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
               populateAllModels(project, TapestryLookup.ACCEPT_ANY, monitor);
             }
@@ -637,9 +632,7 @@ public class TapestryProjectModelManager
 
     workspace.addResourceChangeListener(
       this,
-      IResourceChangeEvent.PRE_CLOSE
-        | IResourceChangeEvent.PRE_DELETE
-        | IResourceChangeEvent.PRE_AUTO_BUILD);
+      IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.PRE_AUTO_BUILD);
     initialized = true;
   }
 
@@ -672,11 +665,11 @@ public class TapestryProjectModelManager
       monitor.worked(1);
       IStorage storage = (IStorage) foundElements.next();
       if (models.containsKey(storage)) {
-      	
-      	continue;
+
+        continue;
       }
       ITapestryModel model = createModel(storage);
-      if (model != null ) {
+      if (model != null) {
 
         addModel(model);
 
@@ -837,7 +830,7 @@ public class TapestryProjectModelManager
     nuked.dispose();
   }
   public void reset() {
-    initialized = false;
+    shutdown();
     initializeProjectTapestryModels();
   }
 
@@ -846,36 +839,35 @@ public class TapestryProjectModelManager
     if (allModels == null) {
       return;
     }
-    
+
     IPath thisProjectPath = getProject().getFullPath();
     IResourceDelta topLevelDelta = event.getDelta();
     if (topLevelDelta == null) {
-    	
-    	return;
-    	
+
+      return;
+
     }
     IResourceDelta thisProjectDelta = topLevelDelta.findMember(thisProjectPath);
     if (thisProjectDelta == null) {
-    	
-    	// the event does not pertain to this project!
-    	return;
-    	
+
+      // the event does not pertain to this project!
+      return;
+
     }
-    
 
     switch (event.getType()) {
       case IResourceChangeEvent.PRE_AUTO_BUILD :
-      
- 		IPath classpath = thisProjectPath.append(".classpath");
- 		IResourceDelta classpathDelta = topLevelDelta.findMember(classpath);
- 		
- 		if (classpathDelta != null && classpathChanged(classpathDelta)) {
- 			
- 			reset();
- 			return;
- 			
- 		}
- 		
+
+        IPath classpath = thisProjectPath.append(".classpath");
+        IResourceDelta classpathDelta = topLevelDelta.findMember(classpath);
+
+        if (classpathDelta != null && classpathChanged(classpathDelta)) {
+
+          reset();
+          return;
+
+        }
+
         if (modelChanges == null)
           modelChanges = new ArrayList();
         handleResourceDelta(event.getDelta());
@@ -904,11 +896,10 @@ public class TapestryProjectModelManager
    * @return boolean
    */
   private boolean classpathChanged(IResourceDelta classpathDelta) {
-  	int kind = classpathDelta.getKind();
-  	int flags = classpathDelta.getFlags();
+    int kind = classpathDelta.getKind();
+    int flags = classpathDelta.getFlags();
     return kind == IResourceDelta.CHANGED && (flags & IResourceDelta.CONTENT) != 0;
   }
-
 
   private void processModelChanges() {
     if (modelChanges.size() == 0) {
@@ -926,13 +917,9 @@ public class TapestryProjectModelManager
         removed.add(change.model);
     }
     ITapestryModel[] addedArray =
-      added.size() > 0
-        ? (ITapestryModel[]) added.toArray(new ITapestryModel[added.size()])
-        : (ITapestryModel[]) null;
+      added.size() > 0 ? (ITapestryModel[]) added.toArray(new ITapestryModel[added.size()]) : (ITapestryModel[]) null;
     ITapestryModel[] removedArray =
-      removed.size() > 0
-        ? (ITapestryModel[]) removed.toArray(new ITapestryModel[removed.size()])
-        : (ITapestryModel[]) null;
+      removed.size() > 0 ? (ITapestryModel[]) removed.toArray(new ITapestryModel[removed.size()]) : (ITapestryModel[]) null;
     int type = 0;
     if (addedArray != null)
       type |= IModelProviderEvent.MODELS_ADDED;
@@ -940,8 +927,7 @@ public class TapestryProjectModelManager
       type |= IModelProviderEvent.MODELS_REMOVED;
     modelChanges = null;
     if (type != 0) {
-      final ModelProviderEvent event =
-        new ModelProviderEvent(this, type, addedArray, removedArray, null);
+      final ModelProviderEvent event = new ModelProviderEvent(this, type, addedArray, removedArray, null);
       fireModelProviderEvent(event);
     }
   }
@@ -959,6 +945,13 @@ public class TapestryProjectModelManager
         info.readOnlyModel.dispose();
       info = null;
     }
+    
+    for (Iterator iter = modelDelegates.keySet().iterator(); iter.hasNext();) {
+      String extension = (String) iter.next();
+      ITapestryModelManagerDelegate delegate = (ITapestryModelManagerDelegate)modelDelegates.get(extension);
+      delegate.clear();
+    }
+    
     models.clear();
     allModels = null;
     initialized = false;
@@ -996,8 +989,7 @@ public class TapestryProjectModelManager
     }
 
     for (Iterator iter = modelDelegates.keySet().iterator(); iter.hasNext();) {
-      ITapestryModelManagerDelegate mgr =
-        (ITapestryModelManagerDelegate) getDelegate((String) iter.next());
+      ITapestryModelManagerDelegate mgr = (ITapestryModelManagerDelegate) getDelegate((String) iter.next());
       validate(mgr.getAllModels());
     }
 
@@ -1073,7 +1065,7 @@ public class TapestryProjectModelManager
     for (int i = 0; i < models.size(); i++) {
       ITapestryModel model = (ITapestryModel) models.get(i);
       IStorage foundStorage = model.getUnderlyingStorage();
-      if (foundStorage == storage) {
+      if (foundStorage.equals(storage)) {
         return model;
       }
     }
@@ -1157,10 +1149,24 @@ public class TapestryProjectModelManager
 
   }
 
-  /**
-   * @see org.eclipse.pde.core.IModelChangedListener#modelChanged(IModelChangedEvent)
-   */
-  public void modelChanged(IModelChangedEvent event) {
+  
+  public void modelsChanged(IModelProviderEvent event) {
+
+    Object[] changed = event.getChangedModels();
+
+    for (int i = 0; i < changed.length; i++) {
+
+      ITapestryModel model = (ITapestryModel) changed[i];
+      IStorage storage = model.getUnderlyingStorage();
+
+      ModelInfo info = (ModelInfo) models.get(storage);
+      if (info != null) {
+
+        info.readOnlyModel = model;
+
+      }
+
+    }
   }
 
   public List getAllPageModelsDefinedIn(TapestryLibraryModel model, TapestryLookup lookup) {

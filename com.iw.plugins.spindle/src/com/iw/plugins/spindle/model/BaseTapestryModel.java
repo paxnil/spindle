@@ -136,17 +136,17 @@ public abstract class BaseTapestryModel
 
   protected void addProblemMarker(DocumentParseException exception) {
 
-    if (exception instanceof InvalidStringException) {
-
-      InvalidStringException invalidEx = (InvalidStringException) exception;
-
-      addBadWordProblemMarker(
-        invalidEx.getMessage(),
-        IMarker.SEVERITY_ERROR,
-        invalidEx.getInvalidString(),
-        invalidEx.getPattern());
-
-    } else {
+//    if (exception instanceof InvalidStringException) {
+//
+//      InvalidStringException invalidEx = (InvalidStringException) exception;
+//
+//      addBadWordProblemMarker(
+//        invalidEx.getMessage(),
+//        IMarker.SEVERITY_ERROR,
+//        invalidEx.getInvalidString(),
+//        invalidEx.getPattern());
+//
+//    } else {
 
       addProblemMarker(
         exception.getMessage(),
@@ -154,7 +154,7 @@ public abstract class BaseTapestryModel
         Math.max(exception.getColumn(), 0),
         IMarker.SEVERITY_ERROR);
 
-    }
+//    }
 
   }
 
