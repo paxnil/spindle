@@ -45,7 +45,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -64,13 +66,13 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     public static final String STRING_KEY = "builder-";
     public static final String APPLICATION_SERVLET_NAME = STRING_KEY + "applicationServletClassname";
     public static final String STARTING = STRING_KEY + "full-build-starting";
-    public static final String TAPESTRY_JAR_MISSING = STRING_KEY + "-tapestry-jar-missing";
-    public static final String LOCATING_ARTIFACTS = STRING_KEY + "-locating-artifacts";
-    public static final String MISSING_CONTEXT = STRING_KEY + "-missing-context";
-    public static final String NON_JAVA_PROJECTS = STRING_KEY + "-non-java-projects";
-    public static final String JAVA_BUILDER_FAILED = STRING_KEY + "-java-builder-failed";
-    public static final String ABORT_PREREQ_NOT_BUILT = STRING_KEY + "-abort-prereq-not-built";
-    public static final String ABORT_MISSING_WEB_XML = STRING_KEY + "-abort-missing-web-xml";
+    public static final String TAPESTRY_JAR_MISSING = STRING_KEY + "tapestry-jar-missing";
+    public static final String LOCATING_ARTIFACTS = STRING_KEY + "locating-artifacts";
+    public static final String MISSING_CONTEXT = STRING_KEY + "missing-context";
+    public static final String NON_JAVA_PROJECTS = STRING_KEY + "non-java-projects";
+    public static final String JAVA_BUILDER_FAILED = STRING_KEY + "java-builder-failed";
+    public static final String ABORT_PREREQ_NOT_BUILT = STRING_KEY + "abort-prereq-not-built";
+    public static final String ABORT_MISSING_WEB_XML = STRING_KEY + "abort-missing-web-xml";
 
     public static final String APPLICATION_EXTENSION = "application";
     public static final String COMPONENT_EXTENSION = "jwc";
@@ -321,6 +323,14 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             }
         }
 
+        if (getType(APPLICATION_SERVLET_NAME) == null)
+        {
+            Markers.addBuildBrokenProblemMarkerToResource(
+                currentProject,
+                TapestryCore.getString(TapestryBuilder.TAPESTRY_JAR_MISSING));
+            return false;
+        }
+
         String projectType = tapestryProject.getProjectType();
 
         if (TapestryProject.APPLICATION_PROJECT.equals(projectType))
@@ -372,6 +382,17 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             TapestryCore.log(e);
         }
 
+    }
+
+    protected IType getType(String fullyQualifiedName)
+    {
+        try
+        {
+            return javaProject.findType(fullyQualifiedName);
+        } catch (JavaModelException e)
+        {
+            return null;
+        }
     }
 
 }

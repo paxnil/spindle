@@ -70,7 +70,7 @@ public class FullBuild extends Build
     public FullBuild(TapestryBuilder builder)
     {
         super(builder);
-        this.tapestryServletType = getType(TapestryCore.getString(TapestryBuilder.APPLICATION_SERVLET_NAME));
+        this.tapestryServletType = builder.getType(TapestryCore.getString(TapestryBuilder.APPLICATION_SERVLET_NAME));
 
     }
 
@@ -84,15 +84,7 @@ public class FullBuild extends Build
             notifier.subTask(TapestryCore.getString(TapestryBuilder.STARTING));
             Markers.removeProblemsForProject(tapestryBuilder.currentProject);
 
-            if (tapestryServletType == null)
-            {
-                Markers.addBuildBrokenProblemMarkerToResource(
-                    tapestryBuilder.currentProject,
-                    TapestryCore.getString(TapestryBuilder.TAPESTRY_JAR_MISSING));
-            } else
-            {
-                findDeclaredApplications();
-            }
+            findDeclaredApplications();
             notifier.updateProgressDelta(0.1f);
 
             notifier.subTask(TapestryCore.getString(TapestryBuilder.LOCATING_ARTIFACTS));

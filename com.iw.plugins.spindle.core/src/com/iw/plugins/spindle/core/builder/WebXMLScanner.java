@@ -171,7 +171,7 @@ public class WebXMLScanner extends AbstractScanner
             }
             return false;
         }
-        IType servletType = builder.getType(newInfo.classname);
+        IType servletType = builder.tapestryBuilder.getType(newInfo.classname);
         if (servletType == null)
         {
             addProblem(

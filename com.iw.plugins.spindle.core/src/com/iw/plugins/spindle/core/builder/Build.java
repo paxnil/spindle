@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.w3c.dom.Node;
@@ -90,17 +89,6 @@ public abstract class Build
         Markers.addTapestryProblemMarkersToResource(((IResource) file), parser.getProblems());
 
         return result;
-    }
-
-    protected IType getType(String fullyQualifiedName)
-    {
-        try
-        {
-            return javaProject.findType(fullyQualifiedName);
-        } catch (JavaModelException e)
-        {
-            return null;
-        }
     }
 
     protected void markError(IResource resource, int severity, ISourceLocation location, String message)

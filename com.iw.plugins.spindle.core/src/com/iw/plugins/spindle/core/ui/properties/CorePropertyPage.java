@@ -25,6 +25,8 @@ package com.iw.plugins.spindle.core.ui.properties;
  *
  * ***** END LICENSE BLOCK ***** */
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -33,7 +35,9 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
@@ -54,6 +58,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionValidator;
 import org.eclipse.ui.dialogs.PropertyPage;
@@ -550,27 +555,45 @@ public class CorePropertyPage extends PropertyPage
         {
             if (isTapestryProjectCheck.getSelection())
             {
-                TapestryProject.addTapestryNature(getJavaProject());
-                TapestryProject prj = getTapestryProject();
-                switch (projectTypeCombo.getSelectionIndex())
+                WorkspaceModifyOperation op = new WorkspaceModifyOperation()
                 {
-                    case APP :
-                        prj.setProjectType(TapestryProject.APPLICATION_PROJECT);
-                        String projectName = prj.getProject().getName();
-                        String temp = webContextRoot.getText();
-                        createFolderIfRequired(projectName + temp);
-                        prj.setWebContext(temp);
-                        break;
+                    protected void execute(IProgressMonitor monitor)
+                        throws CoreException, InvocationTargetException, InterruptedException
+                    {
+                        TapestryProject.addTapestryNature(getJavaProject());
+                        TapestryProject prj = getTapestryProject();
+                        switch (projectTypeCombo.getSelectionIndex())
+                        {
+                            case APP :
+                                prj.setProjectType(TapestryProject.APPLICATION_PROJECT);
+                                String projectName = prj.getProject().getName();
+                                String temp = webContextRoot.getText();
+                                createFolderIfRequired(projectName + temp);
+                                prj.setWebContext(temp);
+                                break;
 
-                    case LIB :
-                        prj.setProjectType(TapestryProject.LIBRARY_PROJECT);
-                        prj.setLibrarySpecPath(librarySpec.getText());
-                        break;
-                }
-                prj.saveProperties();
+                            case LIB :
+                                prj.setProjectType(TapestryProject.LIBRARY_PROJECT);
+                                prj.setLibrarySpecPath(librarySpec.getText());
+                                break;
+                        }
+                        prj.saveProperties();
+                    }
+                };
+                op.run(new NullProgressMonitor());
+
             } else
             {
-                TapestryProject.removeTapestryNature(getJavaProject());
+                WorkspaceModifyOperation op = new WorkspaceModifyOperation()
+                {
+                    protected void execute(IProgressMonitor monitor)
+                        throws CoreException, InvocationTargetException, InterruptedException
+                    {
+                        TapestryProject.removeTapestryNature(getJavaProject());
+                    }
+                };
+                op.run(new NullProgressMonitor());
+
             }
         } catch (Exception ex)
         {
