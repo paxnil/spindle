@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.iw.features.spindle.groovy"
-      label="Spindle 3, an Eclipse Plugin for Tapestry incl Groovestry Support"
+      label="Groovestry Support Add-in for SPindle"
       version="3.1.19"
       provider-name="Geoffrey Longman"
       image="spindle.gif">
@@ -47,33 +47,8 @@ All Rights Reserved
    </url>
 
    <requires>
-      <import plugin="org.eclipse.core.runtime" version="3.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.core.runtime.compatibility"/>
-      <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="org.eclipse.ui.views"/>
-      <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.jdt.ui"/>
-      <import plugin="org.eclipse.search"/>
-      <import plugin="org.eclipse.jdt.launching"/>
-      <import plugin="org.eclipse.compare"/>
+      <import feature="com.iw.features.spindle" version="3.1.19" match="greaterOrEqual"/>
    </requires>
-
-   <plugin
-         id="org.apache.xerces"
-         download-size="0"
-         install-size="0"
-         version="4.0.13"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.core"
-         download-size="0"
-         install-size="0"
-         version="0.1.19 "/>
 
    <plugin
          id="com.iw.plugins.spindle.core.groovy"
@@ -81,43 +56,5 @@ All Rights Reserved
          install-size="0"
          version="1.0.1"
          fragment="true"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.docs"
-         download-size="0"
-         install-size="0"
-         version="0.1.19"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.docs.default"
-         download-size="0"
-         install-size="0"
-         version="0.1.19 "
-         fragment="true"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.ui"
-         download-size="0"
-         install-size="0"
-         version="0.1.19"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.ui.contrib"
-         download-size="0"
-         install-size="0"
-         version="0.1.19"
-         fragment="true"/>
-
-   <plugin
-         id="net.sf.solareclipse.ui"
-         download-size="0"
-         install-size="0"
-         version="0.4.0.spindle-dep-6"/>
-
-   <plugin
-         id="net.sf.solareclipse.xml.ui"
-         download-size="0"
-         install-size="0"
-         version="0.4.0.spindle-dep-6"/>
 
 </feature>

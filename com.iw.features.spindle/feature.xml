@@ -46,7 +46,7 @@ All Rights Reserved
    </url>
 
    <requires>
-      <import plugin="org.eclipse.core.runtime.compatibility"/>
+      <import plugin="org.eclipse.core.runtime" version="3.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.ui.views"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
@@ -55,7 +55,6 @@ All Rights Reserved
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.help"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jdt.launching"/>
