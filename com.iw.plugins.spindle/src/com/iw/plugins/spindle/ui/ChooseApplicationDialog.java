@@ -74,7 +74,7 @@ public class ChooseApplicationDialog extends AbstractDialog {
   private TapestryLookup lookup;
 
   private String resultApplication;
-
+  
   protected int acceptFlags = TapestryLookup.ACCEPT_APPLICATIONS;
 
   static private final Object[] empty = new Object[0];
@@ -127,10 +127,10 @@ public class ChooseApplicationDialog extends AbstractDialog {
     return super.hardClose();
   }
 
-  /**
-   * Constructor for ChooseComponentControl
-   */
-  protected Composite createAreaContents(Composite parent) {
+   protected Composite createAreaContents(Composite parent) {
+  	
+    setTitleImage(TapestryImages.getSharedImage("application48.gif"));
+
     Composite container = new Composite(parent, SWT.NONE);
     GridData data = null;
     GridLayout layout = new GridLayout();
@@ -144,7 +144,7 @@ public class ChooseApplicationDialog extends AbstractDialog {
     packages = createLowerList(container);
 
     //a little trick to make the window come up faster
-    String initialFilter = "A";
+    String initialFilter = "*";
     if (initialFilter != null) {
       nameText.setText(initialFilter);
       nameText.selectAll();
@@ -187,7 +187,7 @@ public class ChooseApplicationDialog extends AbstractDialog {
   }
 
   private Text createText(Composite parent) {
-    (new Label(parent, SWT.NONE)).setText("choose a component:");
+    (new Label(parent, SWT.NONE)).setText("choose an application:");
     Text text = new Text(parent, SWT.BORDER);
     GridData spec = new GridData();
     spec.grabExcessVerticalSpace = false;
@@ -207,7 +207,7 @@ public class ChooseApplicationDialog extends AbstractDialog {
 
 
   private Table createUpperList(Composite parent) {
-    (new Label(parent, SWT.NONE)).setText("choose component:");
+    (new Label(parent, SWT.NONE)).setText("choose application:");
 
     Table list = new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
     list.addListener(SWT.Selection, new Listener() {
@@ -335,12 +335,12 @@ public class ChooseApplicationDialog extends AbstractDialog {
     int j = packages.getSelectionIndex();
 
     if (i >= 0) {
-      String chosenComponent = applications.getItem(i).getText();
-      if (chosenComponent.endsWith(".jwc") && j >= 0) {
+      String chosenApplication = applications.getItem(i).getText();
+      if (chosenApplication.endsWith(".application") && j >= 0) {
         resultApplication = "/" + packages.getItem(j).getText() + "/";
-        resultApplication = resultApplication.replace('.', '/') + chosenComponent;
+        resultApplication = resultApplication.replace('.', '/') + chosenApplication;
       } else {
-        resultApplication = chosenComponent;
+        resultApplication = chosenApplication;
       }
     }
     return resultApplication;
@@ -427,7 +427,7 @@ public class ChooseApplicationDialog extends AbstractDialog {
 
     public Image getImage(Object element) {
       if (image == null) {
-        image = TapestryImages.getSharedImage("application16.jpg");
+        image = TapestryImages.getSharedImage("application16.gif");
       }
       return image;
     }

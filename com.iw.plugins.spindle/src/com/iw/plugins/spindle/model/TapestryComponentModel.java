@@ -122,15 +122,6 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
     writer.print(stringwriter.toString());
   }
 
-  /**
-   * All property change events from the underlying Spec objects are translated into
-   * Model events
-   */
-  public void propertyChange(PropertyChangeEvent event) {
-    dirty = true;
-    fireModelObjectChanged(this, event.getPropertyName());
-  }
-
   public void setDescription(String description) {
     PluginComponentSpecification spec = getComponentSpecification();
     if (spec != null) {
@@ -302,17 +293,6 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
       return spec.getDTDVersion();
     }
     return null;
-  }
-
-  /**
-   * @see com.iw.plugins.spindle.model.ITapestryModel#toXML()
-   */
-  public String toXML() {
-    StringWriter swriter = new StringWriter();
-    PrintWriter writer = new PrintWriter(swriter);
-    save(writer);
-    writer.flush();
-    return swriter.toString();
   }
 
 }

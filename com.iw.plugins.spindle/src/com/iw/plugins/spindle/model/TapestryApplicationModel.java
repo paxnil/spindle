@@ -109,15 +109,6 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
     writer.print(stringwriter.toString());
   }
 
-  /**
-   * All property change events from the underlying Spec objects are translated into
-   * Model events
-   */
-  public void propertyChange(PropertyChangeEvent event) {
-    dirty = true;
-    fireModelObjectChanged(this, event.getPropertyName());
-  }
-
   public void setDescription(String description) {
     PluginApplicationSpecification spec = getApplicationSpec();
     if (spec != null) {
@@ -320,20 +311,6 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
   		return spec.getDTDVersion();
   	}
     return null;
-  }
-
-  /**
-   * @see com.iw.plugins.spindle.model.ITapestryModel#toXML()
-   */
-   /**
-   * @see com.iw.plugins.spindle.model.ITapestryModel#toXML()
-   */
-  public String toXML() {
-      StringWriter swriter = new StringWriter();
-      PrintWriter writer = new PrintWriter(swriter);
-      save(writer);
-      writer.flush();
-      return swriter.toString();
   }
 
 }

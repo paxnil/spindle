@@ -48,6 +48,44 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
  *
  */
 public class ModelUtils {
+  /**
+   * returns a readonly model, if found!
+   * the model called root is used only to figure out which project to search
+   */
+  public static TapestryApplicationModel findApplication(
+    String specificationPath,
+    ITapestryModel root) {
+    Assert.isNotNull(specificationPath);
+    Assert.isNotNull(root);
+    
+    if (!specificationPath.endsWith(".application")) {
+      return null;
+    }
+    
+    TapestryLookup lookup = new TapestryLookup();
+    
+    try {
+    	
+      IJavaProject jproject =
+        TapestryPlugin.getDefault().getJavaProjectFor(root.getUnderlyingStorage());
+        
+      lookup.configure(jproject);
+      
+      IStorage[] results = lookup.findApplication(specificationPath);
+      
+      if (results.length == 0) {
+        return null;
+      }
+      
+      return (TapestryApplicationModel) TapestryPlugin.getTapestryModelManager().getReadOnlyModel(
+        results[0]);
+        
+    } catch (JavaModelException jmex) {
+      return null;
+    }
+  }
+
+
 
   public static TapestryComponentModel findComponentWithHTML(IStorage storage) {
     List componentModels = TapestryPlugin.getTapestryModelManager().getAllModels(storage, "jwc");
