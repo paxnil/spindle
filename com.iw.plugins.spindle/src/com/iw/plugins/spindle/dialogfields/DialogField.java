@@ -41,7 +41,7 @@ public class DialogField implements IDialogFieldChangedListener {
 
   public DialogField(String labelText, int labelWidth) {
 
-    this.labelText = labelText;
+    this.labelText = labelText == null ? "" :labelText;
     this.labelWidth = labelWidth;
     addListener(this);
   }

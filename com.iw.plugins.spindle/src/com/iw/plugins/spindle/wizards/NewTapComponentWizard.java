@@ -36,7 +36,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 
-
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
 
@@ -68,13 +67,15 @@ public class NewTapComponentWizard extends NewTapestryElementWizard {
    * @see Wizard#performFinish()
    */
   public boolean performFinish() {
-    if (finishPage(fPage2.getRunnable())) { 
-      if (finishPage(fPage1.getRunnable(fPage2.getFinalSpecClass()))) {
-        IFile file = fPage1.getComponent();
-        try {
-          selectAndReveal(file);
-          openResource(file);
-        } catch (Exception e) { // let pass, only reveal and open will fail
+    if (finishPage(fPage1.getAutoAddRunnable())) {
+      if (finishPage(fPage2.getRunnable())) {
+        if (finishPage(fPage1.getRunnable(fPage2.getFinalSpecClass()))) {
+          IFile file = fPage1.getComponent();
+          try {
+            selectAndReveal(file);
+            openResource(file);
+          } catch (Exception e) { // let pass, only reveal and open will fail
+          }
         }
       }
     }
@@ -82,16 +83,17 @@ public class NewTapComponentWizard extends NewTapestryElementWizard {
     fPage1.performFinish();
     fPage2.performFinish();
     return true;
-  }
+  } 
+  
   /**
-             * @see IWizard#createPageControls(Composite)
-             */
+   * @see IWizard#createPageControls(Composite)
+   */
   public void createPageControls(Composite pageContainer) {
     super.createPageControls(pageContainer);
     setWindowTitle(MessageUtil.getString("NewTapComponentWizard.windowtitle"));
     IJavaElement initElem = getInitElement();
     fPage1.init(initElem);
-    fPage2.init(initElem);   
+    fPage2.init(initElem);
   }
 
 }

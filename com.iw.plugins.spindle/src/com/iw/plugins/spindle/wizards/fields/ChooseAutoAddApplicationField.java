@@ -21,6 +21,7 @@ import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
+import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
 import com.iw.plugins.spindle.util.TapestryLookup;
@@ -38,6 +39,9 @@ import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField {
   ArrayList appModels;
   ArrayList appPackages;
+  ComponentNameField nameField;
+
+  private boolean isComponentWizard;
 
   /**
    * Constructor for ChooseAutoAddApplicationField.
@@ -58,7 +62,10 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
     super(labelText, values);
   }
 
-  public void init(IJavaElement element) {
+  public void init(IJavaElement element, ComponentNameField nameField, boolean isComponentWizard) {
+  	this.nameField = nameField;  	
+  	nameField.addListener(this);
+  	this.isComponentWizard = isComponentWizard;
     try {
       IJavaProject project = (IJavaProject) Utils.findElementOfKind(element, IJavaElement.JAVA_PROJECT);
       TapestryLookup lookup = new TapestryLookup();
@@ -170,24 +177,29 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
     return result;
 
   }
-
-  /**
-   * @see com.iw.plugins.spindle.dialogfields.DialogField#fireDialogChanged(DialogField)
+  
+ /**
+   * @see com.iw.plugins.spindle.dialogfields.IDialogFieldChangedListener#dialogFieldChanged(DialogField)
    */
-  protected void fireDialogChanged(DialogField field) {
-    if (field == this) {
-      setStatus(selectionChanged());
+  public void dialogFieldChanged(DialogField field) {
+    if (field == this || field == nameField) {
+      updateStatus();
     }
-  }
+  } 
+  
+  public void updateStatus() {
+  	setStatus(selectionChanged());
+  } 
 
   /**
    * Method selectionChanged.
    */
   private IStatus selectionChanged() {
     DialogFieldStatus newStatus = new DialogFieldStatus();
+    boolean enabled = isEnabled();
     if (isEnabled()) {
       int index = getSelectedIndex();
-      if (index > 0) {
+      if (index >= 0) {
         TapestryApplicationModel selected = getSelectedModel();
         if (selected.getApplicationSpec() == null) {
           try {
@@ -199,6 +211,15 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
             return newStatus;
           }
         }
+        PluginApplicationSpecification spec = selected.getApplicationSpec();
+        String newName = nameField.getTextValue();
+        if (isComponentWizard && spec.getComponentAlias(newName) != null) {
+        	newStatus.setError(newName+" already exists as a component in "+selected.getUnderlyingStorage().getName());
+        	return newStatus;
+        } else if (spec.getPageSpecification(newName) != null) {
+        	newStatus.setError(newName+" already exists as page in "+selected.getUnderlyingStorage().getName());
+        	return newStatus;
+        }        	
       }
     }
     return newStatus;
@@ -277,6 +298,17 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
       }
       return TapestryPlugin.getTapestryModelManager().getModelListFor(storages);
     }
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.dialogfields.DialogField#setEnabled(boolean)
+   */
+  public void setEnabled(boolean flag) {
+  	boolean oldEnabled = isEnabled();
+  	if (oldEnabled != flag) {
+    	super.setEnabled(flag);   
+    	updateStatus();
+  	}
   }
 
 }

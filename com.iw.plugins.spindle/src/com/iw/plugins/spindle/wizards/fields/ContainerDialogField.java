@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -190,7 +191,7 @@ public class ContainerDialogField extends StringButtonField {
         return super.select(viewer, parent, element);
       }
     };
-    JavaElementContentProvider provider = new JavaElementContentProvider();
+    StandardJavaElementContentProvider provider = new StandardJavaElementContentProvider();
     ILabelProvider labelProvider = new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
     ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(getShell(), labelProvider, provider);
     dialog.setValidator(validator);
