@@ -27,8 +27,6 @@
 package com.iw.plugins.spindle.core.spec;
 
 import org.apache.tapestry.ILocation;
-import org.apache.tapestry.INamespace;
-import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -45,33 +43,25 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  */
 public class PluginLibraryDeclaration extends BaseSpecification
 {
-    String fName;
+
     String fResourcePath;
 
     public PluginLibraryDeclaration(String name, String resourcePath, ILocation location)
     {
         super(BaseSpecification.LIBRARY_DECLARATION);
-        fName = name;
+        setIdentifier(name);
         fResourcePath = resourcePath;
         setLocation(location);
     }
 
     public String getName()
     {
-        return fName;
+        return getIdentifier();
     }
 
     public String getResourcePath()
     {
         return fResourcePath;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.spec.IIdentifiable#getIdentifier()
-     */
-    public String getIdentifier()
-    {
-        return getName();
     }
 
     /**
@@ -89,22 +79,7 @@ public class PluginLibraryDeclaration extends BaseSpecification
         try
         {
 
-            validator.validatePattern(
-                fName,
-                SpecificationParser.LIBRARY_ID_PATTERN,
-                "SpecificationParser.invalid-library-id",
-                IProblem.ERROR,
-                info.getAttributeSourceLocation("id"));
-
-            if (fName.equals(INamespace.FRAMEWORK_NAMESPACE))
-                validator.addProblem(
-                    IProblem.ERROR,
-                    info.getAttributeSourceLocation("id"),
-                    TapestryCore.getTapestryString(
-                        "SpecificationParser.framework-library-id-is-reserved",
-                        INamespace.FRAMEWORK_NAMESPACE));
-
-            if (fResourcePath.startsWith(validator.getDummyStringPrefix()))
+            if (fResourcePath == null || fResourcePath.startsWith(validator.getDummyStringPrefix()))
             {
                 validator.addProblem(IProblem.ERROR, info.getAttributeSourceLocation("id"), "blank value");
             } else

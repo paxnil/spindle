@@ -26,7 +26,9 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
+import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceResolver;
+import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.w3c.dom.Node;
@@ -165,6 +167,14 @@ public class LibraryScanner extends SpecificationScanner
     {
         String type = getAttribute(node, "type", true);
 
+        // validate here - the error status can only change if the file changed
+        validatePattern(
+            type,
+            SpecificationParser.COMPONENT_ALIAS_PATTERN,
+            "SpecificationParser.invalid-component-type",
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "type"));
+
         // must be validated now TODO reimplement in PluginLibrarySpecification
         if (specification.getComponentTypes().contains(type))
         {
@@ -190,9 +200,16 @@ public class LibraryScanner extends SpecificationScanner
     {
         String propertyName = getAttribute(node, "property-name", false);
 
+        // validate here - the error status can only change if the file changed
+        validatePattern(
+            propertyName,
+            SpecificationParser.PROPERTY_NAME_PATTERN,
+            "SpecificationParser.invalid-property-name",
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "property-name"));
+
         String type = getAttribute(node, "type");
 
-        //  TODO reimplement differently in PluginLibrarySpecification
         if (spec.getConfiguration().containsKey(propertyName))
         {
             addProblem(
@@ -227,11 +244,18 @@ public class LibraryScanner extends SpecificationScanner
     protected void scanExtension(ILibrarySpecification specification, Node node) throws ScannerException
     {
         String name = getAttribute(node, "name", true);
+
+        validatePattern(
+            name,
+            SpecificationParser.EXTENSION_NAME_PATTERN,
+            "SpecificationParser.invalid-extension-name",
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "name"));
+
         String className = getAttribute(node, "class");
 
         boolean immediate = getBooleanAttribute(node, "immediate");
 
-        //   TODO reimplement in PluginLibrarySpecification
         if (specification.getExtensionNames().contains(name))
         {
             addProblem(
@@ -268,13 +292,29 @@ public class LibraryScanner extends SpecificationScanner
             }
         }
 
-        specification.addExtensionSpecification(name, exSpec);
+        ((PluginLibrarySpecification) specification).addExtension(exSpec);
     }
+
     protected void scanLibrary(ILibrarySpecification specification, Node node) throws ScannerException
     {
         String id = getAttribute(node, "id", false);
 
         String specificationPath = getAttribute(node, "specification-path", true);
+
+        validatePattern(
+            id,
+            SpecificationParser.LIBRARY_ID_PATTERN,
+            "SpecificationParser.invalid-library-id",
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "id"));
+
+        if (id.equals(INamespace.FRAMEWORK_NAMESPACE))
+            addProblem(
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "id"),
+                TapestryCore.getTapestryString(
+                    "SpecificationParser.framework-library-id-is-reserved",
+                    INamespace.FRAMEWORK_NAMESPACE));
 
         PluginLibraryDeclaration declaration =
             new PluginLibraryDeclaration(id, specificationPath, getSourceLocationInfo(node));
@@ -287,7 +327,14 @@ public class LibraryScanner extends SpecificationScanner
 
     protected void scanPage(ILibrarySpecification specification, Node node) throws ScannerException
     {
-        String name = getAttribute(node, "name", true);
+        String name = getAttribute(node, "name", false);
+
+        validatePattern(
+            name,
+            SpecificationParser.PAGE_NAME_PATTERN,
+            "SpecificationParser.invalid-page-name",
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "name"));
 
         //must be validated here
         if (specification.getPageNames().contains(name))
@@ -304,12 +351,19 @@ public class LibraryScanner extends SpecificationScanner
         declaration.validate(specification, fValidator);
 
         ((PluginLibrarySpecification) specification).addPageDeclaration(declaration);
- 
+
     }
 
     protected void scanService(ILibrarySpecification spec, Node node) throws ScannerException
     {
-        String name = getAttribute(node, "name", true);
+        String name = getAttribute(node, "name", false);
+
+        validatePattern(
+            name,
+            SpecificationParser.PAGE_NAME_PATTERN,
+            "SpecificationParser.invalid-page-name",
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "name"));
 
         String className = getAttribute(node, "class");
 

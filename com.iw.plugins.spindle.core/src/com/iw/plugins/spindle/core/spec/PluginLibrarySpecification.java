@@ -29,7 +29,6 @@ package com.iw.plugins.spindle.core.spec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,11 +37,7 @@ import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
-import com.iw.plugins.spindle.core.scanning.ScannerException;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Spindle aware concrete implementation of ILibrarySpecification
@@ -464,7 +459,7 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
             fPageDeclarations = new ArrayList();
 
         fPageDeclarations.add(declaration);
-        
+
         declaration.setParent(this);
 
         if (!getPageNames().contains(declaration.getName()))
@@ -546,77 +541,59 @@ public class PluginLibrarySpecification extends BaseSpecLocatable implements ILi
 
     public void validate(IScannerValidator validator)
     {
-        List seenList = new ArrayList();
-        ISourceLocationInfo sourceInfo;
 
-        try
+        if (fComponentTypeDeclarations != null)
         {
-            for (Iterator iter = fComponentTypeDeclarations.iterator(); iter.hasNext();)
+            for (int i = 0; i < fComponentTypeDeclarations.size(); i++)
             {
-                PluginComponentTypeDeclaration element = (PluginComponentTypeDeclaration) iter.next();
 
-                String type = element.getId();
-
-                if (seenList.contains(type))
-                {
-                    sourceInfo = (ISourceLocationInfo) element.getLocation();
-                    validator.addProblem(
-                        IProblem.ERROR,
-                        sourceInfo.getAttributeSourceLocation("type"),
-                        TapestryCore.getTapestryString("LibrarySpecification.duplicate-component-alias", type));
-                }
-
+                PluginComponentTypeDeclaration element =
+                    (PluginComponentTypeDeclaration) fComponentTypeDeclarations.get(i);
                 element.validate(this, validator);
-                seenList.add(type);
-
             }
+        }
 
-            seenList.clear();
-            sourceInfo = null;
-
-            for (Iterator iter = fPageDeclarations.iterator(); iter.hasNext();)
-            {
-                PluginPageDeclaration element = (PluginPageDeclaration) iter.next();
-
-                String name = element.getIdentifier();
-                if (seenList.contains(name))
-                {
-                    sourceInfo = (ISourceLocationInfo) element.getLocation();
-                    validator.addProblem(
-                        IProblem.ERROR,
-                        sourceInfo.getAttributeSourceLocation("name"),
-                        TapestryCore.getTapestryString("LibrarySpecification.duplicate-page-name", name));
-                }
-
-                element.validate(this, validator);
-                seenList.add(name);
-            }
-
-            seenList.clear();
-            sourceInfo = null;
-
-            for (Iterator iter = fEngineServiceDeclarations.iterator(); iter.hasNext();)
-            {
-                PluginEngineServiceDeclaration element = (PluginEngineServiceDeclaration) iter.next();
-
-                String name = element.getIdentifier();
-                if (seenList.contains(name))
-                {
-                    sourceInfo = (ISourceLocationInfo) element.getLocation();
-                    validator.addProblem(
-                        IProblem.ERROR,
-                        sourceInfo.getAttributeSourceLocation("name"),
-                        TapestryCore.getTapestryString("LibrarySpecification.duplicate-service-name", name));
-                }
-
-                element.validate(this, validator);
-                seenList.add(name);
-            }
-
-        } catch (ScannerException e)
+        if (fPageDeclarations != null)
         {
-            TapestryCore.log(e);
-            e.printStackTrace();
+            for (int i = 0; i < fPageDeclarations.size(); i++)
+            {
+
+                PluginPageDeclaration element = (PluginPageDeclaration) fPageDeclarations.get(i);
+                element.validate(this, validator);
+            }
+        }
+
+        if (fEngineServiceDeclarations != null)
+        {
+            for (int i = 0; i < fEngineServiceDeclarations.size(); i++)
+            {
+
+                PluginEngineServiceDeclaration element =
+                    (PluginEngineServiceDeclaration) fEngineServiceDeclarations.get(i);
+                element.validate(this, validator);
+            }
+        }
+
+        if (fExtensionDeclarations != null)
+        {
+            for (int i = 0; i < fExtensionDeclarations.size(); i++)
+            {
+
+                PluginExtensionSpecification element = (PluginExtensionSpecification) fExtensionDeclarations.get(i);
+                element.validate(this, validator);
+            }
+        }
+
+        if (fLibraryDeclarations != null)
+        {
+            for (int i = 0; i < fLibraryDeclarations.size(); i++)
+            {
+
+                PluginLibraryDeclaration element = (PluginLibraryDeclaration) fLibraryDeclarations.get(i);
+                element.validate(this, validator);
+            }
+
         }
     }
+
 }

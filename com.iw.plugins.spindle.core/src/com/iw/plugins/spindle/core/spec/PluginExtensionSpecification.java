@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.IResourceResolver;
-import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
@@ -213,13 +212,6 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
                 fClassName,
                 IProblem.ERROR,
                 sourceInfo.getAttributeSourceLocation("class"));
-
-            validator.validatePattern(
-                getIdentifier(),
-                SpecificationParser.EXTENSION_NAME_PATTERN,
-                "SpecificationParser.invalid-extension-name",
-                IProblem.ERROR,
-                sourceInfo.getAttributeSourceLocation("name"));
 
         } catch (ScannerException e)
         {

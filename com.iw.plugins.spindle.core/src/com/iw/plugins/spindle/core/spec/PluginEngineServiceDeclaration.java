@@ -27,7 +27,6 @@
 package com.iw.plugins.spindle.core.spec;
 
 import org.apache.tapestry.ILocation;
-import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -85,14 +84,7 @@ public class PluginEngineServiceDeclaration extends DescribableSpecification
         ISourceLocationInfo info = (ISourceLocationInfo) getLocation();
 
         try
-        {
-            validator.validatePattern(
-                fName,
-                SpecificationParser.PAGE_NAME_PATTERN,
-                "SpecificationParser.invalid-page-name",
-                IProblem.ERROR,
-                info.getAttributeSourceLocation("name"));
-
+        {           
             ILibrarySpecification parentLib = (ILibrarySpecification) parent;
 
             validator.validateTypeName(

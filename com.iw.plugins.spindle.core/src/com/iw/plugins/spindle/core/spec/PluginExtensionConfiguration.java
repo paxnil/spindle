@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.tapestry.ILocation;
-import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IExtensionSpecification;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -276,13 +275,7 @@ public class PluginExtensionConfiguration extends DescribableSpecification
 
         try
         {
-            validator.validatePattern(
-                getIdentifier(),
-                SpecificationParser.PROPERTY_NAME_PATTERN,
-                "SpecificationParser.invalid-property-name",
-                IProblem.ERROR,
-                sourceInfo.getAttributeSourceLocation("property-name"));
-
+          
             if (fDeclaredType != null)
             {
                 SpecificationScanner.IConverter converter =
