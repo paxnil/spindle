@@ -830,6 +830,8 @@ public class ComponentScanner extends SpecificationScanner
 
         spec.addInitializer(iz);
     }
+    
+    private TemplateFinder fTemplateFinder = new TemplateFinder();
 
     /**
      * @param IComponentSpecification the spec we are looking up templates on behalf of
@@ -837,10 +839,10 @@ public class ComponentScanner extends SpecificationScanner
     public void scanForTemplates(IComponentSpecification specification)
     {
         IResourceWorkspaceLocation[] locations = new IResourceWorkspaceLocation[0];
-        TemplateFinder finder = new TemplateFinder();
+//        TemplateFinder finder = new TemplateFinder();
         try
         {
-            locations = finder.getTemplates(specification, this);
+            locations = fTemplateFinder.getTemplates(specification, this);
         } catch (CoreException e)
         {
             TapestryCore.log(e);

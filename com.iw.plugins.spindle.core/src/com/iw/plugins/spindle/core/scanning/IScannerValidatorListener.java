@@ -24,36 +24,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.builder;
+package com.iw.plugins.spindle.core.scanning;
 
-import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.jdt.core.IType;
 
 /**
- *  Common Question asked of all kinds of Incremental Builders
+ *  Listener interface for classes that are interested in things the
+ *  Validators find/don't find.
+ * 
+ *  Right now it handles only Type checks
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface IIncrementalBuild extends IBuild
+public interface IScannerValidatorListener
 {
-    /**
-     * A question asked of Incremental Builds by the TapestryBuilder.
-     * <p>
-     * Answering false prompts a Full Build
-     * 
-     * @param delta the current IResourceDelta for the project
-     * @return true if an incremental build is indicated, false otherwise.
-     */
-    public boolean canIncrementalBuild(IResourceDelta projectDelta);
-    
-    /**
-     * A question asked of Incremental Builds by the TapestryBuilder.
-     * <p>
-     * Answering false prompts aborts an incremental build
-     * 
-     * @param delta the current IResourceDelta for the project
-     * @return true if an build is indicated, false otherwise.
-     */
-    public boolean needsIncrementalBuild(IResourceDelta projectDelta);
-
+    public void typeChecked(String fullyQualifiedName, IType result);
 }

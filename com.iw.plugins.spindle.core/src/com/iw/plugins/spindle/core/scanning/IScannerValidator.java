@@ -200,4 +200,8 @@ public interface IScannerValidator
     public boolean validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException;
 
     public Object findType(String fullyQualifiedName);
+    
+    public void addListener(IScannerValidatorListener listener);
+    
+    public void removeListener(IScannerValidatorListener listener);
 }

@@ -27,10 +27,10 @@ package com.iw.plugins.spindle.core.builder;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -41,6 +41,8 @@ import org.eclipse.jdt.core.IType;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.search.AbstractTapestrySearchAcceptor;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
@@ -67,29 +69,26 @@ public class FullBuild extends Build
     public FullBuild(TapestryBuilder builder)
     {
         super(builder);
-        fTapestryServletType = builder.getType(TapestryCore.getString(TapestryBuilder.APPLICATION_SERVLET_NAME));
+        fTapestryServletType =
+            builder.getType(TapestryCore.getString(TapestryBuilder.STRING_KEY + "applicationServletClassname"));
 
     }
 
     public void build() throws BuilderException
     {
-        if (TapestryBuilder.DEBUG)
-            System.out.println("FULL Tapestry build");
 
         try
         {
-            fNotifier.subTask(TapestryCore.getString(TapestryBuilder.STARTING));
-            Markers.removeProblemsForProject(fTapestryBuilder.fCurrentProject);
 
             findDeclaredApplication();
 
             fNotifier.updateProgressDelta(0.1f);
 
-            fNotifier.subTask(TapestryCore.getString(TapestryBuilder.LOCATING_ARTIFACTS));
+            fNotifier.subTask(TapestryCore.getString(TapestryBuilder.STRING_KEY + "locating-artifacts"));
 
             fBuildQueue.addAll(findAllTapestryArtifacts());
 
-            fNSResolver = new NamespaceResolver(this);
+            fNSResolver = getNamespaceResolver();
 
             fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace();
 
@@ -108,20 +107,46 @@ public class FullBuild extends Build
                 }
             }
 
+            saveState();
+
         } catch (CoreException e)
         {
             TapestryCore.log(e);
         }
     }
 
-   
-    private void goofTest()
+    protected void saveState()
     {
-        IResourceLocation goof = fTapestryBuilder.fClasspathRoot.getRelativeLocation("com/Framework.library");
-        parseLibrary(goof);
-        goof = fTapestryBuilder.fContextRoot.getRelativeLocation("com/ExampleLayout.application");
-        parseApplication(goof);
+        State newState = new State(fTapestryBuilder);
+        newState.fFrameworkNamespace = fFrameworkNamespace;
+        newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
+        newState.fLastKnownClasspath = fTapestryBuilder.fClasspath;
+        newState.fJavaDependencies = fFoundTypes;
+        newState.fMissingJavaTypes = fMissingTypes;
+        // save the processed binary libraries
+        saveBinaryLibraries(fApplicationNamespace, newState);
+        TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
+            fTapestryBuilder.fCurrentProject,
+            newState);
+    }
 
+    protected void saveBinaryLibraries(ICoreNamespace namespace, State state)
+    {
+        for (Iterator iter = namespace.getChildIds().iterator(); iter.hasNext();)
+        {
+            String id = (String) iter.next();
+            ICoreNamespace child = (ICoreNamespace) namespace.getChildNamespace(id);
+            IResourceWorkspaceLocation libraryLocation = (IResourceWorkspaceLocation) child.getSpecificationLocation();
+            if (libraryLocation.isBinary())
+            {
+                state.fBinaryNamespaces.put(libraryLocation, namespace);                
+            }
+
+        }
+    }
+
+    protected NamespaceResolver getNamespaceResolver() {
+        return new NamespaceResolver(this, false);
     }
 
     /**
@@ -213,7 +238,8 @@ public class FullBuild extends Build
             Node wxmlElement = null;
             try
             {
-                fTapestryBuilder.fNotifier.subTask(TapestryCore.getString(TapestryBuilder.SCANNING, webXML.toString()));
+                fTapestryBuilder.fNotifier.subTask(
+                    TapestryCore.getString(TapestryBuilder.STRING_KEY + "scanning", webXML.toString()));
                 wxmlElement = parseToNode(webXML);
             } catch (IOException e1)
             {
@@ -241,14 +267,16 @@ public class FullBuild extends Build
 
             if (servletInfos == null || servletInfos.length == 0)
             {
-                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_NO_SERVLETS));
+                throw new BuilderException(
+                    TapestryCore.getString(TapestryBuilder.STRING_KEY + "abort-no-valid-application-servlets-found"));
             }
             if (servletInfos.length > 1)
             {
-                throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_ONE_SERVLET_ONLY));
+                throw new BuilderException(
+                    TapestryCore.getString(TapestryBuilder.STRING_KEY + "abort-too-many-valid-servlets-found"));
             }
             fApplicationServlet = servletInfos[0];
-           
+
         } else
         {
             String definedWebRoot = fTapestryBuilder.fTapestryProject.getWebContext();
@@ -256,7 +284,7 @@ public class FullBuild extends Build
             {
                 Markers.addTapestryProblemMarkerToResource(
                     fTapestryBuilder.getProject(),
-                    TapestryCore.getString(TapestryBuilder.MISSING_CONTEXT, definedWebRoot),
+                    TapestryCore.getString(TapestryBuilder.STRING_KEY + "missing-context", definedWebRoot),
                     IMarker.SEVERITY_WARNING,
                     0,
                     0,

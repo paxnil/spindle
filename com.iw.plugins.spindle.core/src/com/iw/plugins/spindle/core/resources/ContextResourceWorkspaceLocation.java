@@ -67,12 +67,12 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
         IContainer container = getContainer();
         if (container == null || !container.exists())
             return false;
-            
+
         IStorage storage = getStorage();
-       
+
         if (storage == null && TapestryCore.isNull(getName()))
             return true;
-            
+
         return storage != null;
     }
 
@@ -87,13 +87,13 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
     public IStorage getStorage()
     {
         IContainer container = getContainer();
-        if (container != null && getName() != null) {
+        if (container != null && getName() != null)
+        {
             IStorage storage = (IStorage) container.getFile(new Path(getName()));
-            IResource resource = (IResource)storage.getAdapter(IResource.class);
-            if (resource == null || resource.exists())                
-                return storage; 
+            IResource resource = (IResource) storage.getAdapter(IResource.class);
+            if (resource == null || resource.exists())
+                return storage;
         }
-            
 
         return null;
     }
@@ -173,4 +173,12 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
     {
         return fRoot.getSearch();
     }
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
+     */
+    public boolean isBinary()
+    {
+        return false;
+    }
+
 }

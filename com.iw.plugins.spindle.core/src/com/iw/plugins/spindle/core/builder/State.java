@@ -28,35 +28,95 @@ package com.iw.plugins.spindle.core.builder;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.jdt.core.IClasspathEntry;
+
+import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /**
  * An object intended to store the state of the build between builds.
  * Normally, a builder's output is the result of compiling source files, and the State
  * is merely there to make things like incremental builds possible.
  * 
- * This is true for Tapestry but different in that the builds state is *the* result
+ * This is true for Tapestry but different in that the build state is *the* result
  * of the build!
+ * 
+ * TODO extend design so that States can be persisted!
  * 
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
 public class State
 {
+    public static byte VERSION = 0x0001;
+
+    String fProjectName;
+    IResourceWorkspaceLocation fContextRoot;
+    String fLibraryLocation;
+    byte fVersion = VERSION;
+    int fBuildNumber;
+    ICoreNamespace fFrameworkNamespace;
+    Map fBinaryNamespaces = new HashMap();
+    IClasspathEntry[] fLastKnownClasspath;
+    
+    // following are used to determine if an incremental Tapestry build is required at all.
+    
+    // list of IResources to java types in the project
+    List fJavaDependencies;
+    
+    // list of fullyQualified names of types not found during a build
+    List fMissingJavaTypes;
 
     /**
      * Constructor for State.
      */
-    public State()
-    {
-        super();
-    }
+    State()
+    {}
 
     /**
      * Constructor State.
      * @param builder
      */
-    public State(TapestryBuilder builder)
-    {}
+    State(TapestryBuilder builder)
+    {
+        fProjectName = builder.getProject().getName();
+        fContextRoot = builder.fTapestryProject.getWebContextLocation();
+        fLibraryLocation = builder.fTapestryProject.getLibrarySpecPath();
+        fBuildNumber = 0;
+    }
+
+    void markAsBrokenBuild()
+    {
+        fBuildNumber = -1;
+    }
+
+    void copyFrom(State lastState)
+    {
+        fProjectName = lastState.fProjectName;
+        fContextRoot = lastState.fContextRoot;
+        fLibraryLocation = lastState.fLibraryLocation;
+        fBuildNumber = lastState.fBuildNumber + 1;
+        fFrameworkNamespace = lastState.fFrameworkNamespace;
+        fBinaryNamespaces.clear();
+        for (Iterator iter = lastState.fBinaryNamespaces.entrySet().iterator(); iter.hasNext();)
+        {
+            Map.Entry element = (Map.Entry) iter.next();
+            fBinaryNamespaces.put(element.getKey(), element.getValue());
+        }
+        fLastKnownClasspath = new IClasspathEntry[lastState.fLastKnownClasspath.length];
+        System.arraycopy(
+            lastState.fLastKnownClasspath,
+            0,
+            fLastKnownClasspath,
+            0,
+            lastState.fLastKnownClasspath.length);
+
+    }
 
     void write(DataOutputStream out) throws IOException
     {}

@@ -26,16 +26,33 @@ package com.iw.plugins.spindle.core.builder;
  * ***** END LICENSE BLOCK ***** */
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -45,6 +62,8 @@ import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.ApplicationScanner;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.IScannerValidatorListener;
 import com.iw.plugins.spindle.core.scanning.LibraryScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.scanning.TemplateScanner;
@@ -57,7 +76,7 @@ import com.iw.plugins.spindle.core.util.Utils;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public abstract class Build implements IBuild
+public abstract class Build implements IIncrementalBuild, IScannerValidatorListener
 {
 
     private static final Parser BUILD_PARSER = new Parser();
@@ -70,6 +89,11 @@ public abstract class Build implements IBuild
     protected ICoreNamespace fFrameworkNamespace;
     protected ICoreNamespace fApplicationNamespace;
     protected BuilderValidator fValidator;
+    protected State fLastState;
+
+    protected List fFoundTypes;
+    protected List fMissingTypes;
+    protected Map fProcessedLocations;
 
     public Build(TapestryBuilder builder)
     {
@@ -80,6 +104,105 @@ public abstract class Build implements IBuild
         fJavaProject = builder.fJavaProject;
         fParser = BUILD_PARSER;
         fValidator = new BuilderValidator(this);
+        fValidator.addListener(this);
+        fFoundTypes = new ArrayList();
+        fMissingTypes = new ArrayList();
+        fProcessedLocations = new HashMap();
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild(org.eclipse.core.resources.IResourceDelta)
+     */
+    public boolean canIncrementalBuild(IResourceDelta projectDelta)
+    {
+        fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
+        if (fLastState == null || fLastState.fBuildNumber < 0 || fLastState.fVersion != State.VERSION)
+            return false;
+
+        if (fLastState.fFrameworkNamespace == null)
+            return false;
+
+        if (hasClasspathChanged())
+            return false;
+
+        return true;
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild(org.eclipse.core.resources.IResourceDelta)
+     */
+    public boolean needsIncrementalBuild(IResourceDelta projectDelta)
+    {
+        fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
+        final List knownTapestryExtensions = Arrays.asList(fTapestryBuilder.KnownExtensions);
+
+        // check for java files that changed, or have been added
+        try
+        {
+            projectDelta.accept(new IResourceDeltaVisitor()
+            {
+                public boolean visit(IResourceDelta delta) throws CoreException
+                {
+                    IResource resource = delta.getResource();
+
+                    IPath path = resource.getFullPath();
+                    String extension = path.getFileExtension();
+
+                    if (resource instanceof IContainer)
+                        return true;
+
+                    if (fLastState.fJavaDependencies.contains(resource) || knownTapestryExtensions.contains(extension))
+                    {
+                        throw new NeedToBuildException();
+                    } else
+                    {
+
+                        if (!"java".equals(extension))
+                            return true;
+
+                        String name = path.removeFileExtension().lastSegment();
+                        IContainer container = resource.getParent();
+                        IJavaElement element = (IPackageFragment) JavaCore.getJavaCore().create((IFolder) container);
+                        if (element == null)
+                            return true;
+                        if (element instanceof IPackageFragmentRoot && fLastState.fMissingJavaTypes.contains(name))
+                        {
+                            throw new NeedToBuildException();
+                        } else if (
+                            fLastState.fMissingJavaTypes.contains(
+                                ((IPackageFragment) element).getElementName() + "." + name))
+                        {
+                            throw new NeedToBuildException();
+                        }
+
+                    }
+
+                    return true;
+                }
+            });
+        } catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        } catch (NeedToBuildException e)
+        {
+            return true;
+        }
+        return false;
+
+    }
+
+    protected boolean hasClasspathChanged()
+    {
+        IClasspathEntry[] currentEntries = fTapestryBuilder.fClasspath;
+
+        if (currentEntries.length != fLastState.fLastKnownClasspath.length)
+            return true;
+
+        List old = Arrays.asList(fLastState.fLastKnownClasspath);
+        List current = Arrays.asList(currentEntries);
+
+        return !current.containsAll(old);
     }
 
     protected ICoreNamespace createNamespace(String id, IResourceWorkspaceLocation location)
@@ -112,9 +235,8 @@ public abstract class Build implements IBuild
                 scanner.setResourceLocation(location);
                 scanner.setFactory(TapestryCore.getSpecificationFactory());
                 scanner.setPublicId(fParser.getPublicId());
-                
-                IApplicationSpecification result =
-                    (IApplicationSpecification) scanner.scan(node, fValidator);
+
+                IApplicationSpecification result = (IApplicationSpecification) scanner.scan(node, fValidator);
                 IResource res = Utils.toResource(location);
                 if (res != null)
                 {
@@ -139,88 +261,6 @@ public abstract class Build implements IBuild
         }
         return null;
     }
-
-    //    protected IStorage findInPackage(IPackageFragment pack, String filename)
-    //    {
-    //        IPackageFragmentRoot root = (IPackageFragmentRoot) pack.getParent();
-    //        try
-    //        {
-    //            int packageFlavor = root.getKind();
-    //            switch (packageFlavor)
-    //            {
-    //                case IPackageFragmentRoot.K_BINARY :
-    //
-    //                    return findInBinaryPackage(pack, filename);
-    //                case IPackageFragmentRoot.K_SOURCE :
-    //                    return findInSourcePackage(pack, filename);
-    //            }
-    //        } catch (JavaModelException e)
-    //        {
-    //            TapestryCore.log(e);
-    //        }
-    //        return null;
-    //    }
-    //
-    //    protected IStorage findInBinaryPackage(IPackageFragment pack, String filename)
-    //    {
-    //        Object[] jarFiles = null;
-    //        try
-    //        {
-    //            jarFiles = pack.getNonJavaResources();
-    //        } catch (JavaModelException npe)
-    //        {
-    //            return null; // the package is not present
-    //        }
-    //        int length = jarFiles.length;
-    //        for (int i = 0; i < length; i++)
-    //        {
-    //            JarEntryFile jarFile = null;
-    //            try
-    //            {
-    //                jarFile = (JarEntryFile) jarFiles[i];
-    //            } catch (ClassCastException ccex)
-    //            { //skip it
-    //                continue;
-    //            }
-    //            if (jarFile.getName().equals(filename))
-    //            {
-    //                return (IStorage) jarFile;
-    //            }
-    //        }
-    //        return null;
-    //    }
-    //
-    //    protected IStorage findInSourcePackage(IPackageFragment pack, String filename)
-    //    {
-    //        Object[] files = null;
-    //        try
-    //        {
-    //            files = pack.getNonJavaResources();
-    //        } catch (CoreException npe)
-    //        {
-    //            return null; // the package is not present
-    //        }
-    //        if (files != null)
-    //        {
-    //            int length = files.length;
-    //            for (int i = 0; i < length; i++)
-    //            {
-    //                IFile file = null;
-    //                try
-    //                {
-    //                    file = (IFile) files[i];
-    //                } catch (ClassCastException ccex)
-    //                { // skip it
-    //                    continue;
-    //                }
-    //                if (file.getName().equals(filename))
-    //                {
-    //                    return (IStorage) file;
-    //                }
-    //            }
-    //        }
-    //        return null;
-    //    }
 
     protected ILibrarySpecification parseLibrary(IResourceLocation location)
     {
@@ -303,47 +343,17 @@ public abstract class Build implements IBuild
         return result;
     }
 
-    //    protected IComponentSpecification resolveComponent(String type, ICoreNamespace namespace) throws BuilderException
-    //    {
-    //        IComponentSpecification result = namespace.getComponentSpecification(type);
-    //        if (result == null)
-    //        {
-    //            ILibrarySpecification namespaceSpec = namespace.getSpecification();
-    //
-    //            IResourceWorkspaceLocation location = null;
-    //            String specPath = namespaceSpec.getPageSpecificationPath(type);
-    //            if (specPath != null)
-    //            {
-    //                location =
-    //                    (IResourceWorkspaceLocation) namespaceSpec.getSpecificationLocation().getRelativeLocation(specPath);
-    //                if (!location.exists())
-    //                    return null;
-    //
-    //            }
-    //            if (location == null)
-    //                location = null; // find page using any funny rules!
-    //
-    //            result = resolveIComponentSpecification(namespace, location);
-    //
-    //            if (result != null)
-    //            {
-    //                if (result.isPageSpecification())
-    //                {
-    //                    throw new BuilderException("expected component but got page");
-    //                } else
-    //                {
-    //                    namespace.installComponentSpecification(type, result);
-    //                }
-    //            }
-    //        }
-    //
-    //        return result;
-    //    }
+    private ComponentScanner fComponentScanner = new ComponentScanner();
 
     protected IComponentSpecification resolveIComponentSpecification(
         ICoreNamespace namespace,
         IResourceWorkspaceLocation location)
     {
+        // to avoid double parsing specs that are accessible
+        // by multiple means in Tapestry
+        if (fProcessedLocations.containsKey(location))
+            return (IComponentSpecification) fProcessedLocations.get(location);
+
         IComponentSpecification result = null;
         if (location != null)
             if (location.exists())
@@ -351,38 +361,39 @@ public abstract class Build implements IBuild
                 try
                 {
                     Node node = parseToNode(location);
-                    ComponentScanner scanner = new ComponentScanner();
-                    scanner.setResourceLocation(location);
-                    scanner.setNamespace(namespace);
-                    scanner.setPublicId(fParser.getPublicId());
-                    scanner.setFactory(TapestryCore.getSpecificationFactory());
+
+                    fComponentScanner.setResourceLocation(location);
+                    fComponentScanner.setNamespace(namespace);
+                    fComponentScanner.setPublicId(fParser.getPublicId());
+                    fComponentScanner.setFactory(TapestryCore.getSpecificationFactory());
                     if (node != null)
                     {
                         try
                         {
-                            result =
-                                (IComponentSpecification) scanner.scan(node, new BuilderValidator(this, namespace));
+                            IScannerValidator useValidator = new BuilderValidator(this, namespace);
+                            useValidator.addListener(this);
+                            result = (IComponentSpecification) fComponentScanner.scan(node, useValidator);
                         } catch (ScannerException e1)
                         {
                             e1.printStackTrace();
-                        } 
+                        }
                     } else
                     {
                         PluginComponentSpecification dummy = new PluginComponentSpecification();
                         dummy.setSpecificationLocation(location);
                         dummy.setNamespace(namespace);
-                        scanner.scanForTemplates(dummy);
+                        fComponentScanner.scanForTemplates(dummy);
                         result = dummy;
                     }
                     IResource res = Utils.toResource(location);
                     if (res != null)
                     {
-                        Markers.addTapestryProblemMarkersToResource(res, scanner.getProblems());
+                        Markers.addTapestryProblemMarkersToResource(res, fComponentScanner.getProblems());
                     } else
                     {
                         TapestryCore.logProblems(
                             ((IResourceWorkspaceLocation) location).getStorage(),
-                            scanner.getProblems());
+                            fComponentScanner.getProblems());
                     }
                 } catch (IOException e)
                 {
@@ -401,6 +412,8 @@ public abstract class Build implements IBuild
                 }
 
             }
+        if (result != null)
+            fProcessedLocations.put(location, result);
         return result;
     }
 
@@ -412,6 +425,8 @@ public abstract class Build implements IBuild
         for (Iterator iter = spec.getTemplateLocations().iterator(); iter.hasNext();)
         {
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
+            if (fProcessedLocations.containsKey(location))
+                continue;
             try
             {
                 scanner.scanTemplate(spec, location, fValidator);
@@ -426,6 +441,7 @@ public abstract class Build implements IBuild
                         ((IResourceWorkspaceLocation) location).getStorage(),
                         scanner.getProblems());
                 }
+                fProcessedLocations.put(location, null);
             } catch (ScannerException e)
             {
                 TapestryCore.log(e);
@@ -437,6 +453,50 @@ public abstract class Build implements IBuild
                     fNotifier.processed(location);
                 }
             }
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.builder.IBuild#cleanUp()
+     */
+    public void cleanUp()
+    {
+        fLastState = null;
+        fFoundTypes.clear();
+        fMissingTypes.clear();
+        fProcessedLocations.clear();
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidatorListener#typeChecked(java.lang.String, org.eclipse.jdt.core.IType)
+     */
+    public void typeChecked(String fullyQualifiedName, IType result)
+    {
+        if (result == null)
+        {
+            if (!fMissingTypes.contains(fullyQualifiedName))
+                fMissingTypes.add(fullyQualifiedName);
+        } else if (!result.isBinary())
+        {
+            try
+            {
+                IResource resource = result.getUnderlyingResource();
+                if (!fFoundTypes.contains(resource))
+                    fFoundTypes.add(resource);
+            } catch (JavaModelException e)
+            {
+                TapestryCore.log(e);
+            }
+
+        }
+
+    }
+
+    private static class NeedToBuildException extends RuntimeException
+    {
+        public NeedToBuildException()
+        {
+            super();
         }
     }
 

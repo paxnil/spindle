@@ -37,6 +37,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
@@ -84,6 +85,21 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
         {
             return storage instanceof IResource;
         }
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
+     */
+    public boolean isBinary()
+    {
+        IStorage storage = getStorage();
+        if (storage == null)
+            return false;
+
+        if (storage instanceof JarEntryFile)
+            return true;
+
         return false;
     }
 

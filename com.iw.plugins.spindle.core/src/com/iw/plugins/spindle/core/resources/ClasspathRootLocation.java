@@ -315,4 +315,12 @@ public class ClasspathRootLocation extends AbstractRootLocation
         return "cp(" + fJavaProject.getProject().getName() + ")/";
     }
 
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
+     */
+    public boolean isBinary()
+    {       
+        return false;
+    }
+
 }

@@ -57,7 +57,7 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.TapestryResourceLocationAcceptor;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;
-import com.iw.plugins.spindle.core.spec.*;
+import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 
@@ -120,6 +120,8 @@ public class NamespaceResolver
      **/
     private boolean fResolvingFramework;
 
+    private boolean fIsIncrementalBuild;
+
     /**
      * 
      * To resolve a namespace you need:
@@ -180,12 +182,21 @@ public class NamespaceResolver
      */
     public NamespaceResolver(Build build)
     {
+        this(build, false);
+    }
+
+    NamespaceResolver(Build build, boolean isIncrementalBuild)
+    {
         super();
-        this.fBuild = build;
+        fBuild = build;
+        fIsIncrementalBuild = isIncrementalBuild;
     }
 
     public ICoreNamespace resolveFrameworkNamespace()
     {
+        if (fIsIncrementalBuild)
+            return fBuild.fLastState.fFrameworkNamespace;
+
         IResourceWorkspaceLocation frameworkLocation =
             (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot.getRelativeLocation(
                 "/org/apache/tapestry/Framework.library");
@@ -205,6 +216,9 @@ public class NamespaceResolver
         String libraryId,
         IResourceWorkspaceLocation location)
     {
+        if (fIsIncrementalBuild && fBuild.fLastState.fBinaryNamespaces.containsKey(location))
+            return (ICoreNamespace)fBuild.fLastState.fBinaryNamespaces.get(location);
+            
         reset();
         resolve(framework, libraryId, location);
         return fResultNamespace;
@@ -228,11 +242,13 @@ public class NamespaceResolver
         if (fSpecLocation != null)
         {
             if (!fSpecLocation.exists())
-                throw new BuilderException("Tapestry Build failed: application spec does not exist: '"+fSpecLocation.toString()+"'"); //TODO internationalize
-                
+                throw new BuilderException(
+                    "Tapestry Build failed: application spec does not exist: '" + fSpecLocation.toString() + "'");
+            //TODO internationalize
+
             fResultNamespace = fBuild.createNamespace(fNamespaceId, fSpecLocation);
         } else
-        {            
+        {
             fResultNamespace = createStandinApplicationNamespace(servlet);
             fSpecLocation = (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
         }
@@ -360,11 +376,12 @@ public class NamespaceResolver
      */
     private void resolveChildNamespaces()
     {
+
         ILibrarySpecification spec = fResultNamespace.getSpecification();
         List ids = spec.getLibraryIds();
         if (!ids.isEmpty())
         {
-            NamespaceResolver childResolver = new NamespaceResolver(fBuild);
+            NamespaceResolver childResolver = new NamespaceResolver(fBuild, fIsIncrementalBuild);
             for (Iterator iter = ids.iterator(); iter.hasNext();)
             {
                 String libraryId = (String) iter.next();

@@ -159,11 +159,10 @@ public class WebXMLScanner extends AbstractScanner
     protected IType checkJavaType(String className, ISourceLocation location)
     {
         IType found = fBuilder.fTapestryBuilder.getType(className);
+        fBuilder.typeChecked(className, found);
+        
         if (found == null)
-            addProblem(
-                IProblem.ERROR,
-                location,
-                TapestryCore.getTapestryString(TapestryBuilder.TAPESTRY_CLASS_NOT_FOUND, className));
+            addProblem(IProblem.ERROR, location, TapestryCore.getTapestryString("unable-to-resolve-class", className));
 
         return found;
     }

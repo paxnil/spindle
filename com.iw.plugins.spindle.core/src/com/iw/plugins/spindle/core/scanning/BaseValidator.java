@@ -26,7 +26,10 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import ognl.Ognl;
@@ -43,6 +46,7 @@ import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
+import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.IProblem;
@@ -123,12 +127,47 @@ public class BaseValidator implements IScannerValidator
     protected PatternCompiler fPatternCompiler;
     protected IProblemCollector fProblemCollector;
 
+    private List fListeners;
+
     /**
      * 
      */
     public BaseValidator()
     {
         super();
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#addListener(com.iw.plugins.spindle.core.scanning.IScannerValidatorListener)
+     */
+    public void addListener(IScannerValidatorListener listener)
+    {
+        if (fListeners == null)
+            fListeners = new ArrayList();
+
+        if (!fListeners.contains(listener))
+            fListeners.add(listener);
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#removeListener(com.iw.plugins.spindle.core.scanning.IScannerValidatorListener)
+     */
+    public void removeListener(IScannerValidatorListener listener)
+    {
+        if (fListeners != null)
+            fListeners.remove(listener);
+    }
+
+    protected void fireTypeCheck(String fullyQulaifiedName, IType result)
+    {
+        if (fListeners == null)
+            return;
+
+        for (Iterator iter = fListeners.iterator(); iter.hasNext();)
+        {
+            IScannerValidatorListener listener = (IScannerValidatorListener) iter.next();
+            listener.typeChecked(fullyQulaifiedName, result);
+        }
     }
 
     /** 

@@ -55,7 +55,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="com.iw.plugins.spindle.core.TapestryProject">
+             class="com.iw.plugins.spindle.core.TapestryProject">
          </run>
       </runtime>
       <requires-nature

@@ -122,7 +122,7 @@ public class CoreTemplateParser extends TemplateParser
             } catch (Exception e)
             {
                 //ignore, problems already recorded
-                e.printStackTrace();
+                //e.printStackTrace();
             }
 
             List tokens = getTokens();

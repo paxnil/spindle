@@ -61,7 +61,7 @@ public class ContextRootLocation extends AbstractRootLocation
     {
         if (fRootFolder == null)
             return false;
-            
+
         return fRootFolder.exists();
     }
 
@@ -170,6 +170,31 @@ public class ContextRootLocation extends AbstractRootLocation
     public String toString()
     {
         return "ctx(" + fRootFolder.getFullPath() + ")/";
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
+     */
+    public boolean isBinary()
+    {
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+            return false;
+
+        if (obj.getClass().equals(getClass()))
+        {
+            ContextRootLocation other = (ContextRootLocation) obj;
+            return fRootFolder.equals(other.fRootFolder);
+        }
+
+        return false;
     }
 
 }

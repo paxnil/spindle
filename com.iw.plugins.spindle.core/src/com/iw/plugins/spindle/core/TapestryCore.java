@@ -59,13 +59,13 @@ public class TapestryCore extends AbstractUIPlugin
     /**
      *  Used by label decorators to listen to Core changes
      */
-    public static interface ICoreListener 
+    public static interface ICoreListener
     {
 
         public void coreChanged();
 
     }
-    
+
     private static ResourceBundle TapestryStrings;
     private static ResourceBundle SpindleCoreStrings;
 
@@ -183,6 +183,18 @@ public class TapestryCore extends AbstractUIPlugin
         fireCoreListenerEvent();
     }
 
+    public static boolean hasTapestryNature(IProject project)
+    {
+        try
+        {
+            return project.hasNature(NATURE_ID);
+        } catch (CoreException e)
+        {
+            log(e);
+        }
+        return false;
+    }
+
     public static void removeNatureFromProject(IProject project, String natureId) throws CoreException
     {
         IProject proj = project.getProject(); // Needed if project is a IJavaProject
@@ -230,14 +242,15 @@ public class TapestryCore extends AbstractUIPlugin
         if (CoreListeners != null)
             CoreListeners.remove(listener);
     }
-    
-    private static void fireCoreListenerEvent() {
-        for (Iterator iter = CoreListeners.iterator(); iter.hasNext();)
+
+    private static void fireCoreListenerEvent()
     {
-        ICoreListener listener = (ICoreListener) iter.next();
-        // simple for now - may create an event type later
-        listener.coreChanged();
-    }
+        for (Iterator iter = CoreListeners.iterator(); iter.hasNext();)
+        {
+            ICoreListener listener = (ICoreListener) iter.next();
+            // simple for now - may create an event type later
+            listener.coreChanged();
+        }
     }
 
     public static String getString(String key, Object[] args)

@@ -59,6 +59,8 @@ public interface IResourceWorkspaceLocation extends IResourceLocation
     public boolean isWorkspaceResource();
     
     public boolean isOnClasspath();
+    
+    public boolean isBinary();
 
     /**
      * return the project that contains the artifact

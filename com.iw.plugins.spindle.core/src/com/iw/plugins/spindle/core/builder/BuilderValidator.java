@@ -38,6 +38,7 @@ import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
+import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
@@ -84,7 +85,9 @@ public class BuilderValidator extends BaseValidator
      */
     public Object findType(String fullyQualifiedName)
     {
-        return fBuild.fTapestryBuilder.getType(fullyQualifiedName);
+        IType result = fBuild.fTapestryBuilder.getType(fullyQualifiedName);
+        fireTypeCheck(fullyQualifiedName, result);
+        return result;
     }
 
     /* (non-Javadoc)
@@ -417,7 +420,7 @@ public class BuilderValidator extends BaseValidator
 
         if (!specLocation.isOnClasspath())
             useLocation = fBuild.fTapestryBuilder.fClasspathRoot;
-            
+
         return validateResourceLocation(useLocation, path, errorKey, source);
     }
 
