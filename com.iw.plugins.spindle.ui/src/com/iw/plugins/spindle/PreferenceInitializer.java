@@ -71,62 +71,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
   private void initializeDefaultValues(IPreferenceStore store)
   {
 
-    //        store.setDefault(EDITOR_OVERVIEW_RULER, true);
-    //
-    //        store.setDefault(PreferenceConstants.EDITOR_CURRENT_LINE, true);
-    //        PreferenceConverter.setDefault(store,
-    // PreferenceConstants.EDITOR_CURRENT_LINE_COLOR, new RGB(225, 235, 224));
-    //
-    //        store.setDefault(PreferenceConstants.EDITOR_PRINT_MARGIN, false);
-    //        store.setDefault(PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN, 80);
-    //        PreferenceConverter.setDefault(store,
-    // PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR, new RGB(176, 180, 185));
-    //
-    //        store.setDefault(PreferenceConstants.EDITOR_PROBLEM_INDICATION, true);
-    //        PreferenceConverter.setDefault(
-    //            store,
-    //            PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR,
-    //            new RGB(255, 0, 128));
-    //        store.setDefault(PreferenceConstants.EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER,
-    // true);
-    //
-    //        store.setDefault(PreferenceConstants.EDITOR_WARNING_INDICATION, true);
-    //        PreferenceConverter.setDefault(
-    //            store,
-    //            PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR,
-    //            new RGB(244, 200, 45));
-    //        store.setDefault(PreferenceConstants.EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER,
-    // true);
-    //
-    //        store.setDefault(PreferenceConstants.EDITOR_TASK_INDICATION, false);
-    //        PreferenceConverter.setDefault(store,
-    // PreferenceConstants.EDITOR_TASK_INDICATION_COLOR, new RGB(0, 128, 255));
-    //        store.setDefault(PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER,
-    // true);
-    //
-    //        store.setDefault(PreferenceConstants.EDITOR_BOOKMARK_INDICATION, false);
-    //        PreferenceConverter.setDefault(
-    //            store,
-    //            PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR,
-    //            new RGB(34, 164, 99));
-    //        store.setDefault(PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER,
-    // true);
-    //
-    //        store.setDefault(PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION,
-    // true);
-    //        PreferenceConverter.setDefault(
-    //            store,
-    //            PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR,
-    //            new RGB(192, 192, 192));
-    //        store.setDefault(PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER,
-    // true);
-    //
-    //        store.setDefault(PreferenceConstants.EDITOR_UNKNOWN_INDICATION, false);
-    //        PreferenceConverter.setDefault(store,
-    // PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR, new RGB(0, 0, 0));
-    //        store.setDefault(PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER,
-    // false);
-
     store.setDefault(PreferenceConstants.P_HTML_TO_GENERATE, UIPlugin
         .getString("TAPESTRY.genHTMLSource"));
 
@@ -146,10 +90,10 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
     store.setDefault(TEMPLATE_EDITOR_HTML_SHOW_XHTML, TemplateEditor.XHTML_NONE_LABEL);
     store.setDefault(AUTO_ACTIVATE_CONTENT_ASSIST, true);
     
-    store.setDefault(FORMATTER_MAX_LINE_LENGTH, 2); 
+    store.setDefault(FORMATTER_MAX_LINE_LENGTH, 80); 
     store.setDefault(FORMATTER_WRAP_LONG, true);  
     store.setDefault(FORMATTER_ALIGN, false);  
-    store.setDefault(FORMATTER_PRESERVE_BLANK_LINES, true);
+    store.setDefault(FORMATTER_PRESERVE_BLANK_LINES, false);
     store.setDefault(FORMATTER_TAB_SIZE, 4); 
     store.setDefault(FORMATTER_TAB_CHAR, false);
 
