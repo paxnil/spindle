@@ -258,7 +258,17 @@ public class CoreUtils
     {
         return (IPackageFragmentRoot) findElementOfKind(element, IJavaElement.PACKAGE_FRAGMENT_ROOT);
     }
-    
-    
+
+    public static String abbreviate(String str, int maxWidth)
+    {
+        if (str == null)
+            return null;
+
+        if (maxWidth < 4)
+            throw new IllegalArgumentException("Minimum abbreviation width is 4");
+
+        return str.substring(0, maxWidth - 3) + "...";
+
+    }
 
 }

@@ -39,6 +39,7 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Document;
 
+import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
@@ -74,6 +76,7 @@ import com.iw.plugins.spindle.core.scanning.TemplateScanner;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
+import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.Markers;
 /**
  * Abstract base class for full and incremental builds
@@ -500,7 +503,6 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 result = (IApplicationSpecification) scanner.scan(document, fValidator);
                 Markers.recordProblems(useLocation, scanner.getProblems());
 
-               
             } else
             {
                 PluginApplicationSpecification dummy = new PluginApplicationSpecification();
@@ -519,11 +521,23 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             TapestryCore.log(e);
         } catch (ScannerException e)
         {
-            //TODO remove
-            e.printStackTrace();
-            TapestryCore.log(e);
+            recordFatalProblem(location, e);
         }
         return result;
+    }
+
+    protected void recordFatalProblem(IResourceLocation location, ScannerException e)
+    {
+        IResource resource = CoreUtils.toResource(location);
+        if (resource != null)
+            Markers.addProblemMarkerToResource(
+                resource,
+                ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER,
+                e.getMessage(),
+                IMarker.SEVERITY_ERROR,
+                1,
+                0,
+                0);
     }
 
     /**
@@ -573,9 +587,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             TapestryCore.log(e);
         } catch (ScannerException e)
         {
-            //TODO remove
-            e.printStackTrace();
-            TapestryCore.log(e);
+            recordFatalProblem(location, e);
         }
         if (result != null)
             fProcessedLocations.put(useLocation, result);
@@ -727,14 +739,12 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                         try
                         {
                             result = (IComponentSpecification) fComponentScanner.scan(document, useValidator);
-                        } catch (Exception e1)
-                        {
-                            TapestryCore.log(e1);
+
                         } finally
                         {
                             useValidator.removeListener(this);
                         }
-                        
+
                         Markers.recordProblems(location, fComponentScanner.getProblems());
 
                     } else
@@ -748,13 +758,16 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
                     fSpecificationMap.put(location.getStorage(), result);
 
-
                 } catch (IOException e)
                 {
                     e.printStackTrace();
                 } catch (CoreException e)
                 {
                     e.printStackTrace();
+                } catch (ScannerException e)
+                {
+                    recordFatalProblem(location, e);
+                    
                 } finally
                 {
                     if (fBuildQueue.isWaiting(location))

@@ -84,6 +84,11 @@ public class XMLUtil
     static public final int DTD_SERVLET_2_2 = 5;
     static public final int DTD_SERVLET_2_3 = 6;
 
+    static public final int[] ALLOWED_SPEC_DTDS = new int[] { DTD_1_3, DTD_3_0 };
+    static public final String SPEC_DTD_ERROR_KEY = "error-invalid-spec-public-id";
+    static public final int[] ALLOWED_SERVLET_DTDS = new int[] { DTD_SERVLET_2_2, DTD_SERVLET_2_3 };
+    static public final String SERVLET_DTD_ERROR_KEY = "error-invalid-servlet-public-id";
+
     static public int getDTDVersion(String publicId)
     {
 
@@ -1070,7 +1075,7 @@ public class XMLUtil
             {
 
                 String name = (String) libraryNames.next();
-                writeLibrary(name, (String)libraryMap.get(name), writer, indent);
+                writeLibrary(name, (String) libraryMap.get(name), writer, indent);
             }
         }
 
@@ -1084,8 +1089,7 @@ public class XMLUtil
         writer.print(speclocation);
         writer.println("\" />");
     }
-    
- 
+
     static public void writeMultiLine(PrintWriter writer, String message)
     {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(message.getBytes())));

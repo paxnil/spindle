@@ -43,6 +43,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
  *  Scanner for building Tapestry Specs - this is the base class
@@ -70,10 +71,36 @@ public abstract class SpecificationScanner extends AbstractScanner
 
         Document document = (Document) source;
         fPublicId = W3CAccess.getPublicId(document);
-        if (fPublicId == null)
-            return null;
+        if (fPublicId == null || !checkPublicId())
+        {
+            throw new ScannerException(TapestryCore.getString(XMLUtil.SPEC_DTD_ERROR_KEY));
+        }
         fRootNode = document.getDocumentElement();
         return document;
+    }
+
+    /**
+     * @return
+     */
+    protected boolean checkPublicId()
+    {
+        boolean ok = false;
+        if (fPublicId != null)
+        {
+            int version = XMLUtil.getDTDVersion(fPublicId);
+            if (version != XMLUtil.UNKNOWN_DTD)
+            {
+                for (int i = 0; i < XMLUtil.ALLOWED_SPEC_DTDS.length; i++)
+                {
+                    if (XMLUtil.ALLOWED_SPEC_DTDS[i] == version)
+                    {
+                        ok = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return ok;
     }
 
     /* (non-Javadoc)
@@ -83,7 +110,7 @@ public abstract class SpecificationScanner extends AbstractScanner
     {
         validate(source);
     }
-    
+
     protected void validate(Object source)
     {
         DOMValidator validator = new DOMValidator();

@@ -125,6 +125,11 @@ public class DOMValidator implements IProblemCollector
             throw new Error(TapestryCore.getString("dom-validator-error-no-DTD-parse", e.getMessage()));
         }
     }
+    
+    public static DTD getDTD(String publicId) {
+        return (DTD)DTDS.get(publicId);
+    }
+    
     private Document fXMLDocument;
     private String fRootElementName;
     private boolean fSeenRootElement;
