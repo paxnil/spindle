@@ -620,7 +620,8 @@ public class ComponentSelectionSection
     }
     public Image getImage(Object element) {
       CHolder holder = ((CHolder) element);
-      if (!holder.component.getType().endsWith(".jwc")) {
+      String type = holder.component.getType();
+      if (type != null && !type.endsWith(".jwc")) {
         return componentAliasImage;
       }
       return componentImage;

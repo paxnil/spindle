@@ -75,7 +75,8 @@ public class ComponentFormOutlinePage extends SpindleFormOutlinePage {
     SpindleFormPage page = (SpindleFormPage) holder.page;
     if ("Components".equals(page.getTitle())) {
       PluginContainedComponent component = (PluginContainedComponent) holder.element;
-      if (component.getType().endsWith(".jwc")) { 
+      String type = component.getType();
+      if (type != null && component.getType().endsWith(".jwc")) { 
         return containedComponentImage;
       } else {
         return componentAliasImage;

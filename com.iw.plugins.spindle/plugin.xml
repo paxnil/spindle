@@ -22,7 +22,7 @@
       <library name="iw_tapestry.jar">
          <export name="*"/>
       </library>
-      <library name="net.sf.tapestry-2.0.4.jar">
+      <library name="net.sf.tapestry-2.0.5.jar">
          <export name="*"/>
       </library>
    </runtime>
@@ -76,6 +76,22 @@
          </description>
       </wizard>
    </extension>
+   
+   <extension
+   point="org.eclipse.ui.decorators">
+      <decorator
+            objectClass="org.eclipse.core.resources.IStorage"
+            adaptable="true"
+            label="Spindle DTD Decorator"
+            state="true"
+            class="com.iw.plugins.spindle.ui.DTDLableDecorator"
+            id="com.iw.plugins.spindle.DTDVersionDecorator">
+         <description>
+            Adds the DTD version to .jwc and .application files in the package explorer
+         </description>
+      </decorator>
+</extension>
+
    <extension
          point="org.eclipse.ui.editors">
       <editor
