@@ -78,7 +78,7 @@ public class PluginExtensionConfiguration extends DescribableSpecification
 
     }
 
-     public Object fValueObject;
+    public Object fValueObject;
     public Class fType;
 
     private String fDeclaredType;
@@ -275,7 +275,7 @@ public class PluginExtensionConfiguration extends DescribableSpecification
 
         try
         {
-          
+
             if (fDeclaredType != null)
             {
                 SpecificationScanner.IConverter converter =
@@ -287,7 +287,8 @@ public class PluginExtensionConfiguration extends DescribableSpecification
                     validator.addProblem(
                         IProblem.ERROR,
                         sourceInfo.getAttributeSourceLocation("type"),
-                        TapestryCore.getTapestryString("SpecificationParser.unknown-static-value-type", fDeclaredType));
+                        TapestryCore.getTapestryString("SpecificationParser.unknown-static-value-type", fDeclaredType),
+                        true);
                 } else if (fDeclaredValue != null)
                 {
                     try
@@ -304,16 +305,14 @@ public class PluginExtensionConfiguration extends DescribableSpecification
                         {
                             problemLocation = sourceInfo.getContentSourceLocation();
                         }
-                        validator.addProblem(IProblem.ERROR, problemLocation, e2.getMessage());
+                        validator.addProblem(IProblem.ERROR, problemLocation, e2.getMessage(), true);
                     }
                 }
             }
 
         } catch (ScannerException e)
         {
-            // TODO remove
-            e.printStackTrace();
-            TapestryCore.log(e);
+             TapestryCore.log(e);
         }
 
     }

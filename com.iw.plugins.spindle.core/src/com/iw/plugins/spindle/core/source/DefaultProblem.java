@@ -48,18 +48,21 @@ public class DefaultProblem implements IProblem
     private int fSeverity;
 
     private String fType;
+    
+    private boolean fTemporary;
 
     /**
      * 
      */
-    public DefaultProblem(String type, int severity, String message, int lineNumber, int charStart, int charEnd)
+    public DefaultProblem(String type, int severity, String message, int lineNumber, int charStart, int charEnd, boolean isTemporary)
     {
-        this.fType = type;
-        this.fSeverity = severity;
-        this.fMessage = message;
-        this.fLineNumber = lineNumber;
-        this.fCharStart = charStart;
-        this.fCharEnd = charEnd;
+        fType = type;
+        fSeverity = severity;
+        fMessage = message;
+        fLineNumber = lineNumber;
+        fCharStart = charStart;
+        fCharEnd = charEnd;
+        fTemporary = isTemporary;
     }
 
     public String toString()
@@ -148,6 +151,11 @@ public class DefaultProblem implements IProblem
     public String getType()
     {
         return fType;
+    }
+
+    public boolean isTemporary()
+    {
+        return fTemporary;
     }
 
 }

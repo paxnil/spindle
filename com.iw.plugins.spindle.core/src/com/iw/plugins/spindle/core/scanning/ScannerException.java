@@ -38,44 +38,40 @@ public class ScannerException extends Exception
 {
 
     ISourceLocation location;
-    
-    public ScannerException()
-    {
-        super();
-    }
+    boolean fTemporary = false;
 
     /**
      * @param arg0
      */
-    public ScannerException(String arg0)
+    public ScannerException(String message, boolean temporary)
     {
-        super(arg0);
+        super(message);
+        fTemporary = temporary;
     }
 
     /**
      * @param arg0
      * @param arg1
      */
-    public ScannerException(String arg0, Throwable arg1)
+    public ScannerException(String message, Throwable exception, boolean temporary)
     {
-        super(arg0, arg1);
+        super(message, exception);
+        fTemporary = temporary;
     }
 
-    /**
-     * @param arg0
-     */
-    public ScannerException(Throwable arg0)
-    {
-        super(arg0);
-    }
     
-    public ScannerException(String message, ISourceLocation location) {
+    public ScannerException(String message, ISourceLocation location, boolean temporary) {
         super(message);
         this.location = location;
+        fTemporary = temporary;
     }
     
     public ISourceLocation getLocation() {
         return this.location;
+    }
+    
+    public boolean isTemporary() {
+        return fTemporary;
     }
 
 }

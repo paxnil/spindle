@@ -284,21 +284,26 @@ public class BaseValidator implements IScannerValidator
                 Ognl.parseExpression(expression);
             } catch (OgnlException e)
             {
-                addProblem(severity, location, e.getMessage());
+                addProblem(severity, location, e.getMessage(), false);
                 return false;
             }
         }
         return true;
     }
 
-    public void addProblem(int severity, ISourceLocation location, String message) throws ScannerException
+    public void addProblem(int severity, ISourceLocation location, String message, boolean isTemporary)
+        throws ScannerException
     {
         if (fProblemCollector == null)
         {
-            throw new ScannerException(message);
+            throw new ScannerException(message, isTemporary);
         } else
         {
-            fProblemCollector.addProblem(severity, (location == null ? DefaultSourceLocation : location), message);
+            fProblemCollector.addProblem(
+                severity,
+                (location == null ? DefaultSourceLocation : location),
+                message,
+                isTemporary);
         }
     }
 
@@ -338,12 +343,12 @@ public class BaseValidator implements IScannerValidator
 
             if (!fMatcher.matches(value, compiled))
             {
-                addProblem(severity, location, TapestryCore.getTapestryString(errorKey, value));
+                addProblem(severity, location, TapestryCore.getTapestryString(errorKey, value), false);
                 return false;
             }
             return true;
         }
-        addProblem(severity, location, TapestryCore.getTapestryString(errorKey, "null value"));
+        addProblem(severity, location, TapestryCore.getTapestryString(errorKey, "null value"), false);
         return false;
     }
 
@@ -388,7 +393,7 @@ public class BaseValidator implements IScannerValidator
         {
             IResourceWorkspaceLocation relative =
                 (IResourceWorkspaceLocation) location.getRelativeLocation(relativePath);
-            addProblem(IProblem.ERROR, source, TapestryCore.getString(errorKey, relative.toString()));
+            addProblem(IProblem.ERROR, source, TapestryCore.getString(errorKey, relative.toString()), true);
             return false;
         }
         return true;
@@ -398,7 +403,7 @@ public class BaseValidator implements IScannerValidator
     {
         IResourceWorkspaceLocation real = (IResourceWorkspaceLocation) location;
         IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) real.getRelativeLocation(relativePath);
-        return relative.exists();
+        return relative.getStorage() != null;
     }
 
     public boolean validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType, int severity)
@@ -423,7 +428,8 @@ public class BaseValidator implements IScannerValidator
             addProblem(
                 severity,
                 location,
-                TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType));
+                TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType),
+                true);
             return false;
         }
         return true;

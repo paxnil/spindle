@@ -41,9 +41,11 @@ import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
 public class BuilderValidator extends SpecificationValidator
 {
 
-    public BuilderValidator(Build build, boolean performDeferredValidations) throws CoreException
+    public BuilderValidator(Build build, SpecificationValidator.TypeFinder finder, boolean performDeferredValidations)
+        throws CoreException
     {
         super(build.fTapestryBuilder.fTapestryProject, performDeferredValidations);
+        setTypeFinder(finder);
     }
 
 }

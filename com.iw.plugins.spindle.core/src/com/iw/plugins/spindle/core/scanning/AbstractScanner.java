@@ -147,7 +147,7 @@ public abstract class AbstractScanner implements IProblemCollector
         }
     }
 
-    public void addProblem(int severity, ISourceLocation location, String message)
+    public void addProblem(int severity, ISourceLocation location, String message, boolean isTemporary)
     {
         addProblem(
             new DefaultProblem(
@@ -156,7 +156,7 @@ public abstract class AbstractScanner implements IProblemCollector
                 message,
                 location.getLineNumber(),
                 location.getCharStart(),
-                location.getCharEnd()));
+                location.getCharEnd(), isTemporary));
     }
 
     public void addProblems(IProblem[] problems)
@@ -222,7 +222,7 @@ public abstract class AbstractScanner implements IProblemCollector
                 addProblem(
                     IProblem.WARNING,
                     getAttributeSourceLocation(node, attributeName),
-                    "warning, attribute value is null!");
+                    "warning, attribute value is null!", false);
         }
 
         return result;

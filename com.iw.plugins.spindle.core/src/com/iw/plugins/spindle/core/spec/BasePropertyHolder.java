@@ -29,11 +29,8 @@ package com.iw.plugins.spindle.core.spec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 
 /**
  *  Base class for Spec classes that have properties
@@ -144,12 +141,4 @@ public abstract class BasePropertyHolder extends DescribableSpecification implem
         return (PluginPropertyDeclaration) fProperties.get(name);
     }
 
-    public void validateProperties(IScannerValidator validator)
-    {
-        for (Iterator iter = fPropertyDeclarations.iterator(); iter.hasNext();)
-        {
-            PluginPropertyDeclaration element = (PluginPropertyDeclaration) iter.next();
-            element.validate(this, validator);
-        }
-    }
 }

@@ -46,7 +46,7 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
 public interface IResourceWorkspaceLocation extends IResourceLocation
 {
 
-    public boolean exists();
+//    public boolean exists();
 
     /**
      * return the workspace storage associated with this descriptor

@@ -215,9 +215,7 @@ public class PluginExtensionSpecification extends BasePropertyHolder implements 
 
         } catch (ScannerException e)
         {
-            // TODO remove
-            e.printStackTrace();
-            TapestryCore.log(e);
+             TapestryCore.log(e);
         }
 
     }

@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *  TODO Add Type comment
+ *  Specification types that can have description tags
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$

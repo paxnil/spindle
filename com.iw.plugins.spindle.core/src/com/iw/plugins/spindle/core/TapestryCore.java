@@ -189,6 +189,11 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
 
     static public void log(Throwable ex)
     {
+        log(null, ex);
+    }
+
+    static public void log(String message, Throwable ex)
+    {
         TapestryCore core = getDefault();
         if (core == null)
         {
@@ -197,6 +202,12 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         }
         ILog log = core.getLog();
         StringWriter stringWriter = new StringWriter();
+        if (message != null)
+        {
+            stringWriter.write(message);
+            stringWriter.write('\n');
+        }
+
         ex.printStackTrace(new PrintWriter(stringWriter));
         String msg = stringWriter.getBuffer().toString();
 

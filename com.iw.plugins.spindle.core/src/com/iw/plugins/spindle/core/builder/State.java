@@ -28,9 +28,12 @@ package com.iw.plugins.spindle.core.builder;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 
@@ -74,8 +77,12 @@ public class State
     // map template storages to components
     Map fTemplateMap;
 
-    // map spec storages to specification objects
-    Map fSpecificationMap;
+    // map spec files to specification objects
+    Map fFileSpecificationMap;
+    // map binary spec files to specification objects
+    Map fBinarySpecificationMap;
+    // map containing all of the above
+    private Map fSpecificationMap = new CompositeMap();
 
     //  list of known template extensions
     List fSeenTemplateExtensions;
@@ -85,15 +92,21 @@ public class State
 
     // the main namespace result of the last build.
     ICoreNamespace fPrimaryNamespace;
-    
+
     // the frameowrk namespace for this project
     ICoreNamespace fFrameworkNamespace;
+
+    //templates that do not contain implicit components and thus may not need reparsing
+    //during a sunsequent incremental build.
+    List fCleanTemplates;
 
     /**
      * Constructor for State.
      */
     State()
-    {}
+    {
+        //do nothing.
+    }
 
     /**
      * Constructor State.
@@ -119,6 +132,7 @@ public class State
         fLibraryLocation = lastState.fLibraryLocation;
         fBuildNumber = lastState.fBuildNumber + 1;
         fBinaryNamespaces = new HashMap(lastState.fBinaryNamespaces);
+        fBinarySpecificationMap = new HashMap(lastState.fBinaryNamespaces);
         fLastKnownClasspath = new IClasspathEntry[lastState.fLastKnownClasspath.length];
         System.arraycopy(
             lastState.fLastKnownClasspath,
@@ -148,5 +162,111 @@ public class State
     public Map getSpecificationMap()
     {
         return fSpecificationMap;
-    }   
+    }
+
+    class CompositeMap implements Map
+    {
+        /* (non-Javadoc)
+        * @see java.util.Map#clear()
+        */
+        public void clear()
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#containsKey(java.lang.Object)
+         */
+        public boolean containsKey(Object key)
+        {
+            return fBinaryNamespaces.containsKey(key) || fFileSpecificationMap.containsKey(key);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#containsValue(java.lang.Object)
+         */
+        public boolean containsValue(Object value)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#entrySet()
+         */
+        public Set entrySet()
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#get(java.lang.Object)
+         */
+        public Object get(Object key)
+        {
+            Object binary = fBinarySpecificationMap.get(key);
+            if (binary != null)
+                return binary;
+            return fFileSpecificationMap.get(key);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#isEmpty()
+         */
+        public boolean isEmpty()
+        {
+            return fBinaryNamespaces.isEmpty() && fFileSpecificationMap.isEmpty();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#keySet()
+         */
+        public Set keySet()
+        {
+            HashSet result = new HashSet(fBinarySpecificationMap.keySet());
+            result.addAll(fFileSpecificationMap.keySet());
+            return result;
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#put(java.lang.Object, java.lang.Object)
+         */
+        public Object put(Object key, Object value)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#putAll(java.util.Map)
+         */
+        public void putAll(Map t)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#remove(java.lang.Object)
+         */
+        public Object remove(Object key)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#size()
+         */
+        public int size()
+        {
+
+            return fBinaryNamespaces.size() + fFileSpecificationMap.size();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#values()
+         */
+        public Collection values()
+        {
+            throw new UnsupportedOperationException();
+        }
+
+    }
 }

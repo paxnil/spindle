@@ -132,7 +132,7 @@ public class I18NResourceAcceptor implements IResourceLocationAcceptor
         PERL = new Perl5Util(new PatternCacheLRU(100));
 
         String name = location.getName();
-        if (name == null || name.trim().length() > 0)
+        if (name != null && name.trim().length() > 0)
         {
             String foundName = name;
             String foundExtension = null;

@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,6 +87,8 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
 
     protected Map fParameters;
     protected List fParameterObjects;
+
+    private List fRequiredParameterNames;
 
     /**
      *  Defines all helper beans.  Keyed on name, value is {@link IBeanSpecification}.
@@ -251,7 +254,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
         pluginParm.setParent(this);
         pluginParm.setIdentifier(name);
 
-        fParameterObjects.add(name);
+        fParameterObjects.add(pluginParm);
 
         if (!fParameters.containsKey(name))
             fParameters.put(name, spec);
@@ -335,6 +338,27 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     public List getParameterNames()
     {
         return keys(fParameters);
+    }
+
+    public List getRequiredParameterNames()
+    {
+        if (fParameters == null)
+            return Collections.EMPTY_LIST;
+
+        if (fRequiredParameterNames == null)
+        {
+            fRequiredParameterNames = new ArrayList();
+            for (Iterator iter = getParameterNames().iterator(); iter.hasNext();)
+            {
+                String name = (String) iter.next();
+                PluginParameterSpecification parm = (PluginParameterSpecification) fParameters.get(name);
+
+                if (parm.isRequired())
+                    fRequiredParameterNames.add(name);
+            }
+
+        }
+        return fRequiredParameterNames;
     }
 
     /* (non-Javadoc)
@@ -592,7 +616,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
             for (int i = 0; i < fParameterObjects.size(); i++)
             {
 
-                PluginParameterSpecification element = (PluginParameterSpecification) fComponentObjects.get(i);
+                PluginParameterSpecification element = (PluginParameterSpecification) fParameterObjects.get(i);
                 element.validate(this, validator);
             }
         }
@@ -612,7 +636,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
             for (int i = 0; i < fAssetObjects.size(); i++)
             {
 
-                PluginAssetSpecification element = (PluginAssetSpecification) fComponentObjects.get(i);
+                PluginAssetSpecification element = (PluginAssetSpecification) fAssetObjects.get(i);
                 element.validate(this, validator);
             }
         }
@@ -622,7 +646,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
             for (int i = 0; i < fBeanSpecifications.size(); i++)
             {
 
-                PluginBeanSpecification element = (PluginBeanSpecification) fComponentObjects.get(i);
+                PluginBeanSpecification element = (PluginBeanSpecification) fBeanSpecifications.get(i);
                 element.validate(this, validator);
             }
         }
@@ -632,7 +656,8 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
             for (int i = 0; i < fPropertySpecificationObjects.size(); i++)
             {
 
-                PluginPropertySpecification element = (PluginPropertySpecification) fComponentObjects.get(i);
+                PluginPropertySpecification element =
+                    (PluginPropertySpecification) fPropertySpecificationObjects.get(i);
                 element.validate(this, validator);
             }
         }

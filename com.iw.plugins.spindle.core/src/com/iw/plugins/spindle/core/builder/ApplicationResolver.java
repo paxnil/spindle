@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.tapestry.IResourceLocation;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -106,13 +107,14 @@ public class ApplicationResolver extends NamespaceResolver
             fNamespaceSpecLocation = fServlet.applicationSpecLocation;
             if (fNamespaceSpecLocation != null)
             {
-                if (!fNamespaceSpecLocation.exists())
+                IStorage storage = fNamespaceSpecLocation.getStorage();
+                if (storage == null)
                     throw new BuilderException(
                         TapestryCore.getString(
                             "build-failed-missing-application-spec",
                             fNamespaceSpecLocation.toString()));
 
-                fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fNamespaceSpecLocation, null);
+                fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, storage,  fNamespaceSpecLocation, null);
             } else
             {
                 fResultNamespace = createStandinApplicationNamespace(fServlet);
@@ -125,7 +127,8 @@ public class ApplicationResolver extends NamespaceResolver
                 for (Iterator iter = fServlet.parameters.keySet().iterator(); iter.hasNext();)
                 {
                     String key = (String) iter.next();
-                    PluginPropertyDeclaration declaration = new PluginPropertyDeclaration(key, (String) fServlet.parameters.get(key));
+                    PluginPropertyDeclaration declaration =
+                        new PluginPropertyDeclaration(key, (String) fServlet.parameters.get(key));
                     spec.addPropertyDeclaration(declaration);
                 }
                 doResolve();
@@ -299,7 +302,8 @@ public class ApplicationResolver extends NamespaceResolver
         specification.setNamespace(fResultNamespace);
 
         ComponentScanner scanner = new ComponentScanner();
-        scanner.scanForTemplates(specification);
+        IResourceWorkspaceLocation[] templateLocs = TapestryBuilder.scanForTemplates(specification, null);
+        specification.setTemplateLocations(templateLocs);
 
         List templates = specification.getTemplateLocations();
 

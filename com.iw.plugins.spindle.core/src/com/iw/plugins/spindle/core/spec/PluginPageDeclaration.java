@@ -92,8 +92,6 @@ public class PluginPageDeclaration extends BaseSpecification
 
         } catch (ScannerException e)
         {
-            // TODO remove
-            e.printStackTrace();
             TapestryCore.log(e);
         }
 

@@ -37,12 +37,10 @@ import org.apache.tapestry.spec.IBeanSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IListenerBindingSpecification;
-import org.eclipse.core.runtime.CoreException;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
@@ -72,8 +70,6 @@ public class ComponentScanner extends SpecificationScanner
     boolean fSeenTemplateAsset;
     protected INamespace fNamespace;
 
-    private TemplateFinder fTemplateFinder = new TemplateFinder();
-
     /* Don't need to throw an exception or add a problem here, the Parser will already have caught this
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#doScan(
      */
@@ -81,10 +77,11 @@ public class ComponentScanner extends SpecificationScanner
     {
         if (super.beforeScan(source) == null)
             return null;
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fResourceLocation;
-        String extension = location.getStorage().getFullPath().getFileExtension();
+
+        String extension = fStorage.getFullPath().getFileExtension();
         if (!extension.equals("jwc") && !extension.equals("page"))
             return null;
+
         fIsPageSpec = extension.equals("page");
         fSeenTemplateAsset = false;
         return fSpecificationFactory.createComponentSpecification();
@@ -110,7 +107,6 @@ public class ComponentScanner extends SpecificationScanner
         specification.setAllowInformalParameters(getBooleanAttribute(fRootNode, "allow-informal-parameters"));
 
         scanComponentSpecification(fRootNode, specification, fIsPageSpec);
-        scanForTemplates(specification);
     }
 
     public void setNamespace(INamespace namespace)
@@ -134,7 +130,8 @@ public class ComponentScanner extends SpecificationScanner
                 TapestryCore.getTapestryString(
                     "ComponentSpecification.duplicate-asset",
                     specification.getSpecificationLocation().getName(),
-                    name));
+                    name),
+                false);
         }
 
         // not revalidatable - error state would only change if the file changed!
@@ -181,7 +178,8 @@ public class ComponentScanner extends SpecificationScanner
                 TapestryCore.getTapestryString(
                     "ComponentSpecification.duplicate-bean",
                     specification.getSpecificationLocation().getName(),
-                    name));
+                    name),
+                false);
         }
 
         // not revalidatable - error state would only change if the file changed!
@@ -257,7 +255,8 @@ public class ComponentScanner extends SpecificationScanner
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"),
-                "duplicate binding name '" + name + "'");
+                "duplicate binding name '" + name + "'",
+                false);
             // TODO I18N
         }
 
@@ -286,7 +285,7 @@ public class ComponentScanner extends SpecificationScanner
                 if (type == BindingType.STATIC)
                     severity = IProblem.WARNING;
 
-                addProblem(IProblem.WARNING, e.getLocation(), e.getMessage());
+                addProblem(IProblem.WARNING, e.getLocation(), e.getMessage(), false);
 
                 value = getNextDummyString();
             }
@@ -330,7 +329,8 @@ public class ComponentScanner extends SpecificationScanner
                 TapestryCore.getTapestryString(
                     "ComponentSpecification.duplicate-component",
                     specification.getSpecificationLocation().getName(),
-                    id));
+                    id),
+                false);
         }
 
         // not revalidatable - error state would only change if the file changed!
@@ -350,14 +350,16 @@ public class ComponentScanner extends SpecificationScanner
             addProblem(
                 IProblem.ERROR,
                 getNodeStartSourceLocation(node),
-                TapestryCore.getTapestryString("SpecificationParser.missing-type-or-copy-of", id));
+                TapestryCore.getTapestryString("SpecificationParser.missing-type-or-copy-of", id),
+                false);
 
         } else if (type != null && copyOf != null)
         {
             addProblem(
                 IProblem.ERROR,
                 getNodeStartSourceLocation(node),
-                TapestryCore.getTapestryString("SpecificationParser.both-type-and-copy-of", id));
+                TapestryCore.getTapestryString("SpecificationParser.both-type-and-copy-of", id),
+                false);
         } else if (copyOf != null)
         {
             IContainedComponent parentComponent = specification.getComponent(copyOf);
@@ -366,7 +368,8 @@ public class ComponentScanner extends SpecificationScanner
                 addProblem(
                     IProblem.ERROR,
                     getAttributeSourceLocation(node, "copy-of"),
-                    TapestryCore.getTapestryString("SpecificationParser.unable-to-copy", copyOf));
+                    TapestryCore.getTapestryString("SpecificationParser.unable-to-copy", copyOf),
+                    false);
             }
         } else
         {
@@ -406,7 +409,8 @@ public class ComponentScanner extends SpecificationScanner
                     addProblem(
                         IProblem.ERROR,
                         getNodeStartSourceLocation(child),
-                        "field-binding not supported in DTD 3.0 and up.");
+                        "field-binding not supported in DTD 3.0 and up.",
+                        false);
                 }
                 continue;
             }
@@ -474,7 +478,8 @@ public class ComponentScanner extends SpecificationScanner
                     TapestryCore.getTapestryString(
                         "AbstractDocumentParser.incorrect-document-type",
                         "page-specification",
-                        rootName));
+                        rootName),
+                    false);
                 return;
             }
             // not revalidatable - error state would only change if the file changed!
@@ -486,7 +491,8 @@ public class ComponentScanner extends SpecificationScanner
                 TapestryCore.getTapestryString(
                     "AbstractDocumentParser.incorrect-document-type",
                     "component-specification",
-                    rootName));
+                    rootName),
+                false);
             return;
         }
         String componentClassname = getAttribute(rootNode, "class");
@@ -535,7 +541,8 @@ public class ComponentScanner extends SpecificationScanner
                         getNodeStartSourceLocation(node),
                         TapestryCore.getTapestryString(
                             "SpecificationParser.not-allowed-for-page",
-                            "reserved-parameter"));
+                            "reserved-parameter"),
+                        false);
                 } else
                 {
                     scanReservedParameter(specification, node);
@@ -635,7 +642,8 @@ public class ComponentScanner extends SpecificationScanner
                 TapestryCore.getTapestryString(
                     "ComponentSpecification.duplicate-parameter",
                     specification.getSpecificationLocation().getName(),
-                    name));
+                    name),
+                false);
         }
 
         PluginParameterSpecification param =
@@ -671,16 +679,6 @@ public class ComponentScanner extends SpecificationScanner
         if (type == null)
             type = "java.lang.Object";
 
-        //        //TODO revalidatable! REMOVE
-        //        if (!TYPE_LIST.contains(type))
-        //        {
-        //            validateTypeSpecial(
-        //                (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
-        //                type,
-        //                IProblem.ERROR,
-        //                getAttributeSourceLocation(node, typeAttr));
-        //        }
-
         param.setType(type);
 
         param.setRequired(getBooleanAttribute(node, "required"));
@@ -702,7 +700,8 @@ public class ComponentScanner extends SpecificationScanner
                     TapestryCore.getTapestryString(
                         "EstablishDefaultParameterValuesVisitor.parameter-must-have-no-default-value",
                         specification.getSpecificationLocation().getName(),
-                        name));
+                        name),
+                    false);
             }
 
         }
@@ -759,7 +758,8 @@ public class ComponentScanner extends SpecificationScanner
                 TapestryCore.getTapestryString(
                     "ComponentSpecification.duplicate-property-specification",
                     spec.getSpecificationLocation().getName(),
-                    name));
+                    name),
+                false);
         }
 
         PluginPropertySpecification ps =
@@ -801,7 +801,7 @@ public class ComponentScanner extends SpecificationScanner
             initialValue = result.value;
         } catch (ScannerException e)
         {
-            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage());
+            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false);
         }
 
         //   not revalidatable - error state would only change if the file changed!
@@ -838,7 +838,8 @@ public class ComponentScanner extends SpecificationScanner
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"),
-                "duplicate reserved paramter name: " + name);
+                "duplicate reserved parameter name: " + name,
+                false);
         }
         PluginReservedParameterDeclaration declaration =
             new PluginReservedParameterDeclaration(name, getSourceLocationInfo(node));
@@ -871,7 +872,7 @@ public class ComponentScanner extends SpecificationScanner
             expression = result.value;
         } catch (ScannerException e)
         {
-            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage());
+            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false);
         }
 
         //   not revalidatable - error state would only change if the file changed!
@@ -919,7 +920,7 @@ public class ComponentScanner extends SpecificationScanner
         {
             if (key.trim().length() == 0)
             {
-                addProblem(IProblem.ERROR, getAttributeSourceLocation(node, "key"), "key must not be empty");
+                addProblem(IProblem.ERROR, getAttributeSourceLocation(node, "key"), "key must not be empty", false);
             }
         }
 
@@ -944,7 +945,8 @@ public class ComponentScanner extends SpecificationScanner
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"),
-                TapestryCore.getTapestryString("SpecificationParser.invalid-property-name", "not specified"));
+                TapestryCore.getTapestryString("SpecificationParser.invalid-property-name", "not specified"),
+                false);
         } else
         {
             validatePattern(
@@ -954,24 +956,6 @@ public class ComponentScanner extends SpecificationScanner
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"));
         }
-    }
-
-    /**
-     * @param IComponentSpecification the spec we are looking up templates on behalf of
-     */
-    public void scanForTemplates(IComponentSpecification specification)
-    {
-
-        IResourceWorkspaceLocation[] locations = new IResourceWorkspaceLocation[0];
-        //        TemplateFinder finder = new TemplateFinder();
-        try
-        {
-            locations = fTemplateFinder.getTemplates(specification, this);
-        } catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
-        ((PluginComponentSpecification) specification).setTemplateLocations(locations);
     }
 
     public boolean validateTypeSpecial(

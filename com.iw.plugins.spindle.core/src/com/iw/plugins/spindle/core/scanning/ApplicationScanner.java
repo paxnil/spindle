@@ -79,7 +79,7 @@ public class ApplicationScanner extends LibraryScanner
                 TapestryCore.getTapestryString(
                     "AbstractDocumentParser.incorrect-document-type",
                     "application",
-                    rootName));
+                    rootName), false);
             return;
         }
         scanApplicationSpecification(fRootNode, specification, null);

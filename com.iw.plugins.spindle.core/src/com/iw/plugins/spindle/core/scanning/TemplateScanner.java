@@ -53,9 +53,11 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.spec.SpecFactory;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.Build;
 import com.iw.plugins.spindle.core.builder.FrameworkComponentValidator;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
@@ -101,6 +103,7 @@ public class TemplateScanner extends AbstractScanner
     private String fContents;
     private boolean fPerformDeferredValidations = true;
     private String fEncoding;
+    private boolean fContainsImplicitComponents; // true if template contains implicit components
 
     public void scanTemplate(
         PluginComponentSpecification spec,
@@ -116,9 +119,14 @@ public class TemplateScanner extends AbstractScanner
         fParser = new CoreTemplateParser();
         fParser.setProblemCollector(this);
         fSeenIds.clear();
+        fContainsImplicitComponents = false;
 
         scan(templateLocation, validator);
 
+    }
+    
+    public boolean containsImplicitComponents() {
+        return fContainsImplicitComponents;
     }
 
     public void scanTemplate(PluginComponentSpecification spec, String contents, IScannerValidator validator)
@@ -132,6 +140,7 @@ public class TemplateScanner extends AbstractScanner
         fParser = new CoreTemplateParser();
         fParser.setProblemCollector(this);
         fSeenIds.clear();
+        fContainsImplicitComponents = false;
 
         scan(contents, validator);
 
@@ -163,7 +172,7 @@ public class TemplateScanner extends AbstractScanner
             }
         }
         if (data == null)
-            throw new ScannerException("null data!");
+            throw new ScannerException("null data!", false);
 
         List result = (List) resultObject;
 
@@ -187,7 +196,8 @@ public class TemplateScanner extends AbstractScanner
             {
                 scanOpenToken((CoreOpenToken) parseResults[i], result);
             }
-        }
+        }        
+        
     }
 
     private void scanOpenToken(CoreOpenToken token, List result) throws ScannerException
@@ -211,7 +221,8 @@ public class TemplateScanner extends AbstractScanner
                 TapestryCore.getTapestryString(
                     "BaseComponent.multiple-component-references",
                     fComponentSpec.getSpecificationLocation().getName(),
-                    id));
+                    id),
+                false);
             return;
         }
         fSeenIds.add(id);
@@ -227,6 +238,9 @@ public class TemplateScanner extends AbstractScanner
 
     private PluginContainedComponent createImplicitComponent(CoreOpenToken token, String id, String componentType)
     {
+        if (!fContainsImplicitComponents)
+            fContainsImplicitComponents = true;
+
         PluginContainedComponent result = (PluginContainedComponent) fSpecificationFactory.createContainedComponent();
         result.setIdentifier(id);
         result.setType(componentType);
@@ -261,7 +275,8 @@ public class TemplateScanner extends AbstractScanner
                 TapestryCore.getTapestryString(
                     "PageLoader.required-parameter-not-bound",
                     required.toString(),
-                    "'"+token.getComponentType()+"'"));
+                    "'" + token.getComponentType() + "'"),
+                false);
         }
 
         Iterator i = bindingNames.iterator();
@@ -304,7 +319,8 @@ public class TemplateScanner extends AbstractScanner
                 token.getComponentType(),
                 containedSpecification,
                 contained,
-                token.getEventInfo(), containedSpecification.getPublicId());
+                token.getEventInfo(),
+                containedSpecification.getPublicId());
 
     }
 
@@ -333,7 +349,8 @@ public class TemplateScanner extends AbstractScanner
                 TapestryCore.getTapestryString(
                     "PageLoader.formal-parameters-only",
                     containedSpecification.getSpecificationLocation().getName(),
-                    bspec.getIdentifier()));
+                    bspec.getIdentifier()),
+                false);
         }
 
     }
@@ -444,7 +461,8 @@ public class TemplateScanner extends AbstractScanner
                         + containedSpecification.getSpecificationLocation().getName()
                         + "' expects bindings to be of type '"
                         + pType
-                        + "'");
+                        + "'",
+                    false);
         }
 
         //        else
@@ -471,14 +489,17 @@ public class TemplateScanner extends AbstractScanner
 
     private List findRequiredParameterNames(IComponentSpecification spec)
     {
-        List result = new ArrayList();
-        for (Iterator iter = spec.getParameterNames().iterator(); iter.hasNext();)
-        {
-            String name = (String) iter.next();
-            IParameterSpecification pspec = spec.getParameter(name);
-            if (pspec.isRequired())
-                result.add(name);
-        }
+        //        List result = new ArrayList();
+        //        for (Iterator iter = spec.getParameterNames().iterator(); iter.hasNext();)
+        //        {
+        //            String name = (String) iter.next();
+        //            IParameterSpecification pspec = spec.getParameter(name);
+        //            if (pspec.isRequired())
+        //                result.add(name);
+        //        }
+        //        return result;
+        ArrayList result = new ArrayList();
+        result.addAll(((PluginComponentSpecification) spec).getRequiredParameterNames());
         return result;
     }
 
@@ -582,7 +603,8 @@ public class TemplateScanner extends AbstractScanner
                         "BaseComponent.dupe-template-expression",
                         name,
                         spec.getSpecificationLocation().getName(),
-                        fComponentSpec.getSpecificationLocation().getName()));
+                        fComponentSpec.getSpecificationLocation().getName()),
+                    false);
 
             //            throw new ApplicationRuntimeException(
             //                Tapestry.format(
@@ -603,7 +625,8 @@ public class TemplateScanner extends AbstractScanner
                         "BaseComponent.template-expression-for-informal-parameter",
                         name,
                         spec.getSpecificationLocation().getName(),
-                        fComponentSpec.getSpecificationLocation().getName()));
+                        fComponentSpec.getSpecificationLocation().getName()),
+                    false);
 
             //            throw new ApplicationRuntimeException(
             //                Tapestry.format(
@@ -626,7 +649,8 @@ public class TemplateScanner extends AbstractScanner
                         "BaseComponent.template-expression-for-reserved-parameter",
                         name,
                         spec.getSpecificationLocation().getName(),
-                        fComponentSpec.getSpecificationLocation().getName()));
+                        fComponentSpec.getSpecificationLocation().getName()),
+                    false);
 
             //            throw new ApplicationRuntimeException(
             //                Tapestry.format(
@@ -667,7 +691,8 @@ public class TemplateScanner extends AbstractScanner
                         "BaseComponent.dupe-string",
                         name,
                         spec.getSpecificationLocation().getName(),
-                        fComponentSpec.getSpecificationLocation().getName()));
+                        fComponentSpec.getSpecificationLocation().getName()),
+                    false);
 
             //                throw new ApplicationRuntimeException(
             //                    Tapestry.format(
@@ -690,7 +715,8 @@ public class TemplateScanner extends AbstractScanner
                         "BaseComponent.template-expression-for-informal-parameter",
                         name,
                         spec.getSpecificationLocation().getName(),
-                        fComponentSpec.getSpecificationLocation().getName()));
+                        fComponentSpec.getSpecificationLocation().getName()),
+                    false);
 
                 return;
             }
@@ -716,7 +742,8 @@ public class TemplateScanner extends AbstractScanner
                         "BaseComponent.template-expression-for-reserved-parameter",
                         name,
                         spec.getSpecificationLocation().getName(),
-                        fComponentSpec.getSpecificationLocation().getName()));
+                        fComponentSpec.getSpecificationLocation().getName()),
+                    false);
 
             //                throw new ApplicationRuntimeException(
             //                    Tapestry.format(
@@ -829,12 +856,14 @@ public class TemplateScanner extends AbstractScanner
     {
         fSpecificationFactory = factory;
     }
-    
-    public void setEncoding(String encoding) {
+
+    public void setEncoding(String encoding)
+    {
         fEncoding = encoding;
     }
-    
-    public String getEncoding() {
+
+    public String getEncoding()
+    {
         return fEncoding;
     }
 

@@ -236,7 +236,8 @@ public interface IScannerValidator
      * @param severity
      * @param sourceLocation the location in the source code
      * @param message a String describing the problem 
+     * @param isTemporary flag indicating that the problem is temporary.
      */
-    public void addProblem(int severity, ISourceLocation sourceLocation, String message) throws ScannerException;
+    public void addProblem(int severity, ISourceLocation sourceLocation, String message, boolean isTemporary) throws ScannerException;
 
 }

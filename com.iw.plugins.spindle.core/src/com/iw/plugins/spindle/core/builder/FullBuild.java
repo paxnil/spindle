@@ -30,7 +30,7 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.w3c.dom.Document;
 
@@ -57,12 +57,6 @@ public class FullBuild extends Build
     public FullBuild(TapestryBuilder builder)
     {
         super(builder);
-    }
-
-    // used only by incremental subclasses
-    protected FullBuild(TapestryBuilder builder, IResourceDelta projectDelta)
-    {
-        super(builder, projectDelta);
     }
 
     /**
@@ -116,11 +110,13 @@ public class FullBuild extends Build
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
         newState.fTemplateMap = fTemplateMap;
-        newState.fSpecificationMap = fSpecificationMap;
+        newState.fFileSpecificationMap = fFileSpecificationMap;
+        newState.fBinarySpecificationMap= fBinarySpecificationMap;
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
         newState.fApplicationServlet = fApplicationServlet;
         newState.fPrimaryNamespace = fApplicationNamespace;
         newState.fFrameworkNamespace = fFrameworkNamespace;
+        newState.fCleanTemplates = fCleanTemplates;
 
         // save the processed binary libraries
         saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
@@ -131,24 +127,22 @@ public class FullBuild extends Build
 
     protected void saveBinaryLibraries(ICoreNamespace framework, ICoreNamespace namespace, State state)
     {
-        IResourceWorkspaceLocation frameworkLoc = (IResourceWorkspaceLocation) framework.getSpecificationLocation();
-        if (frameworkLoc.isBinary())
-            state.fBinaryNamespaces.put(frameworkLoc, framework);
+        saveBinaryLibraries(framework, state);
+        saveBinaryLibraries(namespace, state);
+    }
+
+    private void saveBinaryLibraries(ICoreNamespace namespace, State state)
+    {
+        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
+        if (location.isBinary())
+            state.fBinaryNamespaces.put(location, namespace);
 
         for (Iterator iter = namespace.getChildIds().iterator(); iter.hasNext();)
         {
             String id = (String) iter.next();
             ICoreNamespace child = (ICoreNamespace) namespace.getChildNamespace(id);
             if (child != null)
-            {
-                IResourceWorkspaceLocation childLocation =
-                    (IResourceWorkspaceLocation) child.getSpecificationLocation();
-                if (childLocation.isBinary())
-                {
-                    state.fBinaryNamespaces.put(childLocation, child);
-                }
-            }
-
+                saveBinaryLibraries(child, state);
         }
     }
 
@@ -167,15 +161,16 @@ public class FullBuild extends Build
 
         IResourceWorkspaceLocation webXML =
             (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot.getRelativeLocation("WEB-INF/web.xml");
+        IStorage storage = webXML.getStorage();
         //        IFile webXML = tapestryBuilder.contextRoot.getFile("WEB-INF/web.xml");
-        if (webXML.exists())
+        if (storage != null)
         {
             Document wxmlElement = null;
             try
             {
                 fTapestryBuilder.fNotifier.subTask(
                     TapestryCore.getString(TapestryBuilder.STRING_KEY + "scanning", webXML.toString()));
-                wxmlElement = parseToDocument(servletParser, webXML, null);
+                wxmlElement = parseToDocument(servletParser, storage, webXML, null);
             } catch (IOException e1)
             {
                 TapestryCore.log(e1);

@@ -26,11 +26,6 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.scanning.IScannerValidator;
-import com.iw.plugins.spindle.core.scanning.ScannerException;
-import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  *  Record <property> tags in a document
@@ -68,45 +63,6 @@ public class PluginPropertyDeclaration extends BaseSpecification
         return fValue;
     }
 
-    public void validate(Object parent, IScannerValidator validator)
-    {
-
-        BasePropertyHolder spec = (BasePropertyHolder) parent;
-
-        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-        if (sourceInfo == null) //TODO is this the right thing to do?
-            return;
-
-        String key = getKey();
-
-        try
-        {
-            if (spec.getPropertyDeclaration(key) != this)
-            {
-                validator.addProblem(
-                    IProblem.WARNING,
-                    sourceInfo.getAttributeSourceLocation("name"),
-                    "duplicate definition of property: " + key);
-            }
-
-            String value = getValue();
-
-            if (value != null && value.trim().length() == 0)
-            {
-                validator.addProblem(
-                    IProblem.WARNING,
-                    fValueIsFromAttribute
-                        ? sourceInfo.getAttributeSourceLocation("value")
-                        : sourceInfo.getContentSourceLocation(),
-                    "missing value of property: " + key);
-            }
-        } catch (ScannerException e)
-        {
-            TapestryCore.log(e);
-            e.printStackTrace();
-        }
-    }
     /**
      * @return
      */

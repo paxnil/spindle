@@ -81,7 +81,7 @@ public class PluginLibraryDeclaration extends BaseSpecification
 
             if (fResourcePath == null || fResourcePath.startsWith(validator.getDummyStringPrefix()))
             {
-                validator.addProblem(IProblem.ERROR, info.getAttributeSourceLocation("id"), "blank value");
+                validator.addProblem(IProblem.ERROR, info.getAttributeSourceLocation("id"), "blank value", true);
             } else
             {
                 ILibrarySpecification parentLib = (ILibrarySpecification) parent;
@@ -95,8 +95,6 @@ public class PluginLibraryDeclaration extends BaseSpecification
 
         } catch (ScannerException e)
         {
-            // TODO remove
-            e.printStackTrace();
             TapestryCore.log(e);
         }
 

@@ -42,7 +42,6 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.runtime.Path;
 
-import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
@@ -53,8 +52,6 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.TapestryResourceLocationAcceptor;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.source.IProblemCollector;
-import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.Markers;
@@ -102,7 +99,7 @@ public abstract class NamespaceResolver
     /**
      *  collector for any problems not handled by the Build
      */
-    private ProblemCollector fProblemCollector = new ProblemCollector();
+    //    private ProblemCollector fProblemCollector = new ProblemCollector();
     /** 
      * the instance of IBuild that instantiated the first Resolver 
      **/
@@ -170,7 +167,13 @@ public abstract class NamespaceResolver
             fResultNamespace = prebuilt;
         } else
         {
-            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fNamespaceSpecLocation, null);
+            fResultNamespace =
+                fBuild.createNamespace(
+                    fParser,
+                    fNamespaceId,
+                    fNamespaceSpecLocation.getStorage(),
+                    fNamespaceSpecLocation,
+                    null);
             doResolve();
         }
         return fResultNamespace;
@@ -197,7 +200,7 @@ public abstract class NamespaceResolver
         {
             fWorking = true;
             fComponentStack.clear();
-            fProblemCollector.beginCollecting();
+            //            fProblemCollector.beginCollecting();
             if (fResultNamespace == null)
                 throw new RuntimeException("Null namespace!");
 
@@ -282,15 +285,24 @@ public abstract class NamespaceResolver
     protected Set getAllPageFileTemplates()
     {
         Set result = new HashSet();
-        for (Iterator iter = fResultNamespace.getPageNames().iterator(); iter.hasNext();)
+        List pageNames = fResultNamespace.getPageNames();
+        int count = pageNames.size();
+        for (int i = 0; i < count; i++)
         {
-            String name = (String) iter.next();
-
             PluginComponentSpecification spec =
-                (PluginComponentSpecification) fResultNamespace.getPageSpecification(name);
+                (PluginComponentSpecification) fResultNamespace.getPageSpecification((String) pageNames.get(i));
 
             result.addAll(spec.getTemplateLocations());
         }
+        //        for (Iterator iter = fResultNamespace.getPageNames().iterator(); iter.hasNext();)
+        //        {
+        //            String name = (String) iter.next();
+        //
+        //            PluginComponentSpecification spec =
+        //                (PluginComponentSpecification) fResultNamespace.getPageSpecification(name);
+        //
+        //            result.addAll(spec.getTemplateLocations());
+        //        }
         return result;
     }
 
@@ -324,8 +336,8 @@ public abstract class NamespaceResolver
                     libLocation =
                         (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot.getRelativeLocation(
                             spec.getLibrarySpecificationPath(libraryId));
-
-                if (libLocation.exists())
+                            
+                if (libLocation.getStorage() != null)
                 {
                     NamespaceResolver childResolver =
                         new LibraryResolver(
@@ -386,7 +398,8 @@ public abstract class NamespaceResolver
 
         fComponentStack.push(location);
 
-        result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location, null);
+        result =
+            fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location.getStorage(), location, null);
 
         if (result != null)
         {
@@ -438,12 +451,20 @@ public abstract class NamespaceResolver
         ILibrarySpecification spec = fResultNamespace.getSpecification();
 
         // pull the ones that are defined in the spec.
-        for (Iterator iter = spec.getComponentTypes().iterator(); iter.hasNext();)
+        List cTypes = spec.getComponentTypes();
+        int count = cTypes.size();
+        for (int i = 0; i < count; i++)
         {
-            String type = (String) iter.next();
+            String type = (String) cTypes.get(i);
             IResourceLocation specLoc = location.getRelativeLocation(spec.getComponentSpecificationPath(type));
             result.put(type, specLoc);
         }
+        //        for (Iterator iter = spec.getComponentTypes().iterator(); iter.hasNext();)
+        //        {
+        //            String type = (String) iter.next();
+        //            IResourceLocation specLoc = location.getRelativeLocation(spec.getComponentSpecificationPath(type));
+        //            result.put(type, specLoc);
+        //        }
 
         TapestryResourceLocationAcceptor acceptor =
             new TapestryResourceLocationAcceptor("*", false, TapestryResourceLocationAcceptor.ACCEPT_JWC);
@@ -469,7 +490,8 @@ public abstract class NamespaceResolver
                             TapestryCore.getString("builder-hidden-jwc-file", jwcs[i], result.get(type)),
                             1,
                             0,
-                            0)});
+                            0,
+                            false)});
             }
         }
         return result;
@@ -518,7 +540,8 @@ public abstract class NamespaceResolver
                                 TapestryCore.getString("builder-hidden-page-file", pages[i], result.get(name)),
                                 1,
                                 0,
-                                0)});
+                                0,
+                                false)});
             }
         }
         return result;
@@ -564,7 +587,8 @@ public abstract class NamespaceResolver
 
         result = null;
 
-        result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location, null);
+        result =
+            fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location.getStorage(), location, null);
         if (result != null)
         {
             fResultNamespace.installPageSpecification(name, result);
@@ -603,51 +627,52 @@ public abstract class NamespaceResolver
         }
 
     }
-
-    class ProblemCollector implements IProblemCollector
-    {
-        private List problems = new ArrayList();
-
-        private void reset()
-        {
-            problems.clear();
-        }
-
-        public void addProblem(int severity, ISourceLocation location, String message)
-        {
-            addProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity, location, message);
-        }
-
-        private void addProblem(String type, int severity, ISourceLocation location, String message)
-        {
-            addProblem(
-                new DefaultProblem(
-                    type,
-                    severity,
-                    message,
-                    location.getLineNumber(),
-                    location.getCharStart(),
-                    location.getCharEnd()));
-        }
-
-        public void addProblem(IProblem problem)
-        {
-            problems.add(problem);
-        }
-
-        public IProblem[] getProblems()
-        {
-            return (IProblem[]) problems.toArray(new IProblem[problems.size()]);
-        }
-
-        public void beginCollecting()
-        {
-            reset();
-        }
-
-        public void endCollecting()
-        {}
-
-    }
+    //TODO remove
+    //    class ProblemCollector implements IProblemCollector
+    //    {
+    //        private List problems = new ArrayList();
+    //
+    //        private void reset()
+    //        {
+    //            problems.clear();
+    //        }
+    //
+    //        public void addProblem(int severity, ISourceLocation location, String message)
+    //        {
+    //            addProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity, location, message);
+    //        }
+    //
+    //        private void addProblem(String type, int severity, ISourceLocation location, String message)
+    //        {
+    //            addProblem(
+    //                new DefaultProblem(
+    //                    type,
+    //                    severity,
+    //                    message,
+    //                    location.getLineNumber(),
+    //                    location.getCharStart(),
+    //                    location.getCharEnd(),
+    //                    false));
+    //        }
+    //
+    //        public void addProblem(IProblem problem)
+    //        {
+    //            problems.add(problem);
+    //        }
+    //
+    //        public IProblem[] getProblems()
+    //        {
+    //            return (IProblem[]) problems.toArray(new IProblem[problems.size()]);
+    //        }
+    //
+    //        public void beginCollecting()
+    //        {
+    //            reset();
+    //        }
+    //
+    //        public void endCollecting()
+    //        {}
+    //
+    //    }
 
 }

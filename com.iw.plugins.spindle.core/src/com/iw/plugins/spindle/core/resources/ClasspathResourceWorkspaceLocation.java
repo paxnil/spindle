@@ -27,9 +27,13 @@
 package com.iw.plugins.spindle.core.resources;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.tapestry.IResourceLocation;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -39,6 +43,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 
 /**
@@ -64,11 +69,14 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
     public boolean exists()
     {
         IStorage storage = getStorage();
-        if (storage !=null) {
-            if (storage instanceof IResource) {
-                IResource resource = (IResource)storage;
+        if (storage != null)
+        {
+            if (storage instanceof IResource)
+            {
+                IResource resource = (IResource) storage;
                 return resource.exists();
-            } else {
+            } else
+            {
                 return true;
             }
         }
@@ -80,7 +88,18 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public IStorage getStorage()
     {
-        return ((ClasspathRootLocation) fRoot).findStorage(this);
+        //if we are in a build, the storages get cached for speed.
+        Map cache = TapestryBuilder.getStorageCache();
+        
+        if (cache != null && cache.containsKey(this))
+            return (IStorage) cache.get(this);
+            
+        IStorage result =  ((ClasspathRootLocation) fRoot).findStorage(this);
+        
+        if (cache != null)
+            cache.put(this, result);
+            
+       return result;
     }
 
     /* (non-Javadoc)
@@ -141,16 +160,16 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
         throw new RuntimeException("not implemented");
     }
 
-//    public int hashCode()
-//    {
-//        HashCodeBuilder builder = new HashCodeBuilder(5591, 1009);
-//
-//        builder.append(getPath());
-//        builder.append(getName());
-//        builder.append(fRoot);
-//
-//        return builder.toHashCode();
-//    }
+    //    public int hashCode()
+    //    {
+    //        HashCodeBuilder builder = new HashCodeBuilder(5591, 1009);
+    //
+    //        builder.append(getPath());
+    //        builder.append(getName());
+    //        builder.append(fRoot);
+    //
+    //        return builder.toHashCode();
+    //    }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)
@@ -164,7 +183,25 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
             Object[] nonJavaResources = null;
             try
             {
-                nonJavaResources = fragments[i].getNonJavaResources();
+                if (fragments[i].isReadOnly())
+                {
+                    //TODO - is this the correct check for a package in a jar file?
+                    nonJavaResources = fragments[i].getNonJavaResources();
+                } else
+                {
+                    IContainer container = (IContainer) fragments[i].getUnderlyingResource();
+                    if (container != null && container.exists())
+                    {
+                        IResource[] members = container.members(false);
+                        ArrayList resultList = new ArrayList();
+                        for (int j = 0; j < members.length; j++)
+                        {
+                            if (members[j] instanceof IFile)
+                                resultList.add(members[j]);
+                        }
+                        nonJavaResources = resultList.toArray();
+                    }
+                }
             } catch (JavaModelException e)
             {
                 TapestryCore.log(e);

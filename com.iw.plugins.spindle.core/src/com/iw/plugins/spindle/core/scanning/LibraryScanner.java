@@ -96,7 +96,7 @@ public class LibraryScanner extends SpecificationScanner
                 TapestryCore.getTapestryString(
                     "AbstractDocumentParser.incorrect-document-type",
                     "library-specification",
-                    rootName));
+                    rootName), false);
             return;
         }
         scanLibrarySpecification(fRootNode, specification, null);
@@ -175,13 +175,12 @@ public class LibraryScanner extends SpecificationScanner
             IProblem.ERROR,
             getAttributeSourceLocation(node, "type"));
 
-        // must be validated now TODO reimplement in PluginLibrarySpecification
         if (specification.getComponentTypes().contains(type))
         {
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "type"),
-                TapestryCore.getTapestryString("LibrarySpecification.duplicate-component-alias", type));
+                TapestryCore.getTapestryString("LibrarySpecification.duplicate-component-alias", type), false);
         }
 
         String path = getAttribute(node, "specification-path");
@@ -215,7 +214,7 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "property-name"),
-                TapestryCore.getTapestryString("ExtensionSpecification.duplicate-property", "extension", propertyName));
+                TapestryCore.getTapestryString("ExtensionSpecification.duplicate-property", "extension", propertyName), false);
         }
 
         // must be done now - not revalidatable
@@ -227,7 +226,7 @@ public class LibraryScanner extends SpecificationScanner
             value = result.value;
         } catch (ScannerException e)
         {
-            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage());
+            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false);
         }
 
         PluginExtensionConfiguration configuration =
@@ -261,7 +260,7 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"),
-                TapestryCore.getTapestryString("LibrarySpecification.duplicate-extension-name", name));
+                TapestryCore.getTapestryString("LibrarySpecification.duplicate-extension-name", name), false);
         }
 
         PluginExtensionSpecification exSpec =
@@ -314,7 +313,7 @@ public class LibraryScanner extends SpecificationScanner
                 getAttributeSourceLocation(node, "id"),
                 TapestryCore.getTapestryString(
                     "SpecificationParser.framework-library-id-is-reserved",
-                    INamespace.FRAMEWORK_NAMESPACE));
+                    INamespace.FRAMEWORK_NAMESPACE), false);
 
         PluginLibraryDeclaration declaration =
             new PluginLibraryDeclaration(id, specificationPath, getSourceLocationInfo(node));
@@ -341,7 +340,7 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"),
-                TapestryCore.getTapestryString("LibrarySpecification.duplicate-page-name", name));
+                TapestryCore.getTapestryString("LibrarySpecification.duplicate-page-name", name), false);
 
         String specificationPath = getAttribute(node, "specification-path");
 
@@ -374,7 +373,7 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"),
-                TapestryCore.getTapestryString("LibrarySpecification.duplicate-service-name", name));
+                TapestryCore.getTapestryString("LibrarySpecification.duplicate-service-name", name), false);
         }
 
         PluginEngineServiceDeclaration declaration =

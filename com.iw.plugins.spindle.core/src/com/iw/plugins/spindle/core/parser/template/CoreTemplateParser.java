@@ -61,7 +61,6 @@ public class CoreTemplateParser extends TemplateParser
     public static final int IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP = 4;
     public static final int IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP = 5;
 
-
     static class CoreTemplateTokenFactory extends TemplateTokenFactory
     {
         private TagEventHandler eventHandler;
@@ -181,7 +180,7 @@ public class CoreTemplateParser extends TemplateParser
         throws ApplicationRuntimeException
     {
         if (fProblemCollector != null)
-            fProblemCollector.addProblem(IProblem.ERROR, getJWCIDLocation(), exception.getMessage());
+            fProblemCollector.addProblem(IProblem.ERROR, getJWCIDLocation(), exception.getMessage(), false);
         super.templateParseProblem(exception, line, cursor);
     }
 
@@ -193,7 +192,7 @@ public class CoreTemplateParser extends TemplateParser
     {
         if (fProblemCollector != null)
         {
-            fProblemCollector.addProblem(IProblem.ERROR, getSourceLocation(line, cursor, message), message);
+            fProblemCollector.addProblem(IProblem.ERROR, getSourceLocation(line, cursor, message), message, false);
         }
 
         super.templateParseProblem(message, location, line, cursor);

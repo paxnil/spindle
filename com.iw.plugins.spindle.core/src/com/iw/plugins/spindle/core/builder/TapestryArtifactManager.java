@@ -117,7 +117,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
             try
             {
                 buildStateIfPossible(project, context);
-                state =getProjectState(project);
+                state = getProjectState(project);
             } catch (CoreException e)
             {
                 TapestryCore.log(e);
@@ -267,7 +267,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
     {
         State state = (State) getLastBuildState(project, buildIfRequired);
         if (state != null)
-            return state.fSpecificationMap;
+            return state.getSpecificationMap();
         return null;
     }
 
@@ -312,25 +312,30 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         if (buildState == null)
             return Collections.EMPTY_LIST;
         List result = new ArrayList();
-        for (Iterator iter = buildState.fSpecificationMap.keySet().iterator(); iter.hasNext();)
+        Map specMap = buildState.getSpecificationMap();
+        for (Iterator iter = specMap.keySet().iterator(); iter.hasNext();)
         {
             Object key = iter.next();
-            BaseSpecification spec = (BaseSpecification) buildState.fSpecificationMap.get(key);
-            switch (spec.getSpecificationType())
+            BaseSpecification spec = (BaseSpecification) specMap.get(key);
+            if (spec != null)
             {
-                case BaseSpecification.APPLICATION_SPEC :
-                    String engineSpec = ((IApplicationSpecification) spec).getEngineClassName();
-                    if (engineSpec != null && engineSpec.equals(fullyQualifiedTypeName))
-                        result.add(spec);
-                    break;
-                case BaseSpecification.COMPONENT_SPEC :
-                    String componentSpec = ((IComponentSpecification) spec).getComponentClassName();
-                    if (componentSpec != null && componentSpec.equals(fullyQualifiedTypeName))
-                        result.add(spec);
-                    break;
 
-                default :
-                    break;
+                switch (spec.getSpecificationType())
+                {
+                    case BaseSpecification.APPLICATION_SPEC :
+                        String engineSpec = ((IApplicationSpecification) spec).getEngineClassName();
+                        if (engineSpec != null && engineSpec.equals(fullyQualifiedTypeName))
+                            result.add(spec);
+                        break;
+                    case BaseSpecification.COMPONENT_SPEC :
+                        String componentSpec = ((IComponentSpecification) spec).getComponentClassName();
+                        if (componentSpec != null && componentSpec.equals(fullyQualifiedTypeName))
+                            result.add(spec);
+                        break;
+
+                    default :
+                        break;
+                }
             }
         }
         return result;

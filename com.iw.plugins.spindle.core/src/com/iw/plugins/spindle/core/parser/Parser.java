@@ -389,7 +389,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
     }
 
-    public void addProblem(int severity, ISourceLocation location, String message)
+    public void addProblem(int severity, ISourceLocation location, String message, boolean isTemporary)
     {
         addProblem(
             new DefaultProblem(
@@ -398,7 +398,8 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
                 message,
                 location.getLineNumber(),
                 location.getCharStart(),
-                location.getCharEnd()));
+                location.getCharEnd(),
+                isTemporary));
     }
 
     public IProblem[] getProblems()
@@ -432,11 +433,10 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             charEnd = charStart + fEclipseDocument.getLineLength(lineNumber) - 1;
         } catch (BadLocationException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            TapestryCore.log(e);
         }
 
-        return new DefaultProblem(type, severity, ex.getMessage(), lineNumber, charStart, charEnd);
+        return new DefaultProblem(type, severity, ex.getMessage(), lineNumber, charStart, charEnd, false);
     }
 
     //*** XMLErrorHandler for DOM && PULL Parsing **

@@ -38,7 +38,7 @@ public interface IProblemCollector
 
     public void addProblem(IProblem problem);
 
-    public void addProblem(int severity, ISourceLocation location, String message);
+    public void addProblem(int severity, ISourceLocation location, String message, boolean isTemporary);
 
     public IProblem[] getProblems();
 

@@ -95,8 +95,6 @@ public class PluginEngineServiceDeclaration extends DescribableSpecification
 
         } catch (ScannerException e)
         {
-            // TODO remove
-            e.printStackTrace();
             TapestryCore.log(e);
         }
 

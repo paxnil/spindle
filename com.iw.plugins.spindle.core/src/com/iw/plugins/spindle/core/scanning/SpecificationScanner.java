@@ -36,6 +36,7 @@ import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.Direction;
 import org.apache.tapestry.spec.SpecFactory;
 import org.apache.tapestry.util.IPropertyHolder;
+import org.eclipse.core.resources.IStorage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -61,9 +62,10 @@ public abstract class SpecificationScanner extends AbstractScanner
 {
 
     protected IResourceLocation fResourceLocation;
+    protected IStorage fStorage;
     protected String fPublicId;
     protected Node fRootNode;
-
+    
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.scanning.AbstractScanner#beforeScan(java.lang.Object)
      */
@@ -76,7 +78,7 @@ public abstract class SpecificationScanner extends AbstractScanner
         fPublicId = W3CAccess.getPublicId(document);
         if (fPublicId == null || !checkPublicId())
         {
-            throw new ScannerException(TapestryCore.getString(XMLUtil.SPEC_DTD_ERROR_KEY));
+            throw new ScannerException(TapestryCore.getString(XMLUtil.SPEC_DTD_ERROR_KEY), false);
         }
         fRootNode = document.getDocumentElement();
         return document;
@@ -134,9 +136,10 @@ public abstract class SpecificationScanner extends AbstractScanner
         return super.afterScan(scanResults);
     }
 
-    public void setResourceLocation(IResourceLocation location)
+    public void setResourceInformation(IStorage storage, IResourceLocation location)
     {
-        this.fResourceLocation = location;
+        fStorage = storage;
+        fResourceLocation = location;        
     }
 
     protected void setPublicId(String publicId)
@@ -158,7 +161,8 @@ public abstract class SpecificationScanner extends AbstractScanner
 
             if (result == null || !(result instanceof Boolean))
                 throw new ScannerException(
-                    TapestryCore.getTapestryString("SpecificationParser.fail-convert-boolean", value));
+                    TapestryCore.getTapestryString("SpecificationParser.fail-convert-boolean", value),
+                    false);
 
             return result;
         }
@@ -175,7 +179,8 @@ public abstract class SpecificationScanner extends AbstractScanner
             {
                 throw new ScannerException(
                     TapestryCore.getTapestryString("SpecificationParser.fail-convert-int", value),
-                    ex);
+                    ex,
+                    false);
             }
         }
     }
@@ -191,7 +196,8 @@ public abstract class SpecificationScanner extends AbstractScanner
             {
                 throw new ScannerException(
                     TapestryCore.getTapestryString("SpecificationParser.fail-convert-long", value),
-                    ex);
+                    ex,
+                    false);
             }
         }
     }
@@ -207,7 +213,8 @@ public abstract class SpecificationScanner extends AbstractScanner
             {
                 throw new ScannerException(
                     TapestryCore.getTapestryString("SpecificationParser.fail-convert-double", value),
-                    ex);
+                    ex,
+                    false);
             }
         }
     }
@@ -303,6 +310,15 @@ public abstract class SpecificationScanner extends AbstractScanner
     {
         String name = getAttribute(node, "name", false);
 
+        if (holder.getProperty(name) != null)
+        {
+            addProblem(
+                IProblem.WARNING,
+                getAttributeSourceLocation(node, "name"),
+                "duplicate definition of property: " + name,
+                false);
+        }
+
         //      must be done now - not revalidatable
         ExtendedAttributeResult result = null;
         String value = null;
@@ -312,16 +328,25 @@ public abstract class SpecificationScanner extends AbstractScanner
             value = result.value;
         } catch (ScannerException e)
         {
-            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage());
+            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false);
         }
 
         PluginPropertyDeclaration declaration = new PluginPropertyDeclaration(name, value);
         declaration.setLocation(getSourceLocationInfo(node));
         declaration.setValueIsFromAttribute(result == null ? false : result.fromAttribute);
 
-        holder.addPropertyDeclaration(declaration);
+        if (value != null && value.trim().length() == 0)
+        {
+            addProblem(
+                IProblem.WARNING,
+                result.fromAttribute
+                    ? getAttributeSourceLocation(node, "value")
+                    : getBestGuessSourceLocation(node, true),
+                "missing value of property: " + name,
+                false);
+        }
 
-        declaration.validate(holder, fValidator);
+        holder.addPropertyDeclaration(declaration);
     }
 
     /**
@@ -387,7 +412,8 @@ public abstract class SpecificationScanner extends AbstractScanner
                     "SpecificationParser.no-attribute-and-body",
                     attributeName,
                     node.getNodeName()),
-                getNodeBodySourceLocation(node));
+                getNodeBodySourceLocation(node),
+                false);
 
         if (required && nullAttributeValue && nullBodyValue)
             throw new ScannerException(
@@ -395,7 +421,8 @@ public abstract class SpecificationScanner extends AbstractScanner
                     "SpecificationParser.required-extended-attribute",
                     node.getNodeName(),
                     attributeName),
-                getNodeStartSourceLocation(node));
+                getNodeStartSourceLocation(node),
+                false);
 
         ExtendedAttributeResult result = new ExtendedAttributeResult();
         if (nullAttributeValue)
@@ -433,7 +460,7 @@ public abstract class SpecificationScanner extends AbstractScanner
          */
         public ExtendedAttributeException(int errorType, String message, ISourceLocation location)
         {
-            super(message, location);
+            super(message, location, false);
             this.errorType = errorType;
         }
 
