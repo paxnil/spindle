@@ -115,7 +115,7 @@ public class State
         fContextRoot = lastState.fContextRoot;
         fLibraryLocation = lastState.fLibraryLocation;
         fBuildNumber = lastState.fBuildNumber + 1;
-        fBinaryNamespaces.clear();
+        fBinaryNamespaces = new HashMap(lastState.fBinaryNamespaces);
         fLastKnownClasspath = new IClasspathEntry[lastState.fLastKnownClasspath.length];
         System.arraycopy(
             lastState.fLastKnownClasspath,

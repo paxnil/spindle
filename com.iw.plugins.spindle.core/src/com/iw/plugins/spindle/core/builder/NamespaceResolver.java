@@ -228,7 +228,15 @@ public class NamespaceResolver
     {
         this.fNamespaceId = namespaceId;
         this.fSpecLocation = location;
-        fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation);
+        ICoreNamespace prebuilt = fBuild.getPreBuiltNamespace(fSpecLocation);
+        if (prebuilt != null)
+        {   
+            // this can only happen in an incremental build!
+            fResultNamespace = prebuilt;
+        } else
+        {
+            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation);
+        }
         doResolve();
         return fResultNamespace;
     }

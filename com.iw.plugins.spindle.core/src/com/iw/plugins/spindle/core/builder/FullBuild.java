@@ -27,7 +27,6 @@ package com.iw.plugins.spindle.core.builder;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -53,7 +52,6 @@ public class FullBuild extends Build
 {
 
     protected ServletInfo fApplicationServlet;
-    protected Map fInfoCache;
     /**
      * Constructor for FullBuilder.
      */

@@ -241,7 +241,6 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
         newState.fPrimaryNamespace = fApplicationNamespace;
         newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
 
-        saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
             fTapestryBuilder.fCurrentProject,
             newState);

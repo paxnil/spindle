@@ -182,7 +182,6 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
         Parser parser = new Parser(false);
 
-
         preBuild();
 
         fNotifier.updateProgressDelta(0.1f);
@@ -266,8 +265,20 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fSpecificationMap = null;
     }
 
+    protected ICoreNamespace getPreBuiltNamespace(IResourceWorkspaceLocation location)
+    {
+        if (fLastState != null)
+        {
+            if (location.isBinary() && fLastState.fBinaryNamespaces.containsKey(location))
+                return (ICoreNamespace) fLastState.fBinaryNamespaces.get(location);
+
+        }
+        return null;
+    }
+
     protected ICoreNamespace createNamespace(Parser parser, String id, IResourceWorkspaceLocation location)
     {
+
         ICoreNamespace result = null;
 
         ILibrarySpecification lib = null;
@@ -497,7 +508,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 dummy.setSpecificationLocation(location);
                 result = dummy;
             }
-            fSpecificationMap.put(useLocation.getStorage(), result); 
+            fSpecificationMap.put(useLocation.getStorage(), result);
 
         } catch (IOException e)
         {
@@ -720,7 +731,8 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                         } catch (Exception e1)
                         {
                             TapestryCore.log(e1);
-                        } finally {
+                        } finally
+                        {
                             useValidator.removeListener(this);
                         }
                     } else
