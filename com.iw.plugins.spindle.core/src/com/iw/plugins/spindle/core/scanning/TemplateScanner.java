@@ -319,41 +319,108 @@ public class TemplateScanner extends AbstractScanner
 
         boolean isAllowInformalParameters = containedSpecification.getAllowInformalParameters();
 
+        String value = bspec.getValue();
+
         if (isFormal)
         {
             String pType = parameter.getType();
+            boolean allowed = true;
             if (pType != null)
             {
-                boolean allowed =
-                    "String".equalsIgnoreCase(pType)
-                        || "java.lang.String".equals(pType)
-                        || "Object".equalsIgnoreCase(pType)
-                        || "java.lang.Object".equals(pType);
-                if (!allowed)
-                    addProblem(
-                        IProblem.WARNING,
-                        location,
-                        "Parameter '"
-                            + bspec.getIdentifier()
-                            + "' of '"
-                            + containedSpecification.getSpecificationLocation().getName()
-                            + "' expects bindings to be of type '"
-                            + pType
-                            + "'");
-                //TODO internationalize
-            }
+                if ("int".equals(pType))
+                {
+                    try
+                    {
+                        new Integer(value);
+                    } catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
+                } else if ("short".equals(pType))
+                {
+                    try
+                    {
+                        new Short(value);
+                    } catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
+                } else if ("boolean".equals(pType))
+                {
+                    allowed = "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value);
+                } else if ("long".equals(pType))
+                {
+                    try
+                    {
+                        new Long(value);
+                    } catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
 
-        } else
-        {
-            if (!isAllowInformalParameters)
+                } else if ("float".equals(pType))
+                {
+                    try
+                    {
+                        new Float(value);
+                    } catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
+                } else if ("double".equals(pType))
+                {
+                    try
+                    {
+                        new Double(value);
+                    } catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
+                } else if ("char".equals(pType))
+                {} else if ("byte".equals(pType))
+                {
+                    try
+                    {
+                        new Byte(value);
+                    } catch (NumberFormatException ex)
+                    {
+                        allowed = false;
+                    }
+                } else
+                {
+                    allowed =
+                        "String".equalsIgnoreCase(pType)
+                            || "java.lang.String".equals(pType)
+                            || "Object".equalsIgnoreCase(pType)
+                            || "java.lang.Object".equals(pType);
+                }
+
+            }
+            if (!allowed)
                 addProblem(
-                    IProblem.ERROR,
+                    IProblem.WARNING,
                     location,
-                    TapestryCore.getTapestryString(
-                        "PageLoader.formal-parameters-only",
-                        containedSpecification.getSpecificationLocation().getName(),
-                        bspec.getIdentifier()));
+                    "Parameter '"
+                        + bspec.getIdentifier()
+                        + "' of '"
+                        + containedSpecification.getSpecificationLocation().getName()
+                        + "' expects bindings to be of type '"
+                        + pType
+                        + "'");
+            //TODO internationalize
         }
+
+        //        else
+        //        {
+        //            if (!isAllowInformalParameters)
+        //                addProblem(
+        //                    IProblem.ERROR,
+        //                    location,
+        //                    TapestryCore.getTapestryString(
+        //                        "PageLoader.formal-parameters-only",
+        //                        containedSpecification.getSpecificationLocation().getName(),
+        //                        bspec.getIdentifier()));
+        //        }
 
     }
 
