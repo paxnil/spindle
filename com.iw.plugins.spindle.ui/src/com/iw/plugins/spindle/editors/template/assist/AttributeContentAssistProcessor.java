@@ -35,15 +35,13 @@ import org.eclipse.swt.graphics.Point;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.editors.assist.CompletionProposal;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
-import com.iw.plugins.spindle.editors.util.CompletionProposal;
 
 /**
- * Content assist inside of Tags (but not attributes)
+ * Content assist inside of Attribute values
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: AttributeContentAssistProcessor.java,v 1.5 2003/11/21 17:41:23
- *          glongman Exp $
  */
 public class AttributeContentAssistProcessor extends TemplateContentAssistProcessor
 {
@@ -58,8 +56,8 @@ public class AttributeContentAssistProcessor extends TemplateContentAssistProces
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.template.assist.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
-   *      int)
+   * @see com.iw.plugins.spindle.editors.template.assist.AbstractContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
+   *              int)
    */
   protected ICompletionProposal[] doComputeCompletionProposals(
       ITextViewer viewer,

@@ -3,7 +3,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.1.3"
+   version="0.1.3   "
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -474,6 +474,65 @@ the new Spindle
          markerSeverity="0">
       </type>
    </extension>   
+   
+   <extension
+         point="org.eclipse.ui.editors.templates">
+        
+      <contextType
+            name="Tapestry Application File"
+            class="com.iw.plugins.spindle.editors.spec.assist.usertemplates.XMLFileContextType"
+            id="com.iw.plugins.spindle.ui.templateContextType.applicationFile">
+      </contextType>
+     
+      <contextType
+            name="Tapestry Library File"
+            class="com.iw.plugins.spindle.editors.spec.assist.usertemplates.XMLFileContextType"
+            id="com.iw.plugins.spindle.ui.templateContextType.libraryFile">
+      </contextType>
+      
+   
+      <contextType
+            name="Tapestry Page File"
+            class="com.iw.plugins.spindle.editors.spec.assist.usertemplates.XMLFileContextType"
+            id="com.iw.plugins.spindle.ui.templateContextType.pageFile">
+      </contextType>
+        
+      
+      <contextType
+            name="Tapestry Component File"
+            class="com.iw.plugins.spindle.editors.spec.assist.usertemplates.XMLFileContextType"
+            id="com.iw.plugins.spindle.ui.templateContextType.componentFile">
+      </contextType>
+          
+      <contextType
+            name="Tapestry Template File"
+            class="com.iw.plugins.spindle.editors.spec.assist.usertemplates.XMLFileContextType"
+            id="com.iw.plugins.spindle.ui.templateContextType.templateFile">
+      </contextType>
+       <!--
+      <resolver
+            name="%ant.resolvers.src"
+            type="src"
+            icon="templates/resolver.gif"
+            description="%ant.resolvers.src.description"
+            contextTypeId="org.eclipse.ant.ui.templateContextType.XML"
+            class="org.eclipse.ant.internal.ui.editor.templates.AntVariableResolver">
+      </resolver>
+      <resolver
+            name="%ant.resolvers.dst"
+            type="dst"
+            icon="templates/resolver.gif"
+            description="%ant.resolvers.dst.description"
+            contextTypeId="org.eclipse.ant.ui.templateContextType.XML"
+            class="org.eclipse.ant.internal.ui.editor.templates.AntVariableResolver">
+      </resolver>
+     -->
+      <include
+      		file="templates/templates.xml"
+      		translations="templates/template.properties">
+      </include>
+   </extension>
+   
    <extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">
       <specification
@@ -489,5 +548,7 @@ the new Spindle
             annotationImageProvider="com.iw.plugins.spindle.editors.ProblemAnnotationImageProvider">
       </specification>
       </extension>
+      
+      
    
 </plugin>

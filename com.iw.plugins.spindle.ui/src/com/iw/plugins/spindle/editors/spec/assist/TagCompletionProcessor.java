@@ -47,7 +47,8 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.util.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 
 /**
  * Processor for default declType type - only works to insert comments within
@@ -71,7 +72,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
+   * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
    *      int)
    */
   protected ICompletionProposal[] doComputeCompletionProposals(
@@ -177,9 +178,9 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
     } else if (baseState == XMLNode.ATT_VALUE)
     {
       return new ICompletionProposal[]{new CompletionProposal("'"
-          + CompletionProposal.DEFAULT_ATTR_VALUE + "'", documentOffset, 0, new Point(
+          + ProposalFactory.DEFAULT_ATTR_VALUE + "'", documentOffset, 0, new Point(
           1,
-          CompletionProposal.DEFAULT_ATTR_VALUE.length()))};
+          ProposalFactory.DEFAULT_ATTR_VALUE.length()))};
     } else
     {
       //ensure that we are in a legal position to insert. ie. not inside
@@ -224,7 +225,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
     if (proposals.isEmpty())
       return NoSuggestions;
 
-    Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
+    Collections.sort(proposals, ProposalFactory.PROPOSAL_COMPARATOR);
 
     return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals
         .size()]);
@@ -378,7 +379,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
         String attrname = (String) iter.next();
         if (!existingAttributeNames.contains(attrname))
         {
-          CompletionProposal proposal = CompletionProposal.getAttributeProposal(
+          CompletionProposal proposal = ProposalFactory.getAttributeProposal(
               attrname,
               addLeadingSpace,
               documentOffset);
@@ -396,7 +397,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
+   * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
    *      int)
    */
   public IContextInformation[] doComputeContextInformation(

@@ -35,7 +35,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
+import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
 
 /**
  * Text Hover for Editor annotations
@@ -80,7 +80,7 @@ public class DefaultTextHover implements ITextHover
 
       synchronized (fEditor)
       {
-        ContentAssistProcessor assister = (ContentAssistProcessor) assistant
+        AbstractContentAssistProcessor assister = (AbstractContentAssistProcessor) assistant
             .getContentAssistProcessor(typedRegion.getType());
         if (assister != null)
         {

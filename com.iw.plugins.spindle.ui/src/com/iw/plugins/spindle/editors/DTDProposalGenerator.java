@@ -43,7 +43,7 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.editors.util.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.CompletionProposal;
 import com.wutka.dtd.DTD;
 import com.wutka.dtd.DTDAttribute;
 import com.wutka.dtd.DTDComment;

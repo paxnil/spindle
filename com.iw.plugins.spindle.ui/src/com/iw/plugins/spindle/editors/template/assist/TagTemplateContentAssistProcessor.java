@@ -34,7 +34,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.parse.TemplateParser;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -46,20 +48,23 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.OrderedProposal;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
  * Content assist inside of Tags (but not attributes)
  * 
+ * TODO make this generic for any processor that presents tag attribute
+ * proposals.
+ * 
  * @author glongman@intelligentworks.com
- * @version $Id: TagContentAssistProcessor.java,v 1.11.2.2 2004/06/22 12:23:59
- *          glongman Exp $
+ *  
  */
-public class TagContentAssistProcessor extends TemplateContentAssistProcessor
+public class TagTemplateContentAssistProcessor extends TemplateContentAssistProcessor
 {
 
-  public TagContentAssistProcessor(TemplateEditor editor)
+  public TagTemplateContentAssistProcessor(TemplateEditor editor)
   {
     super(editor);
   }
@@ -68,7 +73,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.editors.template.assist.AbstractContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
-   *      int)
+   *              int)
    */
   protected ICompletionProposal[] doComputeCompletionProposals(
       ITextViewer viewer,
@@ -90,6 +95,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
     {
       boolean atStart = tag.getOffset() == documentOffset;
       boolean canInsertNewTag = tag.getAttributes().isEmpty() && !tag.isTerminated();
+
       if (fDTD != null && (atStart || canInsertNewTag))
       {
         List allElementProposals = DTDProposalGenerator.getRawNewTagProposalsSimple(
@@ -180,6 +186,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
         && !attrmap.containsKey(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME))
     {
       proposals = computeNewAttributeProposalsNoParameters(
+          viewer.getDocument(),
           documentOffset,
           tagName,
           existingAttributeNames,
@@ -204,21 +211,8 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
 
   }
 
-  /**
-   * @param tag
-   * @param tagName
-   * @param fDocumentOffset
-   * @return
-   */
-  private ICompletionProposal[] computeStartTagProposals(
-      XMLNode tag,
-      String tagName,
-      int documentOffset)
-  {   
-    return null;
-  }
-
   private List computeNewAttributeProposalsNoParameters(
+      IDocument document,
       int documentOffset,
       String tagName,
       HashSet existingAttributeNames,
@@ -226,43 +220,52 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
   {
     List proposals = new ArrayList();
     List webAttributeNames = Collections.EMPTY_LIST;
-    CompletionProposal proposal;
+    OrderedProposal proposal;
 
     if (fDTD != null && tagName != null)
       webAttributeNames = DTDProposalGenerator.getAttributes(fDTD, tagName);
 
-    // we have no Tapestry attributes yet.
-    proposal = ProposalFactory.getAttributeProposal(
-        TemplateParser.JWCID_ATTRIBUTE_NAME,
-        addLeadingSpace,
-        documentOffset);
+    AttributeTemplateContext context = new AttributeTemplateContext(
+        document,
+        documentOffset,
+        0,
+        addLeadingSpace);
+    context.setAttributeName(TemplateParser.JWCID_ATTRIBUTE_NAME);
 
-    proposal.setYOrder(-1);
-    proposals.add(proposal);
+    proposals.add(ProposalFactory.createTemplateProposal(
+        context.getTemplate(),
+        context,
+        new Region(documentOffset, 0),
+        null,
+        -1));
 
-    proposal = ProposalFactory.getAttributeProposal(
-        TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
-        addLeadingSpace,
-        documentOffset);
+    context = new AttributeTemplateContext(document, documentOffset, 0, addLeadingSpace);
+    context.setAttributeName(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME);
 
-    proposal.setYOrder(-1);
-    proposals.add(proposal);
+    proposals.add(ProposalFactory.createTemplateProposal(
+        context.getTemplate(),
+        context,
+        new Region(documentOffset, 0),
+        null,
+        -1));
 
     for (Iterator iter = webAttributeNames.iterator(); iter.hasNext();)
     {
       String name = (String) iter.next();
+
       if (existingAttributeNames.contains(name))
         continue;
-      proposal = ProposalFactory.getAttributeProposal(
-          name,
-          name,
-          ProposalFactory.DEFAULT_ATTR_VALUE,
-          null,
-          addLeadingSpace,
-          documentOffset);
 
-      proposal.setImage(Images.getSharedImage("bullet_web.gif"));
-      proposals.add(proposal);
+      context = new AttributeTemplateContext(document, documentOffset, 0, addLeadingSpace);
+      context.setAttributeName(name);
+
+      proposals.add(ProposalFactory.createTemplateProposal(
+          context.getTemplate(),
+          context,
+          new Region(documentOffset, 0),
+          Images.getSharedImage("bullet_web.gif"),
+          null,
+          0));
     }
 
     return proposals;
@@ -601,7 +604,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
    * (non-Javadoc)
    * 
    * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
-   *      int)
+   *              int)
    */
   public IContextInformation[] doComputeContextInformation(
       ITextViewer viewer,

@@ -57,7 +57,7 @@ import com.iw.plugins.spindle.editors.formatter.XMLAutoIndentStrategy;
 import com.iw.plugins.spindle.editors.template.assist.AttributeContentAssistProcessor;
 import com.iw.plugins.spindle.editors.template.assist.DefaultContentAssistProcessor;
 import com.iw.plugins.spindle.editors.template.assist.JWCIDContentAssistProcessor;
-import com.iw.plugins.spindle.editors.template.assist.TagContentAssistProcessor;
+import com.iw.plugins.spindle.editors.template.assist.TagTemplateContentAssistProcessor;
 
 /**
  * SourceViewerConfiguration for the TemplateEditor
@@ -240,7 +240,7 @@ public class TemplateConfiguration extends BaseSourceConfiguration
   public IContentAssistant getContentAssistant(ISourceViewer sourceViewer)
   {
     ContentAssistant assistant = getEditor().getContentAssistant();
-    TagContentAssistProcessor contentAssistForTag = new TagContentAssistProcessor(
+    TagTemplateContentAssistProcessor contentAssistForTag = new TagTemplateContentAssistProcessor(
         (TemplateEditor) getEditor());
     AttributeContentAssistProcessor contentAssistForAttribute = new AttributeContentAssistProcessor(
         (TemplateEditor) getEditor());

@@ -44,8 +44,8 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.util.CommentCompletionProcessor;
-import com.iw.plugins.spindle.editors.util.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.spec.assist.usertemplates.UserTemplateCompletionProcessor;
 
 /**
  * Processor for default content type
@@ -57,15 +57,17 @@ import com.iw.plugins.spindle.editors.util.CompletionProposal;
 public class DefaultCompletionProcessor extends SpecCompletionProcessor
 {
 
+  protected UserTemplateCompletionProcessor fUserTemplates;
   public DefaultCompletionProcessor(Editor editor)
   {
     super(editor);
+    fUserTemplates = new UserTemplateCompletionProcessor(editor);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
+   * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
    *      int)
    */
   protected ICompletionProposal[] doComputeCompletionProposals(
@@ -74,6 +76,12 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
   {
     IDocument document = viewer.getDocument();
     XMLNode node = XMLNode.getArtifactAt(document, documentOffset);
+    
+    if (node == null || document.get().trim().length() == 0)
+      return fUserTemplates.computeCompletionProposals(viewer, documentOffset);
+    
+    //FIXME Add the ability to inser user nodes (if appropriate)
+    
     XMLNode nextNode = node;
     XMLNode parentNode = null;
     // The cursor could be at the very end of the document!

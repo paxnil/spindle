@@ -44,16 +44,15 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
+import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.template.TemplatePartitionScanner;
-import com.iw.plugins.spindle.editors.util.CompletionProposal;
 
 /**
  * Content assist inside of jwcid attributes
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: JWCIDContentAssistProcessor.java,v 1.9.2.1 2004/06/10 16:48:21
- *          glongman Exp $
  */
 public class JWCIDContentAssistProcessor extends TemplateContentAssistProcessor
 {
@@ -74,7 +73,7 @@ public class JWCIDContentAssistProcessor extends TemplateContentAssistProcessor
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.template.assist.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
+   * @see com.iw.plugins.spindle.editors.template.assist.AbstractContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
    *      int)
    */
   protected ICompletionProposal[] doComputeCompletionProposals(
@@ -157,7 +156,7 @@ public class JWCIDContentAssistProcessor extends TemplateContentAssistProcessor
     if (proposals.isEmpty())
       return NoSuggestions;
 
-    Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
+    Collections.sort(proposals, ProposalFactory.PROPOSAL_COMPARATOR);
 
     return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals
         .size()]);
@@ -335,7 +334,7 @@ public class JWCIDContentAssistProcessor extends TemplateContentAssistProcessor
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
+   * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
    *      int)
    */
   public IContextInformation[] doComputeContextInformation(

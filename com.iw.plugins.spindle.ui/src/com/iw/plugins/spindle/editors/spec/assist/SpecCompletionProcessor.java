@@ -42,9 +42,9 @@ import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
-import com.iw.plugins.spindle.editors.util.CompletionProposal;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
 /**
  * Base class for context assist processors for Tapestry specss
@@ -53,7 +53,7 @@ import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
  * @version $Id: SpecCompletionProcessor.java,v 1.9.2.1 2004/06/10 16:48:20
  *                     glongman Exp $
  */
-public abstract class SpecCompletionProcessor extends ContentAssistProcessor
+public abstract class SpecCompletionProcessor extends AbstractContentAssistProcessor
 {
 
   public SpecCompletionProcessor(Editor editor)
@@ -64,7 +64,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect()
+   * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#connect()
    */
   protected void init(IDocument document) throws IllegalStateException
   {
@@ -77,7 +77,7 @@ public abstract class SpecCompletionProcessor extends ContentAssistProcessor
     if (model != null)
       fDTD = DOMValidator.getDTD(model.getPublicId());
 
-    if (fDTD == null)
+    if (fDTD == null && !(this instanceof DefaultCompletionProcessor))
       throw new IllegalStateException();
   }
 

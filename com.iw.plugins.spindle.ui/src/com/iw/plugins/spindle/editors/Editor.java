@@ -50,7 +50,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
+import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -77,7 +77,7 @@ import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
  * @author glongman@intelligentworks.com
  *  
  */
-public abstract class Editor extends AbstractDecoratedTextEditor
+public abstract class Editor extends TextEditor
     implements
       IAdaptable,
       IReconcileWorker
@@ -147,12 +147,6 @@ public abstract class Editor extends AbstractDecoratedTextEditor
   public void init(IEditorSite site, IEditorInput input) throws PartInitException
   {
     setDocumentProvider(createDocumentProvider(input));
-    //       TODO remove IProject project =
-    // UIPlugin.getDefault().getProjectFor(input);
-    //        if (project != null)
-    //            // force a build if necessary
-    //            TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(project,
-    // true);
     super.init(site, input);
   }
 

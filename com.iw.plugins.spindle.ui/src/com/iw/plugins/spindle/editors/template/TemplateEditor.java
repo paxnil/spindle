@@ -76,7 +76,6 @@ import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
-import com.iw.plugins.spindle.editors.documentsAndModels.BaseDocumentSetupParticipant;
 import com.iw.plugins.spindle.editors.template.actions.MoveToSpecAction;
 import com.iw.plugins.spindle.editors.template.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.template.actions.ShowInPackageExplorerAction;

@@ -29,48 +29,63 @@ package com.iw.plugins.spindle.editors.template.assist;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.parse.TemplateParser;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
+import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.OrderedProposal;
+import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;
+import com.iw.plugins.spindle.editors.spec.assist.usertemplates.UserTemplateCompletionProcessor;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
-import com.iw.plugins.spindle.editors.util.CompletionProposal;
 
 /**
  * Content assist inside of Tags (but not attributes)
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: DefaultContentAssistProcessor.java,v 1.2.2.2 2004/06/22
- *          12:23:59 glongman Exp $
+ *                     12:23:59 glongman Exp $
  */
 public class DefaultContentAssistProcessor extends TemplateContentAssistProcessor
 {
 
+  protected UserTemplateCompletionProcessor fUserTemplates;
+
   public DefaultContentAssistProcessor(TemplateEditor editor)
   {
     super(editor);
+    fUserTemplates = new UserTemplateCompletionProcessor(editor);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.template.assist.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
-   *      int)
+   * @see com.iw.plugins.spindle.editors.template.assist.AbstractContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
+   *              int)
    */
   protected ICompletionProposal[] doComputeCompletionProposals(
       ITextViewer viewer,
       int documentOffset)
   {
-    XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
+
+    IDocument document = viewer.getDocument();
+    XMLNode tag = XMLNode.getArtifactAt(document, documentOffset);
+    if (tag == null)
+      return fUserTemplates.computeCompletionProposals(viewer, documentOffset);
+
     int baseState = tag.getStateAt(documentOffset);
 
     String type = tag.getType();
@@ -84,10 +99,11 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
     if (tag.isTerminated() && documentOffset == tag.getOffset() + tag.getLength())
       return NoProposals;
 
+    String tagName = tag.getName();
     boolean addLeadingSpace = false;
     if (baseState == XMLNode.TAG)
     {
-      String tagName = tag.getName();
+
       if (tagName != null)
       {
         System.out.println(tag.getContentTo(documentOffset, false));
@@ -101,9 +117,9 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
     } else if (baseState == XMLNode.ATT_VALUE)
     {
       return new ICompletionProposal[]{new CompletionProposal("'"
-          + CompletionProposal.DEFAULT_ATTR_VALUE + "'", documentOffset, 0, new Point(
+          + ProposalFactory.DEFAULT_ATTR_VALUE + "'", documentOffset, 0, new Point(
           1,
-          CompletionProposal.DEFAULT_ATTR_VALUE.length()))};
+          ProposalFactory.DEFAULT_ATTR_VALUE.length()))};
     } else
     {
       //ensure that we are in a legal position to insert. ie. not inside
@@ -116,6 +132,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
     Map attrmap = tag.getAttributesMap();
     String jwcid = null;
     jwcid = getJwcid(attrmap);
+    HashSet existingAttributeNames = new HashSet(attrmap.keySet());
 
     XMLNode existingAttr = tag.getAttributeAt(documentOffset);
     if (baseState != XMLNode.AFTER_ATT_VALUE && existingAttr != null
@@ -140,7 +157,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
 
           if (TemplateParser.JWCID_ATTRIBUTE_NAME.startsWith(currentName))
           {
-            return new ICompletionProposal[]{CompletionProposal.getAttributeProposal(
+            return new ICompletionProposal[]{ProposalFactory.getAttributeProposal(
                 TemplateParser.JWCID_ATTRIBUTE_NAME.substring(currentName.length()),
                 TemplateParser.JWCID_ATTRIBUTE_NAME,
                 "",
@@ -151,7 +168,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
           } else if (TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME
               .startsWith(currentName))
           {
-            return new ICompletionProposal[]{CompletionProposal.getAttributeProposal(
+            return new ICompletionProposal[]{ProposalFactory.getAttributeProposal(
                 TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME.substring(currentName
                     .length()),
                 TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
@@ -177,15 +194,69 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
     } else if (!attrmap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME)
         && !attrmap.containsKey(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME))
     {
+
+      List webAttributeNames = Collections.EMPTY_LIST;
+      OrderedProposal proposal;
+
+      if (fDTD != null && tagName != null)
+        webAttributeNames = DTDProposalGenerator.getAttributes(fDTD, tagName);
+
+      AttributeTemplateContext context = new AttributeTemplateContext(
+          document,
+          documentOffset,
+          0,
+          addLeadingSpace);
+      context.setAttributeName(TemplateParser.JWCID_ATTRIBUTE_NAME);
+
+      proposals.add(ProposalFactory.createTemplateProposal(
+          context.getTemplate(),
+          context,
+          new Region(documentOffset, 0),
+          null,
+          -1));
+
+      context = new AttributeTemplateContext(document, documentOffset, 0, addLeadingSpace);
+      context.setAttributeName(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME);
+
+      proposals.add(ProposalFactory.createTemplateProposal(
+          context.getTemplate(),
+          context,
+          new Region(documentOffset, 0),
+          null,
+          -1));
+
+      for (Iterator iter = webAttributeNames.iterator(); iter.hasNext();)
+      {
+        String name = (String) iter.next();
+
+        if (existingAttributeNames.contains(name))
+          continue;
+
+        context = new AttributeTemplateContext(
+            document,
+            documentOffset,
+            0,
+            addLeadingSpace);
+        context.setAttributeName(name);
+
+        proposals.add(ProposalFactory.createTemplateProposal(
+            context.getTemplate(),
+            context,
+            new Region(documentOffset, 0),
+            Images.getSharedImage("bullet_web.gif"),
+            null,
+            0));
+      }
+
       // we have no Tapestry attributes yet.
-      proposals.add(CompletionProposal.getAttributeProposal(
-          TemplateParser.JWCID_ATTRIBUTE_NAME,
-          addLeadingSpace,
-          documentOffset));
-      proposals.add(CompletionProposal.getAttributeProposal(
-          TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
-          addLeadingSpace,
-          documentOffset));
+      //      proposals.add(ProposalFactory.getAttributeProposal(
+      //          TemplateParser.JWCID_ATTRIBUTE_NAME,
+      //          addLeadingSpace,
+      //          documentOffset));
+      //      proposals.add(ProposalFactory.getAttributeProposal(
+      //          TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
+      //          addLeadingSpace,
+      //          documentOffset));
 
     } else
     {
@@ -196,7 +267,7 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
     if (proposals.isEmpty())
       return NoSuggestions;
 
-    Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
+    Collections.sort(proposals, ProposalFactory.PROPOSAL_COMPARATOR);
 
     return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals
         .size()]);
@@ -225,10 +296,10 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
           existingAttributeNames);
       for (int i = 0; i < infos.length; i++)
       {
-        CompletionProposal proposal = CompletionProposal.getAttributeProposal(
+        CompletionProposal proposal = ProposalFactory.getAttributeProposal(
             infos[i].name,
             infos[i].name,
-            CompletionProposal.DEFAULT_ATTR_VALUE,
+            ProposalFactory.DEFAULT_ATTR_VALUE,
             infos[i].description,
             addLeadingSpace,
             documentOffset);
@@ -351,70 +422,16 @@ public class DefaultContentAssistProcessor extends TemplateContentAssistProcesso
     }
   }
 
-  /**
-   * @param tag
-   * @param fDocumentOffset
-   * @return
-   */
   private ICompletionProposal[] computeTextProposals(
       ITextViewer viewer,
       int documentOffset)
   {
     ICompletionProposal endTagProposal = DefaultCompletionProcessor
         .computeEndTagProposal(viewer, documentOffset);
-    if (endTagProposal == null)
-      return NoSuggestions;
 
-    return new ICompletionProposal[]{endTagProposal};
+    if (endTagProposal != null)
+      return new ICompletionProposal[]{endTagProposal};
+
+    return fUserTemplates.computeCompletionProposals(viewer, documentOffset);
   }
-
-  // Not needed (I think)
-
-  //    /* (non-Javadoc)
-  //     * @see
-  // com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
-  // int)
-  //     */
-  //    public IContextInformation[] doComputeContextInformation(ITextViewer
-  // viewer, int fDocumentOffset)
-  //    {
-  //        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), fDocumentOffset);
-  //        int baseState = tag.getStateAt(fDocumentOffset);
-  //        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
-  //            return NoInformation;
-  //
-  //        Map attrMap = tag.getAttributesMap();
-  //
-  //        if (!attrMap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME))
-  //            return NoInformation;
-  //
-  //        XMLNode attr = tag.getAttributeAt(fDocumentOffset);
-  //        if (attr == null ||
-  // attr.getName().equalsIgnoreCase(TemplateParser.JWCID_ATTRIBUTE_NAME))
-  //        {
-  //            return NoInformation;
-  //        }
-  //
-  //        try
-  //        {
-  //            TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor)
-  // fEditor);
-  //            XMLNode jwcidAttr = (XMLNode)
-  // attrMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
-  //            helper.setJwcid(jwcidAttr.getAttributeValue());
-  //
-  //            UITapestryAccess.Result result =
-  // helper.getParameterContextInformation(attr.getName());
-  //
-  //            if (result != null)
-  //                return new IContextInformation[] { new
-  // ContextInformation(result.displayName, result.description)};
-  //
-  //        } catch (IllegalArgumentException e)
-  //        {
-  //            //do nothing
-  //        }
-  //
-  //        return NoInformation;
-  //    }
 }

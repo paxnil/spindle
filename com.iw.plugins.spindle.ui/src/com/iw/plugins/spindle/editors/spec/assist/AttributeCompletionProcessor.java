@@ -62,8 +62,9 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
+import com.iw.plugins.spindle.editors.assist.CompletionProposal;
+import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.spec.SpecEditor;
-import com.iw.plugins.spindle.editors.util.CompletionProposal;
 
 /**
  * Content assist inside of attribute values
@@ -100,7 +101,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.template.assist.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
+   * @see com.iw.plugins.spindle.editors.template.assist.AbstractContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
    *      int)
    */
   protected ICompletionProposal[] doComputeCompletionProposals(
@@ -188,7 +189,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
           proposals.add(getProposal(special));
       }
 
-      Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
+      Collections.sort(proposals, ProposalFactory.PROPOSAL_COMPARATOR);
 
       return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals
           .size()]);
@@ -205,7 +206,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
+   * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
    *      int)
    */
   public IContextInformation[] doComputeContextInformation(

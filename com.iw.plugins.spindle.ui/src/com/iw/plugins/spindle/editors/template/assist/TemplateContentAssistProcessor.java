@@ -38,18 +38,16 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
 /**
  * Base class for Template completion assist. Basicly here to set a flag if
  * XHTML completions have been requested via the property page.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: TemplateContentAssistProcessor.java,v 1.1.2.2 2004/06/22
- *          12:23:59 glongman Exp $
  */
-public abstract class TemplateContentAssistProcessor extends ContentAssistProcessor
+public abstract class TemplateContentAssistProcessor extends AbstractContentAssistProcessor
 {
 
   private boolean fHasHTMLExtension;
@@ -64,7 +62,7 @@ public abstract class TemplateContentAssistProcessor extends ContentAssistProces
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect(org.eclipse.jface.text.IDocument)
+   * @see com.iw.plugins.spindle.editors.util.AbstractContentAssistProcessor#connect(org.eclipse.jface.text.IDocument)
    */
   protected void init(IDocument document) throws IllegalStateException
   {

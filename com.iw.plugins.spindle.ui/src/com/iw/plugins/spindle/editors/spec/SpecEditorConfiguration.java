@@ -61,14 +61,14 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
 import com.iw.plugins.spindle.editors.DefaultDoubleClickStrategy;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.assist.AbstractContentAssistProcessor;
 import com.iw.plugins.spindle.editors.formatter.FormattingPreferences;
 import com.iw.plugins.spindle.editors.spec.assist.AttributeCompletionProcessor;
+import com.iw.plugins.spindle.editors.spec.assist.CDATACompletionProcessor;
+import com.iw.plugins.spindle.editors.spec.assist.CommentCompletionProcessor;
+import com.iw.plugins.spindle.editors.spec.assist.DeclCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.TagCompletionProcessor;
-import com.iw.plugins.spindle.editors.util.CDATACompletionProcessor;
-import com.iw.plugins.spindle.editors.util.CommentCompletionProcessor;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
-import com.iw.plugins.spindle.editors.util.DeclCompletionProcessor;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
@@ -181,12 +181,12 @@ public class SpecEditorConfiguration extends BasicSpecConfiguration
       return super.getContentAssistant(sourceViewer);
 
     ContentAssistant assistant = getEditor().getContentAssistant();
-    ContentAssistProcessor tagProcessor = new TagCompletionProcessor(fEditor);
-    ContentAssistProcessor commentProcessor = new CommentCompletionProcessor(fEditor);
-    ContentAssistProcessor attributeProcessor = new AttributeCompletionProcessor(fEditor);
-    ContentAssistProcessor declProcessor = new DeclCompletionProcessor(fEditor);
-    ContentAssistProcessor defaultProcessor = new DefaultCompletionProcessor(fEditor);
-    ContentAssistProcessor cdataProcessor = new CDATACompletionProcessor(fEditor);
+    AbstractContentAssistProcessor tagProcessor = new TagCompletionProcessor(fEditor);
+    AbstractContentAssistProcessor commentProcessor = new CommentCompletionProcessor(fEditor);
+    AbstractContentAssistProcessor attributeProcessor = new AttributeCompletionProcessor(fEditor);
+    AbstractContentAssistProcessor declProcessor = new DeclCompletionProcessor(fEditor);
+    AbstractContentAssistProcessor defaultProcessor = new DefaultCompletionProcessor(fEditor);
+    AbstractContentAssistProcessor cdataProcessor = new CDATACompletionProcessor(fEditor);
 
     assistant.setContentAssistProcessor(tagProcessor, XMLPartitionScanner.XML_TAG);
     assistant
