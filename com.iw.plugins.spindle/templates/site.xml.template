@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <site> 
+    <description url="index.html">The Spindle Update Site contains feature and plug-in versions for Spindle release @version@.</description>
+	<feature url="features/com.iw.features.spindle_@version@.jar" id="com.iw.plugins.spindle" version="@version@">
+ 	<category name="cat"/>
+	</feature>  
+    <archive url="archive/com.iw.plugins.spindle_@version@.jar" 
+		path="plugins/com.iw.plugins.spindle_@version@.jar"/>
+    <category-def label="Spindle @version@" name="cat"> 
+      <description>This category contains the release files plugins for Spindle @version@</description>
+    </category-def>
+  </site>

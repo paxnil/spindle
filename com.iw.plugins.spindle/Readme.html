@@ -22,7 +22,7 @@
   <tbody>
     <tr>
     <td>
-      <h1> Release <i>1.1beta3</i><br>
+      <h1> Release <i>1.1beta4</i><br>
       </h1>
       <h1> works only with Tapestry release 2.2-beta-2+<br>
       </h1>
@@ -44,7 +44,6 @@
       <p> This product includes software developed by the Apache Software Foundation 
         (<a href="http://www.apache.org/"> http://www.apache.org/</a>). </p>
       <p><a href="#whatsnew">What's New</a><br>
-        &nbsp; <a href="#contents">Contents</a><br>
         &nbsp; <a href="#doc">Documentation</a><br>
         &nbsp; <a href="#bulding">Building Spindle</a><br>
         &nbsp; <a href="#Installing_Spindle_and_Getting_Started_"> Installing 
@@ -60,11 +59,15 @@
         <br>
         <a name="whatsnew"></a></p>
       <h2> What's New </h2>
+      <p> Installing Spindle has changed since 1.1beta3. You now need to un-archive the distro, the use Eclipse's Update Manager to perform the install. 
+        Instructions are available <a href="#" target="http://spindle.sourceforge.net/install/">here</a></p>
       <ol>
 	  <li> Added the following <a href="https://sourceforge.net/tracker/index.php?group_id=50321&amp;atid=459331">features</a></li>
 	  </ol>
       <ul>        
-        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=622382&group_id=50321&atid=459331">[ 622382 ] navigate to component from html outline</a></li>
+        <li><a href="https://sourceforge.net/tracker/index.php?func=detail&aid=623730&group_id=50321&atid=459331">[ 623730 ] Use Eclipse Update Mgr to install Spindl</a></li>
+        <li><a href="https://sourceforge.net/tracker/index.php?func=detail&aid=622613&group_id=50321&atid=459331">[ 622613 ] Jump from .jwc to .html</a></li>
+        <li><a href="https://sourceforge.net/tracker/index.php?func=detail&aid=611570&group_id=50321&atid=459331">[ 611570 ] Add refactoring support</a></li>
       </ul>
       <ol>
         <li>Closed the following <a href="http://sourceforge.net/tracker/?group_id=50321&amp;atid=459328"> 
@@ -72,45 +75,26 @@
         </li>
       </ol>
       <ul>
-        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=622272&group_id=50321&atid=459328">[ 622272 ] Renaming a bean produces a duplicate</a></li>
-        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=621854&group_id=50321&atid=459328">[ 621854 ] 'Add Comp' button stops working</a></li>
-        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=621513&group_id=50321&atid=459328">[ 621513 ] Expression values, in .jwc source</a></li>
-        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=620770&group_id=50321&atid=459328">[ 620770 ] Error when converting project</a></li>
-        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&aid=618860&group_id=50321&atid=459328">[ 618860 ] 1.1alpha3 - NullPointerException</a></li>
-		
+        <li><a href="https://sourceforge.net/tracker/index.php?func=detail&aid=621849&group_id=50321&atid=459328">[ 621849 ] Class selection dlg searches workspace</a></li>
+        <li><a href="https://sourceforge.net/tracker/index.php?func=detail&aid=619337&group_id=50321&atid=459328">[ 619337 ] SWT error when resizing binding window</a></li>
+
 
       </ul>
       <p><br>
         <br>
-        The Spindle HTML editor is no longer the default editor. If you are installing 
-        this release over top of another spindle release, the HTML editor will 
-        remain the default.<br>
-        If you want it to be the default editor go WINDOW-&gt;PREFERENCES-&gt;WORKBENCH-&gt;FILE 
-        ASSOCIATIONS. You can make it (or remove it as) the default there. <br>
+        The Spindle HTML editor is no longer the default editor. If you are installing this release over top of another spindle release, the HTML editor 
+        will remain the default.<br>
+        If you want it to be the default editor go WINDOW-&gt;PREFERENCES-&gt;WORKBENCH-&gt;FILE ASSOCIATIONS. You can make it (or remove it as) the default 
+        there. <br>
         <br>
         <br>
-      </p>
-      <ul>
-        <p> .....................................................<br>
-          <br>
-        </p>
-      </ul>
-      <a name="contents"></a> <h2> Contents </h2>
-      <p> The contents of the release are thus: </p>
-      <ol>
-        <li> com.iw.plugins.spindle-1.1beta3.jar - The file one unjars into <tt>ECLIPSE_HOME/plugins</tt> 
-          to install the plugin. Note that in this release, the src is included 
-          in this file -&nbsp;see <a href="file:///Q:/eclipse2/workspace/com.iw.plugins.spindle/Readme.html#bulding"> 
-          Building Spindle.</a></li>
-        <li> Readme.html - this file</li>
-        <li><a href="file:///Q:/eclipse2/workspace/com.iw.plugins.spindle/LICENSE.txt"> 
-          License.txt</a> - the license</li>
-        <li> Other .txt and .html files - 3rd Party licenses - see <a href="file:///Q:/eclipse2/workspace/com.iw.plugins.spindle/Readme.html#jars"> 
-          Third Party Jars.</a></li>
-      </ol>
-      <br> <br>
-      .....................................................<br> <br> <br> <br> 
-      <a name="doc"></a> <h2> Documentation </h2>
+        <br>
+        .....................................................<br>
+        <br>
+        <br>
+        <br>
+        <a name="doc"></a> </p>
+      <h2> Documentation </h2>
       <p> &nbsp;this release of Spindle has many changes, for a summary of those 
         changes and how to use this version of Spindle, see&nbsp; <a href="Spindle_1_1alpha_FAQ.html">Spindle 
         1.1alpha Overview</a><br>
@@ -151,16 +135,12 @@
         (<a href="http://www.eclipse.org/downloads/index.php"> found here</a>) 
         of the Eclipse Platform:</b></p>
       <p><b>Eclipse R2.0 (SDK)</b></p>
-      Assuming that you have and installed a working Spindle compatible build 
-      of Eclipse (see above) into a directory, say <tt>C:\eclipse</tt> ...<br> 
-      <br>
-      Simply unjar the file&nbsp; <tt>com.iw.plugins.spindle-1.1beta3.jar</tt> 
-      into <tt> C:\eclipse\plugins</tt> and restart Eclipse. That's almost all 
-      there is to it!<br> <br>
-      Since Spindle is a plugin that adds IDE support to Tapestry, it only makes 
-      sense that you are building an app with Tapestry. So you need to at least 
-      have the required version of<br> <b><br>
-      This build requires Tapestry version 2.2</b><br> <ul>
+      <h3>Installing Spindle has changed since 1.1beta3. Its easier! see this link on the <a href="#" target="http://spindle.sourceforge.net/install/">Spindle</a> 
+        site</h3>
+      <h3><b><br>
+        This build requires Tapestry version 2.2</b><br>
+      </h3>
+      <ul>
         <li><tt>net.sf.tapestry.jar</tt> ; and </li>
         <li><tt>javax.servlet.jar</tt> (also found in the Tapestry distro) </li>
       </ul>
@@ -189,7 +169,7 @@
       <br>
       </a>&nbsp;.....................................................<br> <br> 
       <br> <a name="issues"></a> <h2> Known Issues </h2>
-      Working but incomplete functionality has been added for refactoring see the refactoring feature request mentioned in What's New above.<br> <br>
+      <br> <br>
       <br>
       Pls log any issues you find <a href="http://sourceforge.net/tracker/?group_id=50321&amp;atid=459328"> 
       here</a><br> <br> <br> <br>

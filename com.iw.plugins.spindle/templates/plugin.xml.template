@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="com.iw.plugins.spindle"
+   name="Spindle, an Eclipse Plugin for Tapestry (tapestry.sourceforge.net)"
+   version="@version@"
+   provider-name="Intelligent Works Inc."
+   class="com.iw.plugins.spindle.TapestryPlugin">
+
+   <runtime>
+      <library name="javax.xml.jaxp.jar">
+         <export name="*"/>
+      </library>
+      <library name="log4j-1.2.6.jar">
+         <export name="*"/>
+      </library>
+      <library name="org.apache.crimson.jar">
+         <export name="*"/>
+      </library>
+      <library name="javax.servlet.jar">
+         <export name="*"/>
+      </library>
+      <library name="iw_tapestry.jar">
+         <export name="*"/>
+      </library>
+      <library name="net.sf.tapestry-2.2.jar">
+         <export name="*"/>
+      </library>
+      <library name="jakarta-oro-2.0.6.jar">
+         <export name="*"/>
+      </library>
+      <library name="ognl-2.1.4-opt.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+   <requires>
+     
+      <import plugin="org.apache.xerces"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.pde"/>
+      <import plugin="org.eclipse.pde.ui"/>
+      <import plugin="org.eclipse.pde.core"/>
+      <import plugin="org.eclipse.update.ui.forms"/>
+   </requires>
+
+
+   <extension-point id="modelManagers" name="Internal Model Manager Point" schema="schema/modelManagers.exsd"/>
+
+   <extension
+         id="project.TapestryProject"
+         name="SpindleProjectNature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="com.iw.plugins.spindle.project.TapestryProject">
+         </run>
+      </runtime>
+   </extension>
+   <extension
+         point="org.eclipse.ui.projectNatureImages">
+      <image
+            icon="icons/full/application16.gif"
+            natureId="project.TapestryProject"
+            id="com.iw.plugins.spindle.project.TapestryProject.image">
+      </image>
+   </extension>
+   <extension
+         point="org.eclipse.team.core.fileTypes">
+      <fileTypes
+            type="text"
+            extension="application">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="spindle">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="library">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="jwc">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="page">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="script">
+      </fileTypes>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Spindle (Tapestry)"
+            id="com.iw.plugins.spindle.new">
+      </category>
+      <wizard
+            name="Tapestry Library Project"
+            icon="./icons/basic/library16.gif"
+            project="true"
+            category="com.iw.plugins.spindle.new"
+            class="com.iw.plugins.spindle.wizards.project.NewLibraryProjectWizard"
+            id="com.iw.plugins.spindle.new_library_wizard">
+         <description>
+            Create a new Tapestry Library Project
+         </description>
+      </wizard>
+      <wizard
+            name="Tapestry Application Project"
+            icon="./icons/basic/application16.gif"
+            category="com.iw.plugins.spindle.new"
+            project="true"
+            class="com.iw.plugins.spindle.wizards.project.NewApplicationProjectWizard"
+            id="com.iw.plugins.spindle.new_app_wizard">
+         <description>
+            Create a new Tapestry Application Project
+         </description>
+      </wizard>
+      <wizard
+            name="Tapestry Component"
+            icon="./icons/basic/component16.gif"
+            category="com.iw.plugins.spindle.new"
+            class="com.iw.plugins.spindle.wizards.NewTapComponentWizard"
+            id="com.iw.plugins.spindle.new_jwc_wizard">
+         <description>
+            Create a new Tapestry Component
+         </description>
+      </wizard>
+      <wizard
+            name="Tapestry Page"
+            icon="./icons/basic/page16.gif"
+            category="com.iw.plugins.spindle.new"
+            class="com.iw.plugins.spindle.wizards.NewTapPageWizard"
+            id="com.iw.plugins.spindle.new_page_wizard">
+         <description>
+            Create a new Tapestry Page
+         </description>
+      </wizard>
+   </extension>
+   <!--
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            objectClass="org.eclipse.core.resources.IStorage"
+            adaptable="true"
+            label="Spindle DTD Decorator"
+            state="false"
+            class="com.iw.plugins.spindle.ui.decorators.DTDLableDecorator"
+            id="com.iw.plugins.spindle.DTDVersionDecorator">
+         <description>
+            Adds the DTD version to .jwc and .application files in the package explorer
+         </description>
+      </decorator>
+   </extension>
+   -->   
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            adaptable="true"
+            label="Spindle Project Decorator"
+            state="true"
+            class="com.iw.plugins.spindle.ui.decorators.TapestryProjectLableDecorator"
+            id="com.iw.plugins.spindle.TapestryProjectLableDecorator">
+         <description>
+            Describes the Tapestry resource associated with a Tapestry project
+         </description>
+      </decorator>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="Spindle editor for Tapestry Applications"
+            default="true"
+            icon="./icons/basic/application16.gif"
+            filenames="*.application"
+            contributorClass="com.iw.plugins.spindle.editorapp.APPMultipageEditorContributor"
+            class="com.iw.plugins.spindle.editorapp.APPMultipageEditor"
+            id="com.iw.plugins.spindle.editors.app_editor">
+      </editor>
+      <editor
+            name="Spindle Editor for Tapestry Components"
+            default="true"
+            icon="./icons/basic/component16.gif"
+            filenames="*.jwc"
+            contributorClass="com.iw.plugins.spindle.editorjwc.JWCMultipageEditorContributor"
+            class="com.iw.plugins.spindle.editorjwc.JWCMultipageEditor"
+            id="com.iw.plugins.spindle.editors.jwc_editor">
+      </editor>
+      <editor
+            name="Spindle Editor for Tapestry Pages"
+            default="true"
+            icon="./icons/basic/page16.gif"
+            filenames="*.page"
+            contributorClass="com.iw.plugins.spindle.editorjwc.JWCMultipageEditorContributor"
+            class="com.iw.plugins.spindle.editorjwc.JWCPageMultipageEditor"
+            id="com.iw.plugins.spindle.editors.page_editor">
+      </editor>
+      <editor
+            name="Spindle HTML Editor for Tapestry"
+            default="false"
+            icon="./icons/basic/html16.gif"
+            filenames="*.html"
+            contributorClass="com.iw.plugins.spindle.html.TapestryHTMLEditorContributor"
+            class="com.iw.plugins.spindle.html.TapestryHTMLEditor"
+            id="com.iw.plugins.spindle.editors.html">
+      </editor>
+      <editor
+            name="Spindle Editor for Tapestry Libraries"
+            default="true"
+            icon="icons/full/library16.gif"
+            filenames="*.library"
+            contributorClass="com.iw.plugins.spindle.editorlib.LibraryMultipageEditorContributor"
+            class="com.iw.plugins.spindle.editorlib.LibraryMultipageEditor"
+            id="com.iw.plugins.spindle.editors.library_editor">
+      </editor>
+   </extension>
+   <extension
+         id="tapestryproblem"
+         name="TapestryProblem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+      <persistent
+            value="false">
+      </persistent>
+   </extension>
+   <extension
+         id="badwordproblem"
+         name="TapestryInvalidStringProblem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+      <attribute name="invalidString"/>
+      <attribute name="pattern"/>
+      <persistent
+            value="false">
+      </persistent>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="Spindle Toolbar Action Set"
+            visible="false"
+            id="com.iw.spindle.actions.set">
+         <action
+               label="New Tapestry Library Project"
+               icon="icons/full/library16_dark.gif"
+               tooltip="Create a new Tapestry Library Project"
+               class="com.iw.plugins.spindle.wizards.project.OpenLibraryProjectWizard"
+               toolbarPath="Normal/spindle"
+               id="com.iw.spindle.actions.set.open-lib-proj-wiz">
+         </action>
+         <action
+               label="New Tapestry Application Project"
+               icon="icons/full/application16_dark.gif"
+               tooltip="Create a new Tapestry Application Project"
+               class="com.iw.plugins.spindle.wizards.project.OpenApplicationProjectWizard"
+               toolbarPath="Normal/spindle"
+               id="com.iw.spindle.actions.set.open-app-proj-wiz">
+         </action>
+         <action
+               label="New Tapestry Component"
+               icon="icons/full/component16_dark.gif"
+               tooltip="Create a new Tapestry Component"
+               class="com.iw.plugins.spindle.wizards.OpenTapestryComponentWizard"
+               toolbarPath="Normal/spindle"
+               id="com.iw.spindle.actions.set.OpenTapestryComponentWizard">
+         </action>
+         <action
+               label="New Tapestry Page"
+               icon="icons/full/page16.gif"
+               tooltip="Create a new Tapestry Page"
+               class="com.iw.plugins.spindle.wizards.OpenTapestryPageWizard"
+               toolbarPath="Normal/spindle"
+               id="com.iw.spindle.actions.set.OpenTapestryPageWizard">
+         </action>         
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="com.iw.plugins.spindle.project.popupMenus.project">
+         <menu
+               label="Spindle"
+               id="org.eclipse.ui.popupMenus.project.menu1">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Migration Tool"
+               icon="icons/full/migrate16_dark.gif"
+               class="com.iw.plugins.spindle.project.actions.MigrateToTapestryDTD13"
+               menubarPath="org.eclipse.ui.popupMenus.project.menu1/group1"
+               enablesFor="1"
+               id="com.iw.plugins.spindle.project.popupMenus.project.migrateToTapestryDTD13">
+         </action>
+         <action
+               label="Convert to Tapestry Project"
+               icon="icons/full/application16_dark.gif"
+               class="com.iw.plugins.spindle.project.actions.ConvertToTapestryProjectAction"
+               menubarPath="org.eclipse.ui.popupMenus.project.menu1/group1"
+               enablesFor="1"
+               id="com.iw.plugins.spindle.project.popupMenus.project.convertToTapestryProject">
+         </action>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            nameFilter="*.html"
+            id="com.iw.plugins.spindle.popupMenus">
+         <menu
+               label="Spindle"
+               id="com.iw.plugins.spindle.popupMenus.createComponents">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Create Tapestry Component"
+               icon="icons/full/component16_dark.gif"
+               class="com.iw.plugins.spindle.wizards.extra.CreateComponentFromTemplateAction"
+               menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
+               enablesFor="+"
+               id="com.iw.plugins.spindle.popupMenus.createComponents.componentFromTemplate">
+         </action>
+         <action
+               label="Create Tapestry Page"
+               icon="icons/full/page16.gif"
+               class="com.iw.plugins.spindle.wizards.extra.CreatePageFromTemplateAction"
+               menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
+               enablesFor="+"
+               id="com.iw.plugins.spindle.popupMenus.createComponents.pageFromTemplate">
+         </action>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            nameFilter="*.jwc"
+            id="com.iw.plugins.spindle.popupMenus">
+         <menu
+               label="Spindle"
+               id="com.iw.plugins.spindle.popupMenus.convert">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Convert to Tapestry Page (.page)"
+               icon="icons/full/page16.gif"
+               class="com.iw.plugins.spindle.wizards.extra.ConvertComponentIntoPageAction"
+               menubarPath="com.iw.plugins.spindle.popupMenus.convert/group1"
+               enablesFor="1"
+               id="com.iw.plugins.spindle.popupMenus.convert.ConvertToTapestryPage">
+         </action>         
+      </objectContribution>
+   </extension>
+   <extension
+         point="modelManagers">
+      <manager
+            file-extension="application"
+            class="com.iw.plugins.spindle.model.manager.ApplicationManagerDelegate">
+      </manager>
+      <manager
+            file-extension="jwc"
+            class="com.iw.plugins.spindle.model.manager.ComponentManagerDelegate">
+      </manager>
+      <manager
+            file-extension="page"
+            class="com.iw.plugins.spindle.model.manager.ComponentManagerDelegate">
+      </manager>
+      <manager
+            file-extension="library"
+            class="com.iw.plugins.spindle.model.manager.LibraryManagerDelegate">
+      </manager>
+   </extension>
+   
+    <extension
+         point="org.eclipse.ui.markerUpdaters">
+      <updater
+            class="com.iw.plugins.spindle.editors.BadStringMarkerUpdater"
+            id="com.iw.plugins.spindle.editors.BadStringMarkerUpdater">
+      </updater>
+   </extension>
+</plugin>

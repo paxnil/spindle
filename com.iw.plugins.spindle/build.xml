@@ -1,6 +1,37 @@
 <project name="builder" default="init" basedir=".">
 
-  <property name="version" value="1.1beta3"/>
+  <property name="version" value="1.1.0.beta4"/>
+  <property name="size" value="3232"/>
+  <property name="tap_version" value="2.2"/>
+  
+  <property name="templates" value="${basedir}/templates"/>
+  <property name="buildRelease" value="${basedir}/buildRelease"/>
+
+  <property name="feature-home" value="${buildRelease}/feature"/>
+  <property name="plugin-home" value="${buildRelease}/plugin"/>
+  <property name="site-home" value="${buildRelease}/site"/>
+
+  
+  <target name="build-plugin-xml">
+    <copy file="${templates}/plugin.xml.template" toFile="${basedir}/plugin.xml"/>
+    <replace file="${basedir}/plugin.xml" token="@version@" value="${version}"/>
+  </target>
+  
+  <target name="build-feature-xml">
+    <copy file="${templates}/feature.xml.template" toFile="${feature-home}/feature.xml"/>
+    <copy file="${templates}/spindle.jpg" toFile="${feature-home}/spindle.jpg"/>
+    <replace file="${feature-home}/feature.xml" token="@version@" value="${version}"/>  
+    <replace file="${feature-home}/feature.xml" token="@size@" value="${size}"/>  
+    <replace file="${feature-home}/feature.xml" token="@tap_version@" value="${tap_version}"/>  
+  </target>
+  
+  <target name="build-site-xml">
+    <copy file="${templates}/site.xml.template" toFile="${site-home}/site.xml"/>
+    <copy file="${templates}/index.html.template" toFile="${site-home}/index.html"/>
+    <copy file="headerBkgII.jpg" toFile="${site-home}/headerBkgII.jpg"/>
+    <replace file="${site-home}/site.xml" token="@version@" value="${version}"/>  
+    <replace file="${site-home}/index.html" token="@version@" value="${version}"/>    
+  </target>
   
   <target name="init">
     <available property="buildReleaseAvailable" file="${basedir}/buildRelease"/>
@@ -15,31 +46,52 @@
     	 <exclude name="**/*.png"/>
     	 <exclude name="**/*.txt"/>
     	 <exclude name="**/*.html"/>
+    	 <exclude name="**/feature/*.*"/>
+    	 <exclude name="**/plugin/*.*"/>
     	 <exclude name="**/scratchpad/*.*"/>
     	 </fileset>
   	</jar> 
   </target>
   
-  <target name="build-src-jar">
-  	<delete file="${basedir}/*-src.jar"/>
-  	<jar jarfile="${basedir}/spindle-${version}-src.jar">
+  <target name="build-src-jar" depends="release-build-dir">  	
+  	<jar jarfile="${plugin-home}/spindle-${version}-src.jar">
   		<fileset dir="${basedir}/src"> 
-    	 <exclude name="**/scratchpad/*.*"/>
+    	 <exclude name="**/scratchpad/*.*"/>    	 
   		</fileset>   	
   	</jar> 
   </target>
   
-  <target name="build-plugin-release" depends="prepare-to-build-release">
-  	<jar jarfile="${basedir}/com.iw.plugins.spindle-${version}.jar" basedir="${basedir}/buildRelease"/>  	  
+  <target name="build-plugin-release" depends="prepare-to-build-release, build-feature-xml, build-site-xml">
+  	<jar jarfile="${site-home}/archive/com.iw.plugins.spindle_${version}.jar" basedir="${plugin-home}"/>  	  
+  	<jar jarfile="${site-home}/features/com.iw.features.spindle_${version}.jar" basedir="${feature-home}"/>  	  
+  	<exec dir="${site-home}" executable="tar">
+  		<arg line="-cvf spindle-distro-${version}.tar *"/>
+	</exec>
+<!--
+  	<exec dir="${site-home}" executable="gzip">
+  		<arg line="spindle-distro-${version}.tar"/>
+	</exec>
+-->
   </target>
   
-  <target name="prepare-to-build-release" depends="clean-release, build-plugin-jar, build-src-jar">      	
-    <mkdir dir="${basedir}/buildRelease"/>
-    <mkdir dir="${basedir}/buildRelease/com.iw.plugins.spindle"/>
-    <copy toDir="buildRelease/com.iw.plugins.spindle">
+  <target name="release-build-dir" depends="clean-release">
+  	<mkdir dir="${buildRelease}"/>
+    <mkdir dir="${feature-home}"/>
+    <mkdir dir="${plugin-home}"/>
+    <mkdir dir="${site-home}"/>
+    <mkdir dir="${site-home}/features"/>
+    <mkdir dir="${site-home}/archive"/>
+  </target>
+  
+  
+  <target name="prepare-to-build-release" depends="build-plugin-xml, release-build-dir, build-plugin-jar, build-src-jar">      	
+    
+    <copy toDir="${plugin-home}">
       <fileset dir="${basedir}">
         <exclude name="spindle.jar"/>
         <exclude name="*.jardesc"/>
+        <exclude name="**/feature/*.*"/>
+        <exclude name="**/plugin/*.*"/>
   	    <include name="*.jar"/>
   	    <include name="plugin.xml"/>
   	    <include name="*.html"/> 
@@ -47,14 +99,14 @@
   	    <include name="*.jpg"/> 	    
   	  </fileset>    
     </copy>
-    <copy toDir="${basedir}/buildRelease/com.iw.plugins.spindle/icons">
+    <copy toDir="${plugin-home}/icons">
       <fileset dir="${basedir}/icons"/>
     </copy>
   </target>
   
   <target name="clean-release" depends="init" if="buildReleaseAvailable">    
   	<delete includeEmptyDirs="true" >
-      <fileset dir="${basedir}/buildRelease" />
+      <fileset dir="${buildRelease}" />
     </delete>    
   </target>  
   
