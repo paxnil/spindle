@@ -36,8 +36,8 @@ import org.eclipse.jface.text.rules.WhitespaceRule;
 public class JWCTagScanner extends RuleBasedScanner {
 
   public JWCTagScanner(ISpindleColorManager manager) {
-    IToken jwcid = new Token(new TextAttribute(manager.getColor(IColorConstants.JWCID)));
-    IToken string = new Token(new TextAttribute(manager.getColor(IColorConstants.STRING)));
+    IToken jwcid = new Token(new TextAttribute(manager.getColor(IColorConstants.P_JWCID)));
+    IToken string = new Token(new TextAttribute(manager.getColor(IColorConstants.P_STRING)));
     setRules(
 		new IRule [] {
 			new SingleLineRule("id=\"", "\"", jwcid, '\\'),

@@ -66,6 +66,7 @@ import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.TapestryModelManager;
 import com.iw.plugins.spindle.spec.TapestryPluginFactory;
+import com.iw.plugins.spindle.ui.text.ColorManager;
 import com.iw.plugins.spindle.util.TapestryLookup;
 import com.iw.plugins.spindle.util.Utils;
 import com.primix.tapestry.parse.SpecificationParser;
@@ -325,18 +326,9 @@ public class TapestryPlugin extends AbstractUIPlugin {
      * Sets default preference values. These values will be used
      * until some preferences are actually set using Preference dialog.
      */
-  protected void initializeDefaultPreferences(IPreferenceStore store) { /*
-     
-     // These settings will show up when Preference dialog
-     // opens up for the first time.
-     store.setDefault(ITapPluginConstants.PRE_CHECK1, true);
-     store.setDefault(ITapPluginConstants.PRE_CHECK2, true);
-     store.setDefault(ITapPluginConstants.PRE_CHECK3, false);
-     store.setDefault(ITapPluginConstants.PRE_RADIO_CHOICE, 2);
-     store.setDefault(ITapPluginConstants.PRE_TEXT, MessageUtil.getString("Default_text"));
-     */
-
-  }
+  protected void initializeDefaultPreferences(IPreferenceStore store) {
+		ColorManager.initializeDefaults(store);
+	}
 
   static public void openTapestryEditor(BaseTapestryModel model) {
     String editorId = null;

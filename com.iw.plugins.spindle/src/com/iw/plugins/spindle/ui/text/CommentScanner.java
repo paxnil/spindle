@@ -21,7 +21,7 @@ public class CommentScanner extends RuleBasedScanner {
 	 */
 	public CommentScanner(ISpindleColorManager manager) {
 		IToken comment =
-			new Token(manager.getColor(IColorConstants.XML_COMMENT));
+			new Token(manager.getColor(IColorConstants.P_XML_COMMENT));
 
 		setRules(
 		  new IRule [] { new MultiLineRule("<!--", "-->", comment) });
