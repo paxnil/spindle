@@ -11,7 +11,7 @@
 
 	<target name="init" depends="properties">
 		<property name="plugin" value="com.iw.plugins.spindle.core"/>
-		<property name="version.suffix" value="_0.0.39"/>
+		<property name="version.suffix" value="_0.0.40"/>
 		<property name="full.name" value="${plugin}${version.suffix}"/>
 		<property name="temp.folder" value="${basedir}/temp.folder"/>
 		<property name="plugin.destination" value="${basedir}"/>
@@ -38,7 +38,7 @@
 		<copy file="${build.result.folder}/dtdparser.jar" todir="${destination.temp.folder}/${full.name}"/>
 		<copy file="${build.result.folder}/core.jar" todir="${destination.temp.folder}/${full.name}"/>
 		<copy todir="${destination.temp.folder}/${full.name}">
-			<fileset dir="${basedir}" includes="plugin.xml,LICENSE*,*.jar"/>
+			<fileset dir="${basedir}" includes="plugin.xml,LICENSE*,*.jar,libsrc/"/>
 		</copy>
 	</target>
 

@@ -149,7 +149,15 @@ public class ClassFactory
             ISourceRange range = createdType.getSourceRange();
             IBuffer buffer = cu.getBuffer();
             String originalContent = buffer.getText(range.getOffset(), range.getLength());
-            String formattedContent = StubUtility.codeFormat(originalContent, 0, lineDelimiter);
+            String formattedContent;
+            try
+            {
+                formattedContent = StubUtility.codeFormat(originalContent, 0, lineDelimiter);
+            } catch (NoSuchMethodError e)
+            {
+                formattedContent = originalContent;
+                UIPlugin.log("See spindle bug 898181 - will go away when Spindle is ported to 3.0");
+            }
             buffer.replace(range.getOffset(), range.getLength(), formattedContent);
 
             cu.commit(false, new SubProgressMonitor(monitor, 1));
@@ -303,7 +311,6 @@ public class ClassFactory
     private IMethod[] createMethods(String[] methods, IType createdType, ImportsStructure imports)
         throws CoreException, JavaModelException
     {
-
         IMethod[] newMethods = new IMethod[methods.length];
         if (methods.length > 0)
         {
@@ -323,7 +330,15 @@ public class ClassFactory
 
         ITypeHierarchy hierarchy = createdType.newSupertypeHierarchy(monitor);
         CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings();
-        return StubUtility.evalUnimplementedMethods(createdType, hierarchy, false, settings, null, imports);
+        try
+        {
+            // TODO fudge to allow things to work in M7                                           
+            return StubUtility.evalUnimplementedMethods(createdType, hierarchy, false, settings, null, imports);
+        } catch (NoSuchMethodError e)
+        {
+           UIPlugin.log("See spindle bug 898181 - will go away when Spindle is ported to 3.0");
+           return new String [] {};
+        }
     }
 
     private void save(IType createdType, String formattedContent, IProgressMonitor monitor) throws JavaModelException

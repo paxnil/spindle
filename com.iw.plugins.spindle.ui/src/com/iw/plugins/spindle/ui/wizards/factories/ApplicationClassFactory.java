@@ -93,8 +93,17 @@ public class ApplicationClassFactory
 
         monitor.worked(1);
 
-        String formattedContent = StubUtility.codeFormat(createdType.getSource(), indent, lineDelimiter);
+        String originalContent = createdType.getSource();
+        String formattedContent = null;
 
+        try
+        {
+            formattedContent = StubUtility.codeFormat(originalContent, indent, lineDelimiter);
+        } catch (NoSuchMethodError e)
+        {
+            formattedContent = originalContent;
+            UIPlugin.log("See spindle bug 898181 - will go away when Spindle is ported to 3.0");
+        }
         save(createdType, formattedContent, monitor);
         monitor.done();
         return createdType;
@@ -167,7 +176,16 @@ public class ApplicationClassFactory
 
         ITypeHierarchy hierarchy = createdType.newSupertypeHierarchy(monitor);
         CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings();
-        return StubUtility.evalUnimplementedMethods(createdType, hierarchy, false, settings, null, imports);
+
+        try
+        {
+            // TODO fudge to allow things to work in M7                        
+            return StubUtility.evalUnimplementedMethods(createdType, hierarchy, false, settings, null, imports);
+        } catch (NoSuchMethodError e)
+        {
+            UIPlugin.log("See spindle bug 898181 - will go away when Spindle is ported to 3.0");
+            return new String[] {};
+        }
     }
 
     /*
