@@ -1,8 +1,0 @@
-bin
-tapestry-2.4.jar
-tapJar.jardesc
-buildRelease
-core.jar
-core-src.jar
-*.zip
-dtdparser.jar
