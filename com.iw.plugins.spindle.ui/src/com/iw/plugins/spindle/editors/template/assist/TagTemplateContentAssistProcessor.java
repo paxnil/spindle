@@ -262,7 +262,7 @@ public class TagTemplateContentAssistProcessor extends TemplateContentAssistProc
         documentOffset,
         0,
         tagName,
-        Collections.EMPTY_LIST,
+        new ArrayList(),
         existingAttributeNames,
         null,
         addLeadingSpace));

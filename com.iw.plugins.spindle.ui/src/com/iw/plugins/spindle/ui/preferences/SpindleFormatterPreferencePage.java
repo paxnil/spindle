@@ -73,8 +73,7 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * SpindleFormatterPreferencePage
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: SpindleFormatterPreferencePage.java,v 1.1.2.1 2004/07/14
- *                     21:15:47 glongman Exp $
+
  */
 public class SpindleFormatterPreferencePage extends AbstractPreferencePage
 {

@@ -50,8 +50,6 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
  * @author GWL
- * @version $Id: SpindleEditorPreferencePage.java,v 1.1 2004/05/05 19:24:58
- *                     glongman Exp $
  * 
  * Copryright 2002, Intelligent Works Inc. All Rights Reserved
  */

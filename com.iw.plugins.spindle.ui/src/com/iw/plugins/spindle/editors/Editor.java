@@ -31,7 +31,6 @@ import java.util.Map;
 import net.sf.solareclipse.xml.ui.XMLPlugin;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
@@ -47,6 +46,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
@@ -389,8 +389,49 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
       fPreferenceListener = null;
     }
   }
+
+  public int getCursorOffset(int x, int y)
+  {
+    ISourceViewer viewer = getSourceViewer();
+    StyledText styledText = viewer.getTextWidget();
+    int caret = -1;
+    try
+    {
+      caret = styledText.getOffsetAtLocation(styledText.toControl(x, y));
+    } catch (Exception ex)
+    {
+      //ex.printStackTrace();
+    }
+
+    return caret;
+  }
+
+  public Object highlightRange(StyleRange range)
+  {
+    ISourceViewer viewer = getSourceViewer();
+    StyledText styledText = viewer.getTextWidget();
+
+    StyleRange[] styles = styledText.getStyleRanges(0, styledText.getText().length());
+    styledText.setStyleRange(range);
+
+    return styles;
+
+  }
   
-  
+  public Object getPlugin()
+  {
+      return UIPlugin.getDefault();
+   }
+
+  public void restoreStyles(Object object)
+  {
+    StyleRange[] styles = (StyleRange[]) object;
+    System.out.println("styles.length = " + styles.length);
+
+    ISourceViewer viewer = getSourceViewer();
+    StyledText styledText = viewer.getTextWidget();
+    styledText.setStyleRanges(styles);
+  }
 
   public void addReconcileListener(IReconcileListener listener)
   {
@@ -407,5 +448,11 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     // TODO Auto-generated method stub
 
   }
-  
+
+
+  public final ISourceViewer getViewer() 
+  {
+    return getSourceViewer();
+  }
+
 }

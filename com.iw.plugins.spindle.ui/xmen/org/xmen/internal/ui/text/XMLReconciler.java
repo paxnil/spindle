@@ -58,6 +58,10 @@ public class XMLReconciler implements IDocumentListener, XMLDocumentPartitioner.
   {
 
   }
+  
+  public IDocument getDocument() { 
+    return fDocument;
+  }
 
   public void addListener(XMLModelListener listener)
   {

@@ -3,7 +3,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.1.9"
+   version="0.1.15"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -112,8 +112,14 @@
             id="SpindleEditorPreferences">
       </page>
       <page
-            name="Formatter"
-            category="SpindlePreferences"
+            name="Folding"
+            category="SpindleEditorPreferences"
+            class="com.iw.plugins.spindle.ui.preferences.SpecFoldingPreferencePage"
+            id="SpindleFoldingPreferences">
+      </page>
+      <page
+            name="Specification Formatter"
+            category="SpindleEditorPreferences"
             class="com.iw.plugins.spindle.ui.preferences.SpindleFormatterPreferencePage"
             id="SpindleFormatterPreferences">
       </page>
@@ -196,7 +202,88 @@
             class="com.iw.plugins.spindle.editors.spec.SpecEditor"
             id="com.iw.plugins.spindle.ui.editors.spec">
       </editor>
+      
+     
    </extension>
+      <extension
+         point="org.eclipse.ui.popupMenus">
+        
+      <viewerContribution
+            targetID="#TapestrySpecificationRulerContext"
+            id="com.iw.plugins.spindle.ui.SpecificationEditorPopupActions">            
+         <action
+               label="Add &amp;Task"
+               helpContextId="org.eclipse.ui.AddTask_action_context"
+               tooltip="Add Task..."
+               class="org.eclipse.ui.texteditor.TaskRulerAction"
+               menubarPath="add"
+               id="org.eclipse.ui.texteditor.TaskRulerAction">
+         </action>
+         <action
+               label="Add Boo&amp;kmark"
+               helpContextId="org.eclipse.ui.bookmark_action_context"
+               tooltip="Add Bookmark..."
+               class="org.eclipse.ui.texteditor.BookmarkRulerAction"
+               menubarPath="add"
+               id="org.eclipse.ui.texteditor.BookmarkRulerAction">
+               
+         </action>
+         <action
+               label="Enable &amp;QuickDiff"
+               style="push"
+               helpContextId="quickdiff.toggle"
+               class="org.eclipse.ui.texteditor.quickdiff.QuickDiffToggleAction"
+               menubarPath="quickdiff"
+               definitionId="org.eclipse.quickdiff.toggle"
+               id="quickdiff.toggle">
+         </action>
+         
+         <menu
+			id="projection"
+			label="Folding"
+			path="rest">
+		 </menu>
+         <action
+               label="%Dummy.label"
+               tooltip="%Dummy.label"
+               class="com.iw.plugins.spindle.actions.FoldingExpandAllRulerAction"
+               menubarPath="projection/additions"
+               definitionId="org.eclipse.ui.edit.text.folding.expand_all"
+               id="com.iw.plugins.spindle.actions.folding.expandAll">
+         </action>
+         
+         <action
+               label="%Dummy.label"
+               tooltip="%Dummy.label"
+               class="com.iw.plugins.spindle.actions.FoldingToggleRulerAction"
+               menubarPath="projection/additions"
+               definitionId="org.eclipse.ui.edit.text.folding.toggle"
+               id="com.iw.plugins.spindle.actions.folding.toggle">
+         </action>
+         
+      </viewerContribution>
+   </extension>
+  <!-- 
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      
+      <objectContribution 
+      	objectClass="org.eclipse.core.resources.IProject" 
+      	adaptable="true" 
+      	id="com.iw.plugins.spindle.ui.projectToolSet">
+ 	  		<menu label="Spindle Tools" id="com.iw.plugins.spindle.ui.project.tools">
+  				<separator name="group0" /> 
+  				<separator name="group1" /> 
+  			</menu>
+  			<filter name="projectNature" value="com.iw.plugins.spindle.core.tapestrynature" /> 
+  			<action label="Generate ANT script"   				
+  				class="com.iw.plugins.spindle.ant.GenerateAntScriptAction" 
+  				menubarPath="com.iw.plugins.spindle.ui.project.tools/group0" 
+  				enablesFor="1" id="com.iw.plugins.spindle.ui.GenerateAntScript" /> 
+  </objectContribution>
+      
+   </extension>
+   -->
 <!--
 
 This is from the old Spindle. Have not decided if I will port them to

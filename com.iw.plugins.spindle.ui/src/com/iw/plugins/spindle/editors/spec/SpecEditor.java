@@ -47,6 +47,7 @@ import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -56,6 +57,8 @@ import org.eclipse.jface.text.information.IInformationProviderExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.text.source.projection.ProjectionSupport;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -71,6 +74,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -83,6 +87,7 @@ import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
@@ -132,6 +137,9 @@ public class SpecEditor extends Editor
   private Control fControl;
 
   private Object fInformationControlInput;
+  private ProjectionSupport fProjectionSupport;
+  private SpecFoldingStructureProvider fFoldingStructureProvider;
+ 
 
   public SpecEditor()
   {
@@ -170,13 +178,15 @@ public class SpecEditor extends Editor
    */
   public void createPartControl(Composite parent)
   {
+    //TODO get rid of this kludge
+
     super.createPartControl(parent);
 
     IStorage storage = getStorage();
     IProject project = TapestryCore.getDefault().getProjectFor(storage);
     TapestryArtifactManager manager = TapestryArtifactManager
         .getTapestryArtifactManager();
-    Map specs = manager.getSpecMap(project);
+    manager.pingProjectState(project);
 
     Control[] children = parent.getChildren();
     fControl = children[children.length - 1];
@@ -194,10 +204,23 @@ public class SpecEditor extends Editor
           Object first = structured.getFirstElement();
           highlight(first);
         }
-
       }
-
     };
+
+    ProjectionViewer projectionViewer = (ProjectionViewer) getSourceViewer();
+
+    fProjectionSupport = new ProjectionSupport(
+        projectionViewer,
+        getAnnotationAccess(),
+        getSharedColors());
+    fProjectionSupport.install();
+
+    fFoldingStructureProvider = new SpecFoldingStructureProvider();
+    fFoldingStructureProvider.install(this, projectionViewer);
+    if (isFoldingEnabled())
+    {
+      projectionViewer.doOperation(ProjectionViewer.TOGGLE);
+    }
 
     if (fOutline != null)
       fOutline.addSelectionChangedListener(fSelectionChangedListener);
@@ -206,7 +229,6 @@ public class SpecEditor extends Editor
     reconcileOutline();
 
   }
-
   public void openTo(Object obj)
   {
     if (obj instanceof XMLNode)
@@ -329,9 +351,11 @@ public class SpecEditor extends Editor
    */
   protected void doSetInput(IEditorInput input) throws CoreException
   {
+    super.doSetInput(input);
     fReconciler = null;
     if (input instanceof IFileEditorInput)
     {
+      setRulerContextMenuId("#TapestrySpecificationRulerContext"); //$NON-NLS-1$
       // only files have reconcilers
       IFile file = ((IFileEditorInput) input).getFile();
       String extension = file.getFullPath().getFileExtension();
@@ -347,11 +371,38 @@ public class SpecEditor extends Editor
       {
         fReconciler = new LibraryReconciler();
       }
-
+     initializeFoldingRegions();
+    } else
+    {
+      setRulerContextMenuId(AbstractTextEditor.DEFAULT_RULER_CONTEXT_MENU_ID);
     }
-    super.doSetInput(input);
+
   }
 
+  private void initializeFoldingRegions()
+  {
+    if (fFoldingStructureProvider != null)
+      fFoldingStructureProvider.initialize();
+  }
+
+  public boolean isFoldingEnabled()
+  {
+    IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+    return store.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
+  }
+
+  public Object getAdapter(Class clazz)
+  {
+    if (fProjectionSupport != null)
+    {
+      Object adapter = fProjectionSupport.getAdapter(getSourceViewer(), clazz);
+      if (adapter != null)
+      {
+        return adapter;
+      }
+    }
+    return super.getAdapter(clazz);
+  }
   /*
    * (non-Javadoc)
    * 
@@ -476,6 +527,7 @@ public class SpecEditor extends Editor
     {
       public void run()
       {
+        initializeFoldingRegions();
         IActionBars bars = getEditorSite().getActionBars();
         bars.getStatusLineManager().setMessage(null);
       }
@@ -952,8 +1004,8 @@ public class SpecEditor extends Editor
     super.editorContextMenuAboutToShow(menu);
     menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
     if (!(getStorage() instanceof JarEntryFile))
-    {     
-       addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
+    {
+      addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
       addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
     }
     MenuManager moreNav = new MenuManager("Jump");

@@ -124,6 +124,10 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
    */
   private void initSelection(IResource initResource)
   {
+    
+    if (initResource == null)
+      return;
+    
     int found = -1;
     boolean isOnClasspath = JavaCore.create(initResource.getParent()) != null;
     int firstClasspathNamespace = -1;

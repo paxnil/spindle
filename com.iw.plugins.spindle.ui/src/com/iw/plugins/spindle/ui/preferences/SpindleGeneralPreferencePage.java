@@ -48,8 +48,6 @@ import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
  * @author GWL
- * @version $Id: SpindleGeneralPreferencePage.java,v 1.5 2004/05/05 19:24:58
- *                     glongman Exp $
  * 
  * Copryright 2002, Intelligent Works Inc. All Rights Reserved
  */

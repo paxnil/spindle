@@ -99,7 +99,7 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction
         Object buildState = TapestryArtifactManager
             .getTapestryArtifactManager()
             .getLastBuildState(fProject, false);
-        // must not be a broken build
+        // must not be a broken build TODO this can be replaced by making the above call force a build
         if (buildState == null && Markers.getBrokenBuildProblemsFor(fProject).length == 0)
         {
           buildState = TapestryArtifactManager

@@ -27,7 +27,6 @@
 package com.iw.plugins.spindle.editors.spec.actions;
 
 import org.apache.tapestry.INamespace;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
