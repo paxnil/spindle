@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.builder;
 
-import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 
@@ -145,10 +144,13 @@ public class BuilderValidator extends BaseValidator
             reportProblem(
                 IProblem.ERROR,
                 info.getAttributeSourceLocation("type"),
-                TapestryCore.getTapestryString("Namespace.no-such-component-type", type, use_namespace.getExtendedId()));
+                TapestryCore.getTapestryString(
+                    "Namespace.no-such-component-type",
+                    type,
+                    use_namespace.getExtendedId()));
             return false;
         }
-
+        return true;
     }
-    return true;
+
 }

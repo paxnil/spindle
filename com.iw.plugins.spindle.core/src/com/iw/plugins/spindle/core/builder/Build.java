@@ -112,7 +112,9 @@ public abstract class Build implements IBuild
                     Markers.addTapestryProblemMarkersToResource(res, scanner.getProblems());
                 } else
                 {
-                    TapestryCore.logProblems(((IResourceWorkspaceLocation) location).getStorage(), scanner.getProblems());
+                    TapestryCore.logProblems(
+                        ((IResourceWorkspaceLocation) location).getStorage(),
+                        scanner.getProblems());
                 }
             }
         } catch (IOException e)
@@ -220,14 +222,17 @@ public abstract class Build implements IBuild
                 LibraryScanner scanner = new LibraryScanner();
                 scanner.setResourceLocation(location);
                 scanner.setFactory(TapestryCore.getSpecificationFactory());
-                ILibrarySpecification result = (ILibrarySpecification) scanner.scan(BUILD_PARSER, new BuilderValidator(this), node);
+                ILibrarySpecification result =
+                    (ILibrarySpecification) scanner.scan(BUILD_PARSER, new BuilderValidator(this), node);
                 IResource res = Utils.toResource(location);
                 if (res != null)
                 {
                     Markers.addTapestryProblemMarkersToResource(res, scanner.getProblems());
                 } else
                 {
-                    TapestryCore.logProblems(((IResourceWorkspaceLocation) location).getStorage(), scanner.getProblems());
+                    TapestryCore.logProblems(
+                        ((IResourceWorkspaceLocation) location).getStorage(),
+                        scanner.getProblems());
                 }
             }
         } catch (IOException e)
@@ -300,7 +305,8 @@ public abstract class Build implements IBuild
             String specPath = namespaceSpec.getPageSpecificationPath(type);
             if (specPath != null)
             {
-                location = (IResourceWorkspaceLocation) namespaceSpec.getSpecificationLocation().getRelativeLocation(specPath);
+                location =
+                    (IResourceWorkspaceLocation) namespaceSpec.getSpecificationLocation().getRelativeLocation(specPath);
                 if (!location.exists())
                 {
                     return null;
@@ -328,7 +334,9 @@ public abstract class Build implements IBuild
         return result;
     }
 
-    private IComponentSpecification resolveIComponentSpecification(ICoreNamespace namespace, IResourceWorkspaceLocation location)
+    private IComponentSpecification resolveIComponentSpecification(
+        ICoreNamespace namespace,
+        IResourceWorkspaceLocation location)
     {
         IComponentSpecification result = null;
         if (location == null)
@@ -347,7 +355,7 @@ public abstract class Build implements IBuild
                             result =
                                 (IComponentSpecification) scanner.scan(
                                     parser,
-                                    new BuilderValidator(this, namespace, framework),
+                                    new BuilderValidator(this, namespace),
                                     node);
                         } catch (ScannerException e1)
                         {
@@ -359,7 +367,9 @@ public abstract class Build implements IBuild
                             Markers.addTapestryProblemMarkersToResource(res, scanner.getProblems());
                         } else
                         {
-                            TapestryCore.logProblems(((IResourceWorkspaceLocation) location).getStorage(), scanner.getProblems());
+                            TapestryCore.logProblems(
+                                ((IResourceWorkspaceLocation) location).getStorage(),
+                                scanner.getProblems());
                         }
                     }
                 } catch (IOException e)
@@ -385,7 +395,8 @@ public abstract class Build implements IBuild
             String specPath = namespaceSpec.getPageSpecificationPath(pageName);
             if (specPath != null)
             {
-                location = (IResourceWorkspaceLocation) namespaceSpec.getSpecificationLocation().getRelativeLocation(specPath);
+                location =
+                    (IResourceWorkspaceLocation) namespaceSpec.getSpecificationLocation().getRelativeLocation(specPath);
                 if (!location.exists())
                 {
                     return null;
