@@ -36,6 +36,7 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.TypedPosition;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
  * 
@@ -213,7 +214,7 @@ public abstract class PositionUpdatingFormatWorker extends FormatWorker
 
       fDocument = document;
       fOffset = partition.offset;
-      fLineDelimiter = getLineDelimiter(fDocument);
+      fLineDelimiter = UIUtils.getLineDelimiter(fDocument);
       fInitialIndent = 0;
       fIndentLevel = 0;
       fPositions = positions;

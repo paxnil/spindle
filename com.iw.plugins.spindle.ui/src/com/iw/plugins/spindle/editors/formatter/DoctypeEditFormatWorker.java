@@ -33,6 +33,7 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
  * MasterFormatter formats a whole document or a section of a document.
@@ -72,7 +73,7 @@ public class DoctypeEditFormatWorker extends FormatWorker
 
     fDocument = document;
     fPreferences = prefs;
-    fLineDelimiter = getLineDelimiter(document);
+    fLineDelimiter = UIUtils.getLineDelimiter(document);
 
     try
     {
