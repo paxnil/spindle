@@ -88,9 +88,9 @@ public class TestPropertyFiringList extends PropertyFiringBase
             public void propertyChange(PropertyChangeEvent evt)
             {
                 super.propertyChange(evt);
-                assertEquals(propertyName, eventProperty);
-                assertNull(oldValue);
-                assertEquals(newValue, stored);
+                assertEquals(eventPropertyName, eventProperty);
+                assertNull(eventOldValue);
+                assertEquals(eventNewValue, stored);
             }
         };
 
