@@ -38,6 +38,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.parser.DefaultProblem;
 import com.iw.plugins.spindle.core.parser.IProblem;
@@ -175,11 +176,18 @@ public abstract class AbstractScanner implements IProblemCollector
                 result = attributeNode.getNodeValue();
             }
         }
-        if ((result == null || "".equals(result.trim())) && returnDummyIfNull)
+        if (TapestryCore.isNull(result) && returnDummyIfNull)
         {
             result = getNextDummyString();
         }
         return result;
+    }
+    
+    protected boolean isDummyString(String value) {
+        if (value != null) {
+            return value.startsWith(validator.getDummyStringPrefix());
+        }
+        return false;
     }
 
     protected String getAttribute(Node node, String attributeName)

@@ -203,20 +203,25 @@ public class LibraryScanner extends SpecificationScanner
     {
         String name = getAttribute(node, "name", true);
         String className = getAttribute(node, "class");
-        
+
         validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
-        
+
         boolean immediate = getBooleanAttribute(node, "immediate");
 
-        boolean valid = validatePattern(
-            name,
-            SpecificationParser.EXTENSION_NAME_PATTERN,
-            "SpecificationParser.invalid-extension-name",
-            IProblem.ERROR,
-            getAttributeSourceLocation(node, "name"));
-            
-        if (valid && specification.getExtensionNames().contains(name)) {
-            addProblem(IProblem.ERROR, getAttributeSourceLocation(node, "name"), TapestryCore.getTapestryString("LibrarySpecification.duplicate-extension-name", name));            
+        boolean valid =
+            validatePattern(
+                name,
+                SpecificationParser.EXTENSION_NAME_PATTERN,
+                "SpecificationParser.invalid-extension-name",
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "name"));
+
+        if (valid && specification.getExtensionNames().contains(name))
+        {
+            addProblem(
+                IProblem.ERROR,
+                getAttributeSourceLocation(node, "name"),
+                TapestryCore.getTapestryString("LibrarySpecification.duplicate-extension-name", name));
         }
 
         IExtensionSpecification exSpec = specificationFactory.createExtensionSpecification();
@@ -322,11 +327,7 @@ public class LibraryScanner extends SpecificationScanner
             getAttributeSourceLocation(node, "name"));
 
         String className = getAttribute(node, "class");
-
-        if (className != null)
-        {
-            validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
-        }
+        validateTypeName(className, IProblem.ERROR, getAttributeSourceLocation(node, "class"));
         spec.setServiceClassName(name, className);
     }
 

@@ -48,22 +48,6 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.apache.xerces"/>
    </requires>
-
-
-   <extension
-         point="org.eclipse.ui.propertyPages">
-      <page
-            objectClass="org.eclipse.core.resources.IProject"
-            adaptable="true"
-            name="Tapestry"
-            class="com.iw.plugins.spindle.core.ui.properties.CorePropertyPage"
-            id="CorePropertyPage">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-      </page>
-   </extension>
    <extension
          id="tapestrynature"
          name="Tapestry Nature"
