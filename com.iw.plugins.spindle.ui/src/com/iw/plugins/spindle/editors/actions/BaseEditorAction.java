@@ -33,6 +33,7 @@ import java.util.SortedSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -66,6 +67,7 @@ import org.eclipse.ui.internal.commands.Stroke;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.editors.Editor;
 
@@ -149,6 +151,18 @@ public abstract class BaseEditorAction extends Action
             IType[] types = unit.getAllTypes();
             if (types.length > 0)
                 return types[0];
+        } catch (JavaModelException e)
+        {
+            UIPlugin.log(e);
+        }
+        return null;
+    }
+
+    protected IType resolveType(IClassFile file)
+    {
+        try
+        {
+            return (IType) file.getType();
         } catch (JavaModelException e)
         {
             UIPlugin.log(e);
@@ -555,5 +569,17 @@ public abstract class BaseEditorAction extends Action
         if (storage != null)
             UIPlugin.openTapestryEditor((IStorage) storage);
     }
+
+    protected TapestryProject findTapestryProject(IClassFile file)
+    {
+        TapestryProject tproject = TapestryCore.getDefault().getTapestryProjectFor(file);
+        return tproject;
+    }
+    
+    protected TapestryProject findTapestryProject(IFile file)
+       {
+           TapestryProject tproject = TapestryCore.getDefault().getTapestryProjectFor(file);
+           return tproject;
+       }
 
 }
