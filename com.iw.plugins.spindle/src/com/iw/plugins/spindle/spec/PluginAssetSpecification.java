@@ -28,8 +28,8 @@ package com.iw.plugins.spindle.spec;
 import java.io.PrintWriter;
 
 import com.iw.plugins.spindle.util.Indenter;
-import com.primix.tapestry.spec.AssetSpecification;
-import com.primix.tapestry.spec.AssetType;
+import net.sf.tapestry.spec.AssetSpecification;
+import net.sf.tapestry.spec.AssetType;
 
 public class PluginAssetSpecification extends AssetSpecification {
 

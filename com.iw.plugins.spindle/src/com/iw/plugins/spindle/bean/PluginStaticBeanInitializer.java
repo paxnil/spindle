@@ -29,7 +29,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import com.iw.plugins.spindle.spec.IPropertyChangeProvider;
-import com.primix.tapestry.bean.StaticBeanInitializer;
+import net.sf.tapestry.bean.StaticBeanInitializer;
 
 public class PluginStaticBeanInitializer extends StaticBeanInitializer 
   implements IPropertyChangeProvider {

@@ -28,9 +28,10 @@ package com.iw.plugins.spindle.editorjwc;
 import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.ui.ChooseFromListDialog;
-import com.primix.tapestry.bean.FieldBeanInitializer;
-import com.primix.tapestry.bean.PropertyBeanInitializer;
-import com.primix.tapestry.bean.StaticBeanInitializer;
+
+import net.sf.tapestry.bean.FieldBeanInitializer;
+import net.sf.tapestry.bean.PropertyBeanInitializer;
+import net.sf.tapestry.bean.StaticBeanInitializer;
 
 public class ChooseBeanInitializerDialog extends ChooseFromListDialog {
 

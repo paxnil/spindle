@@ -51,7 +51,7 @@ import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.util.SourceWriter;
 import com.iw.plugins.spindle.util.TapestryLookup;
-import com.primix.tapestry.util.xml.DocumentParseException;
+import net.sf.tapestry.util.xml.DocumentParseException;
 
 public class TapestryComponentModel extends BaseTapestryModel implements PropertyChangeListener {
 

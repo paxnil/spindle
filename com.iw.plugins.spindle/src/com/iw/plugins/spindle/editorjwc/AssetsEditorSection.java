@@ -57,7 +57,7 @@ import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginAssetSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.util.JavaListSelectionProvider;
-import com.primix.tapestry.spec.AssetType;
+import net.sf.tapestry.spec.AssetType;
 
 public class AssetsEditorSection extends AbstractPropertySheetEditorSection {
 

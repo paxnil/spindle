@@ -70,7 +70,7 @@ import com.iw.plugins.spindle.ui.text.ColorManager;
 import com.iw.plugins.spindle.util.TapestryLookup;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
-import com.primix.tapestry.parse.SpecificationParser;
+import net.sf.tapestry.parse.SpecificationParser;
 
 /**
  * This is the top-level class of the Tapestry plugin tool.

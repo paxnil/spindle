@@ -28,8 +28,8 @@ package com.iw.plugins.spindle.spec;
 import java.io.PrintWriter;
 
 import com.iw.plugins.spindle.util.Indenter;
-import com.primix.tapestry.spec.BindingSpecification;
-import com.primix.tapestry.spec.BindingType;
+import net.sf.tapestry.spec.BindingSpecification;
+import net.sf.tapestry.spec.BindingType;
 
 public class PluginBindingSpecification extends BindingSpecification {
 
@@ -59,6 +59,9 @@ public class PluginBindingSpecification extends BindingSpecification {
     } else if (type.equals(BindingType.DYNAMIC)) {
       writer.print("binding name=\"" + name);
       writer.print("\" property-path=\"");
+    } else if (type.equals(BindingType.STRING)) {
+      writer.print("string-binding name=\"" + name);
+      writer.print("\" key=\"");
     }
     writer.print(getValue());
     writer.println("\"/>");

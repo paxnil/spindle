@@ -41,7 +41,7 @@ import com.iw.plugins.spindle.editors.SpindleFormSection;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginBeanSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
-import com.primix.tapestry.spec.BeanLifecycle;
+import net.sf.tapestry.spec.BeanLifecycle;
 
 public class BeanSummarySection extends SpindleFormSection {
 

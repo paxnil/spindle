@@ -33,7 +33,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.util.ResourceBundle;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -73,9 +72,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.ContainerGenerator;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
@@ -86,81 +83,84 @@ import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.ui.ToolTipHandler;
 import com.iw.plugins.spindle.ui.text.*;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
-import com.primix.tapestry.parse.ITemplateParserDelegate;
-import com.primix.tapestry.parse.TemplateParseException;
-import com.primix.tapestry.parse.TemplateParser;
+import net.sf.tapestry.parse.ITemplateParserDelegate;
+import net.sf.tapestry.parse.TemplateParseException;
+import net.sf.tapestry.parse.TemplateParser;
 
 public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
 
-  private ISpindleColorManager colorManager = new ColorManager();
-  private HTMLContentOutlinePage outline = null;
-  private Shell shell;
-  private DebugToolTipHandler handler;
-  private IEditorInput input;
-  private StyledText text;
+	private ISpindleColorManager colorManager = new ColorManager();
+	private HTMLContentOutlinePage outline = null;
+	private Shell shell;
+	private DebugToolTipHandler handler;
+	private IEditorInput input;
+	private StyledText text;
 
-  /**
-   * Constructor for TapestryHTMLEdiitor
-   */
-  public TapestryHTMLEditor() {
-    super();
-    setSourceViewerConfiguration(new TapestrySourceConfiguration(colorManager));
-  }
+	/**
+	 * Constructor for TapestryHTMLEdiitor
+	 */
+	public TapestryHTMLEditor() {
+		super();
+		setSourceViewerConfiguration(
+			new TapestrySourceConfiguration(colorManager));
+	}
 
-  public void init(IEditorSite site, IEditorInput input) throws PartInitException {
-    setDocumentProvider(createDocumentProvider(input.getAdapter(IResource.class)));
-    super.init(site, input);
-    parseForProblems();
-  }
+	public void init(IEditorSite site, IEditorInput input)
+		throws PartInitException {
+		setDocumentProvider(
+			createDocumentProvider(input.getAdapter(IResource.class)));
+		super.init(site, input);
+		parseForProblems();
+	}
 
-  public void createPartControl(Composite parent) {
-    super.createPartControl(parent);
-    shell = parent.getShell();
-    text = (StyledText) getSourceViewer().getTextWidget();
+	public void createPartControl(Composite parent) {
+		super.createPartControl(parent);
+		shell = parent.getShell();
+		text = (StyledText) getSourceViewer().getTextWidget();
 
-    text.setKeyBinding(262144, ST.COPY);
-    //text.setKeyBinding(131072, ST.CUT);
-    text.setKeyBinding(131072, ST.COPY);
-    // for debugging the partitioning only		
-//    handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
-//    handler.activateHoverHelp(text);
-  }
+		text.setKeyBinding(262144, ST.COPY);
+		//text.setKeyBinding(131072, ST.CUT);
+		text.setKeyBinding(131072, ST.COPY);
+// for debugging the partitioning only		
+//		handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
+//		handler.activateHoverHelp(text);
+	}
 
-  protected void doSetInput(IEditorInput input) throws CoreException {
-    super.doSetInput(input);
-    this.input = input;
-    outline = createContentOutlinePage(input);
-  }
+	protected void doSetInput(IEditorInput input) throws CoreException {
+		super.doSetInput(input);
+		this.input = input;
+		outline = createContentOutlinePage(input);
+	}
 
-  /*
-  * @see IEditorPart#doSave(IProgressMonitor)
-  */
-  public void doSave(IProgressMonitor monitor) {
-    parseForProblems();
-    super.doSave(monitor);
+	/*
+	* @see IEditorPart#doSave(IProgressMonitor)
+	*/
+	public void doSave(IProgressMonitor monitor) {
+		parseForProblems();
+		super.doSave(monitor);
 
-  }
+	}
 
-  /*
-   * @see IEditorPart#doSaveAs()
-   */
-  public void doSaveAs() {
-    super.doSaveAs();
-    parseForProblems();
-  }
+	/*
+	 * @see IEditorPart#doSaveAs()
+	 */
+	public void doSaveAs() {
+		super.doSaveAs();
+		parseForProblems();
+	}
 
-  public Object getAdapter(Class clazz) {
-    Object result = super.getAdapter(clazz);
-    if (result == null && IContentOutlinePage.class.equals(clazz)) {
-      result = outline;
-    }
-    return result;
-  }
+	public Object getAdapter(Class clazz) {
+		Object result = super.getAdapter(clazz);
+		if (result == null && IContentOutlinePage.class.equals(clazz)) {
+			result = outline;
+		}
+		return result;
+	}
 
-  public void dispose() {
-    colorManager.dispose();
-    super.dispose();
-  }
+	public void dispose() {
+		colorManager.dispose();
+		super.dispose();
+	}
 
   public HTMLContentOutlinePage createContentOutlinePage(IEditorInput input) {
     HTMLContentOutlinePage result = new HTMLContentOutlinePage(this);

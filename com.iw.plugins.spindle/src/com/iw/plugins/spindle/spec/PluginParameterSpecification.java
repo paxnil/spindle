@@ -30,7 +30,8 @@ import java.io.StringWriter;
 
 import com.iw.plugins.spindle.util.Indenter;
 import com.iw.plugins.spindle.util.SourceWriter;
-import com.primix.tapestry.spec.ParameterSpecification;
+import net.sf.tapestry.spec.ParameterSpecification;
+import net.sf.tapestry.spec.Direction;
 
 public class PluginParameterSpecification extends ParameterSpecification {
 	

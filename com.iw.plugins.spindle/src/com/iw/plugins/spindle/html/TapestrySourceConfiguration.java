@@ -97,7 +97,7 @@ public class TapestrySourceConfiguration extends SourceViewerConfiguration imple
     }
     return jwcTagScanner;
   }  
-  
+
   public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
     PresentationReconciler reconciler = new PresentationReconciler();
 

@@ -69,12 +69,12 @@ import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.spec.PluginParameterSpecification;
 import com.iw.plugins.spindle.ui.ComponentAliasParameterViewer;
 import com.iw.plugins.spindle.ui.EmptySelection;
-import com.iw.plugins.spindle.ui.FieldBindingPropertyDescriptor;
+import com.iw.plugins.spindle.ui.FieldPropertyDescriptor;
 import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 import com.iw.plugins.spindle.ui.TreeViewerWithToolTips;
 import com.iw.plugins.spindle.util.JavaListSelectionProvider;
-import com.primix.tapestry.spec.BindingType;
+import net.sf.tapestry.spec.BindingType;
 
 public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorSection {
 
@@ -85,6 +85,7 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
   private NewInheritedBindingAction newInheritedAction = new NewInheritedBindingAction();
   private NewFieldBindingAction newFieldAction = new NewFieldBindingAction();
   private NewStaticBindingAction newStaticAction = new NewStaticBindingAction();
+  private NewStringBindingAction newStringAction = new NewStringBindingAction();
 
   private NewBindingButtonAction newBindingButtonAction = new NewBindingButtonAction();
 
@@ -119,6 +120,7 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
       newBindingAction.setEnabled(false);
       newFieldAction.setEnabled(false);
       newStaticAction.setEnabled(false);
+      newStringAction.setEnabled(false);
     }
     TreeViewerWithToolTips viewer = (TreeViewerWithToolTips) getViewer();
     viewer.setToolTipProvider(labelProvider);
@@ -179,6 +181,7 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
     submenu.add(newBindingAction);
     submenu.add(newFieldAction);
     submenu.add(newStaticAction);
+    submenu.add(newStringAction);
     manager.add(submenu);
     if (object != null) {
       manager.add(new Separator());
@@ -249,7 +252,11 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
       { new TextPropertyDescriptor("name", "Name"), new TextPropertyDescriptor("value", "Parameter Name")};
 
     private IPropertyDescriptor[] fieldDescriptors =
-      { new FieldBindingPropertyDescriptor("value", "Field Name", getModel())};
+      { new FieldPropertyDescriptor("value", "Field Name", getModel())};
+      
+    private IPropertyDescriptor[] stringDescriptiors =
+      { new TextPropertyDescriptor("name", "Name"), new TextPropertyDescriptor("value", "Key")};
+    
   
 
   /**
@@ -339,6 +346,9 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
     if (type == BindingType.FIELD) {
       return fieldDescriptors;
     }
+    if (type == BindingType.STRING) {
+    	return stringDescriptiors;
+    }
 
     return null;
   }
@@ -364,6 +374,7 @@ public class BindingEditorLabelProvider
   private Image fieldBindingImage = TapestryImages.getSharedImage("bind-field.gif");
   private Image inheritedBindingImage = TapestryImages.getSharedImage("bind-inhert.gif");
   private Image staticBindingImage = TapestryImages.getSharedImage("bind-static.gif");
+    private Image stringBindingImage = TapestryImages.getSharedImage("bind-string.gif");
 
   private HashMap toolTipInfo = new HashMap();
 
@@ -487,6 +498,9 @@ public class BindingEditorLabelProvider
     if (type == BindingType.INHERITED) {
       return holder.name + " parameter-name = " + spec.getValue();
     }
+    if (type == BindingType.STRING) {
+      return holder.name + " key = " + spec.getValue();
+    }
 
     return null;
   }
@@ -517,6 +531,9 @@ public class BindingEditorLabelProvider
     }
     if (type == BindingType.STATIC) {
       return staticBindingImage;
+    }
+    if (type == BindingType.STRING) {
+      return stringBindingImage;
     }
     return null;
   }
@@ -638,6 +655,8 @@ protected class NewBindingButtonAction extends Action {
       newInheritedAction.run();
     } else if (type == BindingType.STATIC) {
       newStaticAction.run();
+    } else if (type == BindingType.STRING) {
+      newStringAction.run();
     }
   }
   private void createBinding(BindingType type, String parameterName) {
@@ -649,6 +668,8 @@ protected class NewBindingButtonAction extends Action {
       newInheritedAction.run(parameterName);
     } else if (type == BindingType.STATIC) {
       newStaticAction.run(parameterName);
+    } else if (type == BindingType.STRING) {
+      newStringAction.run(parameterName);
     }
   }
 }
@@ -687,6 +708,24 @@ protected abstract class BaseNewBindingAction extends Action {
   }
 
   protected abstract BindingType getType();
+}
+
+class NewStringBindingAction
+  extends BaseNewBindingAction { /**
+     * Constructor for NewPropertyAction
+     */
+  protected NewStringBindingAction() {
+    super();
+    setText("String Binding");
+    defaultBindingName = "string";
+    setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("bind-string.gif")));
+
+  }
+
+  public BindingType getType() {
+    return BindingType.STRING;
+  }
+
 }
 
 class NewFieldBindingAction

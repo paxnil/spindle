@@ -66,10 +66,11 @@ import com.iw.plugins.spindle.ui.ComboBoxPropertyDescriptor;
 import com.iw.plugins.spindle.ui.EmptySelection;
 import com.iw.plugins.spindle.ui.FieldPropertyDescriptor;
 import com.iw.plugins.spindle.util.JavaListSelectionProvider;
-import com.primix.tapestry.bean.FieldBeanInitializer;
-import com.primix.tapestry.bean.IBeanInitializer;
-import com.primix.tapestry.bean.PropertyBeanInitializer;
-import com.primix.tapestry.bean.StaticBeanInitializer;
+
+import net.sf.tapestry.bean.FieldBeanInitializer;
+import net.sf.tapestry.bean.IBeanInitializer;
+import net.sf.tapestry.bean.PropertyBeanInitializer;
+import net.sf.tapestry.bean.StaticBeanInitializer;
 
 public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSection {
 
@@ -84,7 +85,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
   private PluginBeanSpecification selectedBean;
 
   /**
-   * Constructor for ParameterEditorSection 
+   * Constructor for ParameterEditorSection
    */
   public BeanInitializerEditorSection(SpindleFormPage page) {
     super(page);
@@ -225,7 +226,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     return null;
   }
 
-  protected abstract class BaseInitializerHolder implements IPropertySource{
+  protected abstract class BaseInitializerHolder implements IPropertySource {
     public abstract IBeanInitializer getInitializer();
 
     public Object getAdapter(Class clazz) {
@@ -777,7 +778,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
     */
     public void run() {
       if (selectedBean == null) {
-      	return;
+        return;
       }
       PluginBeanSpecification spec = selectedBean;
       String newName = "property";

@@ -1,6 +1,6 @@
 <project name="builder" default="init" basedir=".">
 
-  <property name="version" value="0.0.9-20020321"/>
+  <property name="version" value="1.0.0-EarlyAccess-TAP-2.0.4-ECLIPSE-F3"/>
   
   <target name="init">
     <available property="buildReleaseAvailable" file="${basedir}/buildRelease"/>

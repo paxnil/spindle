@@ -22,8 +22,7 @@
  * 
  *  glongman@intelligentworks.com
  *
- * ***** END LICENSE BLOCK ***** */
- package com.iw.plugins.spindle.ui;
+ * ***** END LICENSE BLOCK ***** */package com.iw.plugins.spindle.ui;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.CellEditor;

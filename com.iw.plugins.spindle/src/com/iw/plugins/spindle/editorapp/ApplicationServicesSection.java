@@ -372,7 +372,7 @@ public class ApplicationServicesSection
     public IPropertyDescriptor[] getPropertyDescriptors() {
       return new IPropertyDescriptor[] {
         new TextPropertyDescriptor("name", "Name"),
-        new TypeDialogPropertyDescriptor("class", "Class", getModel(), "com.primix.tapestry.IEngineService"),
+        new TypeDialogPropertyDescriptor("class", "Class", getModel(), "net.sf.tapestry.IEngineService"),
         };
     }
 
