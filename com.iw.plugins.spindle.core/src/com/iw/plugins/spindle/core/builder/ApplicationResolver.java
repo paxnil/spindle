@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.tapestry.IResourceLocation;
-import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -47,6 +46,8 @@ import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
+import com.iw.plugins.spindle.core.spec.PluginPropertyDeclaration;
 
 /**
  *  Namespace resolver for applications
@@ -120,11 +121,12 @@ public class ApplicationResolver extends NamespaceResolver
             if (fResultNamespace != null)
             {
                 fResultNamespace.setAppNameFromWebXML(fServlet.name);
-                ILibrarySpecification spec = fResultNamespace.getSpecification();
+                PluginLibrarySpecification spec = (PluginLibrarySpecification) fResultNamespace.getSpecification();
                 for (Iterator iter = fServlet.parameters.keySet().iterator(); iter.hasNext();)
                 {
                     String key = (String) iter.next();
-                    spec.setProperty(key, (String) fServlet.parameters.get(key));
+                    PluginPropertyDeclaration declaration = new PluginPropertyDeclaration(key, (String) fServlet.parameters.get(key));
+                    spec.addPropertyDeclaration(declaration);
                 }
                 doResolve();
             }
