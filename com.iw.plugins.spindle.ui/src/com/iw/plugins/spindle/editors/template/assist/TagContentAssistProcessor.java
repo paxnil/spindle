@@ -205,10 +205,10 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
         try
         {
             TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
-            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            helper.setFrameworkNamespace(
-                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+//            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
+//            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+//            helper.setFrameworkNamespace(
+//                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
             helper.setJwcid(jwcid);
             UITapestryAccess.Result[] infos = helper.findParameters(null, existingAttributeNames);
             for (int i = 0; i < infos.length; i++)

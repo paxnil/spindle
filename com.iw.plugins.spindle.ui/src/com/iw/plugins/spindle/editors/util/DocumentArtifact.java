@@ -38,7 +38,9 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TypedPosition;
 
 import com.iw.plugins.spindle.UIPlugin;
@@ -100,6 +102,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         Arrays.sort(pos, COMPARATOR);
 
         DocumentArtifact root = new DocumentArtifact(0, 0, "/", document);
+        root.fPos = pos;
         root.fParent = null;
         DocumentArtifact parent = root;
         for (int i = 0; i < pos.length; i++)
@@ -154,11 +157,26 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     protected DocumentArtifact fCorrespondingNode;
     public String fPublicId; // only available in the root artifact
     public String fRootNodeId; // only available in the root artifact
+    private Position[] fPos; // valid only in a root after a tree is built.
 
     public DocumentArtifact(int offset, int length, String type, IDocument document)
     {
         super(offset, length, type);
         this.fDocument = document;
+    }
+
+    public DocumentArtifact get(int documentOffset)
+    {
+        if (fPos != null)
+        {
+            for (int i = 0; i < fPos.length; i++)
+            {
+                if (fPos[i].offset <= documentOffset && documentOffset < fPos[i].offset + fPos[i].length)
+                    return (DocumentArtifact) fPos[i];
+            }
+
+        }
+        return null;
     }
 
     public boolean whiteSpaceOnly()
@@ -396,32 +414,63 @@ public class DocumentArtifact extends TypedPosition implements Comparable
 
     public String getAttributeValue()
     {
-        String content = null;
+        int index = getAttributeValueStart();
+
+        if (index < 0)
+            return null;
+
+        try
+        {
+            String content = fDocument.get(getOffset(), getLength());
+            content = content.substring(index).trim();
+
+            return content.substring(1, content.length() - 1);
+        } catch (BadLocationException e)
+        {
+            UIPlugin.log(e);
+        }
+
+        return null;
+    }
+
+    private int getAttributeValueStart()
+    {
         int index = 0;
         try
         {
-            content = fDocument.get(getOffset(), getLength());
+            String content = fDocument.get(getOffset(), getLength());
             int singleIndex = content.indexOf("\"");
             int doubleIndex = content.indexOf("'");
-            
-            if (singleIndex >=0 && doubleIndex > 0) {
-            
+
+            if (singleIndex >= 0 && doubleIndex > 0)
+            {
+
                 index = Math.min(singleIndex, doubleIndex);
-            } else {
+            } else
+            {
                 index = Math.max(singleIndex, doubleIndex);
-            }                      
+            }
 
         } catch (BadLocationException e)
         {
             UIPlugin.log(e);
         }
 
+        return index;
+    }
+
+    public IRegion getAttributeValueRegion()
+    {
+        int index = getAttributeValueStart();
+
         if (index < 0)
             return null;
 
-        content = content.substring(index).trim();
-        
-        return content.substring(1, content.length() - 1);
+        String value = getAttributeValue();
+        if (value != null)
+            return new Region(getOffset() + index + 1, value.length());
+
+        return null;
     }
 
     public DocumentArtifact getAttributeAt(int offset)
@@ -750,26 +799,26 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                 return Integer.toString(state);
         }
     } /**
-                                                                                                                                                                                              * @return
-                                                                                                                                                                                              */
+                                                                                                                                                                                                                               * @return
+                                                                                                                                                                                                                               */
     public DocumentArtifact getCorrespondingNode()
     {
         return fCorrespondingNode;
     } /**
-                                                                                                                                                                                                  * @return
-                                                                                                                                                                                                  */
+                                                                                                                                                                                                                                   * @return
+                                                                                                                                                                                                                                   */
     public DocumentArtifact getParent()
     {
         return fParent;
     } /**
-                                                                                                                                                                                                  * @param artifact
-                                                                                                                                                                                                  */
+                                                                                                                                                                                                                                   * @param artifact
+                                                                                                                                                                                                                                   */
     public void setCorrespondingNode(DocumentArtifact artifact)
     {
         fCorrespondingNode = artifact;
     } /**
-                                                                                                                                                                                                  * @param artifact
-                                                                                                                                                                                                  */
+                                                                                                                                                                                                                                   * @param artifact
+                                                                                                                                                                                                                                   */
     public void setParent(DocumentArtifact artifact)
     {
         fParent = artifact;
@@ -815,7 +864,6 @@ public class DocumentArtifact extends TypedPosition implements Comparable
 
             String type = artifact.getType();
             if (type == DocumentArtifactPartitioner.TAG
-                || type == DocumentArtifactPartitioner.PI
                 || type == DocumentArtifactPartitioner.EMPTYTAG)
             {
                 result.addAll(0, artifact.getAttributes());
@@ -965,4 +1013,5 @@ public class DocumentArtifact extends TypedPosition implements Comparable
 
         return null;
     }
+
 }

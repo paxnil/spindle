@@ -328,6 +328,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
      */
     public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
     {
+        
         DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
         int baseState = tag.getStateAt(documentOffset);
         String name = null;

@@ -109,11 +109,7 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
         {
             case STAGE_INACTIVE :
                 fStage = STAGE_PARSER;
-                Object spec = getSpecification();
-                if (spec != null)
-                    setIsActive(true);
-                else
-                    setIsActive(false);
+                setIsActive(getSpecification() != null);
                 break;
             case STAGE_PARSER :
                 fStage = STAGE_SCANNER;
@@ -170,6 +166,9 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
                 updateAnnotationsNormal();
                 fStage = STAGE_INACTIVE;
                 break;
+                
+            default:
+                throw new Error("invalid stage");
         }
     }
 

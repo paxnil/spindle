@@ -150,6 +150,7 @@ public class DOMValidator implements IProblemCollector
     private DTD fDTD;
     private Map fNodeInfoMap;
     private List fProblems = new ArrayList();
+    private Map fSeenIds = new HashMap();
 
     public DOMValidator()
     {}
@@ -157,10 +158,25 @@ public class DOMValidator implements IProblemCollector
     // standalone version
     public void validate(Document xmlDocument)
     {
+        fSeenIds.clear();
         beginCollecting();
         documentStart(xmlDocument);
         Node rootNode = xmlDocument.getDocumentElement();
         traverseNode(rootNode);
+        if (!fSeenIds.isEmpty()) {
+            for (Iterator iter = fSeenIds.entrySet().iterator(); iter.hasNext();)
+            {
+                Map.Entry entry = (Map.Entry) iter.next();
+                List nodeList = (List) entry.getValue();
+                if (nodeList.size() < 2)
+                    continue;
+                for (Iterator iterator = nodeList.iterator(); iterator.hasNext();)
+                {
+                    Node node = (Node) iterator.next();
+                    recordAttributeError(node, "id", TapestryCore.getString("dom-validator-id-attribute-must-be-unique"));
+                }                               
+            }
+        }
         documentEnd();
         endCollecting();
     }
@@ -341,6 +357,9 @@ public class DOMValidator implements IProblemCollector
             {
                 sourceAttributeNames.remove(declaredAttrName);
                 String value = W3CAccess.getAttribute(node, declaredAttrName);
+                if (declaredAttrName.equals("id"))
+                    recordSeenIdValue(node, value);
+
                 if (declaredAttribute.defaultValue != null)
                 {
                     if (value.equals(declaredAttribute.defaultValue))
@@ -386,6 +405,15 @@ public class DOMValidator implements IProblemCollector
                     TapestryCore.getString("dom-validator-undeclared-atttribute", undeclaredName, nodeName));
             }
         }
+    }
+
+    private void recordSeenIdValue(Node node, String value)
+    {
+        List nodeList = (List) fSeenIds.get(value);
+        if (nodeList == null)
+            nodeList = new ArrayList();
+        nodeList.add(node);
+        fSeenIds.put(value, nodeList);
     }
 
     private void recordErrorOnTagName(Node node, String errorMessage)

@@ -3,6 +3,8 @@ package com.wutka.dtd;
 import java.util.*;
 import java.io.*;
 
+import com.iw.plugins.spindle.core.util.OrderPreservingMap;
+
 /** Represents an element defined with the ELEMENT DTD tag
  *
  * @author Mark Wutka
@@ -14,21 +16,21 @@ public class DTDElement implements DTDOutput
     public String name;
 
 /** The element's attributes */
-    public Hashtable attributes;
+    public Map attributes;
 
 /** The element's content */
     public DTDItem content;
 
     public DTDElement()
     {
-        attributes = new Hashtable();
+        attributes = new OrderPreservingMap();
     }
 
     public DTDElement(String aName)
     {
         name = aName;
 
-        attributes = new Hashtable();
+        attributes = new OrderPreservingMap();
     }
 
 /** Writes out an element declaration and an attlist declaration (if necessary)

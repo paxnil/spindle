@@ -34,7 +34,7 @@ public class SharedTextColors implements ISharedTextColors {
 		}
 			
 		Color color= (Color) colorTable.get(rgb);
-		if (color == null) {
+		if (color == null || color.isDisposed()) {
 			color= new Color(display, rgb);
 			colorTable.put(rgb, color);
 		}

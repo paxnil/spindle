@@ -39,7 +39,11 @@ import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IStorage;
 
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
@@ -85,6 +89,8 @@ public abstract class UITapestryAccess
         {
             String libId = (String) iter.next();
             ICoreNamespace childNamespace = (ICoreNamespace) namespace.getChildNamespace(libId);
+            if (childNamespace == null)
+                continue;
             List types = childNamespace.getComponentTypes();
             ComponentSpecificationResolver resolver = childNamespace.getComponentResolver();
 
@@ -317,6 +323,10 @@ public abstract class UITapestryAccess
     {
         fNamespace = editor.getNamespace();
         Assert.isLegal(fNamespace != null);
+        IStorage storage = (IStorage) editor.getEditorInput().getAdapter(IStorage.class);
+        IProject project = TapestryCore.getDefault().getProjectFor(storage);
+        setFrameworkNamespace(
+            (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
     }
 
     public ICoreNamespace getFrameworkNamespace()
@@ -352,7 +362,7 @@ public abstract class UITapestryAccess
         return getAllChildNamespaceComponents(fNamespace);
     }
 
-    protected IComponentSpecification resolveComponentType(String type)
+    public IComponentSpecification resolveComponentType(String type)
     {
         ComponentSpecificationResolver resolver = fNamespace.getComponentResolver();
         IComponentSpecification containedSpecification = resolver.resolve(type);

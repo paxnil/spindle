@@ -91,10 +91,10 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
         try
         {
             fAssistHelper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
-            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            fAssistHelper.setFrameworkNamespace(
-                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+//            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
+//            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+//            fAssistHelper.setFrameworkNamespace(
+//                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
             fAssistHelper.setJwcid(jwcidAttr.getAttributeValue());
         } catch (IllegalArgumentException e)
         {
@@ -340,10 +340,10 @@ public class JWCIDContentAssistProcessor extends ContentAssistProcessor
         try
         {
             fAssistHelper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
-            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            fAssistHelper.setFrameworkNamespace(
-                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+//            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
+//            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+//            fAssistHelper.setFrameworkNamespace(
+//                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
             fAssistHelper.setJwcid(attributeValue);
         } catch (IllegalArgumentException e)
         {

@@ -1,8 +1,10 @@
 package com.wutka.dtd;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
 import java.net.URL;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
 
 /** Example program to read a DTD and print out its object model
  *
@@ -12,29 +14,27 @@ import java.net.URL;
 
 class Tokenize
 {
-	public static void main(String[] args)
-	{
-		try
-		{
+    public static void main(String[] args)
+    {
+        try
+        {
             DTDParser parser = null;
-// MAW Version 1.17
-// If it looks like the filename may be a URL, use the URL class
+            // MAW Version 1.17
+            // If it looks like the filename may be a URL, use the URL class
             if (args[0].indexOf("://") > 0)
             {
                 parser = new DTDParser(new URL(args[0]), null, true);
-            }
-            else
+            } else
             {
                 parser = new DTDParser(new File(args[0]), null, true);
             }
 
-// Parse the DTD and ask the parser to guess the root element
+            // Parse the DTD and ask the parser to guess the root element
             DTD dtd = parser.parse(true);
 
             if (dtd.rootElement != null)
             {
-                System.out.println("Root element is probably: "+
-                    dtd.rootElement.name);
+                System.out.println("Root element is probably: " + dtd.rootElement.name);
             }
 
             Enumeration e = dtd.elements.elements();
@@ -43,7 +43,7 @@ class Tokenize
             {
                 DTDElement elem = (DTDElement) e.nextElement();
 
-                System.out.println("Element: "+elem.name);
+                System.out.println("Element: " + elem.name);
                 System.out.print("   Content: ");
                 dumpDTDItem(elem.content);
                 System.out.println();
@@ -51,11 +51,12 @@ class Tokenize
                 if (elem.attributes.size() > 0)
                 {
                     System.out.println("   Attributes: ");
-                    Enumeration attrs = elem.attributes.elements();
-                    while (attrs.hasMoreElements())
+                    Iterator attrs = elem.attributes.entrySet().iterator();
+                    while (attrs.hasNext())
                     {
                         System.out.print("        ");
-                        DTDAttribute attr = (DTDAttribute) attrs.nextElement();
+                        Map.Entry entry = (Map.Entry) attrs.next();
+                        DTDAttribute attr = (DTDAttribute) entry.getValue();
                         dumpAttribute(attr);
                     }
                     System.out.println();
@@ -68,34 +69,32 @@ class Tokenize
             {
                 DTDEntity entity = (DTDEntity) e.nextElement();
 
-                if (entity.isParsed) System.out.print("Parsed ");
+                if (entity.isParsed)
+                    System.out.print("Parsed ");
 
-                System.out.println("Entity: "+entity.name);
-                
+                System.out.println("Entity: " + entity.name);
+
                 if (entity.value != null)
                 {
-                    System.out.println("    Value: "+entity.value);
+                    System.out.println("    Value: " + entity.value);
                 }
 
                 if (entity.externalID != null)
                 {
                     if (entity.externalID instanceof DTDSystem)
                     {
-                        System.out.println("    System: "+
-                            entity.externalID.system);
-                    }
-                    else
+                        System.out.println("    System: " + entity.externalID.system);
+                    } else
                     {
                         DTDPublic pub = (DTDPublic) entity.externalID;
 
-                        System.out.println("    Public: "+
-                            pub.pub+" "+pub.system);
+                        System.out.println("    Public: " + pub.pub + " " + pub.system);
                     }
                 }
 
                 if (entity.ndata != null)
                 {
-                    System.out.println("    NDATA "+entity.ndata);
+                    System.out.println("    NDATA " + entity.ndata);
                 }
             }
             e = dtd.notations.elements();
@@ -104,92 +103,85 @@ class Tokenize
             {
                 DTDNotation notation = (DTDNotation) e.nextElement();
 
-                System.out.println("Notation: "+notation.name);
-                
+                System.out.println("Notation: " + notation.name);
+
                 if (notation.externalID != null)
                 {
                     if (notation.externalID instanceof DTDSystem)
                     {
-                        System.out.println("    System: "+
-                            notation.externalID.system);
-                    }
-                    else
+                        System.out.println("    System: " + notation.externalID.system);
+                    } else
                     {
                         DTDPublic pub = (DTDPublic) notation.externalID;
 
-                        System.out.print("    Public: "+
-                            pub.pub+" ");
+                        System.out.print("    Public: " + pub.pub + " ");
                         if (pub.system != null)
                         {
                             System.out.println(pub.system);
-                        }
-                        else
+                        } else
                         {
                             System.out.println();
                         }
                     }
                 }
             }
-		}
-		catch (Exception exc)
-		{
-			exc.printStackTrace(System.out);
-		}
-	}
+        } catch (Exception exc)
+        {
+            exc.printStackTrace(System.out);
+        }
+    }
 
     public static void dumpDTDItem(DTDItem item)
     {
-        if (item == null) return;
+        if (item == null)
+            return;
 
         if (item instanceof DTDAny)
         {
             System.out.print("Any");
-        }
-        else if (item instanceof DTDEmpty)
+        } else if (item instanceof DTDEmpty)
         {
             System.out.print("Empty");
-        }
-        else if (item instanceof DTDName)
+        } else if (item instanceof DTDName)
         {
             System.out.print(((DTDName) item).value);
-        }
-        else if (item instanceof DTDChoice)
+        } else if (item instanceof DTDChoice)
         {
             System.out.print("(");
             DTDItem[] items = ((DTDChoice) item).getItems();
 
-            for (int i=0; i < items.length; i++)
+            for (int i = 0; i < items.length; i++)
             {
-                if (i > 0) System.out.print("|");
+                if (i > 0)
+                    System.out.print("|");
                 dumpDTDItem(items[i]);
             }
             System.out.print(")");
-        }
-        else if (item instanceof DTDSequence)
+        } else if (item instanceof DTDSequence)
         {
             System.out.print("(");
             DTDItem[] items = ((DTDSequence) item).getItems();
 
-            for (int i=0; i < items.length; i++)
+            for (int i = 0; i < items.length; i++)
             {
-                if (i > 0) System.out.print(",");
+                if (i > 0)
+                    System.out.print(",");
                 dumpDTDItem(items[i]);
             }
             System.out.print(")");
-        }
-        else if (item instanceof DTDMixed)
+        } else if (item instanceof DTDMixed)
         {
             System.out.print("(");
             DTDItem[] items = ((DTDMixed) item).getItems();
 
-            for (int i=0; i < items.length; i++)
+            for (int i = 0; i < items.length; i++)
             {
-                if (i > 0) System.out.print(",");
+                if (i > 0)
+                    System.out.print(",");
                 dumpDTDItem(items[i]);
             }
             System.out.print(")");
-        }
-        else if (item instanceof DTDPCData)
+        } else if (item instanceof DTDPCData)
         {
             System.out.print("#PCDATA");
         }
@@ -197,12 +189,10 @@ class Tokenize
         if (item.cardinal == DTDCardinal.OPTIONAL)
         {
             System.out.print("?");
-        }
-        else if (item.cardinal == DTDCardinal.ZEROMANY)
+        } else if (item.cardinal == DTDCardinal.ZEROMANY)
         {
             System.out.print("*");
-        }
-        else if (item.cardinal == DTDCardinal.ONEMANY)
+        } else if (item.cardinal == DTDCardinal.ONEMANY)
         {
             System.out.print("+");
         }
@@ -210,31 +200,31 @@ class Tokenize
 
     public static void dumpAttribute(DTDAttribute attr)
     {
-        System.out.print(attr.name+" ");
+        System.out.print(attr.name + " ");
         if (attr.type instanceof String)
         {
             System.out.print(attr.type);
-        }
-        else if (attr.type instanceof DTDEnumeration)
+        } else if (attr.type instanceof DTDEnumeration)
         {
             System.out.print("(");
             String[] items = ((DTDEnumeration) attr.type).getItems();
 
-            for (int i=0; i < items.length; i++)
+            for (int i = 0; i < items.length; i++)
             {
-                if (i > 0) System.out.print(",");
+                if (i > 0)
+                    System.out.print(",");
                 System.out.print(items[i]);
             }
             System.out.print(")");
-        }
-        else if (attr.type instanceof DTDNotationList)
+        } else if (attr.type instanceof DTDNotationList)
         {
             System.out.print("Notation (");
             String[] items = ((DTDNotationList) attr.type).getItems();
 
-            for (int i=0; i < items.length; i++)
+            for (int i = 0; i < items.length; i++)
             {
-                if (i > 0) System.out.print(",");
+                if (i > 0)
+                    System.out.print(",");
                 System.out.print(items[i]);
             }
             System.out.print(")");
@@ -242,12 +232,12 @@ class Tokenize
 
         if (attr.decl != null)
         {
-            System.out.print(" "+attr.decl.name);
+            System.out.print(" " + attr.decl.name);
         }
 
         if (attr.defaultValue != null)
         {
-            System.out.print(" "+attr.defaultValue);
+            System.out.print(" " + attr.defaultValue);
         }
 
         System.out.println();

@@ -162,14 +162,17 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, Rec
 
     protected ContentAssistant fContentAssistant = new ContentAssistant();
 
+    protected IPreferenceStore fPreferenceStore;
+
     public Editor()
     {
         super();
         setSourceViewerConfiguration(createSourceViewerConfiguration());
-        setPreferenceStore(
+        fPreferenceStore =
             new PreferenceStoreWrapper(
                 UIPlugin.getDefault().getPreferenceStore(),
-                XMLPlugin.getDefault().getPreferenceStore()));
+                XMLPlugin.getDefault().getPreferenceStore());
+        setPreferenceStore(fPreferenceStore);
         setRangeIndicator(new DefaultRangeIndicator());
     }
 

@@ -29,7 +29,6 @@ package com.iw.plugins.spindle.editors.spec.assist;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -340,9 +339,9 @@ public class SpecAssistHelper extends UITapestryAccess
             // non empty only!
             defaultProposal = nonEmptyProposal;
             optionalProposal = null;
-        } else if (nonEmptyProposal != null && elementName.equals("component"))
-        {
-            // non empty first!
+        } else if (nonEmptyProposal != null 
+                        && (elementName.equals("component") || elementName.equals("listener-binding")))
+        { // non empty first!
             defaultProposal = nonEmptyProposal;
             optionalProposal = emptyProposal;
         }
@@ -397,12 +396,10 @@ public class SpecAssistHelper extends UITapestryAccess
     public static List getAttributes(DTD dtd, String elementName)
     {
         return internalGetAttributes(dtd, elementName.toLowerCase());
-    }
-
-    /**
-     * @param dtd
-     * @param elementName assumed to be lowercase
-     */
+    } /**
+            * @param dtd
+            * @param elementName assumed to be lowercase
+            */
     private static List internalGetAttributes(DTD dtd, String elementName)
     {
         MultiKey key = new MultiKey(new Object[] { dtd, elementName, ELEMENT_ATTRIBUTES }, false);
@@ -415,7 +412,7 @@ public class SpecAssistHelper extends UITapestryAccess
                 DTDInfoMap.put(key, Collections.EMPTY_LIST);
             } else
             {
-                Hashtable attrTable = element.attributes;
+                Map attrTable = element.attributes;
                 if (attrTable == null || attrTable.isEmpty())
                 {
                     DTDInfoMap.put(key, Collections.EMPTY_LIST);
@@ -431,14 +428,11 @@ public class SpecAssistHelper extends UITapestryAccess
                         String attrName = (String) iter.next();
                         attributes.add(attrName);
                         DTDAttribute dtdattr = (DTDAttribute) attrTable.get(attrName);
-
                         String defaultValue = dtdattr.getDefaultValue();
                         if (defaultValue == null)
                             defaultValue = getTapestryDefaultValue(dtd, elementName, attrName);
-
                         if (dtdattr.decl == DTDDecl.REQUIRED)
                             required.add(attrName);
-
                         // find allowed and default values (if any)
                         Object type = dtdattr.type;
                         if (type instanceof DTDEnumeration)
@@ -463,7 +457,6 @@ public class SpecAssistHelper extends UITapestryAccess
                             (allowedValues == null || allowedValues.isEmpty())
                                 ? Collections.EMPTY_LIST
                                 : Collections.unmodifiableList(allowedValues));
-
                     }
                     DTDInfoMap.put(
                         key,
@@ -478,7 +471,6 @@ public class SpecAssistHelper extends UITapestryAccess
         }
         if (attributes == null || attributes.isEmpty())
             return Collections.EMPTY_LIST;
-
         return attributes;
     }
 
@@ -494,37 +486,30 @@ public class SpecAssistHelper extends UITapestryAccess
         {
             if ("engine-class".equals(attrName))
                 result = TapestryCore.getString("TapestryEngine.defaultEngine");
-
         } else if ("component-specification".equals(elementName))
         {
             if ("class".equals(attrName))
                 result = TapestryCore.getString("TapestryComponentSpec.defaultSpec");
-
         } else if ("page-specification".equals(elementName))
         {
             if ("class".equals(attrName))
                 result = TapestryCore.getString("TapestryPageSpec.defaultSpec");
-
         }
         return result;
-    }
-
-    /**
-     * @param dtd
-     * @param elementName
-     * @param elementName 
-     * @return
-     */
+    } /**
+            * @param dtd
+            * @param elementName
+            * @param elementName 
+            * @return
+            */
     public static List getRequiredAttributes(DTD dtd, String elementName)
     {
         return internalGetRequiredAttributes(dtd, elementName.toLowerCase());
-    }
-
-    /**
-     * @param dtd
-     * @param elementName assumed to be lowercase
-     * @return
-     */
+    } /**
+            * @param dtd
+            * @param elementName assumed to be lowercase
+            * @return
+            */
     private static List internalGetRequiredAttributes(DTD dtd, String elementName)
     {
         MultiKey key = new MultiKey(new Object[] { dtd, elementName, ELEMENT_REQUIRED_ATTRIBUTES }, false);
@@ -535,29 +520,25 @@ public class SpecAssistHelper extends UITapestryAccess
             return (List) DTDInfoMap.get(key);
         }
         return result;
-    }
-
-    /**
-     * @param dtd
-     * @param elementName
-     * @param elementName 
-     * @return
-     */
+    } /**
+            * @param dtd
+            * @param elementName
+            * @param elementName 
+            * @return
+            */
     public static String getDefaultAttributeValue(DTD dtd, String elementName, String attrName)
     {
         return internalGetDefaultAttributeValue(dtd, elementName.toLowerCase(), attrName.toLowerCase());
-    }
-    /**
-     * @param dtd
-     * @param elementName
-     * @param elementName assumed to be lowercase
-     * @return
-     */
+    } /**
+            * @param dtd
+            * @param elementName
+            * @param elementName assumed to be lowercase
+            * @return
+            */
     private static String internalGetDefaultAttributeValue(DTD dtd, String elementName, String attrName)
     {
         MultiKey key =
             new MultiKey(new Object[] { dtd, elementName, attrName, ELEMENT_ATTRIBUTE_DEFAULT_VALUE }, false);
-
         String result = (String) DTDInfoMap.get(key);
         if (result == null)
         {
@@ -565,25 +546,21 @@ public class SpecAssistHelper extends UITapestryAccess
             return (String) DTDInfoMap.get(key);
         }
         return result;
-    }
-
-    /**
-     * @param dtd
-     * @param elementName
-     * @param elementName 
-     * @return
-     */
+    } /**
+            * @param dtd
+            * @param elementName
+            * @param elementName 
+            * @return
+            */
     public static List getAllowedAttributeValues(DTD dtd, String elementName, String attrName)
     {
         return internalGetAllowedAttributeValues(dtd, elementName.toLowerCase(), attrName.toLowerCase());
-    }
-
-    /**
-     * @param dtd
-     * @param elementName
-     * @param elementName assumed to be lowercase
-     * @return
-     */
+    } /**
+            * @param dtd
+            * @param elementName
+            * @param elementName assumed to be lowercase
+            * @return
+            */
     private static List internalGetAllowedAttributeValues(DTD dtd, String elementName, String attrName)
     {
         MultiKey key =
@@ -596,19 +573,17 @@ public class SpecAssistHelper extends UITapestryAccess
         }
 
         return result;
-    }
-
-    /**
-     * Return the default ICompletionProposal for inserting an XML Comment.
-     * <pre>
-     *  <!--  -->
-     * </pre>
-     * The cursor position after the proposal is applied is in the middle.
-     * 
-     * @param replacementOffset the location in the document where the proposal will be applied
-     * @param replacementLength the number of characters in the document from replacementOffset that will be replaced.
-     * @return
-     */
+    } /**
+            * Return the default ICompletionProposal for inserting an XML Comment.
+            * <pre>
+            *  <!--  -->
+            * </pre>
+            * The cursor position after the proposal is applied is in the middle.
+            * 
+            * @param replacementOffset the location in the document where the proposal will be applied
+            * @param replacementLength the number of characters in the document from replacementOffset that will be replaced.
+            * @return
+            */
     public static ICompletionProposal getDefaultInsertCommentProposal(int replacementOffset, int replacementLength)
     {
         CompletionProposal proposal =
@@ -623,11 +598,8 @@ public class SpecAssistHelper extends UITapestryAccess
                 null);
         proposal.setYOrder(99);
         return proposal;
-    }
-
-    // will be non null iff invoke by an editor working on
+    } // will be non null iff invoke by an editor working on
     private IComponentSpecification fComponentSpecification;
-    
     public SpecAssistHelper(Editor editor) throws IllegalArgumentException
     {
         super(editor);

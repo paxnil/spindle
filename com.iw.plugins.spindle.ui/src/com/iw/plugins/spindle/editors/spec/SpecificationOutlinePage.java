@@ -27,8 +27,16 @@
 package com.iw.plugins.spindle.editors.spec;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -63,14 +71,21 @@ public class SpecificationOutlinePage extends ContentOutlinePage
         {
             if (fRoot != null)
             {
-                return fRoot.getChildren(fRoot);
+                Object[] result = fRoot.getChildren(fRoot);
+                addAll(result);
+                return result;
             }
             return new Object[] {};
         }
         public Object[] getChildren(Object obj)
         {
             if (obj instanceof DocumentArtifact)
-                return ((DocumentArtifact) obj).getChildren(obj);
+            {
+                Object[] result = ((DocumentArtifact) obj).getChildren(obj);
+                addAll(result);
+                return result;
+            }
+
             return new Object[0];
         }
         public boolean hasChildren(Object obj)
@@ -85,12 +100,32 @@ public class SpecificationOutlinePage extends ContentOutlinePage
         }
         public void dispose()
         {}
+
+        private void addAll(Object[] elements)
+        {
+            if (elements == null || elements.length == 0)
+                return;
+
+            if (flatChildren.length == 0)
+            {
+                flatChildren = elements;
+                return;
+            }
+
+            Object[] expanded = new Object[flatChildren.length + elements.length];
+            System.arraycopy(flatChildren, 0, expanded, 0, flatChildren.length);
+            System.arraycopy(elements, 0, expanded, flatChildren.length, elements.length);
+            flatChildren = expanded;
+
+        }
         public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
-        {}
+        {
+            flatChildren = new DocumentArtifact[0];
+        }
 
     }
 
-    public class BasicLabelProvider extends LabelProvider
+    public class BasicLabelProvider extends LabelProvider //implements IColorProvider
     {
         public String getText(Object obj)
         {
@@ -164,26 +199,115 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             }
             return null;
         }
+
+//        /* (non-Javadoc)
+//         * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
+//         */
+//        public Color getBackground(Object element)
+//        {
+//            return fTree.getBackground();
+//        }
+//
+//        private Color getColor(String key)
+//        {
+//            ISharedTextColors colors = UIPlugin.getDefault().getSharedTextColors();
+//            return colors.getColor(PreferenceConverter.getColor(fPreferences, key + ITextStylePreferences.SUFFIX_FOREGROUND));
+//        }
+//
+//        /* (non-Javadoc)
+//         * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
+//         */
+//        public Color getForeground(Object element)
+//        {
+//
+//            if (element instanceof DocumentArtifact)
+//            {
+//                DocumentArtifact artifact = (DocumentArtifact) element;
+//                String type = artifact.getType();
+//                if (type == DocumentArtifactPartitioner.DECL)
+//                {
+//
+//                    if (artifact.getParent().getType().equals("/"))
+//                        return getColor(IXMLSyntaxConstants.XML_DECL);
+//
+//                    return getColor(IXMLSyntaxConstants.XML_CDATA);
+//
+//                }
+//
+//                if (type == DocumentArtifactPartitioner.TAG)
+//                    return getColor(IXMLSyntaxConstants.XML_TAG);
+//
+//                if (type == DocumentArtifactPartitioner.EMPTYTAG)
+//                    return getColor(IXMLSyntaxConstants.XML_TAG);
+//
+//                if (type == DocumentArtifactPartitioner.ATTR)
+//                    return getColor(IXMLSyntaxConstants.XML_ATT_VALUE);
+//
+//                if (type == DocumentArtifactPartitioner.COMMENT)
+//                    return getColor(IXMLSyntaxConstants.XML_COMMENT);
+//
+//                if (type == DocumentArtifactPartitioner.PI)
+//                    return getColor(IXMLSyntaxConstants.XML_PI);
+//            }
+//            return fTree.getForeground();
+//        }
+
     }
+
     private SpecEditor fEditor;
+    private Tree fTree;
     private TreeViewer treeViewer;
     private DocumentArtifact fRoot;
     private boolean fFireSelection = true;
+    private Object[] flatChildren = new DocumentArtifact[0];
+    private IPreferenceStore fPreferences;
+    private IPropertyChangeListener fPreferenceStoreListener = new IPropertyChangeListener()
+    {
+        public void propertyChange(PropertyChangeEvent event)
+        {
+            treeViewer.refresh(true);
+        }
 
-    public SpecificationOutlinePage(SpecEditor editor)
+    };
+
+    public SpecificationOutlinePage(SpecEditor editor, IPreferenceStore store)
     {
         fEditor = editor;
+        fPreferences = store;
     }
 
     public void createControl(Composite parent)
     {
-        Tree widget = new Tree(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        treeViewer = new TreeViewer(widget);
+        fTree = new Tree(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+        treeViewer = new TreeViewer(fTree);
         treeViewer.addSelectionChangedListener(this);
         treeViewer.setContentProvider(createContentProvider());
         treeViewer.setLabelProvider(createLabelProvider());
         treeViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
         treeViewer.setUseHashlookup(true);
+        treeViewer.addDoubleClickListener(new IDoubleClickListener()
+        {
+            public void doubleClick(DoubleClickEvent event)
+            {
+                try
+                {
+                    fFireSelection = true;
+                    selectionChanged(new SelectionChangedEvent(treeViewer, treeViewer.getSelection()));
+
+                } finally
+                {
+                    fFireSelection = false;
+                }
+            }
+        });
+        fPreferences.addPropertyChangeListener(fPreferenceStoreListener);
+
+    }
+
+    public void dispose()
+    {
+        fPreferences.removePropertyChangeListener(fPreferenceStoreListener);
+        super.dispose();
     }
 
     public void setRoot(final DocumentArtifact artifact)
@@ -200,14 +324,14 @@ public class SpecificationOutlinePage extends ContentOutlinePage
                     fFireSelection = false;
                     ISelection oldSelection = getSelection();
                     treeViewer.setInput(fRoot);
-//                    treeViewer.refresh();
+                    //                    treeViewer.refresh();
                     treeViewer.setSelection(oldSelection);
                 } catch (RuntimeException e)
                 {
                     UIPlugin.log(e);
                 } finally
                 {
-                    fFireSelection = true;
+                    fFireSelection = false;
                 }
             }
         });
@@ -249,4 +373,29 @@ public class SpecificationOutlinePage extends ContentOutlinePage
             super.selectionChanged(event);
     }
 
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
+     */
+    public void setSelection(ISelection selection)
+    {
+        if (!selection.isEmpty() && selection instanceof IStructuredSelection)
+        {
+            Object selected = ((IStructuredSelection) selection).getFirstElement();
+            if (selected instanceof IRegion && fRoot != null)
+            {
+                int documentOffset = ((IRegion) selected).getOffset();
+                for (int i = 0; i < flatChildren.length; i++)
+                {
+                    Position p = (Position) flatChildren[i];
+                    if (p.offset <= documentOffset && documentOffset < p.offset + p.length)
+                    {
+                        treeViewer.setSelection(new StructuredSelection((DocumentArtifact) p));
+                    }
+
+                }
+            }
+            super.setSelection(selection);
+        }
+
+    }
 }

@@ -37,7 +37,6 @@ import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.ParserRuntimeException;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
@@ -89,11 +88,13 @@ public abstract class AbstractScanner implements IProblemCollector
             {
                 doScan(source, resultObject);
 
-            } catch (ParserRuntimeException e)
+            } catch (Exception e)
             {
                 // do nothing - return what we have so far
                 // this could only happen when pull parsing!
-                e.printStackTrace();
+                TapestryCore.log(e);
+                if (e instanceof RuntimeException)
+                    throw (RuntimeException)e;
             }
             return afterScan(resultObject);
         } finally

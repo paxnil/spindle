@@ -28,22 +28,25 @@ package com.iw.plugins.spindle.editors.spec.assist;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IStorage;
+import org.apache.tapestry.spec.IComponentSpecification;
+import org.apache.tapestry.spec.IParameterSpecification;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
@@ -70,6 +73,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
     private boolean fIsAttributeTerminated;
 
+    private DocumentArtifact fTag;
+
+    private SpecAssistHelper fAssistHelper;
+
     public AttributeCompletionProcessor(Editor editor)
     {
         super(editor);
@@ -80,14 +87,14 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
      */
     protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        DocumentArtifact tag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
-        fTagName = tag.getName();
-        String type = tag.getType();
+        fTag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
+        fTagName = fTag.getName();
+        String type = fTag.getType();
         if (fTagName == null
             || (type != DocumentArtifactPartitioner.TAG && type != DocumentArtifactPartitioner.EMPTYTAG))
             return NoProposals;
 
-        DocumentArtifact attribute = tag.getAttributeAt(documentOffset);
+        DocumentArtifact attribute = fTag.getAttributeAt(documentOffset);
         fAttributeName = attribute.getName();
 
         if (fAttributeName == null)
@@ -151,11 +158,111 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         {
             if (special != null)
                 proposals.add(getProposal(special));
-        } 
+        }
 
         Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
 
         return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+    }
+
+    /* (non-Javadoc)
+        * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer, int)
+        */
+    public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int documentOffset)
+    {
+        SpecAssistHelper helper;
+        try
+        {
+            helper = new SpecAssistHelper(fEditor);
+        } catch (IllegalArgumentException e)
+        {
+            return NoInformation;
+        }
+        fTag = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
+        fTagName = fTag.getName();
+
+        if (fTagName == null)
+            return NoInformation;
+
+        DocumentArtifact attribute = fTag.getAttributeAt(documentOffset);
+
+        if (attribute != null)
+        {
+            fAttributeName = attribute.getName();
+            String value = attribute.getAttributeValue();
+
+            if (value != null)
+            {
+                fAssistHelper = null;
+                try
+                {
+                    fAssistHelper = new SpecAssistHelper(fEditor);
+                } catch (IllegalArgumentException e1)
+                {
+                    return NoInformation;
+                }
+
+                if ("component".equals(fTagName) && "type".equals(fAttributeName))
+                    return computeComponentTypeInformation(value);
+
+                if ("binding".equals(fTagName) && "name".equals(fAttributeName))
+                    return computeBindingNameInformation(value);
+
+                if ("static-binding".equals(fTagName) && "name".equals(fAttributeName))
+                    return computeBindingNameInformation(value);
+
+                if ("message-binding".equals(fTagName) && "name".equals(fAttributeName))
+                    return computeBindingNameInformation(value);
+
+                if ("inherited-binding".equals(fTagName) && "name".equals(fAttributeName))
+                    return computeBindingNameInformation(value);
+
+                if ("listener-binding".equals(fTagName) && "name".equals(fAttributeName))
+                    return computeBindingNameInformation(value);
+            }
+        }
+        return NoInformation;
+    }
+
+    /**
+     * @param value
+     * @return
+     */
+    private IContextInformation[] computeComponentTypeInformation(String value)
+    {
+        IComponentSpecification resolved = fAssistHelper.resolveComponentType(value);
+        
+        if (resolved == null)
+            return NoInformation;
+            
+        
+        UITapestryAccess.Result info =
+            fAssistHelper.createComponentInformationResult(value, value, resolved);
+            
+        return new IContextInformation[] { new ContextInformation(value, info.description)};    
+    }
+
+    /**
+     * @param value
+     * @return
+     */
+    private IContextInformation[] computeBindingNameInformation(String value)
+    {
+        PluginComponentSpecification containedComponent = findParentSpecification();
+        // are we editing a component/page and was it picked up by the last build?
+
+        if (containedComponent == null)
+            return NoInformation;
+
+        IParameterSpecification parameter = containedComponent.getParameter(value);
+
+        if (parameter == null)
+            return NoInformation;
+
+        UITapestryAccess.Result info =
+            fAssistHelper.createParameterResult(value, parameter, containedComponent.getPublicId());
+
+        return new IContextInformation[] { new ContextInformation(value, info.description)};
     }
 
     /**
@@ -163,10 +270,121 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
      */
     private List computeTagAttrSpecificProposals()
     {
+        fAssistHelper = null;
+        try
+        {
+            fAssistHelper = new SpecAssistHelper(fEditor);
+        } catch (IllegalArgumentException e1)
+        {
+            return Collections.EMPTY_LIST;
+        }
         if ("component".equals(fTagName) && "type".equals(fAttributeName))
             return computeComponentTypeProposals();
 
+        if ("binding".equals(fTagName) && "name".equals(fAttributeName))
+            return computeBindingNameProposals();
+
+        if ("static-binding".equals(fTagName) && "name".equals(fAttributeName))
+            return computeBindingNameProposals();
+
+        if ("message-binding".equals(fTagName) && "name".equals(fAttributeName))
+            return computeBindingNameProposals();
+
+        if ("inherited-binding".equals(fTagName) && "name".equals(fAttributeName))
+            return computeBindingNameProposals();
+
+        if ("listener-binding".equals(fTagName) && "name".equals(fAttributeName))
+            return computeBindingNameProposals();
+
         return Collections.EMPTY_LIST;
+    }
+
+    private PluginComponentSpecification findParentSpecification()
+    {
+        PluginComponentSpecification fileComponent = (PluginComponentSpecification) fEditor.getComponent();
+        if (fileComponent == null)
+            return null;
+
+        // need to determine:
+        // 1. the component type
+        // 2. the parameter names already in use
+        DocumentArtifact parent = fTag.getParent();
+        String parentName;
+
+        // locate the spec for the contained component
+        if (parent != null)
+        {
+            parentName = parent.getName();
+            if (parentName != null && parentName.equals("component"))
+            {
+                Map attrs = parent.getAttributesMap();
+                DocumentArtifact typeAttribute = (DocumentArtifact) attrs.get("type");
+                if (typeAttribute != null)
+                {
+                    String typeValue = typeAttribute.getAttributeValue();
+                    if (typeValue != null && typeValue.length() > 0)
+                        return (PluginComponentSpecification) fAssistHelper.resolveComponentType(typeValue);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * compute proposals for 'name' attributes of the various binding tags.
+     */
+    private List computeBindingNameProposals()
+    {
+        PluginComponentSpecification containedComponent = findParentSpecification();
+        // are we editing a component/page and was it picked up by the last build?
+
+        if (containedComponent == null)
+            return Collections.EMPTY_LIST;
+
+        // get a list of parameters already chosen
+        List children = fTag.getParent().getChildren();
+        Set existingParameterNames = new HashSet();
+        for (Iterator iter = children.iterator(); iter.hasNext();)
+        {
+            DocumentArtifact child = (DocumentArtifact) iter.next();
+            String childType = child.getType();
+            if ((childType != DocumentArtifactPartitioner.TAG && childType != DocumentArtifactPartitioner.EMPTYTAG)
+                || child.equals(fTag))
+                continue;
+
+            String childName = child.getName();
+            if (childName == null || childName.length() == 0)
+                continue;
+
+            if (!("binding".equals(childName)
+                || "static-binding".equals(childName)
+                || "inherited-binding".equals(childName)
+                || "message-binding".equals(childName)
+                || "listener-binding".equals(childName)))
+            {
+                continue;
+            }
+            Map childParms = child.getAttributesMap();
+            DocumentArtifact nameAttr = (DocumentArtifact) childParms.get("name");
+            if (nameAttr == null)
+                continue;
+
+            existingParameterNames.add(nameAttr.getAttributeValue().toLowerCase());
+        }
+
+        UITapestryAccess.Result[] parms =
+            SpecAssistHelper.findParameters(containedComponent, fMatchString, existingParameterNames);
+
+        List proposals = new ArrayList();
+        for (int i = 0; i < parms.length; i++)
+        {
+            CompletionProposal proposal = getProposal(parms[i].name, parms[i].displayName, parms[i].description);
+            if (parms[i].required)
+                proposal.setImage(Images.getSharedImage("bullet_pink.gif"));
+            proposals.add(proposal);
+        }
+
+        return proposals;
     }
 
     /**
@@ -217,22 +435,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
     private List computeComponentTypeProposals()
     {
-        SpecAssistHelper helper = null;
-        try
-        {
-            helper = new SpecAssistHelper(fEditor);
-            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
-            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            helper.setFrameworkNamespace(
-                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
-        } catch (IllegalArgumentException e1)
-        {
-            return Collections.EMPTY_LIST;
-        }
 
         List proposals = new ArrayList();
 
-        UITapestryAccess.Result[] foundTopLevel = helper.getComponents();
+        UITapestryAccess.Result[] foundTopLevel = fAssistHelper.getComponents();
         for (int i = 0; i < foundTopLevel.length; i++)
         {
             boolean matches =
@@ -245,7 +451,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
                 proposals.add(proposal);
             }
         }
-        UITapestryAccess.Result[] foundChild = helper.getAllChildNamespaceComponents();
+        UITapestryAccess.Result[] foundChild = fAssistHelper.getAllChildNamespaceComponents();
         for (int i = 0; i < foundChild.length; i++)
         {
             boolean matches = fMatchString == null ? true : foundChild[i].name.toLowerCase().startsWith(fMatchString);

@@ -40,13 +40,19 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewerExtension3;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
@@ -95,10 +101,13 @@ public class SpecEditor extends Editor
     IScannerValidator fValidator = null;
     Parser fParser = new Parser();
     Object fReconciledSpec;
+    ISelectionChangedListener fSelectionChangedListener;
+    OutlinePageSelectionUpdater fUpdater;
 
     public SpecEditor()
     {
         super();
+        fOutline = new SpecificationOutlinePage(this, fPreferenceStore);
     }
 
     /* (non-Javadoc)
@@ -107,7 +116,10 @@ public class SpecEditor extends Editor
     public void createPartControl(Composite parent)
     {
         super.createPartControl(parent);
-        fOutline.addSelectionChangedListener(new ISelectionChangedListener()
+
+        fUpdater = new OutlinePageSelectionUpdater();
+
+        fSelectionChangedListener = new ISelectionChangedListener()
         {
             public void selectionChanged(SelectionChangedEvent event)
             {
@@ -116,15 +128,36 @@ public class SpecEditor extends Editor
                 {
                     IStructuredSelection structured = (IStructuredSelection) selection;
                     Object first = structured.getFirstElement();
-                    if (first instanceof DocumentArtifact)
-                    {
-                        DocumentArtifact artifact = (DocumentArtifact) first;
-                        selectAndReveal(artifact.getOffset(), artifact.getLength());
-                    }
+                    openTo(first);
                 }
 
             }
-        });
+
+        };
+
+        if (fOutline != null)
+            fOutline.addSelectionChangedListener(fSelectionChangedListener);
+
+    }
+
+    private void openTo(Object obj)
+    {
+        if (obj instanceof DocumentArtifact)
+        {
+            DocumentArtifact artifact = (DocumentArtifact) obj;
+            String type = artifact.getType();
+            if (type == DocumentArtifactPartitioner.ATTR)
+            {
+                IRegion valueRegion = artifact.getAttributeValueRegion();
+                if (valueRegion != null)
+                {
+                    selectAndReveal(valueRegion.getOffset(), valueRegion.getLength());
+                    return;
+                }
+            }
+            selectAndReveal(artifact.getOffset(), artifact.getLength());
+
+        }
     }
 
     /* (non-Javadoc)
@@ -209,7 +242,7 @@ public class SpecEditor extends Editor
      */
     public IContentOutlinePage createContentOutlinePage(IEditorInput input)
     {
-        return new SpecificationOutlinePage(this);
+        return fOutline;
     }
 
     /* (non-Javadoc)
@@ -247,6 +280,16 @@ public class SpecEditor extends Editor
         markAsStateDependentAction(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, true);
         setAction("ContentAssistProposal", action);
 
+    }
+
+    /*
+     * @see AbstractTextEditor#handleCursorPositionChanged()
+     */
+    protected void handleCursorPositionChanged()
+    {
+        super.handleCursorPositionChanged();
+        if (fUpdater != null)
+            fUpdater.post();
     }
 
     /* (non-Javadoc)
@@ -289,6 +332,7 @@ public class SpecEditor extends Editor
                     // do nothing
                 }
             }
+            fUpdater.post();
 
         } finally
         {
@@ -366,8 +410,8 @@ public class SpecEditor extends Editor
                         {
                             UIPlugin.log(e);
                         }
+                        didReconcile = true;
                     }
-                    didReconcile = true;
                 }
             }
             fReconciledSpec = reconcileResult;
@@ -508,7 +552,77 @@ public class SpecEditor extends Editor
         }
     }
 
-    class ApplicationReconciler extends LibraryReconciler
+    /**
+    * Synchronizes the outliner selection with the actual cursor
+    * position in the editor.
+    */
+    public void synchronizeOutlinePageSelection()
+    {
+
+        ISourceViewer sourceViewer = getSourceViewer();
+        if (sourceViewer == null || fOutline == null)
+            return;
+
+        StyledText styledText = sourceViewer.getTextWidget();
+        if (styledText == null)
+            return;
+
+        int caret = 0;
+        if (sourceViewer instanceof ITextViewerExtension3)
+        {
+            ITextViewerExtension3 extension = (ITextViewerExtension3) sourceViewer;
+            caret = extension.widgetOffset2ModelOffset(styledText.getCaretOffset());
+        } else
+        {            
+            int offset = sourceViewer.getVisibleRegion().getOffset();
+            caret = offset + styledText.getCaretOffset();
+        }
+
+        fOutline.removeSelectionChangedListener(fSelectionChangedListener);
+        ((SpecificationOutlinePage) fOutline).setSelection(new StructuredSelection(new Region(caret, 0)));
+        fOutline.addSelectionChangedListener(fSelectionChangedListener);
+
+    }
+
+    /**
+     * "Smart" runnable for updating the outline page's selection.
+     */
+    class OutlinePageSelectionUpdater implements Runnable
+    {
+
+        /** Has the runnable already been posted? */
+        private boolean fPosted = false;
+
+        public OutlinePageSelectionUpdater()
+        {}
+
+        /*
+         * @see Runnable#run()
+         */
+        public void run()
+        {
+            synchronizeOutlinePageSelection();
+            fPosted = false;
+        }
+
+        /**
+         * Posts this runnable into the event queue.
+         */
+        public void post()
+        {
+            if (fPosted)
+                return;
+
+            Shell shell = getSite().getShell();
+            if (shell != null & !shell.isDisposed())
+            {
+                fPosted = true;
+                shell.getDisplay().asyncExec(this);
+            }
+        }
+    };
+
+    class ApplicationReconciler extends BaseWorker
     {
         ApplicationScanner scanner;
 
@@ -522,6 +636,44 @@ public class SpecEditor extends Editor
         protected boolean isSpecOk(Object spec)
         {
             return spec instanceof IApplicationSpecification;
+        }
+
+        protected SpecificationScanner getInitializedScanner(IApplicationSpecification application)
+        {
+            scanner.setExternalProblemCollector(collector);
+            scanner.setResourceLocation(application.getSpecificationLocation());
+            String publicId = W3CAccess.getPublicId(fParser.getParsedDocument());
+            if (publicId == null)
+                return null;
+            return scanner;
+        }
+
+        protected Object doReconcile(String content, Object spec, IScannerValidator validator)
+        {
+            if (isSpecOk(spec))
+            {
+                if (isCancelled())
+                    return null;
+                Node node = parse(content);
+                if (isCancelled())
+                    return null;
+                if (node != null)
+                {
+                    SpecificationScanner initializedScanner = getInitializedScanner((IApplicationSpecification) spec);
+                    if (initializedScanner != null)
+                    {
+                        validator.setProblemCollector(initializedScanner);
+                        try
+                        {
+                            return initializedScanner.scan(node, validator);
+                        } catch (ScannerException e)
+                        {
+                            // eat it
+                        }
+                    }
+                }
+            }
+            return null;
         }
     }
 
