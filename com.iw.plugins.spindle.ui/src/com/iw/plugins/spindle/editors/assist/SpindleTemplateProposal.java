@@ -28,9 +28,8 @@ package com.iw.plugins.spindle.editors.assist;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContext;
-import org.eclipse.jface.text.templates.TemplateProposal;
-import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.swt.graphics.Image;
 
 /**
  * SpindleTemplateProposal orderable template proposal.
@@ -38,34 +37,33 @@ import org.eclipse.swt.graphics.Image;
  * @author glongman@gmail.com
  *  
  */
-public class SpindleTemplateProposal extends TemplateProposal implements OrderedProposal
+public class SpindleTemplateProposal extends TemplateProposal 
 {
-  private int fYOrder;
-  private TemplateContext fContext;
+
+  
   private String fAdditionalInfo;
 
   public SpindleTemplateProposal(Template template, TemplateContext context,
       IRegion region, String extraInfo, Image image, int yOrder, int relevance)
   {
     super(template, context, region, image, relevance);
-    fYOrder = yOrder;
-    fContext = context;
+   setYOrder(yOrder);
     fAdditionalInfo = extraInfo;
   }
 
   public SpindleTemplateProposal(Template template, TemplateContext context,
-      IRegion region, String extraInfo,  Image image, int yOrder)
+      IRegion region, String extraInfo, Image image, int yOrder)
   {
-    this(template, context, region, extraInfo,  image, yOrder, 99);
+    this(template, context, region, extraInfo, image, yOrder, 99);
   }
 
   public String getDisplayString()
   {
     if (fContext instanceof AttributeTemplateContext)
       return ((AttributeTemplateContext) fContext).getAttributeName();
-    
+
     if (fContext instanceof TagTemplateContext)
-      return ((TagTemplateContext)fContext).getDisplayString();
+      return ((TagTemplateContext) fContext).getDisplayString();
 
     return super.getDisplayString();
   }
@@ -81,25 +79,6 @@ public class SpindleTemplateProposal extends TemplateProposal implements Ordered
       return fAdditionalInfo;
 
     return super.getAdditionalProposalInfo();
-  }
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.editors.assist.OrderedProposal#setYOrder(int)
-   */
-  public void setYOrder(int order)
-  {
-    fYOrder = order;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.editors.assist.OrderedProposal#getYOrder()
-   */
-  public int getYOrder()
-  {
-    return fYOrder;
   }
 
 }
