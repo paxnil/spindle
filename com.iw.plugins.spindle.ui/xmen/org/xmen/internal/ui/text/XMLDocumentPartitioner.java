@@ -12,6 +12,7 @@
 package org.xmen.internal.ui.text;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -41,19 +42,58 @@ import com.iw.plugins.spindle.core.util.Assert;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: XMLDocumentPartitioner.java,v 1.2.2.2 2004/06/22 12:25:19
- *          glongman Exp $
+ *                     glongman Exp $
  */
-public class XMLDocumentPartitioner 
+public class XMLDocumentPartitioner
     implements
       IDocumentPartitioner,
       IDocumentPartitionerExtension,
       IDocumentPartitionerExtension2
 {
+
+  public static interface Listener
+  {
+    void connected(IDocument document);
+    void disconnected(IDocument document);
+  }
+
+  private static ArrayList LISTENERS = new ArrayList();
+
+  public static void addListener(Listener l)
+  {
+    if (!LISTENERS.contains(l))
+      LISTENERS.add(l);
+  }
+
+  public static void removeListener(Listener l)
+  {
+    LISTENERS.remove(l);
+  }
+
+  private static void connected(IDocument document)
+  {
+    for (Iterator iter = LISTENERS.iterator(); iter.hasNext();)
+    {
+      Listener element = (Listener) iter.next();
+      element.connected(document);
+    }
+  }
+
+  private static void disconnected(IDocument document)
+  {
+    for (Iterator iter = LISTENERS.iterator(); iter.hasNext();)
+    {
+      Listener element = (Listener) iter.next();
+      element.disconnected(document);
+    }
+  }
+
   public static final String CONTENT_TYPES_CATEGORY = "__spindle_xml_artifacts_category";
 
-  public static RuleBasedPartitionScanner createScanner() {
+  public static RuleBasedPartitionScanner createScanner()
+  {
     RuleBasedPartitionScanner result = new RuleBasedPartitionScanner();
-    result.setPredicateRules(new IPredicateRule[] { new XMLTagsRule() });
+    result.setPredicateRules(new IPredicateRule[]{new XMLTagsRule()});
     return result;
   }
 
@@ -113,7 +153,7 @@ public class XMLDocumentPartitioner
    */
   public String[] getManagingPositionCategories()
   {
-    return new String[] { fPositionCategory };
+    return new String[]{fPositionCategory};
   }
 
   /*
@@ -128,6 +168,8 @@ public class XMLDocumentPartitioner
     fDocument.addPositionCategory(fPositionCategory);
 
     initialize();
+
+    connected(document);
   }
 
   /**
@@ -180,6 +222,7 @@ public class XMLDocumentPartitioner
     {
       // can not happen because of Assert
     }
+    disconnected(fDocument);
   }
 
   /*
@@ -620,7 +663,7 @@ public class XMLDocumentPartitioner
 
   /*
    * @see org.eclipse.jface.text.IDocumentPartitionerExtension2#computeZeroLengthPartitioning(int,
-   *      int)
+   *              int)
    * @since 3.0
    */
   public ITypedRegion[] computePartitioning(

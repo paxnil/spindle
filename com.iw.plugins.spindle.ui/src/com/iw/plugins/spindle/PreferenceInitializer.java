@@ -146,7 +146,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
     store.setDefault(TEMPLATE_EDITOR_HTML_SHOW_XHTML, TemplateEditor.XHTML_NONE_LABEL);
     store.setDefault(AUTO_ACTIVATE_CONTENT_ASSIST, true);
     
-    store.setDefault(FORMATTER_MAX_LINE_LENGTH, 132); 
+    store.setDefault(FORMATTER_MAX_LINE_LENGTH, 2); 
     store.setDefault(FORMATTER_WRAP_LONG, true);  
     store.setDefault(FORMATTER_ALIGN, false);  
     store.setDefault(FORMATTER_PRESERVE_BLANK_LINES, true);

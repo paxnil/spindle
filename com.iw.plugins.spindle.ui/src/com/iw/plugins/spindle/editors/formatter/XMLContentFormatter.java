@@ -35,8 +35,10 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.formatter.IFormattingStrategy;
+import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.rules.DefaultPartitioner;
+
+import com.iw.plugins.spindle.core.util.Assert;
 
 /**
  * a formatter for XML content.
@@ -54,29 +56,29 @@ import org.eclipse.jface.text.rules.DefaultPartitioner;
  */
 public class XMLContentFormatter
 {
-  public interface FormattingStrategy
-  {
-    /**
-     * Do the actual formatting. The document should not be modified by this
-     * method. Instead, the formatted string must be returned and will be used
-     * by the caller to replace the document text, after synchronizing
-     * positionings.
-     * 
-     * @param document the document containing the region to be formatted.
-     * @param offset the offset into the document
-     * @param length length of the region to format
-     * @param positions positions that must be maintained by the formatter
-     * @return the formatted string to be inserted in place of the selected
-     *                 region
-     */
-    String format(
-        FormattingPreferences prefs,
-        IDocument document,
-        int offset,
-        int length,
-        int[] positions);
-
-  }
+//  public static interface FormatWorker
+//  {
+//    /**
+//     * Do the actual formatting. The document should not be modified by this
+//     * method. Instead, the formatted string must be returned and will be used
+//     * by the caller to replace the document text, after synchronizing
+//     * positionings.
+//     * 
+//     * @param prefs the formatter preferences
+//     * @param document the document containing the region to be formatted.
+//     * @param offset the offset into the document
+//     * @param length length of the region to format
+//     * @param positions positions that must be maintained by the formatter
+//     * @return the formatted string to be inserted in place of the selected
+//     *                 region
+//     */
+//    String format(
+//        FormattingPreferences prefs,
+//        IDocument document,
+//       TypedPosition position,
+//        int[] positions);
+//
+//  }
 
   /**
    * Defines a reference to either the offset or the end offset of a particular
@@ -279,7 +281,7 @@ public class XMLContentFormatter
    */
   private List fOverlappingPositionReferences;
   /** The strategy used to do the actual formatting */
-  private FormattingStrategy fFormattingStrategy;
+  private FormatWorker fFormatWorker; 
   /** The store to pull formatting preferences from */
   private FormattingPreferences fFormattingPreferences;
   /** Display tab width - set on construction only */
@@ -289,36 +291,40 @@ public class XMLContentFormatter
    *                     manage the document's partitioning information and thus should be
    *                     ignored when this formatter updates positions
    */
-  public XMLContentFormatter(FormattingStrategy formattingStrategy,
+  public XMLContentFormatter(FormatWorker formatWorker,
       String[] partitioningCategories, FormattingPreferences formattingPreferences)
   {
+    Assert.isLegal(!formatWorker.usesEdits());
     fPartitionManagingCategories = partitioningCategories;
-    fFormattingStrategy = formattingStrategy;
+    fFormatWorker = formatWorker;
     fFormattingPreferences = formattingPreferences;
   }
 
-  public void format(IDocument document, final int offset, int length)
+  public void format(IDocument document, TypedPosition partition)
   {
+
     try
     {
 
-      final int[] positions = getAffectedPositions(document, offset, length);
+      final int[] positions = getAffectedPositions(
+          document,
+          partition.offset,
+          partition.length);
 
-      String formatted = fFormattingStrategy.format(
+      String formatted = (String) fFormatWorker.format(
           fFormattingPreferences,
           document,
-          offset,
-          length,
+          partition,
           positions);
 
       if (formatted != null)
       {
         IPositionUpdater first = new RemoveAffectedPositions();
         document.insertPositionUpdater(first, 0);
-        IPositionUpdater last = new UpdateAffectedPositions(positions, offset);
+        IPositionUpdater last = new UpdateAffectedPositions(positions, partition.offset);
         document.addPositionUpdater(last);
 
-        document.replace(offset, length, formatted);
+        document.replace(partition.offset, partition.length, formatted);
 
         document.removePositionUpdater(first);
         document.removePositionUpdater(last);
@@ -327,17 +333,6 @@ public class XMLContentFormatter
     {
       // should not happen
     }
-  }
-
-  /*
-   * We dont support/use formatting strategies, therefore this method returns
-   * <code> null </code>
-   * 
-   * @see IContentFormatter#getFormattingStrategy(String)
-   */
-  public IFormattingStrategy getFormattingStrategy(String contentType)
-  {
-    return null;
   }
 
   /**

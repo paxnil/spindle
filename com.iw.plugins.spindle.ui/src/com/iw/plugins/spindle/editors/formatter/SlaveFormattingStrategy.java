@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editors.formatter;
 import java.util.LinkedList;
 
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
@@ -35,15 +36,21 @@ import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.formatter.IFormattingStrategy;
 import org.eclipse.jface.text.rules.DefaultPartitioner;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
+import com.iw.plugins.spindle.UIPlugin;
+
 /**
- * MasterFormattingStrategy the master xml formatting Strategy
+ * SlaveFormattingStrategy formatting xml start tags only Will do nothing if
+ * fPrefs aren't set to wrap long lines.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: MasterFormattingStrategy.java,v 1.1.2.1 2004/07/11 04:33:42
+ *                     glongman Exp $
  */
-public class MasterFormattingStrategy extends ContextBasedFormattingStrategy
+public class SlaveFormattingStrategy extends ContextBasedFormattingStrategy
     implements
       IFormattingStrategy
 {
@@ -54,20 +61,29 @@ public class MasterFormattingStrategy extends ContextBasedFormattingStrategy
   private final LinkedList fPartitions = new LinkedList();
 
   /** access to the preferences store * */
-  private FormattingPreferences prefs;
+  private FormattingPreferences fPrefs;
 
-  private int indent = -1;
+  /** partition types we allow */
+  private String[] fAllowedTypes;
 
-  public MasterFormattingStrategy()
+  private FormatWorker fFormatWorker;
+
+  public SlaveFormattingStrategy(String[] allowedContentTypes, FormatWorker worker)
   {
-    this.prefs = new FormattingPreferences();
+    this(new FormattingPreferences(), allowedContentTypes, worker);
   }
 
-  public MasterFormattingStrategy(FormattingPreferences prefs, int indent)
+  public SlaveFormattingStrategy(FormattingPreferences prefs,
+      String[] allowedContentTypes, FormatWorker worker)
   {
     Assert.isNotNull(prefs);
-    this.prefs = prefs;
-    this.indent = indent;
+    Assert.isNotNull(allowedContentTypes);
+    Assert.isLegal(allowedContentTypes.length > 0);
+    Assert.isNotNull(worker);
+    Assert.isLegal(worker.usesEdits());
+    fPrefs = prefs;
+    fAllowedTypes = allowedContentTypes;
+    fFormatWorker = worker;
   }
 
   /*
@@ -77,22 +93,41 @@ public class MasterFormattingStrategy extends ContextBasedFormattingStrategy
    */
   public void format()
   {
-    // TODO Auto-generated method stub
+
     super.format();
+
     final IDocument document = (IDocument) fDocuments.removeFirst();
     final TypedPosition partition = (TypedPosition) fPartitions.removeFirst();
 
+    if (!isAllowedType(partition.getType()))
+      return;
+
     if (document != null && partition != null)
     {
+      Object result = fFormatWorker.format(fPrefs, document, partition, new int[]{});
+      if (result != null && result instanceof TextEdit)
+        try
+        {
+          ((TextEdit) result).apply(document);
+        } catch (MalformedTreeException e)
+        {
+          UIPlugin.log(e);
+        } catch (BadLocationException e)
+        {
+          UIPlugin.log(e);
+        }
+    }
+  }
 
-      XMLContentFormatter formatter = new XMLContentFormatter(
-          new MasterFormatWorker(),
-          new String[]{DefaultPartitioner.CONTENT_TYPES_CATEGORY,
-              XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY},
-          prefs);
-      formatter.format(document, partition);
+  private boolean isAllowedType(String type)
+  {
+    for (int i = 0; i < fAllowedTypes.length; i++)
+    {
+      if (fAllowedTypes[i].equals(type))
+        return true;
     }
 
+    return false;
   }
 
   /*

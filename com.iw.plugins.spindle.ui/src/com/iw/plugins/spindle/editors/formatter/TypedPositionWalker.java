@@ -80,6 +80,14 @@ class TypedPositionWalker
     return artifact;
   }
 
+  public boolean hasNext()
+  {
+    if (!modeForward)
+      throw new UnsupportedOperationException(
+          "calling hasNext on backward walker not allowed");
+    return fNextIndex < fTypedPositions.length;
+  }
+
   public TypedPosition previous() throws BadLocationException
   {
     if (modeForward)
@@ -93,6 +101,14 @@ class TypedPositionWalker
     fLastIndex = fNextIndex;
     fNextIndex -= 1;
     return artifact;
+  }
+
+  public boolean hasPrevious()
+  {
+    if (modeForward)
+      throw new UnsupportedOperationException(
+          "calling hasPrevious on forward walker not allowed");
+    return fNextIndex >= 0;
   }
 
   /**

@@ -732,7 +732,7 @@ public class XMLNode extends TypedPosition
     }
 
     String name = getName();
-    int initial = name == null ? 0 : name.length();
+    int initial = name == null ? 0 : content.indexOf(name)+name.length() ;
 
     for (int i = startLength + initial; i < content.length() - endLength; i++)
     {

@@ -84,10 +84,11 @@ public abstract class StorageDocumentModelProvider extends StorageDocumentProvid
 
     if (document != null)
     {
-      TextUtilities.addDocumentPartitioners(document, createParitionerMap());
       XMLReconciler model = new XMLReconciler();
-      model.createTree(document);
+      model.setDocument(document);
+      document.addDocumentListener(model);
       fModelMap.put(document, model);
+      TextUtilities.addDocumentPartitioners(document, createParitionerMap());
     }
     return document;
   }

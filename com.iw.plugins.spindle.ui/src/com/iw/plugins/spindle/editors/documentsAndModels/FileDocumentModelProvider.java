@@ -46,10 +46,11 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: FileDocumentModelProvider.java,v 1.1.2.1 2004/06/22 12:13:52
- *          glongman Exp $
+ *                     glongman Exp $
  */
-public abstract class FileDocumentModelProvider extends FileDocumentProvider implements
-    IXMLModelProvider
+public abstract class FileDocumentModelProvider extends FileDocumentProvider
+    implements
+      IXMLModelProvider
 {
   private Map fModelMap = new HashMap();
 
@@ -86,11 +87,11 @@ public abstract class FileDocumentModelProvider extends FileDocumentProvider imp
 
     if (document != null)
     {
-      TextUtilities.addDocumentPartitioners(document, createParitionerMap());
       XMLReconciler model = new XMLReconciler();
-      model.createTree(document);
+      model.setDocument(document);
       document.addDocumentListener(model);
       fModelMap.put(document, model);
+      TextUtilities.addDocumentPartitioners(document, createParitionerMap());
     }
     return document;
   }
@@ -123,13 +124,17 @@ public abstract class FileDocumentModelProvider extends FileDocumentProvider imp
    * (non-Javadoc)
    * 
    * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#disposeElementInfo(java.lang.Object,
-   *      org.eclipse.ui.texteditor.AbstractDocumentProvider.ElementInfo)
+   *              org.eclipse.ui.texteditor.AbstractDocumentProvider.ElementInfo)
    */
   protected void disposeElementInfo(Object element, ElementInfo info)
   {
     XMLReconciler model = (XMLReconciler) fModelMap.remove(info.fDocument);
     if (model != null)
+    {
       model.dispose();
+      info.fDocument.removeDocumentListener(model);
+      XMLDocumentPartitioner.removeListener(model);
+    }
     super.disposeElementInfo(element, info);
 
   }

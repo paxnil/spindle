@@ -57,13 +57,18 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
 import com.iw.plugins.spindle.editors.DefaultDoubleClickStrategy;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.formatter.DoctypeEditFormatWorker;
+import com.iw.plugins.spindle.editors.formatter.FormattingPreferences;
 import com.iw.plugins.spindle.editors.formatter.MasterFormattingStrategy;
+import com.iw.plugins.spindle.editors.formatter.SlaveFormattingStrategy;
+import com.iw.plugins.spindle.editors.formatter.StartTagEditFormatWorker;
 import com.iw.plugins.spindle.editors.spec.assist.AttributeCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.TagCompletionProcessor;
@@ -151,14 +156,25 @@ public class SpecConfiguration extends BaseSourceConfiguration
   {
 
     MultiPassContentFormatter formatter = new MultiPassContentFormatter(
-        XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY, //used for slave formatters only
+        XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY,
         IDocument.DEFAULT_CONTENT_TYPE);
 
-    formatter.setMasterStrategy(new MasterFormattingStrategy());
+    formatter.setMasterStrategy(new MasterFormattingStrategy());    
 
-    //    formatter.setSlaveStrategy(
-    //        new XmlElementFormattingStrategy(),
-    //        AntEditorPartitionScanner.XML_TAG);
+    formatter.setSlaveStrategy(new SlaveFormattingStrategy(
+        new FormattingPreferences(),
+        new String[]{ITypeConstants.TAG},
+        new StartTagEditFormatWorker()), ITypeConstants.TAG);
+    
+    formatter.setSlaveStrategy(new SlaveFormattingStrategy(
+        new FormattingPreferences(),
+        new String[]{ITypeConstants.EMPTYTAG},
+        new StartTagEditFormatWorker()), ITypeConstants.EMPTYTAG);
+    
+    formatter.setSlaveStrategy(new SlaveFormattingStrategy(
+        new FormattingPreferences(),
+        new String[]{ITypeConstants.DECL},
+        new DoctypeEditFormatWorker()), ITypeConstants.DECL);
 
     return formatter;
   }

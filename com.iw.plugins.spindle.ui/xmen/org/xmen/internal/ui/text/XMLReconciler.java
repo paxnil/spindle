@@ -33,9 +33,10 @@ import com.iw.plugins.spindle.UIPlugin;
  * To change the template for this generated type comment go to
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
-public class XMLReconciler implements IDocumentListener
+public class XMLReconciler implements IDocumentListener, XMLDocumentPartitioner.Listener
 {
-  private IDocument document;
+
+  private IDocument fDocument;
   private ArrayList storedPos;
   private ArrayList deleted;
   private ArrayList added;
@@ -79,11 +80,44 @@ public class XMLReconciler implements IDocumentListener
   /*
    * (non-Javadoc)
    * 
+   * @see org.xmen.internal.ui.text.XMLDocumentPartitioner.Listener#connected(org.eclipse.jface.text.IDocument)
+   */
+  public void connected(IDocument document)
+  {
+    if (fDocument == document)
+    {
+      createTree(fDocument);
+      fireModelChanged();
+    }
+  }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.xmen.internal.ui.text.XMLDocumentPartitioner.Listener#disconnected(org.eclipse.jface.text.IDocument)
+   */
+  public void disconnected(IDocument document)
+  {
+    if (fDocument == document)
+    {
+      storedPos.clear();
+      added.clear();
+      deleted.clear();
+      root = null;
+      sendOnlyAdditions = false;
+      firstTime = true;
+      fireModelChanged();
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#setDocument(org.eclipse.jface.text.IDocument)
    */
   public void setDocument(IDocument document)
   {
-    this.document = document;
+    this.fDocument = document;
+    XMLDocumentPartitioner.addListener(this);
   }
 
   //    /* (non-Javadoc)
@@ -124,7 +158,7 @@ public class XMLReconciler implements IDocumentListener
 
   public void createTree(IDocument doc)
   {
-    document = doc;
+    fDocument = doc;
     try
     {
       Position[] pos = doc.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
@@ -183,7 +217,7 @@ public class XMLReconciler implements IDocumentListener
   public void documentChanged(DocumentEvent event)
   {
     IDocument doc = event.getDocument();
-    document = doc;
+    fDocument = doc;
     XMLNode firstAdded = null;
     try
     {
@@ -342,7 +376,7 @@ public class XMLReconciler implements IDocumentListener
       sendOnlyAdditions = false;
     } catch (BadPositionCategoryException e)
     {
-      UIPlugin.log(e);
+      //UIPlugin.log(e);
     }
   }
 
@@ -351,7 +385,7 @@ public class XMLReconciler implements IDocumentListener
     try
     {
       sendOnlyAdditions = true;
-      document.replace(to.getOffset(), 0, "<" + name + "/>");
+      fDocument.replace(to.getOffset(), 0, "<" + name + "/>");
     } catch (BadLocationException e)
     {
 
@@ -364,7 +398,7 @@ public class XMLReconciler implements IDocumentListener
     try
     {
       sendOnlyAdditions = true;
-      document.replace(to.getOffset() + to.getLength(), 0, "<" + name + "/>");
+      fDocument.replace(to.getOffset() + to.getLength(), 0, "<" + name + "/>");
     } catch (BadLocationException e)
     {
       UIPlugin.log(e);
@@ -596,7 +630,7 @@ public class XMLReconciler implements IDocumentListener
 
     try
     {
-      document.replace(offset, 0, "<" + name + "/>");
+      fDocument.replace(offset, 0, "<" + name + "/>");
       sendOnlyAdditions = true;
     } catch (BadLocationException e)
     {
@@ -665,7 +699,7 @@ public class XMLReconciler implements IDocumentListener
     try
     {
       sendOnlyAdditions = true;
-      document.replace(to.getOffset() + to.getLength() - 1, 0, " " + name + "=\"\"");
+      fDocument.replace(to.getOffset() + to.getLength() - 1, 0, " " + name + "=\"\"");
     } catch (BadLocationException e)
     {
       UIPlugin.log(e);
@@ -680,8 +714,8 @@ public class XMLReconciler implements IDocumentListener
 
   public void dispose()
   {
-    document.removeDocumentListener(this);
-    document = null;
+    fDocument.removeDocumentListener(this);
+    fDocument = null;
   }
 
   public String getPublicId()
