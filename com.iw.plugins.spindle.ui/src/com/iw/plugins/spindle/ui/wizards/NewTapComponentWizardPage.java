@@ -318,7 +318,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     fApplicationLocationField.init(
         fComponentNameDialogField,
         fTapestryProjectDialogField,
-        initResource,
+        fGenerateHTML, initResource,
         context);
 
     namespaceChanged();
@@ -891,6 +891,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     fGenerateHTML.setEnabled(flag);
     setCompositeEnabled(fTemplatesGroup, flag);
     setCompositeEnabled(fPageBook, flag);
+    fApplicationLocationField.setEnabled(flag);
     if (fGenerateHTML.isEnabled())
       fTapestryTemplateSelector.setEnabled(fGenerateHTML.getSelection());
   }
@@ -1047,6 +1048,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
       {
         fTapestryTemplateSelector.setEnabled(fGenerateHTML.isEnabled()
             && fGenerateHTML.getSelection());
+        refreshStatus();
       } else if (source == fToggleAdvancedOptions)
       {
         fShowingAdvanced = !fShowingAdvanced;

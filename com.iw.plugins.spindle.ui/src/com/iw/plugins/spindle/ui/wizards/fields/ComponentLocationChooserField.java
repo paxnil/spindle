@@ -40,6 +40,8 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -64,6 +66,7 @@ public class ComponentLocationChooserField extends StringButtonField
   private String fName;
   private boolean fForPage;
   private Button fTemplateLocationButton;
+  private Button fGenTemplate;
 
   private AbstractNameField fNameField;
   private TapestryProjectDialogField fTapestryProjectField;
@@ -95,16 +98,34 @@ public class ComponentLocationChooserField extends StringButtonField
   public void init(
       AbstractNameField nameField,
       TapestryProjectDialogField projectField,
+      Button genTemplate,
       IResource initResource,
       IRunnableContext context)
   {
     fNameField = nameField;
     nameField.addListener(this);
+    fGenTemplate = genTemplate;
+    fGenTemplate.addSelectionListener(new SelectionListener()
+    {
+      public void widgetSelected(SelectionEvent e)
+      {
+        if (fTemplateLocationButton != null && !fTemplateLocationButton.isDisposed())
+          fTemplateLocationButton.setEnabled(fGenTemplate.getSelection() && isEnabled());
+      }
+      public void widgetDefaultSelected(SelectionEvent e)
+      {
+        //eat it
+      }
+    });
     this.init(projectField, initResource, context);
-
-    
   }
 
+  public void setEnabled(boolean flag)
+  {
+    super.setEnabled(flag);
+    if (fTemplateLocationButton != null && !fTemplateLocationButton.isDisposed() && fGenTemplate != null )
+      fTemplateLocationButton.setEnabled(fGenTemplate.getSelection() && flag);
+  } 
   public void init(
       TapestryProjectDialogField projectField,
       IResource initResource,
@@ -121,9 +142,9 @@ public class ComponentLocationChooserField extends StringButtonField
     } else
     {
       IFolder webinf = tproject.getWebContextFolder().getFolder("WEB-INF");
-      
+
       if (fForPage)
-      {       
+      {
         if (tproject != null)
           fTemplateLocationButton.setText(UIPlugin.getString(fName
               + ".templateInContextQuestion", tproject
@@ -176,11 +197,14 @@ public class ComponentLocationChooserField extends StringButtonField
   {
     return fResultLocation;
   }
-  
-  public IFolder getTemplateLocation() {
-    if (!fForPage || !fTemplateLocationButton.getSelection())
+
+  public IFolder getTemplateLocation()
+  {
+    if (!fForPage || fTemplateLocationButton == null
+        || !fTemplateLocationButton.isEnabled()
+        || !fTemplateLocationButton.getSelection() || !fGenTemplate.getSelection())
       return fResultLocation;
-    
+
     TapestryProject tproject = fTapestryProjectField.getTapestryProject();
     return tproject.getWebContextFolder();
   }
@@ -190,6 +214,7 @@ public class ComponentLocationChooserField extends StringButtonField
     if (field == this)
       chooseLocation();
   }
+
   /**
    *  
    */
@@ -356,9 +381,9 @@ public class ComponentLocationChooserField extends StringButtonField
     {
       setStatus(new SpindleStatus());
     }
-    
+
     if (fForPage)
-    {    
+    {
       TapestryProject tproject = fTapestryProjectField.getTapestryProject();
       if (tproject != null)
         fTemplateLocationButton.setText(UIPlugin.getString(fName
@@ -367,7 +392,7 @@ public class ComponentLocationChooserField extends StringButtonField
             .getFullPath()
             .toString()));
     }
-    
+
     setTextValue("");
   }
 }
