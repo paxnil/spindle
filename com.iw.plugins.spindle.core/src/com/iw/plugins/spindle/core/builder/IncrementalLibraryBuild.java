@@ -36,6 +36,7 @@ import com.iw.plugins.spindle.core.parser.Parser;
  * 
  * @version $Id$
  * @author glongman@intelligentworks.com
+ * @deprecated to be removed
  */
 public class IncrementalLibraryBuild extends LibraryBuild implements IIncrementalBuild
 {

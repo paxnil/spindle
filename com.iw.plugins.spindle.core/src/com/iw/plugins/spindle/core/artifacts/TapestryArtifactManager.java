@@ -86,8 +86,12 @@ public class TapestryArtifactManager implements ITemplateFinderListener
 
         fProjectBuildStates.put(project, state);
     }
+    
+    public void clearBuildState(IProject project) {
+        fProjectBuildStates.remove(project);
+    }
 
-    public Object getLastBuildState(IProject project)
+    public synchronized Object getLastBuildState(IProject project)
     {
 
         if (!TapestryCore.hasTapestryNature(project))

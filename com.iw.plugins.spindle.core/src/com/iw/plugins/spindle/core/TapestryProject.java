@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -66,7 +67,7 @@ public class TapestryProject implements IProjectNature
     public static final String KEY_LIBRARY = "library-spec";
 
     public static final int APPLICATION_PROJECT_TYPE = 0;
-    public static final int LIBRARY_PROJECT_TYPE = 1;
+//    public static final int LIBRARY_PROJECT_TYPE = 1;
 
     /**
      * The platform project this <code>TapestryProject</code> is based on
@@ -77,10 +78,10 @@ public class TapestryProject implements IProjectNature
     protected String fWebContext;
     protected IFolder fWebContextFolder;
     
-    protected String fLibrarySpecPath;
-    protected IFile fLibraryFile;
+//    protected String fLibrarySpecPath;
+//    protected IFile fLibraryFile;
 
-    protected int fProjectType;
+    protected final int fProjectType = APPLICATION_PROJECT_TYPE;
 
     /** needed for project nature creation **/
     public TapestryProject()
@@ -121,6 +122,7 @@ public class TapestryProject implements IProjectNature
     {
         removeFromBuildSpec(TapestryCore.BUILDER_ID);
         Markers.removeProblemsForProject(getProject());
+        TapestryArtifactManager.getTapestryArtifactManager().clearBuildState(getProject());
         clearProperties();
     }
 
@@ -293,10 +295,10 @@ public class TapestryProject implements IProjectNature
         return -1;
     }
 
-    public void setProjectType(int projectType)
-    {
-        this.fProjectType = projectType;
-    }
+//    public void setProjectType(int projectType)
+//    {
+//        this.fProjectType = projectType;
+//    }
 
     public int getProjectType()
     {
@@ -331,10 +333,10 @@ public class TapestryProject implements IProjectNature
         return path;
     }
 
-    public void setLibrarySpecPath(String librarySpecPath)
-    {
-        this.fLibrarySpecPath = librarySpecPath;
-    }
+//    public void setLibrarySpecPath(String librarySpecPath)
+//    {
+//        this.fLibrarySpecPath = librarySpecPath;
+//    }
     
     public IResourceWorkspaceLocation getLibraryLocation() throws CoreException {
         return (IResourceWorkspaceLocation)getClasspathRoot().getRelativeLocation(getLibrarySpecPath());  
@@ -346,7 +348,8 @@ public class TapestryProject implements IProjectNature
 
     public void saveProperties()
     {
-        boolean isApplicationProject = APPLICATION_PROJECT_TYPE == fProjectType;
+//        boolean isApplicationProject = APPLICATION_PROJECT_TYPE == fProjectType;
+        boolean isApplicationProject = true;
         try
         {
             StringBuffer fileContent = new StringBuffer();
@@ -359,10 +362,11 @@ public class TapestryProject implements IProjectNature
                     "    <context-root>" + (fWebContext != null ? fWebContext : "") + "</context-root>\n");
             } else
             {
-                fileContent.append(
-                    "    <library-spec>"
-                        + (fLibrarySpecPath != null ? fLibrarySpecPath : "NOT_SPECIFIED")
-                        + "</library-spec>\n");
+//                fileContent.append(
+//                    "    <library-spec>"
+//                        + (fLibrarySpecPath != null ? fLibrarySpecPath : "NOT_SPECIFIED")
+//                        + "</library-spec>\n");
+                  throw new Error("unsupported project type!");
             }
             fileContent.append("</tapestry-project-properties>\n");
             Files.toTextFile(getPropertiesFile(), fileContent.toString());

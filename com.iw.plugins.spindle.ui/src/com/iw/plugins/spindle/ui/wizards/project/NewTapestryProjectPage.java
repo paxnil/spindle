@@ -275,7 +275,8 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
 
         TapestryProject.addTapestryNature(jproject);
         TapestryProject prj = TapestryProject.create(jproject);
-        prj.setProjectType(TapestryProject.APPLICATION_PROJECT_TYPE);
+// No longer required, library projects are deprecated
+//        prj.setProjectType(TapestryProject.APPLICATION_PROJECT_TYPE);
         prj.setWebContext(getContextFolderName());
         prj.saveProperties();
 

@@ -35,12 +35,13 @@ import com.iw.plugins.spindle.core.parser.Parser;
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
+ * @deprecated to be removed
  */
 public class LibraryBuild extends FullBuild
-{   
-    
+{
+
     protected boolean fIsFrameworkLibrary;
-    
+
     public LibraryBuild(TapestryBuilder builder)
     {
         super(builder);
@@ -54,9 +55,9 @@ public class LibraryBuild extends FullBuild
         if (fIsFrameworkLibrary)
             //already done!
             return;
-            
+
         System.out.println("do build called");
-//        fNSResolver.resolveLibrary(fFrameworkNamespace, null, somelocation);
+        //        fNSResolver.resolveLibrary(fFrameworkNamespace, null, somelocation);
     }
 
     /* (non-Javadoc)
@@ -72,10 +73,10 @@ public class LibraryBuild extends FullBuild
      */
     protected void resolveFramework()
     {
-      super.resolveFramework();
-     //is the library in question the framework?      
-      fIsFrameworkLibrary = true;
-      
+        super.resolveFramework();
+        //is the library in question the framework?      
+        fIsFrameworkLibrary = true;
+
     }
 
 }
