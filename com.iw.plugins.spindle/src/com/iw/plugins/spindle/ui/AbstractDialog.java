@@ -27,30 +27,60 @@ package com.iw.plugins.spindle.ui;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.operation.ModalContext;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+
+import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public abstract class AbstractDialog extends TitleAreaDialog {
 
@@ -445,11 +475,42 @@ public abstract class AbstractDialog extends TitleAreaDialog {
     }
     getShell().setText(windowTitle);
   }
-  
+
   public void create() {
-  	super.create();
-  	update();
-  } 
-  
- 
+    super.create();
+    update();
+  }
+
+  /**
+   * Returns the titleImageString.
+   * @return String
+   */
+  public String getTitleImageString() {
+    return titleImageString;
+  }
+
+  /**
+   * Sets the titleImageString.
+   * @param titleImageString The titleImageString to set
+   */
+  public void setTitleImageString(String titleImageString) {
+    this.titleImageString = titleImageString;
+  }
+
+  protected String titleImageString;
+
+  /**
+   * @see org.eclipse.jface.window.Window#createContents(Composite)
+   */
+  protected Control createContents(Composite parent) {
+    Control result =  super.createContents(parent);
+    
+    if (titleImageString != null) {
+
+      setTitleImage(TapestryImages.getSharedImage(titleImageString));
+    }
+    
+    return result;
+  }
+
 }

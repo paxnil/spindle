@@ -231,7 +231,10 @@ public abstract class AbstractPropertySheetEditorSection
   }
 
   protected void createButtons(Composite buttonContainer, FormWidgetFactory factory) {
-    newButton = factory.createButton(buttonContainer, "New", SWT.PUSH);
+
+    String temp = newAction == null ? "New" : newAction.getText();
+    temp = (temp == null || "".equals(temp)) ? "New" : temp;
+    newButton = factory.createButton(buttonContainer, temp, SWT.PUSH);
     GridData gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
     newButton.setLayoutData(gd);
     newButton.addSelectionListener(new SelectionAdapter() {
@@ -377,20 +380,20 @@ public abstract class AbstractPropertySheetEditorSection
     IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
     if (!selection.isEmpty()) {
       Object object = ((IStructuredSelection) selection).getFirstElement();
-      fireSelectionNotification(((IIdentifiable) object).getIdentifier());
+      fireSelectionNotification(object);
       setPageSelection();
       pAction.run();
     }
   }
 
   protected void setPageSelection() {
-  	
+
     getFormPage().setSelection(new StructuredSelection(this));
   }
-  
+
   protected void clearPageSelection() {
-  	
-  	getFormPage().setSelection(EmptySelection.Instance);
+
+    getFormPage().setSelection(EmptySelection.Instance);
   }
 
   protected void handleDelete() {
@@ -553,10 +556,12 @@ public abstract class AbstractPropertySheetEditorSection
    * @see org.eclipse.ui.views.properties.IPropertySource#setPropertyValue(Object, Object)
    */
   public void setPropertyValue(Object id, Object value) {
+
+    String oldSelected = ((IIdentifiable) getSelected()).getIdentifier();
     if (!isModelEditable()) {
       updateNeeded = true;
       update();
-      setSelection(((IIdentifiable) getSelected()).getIdentifier());
+      setSelection(oldSelected);
       return;
     }
     IPropertySource selected = getSelectedPropertySource();
@@ -568,7 +573,12 @@ public abstract class AbstractPropertySheetEditorSection
 
     // we may have changed the identifier, must ensure that
     // which was selected is still selected!
-    setSelection((IIdentifiable) selected);
+
+    String newSelected = ((IIdentifiable) selected).getIdentifier();
+
+    if (!newSelected.equals(oldSelected) || getSelection() == null) {
+      setSelection(newSelected);
+    }
 
   }
 
@@ -727,7 +737,5 @@ public abstract class AbstractPropertySheetEditorSection
     }
 
   }
-
-  
 
 }

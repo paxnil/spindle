@@ -96,7 +96,7 @@ public class ComponentsFormPage extends SpindleFormPage {
       Control control;
 
       Composite leftColumn = getFactory().createComposite(parent);
-      gd = new GridData(GridData.FILL_BOTH);
+      gd = new GridData(GridData.FILL_VERTICAL);
       leftColumn.setLayoutData(gd);
       GridLayout leftLayout = new GridLayout();
       leftLayout.verticalSpacing = 10;
@@ -114,7 +114,6 @@ public class ComponentsFormPage extends SpindleFormPage {
       selectionSection = new ComponentSelectionSection((SpindleFormPage) page);
       control = selectionSection.createControl(leftColumn, getFactory());
       gd = new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING);
-      gd.widthHint = 200;
       gd.verticalSpan = 75;
       control.setLayoutData(gd);
 
@@ -141,7 +140,6 @@ public class ComponentsFormPage extends SpindleFormPage {
       manager.linkSections(selectionSection, summarySection);
       manager.linkSections(selectionSection, editorSection);
 
-      editorSection.setPrecomputedAliasInfo(selectionSection.getPrecomputedAliasInfo());
     }
 
     public void stimulate(Object stimulus) {

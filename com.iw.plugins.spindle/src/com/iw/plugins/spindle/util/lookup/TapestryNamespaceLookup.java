@@ -53,7 +53,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.JarEntryFileFaker;
 
 // does not stay up to date as time goes on!
@@ -94,7 +94,7 @@ public class TapestryNamespaceLookup implements ILookupAcceptor {
   private NamespaceFragment[] getNamespaceFragments() throws CoreException {
 
     ILibrarySpecification specification = library.getSpecification();
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
 
     ArrayList result = new ArrayList();
 
@@ -122,7 +122,7 @@ public class TapestryNamespaceLookup implements ILookupAcceptor {
 
   private IStorage findTapestryLibrary(String path) throws CoreException {
 
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
 
     TapestryLookup lookup = project.getLookup();
 
@@ -205,7 +205,7 @@ public class TapestryNamespaceLookup implements ILookupAcceptor {
       stopLooking =
         doSeek(
           fragment.getSpecification().getComponentAliases(),
-          name,
+          matchName,
           fragment,
           partialMatch,
           requestor);

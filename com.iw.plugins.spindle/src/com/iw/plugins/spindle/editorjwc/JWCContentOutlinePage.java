@@ -46,6 +46,7 @@ public class JWCContentOutlinePage extends SpindleFormOutlinePage {
 
   Image containedComponentImage;
   Image componentAliasImage;
+  Image copyOfImage;
   Image beanImage;
 
   /**
@@ -55,6 +56,7 @@ public class JWCContentOutlinePage extends SpindleFormOutlinePage {
     super(page);
     containedComponentImage = TapestryImages.getSharedImage("component16.gif");
     componentAliasImage = TapestryImages.getSharedImage("componentAlias16.gif");
+    copyOfImage = TapestryImages.getSharedImage("componentCopyOf16.gif");
     beanImage = TapestryImages.getSharedImage("bean.gif");
   }
 
@@ -75,6 +77,12 @@ public class JWCContentOutlinePage extends SpindleFormOutlinePage {
     SpindleFormPage page = (SpindleFormPage) holder.page;
     if ("Components".equals(page.getTitle())) {
       PluginContainedComponent component = (PluginContainedComponent) holder.element;
+      
+      if (component.getCopyOf() != null) {
+      	
+      	return copyOfImage;
+      	
+      }
       String type = component.getType();
       if (type != null && component.getType().endsWith(".jwc")) { 
         return containedComponentImage;

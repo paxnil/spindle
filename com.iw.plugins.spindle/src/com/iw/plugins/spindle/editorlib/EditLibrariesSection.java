@@ -66,9 +66,10 @@ import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
+import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.descriptors.TypeDialogPropertyDescriptor;
 import com.iw.plugins.spindle.ui.descriptors.WorkspaceStoragePropertyDescriptor;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
@@ -85,7 +86,7 @@ public class EditLibrariesSection
   public EditLibrariesSection(SpindleFormPage page) {
     super(page);
     setLabelProvider(new LibraryLabelProvider());
-    setNewAction(new NewLibraryAction());
+    setNewAction(new AddLibraryAction());
     setDeleteAction(new DeleteLibraryAction());
     setHeaderText("Libraries");
     setDescription("In this section you can work with libraries");
@@ -125,7 +126,7 @@ public class EditLibrariesSection
       potentialPackage = (potentialPackage.substring(1)).replace('/', '.');
 
       try {
-      	
+
         ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(modelStorage);
 
         TapestryLookup lookup = project.getLookup();
@@ -136,7 +137,7 @@ public class EditLibrariesSection
 
           return true;
         }
-        
+
       } catch (JavaModelException e) {
       } catch (CoreException e) {
       }
@@ -162,6 +163,36 @@ public class EditLibrariesSection
       holderArray.add(holder);
     }
     setInput(holderArray);
+  }
+
+  protected boolean checkLibraryPathOk(String potentialValue) {
+
+    SpindleStatus status = new SpindleStatus();
+
+    if ("/net/sf/tapestry/Framework.library".equals(potentialValue)) {
+
+      status.setError("/net/sf/tapestry/Framework.library is implied");
+
+    }
+
+    if (checkSelfAdd(potentialValue)) {
+
+      status.setError("Can't add " + potentialValue + " to itself");
+    }
+
+    if (status.isError()) {
+
+      ErrorDialog.openError(
+        newButton.getShell(),
+        "Spindle Error",
+        "Could not add library: " + potentialValue,
+        status);
+
+      return false;
+
+    }
+
+    return true;
   }
 
   public class LibraryLabelProvider extends AbstractIdentifiableLabelProvider {
@@ -215,37 +246,55 @@ public class EditLibrariesSection
 
   }
 
-  class NewLibraryAction extends Action {
+  class AddLibraryAction extends Action {
 
     private ITapestryModel model;
 
-    protected NewLibraryAction() {
+    protected AddLibraryAction() {
       super();
-      setText("New");
+      setText("Add");
     }
 
     /**
     * @see Action#run()
     */
     public void run() {
-      updateSelection = true;
-      TapestryLibraryModel model = (TapestryLibraryModel) getModel();
-      ILibrarySpecification spec = (PluginLibrarySpecification) model.getSpecification();
-      String useLibraryName = "library";
-      if (spec.getLibrarySpecificationPath(useLibraryName + 1) != null) {
-        int counter = 2;
-        while (spec.getLibrarySpecificationPath(useLibraryName + counter) != null) {
-          counter++;
+      try {
+        TapestryLibraryModel model = (TapestryLibraryModel) getModel();
+        ILibrarySpecification spec = (PluginLibrarySpecification) model.getSpecification();
+
+        ChooseWorkspaceModelDialog dialog =
+          ChooseWorkspaceModelDialog.createLibraryModelDialog(
+            newButton.getShell(),
+            TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage()),
+            "Choose Library",
+            "Choose a Library to add");
+
+        if (dialog.open() == dialog.OK) {
+
+          String resultPath = dialog.getResultPath();
+
+          if (checkLibraryPathOk(resultPath)) {
+            updateSelection = true;
+
+            String useLibraryName = dialog.getResultString();
+            useLibraryName = useLibraryName.substring(0, useLibraryName.lastIndexOf("."));
+            if (spec.getLibrarySpecificationPath(useLibraryName) != null) {
+              int counter = 1;
+              while (spec.getLibrarySpecificationPath(useLibraryName + counter) != null) {
+                counter++;
+              }
+              useLibraryName = useLibraryName + counter;
+            }
+            spec.setLibrarySpecificationPath(useLibraryName, dialog.getResultPath());
+            forceDirty();
+            update();
+            setSelection(useLibraryName);
+            updateSelection = false;
+          }
         }
-        useLibraryName = useLibraryName + counter;
-      } else {
-        useLibraryName = useLibraryName + 1;
+      } catch (CoreException e) {
       }
-      spec.setLibrarySpecificationPath(useLibraryName, "fill in value");
-      forceDirty();
-      update();
-      setSelection(useLibraryName);
-      updateSelection = false;
     }
 
   }
@@ -322,28 +371,7 @@ public class EditLibrariesSection
 
         String potentialValue = (String) value;
 
-        DialogFieldStatus status = new DialogFieldStatus();
-
-        if ("/net/sf/tapestry/Framework.library".equals(potentialValue)) {
-
-          status.setError("/net/sf/tapestry/Framework.library is implied");
-
-        }
-
-        if (checkSelfAdd(potentialValue)) {
-
-          status.setError("Can't add " + potentialValue + " to itself");
-        }
-
-        if (status.isError()) {
-
-          ErrorDialog.openError(
-            newButton.getShell(),
-            "Spindle Error",
-            "Could not add library: " + potentialValue,
-            status);
-
-        } else {
+        if (checkLibraryPathOk(potentialValue)) {
 
           this.specificationPath = (String) value;
           spec.setLibrarySpecificationPath(this.identifier, this.specificationPath);
@@ -386,6 +414,43 @@ public class EditLibrariesSection
       return identifier;
     }
 
+  }
+
+  String oldLibraryName = null;
+
+  /**
+   * @see org.eclipse.ui.views.properties.IPropertySource#getPropertyValue(Object)
+   */
+  public Object getPropertyValue(Object id) {
+  	
+  	Object result = super.getPropertyValue(id);
+
+    if (id.equals("name")) {
+
+      oldLibraryName = (String) result;
+    }
+    return result;
+  }
+
+  /**
+   * @see org.eclipse.ui.views.properties.IPropertySource#setPropertyValue(Object, Object)
+   */
+  public void setPropertyValue(Object id, Object value) {
+    super.setPropertyValue(id, value);
+
+    if ("name".equals(id) && oldLibraryName != null && !oldLibraryName.equals(value)) {
+
+     try {
+         RenamedLibraryAction action =
+            new RenamedLibraryAction((TapestryLibraryModel) getModel(), (String) value, oldLibraryName);
+        
+          action.run();
+      } catch (CoreException e) {
+      	
+      	e.printStackTrace();
+      }
+      oldLibraryName = (String)value;
+    }
   }
 
 }

@@ -25,9 +25,13 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.util.lookup;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
+
+import com.iw.plugins.spindle.TapestryPlugin;
 
 /**
  * @author gwl
@@ -45,37 +49,63 @@ public class DefaultAcceptor implements ILookupAcceptor {
 
   }
 
-  protected final boolean defaultAcceptAsTapestry(IJavaProject jproject, IStorage s, int acceptFlags) {
+  protected final boolean defaultAcceptAsTapestry(
+    IJavaProject jproject,
+    IStorage s,
+    int acceptFlags) {
     String extension = s.getFullPath().getFileExtension();
     //    int w = acceptFlags & WRITEABLE;
     //    int j = acceptFlags & ACCEPT_COMPONENTS;
     if ((acceptFlags & WRITEABLE) != 0 && s.isReadOnly()) {
       return false;
     }
-    
-    if ((s instanceof IResource) && (acceptFlags & THIS_PROJECT_ONLY) != 0) {
+
+    if (s instanceof IResource) {
     	
-    	if (!((IResource)s).getProject().equals(jproject.getProject())) {
-    		
-    		return false;
-    	}
+    	IResource resource = (IResource)s;
+
+      if ((acceptFlags & THIS_PROJECT_ONLY) != 0) {
+
+        if (!resource.getProject().equals(jproject.getProject())) {
+
+          return false;
+        }
+      } else if ((acceptFlags & ACCEPT_TAPESTRY_PROJECTS_ONLY) != 0) {
+      	
+        try {
+        	
+          IProject thisProject = jproject.getProject();
+          IProject resourceProject = resource.getProject();
+          
+          if (!thisProject.equals(resourceProject) && !resourceProject.hasNature(TapestryPlugin.NATURE_ID)) {
+          	
+          	return false;
+          }
+        } catch (CoreException e) {
+        	
+        	return false;
+        }
+      	
+      }
+      	
+      	
 
     }
-    
+
     if ("jwc".equals(extension)) {
-      return (acceptFlags & ACCEPT_COMPONENTS) != 0;
+      return (acceptFlags & ACCEPT_COMPONENTS) != 0 || (acceptFlags & ACCEPT_ANY) != 0;
     }
     if ("application".equals(extension)) {
-      return (acceptFlags & ACCEPT_APPLICATIONS) != 0;
+      return (acceptFlags & ACCEPT_APPLICATIONS) != 0 || (acceptFlags & ACCEPT_ANY) != 0;
     }
     if ("html".equals(extension)) {
-      return (acceptFlags & ACCEPT_HTML) != 0;
+      return (acceptFlags & ACCEPT_HTML) != 0 || (acceptFlags & ACCEPT_ANY) != 0;
     }
     if ("library".equals(extension)) {
-    	return (acceptFlags & ACCEPT_LIBRARIES) != 0;
+      return (acceptFlags & ACCEPT_LIBRARIES) != 0 || (acceptFlags & ACCEPT_ANY) != 0;
     }
     if ("page".equals(extension)) {
-    	return (acceptFlags & ACCEPT_PAGES) != 0;
+      return (acceptFlags & ACCEPT_PAGES) != 0 || (acceptFlags & ACCEPT_ANY) != 0;
     }
     return false;
   }

@@ -30,11 +30,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.pde.core.IModel;
@@ -52,11 +56,14 @@ import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class ComponentAliasSection
@@ -176,6 +183,33 @@ public class ComponentAliasSection
     }
 
   }
+
+  protected boolean checkComponentPathOk(String potentialValue) {
+
+    SpindleStatus status = new SpindleStatus();
+
+    if (potentialValue.startsWith("/net/sf/tapestry")) {
+
+      status.setError(potentialValue + " is defined by default");
+
+    }
+
+    if (status.isError()) {
+
+      ErrorDialog.openError(
+        newButton.getShell(),
+        "Spindle Error",
+        "Could not add Component: " + potentialValue,
+        status);
+
+      return false;
+
+    }
+
+    return true;
+  }
+
+ 
 
   protected class AliasHolder implements IIdentifiable, IPropertySource {
 
@@ -297,7 +331,6 @@ public class ComponentAliasSection
     protected NewAliasAction() {
       super();
       setText("New");
-      setDescription("create a new component alias");
     }
 
     /**
@@ -305,7 +338,6 @@ public class ComponentAliasSection
     */
     public void run() {
       try {
-        updateSelection = true;
 
         IPluginLibrarySpecification specification =
           (IPluginLibrarySpecification) ((TapestryLibraryModel) getModel()).getSpecification();
@@ -315,7 +347,7 @@ public class ComponentAliasSection
             newButton.getShell(),
             TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage()),
             "Choose Component",
-            "Choose a Component to be added");
+            "Choose a Component to be aliased");
 
         dialog.create();
 
@@ -325,25 +357,31 @@ public class ComponentAliasSection
           IPackageFragment componentPackage = dialog.getResultPackage();
           String path = dialog.getResultPath();
 
-          int index = componentName.indexOf(".");
+          if (checkComponentPathOk(path)) {
 
-          componentName = componentName.substring(0, index);
+            updateSelection = true;
 
-          if (specification.getComponentSpecificationPath(componentName) != null) {
+            int index = componentName.indexOf(".");
 
-            int count = 1;
-            while (specification.getComponentSpecificationPath(componentName + count) != null) {
-              count++;
+            componentName = componentName.substring(0, index);
+
+            if (specification.getComponentSpecificationPath(componentName) != null) {
+
+              int count = 1;
+              while (specification.getComponentSpecificationPath(componentName + count) != null) {
+                count++;
+              }
+
+              componentName += count;
             }
+            specification.setComponentSpecificationPath(componentName, path);
+            forceDirty();
+            update();
+            setSelection(componentName);
+            updateSelection = false;
 
-            componentName += count;
           }
-          specification.setComponentSpecificationPath(componentName, path);
-          forceDirty();
-          update();
-          setSelection(componentName);
         }
-        updateSelection = false;
       } catch (CoreException e) {
       }
     }

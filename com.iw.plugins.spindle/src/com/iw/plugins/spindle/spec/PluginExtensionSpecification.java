@@ -113,11 +113,10 @@ public class PluginExtensionSpecification
 
   public void removeConfiguration(String propertyName) {
 
-    if (_configuration == null && _configuration.containsKey(propertyName)) {
+    if (_configuration != null &&  _configuration.containsKey(propertyName)) {
 
       PluginExtensionConfiguration config =
         (PluginExtensionConfiguration) _configuration.get(propertyName);
-      config.setParent(null);
       _configuration.remove(propertyName);
       propertySupport.firePropertyChange("configuration", null, _configuration);
     }

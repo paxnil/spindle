@@ -73,6 +73,22 @@ public class XMLUtil {
     }
     return UNKNOWN_DTD;
   }
+  
+  static public String getPublicId(int DTDVersion) {
+  	
+  	switch (DTDVersion) {
+  		
+  		case DTD_1_1: return SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID;
+  		
+  		case DTD_1_2: return SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID;
+  		
+  		case DTD_1_3: return SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID;
+  		
+  	}
+  	
+  	return null;
+  	
+  }
 
   public static void writeDescription(PrintWriter writer, int indent, String description) {
 

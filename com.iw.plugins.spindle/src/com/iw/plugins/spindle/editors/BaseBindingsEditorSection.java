@@ -72,7 +72,6 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
 
   private BindingEditorLabelProvider labelProvider = new BindingEditorLabelProvider();
 
-  private HashMap precomputedAliasInfo = new HashMap();
 
 
   /**
@@ -88,9 +87,7 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
     setUseToolTips(false);
   }
 
-  public void setPrecomputedAliasInfo(HashMap map) {
-    precomputedAliasInfo = map;
-  }
+
 
   public void initialize(Object object) {
     super.initialize(object);
@@ -301,6 +298,23 @@ public class BaseBindingsEditorSection extends AbstractPropertySheetEditorSectio
 
 
   protected class NewBindingButtonAction extends Action {
+
+    /**
+     * Constructor for NewBindingButtonAction.
+     */
+    public NewBindingButtonAction() {
+      super();
+      setText("New");
+    }   
+
+    /**
+     * Constructor for NewBindingButtonAction.
+     * @param text
+     * @param image
+     */
+    public NewBindingButtonAction(String text, ImageDescriptor image) {
+      super(text, image);
+    }
 
     public void run() {
 

@@ -323,4 +323,15 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
     return "";
   }
 
+  /**
+   * @see com.iw.plugins.spindle.model.ITapestryModel#setPublicId(String)
+   */
+  public void setPublicId(String value) {
+  	
+  	if (componentSpec != null) {
+  		
+  		componentSpec.setPublicId(value);
+  	}
+  }
+
 }

@@ -38,8 +38,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.ui.dialogfields.UpdateStatusContainer;
+import com.iw.plugins.spindle.util.SpindleStatus;
 
 /**
  * @author GWL
@@ -50,7 +50,7 @@ import com.iw.plugins.spindle.ui.dialogfields.UpdateStatusContainer;
  */
 public abstract class TapestryWizardPage extends WizardPage {
 
-  private IStatus fCurrStatus = new DialogFieldStatus();
+  private IStatus fCurrStatus = new SpindleStatus();
 
   private UpdateStatusContainer statusContainer = new UpdateStatusContainer();
 
@@ -71,7 +71,7 @@ public abstract class TapestryWizardPage extends WizardPage {
     fPageVisible = visible;
     // policy: wizards are not allowed to come up with an error message
     if (visible && (fCurrStatus != null && fCurrStatus.matches(IStatus.ERROR))) {
-      DialogFieldStatus status = new DialogFieldStatus();
+      SpindleStatus status = new SpindleStatus();
       status.setError(""); //$NON-NLS-1$
       fCurrStatus = status;
     }

@@ -50,10 +50,10 @@ import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 import com.iw.plugins.spindle.ui.dialogfields.UneditableStringButtonField;
 import com.iw.plugins.spindle.ui.dialogfields.UneditableStringField;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
@@ -136,7 +136,7 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
 
   public IStatus containerChanged() {
 
-    DialogFieldStatus newStatus = new DialogFieldStatus();
+    SpindleStatus newStatus = new SpindleStatus();
     checkButtonEnabled();
     String libraryName = getTextValue();
 

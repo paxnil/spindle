@@ -29,38 +29,59 @@ import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.graphics.Image;
 
+import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.editorlib.components.ComponentsFormPage;
+import com.iw.plugins.spindle.editorlib.extensions.ExtensionsFormPage;
 import com.iw.plugins.spindle.editorlib.pages.LibraryPagesFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormOutlinePage;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
 
 public class LibraryContentOutlinePage extends SpindleFormOutlinePage {
-  private Image pageImage;
-  private Image componentImage;
 
-   
-  /**
-   * Constructor for AppFormOutlinePage
-   */
+  private Image pageImage;
+  private Image componentImage;
+  private Image extensionImage;
+
+  static private String COMPONENTS = MessageUtil.getString("LibMultipageEditor.ComponentsTabLabel");
+  static private String PAGES = MessageUtil.getString("LibMultipageEditor.PagesTabLabel");
+  static private String EXTENSIONS = MessageUtil.getString("LibMultipageEditor.ExtensionsTabLabel");
+
   public LibraryContentOutlinePage(SpindleFormPage page) {
     super(page);
     //Image disposal handled by Plugin
     componentImage = TapestryImages.getSharedImage("component16.gif");
     pageImage = TapestryImages.getSharedImage("page16.gif");
+    extensionImage = TapestryImages.getSharedImage("extension16.gif");
   }
 
   protected Image getObjectImage(Object obj) {
+
     if (obj instanceof SpindleFormPage) {
+
       return getPageImage((SpindleFormPage) obj);
+
     }
     Holder holder = (Holder) obj;
+
     SpindleFormPage page = (SpindleFormPage) holder.page;
-    if ("Components".equals(page.getTitle())) { 
+
+    String title = page.getTitle();
+
+    if (COMPONENTS.equals(title)) {
+
       return componentImage;
-    } else if ("Pages".equals(page.getTitle())) {
+
+    } else if (PAGES.equals(title)) {
+
       return pageImage;
+
+    } else if (EXTENSIONS.equals(title)) {
+
+      return extensionImage;
+
     }
     return null;
   }
@@ -70,21 +91,36 @@ public class LibraryContentOutlinePage extends SpindleFormOutlinePage {
   }
 
   class AppContentProvider extends BasicContentProvider {
+  	
     public Object[] getChildren(Object parent) {
+    	
       TapestryLibraryModel model = (TapestryLibraryModel) formPage.getModel();
-      ILibrarySpecification spec = (ILibrarySpecification)model.getSpecification();
+      PluginLibrarySpecification spec = (PluginLibrarySpecification) model.getSpecification();
       if (spec != null) {
+      	
         if (parent instanceof ComponentsFormPage) {
+        	
           return getObjects(spec.getComponentAliases(), (SpindleFormPage) parent);
+          
         }
         if (parent instanceof LibraryPagesFormPage) {
+        	
           return getObjects(spec.getPageNames(), (SpindleFormPage) parent);
+          
+        }
+        if (parent instanceof ExtensionsFormPage) {
+
+          return getObjects(spec.getAllExtensionNames(), (SpindleFormPage) parent);
+
         }
       }
       return super.getChildren(parent);
     }
+    
     public Object getParent(Object child) {
+    	
       return super.getParent(child);
+      
     }
   }
 

@@ -542,12 +542,7 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
       }
     } catch (CoreException e) {
 
-      Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchShell();
-      ErrorDialog.openError(
-        shell,
-        "Tapestry Editor Error",
-        "Critical Error closing editor!",
-        e.getStatus());
+
     }
   }
 

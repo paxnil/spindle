@@ -50,17 +50,27 @@ public class OverviewComponentsSection extends BasicLinksSection {
 
   public void update(boolean removePrevious) {
     if (removePrevious) {
+    	
       removeAll();
+      
     }
     TapestryComponentModel model = (TapestryComponentModel) getModel();
     PluginComponentSpecification spec = model.getComponentSpecification();
     Iterator i = new TreeSet(spec.getComponentIds()).iterator();
     while (i.hasNext()) {
+    	
       String name = (String) i.next();
       Image image = null;
-      if (spec.getComponent(name).getType().endsWith(".jwc")) {
+      if (spec.getComponent(name).getCopyOf() != null) {
+
+        image = TapestryImages.getSharedImage("componentCopyOf16.gif");
+        
+      } else if (spec.getComponent(name).getType().endsWith(".jwc")) {
+      	
         image = TapestryImages.getSharedImage("component16.gif");
+        
       } else {
+      	
         image = TapestryImages.getSharedImage("componentAlias16.gif");
       }
       String value = name + "  type = " + spec.getComponent(name).getType();
@@ -70,15 +80,24 @@ public class OverviewComponentsSection extends BasicLinksSection {
   }
 
   protected SpindleFormPage getGotoPage() {
-    return (SpindleFormPage)getFormPage().getEditor().getPage(JWCMultipageEditor.COMPONENTS);
+    return (SpindleFormPage) getFormPage().getEditor().getPage(JWCMultipageEditor.COMPONENTS);
   }
 
   public void modelChanged(IModelChangedEvent event) {
     super.modelChanged(event);
     if (!updateNeeded) {
-      if (event.getChangeType() == IModelChangedEvent.CHANGE) {
+
+      if (event.getChangeType() == IModelChangedEvent.WORLD_CHANGED) {
+
+        updateNeeded = true;
+
+      } else if (event.getChangeType() == IModelChangedEvent.CHANGE) {
+
         updateNeeded = event.getChangedProperty().equals("components");
+
       }
+
+      update();
     }
   }
 

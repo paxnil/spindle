@@ -50,7 +50,11 @@ public class ExtensionConfigurationSection extends AbstractPropertySheetEditorSe
    */
   public void update(BaseTapestryModel model) {
     holderArray.removeAll(holderArray);
-    if (selectedExtension == null) {
+    boolean hasSelected = selectedExtension != null;
+    newButton.setEnabled(hasSelected);
+    editButton.setEnabled(hasSelected);
+    deleteButton.setEnabled(hasSelected);
+    if (!hasSelected) {
       setInput(holderArray);
       fireSelectionNotification(EmptySelection.Instance);
       clearPageSelection();

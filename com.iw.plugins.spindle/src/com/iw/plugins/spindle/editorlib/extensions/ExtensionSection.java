@@ -227,7 +227,7 @@ public class ExtensionSection
           (IPluginLibrarySpecification) holder.getParent();
 
         String prev = findPrevious(holder.getIdentifier());
-        appSpec.removeComponentSpecificationPath(holder.getIdentifier());
+        appSpec.removeExtensionSpecification(holder.getIdentifier());
         holder.setParent(null);
         forceDirty();
         update();

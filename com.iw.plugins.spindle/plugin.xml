@@ -225,7 +225,7 @@
             type="org.eclipse.core.resources.textmarker">
       </super>
       <persistent
-            value="true">
+            value="false">
       </persistent>
    </extension>
    <extension
@@ -354,5 +354,10 @@
             class="com.iw.plugins.spindle.model.manager.LibraryManagerDelegate">
       </manager>
    </extension>
+   <extension point="org.eclipse.core.resources.moveDeleteHook" id="MoveDeleteHook">
+	 <moveDeleteHook class="com.iw.plugins.spindle.change.MoveDeleteManager"/>
+   </extension>
+
+
 
 </plugin>

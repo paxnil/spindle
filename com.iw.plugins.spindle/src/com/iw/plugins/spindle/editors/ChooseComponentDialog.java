@@ -146,6 +146,8 @@ public class ChooseComponentDialog extends AbstractDialog {
    * Constructor for ChooseComponentControl
    */
   protected Composite createAreaContents(Composite parent) {
+  	
+  	
     Composite container = new Composite(parent, SWT.NONE);
     GridData data = null;
     GridLayout layout = new GridLayout();

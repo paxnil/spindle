@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableContext;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.util.SpindleStatus;
 
 public class EngineClassDialog extends TypeDialogField {
 
@@ -84,7 +84,7 @@ public class EngineClassDialog extends TypeDialogField {
 
   protected IStatus typeChanged() {
 
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
 
     String engineClassname = getTextValue();
     IPackageFragmentRoot root =

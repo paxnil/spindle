@@ -78,8 +78,6 @@ public class ChooseFromNamespaceDialog
 
   private ChooseFromNamespaceWidget chooserWidget;
 
-  private String titleImageString;
-
   public ChooseFromNamespaceDialog(
     Shell shell,
     ITapestryProject project,
@@ -126,10 +124,6 @@ public class ChooseFromNamespaceDialog
 
   protected Composite createAreaContents(Composite parent) {
 
-    if (titleImageString != null) {
-
-      setTitleImage(TapestryImages.getSharedImage(titleImageString));
-    }
 
     Composite container = new Composite(parent, SWT.NONE);
 
@@ -168,22 +162,6 @@ public class ChooseFromNamespaceDialog
   	
   	return chooserWidget.getResultPath();
   	
-  }
-
-  /**
-   * Returns the titleImageString.
-   * @return String
-   */
-  public String getTitleImageString() {
-    return titleImageString;
-  }
-
-  /**
-   * Sets the titleImageString.
-   * @param titleImageString The titleImageString to set
-   */
-  public void setTitleImageString(String titleImageString) {
-    this.titleImageString = titleImageString;
   }
 
   /**

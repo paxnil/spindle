@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.IJavaProject;
  */
 public interface ILookupAcceptor {
 
-  public int NULL_FLAG = 0x00000000;
   /**
   * Accept flag for specifying components.
   */
@@ -61,6 +60,10 @@ public interface ILookupAcceptor {
   public int ACCEPT_PAGES = 0x00000040;
   
   public int THIS_PROJECT_ONLY = 0x00000080;
+  
+  public int ACCEPT_ANY = 0x00000100;
+  
+  public int ACCEPT_TAPESTRY_PROJECTS_ONLY = 0x00000200;
 
   public boolean acceptAsTapestry(IJavaProject jproject, IStorage s, int acceptFlags);
 

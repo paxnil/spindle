@@ -83,8 +83,14 @@ public class PropertyEditableSection
   public void update(BaseTapestryModel model) {
   	
     holderArray.removeAll(holderArray);
+    
+    boolean hasPropertyHolder = externalPropertyHolder != null;
+    
+    newButton.setEnabled(hasPropertyHolder);
+    deleteButton.setEnabled(hasPropertyHolder);
+    editButton.setEnabled(hasPropertyHolder);
 
-	if (externalPropertyHolder == null) {
+	if (!hasPropertyHolder) {
 		
 		setInput(holderArray);
 		return;

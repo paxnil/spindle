@@ -25,14 +25,17 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.util;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -53,20 +56,20 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.part.ISetSelectionTarget;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.model.ModelUtils;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.spec.PluginBindingSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 
@@ -76,6 +79,47 @@ import com.iw.plugins.spindle.spec.PluginContainedComponent;
  */
 
 public class Utils {
+
+  public static void selectAndReveal(IResource resource, IWorkbenchWindow window) {
+    // validate the input
+    if (window == null || resource == null)
+      return;
+    IWorkbenchPage page = window.getActivePage();
+    if (page == null)
+      return;
+
+    // get all the view and editor parts
+    List parts = new ArrayList();
+    parts.addAll(Arrays.asList(page.getViews()));
+    IEditorReference refs[] = page.getEditorReferences();
+    for (int i = 0; i < refs.length; i++) {
+      if (refs[i].getPart(false) != null)
+        parts.add(refs[i].getPart(false));
+    }
+
+    final ISelection selection = new StructuredSelection(resource);
+    Iterator enum = parts.iterator();
+    while (enum.hasNext()) {
+      IWorkbenchPart part = (IWorkbenchPart) enum.next();
+
+      // get the part's ISetSelectionTarget implementation
+      ISetSelectionTarget target = null;
+      if (part instanceof ISetSelectionTarget)
+        target = (ISetSelectionTarget) part;
+      else
+        target = (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
+
+      if (target != null) {
+        // select and reveal resource
+        final ISetSelectionTarget finalTarget = target;
+        window.getShell().getDisplay().asyncExec(new Runnable() {
+          public void run() {
+            finalTarget.selectReveal(selection);
+          }
+        });
+      }
+    }
+  }
 
   /**
    * @return all the editors in the workbench that need saving
@@ -113,7 +157,7 @@ public class Utils {
   /**
     * @return the editor for a Tapestry model
     */
-  public static IEditorPart getEditorFor(IStorage storage) { 
+  public static IEditorPart getEditorFor(IStorage storage) {
 
     IWorkbench workbench = TapestryPlugin.getDefault().getWorkbench();
     IWorkbenchWindow[] windows = workbench.getWorkbenchWindows();
@@ -128,9 +172,9 @@ public class Utils {
 
           IEditorReference ref = editors[z];
           IEditorPart editor = ref.getEditor(true);
-          
+
           if (editor == null) {
-          	continue;
+            continue;
           }
 
           if (editor instanceof SpindleMultipageEditor) {
@@ -183,26 +227,26 @@ public class Utils {
     return null;
   }
 
-//  public static List getApplicationsWithAlias(String alias) {
-//    ArrayList result = new ArrayList();
-//    Iterator iter = ModelUtils.getApplicationModels();
-//    while (iter.hasNext()) {
-//      TapestryApplicationModel model = (TapestryApplicationModel) iter.next();
-//      if (!model.isLoaded()) {
-//        try {
-//          model.load();
-//        } catch (Exception e) {
-//          continue;
-//        }
-//      }
-//      PluginApplicationSpecification spec =
-//        (PluginApplicationSpecification) model.getSpecification();
-//      if (spec != null && spec.getComponentSpecificationPath(alias) != null) {
-//        result.add(model);
-//      }
-//    }
-//    return result;
-//  }
+  //  public static List getApplicationsWithAlias(String alias) {
+  //    ArrayList result = new ArrayList();
+  //    Iterator iter = ModelUtils.getApplicationModels();
+  //    while (iter.hasNext()) {
+  //      TapestryApplicationModel model = (TapestryApplicationModel) iter.next();
+  //      if (!model.isLoaded()) {
+  //        try {
+  //          model.load();
+  //        } catch (Exception e) {
+  //          continue;
+  //        }
+  //      }
+  //      PluginApplicationSpecification spec =
+  //        (PluginApplicationSpecification) model.getSpecification();
+  //      if (spec != null && spec.getComponentSpecificationPath(alias) != null) {
+  //        result.add(model);
+  //      }
+  //    }
+  //    return result;
+  //  }
 
   // assumes target ComponentModel is loaded.
   // this could use some refactoring for sure!
@@ -223,7 +267,7 @@ public class Utils {
     } else {
       sourceName = sourceName + 1;
     }
-    
+
     targetSpec.addComponent(useName, componentClone);
     target.setOutOfSynch(true);
   }
@@ -488,8 +532,35 @@ public class Utils {
       }
     }
   }
-  
-  public static byte[] getInputStreamAsByteArray(InputStream stream, int length) throws IOException {
+
+  /**
+  * Returns the given file's contents as a byte array.
+  */
+  public static byte[] getResourceContentsAsByteArray(IFile file) throws CoreException {
+    InputStream stream = null;
+    try {
+
+      stream = new BufferedInputStream(file.getContents(true));
+
+      return Utils.getInputStreamAsByteArray(stream, -1);
+
+    } catch (IOException e) {
+
+      throw new CoreException(new SpindleStatus(e)); 
+
+    } finally {
+
+      try {
+
+        stream.close();
+
+      } catch (IOException e) {
+      }
+    }
+  }
+
+  public static byte[] getInputStreamAsByteArray(InputStream stream, int length)
+    throws IOException {
     byte[] contents;
     if (length == -1) {
       contents = new byte[0];

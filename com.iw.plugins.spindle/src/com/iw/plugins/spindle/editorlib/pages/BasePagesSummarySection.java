@@ -83,7 +83,7 @@ public abstract class BasePagesSummarySection
    * @see FormSection#createClient(Composite, FormWidgetFactory)
    */
   public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
-  	
+
     container = factory.createComposite(parent);
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;
@@ -202,7 +202,7 @@ public abstract class BasePagesSummarySection
 
     resolveFailedLabel.setVisible(false);
 
-    String specificationPath = null;
+    String specificationPath = "";
 
     if (selectedPage != null) {
 
@@ -211,10 +211,16 @@ public abstract class BasePagesSummarySection
       if (specificationPath == null) {
 
         // we must resolve it from Framework.library
-        ILibrarySpecification framework =
-          TapestryProjectModelManager.getDefaultLibraryModel().getSpecification();
+        TapestryProjectModelManager mgr;
+        try {
+          mgr =
+            TapestryPlugin.getDefault().getTapestryModelManager(getModel().getUnderlyingStorage());
 
-        specificationPath = framework.getPageSpecificationPath(selectedPage);
+          ILibrarySpecification framework = mgr.getDefaultLibrary().getSpecification();
+
+          specificationPath = framework.getPageSpecificationPath(selectedPage);
+        } catch (CoreException e) {
+        }
       }
     }
 
@@ -235,7 +241,7 @@ public abstract class BasePagesSummarySection
 
       if (specificationPath == null
         || !(specificationPath.endsWith(".jwc") || specificationPath.endsWith("page"))) {
-        	
+
         resolveFailed(specificationPath);
         return;
       }
@@ -243,37 +249,37 @@ public abstract class BasePagesSummarySection
       ITapestryModel model = (ITapestryModel) getModel();
       IStorage thisStorage = model.getUnderlyingStorage();
       try {
-      	
+
         IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisStorage);
         if (jproject == null) {
 
           resolveFailed(specificationPath);
-          
+
         }
-        
+
         lookup.configure(jproject);
-        
+
       } catch (CoreException jmex) {
 
         resolveFailed(specificationPath);
 
       }
       IStorage[] found = lookup.findPage(specificationPath);
-      
+
       if (found.length != 1) {
-      	
+
         resolveFailed(specificationPath);
         return;
-        
+
       }
       sourceViewer.update(null, found[0]);
       IStorage[] htmlStorage = lookup.findHtmlFor(specificationPath);
-      
+
       if (htmlStorage.length != 1) {
-      	
+
         htmlViewer.updateNotFound();
         return;
-        
+
       }
       htmlViewer.update(null, htmlStorage[0]);
       container.layout(true);

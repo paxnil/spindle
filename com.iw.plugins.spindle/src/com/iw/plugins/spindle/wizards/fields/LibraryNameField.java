@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.util.SpindleStatus;
 
 /**
  * @author gwl
@@ -37,7 +37,7 @@ public class LibraryNameField extends ApplicationNameField {
   }
 
   protected IStatus nameChanged() {
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
     String appname = getTextValue();
     if ("".equals(appname)) {
       status.setError("");

@@ -30,12 +30,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -57,14 +57,14 @@ import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public abstract class BasePagesSection
   extends AbstractPropertySheetEditorSection
   implements IModelChangedListener, ISelectionChangedListener {
 
-  private Action newPageAction = new NewPageAction();
+  private Action newPageAction = new AddPageAction();
   private Action deletePageAction = new DeletePageAction();
 
   private TreeViewer viewer;
@@ -129,21 +129,27 @@ public abstract class BasePagesSection
 
     IPluginLibrarySpecification libSpec = getSpec();
 
-    IPluginLibrarySpecification defaultSpec =
-      TapestryProjectModelManager.getDefaultLibraryModel().getSpecification();
-
     List ids = libSpec.getPageNames();
-    ArrayList defaultIds = (ArrayList) ((ArrayList) defaultSpec.getPageNames()).clone();
+    
+    try {
+      TapestryProjectModelManager mgr;
+      mgr = TapestryPlugin.getDefault().getTapestryModelManager(getModel().getUnderlyingStorage());
 
-    defaultIds.removeAll(ids);
+      IPluginLibrarySpecification defaultSpec = mgr.getDefaultLibrary().getSpecification();
 
-    for (Iterator iter = defaultIds.iterator(); iter.hasNext();) {
+      ArrayList defaultIds = (ArrayList) ((ArrayList) defaultSpec.getPageNames()).clone();
 
-      String defaultName = (String) iter.next();
-      String path = defaultSpec.getPageSpecificationPath(defaultName);
+      defaultIds.removeAll(ids);
 
-      holderArray.add(new DefaultPageHolder(defaultName, path, libSpec));
+      for (Iterator iter = defaultIds.iterator(); iter.hasNext();) {
 
+        String defaultName = (String) iter.next();
+        String path = defaultSpec.getPageSpecificationPath(defaultName);
+
+        holderArray.add(new DefaultPageHolder(defaultName, path, libSpec));
+
+      }
+    } catch (CoreException e) {
     }
 
     Iterator iter = ids.iterator();
@@ -185,6 +191,31 @@ public abstract class BasePagesSection
 
   protected abstract IPluginLibrarySpecification getSpec();
 
+  protected boolean checkPagePathOk(String potentialValue) {
+
+    SpindleStatus status = new SpindleStatus();
+
+    if (potentialValue.startsWith("/net/sf/tapestry")) {
+
+      status.setError(potentialValue + " is already defined by default");
+
+    }
+
+    if (status.isError()) {
+
+      ErrorDialog.openError(
+        newButton.getShell(),
+        "Spindle Error",
+        "Could not add Page: " + potentialValue,
+        status);
+
+      return false;
+
+    }
+
+    return true;
+  }
+
   protected class PageLabelProvider extends AbstractIdentifiableLabelProvider {
 
     Image pageImage;
@@ -206,12 +237,11 @@ public abstract class BasePagesSection
 
   }
 
-  protected class NewPageAction extends Action {
+  protected class AddPageAction extends Action {
 
-    protected NewPageAction() {
+    protected AddPageAction() {
       super();
-      setText("New");
-      setDescription("create a new page");
+      setText("Add");
     }
 
     /**
@@ -219,7 +249,6 @@ public abstract class BasePagesSection
     */
     public void run() {
       try {
-        updateSelection = true;
         ILibrarySpecification specification = getSpec();
 
         ChooseWorkspaceModelDialog dialog =
@@ -232,32 +261,35 @@ public abstract class BasePagesSection
 
         dialog.create();
         if (dialog.open() == dialog.OK) {
-        	
+
           String pageName = dialog.getResultString();
           IPackageFragment pagePackage = dialog.getResultPackage();
           String path = dialog.getResultPath();
-          
-          int index = pageName.indexOf(".");
-          
-          pageName = pageName.substring(0, index);
-          
-          if (specification.getPageSpecificationPath(pageName) != null) {
-          	
-          	int count=1;
-          	while (specification.getPageSpecificationPath(pageName+count) != null) {
-          		count ++;
-          	}
-          	
-          	pageName += count;
+
+          if (checkPagePathOk(path)) {
+            updateSelection = true;
+
+            int index = pageName.indexOf(".");
+
+            pageName = pageName.substring(0, index);
+
+            if (specification.getPageSpecificationPath(pageName) != null) {
+
+              int count = 1;
+              while (specification.getPageSpecificationPath(pageName + count) != null) {
+                count++;
+              }
+
+              pageName += count;
+            }
+
+            specification.setPageSpecificationPath(pageName, path);
+            forceDirty();
+            update();
+            setSelection(pageName);
+            updateSelection = false;
           }
-                  	
-          
-          specification.setPageSpecificationPath(pageName, path);
-          forceDirty();
-          update();
-          setSelection(pageName);
         }
-        updateSelection = false;
       } catch (CoreException e) {
       }
     }
@@ -481,7 +513,7 @@ public abstract class BasePagesSection
         }
         this.identifier = newName;
         parent.removePageSpecificationPath(oldName);
-        parent.setPageSpecificationPath(this.identifier, (String) value);
+        parent.setPageSpecificationPath(this.identifier, specPath);
 
       } else if ("spec".equals(key)) {
 

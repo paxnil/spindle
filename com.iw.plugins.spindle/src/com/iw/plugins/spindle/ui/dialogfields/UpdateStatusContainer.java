@@ -34,6 +34,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 
+import com.iw.plugins.spindle.util.*;
+
 
 /**
  * @author GWL
@@ -46,7 +48,7 @@ public class UpdateStatusContainer implements IDialogFieldChangedListener {
 
   public void add(DialogField widget) {
     widget.addListener(this);
-    IStatus widgetStatus = new DialogFieldStatus();
+    IStatus widgetStatus = new SpindleStatus();
     map.put(widget, widgetStatus);
   }
 

@@ -170,8 +170,6 @@ public class ChooseWorkspaceModelDialog
 
   private ChooseWorkspaceModelWidget chooserWidget;
 
-  private String titleImageString;
-
   public ChooseWorkspaceModelDialog(
     Shell shell,
     IJavaProject project,
@@ -270,22 +268,6 @@ public class ChooseWorkspaceModelDialog
   	
   	return chooserWidget.getResultPath();
   	
-  }
-
-  /**
-   * Returns the titleImageString.
-   * @return String
-   */
-  public String getTitleImageString() {
-    return titleImageString;
-  }
-
-  /**
-   * Sets the titleImageString.
-   * @param titleImageString The titleImageString to set
-   */
-  public void setTitleImageString(String titleImageString) {
-    this.titleImageString = titleImageString;
   }
 
   /**

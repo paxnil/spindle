@@ -2,7 +2,7 @@ package com.iw.plugins.spindle.project;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayOutputStream; 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -165,6 +165,58 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
   }
 
+  public ITapestryModel getProjectModel() throws CoreException {
+
+    return getModelManager().getReadOnlyModel(getProjectStorage());
+
+  }
+
+  public String findFrameworkComponentPath(String alias) throws CoreException {
+
+    return getDefaultLibraryModel().getSpecification().getComponentSpecificationPath(alias);
+
+  }
+
+  public String findFrameworkPagePath(String alias) throws CoreException {
+
+    return getDefaultLibraryModel().getSpecification().getPageSpecificationPath(alias);
+
+  }
+
+  public TapestryLibraryModel getDefaultLibraryModel() throws CoreException {
+
+    return getModelManager().getDefaultLibrary();
+
+  }
+
+  public ITapestryModel findModelByPath(String specificationPath) throws CoreException {
+
+    return findModelByPath(specificationPath, TapestryLookup.ACCEPT_ANY);
+  }
+
+  public ITapestryModel findModelByPath(String specificationPath, int acceptFlags)
+    throws CoreException {
+
+    TapestryLookup.StorageOnlyRequest request = new TapestryLookup.StorageOnlyRequest();
+
+    getLookup().findAll(
+      specificationPath,
+      false,
+      acceptFlags | TapestryLookup.FULL_TAPESTRY_PATH,
+      request);
+
+    IStorage[] results = request.getResults();
+
+    if (results.length > 0) {
+
+      return getModelManager().getReadOnlyModel(results[0]);
+
+    }
+
+    return null;
+
+  }
+
   public synchronized IStorage getProjectStorage() throws CoreException {
 
     if (projectResource == null) {
@@ -172,7 +224,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
       IProject project = getProject();
 
       String projectPath = project.getFullPath().toString();
-      
+
       try {
 
         Path path = new Path(readProperties());
@@ -206,53 +258,53 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
   }
 
   // not called because of the conflicting org.wc3.dom stuff
-//  protected String readApplicationPath(String xmlSpec) throws IOException {
-//
-//    IPath projectPath = getProject().getFullPath();
-//    StringReader reader = new StringReader(xmlSpec);
-//    Element configElement;
-//
-//    String path = null;
-//
-//    try {
-//
-//      DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-//      configElement = parser.parse(new InputSource(reader)).getDocumentElement();
-//
-//    } catch (SAXException e) {
-//
-//      throw new IOException("bad file format");
-//    } catch (ParserConfigurationException e) {
-//
-//      reader.close();
-//      throw new IOException("bad file format");
-//    } finally {
-//
-//      reader.close();
-//    }
-//
-//    if (!configElement.getNodeName().equalsIgnoreCase("spindle")) {
-//      throw new IOException("bad file format");
-//    }
-//
-//    NodeList list = configElement.getChildNodes();
-//    int length = list.getLength();
-//
-//    for (int i = 0; i < length; ++i) {
-//      Node node = list.item(i);
-//      short type = node.getNodeType();
-//      if (type == Node.ELEMENT_NODE) {
-//        Element element = (Element) node;
-//
-//        if (element.getNodeName().equalsIgnoreCase("application")) {
-//
-//          path = element.getAttribute("path"); //$NON-NLS-1$
-//
-//        }
-//      }
-//    }
-//    return path;
-//  }
+  //  protected String readApplicationPath(String xmlSpec) throws IOException {
+  //
+  //    IPath projectPath = getProject().getFullPath();
+  //    StringReader reader = new StringReader(xmlSpec);
+  //    Element configElement;
+  //
+  //    String path = null;
+  //
+  //    try {
+  //
+  //      DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+  //      configElement = parser.parse(new InputSource(reader)).getDocumentElement();
+  //
+  //    } catch (SAXException e) {
+  //
+  //      throw new IOException("bad file format");
+  //    } catch (ParserConfigurationException e) {
+  //
+  //      reader.close();
+  //      throw new IOException("bad file format");
+  //    } finally {
+  //
+  //      reader.close();
+  //    }
+  //
+  //    if (!configElement.getNodeName().equalsIgnoreCase("spindle")) {
+  //      throw new IOException("bad file format");
+  //    }
+  //
+  //    NodeList list = configElement.getChildNodes();
+  //    int length = list.getLength();
+  //
+  //    for (int i = 0; i < length; ++i) {
+  //      Node node = list.item(i);
+  //      short type = node.getNodeType();
+  //      if (type == Node.ELEMENT_NODE) {
+  //        Element element = (Element) node;
+  //
+  //        if (element.getNodeName().equalsIgnoreCase("application")) {
+  //
+  //          path = element.getAttribute("path"); //$NON-NLS-1$
+  //
+  //        }
+  //      }
+  //    }
+  //    return path;
+  //  }
 
   protected String saveProjectResourcePathAsXML(IStorage storage) throws IOException {
 
@@ -318,7 +370,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     String propertyFileName = ".spindle";
     IFile rscFile = getProject().getFile(propertyFileName);
     if (rscFile.exists()) {
-      property = new String(getResourceContentsAsByteArray(rscFile));
+      property = new String(Utils.getResourceContentsAsByteArray(rscFile));
 
       // Ugly hack follows
 
@@ -328,32 +380,6 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     }
 
     return property;
-  }
-
-  /**
-   * Returns the given file's contents as a byte array.
-   */
-  public byte[] getResourceContentsAsByteArray(IFile file) throws CoreException {
-    InputStream stream = null;
-    try {
-
-      stream = new BufferedInputStream(file.getContents(true));
-
-      return Utils.getInputStreamAsByteArray(stream, -1);
-
-    } catch (IOException e) {
-
-      throw new CoreException(new TempStatus(e));
-
-    } finally {
-
-      try {
-
-        stream.close();
-
-      } catch (IOException e) {
-      }
-    }
   }
 
   public class TempStatus implements IStatus {
@@ -443,5 +469,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     }
 
   }
+
+
 
 }

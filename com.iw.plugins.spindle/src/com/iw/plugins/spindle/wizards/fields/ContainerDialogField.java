@@ -53,8 +53,8 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 
 public class ContainerDialogField extends StringButtonField {
@@ -216,7 +216,7 @@ public class ContainerDialogField extends StringButtonField {
   }
 
   protected IStatus containerChanged() {
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
 
     currentRoot = null;
     String str = getContainerText();

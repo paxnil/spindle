@@ -69,12 +69,13 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.TapestryPluginSpecFactory;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.ui.text.ColorManager;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 
@@ -183,6 +184,10 @@ public class TapestryPlugin extends AbstractUIPlugin {
 
       project = ((IJavaProject) element).getProject();
 
+    } else if (element instanceof ITapestryModel) {
+    	
+      project = getProjectFor(((ITapestryModel)element).getUnderlyingStorage());
+      
     }
 
     if (project != null && project.isOpen() && project.hasNature(NATURE_ID)) {
@@ -192,7 +197,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
 
     if (result == null) {
 
-      DialogFieldStatus status = new DialogFieldStatus();
+      SpindleStatus status = new SpindleStatus();
       status.setError(
         project.getFullPath().toString() + " is not open or is not a Tapestry project");
 

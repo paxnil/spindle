@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
@@ -46,6 +47,7 @@ import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
@@ -115,18 +117,26 @@ public class LibraryServicesSection
 
     List myServices = spec.getServiceNames();
 
-    ILibrarySpecification framework = TapestryProjectModelManager.getDefaultLibraryModel().getSpecification();
+    try {
+    	
+      TapestryProjectModelManager mgr;
+      mgr = TapestryPlugin.getDefault().getTapestryModelManager(getModel().getUnderlyingStorage());
 
-    ArrayList defaultServices = (ArrayList) ((ArrayList) framework.getServiceNames()).clone();
+      ILibrarySpecification framework = mgr.getDefaultLibrary().getSpecification();
 
-    defaultServices.removeAll(myServices);
+      ArrayList defaultServices = (ArrayList) ((ArrayList) framework.getServiceNames()).clone();
 
-    for (Iterator iter = defaultServices.iterator(); iter.hasNext();) {
+      defaultServices.removeAll(myServices);
 
-      String defaultName = (String) iter.next();
-      ServiceHolder holder =
-        new ServiceHolder(defaultName, framework.getServiceClassName(defaultName));
-      holderArray.add(holder);
+      for (Iterator iter = defaultServices.iterator(); iter.hasNext();) {
+
+        String defaultName = (String) iter.next();
+        ServiceHolder holder =
+          new ServiceHolder(defaultName, framework.getServiceClassName(defaultName));
+        holderArray.add(holder);
+      }
+    } catch (CoreException e) {
+
     }
 
     Iterator iter = myServices.iterator();
@@ -151,8 +161,8 @@ public class LibraryServicesSection
      * @see org.eclipse.jface.viewers.ILabelProvider#getText(Object)
      */
     public String getText(Object element) {
-    	
-      ServiceHolder holder = (ServiceHolder)element;
+
+      ServiceHolder holder = (ServiceHolder) element;
       return holder.getIdentifier() + " = " + holder.getPropertyValue("class");
     }
 
@@ -213,8 +223,7 @@ public class LibraryServicesSection
     public void run() {
       updateSelection = true;
       TapestryLibraryModel model = (TapestryLibraryModel) getModel();
-      PluginLibrarySpecification spec =
-        (PluginLibrarySpecification) model.getSpecification();
+      PluginLibrarySpecification spec = (PluginLibrarySpecification) model.getSpecification();
       String useSeviceName = "service";
       if (spec.getServiceClassName(useSeviceName + 1) != null) {
         int counter = 2;

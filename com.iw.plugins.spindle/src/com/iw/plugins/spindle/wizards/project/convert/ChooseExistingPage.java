@@ -45,7 +45,7 @@ import org.eclipse.swt.widgets.Display;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelWidget;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.TapestryWizardPage;
 

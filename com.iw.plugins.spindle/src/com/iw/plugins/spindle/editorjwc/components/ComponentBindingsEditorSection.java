@@ -41,6 +41,7 @@ import com.iw.plugins.spindle.model.ModelUtils;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.IBindingHolder;
 import com.iw.plugins.spindle.spec.PluginBindingSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
@@ -55,8 +56,6 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
 
   private ToolTipProvider toolTipProvider = new ToolTipProvider();
 
-  private HashMap precomputedAliasInfo = new HashMap();
-
   /**
    * Constructor for ParameterEditorSection
    */
@@ -67,10 +66,6 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
     setUseToolTips(true);
     setToolTipProvider(toolTipProvider);
     setToolTipHelpProvider(toolTipProvider);
-  }
-
-  public void setPrecomputedAliasInfo(HashMap map) {
-    precomputedAliasInfo = map;
   }
 
   public void sectionChanged(FormSection source, int changeType, Object changeObject) {
@@ -97,50 +92,36 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
   protected ChooseBindingTypeDialog getDialog() {
 
     ChooseBindingTypeDialog dialog = null;
+
+    TapestryComponentModel cmodel = null;
+    Shell shell = newButton.getShell();
+
+    PluginContainedComponent containedComponent = (PluginContainedComponent) selectedComponent;
+
+    Set existingBindingParms = getExistingBindingParameters();
+
     try {
-      TapestryProjectModelManager mgr =
-        TapestryPlugin.getTapestryModelManager(getModel().getUnderlyingStorage());
-      TapestryComponentModel cmodel = null;
-      Shell shell = newButton.getShell();
 
-      PluginContainedComponent containedComponent = (PluginContainedComponent) selectedComponent;
+      ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(getModel());
 
-      Set existingBindingParms = getExistingBindingParameters();
+      cmodel = ComponentSelectionSection.resolveContainedComponent(project, containedComponent);
 
-      if (precomputedAliasInfo.isEmpty()) {
-
-        String selectedType = containedComponent.getType();
-
-        if (selectedComponent != null) {
-
-          cmodel = ModelUtils.findComponent(selectedType, getModel());
-
-          if (cmodel != null) {
-            dialog =
-              new ChooseBindingTypeDialog(
-                shell,
-                cmodel,
-                existingBindingParms,
-                DTDVersion >= XMLUtil.DTD_1_2);
-          } else {
-            dialog = new ChooseBindingTypeDialog(shell, DTDVersion >= XMLUtil.DTD_1_2);
-          }
-
-        } else {
-
-          dialog = null;
-
-        }
-      } else {
-
-        dialog =
-          new ChooseBindingTypeDialog(
-            shell,
-            precomputedAliasInfo,
-            existingBindingParms,
-            DTDVersion >= XMLUtil.DTD_1_2);
-      }
     } catch (CoreException e) {
+
+    }
+
+    if (cmodel != null) {
+
+      dialog =
+        new ChooseBindingTypeDialog(
+          shell,
+          cmodel,
+          existingBindingParms,
+          DTDVersion >= XMLUtil.DTD_1_2);
+
+    } else {
+
+      dialog = new ChooseBindingTypeDialog(shell, DTDVersion >= XMLUtil.DTD_1_2);
     }
 
     return dialog;
@@ -156,115 +137,58 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
     //---------- IToolTipProvider ----------------------------//
 
     public String getToolTipText(Object object) {
-      TapestryComponentModel component = null;
-      String result = null;
-      toolTipInfo.clear();
 
-      PluginBindingSpecification spec = (PluginBindingSpecification) object;
+      String result = null;
+
+      PluginBindingSpecification bindingSpec = (PluginBindingSpecification) object;
+
       PluginContainedComponent containedComponent = (PluginContainedComponent) selectedComponent;
-      String parameter = spec.getIdentifier();
-      // empty means no alias!
-      if (precomputedAliasInfo.isEmpty()) {
-        // the type is not an alias
-        String type = containedComponent.getType();
-        if (type == null || type.equals("")) {
-          return "No Type found for contained component: " + parameter;
-        }
-        StringBuffer buffer = new StringBuffer();
-        component = ModelUtils.findComponent(type, getModel());
-        if (component == null) {
-          buffer.append("Component: " + type + " not found.");
-          result = buffer.toString();
-        } else if (!component.isLoaded()) {
-          try {
-            component.load();
-          } catch (Exception e) {
-            buffer.append("Could not load component: " + type);
-            result = buffer.toString();
-          }
-        }
-        PluginComponentSpecification componentSpec = component.getComponentSpecification();
-        PluginParameterSpecification parameterSpec =
-          (PluginParameterSpecification) componentSpec.getParameter(parameter);
-        if (parameterSpec == null) {
-          buffer.append("parameter '" + parameter + "' not found");
-          if (componentSpec.getAllowInformalParameters()) {
-            buffer.append(" but informals are allowed");
-            result = buffer.toString();
-          } else {
-            buffer.append(" WARNING informals are not allowed!");
-            result = buffer.toString();
-          }
-        }
-        parameterSpec.getHelpText(parameter, buffer);
-        result = buffer.toString();
+      TapestryComponentModel cmodel = null;
+
+      try {
+
+        ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(getModel());
+        cmodel = ComponentSelectionSection.resolveContainedComponent(project, containedComponent);
+
+      } catch (CoreException e) {
+
+      }
+
+      if (cmodel == null) {
+
+        result = "could not resolve '" + containedComponent.getType();
 
       } else {
-        // the type IS an alias
-        computeToolTipInfo(parameter, precomputedAliasInfo);
-        String alias = containedComponent.getType();
-        Set keys = toolTipInfo.keySet();
-        TapestryApplicationModel firstModel = null;
-        TapestryApplicationModel defaultModel = TapestryPlugin.selectedApplication;
-        if (defaultModel != null && keys.contains(defaultModel)) {
-          firstModel = defaultModel;
-        }
-        Object[] keyArray = toolTipInfo.keySet().toArray();
-        if (keyArray.length == 0) {
+
+        PluginComponentSpecification componentSpec = cmodel.getComponentSpecification();
+
+        String parameter = bindingSpec.getIdentifier();
+
+        PluginParameterSpecification parameterSpec =
+          (PluginParameterSpecification) componentSpec.getParameter(parameter);
+
+        if (parameterSpec == null) {
+
           result =
-            "Couldn't find any component aliased to '"
-              + alias
-              + "' and having parameter '"
+            "no parameter '"
               + parameter
-              + "'";
+              + "' found in "
+              + cmodel.getUnderlyingStorage().getFullPath().toString();
         } else {
-          StringBuffer buffer = new StringBuffer();
-          if (firstModel == null) {
-            firstModel = ((TapestryApplicationModel) keyArray[0]);
-          }
-          TapestryComponentModel cmodel = (TapestryComponentModel) toolTipInfo.get(firstModel);
-          PluginComponentSpecification firstComponent =
-            (PluginComponentSpecification) cmodel.getComponentSpecification();
-          buffer.append(
-            "Found alias '"
-              + alias
-              + "' in application '"
-              + firstModel.getUnderlyingStorage().getFullPath()
-              + "\n");
-          buffer.append(
-            alias
-              + " maps to "
-              + firstModel.getSpecification().getComponentSpecificationPath(alias)
-              + "\n");
-          if (keyArray.length > 1) {
-            buffer.append(
-              "press F1 to check "
-                + (keyArray.length - 1)
-                + " other application(s) that have alias '"
-                + alias
-                + "'.\n");
-          }
-          ((PluginParameterSpecification) firstComponent.getParameter(parameter)).getHelpText(
-            parameter,
-            buffer);
+
+		  StringBuffer buffer = new StringBuffer();
+          parameterSpec.getHelpText(parameter, buffer);
           result = buffer.toString();
+
         }
+
       }
+
       return result;
+
+
     }
 
-    private void computeToolTipInfo(String parameter, HashMap precomputed) {
-      Iterator iter = precomputed.keySet().iterator();
-      while (iter.hasNext()) {
-        Object applicationModel = iter.next();
-        TapestryComponentModel cmodel = (TapestryComponentModel) precomputed.get(applicationModel);
-        PluginComponentSpecification component =
-          (PluginComponentSpecification) cmodel.getComponentSpecification();
-        if (component.getParameter(parameter) != null) {
-          toolTipInfo.put(applicationModel, cmodel);
-        }
-      }
-    }
 
     public Image getToolTipImage(Object object) {
       return getImage(object);
@@ -273,12 +197,15 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
     //---------- IToolTipHelpTextProvider --------------------//
 
     public Object getHelp(Object obj) {
-      String parameter = ((PluginBindingSpecification) obj).getIdentifier();
-      if (precomputedAliasInfo.isEmpty()) {
-        return null;
-      }
-      // its not a possible alias now...
-      return new ComponentAliasParameterViewer(parameter, precomputedAliasInfo);
+
+      return null;
+
+      //      String parameter = ((PluginBindingSpecification) obj).getIdentifier();
+      //      if (precomputedAliasInfo.isEmpty()) {
+      //        return null;
+      //      }
+      //      // its not a possible alias now...
+      //      return new ComponentAliasParameterViewer(parameter, precomputedAliasInfo);
     }
 
   }

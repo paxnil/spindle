@@ -25,12 +25,29 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorlib.extensions;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+
 import net.sf.tapestry.util.IPropertyHolder;
+import org.eclipse.jface.action.Action;
+import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.eclipse.update.ui.forms.internal.FormSection;
 
+import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
+import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.PropertyEditableSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
+import com.iw.plugins.spindle.model.BaseTapestryModel;
+import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.spec.IIdentifiable;
+import com.iw.plugins.spindle.ui.EmptySelection;
 
 public class ExtensionPropertiesSection
   extends PropertyEditableSection

@@ -93,7 +93,6 @@ public class ExtensionsFormPage extends SpindleFormPage {
 
 
     protected void createFormClient(Composite parent) {
-
       GridLayout layout = new GridLayout();
       layout.numColumns = 2;
       layout.marginWidth = 10;
@@ -105,7 +104,7 @@ public class ExtensionsFormPage extends SpindleFormPage {
       Control control;
 
       Composite leftColumn = getFactory().createComposite(parent);
-      gd = new GridData(GridData.FILL_BOTH);
+      gd = new GridData(GridData.FILL_VERTICAL);
       leftColumn.setLayoutData(gd);
       GridLayout leftLayout = new GridLayout();
       leftLayout.verticalSpacing = 10;
@@ -123,7 +122,6 @@ public class ExtensionsFormPage extends SpindleFormPage {
       extensionSection = new ExtensionSection(page);
       control = extensionSection.createControl(leftColumn, getFactory());
       gd = new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING);
-      gd.widthHint = 200;
       gd.verticalSpan = 75;
       control.setLayoutData(gd);
 

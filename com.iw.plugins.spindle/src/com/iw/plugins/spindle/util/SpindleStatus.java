@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.ui.dialogfields;
+package com.iw.plugins.spindle.util;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.util.Assert;
@@ -37,7 +37,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
  * Copyright 2002, Intelligent Works Incoporated
  * All Rights Reserved
  */
-public class DialogFieldStatus implements IStatus {
+public class SpindleStatus implements IStatus {
 
 	private String statusMessage;
 	private int severity;
@@ -61,7 +61,7 @@ public class DialogFieldStatus implements IStatus {
 	 * than ok.
 	 */
 	public static IStatus getMostSevere(IStatus[] status) {
-		IStatus max= null;
+		IStatus max= new SpindleStatus();
 		for (int i= 0; i < status.length; i++) {
 			IStatus curr= status[i];
 			if (curr.matches(IStatus.ERROR)) {
@@ -77,7 +77,7 @@ public class DialogFieldStatus implements IStatus {
 	/**
 	 * Creates a status set to OK (no message)
 	 */
-	public DialogFieldStatus() {
+	public SpindleStatus() {
 		this(OK, null);
 	}
 
@@ -87,10 +87,15 @@ public class DialogFieldStatus implements IStatus {
 	 * @param message The message of the status. Applies only for ERROR,
 	 * WARNING and INFO.
 	 */	
-	public DialogFieldStatus(int severity, String message) {
+	public SpindleStatus(int severity, String message) {
 		statusMessage= message;
-		severity= severity;
-	}		
+		this.severity= severity;
+	}	
+	
+	public SpindleStatus(Throwable exception) {
+		statusMessage = exception.getMessage();
+		this.severity = ERROR;
+	}	
 	
 	/**
 	 *  Returns if the status' severity is OK.

@@ -44,8 +44,8 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 
 public class TypeDialogField extends StringButtonField {
@@ -109,7 +109,7 @@ public class TypeDialogField extends StringButtonField {
   protected IStatus typeChanged() {
     IPackageFragmentRoot root = packageChooser.getContainer().getPackageFragmentRoot();
     chosenType = null;
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
     String typeName = getTextValue();
     if ("".equals(typeName)) {
       status.setError(MessageUtil.getString(name + ".error.EnterTypeName"));

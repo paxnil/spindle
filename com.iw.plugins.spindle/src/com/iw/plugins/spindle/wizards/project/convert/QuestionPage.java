@@ -42,9 +42,9 @@ import org.eclipse.update.ui.forms.internal.engine.FormEngine;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.RadioDialogField;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.wizards.TapestryWizardPage;
 

@@ -100,10 +100,16 @@ public class ChooseFromNamespaceWidget extends TwoListChooserWidget {
     Object[] selectionData = selection.toArray();
 
     resultString = (String) selectionData[0];
-    resultNamespace = (INamespaceFragment) selectionData[1];
+    Object dataNamespace = selectionData[1];
 
-    resultString = null;
-    resultNamespace = null;
+    if (dataNamespace instanceof INamespaceFragment) {
+
+      resultNamespace = (INamespaceFragment) selectionData[1];
+
+    } else {
+
+      resultNamespace = null;
+    }
 
     if (resultString == null) {
 
@@ -163,7 +169,13 @@ public class ChooseFromNamespaceWidget extends TwoListChooserWidget {
     }
 
     if (!"".equals(result)) {
+    	
       result += ":" + resultString;
+      
+    } else {
+    	
+      result = resultString;
+      
     }
 
     return result;
@@ -232,7 +244,7 @@ public class ChooseFromNamespaceWidget extends TwoListChooserWidget {
      * @see org.eclipse.jface.viewers.ILabelProvider#getText(Object)
      */
     public String getText(Object element) {
-		return super.getText(element);
+      return super.getText(element);
     }
 
   }
@@ -351,13 +363,13 @@ public class ChooseFromNamespaceWidget extends TwoListChooserWidget {
       if (fragment.isDefaultNamespace()) {
 
         storeNamespace = "(framework namespace)";
-        namespaceName = (String)storeNamespace;
+        namespaceName = (String) storeNamespace;
 
       } else if ("".equals(fragment.getName())) {
-      	
-      	storeNamespace = "(default namespace)";
-      	namespaceName = (String)storeNamespace;
-      	
+
+        storeNamespace = "(default namespace)";
+        namespaceName = (String) storeNamespace;
+
       } else {
 
         storeNamespace = fragment;

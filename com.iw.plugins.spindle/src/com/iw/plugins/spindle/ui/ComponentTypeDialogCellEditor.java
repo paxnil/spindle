@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.project.ITapestryProject;
+import com.iw.plugins.spindle.util.lookup.TapestryNamespaceLookup;
 
 public class ComponentTypeDialogCellEditor extends EditableDialogCellEditor {
 
@@ -82,10 +83,10 @@ public class ComponentTypeDialogCellEditor extends EditableDialogCellEditor {
       return value;
     }
     ChooseFromNamespaceDialog dialog =
-      new ChooseFromNamespaceDialog(cellEditorWindow.getShell(), tproject, title, message, true);
+      new ChooseFromNamespaceDialog(cellEditorWindow.getShell(), tproject, title, message, TapestryNamespaceLookup.ACCEPT_COMPONENTS);
 
     if (dialog.open() == dialog.OK) {
-      return dialog.getResultComponent();
+      return dialog.getResultPath();
     }
     return value;
   }

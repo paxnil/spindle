@@ -138,6 +138,7 @@ public abstract class AbstractModel implements ITapestryModel, IModel, IModelCha
 	public void addModelChangedListener(IModelChangedListener listener) {
 		changeListeners.add(listener);
 	}
+	
 
 	/**
 	 * @see IModelChangeProvider#fireModelChanged(IModelChangedEvent)

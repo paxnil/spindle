@@ -46,8 +46,8 @@ import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.ui.dialogfields.UneditableComboBoxDialogField;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
@@ -225,7 +225,7 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
    * Method selectionChanged.
    */
   private IStatus selectionChanged() {
-    DialogFieldStatus newStatus = new DialogFieldStatus();
+    SpindleStatus newStatus = new SpindleStatus();
     boolean enabled = isEnabled();
     if (isEnabled()) {
       int index = getSelectedIndex();

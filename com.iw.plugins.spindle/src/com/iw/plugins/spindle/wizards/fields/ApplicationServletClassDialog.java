@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableContext;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.util.SpindleStatus;
 
 public class ApplicationServletClassDialog extends SuperClassDialogField {
 
@@ -84,7 +84,7 @@ public class ApplicationServletClassDialog extends SuperClassDialogField {
   }
 
   private IStatus hasTapestryServletClassAsSuperType(String superclassName, IPackageFragmentRoot root) {
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
     enableButton(root == null);
     if (root == null) {
       return status;

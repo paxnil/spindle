@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -66,21 +65,19 @@ import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
-import com.iw.plugins.spindle.model.ModelUtils;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.ui.ChooseFromNamespaceDialog;
-import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.ComponentAliasViewer;
 import com.iw.plugins.spindle.ui.CopyToClipboardAction;
 import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.util.lookup.TapestryNamespaceLookup;
@@ -101,7 +98,58 @@ public class ComponentSelectionSection
 
   private ContainedComponentLabelProvider labelProvider = new ContainedComponentLabelProvider();
 
-  private HashMap precomputedAliasInfo = new HashMap();
+
+  static public TapestryComponentModel resolveContainedComponent(
+    ITapestryProject project,
+    PluginContainedComponent component)
+    throws CoreException {
+
+    TapestryLibraryModel projectModel = (TapestryLibraryModel) project.getProjectModel();
+
+    String componentPath = projectModel.findComponentPath(component.getType());
+
+    TapestryComponentModel result = null;
+
+    SpindleStatus status = new SpindleStatus();
+
+    if (componentPath != null) {
+
+      result =
+        (TapestryComponentModel) project.findModelByPath(
+          componentPath,
+          TapestryLookup.ACCEPT_COMPONENTS);
+
+      if (result == null) {
+
+        status.setError("(bad path '" + componentPath + "')");
+
+        throw new CoreException(status);
+
+      } else if (!result.isLoaded()) {
+
+        try {
+
+          result.load();
+
+        } catch (Exception e) {
+
+          status.setError(
+            "could not load the component "
+              + "("
+              + componentPath
+              + "). There could be a parse error.");
+
+          throw new CoreException(status);
+
+        }
+
+      }
+
+    }
+
+    return result;
+
+  }
 
   /**
    * Constructor for ComponentSelectionSection
@@ -117,15 +165,10 @@ public class ComponentSelectionSection
     setToolTipHelpProvider(labelProvider);
   }
 
-  public HashMap getPrecomputedAliasInfo() {
-    return precomputedAliasInfo;
-  }
-
   public void selectionChanged(SelectionChangedEvent event) {
 
     PluginContainedComponent component = (PluginContainedComponent) getSelected();
     if (component == null) {
-      precomputedAliasInfo.clear();
       deleteButton.setEnabled(false);
       copyButton.setEnabled(false);
       fireSelectionNotification(null);
@@ -143,45 +186,20 @@ public class ComponentSelectionSection
       deleteButton.setEnabled(isEditable);
       editButton.setEnabled(isEditable);
       copyButton.setEnabled(isEditable && component.getCopyOf() == null);
-      // lets pre-compute the alias lookup for the Tooltips (if required)
-      String selectedType = component.getType();
-      if (selectedType == null
-        || "".equals(selectedType.trim())
-        || selectedType.endsWith(".jwc")) {
-        precomputedAliasInfo.clear();
-        return;
-      }
-      precomputeAliasInfoForTooltip(selectedType);
 
     }
   }
 
-  private void precomputeAliasInfoForTooltip(String alias) {
-    precomputedAliasInfo.clear();
-    Iterator applications = Utils.getApplicationsWithAlias(alias).iterator();
-    while (applications.hasNext()) {
-      TapestryApplicationModel appModel = (TapestryApplicationModel) applications.next();
-      PluginApplicationSpecification appSpec =
-        (PluginApplicationSpecification) (appModel).getSpecification();
-      TapestryComponentModel cmodel =
-        (TapestryComponentModel) ModelUtils.findComponent(
-          appSpec.getComponentSpecificationPath(alias),
-          getModel());
-      if (cmodel == null) {
-        continue;
-      }
-      precomputedAliasInfo.put(appModel, cmodel);
-    }
-  }
+
   /**
    * @see com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection#createButtons(Composite, FormWidgetFactory)
    */
   protected void createButtons(Composite buttonContainer, FormWidgetFactory factory) {
 
     super.createButtons(buttonContainer, factory);
-    
+
     newButton.setText(newComponentAction.getText());
-    
+
     copyButton = factory.createButton(buttonContainer, "Copy", SWT.PUSH);
     GridData gd = new GridData(GridData.FILL_HORIZONTAL);
     gd.verticalAlignment = GridData.BEGINNING;
@@ -250,7 +268,6 @@ public class ComponentSelectionSection
       holderArray.add((PluginContainedComponent) spec.getComponent(id));
     }
     setInput(holderArray);
-    selectFirst();
   }
 
   public void modelChanged(IModelChangedEvent event) {
@@ -270,16 +287,25 @@ public class ComponentSelectionSection
 
     Image componentImage;
     Image componentAliasImage;
+    Image copyOfImage;
     ILabelProviderListener listener;
 
     public ContainedComponentLabelProvider() {
       componentImage = TapestryImages.getSharedImage("component16.gif");
       componentAliasImage = TapestryImages.getSharedImage("componentAlias16.gif");
+      copyOfImage = TapestryImages.getSharedImage("componentCopyOf16.gif");
     }
     public Image getImage(Object element) {
 
       PluginContainedComponent component = (PluginContainedComponent) element;
+      String copyOf = component.getCopyOf();
       String type = component.getType();
+
+      if (copyOf != null) {
+
+        return copyOfImage;
+
+      }
 
       if (type != null && !type.endsWith(".jwc")) {
 
@@ -288,92 +314,48 @@ public class ComponentSelectionSection
       return componentImage;
     }
 
-    //---------- IToolTipProvider ----------------------------//
-
     public String getToolTipText(Object object) {
 
-      return TOOL_TIPS_OFF;
+      PluginContainedComponent selectedComponent = (PluginContainedComponent) object;
 
-      //      PluginContainedComponent selectedComponent = (PluginContainedComponent) object;
-      //      String identifier = selectedComponent.getIdentifier();
-      //      String aliasOrType = selectedComponent.getType();
-      //      String copyOf = selectedComponent.getCopyOf();
-      //      if (copyOf != null && !"".equals(copyOf.trim())) {
-      //        return identifier + " is copy-of " + copyOf;
-      //      }
-      //      StringBuffer buffer =
-      //        new StringBuffer(identifier + " type = " + (aliasOrType == null ? "" : aliasOrType) + "\n");
-      //      if (!isSelected(selectedComponent)) {
-      //        buffer.append("Select this contained component for more tooltip info");
-      //        return buffer.toString();
-      //      }
-      //      // empty means no alias!
-      //      if (precomputedAliasInfo.isEmpty()) {
-      //        // the type is not an alias
-      //        String type = aliasOrType;
-      //        if (type == null || type.equals("")) {
-      //          buffer.append("No Type found for contained component: " + identifier);
-      //          return buffer.toString();
-      //        }
-      //        TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager();
-      //        TapestryComponentModel component = ModelUtils.findComponent(type, getModel());
-      //
-      //        if (component == null) {
-      //          buffer.append(identifier + "'s type: " + type + " not found.");
-      //          return buffer.toString();
-      //        } else if (!component.isLoaded()) {
-      //          try {
-      //            component.load();
-      //          } catch (Exception e) {
-      //            buffer.append("Could not load component: " + type + ". There could be a parse error.");
-      //            return buffer.toString();
-      //          }
-      //        }
-      //        PluginComponentSpecification componentSpec = component.getComponentSpecification();
-      //        componentSpec.getHelpText(identifier, buffer);
-      //        return buffer.toString();
-      //
-      //      } else {
-      //        // the type IS an alias        
-      //        String alias = aliasOrType;
-      //        Object[] keys = precomputedAliasInfo.keySet().toArray();
-      //        if (keys.length == 0) {
-      //          buffer.append("Alias '" + alias + "' not found in an application.");
-      //          return buffer.toString();
-      //        } else {
-      //          TapestryApplicationModel firstModel = ((TapestryApplicationModel) keys[0]);
-      //          TapestryComponentModel cmodel =
-      //            (TapestryComponentModel) precomputedAliasInfo.get(keys[0]);
-      //          if (!cmodel.isLoaded()) {
-      //            try {
-      //              cmodel.load();
-      //            } catch (CoreException e) {
-      //            }
-      //          }
-      //          PluginComponentSpecification firstComponent =
-      //            (PluginComponentSpecification) cmodel.getComponentSpecification();
-      //          buffer.append(
-      //            "Found alias '"
-      //              + alias
-      //              + "' in application '"
-      //              + firstModel.getUnderlyingStorage().getFullPath()
-      //              + "\n");
-      //          buffer.append(
-      //            alias + " maps to " + firstModel.getSpecification().getComponentSpecificationPath(alias) + "\n");
-      //          if (keys.length > 1) {
-      //            buffer.append(
-      //              "press F1 to check "
-      //                + (keys.length - 1)
-      //                + " other application(s) that have alias '"
-      //                + alias
-      //                + "'.\n");
-      //          }
-      //          if (firstComponent != null) {
-      //            firstComponent.getHelpText(alias, buffer);
-      //          }
-      //          return buffer.toString();
-      //        }
-      //      }
+      String identifier = selectedComponent.getIdentifier();
+      String type = selectedComponent.getType();
+
+      String copyOf = selectedComponent.getCopyOf();
+
+      if (copyOf != null && !"".equals(copyOf.trim())) {
+
+        return identifier + " is copy-of " + copyOf;
+
+      }
+
+      String message = "could not resolve'" + type + "' ";
+
+      if (type.endsWith(".jwc")) {
+
+        message = "can't resolve specification paths. Use aliases instead.";
+
+      } else {
+
+        try {
+
+          ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(getModel());
+
+          TapestryComponentModel compModel = resolveContainedComponent(project, selectedComponent);
+
+          StringBuffer resultBuffer = new StringBuffer();
+          compModel.getComponentSpecification().getHelpText(type, resultBuffer);
+          message = resultBuffer.toString();
+
+        } catch (CoreException e) {
+
+          message += e.getStatus().getMessage();
+        }
+
+      }
+
+      return message;
+
     }
 
     public Image getToolTipImage(Object object) {
@@ -382,18 +364,27 @@ public class ComponentSelectionSection
 
     //---------- IToolTipHelpProvider --------------------//
 
-    public Object getHelp(Object obj) {
-      //      return HELP_OFF;
-      if (!isSelected(obj)) {
+    public Object getHelp(Object object) {
+
+      PluginContainedComponent selectedComponent = (PluginContainedComponent) object;
+      TapestryComponentModel componentModel = null;
+
+      try {
+
+        ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(getModel());
+
+        componentModel = resolveContainedComponent(project, selectedComponent);
+
+      } catch (CoreException e) {
+
         return null;
+
       }
-      if (precomputedAliasInfo.isEmpty()) {
-        return null;
-      }
-      PluginContainedComponent component = (PluginContainedComponent) obj;
-      String id = component.getIdentifier();
-      String alias = component.getType();
-      return new ComponentAliasViewer(id, alias, precomputedAliasInfo);
+
+      return new ComponentAliasViewer(
+        selectedComponent.getIdentifier(),
+        selectedComponent.getType(),
+        componentModel);
 
     }
 
@@ -432,10 +423,6 @@ public class ComponentSelectionSection
           String componentName = dialog.getResultString();
           String path = dialog.getResultPath();
 
-          int index = componentName.indexOf(".");
-
-          componentName = componentName.substring(0, index);
-
           if (specification.getComponent(componentName) != null) {
 
             int count = 1;
@@ -452,10 +439,16 @@ public class ComponentSelectionSection
           forceDirty();
           update();
           setSelection(componentName);
-          updateSelection = false;
         }
 
       } catch (CoreException e) {
+
+        e.printStackTrace();
+
+      } finally {
+
+        updateSelection = false;
+
       }
 
     }

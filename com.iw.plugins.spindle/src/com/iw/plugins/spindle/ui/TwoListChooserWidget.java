@@ -223,17 +223,20 @@ public class TwoListChooserWidget extends Viewer {
   }
 
   protected void handleUpperSelectionChanged() {
+  	
+  	TableItem [] selected = upperList.getSelection();
+
+    if (selected.length > 0) {
+
     TableItem selectedItem = upperList.getSelection()[0];
-
-    if (selectedItem != null) {
-
+    
       Object[] newLowerListData = lowerListContentProvider.getElements(selectedItem.getData());
 
       updateListWidget(newLowerListData, lowerList, lowerListLabelProvider);
 
     } else {
 
-      updateListWidget(empty, upperList, lowerListLabelProvider);
+      updateListWidget(empty, lowerList, lowerListLabelProvider);
 
     }
 

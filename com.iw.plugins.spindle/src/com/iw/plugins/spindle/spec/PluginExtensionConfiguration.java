@@ -244,8 +244,9 @@ public class PluginExtensionConfiguration implements IIdentifiable, IPropertySou
     		newName = newName + i++;
     		
     	}
+    	this.identifier = newName;
     	parent.removeConfiguration(oldName);
-    	parent.addConfiguration(newName, value);  
+    	parent.addConfiguration(newName, this.valueObject);  
 
     }
 

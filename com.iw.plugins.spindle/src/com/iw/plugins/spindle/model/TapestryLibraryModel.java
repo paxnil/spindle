@@ -44,11 +44,16 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.util.Assert;
 
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.SourceWriter;
 
 public class TapestryLibraryModel extends BaseTapestryModel implements PropertyChangeListener {
@@ -69,6 +74,103 @@ public class TapestryLibraryModel extends BaseTapestryModel implements PropertyC
     return librarySpecification;
   }
 
+  public String findComponentAlias(String path) {
+
+    IPluginLibrarySpecification spec = getSpecification();
+
+    for (Iterator iter = spec.getComponentAliases().iterator(); iter.hasNext();) {
+      String possibleAlias = (String) iter.next();
+
+      String existingPath = spec.getComponentSpecificationPath(possibleAlias);
+
+      if (existingPath.equals(path)) {
+
+        return possibleAlias;
+      }
+    }
+
+    return null;
+
+  }
+
+  public String findPageName(String path) {
+
+    IPluginLibrarySpecification spec = getSpecification();
+
+    for (Iterator iter = spec.getPageNames().iterator(); iter.hasNext();) {
+      String possibleName = (String) iter.next();
+
+      String existingPath = spec.getPageSpecificationPath(possibleName);
+
+      if (existingPath.equals(path)) {
+
+        return possibleName;
+      }
+    }
+
+    return null;
+
+  }
+
+  public String findComponentPath(String type) throws CoreException {
+
+    SpindleStatus status = new SpindleStatus();
+    String result = null;
+    ITapestryProject project = getProject();
+
+    Assert.isNotNull(type);
+
+    int index = type.indexOf(":");
+
+    if (index == 0) {
+
+      status.setError("invalid type: " + type);
+      throw new CoreException(status);
+
+    }
+
+    String namespacePart = null;
+    String componentAlias = type;
+
+    if (index >= 0) {
+
+      namespacePart = type.substring(0, index);
+      componentAlias = type.substring(index + 1);
+    }
+
+    if (namespacePart == null) {
+
+      result = librarySpecification.getComponentSpecificationPath(componentAlias);
+
+      if (result == null) {
+
+        result = project.findFrameworkComponentPath(componentAlias);
+
+      }
+
+    } else {
+
+      String subLibrarySpecPath = librarySpecification.getLibrarySpecificationPath(namespacePart);
+
+      if (subLibrarySpecPath == null) {
+
+        status.setError("unable to resolve namespace: " + namespacePart);
+
+        throw new CoreException(status);
+
+      }
+
+      TapestryLibraryModel subLib =
+        (TapestryLibraryModel) project.findModelByPath(subLibrarySpecPath);
+
+      result = subLib.getSpecification().getComponentSpecificationPath(componentAlias);
+
+    }
+
+    return result;
+
+  }
+
   public void load(final InputStream source) throws CoreException {
     final TapestryLibraryModel thisModel = this;
     TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
@@ -85,8 +187,7 @@ public class TapestryLibraryModel extends BaseTapestryModel implements PropertyC
         try {
 
           SpecificationParser parser =
-            (SpecificationParser) TapestryPlugin.getParserFor(
-              "application");
+            (SpecificationParser) TapestryPlugin.getParserFor("application");
           librarySpecification =
             (PluginLibrarySpecification) parser.parseLibrarySpecification(
               source,
@@ -204,6 +305,17 @@ public class TapestryLibraryModel extends BaseTapestryModel implements PropertyC
       return librarySpecification.getPublicId();
     }
     return "";
+  }
+
+  /**
+  * @see com.iw.plugins.spindle.model.ITapestryModel#setPublicId(String)
+  */
+  public void setPublicId(String value) {
+
+    if (librarySpecification != null) {
+
+      librarySpecification.setPublicId(value);
+    }
   }
 
 }

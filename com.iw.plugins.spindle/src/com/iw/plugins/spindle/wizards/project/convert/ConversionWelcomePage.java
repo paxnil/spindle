@@ -46,9 +46,9 @@ import org.eclipse.update.ui.forms.internal.engine.FormEngine;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
-import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.RadioDialogField;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.TapestryWizardPage;
@@ -301,7 +301,7 @@ public class ConversionWelcomePage
    */
   public void dialogFieldChanged(DialogField field) {
 
-    DialogFieldStatus status = new DialogFieldStatus();
+    SpindleStatus status = new SpindleStatus();
 
     int index = applicationOrLibrary.getSelectedIndex();
 
