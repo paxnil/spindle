@@ -144,7 +144,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
      */
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException
     {
-        this.fCurrentProject = getProject();
+        fCurrentProject = getProject();
+        Markers.removeBuildProblemsForProject(fCurrentProject);
         if (fCurrentProject == null || !fCurrentProject.isAccessible())
             return new IProject[0];
 

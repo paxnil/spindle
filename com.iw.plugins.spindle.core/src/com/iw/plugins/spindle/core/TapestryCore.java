@@ -28,6 +28,9 @@ package com.iw.plugins.spindle.core;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -53,6 +56,16 @@ import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
 public class TapestryCore extends AbstractUIPlugin
 {
 
+    /**
+     *  Used by label decorators to listen to Core changes
+     */
+    public static interface ICoreListener 
+    {
+
+        public void coreChanged();
+
+    }
+    
     private static ResourceBundle TapestryStrings;
     private static ResourceBundle SpindleCoreStrings;
 
@@ -68,6 +81,8 @@ public class TapestryCore extends AbstractUIPlugin
     //The shared instance.
     private static TapestryCore plugin;
     //Resource bundle.
+
+    private static List CoreListeners;
 
     /**
      * The constructor.
@@ -104,7 +119,7 @@ public class TapestryCore extends AbstractUIPlugin
         TapestryCore core = getDefault();
         if (core == null)
         {
-            System.err.println("TapestryCore log: "+msg);
+            System.err.println("TapestryCore log: " + msg);
         }
         ILog log = core.getLog();
         Status status =
@@ -165,6 +180,7 @@ public class TapestryCore extends AbstractUIPlugin
             description.setNatureIds(newNatures);
             proj.setDescription(description, null);
         }
+        fireCoreListenerEvent();
     }
 
     public static void removeNatureFromProject(IProject project, String natureId) throws CoreException
@@ -197,6 +213,31 @@ public class TapestryCore extends AbstractUIPlugin
             description.setNatureIds(newNatures);
             proj.setDescription(description, null);
         }
+        fireCoreListenerEvent();
+    }
+
+    public static synchronized void addCoreListener(ICoreListener listener)
+    {
+        if (CoreListeners == null)
+            CoreListeners = new ArrayList();
+
+        if (!CoreListeners.contains(listener))
+            CoreListeners.add(listener);
+    }
+
+    public static void removeCoreListener(ICoreListener listener)
+    {
+        if (CoreListeners != null)
+            CoreListeners.remove(listener);
+    }
+    
+    private static void fireCoreListenerEvent() {
+        for (Iterator iter = CoreListeners.iterator(); iter.hasNext();)
+    {
+        ICoreListener listener = (ICoreListener) iter.next();
+        // simple for now - may create an event type later
+        listener.coreChanged();
+    }
     }
 
     public static String getString(String key, Object[] args)

@@ -253,7 +253,8 @@ public class BaseValidator implements IScannerValidator
         ISourceLocation location)
         throws ScannerException
     {
-        if (!value.startsWith(fDummyString))
+            
+        if (value != null && !value.startsWith(fDummyString))
         {
             if (fCompiledPatterns == null)
                 fCompiledPatterns = new HashMap();
@@ -275,8 +276,10 @@ public class BaseValidator implements IScannerValidator
                 reportProblem(severity, location, TapestryCore.getTapestryString(errorKey, value));
                 return false;
             }
+            return true;
         }
-        return true;
+        reportProblem(severity, location, TapestryCore.getTapestryString(errorKey, "null value"));
+        return false;
     }
 
     /* (non-Javadoc)

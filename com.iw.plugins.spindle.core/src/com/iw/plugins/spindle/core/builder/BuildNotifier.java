@@ -85,7 +85,7 @@ public class BuildNotifier
 
     private void processed(String message)
     {
-        subTask("processing" + message);
+        subTask("processed " + message);
         updateProgressDelta(fProcessingProgress);
         checkCancel();
     }

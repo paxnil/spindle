@@ -101,8 +101,8 @@ public class ComponentSpecificationResolver
             namespace = fContainerNamespace.getChildNamespace(libraryId);
         else
             namespace = fContainerNamespace;
-            
-        if (namespace == null) 
+
+        if (namespace == null)
             return null;
 
         if (namespace.containsComponentType(type))
@@ -110,8 +110,10 @@ public class ComponentSpecificationResolver
             return namespace.getComponentSpecification(type);
         }
 
-        return resolveInFramework(type);
-       
+        if (libraryId == null)
+            return resolveInFramework(type);
+        
+        return null;
     }
 
     private IComponentSpecification resolveInFramework(String type)

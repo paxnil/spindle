@@ -225,7 +225,7 @@ public class FullBuild extends Build
                 e1.printStackTrace();
             }
             if (wxmlElement == null)
-                return;
+                throw new BuilderException("Tapestry Build failed: could not parse web.xml");
 
             ServletInfo[] servletInfos = null;
             try

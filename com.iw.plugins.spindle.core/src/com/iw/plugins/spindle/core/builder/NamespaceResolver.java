@@ -227,9 +227,12 @@ public class NamespaceResolver
         fSpecLocation = servlet.applicationSpecLocation;
         if (fSpecLocation != null)
         {
+            if (!fSpecLocation.exists())
+                throw new BuilderException("Tapestry Build failed: application spec does not exist: '"+fSpecLocation.toString()+"'"); //TODO internationalize
+                
             fResultNamespace = fBuild.createNamespace(fNamespaceId, fSpecLocation);
         } else
-        {
+        {            
             fResultNamespace = createStandinApplicationNamespace(servlet);
             fSpecLocation = (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
         }

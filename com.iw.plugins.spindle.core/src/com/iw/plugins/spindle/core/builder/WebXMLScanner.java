@@ -83,14 +83,17 @@ public class WebXMLScanner extends AbstractScanner
 
     protected void checkApplicationLocation(IResourceWorkspaceLocation location) throws ScannerException
     {
-        IPath ws_path = new Path(location.getName());
-        String extension = ws_path.getFileExtension();
-        if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
-            throw new ScannerException(TapestryCore.getString("web-xml-wrong-file-extension", location.toString()));
+        if (location == null)
+            return;
 
         if (location.getStorage() == null)
             throw new ScannerException(
-                TapestryCore.getString("web-xml-ignore-application-path-not-found", location.toString()));
+                TapestryCore.getString("web-xml-ignore-application-path-not-found", location == null ? "no location found" : location.toString()));
+                
+        IPath ws_path = new Path(location.getName());
+                String extension = ws_path.getFileExtension();
+                if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
+                    throw new ScannerException(TapestryCore.getString("web-xml-wrong-file-extension", location.toString()));                
 
     }
 
@@ -196,7 +199,7 @@ public class WebXMLScanner extends AbstractScanner
                 (IResourceWorkspaceLocation) context.getRelativeLocation("/WEB-INF/");
             IResourceWorkspaceLocation webInfAppLocation =
                 (IResourceWorkspaceLocation) webInfLocation.getRelativeLocation(servletName + "/");
-
+                
             IResourceWorkspaceLocation result = check(webInfAppLocation, expectedName);
             if (result != null)
                 return result;
@@ -207,6 +210,9 @@ public class WebXMLScanner extends AbstractScanner
 
     private IResourceWorkspaceLocation check(IResourceWorkspaceLocation location, String name)
     {
+        if (location == null)
+            return null;
+            
         IResourceWorkspaceLocation result = (IResourceWorkspaceLocation) location.getRelativeLocation(name);
 
         if (result != null && result.exists())
@@ -354,7 +360,9 @@ public class WebXMLScanner extends AbstractScanner
         {
             return false;
 
-        } else if (!fBuilder.fTapestryServletType.equals(servletType))
+        } 
+        
+        if (!fBuilder.fTapestryServletType.equals(servletType))
         {
             newInfo.isServletSubclass = true; // its a subclass
             String path = getApplicationPathFromServlet(servletType);

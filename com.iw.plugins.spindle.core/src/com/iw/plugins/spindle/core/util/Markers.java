@@ -210,6 +210,24 @@ public class Markers
     }
 
     /**
+       * @param fCurrentProject
+       */
+    public static void removeBuildProblemsForProject(IProject iProject)
+    {
+        try
+        {
+            if (iProject != null && iProject.exists())
+            {
+
+                
+                iProject.deleteMarkers(Markers.TAPESTRY_BUILBROKEN_TAG, false, IResource.DEPTH_ZERO);
+            }
+        } catch (CoreException e)
+        {} // assume there were no problems
+
+    }
+
+    /**
      * Method addBuildBrokenProblemMarkerToResource.
      * @param iProject
      * @param string

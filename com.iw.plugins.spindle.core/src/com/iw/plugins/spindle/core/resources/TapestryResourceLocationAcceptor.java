@@ -29,7 +29,6 @@ package com.iw.plugins.spindle.core.resources;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class TapestryResourceLocationAcceptor implements IResourceLocationAcceptor
 {
     /**
@@ -109,9 +108,7 @@ public class TapestryResourceLocationAcceptor implements IResourceLocationAccept
                 if ("jwc".equals(extension))
                 {
                     match = (fAcceptFlags & ACCEPT_JWC) != 0;
-                }
-
-                if ("page".equals(extension))
+                } else if ("page".equals(extension))
                 {
                     match = (fAcceptFlags & ACCEPT_PAGE) != 0;
                 } else

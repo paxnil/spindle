@@ -39,6 +39,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 
 /**
@@ -63,7 +64,16 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
 
     public boolean exists()
     {
-        return getStorage() != null;
+        IContainer container = getContainer();
+        if (container == null || !container.exists())
+            return false;
+            
+        IStorage storage = getStorage();
+       
+        if (storage == null && TapestryCore.isNull(getName()))
+            return true;
+            
+        return storage != null;
     }
 
     private IContainer getContainer()
@@ -77,8 +87,13 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
     public IStorage getStorage()
     {
         IContainer container = getContainer();
-        if (container != null && getName() != null)
-            return (IStorage) container.getFile(new Path(getName()));
+        if (container != null && getName() != null) {
+            IStorage storage = (IStorage) container.getFile(new Path(getName()));
+            IResource resource = (IResource)storage.getAdapter(IResource.class);
+            if (resource == null || resource.exists())                
+                return storage; 
+        }
+            
 
         return null;
     }

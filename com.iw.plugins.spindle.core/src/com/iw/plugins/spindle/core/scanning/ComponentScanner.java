@@ -383,7 +383,7 @@ public class ComponentScanner extends SpecificationScanner
 
                     if (isElement(child, "field-binding"))
                     {
-                        if (XMLUtil.getDTDVersion(fParser.getPublicId()) < XMLUtil.DTD_1_4)
+                        if (XMLUtil.getDTDVersion(fParser.getPublicId()) < XMLUtil.DTD_3_0)
                         {
                             scanBinding(c, child, BindingType.FIELD, "field-name");
                         } else
@@ -391,7 +391,7 @@ public class ComponentScanner extends SpecificationScanner
                             addProblem(
                                 IProblem.ERROR,
                                 getNodeStartSourceLocation(child),
-                                "field-binding not supported in DTD 1.4 and up.");
+                                "field-binding not supported in DTD 3.0 and up.");
                         }
                         continue;
                     }
@@ -599,16 +599,25 @@ public class ComponentScanner extends SpecificationScanner
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "name"));
 
-            String type = getAttribute(node, "type");
+            String typeAttr = "type";
+            int DTDVersion = XMLUtil.getDTDVersion(specification.getPublicId());
+            switch (DTDVersion)
+            {
+                case XMLUtil.DTD_1_3 :
+                    typeAttr = "java-type";
+                    break;
 
-            // The attribute was called "java-type" in the 1.3 and earlier DTD
+                case XMLUtil.DTD_3_0 :
 
-            if (type == null)
-                type = getAttribute(node, "java-type");
+                    break;
+            }
+
+            String type = getAttribute(node, typeAttr);
 
             if (type == null)
                 type = "java.lang.Object";
 
+            validateTypeName(type, IProblem.ERROR, getAttributeSourceLocation(node, typeAttr));
             param.setType(type);
 
             param.setRequired(getBooleanAttribute(node, "required"));

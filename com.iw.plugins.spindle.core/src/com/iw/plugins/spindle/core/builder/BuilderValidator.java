@@ -141,6 +141,14 @@ public class BuilderValidator extends BaseValidator
                         "Unable to resolve "
                             + TapestryCore.getTapestryString("Namespace.nested-namespace", namespaceId));
 
+                } else
+                {
+                    reportProblem(
+                        IProblem.ERROR,
+                        info.getAttributeSourceLocation("type"),
+                        
+                            TapestryCore.getTapestryString("Namespace.no-such-component-type", type, namespaceId));
+
                 }
 
             } else
@@ -222,19 +230,18 @@ public class BuilderValidator extends BaseValidator
         while (i.hasNext())
         {
             String name = (String) i.next();
-            
+
             boolean isFormal = containedSpecification.getParameter(name) != null;
 
             IBindingSpecification bspec = component.getBinding(name);
 
-            ISourceLocationInfo bindingSrcInfo = (ISourceLocationInfo)bspec.getLocation();
+            ISourceLocationInfo bindingSrcInfo = (ISourceLocationInfo) bspec.getLocation();
             ISourceLocation location =
                 name.startsWith(getDummyStringPrefix())
                     ? bindingSrcInfo.getStartTagSourceLocation()
                     : bindingSrcInfo.getAttributeSourceLocation("name");
 
             name = name.startsWith(getDummyStringPrefix()) ? "'name not found'" : name;
-
 
             // If not allowing informal parameters, check that each binding matches
             // a formal parameter.
@@ -400,8 +407,8 @@ public class BuilderValidator extends BaseValidator
         return true;
     }
 
-
-    public boolean validateLibraryResourceLocation(String path, String errorKey, ISourceLocation source) throws ScannerException
+    public boolean validateLibraryResourceLocation(String path, String errorKey, ISourceLocation source)
+        throws ScannerException
     {
         // TODO Auto-generated method stub
         return validateResourceLocation(fBuild.fTapestryBuilder.fClasspathRoot, path, errorKey, source);
