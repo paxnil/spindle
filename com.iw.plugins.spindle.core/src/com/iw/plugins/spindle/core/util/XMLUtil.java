@@ -75,7 +75,7 @@ import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
 public class XMLUtil
 {
 
-  static public final int UNKNOWN_DTD = 0;
+  
 
   static public final int DTD_1_1 = 1;
 
@@ -88,6 +88,8 @@ public class XMLUtil
   static public final int DTD_SERVLET_2_2 = 5;
 
   static public final int DTD_SERVLET_2_3 = 6;
+  
+  static public final int UNKNOWN_DTD = 999;
 
   static public final int[] ALLOWED_SPEC_DTDS = new int[]{DTD_1_3, DTD_3_0};
 
@@ -100,6 +102,9 @@ public class XMLUtil
 
   static public int getDTDVersion(String publicId)
   {
+    
+    if (publicId == null)
+      return UNKNOWN_DTD;
 
     if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID))
       return DTD_1_3;
@@ -1029,21 +1034,26 @@ public class XMLUtil
   {
     IndentingWriter indenter = checkWriter(writer);
 
+    int dtdId = XMLUtil.getDTDVersion(publicId);
+    if (dtdId != XMLUtil.UNKNOWN_DTD) {
+      
     XMLUtil.writeXMLHeader(publicId, "web-app", indenter);
-
     indenter.println();
-
     indenter.println("<web-app>");
+    } else {
+      indenter.println("<?xml version=\"1.0\"?>");
+      indenter.println("<web-app xmlns=\"http://java.sun.com/xml/ns/j2ee\"");
+      indenter.printlnIndented(1,"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+      indenter.printIndented(1,"xsi:schemaLocation=\"http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd\" version=\"2.4\">");
+      indenter.println();    
+    }
     indenter.printlnIndented(1, "<display-name>" + servletName + "</display-name>");
+    
+  
 
-    if (TapestryCore.SERVLET_2_3_PUBLIC_ID.equals(publicId) && writeFilter)
+    if (dtdId >= XMLUtil.DTD_SERVLET_2_3 && writeFilter)
       writeTapestryFilter("org.apache.tapestry.RedirectFilter", writer, 1); //TODO
-    // add
-    // filter
-    // classname
-    // to
-    // properties
-    // file
+    // add filter classname to properties file
     writeServlet(servletName, indenter, 1);
     writeServletMapping(servletName, indenter, 1);
     indenter.println("</web-app>");

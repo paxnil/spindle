@@ -79,8 +79,7 @@ import com.iw.plugins.spindle.ui.properties.ProjectPropertyPage;
  * A wizard page for creating a new Tapestry web project.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: NewTapestryProjectPage.java,v 1.12 2004/05/07 15:33:58 glongman
- *          Exp $
+ * 
  */
 public class NewTapestryProjectPage extends WizardNewProjectCreationPage
 {

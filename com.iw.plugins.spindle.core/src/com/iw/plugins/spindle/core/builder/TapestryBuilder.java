@@ -163,6 +163,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
   ContextRootLocation fContextRoot;
   ClasspathRootLocation fClasspathRoot;
   int fProjectType;
+  boolean fValidateWebXML;
 
   private IBuild fBuild;
 
@@ -529,6 +530,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     {
       throw new BuilderException("could not obtain the Classpath Root!");
     }
+    
+    fValidateWebXML = fTapestryProject.isValidatingWebXML();
 
   }
 

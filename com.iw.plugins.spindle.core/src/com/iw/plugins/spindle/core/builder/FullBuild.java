@@ -163,15 +163,13 @@ public class FullBuild extends Build
   protected void findDeclaredApplication() throws CoreException
   {
     Parser servletParser = new Parser();
-    servletParser.setDoValidation(true);
-    // uses a validating parser here.
+    servletParser.setDoValidation(fTapestryBuilder.fValidateWebXML);  
     // Parser does not validate by default.
     // Scanners use the Spindle validator.
 
     IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot
         .getRelativeLocation("WEB-INF/web.xml");
     IStorage storage = webXML.getStorage();
-    //        IFile webXML = tapestryBuilder.contextRoot.getFile("WEB-INF/web.xml");
     if (storage != null)
     {
       Document wxmlElement = null;
@@ -180,6 +178,7 @@ public class FullBuild extends Build
         fTapestryBuilder.fNotifier.subTask(TapestryCore.getString(
             TapestryBuilder.STRING_KEY + "scanning",
             webXML.toString()));
+        Markers.removeProblemsFor((IResource)storage);
         wxmlElement = parseToDocument(servletParser, storage, webXML, null);
       } catch (IOException e1)
       {

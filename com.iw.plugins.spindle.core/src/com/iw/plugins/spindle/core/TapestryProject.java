@@ -65,9 +65,9 @@ public class TapestryProject implements IProjectNature
   public static final String KEY_TYPE = "project-type";
   public static final String KEY_CONTEXT = "context-root";
   public static final String KEY_LIBRARY = "library-spec";
+  public static final String KEY_VALIDATE="validate-web-xml";
 
   public static final int APPLICATION_PROJECT_TYPE = 0;
-  //    public static final int LIBRARY_PROJECT_TYPE = 1;
 
   /**
    * The platform project this <code>TapestryProject</code> is based on
@@ -77,9 +77,7 @@ public class TapestryProject implements IProjectNature
 
   protected String fWebContext;
   protected IFolder fWebContextFolder;
-
-  //    protected String fLibrarySpecPath;
-  //    protected IFile fLibraryFile;
+  protected boolean fValidateWebXML = true;
 
   protected final int fProjectType = APPLICATION_PROJECT_TYPE;
 
@@ -123,7 +121,7 @@ public class TapestryProject implements IProjectNature
   public void deconfigure() throws CoreException
   {
     removeFromBuildSpec(TapestryCore.BUILDER_ID);
-    Markers.removeProblemsForProject(getProject());
+    Markers.cleanProblemsForProject(getProject());
     TapestryArtifactManager.getTapestryArtifactManager().clearBuildState(getProject());
     clearProperties();
   }
@@ -224,9 +222,7 @@ public class TapestryProject implements IProjectNature
           .append(PROPERTIES_FILENAME)
           .toFile();
       if (properties.exists())
-        properties.delete();
-
-      Markers.removeProblemsForProject(project.getProject());
+        properties.delete();     
 
     } catch (CoreException ex)
     {
@@ -236,7 +232,7 @@ public class TapestryProject implements IProjectNature
 
   /**
    * @return a TapestryProject if this javaProject has the tapestry nature or
-   *         null if Project has not tapestry nature
+   *                 null if Project has not tapestry nature
    */
   static public TapestryProject create(IJavaProject javaProject)
   {
@@ -254,7 +250,7 @@ public class TapestryProject implements IProjectNature
 
   /**
    * @return a TapestryProject if this Project has the tapestry nature or null
-   *         if Project doen't have the tapestry nature
+   *                 if Project doen't have the tapestry nature
    */
   static public TapestryProject create(IProject project)
   {
@@ -321,6 +317,14 @@ public class TapestryProject implements IProjectNature
   {
     return this.readProperty(KEY_CONTEXT);
   }
+  
+  public boolean isValidatingWebXML() {
+    String value = this.readProperty(KEY_VALIDATE);
+    if (value == null)
+      return true;
+    
+    return new Boolean(value).booleanValue();
+  }
 
   /**
    * Sets the webpath.
@@ -342,10 +346,10 @@ public class TapestryProject implements IProjectNature
     return path;
   }
 
-  //    public void setLibrarySpecPath(String librarySpecPath)
-  //    {
-  //        this.fLibrarySpecPath = librarySpecPath;
-  //    }
+  public void setValidateWebXML(boolean flag)
+  {
+    fValidateWebXML = flag;
+  }
 
   public IResourceWorkspaceLocation getLibraryLocation() throws CoreException
   {
@@ -368,16 +372,13 @@ public class TapestryProject implements IProjectNature
       fileContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
       fileContent.append("<tapestry-project-properties>\n");
       fileContent.append("    <project-type>" + fProjectType + "</project-type>\n");
+      fileContent.append("    <validate-web-xml>"+fValidateWebXML+"</validate-web-xml>\n");
       if (isApplicationProject)
       {
         fileContent.append("    <context-root>"
             + (fWebContext != null ? fWebContext : "") + "</context-root>\n");
       } else
       {
-        //                fileContent.append(
-        //                    " <library-spec>"
-        //                        + (fLibrarySpecPath != null ? fLibrarySpecPath : "NOT_SPECIFIED")
-        //                        + "</library-spec>\n");
         throw new Error("unsupported project type!");
       }
       fileContent.append("</tapestry-project-properties>\n");

@@ -127,7 +127,7 @@
    </extension>
    <extension
          id="problemmarker"
-         name="TapestryProblem"
+         name="Tapestry Problem"
          point="org.eclipse.core.resources.markers">
       <super
             type="org.eclipse.core.resources.problemmarker">
@@ -152,7 +152,7 @@
    </extension>
    <extension
          id="fatalproblemmarker"
-         name="Tapestry Build Problem"
+         name="Tapestry Fatal Problem"
          point="org.eclipse.core.resources.markers">
       <super
             type="com.iw.plugins.spindle.core.problemmarker">
@@ -164,7 +164,7 @@
    </extension>
    <extension
          id="problemmarker.source"
-         name="Tapestry Build Problem"
+         name="Tapestry Parser Problem"
          point="org.eclipse.core.resources.markers">
       <super
             type="com.iw.plugins.spindle.core.problemmarker">

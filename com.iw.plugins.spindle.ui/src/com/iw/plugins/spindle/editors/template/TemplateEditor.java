@@ -232,7 +232,7 @@ public class TemplateEditor extends Editor
     IDocument document = getDocumentProvider().getDocument(input);
     result.setDocument(document);
 
-    //    FIXME result.addSelectionChangedListener(new OutlineSelectionListener());
+    result.addSelectionChangedListener(new OutlineSelectionListener());
     return result;
   }
 

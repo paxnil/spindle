@@ -48,8 +48,7 @@ public class Markers
   public static final String TAPESTRY_MARKER_TAG = ITapestryMarker.TAPESTRY_PROBLEM_MARKER;
   public static final String TAPESTRY_BUILBROKEN_TAG = ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER;
   public static final String TAPESTRY_FATAL = ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER;
-  //    public static final String TAPESTRY_SOURCE =
-  // ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER;
+  public static final String TAPESTRY_SOURCE = ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER;
 
   /**
    * Method addBuildBrokenProblemMarkerToResource.
@@ -243,7 +242,7 @@ public class Markers
     try
     {
       if (resource != null && resource.exists())
-        return resource.findMarkers(TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
+        return resource.findMarkers(TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);      
     } catch (CoreException e)
     {} // assume there are no problems
     return new IMarker[0];
@@ -260,6 +259,7 @@ public class Markers
             false,
             IResource.DEPTH_INFINITE);
         resource.deleteMarkers(Markers.TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
+        resource.deleteMarkers(Markers.TAPESTRY_SOURCE, false, IResource.DEPTH_INFINITE);
       }
     } catch (CoreException e)
     {} // assume there were no problems
@@ -268,29 +268,48 @@ public class Markers
   /**
    * Method removeProblemsForProject.
    * 
-   * @param iProject
+   * @param project
    */
-  public static void removeProblemsForProject(IProject iProject)
+  public static void removeProblemsForProject(IProject project)
   {
     try
     {
-      if (iProject != null && iProject.exists())
+      if (project != null && project.isAccessible())
       {
 
-        iProject.deleteMarkers(
+        project.deleteMarkers(
             Markers.TAPESTRY_MARKER_TAG,
             false,
             IResource.DEPTH_INFINITE);
-        iProject.deleteMarkers(Markers.TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
-        iProject.deleteMarkers(
+
+        project.deleteMarkers(Markers.TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
+
+        project.deleteMarkers(
             Markers.TAPESTRY_BUILBROKEN_TAG,
             false,
             IResource.DEPTH_ZERO);
-        //                iProject.deleteMarkers(Markers.TAPESTRY_SOURCE, false,
-        // IResource.DEPTH_INFINITE);
       }
     } catch (CoreException e)
     {} // assume there were no problems
+  }
+
+  /**
+   * @param project
+   */
+  public static void cleanProblemsForProject(IProject project)
+  {
+    if (project != null && project.isAccessible())
+    {
+      try
+      {
+        removeProblemsForProject(project);
+        project.deleteMarkers(Markers.TAPESTRY_SOURCE, false, IResource.DEPTH_INFINITE);
+      } catch (CoreException e)
+      {
+        //      assume there were no problems
+      }
+    }
+
   }
 
   /**

@@ -211,7 +211,16 @@ public class Parser
       CoreException
   {
 
-    return parse(storage.getContents(), encoding);
+    try
+    {
+      return parse(storage.getContents(), encoding);
+
+    } catch (CoreException e)
+    {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      throw e;
+    }
   }
 
   public DocumentImpl parse(InputStream input, String encoding) throws IOException
@@ -511,7 +520,7 @@ public class Parser
 
   /**
    * @see org.apache.xerces.xni.parser.XMLErrorHandler#error(String, String,
-   *      XMLParseException)
+   *              XMLParseException)
    */
   public void error(String domain, String key, XMLParseException exception) throws XNIException
   {
@@ -520,7 +529,7 @@ public class Parser
 
   /**
    * @see org.apache.xerces.xni.parser.XMLErrorHandler#fatalError(String,
-   *      String, XMLParseException)
+   *              String, XMLParseException)
    */
   public void fatalError(String domain, String key, XMLParseException exception) throws XNIException
   {
@@ -530,7 +539,7 @@ public class Parser
 
   /**
    * @see org.apache.xerces.xni.parser.XMLErrorHandler#warning(String, String,
-   *      XMLParseException)
+   *              XMLParseException)
    */
   public void warning(String domain, String key, XMLParseException exception) throws XNIException
   {
