@@ -279,7 +279,11 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         return null;
     }
 
-    protected ICoreNamespace createNamespace(Parser parser, String id, IResourceWorkspaceLocation location)
+    protected ICoreNamespace createNamespace(
+        Parser parser,
+        String id,
+        IResourceWorkspaceLocation location,
+        String encoding)
     {
 
         ICoreNamespace result = null;
@@ -288,15 +292,15 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         String name = location.getName();
         if (name.endsWith(".application"))
         {
-            lib = parseApplication(parser, location);            
+            lib = parseApplication(parser, location, encoding);
         } else if (name.endsWith(".library"))
         {
-            lib = parseLibrary(parser, location);
+            lib = parseLibrary(parser, location, encoding);
         }
         if (lib != null)
             result = new CoreNamespace(id, lib);
-            
-        ((BaseSpecification)lib).setNamespace(result);
+
+        ((BaseSpecification) lib).setNamespace(result);
 
         return result;
     }
@@ -489,13 +493,13 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      * If the entity referred to by the location is really a file in the workspace, 
      * the problems are recorded as resource markers. Otherwise, the problem is logged. 
      */
-    protected IApplicationSpecification parseApplication(Parser parser, IResourceLocation location)
+    protected IApplicationSpecification parseApplication(Parser parser, IResourceLocation location, String encoding)
     {
         IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
         IApplicationSpecification result = null;
         try
         {
-            Document document = parseToDocument(parser, useLocation);
+            Document document = parseToDocument(parser, useLocation, encoding == null ? "UTF-8" : encoding);
             //            Node node = parseToNode(location);
             if (document != null)
             {
@@ -550,7 +554,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      * If the entity referred to by the location is really a resource in the workspace, 
      * the problems are recorded as resource markers. Otherwise, the problem is logged. 
      */
-    protected ILibrarySpecification parseLibrary(Parser parser, IResourceLocation location)
+    protected ILibrarySpecification parseLibrary(Parser parser, IResourceLocation location, String encoding)
     {
         IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
         ILibrarySpecification result = null;
@@ -559,7 +563,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
         try
         {
-            Document document = parseToDocument(parser, location);
+            Document document = parseToDocument(parser, location, encoding == null ? "UTF-8" : encoding);
             //            Node node = parseToNode(location);
             if (document != null)
             {
@@ -649,13 +653,14 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      * If the entity referred to by the location is really a resource in the workspace, the problems are
      * recorded as resource markers. Otherwise, the problem is logged. 
      */
-    protected Document parseToDocument(Parser parser, IResourceLocation location) throws IOException, CoreException
+    protected Document parseToDocument(Parser parser, IResourceLocation location, String encoding)
+        throws IOException, CoreException
     {
         IResourceWorkspaceLocation use_loc = (IResourceWorkspaceLocation) location;
         IStorage storage = use_loc.getStorage();
         if (storage != null)
         {
-            return parseToDocument(parser, storage);
+            return parseToDocument(parser, storage, encoding);
         } else
         {
             throw new IOException(TapestryCore.getString("core-resource-does-not-exist", location));
@@ -669,13 +674,14 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
      * If the IStorage is really a resource in the workspace, the problems are
      * recorded as resource markers. Otherwise, the problem is logged. 
      */
-    protected Document parseToDocument(Parser parser, IStorage storage) throws IOException, CoreException
+    protected Document parseToDocument(Parser parser, IStorage storage, String encoding)
+        throws IOException, CoreException
     {
         Document result = null;
         try
         {
             //            result = fParser.parse(storage);
-            result = parser.parse(storage);
+            result = parser.parse(storage, encoding);
 
         } catch (CoreException e)
         {
@@ -716,7 +722,8 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
     protected IComponentSpecification resolveIComponentSpecification(
         Parser parser,
         ICoreNamespace namespace,
-        IResourceWorkspaceLocation location)
+        IResourceWorkspaceLocation location,
+        String encoding)
     
     {
         // to avoid double parsing specs that are accessible
@@ -730,7 +737,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             {
                 try
                 {
-                    Document document = parseToDocument(parser, location);
+                    Document document = parseToDocument(parser, location, encoding == null ? "UTF-8" : encoding);
 
                     fComponentScanner.setResourceLocation(location);
                     fComponentScanner.setNamespace(namespace);
@@ -770,7 +777,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 } catch (ScannerException e)
                 {
                     recordFatalProblem(location, e);
-                    
+
                 } finally
                 {
                     if (fBuildQueue.isWaiting(location))

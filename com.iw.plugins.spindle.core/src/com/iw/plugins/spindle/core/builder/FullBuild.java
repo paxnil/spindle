@@ -167,7 +167,7 @@ public class FullBuild extends Build
             {
                 fTapestryBuilder.fNotifier.subTask(
                     TapestryCore.getString(TapestryBuilder.STRING_KEY + "scanning", webXML.toString()));
-                wxmlElement = parseToDocument(servletParser, webXML);
+                wxmlElement = parseToDocument(servletParser, webXML, null);
             } catch (IOException e1)
             {
                 TapestryCore.log(e1);

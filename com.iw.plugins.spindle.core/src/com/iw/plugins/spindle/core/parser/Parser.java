@@ -182,15 +182,15 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
     }
 
-    public DocumentImpl parse(IStorage storage) throws IOException, CoreException
+    public DocumentImpl parse(IStorage storage, String encoding) throws IOException, CoreException
     {
 
-        return parse(storage.getContents());
+        return parse(storage.getContents(), encoding);
     }
 
-    public DocumentImpl parse(InputStream input) throws IOException
+    public DocumentImpl parse(InputStream input, String encoding) throws IOException
     {
-        String content = Files.readFileToString(input, null);
+        String content = Files.readFileToString(input, encoding);
         return parse(content);
     }
 

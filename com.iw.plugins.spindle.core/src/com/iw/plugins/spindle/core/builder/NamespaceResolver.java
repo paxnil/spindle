@@ -235,7 +235,7 @@ public class NamespaceResolver
             fResultNamespace = prebuilt;
         } else
         {
-            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation);
+            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation, null);
             doResolve();
         }
         return fResultNamespace;
@@ -251,7 +251,7 @@ public class NamespaceResolver
                 throw new BuilderException(
                     TapestryCore.getString("build-failed-missing-application-spec", fSpecLocation.toString()));
 
-            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation);
+            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fSpecLocation, null);
         } else
         {
             fResultNamespace = createStandinApplicationNamespace(servlet);
@@ -480,7 +480,7 @@ public class NamespaceResolver
 
         fComponentStack.push(location);
 
-        result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location);
+        result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location, null);
 
         if (result != null)
         {
@@ -746,7 +746,7 @@ public class NamespaceResolver
 
         result = null;
 
-        result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location);
+        result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location, null);
         if (result != null)
         {
             fResultNamespace.installPageSpecification(name, result);

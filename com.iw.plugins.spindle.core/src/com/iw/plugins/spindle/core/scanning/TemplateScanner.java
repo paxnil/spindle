@@ -100,6 +100,7 @@ public class TemplateScanner extends AbstractScanner
     private IResourceWorkspaceLocation fTemplateLocation;
     private String fContents;
     private boolean fPerformDeferredValidations = true;
+    private String fEncoding;
 
     public void scanTemplate(
         PluginComponentSpecification spec,
@@ -152,7 +153,7 @@ public class TemplateScanner extends AbstractScanner
             try
             {
                 InputStream in = fTemplateLocation.getContents();
-                data = Files.readFileToString(in, null).toCharArray();
+                data = Files.readFileToString(in, fEncoding == null ? "UTF-8" : fEncoding).toCharArray();
             } catch (CoreException e)
             {
                 TapestryCore.log(e);
@@ -827,6 +828,14 @@ public class TemplateScanner extends AbstractScanner
     public void setFactory(SpecFactory factory)
     {
         fSpecificationFactory = factory;
+    }
+    
+    public void setEncoding(String encoding) {
+        fEncoding = encoding;
+    }
+    
+    public String getEncoding() {
+        return fEncoding;
     }
 
     /**

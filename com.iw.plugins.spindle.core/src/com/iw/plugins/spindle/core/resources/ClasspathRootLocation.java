@@ -186,16 +186,18 @@ public class ClasspathRootLocation extends AbstractRootLocation
             try
             {
                 IPackageFragmentRoot root = (IPackageFragmentRoot) fragments[i].getParent();
-                if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {  
-                    IFolder folder = (IFolder)fragments[i].getUnderlyingResource();
+                if (root.getKind() == IPackageFragmentRoot.K_SOURCE)
+                {
+                    IFolder folder = (IFolder) fragments[i].getUnderlyingResource();
                     try
                     {
-                        nonJavaResources = folder.members(); 
+                        nonJavaResources = folder.members();
                     } catch (CoreException e1)
                     {
                         // do nothing
                     }
-                } else {
+                } else
+                {
                     nonJavaResources = fragments[i].getNonJavaResources();
                 }
             } catch (JavaModelException e)
@@ -207,9 +209,19 @@ public class ClasspathRootLocation extends AbstractRootLocation
 
             for (int j = 0; j < nonJavaResources.length; j++)
             {
-                IStorage storage = (IStorage) nonJavaResources[j];
-                if (!requestor.accept(fragments[i], storage))
-                    return;
+                try
+                {
+                    if (nonJavaResources[j] instanceof IContainer)
+                        continue;
+                    IStorage storage = (IStorage) nonJavaResources[j];
+                    if (!requestor.accept(fragments[i], storage))
+                        return;
+                } catch (ClassCastException e1)
+                {
+                    TapestryCore.log(
+                        "[ 834756 ] Editing .xml files causes Eclipse to hang" + nonJavaResources[j].toString());
+
+                }
             }
         }
     }
@@ -329,8 +341,9 @@ public class ClasspathRootLocation extends AbstractRootLocation
     {
         return "cp(" + fJavaProject.getProject().getName() + ")/";
     }
-    
-    String toHashString() {
+
+    String toHashString()
+    {
         return toString();
     }
 
@@ -338,7 +351,7 @@ public class ClasspathRootLocation extends AbstractRootLocation
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
      */
     public boolean isBinary()
-    {       
+    {
         return false;
     }
 
@@ -349,7 +362,7 @@ public class ClasspathRootLocation extends AbstractRootLocation
     {
         if (obj == null)
             return false;
-            
+
         if (obj.getClass().equals(getClass()))
         {
             ClasspathRootLocation other = (ClasspathRootLocation) obj;
