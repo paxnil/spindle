@@ -152,7 +152,7 @@ public class OrderPreservingSet implements Set
         for (Iterator iter = arg0.iterator(); iter.hasNext();)
         {
             Object element = iter.next();
-            changed = changed || store.remove(element);
+            changed = store.remove(element)|| changed;
         }
         return changed;
     }
