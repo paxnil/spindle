@@ -192,7 +192,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     dtdText.setText("-//Howard Ship//Tapestry Specification 1.2//EN");
     dtdText.setEnabled(false);
 
-    labelName = "Component Path";
+    labelName = "Path";
     pathText = createText(container, labelName, factory);
     pathText.setEnabled(false);
 

@@ -29,15 +29,11 @@ import java.beans.PropertyChangeListener;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.spec.ILibrarySpecification;
-import net.sf.tapestry.util.IPropertyHolder;
 import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;
@@ -49,12 +45,9 @@ import org.eclipse.jface.util.Assert;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
-import com.iw.plugins.spindle.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
-import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.SourceWriter;
+import com.iw.plugins.spindle.util.SpindleStatus;
 
 public class TapestryLibraryModel extends BaseTapestryModel implements PropertyChangeListener {
 

@@ -31,8 +31,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.util.xml.DocumentParseException;
@@ -43,7 +41,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;

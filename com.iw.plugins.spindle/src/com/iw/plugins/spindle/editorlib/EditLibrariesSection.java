@@ -25,11 +25,8 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorlib;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import net.sf.tapestry.spec.ILibrarySpecification;
 
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
@@ -40,17 +37,11 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
-import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
@@ -60,17 +51,13 @@ import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
-import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
-import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
-import com.iw.plugins.spindle.ui.descriptors.TypeDialogPropertyDescriptor;
 import com.iw.plugins.spindle.ui.descriptors.WorkspaceStoragePropertyDescriptor;
 import com.iw.plugins.spindle.util.SpindleStatus;
-import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class EditLibrariesSection
@@ -150,8 +137,8 @@ public class EditLibrariesSection
   public void update(BaseTapestryModel model) {
     holderArray.removeAll(holderArray);
 
-    ILibrarySpecification spec =
-      (ILibrarySpecification) ((TapestryLibraryModel) model).getSpecification();
+    IPluginLibrarySpecification spec =
+      (IPluginLibrarySpecification) ((TapestryLibraryModel) model).getSpecification();
 
     List myLibraries = spec.getLibraryIds();
 
@@ -261,7 +248,7 @@ public class EditLibrariesSection
     public void run() {
       try {
         TapestryLibraryModel model = (TapestryLibraryModel) getModel();
-        ILibrarySpecification spec = (PluginLibrarySpecification) model.getSpecification();
+        IPluginLibrarySpecification spec = (IPluginLibrarySpecification) model.getSpecification();
 
         ChooseWorkspaceModelDialog dialog =
           ChooseWorkspaceModelDialog.createLibraryModelDialog(

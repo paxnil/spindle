@@ -29,14 +29,9 @@ import java.beans.PropertyChangeListener;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import net.sf.tapestry.parse.SpecificationParser;
-import net.sf.tapestry.spec.IApplicationSpecification;
-import net.sf.tapestry.spec.ILibrarySpecification;
 import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;

@@ -25,7 +25,6 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.html;
 
-import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.TextAttribute;
@@ -35,7 +34,6 @@ import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.pde.internal.ui.editor.XMLDoubleClickStrategy;
 import org.eclipse.pde.internal.ui.editor.text.NonRuleBasedDamagerRepairer;
 
 import com.iw.plugins.spindle.ui.text.CommentScanner;

@@ -112,8 +112,8 @@ public class LibraryServicesSection
   public void update(BaseTapestryModel model) {
     holderArray.removeAll(holderArray);
 
-    ILibrarySpecification spec =
-      (ILibrarySpecification) ((TapestryLibraryModel) model).getSpecification();
+    IPluginLibrarySpecification spec =
+      (IPluginLibrarySpecification) ((TapestryLibraryModel) model).getSpecification();
 
     List myServices = spec.getServiceNames();
 
@@ -223,7 +223,7 @@ public class LibraryServicesSection
     public void run() {
       updateSelection = true;
       TapestryLibraryModel model = (TapestryLibraryModel) getModel();
-      PluginLibrarySpecification spec = (PluginLibrarySpecification) model.getSpecification();
+      IPluginLibrarySpecification spec = (IPluginLibrarySpecification) model.getSpecification();
       String useSeviceName = "service";
       if (spec.getServiceClassName(useSeviceName + 1) != null) {
         int counter = 2;

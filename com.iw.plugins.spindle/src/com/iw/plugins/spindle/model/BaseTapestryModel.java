@@ -29,11 +29,9 @@ import java.beans.PropertyChangeEvent;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.sf.tapestry.util.IPropertyHolder;
 import org.eclipse.core.resources.IFile;
@@ -46,7 +44,6 @@ import org.eclipse.pde.core.ModelChangedEvent;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
 
 public abstract class BaseTapestryModel

@@ -25,7 +25,6 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.model;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,13 +33,10 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.util.Assert;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.project.ITapestryProject;
-import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 /**
