@@ -234,4 +234,11 @@ public class PluginApplicationSpecification
     helper.addExtensionSpecification(getExtensions(), name, extension);
   }
 
+  /**
+   * @see net.sf.tapestry.spec.ILibrarySpecification#instantiateImmediateExtensions()
+   */
+  public void instantiateImmediateExtensions() {
+    // do nothing
+  }
+
 }
