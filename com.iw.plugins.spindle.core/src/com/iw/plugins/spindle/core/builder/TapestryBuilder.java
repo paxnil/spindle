@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.ui.internal.Workbench;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
@@ -129,6 +130,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
      */
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException
     {
+        Workbench workbench = (Workbench)TapestryCore.getDefault().getWorkbench();
+        if (workbench.isClosing())
+            return getRequiredProjects(true);
         fCurrentProject = getProject();
         Markers.removeProblemsForProject(fCurrentProject);
         if (fCurrentProject == null || !fCurrentProject.isAccessible())

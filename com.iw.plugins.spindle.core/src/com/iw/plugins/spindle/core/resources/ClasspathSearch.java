@@ -289,5 +289,27 @@ public class ClasspathSearch implements ISearch
         }
         return result;
     }
+    class JarEntryAcceptor implements ISearchAcceptor
+    {
+        private JarEntryFile fToBeFound;
+        public boolean success = false;
+        
+        public JarEntryAcceptor(JarEntryFile toBeFound) {
+            fToBeFound = toBeFound;
+        }
+         
+        public boolean accept(Object parent, IStorage storage)
+        {
+            success = storage.equals(fToBeFound);
+            return !success;
+        }
+    }
+
+    public boolean projectContainsJarEntry(final JarEntryFile entry)
+    {       
+        JarEntryAcceptor acceptor = new JarEntryAcceptor(entry);
+        search(acceptor);
+        return acceptor.success;
+    }
 
 }

@@ -129,7 +129,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
                     {
                         try
                         {
-                            project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+                            project.build(IncrementalProjectBuilder.FULL_BUILD, TapestryCore.BUILDER_ID, new HashMap(), monitor);
                         } catch (CoreException e)
                         {
                             TapestryCore.log(e);

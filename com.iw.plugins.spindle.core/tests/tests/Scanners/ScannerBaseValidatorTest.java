@@ -623,6 +623,24 @@ public class ScannerBaseValidatorTest extends TestCase
 
         }
 
+        /* (non-Javadoc)
+         * @see com.iw.plugins.spindle.core.parser.IProblemCollector#beginCollecting()
+         */
+        public void beginCollecting()
+        {
+            // TODO Auto-generated method stub
+
+        }
+
+        /* (non-Javadoc)
+         * @see com.iw.plugins.spindle.core.parser.IProblemCollector#endCollecting()
+         */
+        public void endCollecting()
+        {
+            // TODO Auto-generated method stub
+
+        }
+
     }
 
     class DummySourceLocation implements ISourceLocation

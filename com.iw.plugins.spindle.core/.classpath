@@ -12,7 +12,8 @@
     <classpathentry kind="lib" path="javassist-2.5.1.jar"/>
     <classpathentry exported="true" kind="lib" path="javax.servlet.jar"/>
     <classpathentry kind="lib" path="ognl-2.5.1.jar"/>
-    <classpathentry exported="true" kind="lib" path="tapestry-3.0-beta-2.jar"/>
+    <classpathentry exported="true" kind="lib"
+        path="tapestry-3.0-beta-2.jar" sourcepath="/jakarta-tapestry/framework/src"/>
     <classpathentry kind="lib" path="tapestry-contrib-3.0-beta-2.jar"/>
     <classpathentry kind="src" path="/org.eclipse.core.resources"/>
     <classpathentry exported="true" kind="src" path="/org.eclipse.jdt.core"/>

@@ -37,6 +37,7 @@ import java.util.ResourceBundle;
 import org.apache.tapestry.spec.SpecFactory;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -45,6 +46,9 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -56,6 +60,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
+import com.iw.plugins.spindle.core.resources.ClasspathSearch;
 import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
 
 /**
@@ -83,9 +88,9 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
 
     public static final String CACHE_GRAMMAR_PREFERENCE = PLUGIN_ID + ".cachinggrammars";
     public static final String CORE_CONTAINER = PLUGIN_ID + ".TAPESTRY_FRAMEWORK";
-    
-    public static final String SERVLET_2_2_PUBLIC_ID="-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
-    public static final String SERVLET_2_3_PUBLIC_ID="-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN";
+
+    public static final String SERVLET_2_2_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
+    public static final String SERVLET_2_3_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN";
 
     /**
      * SpecFactory instance used by the Scanners
@@ -111,22 +116,26 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
             SpindleCoreStrings = null;
         }
     }
-    
-    public Shell getActiveWorkbenchShell() {
-       IWorkbenchWindow window = getActiveWorkbenchWindow();
-       if (window != null) {
-         return window.getShell();
-       }
-       return null;
-     }
 
-     public IWorkbenchWindow getActiveWorkbenchWindow() {
-       IWorkbench workbench = getWorkbench();
-       if (workbench != null) {
-         return workbench.getActiveWorkbenchWindow();
-       }
-       return null;
-     }
+    public Shell getActiveWorkbenchShell()
+    {
+        IWorkbenchWindow window = getActiveWorkbenchWindow();
+        if (window != null)
+        {
+            return window.getShell();
+        }
+        return null;
+    }
+
+    public IWorkbenchWindow getActiveWorkbenchWindow()
+    {
+        IWorkbench workbench = getWorkbench();
+        if (workbench != null)
+        {
+            return workbench.getActiveWorkbenchWindow();
+        }
+        return null;
+    }
 
     /**
      * Returns the shared instance.
@@ -455,5 +464,75 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         // force full builds
         TapestryArtifactManager.getTapestryArtifactManager().invalidateBuildStates();
     }
+
+    public IProject getProjectFor(IStorage storage)
+    {
+        ClasspathSearch lookup = null;
+        if (storage instanceof JarEntryFile)
+        {
+            try
+            {
+                IWorkspace workspace = getWorkspace();
+                IProject[] projects = workspace.getRoot().getProjects();
+                for (int i = 0; i < projects.length; i++)
+                {
+                    if (!projects[i].isOpen())
+                    {
+                        continue;
+                    }
+                    if (lookup == null)
+                    {
+                        lookup = new ClasspathSearch();
+                    }
+                    IJavaProject jproject = getJavaProjectFor(projects[i]);
+                    lookup.configure(jproject);
+                    if (lookup.projectContainsJarEntry((JarEntryFile) storage))
+                    {
+                        return projects[i];
+                    }
+                }
+            } catch (CoreException jmex)
+            {
+                jmex.printStackTrace();
+            }
+            return null;
+        } else if (storage instanceof IResource)
+        {
+            IResource resource = (IResource) storage;
+            if (resource.getType() == IResource.PROJECT)
+            {
+                return (IProject) resource;
+            } else
+            {
+                return ((IResource) storage).getProject();
+            }
+        }
+        return null;
+    }
+
+    public IJavaProject getJavaProjectFor(Object obj) throws CoreException
+    {
+        IProject project = null;
+        if (obj instanceof IProject)
+        {
+            project = (IProject) obj;
+        } else if (obj instanceof IResource)
+        {
+            project = ((IResource) obj).getProject();
+        } else if (obj instanceof IStorage)
+        {
+            project = getProjectFor((IStorage) obj);
+        }
+        if (project == null)
+        {
+            return null;
+        }
+
+        if (!project.hasNature(JavaCore.NATURE_ID))
+        {
+            return null;
+        }
+        return JavaCore.create(project);
+     }
 
 }

@@ -121,7 +121,7 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
 
     public void testTapestryEntityResolver() throws Exception
     {
-        TapestryEntityResolver.register(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, "Tapestry_3_0.dtd");
+        TapestryEntityResolver.registerTapestryDTD(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, "Tapestry_3_0.dtd");
         final TapestryEntityResolver RESOLVER = new TapestryEntityResolver();
         // lets wrap the resolver so that the default fallback behaviour of xerces is short circuited
         XMLEntityResolver testResolver = new XMLEntityResolver()
