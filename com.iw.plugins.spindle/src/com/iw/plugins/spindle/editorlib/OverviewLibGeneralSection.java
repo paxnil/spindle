@@ -107,9 +107,10 @@ public class OverviewLibGeneralSection extends SpindleFormSection implements IMo
     final TapestryLibraryModel model = (TapestryLibraryModel) getFormPage().getModel();
 
 
+	ILibrarySpecification spec = model.getSpecification();
     String labelName = "DTD";
     dtdText = createText(container, labelName, factory);
-    dtdText.setText(model.getSpecification().getPublicId());
+    dtdText.setText(spec == null ? "xml has errors" : model.getSpecification().getPublicId());
     dtdText.setEnabled(false);
 
 

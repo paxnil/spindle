@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.editorlib;
+package com.iw.plugins.spindle.editorlib.extensions;
 
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -31,19 +31,30 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.update.ui.forms.internal.AbstractSectionForm;
+import org.eclipse.update.ui.forms.internal.SectionChangeManager;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.editorlib.EditLibrariesSection;
+import com.iw.plugins.spindle.editorlib.LibraryContentOutlinePage;
+import com.iw.plugins.spindle.editorlib.LibraryServicesSection;
+import com.iw.plugins.spindle.editorlib.OverviewAlertSection;
+import com.iw.plugins.spindle.editorlib.OverviewComponentRefSection;
+import com.iw.plugins.spindle.editorlib.OverviewLibGeneralSection;
+import com.iw.plugins.spindle.editorlib.OverviewPageSection;
 import com.iw.plugins.spindle.editors.PropertyEditableSection;
 import com.iw.plugins.spindle.editors.SpindleForm;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormSection;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.util.IStimulatable;
 
-public class OverviewLibFormPage extends SpindleFormPage {
+public class ExtensionsFormPage extends SpindleFormPage {
+	
+  IStimulatable form;
 
-  public OverviewLibFormPage(SpindleMultipageEditor editor, String title) {
+  public ExtensionsFormPage(SpindleMultipageEditor editor, String title) {
     super(editor, title);
   }
 
@@ -51,37 +62,34 @@ public class OverviewLibFormPage extends SpindleFormPage {
    * @see PDEFormPage#createForm()
    */
   protected AbstractSectionForm createForm() {
-    return new OverviewForm(this);
+  	
+  	ExtensionsForm eForm = new ExtensionsForm(this);
+  	form = (IStimulatable)eForm;
+    return eForm;
   }
 
-  /**
-   * @see PDEFormPage#createContentOutlinePage()
-   */
-  /**
-   * @see PDEFormPage#createContentOutlinePage()
-   */
+ 
   public IContentOutlinePage createContentOutlinePage() {
     return new LibraryContentOutlinePage(this);
   }
-
-  protected SpindleFormSection getGeneralSection(SpindleFormPage page) {
-    return new OverviewLibGeneralSection(page);
+  
+  public void openTo(Object object) {
+    form.stimulate(object);
   }
 
-  protected class OverviewForm extends SpindleForm {
+  protected class ExtensionsForm extends SpindleForm implements IStimulatable {
 
-    private OverviewAlertSection alertSection;
-    private SpindleFormSection generalSection;
-    private OverviewPageSection pageSection;
-    private OverviewComponentRefSection componentSection;
-    private EditLibrariesSection librariesSection;
-    private PropertyEditableSection propertySection;
-    private LibraryServicesSection servicesSection;
-    private OverviewExtensionSection extensionLinksSection;
+    private ExtensionSection extensionSection;
+    private ExtensionPropertiesSection propertiesSection;
 
-    public OverviewForm(SpindleFormPage page) {
+    public ExtensionsForm(SpindleFormPage page) {
       super(page);
     }
+    
+    public void stimulate(Object stimulus) {
+      extensionSection.setSelection((String) stimulus);
+    }
+
 
     protected void createFormClient(Composite parent) {
 
@@ -118,50 +126,53 @@ public class OverviewLibFormPage extends SpindleFormPage {
       rightLayout.marginWidth = 0;
       rightColumn.setLayout(rightLayout);
 
-      generalSection = getGeneralSection(page);
-      control = generalSection.createControl(leftColumn, getFactory());
+      extensionSection = new ExtensionSection(page);
+      control = extensionSection.createControl(leftColumn, getFactory());
+      gd = new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING);
+      gd.widthHint = 200;
+      gd.verticalSpan = 75;
+      control.setLayoutData(gd);
+
+      propertiesSection = new ExtensionPropertiesSection((SpindleFormPage) page);
+      control = propertiesSection.createControl(rightColumn, getFactory());
       gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
       control.setLayoutData(gd);
 
-      librariesSection = new EditLibrariesSection((SpindleFormPage) page);
-      control = librariesSection.createControl(leftColumn, getFactory());
-      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-      control.setLayoutData(gd);
-      
-      servicesSection = new LibraryServicesSection((SpindleFormPage) page);
-      control = servicesSection.createControl(leftColumn, getFactory());
-      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-      control.setLayoutData(gd);
-
-      propertySection = new PropertyEditableSection((SpindleFormPage) page);
-      control = propertySection.createControl(leftColumn, getFactory());
-      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-      control.setLayoutData(gd);
-
-      pageSection = new OverviewPageSection((SpindleFormPage) page);
-      control = pageSection.createControl(rightColumn, getFactory());
-      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-      control.setLayoutData(gd);
-
-      componentSection = new OverviewComponentRefSection((SpindleFormPage) page);
-      control = componentSection.createControl(rightColumn, getFactory());
-      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-      control.setLayoutData(gd);
-
-      extensionLinksSection = new OverviewExtensionSection((SpindleFormPage) page);
-      control = extensionLinksSection.createControl(rightColumn, getFactory());
-      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-      control.setLayoutData(gd);
+      //      librariesSection = new EditLibrariesSection((SpindleFormPage) page);
+      //      control = librariesSection.createControl(leftColumn, getFactory());
+      //      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+      //      control.setLayoutData(gd);
+      //      
+      //      servicesSection = new LibraryServicesSection((SpindleFormPage) page);
+      //      control = servicesSection.createControl(leftColumn, getFactory());
+      //      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+      //      control.setLayoutData(gd);
+      //
+      //      propertySection = new PropertyEditableSection((SpindleFormPage) page);
+      //      control = propertySection.createControl(leftColumn, getFactory());
+      //      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+      //      control.setLayoutData(gd);
+      //
+      //      pageSection = new OverviewPageSection((SpindleFormPage) page);
+      //      control = pageSection.createControl(rightColumn, getFactory());
+      //      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+      //      control.setLayoutData(gd);
+      //
+      //      componentSection = new OverviewComponentRefSection((SpindleFormPage) page);
+      //      control = componentSection.createControl(rightColumn, getFactory());
+      //      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+      //      control.setLayoutData(gd);
 
       //    registerSection(alertSection);
-      registerSection(generalSection);
-      registerSection(pageSection);
-      registerSection(componentSection);
-      registerSection(propertySection);
-      registerSection(servicesSection);
-      registerSection(librariesSection);
-      registerSection(extensionLinksSection);
+      registerSection(extensionSection);
+      registerSection(propertiesSection);
+      //      registerSection(componentSection);
+      //      registerSection(propertySection);
+      //      registerSection(servicesSection);
+      //      registerSection(librariesSection);
 
+      SectionChangeManager manager = new SectionChangeManager();
+      manager.linkSections(extensionSection, propertiesSection);
 
     }
 

@@ -26,6 +26,7 @@
 package com.iw.plugins.spindle.editors;
 
 import org.eclipse.pde.internal.ui.editor.PDEFormPage;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.update.ui.forms.internal.AbstractSectionForm;
@@ -33,28 +34,21 @@ import org.eclipse.update.ui.forms.internal.IFormPage;
 
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 
-public class SpindleFormPage extends PDEFormPage {
+public abstract class SpindleFormPage extends PDEFormPage {
 
   /**
    * Constructor for TapestryFormPage
    */
-  public SpindleFormPage(SpindleMultipageEditor arg0, String arg1) {
-    super(arg0, arg1);
+  public SpindleFormPage(SpindleMultipageEditor editor, String title) {
+    super(editor, title);
+    Image editorHeadingImage = editor.getDefaultHeadingImage();
+    if (editorHeadingImage != null) {
+    	
+    	   getForm().setHeadingImage(editorHeadingImage);
+    	   
+    }
   }
 
-  /** must override
-    * @see PDEFormPage#createForm()
-    */
-  protected AbstractSectionForm createForm() {
-    return null;
-  }
-
-  /** 
-    * @see PDEFormPage#createContentOutlinePage()
-    */
-  public IContentOutlinePage createContentOutlinePage() {
-    return null;
-  }
 
   public void update() {
     if (((BaseTapestryModel) getEditor().getModel()).isLoaded()) {

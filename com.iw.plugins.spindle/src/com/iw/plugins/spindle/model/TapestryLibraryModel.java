@@ -29,12 +29,15 @@ import java.beans.PropertyChangeListener;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.spec.ILibrarySpecification;
+import net.sf.tapestry.util.IPropertyHolder;
 import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;
@@ -50,7 +53,7 @@ import com.iw.plugins.spindle.util.SourceWriter;
 
 public class TapestryLibraryModel extends BaseTapestryModel implements PropertyChangeListener {
 
-  protected IPluginLibrarySpecification librarySpecification; 
+  protected IPluginLibrarySpecification librarySpecification;
 
   /**
    * Constructor for TapestryApplicationModel
@@ -67,13 +70,13 @@ public class TapestryLibraryModel extends BaseTapestryModel implements PropertyC
   }
 
   public void load(final InputStream source) throws CoreException {
-  	final TapestryLibraryModel thisModel = this;
+    final TapestryLibraryModel thisModel = this;
     TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) {
 
         removeAllProblemMarkers();
-        
-        PluginLibrarySpecification pluginSpec = (PluginLibrarySpecification)librarySpecification;
+
+        PluginLibrarySpecification pluginSpec = (PluginLibrarySpecification) librarySpecification;
         if (pluginSpec != null) {
 
           pluginSpec.removePropertyChangeListener(TapestryLibraryModel.this);
@@ -89,8 +92,8 @@ public class TapestryLibraryModel extends BaseTapestryModel implements PropertyC
               source,
               getUnderlyingStorage().getName(),
               null);
-              
-          pluginSpec = (PluginLibrarySpecification)librarySpecification;
+
+          pluginSpec = (PluginLibrarySpecification) librarySpecification;
           pluginSpec.addPropertyChangeListener(TapestryLibraryModel.this);
           loaded = true;
           editable = !(getUnderlyingStorage().isReadOnly());
@@ -142,29 +145,29 @@ public class TapestryLibraryModel extends BaseTapestryModel implements PropertyC
     return "";
   }
 
-  public boolean containsReference(String name) {
-    PluginLibrarySpecification spec = (PluginLibrarySpecification)getSpecification();
-    Iterator aliases = spec.getComponentMapAliases().iterator();
-    while (aliases.hasNext()) {
-      String alias = (String) aliases.next();
-      if (spec.getComponentSpecificationPath(alias).equals(name)) {
-        return true;
-      }
-    }
-    Iterator pages = spec.getPageNames().iterator();
-    while (pages.hasNext()) {
-      String pageName = (String) pages.next();
+  //  public boolean containsReference(String name) {
+  //    PluginLibrarySpecification spec = (PluginLibrarySpecification)getSpecification();
+  //    Iterator aliases = spec.getComponentMapAliases().iterator();
+  //    while (aliases.hasNext()) {
+  //      String alias = (String) aliases.next();
+  //      if (spec.getComponentSpecificationPath(alias).equals(name)) {
+  //        return true;
+  //      }
+  //    }
+  //    Iterator pages = spec.getPageNames().iterator();
+  //    while (pages.hasNext()) {
+  //      String pageName = (String) pages.next();
+  //
+  //      String path =  spec.getPageSpecificationPath(pageName);
+  //      if (path.equals(name)) {
+  //        return true;
+  //      }
+  //    }
+  //    return false;
+  //  }
 
-      String path =  spec.getPageSpecificationPath(pageName);
-      if (path.equals(name)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public Set getPropertyNames() {
-    return new TreeSet(getSpecification().getPropertyNames());
+  public List getPropertyNames() {
+    return getSpecification().getPropertyNames();
   }
 
   public String getProperty(String name) {
@@ -177,21 +180,30 @@ public class TapestryLibraryModel extends BaseTapestryModel implements PropertyC
     }
   }
 
+  public void removeProperty(String name) {
+
+    if (isEditable()) {
+
+      getSpecification().removeProperty(name);
+    }
+
+  }
+
   /**
    * @see com.iw.plugins.spindle.model.BaseTapestryModel#resolveReferences(boolean)
    */
   public ReferenceInfo resolveReferences(boolean reverse) {
     return null;
   }
-  
-    /**
-   * @see com.iw.plugins.spindle.model.ITapestryModel#getPublicId()
-   */
+
+  /**
+  * @see com.iw.plugins.spindle.model.ITapestryModel#getPublicId()
+  */
   public String getPublicId() {
-  	if (librarySpecification != null) {
-  		return librarySpecification.getPublicId();
-  	}
-  	return "";
+    if (librarySpecification != null) {
+      return librarySpecification.getPublicId();
+    }
+    return "";
   }
 
 }

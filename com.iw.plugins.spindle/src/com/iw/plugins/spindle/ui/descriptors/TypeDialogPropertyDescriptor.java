@@ -26,6 +26,7 @@
 package com.iw.plugins.spindle.ui.descriptors;
 
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.util.Assert;
@@ -65,7 +66,13 @@ public class TypeDialogPropertyDescriptor extends PropertyDescriptor implements 
   	TapestryLookup lookup = new TapestryLookup();
   	try {
   		lookup.configure(TapestryPlugin.getDefault().getJavaProjectFor(storage));
-  		return (IPackageFragmentRoot)lookup.findPackageFragment(storage).getParent();
+  		
+  		IPackageFragment fragment = lookup.findPackageFragment(storage);
+  		
+  		Object possibleRoot = fragment.getParent();
+  		
+  		return (IPackageFragmentRoot)possibleRoot;
+  		
   	} catch (JavaModelException jmex) {
   	}
   	return null;

@@ -54,7 +54,7 @@ public class ComboBoxPropertyDescriptor extends PropertyDescriptor {
       public boolean isLabelProperty(Object element, String value) {
         return false;
       }
-      public void dispose() {
+      public void dispose() { 
       }
       public void addListener(ILabelProviderListener listener) {
       }

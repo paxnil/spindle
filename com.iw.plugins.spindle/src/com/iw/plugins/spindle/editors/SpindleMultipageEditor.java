@@ -56,6 +56,7 @@ import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.pde.internal.ui.editor.PDEEditorContributor;
 import org.eclipse.pde.internal.ui.editor.PDEMultiPageXMLEditor;
 import org.eclipse.pde.internal.ui.editor.SystemFileEditorInput;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -526,5 +527,11 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
   protected String getSourcePageId() {
     return null;
   }
+
+  /**
+   * Method getDefaultHeadingImage.
+   * @return Image
+   */
+  public abstract Image getDefaultHeadingImage();
 
 }

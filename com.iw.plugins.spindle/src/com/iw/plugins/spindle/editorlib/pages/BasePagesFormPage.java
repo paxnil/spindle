@@ -90,7 +90,7 @@ public abstract class BasePagesFormPage extends SpindleFormPage {
         if (model.isEditable() == false) {
           name = MessageUtil.getFormattedString("TapistryComponentsForm.readonly", name);
         }
-        setHeadingText("Application Pages");
+        setHeadingText("Pages");
         ((Composite) getControl()).layout(true);
       }
     }

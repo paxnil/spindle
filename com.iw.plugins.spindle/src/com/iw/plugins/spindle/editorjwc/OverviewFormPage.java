@@ -87,7 +87,8 @@ public class OverviewFormPage extends SpindleFormPage {
       PluginComponentSpecification componentSpec =
         (PluginComponentSpecification) model.getComponentSpecification();
 
-      boolean isPage = componentSpec.isPageSpecification();
+	
+      boolean isPage = componentSpec == null ? false : componentSpec.isPageSpecification();
 
       GridLayout layout = new GridLayout();
       layout.numColumns = 2;

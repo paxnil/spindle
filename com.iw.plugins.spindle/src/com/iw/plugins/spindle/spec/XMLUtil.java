@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -58,7 +59,6 @@ public class XMLUtil {
   static public final int DTD_1_1 = 1;
   static public final int DTD_1_2 = 2;
   static public final int DTD_1_3 = 3;
-  
 
   static public int getDTDVersion(String publicId) {
 
@@ -76,15 +76,19 @@ public class XMLUtil {
 
   public static void writeDescription(PrintWriter writer, int indent, String description) {
 
-	writeDescription(writer, indent, description, true);
-  
+    writeDescription(writer, indent, description, true);
+
   }
 
-  public static void writeDescription(PrintWriter writer, int indent, String description, boolean nextLine) {
+  public static void writeDescription(
+    PrintWriter writer,
+    int indent,
+    String description,
+    boolean nextLine) {
 
     if (description != null && !"".equals(description.trim())) {
       if (nextLine) {
-      	writer.println();
+        writer.println();
       }
       boolean tooLong = description.length() > 40;
       boolean singleLine = description.indexOf("\r") <= 0 && description.indexOf("\n") <= 0;
@@ -106,13 +110,81 @@ public class XMLUtil {
     }
   }
 
+  public static void writeExtensions(Map extensions, PrintWriter writer, int indent) {
+
+    if (extensions != null && !extensions.isEmpty()) {
+
+      writer.println();
+
+      for (Iterator iter = new TreeSet(extensions.keySet()).iterator(); iter.hasNext();) {
+        String name = (String) iter.next();
+
+        PluginExtensionSpecification spec = (PluginExtensionSpecification) extensions.get(name);
+
+        Indenter.printIndented(writer, indent, "<extension name=\"");
+        writer.print(name);
+        writer.print("\" class=\"");
+        writer.print(spec.getClassName());
+        writer.print("\"");
+
+        if (spec.isImmediate()) {
+
+          writer.print(" immediate=\"yes\"");
+        }
+
+        List propertyNames = spec.getPropertyNames();
+        Map configurations = spec.getConfiguration();
+
+        boolean hasProperties = propertyNames != null && !propertyNames.isEmpty();
+        boolean hasConfiguration = configurations != null && !configurations.isEmpty();
+
+        if (hasProperties || hasConfiguration) {
+
+          writer.println(">");
+
+          if (hasProperties) {
+
+            writeProperties(spec, writer, indent + 1, false);
+
+          }
+
+          if (hasConfiguration) {
+
+            spec.writeConfigurations(writer, indent + 1);
+          }
+
+          Indenter.printlnIndented(writer, indent, "</extension>");
+
+        } else {
+
+          writer.println("/>");
+
+        }
+
+      }
+
+    }
+
+  }
+
   public static void writeProperties(
     IPropertyHolder propertyHolder,
     PrintWriter writer,
     int indent) {
+
+    writeProperties(propertyHolder, writer, indent, true);
+  }
+
+  public static void writeProperties(
+    IPropertyHolder propertyHolder,
+    PrintWriter writer,
+    int indent,
+    boolean nextLine) {
     Collection properties = propertyHolder.getPropertyNames();
     if (properties != null) {
-      writer.println();
+      if (nextLine) {
+        writer.println();
+      }
       Iterator propertyNames = new TreeSet(properties).iterator();
       while (propertyNames.hasNext()) {
         String propertyName = (String) propertyNames.next();
@@ -145,11 +217,14 @@ public class XMLUtil {
 
   public static void writeLibraryComponents(Map componentMap, PrintWriter writer, int indent) {
     if (componentMap != null && !componentMap.isEmpty()) {
+
       Iterator componentAliases = new TreeSet(componentMap.keySet()).iterator();
       if (componentAliases.hasNext()) {
+
         writer.println();
       }
       while (componentAliases.hasNext()) {
+
         String alias = (String) componentAliases.next();
         Indenter.printIndented(writer, indent, "<component-alias type=\"");
         writer.print(alias);
@@ -161,6 +236,25 @@ public class XMLUtil {
   }
 
   public static void writeLibraries(Map libraryMap, PrintWriter writer, int indent) {
+    if (libraryMap != null && !libraryMap.isEmpty()) {
+
+      Iterator libraryNames = new TreeSet(libraryMap.keySet()).iterator();
+      if (libraryNames.hasNext()) {
+
+        writer.println();
+
+      }
+      while (libraryNames.hasNext()) {
+
+        String name = (String) libraryNames.next();
+        Indenter.printIndented(writer, indent, "<library id=\"");
+        writer.print(name);
+        writer.print("\" specification-path=\"");
+        writer.print(libraryMap.get(name));
+        writer.println("\" />");
+      }
+    }
+
   }
 
   static public void writeMultiLine(PrintWriter writer, String message) {

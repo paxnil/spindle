@@ -26,10 +26,13 @@
 package com.iw.plugins.spindle.editorlib;
 
 import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 
 import com.iw.plugins.spindle.MessageUtil;
+import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.editorlib.components.ComponentsFormPage;
+import com.iw.plugins.spindle.editorlib.extensions.*;
 import com.iw.plugins.spindle.editorlib.pages.LibraryPagesFormPage;
 import com.iw.plugins.spindle.editors.DocumentationFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
@@ -43,6 +46,7 @@ public class LibraryMultipageEditor extends SpindleMultipageEditor {
   public static final String DEPENDS = "DEPENDS";
   public static final String COMPONENTS = "COMPONENTS";
   public static final String PAGES = "PAGES";
+  public static final String EXTENSIONS = "EXTENSIONS";
   public static final String DOCUMENTATION = "DOCUMENTATION";
   public static final String SOURCE_PAGE = "SOURCEPAGE";
 
@@ -88,7 +92,8 @@ public class LibraryMultipageEditor extends SpindleMultipageEditor {
     addPage(
       COMPONENTS,
       new ComponentsFormPage(this, MessageUtil.getString("LibMultipageEditor.ComponentsTabLabel")));
-    addPage(PAGES, new LibraryPagesFormPage(this, MessageUtil.getString("AppMultipageEditor.PagesTabLabel")));
+    addPage(PAGES, new LibraryPagesFormPage(this, MessageUtil.getString("LibMultipageEditor.PagesTabLabel")));
+    addPage(EXTENSIONS, new ExtensionsFormPage(this, MessageUtil.getString("LibMultipageEditor.ExtensionsTabLabel")));
     addPage(
       DOCUMENTATION,
       new DocumentationFormPage(this, MessageUtil.getString("LibMultipageEditor.DocTabLabel")));
@@ -101,5 +106,12 @@ public class LibraryMultipageEditor extends SpindleMultipageEditor {
     return name.endsWith(MessageUtil.getString("LibMultipageEditor.ValidContentType"));
 
   }       
+
+  /**
+   * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()
+   */
+  public Image getDefaultHeadingImage() {
+    return TapestryImages.getSharedImage("library_banner.gif");
+  }
 
 }

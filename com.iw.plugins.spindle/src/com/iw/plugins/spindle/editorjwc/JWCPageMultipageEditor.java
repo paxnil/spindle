@@ -25,9 +25,11 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorjwc;
 
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 
 import com.iw.plugins.spindle.MessageUtil;
+import com.iw.plugins.spindle.TapestryImages;
 
 //Commented out Dependency Page until replacement available
 
@@ -43,7 +45,15 @@ public class JWCPageMultipageEditor extends JWCMultipageEditor {
 
   protected boolean isValidContentType(IEditorInput input) {
     String name = input.getName().toLowerCase();
-    return name.endsWith(MessageUtil.getString("JWCPageMultipageEditor.ValidContentType"));
+    String valid = MessageUtil.getString("JWCPageMultipageEditor.ValidContentType");
+    return name.endsWith(valid);
+  }
+  
+  /**
+   * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()
+   */
+  public Image getDefaultHeadingImage() {
+    return TapestryImages.getSharedImage("page_banner.gif");
   }
 
 }

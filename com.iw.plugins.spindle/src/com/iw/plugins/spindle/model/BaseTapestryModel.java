@@ -29,10 +29,13 @@ import java.beans.PropertyChangeEvent;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.tapestry.util.IPropertyHolder;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -42,7 +45,7 @@ import org.eclipse.pde.core.IEditable;
 import org.eclipse.pde.core.ModelChangedEvent;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
-public abstract class BaseTapestryModel extends AbstractModel implements IEditable {
+public abstract class BaseTapestryModel extends AbstractModel implements IEditable, IPropertyHolder {
 
   protected boolean editable = true;
   protected boolean dirty = false;
@@ -172,11 +175,14 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
 
   public abstract ReferenceInfo resolveReferences(boolean reverse);
 
-  public abstract Set getPropertyNames();
+  public abstract List getPropertyNames();
 
   public abstract String getProperty(String name);
 
   public abstract void setProperty(String name, String value);
+  
+  public abstract void removeProperty(String name);
+
 
   /**
   	* @see IAdaptable#getAdapter(Class)

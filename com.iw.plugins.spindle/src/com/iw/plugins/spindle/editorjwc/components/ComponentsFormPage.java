@@ -113,8 +113,6 @@ public class ComponentsFormPage extends SpindleFormPage {
 
       selectionSection = new ComponentSelectionSection((SpindleFormPage) page);
       control = selectionSection.createControl(leftColumn, getFactory());
-      gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-      control.setLayoutData(gd);
       gd = new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_BEGINNING);
       gd.widthHint = 200;
       gd.verticalSpan = 75;

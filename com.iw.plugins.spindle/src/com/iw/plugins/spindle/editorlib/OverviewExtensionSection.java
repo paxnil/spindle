@@ -26,6 +26,7 @@
 package com.iw.plugins.spindle.editorlib;
 
 import java.util.Iterator;
+import java.util.TreeSet;
 
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.swt.graphics.Image;
@@ -38,21 +39,21 @@ import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 
-public class OverviewPageSection extends BasicLinksSection {
+public class OverviewExtensionSection extends BasicLinksSection {
 
 	/**
 	 * Constructor for OverviewPageSection
 	 */
-	public OverviewPageSection(SpindleFormPage page) {
+	public OverviewExtensionSection(SpindleFormPage page) {
 		super(
 			page,
-			"Pages",
-			"This section lists the pages defined in this file");
+			"Extensions",
+			"This section lists the extensions defined in this file");
 
 	}
 
 	protected SpindleFormPage getGotoPage() {
-		return (SpindleFormPage)getFormPage().getEditor().getPage(LibraryMultipageEditor.PAGES);
+		return (SpindleFormPage)getFormPage().getEditor().getPage(LibraryMultipageEditor.EXTENSIONS);
 	}
 
 	public void update(boolean removePrevious) {
@@ -62,11 +63,11 @@ public class OverviewPageSection extends BasicLinksSection {
 		TapestryLibraryModel model =
 			(TapestryLibraryModel) getFormPage().getModel();
 		IPluginLibrarySpecification spec = (IPluginLibrarySpecification)model.getSpecification();
-		Iterator i = spec.getPageNames().iterator();
+		Iterator i = new TreeSet(spec.getAllExtensionNames()).iterator();
 		while (i.hasNext()) {
-			String pageName = (String) i.next();
-			Image image = TapestryImages.getSharedImage("page16.gif");
-			addHyperLink(pageName, pageName, image, new PagesHyperLinkAdapter());
+			String extensionName = (String) i.next(); 
+			Image image = TapestryImages.getSharedImage("extension16.gif");
+			addHyperLink(extensionName, extensionName, image, new ExtensionHyperLinkAdapter());
 		}
 		super.update(removePrevious);
 	}
@@ -78,11 +79,11 @@ public class OverviewPageSection extends BasicLinksSection {
 			return;
 		}
 		if (eventType == IModelChangedEvent.CHANGE) {
-			updateNeeded = event.getChangedProperty().equals("pageMap");
+			updateNeeded = event.getChangedProperty().equals("extensions");
 		}
 	}
 
-	protected class PagesHyperLinkAdapter extends HyperLinkAdapter {
+	protected class ExtensionHyperLinkAdapter extends HyperLinkAdapter {
 		public void linkActivated(Control parent) {
 			final SpindleFormPage targetPage = getGotoPage();
 			if (targetPage == null) {

@@ -27,9 +27,12 @@ package com.iw.plugins.spindle.editorjwc;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 
+
 import com.iw.plugins.spindle.MessageUtil;
+import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.editorjwc.beans.*;
 import com.iw.plugins.spindle.editorjwc.components.*;
 import com.iw.plugins.spindle.editors.DocumentationFormPage;
@@ -110,6 +113,13 @@ public class JWCMultipageEditor extends SpindleMultipageEditor {
   protected boolean isValidContentType(IEditorInput input) {
     String name = input.getName().toLowerCase();
     return name.endsWith(MessageUtil.getString("JWCMultipageEditor.ValidContentType"));
+  }
+  
+    /**
+   * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()
+   */
+  public Image getDefaultHeadingImage() {
+    return TapestryImages.getSharedImage("component_banner.gif");
   }
 
 }

@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -259,29 +260,29 @@ public class TapestryApplicationModel extends TapestryLibraryModel implements Pr
   //    return new ReferenceInfo(resolved, new ArrayList(), true);
   //  }
 
-  public boolean containsReference(String name) {
-    PluginApplicationSpecification spec = (PluginApplicationSpecification)getSpecification();
-    Iterator aliases = spec.getComponentMapAliases().iterator();
-    while (aliases.hasNext()) {
-      String alias = (String) aliases.next();
-      if (spec.getComponentSpecificationPath(alias).equals(name)) {
-        return true;
-      }
-    }
-    Iterator pages = spec.getPageNames().iterator();
-    while (pages.hasNext()) {
-      String pageName = (String) pages.next();
+//  public boolean containsReference(String name) {
+//    PluginApplicationSpecification spec = (PluginApplicationSpecification)getSpecification();
+//    Iterator aliases = spec.getComponentMapAliases().iterator();
+//    while (aliases.hasNext()) {
+//      String alias = (String) aliases.next();
+//      if (spec.getComponentSpecificationPath(alias).equals(name)) {
+//        return true;
+//      }
+//    }
+//    Iterator pages = spec.getPageNames().iterator();
+//    while (pages.hasNext()) {
+//      String pageName = (String) pages.next();
+//
+//      String path =  spec.getPageSpecificationPath(pageName);
+//      if (path.equals(name)) {
+//        return true;
+//      }
+//    }
+//    return false;
+//  }
 
-      String path =  spec.getPageSpecificationPath(pageName);
-      if (path.equals(name)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public Set getPropertyNames() {
-    return new TreeSet(getSpecification().getPropertyNames());
+  public List getPropertyNames() { 
+    return getSpecification().getPropertyNames();
   }
 
   public String getProperty(String name) {

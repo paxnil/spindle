@@ -106,14 +106,7 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
     TapestryApplicationModel model = (TapestryApplicationModel) input;
     PluginApplicationSpecification spec = (PluginApplicationSpecification) model.getSpecification();
     String name = spec.getName();
-    String dtdVersion = spec.getDTDVersion();
-    if (dtdVersion == null) {
-      dtdVersion = "Unknown DTD or pre 1.1 DTD";
-    } else if ("1.1".equals(dtdVersion)) {
-      dtdVersion = SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID;
-    } else if ("1.2".equals(dtdVersion)) {
-      dtdVersion = SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID;
-    }
+    String dtdVersion = spec.getPublicId();
 
     getFormPage().getForm().setHeadingText(name);
     ((SpindleMultipageEditor) getFormPage().getEditor()).updateTitle();
@@ -134,12 +127,12 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
     layout.horizontalSpacing = 6;
     container.setLayout(layout);
 
+    final TapestryApplicationModel model = (TapestryApplicationModel) getFormPage().getModel();
+	
     String labelName = "DTD";
     dtdText = createText(container, labelName, factory);
-    dtdText.setText("-//Howard Ship//Tapestry Specification 1.1//EN");
+    dtdText.setText("xml has problems");
     dtdText.setEnabled(false);
-
-    final TapestryApplicationModel model = (TapestryApplicationModel) getFormPage().getModel();
 
 
     labelName = "Application Name";

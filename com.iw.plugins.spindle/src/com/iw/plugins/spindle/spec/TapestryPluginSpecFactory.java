@@ -101,7 +101,7 @@ public class TapestryPluginSpecFactory extends SpecFactory {
    * @see net.sf.tapestry.spec.SpecFactory#createExtensionSpecification()
    */
   public ExtensionSpecification createExtensionSpecification() {
-    return super.createExtensionSpecification();
+    return new PluginExtensionSpecification();
   }
 
   /**

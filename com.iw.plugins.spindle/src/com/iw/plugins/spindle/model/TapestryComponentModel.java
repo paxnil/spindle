@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -287,8 +288,8 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
     return tapestryName + "/" + underlier.getName();
   }
 
-  public Set getPropertyNames() {
-    return new TreeSet(getComponentSpecification().getPropertyNames());
+  public List getPropertyNames() {
+    return getComponentSpecification().getPropertyNames();
   }
 
   public String getProperty(String name) {
@@ -301,7 +302,15 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
     }
   }
 
- 
+  public void removeProperty(String name) {
+
+    if (isEditable()) {
+
+      getComponentSpecification().removeProperty(name);
+    }
+
+  }
+
   /**
    * @see com.iw.plugins.spindle.model.ITapestryModel#getPublicId()
    */

@@ -25,9 +25,11 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorapp;
 
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 
 import com.iw.plugins.spindle.MessageUtil;
+import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.editorlib.LibraryMultipageEditor;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
@@ -51,6 +53,13 @@ public class APPMultipageEditor extends LibraryMultipageEditor {
     String name = input.getName().toLowerCase();
     return name.endsWith(MessageUtil.getString("AppMultipageEditor.ValidContentType"));
 
+  }
+  
+    /**
+   * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()
+   */
+  public Image getDefaultHeadingImage() {
+    return TapestryImages.getSharedImage("application_banner.gif");
   }
 
 }

@@ -220,8 +220,10 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
 
     PluginComponentSpecification componentSpec =
       (PluginComponentSpecification) model.getComponentSpecification();
+      
+    boolean isPage = componentSpec == null ? false : componentSpec.isPageSpecification();
 
-    if (!componentSpec.isPageSpecification()) {
+    if (!isPage) {
 
       labelName = "Allow Body";
       bodyLabel = factory.createLabel(container, labelName);

@@ -27,9 +27,8 @@ package com.iw.plugins.spindle.editors;
 
 import java.util.Iterator;
 
+import net.sf.tapestry.util.IPropertyHolder;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
 import org.eclipse.swt.graphics.Image;
@@ -39,12 +38,13 @@ import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
-import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 
 public class PropertyEditableSection
   extends AbstractPropertySheetEditorSection
   implements IModelChangedListener {
+  	
+  protected IPropertyHolder externalPropertyHolder;
 
   /**
    * Constructor for PropertySection 
@@ -68,23 +68,43 @@ public class PropertyEditableSection
       }
     }
   }
+  
+  public void initialize(Object input) {
+    BaseTapestryModel model = (BaseTapestryModel) input;
+    setDefaultExternalPropertyHolder((IPropertyHolder)model);
+    super.initialize(input);
+  }
+  
+  protected void setDefaultExternalPropertyHolder(IPropertyHolder holder) {
+    externalPropertyHolder = holder;    
+  }	
+  	
 
   public void update(BaseTapestryModel model) {
-    Iterator iter = model.getPropertyNames().iterator();
+  	
     holderArray.removeAll(holderArray);
+
+	if (externalPropertyHolder == null) {
+		
+		setInput(holderArray);
+		return;
+	}  	
+  	
+    Iterator iter = externalPropertyHolder.getPropertyNames().iterator();
     while (iter.hasNext()) {
       String name = (String) iter.next();
-      PropertyHolder holder = new PropertyHolder(name, model.getProperty(name));
+      PropertyHolder holder = new PropertyHolder(name, externalPropertyHolder.getProperty(name));
+      holder.setParent(externalPropertyHolder);
       holderArray.add(holder);
     }
     boolean editable = isModelEditable();
+    newButton.setEnabled(editable);
+    deleteButton.setEnabled(editable);
     if (editButton != null) {
       editButton.setEnabled(editable);
     }
     setInput(holderArray);
   }
-
-
 
 
   public class PropertyLabelProvider extends AbstractIdentifiableLabelProvider {
@@ -111,8 +131,6 @@ public class PropertyEditableSection
 
   class DeletePropertyAction extends Action {
 
-    private ITapestryModel model;
-
     /**
      * Constructor for NewPropertyAction
      */
@@ -128,10 +146,9 @@ public class PropertyEditableSection
     public void run() {
       updateSelection = true;
       PropertyHolder holder = (PropertyHolder) getSelected();
-      if (holder != null) {
-        BaseTapestryModel model = (BaseTapestryModel) getFormPage().getModel();
+      if (holder != null) {        
         String prev = findPrevious(holder.identifier);
-        model.setProperty(holder.identifier, null);
+        externalPropertyHolder.setProperty(holder.identifier, null);
         holder.setParent(null);
         forceDirty();
         update();
@@ -148,8 +165,6 @@ public class PropertyEditableSection
 
   class NewPropertyAction extends Action {
 
-    private ITapestryModel model;
-
     /**
      * Constructor for NewPropertyAction
      */
@@ -164,18 +179,17 @@ public class PropertyEditableSection
     */
     public void run() {
       updateSelection = true;
-      BaseTapestryModel model = (BaseTapestryModel) getFormPage().getModel();
       String useProperty = "property";
-      if (model.getProperty(useProperty + 1) != null) {
+      if (externalPropertyHolder.getProperty(useProperty + 1) != null) {
         int counter = 2;
-        while (model.getProperty(useProperty + counter) != null) {
+        while (externalPropertyHolder.getProperty(useProperty + counter) != null) {
           counter++;
         }
         useProperty = useProperty + counter;
       } else {
         useProperty = useProperty + 1;
       }
-      model.setProperty(useProperty, "fill in value");
+      externalPropertyHolder.setProperty(useProperty, "fill in value");
       forceDirty();
       update();
       setSelection(useProperty);
@@ -197,6 +211,7 @@ public class PropertyEditableSection
 
     public String identifier;
     public String value;
+    private IPropertyHolder parent;
 
     /**
      * Constructor for PropertyHolder
@@ -217,7 +232,7 @@ public class PropertyEditableSection
 
     public void setPropertyValue(Object key, Object value) {
 
-      BaseTapestryModel model = (BaseTapestryModel) getParent();
+      IPropertyHolder pholder = (IPropertyHolder) getParent();
 
       if ("name".equals(key)) {
 
@@ -228,20 +243,20 @@ public class PropertyEditableSection
 
           newName = oldName;
 
-        } else if (model.getProperty(newName) != null) {
+        } else if (pholder.getProperty(newName) != null) {
 
           newName = "Copy of " + newName;
 
         }
 
         this.identifier = newName;
-        model.setProperty(oldName, null);
-        model.setProperty(this.identifier, this.value);
+        pholder.setProperty(oldName, null);
+        pholder.setProperty(this.identifier, this.value);
 
       } else if ("value".equals(key)) {
 
         this.value = (String) value;
-        model.setProperty(this.identifier, this.value);
+        pholder.setProperty(this.identifier, this.value);
       }
 
     }
@@ -290,7 +305,7 @@ public class PropertyEditableSection
      * @see com.iw.plugins.spindle.spec.IIdentifiable#getParent()
      */
     public Object getParent() {
-      return (BaseTapestryModel) getFormPage().getModel();
+      return (IPropertyHolder) getFormPage().getModel();
     }
 
     /**
@@ -304,6 +319,7 @@ public class PropertyEditableSection
      * @see com.iw.plugins.spindle.spec.IIdentifiable#setParent(Object)
      */
     public void setParent(Object parent) {
+    	this.parent = (IPropertyHolder)parent;
     }
 
   }

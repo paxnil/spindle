@@ -46,7 +46,7 @@ public class OverviewComponentRefSection extends BasicLinksSection {
     super(
       page,
       "Component Aliases",
-      "This section describes the components defined in this file");
+      "This section lists the components defined in this file");
 
   }
 
@@ -65,7 +65,7 @@ public class OverviewComponentRefSection extends BasicLinksSection {
       String alias = (String) i.next();
       String linkLabel = alias + " [" + librarySpec.getComponentSpecificationPath(alias) + "]";
       Image image = TapestryImages.getSharedImage("component16.gif");
-      addHyperLink(alias, linkLabel, image, new PagesHyperLinkAdapter());
+      addHyperLink(alias, linkLabel, image, new ComponentHyperLinkAdapter());
     }
     super.update(removePrevious);
   }
@@ -81,7 +81,7 @@ public class OverviewComponentRefSection extends BasicLinksSection {
     }
   }
 
-  protected class PagesHyperLinkAdapter extends HyperLinkAdapter {
+  protected class ComponentHyperLinkAdapter extends HyperLinkAdapter {
     public void linkActivated(Control parent) {
       final SpindleFormPage targetPage = getGotoPage();
       if (targetPage == null) {
