@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
-   version="0.0.42"
+   version="0.0.43"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.core.TapestryCore">
 
@@ -40,10 +40,10 @@
       <library name="ognl-2.6.3.jar">
          <export name="*"/>
       </library>
-      <library name="tapestry-3.0-rc-1.jar">
+      <library name="tapestry-3.0.jar">
          <export name="*"/>
       </library>
-      <library name="tapestry-contrib-3.0-rc-1.jar">
+      <library name="tapestry-contrib-3.0.jar">
          <export name="*"/>
       </library>
       <library name="bsf-2.3.0.jar">
