@@ -4,10 +4,10 @@
    <description>
       Update site for the JettyLauncher plugin
    </description>
-   <feature url="features/com.iw.features.jettylauncher_1.0.15.jar" id="com.iw.features.jettylauncher" version="1.0.15">
+   <feature url="features/com.iw.features.jettylauncher_1.2.0.jar" id="com.iw.features.jettylauncher" version="1.2.0">
       <category name="jettylauncher"/>
    </feature>
-   <feature url="features/com.iw.features.jettylauncher_profile_1.0.15.jar" id="com.iw.features.jettylauncher_profile" version="1.0.15">
+   <feature url="features/com.iw.features.jettylauncher_profile_1.2.0.jar" id="com.iw.features.jettylauncher_profile" version="1.2.0">
       <category name="jettylauncher_profile"/>
    </feature>
    <category-def name="jettylauncher" label="Jetty Launcher"/>
