@@ -56,10 +56,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
 import com.iw.plugins.spindle.core.scanning.ApplicationScanner;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
@@ -76,7 +78,7 @@ import com.iw.plugins.spindle.core.util.Utils;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public abstract class Build implements IIncrementalBuild, IScannerValidatorListener
+public abstract class Build implements IIncrementalBuild, IScannerValidatorListener, ITemplateFinderListener
 {
 
     private static final Parser BUILD_PARSER = new Parser();
@@ -94,6 +96,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
     protected List fFoundTypes;
     protected List fMissingTypes;
     protected Map fProcessedLocations;
+    protected List fSeenTemplateExtensions;
 
     public Build(TapestryBuilder builder)
     {
@@ -108,6 +111,8 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fFoundTypes = new ArrayList();
         fMissingTypes = new ArrayList();
         fProcessedLocations = new HashMap();
+        fSeenTemplateExtensions = new ArrayList();
+        TapestryArtifactManager.getTapestryArtifactManager().addTemplateFinderListener(this);
     }
 
     /* (non-Javadoc)
@@ -146,11 +151,14 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
                 {
                     IResource resource = delta.getResource();
 
+                    if (resource instanceof IContainer)
+                        return true;
+
                     IPath path = resource.getFullPath();
                     String extension = path.getFileExtension();
 
-                    if (resource instanceof IContainer)
-                        return true;
+                    if (fLastState.fSeenTemplateExtensions.contains(extension))
+                        throw new NeedToBuildException();
 
                     if (fLastState.fJavaDependencies.contains(resource) || knownTapestryExtensions.contains(extension))
                     {
@@ -430,7 +438,7 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
             try
             {
                 scanner.scanTemplate(spec, location, fValidator);
-                
+
                 IResource res = Utils.toResource(location);
                 if (res != null)
                 {
@@ -465,6 +473,8 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
         fFoundTypes.clear();
         fMissingTypes.clear();
         fProcessedLocations.clear();
+        fSeenTemplateExtensions.clear();
+        TapestryArtifactManager.getTapestryArtifactManager().removeTemplateFinderListener(this);
     }
 
     /* (non-Javadoc)
@@ -492,12 +502,31 @@ public abstract class Build implements IIncrementalBuild, IScannerValidatorListe
 
     }
 
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener#templateExtensionSeen(java.lang.String)
+     */
+    public void templateExtensionSeen(String extension)
+    {
+        if (!fSeenTemplateExtensions.contains(extension))
+            fSeenTemplateExtensions.add(extension);
+
+    }
+
     private static class NeedToBuildException extends RuntimeException
     {
         public NeedToBuildException()
         {
             super();
         }
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.builder.IBuild#build()
+     */
+    public void build() throws BuilderException
+    {
+        // TODO Auto-generated method stub
+
     }
 
 }

@@ -71,6 +71,9 @@ public class State
     
     // list of fullyQualified names of types not found during a build
     List fMissingJavaTypes;
+    
+    // list of known template extensions
+    List fSeenTemplateExtensions;
 
     /**
      * Constructor for State.

@@ -123,6 +123,8 @@ public class FullBuild extends Build
         newState.fLastKnownClasspath = fTapestryBuilder.fClasspath;
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
+        newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
+
         // save the processed binary libraries
         saveBinaryLibraries(fApplicationNamespace, newState);
         TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
@@ -226,7 +228,9 @@ public class FullBuild extends Build
     }
 
     public void cleanUp()
-    {}
+    {
+        super.cleanUp();
+    }
 
     protected void findDeclaredApplication()
     {

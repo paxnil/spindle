@@ -838,6 +838,7 @@ public class ComponentScanner extends SpecificationScanner
      */
     public void scanForTemplates(IComponentSpecification specification)
     {
+        
         IResourceWorkspaceLocation[] locations = new IResourceWorkspaceLocation[0];
 //        TemplateFinder finder = new TemplateFinder();
         try

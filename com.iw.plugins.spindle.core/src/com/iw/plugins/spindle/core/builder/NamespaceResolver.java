@@ -27,11 +27,12 @@
 package com.iw.plugins.spindle.core.builder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import org.apache.tapestry.INamespace;
@@ -326,7 +327,7 @@ public class NamespaceResolver
                 fResultNamespace.setComponentResolver(new BuilderComponentResolver(fFrameworkNamespace));
                 resolveChildNamespaces();
                 resolveComponents();
-                List definitelyNotSpeclessPages = getAllComponentTemplates();
+                Set definitelyNotSpeclessPages = getAllComponentTemplates();
                 resolvePages(definitelyNotSpeclessPages);
             }
         } catch (Exception e)
@@ -342,9 +343,9 @@ public class NamespaceResolver
     /**
      * @return List a list of all the templates for all components in this Namespace
      */
-    private List getAllComponentTemplates()
+    private Set getAllComponentTemplates()
     {
-        List result = new ArrayList();
+        Set result = new HashSet();
         for (Iterator iter = fResultNamespace.getComponentTypes().iterator(); iter.hasNext();)
         {
             String type = (String) iter.next();
@@ -358,9 +359,9 @@ public class NamespaceResolver
     /**
      * @return List a list of all the templates for all page files in this Namespace
      */
-    private List getAllPageFileTemplates()
+    private Set getAllPageFileTemplates()
     {
-        List result = new ArrayList();
+        Set result = new HashSet();
         for (Iterator iter = fResultNamespace.getPageNames().iterator(); iter.hasNext();)
         {
             String name = (String) iter.next();
@@ -533,7 +534,7 @@ public class NamespaceResolver
      * 1st Step resolve all the .page files.
      * 2nd Step resolve all the spec-less pages.
      */
-    private void resolvePages(List componentTemplates)
+    private void resolvePages(Set componentTemplates)
     {
         Map dotPageFiles = getAllPageFilesForNamespace();
         for (Iterator iter = dotPageFiles.keySet().iterator(); iter.hasNext();)
@@ -546,7 +547,7 @@ public class NamespaceResolver
 
     }
 
-    protected void resolveSpeclessPages(List componentTemplates)
+    protected void resolveSpeclessPages(Set componentTemplates)
     {
         if (!fResultNamespace.isApplicationNamespace())
             return;
@@ -590,7 +591,8 @@ public class NamespaceResolver
                 }
                 return true;
             }
-
+            
+            // not used
             public IResourceWorkspaceLocation[] getResults()
             {
                 IResourceWorkspaceLocation[] result = new IResourceWorkspaceLocation[speclessPages.size()];
@@ -606,10 +608,10 @@ public class NamespaceResolver
             TapestryCore.log(e);
         }
 
-        List appRootTemplates = Arrays.asList(acceptor.getResults());
+        
         // need to filter out localized page templates. They will be picked up
         // again later.
-        List filtered = TemplateFinder.filterTemplateList(appRootTemplates, fResultNamespace);
+        List filtered = TemplateFinder.filterTemplateList(speclessPages, fResultNamespace);
         for (Iterator iter = filtered.iterator(); iter.hasNext();)
         {
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
@@ -630,6 +632,7 @@ public class NamespaceResolver
         PluginComponentSpecification specification = new PluginComponentSpecification();
         specification.setPageSpecification(true);
         specification.setSpecificationLocation(location);
+        specification.setNamespace(fResultNamespace);
         ComponentScanner scanner = new ComponentScanner();
         scanner.scanForTemplates(specification);
         List templates = specification.getTemplateLocations();

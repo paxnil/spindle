@@ -26,12 +26,16 @@
 
 package com.iw.plugins.spindle.core.artifacts;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
 
 /**
  * The <code>TapestryArtifactManager</code> manages all the Tapestry Artifacts in the workspace.
@@ -43,7 +47,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class TapestryArtifactManager
+public class TapestryArtifactManager implements ITemplateFinderListener
 {
 
     static private TapestryArtifactManager instance = new TapestryArtifactManager();
@@ -55,6 +59,7 @@ public class TapestryArtifactManager
     }
 
     Map fProjectBuildStates = new HashMap();
+    List fTemplateExtensionListeners;
 
     private TapestryArtifactManager()
     {
@@ -79,6 +84,43 @@ public class TapestryArtifactManager
             return null;
 
         return fProjectBuildStates.get(project);
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#addListener(com.iw.plugins.spindle.core.scanning.IScannerValidatorListener)
+     */
+    public void addTemplateFinderListener(ITemplateFinderListener listener)
+    {
+        if (fTemplateExtensionListeners == null)
+            fTemplateExtensionListeners = new ArrayList();
+
+        if (!fTemplateExtensionListeners.contains(listener))
+            fTemplateExtensionListeners.add(listener);
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#removeListener(com.iw.plugins.spindle.core.scanning.IScannerValidatorListener)
+     */
+    public void removeTemplateFinderListener(ITemplateFinderListener listener)
+    {
+        if (fTemplateExtensionListeners != null)
+            fTemplateExtensionListeners.remove(listener);
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener#templateExtensionSeen(java.lang.String)
+     */
+    public void templateExtensionSeen(String extension)
+    {
+        if (fTemplateExtensionListeners == null)
+            return;
+
+        for (Iterator iter = fTemplateExtensionListeners.iterator(); iter.hasNext();)
+        {
+            ITemplateFinderListener listener = (ITemplateFinderListener) iter.next();
+            listener.templateExtensionSeen(extension);
+        }
+
     }
 
 }

@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.artifacts.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.IProblemCollector;
@@ -117,7 +118,7 @@ public class TemplateFinder implements IResourceLocationAcceptor
             {
                 foundName = name.substring(0, dotx);
                 foundExtension = name.substring(dotx + 1);
-                if (foundName.length() == 0 || !expectedExtension.equals(foundExtension));
+                if (foundName.length() == 0 || !expectedExtension.equals(foundExtension))
                 continue;
             }
             boolean ok = true;
@@ -143,6 +144,8 @@ public class TemplateFinder implements IResourceLocationAcceptor
 
     private String fTemplateBaseName;
     private String fPerlExpression;
+
+    private ITemplateFinderListener fListener = TapestryArtifactManager.getTapestryArtifactManager();
 
     public IResourceWorkspaceLocation[] getTemplates(
         IComponentSpecification specification,
@@ -206,14 +209,16 @@ public class TemplateFinder implements IResourceLocationAcceptor
 
         String extension =
             specification == null ? null : specification.getProperty(Tapestry.TEMPLATE_EXTENSION_PROPERTY);
-        if (extension != null)
-            return extension;
+        if (extension == null)
+            extension =
+                specification.getNamespace().getSpecification().getProperty(Tapestry.TEMPLATE_EXTENSION_PROPERTY);
 
-        extension = specification.getNamespace().getSpecification().getProperty(Tapestry.TEMPLATE_EXTENSION_PROPERTY);
-        if (extension != null)
-            return extension;
+        if (extension == null)
+            extension = Tapestry.DEFAULT_TEMPLATE_EXTENSION;
 
-        return Tapestry.DEFAULT_TEMPLATE_EXTENSION;
+        fListener.templateExtensionSeen(extension);
+        
+        return extension;
     }
 
     private void readTemplatesFromAsset(PluginComponentSpecification specification, IAssetSpecification templateAsset)
