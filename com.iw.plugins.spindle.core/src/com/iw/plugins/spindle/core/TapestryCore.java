@@ -33,6 +33,7 @@ import java.util.ResourceBundle;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -41,6 +42,8 @@ import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import com.iw.plugins.spindle.core.parser.IProblem;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -172,13 +175,17 @@ public class TapestryCore extends AbstractUIPlugin
     {
         if (SpindleCoreStrings == null)
             SpindleCoreStrings = ResourceBundle.getBundle("com.iw.plugins.spindle.core.resources");
+        try
+        {
+            String pattern = SpindleCoreStrings.getString(key);
+            if (args == null)
+                return pattern;
 
-        String pattern = SpindleCoreStrings.getString(key);
-
-        if (args == null)
-            return pattern;
-
-        return MessageFormat.format(pattern, args);
+            return MessageFormat.format(pattern, args);
+        } catch (MissingResourceException e)
+        {
+            return "!" + key + "!";
+        }
     }
 
     public static String getString(String key)
@@ -206,12 +213,17 @@ public class TapestryCore extends AbstractUIPlugin
         if (TapestryStrings == null)
             TapestryStrings = ResourceBundle.getBundle("org.apache.tapestry.TapestryStrings");
 
-        String pattern = TapestryStrings.getString(key);
+        try
+        {
+            String pattern = TapestryStrings.getString(key);
+            if (args == null)
+                return pattern;
 
-        if (args == null)
-            return pattern;
-
-        return MessageFormat.format(pattern, args);
+            return MessageFormat.format(pattern, args);
+        } catch (MissingResourceException e)
+        {
+            return "!" + key + "!";
+        }
     }
 
     public static String getTapestryString(String key)
@@ -243,6 +255,24 @@ public class TapestryCore extends AbstractUIPlugin
             return true;
 
         return value.trim().length() == 0;
+    }  
+    
+    public static void logProblem(IStorage storage, IProblem problem) {
+        log(getString("core-non-resource-problem", storage.toString(), problem.toString()));        
+    }
+
+    /**
+     * @param path
+     * @param problems
+     */
+    public static void logProblems(IStorage storage, IProblem[] problems)
+    {
+        if (problems != null) {
+            for (int i = 0; i < problems.length; i++)
+            {
+                logProblem(storage, problems[i]);                
+            }
+        }        
     }
 
 }

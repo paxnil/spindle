@@ -1,5 +1,7 @@
 package com.iw.plugins.spindle.core.builder;
 
+import org.eclipse.core.resources.IResourceDelta;
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -57,11 +59,11 @@ public class IncrementalLibraryBuild extends Build implements IIncrementalBuild
     {}
 
     /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild()
+     * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild(org.eclipse.core.resources.IResourceDelta)
      */
-    public boolean canIncrementalBuild()
-    {
-        return false;
+    public boolean canIncrementalBuild(IResourceDelta projectDelta)
+    {       
+        return true;
     }
 
 }

@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.core.builder;
 
 import java.io.IOException;
 
+import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -39,8 +40,10 @@ import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.scanning.LibraryScanner;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.util.Markers;
 /**
  * Abstract base class for full and incremental builds
@@ -67,14 +70,25 @@ public abstract class Build implements IBuild
         this.parser = BUILD_PARSER;
     }
 
+    protected Node parseToNode(IResourceWorkspaceLocation location) throws IOException, CoreException
+    {
+        IStorage storage = location.getStorage();
+        if (storage != null)
+        {
+            return parseToNode(storage);
+        } else
+        {
+            throw new IOException(TapestryCore.getString("core-resource-does-not-exist", location));
+        }
+    }
 
-    protected Node parseToNode(IFile file) throws IOException, CoreException
+    protected Node parseToNode(IStorage storage) throws IOException, CoreException
     {
         Node result = null;
         try
         {
-            result = parser.parse(file);
-        
+            result = parser.parse(storage);
+
         } catch (CoreException e)
         {
             TapestryCore.log(e);
@@ -85,14 +99,15 @@ public abstract class Build implements IBuild
             throw e;
         }
 
-        Markers.addTapestryProblemMarkersToResource(((IResource) file), parser.getProblems());
+        if (storage.getAdapter(IResource.class) != null)
+        {
+            Markers.addTapestryProblemMarkersToResource(((IResource) storage), parser.getProblems());
+        } else
+        {
+            TapestryCore.logProblems(storage, parser.getProblems());
+        }
 
         return result;
-    }
-
-    protected void markError(IResource resource, int severity, ISourceLocation location, String message)
-    {
-        Markers.addTapestryProblemMarkerToResource(resource, message, severity, location);
     }
 
     protected IStorage findInPackage(IPackageFragment pack, String filename)
@@ -173,6 +188,29 @@ public abstract class Build implements IBuild
                     return (IStorage) file;
                 }
             }
+        }
+        return null;
+    }
+
+    protected ILibrarySpecification parseLibrary(IResourceWorkspaceLocation location)
+    {
+        try
+        {
+            Node node = parseToNode(location);
+            LibraryScanner scanner = new LibraryScanner();
+            return (ILibrarySpecification)scanner.scan(BUILD_PARSER, null, node);
+        } catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (CoreException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ScannerException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         return null;
     }

@@ -85,7 +85,6 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     public static final String ABORT_LIBRARY_SPEC_IN_WRONG_PROJECT = STRING_KEY + "abort-library-not-in-this-project";
     public static final String ABORT_APPLICATION_NO_SERVLETS = STRING_KEY + "abort-no-valid-application-servlets-found";
     public static final String ABORT_APPLICATION_ONE_SERVLET_ONLY = STRING_KEY + "abort-too-many-valid-servlets-found";
-    
 
     public static final String APPLICATION_EXTENSION = "application";
     public static final String COMPONENT_EXTENSION = "jwc";
@@ -95,6 +94,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     public static final String[] KnownExtensions =
         new String[] { APPLICATION_EXTENSION, COMPONENT_EXTENSION, PAGE_EXTENSION, TEMPLATE_EXTENSION, SCRIPT_EXTENSION };
     public static final String APP_SPEC_PATH_PARAM = "org.apache.tapestry.application-specification";
+    public static final String ENGINE_CLASS_PARAM = "org.apache.tapestry.engine-class";
 
     public static boolean DEBUG = true;
 
@@ -334,7 +334,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             default :
                 break;
         }
-        if (inc != null && inc.canIncrementalBuild())
+        if (inc != null && inc.canIncrementalBuild(getDelta(tapestryProject.getProject())))
         {
             build = inc;
             inc.build();

@@ -87,14 +87,13 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
         {
             NameLookup lookup = ((JavaProject) jproject).getNameLookup();
             fragments = lookup.findPackageFragments(packageName, false);
-            return;
 
         } catch (JavaModelException e)
         {
             TapestryCore.log(e);
         }
 
-        if (fragments != null || fragments.length >= 0)
+        if (fragments != null && fragments.length >= 0)
         {
             for (int i = 0; i < fragments.length; i++)
             {
@@ -106,7 +105,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
                     if (storage.getName().equals(getName()))
                     {
                         fragment = fragments[i];
-                        break;
+                        return;
                     }
                 }
             }

@@ -88,7 +88,11 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
     {
         IWorkspace workspace = ResourcesPlugin.getWorkspace();
         IWorkspaceRoot root = workspace.getRoot();
-        return root.getFileForLocation(path);
+        IFile file = root.getFile(path);
+        if (file != null && file.exists()) {
+            return file;
+        }
+        return null;
     }
 
     private IPath getCompletePath()

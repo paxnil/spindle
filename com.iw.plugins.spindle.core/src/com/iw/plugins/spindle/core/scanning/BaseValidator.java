@@ -39,14 +39,17 @@ import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
 import org.apache.tapestry.ApplicationRuntimeException;
+import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.parser.IProblem;
 import com.iw.plugins.spindle.core.parser.IProblemCollector;
 import com.iw.plugins.spindle.core.parser.ISourceLocation;
 import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /**
  *  TODO Add Type comment
@@ -57,19 +60,44 @@ import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
 public class BaseValidator implements IScannerValidator
 {
 
-    private static final ISourceLocation DefaultLocation = new SLocation();
+    static class SLocation implements ISourceLocation
+    { /* (non-Javadoc)
+             * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
+             */
+        public int getCharEnd()
+        {
+            return 1;
+        }
+        /* (non-Javadoc)
+        * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharStart()
+        */
+        public int getCharStart()
+        {
+            return 0;
+        }
+        /* (non-Javadoc)
+        * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getLineNumber()
+        */
+        public int getLineNumber()
+        {
+            return 1;
+        }
+    }
 
     public static final String DefaultDummyString = "1~dummy<>";
 
+    private static final ISourceLocation DefaultLocation = new SLocation();
+
     /** 
      * 
-     *  Compiler used to convert pattern strings into Patterns
-     *  instances.
-     * 
+     *  Map of compiled Patterns, keyed on pattern
+     *  string.  Patterns are lazily compiled as needed.
      * 
      **/
 
-    protected PatternCompiler patternCompiler;
+    protected Map compiledPatterns;
+
+    protected String dummyString = DefaultDummyString;
 
     /** 
      * 
@@ -81,13 +109,13 @@ public class BaseValidator implements IScannerValidator
 
     /** 
      * 
-     *  Map of compiled Patterns, keyed on pattern
-     *  string.  Patterns are lazily compiled as needed.
+     *  Compiler used to convert pattern strings into Patterns
+     *  instances.
+     * 
      * 
      **/
 
-    protected Map compiledPatterns;
-    protected String dummyString = DefaultDummyString;
+    protected PatternCompiler patternCompiler;
     protected IProblemCollector problemCollector;
 
     /**
@@ -98,36 +126,111 @@ public class BaseValidator implements IScannerValidator
         super();
 
     }
-    public void validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
+
+    /** 
+     * 
+     *  Returns a pattern compiled for single line matching
+     * 
+     **/
+
+    protected Pattern compilePattern(String pattern)
     {
-        validateTypeName(fullyQualifiedType, severity, DefaultLocation);
-    }
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
-     */
-    public void validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
-    {
-        Object type = findType(fullyQualifiedType);
-        if (type == null)
+        if (patternCompiler == null)
+            patternCompiler = new Perl5Compiler();
+
+        try
         {
-            String message = TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType);
-            if (problemCollector == null)
-            {
-                throw new ScannerException(message);
-            } else
-            {
-                problemCollector.addProblem(severity, location, message);
-            }
+            return patternCompiler.compile(pattern, Perl5Compiler.SINGLELINE_MASK);
+        } catch (MalformedPatternException ex)
+        {
+
+            throw new ApplicationRuntimeException(ex);
         }
     }
-    
+
     /**
      * Base Implementation always passes!
      * @param fullyQualifiedName
      * @return
      */
-    protected Object findType(String fullyQualifiedName) {
+    protected Object findType(String fullyQualifiedName)
+    {
         return this;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#getDummyStringPrefix()
+     */
+    public String getDummyStringPrefix()
+    {
+        return dummyString;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#getNextDummyString()
+     */
+    public String getNextDummyString()
+    {
+        return dummyString + System.currentTimeMillis();
+    }
+
+    public IProblemCollector getProblemCollector()
+    {
+        return problemCollector;
+    }
+
+    public void setProblemCollector(IProblemCollector collector)
+    {
+        problemCollector = collector;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateAsset(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.IAsset, com.iw.plugins.spindle.core.parser.ISourceLocationInfo)
+     */
+    public void validateAsset(IComponentSpecification specification, IAssetSpecification asset, ISourceLocationInfo sourceLocation)
+        throws ScannerException
+    {
+        return;
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateContainedComponent(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.spec.IContainedComponent)
+     */
+    public void validateContainedComponent(
+        IComponentSpecification specification,
+        IContainedComponent component,
+        ISourceLocationInfo info)
+        throws ScannerException
+    {
+        return;
+
+    }
+
+    public void validateExpression(String expression, int severity) throws ScannerException
+    {
+        validateExpression(expression, severity, DefaultLocation);
+    }
+
+    public void validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException
+    {
+        if (!expression.startsWith(dummyString))
+        {
+            try
+            {
+                Ognl.parseExpression(expression);
+            } catch (OgnlException e)
+            {
+                if (problemCollector == null)
+                {
+                    throw new ScannerException(e.getMessage());
+                } else
+                {
+                    problemCollector.addProblem(severity, (location == null ? DefaultLocation : location), e.getMessage());
+                }
+
+            }
+        }
     }
 
     public void validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException
@@ -170,126 +273,48 @@ public class BaseValidator implements IScannerValidator
         }
     }
 
-    public void validateExpression(String expression, int severity) throws ScannerException
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(org.apache.tapestry.IResourceLocation, java.lang.String)
+     */
+    public void validateResourceLocation(IResourceLocation location, String relativePath, String errorKey, ISourceLocation source)
+        throws ScannerException
     {
-        validateExpression(expression, severity, DefaultLocation);
-    }
+        IResourceWorkspaceLocation real = (IResourceWorkspaceLocation) location;
+        IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) real.getRelativeLocation(relativePath);
 
-    public void validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException
-    {
-        if (!expression.startsWith(dummyString))
+        if (!relative.exists())
         {
-            try
+            String message = TapestryCore.getString("validate-could-not-find-resource", relative.toString());
+            if (problemCollector == null)
             {
-                Ognl.parseExpression(expression);
-            } catch (OgnlException e)
+                throw new ScannerException(message);
+            } else
             {
-                if (problemCollector == null)
-                {
-                    throw new ScannerException(e.getMessage());
-                } else
-                {
-                    problemCollector.addProblem(severity, (location == null ? DefaultLocation : location), e.getMessage());
-                }
-
+                problemCollector.addProblem(IProblem.ERROR, source, message);
             }
         }
     }
-
+    
+    public void validateTypeName(String fullyQualifiedType, int severity) throws ScannerException
+    {
+        validateTypeName(fullyQualifiedType, severity, DefaultLocation);
+    }
     /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateContainedComponent(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.spec.IContainedComponent)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
      */
-    public void validateContainedComponent(
-        IComponentSpecification specification,
-        IContainedComponent component,
-        ISourceLocationInfo info)
-        throws ScannerException
+    public void validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
     {
-        return;
-
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateAsset(org.apache.tapestry.spec.IComponentSpecification, org.apache.tapestry.IAsset, com.iw.plugins.spindle.core.parser.ISourceLocationInfo)
-     */
-    public void validateAsset(IComponentSpecification specification, IAssetSpecification asset, ISourceLocationInfo sourceLocation)
-        throws ScannerException
-    {
-        return;
-
-    }
-
-    /** 
-     * 
-     *  Returns a pattern compiled for single line matching
-     * 
-     **/
-
-    protected Pattern compilePattern(String pattern)
-    {
-        if (patternCompiler == null)
-            patternCompiler = new Perl5Compiler();
-
-        try
+        Object type = findType(fullyQualifiedType);
+        if (type == null)
         {
-            return patternCompiler.compile(pattern, Perl5Compiler.SINGLELINE_MASK);
-        } catch (MalformedPatternException ex)
-        {
-
-            throw new ApplicationRuntimeException(ex);
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#getDummyStringPrefix()
-     */
-    public String getDummyStringPrefix()
-    {
-        return dummyString;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#getNextDummyString()
-     */
-    public String getNextDummyString()
-    {
-        return dummyString + System.currentTimeMillis();
-    }
-
-    public IProblemCollector getProblemCollector()
-    {
-        return problemCollector;
-    }
-
-    public void setProblemCollector(IProblemCollector collector)
-    {
-        problemCollector = collector;
-    }
-
-    static class SLocation implements ISourceLocation
-    { /* (non-Javadoc)
-                            * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharEnd()
-                            */
-        public int getCharEnd()
-        {
-            // TODO Auto-generated method stub
-            return 1;
-        }
-        /* (non-Javadoc)
-        * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getCharStart()
-        */
-        public int getCharStart()
-        {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-        /* (non-Javadoc)
-        * @see com.iw.plugins.spindle.core.parser.ISourceLocation#getLineNumber()
-        */
-        public int getLineNumber()
-        {
-            // TODO Auto-generated method stub
-            return 0;
+            String message = TapestryCore.getTapestryString("unable-to-resolve-class", fullyQualifiedType);
+            if (problemCollector == null)
+            {
+                throw new ScannerException(message);
+            } else
+            {
+                problemCollector.addProblem(severity, location, message);
+            }
         }
     }
 

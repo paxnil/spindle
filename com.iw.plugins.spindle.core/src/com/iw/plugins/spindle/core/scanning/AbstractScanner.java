@@ -29,6 +29,7 @@ package com.iw.plugins.spindle.core.scanning;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
@@ -173,7 +174,7 @@ public abstract class AbstractScanner implements IProblemCollector
                 result = attributeNode.getNodeValue();
             }
         }
-        if ((result == null || "".equals(result.trim()))&& returnDummyIfNull)
+        if ((result == null || "".equals(result.trim())) && returnDummyIfNull)
         {
             result = getNextDummyString();
         }
@@ -298,6 +299,15 @@ public abstract class AbstractScanner implements IProblemCollector
     protected void validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException
     {
         validator.validateTypeName(fullyQualifiedType, severity, location);
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(org.apache.tapestry.IResourceLocation, java.lang.String)
+     */
+    protected void validateResourceLocation(IResourceLocation location, String relativePath) throws ScannerException
+    {
+        validator.validateResourceLocation(location, relativePath );
+
     }
 
     protected void validateContainedComponent(

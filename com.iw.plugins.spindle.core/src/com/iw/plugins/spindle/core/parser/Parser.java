@@ -36,8 +36,8 @@ import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLParseException;
 import org.apache.xerces.xni.parser.XMLPullParserConfiguration;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -188,9 +188,9 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
     }
 
-    public Node parse(IFile file) throws IOException, CoreException
+    public Node parse(IStorage storage) throws IOException, CoreException
     {
-        return parse(file.getContents(true));
+        return parse(storage.getContents());
     }
 
     public Node parse(InputStream input) throws IOException

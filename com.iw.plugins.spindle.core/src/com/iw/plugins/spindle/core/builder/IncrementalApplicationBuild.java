@@ -1,5 +1,9 @@
 package com.iw.plugins.spindle.core.builder;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResourceDelta;
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -57,11 +61,26 @@ public class IncrementalApplicationBuild extends Build implements IIncrementalBu
     {}
 
     /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild()
+     * @see com.iw.plugins.spindle.core.builder.IIncrementalBuild#canIncrementalBuild(org.eclipse.core.resources.IResourceDelta)
      */
-    public boolean canIncrementalBuild()
+    public boolean canIncrementalBuild(IResourceDelta projectDelta)
     {
-        return false;
+        IFolder contextRoot = tapestryBuilder.contextRoot;
+        if (contextRoot == null || !contextRoot.exists())
+        {
+            return false;
+        }
+        IFile webXML = contextRoot.getFile("WEB-INF/web.xml");
+        if (webXML == null || !webXML.exists())
+        {
+            return false;
+        }
+        IResourceDelta webXMLDelta = projectDelta.findMember(webXML.getProjectRelativePath());
+        if (webXMLDelta != null)
+        {
+            return false;
+        }
+        return true;
     }
 
 }

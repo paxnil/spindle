@@ -26,6 +26,7 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
+import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
@@ -42,27 +43,29 @@ import com.iw.plugins.spindle.core.parser.ISourceLocationInfo;
  */
 public interface IScannerValidator
 {
+    
+    public String getDummyStringPrefix();
+    
+    public String getNextDummyString();
 
     public void setProblemCollector(IProblemCollector collector);
     
-    public void validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException;
+    public void validateAsset(IComponentSpecification specification, IAssetSpecification asset, ISourceLocationInfo sourceLocation) throws ScannerException;
     
-    public void validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location) throws ScannerException;
+    public void validateContainedComponent(IComponentSpecification specification, IContainedComponent component, ISourceLocationInfo node) throws ScannerException;
     
     public void validateExpression(String expression, int severity) throws ScannerException;
     
     public void validateExpression(String expression, int severity, ISourceLocation location) throws ScannerException;
     
+    public void validatePattern(String value, String pattern, String errorKey, int severity) throws ScannerException;
+    
+    public void validatePattern(String value, String pattern, String errorKey, int severity, ISourceLocation location) throws ScannerException;
+
+    public void validateResourceLocation(IResourceLocation location, String relativePath); 
+    
     public void validateTypeName(String fullyQualifiedType, int severity) throws ScannerException;
     
     public void validateTypeName(String fullyQualifiedType, int severity, ISourceLocation location) throws ScannerException;
-    
-    public void validateContainedComponent(IComponentSpecification specification, IContainedComponent component, ISourceLocationInfo node) throws ScannerException;
-    
-    public void validateAsset(IComponentSpecification specification, IAssetSpecification asset, ISourceLocationInfo sourceLocation) throws ScannerException;
-    
-    public String getNextDummyString();
-    
-    public String getDummyStringPrefix(); 
 
 }

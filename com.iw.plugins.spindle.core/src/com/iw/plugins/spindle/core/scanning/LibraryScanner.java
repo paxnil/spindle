@@ -27,6 +27,7 @@
 package com.iw.plugins.spindle.core.scanning;
 
 import org.apache.tapestry.INamespace;
+import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IExtensionSpecification;
@@ -71,8 +72,8 @@ public class LibraryScanner extends SpecificationScanner
         throws ScannerException
     {
         specification.setPublicId(parser.getPublicId());
-        //   TODO figure out specLocation & ResourceResolver
-        //     specification.setSpecificationLocation(getResourceLocation());
+        specification.setSpecificationLocation(specification.getSpecificationLocation());
+        //   TODO figure out ResourceResolver
         //        specification.setResourceResolver(resolver);
 
         for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
@@ -169,7 +170,7 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                 IProblem.ERROR,
                 getAttributeSourceLocation(node, "type"),
-            TapestryCore.getTapestryString("SpecificationParser.unknown-static-value-type", type));
+                TapestryCore.getTapestryString("SpecificationParser.unknown-static-value-type", type));
         } else
         {
             try
@@ -242,7 +243,9 @@ public class LibraryScanner extends SpecificationScanner
                 addProblem(
                     IProblem.ERROR,
                     getAttributeSourceLocation(node, "id"),
-                TapestryCore.getTapestryString("SpecificationParser.framework-library-id-is-reserved", INamespace.FRAMEWORK_NAMESPACE));
+                    TapestryCore.getTapestryString(
+                        "SpecificationParser.framework-library-id-is-reserved",
+                        INamespace.FRAMEWORK_NAMESPACE));
             }
 
             String specificationPath = getAttribute(node, "specification-path");
@@ -253,22 +256,21 @@ public class LibraryScanner extends SpecificationScanner
 
     protected void scanPage(ILibrarySpecification specification, Node node) throws ScannerException
     {
-        String name = getAttribute(node, "name");
+        String name = getAttribute(node, "name", true);
 
-        if (name != null)
-        {
+        validatePattern(
+            name,
+            SpecificationParser.PAGE_NAME_PATTERN,
+            "SpecificationParser.invalid-page-name",
+            IProblem.ERROR,
+            getAttributeSourceLocation(node, "name"));
 
-            validatePattern(
-                name,
-                SpecificationParser.PAGE_NAME_PATTERN,
-                "SpecificationParser.invalid-page-name",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"));
+        String specificationPath = getAttribute(node, "specification-path");
+        
+        validateResourceLocation(specification.getSpecificationLocation(), specificationPath);
 
-            String specificationPath = getAttribute(node, "specification-path");
+        specification.setPageSpecificationPath(name, specificationPath);
 
-            specification.setPageSpecificationPath(name, specificationPath);
-        }
     }
 
     protected void scanService(ILibrarySpecification spec, Node node) throws ScannerException

@@ -203,7 +203,7 @@ public class FullBuild extends Build
             try
             {
                 WebXMLScanner wscanner = new WebXMLScanner(this);
-                servletInfos = wscanner.getServletInformation(wxmlElement);
+                servletInfos = wscanner.scanServletInformation(wxmlElement);
                 Markers.addTapestryProblemMarkersToResource(webXML, wscanner.getProblems());
             } catch (ScannerException e)
             {
