@@ -14,7 +14,6 @@
 		<project>org.eclipse.jface.text</project>
 		<project>org.eclipse.search</project>
 		<project>org.eclipse.ui</project>
-		<project>org.eclipse.update.ui.forms</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

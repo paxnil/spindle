@@ -78,8 +78,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.eclipse.ui.views.properties.IPropertySheetPage;
-import org.eclipse.update.ui.forms.internal.IFormPage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
@@ -110,8 +108,6 @@ import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.IReconcileListener;
 import com.iw.plugins.spindle.editors.IReconcileWorker;
 import com.iw.plugins.spindle.editors.ProblemAnnotationType;
-import com.iw.plugins.spindle.editors.multi.IMultiPage;
-import com.iw.plugins.spindle.editors.multi.MultiPageSpecEditor;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
@@ -124,7 +120,7 @@ import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class SpecEditor extends Editor implements IMultiPage
+public class SpecEditor extends Editor 
 {
 
     private IReconcileWorker fReconciler = null;
@@ -138,8 +134,6 @@ public class SpecEditor extends Editor implements IMultiPage
 
     private Object fInformationControlInput;
 
-    /** only here if this editor is embedded in a MultiPageSpecEditor */
-    private MultiPageSpecEditor fMultiPageEditor;
 
     public SpecEditor()
     {
@@ -904,95 +898,7 @@ public class SpecEditor extends Editor implements IMultiPage
         menu.appendToGroup(SOURCE_GROUP, sourceMenu);
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#getContentOutlinePage()
-     */
-    public IContentOutlinePage getContentOutlinePage()
-    {
-        return fOutline;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#getPropertySheetPage()
-     */
-    public IPropertySheetPage getPropertySheetPage()
-    {
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#performGlobalAction(java.lang.String)
-     */
-    public boolean performGlobalAction(String id)
-    {
-        return false;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.spec.multipage.IMultiPage#update()
-     */
-    public void update()
-    {
-        // do nothing
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.update.ui.forms.internal.IFormPage#becomesInvisible(org.eclipse.update.ui.forms.internal.IFormPage)
-     */
-    public boolean becomesInvisible(IFormPage newPage)
-    {
-        return true;
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.update.ui.forms.internal.IFormPage#becomesVisible(org.eclipse.update.ui.forms.internal.IFormPage)
-     */
-    public void becomesVisible(IFormPage previousPage)
-    {
-        //do nothing
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.update.ui.forms.internal.IFormPage#createControl(org.eclipse.swt.widgets.Composite)
-     */
-    public void createControl(Composite parent)
-    {
-        // do nothing
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.update.ui.forms.internal.IFormPage#getControl()
-     */
-    public Control getControl()
-    {
-        return fControl;
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.update.ui.forms.internal.IFormPage#getLabel()
-     */
-    public String getLabel()
-    {
-        return UIPlugin.getString("multieditor-source-tab-label");
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.update.ui.forms.internal.IFormPage#isSource()
-     */
-    public boolean isSource()
-    {
-        return true;
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.update.ui.forms.internal.IFormPage#isVisible()
-     */
-    public boolean isVisible()
-    {
-        if (fMultiPageEditor != null)
-            return fMultiPageEditor.getCurrentMultiPage() == this;
-        return true;
-    }
+ 
 
     public static class SpecEditorInformationProvider implements IInformationProvider, IInformationProviderExtension
     {
