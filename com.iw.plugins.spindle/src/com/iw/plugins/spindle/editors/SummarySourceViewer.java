@@ -71,7 +71,7 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.ui.text.ColorManager;
 import com.iw.plugins.spindle.ui.text.ISpindleColorManager;
 
-public class SummarySourceViewer extends SourceViewer implements IResourceChangeListener {
+public class SummarySourceViewer extends SourceViewer  {
 
   static private IDocument NotFoundDocument = null;
   static private IDocument ErrorReadingDocument = null;
@@ -89,7 +89,7 @@ public class SummarySourceViewer extends SourceViewer implements IResourceChange
   private IStorage currentStorage;
   private IMenuListener menuListener, popupListener;
   private Menu menu;
-  
+
   protected ISpindleColorManager colorManager = new ColorManager();
 
   /**
@@ -100,7 +100,7 @@ public class SummarySourceViewer extends SourceViewer implements IResourceChange
       parent,
       new VerticalRuler(1),
       SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
-    
+
     Control control = getControl();
     initializeWidgetFont((StyledText) getTextWidget());
     provider = new StorageDocumentProvider();
@@ -110,9 +110,7 @@ public class SummarySourceViewer extends SourceViewer implements IResourceChange
     menu = manager.createContextMenu(getTextWidget());
     getTextWidget().setMenu(menu);
     configure(new XMLConfiguration(colorManager));
-    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(this);
   }
-  
 
   protected final IMenuListener getContextMenuListener() {
     if (menuListener == null) {
@@ -133,7 +131,7 @@ public class SummarySourceViewer extends SourceViewer implements IResourceChange
   }
 
   public void dispose() {
-  	
+
     if (colorManager != null) {
       colorManager.dispose();
       colorManager = null;
@@ -153,7 +151,6 @@ public class SummarySourceViewer extends SourceViewer implements IResourceChange
     if (super.getControl() != null) {
       super.getControl().dispose();
     }
-    TapestryPlugin.getDefault().getWorkspace().removeResourceChangeListener(this);
   }
 
   public void setPopupListener(IMenuListener listener) {
@@ -176,10 +173,8 @@ public class SummarySourceViewer extends SourceViewer implements IResourceChange
   }
 
   public void update(IAnnotationModel model, IStorage storage) {
-    currentStorage = null;
     if (storage == null) {
-      setDocument(NotFoundDocument);
-      showAnnotations(false);
+      updateNotFound();
     } else {
       setDocument(provider.getDocument(storage), model);
       showAnnotations(model != null);
@@ -216,33 +211,7 @@ public class SummarySourceViewer extends SourceViewer implements IResourceChange
     styledText.setFont(JFaceResources.getTextFont());
   }
 
-  public void resourceChanged(IResourceChangeEvent event) {
-    IResource inQuestion = event.getResource();
-    int type = event.getType();
-    if (currentStorage != null) {
-      if (type == event.POST_CHANGE) {
-        boolean changed = true;
-        if (currentStorage instanceof IFile) {
-          if (currentStorage.equals(inQuestion)) {
-            if (((IFile) currentStorage).exists()) {
-              update(null, currentStorage);
-            } else {
-              updateNotFound();
-            }
-          }
-        }
-      } else if (type == event.PRE_DELETE) {
-        if (currentStorage instanceof IFile && currentStorage.equals(inQuestion)) {
-          updateNotFound();
-        } else if (currentStorage instanceof JarEntryFile) {
-          IResource parent = TapestryPlugin.getDefault().getParentResourceFor(currentStorage);
-          if (parent.equals(inQuestion)) {
-            updateNotFound();
-          }
-        }
-      }
-    }
-  }
+
 
   protected void setPreferenceStore(IPreferenceStore store) {
     if (preferenceStore != null) {
@@ -333,38 +302,38 @@ public class SummarySourceViewer extends SourceViewer implements IResourceChange
         }
       }
     } /**
-    * @see IDocumentProvider#aboutToChange(Object)
-    */
+       * @see IDocumentProvider#aboutToChange(Object)
+       */
     public void aboutToChange(Object arg0) {
     } /**
-    * @see IDocumentProvider#addElementStateListener(IElementStateListener)
-    */
+       * @see IDocumentProvider#addElementStateListener(IElementStateListener)
+       */
     public void addElementStateListener(IElementStateListener arg0) {
     } /**
-    * @see IDocumentProvider#canSaveDocument(Object)
-    */
+       * @see IDocumentProvider#canSaveDocument(Object)
+       */
     public boolean canSaveDocument(Object arg0) {
       return false;
     } /**
-    * @see IDocumentProvider#changed(Object)
-    */
+       * @see IDocumentProvider#changed(Object)
+       */
     public void changed(Object arg0) {
     } /**
-    * @see IDocumentProvider#connect(Object)
-    */
+       * @see IDocumentProvider#connect(Object)
+       */
     public void connect(Object arg0) throws CoreException {
     } /**
-    * @see IDocumentProvider#disconnect(Object)
-    */
+       * @see IDocumentProvider#disconnect(Object)
+       */
     public void disconnect(Object arg0) {
     } /**
-    * @see IDocumentProvider#getAnnotationModel(Object)
-    */
+       * @see IDocumentProvider#getAnnotationModel(Object)
+       */
     public IAnnotationModel getAnnotationModel(Object arg0) {
       return null;
     } /**
-    * @see IDocumentProvider#getDocument(Object)
-    */
+       * @see IDocumentProvider#getDocument(Object)
+       */
     public IDocument getDocument(Object element) {
       try {
         if (element instanceof IStorage) {
@@ -377,36 +346,36 @@ public class SummarySourceViewer extends SourceViewer implements IResourceChange
       }
       return null;
     } /**
-    * @see IDocumentProvider#getModificationStamp(Object)
-    */
+       * @see IDocumentProvider#getModificationStamp(Object)
+       */
     public long getModificationStamp(Object arg0) {
       return 0;
     } /**
-    * @see IDocumentProvider#getSynchronizationStamp(Object)
-    */
+       * @see IDocumentProvider#getSynchronizationStamp(Object)
+       */
     public long getSynchronizationStamp(Object arg0) {
       return 0;
     } /**
-    * @see IDocumentProvider#isDeleted(Object)
-    */
+       * @see IDocumentProvider#isDeleted(Object)
+       */
     public boolean isDeleted(Object arg0) {
       return false;
     } /**
-    * @see IDocumentProvider#mustSaveDocument(Object)
-    */
+       * @see IDocumentProvider#mustSaveDocument(Object)
+       */
     public boolean mustSaveDocument(Object arg0) {
       return false;
     } /**
-    * @see IDocumentProvider#removeElementStateListener(IElementStateListener)
-    */
+       * @see IDocumentProvider#removeElementStateListener(IElementStateListener)
+       */
     public void removeElementStateListener(IElementStateListener arg0) {
     } /**
-    * @see IDocumentProvider#resetDocument(Object)
-    */
+       * @see IDocumentProvider#resetDocument(Object)
+       */
     public void resetDocument(Object arg0) throws CoreException {
     } /**
-    * @see IDocumentProvider#saveDocument(IProgressMonitor, Object, IDocument, boolean)
-    */
+       * @see IDocumentProvider#saveDocument(IProgressMonitor, Object, IDocument, boolean)
+       */
     public void saveDocument(IProgressMonitor arg0, Object arg1, IDocument arg2, boolean arg3)
       throws CoreException {
     }

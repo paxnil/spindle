@@ -46,6 +46,7 @@ import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
+import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
@@ -88,11 +89,15 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
   }
 
   public void init(IJavaElement element, ComponentNameField nameField, boolean isComponentWizard) {
-  	this.nameField = nameField;  	
-  	nameField.addListener(this);
-  	this.isComponentWizard = isComponentWizard;
+    this.nameField = nameField;
+    nameField.addListener(this);
+    this.isComponentWizard = isComponentWizard;
     try {
-      IJavaProject project = (IJavaProject) Utils.findElementOfKind(element, IJavaElement.JAVA_PROJECT);
+    	
+      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+      mgr.getAllModels(element.getAdapter(IStorage.class), "application");
+      IJavaProject project =
+        (IJavaProject) Utils.findElementOfKind(element, IJavaElement.JAVA_PROJECT);
       TapestryLookup lookup = new TapestryLookup();
       lookup.configure(project);
       FinderRequest request = new FinderRequest();
@@ -123,11 +128,10 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
       IPackageFragment previouslySelectedPackage = null;
 
       Path path = new Path(previouslySelected);
-
+		
       if (path.isValidPath(previouslySelected)) {
 
         try {
-
           TapestryLookup lookup = new TapestryLookup();
           lookup.configure(project);
           FinderRequest request = new FinderRequest();
@@ -142,49 +146,51 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
           if (found == null || found.length == 0) {
             return;
           }
-          previouslySelectedModel = TapestryPlugin.getTapestryModelManager().getModel(found[0]);
+          TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+          previouslySelectedModel =
+            TapestryPlugin.getTapestryModelManager().getReadOnlyModel(found[0]);
           if (previouslySelectedModel == null) {
             return;
           }
           previouslySelectedPackage = request.getPackageResults()[0];
 
-        } catch (JavaModelException e) {
-          e.printStackTrace();
-        }
+          if (appModels != null && appModels.size() > 0) {
+            // check if the previously selected is already in the list,
+            // if so it must be moved to the top
+            // if not, it must be added to the top
+            int location = -1;
+            for (int i = 0; i < appModels.size(); i++) {
+              if (previouslySelectedModel == appModels.get(i)) {
+                location = i;
 
-        if (appModels != null && appModels.size() > 0) {
-          // check if the previously selected is already in the list,
-          // if so it must be moved to the top
-          // if not, it must be added to the top
-          int location = -1;
-          for (int i = 0; i < appModels.size(); i++) {
-            if (previouslySelectedModel == appModels.get(i)) {
-              location = i;
-
-              break;
+                break;
+              }
             }
-          }
-          if (location == 0) {
-            // its already in the right place!
-            return;
-          }
-          if (location > 0) {
-            // gotta move it!
-            appModels.remove(previouslySelectedModel);
-            appPackages.remove(previouslySelectedPackage);
-          }
-          // its not in the list, need to add it to the front
-          appModels.add(0, previouslySelectedModel);
-          appPackages.add(0, previouslySelectedPackage);
+            if (location == 0) {
+              // its already in the right place!
+              return;
+            }
+            if (location > 0) {
+              // gotta move it!
+              appModels.remove(previouslySelectedModel);
+              appPackages.remove(previouslySelectedPackage);
+            }
+            // its not in the list, need to add it to the front
+            appModels.add(0, previouslySelectedModel);
+            appPackages.add(0, previouslySelectedPackage);
 
-        } else {
-          // easy case, the array of models is empty, just
-          // add the previously selected to the list.
-          appModels = new ArrayList();
-          appModels.add(previouslySelectedModel);
-          appPackages = new ArrayList();
-          appPackages.add(previouslySelectedPackage);
-        }        
+          } else {
+            // easy case, the array of models is empty, just
+            // add the previously selected to the list.
+            appModels = new ArrayList();
+            appModels.add(previouslySelectedModel);
+            appPackages = new ArrayList();
+            appPackages.add(previouslySelectedPackage);
+          }
+        } catch (JavaModelException e) {
+        	e.printStackTrace();
+        	TapestryPlugin.getDefault().logException(e);
+        } 
       }
     }
   }
@@ -202,19 +208,19 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
     return result;
 
   }
-  
- /**
-   * @see com.iw.plugins.spindle.dialogfields.IDialogFieldChangedListener#dialogFieldChanged(DialogField)
-   */
+
+  /**
+    * @see com.iw.plugins.spindle.dialogfields.IDialogFieldChangedListener#dialogFieldChanged(DialogField)
+    */
   public void dialogFieldChanged(DialogField field) {
     if (field == this || field == nameField) {
       updateStatus();
     }
-  } 
-  
+  }
+
   public void updateStatus() {
-  	setStatus(selectionChanged());
-  } 
+    setStatus(selectionChanged());
+  }
 
   /**
    * Method selectionChanged.
@@ -226,6 +232,11 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
       int index = getSelectedIndex();
       if (index >= 0) {
         TapestryApplicationModel selected = getSelectedModel();
+        if (existsInNonSpindleEditor(selected)) {
+          newStatus.setError(
+            selected.getUnderlyingStorage().getName() + " is open in an non-Spindle editor");
+          return newStatus;
+        }
         if (selected.getApplicationSpec() == null) {
           try {
             selected.load();
@@ -239,15 +250,30 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
         PluginApplicationSpecification spec = selected.getApplicationSpec();
         String newName = nameField.getTextValue();
         if (isComponentWizard && spec.getComponentAlias(newName) != null) {
-        	newStatus.setError(newName+" already exists as a component in "+selected.getUnderlyingStorage().getName());
-        	return newStatus;
+          newStatus.setError(
+            newName
+              + " already exists as a component in "
+              + selected.getUnderlyingStorage().getName());
+          return newStatus;
         } else if (spec.getPageSpecification(newName) != null) {
-        	newStatus.setError(newName+" already exists as page in "+selected.getUnderlyingStorage().getName());
-        	return newStatus;
-        }        	
+          newStatus.setError(
+            newName + " already exists as page in " + selected.getUnderlyingStorage().getName());
+          return newStatus;
+        }
       }
     }
     return newStatus;
+  }
+
+  /**
+   * Method existsInNonSpindleEditor.
+   * @param selected
+   * @return boolean
+   */
+  private boolean existsInNonSpindleEditor(TapestryApplicationModel model) {
+    Object editor = Utils.getEditorFor(model.getUnderlyingStorage());
+    return (editor != null && !(editor instanceof SpindleMultipageEditor));
+
   }
 
   public TapestryApplicationModel getSelectedModel() {
@@ -329,11 +355,11 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
    * @see com.iw.plugins.spindle.dialogfields.DialogField#setEnabled(boolean)
    */
   public void setEnabled(boolean flag) {
-  	boolean oldEnabled = isEnabled();
-  	if (oldEnabled != flag) {
-    	super.setEnabled(flag);   
-    	updateStatus();
-  	}
+    boolean oldEnabled = isEnabled();
+    if (oldEnabled != flag) {
+      super.setEnabled(flag);
+      updateStatus();
+    }
   }
 
 }

@@ -368,6 +368,7 @@ public abstract class AbstractPropertySheetEditorSection
 
   protected void forceDirty() {
     setDirty(true);
+    updateNeeded=true;
     IModel model = (IModel) getFormPage().getModel();
     if (model instanceof IEditable) {
       IEditable editable = (IEditable) model;

@@ -25,6 +25,8 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorapp;
 
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -54,7 +56,7 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public class PagesSummarySection extends SpindleFormSection {
+public class PagesSummarySection extends SpindleFormSection implements IResourceChangeListener {
 
   private FormEntry pageName;
   private FormEntry specText;
@@ -124,14 +126,13 @@ public class PagesSummarySection extends SpindleFormSection {
     sourceViewer.setPopupListener(new IMenuListener() {
       public void menuAboutToShow(IMenuManager manager) {
         manager.removeAll();
-        manager.add(new Action("Open") {
+        Action openAction = new Action("Open") {
           public void run() {
-
             openTapestryEditor(sourceViewer.getCurrentStorage());
-
           }
-        });
-
+        };
+        openAction.setEnabled(sourceViewer.getCurrentStorage() != null);
+        manager.add(openAction);
       }
     });
 
@@ -146,32 +147,31 @@ public class PagesSummarySection extends SpindleFormSection {
     htmlViewer.setPopupListener(new IMenuListener() {
       public void menuAboutToShow(IMenuManager manager) {
         manager.removeAll();
-        manager.add(new Action("Open") {
+        Action openAction = new Action("Open") {
           public void run() {
             openHtmlEditor(htmlViewer.getCurrentStorage());
           }
-        });
-
+        };
+        openAction.setEnabled(htmlViewer.getCurrentStorage() != null);
+        manager.add(openAction);
       }
     });
 
     sashForm.setWeights(new int[] { 1, 1 });
 
     factory.paintBordersFor(container);
+    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(this);
     return container;
   }
 
   private void openTapestryEditor(IStorage storage) {
     if (storage != null) {
-      SpindleMultipageEditor teditor = (SpindleMultipageEditor) getFormPage().getEditor();
-      TapestryPlugin.openTapestryEditor(
-        (BaseTapestryModel) TapestryPlugin.getTapestryModelManager().getModel(storage));
+      TapestryPlugin.openTapestryEditor(storage);
     }
   }
 
   private void openHtmlEditor(IStorage storage) {
     if (storage != null) {
-      SpindleMultipageEditor teditor = (SpindleMultipageEditor) getFormPage().getEditor();
       TapestryPlugin.openNonTapistryEditor(storage);
     }
   }
@@ -181,6 +181,7 @@ public class PagesSummarySection extends SpindleFormSection {
   }
 
   public void dispose() {
+    TapestryPlugin.getDefault().getWorkspace().removeResourceChangeListener(this);
     super.dispose();
   }
 
@@ -200,7 +201,8 @@ public class PagesSummarySection extends SpindleFormSection {
       htmlViewer.updateNotFound();
     } else {
       pageName.setValue(selectedPage, false);
-      String specificationPath = getModel().getApplicationSpec().getPageSpecification(selectedPage).getSpecificationPath();
+      String specificationPath =
+        getModel().getApplicationSpec().getPageSpecification(selectedPage).getSpecificationPath();
       specText.setValue(specificationPath, false);
       if (!specificationPath.endsWith(".jwc")) {
         resolveFailed(specificationPath);
@@ -240,6 +242,16 @@ public class PagesSummarySection extends SpindleFormSection {
     resolveFailedLabel.setVisible(true);
     sourceViewer.updateNotFound();
     htmlViewer.updateNotFound();
+  }
+
+  /**
+  * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
+  */
+  public void resourceChanged(IResourceChangeEvent event) {
+    if (selectedPage == null)
+      return;
+
+    updateSummary();
   }
 
 }

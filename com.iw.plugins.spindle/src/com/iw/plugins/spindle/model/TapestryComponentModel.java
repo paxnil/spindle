@@ -148,26 +148,27 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
   }
 
   public ReferenceInfo resolveReferences(boolean reverse) {
-    if (!reverse) {
-      ArrayList containedComponents = new ArrayList();
-      PluginComponentSpecification spec = getComponentSpecification();
-      Iterator iter = spec.getComponentIds().iterator();
-      while (iter.hasNext()) {
-        String id = (String) iter.next();
-        PluginContainedComponent contained = (PluginContainedComponent) spec.getComponent(id);
-        if (contained.getCopyOf() != null) {
-          continue;
-        }
-        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
-        holder.name = contained.getType();
-        holder.description = "[component id =" + id + " type=" + holder.name + "] ";
-        containedComponents.add(holder);
-      }
-
-      return resolveForwardReferences(containedComponents);
-    } else {
-      return resolveReverseReferences();
-    }
+    //    if (!reverse) {
+    //      ArrayList containedComponents = new ArrayList();
+    //      PluginComponentSpecification spec = getComponentSpecification();
+    //      Iterator iter = spec.getComponentIds().iterator();
+    //      while (iter.hasNext()) {
+    //        String id = (String) iter.next();
+    //        PluginContainedComponent contained = (PluginContainedComponent) spec.getComponent(id);
+    //        if (contained.getCopyOf() != null) {
+    //          continue;
+    //        }
+    //        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
+    //        holder.name = contained.getType();
+    //        holder.description = "[component id =" + id + " type=" + holder.name + "] ";
+    //        containedComponents.add(holder);
+    //      }
+    //
+    //      return resolveForwardReferences(containedComponents);
+    //    } else {
+    //      return resolveReverseReferences();
+    //    }
+    return null;
   }
 
   public boolean containsReference(String name) {
@@ -193,71 +194,71 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
 
   }
 
-  private ReferenceInfo resolveForwardReferences(List containedComponents) {
-    ArrayList resolved = new ArrayList();
-    ArrayList unresolved = new ArrayList();
-    Iterator iter = containedComponents.iterator();
-    while (iter.hasNext()) {
-      ReferenceInfo.ReferenceHolder holder = (ReferenceInfo.ReferenceHolder) iter.next();
-      holder.isAlias = !holder.name.endsWith(".jwc");
-      IStorage[] resolvedArray =
-        TapestryPlugin.getDefault().resolveTapestryComponent(getUnderlyingStorage(), holder.name);
-      if (resolvedArray.length == 0) {
-        holder.description += "unresolved";
-        unresolved.add(holder);
-        continue;
-      }
-      IStorage resolvedFile = resolvedArray[0];
-      if (resolvedFile instanceof JarEntryFile) {
-        holder.name = ((JarEntryFile) resolvedFile).getName();
+  //  private ReferenceInfo resolveForwardReferences(List containedComponents) {
+  //    ArrayList resolved = new ArrayList();
+  //    ArrayList unresolved = new ArrayList();
+  //    Iterator iter = containedComponents.iterator();
+  //    while (iter.hasNext()) {
+  //      ReferenceInfo.ReferenceHolder holder = (ReferenceInfo.ReferenceHolder) iter.next();
+  //      holder.isAlias = !holder.name.endsWith(".jwc");
+  //      IStorage[] resolvedArray =
+  //        TapestryPlugin.getDefault().resolveTapestryComponent(getUnderlyingStorage(), holder.name);
+  //      if (resolvedArray.length == 0) {
+  //        holder.description += "unresolved";
+  //        unresolved.add(holder);
+  //        continue;
+  //      }
+  //      IStorage resolvedFile = resolvedArray[0];
+  //      if (resolvedFile instanceof JarEntryFile) {
+  //        holder.name = ((JarEntryFile) resolvedFile).getName();
+  //
+  //      }
+  //      if (holder.isAlias) {
+  //        holder.description += "default = /" + resolvedFile.getFullPath().toString();
+  //      }
+  //      holder.model =
+  //        (BaseTapestryModel) TapestryPlugin.getTapestryModelManager().getModel(resolvedFile);
+  //      resolved.add(holder);
+  //    }
+  //    return new ReferenceInfo(resolved, unresolved, false);
+  //  }
 
-      }
-      if (holder.isAlias) {
-        holder.description += "default = /" + resolvedFile.getFullPath().toString();
-      }
-      holder.model =
-        (BaseTapestryModel) TapestryPlugin.getTapestryModelManager().getModel(resolvedFile);
-      resolved.add(holder);
-    }
-    return new ReferenceInfo(resolved, unresolved, false);
-  }
-
-  private ReferenceInfo resolveReverseReferences() {
-    ArrayList resolved = new ArrayList();
-    IStorage underlier = getUnderlyingStorage();
-    String useName = getSpecificationLocation();
-    Iterator components = ModelUtils.getComponentModels();
-    while (components.hasNext()) {
-      TapestryComponentModel cmodel = (TapestryComponentModel) components.next();
-      if (resolved.contains(cmodel)) {
-        continue;
-      }
-      if (cmodel.containsReference(useName)) {
-        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
-        holder.description = cmodel.getUnderlyingStorage().getName();
-        holder.name = cmodel.getUnderlyingStorage().getFullPath().toString();
-        holder.model = cmodel;
-        resolved.add(holder);
-        break;
-      }
-    }
-    Iterator applications = ModelUtils.getApplicationModels();
-    while (applications.hasNext()) {
-      TapestryApplicationModel amodel = (TapestryApplicationModel) applications.next();
-      if (resolved.contains(amodel)) {
-        continue;
-      }
-      if (amodel.containsReference(useName)) {
-        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
-        holder.description = amodel.getUnderlyingStorage().getName();
-        holder.name = amodel.getUnderlyingStorage().getFullPath().toString();
-        holder.model = amodel;
-        resolved.add(holder);
-        break;
-      }
-    }
-    return new ReferenceInfo(resolved, new ArrayList(), true);
-  }
+  // private ReferenceInfo resolveReverseReferences() {
+  //    ArrayList resolved = new ArrayList();
+  //    IStorage underlier = getUnderlyingStorage();
+  //    String useName = getSpecificationLocation();
+  //    Iterator components = ModelUtils.getComponentModels();
+  //    while (components.hasNext()) {
+  //      TapestryComponentModel cmodel = (TapestryComponentModel) components.next();
+  //      if (resolved.contains(cmodel)) {
+  //        continue;
+  //      }
+  //      if (cmodel.containsReference(useName)) {
+  //        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
+  //        holder.description = cmodel.getUnderlyingStorage().getName();
+  //        holder.name = cmodel.getUnderlyingStorage().getFullPath().toString();
+  //        holder.model = cmodel;
+  //        resolved.add(holder);
+  //        break;
+  //      }
+  //    }
+  //    Iterator applications = ModelUtils.getApplicationModels();
+  //    while (applications.hasNext()) {
+  //      TapestryApplicationModel amodel = (TapestryApplicationModel) applications.next();
+  //      if (resolved.contains(amodel)) {
+  //        continue;
+  //      }
+  //      if (amodel.containsReference(useName)) {
+  //        ReferenceInfo.ReferenceHolder holder = new ReferenceInfo.ReferenceHolder();
+  //        holder.description = amodel.getUnderlyingStorage().getName();
+  //        holder.name = amodel.getUnderlyingStorage().getFullPath().toString();
+  //        holder.model = amodel;
+  //        resolved.add(holder);
+  //        break;
+  //      }
+  //    }
+  //    return new ReferenceInfo(resolved, new ArrayList(), true);
+  //  }
 
   public String getSpecificationLocation() {
     IStorage underlier = getUnderlyingStorage();

@@ -52,6 +52,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.pde.core.IEditable;
 import org.eclipse.pde.core.IModel;
 import org.eclipse.pde.internal.core.IModelProvider;
+import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.pde.internal.ui.editor.PDEEditorContributor;
 import org.eclipse.pde.internal.ui.editor.PDEMultiPageXMLEditor;
 import org.eclipse.pde.internal.ui.editor.SystemFileEditorInput;
@@ -73,12 +74,14 @@ import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
+import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.util.JarEditorInputWrapper;
+import com.iw.plugins.spindle.util.Utils;
 
 public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
 
-  private static String EDITOR_NAME="SpindleMultipageEditor";
-  private static String WRONG_EDITOR=EDITOR_NAME+".wrongEditor";
+  private static String EDITOR_NAME = "SpindleMultipageEditor";
+  private static String WRONG_EDITOR = EDITOR_NAME + ".wrongEditor";
   private boolean dirty = false;
   private boolean duringInit = false;
 
@@ -94,7 +97,13 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
     duringInit = true;
     if (isValidContentType(input) == false) {
       String message = MessageUtil.getFormattedString(WRONG_EDITOR, input.getName());
-      IStatus s = new Status(IStatus.ERROR, TapestryPlugin.getDefault().getPluginId(), IStatus.OK, message, null);
+      IStatus s =
+        new Status(
+          IStatus.ERROR,
+          TapestryPlugin.getDefault().getPluginId(),
+          IStatus.OK,
+          message,
+          null);
       throw new PartInitException(s);
     }
 
@@ -115,10 +124,10 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
     }
     site.setSelectionProvider(this);
     try {
-		initializeModels(inputObject);
-	} catch(CoreException e) {
-		throw new PartInitException("Unable to init Spindle models");
-	}
+      initializeModels(inputObject);
+    } catch (CoreException e) {
+      throw new PartInitException("Unable to init Spindle models");
+    }
     for (Iterator iter = super.getPages(); iter.hasNext();) {
       IEditorPart part = (IEditorPart) iter.next();
       part.init(site, input);
@@ -126,7 +135,7 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
     if (inputObject instanceof IFile) {
       setTitle(((IFile) inputObject).getName());
     } else if (inputObject instanceof java.io.File) {
-      setTitle("system:" + ((java.io.File) inputObject).getName()); 
+      setTitle("system:" + ((java.io.File) inputObject).getName());
     } else {
       setTitle(input.toString());
     }
@@ -134,12 +143,11 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
     if (dirty) {
       doSave(new NullProgressMonitor());
     }
-    BaseTapestryModel tapModel = (BaseTapestryModel)model;
+    BaseTapestryModel tapModel = (BaseTapestryModel) model;
     tapModel.setDirty(false);
-    
-    
+
     if (!tapModel.isEditable()) {
-		tapModel.setEditable(!tapModel.getUnderlyingStorage().isReadOnly());
+      tapModel.setEditable(!tapModel.getUnderlyingStorage().isReadOnly());
     }
     duringInit = false;
   }
@@ -184,10 +192,10 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
       } catch (InvocationTargetException x) {
         TapestryPlugin.getDefault().logException(x);
       }
-      try {
-        ((BaseTapestryModel) model).reload();
-      } catch (Exception e) {
-      }
+//      try {
+//        ((BaseTapestryModel) model).reload();
+//      } catch (Exception e) {
+//      }
       dirty = false;
     }
   }
@@ -248,9 +256,6 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
     return swriter.toString();
   }
 
-
-
-
   /**
    * @see PDEMultiPageEditor#isModelDirty(Object)
    */
@@ -276,42 +281,31 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
 
   protected ITapestryModel createResourceModel(IStorage storage) {
     InputStream stream = null;
-    IModelProvider modelProvider = TapestryPlugin.getTapestryModelManager();
-    BaseTapestryModel model = (BaseTapestryModel) modelProvider.getModel(storage, this);
-    // if the model is not loaded, we need to go to the EditorInput's contents
-    if (!model.isLoaded()) {
-      try {
-        stream = storage.getContents();
-      } catch (Exception e) {
-        TapestryPlugin.getDefault().logException(e);
-        return null;
-      }
-
-      try {
-        model.load(stream);
-      } catch (CoreException e) {
-        e.printStackTrace();
-        TapestryPlugin.getDefault().logException(e);
-      }
-      try {
-        stream.close();
-      } catch (IOException e) {
-        TapestryPlugin.getDefault().logException(e);
-      }
-    } else {
-      /*
-      * It could be the case that a model has been modified before being opened in an editor.
-      * For example, the 'Copy To' functionality can be used to do this.
-      * If this is the case, at the time an editor is opened on these models,
-      * they will be dirty.
-      * We need to save the model before continuing with the editor open so that
-      * we don't lose the changes.
-      *
-      * we set the dirty flag so that the init method will know it
-      * must do a doSave before finishing!
-      */
-      dirty = (model instanceof IEditable) && (model.isDirty() || !model.isInSync());
+    TapestryModelManager modelProvider = TapestryPlugin.getTapestryModelManager();
+    modelProvider.connect(storage, this);
+    BaseTapestryModel model = (BaseTapestryModel) modelProvider.getEditableModel(storage, this);
+    if (!model.isInSync() || model.isDirty()) {
+    	Utils.saveModel(model, new NullProgressMonitor());
     }
+    try {
+      stream = storage.getContents();
+    } catch (Exception e) {
+      TapestryPlugin.getDefault().logException(e);
+      return null;
+    }
+
+    try {
+      model.load(stream);
+    } catch (CoreException e) {
+      e.printStackTrace();
+      TapestryPlugin.getDefault().logException(e);
+    }
+    try {
+      stream.close();
+    } catch (IOException e) {
+      TapestryPlugin.getDefault().logException(e);
+    }
+	dirty = false;
     return model;
   }
 
@@ -471,8 +465,9 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
    */
   public void fireSaveNeeded() {
     if (!duringInit) {
-      super.fireSaveNeeded();
       dirty = true;
+      super.fireSaveNeeded();
+     
     }
   }
 
@@ -481,6 +476,37 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
    */
   public boolean isDirty() {
     return dirty;
+  }
+
+  /**
+   * @see org.eclipse.pde.internal.ui.editor.PDEMultiPageEditor#createPages()
+   */
+  protected void createPages() {
+  }
+
+  /**
+   * @see org.eclipse.ui.IWorkbenchPart#dispose()
+   */
+  public void dispose() {
+    super.dispose();
+    ITapestryModel model = (ITapestryModel)getModel();
+    if (model != null) {
+    	TapestryPlugin.getTapestryModelManager().disconnect(model.getUnderlyingStorage(), this);
+    }
+  }
+
+  /**
+   * @see org.eclipse.pde.internal.ui.editor.PDEMultiPageEditor#getHomePage()
+   */
+  public IPDEEditorPage getHomePage() {
+    return null;
+  }
+
+  /**
+   * @see org.eclipse.pde.internal.ui.editor.PDEMultiPageEditor#getSourcePageId()
+   */
+  protected String getSourcePageId() {
+    return null;
   }
 
 }

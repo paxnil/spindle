@@ -40,5 +40,7 @@ public interface ITapestryModel extends IModel, IEditable {
   public String getDTDVersion();
   
   public String toXML();
+  
+  public void setEditable(boolean flag);
 
 }

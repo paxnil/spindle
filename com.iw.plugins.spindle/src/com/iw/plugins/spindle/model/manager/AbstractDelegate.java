@@ -97,7 +97,7 @@ public abstract class AbstractDelegate implements ITapestryModelManagerDelegate 
    * @see com.iw.plugins.spindle.model.manager.ITapestryModelManagerDelegate#getAllModels()
    */
   public List getAllModels() {
-    return Collections.unmodifiableList(models);
+    return models;
   }
 
 

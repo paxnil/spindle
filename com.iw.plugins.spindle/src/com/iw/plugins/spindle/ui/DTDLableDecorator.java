@@ -22,6 +22,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
+import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 
@@ -33,13 +34,17 @@ import com.iw.plugins.spindle.spec.PluginComponentSpecification;
  * To enable and disable the creation of type comments go to
  * Window>Preferences>Java>Code Generation.
  */
-public class DTDLableDecorator extends LabelProvider implements ILabelDecorator, IResourceChangeListener {
+public class DTDLableDecorator
+  extends LabelProvider
+  implements ILabelDecorator, IResourceChangeListener {
 
   /**
    * Constructor for DTDLableDecorator.
    */
   public DTDLableDecorator() {
-    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_AUTO_BUILD);
+    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(
+      this,
+      IResourceChangeEvent.POST_AUTO_BUILD);
   }
 
   private ITapestryModel getTapestryModel(Object element) {
@@ -52,7 +57,8 @@ public class DTDLableDecorator extends LabelProvider implements ILabelDecorator,
       }
     }
     if (resource != null) {
-      return TapestryPlugin.getTapestryModelManager().getModel(resource);
+      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+      return TapestryPlugin.getTapestryModelManager().getReadOnlyModel(resource);
     }
     return null;
   }
@@ -73,14 +79,14 @@ public class DTDLableDecorator extends LabelProvider implements ILabelDecorator,
     }
     return DTDversion;
   } /**
-      * @see org.eclipse.jface.viewers.ILabelDecorator#decorateImage(Image, Object)
-      * we return null here as we are not decorating images (yet)
-      */
+       * @see org.eclipse.jface.viewers.ILabelDecorator#decorateImage(Image, Object)
+       * we return null here as we are not decorating images (yet)
+       */
   public Image decorateImage(Image image, Object element) {
     return null;
   } /**
-      * @see org.eclipse.jface.viewers.ILabelDecorator#decorateText(String, Object)
-      */
+       * @see org.eclipse.jface.viewers.ILabelDecorator#decorateText(String, Object)
+       */
   public String decorateText(String text, Object element) {
     ITapestryModel model = getTapestryModel(element);
     if (model != null) {
@@ -88,8 +94,8 @@ public class DTDLableDecorator extends LabelProvider implements ILabelDecorator,
     }
     return null;
   } /**
-      * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
-      */
+       * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
+       */
   public void resourceChanged(IResourceChangeEvent event) {
     //first collect the label change events
     final IResource[] affectedResources = processDelta(event.getDelta());
@@ -108,7 +114,9 @@ public class DTDLableDecorator extends LabelProvider implements ILabelDecorator,
     try {
       delta.accept(new IResourceDeltaVisitor() {
         public boolean visit(IResourceDelta delta) throws CoreException {
+          TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
           IResource resource = delta.getResource(); //skip workspace root
+          boolean result = true;
           if (resource.getType() == IResource.ROOT) {
             return true;
           } //don't care about deletions
@@ -124,6 +132,7 @@ public class DTDLableDecorator extends LabelProvider implements ILabelDecorator,
             }
           }
           if (resource != null) {
+
             ITapestryModel model = getTapestryModel(resource);
             if (model != null) {
               if (model.isLoaded()) {
@@ -132,10 +141,11 @@ public class DTDLableDecorator extends LabelProvider implements ILabelDecorator,
                 model.load();
               }
               affectedResources.add(resource);
-              return false;
+              result = false;
             }
+
           }
-          return true;
+          return result;
         }
       });
     } catch (CoreException e) {

@@ -258,7 +258,7 @@ public class NewTapAppWizardPage extends TapestryWizardPage {
     String appname = fApplicationNameDialog.getTextValue();
     IType engineClass = fEngineDialogField.getType();
     application = ApplicationFactory.createApplication(root, pack, appname, engineClass, monitor);
-    TapestryPlugin.getTapestryModelManager().getModel(application);
+    //TapestryPlugin.getTapestryModelManager().getModel(application);
   }
 
   public void createServletType(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException, CoreException {

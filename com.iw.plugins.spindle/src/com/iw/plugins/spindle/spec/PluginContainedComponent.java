@@ -33,20 +33,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
-import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.ui.AliasSummarizer;
-import com.iw.plugins.spindle.util.Indenter;
 import net.sf.tapestry.spec.ContainedComponent;
+
+import com.iw.plugins.spindle.util.Indenter;
 
 public class PluginContainedComponent extends ContainedComponent {
 
   private PropertyChangeSupport propertySupport;
 
   public PluginContainedComponent() {
-    propertySupport = new PropertyChangeSupport(this);
+    propertySupport = new PropertyChangeSupport(this); 
   }
 
   public void setBinding(String name, PluginBindingSpecification spec) {

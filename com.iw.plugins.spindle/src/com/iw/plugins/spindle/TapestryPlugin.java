@@ -62,6 +62,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.iw.plugins.spindle.model.BaseTapestryModel;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.manager.TapestryModelManager;
@@ -135,7 +136,9 @@ public class TapestryPlugin extends AbstractUIPlugin {
     builtInAliasLookup.put("ShowInspector", "/com/primix/tapestry/inspector/ShowInspector.jwc");
     builtInAliasLookup.put("Shell", "/com/primix/tapestry/html/Shell.jwc");
     builtInAliasLookup.put("InsertText", "/com/primix/tapestry/html/InsertText.jwc");
-    builtInAliasLookup.put("ValidatingTextField", "/com/primix/tapestry/valid/ValidatingTextField.jwc");
+    builtInAliasLookup.put(
+      "ValidatingTextField",
+      "/com/primix/tapestry/valid/ValidatingTextField.jwc");
     builtInAliasLookup.put("DateField", "/com/primix/tapestry/valid/DateField.jwc");
     builtInAliasLookup.put("IntegerField", "/com/primix/tapestry/valid/IntegerField.jwc");
     builtInAliasLookup.put("FieldLabel", "/com/primix/tapestry/valid/FieldLabel.jwc");
@@ -158,7 +161,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
   static public TapestryPlugin getDefault() {
     return inst;
   }
-  
+
   /** expects a valid IProject in order to find the IJavaProject to search and either an alias name
    * or a path to a tapestry file like:
    * <b>
@@ -219,7 +222,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
       return null;
     }
     return JavaCore.create(project);
-//    return JavaModelManager.getJavaModel(project.getWorkspace()).getJavaProject(project);
+    //    return JavaModelManager.getJavaModel(project.getWorkspace()).getJavaProject(project);
   }
 
   public IProject getProjectFor(IStorage storage) {
@@ -256,7 +259,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
     return ResourcesPlugin.getWorkspace();
   }
 
-  public static TapestryModelManager getTapestryModelManager() {
+  public static synchronized TapestryModelManager getTapestryModelManager() {
     if (modelManager == null) {
       modelManager = new TapestryModelManager();
       modelManager.buildModelDelegates();
@@ -277,7 +280,8 @@ public class TapestryPlugin extends AbstractUIPlugin {
     return result.toArray();
   }
 
-  protected void searchForTapestryElementsIn(IContainer container, List collect) throws CoreException {
+  protected void searchForTapestryElementsIn(IContainer container, List collect)
+    throws CoreException {
     IResource[] members = container.members(false);
     for (int i = 0; i < members.length; i++) {
       if (members[i] instanceof IFile) {
@@ -303,7 +307,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
   public Shell getActiveWorkbenchShell() {
     return getActiveWorkbenchWindow().getShell();
   }
-  
+
   public IWorkbenchWindow getActiveWorkbenchWindow() {
     return getWorkbench().getActiveWorkbenchWindow();
   }
@@ -323,34 +327,53 @@ public class TapestryPlugin extends AbstractUIPlugin {
     ErrorDialog.openError(getActiveWorkbenchShell(), null, null, status);
     ResourcesPlugin.getPlugin().getLog().log(status);
   } /** 
-     * Sets default preference values. These values will be used
-     * until some preferences are actually set using Preference dialog.
-     */
+      * Sets default preference values. These values will be used
+      * until some preferences are actually set using Preference dialog.
+      */
   protected void initializeDefaultPreferences(IPreferenceStore store) {
-		ColorManager.initializeDefaults(store);
-		NewTapComponentWizardPage.initializeDefaults(store);      
-	}
+    ColorManager.initializeDefaults(store);
+    NewTapComponentWizardPage.initializeDefaults(store);
+  }
 
-  static public void openTapestryEditor(BaseTapestryModel model) {
+  static public void openTapestryEditor(IStorage storage) {
     String editorId = null;
+    
+    TapestryModelManager mgr = getTapestryModelManager();
+    
+    ITapestryModel model = mgr.getReadOnlyModel(storage);
+    
     if (model instanceof TapestryApplicationModel) {
+    	
       editorId = TapestryPlugin.appEditorId;
+      
     } else if (model instanceof TapestryComponentModel) {
+    	
       editorId = TapestryPlugin.compEditorId;
+      
     } else {
+    	
       return;
     }
-    IStorage storage = model.getUnderlyingStorage();
+    
     IEditorInput input = null;
+    
     if (storage instanceof JarEntryFile) {
+    	
       input = new JarEntryEditorInput(storage);
+      
     } else {
+    	
       input = new FileEditorInput((IFile) storage);
+      
     }
     try {
+    	
       TapestryPlugin.getDefault().getActivePage().openEditor(input, editorId);
+      
     } catch (PartInitException piex) {
+    	
       TapestryPlugin.getDefault().logException(piex);
+      
     }
   }
 

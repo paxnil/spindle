@@ -42,6 +42,7 @@ import org.eclipse.pde.core.ModelChangedEvent;
 import com.iw.plugins.spindle.MessageUtil;
 
 public abstract class AbstractModel implements ITapestryModel, IModel, IModelChangeProvider {
+	private long timeStamp;
 	private ArrayList changeListeners;
 	protected boolean disposed;
 	protected boolean loaded;
@@ -154,7 +155,7 @@ public abstract class AbstractModel implements ITapestryModel, IModel, IModelCha
 	 */
 	public void fireModelObjectChanged(Object obj, String property) {
 		Object[] objects = new Object[] { obj };
-		fireModelChanged(new ModelChangedEvent(IModelChangedEvent.CHANGE, objects, property));
+		fireModelChanged(new ModelChangedEvent(IModelChangedEvent.WORLD_CHANGED, objects, property));
 	}
 
 	/**
@@ -165,6 +166,8 @@ public abstract class AbstractModel implements ITapestryModel, IModel, IModelCha
 		String property,
 		Object oldValue,
 		Object newValue) {
+		Object[] objects = new Object[] { oldValue, newValue };
+		fireModelChanged(new ModelChangedEvent(IModelChangedEvent.WORLD_CHANGED, objects, property));		
 	}
 
 	/**
@@ -190,7 +193,7 @@ public abstract class AbstractModel implements ITapestryModel, IModel, IModelCha
 	 * @see IModel#getTimeStamp()
 	 */
 	public long getTimeStamp() {
-		return 0;
+		return timeStamp;
 	}
 
 	/**
@@ -224,5 +227,13 @@ public abstract class AbstractModel implements ITapestryModel, IModel, IModelCha
 	protected boolean outOfSynch = false;
 
 
+
+  /**
+   * Sets the timeStamp.
+   * @param timeStamp The timeStamp to set
+   */
+  public void setTimeStamp(long timeStamp) {
+    this.timeStamp = timeStamp;
+  }
 
 }

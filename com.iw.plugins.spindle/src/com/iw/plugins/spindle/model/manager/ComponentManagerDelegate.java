@@ -50,6 +50,7 @@ public class ComponentManagerDelegate extends AbstractDelegate {
       model.load();
     } catch (CoreException e) {
     }
+    model.setEditable(!storage.isReadOnly());
     return model;
   }
 

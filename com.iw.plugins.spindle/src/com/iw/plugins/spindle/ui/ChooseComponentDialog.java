@@ -66,6 +66,7 @@ import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
+import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
@@ -79,8 +80,8 @@ public class ChooseComponentDialog extends AbstractDialog {
   private Table packages;
   private ScanCollector collector = new ScanCollector();
   private ILabelProvider nameLabelProvider = new ComponentLabelProvider();
-  private ILabelProvider packageLabelProvider = new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS);
-
+  private ILabelProvider packageLabelProvider =
+    new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS);
 
   private TapestryLookup lookup;
 
@@ -95,12 +96,17 @@ public class ChooseComponentDialog extends AbstractDialog {
   /**
     * Constructor for PageRefDialog
     */
-  public ChooseComponentDialog(Shell shell, IJavaProject project, String windowTitle, String description, boolean showAliases) {
+  public ChooseComponentDialog(
+    Shell shell,
+    IJavaProject project,
+    String windowTitle,
+    String description,
+    boolean showAliases) {
     super(shell);
     updateWindowTitle(windowTitle);
     updateMessage(description);
     ignoreAliasesAndPages = !showAliases;
-    configure(project); 
+    configure(project);
   }
 
   public ChooseComponentDialog(
@@ -162,7 +168,7 @@ public class ChooseComponentDialog extends AbstractDialog {
     packages = createLowerList(container);
 
     //a little trick to make the window come up faster
-    String initialFilter = "A";
+    String initialFilter = "*";
     if (initialFilter != null) {
       componentNameText.setText(initialFilter);
       componentNameText.selectAll();
@@ -235,7 +241,8 @@ public class ChooseComponentDialog extends AbstractDialog {
           ignoreAliasesAndPages = true;
           scan();
         } else {
-          TapestryPlugin.selectedApplication = (TapestryApplicationModel) allApplications.get(selected - 1);
+          TapestryPlugin.selectedApplication =
+            (TapestryApplicationModel) allApplications.get(selected - 1);
           ignoreAliasesAndPages = false;
           try {
             new ProgressMonitorDialog(getShell()).run(false, false, new IRunnableWithProgress() {
@@ -490,7 +497,7 @@ public class ChooseComponentDialog extends AbstractDialog {
       }
       String name = storage.getFullPath().lastSegment();
       Object storePackageFragment;
-      if (fragment == null ) {
+      if (fragment == null) {
         storePackageFragment = "(default package)";
       } else {
         storePackageFragment = fragment;
@@ -507,18 +514,31 @@ public class ChooseComponentDialog extends AbstractDialog {
     }
 
     private String tryConvertToAlias(IStorage storage) throws PageNotComponentException {
+    	
       TapestryApplicationModel selectedApp = TapestryPlugin.selectedApplication;
+      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+      
+      String result = null;
+      TapestryComponentModel cmodel = null;
+      
       if (selectedApp != null) {
+      	
         PluginApplicationSpecification spec = selectedApp.getApplicationSpec();
-        TapestryComponentModel cmodel =
-          (TapestryComponentModel) TapestryPlugin.getTapestryModelManager().getModel(storage);
+
+        mgr.connect(storage, this);
+
+        cmodel = (TapestryComponentModel) mgr.getReadOnlyModel(storage);
+        
         String componentSpecLocation = cmodel.getSpecificationLocation();
+        
         if (spec.getPageName(componentSpecLocation) != null) {
           throw new PageNotComponentException();
         }
-        return spec.findAliasFor(componentSpecLocation);
+        
+        result = spec.findAliasFor(componentSpecLocation);
       }
-      return null;
+     
+      return result;
 
     }
   }
@@ -551,8 +571,6 @@ public class ChooseComponentDialog extends AbstractDialog {
     }
 
   }
-
-
 
   /**
     * @version 	1.0

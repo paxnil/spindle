@@ -142,10 +142,13 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
       InputStream contents;
       if (storageResource instanceof IFile) {
         contents = ((IFile) storageResource).getContents(true);
+        load(contents);
+        setTimeStamp(((IFile) storageResource).getModificationStamp());
       } else {
         contents = storageResource.getContents();
-      }
-      load(contents);
+        load(contents);
+        setTimeStamp(Long.MAX_VALUE);
+      }            
     }
   }
 

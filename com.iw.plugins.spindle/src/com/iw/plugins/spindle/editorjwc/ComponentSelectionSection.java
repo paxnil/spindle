@@ -32,9 +32,11 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.Action;
@@ -43,6 +45,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -72,6 +75,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
@@ -88,6 +92,7 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.ModelUtils;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
+import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
@@ -109,6 +114,9 @@ public class ComponentSelectionSection
   extends SpindleFormSection
   implements IModelChangedListener, ISelectionChangedListener {
 
+  private static String TOOL_TIPS_OFF = "Tooltips are temporarily disabled";
+  private static String HELP_OFF = "Help is temporarily disabled";
+
   private boolean updateNeeded = false;
   private boolean hasFocus;
   private Button newButton;
@@ -123,7 +131,8 @@ public class ComponentSelectionSection
   private Action copyAction = new CopyComponentAction();
   private Action copyToAction = new CopyToAction();
 
-  private ContainedComponentContentProvider contentProvider = new ContainedComponentContentProvider();
+  private ContainedComponentContentProvider contentProvider =
+    new ContainedComponentContentProvider();
   private ContainedComponentLabelProvider labelProvider = new ContainedComponentLabelProvider();
   private java.util.List containedComponentHolders = new ArrayList();
 
@@ -254,7 +263,9 @@ public class ComponentSelectionSection
       copyButton.setEnabled(isEditable && holder.component.getCopyOf() == null);
       // lets pre-compute the alias lookup for the Tooltips (if required)
       String selectedType = holder.component.getType();
-      if (selectedType == null || "".equals(selectedType.trim()) || selectedType.endsWith(".jwc")) {
+      if (selectedType == null
+        || "".equals(selectedType.trim())
+        || selectedType.endsWith(".jwc")) {
         precomputedAliasInfo.clear();
         return;
       }
@@ -271,7 +282,8 @@ public class ComponentSelectionSection
     Iterator applications = Utils.getApplicationsWithAlias(alias).iterator();
     while (applications.hasNext()) {
       TapestryApplicationModel appModel = (TapestryApplicationModel) applications.next();
-      PluginApplicationSpecification appSpec = (PluginApplicationSpecification) (appModel).getApplicationSpec();
+      PluginApplicationSpecification appSpec =
+        (PluginApplicationSpecification) (appModel).getApplicationSpec();
       TapestryComponentModel cmodel =
         (TapestryComponentModel) ModelUtils.findComponent(
           appSpec.getComponentAlias(alias),
@@ -402,7 +414,8 @@ public class ComponentSelectionSection
           MenuManager submenu = new MenuManager("Copy To Clipboard");
           Display d = viewer.getControl().getDisplay();
           submenu.add(new CopyToClipboardAction(d, "jwcid=\"$value$\"", "value", holder.id));
-          submenu.add(new CopyToClipboardAction(d, "<span jwcid=\"$value$\"></span>", "value", holder.id));
+          submenu.add(
+            new CopyToClipboardAction(d, "<span jwcid=\"$value$\"></span>", "value", holder.id));
           manager.add(submenu);
         }
       }
@@ -521,6 +534,8 @@ public class ComponentSelectionSection
 
     public String getToolTipText(Object object) {
 
+      //      return TOOL_TIPS_OFF;
+
       CHolder holder = (CHolder) object;
       String aliasOrType = holder.component.getType();
       String copyOf = holder.component.getCopyOf();
@@ -541,7 +556,9 @@ public class ComponentSelectionSection
           buffer.append("No Type found for contained component: " + holder.id);
           return buffer.toString();
         }
+        TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
         TapestryComponentModel component = ModelUtils.findComponent(type, getModel());
+
         if (component == null) {
           buffer.append(holder.id + "'s type: " + type + " not found.");
           return buffer.toString();
@@ -566,7 +583,8 @@ public class ComponentSelectionSection
           return buffer.toString();
         } else {
           TapestryApplicationModel firstModel = ((TapestryApplicationModel) keys[0]);
-          TapestryComponentModel cmodel = (TapestryComponentModel) precomputedAliasInfo.get(keys[0]);
+          TapestryComponentModel cmodel =
+            (TapestryComponentModel) precomputedAliasInfo.get(keys[0]);
           if (!cmodel.isLoaded()) {
             try {
               cmodel.load();
@@ -576,11 +594,20 @@ public class ComponentSelectionSection
           PluginComponentSpecification firstComponent =
             (PluginComponentSpecification) cmodel.getComponentSpecification();
           buffer.append(
-            "Found alias '" + alias + "' in application '" + firstModel.getUnderlyingStorage().getFullPath() + "\n");
-          buffer.append(alias + " maps to " + firstModel.getApplicationSpec().getComponentAlias(alias) + "\n");
+            "Found alias '"
+              + alias
+              + "' in application '"
+              + firstModel.getUnderlyingStorage().getFullPath()
+              + "\n");
+          buffer.append(
+            alias + " maps to " + firstModel.getApplicationSpec().getComponentAlias(alias) + "\n");
           if (keys.length > 1) {
             buffer.append(
-              "press F1 to check " + (keys.length - 1) + " other application(s) that have alias '" + alias + "'.\n");
+              "press F1 to check "
+                + (keys.length - 1)
+                + " other application(s) that have alias '"
+                + alias
+                + "'.\n");
           }
           if (firstComponent != null) {
             firstComponent.getHelpText(alias, buffer);
@@ -597,6 +624,7 @@ public class ComponentSelectionSection
     //---------- IToolTipHelpProvider --------------------//
 
     public Object getHelp(Object obj) {
+      //      return HELP_OFF;
       if (!isSelected(obj)) {
         return null;
       }
@@ -697,7 +725,9 @@ public class ComponentSelectionSection
     */
     public void run() {
       CHolder holder = (CHolder) ((IStructuredSelection) viewer.getSelection()).getFirstElement();
-      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage());
+      IJavaProject jproject =
+        TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage());
+
       ChooseComponentDialog dialog =
         new ChooseComponentDialog(
           newButton.getShell(),
@@ -706,38 +736,136 @@ public class ComponentSelectionSection
           "Choose a target for the copy",
           true,
           TapestryLookup.ACCEPT_COMPONENTS | TapestryLookup.WRITEABLE);
+
       dialog.create();
+
       if (dialog.open() == dialog.OK) {
-        try {
-          String chosen = dialog.getResultComponent();
-          TapestryComponentModel target = ModelUtils.findComponent(chosen, getModel());
-          if (target == null) {
-            throw new Exception("could not find '" + chosen + "'");
-          }
-          if (!target.isLoaded()) {
-            target.load();
-          }
-          SpindleMultipageEditor targetEditor = (SpindleMultipageEditor) Utils.getEditorFor(target);
-          if (targetEditor != null && targetEditor.isDirty()) {
-            RequiredSaveEditorAction saver = new RequiredSaveEditorAction(targetEditor);
-            if (!saver.save()) {
-              return;
-            }
-            target = (TapestryComponentModel) targetEditor.getModel();
-          }
-          if (!target.isLoaded()) {
-            parseError();
-            return;
-          }
-          Utils.copyContainedComponentTo(holder.id, holder.component, target);
-          if (targetEditor == null) {
-            TapestryPlugin.openTapestryEditor(target);
-          }
-        } catch (Exception e) {
-          e.printStackTrace();
-          TapestryPlugin.getDefault().logException(e);
+
+        String chosen = dialog.getResultComponent();
+
+        TapestryComponentModel readOnlyModel = ModelUtils.findComponent(chosen, getModel());
+
+        if (readOnlyModel == null) {
+          MessageDialog.openError(
+            newButton.getShell(),
+            "Copy To action aborted",
+            "could not find '" + chosen + "'");
+          return;
+        }
+
+        IStorage underlier = readOnlyModel.getUnderlyingStorage();
+        if (underlier.isReadOnly()) {
+          MessageDialog.openError(
+            newButton.getShell(),
+            "Copy To action aborted",
+            "'" + underlier.getFullPath() + "'\nis readonly");
+          return;
+        }
+
+        IEditorPart editor = Utils.getEditorFor(underlier);
+
+        if (editor != null) {
+
+          performCopyInEditor(holder, editor, chosen);
+
+        } else {
+
+          performCopyInWorkspace(holder, underlier, chosen);
+
         }
       }
+    }
+
+    private void performCopyInEditor(CHolder holder, IEditorPart editor, String name) {
+      SpindleMultipageEditor targetEditor = null;
+      try {
+
+        targetEditor = (SpindleMultipageEditor) editor;
+
+      } catch (ClassCastException e) {
+
+        MessageDialog.openError(
+          newButton.getShell(),
+          "Copy To action aborted",
+          "'" + name + "' \nis open in a non-Spindle editor. Can not continue");
+        return;
+      }
+
+      TapestryComponentModel model = null;
+
+      if (targetEditor != null && targetEditor.isDirty()) {
+        RequiredSaveEditorAction saver = new RequiredSaveEditorAction(targetEditor);
+        if (!saver.save()) {
+          return;
+        }
+
+      }
+
+      model = (TapestryComponentModel) targetEditor.getModel();
+
+      if (!alreadyHasComponent(holder.id, model) && doCopy(holder, model)) {
+        targetEditor.showPage(SpindleMultipageEditor.SOURCE_PAGE);
+      }
+
+    }
+
+    private boolean alreadyHasComponent(String id, TapestryComponentModel model) {
+      boolean result = false;
+      PluginComponentSpecification spec = model.getComponentSpecification();
+      if (spec.getComponent(id) != null) {
+        result = true;
+        MessageDialog.openError(
+          newButton.getShell(),
+          "Copy To action aborted",
+          "The selected target component already has '" + id + "'. Can not continue");
+      }
+      return result;
+    }
+
+    private boolean doCopy(CHolder holder, TapestryComponentModel model) {
+      boolean result = false;
+      try {
+        if (!model.isLoaded()) {
+          parseError();
+        } else {
+          Utils.copyContainedComponentTo(holder.id, holder.component, model);
+          result = true;
+        }
+      } catch (Exception e) {
+        MessageDialog.openError(
+          newButton.getShell(),
+          "Copy To action failed",
+          e.getClass().getName());
+      }
+      return result;
+    }
+
+    private void performCopyInWorkspace(CHolder holder, IStorage storage, String name) {
+      String consumer = "PerformCopyToInWorkspace";
+      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+
+      mgr.connect(storage, consumer, true);
+
+      TapestryComponentModel model =
+        (TapestryComponentModel) mgr.getEditableModel(storage, consumer);
+
+      if (!model.isEditable()) {
+        MessageDialog.openError(
+          newButton.getShell(),
+          "Copy To action aborted",
+          "Unable to obtain an editable copy of '" + name + "'. \nCan not continue");
+        mgr.disconnect(storage, consumer);
+        return;
+      }
+
+      if (!alreadyHasComponent(holder.id, model) && doCopy(holder, model)) {
+
+        Utils.saveModel(model, new NullProgressMonitor());
+        TapestryPlugin.openTapestryEditor(storage);
+
+      }
+
+      mgr.disconnect(storage, consumer);
     }
 
     private void parseError() {
@@ -748,7 +876,11 @@ public class ComponentSelectionSection
           IStatus.OK,
           "Abort, target component is has parse errors",
           null);
-      ErrorDialog.openError(TapestryPlugin.getDefault().getActiveWorkbenchShell(), null, null, status);
+      ErrorDialog.openError(
+        TapestryPlugin.getDefault().getActiveWorkbenchShell(),
+        null,
+        null,
+        status);
     }
 
   }

@@ -49,9 +49,22 @@ public class JarEntryFileFaker implements IFile {
     }
     faked = (JarEntryFile) storage;
   }
+  
+  public JarEntryFile getJarEntryFile() {
+  	return faked;
+  }
 
-  public boolean equals(Object obj) {
-    return faked.equals(obj);
+  public boolean equals(Object object) {
+  	
+  	if (this == object) {
+  		return true;
+  	} else if (object == null || getClass() != object.getClass()) {
+  		return false;
+  	}
+  	
+  	JarEntryFileFaker other = (JarEntryFileFaker) object;
+  	
+    return faked.equals(other.getJarEntryFile());
   }
 
   /**

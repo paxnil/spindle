@@ -51,6 +51,7 @@ public class ApplicationManagerDelegate extends AbstractDelegate {
       model.load();
     } catch (CoreException e) {
     }
+    model.setEditable(!storage.isReadOnly());
     return model;
   }
   

@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UTFDataFormatException;
 import java.io.UnsupportedEncodingException;
 
 import org.eclipse.core.resources.IFile;
@@ -45,6 +46,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -59,6 +61,10 @@ import org.eclipse.jface.text.rules.RuleBasedPartitioner;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.pde.core.IModel;
+import org.eclipse.pde.internal.core.IModelProviderEvent;
+import org.eclipse.pde.internal.core.IModelProviderListener;
+import org.eclipse.pde.internal.core.ModelProviderEvent;
 import org.eclipse.pde.internal.ui.editor.SystemFileDocumentProvider;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyledText;
@@ -66,11 +72,14 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.ContainerGenerator;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
+import org.eclipse.ui.editors.text.StorageDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
@@ -78,90 +87,99 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.ModelUtils;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
+import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.ui.ToolTipHandler;
 import com.iw.plugins.spindle.ui.text.*;
+import com.iw.plugins.spindle.util.Utils;
+
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 import net.sf.tapestry.parse.ITemplateParserDelegate;
 import net.sf.tapestry.parse.TemplateParseException;
 import net.sf.tapestry.parse.TemplateParser;
 
-public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
+public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModelProviderListener {
 
-	private ISpindleColorManager colorManager = new ColorManager();
-	private HTMLContentOutlinePage outline = null;
-	private Shell shell;
-	private DebugToolTipHandler handler;
-	private IEditorInput input;
-	private StyledText text;
+  private ISpindleColorManager colorManager = new ColorManager();
+  private HTMLContentOutlinePage outline = null;
+  private Shell shell;
+  private DebugToolTipHandler handler;
+  private IEditorInput input;
+  private StyledText text;
 
-	/**
-	 * Constructor for TapestryHTMLEdiitor
-	 */
-	public TapestryHTMLEditor() {
-		super();
-		setSourceViewerConfiguration(
-			new TapestrySourceConfiguration(colorManager));
-	}
+  private boolean duringInit = false;
 
-	public void init(IEditorSite site, IEditorInput input)
-		throws PartInitException {
-		setDocumentProvider(
-			createDocumentProvider(input.getAdapter(IResource.class)));
-		super.init(site, input);
-		parseForProblems();
-	}
+  /**
+   * Constructor for TapestryHTMLEdiitor
+   */
+  public TapestryHTMLEditor() {
+    super();
+    setSourceViewerConfiguration(new TapestrySourceConfiguration(colorManager));
+  }
 
-	public void createPartControl(Composite parent) {
-		super.createPartControl(parent);
-		shell = parent.getShell();
-		text = (StyledText) getSourceViewer().getTextWidget();
+  public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+    duringInit = true;
+    setDocumentProvider(createDocumentProvider(input));
+    super.init(site, input);
+    TapestryPlugin.getTapestryModelManager().addModelProviderListener(this);
+    duringInit = false;
 
-		text.setKeyBinding(262144, ST.COPY);
-		//text.setKeyBinding(131072, ST.CUT);
-		text.setKeyBinding(131072, ST.COPY);
-// for debugging the partitioning only		
-//		handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
-//		handler.activateHoverHelp(text);
-	}
+  }
 
-	protected void doSetInput(IEditorInput input) throws CoreException {
-		super.doSetInput(input);
-		this.input = input;
-		outline = createContentOutlinePage(input);
-	}
+  public void createPartControl(Composite parent) {
+    super.createPartControl(parent);
+    shell = parent.getShell();
+    text = (StyledText) getSourceViewer().getTextWidget();
 
-	/*
-	* @see IEditorPart#doSave(IProgressMonitor)
-	*/
-	public void doSave(IProgressMonitor monitor) {
-		parseForProblems();
-		super.doSave(monitor);
+    text.setKeyBinding(262144, ST.COPY);
+    //text.setKeyBinding(131072, ST.CUT);
+    text.setKeyBinding(131072, ST.COPY);
+    // for debugging the partitioning only		
+    //		handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
+    //		handler.activateHoverHelp(text);
+  }
 
-	}
+  protected void doSetInput(IEditorInput input) throws CoreException {
+    super.doSetInput(input);
+    this.input = input;
+    outline = createContentOutlinePage(input);
+    parseForProblems();
+  }
 
-	/*
-	 * @see IEditorPart#doSaveAs()
-	 */
-	public void doSaveAs() {
-		super.doSaveAs();
-		parseForProblems();
-	}
+  /*
+  * @see IEditorPart#doSave(IProgressMonitor)
+  */
+  public void doSave(IProgressMonitor monitor) {
+    parseForProblems();
+    super.doSave(monitor);
 
-	public Object getAdapter(Class clazz) {
-		Object result = super.getAdapter(clazz);
-		if (result == null && IContentOutlinePage.class.equals(clazz)) {
-			result = outline;
-		}
-		return result;
-	}
+  }
 
-	public void dispose() {
-		colorManager.dispose();
-		super.dispose();
-	}
+  /*
+   * @see IEditorPart#doSaveAs()
+   */
+  public void doSaveAs() {
+    super.doSaveAs();
+    parseForProblems();
+  }
+
+  public Object getAdapter(Class clazz) {
+    Object result = super.getAdapter(clazz);
+    if (result == null && IContentOutlinePage.class.equals(clazz)) {
+      result = outline;
+    }
+    return result;
+  }
+
+  public void dispose() {
+    colorManager.dispose();
+    TapestryPlugin.getTapestryModelManager().removeModelProviderListener(this);
+    super.dispose();
+  }
 
   public HTMLContentOutlinePage createContentOutlinePage(IEditorInput input) {
     HTMLContentOutlinePage result = new HTMLContentOutlinePage(this);
@@ -176,17 +194,30 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
     return result;
   }
 
-  protected void parseForProblems() {
+  void parseForProblems() {
 
     try {
       TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
         public void run(IProgressMonitor monitor) {
-          removeAllProblemMarkers();
           IEditorInput input = getEditorInput();
-          char[] content = getDocumentProvider().getDocument(input).get().toCharArray();
-          TemplateParser parser = new TemplateParser();
+          if (input instanceof IStorageEditorInput) {
+          	return;
+          }
           IFile file = (IFile) input.getAdapter(IFile.class);
-          ITemplateParserDelegate delegate = new TemplateParseDelegate(file);
+          removeAllProblemMarkers(file);
+          char[] content = getDocumentProvider().getDocument(input).get().toCharArray();
+
+          TemplateParser parser = new TemplateParser();
+          TapestryComponentModel model = ModelUtils.findComponentWithHTML(file);
+          if (model == null) {
+            addProblemMarker(
+              "There is no .jwc file for this template.",
+              0,
+              0,
+              IMarker.SEVERITY_WARNING);
+            return;
+          }
+          ITemplateParserDelegate delegate = new TemplateParseDelegate(model);
           try {
             parser.parse(content, delegate, file.getLocation().toString());
           } catch (TemplateParseException e) {
@@ -205,7 +236,8 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
     IStorage storage = (IStorage) getEditorInput().getAdapter(IStorage.class);
     if (storage instanceof IResource) {
       try {
-        IMarker marker = ((IResource) storage).createMarker("com.iw.plugins.spindle.tapestryproblem");
+        IMarker marker =
+          ((IResource) storage).createMarker("com.iw.plugins.spindle.tapestryproblem");
         marker.setAttribute(IMarker.MESSAGE, message);
         marker.setAttribute(IMarker.SEVERITY, severity);
         marker.setAttribute(IMarker.LINE_NUMBER, new Integer(line));
@@ -222,14 +254,13 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
 
   }
 
-  protected void removeAllProblemMarkers() {
+  protected void removeAllProblemMarkers(IFile file) {
 
-    IMarker[] found = findProblemMarkers();
-    for (int i = 0; i < found.length; i++) {
-      try {
-        found[i].delete();
-      } catch (CoreException corex) {
-      }
+    int depth = IResource.DEPTH_INFINITE;
+    try {
+      file.deleteMarkers(IMarker.PROBLEM, true, depth);
+    } catch (CoreException e) {
+      // something went wrong
     }
 
   }
@@ -257,14 +288,32 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
           TapestryPartitionScanner.HTML_COMMENT });
     return partitioner;
   }
-  protected IDocumentProvider createDocumentProvider(Object input) {
+  protected IDocumentProvider createDocumentProvider(IEditorInput input) {
     IDocumentProvider documentProvider = null;
-    if (input instanceof IFile)
-      documentProvider = new UTF8FileDocumentProvider();
-    else if (input instanceof File)
-      documentProvider = new SystemFileDocumentProvider(createDocumentPartitioner(), "UTF8");
+
+    if (input instanceof JarEntryEditorInput) {
+
+      documentProvider = new HTMLStorageDocumentProvider();
+      
+    } else {
+
+      Object element = input.getAdapter(IResource.class);
+      
+      if (element instanceof IFile) {
+      	
+        documentProvider = new UTF8FileDocumentProvider();
+        
+      } else if (element instanceof File) {
+      	
+        documentProvider = new SystemFileDocumentProvider(createDocumentPartitioner(), "UTF8");
+      }
+    }
     return documentProvider;
+
   }
+  
+  
+
   class UTF8FileDocumentProvider extends FileDocumentProvider {
     public IDocument createDocument(Object element) throws CoreException {
       IDocument document = super.createDocument(element);
@@ -277,7 +326,8 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
       }
       return document;
     }
-    protected void setDocumentContent(IDocument document, InputStream contentStream) throws CoreException {
+    protected void setDocumentContent(IDocument document, InputStream contentStream)
+      throws CoreException {
 
       Reader in = null;
 
@@ -306,7 +356,11 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
         }
       }
     }
-    protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document, boolean overwrite)
+    protected void doSaveDocument(
+      IProgressMonitor monitor,
+      Object element,
+      IDocument document,
+      boolean overwrite)
       throws CoreException {
       if (element instanceof IFileEditorInput) {
 
@@ -352,6 +406,25 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
       }
     }
   }
+  
+  class HTMLStorageDocumentProvider extends StorageDocumentProvider {
+  	
+      /**
+     * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createDocument(Object)
+     */
+    protected IDocument createDocument(Object element) throws CoreException {
+	  IDocument document = super.createDocument(element);
+      if (document != null) {
+        IDocumentPartitioner partitioner = createDocumentPartitioner();
+        if (partitioner != null) {
+          partitioner.connect(document);
+          document.setDocumentPartitioner(partitioner);
+        }
+      }
+      return document;
+    }
+
+}
 
   protected class OutlineSelectionListener implements ISelectionChangedListener {
     /**
@@ -372,11 +445,29 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
 
     PluginComponentSpecification spec = null;
 
-    public TemplateParseDelegate(IStorage element) {
-      TapestryComponentModel model = ModelUtils.findComponentWithHTML(element);
+    public TemplateParseDelegate(TapestryComponentModel model) {
+
+      IStorage underlier = model.getUnderlyingStorage();
+
+      IEditorPart editor = null;
+
+      if (!duringInit) {
+        editor = Utils.getEditorFor(underlier);
+      }
+      if (editor != null && editor instanceof SpindleMultipageEditor) {
+
+        model = (TapestryComponentModel) ((SpindleMultipageEditor) editor).getModel();
+
+      } else {
+
+        TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+        model = (TapestryComponentModel) mgr.getReadOnlyModel(underlier);
+
+      }
       if (model != null) {
         spec = model.getComponentSpecification();
       }
+
     }
 
     /*
@@ -443,7 +534,8 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
   }
 
   static public final String SAVE_HTML_TEMPLATE = "com.iw.plugins.spindle.html.saveTemplateAction";
-  static public final String REVERT_HTML_TEMPLATE = "com.iw.plugins.spindle.html.revertTemplateAction";
+  static public final String REVERT_HTML_TEMPLATE =
+    "com.iw.plugins.spindle.html.revertTemplateAction";
 
   /**
    * @see org.eclipse.ui.texteditor.AbstractTextEditor#createActions()
@@ -451,7 +543,8 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
   protected void createActions() {
     super.createActions();
 
-    Action action = new SaveHTMLTemplateAction("Save current as template for New Component Wizards");
+    Action action =
+      new SaveHTMLTemplateAction("Save current as template for New Component Wizards");
     action.setActionDefinitionId(SAVE_HTML_TEMPLATE);
     setAction(SAVE_HTML_TEMPLATE, action);
     action = new RevertTemplateAction("Revert the saved template to the default value");
@@ -492,7 +585,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
         String contents = getDocumentProvider().getDocument(input).get();
         String comment = MessageUtil.getString("TAPESTRY.xmlComment");
         if (!contents.trim().startsWith(comment)) {
-        	contents = comment+contents;
+          contents = comment + contents;
         }
         IPreferenceStore pstore = TapestryPlugin.getDefault().getPreferenceStore();
         pstore.setValue(NewTapComponentWizardPage.P_HTML_TO_GENERATE, contents);
@@ -526,6 +619,57 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
       }
     }
 
+  }
+
+  /**
+   * @see org.eclipse.pde.internal.core.IModelProviderListener#modelsChanged(IModelProviderEvent)
+   */
+  public void modelsChanged(IModelProviderEvent event) {
+    boolean needParse = false;
+    IFile documentFile = (IFile) getEditorInput().getAdapter(IFile.class);
+    if (documentFile == null) {
+      return;
+    }
+
+    needParse = checkNeedParse(documentFile, event.getAddedModels());
+    if (!needParse) {
+      needParse = checkNeedParse(documentFile, event.getChangedModels());
+    }
+    if (!needParse) {
+      needParse = event.getRemovedModels().length > 0;
+    }
+    if (needParse) {
+      parseForProblems();
+    }
+  }
+
+  /**
+   * Method checkNeedParse.
+   * @param iModels
+   * @return boolean
+   */
+  private boolean checkNeedParse(IFile documentFile, IModel[] iModels) {
+    if (iModels == null) {
+      return false;
+    }
+    for (int i = 0; i < iModels.length; i++) {
+      ITapestryModel changedModel = (ITapestryModel) iModels[i];
+      try {
+        IFile changedFile = (IFile) changedModel.getUnderlyingStorage();
+        ITapestryModel model = ModelUtils.findComponentWithHTML(documentFile);
+        if (model == null) {
+          continue;
+        }
+        IFile file = (IFile) model.getUnderlyingStorage();
+
+        if (changedFile.equals(file)) {
+          return true;
+        }
+      } catch (ClassCastException e) {
+        continue;
+      }
+    }
+    return false;
   }
 
 }

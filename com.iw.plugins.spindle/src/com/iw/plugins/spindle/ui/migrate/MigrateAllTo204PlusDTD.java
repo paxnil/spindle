@@ -159,9 +159,11 @@ public class MigrateAllTo204PlusDTD extends Action implements IWorkbenchWindowAc
     final ITapestryModel[] useModelsToSave = migratedModelsToSave;
     return new IRunnableWithProgress() {
       public void run(IProgressMonitor pm) {      	
+      	TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
         pm.beginTask(MessageUtil.getFormattedString(NAME+".migrationCount", Integer.toString(migratedModelsToSave.length)), 1); //$NON-NLS-1$
         for (int i = 0; i < useModelsToSave.length; i++) {
           Utils.saveModel(useModelsToSave[i], pm);
+          mgr.disconnect(useModelsToSave[i].getUnderlyingStorage(), MigrateAllTo204PlusDTD.this);
           pm.worked(1);
         }
         pm.done();
@@ -213,7 +215,7 @@ public class MigrateAllTo204PlusDTD extends Action implements IWorkbenchWindowAc
   protected class MigrationWorker implements ITapestryLookupRequestor {
 
     List results = new ArrayList();
-    TapestryModelManager manager = TapestryPlugin.getTapestryModelManager();
+    TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
     IModelMigrator migrator;
     /**
      * Constructor for MigrationLookupRequestor.
@@ -229,8 +231,13 @@ public class MigrateAllTo204PlusDTD extends Action implements IWorkbenchWindowAc
       if (storage.isReadOnly()) {
       	return false;
       }
-      ITapestryModel model = manager.getModel(storage);
-      if (model != null && model.isLoaded() && migrator.migrate(model)) {
+      mgr.connect(storage, MigrateAllTo204PlusDTD.this);
+      ITapestryModel model = mgr.getEditableModel(storage, MigrateAllTo204PlusDTD.this);
+      if (model == null || !model.isEditable()) {
+      	mgr.disconnect(storage, MigrateAllTo204PlusDTD.this);
+      	return false;
+      }
+      if (model.isLoaded() && migrator.migrate(model)) {
         results.add(model);
       }
       return true;
