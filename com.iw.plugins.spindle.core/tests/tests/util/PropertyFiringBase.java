@@ -43,6 +43,15 @@ import junit.framework.TestCase;
 public abstract class PropertyFiringBase extends TestCase
 {
 
+    /**
+     *  A simple listener that subclasses of PropertyFiringBase can use to
+     *  verify that PropertyChangeEvents are not being fired when they are not
+     *  supposed to. This listener forces any tests using it to fail if an
+     *  event is recieved!
+     * 
+     * @author glongman@intelligentworks.com
+     * @version $Id$
+     */
     protected class ErrorListener implements PropertyChangeListener
     {
         public void propertyChange(PropertyChangeEvent arg0)
@@ -50,7 +59,6 @@ public abstract class PropertyFiringBase extends TestCase
            fail("property event was fired but should not have been"); 
         }
     }
-
 
     /**
      *  A Listener that sublcasses of PropertyFiringBase can use.
