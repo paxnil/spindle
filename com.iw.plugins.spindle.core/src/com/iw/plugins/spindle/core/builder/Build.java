@@ -860,7 +860,7 @@ public abstract class Build
    * A depenency listener that does nothing.
    * 
    * @author glongman@intelligentworks.com
-   * @version $Id$
+   * 
    */
   class NullDependencyListener implements IDependencyListener
   {

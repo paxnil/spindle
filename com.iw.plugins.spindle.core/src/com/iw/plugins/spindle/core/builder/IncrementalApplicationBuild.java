@@ -146,9 +146,10 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
                 && fLastState.fMissingJavaTypes.contains(name))
             {
               throw new NeedToBuildException();
-            } else if (fLastState.fMissingJavaTypes.contains(((IPackageFragment) element)
-                .getElementName()
-                + "." + name))
+            } else if (element instanceof IPackageFragment
+                && fLastState.fMissingJavaTypes.contains(((IPackageFragment) element)
+                    .getElementName()
+                    + "." + name))
             {
               throw new NeedToBuildException();
             }
