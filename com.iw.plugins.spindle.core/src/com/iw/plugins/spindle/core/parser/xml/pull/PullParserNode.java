@@ -105,6 +105,7 @@ public class PullParserNode implements Node
     }
 
     private boolean complete;
+    private boolean empty;
     private TapestryPullParser parser;
 
     /**
@@ -216,7 +217,13 @@ public class PullParserNode implements Node
      */
     protected void completed()
     {
+        System.err.println("PPNode.complete called on: " + getNodeName());
         this.complete = true;
+    }
+
+    protected void setEmpty()
+    {
+        this.empty = true;
     }
 
     /**
@@ -283,7 +290,7 @@ public class PullParserNode implements Node
      */
     public Node getFirstChild()
     {
-        if (!complete)
+        if (!complete && !empty)
         {
             while (!complete)
             {
@@ -308,7 +315,7 @@ public class PullParserNode implements Node
      */
     public Node getLastChild()
     {
-        if (!complete)
+        if (!complete && !empty)
         {
             while (!complete)
             {
@@ -342,17 +349,32 @@ public class PullParserNode implements Node
      */
     public Node getNextSibling()
     {
-        if (!complete && nextSibling == null)
+        System.out.println("PPNode.getNextSibling called on: " + getNodeName());
+
+        if (nextSibling == null)
         {
-            while (!complete)
+            if (!complete)
             {
-                bumpParser();
-                if (nextSibling != null)
+                while (!complete)
                 {
-                    break;
+                    bumpParser();
+                    if (nextSibling != null)
+                    {
+                        break;
+                    }
+                }
+            } else if (empty)
+            {
+                while (!parentNode.complete)
+                {
+                    bumpParser();
+                    if (nextSibling != null)
+                    {
+                        break;
+                    }
                 }
             }
-        }
+        }        
         return nextSibling;
     }
 

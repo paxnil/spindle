@@ -221,6 +221,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         // TODO Auto-generated method stub
         super.emptyElement(element, attributes, augs);
         System.out.println("emptyElement: " + element.rawname);
+        lastCompletedElement.setEmpty();
 
     }
 
