@@ -54,7 +54,9 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
   private boolean fIsComponentWizard;
 
   private TapestryProjectDialogField fProjectField;
+
   private List fValidNamespaces = new ArrayList();
+
   private INamespace fSelectedNamespace;
 
   private TapestryProject fTapestryProject;
@@ -82,6 +84,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
     fComponentNameField.addListener(this);
     this.fIsComponentWizard = isComponentWizard;
     populateNamespaces();
+    addListener(this);
   }
 
   public void dialogFieldChanged(DialogField field)
@@ -140,6 +143,8 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
         //find all the ILibrarySpecs in the namespace that are in the workbench
         // (i.e. not in jars)
         List subTargets = collectValidNamespaces(projectNamespace, new ArrayList());
+        //there may be circular references...
+        List alreadySeen = new ArrayList();
 
         for (Iterator iter = subTargets.iterator(); iter.hasNext();)
         {
@@ -154,8 +159,9 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
           }
           IStorage storage = ((IResourceWorkspaceLocation) element
               .getSpecificationLocation()).getStorage();
-          if (storage != null)
+          if (storage != null && !alreadySeen.contains(storage))
           {
+            alreadySeen.add(storage);
             libNames.add(storage.getName());
             fValidNamespaces.add(element);
           }
@@ -235,17 +241,25 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
 
     if (fIsComponentWizard && spec.getComponentSpecificationPath(newName) != null)
     {
-      newStatus.setError(UIPlugin.getString(
-          fName + ".NameAlreadyExists",
-          newName,
-          storage.getName()));
-      return newStatus;
+      if (pathExists(spec.getSpecificationLocation(), spec
+          .getComponentSpecificationPath(newName)))
+      {
+        newStatus.setError(UIPlugin.getString(
+            fName + ".NameAlreadyExists",
+            newName,
+            storage.getName()));
+        return newStatus;
+      }
     } else if (spec.getPageSpecificationPath(newName) != null)
     {
-      newStatus.setError(UIPlugin.getString(
-          fName + ".NameAlreadyExists",
-          newName,
-          storage.getName()));
+      if (pathExists(spec.getSpecificationLocation(), spec
+          .getPageSpecificationPath(newName)))
+      {
+        newStatus.setError(UIPlugin.getString(
+            fName + ".NameAlreadyExists",
+            newName,
+            storage.getName()));
+      }
       return newStatus;
     }
 
@@ -266,6 +280,16 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
     fSelectedNamespace = selectedTarget;
 
     return newStatus;
+  }
+
+  private boolean pathExists(IResourceLocation base, String path)
+  {
+    if (path == null || path.trim().length() == 0)
+      return false;
+    IResourceWorkspaceLocation checkLocation = (IResourceWorkspaceLocation) ((IResourceWorkspaceLocation) base)
+        .getRelativeLocation(path);
+    return checkLocation.getStorage() != null;
+
   }
 
   public void setSelectedNamespace(INamespace namespace)

@@ -76,7 +76,7 @@ import com.wutka.dtd.DTDParser;
  * Assumes documents provided to it are well-formed!
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class DOMValidator implements IProblemCollector
 {

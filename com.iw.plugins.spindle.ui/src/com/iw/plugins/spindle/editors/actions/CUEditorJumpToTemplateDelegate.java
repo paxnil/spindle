@@ -15,7 +15,7 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 
 /**
- * TODO: Provide description for "CUEditorJumpToSpecDelegate".
+ * Action to Jump from a java file editor to a related tapestry template (if one exists)
  * 
  * @see IEditorActionDelegate
  */

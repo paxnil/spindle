@@ -34,7 +34,7 @@ import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
  * Lookup class for ComponentSpecifications
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class PageLookup extends AbstractLookup
 {

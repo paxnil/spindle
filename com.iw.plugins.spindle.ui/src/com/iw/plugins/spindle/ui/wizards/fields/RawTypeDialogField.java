@@ -148,7 +148,7 @@ public class RawTypeDialogField extends StringButtonField
       chosenType = resolveTypeName(typeName);
       if (chosenType == null)
       {
-        status.setError(UIPlugin.getString(name + ".error.TypeNameNotExist"));
+        status.setError(UIPlugin.getString(name + ".error.TypeNameNotExist", typeName));
         return status;
       }
       if (requiredType != null)

@@ -11,7 +11,7 @@ import java.io.*;
  * </bl>
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDCardinal implements DTDOutput
 {

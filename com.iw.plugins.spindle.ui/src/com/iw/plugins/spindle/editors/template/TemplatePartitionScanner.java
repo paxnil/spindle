@@ -322,7 +322,6 @@ public class TemplatePartitionScanner implements IPartitionTokenScanner
 
   private IToken nextDeclToken()
   {
-    System.out.println("oops");
     loop : while (true)
     {
       switch (read())

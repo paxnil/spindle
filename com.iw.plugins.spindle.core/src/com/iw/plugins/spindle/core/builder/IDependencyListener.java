@@ -47,7 +47,7 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
  * 
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface IDependencyListener
 {

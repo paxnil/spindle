@@ -45,7 +45,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * getAttribute() src if you care.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class W3CAccess
 {

@@ -6,7 +6,7 @@ import java.io.*;
  * Represents any item in the DTD
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public abstract class DTDItem implements DTDOutput, Cloneable
 {

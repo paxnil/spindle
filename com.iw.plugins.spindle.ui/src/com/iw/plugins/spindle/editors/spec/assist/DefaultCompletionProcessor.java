@@ -100,6 +100,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
     {
       int offset = documentOffset;
       int length = 0;
+      String match = null;
 
       try
       {
@@ -114,17 +115,24 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
             break;
         }
         if (length > 0)
+        {
           offset = documentOffset - length;
+          match = document.get(offset, length);
+        }
       } catch (BadLocationException e)
       {
         UIPlugin.log(e);
       }
+
       for (Iterator iterator = rawProposals.iterator(); iterator.hasNext();)
       {
         CompletionProposal p = (CompletionProposal) iterator.next();
+        if (match != null && !p.getDisplayString().startsWith(match))
+          continue;
         p.setReplacementOffset(offset);
         p.setReplacementLength(length);
         proposals.add(p);
+
       }
     }
 

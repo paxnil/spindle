@@ -74,8 +74,8 @@ import com.iw.plugins.spindle.ui.wizards.fields.TapestryProjectDialogField;
  * component classes!
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: TypeChooseWizardPage.java,v 1.2.2.1 2004/06/10 16:48:19
- *          glongman Exp $
+ * @version $Id: TypeChooseWizardPage.java,v 1.2 2004/06/10 15:50:47 glongman
+ *          Exp $
  */
 public class TypeChooseWizardPage extends NewTypeWizardPage
 {

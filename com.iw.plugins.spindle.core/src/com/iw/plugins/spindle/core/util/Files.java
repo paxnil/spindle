@@ -42,7 +42,7 @@ import org.eclipse.core.runtime.CoreException;
 /**
  * File utilities
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class Files

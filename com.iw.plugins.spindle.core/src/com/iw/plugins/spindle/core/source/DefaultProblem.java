@@ -32,7 +32,7 @@ import org.eclipse.core.resources.IMarker;
  * Default impl of IProblem
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class DefaultProblem implements IProblem
 {

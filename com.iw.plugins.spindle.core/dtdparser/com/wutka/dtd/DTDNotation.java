@@ -6,7 +6,7 @@ import java.io.*;
  * Represents a Notation defined in a DTD
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDNotation implements DTDOutput
 {

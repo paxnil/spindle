@@ -41,7 +41,7 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.template.TemplateTextTools;
 
 /**
- * FileDocumentModelProvider TODO add something here
+ * Document provider for xml files that have a model
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: FileDocumentModelProvider.java,v 1.1.2.1 2004/06/22 12:13:52

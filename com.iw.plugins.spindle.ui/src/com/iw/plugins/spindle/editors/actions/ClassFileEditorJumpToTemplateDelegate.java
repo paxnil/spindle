@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.ui.IEditorInput;
 
 /**
- * TODO Add Type comment
+ * Action to Jump from a class file editor to a related tapestry template (if one exists)
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: ClassFileEditorJumpToTemplateDelegate.java,v 1.1 2004/05/06

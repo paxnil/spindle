@@ -100,7 +100,7 @@ import com.iw.plugins.spindle.core.parser.xml.event.ParserEventHandler;
  * @author Arnaud Le Hors, IBM
  * @author Eric Ye, IBM
  * 
- * @version $Id$
+ * 
  */
 public abstract class XMLScanner implements XMLComponent
 {
@@ -1080,21 +1080,21 @@ public abstract class XMLScanner implements XMLComponent
 
   /**
    * Scans public ID literal.
-   *
-   * [12] PubidLiteral ::= '"' PubidChar* '"' | "'" (PubidChar - "'")* "'" 
-   * [13] PubidChar::= #x20 | #xD | #xA | [a-zA-Z0-9] | [-'()+,./:=?;!*#@$_%]
-   *
-   * The returned string is normalized according to the following rule,
-   * from http://www.w3.org/TR/REC-xml#dt-pubid:
-   *
+   * 
+   * [12] PubidLiteral ::= '"' PubidChar* '"' | "'" (PubidChar - "'")* "'" [13]
+   * PubidChar::= #x20 | #xD | #xA | [a-zA-Z0-9] | [-'()+,./:=?;!*#@$_%]
+   * 
+   * The returned string is normalized according to the following rule, from
+   * http://www.w3.org/TR/REC-xml#dt-pubid:
+   * 
    * Before a match is attempted, all strings of white space in the public
    * identifier must be normalized to single space characters (#x20), and
    * leading and trailing white space must be removed.
-   *
+   * 
    * @param literal The string to fill in with the public ID literal.
    * @returns True on success.
-   *
-   * <strong>Note:</strong> This method uses fStringBuffer, anything in it at
+   * 
+   * <strong>Note: </strong> This method uses fStringBuffer, anything in it at
    * the time of calling is lost.
    */
   protected boolean scanPubidLiteral(XMLString literal) throws IOException, XNIException
@@ -1335,9 +1335,9 @@ public abstract class XMLScanner implements XMLComponent
   /**
    * Scans surrogates and append them to the specified buffer.
    * <p>
-   * <strong>Note:</strong> This assumes the current char has already been
+   * <strong>Note: </strong> This assumes the current char has already been
    * identified as a high surrogate.
-   *
+   * 
    * @param buf The StringBuffer to append the read surrogates to.
    * @returns True if it succeeded.
    */

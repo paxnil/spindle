@@ -85,8 +85,7 @@ public class CommentCompletionProcessor extends ContentAssistProcessor
    */
   protected void init(IDocument document) throws IllegalStateException
   {
-    // TODO may be removed - not needed?
-
+    // do nothing
   }
 
   /*

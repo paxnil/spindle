@@ -7,7 +7,7 @@ import java.io.*;
  * Represents an element defined with the ELEMENT DTD tag
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDElement implements DTDOutput
 {

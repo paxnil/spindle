@@ -77,8 +77,7 @@ import com.iw.plugins.spindle.core.util.Files;
  * its namepsace already.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: TemplateScanner.java,v 1.14.2.1 2004/06/10 16:47:48 glongman
- *          Exp $
+ * 
  */
 public class TemplateScanner extends AbstractScanner
 {

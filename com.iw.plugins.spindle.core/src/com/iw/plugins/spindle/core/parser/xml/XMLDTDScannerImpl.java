@@ -96,7 +96,7 @@ import org.apache.xerces.xni.parser.XMLInputSource;
  * @author Glenn Marcy, IBM
  * @author Eric Ye, IBM
  * 
- * @version $Id$
+ * 
  */
 public class XMLDTDScannerImpl extends XMLScanner
     implements
@@ -251,15 +251,14 @@ public class XMLDTDScannerImpl extends XMLScanner
 
   /**
    * Scans the external subset of the document.
-   *
-   * @param complete True if the scanner should scan the document
-   *                 completely, pushing all events to the registered
-   *                 document handler. A value of false indicates that
-   *                 that the scanner should only scan the next portion
-   *                 of the document and return. A scanner instance is
-   *                 permitted to completely scan a document if it does
-   *                 not support this "pull" scanning model.
-   *
+   * 
+   * @param complete True if the scanner should scan the document completely,
+   *          pushing all events to the registered document handler. A value of
+   *          false indicates that that the scanner should only scan the next
+   *          portion of the document and return. A scanner instance is
+   *          permitted to completely scan a document if it does not support
+   *          this "pull" scanning model.
+   * 
    * @returns True if there is more to scan, false otherwise.
    */
   public boolean scanDTDExternalSubset(boolean complete) throws IOException, XNIException
@@ -298,24 +297,22 @@ public class XMLDTDScannerImpl extends XMLScanner
 
   } // scanDTDExternalSubset(boolean):boolean
 
-  /** 
+  /**
    * Scans the internal subset of the document.
-   *
-   * @param complete True if the scanner should scan the document
-   *                 completely, pushing all events to the registered
-   *                 document handler. A value of false indicates that
-   *                 that the scanner should only scan the next portion
-   *                 of the document and return. A scanner instance is
-   *                 permitted to completely scan a document if it does
-   *                 not support this "pull" scanning model.
-   * @param standalone True if the document was specified as standalone.
-   *                   This value is important for verifying certain
-   *                   well-formedness constraints.
-   * @param hasExternalDTD True if the document has an external DTD.
-   *                       This allows the scanner to properly notify
-   *                       the handler of the end of the DTD in the
-   *                       absence of an external subset.
-   *
+   * 
+   * @param complete True if the scanner should scan the document completely,
+   *          pushing all events to the registered document handler. A value of
+   *          false indicates that that the scanner should only scan the next
+   *          portion of the document and return. A scanner instance is
+   *          permitted to completely scan a document if it does not support
+   *          this "pull" scanning model.
+   * @param standalone True if the document was specified as standalone. This
+   *          value is important for verifying certain well-formedness
+   *          constraints.
+   * @param hasExternalDTD True if the document has an external DTD. This allows
+   *          the scanner to properly notify the handler of the end of the DTD
+   *          in the absence of an external subset.
+   * 
    * @returns True if there is more to scan, false otherwise.
    */
   public boolean scanDTDInternalSubset(
@@ -630,17 +627,17 @@ public class XMLDTDScannerImpl extends XMLScanner
     }
   }
 
-  /** 
+  /**
    * Dispatch an XML "event".
-   *
-   * @param complete True if this method is intended to scan
-   *                 and dispatch as much as possible.                 
-   *
+   * 
+   * @param complete True if this method is intended to scan and dispatch as
+   *          much as possible.
+   * 
    * @returns True if a TextDecl was scanned.
-   *
-   * @throws IOException  Thrown on i/o error.
+   * 
+   * @throws IOException Thrown on i/o error.
    * @throws XNIException Thrown on parse error.
-   *
+   *  
    */
   protected final boolean scanTextDecl() throws IOException, XNIException
   {
@@ -2004,17 +2001,17 @@ public class XMLDTDScannerImpl extends XMLScanner
 
   } // scanConditionalSect()
 
-  /** 
+  /**
    * Dispatch an XML "event".
-   *
-   * @param complete True if this method is intended to scan
-   *                 and dispatch as much as possible.                 
-   *
+   * 
+   * @param complete True if this method is intended to scan and dispatch as
+   *          much as possible.
+   * 
    * @returns True if there is more to scan.
-   *
-   * @throws IOException  Thrown on i/o error.
+   * 
+   * @throws IOException Thrown on i/o error.
    * @throws XNIException Thrown on parse error.
-   *
+   *  
    */
   protected final boolean scanDecls(boolean complete) throws IOException, XNIException
   {

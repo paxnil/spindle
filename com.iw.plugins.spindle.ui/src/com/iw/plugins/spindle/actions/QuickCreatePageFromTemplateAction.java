@@ -29,7 +29,7 @@ package com.iw.plugins.spindle.actions;
 import org.eclipse.jface.action.IAction;
 
 /**
- * TODO Add Type comment
+ * TODO Find use or else remove
  * 
  * @author glongman@intelligentworks.com
  * @version $Id: QuickCreatePageFromTemplateAction.java,v 1.1 2003/10/29

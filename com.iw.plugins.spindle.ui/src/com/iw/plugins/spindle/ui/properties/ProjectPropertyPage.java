@@ -52,8 +52,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -70,6 +70,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionValidator;
 import org.eclipse.ui.dialogs.PropertyPage;
@@ -537,7 +538,7 @@ public class ProjectPropertyPage extends PropertyPage
     String fullPath = projPath.toString() + wcroot;
     if (!projPath.isValidPath(fullPath))
     {
-      setErrorMessage("not a valid path: " + fullPath); // TODO I10N
+      setErrorMessage(UIPlugin.getString("property-page-not-valid-path", fullPath));
       return false;
     }
     if (DEBUG)
@@ -829,20 +830,25 @@ public class ProjectPropertyPage extends PropertyPage
     {
       try
       {
-        new ProgressMonitorDialog(shell).run(false, false, new IRunnableWithProgress()
-        {
-          public void run(IProgressMonitor monitor) throws InvocationTargetException,
-              InterruptedException
-          {
-            try
+        PlatformUI.getWorkbench().getProgressService().run(
+            true,
+            false,
+            new IRunnableWithProgress()
+            //                new ProgressMonitorDialog(shell).run(false, false, new
+            // IRunnableWithProgress()
             {
-              doOk(monitor);
-            } catch (CoreException e)
-            {
-              UIPlugin.log(e);
-            }
-          }
-        });
+              public void run(IProgressMonitor monitor) throws InvocationTargetException,
+                  InterruptedException
+              {
+                try
+                {
+                  doOk(monitor);
+                } catch (CoreException e)
+                {
+                  UIPlugin.log(e);
+                }
+              }
+            });
       } catch (InvocationTargetException e)
       {
         UIPlugin.log(e);

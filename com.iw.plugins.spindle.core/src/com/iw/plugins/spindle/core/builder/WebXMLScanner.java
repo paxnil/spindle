@@ -50,7 +50,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocation;
  * A Processor class used by FullBuild that extracts Tapestry information from
  * the file web.xml
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class WebXMLScanner extends AbstractScanner

@@ -68,7 +68,7 @@ import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
 
 /**
  * @author gwl
- * @version $Id$
+ * 
  * 
  * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
  */
@@ -76,17 +76,26 @@ public class XMLUtil
 {
 
   static public final int UNKNOWN_DTD = 0;
+
   static public final int DTD_1_1 = 1;
+
   static public final int DTD_1_2 = 2;
+
   static public final int DTD_1_3 = 3;
+
   static public final int DTD_3_0 = 4;
+
   static public final int DTD_SERVLET_2_2 = 5;
+
   static public final int DTD_SERVLET_2_3 = 6;
 
   static public final int[] ALLOWED_SPEC_DTDS = new int[]{DTD_1_3, DTD_3_0};
+
   static public final String SPEC_DTD_ERROR_KEY = "error-invalid-spec-public-id";
+
   static public final int[] ALLOWED_SERVLET_DTDS = new int[]{DTD_SERVLET_2_2,
       DTD_SERVLET_2_3};
+
   static public final String SERVLET_DTD_ERROR_KEY = "error-invalid-servlet-public-id";
 
   static public int getDTDVersion(String publicId)
@@ -751,6 +760,7 @@ public class XMLUtil
       }
     }
   }
+
   public static void writeContainedComponent(
       IContainedComponent contained,
       String name,
@@ -1011,7 +1021,11 @@ public class XMLUtil
     indenter.println("</application>");
   }
 
-  public static void writeWebDOTXML(String servletName, String publicId, Writer writer)
+  public static void writeWebDOTXML(
+      String servletName,
+      String publicId,
+      boolean writeFilter,
+      Writer writer)
   {
     IndentingWriter indenter = checkWriter(writer);
 
@@ -1021,7 +1035,8 @@ public class XMLUtil
 
     indenter.println("<web-app>");
     indenter.printlnIndented(1, "<display-name>" + servletName + "</display-name>");
-    if (TapestryCore.SERVLET_2_3_PUBLIC_ID.equals(publicId))
+
+    if (TapestryCore.SERVLET_2_3_PUBLIC_ID.equals(publicId) && writeFilter)
       writeTapestryFilter("org.apache.tapestry.RedirectFilter", writer, 1); //TODO
     // add
     // filter

@@ -61,7 +61,7 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
  * resolved by the builder until after all of the components are.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: FrameworkComponentValidator.java,v 1.9.2.1 2004/06/10 16:47:46
+ * @version $Id: FrameworkComponentValidator.java,v 1.10 2004/05/28 15:23:47
  *          glongman Exp $
  */
 public class FrameworkComponentValidator

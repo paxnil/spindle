@@ -52,8 +52,7 @@ public class ShowInPackageExplorerAction extends OpenDeclarationAction
   public ShowInPackageExplorerAction()
   {
     super();
-    //      TODO I10N
-    setText("Show In Package Explorer");
+    setText(UIPlugin.getString(ACTION_ID));
     setId(ACTION_ID);
   }
 

@@ -37,7 +37,7 @@ import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
  * pages and components.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface ICoreNamespace extends INamespace
 {

@@ -40,7 +40,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  * A map that preserves the order things are added
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class OrderPreservingMap implements Map
 {

@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.core.parser.xml.event;
 /**
  * This interface is used to carry location information
  * 
- * @version $Id$
+ * 
  */
 public interface XMLEnityEventInfo
 {

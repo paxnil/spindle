@@ -27,7 +27,6 @@ package com.iw.plugins.spindle.ui.dialogfields;
 
 import java.util.Iterator;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -40,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * @author GWL
@@ -66,7 +66,7 @@ public class StringButtonField extends StringField
   protected IRunnableContext getRunnableContext()
   {
     return (fRunnableContext == null
-        ? new ProgressMonitorDialog(getShell()) : fRunnableContext);
+        ? PlatformUI.getWorkbench().getProgressService() : fRunnableContext);
   }
 
   public StringButtonField(String label, int labelWidth)

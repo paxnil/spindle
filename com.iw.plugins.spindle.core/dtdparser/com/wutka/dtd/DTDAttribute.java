@@ -6,7 +6,7 @@ import java.io.*;
  * Represents a DTD Attribute in an ATTLIST declaration
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 
 public class DTDAttribute implements DTDOutput

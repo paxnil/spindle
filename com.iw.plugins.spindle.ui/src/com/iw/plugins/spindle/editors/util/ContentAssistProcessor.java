@@ -60,29 +60,17 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
   protected IPreferenceStore fPreferenceStore = UIPlugin
       .getDefault()
       .getPreferenceStore();
-  //  TODO remove protected XMLDocumentPartitioner fAssistParititioner;
   protected boolean fDoingContextInformation = false;
   protected DTD fDTD;
 
   public ContentAssistProcessor(Editor editor)
   {
     this.fEditor = editor;
-    //  TODO remove fAssistParititioner = new
-    // XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
-    // XMLDocumentPartitioner.TYPES);
   }
 
   protected abstract void init(IDocument document) throws IllegalStateException;
   {
-    // TODO remove fAssistParititioner.connect(document);
-    //        try
-    //        {
-    //            XMLNode.createTree(document, -1);
-    //        } catch (BadLocationException e)
-    //        {
-    //            UIPlugin.log(e);
-    //            throw new IllegalStateException();
-    //        }
+    // do nothing
   }
 
   public ICompletionProposal[] computeCompletionProposals(
@@ -182,8 +170,8 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
    * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
    */
   public String getErrorMessage()
-  { //TODO I10N
-    return "no completions available";
+  {
+    return UIPlugin.getString("noCompletions");
   }
 
   /*

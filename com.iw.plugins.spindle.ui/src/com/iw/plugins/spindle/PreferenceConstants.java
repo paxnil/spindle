@@ -30,8 +30,7 @@ package com.iw.plugins.spindle;
  * Preference constants used by Spindle
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: PreferenceConstants.java,v 1.7.2.1 2004/06/10 16:48:21 glongman
- *          Exp $
+ * 
  */
 public interface PreferenceConstants
 {

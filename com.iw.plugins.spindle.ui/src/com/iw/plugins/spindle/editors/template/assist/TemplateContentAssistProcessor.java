@@ -69,7 +69,6 @@ public abstract class TemplateContentAssistProcessor extends ContentAssistProces
   protected void init(IDocument document) throws IllegalStateException
   {
     fDTD = null;
-    // TODO remove super.connect(document);
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
     if (fHasHTMLExtension)
     {

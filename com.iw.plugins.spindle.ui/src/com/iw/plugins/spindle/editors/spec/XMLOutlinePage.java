@@ -53,7 +53,7 @@ import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
  * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class XMLOutlinePage extends ContentOutlinePage
 {

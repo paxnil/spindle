@@ -473,18 +473,17 @@ public class StandardParserConfiguration extends BasicParserConfiguration
 
   /**
    * Parses the document in a pull parsing fashion.
-   *
-   * @param complete True if the pull parser should parse the
-   *                 remaining document completely.
-   *
+   * 
+   * @param complete True if the pull parser should parse the remaining document
+   *          completely.
+   * 
    * @returns True if there is more document to parse.
-   *
-   * @exception XNIException Any XNI exception, possibly wrapping 
-   *                         another exception.
-   * @exception IOException  An IO exception from the parser, possibly
-   *                         from a byte stream or character stream
-   *                         supplied by the parser.
-   *
+   * 
+   * @exception XNIException Any XNI exception, possibly wrapping another
+   *              exception.
+   * @exception IOException An IO exception from the parser, possibly from a
+   *              byte stream or character stream supplied by the parser.
+   * 
    * @see #setInputSource
    */
   public boolean parse(boolean complete) throws XNIException, IOException

@@ -113,7 +113,7 @@ import org.apache.xerces.xni.parser.XMLInputSource;
  * @author Andy Clark, IBM
  * @author Arnaud Le Hors, IBM
  * 
- * @version $Id$
+ * 
  */
 public class XMLEntityManager implements XMLComponent, XMLEntityResolver
 {
@@ -420,10 +420,10 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
 
   /**
    * Checks whether an entity given by name is external.
-   *
+   * 
    * @param entityName The name of the entity to check.
-   * @returns True if the entity is external, false otherwise
-   *           (including when the entity is not declared).
+   * @returns True if the entity is external, false otherwise (including when
+   *          the entity is not declared).
    */
   public boolean isExternalEntity(String entityName)
   {
@@ -471,10 +471,10 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
 
   /**
    * Checks whether an entity given by name is unparsed.
-   *
+   * 
    * @param entityName The name of the entity to check.
-   * @returns True if the entity is unparsed, false otherwise
-   *          (including when the entity is not declared).
+   * @returns True if the entity is unparsed, false otherwise (including when
+   *          the entity is not declared).
    */
   public boolean isUnparsedEntity(String entityName)
   {
@@ -489,7 +489,7 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
 
   /**
    * Checks whether an entity given by name is declared.
-   *
+   * 
    * @param entityName The name of the entity to check.
    * @returns True if the entity is declared, false otherwise.
    */
@@ -3531,17 +3531,15 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver
 
     /**
      * Loads a chunk of text.
-     *
-     * @param offset       The offset into the character buffer to
-     *                     read the next batch of characters.
-     * @param changeEntity True if the load should change entities
-     *                     at the end of the entity, otherwise leave
-     *                     the current entity in place and the entity
-     *                     boundary will be signaled by the return
-     *                     value.
-     *
-     * @returns Returns true if the entity changed as a result of this
-     *          load operation.
+     * 
+     * @param offset The offset into the character buffer to read the next batch
+     *          of characters.
+     * @param changeEntity True if the load should change entities at the end of
+     *          the entity, otherwise leave the current entity in place and the
+     *          entity boundary will be signaled by the return value.
+     * 
+     * @returns Returns true if the entity changed as a result of this load
+     *          operation.
      */
     private final boolean load(int offset, boolean changeEntity) throws IOException
     {

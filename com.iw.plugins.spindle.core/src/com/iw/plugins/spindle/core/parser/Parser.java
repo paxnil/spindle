@@ -67,7 +67,7 @@ import com.iw.plugins.spindle.core.util.Files;
  * 
  * Validates by default
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class Parser

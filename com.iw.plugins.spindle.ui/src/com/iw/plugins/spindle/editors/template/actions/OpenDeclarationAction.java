@@ -66,8 +66,7 @@ public class OpenDeclarationAction extends BaseTemplateAction
   public OpenDeclarationAction()
   {
     super();
-    //      TODO I10N
-    setText("Open Declaration");
+    setText(UIPlugin.getString(ACTION_ID));
     setId(ACTION_ID);
   }
 

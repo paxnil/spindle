@@ -316,17 +316,16 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner
     fDocumentSystemId = fEntityManager.expandSystemId(inputSource.getSystemId());
   } // setInputSource(XMLInputSource)
 
-  /** 
+  /**
    * Scans a document.
-   *
-   * @param complete True if the scanner should scan the document
-   *                 completely, pushing all events to the registered
-   *                 document handler. A value of false indicates that
-   *                 that the scanner should only scan the next portion
-   *                 of the document and return. A scanner instance is
-   *                 permitted to completely scan a document if it does
-   *                 not support this "pull" scanning model.
-   *
+   * 
+   * @param complete True if the scanner should scan the document completely,
+   *          pushing all events to the registered document handler. A value of
+   *          false indicates that that the scanner should only scan the next
+   *          portion of the document and return. A scanner instance is
+   *          permitted to completely scan a document if it does not support
+   *          this "pull" scanning model.
+   * 
    * @returns True if there is more to scan, false otherwise.
    */
   public boolean scanDocument(boolean complete) throws IOException, XNIException
@@ -715,26 +714,28 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner
 
   } // scanComment()
 
-  /** 
-   * Scans a start element. This method will handle the binding of
-   * namespace information and notifying the handler of the start
-   * of the element.
+  /**
+   * Scans a start element. This method will handle the binding of namespace
+   * information and notifying the handler of the start of the element.
    * <p>
+   * 
    * <pre>
-   * [44] EmptyElemTag ::= '&lt;' Name (S Attribute)* S? '/>'
-   * [40] STag ::= '&lt;' Name (S Attribute)* S? '>'
-   * </pre> 
+   * 
+   *  [44] EmptyElemTag ::= '&lt;' Name (S Attribute)* S? '/&gt;'
+   *  [40] STag ::= '&lt;' Name (S Attribute)* S? '&gt;'
+   *  
+   * </pre>
+   * 
    * <p>
-   * <strong>Note:</strong> This method assumes that the leading
-   * '&lt;' character has been consumed.
+   * <strong>Note: </strong> This method assumes that the leading '&lt;'
+   * character has been consumed.
    * <p>
-   * <strong>Note:</strong> This method uses the fElementQName and
-   * fAttributes variables. The contents of these variables will be
-   * destroyed. The caller should copy important information out of
-   * these variables before calling this method.
-   *
-   * @returns True if element is empty. (i.e. It matches
-   *          production [44].
+   * <strong>Note: </strong> This method uses the fElementQName and fAttributes
+   * variables. The contents of these variables will be destroyed. The caller
+   * should copy important information out of these variables before calling
+   * this method.
+   * 
+   * @returns True if element is empty. (i.e. It matches production [44].
    */
   protected boolean scanStartElement() throws IOException, XNIException
   {
@@ -912,7 +913,7 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner
 
   /**
    * Scans element content.
-   *
+   * 
    * @returns Returns the next character on the stream.
    */
   protected int scanContent() throws IOException, XNIException
@@ -1061,15 +1062,18 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner
   /**
    * Scans an end element.
    * <p>
+   * 
    * <pre>
-   * [42] ETag ::= '&lt;/' Name S? '>'
+   * 
+   *  [42] ETag ::= '&lt;/' Name S? '&gt;'
+   *  
    * </pre>
+   * 
    * <p>
-   * <strong>Note:</strong> This method uses the fElementQName variable.
-   * The contents of this variable will be destroyed. The caller should
-   * copy the needed information out of this variable before calling
-   * this method.
-   *
+   * <strong>Note: </strong> This method uses the fElementQName variable. The
+   * contents of this variable will be destroyed. The caller should copy the
+   * needed information out of this variable before calling this method.
+   * 
    * @returns The element depth.
    */
   protected int scanEndElement() throws IOException, XNIException
@@ -1254,22 +1258,21 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner
     }
   } // handleCharacter(char)
 
-  /** 
-   * Handles the end element. This method will make sure that
-   * the end element name matches the current element and notify
-   * the handler about the end of the element and the end of any
-   * relevent prefix mappings.
+  /**
+   * Handles the end element. This method will make sure that the end element
+   * name matches the current element and notify the handler about the end of
+   * the element and the end of any relevent prefix mappings.
    * <p>
-   * <strong>Note:</strong> This method uses the fQName variable.
-   * The contents of this variable will be destroyed.
-   *
+   * <strong>Note: </strong> This method uses the fQName variable. The contents
+   * of this variable will be destroyed.
+   * 
    * @param element The element.
-   *
+   * 
    * @returns The element depth.
-   *
-   * @throws XNIException Thrown if the handler throws a SAX exception
-   *                      upon notification.
-   *
+   * 
+   * @throws XNIException Thrown if the handler throws a SAX exception upon
+   *           notification.
+   *  
    */
   protected int handleEndElement(QName element, boolean isEmpty) throws XNIException
   {
@@ -1527,16 +1530,16 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner
     // Dispatcher methods
     //
 
-    /** 
+    /**
      * Dispatch an XML "event".
-     *
-     * @param complete True if this dispatcher is intended to scan
-     *                 and dispatch as much as possible.                 
-     *
-     * @returns True if there is more to dispatch either from this 
-     *          or a another dispatcher.
-     *
-     * @throws IOException  Thrown on i/o error.
+     * 
+     * @param complete True if this dispatcher is intended to scan and dispatch
+     *          as much as possible.
+     * 
+     * @returns True if there is more to dispatch either from this or a another
+     *          dispatcher.
+     * 
+     * @throws IOException Thrown on i/o error.
      * @throws XNIException Thrown on parse error.
      */
     public boolean dispatch(boolean complete) throws IOException, XNIException;
@@ -1557,16 +1560,16 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner
     // Dispatcher methods
     //
 
-    /** 
+    /**
      * Dispatch an XML "event".
-     *
-     * @param complete True if this dispatcher is intended to scan
-     *                 and dispatch as much as possible.                 
-     *
-     * @returns True if there is more to dispatch either from this 
-     *          or a another dispatcher.
-     *
-     * @throws IOException  Thrown on i/o error.
+     * 
+     * @param complete True if this dispatcher is intended to scan and dispatch
+     *          as much as possible.
+     * 
+     * @returns True if there is more to dispatch either from this or a another
+     *          dispatcher.
+     * 
+     * @throws IOException Thrown on i/o error.
      * @throws XNIException Thrown on parse error.
      */
     public boolean dispatch(boolean complete) throws IOException, XNIException
@@ -1785,31 +1788,30 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner
     // NOTE: These hook methods are added so that the full document
     //       scanner can share the majority of code with this class.
 
-    /** 
-     * Scan for DOCTYPE hook. This method is a hook for subclasses
-     * to add code to handle scanning for a the "DOCTYPE" string 
-     * after the string "<!" has been scanned.
+    /**
+     * Scan for DOCTYPE hook. This method is a hook for subclasses to add code
+     * to handle scanning for a the "DOCTYPE" string after the string " <!" has
+     * been scanned.
      * 
-     * @returns True if the "DOCTYPE" was scanned; false if "DOCTYPE"
-     *          was not scanned.
+     * @returns True if the "DOCTYPE" was scanned; false if "DOCTYPE" was not
+     *          scanned.
      */
     protected boolean scanForDoctypeHook() throws IOException, XNIException
     {
       return false;
     } // scanForDoctypeHook():boolean
 
-    /** 
-     * Element depth iz zero. This methos is a hook for subclasses
-     * to add code to handle when the element depth hits zero. When
-     * scanning a document fragment, an element depth of zero is
-     * normal. However, when scanning a full XML document, the
-     * scanner must handle the trailing miscellanous section of
-     * the document after the end of the document's root element.
-     *
-     * @returns True if the caller should stop and return true which
-     *          allows the scanner to switch to a new scanning 
-     *          dispatcher. A return value of false indicates that
-     *          the content dispatcher should continue as normal.
+    /**
+     * Element depth iz zero. This methos is a hook for subclasses to add code
+     * to handle when the element depth hits zero. When scanning a document
+     * fragment, an element depth of zero is normal. However, when scanning a
+     * full XML document, the scanner must handle the trailing miscellanous
+     * section of the document after the end of the document's root element.
+     * 
+     * @returns True if the caller should stop and return true which allows the
+     *          scanner to switch to a new scanning dispatcher. A return value
+     *          of false indicates that the content dispatcher should continue
+     *          as normal.
      */
     protected boolean elementDepthIsZeroHook() throws IOException, XNIException
     {
@@ -1817,16 +1819,15 @@ public class XMLDocumentFragmentScannerImpl extends XMLScanner
     } // elementDepthIsZeroHook():boolean
 
     /**
-     * Scan for root element hook. This method is a hook for
-     * subclasses to add code that handles scanning for the root
-     * element. When scanning a document fragment, there is no
-     * "root" element. However, when scanning a full XML document,
-     * the scanner must handle the root element specially.
-     *
-     * @returns True if the caller should stop and return true which
-     *          allows the scanner to switch to a new scanning 
-     *          dispatcher. A return value of false indicates that
-     *          the content dispatcher should continue as normal.
+     * Scan for root element hook. This method is a hook for subclasses to add
+     * code that handles scanning for the root element. When scanning a document
+     * fragment, there is no "root" element. However, when scanning a full XML
+     * document, the scanner must handle the root element specially.
+     * 
+     * @returns True if the caller should stop and return true which allows the
+     *          scanner to switch to a new scanning dispatcher. A return value
+     *          of false indicates that the content dispatcher should continue
+     *          as normal.
      */
     protected boolean scanRootElementHook() throws IOException, XNIException
     {

@@ -4,7 +4,7 @@ package com.wutka.dtd;
  * Enumerated value representing the type of a token
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 class TokenType
 {

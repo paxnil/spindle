@@ -43,7 +43,7 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
  * Used for the roots
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class ContextRootLocation extends AbstractRootLocation
 {

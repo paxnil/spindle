@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * Helper class used by the Full Build
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class BuilderQueue

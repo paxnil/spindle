@@ -114,12 +114,12 @@ public class UneditableComboBoxDialogField extends DialogField
       {
         public void widgetSelected(SelectionEvent event)
         {
-          fireDialogButtonPressed(field);
+          fireDialogFieldChanged(field);
         }
 
         public void widgetDefaultSelected(SelectionEvent event)
         {
-          fireDialogButtonPressed(field);
+          fireDialogFieldChanged(field);
         }
 
       });

@@ -33,7 +33,7 @@ import org.eclipse.core.runtime.IStatus;
 
 /**
  * @author gwl
- * @version $Id$
+ * 
  * 
  * Copyright 2002, Intelligent Works Inc. All Rights Reserved.
  */

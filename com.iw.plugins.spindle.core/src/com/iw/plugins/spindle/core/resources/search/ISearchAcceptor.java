@@ -32,7 +32,7 @@ import org.eclipse.core.resources.IStorage;
  * An acceptor that is invoked by the find methods in ClasspathRootLocation.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface ISearchAcceptor
 {

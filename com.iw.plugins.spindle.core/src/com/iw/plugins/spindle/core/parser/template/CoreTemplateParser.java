@@ -50,7 +50,7 @@ import com.iw.plugins.spindle.core.source.SourceLocation;
  * Subclass of the Tapestry template parser, tweaked for Spindle.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class CoreTemplateParser extends TemplateParser
 {

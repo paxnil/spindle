@@ -55,7 +55,7 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
  * to be resued. Create one when you need it, or just call the static methods.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class UITapestryAccess
 {

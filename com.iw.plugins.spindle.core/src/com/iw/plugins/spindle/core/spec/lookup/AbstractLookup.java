@@ -35,7 +35,7 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
  * Base class for lookups
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class AbstractLookup
 {

@@ -78,7 +78,7 @@ import com.iw.plugins.spindle.core.spec.PluginPropertyDeclaration;
  * </ul>
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class ApplicationResolver extends NamespaceResolver
 {

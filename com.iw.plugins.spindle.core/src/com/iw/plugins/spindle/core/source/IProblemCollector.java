@@ -30,7 +30,7 @@ package com.iw.plugins.spindle.core.source;
  * Interface for collecting the problems found by Spindle parsers and Scanners.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface IProblemCollector
 {

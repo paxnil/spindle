@@ -54,7 +54,7 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
  * A utility class used to find all the templates for a component
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class TemplateFinder
 {

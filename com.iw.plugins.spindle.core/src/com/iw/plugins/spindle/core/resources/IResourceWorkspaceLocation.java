@@ -40,7 +40,7 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
  * bits of information describing a Tapestry artifact found in the workspace.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  * @see org.apache.tapestry.IResourceLocation
  */
 

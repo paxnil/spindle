@@ -34,7 +34,7 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
  * Namespace reolver for the Tapestry framework and its contained libraries.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class FrameworkResolver extends NamespaceResolver
 {

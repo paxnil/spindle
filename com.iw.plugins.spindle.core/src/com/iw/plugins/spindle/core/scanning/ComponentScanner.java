@@ -62,7 +62,7 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
  * Scanner that turns a node tree into a IComponentSpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class ComponentScanner extends SpecificationScanner
 {

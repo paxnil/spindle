@@ -76,7 +76,7 @@ import com.iw.plugins.spindle.editors.util.DeclCompletionProcessor;
  * SourceViewerConfiguration for the TemplateEditor
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class SpecConfiguration extends BaseSourceConfiguration
 {
@@ -146,6 +146,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
         XMLPartitionScanner.DTD_INTERNAL_DECL,};
   }
 
+  //TODO fix
   public IContentFormatter getContentFormatter(ISourceViewer sourceViewer)
   {
     IContentFormatter formatter = new XMLContentFormatter(

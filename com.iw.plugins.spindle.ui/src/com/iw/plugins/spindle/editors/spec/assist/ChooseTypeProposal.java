@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -44,6 +43,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.Images;
@@ -54,8 +54,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  * Proposal that gets it contents from the user!
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: ChooseTypeProposal.java,v 1.2.2.2 2004/06/22 12:23:19 glongman
- *          Exp $
+ * 
  */
 public class ChooseTypeProposal implements ICompletionProposal
 {
@@ -132,8 +131,9 @@ public class ChooseTypeProposal implements ICompletionProposal
 
       IJavaSearchScope scope = createSearchScope(fJavaProject, fHierarchyRoot);
 
-      SelectionDialog dialog = JavaUI.createTypeDialog(shell, new ProgressMonitorDialog(
-          shell), scope, (fIncludeInterfaces
+      SelectionDialog dialog = JavaUI.createTypeDialog(shell, PlatformUI
+          .getWorkbench()
+          .getProgressService(), scope, (fIncludeInterfaces
           ? IJavaElementSearchConstants.CONSIDER_TYPES
           : IJavaElementSearchConstants.CONSIDER_CLASSES), false);
 

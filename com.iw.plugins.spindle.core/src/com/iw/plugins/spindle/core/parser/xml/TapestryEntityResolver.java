@@ -42,7 +42,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
  * Entity resolver that pulls DTDs out of the plugin classpath
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class TapestryEntityResolver implements XMLEntityResolver
 {

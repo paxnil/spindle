@@ -30,7 +30,7 @@ package com.iw.plugins.spindle.core.builder;
  * Common Question asked of all kinds of Incremental Builders
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface IIncrementalBuild extends IBuild
 {

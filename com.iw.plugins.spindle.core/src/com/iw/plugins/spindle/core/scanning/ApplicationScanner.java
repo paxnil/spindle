@@ -38,7 +38,7 @@ import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
  * Scanner that turns a node tree into a IApplicationSpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class ApplicationScanner extends LibraryScanner
 {

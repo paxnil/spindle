@@ -36,7 +36,7 @@ import com.iw.plugins.spindle.editors.UITapestryAccess;
  * Contains Helper methods for content assist in specs
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class SpecTapestryAccess extends UITapestryAccess
 {

@@ -8,7 +8,7 @@ import java.util.*;
  * option3)
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDChoice extends DTDContainer implements Cloneable
 {

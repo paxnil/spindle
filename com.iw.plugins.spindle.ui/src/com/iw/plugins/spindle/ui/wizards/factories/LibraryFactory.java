@@ -49,7 +49,7 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
  * @author gwl
- * @version $Id$
+ * 
  * 
  * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
  */

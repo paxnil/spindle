@@ -141,6 +141,7 @@ public class TemplateTextTools extends AbstractTextTools
   {
     return new DefaultPartitioner(getTemplatePartitionScanner(), TYPES)
     {
+    //XXX this is probably not right!
       /*
        * @see org.eclipse.jface.text.IDocumentPartitionerExtension2#getManagingPositionCategories()
        * @since 3.0

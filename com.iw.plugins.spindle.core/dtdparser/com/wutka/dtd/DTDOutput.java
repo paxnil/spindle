@@ -6,7 +6,7 @@ import java.io.*;
  * Defines the method used for writing DTD information to a PrintWriter
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public interface DTDOutput
 {

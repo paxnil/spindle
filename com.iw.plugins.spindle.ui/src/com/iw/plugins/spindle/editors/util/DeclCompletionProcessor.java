@@ -59,7 +59,7 @@ public class DeclCompletionProcessor extends ContentAssistProcessor
    */
   protected void init(IDocument document) throws IllegalStateException
   {
-    // TODO not needed?
+    // do nothing
 
   }
   /*

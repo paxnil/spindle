@@ -69,8 +69,7 @@ public class OpenDeclarationAction extends BaseSpecAction
   public OpenDeclarationAction()
   {
     super();
-    //      TODO I10N
-    setText("&Open Declaration");
+    setText(UIPlugin.getString(ACTION_ID));
     setId(ACTION_ID);
   }
 
@@ -500,16 +499,10 @@ public class OpenDeclarationAction extends BaseSpecAction
     IDocument document = editor
         .getDocumentProvider()
         .getDocument(editor.getEditorInput());
-    //   TODO remove XMLDocumentPartitioner partitioner =
-    //            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
-    // XMLDocumentPartitioner.TYPES);
     try
     {
       XMLNode reveal = null;
-      //  TODO remove partitioner.connect(document);
       Position[] pos = null;
-      //   TODO remove pos =
-      // document.getPositions(partitioner.getManagingPositionCategories()[0]);
       pos = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
       for (int i = 0; i < pos.length; i++)
       {
@@ -542,11 +535,6 @@ public class OpenDeclarationAction extends BaseSpecAction
     {
       UIPlugin.log(e);
     }
-
-    //  TODO remove finally
-    //        {
-    //            partitioner.disconnect();
-    //        }
   }
 
 }

@@ -44,7 +44,7 @@ import com.wutka.dtd.DTD;
  * Base class for spec actions that need the xml partitioning.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class BaseSpecAction extends BaseEditorAction
 {
@@ -52,17 +52,13 @@ public abstract class BaseSpecAction extends BaseEditorAction
   protected String fDeclaredRootElementName;
   protected String fPublicId;
   protected DTD fDTD;
-  // TODO remove protected XMLDocumentPartitioner fPartitioner;
   protected INamespace fNamespace;
 
   protected IDocument fDocument;
 
   public BaseSpecAction()
   {
-    super();
-    // TODO remove fPartitioner =
-    //            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
-    // XMLDocumentPartitioner.TYPES);
+    super();   
   }
 
   public BaseSpecAction(String text)
@@ -125,10 +121,6 @@ public abstract class BaseSpecAction extends BaseEditorAction
       UIPlugin.log(e);
       throw e;
     }
-    //   TODO remove finally
-    //        {
-    //            fPartitioner.disconnect();
-    //        }
   }
 
   protected abstract void doRun();

@@ -69,7 +69,7 @@ import com.iw.plugins.spindle.core.util.Markers;
  * The Tapestry Builder, kicks off full and incremental builds.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class TapestryBuilder extends IncrementalProjectBuilder
 {

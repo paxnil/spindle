@@ -10,7 +10,7 @@ import java.util.Map;
  * Example program to read a DTD and print out its object model
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 
 class Tokenize

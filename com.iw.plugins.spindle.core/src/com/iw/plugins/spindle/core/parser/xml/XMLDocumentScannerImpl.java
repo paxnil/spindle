@@ -545,14 +545,14 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
 
     /**
      * Dispatch an XML "event".
-     *
-     * @param complete True if this dispatcher is intended to scan
-     *                 and dispatch as much as possible.
-     *
-     * @returns True if there is more to dispatch either from this
-     *          or a another dispatcher.
-     *
-     * @throws IOException  Thrown on i/o error.
+     * 
+     * @param complete True if this dispatcher is intended to scan and dispatch
+     *          as much as possible.
+     * 
+     * @returns True if there is more to dispatch either from this or a another
+     *          dispatcher.
+     * 
+     * @throws IOException Thrown on i/o error.
      * @throws XNIException Thrown on parse error.
      */
     public boolean dispatch(boolean complete) throws IOException, XNIException
@@ -623,14 +623,14 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
 
     /**
      * Dispatch an XML "event".
-     *
-     * @param complete True if this dispatcher is intended to scan
-     *                 and dispatch as much as possible.
-     *
-     * @returns True if there is more to dispatch either from this
-     *          or a another dispatcher.
-     *
-     * @throws IOException  Thrown on i/o error.
+     * 
+     * @param complete True if this dispatcher is intended to scan and dispatch
+     *          as much as possible.
+     * 
+     * @returns True if there is more to dispatch either from this or a another
+     *          dispatcher.
+     * 
+     * @throws IOException Thrown on i/o error.
      * @throws XNIException Thrown on parse error.
      */
     public boolean dispatch(boolean complete) throws IOException, XNIException
@@ -784,14 +784,14 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
 
     /**
      * Dispatch an XML "event".
-     *
-     * @param complete True if this dispatcher is intended to scan
-     *                 and dispatch as much as possible.
-     *
-     * @returns True if there is more to dispatch either from this
-     *          or a another dispatcher.
-     *
-     * @throws IOException  Thrown on i/o error.
+     * 
+     * @param complete True if this dispatcher is intended to scan and dispatch
+     *          as much as possible.
+     * 
+     * @returns True if there is more to dispatch either from this or a another
+     *          dispatcher.
+     * 
+     * @throws IOException Thrown on i/o error.
      * @throws XNIException Thrown on parse error.
      */
     public boolean dispatch(boolean complete) throws IOException, XNIException
@@ -947,12 +947,12 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
     //       scanner can share the majority of code with this class.
 
     /**
-     * Scan for DOCTYPE hook. This method is a hook for subclasses
-     * to add code to handle scanning for a the "DOCTYPE" string
-     * after the string "<!" has been scanned.
-     *
-     * @returns True if the "DOCTYPE" was scanned; false if "DOCTYPE"
-     *          was not scanned.
+     * Scan for DOCTYPE hook. This method is a hook for subclasses to add code
+     * to handle scanning for a the "DOCTYPE" string after the string " <!" has
+     * been scanned.
+     * 
+     * @returns True if the "DOCTYPE" was scanned; false if "DOCTYPE" was not
+     *          scanned.
      */
     protected boolean scanForDoctypeHook() throws IOException, XNIException
     {
@@ -967,17 +967,16 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
     } // scanForDoctypeHook():boolean
 
     /**
-     * Element depth iz zero. This methos is a hook for subclasses
-     * to add code to handle when the element depth hits zero. When
-     * scanning a document fragment, an element depth of zero is
-     * normal. However, when scanning a full XML document, the
-     * scanner must handle the trailing miscellanous section of
-     * the document after the end of the document's root element.
-     *
-     * @returns True if the caller should stop and return true which
-     *          allows the scanner to switch to a new scanning
-     *          dispatcher. A return value of false indicates that
-     *          the content dispatcher should continue as normal.
+     * Element depth iz zero. This methos is a hook for subclasses to add code
+     * to handle when the element depth hits zero. When scanning a document
+     * fragment, an element depth of zero is normal. However, when scanning a
+     * full XML document, the scanner must handle the trailing miscellanous
+     * section of the document after the end of the document's root element.
+     * 
+     * @returns True if the caller should stop and return true which allows the
+     *          scanner to switch to a new scanning dispatcher. A return value
+     *          of false indicates that the content dispatcher should continue
+     *          as normal.
      */
     protected boolean elementDepthIsZeroHook() throws IOException, XNIException
     {
@@ -989,16 +988,15 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
     } // elementDepthIsZeroHook():boolean
 
     /**
-     * Scan for root element hook. This method is a hook for
-     * subclasses to add code that handles scanning for the root
-     * element. When scanning a document fragment, there is no
-     * "root" element. However, when scanning a full XML document,
-     * the scanner must handle the root element specially.
-     *
-     * @returns True if the caller should stop and return true which
-     *          allows the scanner to switch to a new scanning
-     *          dispatcher. A return value of false indicates that
-     *          the content dispatcher should continue as normal.
+     * Scan for root element hook. This method is a hook for subclasses to add
+     * code that handles scanning for the root element. When scanning a document
+     * fragment, there is no "root" element. However, when scanning a full XML
+     * document, the scanner must handle the root element specially.
+     * 
+     * @returns True if the caller should stop and return true which allows the
+     *          scanner to switch to a new scanning dispatcher. A return value
+     *          of false indicates that the content dispatcher should continue
+     *          as normal.
      */
     protected boolean scanRootElementHook() throws IOException, XNIException
     {
@@ -1044,14 +1042,14 @@ public class XMLDocumentScannerImpl extends XMLDocumentFragmentScannerImpl
 
     /**
      * Dispatch an XML "event".
-     *
-     * @param complete True if this dispatcher is intended to scan
-     *                 and dispatch as much as possible.
-     *
-     * @returns True if there is more to dispatch either from this
-     *          or a another dispatcher.
-     *
-     * @throws IOException  Thrown on i/o error.
+     * 
+     * @param complete True if this dispatcher is intended to scan and dispatch
+     *          as much as possible.
+     * 
+     * @returns True if there is more to dispatch either from this or a another
+     *          dispatcher.
+     * 
+     * @throws IOException Thrown on i/o error.
      * @throws XNIException Thrown on parse error.
      */
     public boolean dispatch(boolean complete) throws IOException, XNIException

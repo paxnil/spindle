@@ -41,7 +41,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * process
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface IScannerValidator
 {

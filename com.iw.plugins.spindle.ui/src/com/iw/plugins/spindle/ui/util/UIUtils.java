@@ -60,7 +60,7 @@ import com.iw.plugins.spindle.editors.XMLFormattingStrategy;
  * Access to features exposed by the JDT UI plugin
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class UIUtils
 {
@@ -216,6 +216,9 @@ public class UIUtils
   }
 
   //TODO remove and replace
+  /**
+   * @deprecated
+   */
   public static void XMLFormatDocument(IDocument document)
   {
     XMLContentFormatter formatter = new XMLContentFormatter(

@@ -39,7 +39,7 @@ import com.iw.plugins.spindle.core.source.IProblem;
 /**
  * Marker utililties
  * 
- * @version $Id$
+ * 
  * @author glongman@intelligentworks.com
  */
 public class Markers

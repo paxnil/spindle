@@ -48,7 +48,7 @@ import com.iw.plugins.spindle.Images;
  * A search dialog for choosing a library for a Library Project
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class LibrarySearchDialog extends TitleAreaDialog
     implements

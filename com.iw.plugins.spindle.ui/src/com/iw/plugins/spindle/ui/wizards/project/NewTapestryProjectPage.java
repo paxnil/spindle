@@ -87,7 +87,9 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
   private String fInitialContextFolderFieldValue = "context";
 
   private Text fProjectContextFolderField;
+
   private Combo fServletSpecVersionCombo;
+
   private CheckBoxField fInsertTapestryFilter;
 
   private List fReveal;
@@ -353,7 +355,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     if (!webInfFolder.exists())
       webInfFolder.create(true, true, monitor);
     monitor.worked(1);
-    configureWebXML(projectName, webInfFolder, monitor);
+    configureWebXML(projectName, webInfFolder, writeTapestryRedirectFilter(), monitor);
     monitor.worked(1);
     configureApplication(projectName, webInfFolder, monitor);
     monitor.worked(1);
@@ -370,6 +372,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
   private void configureWebXML(
       String projectName,
       IFolder webInfFolder,
+      boolean writeRedirectFilter,
       IProgressMonitor monitor) throws CoreException
   {
     IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
@@ -378,7 +381,11 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     StringWriter swriter = new StringWriter();
     IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
 
-    XMLUtil.writeWebDOTXML(projectName, getServletSpecPublicId(), iwriter);
+    XMLUtil.writeWebDOTXML(
+        projectName,
+        getServletSpecPublicId(),
+        writeRedirectFilter,
+        iwriter);
     iwriter.flush();
     IFile webDotXML = webInfFolder.getFile("web.xml");
     fReveal.add(webDotXML);

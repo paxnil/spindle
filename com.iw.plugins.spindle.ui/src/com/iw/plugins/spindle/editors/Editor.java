@@ -75,7 +75,7 @@ import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
  * Abstract base class for Editors.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class Editor extends AbstractDecoratedTextEditor
     implements

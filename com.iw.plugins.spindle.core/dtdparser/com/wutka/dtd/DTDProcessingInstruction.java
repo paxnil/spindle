@@ -6,7 +6,7 @@ import java.io.*;
  * Represents a processing instruction in the DTD
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDProcessingInstruction implements DTDOutput
 {

@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.CoreException;
  * Interface for Builders
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface IBuild
 {

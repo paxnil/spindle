@@ -47,7 +47,7 @@ import com.iw.plugins.spindle.editors.ProblemAnnotationModel;
  * have an annotation model.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class SpecAnnotationModel extends ProblemAnnotationModel
 {

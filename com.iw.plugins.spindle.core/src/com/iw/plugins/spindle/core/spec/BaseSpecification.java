@@ -41,7 +41,7 @@ import org.apache.tapestry.ILocationHolder;
  * Base class for all Spec classes.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class BaseSpecification
     implements

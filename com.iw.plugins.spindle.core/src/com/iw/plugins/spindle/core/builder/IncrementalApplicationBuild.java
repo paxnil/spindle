@@ -63,7 +63,7 @@ import com.iw.plugins.spindle.core.util.CoreUtils;
  * 
  * @see com.iw.plugins.spindle.core.builder.IncrementalProjectBuild
  * 
- * @version $Id: IncrementalApplicationBuild.java,v 1.14.2.1 2004/06/10 16:47:46
+ * @version $Id: IncrementalApplicationBuild.java,v 1.15 2004/06/10 15:50:11
  *          glongman Exp $
  * @author glongman@intelligentworks.com
  */

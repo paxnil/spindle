@@ -6,7 +6,7 @@ import java.io.*;
  * Represents a named item in the DTD
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDName extends DTDItem
 {

@@ -88,7 +88,7 @@ import com.iw.plugins.spindle.core.util.Markers;
  * </ul>
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class NamespaceResolver
 {
@@ -105,22 +105,27 @@ public abstract class NamespaceResolver
    * the instance of IBuild that instantiated the first Resolver
    */
   protected Build fBuild;
+
   /**
    * the result Namespace
    */
   protected ICoreNamespace fResultNamespace;
+
   /**
    * the Tapestry framwork Namespace
    */
   protected ICoreNamespace fFrameworkNamespace;
+
   /**
    * the location of the library spec that defines the Namespace being resolved
    */
   protected IResourceWorkspaceLocation fNamespaceSpecLocation;
+
   /**
    * The id of the Namespace being resolved
    */
   protected String fNamespaceId;
+
   /**
    * A map of all component names -> locations in the Namespace being resolved
    */
@@ -132,10 +137,12 @@ public abstract class NamespaceResolver
    * dependency!
    */
   protected Stack fComponentStack = new Stack();
+
   /**
    * The resolver is not threadsafe
    */
   protected boolean fWorking;
+
   /**
    * flag to indicate that this resolver is resolving the Tapestry Framework
    * Namespace
@@ -505,15 +512,16 @@ public abstract class NamespaceResolver
 
       } else
       {
-
-        Markers.recordProblems(jwcs[i], new IProblem[]{new DefaultProblem(
-            Markers.TAPESTRY_MARKER_TAG,
-            IProblem.ERROR,
-            TapestryCore.getString("builder-hidden-jwc-file", jwcs[i], result.get(type)),
-            1,
-            0,
-            0,
-            false)});
+        if (!jwcs[i].equals(result.get(type)))
+          Markers.recordProblems(jwcs[i], new IProblem[]{new DefaultProblem(
+              Markers.TAPESTRY_MARKER_TAG,
+              IProblem.ERROR,
+              TapestryCore
+                  .getString("builder-hidden-jwc-file", jwcs[i], result.get(type)),
+              1,
+              0,
+              0,
+              false)});
       }
     }
     return result;

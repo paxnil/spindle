@@ -42,10 +42,10 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
@@ -62,7 +62,7 @@ import com.iw.plugins.spindle.core.util.Markers;
  * right now the models/build states are not persited between sessions.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id: TapestryArtifactManager.java,v 1.6 2004/05/17 02:31:48 glongman
+ * @version $Id: TapestryArtifactManager.java,v 1.7 2004/06/15 04:11:27 glongman
  *          Exp $
  */
 public class TapestryArtifactManager implements ITemplateFinderListener
@@ -177,21 +177,25 @@ public class TapestryArtifactManager implements ITemplateFinderListener
 
     };
 
-    if (context == null)
+    if (context == null && Display.getCurrent() != null)
     {
-      Shell shell = TapestryCore.getDefault().getActiveWorkbenchShell();
-      if (shell != null && shell.getVisible())
-      {
-        try
-        {
-          context = new ProgressMonitorDialog(shell);
+      //            Shell shell = TapestryCore.getDefault().getActiveWorkbenchShell();
+      //            if (shell != null && shell.getVisible())
 
-        } catch (Exception e)
-        {
-          TapestryCore.log(e);
-        }
+      //            {
+      try
+      {
+        PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runnable);
+        //                    context = new ProgressMonitorDialog(shell);
+
+      } catch (Exception e)
+      {
+        TapestryCore.log(e);
       }
+      return;
     }
+
+    //        }
 
     if (context != null)
     {

@@ -72,9 +72,7 @@ import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 
 /**
  * Base class for editor actions
- * 
- * TODO fix.
- * 
+ *  
  * @author glongman@intelligentworks.com
  * @version $Id: BaseEditorAction.java,v 1.5.2.1 2004/06/10 16:48:22 glongman
  *          Exp $

@@ -36,7 +36,7 @@ import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
  * i.e. it can resolve type names in the project buildpath
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class BuilderValidator extends SpecificationValidator
 {

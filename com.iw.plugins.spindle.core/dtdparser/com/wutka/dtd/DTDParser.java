@@ -8,7 +8,7 @@ import java.net.*;
  * Parses a DTD file and returns a DTD object
  * 
  * @author Mark Wutka
- * @version $Revision$ $Date$ by $Author$
+ * 
  */
 public class DTDParser implements EntityExpansion
 {

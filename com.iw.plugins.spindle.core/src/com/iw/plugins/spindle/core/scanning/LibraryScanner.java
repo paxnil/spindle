@@ -50,7 +50,7 @@ import com.iw.plugins.spindle.core.spec.PluginPageDeclaration;
  * Scanner that turns a node tree into a ILibrarySpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class LibraryScanner extends SpecificationScanner
 {

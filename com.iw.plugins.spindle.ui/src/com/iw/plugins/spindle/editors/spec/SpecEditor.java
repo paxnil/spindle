@@ -113,7 +113,7 @@ import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
  * Editor for Tapestry Spec files
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class SpecEditor extends Editor
 {
@@ -727,8 +727,7 @@ public class SpecEditor extends Editor
               e.printStackTrace();
             } catch (CoreException e)
             {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+               e.printStackTrace();
             }
           }
 
@@ -958,7 +957,6 @@ public class SpecEditor extends Editor
   {
     private SpecEditor fEditor;
     private boolean fUseReconcileResults;
-    //  TODO remove private XMLDocumentPartitioner fPartitioner;
 
     public SpecEditorInformationProvider(IEditorPart editor)
     {

@@ -39,10 +39,10 @@ import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.ui.util.WrappedImageDescriptor;
 
 /**
- * TODO Add Type comment
+ * Base class for actions that cause a jump from one editor to another
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class BaseJumpAction extends BaseEditorAction
 {
@@ -101,7 +101,6 @@ public abstract class BaseJumpAction extends BaseEditorAction
     }
   }
 
-  // TODO remove private XMLDocumentPartitioner fPartitioner = null;
   protected IDocument fDocument = null;
   /**
    *  
@@ -146,28 +145,9 @@ public abstract class BaseJumpAction extends BaseEditorAction
     } catch (RuntimeException e)
     {
       UIPlugin.log(e);
-    } finally
-    {
-      detachPartitioner();
-    }
+    } 
   }
 
-  protected void detachPartitioner()
-  {
-    //TODO remove
-    //        try
-    //        {
-    //            if (fPartitioner != null)
-    //                fPartitioner.disconnect();
-    //        } catch (RuntimeException e1)
-    //        {
-    //            UIPlugin.log(e1);
-    //        } finally
-    //        {
-    //            fPartitioner = null;
-    //            fDocument = null;
-    //        }
-  }
 
   protected abstract void doRun();
 

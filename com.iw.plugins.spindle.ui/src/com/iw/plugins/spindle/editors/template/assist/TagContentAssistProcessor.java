@@ -213,8 +213,7 @@ public class TagContentAssistProcessor extends TemplateContentAssistProcessor
       XMLNode tag,
       String tagName,
       int documentOffset)
-  {
-    // TODO Auto-generated method stub
+  {   
     return null;
   }
 

@@ -24,6 +24,7 @@
 package com.iw.plugins.spindle.ui.wizards;
 
 import org.apache.tapestry.INamespace;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,16 +42,24 @@ public class NewTapPageWizardPage extends NewTapComponentWizardPage
     super(root, pageName);
   }
 
-  protected void createComponentResource(IProgressMonitor monitor, final IType specClass) throws CoreException,
-      InterruptedException
+  protected void createComponentResource(
+      IProgressMonitor monitor,
+      final IType specClass,
+      IFolder libLocation) throws CoreException, InterruptedException
   {
     INamespace useNamespace = fNamespaceDialogField.getSelectedNamespace();
     IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) useNamespace
         .getSpecificationLocation();
 
-    fComponentFile = PageFactory.createPage(location, fComponentNameDialogField
-        .getTextValue(), specClass, new SubProgressMonitor(monitor, 1));
-
+    if (libLocation != null)
+    {
+      fComponentFile = PageFactory.createPage(libLocation, fComponentNameDialogField
+          .getTextValue(), specClass, new SubProgressMonitor(monitor, 1));
+    } else
+    {
+      fComponentFile = PageFactory.createPage(location, fComponentNameDialogField
+          .getTextValue(), specClass, new SubProgressMonitor(monitor, 1));
+    }
   }
 
 }

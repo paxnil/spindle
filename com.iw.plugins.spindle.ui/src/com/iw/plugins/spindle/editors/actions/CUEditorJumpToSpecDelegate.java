@@ -24,7 +24,7 @@ import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.util.Markers;
 
 /**
- * TODO: Provide description for "CUEditorJumpToSpecDelegate".
+ * Action to Jump from a java file editor to a related tapestry spec (if one exists)
  * 
  * @see IEditorActionDelegate
  */
