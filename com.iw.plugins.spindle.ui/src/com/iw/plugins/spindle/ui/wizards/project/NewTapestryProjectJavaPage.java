@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.ClassPathDetector;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
@@ -191,7 +192,6 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
 
                     fCurrProject.open(null);
                     outputLocation = createOutputLocation().getFullPath();
-                   
 
                 }
 
@@ -216,12 +216,13 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
         if (entries == null)
         {
             createSrcFolder();
-            return new IClasspathEntry[] { createSrcClasspathEntry(), TAPESTRY_FRAMEWORK};
+            return new IClasspathEntry[] { createSrcClasspathEntry(), TAPESTRY_FRAMEWORK, JavaRuntime.getDefaultJREContainerEntry()};
 
         }
 
         boolean hasSrcEntry = false;
         boolean hasTapestryEntry = false;
+        boolean hasDefaultJREEntry = false;
         List allEntries = Arrays.asList(entries);
         for (Iterator iter = allEntries.iterator(); iter.hasNext();)
         {
@@ -229,9 +230,12 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
             if (!hasSrcEntry && element.getEntryKind() == IClasspathEntry.CPE_SOURCE)
             {
                 hasSrcEntry = true;
-            } else if (!hasTapestryEntry && element.getEntryKind() == IClasspathEntry.CPE_CONTAINER)
+            } else if (element.getEntryKind() == IClasspathEntry.CPE_CONTAINER)
             {
-                hasTapestryEntry = element.getPath().segment(0).equals(TapestryCore.CORE_CONTAINER);
+                if (!hasTapestryEntry)
+                    hasTapestryEntry = element.getPath().segment(0).equals(TapestryCore.CORE_CONTAINER);
+                if (!hasDefaultJREEntry)
+                    hasDefaultJREEntry = element.getPath().segment(0).equals(JavaRuntime.JRE_CONTAINER);
             }
         }
 
@@ -244,6 +248,9 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
 
         if (!hasTapestryEntry)
             allEntries.add(TAPESTRY_FRAMEWORK);
+            
+        if (!hasDefaultJREEntry)
+            allEntries.add(JavaRuntime.getDefaultJREContainerEntry());
 
         return (IClasspathEntry[]) allEntries.toArray(new IClasspathEntry[allEntries.size()]);
     }

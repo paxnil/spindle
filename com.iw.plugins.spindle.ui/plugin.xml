@@ -18,6 +18,7 @@
       <import plugin="org.eclipse.search"/>
       <import plugin="net.sf.solareclipse.ui"/>
       <import plugin="net.sf.solareclipse.xml.ui"/>
+      <import plugin="org.eclipse.jdt.launching" version="2.1.0" match="compatible"/>
    </requires>
 
 
@@ -143,21 +144,5 @@
          </action>
       </viewerContribution>
    </extension>
-   <!--
-   <extension
-         point="org.eclipse.ui.actionSets">
-      <actionSet
-            label="Spindle MultiEditor Action"
-            visible="true"
-            id="com.iw.plugins.spindle.actionset.multiEditor">
-         <action
-               label="Open in MultiEditor"
-               class="com.iw.plugins.spindle.editors.multi.OpenActionDelegate"
-               menubarPath="org.eclipse.jdt.ui.A_OpenActionSet/navigate/open.ext"
-               id="com.iw.plugins.spindle.actions.OpenInMultiEditor">
-         </action>
-      </actionSet>
-   </extension>
-   -->
 
 </plugin>

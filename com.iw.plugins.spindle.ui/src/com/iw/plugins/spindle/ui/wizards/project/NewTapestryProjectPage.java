@@ -269,7 +269,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         project.setPersistentProperty(
             new QualifiedName("", ProjectPropertyPage.CONTEXT_ROOT_PROPERTY),
             getContextFolderName());
-        project.setPersistentProperty(new QualifiedName("", ProjectPropertyPage.LIBRARY_SPEC_PROPERTY), "");
+//        project.setPersistentProperty(new QualifiedName("", ProjectPropertyPage.LIBRARY_SPEC_PROPERTY), "");
 
         // now configure/deconfigure the project
 
