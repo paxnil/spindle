@@ -38,6 +38,12 @@
       <category name="spindle_3_1_old"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.1.8.jar" id="com.iw.features.spindle" version="3.1.8">
+      <category name="spindle_3_1_old"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle.groovy_1.0.0.jar" id="com.iw.features.spindle.groovy" version="1.0.0">
+      <category name="add ons"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.1.9.jar" id="com.iw.features.spindle" version="3.1.9">
       <category name="spindle_3_1_latest"/>
    </feature>
    <category-def name="spindle3_0_latest" label="Spindle 3.0 - latest unstable build - Eclipse 2.1.X">
@@ -56,4 +62,13 @@
       </description>
    </category-def>
    <category-def name="spindle_3_1_old" label="3.1 old builds"/>
+   <category-def name="add ons" label="Various add ons for Spindle 3.1">
+      <description>
+         Here are features that one can install that augment Spindle with functionality ouside the realm of the core feature set.
+
+An example is the groovy feature that adds integration for the Goovestry libraries.
+
+Add Ons are always located in the unstable update site.
+      </description>
+   </category-def>
 </site>
