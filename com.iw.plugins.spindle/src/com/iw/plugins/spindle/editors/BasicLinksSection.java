@@ -66,7 +66,7 @@ public abstract class BasicLinksSection extends SpindleFormSection implements IM
   /**
    * @see FormSection#createClient(Composite, FormWidgetFactory)
    */
-  public Composite createClient(Composite parent, FormWidgetFactory factory) {
+  public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
     useFactory = factory;
     Composite container = useFactory.createComposite(parent);
     GridLayout layout = new GridLayout();
@@ -96,20 +96,18 @@ public abstract class BasicLinksSection extends SpindleFormSection implements IM
     //layout.numColumns = 2;
     buttonContainer.setLayout(layout);
 
-    moreButton = factory.createButton(buttonContainer, "More", SWT.PUSH);
-    gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
-    moreButton.setLayoutData(gd);
-    linkMoreButton();
+    createButtons(factory, buttonContainer);
 
     return container;
   }
 
-  protected Button getMoreButton() {
-    return moreButton;
-  }
-
-  protected void linkMoreButton() {
-    final SpindleFormPage targetPage = getMorePage();
+  protected void createButtons(FormWidgetFactory factory, Composite parent) {
+    GridData gd;
+    moreButton = factory.createButton(parent, "More", SWT.PUSH);
+    gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
+    moreButton.setLayoutData(gd);
+    
+    final SpindleFormPage targetPage = getGotoPage();
     if (targetPage == null) {
       return;
     }
@@ -121,7 +119,11 @@ public abstract class BasicLinksSection extends SpindleFormSection implements IM
     });
   }
 
-  protected SpindleFormPage getMorePage() {
+  protected Button getMoreButton() {
+    return moreButton;
+  }
+
+  protected SpindleFormPage getGotoPage() {
     return null;
   }
 
@@ -180,6 +182,9 @@ public abstract class BasicLinksSection extends SpindleFormSection implements IM
       linksParent.redraw();
     }
     updateNeeded = false;
+    reflow();
   }
+  
+  
 
 }
