@@ -81,7 +81,7 @@ public class PluginLibraryDeclaration extends BaseSpecification
 
             if (fResourcePath == null || fResourcePath.startsWith(validator.getDummyStringPrefix()))
             {
-                validator.addProblem(IProblem.ERROR, info.getAttributeSourceLocation("id"), "blank value", true);
+                validator.addProblem(IProblem.ERROR, info.getAttributeSourceLocation("specification-path"), "blank value", true);
             } else
             {
                 ILibrarySpecification parentLib = (ILibrarySpecification) parent;
