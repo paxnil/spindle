@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editors.actions;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
@@ -54,6 +55,15 @@ public class JumpToSpecAction extends BaseJumpAction
     protected void doRun()
     {
         IResourceWorkspaceLocation location = getSpecLocation();
+        if (location == null )
+        {
+            
+            MessageDialog.openInformation(
+                fEditor.getEditorSite().getShell(),
+                "Operation Aborted",
+                "Unable to Jump to Specifications from  a jar based Template");
+            return;
+        }
         reveal(location);
     }
 

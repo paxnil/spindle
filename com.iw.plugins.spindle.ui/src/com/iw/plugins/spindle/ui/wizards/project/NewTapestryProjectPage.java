@@ -49,10 +49,13 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -69,6 +72,7 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginPageDeclaration;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
 import com.iw.plugins.spindle.core.util.XMLUtil;
+import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.properties.ProjectPropertyPage;
 
 /**
@@ -83,6 +87,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
 
     private Text fProjectContextFolderField;
     private Combo fServletSpecVersionCombo;
+    private CheckBoxField fInsertTapestryFilter;
 
     private List fReveal;
 
@@ -100,6 +105,9 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     public NewTapestryProjectPage(String pageName)
     {
         super(pageName);
+
+        fInsertTapestryFilter =
+            new CheckBoxField(UIPlugin.getString("new-project-wizard-page-insert-filter-servlet-2.3-and-up-only"));
     }
 
     /** (non-Javadoc)
@@ -173,6 +181,24 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         fServletSpecVersionCombo.add(TapestryCore.SERVLET_2_2_PUBLIC_ID);
         fServletSpecVersionCombo.setFont(parent.getFont());
         fServletSpecVersionCombo.select(0);
+        fServletSpecVersionCombo.addSelectionListener(new SelectionListener()
+        {
+            public void widgetSelected(SelectionEvent e)
+            {
+                fInsertTapestryFilter.setEnabled(TapestryCore.SERVLET_2_3_PUBLIC_ID.equals(getServletSpecPublicId()));
+            }
+
+            public void widgetDefaultSelected(SelectionEvent e)
+            {
+                //do nothing
+            }
+        });
+
+        Control control = fInsertTapestryFilter.getControl(projectGroup);
+        data = new GridData(GridData.FILL_HORIZONTAL);
+        data.horizontalSpan = 2;
+        control.setLayoutData(data);
+        control.setFont(parent.getFont());
     }
 
     protected boolean validatePage()
@@ -185,6 +211,9 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
 
         if (fServletSpecVersionCombo != null)
             fServletSpecVersionCombo.setEnabled(nameSpecified);
+            
+       if (fInsertTapestryFilter != null)
+            fInsertTapestryFilter.setEnabled(nameSpecified && TapestryCore.SERVLET_2_3_PUBLIC_ID.equals(getServletSpecPublicId()));
 
         if (!superValid)
             return false;
@@ -234,6 +263,11 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         return fServletSpecVersionCombo.getItem(fServletSpecVersionCombo.getSelectionIndex());
     }
 
+    public boolean writeTapestryRedirectFilter()
+    {
+        return fInsertTapestryFilter.isEnabled() && fInsertTapestryFilter.getCheckBoxValue();
+    }
+
     // Once the java project has been created, we can setup the Tapestry stuff.
     // assumes the java project esists and is open.
     protected IRunnableWithProgress getRunnable(final IJavaProject jproject)
@@ -269,16 +303,16 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
             String.valueOf(TapestryProject.APPLICATION_PROJECT_TYPE));
         project.setPersistentProperty(
             new QualifiedName("", ProjectPropertyPage.CONTEXT_ROOT_PROPERTY),
-            "/"+getContextFolderName());
-//        project.setPersistentProperty(new QualifiedName("", ProjectPropertyPage.LIBRARY_SPEC_PROPERTY), "");
+            "/" + getContextFolderName());
+        //        project.setPersistentProperty(new QualifiedName("", ProjectPropertyPage.LIBRARY_SPEC_PROPERTY), "");
 
         // now configure/deconfigure the project
 
         TapestryProject.addTapestryNature(jproject);
         TapestryProject prj = TapestryProject.create(jproject);
-// No longer required, library projects are deprecated
-//        prj.setProjectType(TapestryProject.APPLICATION_PROJECT_TYPE);
-        prj.setWebContext("/"+getContextFolderName());
+        // No longer required, library projects are deprecated
+        //        prj.setProjectType(TapestryProject.APPLICATION_PROJECT_TYPE);
+        prj.setWebContext("/" + getContextFolderName());
         prj.saveProperties();
 
     }
@@ -333,7 +367,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
         int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
         StringWriter swriter = new StringWriter();
         IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
-        
+
         XMLUtil.writeWebDOTXML(projectName, getServletSpecPublicId(), iwriter);
         iwriter.flush();
         IFile webDotXML = webInfFolder.getFile("web.xml");

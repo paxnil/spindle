@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.0.47"
+   version="0.0.48"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -18,7 +18,6 @@
       <import plugin="net.sf.solareclipse.xml.ui"/>
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.update.ui.forms"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.compare"/>
    </requires>
@@ -103,6 +102,12 @@
             name="Spindle 3"
             class="com.iw.plugins.spindle.ui.preferences.SpindleGeneralPreferencePage"
             id="SpindlePreferences">
+      </page>
+      <page
+            name="Editors"
+            category="SpindlePreferences"
+            class="com.iw.plugins.spindle.ui.preferences.SpindleEditorPreferencePage"
+            id="SpindleEditorPreferences">
       </page>
    </extension>
    <extension
@@ -318,18 +323,48 @@
             category="jump"
             id="com.iw.plugins.spindle.ui.editor.commands.jump.java">
       </command>
+      <keyBinding
+            string="Alt+F8"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.jump.java"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>      
       <command
             name="Jump to Specification"
             description="Jump to the specification file (if possible)"
             category="jump"
             id="com.iw.plugins.spindle.ui.editor.commands.jump.spec">
       </command>
+      <keyBinding
+            string="Alt+F7"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.jump.spec"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            string="Alt+F7"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="com.iw.plugins.spindle.ui.editor.commands.jump.spec"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
       <command
             name="Jump to Template"
             description="Jump to the template file (if possible)"
             category="jump"
             id="com.iw.plugins.spindle.ui.editor.commands.jump.template">
       </command>
+      <keyBinding
+            string="Alt+F6"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.jump.template"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            string="Alt+F6"
+            scope="org.eclipse.jdt.ui.javaEditorScope"
+            command="com.iw.plugins.spindle.ui.editor.commands.jump.template"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
       <command
             name="Show Outline"
             description="Show an outline of the XML (if possible)"
@@ -361,36 +396,6 @@
             command="com.iw.plugins.spindle.ui.editor.commands.format"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
-      <keyBinding
-            string="Alt+F8"
-            scope="com.iw.plugins.spindle.ui.editor.commands"
-            command="com.iw.plugins.spindle.ui.editor.commands.jump.java"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            string="Alt+F7"
-            scope="com.iw.plugins.spindle.ui.editor.commands"
-            command="com.iw.plugins.spindle.ui.editor.commands.jump.spec"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            string="Alt+F6"
-            scope="com.iw.plugins.spindle.ui.editor.commands"
-            command="com.iw.plugins.spindle.ui.editor.commands.jump.template"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            string="Alt+F7"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="com.iw.plugins.spindle.ui.editor.commands.jump.spec"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
-      <keyBinding
-            string="Alt+F6"
-            scope="org.eclipse.jdt.ui.javaEditorScope"
-            command="com.iw.plugins.spindle.ui.editor.commands.jump.template"
-            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </keyBinding>
    </extension>
    <extension
          point="org.eclipse.ui.editorActions">
@@ -412,6 +417,24 @@
                id="com.iw.plugins.spindle.editors.cu.jump.template">
          </action>
       </editorContribution>
+      <editorContribution
+            targetID="org.eclipse.jdt.ui.ClassFileEditor"
+            id="com.iw.plugins.spindle.ui.cu.editor.jump">
+         <action
+               definitionId="com.iw.plugins.spindle.ui.editor.commands.jump.spec"
+               label="Jump to spec for CU editors"
+               class="com.iw.plugins.spindle.editors.actions.ClassFileEditorJumpToSpecDelegate"
+               enablesFor="*"
+               id="com.iw.plugins.spindle.editors.cu.jump.spec">
+         </action>
+         <action
+               definitionId="com.iw.plugins.spindle.ui.editor.commands.jump.template"
+               label="Jump to template for CU editors"
+               class="com.iw.plugins.spindle.editors.actions.ClassFileEditorJumpToTemplateDelegate"
+               enablesFor="*"
+               id="com.iw.plugins.spindle.editors.cu.jump.template">
+         </action>
+      </editorContribution>      
    </extension>
 
 </plugin>

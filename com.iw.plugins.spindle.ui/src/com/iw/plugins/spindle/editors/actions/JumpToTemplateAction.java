@@ -34,7 +34,9 @@ import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.IStorageEditorInput;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -64,19 +66,26 @@ public class JumpToTemplateAction extends BaseJumpAction
     protected void doRun()
     {
         PluginComponentSpecification component = getEditorSpecification();
-        if (component != null)
+        if (component == null && fEditor.getEditorInput() instanceof IStorageEditorInput)
         {
-            List possibles = getTemplateLocations(component);
-            if (possibles == null || possibles.isEmpty())
-                return;
-            if (possibles.size() > 1)
-            {
-                new ChooseTemplateLocationPopup(possibles, true).run();
-            } else
-            {
-                reveal((IResourceWorkspaceLocation) possibles.get(0));
-            }
+            MessageDialog.openInformation(
+                fEditor.getEditorSite().getShell(),
+                "Operation Aborted",
+                "Unable to Jump to Templates from  a jar based Specification");
+            return;
         }
+
+        List possibles = getTemplateLocations(component);
+        if (possibles == null || possibles.isEmpty())
+            return;
+        if (possibles.size() > 1)
+        {
+            new ChooseTemplateLocationPopup(possibles, true).run();
+        } else
+        {
+            reveal((IResourceWorkspaceLocation) possibles.get(0));
+        }
+
     }
 
     /**
@@ -85,6 +94,7 @@ public class JumpToTemplateAction extends BaseJumpAction
     private PluginComponentSpecification getEditorSpecification()
     {
         Object spec = fEditor.getSpecification();
+
         if (spec instanceof ILibrarySpecification)
             return null;
 
@@ -165,7 +175,7 @@ public class JumpToTemplateAction extends BaseJumpAction
         protected Image getImage(IResourceWorkspaceLocation location)
         {
             return Images.getSharedImage("html16.gif");
-            }
+        }
 
     }
 
