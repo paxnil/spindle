@@ -69,16 +69,16 @@ All Rights Reserved
          version="4.0.13"/>
 
    <plugin
-         id="com.iw.plugins.spindle.docs"
-         download-size="0"
-         install-size="0"
-         version="0.0.2"/>
-
-   <plugin
          id="com.iw.plugins.spindle.core"
          download-size="0"
          install-size="0"
          version="0.1.0"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.docs"
+         download-size="0"
+         install-size="0"
+         version="0.0.2"/>
 
    <plugin
          id="com.iw.plugins.spindle.ui"
