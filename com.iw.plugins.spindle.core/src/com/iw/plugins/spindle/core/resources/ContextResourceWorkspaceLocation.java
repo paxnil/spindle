@@ -71,13 +71,13 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
 
         if (storage != null)
         {
-            return ((IResource)storage).exists();
+            return ((IResource) storage).exists();
         } else if (TapestryCore.isNull(getName()))
         {
             return true;
-        }   
-        
-        return false;     
+        }
+
+        return false;
     }
 
     private IContainer getContainer()
@@ -99,6 +99,19 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
                 return storage;
         }
 
+        return null;
+    }
+
+    
+    public IResource getResource()
+    {
+       IContainer container = getContainer();
+        if (container != null && getName() != null)
+        {
+            IResource resource = container.findMember(new Path(getName()));
+            if (resource == null || resource.exists())
+                return resource;
+        }
         return null;
     }
 

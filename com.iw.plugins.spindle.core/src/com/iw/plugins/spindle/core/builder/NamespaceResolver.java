@@ -313,7 +313,8 @@ public class NamespaceResolver
                 fResultNamespace.setAppNameFromWebXML(fServlet.name);
 
             NamespaceResourceLookup lookup = new NamespaceResourceLookup();
-            if (fResultNamespace.isApplicationNamespace())
+            IResourceWorkspaceLocation specLocation = (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
+            if (fResultNamespace.isApplicationNamespace() && !specLocation.isOnClasspath())
             {
                 lookup.configure(
                     (PluginApplicationSpecification) fResultNamespace.getSpecification(),

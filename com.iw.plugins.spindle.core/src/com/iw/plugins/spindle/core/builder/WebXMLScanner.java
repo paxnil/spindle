@@ -108,7 +108,7 @@ public class WebXMLScanner extends AbstractScanner
             addProblem(
                 IProblem.WARNING,
                 location,
-                TapestryCore.getString("web-xml-application-path-param-but-servlet-defines"));
+                TapestryCore.getString("web-xml-application-path-param-but-servlet-defines", currentInfo.classname));
             return;
         }
         IResourceWorkspaceLocation ws_location = getApplicationLocation(currentInfo, value);
