@@ -168,7 +168,7 @@
          </action>
          <action
                label="Migrate All to Tapestry 2.0.4+ DTD"
-               icon="icons/full/page16.gif"
+               icon="icons/full/migrate16_dark.gif"
                tooltip="Migrate Tapestry XML files to Tapestry 2.0.4 compatible DTD"
                class="com.iw.plugins.spindle.ui.migrate.MigrateAllTo204PlusDTD"
                toolbarPath="Normal/spindle"

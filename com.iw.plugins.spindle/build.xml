@@ -17,6 +17,13 @@
   	</jar> 
   </target>
   
+  <target name="build-src-jar">
+  	<delete file="${basedir}/*-src.jar"/>
+  	<jar jarfile="${basedir}/spindle-${version}-src.jar">
+  		<fileset dir="${basedir}/src"/>    	
+  	</jar> 
+  </target>
+  
   <target name="build-plugin-release" depends="prepare-to-build-release">
   	<jar jarfile="${basedir}/com.iw.plugins.spindle-${version}.jar" basedir="${basedir}/buildRelease"/>  	  
   </target>
