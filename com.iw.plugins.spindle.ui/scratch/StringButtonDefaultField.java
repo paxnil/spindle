@@ -23,50 +23,62 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
- package com.iw.plugins.spindle.ui.dialogfields;
+package com.iw.plugins.spindle.ui.dialogfields;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.ui.widgets.PixelConverter;
+
 /**
  * @author GWL
- * @version 
- *
- * Copyright 2002, Intelligent Works Incoporated
- * All Rights Reserved
+ * @version Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
-public class StringButtonDefaultField extends StringButtonField {
+public class StringButtonDefaultField extends StringButtonField
+{
 
   private Label defaultLabelControl;
   private String defaultValue;
   private int defaultLableWidth;
 
-  public StringButtonDefaultField(String label) {
+  public StringButtonDefaultField(String label)
+  {
     this(label, "(default)", -1);
   }
 
-  public StringButtonDefaultField(String label, String defaultLabel) {
+  public StringButtonDefaultField(String label, String defaultLabel)
+  {
     this(label, defaultLabel, -1);
   }
 
-  public StringButtonDefaultField(String label, int labelWidth) {
+  public StringButtonDefaultField(String label, int labelWidth)
+  {
     super(label, labelWidth);
   }
 
-  public StringButtonDefaultField(String label, String defaultLabel, int labelWidth) {
+  public StringButtonDefaultField(String label, String defaultLabel, int labelWidth)
+  {
     super(label, labelWidth);
     this.defaultValue = defaultLabel;
     this.defaultLableWidth = labelWidth;
   }
 
-  public Control getControl(Composite parent) {
+  public Control getControl(Composite parent)
+  {
+    Assert.isLegal(
+        defaultLabelControl == null,
+        "can't use FormLayout, already used GridLayout!");
 
     Composite container = new Composite(parent, SWT.NULL);
     FormLayout layout = new FormLayout();
@@ -111,15 +123,67 @@ public class StringButtonDefaultField extends StringButtonField {
 
   }
 
-  public Label getDefaultLabelControl(Composite parent) {
-    if (defaultLabelControl == null) {
+  public void fillIntoGrid(Composite parent, int numcols)
+  {
+
+    Assert.isLegal(
+        defaultLabelControl == null,
+        "can't use GridLayout, already used FormLayout!");
+
+    Assert.isTrue(numcols >= 5);
+
+    GridData data;
+
+    PixelConverter converter = new PixelConverter(parent);
+
+    Label labelControl = getLabelControl(parent);
+    data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+    data.horizontalSpan = 1;
+    labelControl.setLayoutData(data);
+
+    Text textControl = getTextControl(parent);
+    data = new GridData(GridData.FILL_HORIZONTAL);
+    data.horizontalSpan = numcols - 3;
+    textControl.setLayoutData(data);
+
+    Label defaultLabel = getDefaultLabelControl(parent);
+    defaultLabel.setText("(default)");
+    defaultLabel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_BLUE));
+    data = new GridData(GridData.HORIZONTAL_ALIGN_END);
+    data.horizontalSpan = 1;   
+    data.widthHint = Math.max(converter.convertHorizontalDLUsToPixels("(default)"
+        .length()), defaultLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
+    defaultLabel.setLayoutData(data);
+
+    int heightHint = converter
+        .convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
+    int widthHint = converter
+        .convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+
+    Button buttonControl = getButtonControl(parent);
+    data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+    data.horizontalSpan = 1;
+    data.heightHint = heightHint;
+    data.widthHint = Math.max(widthHint, buttonControl.computeSize(
+        SWT.DEFAULT,
+        SWT.DEFAULT,
+        true).x);
+    buttonControl.setLayoutData(data);
+  }
+
+  public Label getDefaultLabelControl(Composite parent)
+  {
+    if (defaultLabelControl == null)
+    {
 
       defaultLabelControl = new Label(parent, SWT.LEFT | SWT.WRAP);
       defaultLabelControl.setFont(parent.getFont());
 
-      if (defaultValue != null && !"".equals(defaultValue)) {
+      if (defaultValue != null && !"".equals(defaultValue))
+      {
         defaultLabelControl.setText(defaultValue);
-      } else {
+      } else
+      {
 
         defaultLabelControl.setText("(default)");
 
@@ -128,25 +192,32 @@ public class StringButtonDefaultField extends StringButtonField {
     return defaultLabelControl;
   }
 
-  public void setEnabled(boolean flag) {
-    if (defaultLabelControl != null && !defaultLabelControl.isDisposed()) {
+  public void setEnabled(boolean flag)
+  {
+    if (defaultLabelControl != null && !defaultLabelControl.isDisposed())
+    {
       defaultLabelControl.setEnabled(flag);
     }
     super.setEnabled(flag);
   }
 
-  public void setDefaultVisible(boolean flag) {
-    if (defaultLabelControl != null && !defaultLabelControl.isDisposed()) {
+  public void setDefaultVisible(boolean flag)
+  {
+    if (defaultLabelControl != null && !defaultLabelControl.isDisposed())
+    {
       defaultLabelControl.setVisible(flag);
     }
   }
 
   /**
    * Gets the defaultLabelControl.
+   * 
    * @return Returns a Label
    */
-  public String getDefaultLabelText() {
-    if (defaultLabelControl != null && !defaultLabelControl.isDisposed()) {
+  public String getDefaultLabelText()
+  {
+    if (defaultLabelControl != null && !defaultLabelControl.isDisposed())
+    {
       return defaultLabelControl.getText();
     }
     return null;
@@ -154,10 +225,13 @@ public class StringButtonDefaultField extends StringButtonField {
 
   /**
    * Sets the defaultLabelControl.
+   * 
    * @param defaultLabelControl The defaultLabelControl to set
    */
-  public void setDefaultLabelText(String text) {
-    if (defaultLabelControl != null && !defaultLabelControl.isDisposed()) {
+  public void setDefaultLabelText(String text)
+  {
+    if (defaultLabelControl != null && !defaultLabelControl.isDisposed())
+    {
       defaultLabelControl.setText(text);
     }
   }
