@@ -47,6 +47,7 @@ import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginParameterSpecification;
@@ -173,7 +174,9 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
         setSelection(this.name);
         return;
       }
-      IModel model = (IModel) getFormPage().getModel();
+      ITapestryModel model = (ITapestryModel) getFormPage().getModel();
+      String dtd = model.getDTDVersion();
+      boolean isDTD12 = dtd != null && dtd.equals("1.2");
       PluginComponentSpecification componentSpec = ((TapestryComponentModel) model).getComponentSpecification();
       if ("name".equals(key)) {
         String oldName = this.name;
@@ -198,9 +201,9 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
       } else if ("required".equals(key)) {
         spec.setRequired(((Boolean) value).booleanValue());
 
-      } else if (isDTD12 && "direction".equals(name)) {
-        String direction = (String) value;
-        if ("in".equals(direction)) {
+      } else if (isDTD12 && "direction".equals(key)) {
+        String newDirection = directionLabels[((Integer) value).intValue()];    
+        if ("in".equals(newDirection)) {
           spec.setDirection(Direction.IN);
         } else {
           spec.setDirection(Direction.CUSTOM);
@@ -302,7 +305,7 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
       buf.append((!"".equals(holder.spec.getType()) ? " type = " + type : ""));
       buf.append((holder.spec.isRequired() ? " REQUIRED" : ""));
       if (isDTD12) {
-      	buf.append(" direction =");
+      	buf.append(" direction = ");
       	buf.append(holder.spec.getDirection() == Direction.CUSTOM ? "custom" : "in");
       }
       return buf.toString();       

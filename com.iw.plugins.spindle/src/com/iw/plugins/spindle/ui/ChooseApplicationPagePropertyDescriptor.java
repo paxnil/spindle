@@ -23,39 +23,31 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.util.lookup;
+package com.iw.plugins.spindle.ui;
 
-import org.eclipse.core.resources.IStorage;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.views.properties.PropertyDescriptor;
 
-/**
- * @author gwl
- * @version $Id$
- */
-public interface ILookupAcceptor {
+import com.iw.plugins.spindle.model.ITapestryModel;
 
-  /**
-  * Accept flag for specifying components.
-  */
-  public int ACCEPT_COMPONENTS = 0x00000001;
-  /**
-   * Accept flag for specifying application.
-   */
-  public int ACCEPT_APPLICATIONS = 0x00000002;
-  /**
-   *  Accept flag for specifying the search name includes Tapestry path!
-   */
-  public int FULL_TAPESTRY_PATH = 0x00000004;
-  /**
-   *  Accept flag for specifying HTML files
-   */
-  public int ACCEPT_HTML = 0x00000008;
-  /**
-   * Accept flag for writeable (non read only) files;
-   */
-  public int WRITEABLE = 0x00000010;
+public class ChooseApplicationPagePropertyDescriptor extends PropertyDescriptor {
+
+  String title;
+  String message;
   
-  public int NULL_FLAG = 0x00000000;
+  public ChooseApplicationPagePropertyDescriptor(Object id, String displayName) {
+  	this(id, displayName, null, null);
+  }
+  
+  public ChooseApplicationPagePropertyDescriptor(Object id, String displayName, String dialogTitle, String dialogMessage) {
+    super(id, displayName);
+    this.title = dialogTitle;
+    this.message = dialogMessage; 
+  }
 
-  public boolean acceptAsTapestry(IStorage s, int acceptFlags);
-
+  public CellEditor createPropertyEditor(Composite parent) {
+    return new ChooseApplicationPageDialogCellEditor(parent, title, message);
+  }
 }

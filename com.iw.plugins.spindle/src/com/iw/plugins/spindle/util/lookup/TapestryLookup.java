@@ -258,7 +258,7 @@ public class TapestryLookup implements ILookupAcceptor {
         for (int j = 0, packageCount = packages.length; j < packageCount; j++) {
           if (requestor.isCancelled())
             return;
-          if (seek(prefix, (IPackageFragment) packages[j], partialMatch, -1, requestor)) {
+          if (seek(prefix, (IPackageFragment) packages[j], partialMatch, NULL_FLAG, requestor)) {
             return;
           }
         }

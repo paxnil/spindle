@@ -83,6 +83,7 @@ public abstract class AbstractPropertySheetEditorSection
   private ITableLabelProvider labelProvider;
   private Action newAction;
   private Action deleteAction;
+  private int boxHeight = -1;
   protected PropertiesAction pAction;
 
   protected boolean hasFocus;
@@ -98,6 +99,11 @@ public abstract class AbstractPropertySheetEditorSection
     pAction = new PropertiesAction(page.getEditor());
     pAction.setText("Edit");
     pAction.setToolTipText("Edit the selected");
+  }
+
+  public AbstractPropertySheetEditorSection(SpindleFormPage page, int boxHeight) {
+  	this(page);
+  	this.boxHeight = boxHeight;
   }
 
   public void setContentProvider(ITreeContentProvider provider) {
@@ -173,6 +179,9 @@ public abstract class AbstractPropertySheetEditorSection
     Control control = createTree(container, factory);
     GridData gd = new GridData(GridData.FILL_BOTH);
     gd.widthHint = 200;
+    if (boxHeight != -1) {
+    	gd.heightHint= boxHeight;
+    }
     control.setLayoutData(gd);
 
     Composite buttonContainer = factory.createComposite(container);
