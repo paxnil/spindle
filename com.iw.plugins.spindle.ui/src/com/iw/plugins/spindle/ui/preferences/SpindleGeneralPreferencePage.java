@@ -63,23 +63,25 @@ public class SpindleGeneralPreferencePage
     private static final String FORMATTER_PRESERVE_BLANK_LINES = PreferenceConstants.FORMATTER_PRESERVE_BLANK_LINES;
     private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
     private static final String BUILD_MISS = TapestryCore.BUILDER_MARKER_MISSES;
-    private static final String[][] BUILD_MISS_OPTIONS =
+    private static final String HANDLE_ASSETS = TapestryCore.BUILDER_HANDLE_ASSETS;
+    private static final String[][] CORE_STATUS_OPTIONS =
         new String[][] {
-            new String[] { TapestryCore.BUILDER_MARKER_MISSES_INFO, TapestryCore.BUILDER_MARKER_MISSES_INFO },
-            new String[] { TapestryCore.BUILDER_MARKER_MISSES_WARN, TapestryCore.BUILDER_MARKER_MISSES_WARN },
-            new String[] { TapestryCore.BUILDER_MARKER_MISSES_ERROR, TapestryCore.BUILDER_MARKER_MISSES_ERROR },
-            new String[] { TapestryCore.BUILDER_MARKER_MISSES_IGNORE, TapestryCore.BUILDER_MARKER_MISSES_IGNORE }
+            new String[] { TapestryCore.CORE_STATUS_INFO, TapestryCore.CORE_STATUS_INFO },
+            new String[] { TapestryCore.CORE_STATUS_WARN, TapestryCore.CORE_STATUS_WARN },
+            new String[] { TapestryCore.CORE_STATUS_ERROR, TapestryCore.CORE_STATUS_ERROR },
+            new String[] { TapestryCore.CORE_STATUS_IGNORE, TapestryCore.CORE_STATUS_IGNORE }
     };
     private static final String OFFER_XHTML = PreferenceConstants.TEMPLATE_EDITOR_HTML_SHOW_XHTML;
     private static final String[][] OFFER_XHTML_OPTIONS =
         new String[][] {
-             new String[] { TemplateEditor.XHTML_STRICT_LABEL, TemplateEditor.XHTML_STRICT_LABEL },
+            new String[] { TemplateEditor.XHTML_STRICT_LABEL, TemplateEditor.XHTML_STRICT_LABEL },
             new String[] { TemplateEditor.XHTML_TRANSITIONAL_LABEL, TemplateEditor.XHTML_TRANSITIONAL_LABEL },
             new String[] { TemplateEditor.XHTML_FRAMES_LABEL, TemplateEditor.XHTML_FRAMES_LABEL },
-            new String[] { TemplateEditor.XHTML_NONE_LABEL,  TemplateEditor.XHTML_NONE_LABEL},
+            new String[] { TemplateEditor.XHTML_NONE_LABEL, TemplateEditor.XHTML_NONE_LABEL },
             };
 
     private RadioGroupFieldEditor fBuildMisses;
+    private RadioGroupFieldEditor fHandleAssets;
     private IntegerFieldEditor fDisplayTabWidth;
     private BooleanFieldEditor fPreserveBlankLines;
     private BooleanFieldEditor fUseTabsForIndentation;
@@ -120,7 +122,7 @@ public class SpindleGeneralPreferencePage
                 BUILD_MISS,
                 UIPlugin.getString("preference-build-miss"),
                 4,
-                BUILD_MISS_OPTIONS,
+                CORE_STATUS_OPTIONS,
                 top);
 
         fBuildMisses.setPreferencePage(this);
@@ -128,6 +130,22 @@ public class SpindleGeneralPreferencePage
         fBuildMisses.load();
         setValid(fBuildMisses.isValid());
         fBuildMisses.setPropertyChangeListener(this);
+
+        createVerticalSpacer(top, 1);
+
+        fHandleAssets =
+            new RadioGroupFieldEditor(
+                HANDLE_ASSETS,
+                UIPlugin.getString("preference-handle-assets"),
+                4,
+                CORE_STATUS_OPTIONS,
+                top);
+
+        fHandleAssets.setPreferencePage(this);
+        fHandleAssets.setPreferenceStore(TapestryCore.getDefault().getPreferenceStore());
+        fHandleAssets.load();
+        setValid(fHandleAssets.isValid());
+        fHandleAssets.setPropertyChangeListener(this);
 
         createVerticalSpacer(top, 1);
 
@@ -200,6 +218,7 @@ public class SpindleGeneralPreferencePage
         fOfferXHTML.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
         fOfferXHTML.load();
         setValid(fBuildMisses.isValid());
+        setValid(fHandleAssets.isValid());
         fOfferXHTML.setPropertyChangeListener(this);
 
         //        createVerticalSpacer(top, 1);
@@ -249,6 +268,7 @@ public class SpindleGeneralPreferencePage
     protected void performDefaults()
     {
         fBuildMisses.loadDefault();
+        fHandleAssets.loadDefault();
         fDisplayTabWidth.loadDefault();
         fPreserveBlankLines.loadDefault();
         fUseTabsForIndentation.loadDefault();
@@ -260,6 +280,7 @@ public class SpindleGeneralPreferencePage
     public boolean performOk()
     {
         fBuildMisses.store();
+        fHandleAssets.store();
         fDisplayTabWidth.store();
         fPreserveBlankLines.store();
         fUseTabsForIndentation.store();
