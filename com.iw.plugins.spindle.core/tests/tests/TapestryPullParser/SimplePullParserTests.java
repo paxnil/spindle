@@ -220,11 +220,6 @@ public class SimplePullParserTests extends ConfiguredPullParserBase
 
     }
 
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(SimplePullParserTests.class);
-    }
-
     /* (non-Javadoc)
      * @see junit.framework.TestCase#setUp()
      */

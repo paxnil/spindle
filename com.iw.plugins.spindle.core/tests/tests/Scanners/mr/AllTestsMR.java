@@ -52,9 +52,6 @@ public class AllTestsMR
     public static final String [] CURRENT_RUN = DOM_ONLY;
     
 
-    public static void main(String[] args)
-    {}
-
     public static Test suite()
     {
         TestSuite suite = new TestSuite("MRTest for tests.Scanner");

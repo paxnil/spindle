@@ -269,11 +269,6 @@ public class SimpleDOMParserTests extends ConfiguredDOMParserBase
 
     }
 
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(SimpleDOMParserTests.class);
-    }
-
     /* (non-Javadoc)
      * @see junit.framework.TestCase#setUp()
      */

@@ -100,9 +100,6 @@ public class PerlTest extends TestCase
         assertFalse(match);
     }
 
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(PerlTest.class);
-    }
+    
 
 }

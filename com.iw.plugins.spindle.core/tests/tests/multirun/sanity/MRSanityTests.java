@@ -98,9 +98,4 @@ public class MRSanityTests extends TestCase
         {}
     }
 
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(MRSanityTests.class);
-    }
-
 }

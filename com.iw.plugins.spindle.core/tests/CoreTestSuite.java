@@ -36,11 +36,6 @@ import junit.framework.TestSuite;
 public class CoreTestSuite
 {
 
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(CoreTestSuite.class);
-    }
-
     public static Test suite()
     {
         TestSuite suite = new TestSuite("Test for eveything");

@@ -65,9 +65,4 @@ public class TestBasicPullParser extends PullParserBase
 
     }
 
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(TestBasicPullParser.class);
-    }
-
 }

@@ -63,9 +63,4 @@ public class TestBasicDOMParser extends DOMParserBase
 
     }
 
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(TestBasicDOMParser.class);
-    }
-
 }

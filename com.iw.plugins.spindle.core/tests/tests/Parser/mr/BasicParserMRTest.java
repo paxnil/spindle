@@ -125,9 +125,4 @@ public class BasicParserMRTest extends MRBaseParserTest
         basicCheckProblems(parser.getProblems(), 1);
     }
 
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(BasicParserMRTest.class);
-    }
-
 }

@@ -73,11 +73,7 @@ public class ScannerBaseValidatorTest extends TestCase
         dummyLocation = new DummySourceLocation();
     }
 
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(ScannerBaseValidatorTest.class);
-    }
-
+    
     class TestProblem extends DefaultProblem
     {
 

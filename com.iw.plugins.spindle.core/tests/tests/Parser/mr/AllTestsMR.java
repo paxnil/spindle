@@ -52,9 +52,6 @@ public class AllTestsMR
     public static final String[] CURRENT_RUN = ALL_RUNS;
     
 
-    public static void main(String[] args)
-    {}
-
     public static Test suite()
     {
         TestSuite suite = new TestSuite("MRTest for tests.Parser");
