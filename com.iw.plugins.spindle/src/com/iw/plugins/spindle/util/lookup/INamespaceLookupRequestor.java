@@ -23,15 +23,14 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.util;
+package com.iw.plugins.spindle.util.lookup;
 
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.jdt.core.IPackageFragment;
 
-public interface ITapestryLookupRequestor {
+public interface INamespaceLookupRequestor {
 
   public boolean isCancelled();
 
-  public boolean accept(IStorage storage, IPackageFragment frgament);
+  public boolean accept(String name, INamespaceFragment namespace);
 
 }

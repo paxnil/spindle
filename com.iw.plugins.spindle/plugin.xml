@@ -203,13 +203,11 @@
             contributorClass="com.iw.plugins.spindle.html.TapestryHTMLEditorContributor"
             class="com.iw.plugins.spindle.html.TapestryHTMLEditor"
             id="com.iw.plugins.spindle.editors.html">
-      </editor>
-      <!--             icon="icons/full/library16.gif" -->
-
+      </editor>     
       <editor
             name="Spindle Editor for Tapestry Libraries"
             default="true"
-            icon="icons/full/application32.gif"
+            icon="icons/full/library16.gif"
             filenames="*.library"
             contributorClass="com.iw.plugins.spindle.editorlib.LibraryMultipageEditorContributor"
             class="com.iw.plugins.spindle.editorlib.LibraryMultipageEditor"

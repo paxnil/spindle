@@ -81,8 +81,8 @@ public class ComponentTypeDialogCellEditor extends EditableDialogCellEditor {
         
       return value;
     }
-    ChooseComponentDialog dialog =
-      new ChooseComponentDialog(cellEditorWindow.getShell(), tproject, title, message, true);
+    ChooseFromNamespaceDialog dialog =
+      new ChooseFromNamespaceDialog(cellEditorWindow.getShell(), tproject, title, message, true);
 
     if (dialog.open() == dialog.OK) {
       return dialog.getResultComponent();

@@ -72,7 +72,7 @@ import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.ui.ChooseComponentDialog;
+import com.iw.plugins.spindle.ui.ChooseFromNamespaceDialog;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.util.StringSorter;
 import com.iw.plugins.spindle.util.Utils;
@@ -597,8 +597,8 @@ public class HTMLContentOutlinePage
 
         return null;
       }
-      ChooseComponentDialog dialog =
-        new ChooseComponentDialog(
+      ChooseFromNamespaceDialog dialog =
+        new ChooseFromNamespaceDialog(
           getTreeViewer().getControl().getShell(),
           tproject,
           "Create in " + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc",

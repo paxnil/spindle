@@ -65,116 +65,24 @@ import org.eclipse.swt.widgets.Text;
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
+import com.iw.plugins.spindle.util.lookup.INamespaceFragment;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public class ChooseWorkspaceModelDialog
+public class ChooseFromNamespaceDialog
   extends AbstractDialog
   implements ISelectionChangedListener, IDoubleClickListener {
 
-  static public ChooseWorkspaceModelDialog createLibraryModelDialog(
-    Shell shell,
-    IJavaProject project,
-    String windowTitle,
-    String description) {
+ 
 
-    ChooseWorkspaceModelDialog result =
-      new ChooseWorkspaceModelDialog(
-        shell,
-        project,
-        windowTitle,
-        description,
-        TapestryLookup.ACCEPT_LIBRARIES);
-
-    result.setTitleImageString("application48.gif");
-
-    return result;
-  }
-
-  static public ChooseWorkspaceModelDialog createApplicationModelDialog(
-    Shell shell,
-    IJavaProject project,
-    String windowTitle,
-    String description) {
-
-    ChooseWorkspaceModelDialog result =
-      new ChooseWorkspaceModelDialog(
-        shell,
-        project,
-        windowTitle,
-        description,
-        TapestryLookup.ACCEPT_APPLICATIONS);
-
-    result.setTitleImageString("application48.gif");
-
-    return result;
-
-  }
-
-  static public ChooseWorkspaceModelDialog createApplicationAndLibraryModelDialog(
-    Shell shell,
-    IJavaProject project,
-    String windowTitle,
-    String description) {
-
-    ChooseWorkspaceModelDialog result =
-      new ChooseWorkspaceModelDialog(
-        shell,
-        project,
-        windowTitle,
-        description,
-        TapestryLookup.ACCEPT_LIBRARIES | TapestryLookup.ACCEPT_APPLICATIONS);
-
-    result.setTitleImageString("application48.gif");
-
-    return result;
-
-  }
-
-  static public ChooseWorkspaceModelDialog createComponentModelDialog(
-    Shell shell,
-    IJavaProject project,
-    String windowTitle,
-    String description) {
-
-    ChooseWorkspaceModelDialog result =
-      new ChooseWorkspaceModelDialog(
-        shell,
-        project,
-        windowTitle,
-        description,
-        TapestryLookup.ACCEPT_COMPONENTS);
-    result.setTitleImageString("component48.gif");
-
-    return result;
-  }
-
-  static public ChooseWorkspaceModelDialog createPageModelDialog(
-    Shell shell,
-    IJavaProject project,
-    String windowTitle,
-    String description) {
-
-    ChooseWorkspaceModelDialog result =
-      new ChooseWorkspaceModelDialog(
-        shell,
-        project,
-        windowTitle,
-        description,
-        TapestryLookup.ACCEPT_PAGES);
-    result.setTitleImageString("component48.gif");
-
-    return result;
-
-  }
-
-  private ChooseWorkspaceModelWidget chooserWidget;
+  private ChooseFromNamespaceWidget chooserWidget;
 
   private String titleImageString;
 
-  public ChooseWorkspaceModelDialog(
+  public ChooseFromNamespaceDialog(
     Shell shell,
-    IJavaProject project,
+    ITapestryProject project,
     String windowTitle,
     String description,
     int acceptFlags) {
@@ -182,7 +90,7 @@ public class ChooseWorkspaceModelDialog
     super(shell);
     updateWindowTitle(windowTitle);
     updateMessage(description);
-    chooserWidget = new ChooseWorkspaceModelWidget(project, acceptFlags);
+    chooserWidget = new ChooseFromNamespaceWidget(project, acceptFlags);
 
     chooserWidget.addSelectionChangedListener(this);
     chooserWidget.addDoubleClickListener(this);
@@ -243,10 +151,6 @@ public class ChooseWorkspaceModelDialog
     }
   }
 
-  public ITapestryModel getResultModel() {
-
-    return chooserWidget.getResultModel();
-  }
 
   public String getResultString() {
 
@@ -254,15 +158,9 @@ public class ChooseWorkspaceModelDialog
 
   }
 
-  public IPackageFragment getResultPackage() {
+  public INamespaceFragment getResultNamespace() {
 
-    return chooserWidget.getResultPackage();
-
-  }
-
-  public IStorage getResultStorage() {
-
-    return chooserWidget.getResultStorage();
+    return chooserWidget.getResultNamespace();
 
   }
   

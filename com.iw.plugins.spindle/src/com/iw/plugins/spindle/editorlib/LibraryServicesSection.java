@@ -213,8 +213,8 @@ public class LibraryServicesSection
     public void run() {
       updateSelection = true;
       TapestryLibraryModel model = (TapestryLibraryModel) getModel();
-      PluginApplicationSpecification spec =
-        (PluginApplicationSpecification) model.getSpecification();
+      PluginLibrarySpecification spec =
+        (PluginLibrarySpecification) model.getSpecification();
       String useSeviceName = "service";
       if (spec.getServiceClassName(useSeviceName + 1) != null) {
         int counter = 2;

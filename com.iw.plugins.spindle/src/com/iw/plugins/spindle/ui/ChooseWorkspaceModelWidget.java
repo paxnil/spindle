@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -22,6 +21,8 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
@@ -44,8 +45,9 @@ import org.eclipse.swt.widgets.Text;
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
+import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
+import com.iw.plugins.spindle.wizards.fields.SuperClassDialogField;
 
 /**
  * @author gwl
@@ -54,17 +56,13 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
  * Copyright 2002, Intelligent Work Inc.
  * All Rights Reserved.
  */
-public class ChooseWorkspaceModelWidget extends Viewer {
+public class ChooseWorkspaceModelWidget extends TwoListChooserWidget {
+
+  static private final Object[] empty = new Object[0];
 
   private int acceptFlags;
 
-  private Text nameText;
-  private Table resources;
-  private Table packages;
   private ScanCollector collector = new ScanCollector();
-  private ILabelProvider nameLabelProvider = new LabelProvider(); 
-  private ILabelProvider packageLabelProvider =
-    new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS);
 
   private TapestryLookup lookup;
 
@@ -72,124 +70,52 @@ public class ChooseWorkspaceModelWidget extends Viewer {
 
   private IPackageFragment resultPackage;
 
-  static private final Object[] empty = new Object[0];
-
-  private List doubleClickListeners = new ArrayList();
-
-  private Composite control = null;
-
   public ChooseWorkspaceModelWidget(IJavaProject project, int acceptFlags) {
+  	
+    super();
+
     configure(project);
     this.acceptFlags = acceptFlags;
-  }
 
-  public void addDoubleClickListener(IDoubleClickListener listener) {
-    if (!doubleClickListeners.contains(listener)) {
+    setFilterLabel("Search:");
+    setInitialFilter("*");
 
-      doubleClickListeners.add(listener);
+    setUpperListLabel("Chose:");
+    setUpperListLabelProvider(new TapestryStorageLabelProvider());
+    setUpperListContentProvider(new StorageContentProvider());
 
-    }
-  }
+    setLowerListLabel("in package:");
+    setLowerListLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
+    setLowerListContentProvider(new PackageContentProvider());
 
-  public void removeDoubleClickListener(IDoubleClickListener listener) {
-
-    doubleClickListeners.remove(listener);
-
-  }
-
-  public Composite createControl(Composite parent) {
-
-    Composite container = new Composite(parent, SWT.NONE);
-
-    FormLayout layout = new FormLayout();
-    layout.marginWidth = 4;
-    layout.marginHeight = 4;
-    container.setLayout(layout);
-
-    FormData formData = new FormData();
-    formData.top = new FormAttachment(0, 0);
-    formData.left = new FormAttachment(0, 0);
-    formData.width = 400;
-
-    container.setLayoutData(formData);
-
-    Label searchLabel = new Label(container, SWT.NONE);
-    searchLabel.setText("search:");
-
-    nameText = createText(container);
-
-    Label resourceListLabel = new Label(container, SWT.NONE);
-    resourceListLabel.setText("choose :");
-
-    resources = createUpperList(container);
-
-    Label packagesLabel = new Label(container, SWT.NONE);
-    packagesLabel.setText("in package:");
-
-    packages = createLowerList(container);
-
-    addControl(searchLabel, container, 4);
-
-    addControl(nameText, searchLabel, 4);
-
-    addControl(resourceListLabel, nameText, 4);
-
-    addControl(resources, resourceListLabel, 4);
-
-    PixelConverter converter = new PixelConverter(resources);
-
-    formData = (FormData) resources.getLayoutData();
-    formData.height = converter.convertHeightInCharsToPixels(8);
-
-    addControl(packagesLabel, resources, 4);
-
-    addControl(packages, packagesLabel, 4);
-    
-    converter = new PixelConverter(packages);
-    formData = (FormData) packages.getLayoutData();
-    formData.height = converter.convertHeightInCharsToPixels(5);
-    
-
-    //a little trick to make the window come up faster
-    String initialFilter = "*";
-    if (initialFilter != null) {
-      nameText.setText(initialFilter);
-      nameText.selectAll();
-    }
-
-    control = container;
-    return container;
-  }
-
-  protected void addControl(Control toBeAdded, Control parent, int verticalOffset) {
-    FormData formData = new FormData();
-    formData.top = new FormAttachment(parent, verticalOffset);
-    formData.left = new FormAttachment(0, 0);
-    formData.right = new FormAttachment(100, 0);
-    toBeAdded.setLayoutData(formData);
-  }
-
-  protected void addControl(Control toBeAdded, Control parent) {
-    addControl(toBeAdded, parent, 0);
   }
 
   public ISelection getSelection() {
 
+    IStructuredSelection selection = (IStructuredSelection) super.getSelection();
+
+    if (selection == null || selection.isEmpty()) {
+
+      return selection;
+
+    }
+
+    Object[] selectionData = selection.toArray();
+
+    IStorage selectedStorage = (IStorage) selectionData[0];
+    IPackageFragment selectedPackage = (IPackageFragment) selectionData[1];
+
     resultString = null;
     resultPackage = null;
 
-    int i = resources.getSelectionIndex();
+    if (selectedStorage != null) {
 
-    if (i >= 0) {
-
-      resultString = resources.getItem(i).getText();
+      resultString = selectedStorage.getName();
     }
 
-    int j = packages.getSelectionIndex();
+    if (selectedPackage != null) {
 
-    if (j >= 0) {
-
-      resultPackage = (IPackageFragment) packages.getItem(j).getData();
+      resultPackage = selectedPackage;
 
     }
 
@@ -207,21 +133,11 @@ public class ChooseWorkspaceModelWidget extends Viewer {
 
       return;
 
-    }
-
-    collector.reset();
-    String componentBit = nameText.getText().trim();
-
-    if ("".equals(componentBit)) {
-
-      updateListWidget(empty, resources, nameLabelProvider);
-
     } else {
 
-      collector.reset();
-      lookup.findAll(componentBit, true, acceptFlags, collector);
-      updateListWidget(collector.getApplicationNames(), resources, nameLabelProvider);
+      super.refresh();
     }
+
   }
 
   public void configure(IJavaProject project) {
@@ -239,144 +155,8 @@ public class ChooseWorkspaceModelWidget extends Viewer {
   }
 
   public void dispose() {
-    nameText.dispose();
-    resources.dispose();
-    packages.dispose();
+    super.dispose();
     lookup = null;
-  }
-
-  private Text createText(Composite parent) {
-    Text text = new Text(parent, SWT.BORDER);
-    Listener l = new Listener() {
-      public void handleEvent(Event evt) {
-        refresh();
-      }
-    };
-    text.addListener(SWT.Modify, l);
-
-    return text;
-  }
-
-  private Table createUpperList(Composite parent) {
-
-    Table table = new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-    table.addListener(SWT.Selection, new Listener() {
-      public void handleEvent(Event evt) {
-        handleUpperSelectionChanged();
-      }
-    });
-
-    table.addListener(SWT.MouseDoubleClick, new Listener() {
-      public void handleEvent(Event evt) {
-        handleDoubleClick();
-      }
-    });
-    table.addDisposeListener(new DisposeListener() {
-      public void widgetDisposed(DisposeEvent e) {
-        nameLabelProvider.dispose();
-      }
-    });
-    return table;
-  }
-
-
-
-  private Table createLowerList(Composite parent) {
-
-    Table table = new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-    table.addListener(SWT.Selection, new Listener() {
-      public void handleEvent(Event evt) {
-        handleLowerSelectionChanged();
-      }
-    });
-    table.addListener(SWT.MouseDoubleClick, new Listener() {
-      public void handleEvent(Event evt) {
-        handleDoubleClick();
-      }
-    });
-    table.addDisposeListener(new DisposeListener() {
-      public void widgetDisposed(DisposeEvent e) {
-        packageLabelProvider.dispose();
-      }
-    });
-
-    return table;
-  }
-
-  /**
-   * Method handleDoubleClick.
-   */
-  private void handleDoubleClick() {
-
-    for (Iterator iter = doubleClickListeners.iterator(); iter.hasNext();) {
-
-      IDoubleClickListener listener = (IDoubleClickListener) iter.next();
-
-      listener.doubleClick(new DoubleClickEvent(this, getSelection()));
-    }
-  }
-  
-  protected void handleUpperSelectionChanged() {
-    int selection = resources.getSelectionIndex();
-
-    if (selection >= 0) {
-
-      String name = resources.getItem(selection).getText();
-      updateListWidget(collector.getPackagesFor(name), packages, packageLabelProvider);
-
-    } else {
-
-      updateListWidget(empty, packages, packageLabelProvider);
-
-    }
-    
-    fireSelectionChanged(new SelectionChangedEvent(this, getSelection()));
-    
-    
-  }
-
-  protected void handleLowerSelectionChanged() {
-
-    fireSelectionChanged(new SelectionChangedEvent(this, getSelection()));
-  	
-  	
-  }
-
-  private void updateListWidget(Object[] elements, Table table, ILabelProvider provider) {
-    int size = elements.length;
-    table.setRedraw(false);
-    int itemCount = table.getItemCount();
-    if (size < itemCount) {
-      table.remove(0, itemCount - size - 1);
-    }
-    TableItem[] items = table.getItems();
-    for (int i = 0; i < size; i++) {
-      TableItem ti = null;
-      if (i < itemCount) {
-        ti = items[i];
-      } else {
-        ti = new TableItem(table, i);
-      }
-      ti.setText(provider.getText(elements[i]));
-      ti.setData(elements[i]);
-      Image img = provider.getImage(elements[i]);
-      if (img != null) {
-        ti.setImage(img);
-      }
-    }
-    if (table.getItemCount() > 0) {
-      table.setSelection(0);
-    }
-    table.setRedraw(true);
-    handleSelectionChanged(table);
-  }
-
-  protected void handleSelectionChanged(Table table) {
-    if (table == resources) {
-      handleUpperSelectionChanged();
-    } else {
-      fireSelectionChanged(new SelectionChangedEvent(this, getSelection()));
-    }
   }
 
   public String getResultString() {
@@ -397,10 +177,92 @@ public class ChooseWorkspaceModelWidget extends Viewer {
     return collector.getStorage(resultString, resultPackage);
 
   }
+  
+  public String getResultPath() {
+  	
+  	String name = getResultStorage().getName();
+  	String path = "/";
+  	if ("".equals(resultPackage.getElementName())) {
+  		
+  		return  path+name;
+  		
+  	}
+  	
+  	path += resultPackage.getElementName().replace('.', '/');
+  	path += "/"+name;
+  	
+  	return path;
+  	
+  }
 
-  protected class ScanCollector implements ITapestryLookupRequestor {
+  class StorageContentProvider implements IStructuredContentProvider {
+
+    public Object[] getElements(Object inputElement) {
+
+      String searchFilter = (String) inputElement;
+
+      if (searchFilter == null || "".equals(searchFilter)) {
+
+        return empty;
+
+      }
+
+      collector.reset();
+
+      lookup.findAll(searchFilter, true, acceptFlags, collector);
+
+      return collector.getStorages().toArray();
+
+    }
+
+    /**
+     * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+     */
+    public void dispose() {
+    }
+
+    /**
+     * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(Viewer, Object, Object)
+     */
+    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    }
+
+  }
+
+  class PackageContentProvider implements IStructuredContentProvider {
+
+    public Object[] getElements(Object inputElement) {
+
+      IStorage selectedStorage = (IStorage) inputElement;
+
+      if (selectedStorage == null) {
+
+        return empty;
+
+      }
+
+      return collector.getPackagesFor(selectedStorage.getName());
+
+    }
+
+    /**
+     * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+     */
+    public void dispose() {
+    }
+
+    /**
+     * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(Viewer, Object, Object)
+     */
+    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    }
+
+  }
+
+  class ScanCollector implements ILookupRequestor {
 
     Map results;
+    List storages;
     Map storageLookup;
 
     /**
@@ -414,10 +276,17 @@ public class ChooseWorkspaceModelWidget extends Viewer {
     public void reset() {
       results = new HashMap();
       storageLookup = new HashMap();
+      storages = new ArrayList();
     }
 
     public Map getResults() {
       return results;
+    }
+
+    public List getStorages() {
+
+      return storages;
+
     }
 
     public IStorage getStorage(String name, IPackageFragment pack) {
@@ -434,14 +303,15 @@ public class ChooseWorkspaceModelWidget extends Viewer {
     public ITapestryModel getModel(String name, IPackageFragment pack) {
 
       try {
-      	
+
         IStorage storage = getStorage(name, pack);
-        
-        return (ITapestryModel) TapestryPlugin.getTapestryModelManager(storage).getReadOnlyModel(storage);
-        
+
+        return (ITapestryModel) TapestryPlugin.getTapestryModelManager(storage).getReadOnlyModel(
+          storage);
+
       } catch (CoreException e) {
-      	
-      	return null;
+
+        return null;
       }
     }
 
@@ -483,6 +353,8 @@ public class ChooseWorkspaceModelWidget extends Viewer {
       Object storePackageFragment;
       String packageElementName;
 
+      storages.add(storage);
+
       if (fragment == null) {
 
         storePackageFragment = "(default package)";
@@ -511,84 +383,6 @@ public class ChooseWorkspaceModelWidget extends Viewer {
       return true;
     }
 
-  }
-  
-  protected class LabelProvider implements ILabelProvider, IBaseLabelProvider {
-
-    Image applicationImage = TapestryImages.getSharedImage("application16.gif");
-    Image libraryImage = TapestryImages.getSharedImage("library16.gif");
-    Image componentImage = TapestryImages.getSharedImage("component16.gif");
-    Image pageImage = TapestryImages.getSharedImage("page16.gif");
-
-    public Image getImage(Object element) {
-
-      String name = (String) element;
-      if (name.indexOf(".application") >= 0) {
-
-        return applicationImage;
-
-      } else if (name.indexOf(".library") >= 0) {
-
-        return libraryImage;
-
-      } else if (name.indexOf(".jwc") >= 0) {
-
-        return componentImage;
-
-      } else if (name.indexOf(".page") >= 0) {
-
-        return pageImage;
-
-      }
-      return null;
-    }
-
-    public String getText(Object element) {
-
-      return (String) element;
-    }
-
-    public void dispose() {
-      // Shared image disposal handled by the Plugin
-    }
-
-    public void addListener(ILabelProviderListener listener) {
-    }
-    public boolean isLabelProperty(Object arg0, String arg1) {
-      return false;
-    }
-    public void removeListener(ILabelProviderListener listener) {
-    }
-
-  }
-
-
-  
-
-  /**
-   * @see org.eclipse.jface.viewers.Viewer#getControl()
-   */
-  public Control getControl() {
-    return control;
-  }
-
-  /**
-   * @see org.eclipse.jface.viewers.IInputProvider#getInput()
-   */
-  public Object getInput() {
-    return null;
-  }
-
-  /**
-   * @see org.eclipse.jface.viewers.Viewer#setInput(Object)
-   */
-  public void setInput(Object input) {
-  }
-
-  /**
-   * @see org.eclipse.jface.viewers.Viewer#setSelection(ISelection, boolean)
-   */
-  public void setSelection(ISelection selection, boolean reveal) {
   }
 
 }

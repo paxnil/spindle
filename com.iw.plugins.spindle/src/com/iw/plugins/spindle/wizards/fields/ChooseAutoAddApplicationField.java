@@ -48,8 +48,8 @@ import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.ui.dialogfields.UneditableComboBoxDialogField;
-import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
 import com.iw.plugins.spindle.util.Utils;
+import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 
@@ -297,7 +297,7 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
     return selectedPackage;
   }
 
-  protected class FinderRequest implements ITapestryLookupRequestor {
+  protected class FinderRequest implements ILookupRequestor {
 
     ArrayList storages;
     ArrayList packages;

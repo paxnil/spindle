@@ -60,7 +60,7 @@ import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.AbstractDialog;
-import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
+import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class ChooseComponentDialog extends AbstractDialog {
@@ -346,7 +346,7 @@ public class ChooseComponentDialog extends AbstractDialog {
     return resultComponent;
   }
 
-  protected class ScanCollector implements ITapestryLookupRequestor {
+  protected class ScanCollector implements ILookupRequestor {
 
     Map results;
 

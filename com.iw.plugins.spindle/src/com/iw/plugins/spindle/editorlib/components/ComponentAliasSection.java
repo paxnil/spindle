@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
@@ -45,6 +47,7 @@ import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
@@ -52,7 +55,9 @@ import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
+import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class ComponentAliasSection
   extends AbstractPropertySheetEditorSection
@@ -74,7 +79,7 @@ public class ComponentAliasSection
   }
 
   protected void fillContextMenu(IMenuManager manager) {
-    Object selected =  getSelected();
+    Object selected = getSelected();
     boolean isEditable = isModelEditable();
     if (isEditable) {
       manager.add(newAliasAction);
@@ -299,32 +304,48 @@ public class ComponentAliasSection
     * @see Action#run()
     */
     public void run() {
-      updateSelection = true;
+      try {
+        updateSelection = true;
 
-      IPluginLibrarySpecification appSpec =
-        (IPluginLibrarySpecification) ((TapestryLibraryModel) getModel())
-          .getSpecification();
+        IPluginLibrarySpecification specification =
+          (IPluginLibrarySpecification) ((TapestryLibraryModel) getModel()).getSpecification();
 
-      ComponentRefDialog dialog =
-        new ComponentRefDialog(newButton.getShell(), getModel(), appSpec.getComponentAliases());
+        ChooseWorkspaceModelDialog dialog =
+          ChooseWorkspaceModelDialog.createComponentModelDialog(
+            newButton.getShell(),
+            TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage()),
+            "Choose Component",
+            "Choose a Component to be added");
 
-      dialog.create();
-      if (dialog.open() == dialog.OK) {
-        String name = dialog.getResultName();
-        String componentString = dialog.getResultComponent();
-        if (appSpec.getComponentSpecificationPath(name) != null) {
-          int counter = 1;
-          while (appSpec.getComponentSpecificationPath(name + counter) != null) {
-            counter++;
+        dialog.create();
+
+        if (dialog.open() == dialog.OK) {
+
+          String componentName = dialog.getResultString();
+          IPackageFragment componentPackage = dialog.getResultPackage();
+          String path = dialog.getResultPath();
+
+          int index = componentName.indexOf(".");
+
+          componentName = componentName.substring(0, index);
+
+          if (specification.getComponentSpecificationPath(componentName) != null) {
+
+            int count = 1;
+            while (specification.getComponentSpecificationPath(componentName + count) != null) {
+              count++;
+            }
+
+            componentName += count;
           }
-          name = name + counter;
+          specification.setComponentSpecificationPath(componentName, path);
+          forceDirty();
+          update();
+          setSelection(componentName);
         }
-        appSpec.setComponentSpecificationPath(name, componentString);
-        forceDirty();
-        update();
-        setSelection(name);
+        updateSelection = false;
+      } catch (CoreException e) {
       }
-      updateSelection = false;
     }
   }
 
@@ -344,8 +365,7 @@ public class ComponentAliasSection
       AliasHolder holder = (AliasHolder) getSelected();
       if (holder != null) {
 
-        IPluginLibrarySpecification appSpec =
-          (IPluginLibrarySpecification) holder.getParent();
+        IPluginLibrarySpecification appSpec = (IPluginLibrarySpecification) holder.getParent();
 
         String prev = findPrevious(holder.getIdentifier());
         appSpec.removeComponentSpecificationPath(holder.getIdentifier());

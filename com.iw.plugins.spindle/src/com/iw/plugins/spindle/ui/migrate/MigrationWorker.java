@@ -10,7 +10,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
-import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
+import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 
 /**
  * @author gwl
@@ -19,7 +19,7 @@ import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
  * Copyright 2002, Intelligent Work Inc.
  * All Rights Reserved.
  */
-public class MigrationWorker implements ITapestryLookupRequestor {
+public class MigrationWorker implements ILookupRequestor {
 
     List results = new ArrayList();
     TapestryProjectModelManager mgr;

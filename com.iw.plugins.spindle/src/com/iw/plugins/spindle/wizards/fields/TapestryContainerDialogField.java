@@ -54,8 +54,8 @@ import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 import com.iw.plugins.spindle.ui.dialogfields.UneditableStringButtonField;
 import com.iw.plugins.spindle.ui.dialogfields.UneditableStringField;
-import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
 import com.iw.plugins.spindle.util.Utils;
+import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 
@@ -297,7 +297,7 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
     }
   }
 
-  protected class FinderRequest implements ITapestryLookupRequestor {
+  protected class FinderRequest implements ILookupRequestor {
 
     ArrayList storages;
     ArrayList packages;

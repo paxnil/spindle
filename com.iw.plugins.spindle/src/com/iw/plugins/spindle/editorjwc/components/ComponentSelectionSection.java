@@ -35,7 +35,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -45,7 +45,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.pde.core.IModel;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
@@ -75,15 +74,16 @@ import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
-import com.iw.plugins.spindle.ui.ChooseComponentDialog;
+import com.iw.plugins.spindle.ui.ChooseFromNamespaceDialog;
+import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.ComponentAliasViewer;
 import com.iw.plugins.spindle.ui.CopyToClipboardAction;
-import com.iw.plugins.spindle.ui.EmptySelection;
 import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
+import com.iw.plugins.spindle.util.lookup.TapestryNamespaceLookup;
 
 public class ComponentSelectionSection
   extends AbstractPropertySheetEditorSection
@@ -179,7 +179,9 @@ public class ComponentSelectionSection
   protected void createButtons(Composite buttonContainer, FormWidgetFactory factory) {
 
     super.createButtons(buttonContainer, factory);
-
+    
+    newButton.setText(newComponentAction.getText());
+    
     copyButton = factory.createButton(buttonContainer, "Copy", SWT.PUSH);
     GridData gd = new GridData(GridData.FILL_HORIZONTAL);
     gd.verticalAlignment = GridData.BEGINNING;
@@ -398,39 +400,65 @@ public class ComponentSelectionSection
   }
 
   class NewComponentAction extends Action {
-    /**
-     * Constructor for NewPropertyAction
-     */
+
     protected NewComponentAction() {
       super();
-      setText("New");
-      setToolTipText("Create a new Contained Component");
+      setText("Add");
     }
 
     /**
     * @see Action#run()
     */
     public void run() {
-      updateSelection = true;
-      TapestryComponentModel model = (TapestryComponentModel) getFormPage().getModel();
-      PluginComponentSpecification spec = model.getComponentSpecification();
-      String newC = "component";
-      if (spec.getComponent(newC) != null) {
-        int counter = 0;
-        while (spec.getComponent(newC + counter) != null) {
-          counter++;
-        }
-        newC = newC + counter;
-      }
-      PluginContainedComponent newComponent = new PluginContainedComponent();
-      newComponent.setType("fill in type");
-      spec.setComponent(newC, newComponent);
-      forceDirty();
-      update();
-      setSelection(newC);
-      updateSelection = false;
-    }
+      try {
+        updateSelection = true;
 
+        TapestryComponentModel model = (TapestryComponentModel) getFormPage().getModel();
+
+        PluginComponentSpecification specification = model.getComponentSpecification();
+
+        ChooseFromNamespaceDialog dialog =
+          new ChooseFromNamespaceDialog(
+            newButton.getShell(),
+            TapestryPlugin.getDefault().getTapestryProjectFor(getModel().getUnderlyingStorage()),
+            "Choose Component",
+            "Choose a Component to be added",
+            TapestryNamespaceLookup.ACCEPT_COMPONENTS);
+
+        dialog.create();
+
+        if (dialog.open() == dialog.OK) {
+
+          String componentName = dialog.getResultString();
+          String path = dialog.getResultPath();
+
+          int index = componentName.indexOf(".");
+
+          componentName = componentName.substring(0, index);
+
+          if (specification.getComponent(componentName) != null) {
+
+            int count = 1;
+            while (specification.getComponent(componentName + count) != null) {
+              count++;
+            }
+
+            componentName += count;
+          }
+
+          PluginContainedComponent newComponent = new PluginContainedComponent();
+          newComponent.setType(path);
+          specification.setComponent(componentName, newComponent);
+          forceDirty();
+          update();
+          setSelection(componentName);
+          updateSelection = false;
+        }
+
+      } catch (CoreException e) {
+      }
+
+    }
   }
 
   class CopyToAction extends Action {
@@ -448,197 +476,195 @@ public class ComponentSelectionSection
     * @see Action#run()
     */
     public void run() {
-      ITapestryProject tproject;
-      try {
-        tproject =
-          TapestryPlugin.getDefault().getTapestryProjectFor(getModel().getUnderlyingStorage());
-      } catch (CoreException e) {
+      //      ITapestryProject tproject;
+      //      try {
+      //        tproject =
+      //          TapestryPlugin.getDefault().getTapestryProjectFor(getModel().getUnderlyingStorage());
+      //      } catch (CoreException e) {
+      //
+      //        MessageDialog.openError(
+      //          newButton.getShell(),
+      //          "Spindle project error",
+      //          "Not in Tapestry project");
+      //        return;
+      //      }
+      //
+      //      ChooseComponentFromNamespaceDialog dialog =
+      //        new ChooseComponentFromNamespaceDialog(
+      //          newButton.getShell(),
+      //          tproject,
+      //          "Copy To",
+      //          "Choose a target for the copy",
+      //          true,
+      //          TapestryLookup.ACCEPT_COMPONENTS | TapestryLookup.WRITEABLE);
+      //
+      //      dialog.create();
+      //
+      //      if (dialog.open() == dialog.OK) {
+      //
+      //        String chosen = dialog.getResultComponent();
+      //
+      //        TapestryComponentModel readOnlyModel = ModelUtils.findComponent(chosen, getModel());
+      //
+      //        if (readOnlyModel == null) {
+      //          MessageDialog.openError(
+      //            newButton.getShell(),
+      //            "Copy To action aborted",
+      //            "could not find '" + chosen + "'");
+      //          return;
+      //        }
+      //
+      //        IStorage underlier = readOnlyModel.getUnderlyingStorage();
+      //        if (underlier.isReadOnly()) {
+      //          MessageDialog.openError(
+      //            newButton.getShell(),
+      //            "Copy To action aborted",
+      //            "'" + underlier.getFullPath() + "'\nis readonly");
+      //          return;
+      //        }
+      //
+      //        PluginContainedComponent component = (PluginContainedComponent) getSelected();
+      //
+      //        IEditorPart editor = Utils.getEditorFor(underlier);
+      //
+      //        if (editor != null) {
+      //
+      //          performCopyInEditor(component, editor, chosen);
+      //
+      //        } else {
+      //
+      //          performCopyInWorkspace(component, underlier, chosen);
+      //
+      //        }
+    }
+  }
 
-        MessageDialog.openError(
-          newButton.getShell(),
-          "Spindle project error",
-          "Not in Tapestry project");
-        return;
-      }
+  private void performCopyInEditor(
+    PluginContainedComponent component,
+    IEditorPart editor,
+    String name) {
+    SpindleMultipageEditor targetEditor = null;
 
-      ChooseComponentDialog dialog =
-        new ChooseComponentDialog(
-          newButton.getShell(),
-          tproject,
-          "Copy To",
-          "Choose a target for the copy",
-          true,
-          TapestryLookup.ACCEPT_COMPONENTS | TapestryLookup.WRITEABLE);
+    try {
 
-      dialog.create();
+      targetEditor = (SpindleMultipageEditor) editor;
 
-      if (dialog.open() == dialog.OK) {
+    } catch (ClassCastException e) {
 
-        String chosen = dialog.getResultComponent();
-
-        TapestryComponentModel readOnlyModel = ModelUtils.findComponent(chosen, getModel());
-
-        if (readOnlyModel == null) {
-          MessageDialog.openError(
-            newButton.getShell(),
-            "Copy To action aborted",
-            "could not find '" + chosen + "'");
-          return;
-        }
-
-        IStorage underlier = readOnlyModel.getUnderlyingStorage();
-        if (underlier.isReadOnly()) {
-          MessageDialog.openError(
-            newButton.getShell(),
-            "Copy To action aborted",
-            "'" + underlier.getFullPath() + "'\nis readonly");
-          return;
-        }
-
-        PluginContainedComponent component = (PluginContainedComponent) getSelected();
-
-        IEditorPart editor = Utils.getEditorFor(underlier);
-
-        if (editor != null) {
-
-          performCopyInEditor(component, editor, chosen);
-
-        } else {
-
-          performCopyInWorkspace(component, underlier, chosen);
-
-        }
-      }
+      MessageDialog.openError(
+        newButton.getShell(),
+        "Copy To action aborted",
+        "'" + name + "' \nis open in a non-Spindle editor. Can not continue");
+      return;
     }
 
-    private void performCopyInEditor(
-      PluginContainedComponent component,
-      IEditorPart editor,
-      String name) {
-      SpindleMultipageEditor targetEditor = null;
+    TapestryComponentModel model = null;
 
-      try {
-
-        targetEditor = (SpindleMultipageEditor) editor;
-
-      } catch (ClassCastException e) {
-
-        MessageDialog.openError(
-          newButton.getShell(),
-          "Copy To action aborted",
-          "'" + name + "' \nis open in a non-Spindle editor. Can not continue");
+    if (targetEditor != null && targetEditor.isDirty()) {
+      RequiredSaveEditorAction saver = new RequiredSaveEditorAction(targetEditor);
+      if (!saver.save()) {
         return;
-      }
-
-      TapestryComponentModel model = null;
-
-      if (targetEditor != null && targetEditor.isDirty()) {
-        RequiredSaveEditorAction saver = new RequiredSaveEditorAction(targetEditor);
-        if (!saver.save()) {
-          return;
-        }
-
-      }
-
-      model = (TapestryComponentModel) targetEditor.getModel();
-
-      if (!alreadyHasComponent(component, model) && doCopy(component, model)) {
-        targetEditor.showPage(SpindleMultipageEditor.SOURCE_PAGE);
       }
 
     }
 
-    private boolean alreadyHasComponent(
-      PluginContainedComponent component,
-      TapestryComponentModel model) {
-      boolean result = false;
-      PluginComponentSpecification spec = model.getComponentSpecification();
-      if (spec.getComponent(component.getIdentifier()) != null) {
+    model = (TapestryComponentModel) targetEditor.getModel();
+
+    if (!alreadyHasComponent(component, model) && doCopy(component, model)) {
+      targetEditor.showPage(SpindleMultipageEditor.SOURCE_PAGE);
+    }
+
+  }
+
+  private boolean alreadyHasComponent(
+    PluginContainedComponent component,
+    TapestryComponentModel model) {
+    boolean result = false;
+    PluginComponentSpecification spec = model.getComponentSpecification();
+    if (spec.getComponent(component.getIdentifier()) != null) {
+      result = true;
+      MessageDialog.openError(
+        newButton.getShell(),
+        "Copy To action aborted",
+        "The selected target component already has '"
+          + component.getIdentifier()
+          + "'. Can not continue");
+    }
+    return result;
+  }
+
+  private boolean doCopy(PluginContainedComponent component, TapestryComponentModel model) {
+    boolean result = false;
+    try {
+      if (!model.isLoaded()) {
+        parseError();
+      } else {
+        Utils.copyContainedComponentTo(component.getIdentifier(), component.deepCopy(), model);
         result = true;
-        MessageDialog.openError(
-          newButton.getShell(),
-          "Copy To action aborted",
-          "The selected target component already has '"
-            + component.getIdentifier()
-            + "'. Can not continue");
       }
-      return result;
+    } catch (Exception e) {
+      MessageDialog.openError(
+        newButton.getShell(),
+        "Copy To action failed",
+        e.getClass().getName());
+    }
+    return result;
+  }
+
+  private void performCopyInWorkspace(
+    PluginContainedComponent component,
+    IStorage storage,
+    String name) {
+    String consumer = "PerformCopyToInWorkspace";
+
+    TapestryProjectModelManager mgr = null;
+    TapestryComponentModel model = null;
+
+    try {
+
+      mgr = TapestryPlugin.getTapestryModelManager(storage);
+      mgr.connect(storage, consumer, true);
+      model = (TapestryComponentModel) mgr.getEditableModel(storage, consumer);
+
+    } catch (CoreException e) {
     }
 
-    private boolean doCopy(PluginContainedComponent component, TapestryComponentModel model) {
-      boolean result = false;
-      try {
-        if (!model.isLoaded()) {
-          parseError();
-        } else {
-          Utils.copyContainedComponentTo(component.getIdentifier(), component.deepCopy(), model);
-          result = true;
-        }
-      } catch (Exception e) {
-        MessageDialog.openError(
-          newButton.getShell(),
-          "Copy To action failed",
-          e.getClass().getName());
-      }
-      return result;
+    if (model == null || !model.isEditable()) {
+      MessageDialog.openError(
+        newButton.getShell(),
+        "Copy To action aborted",
+        "Unable to obtain an editable copy of '" + name + "'. \nCan not continue");
+      mgr.disconnect(storage, consumer);
+      return;
     }
 
-    private void performCopyInWorkspace(
-      PluginContainedComponent component,
-      IStorage storage,
-      String name) {
-      String consumer = "PerformCopyToInWorkspace";
+    if (!alreadyHasComponent(component, model) && doCopy(component, model)) {
 
-      TapestryProjectModelManager mgr = null;
-      TapestryComponentModel model = null;
+      Utils.saveModel(model, new NullProgressMonitor());
+      TapestryPlugin.openTapestryEditor(storage);
 
-      try {
-
-        mgr = TapestryPlugin.getTapestryModelManager(storage);
-        mgr.connect(storage, consumer, true);
-        model = (TapestryComponentModel) mgr.getEditableModel(storage, consumer);
-
-      } catch (CoreException e) {
-      }
-
-      if (model == null || !model.isEditable()) {
-        MessageDialog.openError(
-          newButton.getShell(),
-          "Copy To action aborted",
-          "Unable to obtain an editable copy of '" + name + "'. \nCan not continue");
-        mgr.disconnect(storage, consumer);
-        return;
-      }
-
-      if (!alreadyHasComponent(component, model) && doCopy(component, model)) {
-
-        Utils.saveModel(model, new NullProgressMonitor());
-        TapestryPlugin.openTapestryEditor(storage);
-
-      }
-
-      if (mgr != null) {
-
-        mgr.disconnect(storage, consumer);
-
-      }
     }
 
-    private void parseError() {
-      Status status =
-        new Status(
-          IStatus.ERROR,
-          TapestryPlugin.getDefault().getPluginId(),
-          IStatus.OK,
-          "Abort, target component is has parse errors",
-          null);
-      ErrorDialog.openError(
-        TapestryPlugin.getDefault().getActiveWorkbenchShell(),
-        null,
-        null,
-        status);
-    }
+    if (mgr != null) {
 
+      mgr.disconnect(storage, consumer);
+
+    }
+  }
+
+  private void parseError() {
+    Status status =
+      new Status(
+        IStatus.ERROR,
+        TapestryPlugin.getDefault().getPluginId(),
+        IStatus.OK,
+        "Abort, target component is has parse errors",
+        null);
+    ErrorDialog.openError(
+      TapestryPlugin.getDefault().getActiveWorkbenchShell(),
+      null,
+      null,
+      status);
   }
 
   class CopyComponentAction extends Action {

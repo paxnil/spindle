@@ -46,7 +46,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
 import com.iw.plugins.spindle.util.JarEntryFileFaker;
 
 // does not stay up to date as time goes on!
@@ -167,6 +166,15 @@ public class TapestryLookup implements ILookupAcceptor {
     findAll(tapestryPath, false, ACCEPT_APPLICATIONS | FULL_TAPESTRY_PATH, request);
     return request.getResults();
   }
+  
+  public IStorage[] findLibrary(String tapestryPath) {
+    if (!initialized) {
+      throw new Error("not initialized");
+    }
+    StorageOnlyRequest request = new StorageOnlyRequest();
+    findAll(tapestryPath, false, ACCEPT_LIBRARIES | FULL_TAPESTRY_PATH, request);
+    return request.getResults();
+  }
 
   public IStorage[] findHtmlFor(String tapestryPath) {
 
@@ -176,6 +184,8 @@ public class TapestryLookup implements ILookupAcceptor {
     findAll(usePath, false, ACCEPT_HTML | FULL_TAPESTRY_PATH, request);
     return request.getResults();
   }
+  
+
 
   public IResource findParentResource(IStorage storage) throws JavaModelException {
     if (storage instanceof IResource) {
@@ -193,7 +203,14 @@ public class TapestryLookup implements ILookupAcceptor {
       storage = (IStorage) storage.getAdapter(IStorage.class);
     }
     if (storage instanceof IResource) {
-      return project.findPackageFragment(((IResource) storage).getParent().getFullPath());
+    	
+	  IPackageFragment result = (IPackageFragment)project.findPackageFragment(((IResource) storage).getParent().getFullPath());
+	  
+	  if (result != null) {  
+	  	  
+      	return result;
+      	
+	  }
     }
     for (int i = 0; i < fPackageFragmentRoots.length; i++) {
       boolean isBinary = fPackageFragmentRoots[i].getKind() == IPackageFragmentRoot.K_BINARY;
@@ -205,14 +222,23 @@ public class TapestryLookup implements ILookupAcceptor {
         }
         for (int j = 0; j < children.length; j++) {
           IPackageFragment fragment = (IPackageFragment) children[j];
+          
           Object[] nonJavaResources = fragment.getNonJavaResources();
+          
+          if (nonJavaResources.length == 0) {
+          	
+          	nonJavaResources = getSourcePackageResources(fragment);
+          	
+          }
+          
+          
           for (int k = 0; k < nonJavaResources.length; k++) {
             if (nonJavaResources[k].equals(storage)) {
               return fragment;
             }
           }
         }
-      } catch (JavaModelException ex) {
+      } catch (CoreException ex) {
         //do nothing
       }
     }
@@ -259,7 +285,7 @@ public class TapestryLookup implements ILookupAcceptor {
   public void findAllManaged(
     String prefix,
     boolean partialMatch,
-    ITapestryLookupRequestor requestor) {
+    ILookupRequestor requestor) {
     seekExtensions = TapestryPlugin.getManagedExtensions();
     if (!initialized) {
       throw new Error("not initialized");
@@ -292,7 +318,7 @@ public class TapestryLookup implements ILookupAcceptor {
     String prefix,
     boolean partialMatch,
     int acceptFlags,
-    ITapestryLookupRequestor requestor) {
+    ILookupRequestor requestor) {
 
     if (!initialized) {
       throw new Error("not initialized");
@@ -332,7 +358,7 @@ public class TapestryLookup implements ILookupAcceptor {
     IPackageFragment pkg,
     boolean partialMatch,
     int acceptFlags,
-    ITapestryLookupRequestor requestor) {
+    ILookupRequestor requestor) {
 
     if (!initialized) {
       throw new Error("not initialized");
@@ -372,7 +398,7 @@ public class TapestryLookup implements ILookupAcceptor {
     IPackageFragment pkg,
     boolean partialMatch,
     int acceptFlags,
-    ITapestryLookupRequestor requestor) {
+    ILookupRequestor requestor) {
 
     Object[] jarFiles = null;
     try {
@@ -413,7 +439,7 @@ public class TapestryLookup implements ILookupAcceptor {
     IPackageFragment pkg,
     boolean partialMatch,
     int acceptFlags,
-    ITapestryLookupRequestor requestor) {
+    ILookupRequestor requestor) {
 
     Object[] files = null;
     try {
@@ -519,7 +545,7 @@ public class TapestryLookup implements ILookupAcceptor {
     return acceptor.acceptAsTapestry(jproject, s, acceptFlags);
   }
 
-  public static class StorageOnlyRequest implements ITapestryLookupRequestor {
+  public static class StorageOnlyRequest implements ILookupRequestor {
 
     ArrayList result;
 

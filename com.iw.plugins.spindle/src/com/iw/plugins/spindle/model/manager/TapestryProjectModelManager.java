@@ -8,14 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.Vector;
 
-import net.sf.tapestry.util.xml.AbstractDocumentParser;
-import org.apache.log4j.Category;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.Priority;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -34,7 +28,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.internal.core.IModelProviderEvent;
 import org.eclipse.pde.internal.core.IModelProviderListener;
@@ -44,7 +37,8 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
-import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
+import com.iw.plugins.spindle.util.lookup.DefaultLibraryNamespaceFragment;
+import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 /**
@@ -135,7 +129,7 @@ public class TapestryProjectModelManager
               TapestryPlugin.registerManagedExtension(extension);
             }
           } catch (CoreException e) {
-          	e.printStackTrace();
+            e.printStackTrace();
           }
 
         }
@@ -145,7 +139,6 @@ public class TapestryProjectModelManager
     }
 
   }
-
 
   private ITapestryModelManagerDelegate getDelegate(IStorage storage) {
     return getDelegate(extension(storage));
@@ -173,8 +166,8 @@ public class TapestryProjectModelManager
    * @return Set
    */
   public List getManagedExtensions() {
-  	ArrayList list = new ArrayList();
-  	list.addAll(modelDelegates.keySet());
+    ArrayList list = new ArrayList();
+    list.addAll(modelDelegates.keySet());
     return list;
   }
 
@@ -209,8 +202,8 @@ public class TapestryProjectModelManager
   }
 
   public void connect(Object element, Object consumer, boolean editable) {
-  	initializeProjectTapestryModels();
-  	
+    initializeProjectTapestryModels();
+
     ModelInfo info = (ModelInfo) models.get(element);
 
     if (info == null) {
@@ -318,8 +311,8 @@ public class TapestryProjectModelManager
    * will never return an editable model
    */
   public ITapestryModel getReadOnlyModel(Object element) {
-  	
-  	initializeProjectTapestryModels(); 
+
+    initializeProjectTapestryModels();
 
     ModelInfo info = (ModelInfo) models.get(element);
     ITapestryModel result = null;
@@ -468,7 +461,7 @@ public class TapestryProjectModelManager
       // is now a Tapestry project and act
       try {
         if (!project.hasNature(TapestryPlugin.NATURE_ID)) {
-        
+
           reset();
         }
       } catch (CoreException e) {
@@ -567,13 +560,23 @@ public class TapestryProjectModelManager
         if (storage.getName().equals("Framework.library")) {
 
           defaultLibrary = (TapestryLibraryModel) model;
+          if (DefaultLibraryNamespaceFragment.getInstance() == null) {
+
+           try {
+               DefaultLibraryNamespaceFragment.getInstance(defaultLibrary.getSpecification());
+            } catch (CoreException e) {
+            	
+            	e.printStackTrace();
+            }
+
+          }
         }
       }
-    }
 
+    }
   }
 
-  class Collector implements ITapestryLookupRequestor {
+  class Collector implements ILookupRequestor {
     ArrayList result;
     public boolean isCancelled() {
       return false;
@@ -618,23 +621,23 @@ public class TapestryProjectModelManager
   private boolean isSupportedElement(IStorage storage) {
 
     IJavaProject jproject = null;
-    
+
     try {
-    	
+
       jproject = TapestryPlugin.getDefault().getJavaProjectFor(storage);
-      
+
     } catch (CoreException e) {
     }
-    
+
     if (jproject == null) {
-    	
-    	return false;    	
+
+      return false;
     }
-    
+
     if (!jproject.getProject().equals(project)) {
-    	
-    	return false;
-    	
+
+      return false;
+
     }
 
     String extension = extension(storage);

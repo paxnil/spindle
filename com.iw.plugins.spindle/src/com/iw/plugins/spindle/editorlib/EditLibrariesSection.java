@@ -30,7 +30,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
+
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
 import org.eclipse.swt.SWT;
@@ -46,6 +53,7 @@ import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.eclipse.update.ui.forms.internal.FormWidgetFactory;
 
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
@@ -53,11 +61,16 @@ import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.descriptors.TypeDialogPropertyDescriptor;
+import com.iw.plugins.spindle.ui.descriptors.WorkspaceStoragePropertyDescriptor;
+import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.util.Utils;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class EditLibrariesSection
   extends AbstractPropertySheetEditorSection
@@ -82,8 +95,6 @@ public class EditLibrariesSection
     super.dispose();
   }
 
-
-
   public void modelChanged(IModelChangedEvent event) {
     if (event.getChangeType() == IModelChangedEvent.WORLD_CHANGED) {
       updateNeeded = true;
@@ -93,6 +104,46 @@ public class EditLibrariesSection
         updateNeeded = true;
       }
     }
+  }
+
+  private boolean checkSelfAdd(String potentialLibrary) {
+
+    ITapestryModel model = getModel();
+    IStorage modelStorage = model.getUnderlyingStorage();
+
+    if (model.getClass() == TapestryLibraryModel.class) {
+
+      Path path = new Path(potentialLibrary);
+
+      if (!modelStorage.getName().equals(path.lastSegment())) {
+
+        return false;
+
+      }
+
+      String potentialPackage = path.removeLastSegments(1).toString();
+      potentialPackage = (potentialPackage.substring(1)).replace('/', '.');
+
+      try {
+      	
+        ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(modelStorage);
+
+        TapestryLookup lookup = project.getLookup();
+
+        IPackageFragment fragment = lookup.findPackageFragment(modelStorage);
+
+        if (potentialPackage.equals(fragment.getElementName())) {
+
+          return true;
+        }
+        
+      } catch (JavaModelException e) {
+      } catch (CoreException e) {
+      }
+
+    }
+    return false;
+
   }
 
   public void update(BaseTapestryModel model) {
@@ -251,10 +302,10 @@ public class EditLibrariesSection
     public void setPropertyValue(Object key, Object value) {
       IPluginLibrarySpecification spec = (IPluginLibrarySpecification) getParent();
       if ("name".equals(key)) {
-      	
+
         String oldName = this.identifier;
         String newName = ((String) value).trim();
-        
+
         if ("".equals(newName) || oldName.equals(newName)) {
 
           return;
@@ -268,8 +319,35 @@ public class EditLibrariesSection
         spec.setLibrarySpecificationPath(this.identifier, this.specificationPath);
 
       } else if ("path".equals(key)) {
-        this.specificationPath = (String) value;
-        spec.setLibrarySpecificationPath(this.identifier, this.specificationPath);
+
+        String potentialValue = (String) value;
+
+        DialogFieldStatus status = new DialogFieldStatus();
+
+        if ("/net/sf/tapestry/Framework.library".equals(potentialValue)) {
+
+          status.setError("/net/sf/tapestry/Framework.library is implied");
+
+        }
+
+        if (checkSelfAdd(potentialValue)) {
+
+          status.setError("Can't add " + potentialValue + " to itself");
+        }
+
+        if (status.isError()) {
+
+          ErrorDialog.openError(
+            newButton.getShell(),
+            "Spindle Error",
+            "Could not add library: " + potentialValue,
+            status);
+
+        } else {
+
+          this.specificationPath = (String) value;
+          spec.setLibrarySpecificationPath(this.identifier, this.specificationPath);
+        }
 
       }
 
@@ -295,7 +373,12 @@ public class EditLibrariesSection
     public IPropertyDescriptor[] getPropertyDescriptors() {
       return new IPropertyDescriptor[] {
         new TextPropertyDescriptor("name", "Library Name"),
-        new TextPropertyDescriptor("path", "Spec Path"),
+        new WorkspaceStoragePropertyDescriptor(
+          "path",
+          "Spec Path",
+          "Library Choose",
+          "Choose a Library",
+          TapestryLookup.ACCEPT_LIBRARIES),
         };
     }
 

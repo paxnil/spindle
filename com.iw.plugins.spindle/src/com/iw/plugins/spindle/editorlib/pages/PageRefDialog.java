@@ -43,7 +43,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.AbstractDialog;
-import com.iw.plugins.spindle.ui.ChooseComponentDialog;
+import com.iw.plugins.spindle.ui.ChooseFromNamespaceDialog;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
@@ -203,8 +203,8 @@ public class PageRefDialog extends AbstractDialog {
         
       return;
     }
-      ChooseComponentDialog dialog =
-        new ChooseComponentDialog(getShell(), tproject, "Page Component Reference", "Choose a page component", false);
+      ChooseFromNamespaceDialog dialog =
+        new ChooseFromNamespaceDialog(getShell(), tproject, "Page Component Reference", "Choose a page component", false);
       dialog.create();
       int result = dialog.open();
       if (result == PageRefDialog.OK) {

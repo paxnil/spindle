@@ -30,6 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
@@ -44,6 +47,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
@@ -51,7 +55,10 @@ import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
+import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
+import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public abstract class BasePagesSection
   extends AbstractPropertySheetEditorSection
@@ -122,7 +129,8 @@ public abstract class BasePagesSection
 
     IPluginLibrarySpecification libSpec = getSpec();
 
-    IPluginLibrarySpecification defaultSpec = TapestryProjectModelManager.getDefaultLibraryModel().getSpecification();
+    IPluginLibrarySpecification defaultSpec =
+      TapestryProjectModelManager.getDefaultLibraryModel().getSpecification();
 
     List ids = libSpec.getPageNames();
     ArrayList defaultIds = (ArrayList) ((ArrayList) defaultSpec.getPageNames()).clone();
@@ -171,7 +179,7 @@ public abstract class BasePagesSection
       return;
     }
     if (eventType == IModelChangedEvent.CHANGE) {
-      updateNeeded = event.getChangedProperty().equals("pageMap"); 
+      updateNeeded = event.getChangedProperty().equals("pageMap");
     }
   }
 
@@ -210,22 +218,48 @@ public abstract class BasePagesSection
     * @see Action#run()
     */
     public void run() {
-      updateSelection = true;
-      ILibrarySpecification specification = getSpec();
+      try {
+        updateSelection = true;
+        ILibrarySpecification specification = getSpec();
 
-      PageRefDialog dialog =
-        new PageRefDialog(newButton.getShell(), getModel(), specification.getPageNames());
+        ChooseWorkspaceModelDialog dialog =
+          new ChooseWorkspaceModelDialog(
+            newButton.getShell(),
+            TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage()),
+            "Choose Page",
+            "Choose the Page to be added",
+            TapestryLookup.ACCEPT_PAGES);
 
-      dialog.create();
-      if (dialog.open() == dialog.OK) {
-        String name = dialog.getResultName();
-        String path = dialog.getResultComponent();
-        specification.setPageSpecificationPath(name, path);
-        forceDirty();
-        update();
-        setSelection(name);
+        dialog.create();
+        if (dialog.open() == dialog.OK) {
+        	
+          String pageName = dialog.getResultString();
+          IPackageFragment pagePackage = dialog.getResultPackage();
+          String path = dialog.getResultPath();
+          
+          int index = pageName.indexOf(".");
+          
+          pageName = pageName.substring(0, index);
+          
+          if (specification.getPageSpecificationPath(pageName) != null) {
+          	
+          	int count=1;
+          	while (specification.getPageSpecificationPath(pageName+count) != null) {
+          		count ++;
+          	}
+          	
+          	pageName += count;
+          }
+                  	
+          
+          specification.setPageSpecificationPath(pageName, path);
+          forceDirty();
+          update();
+          setSelection(pageName);
+        }
+        updateSelection = false;
+      } catch (CoreException e) {
       }
-      updateSelection = false;
     }
   }
 

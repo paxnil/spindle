@@ -42,7 +42,9 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.ui.TypeDialogCellEditor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public class TypeDialogPropertyDescriptor extends PropertyDescriptor implements INeedsModelInitialization {
+public class TypeDialogPropertyDescriptor
+  extends PropertyDescriptor
+  implements INeedsModelInitialization {
 
   private IPackageFragmentRoot root;
   private String hierarchyRoot;
@@ -50,9 +52,9 @@ public class TypeDialogPropertyDescriptor extends PropertyDescriptor implements 
   public TypeDialogPropertyDescriptor(Object id, String displayName) {
     super(id, displayName);
   }
-  
+
   public TypeDialogPropertyDescriptor(Object id, String displayName, String hierarchyRoot) {
-    this(id, displayName);    
+    this(id, displayName);
     this.hierarchyRoot = hierarchyRoot;
   }
 
@@ -60,34 +62,33 @@ public class TypeDialogPropertyDescriptor extends PropertyDescriptor implements 
    * @see com.iw.plugins.spindle.ui.descriptors.INeedsModelInitialization#initialize(ITapestryModel)
    */
   public void initialize(ITapestryModel model) {
-  	Assert.isNotNull(model);
-  	this.root = getRoot(model);
+    Assert.isNotNull(model);
+    this.root = getRoot(model);
   }
 
   private IPackageFragmentRoot getRoot(ITapestryModel model) {
-  	
-  	IStorage storage = model.getUnderlyingStorage();
-  	TapestryLookup lookup = new TapestryLookup();
-  	
-  	try {
-  		
-  		lookup.configure(TapestryPlugin.getDefault().getJavaProjectFor(storage));
-  		
-  		IPackageFragment fragment = lookup.findPackageFragment(storage);
-  		
-  		Object possibleRoot = fragment.getParent();
-  		
-  		return (IPackageFragmentRoot)possibleRoot;
-  		
-      } catch (CoreException e) {
-      	
-      	Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchWindow().getShell();
-      	
-      	ErrorDialog.openError(shell, "Spindle error", "can't find java project root", e.getStatus());
-      }
-  	return null;
-  }
 
+    IStorage storage = model.getUnderlyingStorage();
+    TapestryLookup lookup = new TapestryLookup();
+
+    try {
+
+      lookup.configure(TapestryPlugin.getDefault().getJavaProjectFor(storage));
+
+      IPackageFragment fragment = lookup.findPackageFragment(storage);
+
+      Object possibleRoot = fragment.getParent();
+
+      return (IPackageFragmentRoot) possibleRoot;
+
+    } catch (CoreException e) {
+
+      Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchWindow().getShell();
+
+      ErrorDialog.openError(shell, "Spindle error", "can't find java project root", e.getStatus());
+    }
+    return null;
+  }
 
   public CellEditor createPropertyEditor(Composite parent) {
     return new TypeDialogCellEditor(parent, root, hierarchyRoot);

@@ -5,7 +5,6 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -13,7 +12,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.project.ITapestryProject;
-import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
+import com.iw.plugins.spindle.ui.PixelConverter;
+import com.iw.plugins.spindle.util.lookup.ILookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.project.convert.ConvertToTapestryProjectWizard;
 
@@ -87,7 +87,7 @@ public class ConvertToTapestryProjectAction extends AbstractTapestryProjectActio
     return requestor.count >= 0;
   }
 
-  class Requestor implements ITapestryLookupRequestor {
+  class Requestor implements ILookupRequestor {
 
     public int count = 0;
 
