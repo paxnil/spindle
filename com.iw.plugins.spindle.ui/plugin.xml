@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin
    id="com.iw.plugins.spindle.ui"
-   name="Spindle UI"
+   name="Spindle UI plugin"
    version="0.0.1"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
@@ -10,15 +10,13 @@
       <library name="spindle_ui.jar"/>
    </runtime>
    <requires>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.ui" version="2.1.0" match="greaterOrEqual"/>
       <import plugin="com.iw.plugins.spindle.core"/>
-      <import plugin="org.eclipse.jdt.ui"/>
-      <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.search"/>
+      <import plugin="org.eclipse.jdt.ui" version="2.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.search" version="2.1.0" match="greaterOrEqual"/>
       <import plugin="net.sf.solareclipse.ui"/>
       <import plugin="net.sf.solareclipse.xml.ui"/>
-      <import plugin="org.eclipse.jdt.launching" version="2.1.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.launching" version="2.1.0" match="greaterOrEqual"/>
    </requires>
 
 
@@ -130,19 +128,6 @@
             class="com.iw.plugins.spindle.editors.multi.StackedMultiEditor"
             id="com.iw.plugins.spindle.editors.multi.stacked">
       </editor>
-   </extension>
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <viewerContribution
-            targetId="org.eclipse.jdt.ui.PackageExplorer"
-            id="com.iw.plugins.spindle.viewerContributions.java.multiEditor">
-         <action
-               label="Open in MultiEditor"
-               class="com.iw.plugins.spindle.editors.multi.OpenActionDelegate"
-               menubarPath="group.open"
-               id="com.iw.plugins.spindle.viewerContributions.java.OpenInMultiEditor">
-         </action>
-      </viewerContribution>
    </extension>
 
 </plugin>

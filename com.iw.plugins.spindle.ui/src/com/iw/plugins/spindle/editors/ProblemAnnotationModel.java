@@ -40,6 +40,7 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
+import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -228,7 +229,11 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
                         ProblemAnnotation annotation = new ProblemAnnotation(problem);
                         overlayMarkers(position, annotation);
                         fGeneratedAnnotations.add(annotation);
-                        addAnnotation(annotation, position, false);
+                        try {
+							addAnnotation(annotation, position, false);
+						} catch (BadLocationException e1) {
+							UIPlugin.log(e1);
+						}
 
                         temporaryProblemsChanged = true;
                     }
@@ -361,7 +366,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     /*
      * @see AnnotationModel#addAnnotation(Annotation, Position, boolean)
      */
-    protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged)
+    protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged) throws BadLocationException
     {
         super.addAnnotation(annotation, position, fireModelChanged);
 

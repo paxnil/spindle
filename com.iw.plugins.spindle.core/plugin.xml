@@ -54,10 +54,10 @@
       </library>
    </runtime>
    <requires>
-      <import plugin="org.eclipse.core.resources" version="2.1.0" match="compatible"/>
-      <import plugin="org.eclipse.jdt.core" export="true" version="2.1.0" match="compatible"/>
-      <import plugin="org.eclipse.ui" export="true" version="2.1.0" match="compatible"/>
-      <import plugin="org.apache.xerces" export="true" version="4.0.7"/>
+      <import plugin="org.eclipse.core.resources" export="true" version="2.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jdt.core" export="true" version="2.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui" export="true" version="2.1.0" match="greaterOrEqual"/>
+      <import plugin="org.apache.xerces" export="true" version="4.0.7" match="compatible"/>
    </requires>
 
 

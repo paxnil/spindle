@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-    <classpathentry kind="src" path="/org.eclipse.core.resources"/>
-    <classpathentry kind="src" path="/org.eclipse.core.resources.spysupport"/>
+    <classpathentry kind="src" path="src"/>
     <classpathentry kind="src" path="/org.eclipse.ui"/>
     <classpathentry kind="src" path="/com.iw.plugins.spindle.core"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.ui"/>
-    <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
     <classpathentry kind="src" path="/org.eclipse.search"/>
     <classpathentry kind="src" path="/net.sf.solareclipse.ui"/>
     <classpathentry kind="src" path="/net.sf.solareclipse.xml.ui"/>
