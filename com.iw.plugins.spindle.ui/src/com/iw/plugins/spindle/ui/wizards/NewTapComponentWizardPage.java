@@ -166,7 +166,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     {
       fComponentNameDialogField.setTextValue("");
     }
-    fComponentNameDialogField.init(null);
+//    fComponentNameDialogField.init(null);
     fNamespaceDialogField.init(
         fTapestryProjectDialogField,
         fComponentNameDialogField,
@@ -284,7 +284,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   //                                    fComponentNameDialogField.getTextValue(),
   //                                    useClass,
   //                                    new SubProgressMonitor(monitor, 1));
-  //    }
+  //   TODO I can't recall why this is here! }
 
   protected void createComponentResource(
       IProgressMonitor monitor,

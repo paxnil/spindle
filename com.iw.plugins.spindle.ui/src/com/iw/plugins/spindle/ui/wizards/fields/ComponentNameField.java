@@ -26,12 +26,8 @@
 package com.iw.plugins.spindle.ui.wizards.fields;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
@@ -90,21 +86,21 @@ public class ComponentNameField extends AbstractNameField
                 return status;
             }
         }
-        if (fPackageField != null && fPackageField.getPackageFragment() != null)
-        {
-            try
-            {
-                IContainer folder = (IContainer) fPackageField.getPackageFragment().getUnderlyingResource();
-                IFile file = folder.getFile(new Path(name + ".jwc"));
-                if (file.exists())
-                {
-                    status.setError(UIPlugin.getString(fName + ".error.ComponentAlreadyExists", name));
-                }
-            } catch (JavaModelException e)
-            {
-                // do nothing
-            }
-        }
+//        if (fPackageField != null && fPackageField.getPackageFragment() != null)
+//        {
+//            try
+//            {
+//                IContainer folder = (IContainer) fPackageField.getPackageFragment().getUnderlyingResource();
+//                IFile file = folder.getFile(new Path(name + ".jwc"));
+//                if (file.exists())
+//                {
+//                    status.setError(UIPlugin.getString(fName + ".error.ComponentAlreadyExists", name));
+//                }
+//            } catch (JavaModelException e)
+//            {
+//                // do nothing
+//            }
+//        }
         char first = name.charAt(0);
         if (Character.isLowerCase(first))
         {
