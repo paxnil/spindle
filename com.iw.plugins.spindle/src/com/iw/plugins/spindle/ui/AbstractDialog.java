@@ -380,9 +380,9 @@ public abstract class AbstractDialog extends TitleAreaDialog {
   }
 
   public void updateMessage() {
-//    if (getTitleArea() == null) {
-//      return;
-//    }
+    if (getTitleArea() == null) {
+      return;
+    }
     if (dialogMessage == null) {
       setMessage(dialogDescription);
     } else {
@@ -421,8 +421,8 @@ public abstract class AbstractDialog extends TitleAreaDialog {
   }
 
   public void updateTitleBar() {
-//    if (getTitleArea() == null)
-//      return;
+    if (getTitleArea() == null)
+      return;
     if (titleBarMessage == null) {
       titleBarMessage = "";
     }
