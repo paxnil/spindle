@@ -139,8 +139,8 @@ public class TapestryLookup {
     findAll(tapestryPath, false, ACCEPT_COMPONENTS | FULL_TAPESTRY_PATH, request);
     return request.getResults();
   }
-  
-  public IStorage [] findApplication(String tapestryPath) {
+
+  public IStorage[] findApplication(String tapestryPath) {
     if (!initialized) {
       throw new Error("not initialized");
     }
@@ -148,8 +148,7 @@ public class TapestryLookup {
     findAll(tapestryPath, false, ACCEPT_APPLICATIONS | FULL_TAPESTRY_PATH, request);
     return request.getResults();
   }
-    
-
+  
   public IStorage[] findHtmlFor(String tapestryPath) {
     if (!tapestryPath.endsWith(".jwc")) {
       return new IStorage[0];
@@ -240,11 +239,7 @@ public class TapestryLookup {
     return false;
   }
 
-  public void findAll(
-    String prefix,
-    boolean partialMatch,
-    int acceptFlags,
-    ITapestryLookupRequestor requestor) {
+  public void findAll(String prefix, boolean partialMatch, int acceptFlags, ITapestryLookupRequestor requestor) {
 
     if (!initialized) {
       throw new Error("not initialized");
@@ -328,9 +323,17 @@ public class TapestryLookup {
     }
     int length = jarFiles.length;
     for (int i = 0; i < length; i++) {
-      if (requestor.isCancelled())
+      if (requestor.isCancelled()) {
         return true;
-      JarEntryFile jarFile = (JarEntryFile) jarFiles[i];
+      }
+      
+      JarEntryFile jarFile = null;
+      try {
+      	jarFile = (JarEntryFile) jarFiles[i];
+      } catch (ClassCastException ccex) {
+      	//skip it
+      	continue;
+      }
       if (acceptAsTapestry(jarFile, acceptFlags)) {
         if ((acceptFlags & FULL_TAPESTRY_PATH) != 0) {
           if (nameMatchesFull(name, pkg, jarFile.getFullPath())) {
@@ -362,9 +365,16 @@ public class TapestryLookup {
     int length = files.length;
 
     for (int i = 0; i < length; i++) {
-      if (requestor.isCancelled())
+      if (requestor.isCancelled()) {
         return true;
-      IFile file = (IFile) files[i];
+      }
+      IFile file = null;
+      try {
+        file = (IFile) files[i];
+      } catch (ClassCastException ccex) {
+        // skip it
+        continue;
+      }
       if (acceptAsTapestry(file, acceptFlags)) {
         if ((acceptFlags & FULL_TAPESTRY_PATH) != 0) {
           if (nameMatchesFull(name, pkg, file.getFullPath())) {
@@ -450,4 +460,6 @@ public class TapestryLookup {
       }
     }
   }
+  
+  
 }

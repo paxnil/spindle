@@ -91,7 +91,6 @@ public class FieldBindingsPreferencePage implements IWorkbenchPreferencePage {
           searchPattern,
           SearchEngine.createWorkspaceScope(),
           collector);
-        System.out.println("unfold took: "+(new Date().getTime() - start));
         return collector.getFoundElements();
       } catch (JavaModelException jmex) {
         jmex.printStackTrace();

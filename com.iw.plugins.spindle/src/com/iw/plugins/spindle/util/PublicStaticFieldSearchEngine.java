@@ -100,7 +100,6 @@ public class PublicStaticFieldSearchEngine {
        
         
           res[0] = searchPublicStaticMethods(pm, scope, style);
-          System.out.println("ps search took: "+(new Date().getTime() - start));
         } catch (JavaModelException e) {
           throw new InvocationTargetException(e);
         }

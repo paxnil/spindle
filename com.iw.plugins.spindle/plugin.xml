@@ -128,7 +128,7 @@
             id="com.iw.spindle.actions.set">
          <action
                label="New Tapestry Application"
-               icon="icons/full/application16.gif"
+               icon="icons/full/application16_dark.gif"
                tooltip="Create a new Tapestry Application"
                class="com.iw.plugins.spindle.wizards.OpenTapestryApplicationWizard"
                toolbarPath="Normal/spindle"
@@ -136,7 +136,7 @@
          </action>
          <action
                label="New Tapestry Component"
-               icon="icons/full/component16.gif"
+               icon="icons/full/component16_dark.gif"
                tooltip="Create a new Tapestry Component"
                class="com.iw.plugins.spindle.wizards.OpenTapestryComponentWizard"
                toolbarPath="Normal/spindle"

@@ -32,6 +32,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 
+import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.util.Indenter;
 import com.iw.plugins.spindle.util.SourceWriter;
 import net.sf.tapestry.spec.BeanSpecification;
@@ -236,9 +237,9 @@ public class PluginComponentSpecification
     int indent = 1;
     writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     writer.println("<!DOCTYPE specification ");
-    writer.println("      PUBLIC \"-//Howard Ship//Tapestry Specification 1.2//EN\"");
-    writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
-    writer.println("<!-- written by Spindle, an Eclipse Plugin for Tapestry -->");
+    writer.println("      PUBLIC \"-//Howard Ship//Tapestry Specification 1.1//EN\"");
+    writer.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
+    writer.println(MessageUtil.getString("TAPESTRY.xmlComment"));
     writer.println();
 
     writeFirstLine(writer);
