@@ -208,7 +208,7 @@ public class FullBuild extends Build
             ServletInfo[] servletInfos = null;
             try
             {
-                WebXMLProcessor wprocessor = new WebXMLProcessor(this);
+                WebXMLScanner wprocessor = new WebXMLScanner(this);
                 servletInfos = wprocessor.getServletInformation(wxmlElement);
                 Markers.addTapestryProblemMarkersToResource(tapestryBuilder.webXML, wprocessor.getProblems());
             } catch (ScannerException e)
