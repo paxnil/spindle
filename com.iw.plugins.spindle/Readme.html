@@ -2,8 +2,41 @@
 <html>
 <head>
   <title>Spindle, an Eclipse plugin for Tapestry</title>
-                             
+                   
+  <script language="JavaScript">
+
+
+<!-- Begin
+dw=0;   //change in width;
+dh=0;   //change in height;
+function jitter() {
+w = (Math.round(Math.random()*10)%5)-2; dw+=w;
+h = (Math.round(Math.random()*10)%5)-2; dh+=h;
+if (dh>10) {h=(0-11);dh=0;}
+else if (dh<(0-10)) {h=11;dh=0;}
+if (dw>10) {w=(0-11);dw=0;}
+else if (dw<(0-10)) {w=11;dw=0;}
+vers = parseInt(navigator.appVersion);
+if (vers>=4) {
+if (navigator.appName=="Netscape") {
+document.jitterText.left+=w;
+document.jitterText.top+=h;
+}
+else if (navigator.appName=="Microsoft Internet Explorer") {
+document.all.jitterText.style.pixelLeft+=w;
+document.all.jitterText.style.pixelTop+=h;
+}
+setTimeout("jitter()",100);
+}
+else {} // browser can't view effect
+}
+// End -->
+</script>       
   <style type="text/css">
+#jitterText {
+position: absolute; left: 0; top: 300; font-size:24pt; 
+background:white; color:red; }
+
  BODY, P, DIV, TD, TR, OL, UL, LI,  A {
      font-family: Verdana, Tahoma, Arial, Helvetica;
   font-size : 12px;
@@ -14,354 +47,355 @@
     }
 </style>
 </head>
-  <body bgcolor="#ffffff" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
- 
+  <body bgcolor="#ffffff" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="jitter()">
+<br>
+<br>
+<br>
 <h1><img src="headerBkgII.jpg" alt="Spindle logo" width="1000" height="80">
- <br>
- </h1>
- 
+<br>
+</h1>
 <h1><br>
- </h1>
- 
+</h1>
 <h1>          Spindle, an Eclipse plugin for Tapestry       </h1>
- 
 <table width="100%" border="0" cellspacing="0" cellpadding="2">
-   <tbody>
-     <tr>
-       <td>       
-      <h1>                      Release <i>1.0.0-RC2-TAP-2.0.2a-ECLIPSE-F3</i><br>
-       </h1>
-       
-      <h1>                      works only with Tapestry release 2.0.1, 2.0.2a
-       <br>
-       </h1>
-       
-      <h1>                      works only with Eclipse 2.0 stable build F3
-(hence                      <i>ELCIPSE-F1</i>)                   </h1>
-       
-      <p>                      "Tapestry is a powerful, all-Java framework 
- for creating                      leading edge web applications in Java." 
- &nbsp;quoted from                      the&nbsp;<a href="http://tapestry.sourceforge.net">
-   Tapestry                      Home Page</a>.                   </p>
-       
-      <p>                      Eclipse is a platform designed for building 
- integrated                      development environments (IDEs) that can 
-be used to create                      diverse applications. Except for a 
-small run-time kernel,                      all of the Eclipse's functionality 
-is located in plug-ins.                   </p>
-       
-      <p>                      Spindle is one such plugin, built to bring 
- excellent IDE                      support for creating and editing the various
- parts of web                      applications built using Tapestry.   
-               </p>
-       
-      <p>                      Spindle is distributed as a single distribution, 
- including                      source code.                   </p>
-       
-      <p>                      The Spindle JAR was compiled on Windows 2000 
- using Sun's                      JDK 1.3 compiler.                   </p>
-       
-      <p>                      This product includes software developed by 
- the Apache                      Software Foundation (<a href="http://www.apache.org/">
-   http://www.apache.org/</a>).                   </p>
-       
+  <tbody>
+    <tr>
+      <td>
+      <h1>                      Release <i>1.0.0-EarlyAccess-TAP-2.0.4-ECLIPSE-F3</i>
+   &nbsp;</h1>
+      <br>
+      <br>
+      <div id="jitterText">
+      <h1><blink><u>important! check out "What's New"!</u></blink></h1>
+      </div>
+      <br>
+      <br>
+      <h1>                      works only with Tapestry release 2.0.4<br>
+      </h1>
+      <h1>                      works only with Eclipse 2.0 stable build
+ F3&nbsp;                   </h1>
+      <p>                      "Tapestry is a powerful, all-Java framework
+    for creating                      leading edge web applications in Java."
+    &nbsp;quoted from                      the&nbsp;<a href="http://tapestry.sourceforge.net">
+        Tapestry                      Home Page</a>.                   </p>
+      <p>                      Eclipse is a platform designed for building
+    integrated                      development environments (IDEs) that
+can    be used to create                      diverse applications. Except
+for  a  small run-time kernel,                      all of the Eclipse's
+functionality    is located in plug-ins.                   </p>
+      <p>                      Spindle is one such plugin, built to bring
+    excellent IDE                      support for creating and editing the
+  various  parts of web                      applications built using Tapestry.
+                    </p>
+      <p>                      Spindle is distributed as a single distribution,
+    including                      source code.                   </p>
+      <p>                      The Spindle JAR was compiled on Windows  2000 
+  using Sun's                      JDK 1.3 compiler.                   </p>
+      <p>                      This product includes software developed 
+by   the Apache                      Software Foundation (<a href="http://www.apache.org/">
+        http://www.apache.org/</a>).                   </p>
       <p><a href="#whatsnew">What's New</a><br>
-                         &nbsp; <a href="#contents">Contents</a><br>
-                          &nbsp; <a href="#doc">Documentation</a><br>
-                          &nbsp; <a href="#bulding">Building Spindle</a><br>
-                          &nbsp; <a href="#Installing_Spindle_and_Getting_Started_">
-   Installing                      Spindle and Getting Started</a><br>
-                          &nbsp; <a href="#issues">Known Issues</a><br>
-                          &nbsp; <a href="#jars">Third Party Jars</a><br>
-       <br>
-                       .....................................................<br>
-       <br>
-       <br>
-       <br>
-       <a name="whatsnew"></a></p>
-       
+                              &nbsp; <a href="#contents">Contents</a><br>
+                               &nbsp; <a href="#doc">Documentation</a><br>
+                               &nbsp; <a href="#bulding">Building Spindle</a><br>
+                               &nbsp; <a href="#Installing_Spindle_and_Getting_Started_">
+        Installing                      Spindle and Getting Started</a><br>
+                               &nbsp; <a href="#issues">Known Issues</a><br>
+                               &nbsp; <a href="#jars">Third Party Jars</a><br>
+      <br>
+                            .....................................................<br>
+      <br>
+      <br>
+      <br>
+      <a name="whatsnew"></a></p>
       <h2>                      What's New                   </h2>
-       
       <ol>
-         <li>ported to Eclipse F3</li>
-         <li>The New Component and New Page Wizards give the option to the
- user to add the new item to an existing application.</li>
-         <li>The template used by the optional auto-generated html file in
- the New Component and New Page Wizards can be changed:</li>
-         
+        <li>ported to Eclipse F3</li>
+        <li>early support for Tapestry 2.0.4                             
+              
+          <table cellpadding="2" cellspacing="2" border="1" width="500">
+            <tbody>
+              <tr>
+                <td valign="Top" bgcolor="#ff0000">
+                <h3><b><font color="#ffffff">NOTE: This early access version
+  of Spindle reads Tapestry files using the 1.1 and 1.2 version of the Tapestry
+ DTD. </font></b></h3>
+                <h3><b><font color="#ffffff">HOWEVER it only writes files
+  using the 1.2 DTD</font></b></h3>
+                <h3><font color="#ffffff">Files written to the 1.2 DTD can
+  not be read at runtime by Tapestry versions pre-2.0.4</font></h3>
+                <h3><font color="#ffffff">Eventually, this branch of the
+code will be folded into the root when the Tapestry API enables Spindle to
+detect and write either DTD version at the users whim&nbsp;</font></h3>
+                <h3><font color="#ffffff">You have been warned.</font></h3>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
+        </li>
+        <li>The New Component and New Page Wizards give the option to the
+   user to add the new item to an existing application.</li>
+        <li>The template used by the optional auto-generated html file in 
+  the New Component and New Page Wizards can be changed:</li>
         <ul>
-           <li>open any HTML file in the Spindle HTML Editor</li>
-           <li>change the file to look like the template you want the wizards
- to use.<br>
-           </li>
-           <li>right click anywhere in the file.</li>
-           <li>select the option to replace the template with the contents
- of the editor.</li>
-           <li>you can revert to the default template by choosing that option
- in the same pop-up menu.<br>
-           </li>
-         
+          <li>open any HTML file in the Spindle HTML Editor</li>
+          <li>change the file to look like the template you want the wizards 
+   to use.<br>
+          </li>
+          <li>right click anywhere in the file.</li>
+          <li>select the option to replace the template with the contents 
+   of the editor.</li>
+          <li>you can revert to the default template by choosing that option 
+   in the same pop-up menu.<br>
+          </li>
         </ul>
-         <li>Fixed the following <a href="http://sourceforge.net/tracker/?group_id=50321&amp;atid=459328">
-   bugs</a>:</li>
-       
+        <li>Fixed the following <a href="http://sourceforge.net/tracker/?group_id=50321&amp;atid=459328">
+        bugs</a>:</li>
       </ol>
-       
       <ul>
-         <li><a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=568540&amp;group_id=50321&amp;atid=459328">
- [ 568540 ] Eclipse F3 Destroys Spindle</a></li>
-         <li><a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=561972&amp;group_id=50321&amp;atid=459328">
- [ 561972 ] JWC editor outline page broken</a></li>
-         <br>
-   &nbsp; <br>
-   &nbsp;<br>
-         <br>
-       
+        <u><li><a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=568540&amp;group_id=50321&amp;atid=459328">
+      [ 568540 ] Eclipse F3 Destroys Spindle</a></li>
+        <li><a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=561972&amp;group_id=50321&amp;atid=459328">
+      [ 561972 ] JWC editor outline page broken</a></li>
+        <li><a href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=568467&amp;group_id=50321&amp;atid=459328">
+    [ 568467 ] Opening ErrorFest.jwc throws exception</a><br>
+        </li>
+        </u><br>
+        &nbsp; <br>
+        &nbsp;<br>
+        <br>
       </ul>
-       
       <p><br>
-                          .....................................................<br>
-       <br>
-       </p>
-       <a name="contents"></a>       
+                               .....................................................<br>
+      <br>
+      </p>
+      <a name="contents"></a>
       <h2>                      Contents                   </h2>
-       
       <p>                      The contents of the release are thus:     
              </p>
-       
       <ol>
-         <li>                         com.iw.plugins.spindle-1.0.0-RC2-TAP-2.0.2a-ECLIPSE-F3.jar
-                          - The file one unjars into                    
-    <tt>ECLIPSE_HOME/plugins</tt> to install the plugin.                
-     </li>
-         <li>                         com.iw.plugins.spindle-1.0.0-RC2-TAP-2.0.2a-ECLIPSE-F3 
--src.jar                          - The source used to build the plugin. 
-                    </li>
-         <li>                         Readme.html - this file           
-           </li>
-         <li><a href="LICENSE.txt">  License.txt</a> - the license      
-               </li>
-         <li>                         Other .txt and .html files - 3rd Party 
-licenses see <a href="#jars">Third Party Jars</a></li>
-       
+        <li>                         com.iw.plugins.spindle-1.0.0-EarlyAccess-TAP-2.0.4-ECLIPSE-F3.jar 
+                            - The file one unjars into                   
+     <tt>ECLIPSE_HOME/plugins</tt> to install the plugin.               
+      </li>
+        <li>                         com.iw.plugins.spindle-1.0.0-EarlyAccess-TAP-2.0.4-ECLIPSE-F3
+-src.jar                          - The source used to build the plugin.
+                       </li>
+        <li>                         Readme.html - this file             
+         </li>
+        <li><a href="LICENSE.txt">  License.txt</a> - the license        
+             </li>
+        <li>                         Other .txt and .html files - 3rd Party
+   licenses see <a href="#jars">Third Party Jars</a></li>
       </ol>
-       <br>
-       <br>
-                       .....................................................<br>
-       <br>
-       <br>
-       <br>
-       <a name="doc"></a>       
+      <br>
+      <br>
+                            .....................................................<br>
+      <br>
+      <br>
+      <br>
+      <a name="doc"></a>
       <h2>                      Documentation                   </h2>
-       
       <p>                      &nbsp;Coming soon. for now see <a href="#Installing_Spindle_and_Getting_Started_">
-   Installing                      Spindle and Getting Started</a><br>
-       <br>
-                          .....................................................<br>
-       <br>
-       </p>
-       <a name="bulding"></a>       
+        Installing                      Spindle and Getting Started</a><br>
+      <br>
+                               .....................................................<br>
+      <br>
+      </p>
+      <a name="bulding"></a>
       <h2>                      Building Spindle                   </h2>
-       
-      <p>                      Spindle is delivered to you ready to run, just
-skip down                      to&nbsp;<a href="#Installing_Spindle_and_Getting_Started_">
-   Installing                      Spindle and Getting Started</a>.     
-             </p>
-       
-      <p>                      Spindle is built using the the Eclipse platform, 
- and                      distributables are built using the&nbsp;<a href="http://jakarta.apache.org/ant">
-   Ant</a> build tool,                      version 1.4 or better. <b>You 
-do  not need to download and                      install Ant before installing 
- and using Spindle</b>.                   </p>
-       
-      <p>                      Currently, It is possible to build Spindle 
- using the                      sources provided in this release within the 
- Eclipse                      Platform only . That's not likely to change 
-as Eclipse                      provides compile-time libraries for plugins.
-                    </p>
-       
-      <p>                      Instructions on how to build plugins are available 
-       <a href="http://www.eclipse.org/articles/Your%20First%20Plug-in.html">
-                         here</a>.<br>
-       <br>
-                          .....................................................<br>
-       <br>
-       </p>
-       <a name="Installing_Spindle_and_Getting_Started_"></a>       
+      <p>                      Spindle is delivered to you ready to run,
+ just skip down                      to&nbsp;<a href="#Installing_Spindle_and_Getting_Started_">
+        Installing                      Spindle and Getting Started</a>.
+                  </p>
+      <p>                      Spindle is built using the the Eclipse platform,
+   and                      distributables are built using the&nbsp;<a href="http://jakarta.apache.org/ant">
+        Ant</a> build tool,                      version 1.4 or better. <b>
+  You   do  not need to download and                      install Ant before
+ installing    and using Spindle</b>.                   </p>
+      <p>                      Currently, It is possible to build Spindle
+    using the                      sources provided in this release within
+ the   Eclipse                      Platform only . That's not likely to
+change    as Eclipse                      provides compile-time libraries
+for plugins.                       </p>
+      <p>                      Instructions on how to build plugins are 
+available         <a href="http://www.eclipse.org/articles/Your%20First%20Plug-in.html">
+                              here</a>.<br>
+      <br>
+                               .....................................................<br>
+      <br>
+      </p>
+      <a name="Installing_Spindle_and_Getting_Started_"></a>
       <h2>                      Installing Spindle and Getting Started   
-               </h2>
-       
+                </h2>
       <p><b>This release of Spindle only supports the  following         
             release(s)/build(s) (<a href="http://www.eclipse.org/downloads/index.php">
-   found                      here</a>) of the Eclipse Platform:</b></p>
-       
+        found                      here</a>) of the Eclipse Platform:</b></p>
       <p><b>Stable build F3</b></p>
-       
-      <p>                      Spindle probably will not work work in Integration 
- or                      nightly builds in the Eclipse 2.0 development stream 
- other                      than those listed above.</p>
-       
-      <p><b>A version of Spindle that works with Stable build F1 and F2 is 
-available <a href="https://sourceforge.net/project/showfiles.php?group_id=50321">
-   here</a><br>
-       <br>
- A version of Spindle that works with Stable  build                     
-20020214 is available <a href="https://sourceforge.net/project/showfiles.php?group_id=50321">
-   here<br>
-       </a></b></p>
-       
+      <p>                      Spindle probably will not work work in Integration
+   or                      nightly builds in the Eclipse 2.0 development
+stream    other                      than those listed above.</p>
+      <p><b>A version of Spindle that works with Stable build F3 and Tapestry
+2.0.2a&nbsp;  is  available <a href="https://sourceforge.net/project/showfiles.php?group_id=50321">
+        here</a></b><br>
+      </p>
+      <p><b>A version of Spindle that works with Stable build F1 and F2 
+is  available <a href="https://sourceforge.net/project/showfiles.php?group_id=50321">
+        here</a><br>
+      <br>
+      A version of Spindle that works with Stable  build                
+     20020214 is available <a href="https://sourceforge.net/project/showfiles.php?group_id=50321">
+        here<br>
+      </a></b></p>
       <p><b>A version of Spindle that works with Stable  build           
           20020321</b><b>is available <a href="https://sourceforge.net/project/showfiles.php?group_id=50321">
-   here</a></b></p>
-       <b>All the old versions of Spindle require differing versions of Tapestry 
-- check thier respective README files.</b><br>
-       <br>
- Assuming that you have and installed a working Spindle                 
-  compatible build of Eclipse (see above) into a directory,  say        
-          <tt>C:\eclipse</tt> ...<br>
-       <br>
-                       Simply unjar the file&nbsp;                      
-                     com.iw.plugins.spindle-1.0.0-RC2-TAP-2.0.2a-ECLIPSE-F3<tt>
- .jar</tt> into <tt>C:\eclipse\plugins</tt> and restart                 
- Eclipse. That's almost all there is to it!<br>
-       <br>
-                       Since Spindle is a plugin that adds IDE support to 
-Tapestry,                    it only makes sense that you are building an 
-app with                   Tapestry. So you need to at least have the required 
-version of<br>
-                                         <b><br>
-This build requires Tapestry version 2.0.1 or 2.0.2a</b><br>
+        here</a></b></p>
+      <b>All the old versions of Spindle require differing versions of  Tapestry 
+ - check thier respective README files.</b><br>
+      <br>
+      Assuming that you have and installed a working Spindle            
+       compatible build of Eclipse (see above) into a directory,  say   
+               <tt>C:\eclipse</tt> ...<br>
+      <br>
+                            Simply unjar the file&nbsp;                 
+                                                   com.iw.plugins.spindle-1.0.0-EarlyAccess-TAP-2.0.4-ECLIPSE-F3<tt>
+.jar</tt> into <tt>C:\eclipse\plugins</tt> and restart                  
+Eclipse. That's almost all there is to it!<br>
+      <br>
+                            Since Spindle is a plugin that adds IDE support 
+ to  Tapestry,                    it only makes sense that you are building 
+ an  app with                   Tapestry. So you need to at least have the 
+ required  version of<br>
+      <b><br>
+     This build requires Tapestry version 2.0.4</b><br>
       <ul>
-         <li><tt>com.primix.tapestry.jar</tt>  ; and                    
-         </li>
-         <li><tt>javax.servlet.jar</tt>   (also found in the Tapestry   
-                     distro)                      </li>
-       
+        <li><tt>net.sf.tapestry.jar</tt>  ; and                         
+    </li>
+        <li><tt>javax.servlet.jar</tt>   (also found in the Tapestry     
+                   distro)                      </li>
       </ul>
-                      in the build path of your project. The Spindle wizards 
- depend                   on this at runtime. &nbsp;<br>
-       <br>
-                       Invoking the Spindle wizards is as easy as selecting 
- a                   package, right clicking, selecting <tt>New -&gt; Other 
- -&gt;                   Spindle</tt> and the desired wizard.<br>
-       <br>
-                       Quick access the wizards is available by customizing 
- an                   Eclipse perspective with wizard actions on the main 
-toolbar.                   In the Eclipse menu bar, select <tt>Perspective 
--&gt;                   Customize</tt>. Depending on the Eclipse build, you'll 
-find                   <tt>Spindle Action Set</tt> from there. Select it and
-two                   Spindle wizard icons will appear in the main toolbar.<br>
-       <br>
-                       In build F3, the exact steps are: Window <tt>-&gt;
-Customize Perspective -&gt; Other -&gt; Spindle Action                  
-Set</tt>.<br>
-       <br>
-                       Spindle sets its own editors as the default for files 
- with                   the following extensions: &nbsp;<tt>*.application</tt>
-   ,                   <tt>*.jwc</tt>, and <tt>*.html</tt> . Simply open
-any  file                   with these extensions and the corresponding Spindle 
- editor                   will open.<br>
-       <br>
-       <br>
-                       .....................................................<br>
-       <br>
-       <a name="issues"></a>       
+                        in the build path of your project. The Spindle  wizards 
+  depend                   on this at runtime. &nbsp;<br>
+      <br>
+                            Invoking the Spindle wizards is as easy as selecting
+    a                   package, right clicking, selecting <tt>New -&gt;
+Other     -&gt;                   Spindle</tt> and the desired wizard.<br>
+      <br>
+                            Quick access the wizards is available by customizing
+    an                   Eclipse perspective with wizard actions on the main
+   toolbar.                   In the Eclipse menu bar, select <tt>Perspective
+   -&gt;                   Customize</tt>. Depending on the Eclipse build,
+ you'll  find                   <tt>Spindle Action Set</tt> from there. Select
+ it and two                   Spindle wizard icons will appear in the main
+ toolbar.<br>
+      <br>
+                            In build F3, the exact steps are: Window <tt>
+-&gt;   Customize Perspective -&gt; Other -&gt; Spindle Action          
+        Set</tt> .<br>
+      <br>
+                            Spindle sets its own editors as the default for 
+ files   with                   the following extensions: &nbsp;<tt>*.application</tt>
+        ,                   <tt>*.jwc</tt>, and <tt>*.html</tt> . Simply
+open   any  file                   with these extensions and the corresponding 
+Spindle   editor                   will open.<br>
+      <br>
+      <br>
+                            .....................................................<br>
+      <br>
+      <a name="issues"></a>
       <h2>                      Known Issues                   </h2>
-       <br>
-       <a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=564220&amp;group_id=50321&amp;atid=459328">
- [ 564220 ] read-only status not tracked</a><br>
-       <br>
-                       .....................................................<br>
-       <br>
-       <br>
-       <br>
-       <a name="jars"></a>       
+      <br>
+      <a href="https://sourceforge.net/tracker/index.php?func=detail&amp;aid=564220&amp;group_id=50321&amp;atid=459328">
+      [ 564220 ] read-only status not tracked</a><br>
+      <br>
+                            .....................................................<br>
+      <br>
+      <br>
+      <br>
+      <a name="jars"></a>
       <h2>                      Third party JARs                   </h2>
-                      Spindle requires some third party JARs when it is compiled,
-                    as well as at runtime. The Jars required at runtime are 
- are                   included in the distribution.                     
-                   
+                        Spindle requires some third party JARs when  it is 
+compiled,                     as well as at runtime. The Jars required  at 
+runtime are   are                   included in the distribution.        
+                                                     
       <table border="1">
-         <tbody>
-           <tr bgcolor="black">
-             <th><font color="White">  JAR file</font></th>
-             <th><font color="White">  Version</font></th>
-             <th><font color="White">  License</font></th>
-             <th><font color="White">  Description</font></th>
-           </tr>
-           <tr valign="Top" bgcolor="silver">
-             <td valign="Top">                               com.primix.tapestry.jar 
-                           </td>
-             <td valign="Top">                               2.0.2a     
-                      </td>
-             <td valign="Top"><a href="LICENSE.com.primix.tapestry.txt">LGPL, 
-                              Version 2.1</a></td>
-             <td valign="Top">                               The Tapestry 
-framework. more information at the                               <a href="http://tapestry.sourceforge.net">
- Tapestry Home                               Page</a></td>
-           </tr>
-           <tr valign="Top" bgcolor="silver">
-             <td>                               javax.servlet.jar       
-                     </td>
-             <td>                               2.2                     
+        <tbody>
+          <tr bgcolor="black">
+            <th><font color="White">  JAR file</font></th>
+            <th><font color="White">  Version</font></th>
+            <th><font color="White">  License</font></th>
+            <th><font color="White">  Description</font></th>
+          </tr>
+          <tr valign="Top" bgcolor="silver">
+            <td valign="Top">net.sf.tapestry.jar                        
       </td>
-             <td><a href="LICENSE.javax.servlet.txt">  Apache           
-                   Software License, Version 1.1</a></td>
-             <td>                               Servlet API  2.2 reference 
-implementation                            </td>
-           </tr>
-           <tr valign="Top" bgcolor="silver">
-             <td>                               javax.xml.jaxp.jar      
-                      </td>
-             <td>                               1.1                     
+            <td valign="Top">                               2.0.4       
+                    </td>
+            <td valign="Top"><a href="LICENSE.com.primix.tapestry.txt"> LGPL, 
+                                Version 2.1</a></td>
+            <td valign="Top">                               The Tapestry
+ framework. more information at the                               <a href="http://tapestry.sourceforge.net">
+      Tapestry Home                               Page</a></td>
+          </tr>
+          <tr valign="Top" bgcolor="silver">
+            <td>                               javax.servlet.jar         
+                   </td>
+            <td>                               2.2                       
+    </td>
+            <td><a href="LICENSE.javax.servlet.txt">  Apache             
+                 Software License, Version 1.1</a></td>
+            <td>                               Servlet API  2.2 reference
+   implementation                            </td>
+          </tr>
+          <tr valign="Top" bgcolor="silver">
+            <td>                               javax.xml.jaxp.jar        
+                    </td>
+            <td>                               1.1                       
+    </td>
+            <td><a href="License.javax.xml.html">  Sun Binary Code       
+                       License</a></td>
+            <td>                               Java API for XML Processing
+                              </td>
+          </tr>
+          <tr valign="Top" bgcolor="silver">
+            <td>                               log4j-core.jar            
+                </td>
+            <td>                               1.1.3                     
       </td>
-             <td><a href="License.javax.xml.html">  Sun Binary Code     
-                         License</a></td>
-             <td>                               Java API for XML Processing 
-                           </td>
-           </tr>
-           <tr valign="Top" bgcolor="silver">
-             <td>                               log4j-core.jar          
-                  </td>
-             <td>                               1.1.3                   
-        </td>
-             <td><a href="LICENSE.log4j.txt">  Apache Software          
-                    License, Version 1.1</a></td>
-             <td>                               Logging Toolkit,  logging 
-toolkit used by Tapestry                               framework classes.
- More information at the <a href="http://jakarta.apache.org/log4j"> log4j
-home                               page</a>.                            </td>
-           </tr>
-           <tr valign="Top" bgcolor="silver">
-             <td>                               org.apache.crimson.jar  
-                          </td>
-             <td>                               1.1                     
-      </td>
-             <td><a href="License.javax.xml.html">  Sun Binary Code     
-                         License</a></td>
-             <td>                               Sun XML Parser          
-                  </td>
-           </tr>
-         
-        </tbody>       
+            <td><a href="LICENSE.log4j.txt">  Apache Software            
+                  License, Version 1.1</a></td>
+            <td>                               Logging Toolkit,  logging
+ toolkit used by Tapestry                               framework classes. 
+   More information at the <a href="http://jakarta.apache.org/log4j"> log4j 
+  home                               page</a>.                           
+            </td>
+          </tr>
+          <tr valign="Top" bgcolor="silver">
+            <td>                               org.apache.crimson.jar    
+                        </td>
+            <td>                               1.1                       
+    </td>
+            <td><a href="License.javax.xml.html">  Sun Binary Code       
+                       License</a></td>
+            <td>                               Sun XML Parser            
+                </td>
+          </tr>
+        </tbody>
       </table>
-       <br>
-       <br>
-                       .....................................................<br>
-       <br>
-       <br>
-       <br>
-       
-      <p>                      Spindle is an open source project, hosted on
-the <a href="http://sourceforge.net/projects/spindle">SourceForge</a>   
-                  and licensed under the <a href="http://www.mozilla.org/MPL/">
-   Mozilla Public License,                      Version 1.1</a>.        
-          </p>
-       </td>
-     </tr>
-   
-  </tbody> 
+      <br>
+      <br>
+                            .....................................................<br>
+      <br>
+      <br>
+      <br>
+      <p>                      Spindle is an open source project, hosted
+ on the <a href="http://sourceforge.net/projects/spindle">SourceForge</a>
+                       and licensed under the <a href="http://www.mozilla.org/MPL/">
+        Mozilla Public License,                      Version 1.1</a>.</p>
+      </td>
+    </tr>
+  </tbody>
 </table>
- 
 </body>
 </html>
