@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -56,7 +57,7 @@ public class TapestryProjectInstaller {
 		installData = data;
 	}
 
-	protected IStatus configureTapestryProject(ArrayList filesBuilt,
+	public IStatus configureTapestryProject(ArrayList filesBuilt,
 			IProgressMonitor monitor) throws InterruptedException {
 
 		monitor.beginTask(UIPlugin
@@ -178,26 +179,30 @@ public class TapestryProjectInstaller {
 		return SpindleStatus.OK_STATUS;
 	}
 
-	private IStatus configureExistingWebXML(IFolder webInfFolder, IProgressMonitor monitor) {
-		
+	private IStatus configureExistingWebXML(IFolder webInfFolder,
+			IProgressMonitor monitor) {
+
 		SpindleStatus result = new SpindleStatus();
 		IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
 		boolean useTabs = store
 				.getBoolean(PreferenceConstants.FORMATTER_TAB_CHAR);
 		int tabSize = store.getInt(PreferenceConstants.FORMATTER_TAB_SIZE);
-		
+
 		String indentString = "\t";
 		if (!useTabs) {
-			indentString="";
-			for(int i=0;i<tabSize;i++)
-				indentString+=' ';
+			indentString = "";
+			for (int i = 0; i < tabSize; i++)
+				indentString += ' ';
 		}
-		
+
 		IFile webxml = webInfFolder.getFile("web.xml");
 		String newContents = null;
 		try {
-			Document document = WebXMLInspector.loadWebXML(webxml.getContents());
-			WebXMLInspector.addTapestryServlet(document.getRootElement(), installData.getApplicationName(), "org.apache.tapestry.ApplicationServlet", "/app" );
+			Document document = WebXMLInspector
+					.loadWebXML(webxml.getContents());
+			WebXMLInspector.addTapestryServlet(document.getRootElement(),
+					installData.getApplicationName(),
+					"org.apache.tapestry.ApplicationServlet", "/app");
 			newContents = WebXMLInspector.printDocument(document, indentString);
 		} catch (CoreException e1) {
 			return e1.getStatus();
@@ -206,16 +211,18 @@ public class TapestryProjectInstaller {
 		} catch (Exception e1) {
 			result.setError(e1.getMessage());
 		}
-		
+
 		try {
-			webxml.setContents(new ByteArrayInputStream(newContents.getBytes()), true, true, monitor);
+			webxml.setContents(
+					new ByteArrayInputStream(newContents.getBytes()), true,
+					true, monitor);
 		} catch (CoreException e) {
 			return e.getStatus();
 		}
 		return result;
 	}
 
-	protected IStatus addTapestryNature(IProgressMonitor monitor) {
+	public IStatus addTapestryNature(IProgressMonitor monitor) {
 
 		String contextPath = installData.getContextPath();
 		IProject project = installData.getProject();
@@ -246,22 +253,45 @@ public class TapestryProjectInstaller {
 		return TapestryProject
 				.addTapestryNature(installData.getProject(), true);
 	}
-	
-	private IStatus installTapestryFrameworkLibrary(IProgressMonitor monitor) {		
+
+	public IStatus installTapestryFrameworkLibrary(IProgressMonitor monitor) {
 		try {
 			IJavaProject project = JavaCore.create(installData.getProject());
-			IClasspathEntry [] entries = project.getRawClasspath();
+			IClasspathEntry[] entries = project.getRawClasspath();
 			entries = addTapestryFrameworkLibrary(entries);
 			project.setRawClasspath(entries, monitor);
-	
+
 		} catch (CoreException e) {
 			return e.getStatus();
 		}
 		return SpindleStatus.OK_STATUS;
 	}
 
+	public List findLibraryCollisions() {
+		return Collections.EMPTY_LIST;
+	}
+
+	public IStatus installLibraries(boolean overwriteExisting,
+			IProgressMonitor monitor) {
+		return SpindleStatus.OK_STATUS;
+	}
+
 	public TapestryProjectInstallData getInstallData() {
 		return installData;
+	}
+
+	public boolean projectHasTapestryFrameworkLibrary() {
+		IJavaProject project = JavaCore.create(installData.getProject());
+		if (project == null || !project.exists())
+			return false;
+		try {
+			return hasTapestryFrameworkLibrary(project.getRawClasspath());
+
+		} catch (CoreException e) {
+			// do nothing
+
+		}
+		return false;
 	}
 
 	private boolean hasTapestryFrameworkLibrary(IClasspathEntry[] entries)

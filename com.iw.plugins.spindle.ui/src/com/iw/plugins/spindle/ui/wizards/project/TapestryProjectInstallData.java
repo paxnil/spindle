@@ -20,6 +20,12 @@ public class TapestryProjectInstallData {
 	static public final IClasspathEntry TAPESTRY_FRAMEWORK = JavaCore
 			.newContainerEntry(new Path(TapestryCore.CORE_CONTAINER), false);
 
+	public static final int COPY_TAP_JARS = 0;
+
+	public static final int USE_TAPESTRY_LIB = 1;
+
+	public static final int NO_JARS = 2;
+
 	private IProject project;
 
 	private String applicationName;
@@ -41,6 +47,8 @@ public class TapestryProjectInstallData {
 	private Template applicationFileTemplate;
 
 	private boolean writingMetaData;
+	
+	private int tapestryLibraryPolicy = NO_JARS;
 
 	public TapestryProjectInstallData() {
 		this(null);
@@ -137,5 +145,15 @@ public class TapestryProjectInstallData {
 
 	public void setWritingMetaData(boolean writingMetaData) {
 		this.writingMetaData = writingMetaData;
+	}
+
+	
+
+	public int getTapestryLibraryPolicy() {
+		return tapestryLibraryPolicy;
+	}
+
+	public void setTapestryLibraryPolicy(int tapestryLibraryPolicy) {
+		this.tapestryLibraryPolicy = tapestryLibraryPolicy;
 	}
 }
