@@ -69,41 +69,43 @@ public class LibraryMultipageEditor extends SpindleMultipageEditor {
   public IPDEEditorPage getHomePage() {
     return getPage(OVERVIEW);
   }
-  
-  protected  SpindleFormPage getOverviewPage(SpindleMultipageEditor editor) {
-  	return new OverviewLibFormPage( 
-        this,
-        MessageUtil.getString("LibMultipageEditor.OverviewTabLabel"));
-  } 
-  
+
+  protected SpindleFormPage getOverviewPage(SpindleMultipageEditor editor) {
+    return new OverviewLibFormPage(
+      this,
+      MessageUtil.getString("LibMultipageEditor.OverviewTabLabel"));
+  }
+
   /**
    * @see PDEMultiPageEditor#createPages()
    */
   protected void createPages() {
     firstPageId = OVERVIEW;
     formWorkbook.setFirstPageSelected(true);
-    addPage(
-      OVERVIEW,
-      getOverviewPage(this));
-//    addPage(
-//      DEPENDS,
-//      new DependencyFormPage(this, MessageUtil.getString("AppMultipageEditor.DependenciesTabLabel")));
+    addPage(OVERVIEW, getOverviewPage(this));
+    //    addPage(
+    //      DEPENDS,
+    //      new DependencyFormPage(this, MessageUtil.getString("AppMultipageEditor.DependenciesTabLabel")));
     addPage(
       COMPONENTS,
       new ComponentsFormPage(this, MessageUtil.getString("LibMultipageEditor.ComponentsTabLabel")));
-    addPage(PAGES, new LibraryPagesFormPage(this, MessageUtil.getString("LibMultipageEditor.PagesTabLabel")));
-    addPage(EXTENSIONS, new ExtensionsFormPage(this, MessageUtil.getString("LibMultipageEditor.ExtensionsTabLabel")));
+    addPage(
+      PAGES,
+      new LibraryPagesFormPage(this, MessageUtil.getString("LibMultipageEditor.PagesTabLabel")));
+    addPage(
+      EXTENSIONS,
+      new ExtensionsFormPage(this, MessageUtil.getString("LibMultipageEditor.ExtensionsTabLabel")));
     addPage(
       DOCUMENTATION,
       new DocumentationFormPage(this, MessageUtil.getString("LibMultipageEditor.DocTabLabel")));
-	super.createPages();
+    super.createPages();
   }
 
-  protected boolean isValidContentType(IEditorInput input) {
-    String name = input.getName().toLowerCase();
-    return name.endsWith(MessageUtil.getString("LibMultipageEditor.ValidContentType"));
+  protected String getValidExtension() {
 
-  }       
+    return MessageUtil.getString("LibMultipageEditor.ValidContentType");
+
+  }
 
   /**
    * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()

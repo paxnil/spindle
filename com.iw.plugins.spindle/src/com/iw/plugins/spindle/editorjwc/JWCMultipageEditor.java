@@ -110,11 +110,13 @@ public class JWCMultipageEditor extends SpindleMultipageEditor {
     }
     return true;
   }
-
-  protected boolean isValidContentType(IEditorInput input) {
-    String name = input.getName().toLowerCase();
-    return name.endsWith(MessageUtil.getString("JWCMultipageEditor.ValidContentType"));
+  
+  protected String getValidExtension() {
+  	
+  	return MessageUtil.getString("JWCMultipageEditor.ValidContentType");
+  	
   }
+
 
   /**
   * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()

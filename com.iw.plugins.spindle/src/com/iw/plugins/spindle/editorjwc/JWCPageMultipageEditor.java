@@ -42,12 +42,14 @@ public class JWCPageMultipageEditor extends JWCMultipageEditor {
   public JWCPageMultipageEditor() {
     super();
   }
-
-  protected boolean isValidContentType(IEditorInput input) {
-    String name = input.getName().toLowerCase();
-    String valid = MessageUtil.getString("JWCPageMultipageEditor.ValidContentType");
-    return name.endsWith(valid);
+  
+  protected String getValidExtension() {
+  	
+  	return MessageUtil.getString("JWCPageMultipageEditor.ValidContentType");
+  	
   }
+
+  
   
   /**
    * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()

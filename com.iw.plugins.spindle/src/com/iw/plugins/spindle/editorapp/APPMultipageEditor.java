@@ -48,14 +48,14 @@ public class APPMultipageEditor extends LibraryMultipageEditor {
       this,
       MessageUtil.getString("AppMultipageEditor.OverviewTabLabel"));
   }
+  
+  protected String getValidExtension() {
 
-  protected boolean isValidContentType(IEditorInput input) {
-    String name = input.getName().toLowerCase();
-    return name.endsWith(MessageUtil.getString("AppMultipageEditor.ValidContentType"));
+    return MessageUtil.getString("AppMultipageEditor.ValidContentType");
 
   }
   
-    /**
+  /**
    * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()
    */
   public Image getDefaultHeadingImage() {
