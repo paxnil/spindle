@@ -160,19 +160,21 @@ public class OrderPreservingSet implements Set
     /* (non-Javadoc)
      * @see java.util.Collection#retainAll(java.util.Collection)
      */
-    public boolean retainAll(Collection arg0)
+    public boolean retainAll(Collection collection)
     {
-        Assert.isNotNull(arg0);
+        Assert.isNotNull(collection);
         boolean changed = false;
-        for (Iterator iter = store.iterator(); iter.hasNext();)
+        List copy = new ArrayList(store);
+        for (int i = 0; i < copy.size(); i++)
         {
-            Object element = (Object) iter.next();
-            if (!arg0.contains(element))
+            Object element = (Object) copy.get(i);
+            if (!collection.contains(element))
             {
                 store.remove(element);
-                changed = changed || true;
+                changed = true;
             }
         }
+        
         return changed;
     }
 
