@@ -45,25 +45,25 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.IContentFormatter;
+import org.eclipse.jface.text.formatter.MultiPassContentFormatter;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
 import com.iw.plugins.spindle.editors.DefaultDoubleClickStrategy;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.XMLContentFormatter;
-import com.iw.plugins.spindle.editors.XMLFormattingStrategy;
+import com.iw.plugins.spindle.editors.formatter.MasterFormattingStrategy;
 import com.iw.plugins.spindle.editors.spec.assist.AttributeCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.TagCompletionProcessor;
@@ -76,7 +76,7 @@ import com.iw.plugins.spindle.editors.util.DeclCompletionProcessor;
  * SourceViewerConfiguration for the TemplateEditor
  * 
  * @author glongman@intelligentworks.com
- * 
+ *  
  */
 public class SpecConfiguration extends BaseSourceConfiguration
 {
@@ -106,7 +106,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
 
   /*
    * @see SourceViewerConfiguration#getDoubleClickStrategy(ISourceViewer,
-   *      String)
+   *              String)
    */
   public ITextDoubleClickStrategy getDoubleClickStrategy(
       ISourceViewer sourceViewer,
@@ -149,10 +149,16 @@ public class SpecConfiguration extends BaseSourceConfiguration
   //TODO fix
   public IContentFormatter getContentFormatter(ISourceViewer sourceViewer)
   {
-    IContentFormatter formatter = new XMLContentFormatter(
-        new XMLFormattingStrategy(),
-        new String[]{DefaultPartitioner.CONTENT_TYPES_CATEGORY,},
-        UIPlugin.getDefault().getPreferenceStore());
+
+    MultiPassContentFormatter formatter = new MultiPassContentFormatter(
+        XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY, //used for slave formatters only
+        IDocument.DEFAULT_CONTENT_TYPE);
+
+    formatter.setMasterStrategy(new MasterFormattingStrategy());
+
+    //    formatter.setSlaveStrategy(
+    //        new XmlElementFormattingStrategy(),
+    //        AntEditorPartitionScanner.XML_TAG);
 
     return formatter;
   }
@@ -212,7 +218,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
 
     reconciler.setDamager(dr, XMLPartitionScanner.XML_CDATA);
     reconciler.setRepairer(dr, XMLPartitionScanner.XML_CDATA);
-    
+
     reconciler.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
     return reconciler;
@@ -221,7 +227,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * (non-Javadoc)
    * 
    * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTextHover(org.eclipse.jface.text.source.ISourceViewer,
-   *      java.lang.String)
+   *              java.lang.String)
    */
   public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType)
   {
@@ -294,7 +300,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * <code>XMLOutlineInformationControl</code> instances.
    * 
    * @param sourceViewer the source viewer to be configured by this
-   *          configuration
+   *                     configuration
    * @return an information control creator
    */
   private IInformationControlCreator getXMLOutlinePresenterControlCreator(
@@ -323,7 +329,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * <code>XMLOutlineInformationControl</code> instances.
    * 
    * @param sourceViewer the source viewer to be configured by this
-   *          configuration
+   *                     configuration
    * @return an information control creator
    */
   private IInformationControlCreator getStructureOutlinePresenterControlCreator(
@@ -351,7 +357,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * instances.
    * 
    * @param sourceViewer the source viewer to be configured by this
-   *          configuration
+   *                     configuration
    * @return an information control creator
    */
   private IInformationControlCreator getAssetChooserControlCreator(
@@ -377,7 +383,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * requested for the current cursor position.
    * 
    * @param sourceViewer the source viewer to be configured by this
-   *          configuration
+   *                     configuration
    * @return an information presenter
    */
   public IInformationPresenter getXMLOutlinePresenter(ISourceViewer sourceViewer)
@@ -404,7 +410,7 @@ public class SpecConfiguration extends BaseSourceConfiguration
    * requested for the current cursor position.
    * 
    * @param sourceViewer the source viewer to be configured by this
-   *          configuration
+   *                     configuration
    * @return an information presenter
    */
   public IInformationPresenter getStructureOutlinePresenter(ISourceViewer sourceViewer)
