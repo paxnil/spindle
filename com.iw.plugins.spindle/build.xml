@@ -28,7 +28,7 @@
   	<jar jarfile="${basedir}/com.iw.plugins.spindle-${version}.jar" basedir="${basedir}/buildRelease"/>  	  
   </target>
   
-  <target name="prepare-to-build-release" depends="clean-release, build-plugin-jar">      	
+  <target name="prepare-to-build-release" depends="clean-release, build-plugin-jar, build-src-jar">      	
     <mkdir dir="${basedir}/buildRelease"/>
     <mkdir dir="${basedir}/buildRelease/com.iw.plugins.spindle"/>
     <copy toDir="buildRelease/com.iw.plugins.spindle">
