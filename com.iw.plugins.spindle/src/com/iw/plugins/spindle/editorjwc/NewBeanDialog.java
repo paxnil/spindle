@@ -60,7 +60,8 @@ import com.iw.plugins.spindle.dialogfields.UneditableComboBoxDialogField;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.spec.PluginBeanSpecification;
 import com.iw.plugins.spindle.ui.AbstractDialog;
-import com.iw.plugins.spindle.util.TapestryLookup;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
+
 import net.sf.tapestry.spec.BeanLifecycle;
 
 public class NewBeanDialog extends AbstractDialog {

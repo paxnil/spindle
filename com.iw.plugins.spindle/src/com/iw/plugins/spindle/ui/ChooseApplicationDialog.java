@@ -59,7 +59,7 @@ import org.eclipse.swt.widgets.Text;
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
-import com.iw.plugins.spindle.util.TapestryLookup;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class ChooseApplicationDialog extends AbstractDialog {
 

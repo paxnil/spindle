@@ -85,6 +85,7 @@ import com.iw.plugins.spindle.editors.SpindleFormSection;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.model.ModelUtils;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
@@ -101,8 +102,8 @@ import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.ui.TreeViewerWithToolTips;
 import com.iw.plugins.spindle.util.JavaListSelectionProvider;
 import com.iw.plugins.spindle.util.StringSorter;
-import com.iw.plugins.spindle.util.TapestryLookup;
 import com.iw.plugins.spindle.util.Utils;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class ComponentSelectionSection
   extends SpindleFormSection
@@ -272,7 +273,7 @@ public class ComponentSelectionSection
       TapestryApplicationModel appModel = (TapestryApplicationModel) applications.next();
       PluginApplicationSpecification appSpec = (PluginApplicationSpecification) (appModel).getApplicationSpec();
       TapestryComponentModel cmodel =
-        (TapestryComponentModel) TapestryPlugin.getTapestryModelManager().findComponent(
+        (TapestryComponentModel) ModelUtils.findComponent(
           appSpec.getComponentAlias(alias),
           getModel());
       if (cmodel == null) {
@@ -540,7 +541,7 @@ public class ComponentSelectionSection
           buffer.append("No Type found for contained component: " + holder.id);
           return buffer.toString();
         }
-        TapestryComponentModel component = TapestryPlugin.getTapestryModelManager().findComponent(type, getModel());
+        TapestryComponentModel component = ModelUtils.findComponent(type, getModel());
         if (component == null) {
           buffer.append(holder.id + "'s type: " + type + " not found.");
           return buffer.toString();
@@ -709,7 +710,7 @@ public class ComponentSelectionSection
       if (dialog.open() == dialog.OK) {
         try {
           String chosen = dialog.getResultComponent();
-          TapestryComponentModel target = TapestryPlugin.getTapestryModelManager().findComponent(chosen, getModel());
+          TapestryComponentModel target = ModelUtils.findComponent(chosen, getModel());
           if (target == null) {
             throw new Exception("could not find '" + chosen + "'");
           }

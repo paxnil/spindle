@@ -52,7 +52,7 @@ import com.iw.plugins.spindle.editors.SummarySourceViewer;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
-import com.iw.plugins.spindle.util.TapestryLookup;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class PagesSummarySection extends SpindleFormSection {
 

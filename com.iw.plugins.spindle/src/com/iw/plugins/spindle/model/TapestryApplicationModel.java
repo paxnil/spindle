@@ -47,6 +47,8 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.util.SourceWriter;
+
+import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.spec.PageSpecification;
 import net.sf.tapestry.util.xml.DocumentParseException;
 
@@ -77,8 +79,9 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
             applicationSpec.removePropertyChangeListener(TapestryApplicationModel.this);
           }
           try {
+          	SpecificationParser parser = (SpecificationParser)TapestryPlugin.getTapestryModelManager().getParserFor("application");
             applicationSpec =
-              (PluginApplicationSpecification) TapestryPlugin.getParser().parseApplicationSpecification(
+              (PluginApplicationSpecification) parser.parseApplicationSpecification(
                 source,
                 getUnderlyingStorage().getName());
             applicationSpec.addPropertyChangeListener(TapestryApplicationModel.this);
@@ -191,7 +194,7 @@ public class TapestryApplicationModel extends BaseTapestryModel implements Prope
   private ReferenceInfo resolveReverseReferences() {
     ArrayList resolved = new ArrayList();
     Set aliases = getApplicationSpec().getComponentMapAliases();
-    Iterator allComponents = TapestryPlugin.getTapestryModelManager().componentsIterator();
+    Iterator allComponents = ModelUtils.getComponentModels();
     if (!allComponents.hasNext() || aliases.isEmpty()) {
       return new ReferenceInfo(resolved, new ArrayList(), true);
     }

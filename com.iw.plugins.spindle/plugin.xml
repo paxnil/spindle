@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle"
    name="Spindle, an Eclipse Plugin for Tapestry (tapestry.sourceforge.net)"
-   version="1.0.1"
+   version="1.0.3"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.TapestryPlugin">
 
@@ -38,6 +38,8 @@
       <import plugin="org.eclipse.update.ui.forms"/>
    </requires>
 
+
+   <extension-point id="modelManagers" name="Internal Model Manager Point" schema="schema/modelManagers.exsd"/>
 
    <extension
          point="org.eclipse.ui.newWizards">
@@ -76,9 +78,8 @@
          </description>
       </wizard>
    </extension>
-   
    <extension
-   point="org.eclipse.ui.decorators">
+         point="org.eclipse.ui.decorators">
       <decorator
             objectClass="org.eclipse.core.resources.IStorage"
             adaptable="true"
@@ -90,8 +91,7 @@
             Adds the DTD version to .jwc and .application files in the package explorer
          </description>
       </decorator>
-</extension>
-
+   </extension>
    <extension
          point="org.eclipse.ui.editors">
       <editor
@@ -176,29 +176,47 @@
          </action>
       </actionSet>
    </extension>
-   <extension point="org.eclipse.ui.popupMenus"> 
-      <objectContribution 
-         id="com.iw.plugins.spindle.popupMenus" 
-         objectClass="org.eclipse.core.resources.IFile" 
-         nameFilter="*.html"> 
-         <menu id="com.iw.plugins.spindle.popupMenus.createComponents" 
-               label="Spindle"> 
-            <separator name="group1"/> 
-         </menu> 
-         <action id="com.iw.plugins.spindle.popupMenus.createComponents.componentFromTemplate" 
-              label="Create Tapestry Component" 
-              menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1" 
-              icon="icons/full/component16_dark.gif"               
-              class="com.iw.plugins.spindle.wizards.extra.CreateComponentFromTemplateAction" 
-              enablesFor="1"> 
-          </action> 
-          <action id="com.iw.plugins.spindle.popupMenus.createComponents.pageFromTemplate" 
-              label="Create Tapestry Page" 
-              menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1" 
-              icon="icons/full/page16.gif"               
-              class="com.iw.plugins.spindle.wizards.extra.CreatePageFromTemplateAction" 
-              enablesFor="1"> 
-          </action> 
-        </objectContribution> 
-	</extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IFile"
+            nameFilter="*.html"
+            id="com.iw.plugins.spindle.popupMenus">
+         <menu
+               label="Spindle"
+               id="com.iw.plugins.spindle.popupMenus.createComponents">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Create Tapestry Component"
+               icon="icons/full/component16_dark.gif"
+               class="com.iw.plugins.spindle.wizards.extra.CreateComponentFromTemplateAction"
+               menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
+               enablesFor="1"
+               id="com.iw.plugins.spindle.popupMenus.createComponents.componentFromTemplate">
+         </action>
+         <action
+               label="Create Tapestry Page"
+               icon="icons/full/page16.gif"
+               class="com.iw.plugins.spindle.wizards.extra.CreatePageFromTemplateAction"
+               menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
+               enablesFor="1"
+               id="com.iw.plugins.spindle.popupMenus.createComponents.pageFromTemplate">
+         </action>
+      </objectContribution>
+   </extension>
+   <extension
+         point="modelManagers">
+      <manager
+            file-extension="application"
+            class="com.iw.plugins.spindle.model.manager.ApplicationManagerDelegate">
+      </manager>
+      <manager
+            file-extension="jwc"
+            class="com.iw.plugins.spindle.model.manager.ComponentManagerDelegate">
+      </manager>
+   </extension>
+
 </plugin>

@@ -64,10 +64,10 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryModelManager;
 import com.iw.plugins.spindle.spec.TapestryPluginFactory;
 import com.iw.plugins.spindle.ui.text.ColorManager;
-import com.iw.plugins.spindle.util.TapestryLookup;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 
 /**
@@ -259,6 +259,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
   public static TapestryModelManager getTapestryModelManager() {
     if (modelManager == null) {
       modelManager = new TapestryModelManager();
+      modelManager.buildModelDelegates();
     }
     return modelManager;
   }

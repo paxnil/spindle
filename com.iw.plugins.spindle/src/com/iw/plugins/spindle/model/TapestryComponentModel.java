@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;
@@ -51,7 +52,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.util.SourceWriter;
-import com.iw.plugins.spindle.util.TapestryLookup;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class TapestryComponentModel extends BaseTapestryModel implements PropertyChangeListener {
 
@@ -75,33 +76,40 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
   /**
    * @see AbstractModel#load()
    */
-  public void load( final InputStream source) throws CoreException {
-      TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
-        public void run(IProgressMonitor monitor) {
+  public void load(final InputStream source) throws CoreException {
+    TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
+      public void run(IProgressMonitor monitor) {
 
-          removeAllProblemMarkers();
-          if (componentSpec != null) {
-            componentSpec.removePropertyChangeListener(TapestryComponentModel.this);
-            componentSpec = null;
-          }
-          try {
-            IStorage element = getUnderlyingStorage();
-            componentSpec =
-              (PluginComponentSpecification) TapestryPlugin.getParser().parseComponentSpecification(
-                source,
-                element.getName());
-            componentSpec.setName(element.getName());
-            componentSpec.addPropertyChangeListener(TapestryComponentModel.this);
-            loaded = true;
-            editable = !element.isReadOnly();
-            fireModelObjectChanged(componentSpec, "componentSpec");
-          } catch (DocumentParseException dpex) {
-            addProblemMarker(dpex.getMessage(), dpex.getLineNumber(), dpex.getColumn(), IMarker.SEVERITY_ERROR);
-            loaded = false;
-          }
+        removeAllProblemMarkers();
+        if (componentSpec != null) {
+          componentSpec.removePropertyChangeListener(TapestryComponentModel.this);
+          componentSpec = null;
         }
-      }, null);
-   
+        try {
+          IStorage element = getUnderlyingStorage();
+          SpecificationParser parser =
+            (SpecificationParser) TapestryPlugin.getTapestryModelManager().getParserFor(
+              "application");
+          componentSpec =
+            (PluginComponentSpecification) TapestryPlugin.getParser().parseComponentSpecification(
+              source,
+              element.getName());
+          componentSpec.setName(element.getName());
+          componentSpec.addPropertyChangeListener(TapestryComponentModel.this);
+          loaded = true;
+          editable = !element.isReadOnly();
+          fireModelObjectChanged(componentSpec, "componentSpec");
+        } catch (DocumentParseException dpex) {
+          addProblemMarker(
+            dpex.getMessage(),
+            dpex.getLineNumber(),
+            dpex.getColumn(),
+            IMarker.SEVERITY_ERROR);
+          loaded = false;
+        }
+      }
+    }, null);
+
   }
 
   /**
@@ -119,8 +127,8 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
    * Model events
    */
   public void propertyChange(PropertyChangeEvent event) {
-  	dirty = true;
-    fireModelObjectChanged(this, event.getPropertyName());   
+    dirty = true;
+    fireModelObjectChanged(this, event.getPropertyName());
   }
 
   public void setDescription(String description) {
@@ -207,7 +215,8 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
       if (holder.isAlias) {
         holder.description += "default = /" + resolvedFile.getFullPath().toString();
       }
-      holder.model = (BaseTapestryModel) TapestryPlugin.getTapestryModelManager().getModel(resolvedFile);
+      holder.model =
+        (BaseTapestryModel) TapestryPlugin.getTapestryModelManager().getModel(resolvedFile);
       resolved.add(holder);
     }
     return new ReferenceInfo(resolved, unresolved, false);
@@ -217,7 +226,7 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
     ArrayList resolved = new ArrayList();
     IStorage underlier = getUnderlyingStorage();
     String useName = getSpecificationLocation();
-    Iterator components = TapestryPlugin.getTapestryModelManager().componentsIterator();
+    Iterator components = ModelUtils.getComponentModels();
     while (components.hasNext()) {
       TapestryComponentModel cmodel = (TapestryComponentModel) components.next();
       if (resolved.contains(cmodel)) {
@@ -232,7 +241,7 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
         break;
       }
     }
-    Iterator applications = TapestryPlugin.getTapestryModelManager().applicationsIterator();
+    Iterator applications = ModelUtils.getApplicationModels();
     while (applications.hasNext()) {
       TapestryApplicationModel amodel = (TapestryApplicationModel) applications.next();
       if (resolved.contains(amodel)) {
@@ -282,15 +291,15 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
       getComponentSpecification().setProperty(name, value);
     }
   }
-  
-   /**
-   * @see com.iw.plugins.spindle.model.ITapestryModel#getDTDVersion()
-   */
+
+  /**
+  * @see com.iw.plugins.spindle.model.ITapestryModel#getDTDVersion()
+  */
   public String getDTDVersion() {
-  	PluginComponentSpecification spec = getComponentSpecification();
-  	if (spec != null) {
-  		return spec.getDTDVersion();
-  	}
+    PluginComponentSpecification spec = getComponentSpecification();
+    if (spec != null) {
+      return spec.getDTDVersion();
+    }
     return null;
   }
 
@@ -298,11 +307,11 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
    * @see com.iw.plugins.spindle.model.ITapestryModel#toXML()
    */
   public String toXML() {
-      StringWriter swriter = new StringWriter();
-      PrintWriter writer = new PrintWriter(swriter);
-      save(writer);
-      writer.flush();
-      return swriter.toString();
+    StringWriter swriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(swriter);
+    save(writer);
+    writer.flush();
+    return swriter.toString();
   }
 
 }

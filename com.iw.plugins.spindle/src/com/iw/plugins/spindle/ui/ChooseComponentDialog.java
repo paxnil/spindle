@@ -68,7 +68,7 @@ import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
-import com.iw.plugins.spindle.util.TapestryLookup;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class ChooseComponentDialog extends AbstractDialog {
 
@@ -152,7 +152,7 @@ public class ChooseComponentDialog extends AbstractDialog {
     layout.verticalSpacing = 10;
     container.setLayout(layout);
 
-    allApplications = TapestryPlugin.getTapestryModelManager().getAllApplications(null);
+    allApplications = TapestryPlugin.getTapestryModelManager().getAllModels(null, ".application");
     if (!ignoreAliasesAndPages && !allApplications.isEmpty()) {
       selectedApplication = createSelectCombo(container);
 

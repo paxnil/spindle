@@ -35,7 +35,7 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.util.TapestryLookup;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class TypeDialogPropertyDescriptor extends PropertyDescriptor {
 

@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.util;
+package com.iw.plugins.spindle.util.lookup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +39,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
+
+import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
+import com.iw.plugins.spindle.util.JarEntryFileFaker;
 
 // does not stay up to date as time goes on!
 
@@ -74,9 +77,21 @@ public class TapestryLookup {
   protected IWorkspace workspace;
 
   private boolean initialized = false;
+  
+  protected ILookupAcceptor acceptor;
 
   public TapestryLookup() {
+  	
+  	acceptor = new DefaultAcceptor();
 
+  }
+  
+  public void configure(IJavaProject project, ILookupAcceptor acceptor) throws JavaModelException {
+  	if (acceptor == null) {
+  		throw new IllegalArgumentException("null acceptor");
+  	}
+  	this.acceptor = acceptor;
+  	configure(project);
   }
 
   public void configure(IJavaProject project) throws JavaModelException {
@@ -412,22 +427,7 @@ public class TapestryLookup {
   }
 
   protected boolean acceptAsTapestry(IStorage s, int acceptFlags) {
-    String extension = s.getFullPath().getFileExtension();
-    int w = acceptFlags & WRITEABLE;
-    int j = acceptFlags & ACCEPT_COMPONENTS;
-    if ((acceptFlags & WRITEABLE) != 0 && s.isReadOnly()) {
-      return false;
-    }
-    if ("jwc".equals(extension)) {
-      return (acceptFlags & ACCEPT_COMPONENTS) != 0;
-    }
-    if ("application".equals(extension)) {
-      return (acceptFlags & ACCEPT_APPLICATIONS) != 0;
-    }
-    if ("html".equals(extension)) {
-      return (acceptFlags & ACCEPT_HTML) != 0;
-    }
-    return false;
+    return acceptor.acceptAsTapestry(s, acceptFlags);
   }
 
   protected class StorageOnlyRequest implements ITapestryLookupRequestor {

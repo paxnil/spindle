@@ -78,6 +78,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.model.ModelUtils;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.ui.ToolTipHandler;
@@ -372,7 +373,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable {
     PluginComponentSpecification spec = null;
 
     public TemplateParseDelegate(IStorage element) {
-      TapestryComponentModel model = TapestryPlugin.getTapestryModelManager().findComponentWithHTML(element);
+      TapestryComponentModel model = ModelUtils.findComponentWithHTML(element);
       if (model != null) {
         spec = model.getComponentSpecification();
       }

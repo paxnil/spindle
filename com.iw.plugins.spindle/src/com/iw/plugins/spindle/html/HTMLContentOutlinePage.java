@@ -70,8 +70,8 @@ import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.ui.ChooseComponentDialog;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.util.StringSorter;
-import com.iw.plugins.spindle.util.TapestryLookup;
 import com.iw.plugins.spindle.util.Utils;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocumentPartitioningListener, IDocumentListener {
 

@@ -61,6 +61,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
+import com.iw.plugins.spindle.model.ModelUtils;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginBindingSpecification;
@@ -399,7 +400,7 @@ public class BindingEditorLabelProvider
         return "No Type found for contained component: " + parameter;
       }
       StringBuffer buffer = new StringBuffer();
-      TapestryComponentModel component = TapestryPlugin.getTapestryModelManager().findComponent(type, getModel());
+      TapestryComponentModel component = ModelUtils.findComponent(type, getModel());
       if (component == null) {
         buffer.append("Component: " + type + " not found.");
         return buffer.toString();
@@ -618,7 +619,7 @@ protected class NewBindingButtonAction extends Action {
       String selectedType = selectedComponent.getType();
       if (selectedComponent != null) {
         TapestryComponentModel cmodel =
-          TapestryPlugin.getTapestryModelManager().findComponent(selectedType, getModel());
+          ModelUtils.findComponent(selectedType, getModel());
         if (cmodel != null) {
           dialog = new ChooseBindingTypeDialog(shell, cmodel, existingBindingParms, isDTD12);
         } else {

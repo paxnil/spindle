@@ -23,15 +23,17 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.model;
+package com.iw.plugins.spindle.model.manager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
+import net.sf.tapestry.util.xml.AbstractDocumentParser;
 import org.apache.log4j.Category;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -45,14 +47,15 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IPluginRegistry;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JavaModelManager;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.pde.core.IModel;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
@@ -61,61 +64,99 @@ import org.eclipse.pde.internal.core.IModelProviderListener;
 import org.eclipse.pde.internal.core.ModelProviderEvent;
 
 import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.model.BaseTapestryModel;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
-import com.iw.plugins.spindle.util.TapestryLookup;
-import net.sf.tapestry.util.xml.AbstractDocumentParser;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class TapestryModelManager implements IModelProvider, IModelChangedListener {
 
+  static private final String EXTENSION_ID = "modelManagers";
+
   ArrayList providerListeners;
   HashMap allModels;
-  ArrayList applicationModels;
-  ArrayList componentModels;
-  HashMap jarProjectsMap;
+  HashMap modelDelegates;
+  HashMap parsers = new HashMap();
 
   /**
    * Constructor for TapestryModelManager
    */
   public TapestryModelManager() {
     super();
-    providerListeners = new ArrayList(50);
-    //allModels = new HashMap();
+    providerListeners = new ArrayList(11);
     Category CAT = Category.getInstance(AbstractDocumentParser.class);
     CAT.setPriority(Priority.DEBUG);
     CAT.addAppender(new ConsoleAppender(new PatternLayout("%c{1} [%p] %m%n"), "System.out"));
-
+    
   }
 
-  public List getAllComponents(Object element) {
+  /**
+   * Method buildModelDelegates.
+   * @param modelDelegateExtensions
+   */
+  public void buildModelDelegates() {
+  	
+  	modelDelegates = new HashMap();
+  	
+    IPluginRegistry registry = Platform.getPluginRegistry();
+    IExtensionPoint point = registry.getExtensionPoint(TapestryPlugin.ID_PLUGIN, EXTENSION_ID);
+    if (point != null) {
 
-    if (allModels == null) {
-      if (element == null) {
-        return Collections.EMPTY_LIST;
-      } else {
-        populateAllModels(element);
+      IExtension[] extensions = point.getExtensions();
+      System.out.println("Found " + extensions.length + " extensions");
+
+      for (int i = 0; i < extensions.length; i++) {
+      	
+        IConfigurationElement[] elements = extensions[i].getConfigurationElements();
+        for (int j = 0; j < elements.length; j++) {
+
+          try {
+            if ("manager".equals(elements[j].getName())) {
+              String extension = elements[j].getAttribute("file-extension");
+              ITapestryModelManagerDelegate delegate = (ITapestryModelManagerDelegate) elements[j].createExecutableExtension("class");
+              
+              if (modelDelegates.containsKey(extension)) {
+              	throw new IllegalArgumentException(extension+" is already registered with a Spindle Model Delegate");
+              }
+              
+              modelDelegates.put(extension, delegate);
+              delegate.registerParserFor(extension);
+            }
+          } catch (CoreException e) {
+          }
+
+        }
       }
     }
-    return Collections.unmodifiableList(componentModels);
+
+  }
+  
+  public AbstractDocumentParser getParserFor(String extension) {
+  	return (AbstractDocumentParser) parsers.get(extension);
+  }
+  
+  public void registerParser(String extension, AbstractDocumentParser parser) {
+  	parsers.put(extension, parser);
   }
 
-  public List getAllApplications(Object element) {
-    if (allModels == null) {
-      if (element == null) {
-        return Collections.EMPTY_LIST;
-      } else {
-        populateAllModels(element);
-      }
+  private ITapestryModelManagerDelegate getDelegate(IStorage storage) {
+    return getDelegate(extension(storage));
+  }
+
+  private ITapestryModelManagerDelegate getDelegate(ITapestryModel model) {
+    return getDelegate(model.getUnderlyingStorage());
+  }
+
+  private ITapestryModelManagerDelegate getDelegate(String extension) {
+    ITapestryModelManagerDelegate result = null;
+    if (modelDelegates != null) {
+      result = (ITapestryModelManagerDelegate) modelDelegates.get(extension);
     }
-    return Collections.unmodifiableList(applicationModels);
+    return result;
   }
 
-  public Iterator componentsIterator() {
-    return (Collections.unmodifiableList(componentModels)).iterator();
-  }
-
-  public Iterator applicationsIterator() {
-    return (Collections.unmodifiableList(applicationModels)).iterator();
+  private String extension(IStorage storage) {
+    return storage.getFullPath().getFileExtension();
   }
 
   /**
@@ -126,25 +167,19 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
   }
 
   public void addModel(ITapestryModel model) {
-    if (allModels == null) {
-      populateAllModels(model);
-    }
+    checkPopulated(model);
     if (!allModels.containsKey(model.getUnderlyingStorage())) {
       allModels.put(model.getUnderlyingStorage(), model);
-      if (model instanceof TapestryApplicationModel && !applicationModels.contains(model)) {
-        applicationModels.add(model);
-      } else if (model instanceof TapestryComponentModel && !componentModels.contains(model)) {
-        componentModels.add(model);
+      ITapestryModelManagerDelegate delegate = getDelegate(model);
+      if (delegate != null) {
+        delegate.addModel(model);
       }
-
       fireModelProviderEvent(ModelProviderEvent.MODELS_ADDED, (IModel) model);
     }
   }
 
   public ITapestryModel getModel(Object element) {
-    if (allModels == null) {
-      populateAllModels(element);
-    }
+    checkPopulated(element);
     ITapestryModel model = (ITapestryModel) allModels.get(element);
     if (model == null) {
       model = createModel(element, true);
@@ -154,6 +189,12 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
     }
 
     return model;
+  }
+
+  private void checkPopulated(Object element) {
+    if (allModels == null) {
+      populateAllModels(element);
+    }
   }
 
   public void modelChanged(IModelChangedEvent event) {
@@ -166,27 +207,19 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
   }
 
   public void removeModel(ITapestryModel model) {
-    if (allModels == null) {
-      populateAllModels(model.getUnderlyingStorage());
-    }
+    checkPopulated(model);
     Object element = model.getUnderlyingStorage();
     IModel nuked = (IModel) allModels.get(element);
     if (nuked == null) {
       return;
     }
-    if (nuked instanceof TapestryApplicationModel && applicationModels.contains(model)) {
-      applicationModels.remove(nuked);
-    } else if (model instanceof TapestryApplicationModel && componentModels.contains(model)) {
-      componentModels.remove(nuked);
-    }
     allModels.remove(element);
     ((BaseTapestryModel) model).removeModelChangedListener(this);
+    ITapestryModelManagerDelegate delegate = getDelegate(model);
+    if (delegate != null) {
+      delegate.removeModel(nuked);
+    }
     fireModelProviderEvent(ModelProviderEvent.MODELS_REMOVED, nuked);
-  }
-
-  public void removeComponentModel(TapestryComponentModel model) {
-    componentModels.remove(model);
-    fireModelProviderEvent(ModelProviderEvent.MODELS_REMOVED, (IModel) model);
   }
 
   // hmm, might not need this!
@@ -206,7 +239,11 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
       TapestryLookup lookup = new TapestryLookup();
       lookup.configure(jproject);
 
-      lookup.findAll("*", true, TapestryLookup.ACCEPT_APPLICATIONS | TapestryLookup.ACCEPT_COMPONENTS, lookupCollector);
+      lookup.findAll(
+        "*",
+        true,
+        TapestryLookup.ACCEPT_APPLICATIONS | TapestryLookup.ACCEPT_COMPONENTS,
+        lookupCollector);
     } catch (JavaModelException jmex) {
       jmex.printStackTrace();
     }
@@ -215,17 +252,16 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
       return;
     }
     allModels = new HashMap();
-    applicationModels = new ArrayList();
-    componentModels = new ArrayList();
 
     Iterator foundElements = lookupCollector.getResults().iterator();
     while (foundElements.hasNext()) {
       ITapestryModel model = createModel(foundElements.next());
-      if (model != null) {        
+      if (model != null) {
         addModel(model);
       }
     }
-    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(new ResourceChangedAdapter());
+    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(
+      new ResourceChangedAdapter());
     //    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(
     //      new MyResourceChangeReporter());
   }
@@ -308,25 +344,21 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
 
   protected ITapestryModel createModel(Object element, boolean editable) {
     BaseTapestryModel result = null;
+
     if (element instanceof IStorage) {
+
       IStorage storage = (IStorage) element;
-      String name = storage.getName();
-      if (name.endsWith(".application")) {
-        TapestryApplicationModel model = new TapestryApplicationModel(storage);
-        //model.setEditable(editable);
-        result = model;
-      } else if (name.endsWith(".jwc")) {
-        TapestryComponentModel model = new TapestryComponentModel(storage);
-        //model.setEditable(editable);
-        result = model;
+
+      String extension = extension(storage);
+
+      ITapestryModelManagerDelegate delegate = getDelegate(storage);
+
+      if (delegate != null) {
+        result = delegate.createModel(storage);
       }
+
       if (result != null) {
-        if (!result.isLoaded()) {
-          try {
-            result.load();
-          } catch (CoreException e) {
-          }
-        }
+
         result.addModelChangedListener(this);
       }
 
@@ -339,13 +371,16 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
 
     switch (type) {
       case ModelProviderEvent.MODELS_ADDED :
-        event = new ModelProviderEvent(this, type, new IModel[] { model }, new IModel[0], new IModel[0]);
+        event =
+          new ModelProviderEvent(this, type, new IModel[] { model }, new IModel[0], new IModel[0]);
         break;
       case ModelProviderEvent.MODELS_REMOVED :
-        event = new ModelProviderEvent(this, type, new IModel[0], new IModel[] { model }, new IModel[0]);
+        event =
+          new ModelProviderEvent(this, type, new IModel[0], new IModel[] { model }, new IModel[0]);
         break;
       case ModelProviderEvent.MODELS_CHANGED :
-        event = new ModelProviderEvent(this, type, new IModel[0], new IModel[0], new IModel[] { model });
+        event =
+          new ModelProviderEvent(this, type, new IModel[0], new IModel[0], new IModel[] { model });
         break;
     }
     Iterator i = providerListeners.iterator();
@@ -355,45 +390,44 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
     }
   }
 
-  public TapestryApplicationModel getFirstApplicationModel() {
-    TapestryApplicationModel result = null;
-    Iterator iter = applicationModels.iterator();
-    while (iter.hasNext()) {
-      result = (TapestryApplicationModel) iter.next();
-      if (!result.isLoaded()) {
-        try {
-          result.load();
-        } catch (Exception e) {
-          continue;
-        }
-      } else {
-        break;
-      }
+  //  public TapestryApplicationModel getFirstApplicationModel() {
+  //    TapestryApplicationModel result = null;
+  //    Iterator iter = applicationModels.iterator();
+  //    while (iter.hasNext()) {
+  //      result = (TapestryApplicationModel) iter.next();
+  //      if (!result.isLoaded()) {
+  //        try {
+  //          result.load();
+  //        } catch (Exception e) {
+  //          continue;
+  //        }
+  //      } else {
+  //        break;
+  //      }
+  //    }
+  //    return result;
+  //  }
+
+  public ITapestryModel getFirstLoadedModel(String extension) {
+    ITapestryModelManagerDelegate delegate = getDelegate(extension);
+    if (delegate != null) {
+      return delegate.getFirstLoadedModel();
     }
-    return result;
+    return null;
   }
 
-  /**
-   * the model called root is used only to figure out which project to search
-   */
-  public TapestryComponentModel findComponent(String specificationPath, ITapestryModel root) {
-    Assert.isNotNull(specificationPath);
-    Assert.isNotNull(root);
-    if (!specificationPath.endsWith(".jwc")) {
-      return null;
+  public Set getAllModels(Object element) {
+    checkPopulated(element);
+    return Collections.unmodifiableSet(allModels.entrySet());
+  }
+
+  public List getAllModels(Object element, String extension) {
+    checkPopulated(element);
+    ITapestryModelManagerDelegate delegate = getDelegate(extension);
+    if (delegate != null) {
+      return delegate.getAllModels();
     }
-    TapestryLookup lookup = new TapestryLookup();
-    try {
-      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(root.getUnderlyingStorage());
-      lookup.configure(jproject);
-      IStorage[] results = lookup.findComponent(specificationPath);
-      if (results.length == 0) {
-        return null;
-      }
-      return (TapestryComponentModel) getModel(results[0]);
-    } catch (JavaModelException jmex) {
-      return null;
-    }
+    return null;
   }
 
   /**
@@ -413,47 +447,8 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
   }
 
   private void init() {
-    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(new ResourceChangedAdapter());
-  }
-
-  public TapestryComponentModel findComponentWithHTML(IStorage storage) {
-    if (allModels == null) {
-      populateAllModels(storage);
-    }
-    if (componentModels != null && !componentModels.isEmpty()) {
-      IPath htmlPath = storage.getFullPath().removeFileExtension();
-      IPath jwcPath = new Path(htmlPath.toString() + ".jwc");
-      Iterator iter = componentModels.iterator();
-      while (iter.hasNext()) {
-        TapestryComponentModel model = (TapestryComponentModel) iter.next();
-        IStorage underlier = model.getUnderlyingStorage();
-        IPath underlierPath = underlier.getFullPath();
-        if (underlierPath.equals(jwcPath)) {
-          if (storage instanceof IResource && underlier instanceof IResource) {
-            return model;
-          } else if (storage instanceof IStorage && underlier instanceof IStorage) {
-            return model;
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  public List findComponentsUsingAlias(String alias) {
-    ArrayList result = new ArrayList();
-    Iterator iter = componentModels.iterator();
-    while (iter.hasNext()) {
-      TapestryComponentModel model = (TapestryComponentModel) iter.next();
-      PluginComponentSpecification componentSpec = model.getComponentSpecification();
-      if (componentSpec == null) {
-        continue;
-      }
-      if (componentSpec.usesAlias(alias)) {
-        result.add(model);
-      }
-    }
-    return result;
+    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(
+      new ResourceChangedAdapter());
   }
 
   // Adapter added as a listener to the workspace.
@@ -486,7 +481,11 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
         TapestryLookup lookup = new TapestryLookup();
         lookup.configure(jproject);
 
-        lookup.findAll("*", true, TapestryLookup.ACCEPT_APPLICATIONS | TapestryLookup.ACCEPT_COMPONENTS, lookupCollector);
+        lookup.findAll(
+          "*",
+          true,
+          TapestryLookup.ACCEPT_APPLICATIONS | TapestryLookup.ACCEPT_COMPONENTS,
+          lookupCollector);
       } catch (JavaModelException jmex) {
         jmex.printStackTrace();
       }
@@ -607,15 +606,15 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
    * @param appResources
    * @return an array of models found for the parameter IStorages
    */
-  public ITapestryModel[] getModelsFor(IStorage[] appResources) {
+  public ArrayList getModelListFor(List storages) {
     ArrayList result = new ArrayList();
-    for (int i = 0; i < appResources.length; i++) {
-      ITapestryModel foundModel = getModel(appResources[i]);
+    for (int i = 0; i < storages.size(); i++) {
+      ITapestryModel foundModel = getModel(storages.get(i));
       if (foundModel != null) {
         result.add(foundModel);
       }
     }
-    return (ITapestryModel[]) result.toArray(new ITapestryModel[result.size()]);
+    return result;
   }
 
   /**
@@ -623,13 +622,19 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
    * @param storages
    * @return ArrayList
    */
-  public ArrayList getModelListFor(ArrayList storages) {
-    ITapestryModel[] models = getModelsFor((IStorage[]) storages.toArray(new IStorage[storages.size()]));
-    ArrayList result = new ArrayList(models.length);
-    for (int i = 0; i < models.length; i++) {
-      result.add(models[i]);
-    }
-    return result;
+  public ITapestryModel[] getModelsFor(IStorage[] storages) {
+    List models = getModelListFor(Arrays.asList(storages));
+    return (ITapestryModel[]) models.toArray(new ITapestryModel[models.size()]);
+  }
+
+  /**
+   * Method getModelListFor.
+   * @param storages
+   * @return ArrayList
+   */
+  public ITapestryModel[] getModelsFor(List storages) {
+    List models = getModelListFor(storages);
+    return (ITapestryModel[]) models.toArray(new ITapestryModel[models.size()]);
   }
 
 }

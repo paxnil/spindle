@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</HEAD>
+<HTML>
+<BODY>
+<H1><CENTER>Internal Model Manager Point</CENTER></H1>
+<H2>Identifier</H2>
+com.iw.plugins.spindle.modelManagers<H2>Description</H2>
+[Enter description of this extension point]<H2>Markup</H2>
+<p><samp>&nbsp;&nbsp; &lt;!ELEMENT extension EMPTY&gt;</samp>
+<br><samp>&nbsp;&nbsp; &lt;!ATTLIST extension</samp>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;point&nbsp;CDATA #REQUIRED</samp>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;&nbsp;CDATA #IMPLIED</samp>
+<br><samp>&nbsp;&nbsp; &gt;</samp>
+<ul>
+<li><b>point</b> - </li><li><b>name</b> - </li></ul>
+<p><samp>&nbsp;&nbsp; &lt;!ELEMENT manager EMPTY&gt;</samp>
+<br><samp>&nbsp;&nbsp; &lt;!ATTLIST manager</samp>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file-extension&nbsp;CDATA #REQUIRED</samp>
+<br><samp>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED</samp>
+<br><samp>&nbsp;&nbsp; &gt;</samp>
+<ul>
+<li><b>file-extension</b> - The extension of the file type to be managed by this manager.
+Must be of the form ".extension"</li><li><b>class</b> - The fully qualified name of the manager class
+Must implement com.iw.plugins.spindle.model.ITapestryModelManager</li></ul>
+<H2>Example</H2>
+<pre>
+&lt;extension point="com.iw.plugins.spindle.modelManager"&gt;
+ &lt;manager
+  file-extension=".jwc"
+  class="com.iw.plugins.spindle.model.ComponentModelManager/&gt;
+  
+ &lt;manager
+  file-extension=".application"
+  class="com.iw.plugins.spindle.model.ApplicationModelManager/&gt;
+&lt;/extension&gt;
+</pre><H2>API Information</H2>
+[Enter API information here.]<H2>Supplied Implementation</H2>
+[Enter information about supplied implementation of this extension point.]Copyright 2002 Intelligent Works Incorporated</BODY>
+</HTML>

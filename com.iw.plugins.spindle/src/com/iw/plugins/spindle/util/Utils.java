@@ -63,6 +63,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.model.ModelUtils;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
@@ -160,7 +161,7 @@ public class Utils {
 
   public static List getApplicationsWithAlias(String alias) {
     ArrayList result = new ArrayList();
-    Iterator iter = TapestryPlugin.getTapestryModelManager().applicationsIterator();
+    Iterator iter = ModelUtils.getApplicationModels();
     while (iter.hasNext()) {
       TapestryApplicationModel model = (TapestryApplicationModel) iter.next();
       if (!model.isLoaded()) {

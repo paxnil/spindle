@@ -23,23 +23,16 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.ui;
+package com.iw.plugins.spindle.util.lookup;
 
-import com.iw.plugins.spindle.TapestryPlugin;
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
-import com.iw.plugins.spindle.model.manager.ITapestryModelManagerDelegate;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import org.eclipse.core.resources.IStorage;
 
-public class AliasSummarizer {
-	
-	static private TapestryApplicationModel DEFAULT_APPLICATION = null;
-	
-	static public TapestryApplicationModel getCurrentApplication() {
-		if (DEFAULT_APPLICATION == null) {
-			DEFAULT_APPLICATION = (TapestryApplicationModel)TapestryPlugin.getTapestryModelManager().getFirstLoadedModel(".application");
-		}
-		return DEFAULT_APPLICATION;
-	}
+/**
+ * @author gwl
+ * @version $Id$
+ */
+public interface ILookupAcceptor {
+
+  public boolean acceptAsTapestry(IStorage s, int acceptFlags);
 
 }
-
