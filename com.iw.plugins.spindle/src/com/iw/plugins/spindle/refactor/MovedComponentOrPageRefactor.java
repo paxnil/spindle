@@ -61,6 +61,7 @@ import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.project.TapestryProject;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.TapestryStorageLabelProvider;
+import com.iw.plugins.spindle.util.Utils;
 
 /**
  * @author gwl
@@ -69,8 +70,7 @@ import com.iw.plugins.spindle.ui.TapestryStorageLabelProvider;
  * Copyright 2002, Intelligent Works Inc.
  * All Rights Reserved.
  */
-public class MovedComponentOrPageRefactor
-  implements IResourceChangeListener, IResourceDeltaVisitor {
+public class MovedComponentOrPageRefactor implements IResourceChangeListener, IResourceDeltaVisitor {
 
   private TapestryProject project;
   private HashMap potentialModelMoves;
@@ -78,7 +78,6 @@ public class MovedComponentOrPageRefactor
   private TapestryLibraryModel baseModel = null;
   private LibraryRefactorer refactorer = null;
   private IResourceDelta topLevelDelta = null;
-  private List languageCodes = null;
   private boolean hasAliases = false;
 
   public MovedComponentOrPageRefactor(TapestryProject project) {
@@ -117,12 +116,11 @@ public class MovedComponentOrPageRefactor
 
           baseModel = (TapestryLibraryModel) project.getProjectModel();
           if (baseModel == null) {
-          	
-          	return;
-          	
+
+            return;
+
           }
           projectStorage = baseModel.getUnderlyingStorage();
-          
 
           jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisProject);
 
@@ -309,19 +307,11 @@ public class MovedComponentOrPageRefactor
 
         if ("jwc".equals(extension)) {
 
-          return "<component-alias type=\""
-            + (String) entry.getValue()
-            + "\" specification-path=\""
-            + tapestryPath
-            + "\"/>";
+          return "<component-alias type=\"" + (String) entry.getValue() + "\" specification-path=\"" + tapestryPath + "\"/>";
 
         } else {
 
-          return "<page name=\""
-            + (String) entry.getValue()
-            + "\" specification-path=\""
-            + tapestryPath
-            + "\"/>";
+          return "<page name=\"" + (String) entry.getValue() + "\" specification-path=\"" + tapestryPath + "\"/>";
         }
       }
     };
@@ -361,7 +351,7 @@ public class MovedComponentOrPageRefactor
   //
   // 2. The component/page must have templates
   //
-  
+
   // plus we filter out straight renames. ie. a move to the same folder.
   // another refactor will handle those!
 
@@ -371,14 +361,14 @@ public class MovedComponentOrPageRefactor
     for (Iterator iter = potentialModelMoves.keySet().iterator(); iter.hasNext();) {
 
       IFile potential = (IFile) iter.next();
-      
+
       IFile target = (IFile) potentialModelMoves.get(potential);
-      
+
       if (potential.getParent().equals(target.getParent())) {
-      	
-      	// its not a move, but rather a renaming - discard
-      	continue;
-      	
+
+        // its not a move, but rather a renaming - discard
+        continue;
+
       }
 
       try {
@@ -430,15 +420,14 @@ public class MovedComponentOrPageRefactor
   private String getTapestryPath(IResource potential) throws CoreException {
 
     IPackageFragment fragment = project.getLookup().findPackageFragment((IStorage) potential);
-    
+
     if ("".equals(fragment.getElementName())) {
-    	
-    	return "/"+potential.getName();
-    	
+
+      return "/" + potential.getName();
+
     }
 
-    String tapestryPath =
-      "/" + fragment.getElementName().replace('.', '/') + "/" + potential.getName();
+    String tapestryPath = "/" + fragment.getElementName().replace('.', '/') + "/" + potential.getName();
     return tapestryPath;
   }
 
@@ -478,8 +467,7 @@ public class MovedComponentOrPageRefactor
 
       if (oldExtension != null && ("jwc".equals(oldExtension) || "page".equals(oldExtension))) {
 
-        if (delta.getKind() == IResourceDelta.REMOVED
-          && (delta.getFlags() & IResourceDelta.MOVED_TO) != 0) {
+        if (delta.getKind() == IResourceDelta.REMOVED && (delta.getFlags() & IResourceDelta.MOVED_TO) != 0) {
 
           IPath movedToPath = delta.getMovedToPath();
 
@@ -498,12 +486,12 @@ public class MovedComponentOrPageRefactor
               try {
 
                 //now ensure the new location is still within the classpath!
-                IPackageFragment fragment =
-                  project.getLookup().findPackageFragment((IStorage) movedTo);
+                IPackageFragment fragment = project.getLookup().findPackageFragment((IStorage) movedTo);
                 if (fragment != null) {
 
                   potentialModelMoves.put(movedFrom, movedTo);
                   findTemplatesFor(movedFrom);
+
                 }
               } catch (CoreException e) {
               }
@@ -521,103 +509,27 @@ public class MovedComponentOrPageRefactor
     return true;
   }
 
-  // find any templates for the supplied file
-  private void findTemplatesFor(IFile movedFrom) {
+  private void findTemplatesFor(IResource movedFrom) {
 
-    ArrayList templates = new ArrayList();
-    IContainer parent = movedFrom.getParent();
-    String fileName = movedFrom.getFullPath().removeFileExtension().lastSegment();
-    try {
+    List templates = Utils.findTemplatesFor((IFile) movedFrom);
 
-      IResource[] members = parent.members();
+    for (Iterator iter = templates.iterator(); iter.hasNext();) {
+      IResource element = (IResource) iter.next();
 
-      for (int i = 0; i < members.length; i++) {
+      // ensure the template is not already being moved during this event
 
-        IPath memberPath = members[i].getFullPath();
-        String extension = memberPath.getFileExtension();
+      if (topLevelDelta.findMember(element.getFullPath()) != null) {
 
-        if ("html".equals(extension) || "htm".equals(extension)) {
-
-          IResource member = parent.findMember(memberPath.lastSegment());
-
-          // ensure the template is not already being moved during this event
-
-          if (topLevelDelta.findMember(member.getFullPath()) != null) {
-
-            continue;
-
-          }
-
-          String memberName = memberPath.removeFileExtension().lastSegment();
-
-          if (member != null
-            && member instanceof IFile
-            && templateMatchLocalization(fileName, memberName)) {
-
-            templates.add(member);
-
-          }
-
-        }
-
-        if (!templates.isEmpty()) {
-
-          templatesToBeMoved.put(movedFrom, templates);
-
-        }
+        templates.remove(element);
 
       }
-    } catch (CoreException e) {
-    }
-  }
-
-  private boolean templateMatchLocalization(String fileName, String memberName) {
-
-    if (fileName.equals(memberName)) {
-
-      return true;
-
-    } else if (memberName.startsWith(fileName + '_')) {
-
-      int firstUnderscore = memberName.indexOf('_');
-      int secondUnderscore = firstUnderscore + 3;
-
-      String languageString = null;
-
-      if (secondUnderscore < memberName.length()) {
-
-        char next = memberName.charAt(secondUnderscore);
-
-        if (next != '_') {
-
-          return false;
-
-        }
-
-        languageString = memberName.substring(firstUnderscore + 1, secondUnderscore);
-
-      } else {
-
-        languageString = memberName.substring(firstUnderscore + 1);
-
-      }
-
-      if (languageCodes == null) {
-
-        buildLanguageCodes();
-
-      }
-
-      return languageCodes.contains(languageString);
 
     }
+    if (!templates.isEmpty()) {
 
-    return false;
-  }
+      templatesToBeMoved.put(movedFrom, templates);
 
-  private void buildLanguageCodes() {
-
-    languageCodes = Arrays.asList(Locale.getISOLanguages());
+    }
 
   }
 }
