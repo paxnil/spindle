@@ -142,6 +142,8 @@ public class ResourceChooserInformationControl extends TreeInformationControl
                     //                        return false;
                 }
 
+            } if (element instanceof IContainer || element instanceof IJavaElement) {
+                return hasUnfilteredChild(viewer, element);
             }
 
             return super.select(viewer, parentElement, element);
