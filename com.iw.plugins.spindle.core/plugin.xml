@@ -27,7 +27,7 @@
          <export name="*"/>
       </library>
       <library name="commons-lang-cvs-HEAD.jar">
-         <export name="*"/>
+         <export name="*"/> 
       </library>
       <library name="jakarta-oro-2.0.6.jar">
          <export name="*"/>
@@ -97,25 +97,6 @@
       <initializer class="com.iw.plugins.spindle.core.PreferenceInitializer"/>
    </extension>
 
-   <extension
-         point="org.eclipse.team.core.fileTypes">
-      <fileTypes
-            type="text"
-            extension="jwc">
-      </fileTypes>
-      <fileTypes
-            type="text"
-            extension="application">
-      </fileTypes>
-      <fileTypes
-            type="text"
-            extension="page">
-      </fileTypes>
-      <fileTypes
-            type="text"
-            extension="library">
-      </fileTypes>
-   </extension>
    <extension
          id="tapestrynature"
          name="Tapestry Nature"

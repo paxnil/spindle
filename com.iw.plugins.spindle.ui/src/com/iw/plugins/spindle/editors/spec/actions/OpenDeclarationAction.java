@@ -492,14 +492,15 @@ public class OpenDeclarationAction extends BaseSpecAction
     private void revealParameter(AbstractTextEditor editor, String parameterName)
     {
         IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
-        XMLDocumentPartitioner partitioner =
-            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+//   TODO remove     XMLDocumentPartitioner partitioner =
+//            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
         try
         {
             XMLNode reveal = null;
-            partitioner.connect(document);
+//  TODO remove          partitioner.connect(document);
             Position[] pos = null;
-            pos = document.getPositions(partitioner.getPositionCategory());
+//   TODO remove         pos = document.getPositions(partitioner.getManagingPositionCategories()[0]);
+            pos = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
             for (int i = 0; i < pos.length; i++)
             {
                 XMLNode artifact = (XMLNode) pos[i];
@@ -530,10 +531,12 @@ public class OpenDeclarationAction extends BaseSpecAction
         } catch (Exception e)
         {
             UIPlugin.log(e);
-        } finally
-        {
-            partitioner.disconnect();
-        }
+        } 
+        
+//  TODO remove      finally
+//        {
+//            partitioner.disconnect();
+//        }
     }
 
 }

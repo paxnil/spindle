@@ -47,126 +47,131 @@ import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 
 /**
- *  Base class for context assist processors for Tapestry specss
+ * Base class for context assist processors for Tapestry specss
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: SpecCompletionProcessor.java,v 1.9.2.1 2004/06/10 16:48:20
+ *          glongman Exp $
  */
 public abstract class SpecCompletionProcessor extends ContentAssistProcessor
 {
-    
-    public SpecCompletionProcessor(Editor editor)
+
+  public SpecCompletionProcessor(Editor editor)
+  {
+    super(editor);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect()
+   */
+  protected void connect(IDocument document) throws IllegalStateException
+  {
+    String publicId = null;
+    fDTD = null;
+
+    try
     {
-        super(editor);
+      XMLNode root = XMLNode.createTree(document, -1);
+      publicId = root.fPublicId;
+      fDTD = DOMValidator.getDTD(publicId);
+    } catch (BadLocationException e)
+    {
+      // do nothing
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#connect()
-     */
-    protected void connect(IDocument document) throws IllegalStateException
+    if (fDTD == null)
+      throw new IllegalStateException();
+  }
+
+  //    /* (non-Javadoc)
+  //     * @see
+  // org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer,
+  // int)
+  //     */
+  //    public IContextInformation[] computeInformation(ITextViewer viewer, int
+  // fDocumentOffset)
+  //    {
+  //        try
+  //        {
+  //            IDocument document =
+  // fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+  //            fAssistParititioner.connect(document);
+  //
+  //            try
+  //            {
+  //                XMLNode root = XMLNode.createTree(document, -1);
+  //                fPublicId = root.fPublicId;
+  //                fDeclaredRootElementName = root.fRootNodeId;
+  //                fDTD = DOMValidator.getDTD(fPublicId);
+  //
+  //            } catch (BadLocationException e)
+  //            {
+  //                // do nothing
+  //            }
+  //
+  //            if (fDTD == null || fDeclaredRootElementName == null)
+  //                return NoInformation;
+  //
+  //            return doComputeContextInformation(viewer, fDocumentOffset);
+  //
+  //        } catch (RuntimeException e)
+  //        {
+  //            UIPlugin.log(e);
+  //            throw e;
+  //        } finally
+  //        {
+  //            fAssistParititioner.disconnect();
+  //        }
+  //    }
+
+  protected ICompletionProposal[] computeEmptyDocumentProposal(
+      ITextViewer viewer,
+      int documentOffset)
+  {
+
+    IStorage storage = fEditor.getStorage();
+    String extension = storage.getFullPath().getFileExtension();
+    if (extension == null || extension.length() == 0)
     {
-        String publicId = null;
-        fDTD = null;
-
-        super.connect(document);
-        try
-        {
-            XMLNode root = XMLNode.createTree(document, -1);
-            publicId = root.fPublicId;
-            fDTD = DOMValidator.getDTD(publicId);
-        } catch (BadLocationException e)
-        {
-            // do nothing
-        }
-
-        if (fDTD == null )
-            throw new IllegalStateException();
+      return NoProposals;
     }
+    String replacement = getSkeletonSpecification(extension);
+    return new ICompletionProposal[]{new CompletionProposal(replacement, 0, viewer
+        .getDocument()
+        .getLength(), new Point(0, 0), UIPlugin
+        .getDefault()
+        .getStorageLabelProvider()
+        .getImage(storage), "insert default skeletion XML", null, null)};
+  }
 
-    //    /* (non-Javadoc)
-    //     * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
-    //     */
-    //    public IContextInformation[] computeInformation(ITextViewer viewer, int fDocumentOffset)
-    //    {
-    //        try
-    //        {
-    //            IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-    //            fAssistParititioner.connect(document);
-    //
-    //            try
-    //            {
-    //                XMLNode root = XMLNode.createTree(document, -1);
-    //                fPublicId = root.fPublicId;
-    //                fDeclaredRootElementName = root.fRootNodeId;
-    //                fDTD = DOMValidator.getDTD(fPublicId);
-    //
-    //            } catch (BadLocationException e)
-    //            {
-    //                // do nothing
-    //            }
-    //
-    //            if (fDTD == null || fDeclaredRootElementName == null)
-    //                return NoInformation;
-    //
-    //            return doComputeContextInformation(viewer, fDocumentOffset);
-    //
-    //        } catch (RuntimeException e)
-    //        {
-    //            UIPlugin.log(e);
-    //            throw e;
-    //        } finally
-    //        {
-    //            fAssistParititioner.disconnect();
-    //        }
-    //    }
-
-    protected ICompletionProposal[] computeEmptyDocumentProposal(ITextViewer viewer, int documentOffset)
+  private String getSkeletonSpecification(String extension)
+  {
+    IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
+    int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    StringWriter swriter = new StringWriter();
+    IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
+    if ("jwc".equals(extension))
     {
-
-        IStorage storage = fEditor.getStorage();
-        String extension = storage.getFullPath().getFileExtension();
-        if (extension == null || extension.length() == 0)
-        {
-            return NoProposals;
-        }
-        String replacement = getSkeletonSpecification(extension);
-        return new ICompletionProposal[] {
-             new CompletionProposal(
-                replacement,
-                0,
-                viewer.getDocument().getLength(),
-                new Point(0, 0),
-                UIPlugin.getDefault().getStorageLabelProvider().getImage(storage),
-                "insert default skeletion XML",
-                null,
-                null)};
-    }
-
-    private String getSkeletonSpecification(String extension)
+      XMLUtil.writeComponentSpecification(iwriter, UIPlugin.DEFAULT_COMPONENT_SPEC, 0);
+      return swriter.toString();
+    } else if ("page".equals(extension))
     {
-        IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-        boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
-        int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
-        StringWriter swriter = new StringWriter();
-        IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
-        if ("jwc".equals(extension))
-        {
-            XMLUtil.writeComponentSpecification(iwriter, UIPlugin.DEFAULT_COMPONENT_SPEC, 0);
-            return swriter.toString();
-        } else if ("page".equals(extension))
-        {
-            XMLUtil.writeComponentSpecification(iwriter, UIPlugin.DEFAULT_PAGE_SPEC, 0);
-            return swriter.toString();
-        } else if ("application".equals(extension))
-        {
-            XMLUtil.writeApplicationSpecification(iwriter, UIPlugin.DEFAULT_APPLICATION_SPEC, 0);
-            return swriter.toString();
-        } else if ("library".equals(extension))
-        {
-            XMLUtil.writeLibrarySpecification(iwriter, UIPlugin.DEFAULT_LIBRARY_SPEC, 0);
-            return swriter.toString();
-        }
-        return "";
+      XMLUtil.writeComponentSpecification(iwriter, UIPlugin.DEFAULT_PAGE_SPEC, 0);
+      return swriter.toString();
+    } else if ("application".equals(extension))
+    {
+      XMLUtil
+          .writeApplicationSpecification(iwriter, UIPlugin.DEFAULT_APPLICATION_SPEC, 0);
+      return swriter.toString();
+    } else if ("library".equals(extension))
+    {
+      XMLUtil.writeLibrarySpecification(iwriter, UIPlugin.DEFAULT_LIBRARY_SPEC, 0);
+      return swriter.toString();
     }
+    return "";
+  }
 
 }

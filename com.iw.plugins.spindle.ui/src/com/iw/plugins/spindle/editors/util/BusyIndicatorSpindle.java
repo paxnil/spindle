@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 /**
  * Support for showing a Busy Cursor during a long running process.
  */
-public class BusyIndicator
+public class BusyIndicatorSpindle
 {
 
     static int nextBusyId = 1;

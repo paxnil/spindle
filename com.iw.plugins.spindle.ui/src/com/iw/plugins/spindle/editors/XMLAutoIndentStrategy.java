@@ -55,8 +55,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
   private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
   private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
 
-  private XMLDocumentPartitioner fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
-      XMLDocumentPartitioner.TYPES);
+//  private XMLDocumentPartitioner fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
+//      XMLDocumentPartitioner.TYPES);
 
   private TypedPosition[] fTypedPositions;
   private IPreferenceStore fPreferences;
@@ -183,8 +183,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
 
   private void connect(IDocument d) throws BadLocationException, BadPositionCategoryException
   {
-    fPartitioner.connect(d);
-    Position[] pos = d.getPositions(fPartitioner.getPositionCategory());
+//    fPartitioner.connect(d);
+    Position[] pos = d.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
     Arrays.sort(pos, XMLNode.COMPARATOR);
     fTypedPositions = new TypedPosition[pos.length];
     System.arraycopy(pos, 0, fTypedPositions, 0, pos.length);
@@ -193,13 +193,13 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
 
   private void disconnect()
   {
-    try
-    {
-      fPartitioner.disconnect();
-    } catch (Exception e)
-    {
-      UIPlugin.log(e);
-    }
+//    try
+//    {
+//      fPartitioner.disconnect();
+//    } catch (Exception e)
+//    {
+//      UIPlugin.log(e);
+//    }
   }
 
   /**

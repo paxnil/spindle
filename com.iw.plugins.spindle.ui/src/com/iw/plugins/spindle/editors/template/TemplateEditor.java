@@ -233,7 +233,7 @@ public class TemplateEditor extends Editor
         IDocument document = getDocumentProvider().getDocument(input);
         result.setDocument(document);
 
-        result.addSelectionChangedListener(new OutlineSelectionListener());
+//    FIXME    result.addSelectionChangedListener(new OutlineSelectionListener());
         return result;
     }
 
@@ -416,6 +416,12 @@ public class TemplateEditor extends Editor
 
     }
 
+    /**
+     * OutlineSelectionListener TODO add something here
+     * @deprecated 
+     * @author glongman@intelligentworks.com
+     * @version $Id$
+     */
     protected class OutlineSelectionListener implements ISelectionChangedListener
     {
         public void selectionChanged(SelectionChangedEvent event)
@@ -436,7 +442,7 @@ public class TemplateEditor extends Editor
         /** Has the runnable already been posted? */
         private boolean fPosted = false;
         private int fOffset;
-        private XMLDocumentPartitioner fHighlightPartitioner;
+//        private XMLDocumentPartitioner fHighlightPartitioner;
 
         public HighlightUpdater()
         {}
@@ -446,15 +452,15 @@ public class TemplateEditor extends Editor
          */
         public void run()
         {
-            if (fHighlightPartitioner == null)
-                fHighlightPartitioner =
-                    new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+//            if (fHighlightPartitioner == null)
+//                fHighlightPartitioner =
+//                    new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
 
             IDocument document = getDocumentProvider().getDocument(getEditorInput());
 
             try
             {
-                fHighlightPartitioner.connect(document);
+//                fHighlightPartitioner.connect(document);
                 XMLNode.createTree(document, -1);
                 XMLNode artifact = XMLNode.getArtifactAt(document, fOffset);
                 if (artifact == null)
@@ -491,13 +497,13 @@ public class TemplateEditor extends Editor
             } finally
             {
                 fPosted = false;
-                try
-                {
-                    fHighlightPartitioner.disconnect();
-                } catch (Exception e)
-                {
-                    UIPlugin.log(e);
-                }
+//                try
+//                {
+//                    fHighlightPartitioner.disconnect();
+//                } catch (Exception e)
+//                {
+//                    UIPlugin.log(e);
+//                }
             }
 
         }

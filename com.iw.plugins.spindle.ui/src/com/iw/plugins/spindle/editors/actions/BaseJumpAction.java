@@ -33,7 +33,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
@@ -103,7 +102,7 @@ public abstract class BaseJumpAction extends BaseEditorAction
     }
 
    
-    private XMLDocumentPartitioner fPartitioner = null;
+// TODO remove   private XMLDocumentPartitioner fPartitioner = null;
     protected IDocument fDocument = null;
     /**
      * 
@@ -156,29 +155,30 @@ public abstract class BaseJumpAction extends BaseEditorAction
 
     protected void detachPartitioner()
     {
-        try
-        {
-            if (fPartitioner != null)
-                fPartitioner.disconnect();
-        } catch (RuntimeException e1)
-        {
-            UIPlugin.log(e1);
-        } finally
-        {
-            fPartitioner = null;
-            fDocument = null;
-        }
+      //TODO remove
+//        try
+//        {
+//            if (fPartitioner != null)
+//                fPartitioner.disconnect();
+//        } catch (RuntimeException e1)
+//        {
+//            UIPlugin.log(e1);
+//        } finally
+//        {
+//            fPartitioner = null;
+//            fDocument = null;
+//        }
     }
 
     protected abstract void doRun();
 
     protected void attachPartitioner()
     {
-        Assert.isTrue(fPartitioner == null);
-        fPartitioner =
-            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
-        fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-        fPartitioner.connect(fDocument);
+//   TODO remove     Assert.isTrue(fPartitioner == null);
+//        fPartitioner =
+//            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+//        fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+//        fPartitioner.connect(fDocument);
     }
 
     protected IDocument getDocument()

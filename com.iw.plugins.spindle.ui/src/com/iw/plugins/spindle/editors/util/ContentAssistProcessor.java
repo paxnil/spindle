@@ -61,38 +61,40 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
 
     protected Editor fEditor;
     protected IPreferenceStore fPreferenceStore = UIPlugin.getDefault().getPreferenceStore();
-    protected XMLDocumentPartitioner fAssistParititioner;
+//  TODO remove  protected XMLDocumentPartitioner fAssistParititioner;
     protected boolean fDoingContextInformation = false;
     protected DTD fDTD;
 
     public ContentAssistProcessor(Editor editor)
     {
         this.fEditor = editor;
-        fAssistParititioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+//  TODO remove      fAssistParititioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
     }
 
-    protected void connect(IDocument document) throws IllegalStateException
+    
+    protected  abstract void connect(IDocument document) throws IllegalStateException;
     {
-        fAssistParititioner.connect(document);
-        try
-        {
-            XMLNode.createTree(document, -1);
-        } catch (BadLocationException e)
-        {
-            UIPlugin.log(e);
-            throw new IllegalStateException();
-        }
+// TODO remove       fAssistParititioner.connect(document);
+//        try
+//        {
+//            XMLNode.createTree(document, -1);
+//        } catch (BadLocationException e)
+//        {
+//            UIPlugin.log(e);
+//            throw new IllegalStateException();
+//        }
     }
-
+    /** @deprecated */
     protected void disconnect()
     {
-        try
-        {
-            fAssistParititioner.disconnect();
-        } catch (RuntimeException e)
-        {
-            UIPlugin.log(e);
-        }
+//    TODO remove
+//      try
+//        {
+//            fAssistParititioner.disconnect();
+//        } catch (RuntimeException e)
+//        {
+//            UIPlugin.log(e);
+//        }
     }
 
     public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset)

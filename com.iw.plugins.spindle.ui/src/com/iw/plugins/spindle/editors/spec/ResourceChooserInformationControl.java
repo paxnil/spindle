@@ -62,7 +62,7 @@ import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
-import com.iw.plugins.spindle.editors.util.BusyIndicator;
+import com.iw.plugins.spindle.editors.util.BusyIndicatorSpindle;
 
 /**
  *  InformationControl for choosing Assets
@@ -231,7 +231,7 @@ public class ResourceChooserInformationControl extends TreeInformationControl
                         }
                     };
 
-                    BusyIndicator.showWhile(null, runnable);
+                    BusyIndicatorSpindle.showWhile(null, runnable);
 
                     result = (Object[]) runnable.getResult();
 

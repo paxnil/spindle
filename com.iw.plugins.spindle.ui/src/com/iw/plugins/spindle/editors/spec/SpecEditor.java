@@ -449,8 +449,8 @@ public class SpecEditor extends Editor
 
   private void reconcileOutline()
   {
-    if (fOutlinePartitioner == null)
-      fOutlinePartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+//    if (fOutlinePartitioner == null)
+//      fOutlinePartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
     try
     {
       IDocument document = getDocumentProvider().getDocument(getEditorInput());
@@ -460,7 +460,7 @@ public class SpecEditor extends Editor
       } else
       {
 
-        fOutlinePartitioner.connect(document);
+//        fOutlinePartitioner.connect(document);
         try
         {
           ((MultiPageContentOutline) fOutline).setInput(XMLNode.createTree(document, -1));
@@ -476,10 +476,11 @@ public class SpecEditor extends Editor
     {
       UIPlugin.log(e);
       throw e;
-    } finally
-    {
-      fOutlinePartitioner.disconnect();
-    }
+    } 
+//    finally
+//    {
+//      fOutlinePartitioner.disconnect();
+//    }
   }
   /**
    * return the Tapestry specification object obtained during the last build
@@ -919,7 +920,7 @@ public class SpecEditor extends Editor
   {
     private SpecEditor fEditor;
     private boolean fUseReconcileResults;
-    private XMLDocumentPartitioner fPartitioner;
+//  TODO remove  private XMLDocumentPartitioner fPartitioner;
 
     public SpecEditorInformationProvider(IEditorPart editor)
     {
@@ -968,29 +969,30 @@ public class SpecEditor extends Editor
       if (fUseReconcileResults)
         return fEditor.getReconciledSpec();
 
-      if (fPartitioner == null)
-        fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+//  TODO remove    if (fPartitioner == null)
+//        fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
       IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
       if (document == null)
         return null;
       try
       {
-        fPartitioner.connect(document);
+//  TODO remove      fPartitioner.connect(document);
         return XMLNode.createTree(document, -1);
       } catch (Exception e)
       {
         UIPlugin.log(e);
         return null;
-      } finally
-      {
-        try
-        {
-          fPartitioner.disconnect();
-        } catch (RuntimeException e)
-        {
-          UIPlugin.log(e);
-        }
-      }
+      } 
+//   TODO remove   finally
+//      {
+//        try
+//        {
+//          fPartitioner.disconnect();
+//        } catch (RuntimeException e)
+//        {
+//          UIPlugin.log(e);
+//        }
+//      }
     }
   }
 }

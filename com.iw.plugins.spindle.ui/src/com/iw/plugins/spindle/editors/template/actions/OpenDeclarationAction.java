@@ -214,7 +214,7 @@ public class OpenDeclarationAction extends BaseTemplateAction
             XMLNode reveal = null;
             partitioner.connect(document);
             Position[] pos = null;
-            pos = document.getPositions(partitioner.getPositionCategory());
+            pos = document.getPositions(partitioner.getManagingPositionCategories()[0]);
             for (int i = 0; i < pos.length; i++)
             {
                 XMLNode artifact = (XMLNode) pos[i];

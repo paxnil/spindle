@@ -50,7 +50,7 @@ public abstract class BaseSpecAction extends BaseEditorAction
     protected String fDeclaredRootElementName;
     protected String fPublicId;
     protected DTD fDTD;
-    protected XMLDocumentPartitioner fPartitioner;
+// TODO remove   protected XMLDocumentPartitioner fPartitioner;
     protected INamespace fNamespace;
  
     protected IDocument fDocument;
@@ -58,8 +58,8 @@ public abstract class BaseSpecAction extends BaseEditorAction
     public BaseSpecAction()
     {
         super();
-        fPartitioner =
-            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+// TODO remove       fPartitioner =
+//            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
     }
 
     public BaseSpecAction(String text)
@@ -95,7 +95,7 @@ public abstract class BaseSpecAction extends BaseEditorAction
         try
         {
             fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-            fPartitioner.connect(fDocument);
+//    TODO remove        fPartitioner.connect(fDocument);
             if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
                 return;
 
@@ -120,10 +120,11 @@ public abstract class BaseSpecAction extends BaseEditorAction
         {
             UIPlugin.log(e);
             throw e;
-        } finally
-        {
-            fPartitioner.disconnect();
         }
+//   TODO remove     finally
+//        {
+//            fPartitioner.disconnect();
+//        }
     }
 
     protected abstract void doRun();
