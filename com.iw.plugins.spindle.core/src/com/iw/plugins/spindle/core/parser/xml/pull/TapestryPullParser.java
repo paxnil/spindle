@@ -109,9 +109,9 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         theDocument = new DocumentImpl();
     }
 
-    private void checkSanity(boolean failIfDocumentIsDone) throws RuntimeException
+    private void checkSanity() throws RuntimeException
     {
-        if (!documentStarted || !rootElementSeen || (documentIsDone && failIfDocumentIsDone))
+        if (!documentStarted || !rootElementSeen || documentIsDone)
         {
             throw new RuntimeException("TapestryPullParser is insane!");
         }
@@ -123,20 +123,33 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     public void setSourceResolver(Parser parser)
     {
         // TODO Auto-generated method stub
-
     }
 
-    /** internal change state method **/
-    private boolean next()
+    /**
+     * 
+     * 
+     * Internal method to bump the parser.
+     * 
+     * Usually called by instances of PullParserNode
+     * 
+     * returns true if there is more to parse.
+     * returns false if the document is done.
+     *  
+     **/
+    protected boolean bump()
     {
+        //TODO Brian check this out
+        checkSanity();
         try
         {
-            return configuration.parse(false);
+            return configuration.parse();
         } catch (IOException e)
         {
             throw new XNIException(e.getMessage());
         }
     }
+    
+    
 
     /* ***************************************************** 
      *    org.apache.xerces.xni.XMLDocumentHandler Stuff      
@@ -171,7 +184,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         // TODO Auto-generated method stub
         super.emptyElement(element, attributes, augs);
         System.out.println("emptyElement: " + element.rawname);
-        
+
     }
 
     /* (non-Javadoc)
