@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import net.sf.tapestry.spec.ComponentSpecification;
 import net.sf.tapestry.spec.Direction;
 import net.sf.tapestry.spec.ParameterSpecification;
+
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
@@ -45,9 +47,7 @@ import com.iw.plugins.spindle.ui.descriptors.TypeDialogPropertyDescriptor;
 import com.iw.plugins.spindle.util.Indenter;
 import com.iw.plugins.spindle.util.SourceWriter;
 
-public class PluginParameterSpecification
-  extends ParameterSpecification
-  implements IIdentifiable, IPropertySource {
+public class PluginParameterSpecification extends ParameterSpecification implements IIdentifiable, IPropertySource {
 
   private IParameterHolder parent;
   private String identifier;
@@ -307,18 +307,17 @@ public class PluginParameterSpecification
   public IPropertyDescriptor[] getPropertyDescriptors() {
     ArrayList list = new ArrayList();
     list.add(new TextPropertyDescriptor("name", "Name"));
-    list.add(new TypeDialogPropertyDescriptor("type", "Type"));
+    list.add(
+      new TypeDialogPropertyDescriptor(
+        "type",
+        "Type",
+        IJavaElementSearchConstants.CONSIDER_CLASSES | IJavaElementSearchConstants.CONSIDER_INTERFACES));
     list.add(new CheckboxPropertyDescriptor("required", "Required"));
     if (true) {
       list.add(new ComboBoxPropertyDescriptor("direction", "Direction", directionLabels, false));
       list.add(new TextPropertyDescriptor("propertyName", "Property Name"));
     }
-    list.add(
-      new DocumentationPropertyDescriptor(
-        "description",
-        "Description",
-        "Document parameter: " + this.identifier,
-        null));
+    list.add(new DocumentationPropertyDescriptor("description", "Description", "Document parameter: " + this.identifier, null));
 
     return (IPropertyDescriptor[]) list.toArray(new IPropertyDescriptor[list.size()]);
   }

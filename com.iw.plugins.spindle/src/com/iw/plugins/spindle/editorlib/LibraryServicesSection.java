@@ -31,6 +31,7 @@ import java.util.List;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.pde.core.IModelChangedEvent;
 import org.eclipse.pde.core.IModelChangedListener;
@@ -343,7 +344,7 @@ public class LibraryServicesSection
     public IPropertyDescriptor[] getPropertyDescriptors() {
       return new IPropertyDescriptor[] {
         new TextPropertyDescriptor("name", "Name"),
-        new TypeDialogPropertyDescriptor("class", "Class", "net.sf.tapestry.IEngineService"),
+        new TypeDialogPropertyDescriptor("class", "Class", IJavaElementSearchConstants.CONSIDER_CLASSES, "net.sf.tapestry.IEngineService"),
         };
     }
 

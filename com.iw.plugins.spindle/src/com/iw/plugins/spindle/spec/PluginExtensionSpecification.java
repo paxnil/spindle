@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import net.sf.tapestry.spec.ExtensionSpecification;
+
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
@@ -192,7 +194,7 @@ public class PluginExtensionSpecification
 
     return new IPropertyDescriptor[] {
       new TextPropertyDescriptor("name", "Name"),
-      new TypeDialogPropertyDescriptor("class", "Classname"),
+      new TypeDialogPropertyDescriptor("class", "Classname", IJavaElementSearchConstants.CONSIDER_CLASSES),
       new CheckboxPropertyDescriptor("immediate", "Immediate")};
   }
 

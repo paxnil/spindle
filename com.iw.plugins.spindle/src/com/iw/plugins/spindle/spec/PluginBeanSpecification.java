@@ -37,6 +37,9 @@ import net.sf.tapestry.bean.StaticBeanInitializer;
 import net.sf.tapestry.bean.StringBeanInitializer;
 import net.sf.tapestry.spec.BeanLifecycle;
 import net.sf.tapestry.spec.BeanSpecification;
+
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
@@ -417,7 +420,7 @@ public class PluginBeanSpecification
   private IPropertyDescriptor[] descriptorsPre13 =
     {
       new TextPropertyDescriptor("name", "Name"),
-      new TypeDialogPropertyDescriptor("class", "Class"),
+      new TypeDialogPropertyDescriptor("class", "Class", IJavaElementSearchConstants.CONSIDER_CLASSES),
       new ComboBoxPropertyDescriptor("lifecycle", "Lifecycle", lifecycleLabelsPre13, false)};
 
   private String[] lifecycleLabels13 = { "None", "Page", "Request", "Render" };
@@ -425,7 +428,7 @@ public class PluginBeanSpecification
   private IPropertyDescriptor[] descriptors13 =
     {
       new TextPropertyDescriptor("name", "Name"),
-      new TypeDialogPropertyDescriptor("class", "Class"),
+      new TypeDialogPropertyDescriptor("class", "Class",IJavaElementSearchConstants.CONSIDER_CLASSES),
       new ComboBoxPropertyDescriptor("lifecycle", "Lifecycle", lifecycleLabels13, false)};
 
   public void resetPropertyValue(Object key) {

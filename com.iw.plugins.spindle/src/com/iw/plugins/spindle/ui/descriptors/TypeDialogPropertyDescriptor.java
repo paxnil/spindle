@@ -41,20 +41,22 @@ import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.ui.TypeDialogCellEditor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public class TypeDialogPropertyDescriptor
-  extends PropertyDescriptor
-  implements INeedsModelInitialization {
+public class TypeDialogPropertyDescriptor extends PropertyDescriptor implements INeedsModelInitialization {
 
   private IPackageFragmentRoot root;
   private String hierarchyRoot;
 
-  public TypeDialogPropertyDescriptor(Object id, String displayName) {
+  private int searchFlags;
+
+  public TypeDialogPropertyDescriptor(Object id, String displayName, int searchFlags) {
     super(id, displayName);
+    this.searchFlags = searchFlags;
   }
 
-  public TypeDialogPropertyDescriptor(Object id, String displayName, String hierarchyRoot) {
-    this(id, displayName);
+  public TypeDialogPropertyDescriptor(Object id, String displayName, int searchFlags, String hierarchyRoot) {
+    this(id, displayName, searchFlags);
     this.hierarchyRoot = hierarchyRoot;
+
   }
 
   /**
@@ -90,7 +92,7 @@ public class TypeDialogPropertyDescriptor
   }
 
   public CellEditor createPropertyEditor(Composite parent) {
-    return new TypeDialogCellEditor(parent, root, hierarchyRoot);
+    return new TypeDialogCellEditor(parent, root, searchFlags, hierarchyRoot);
   }
 
 }
