@@ -31,15 +31,17 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.iw.plugins.spindle.core.util.Assert;
+
 /**
  * @author GWL
- * @version 
- * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
+ * @version Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
 public class StringField extends DialogField
 {
@@ -56,6 +58,12 @@ public class StringField extends DialogField
     super(label, labelWidth);
   }
 
+  public boolean isVisible()
+  {
+    return super.isVisible() && textControl.isVisible();
+  }
+  
+  
   public Control getControl(Composite parent)
   {
 
@@ -78,6 +86,18 @@ public class StringField extends DialogField
     textControl.setLayoutData(formData);
 
     return container;
+  }
+
+  public void fillIntoGrid(Composite parent, int numcols)
+  {
+    super.fillIntoGrid(parent, numcols);
+    numcols -= 1;
+    Assert.isTrue(numcols >= 1);
+
+    Text textControl = getTextControl(parent);
+    GridData data = new GridData(GridData.FILL_HORIZONTAL);
+    data.horizontalSpan = numcols;
+    textControl.setLayoutData(data);
   }
 
   public Text getTextControl(Composite parent)

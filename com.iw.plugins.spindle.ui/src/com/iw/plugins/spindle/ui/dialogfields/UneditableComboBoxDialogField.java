@@ -57,6 +57,11 @@ public class UneditableComboBoxDialogField extends DialogField
   {
     this(labelText, -1, values);
   }
+
+  public boolean isVisible()
+  {
+    return combo != null && !combo.isDisposed() && combo.isVisible();
+  }
   // ------- layout helpers
 
   /**
@@ -98,6 +103,7 @@ public class UneditableComboBoxDialogField extends DialogField
   {
     return combo.getSelectionIndex();
   }
+  
   // ------- ui creation
 
   public UneditableComboBox getUneditableComboBoxControl(Composite parent)
@@ -156,7 +162,7 @@ public class UneditableComboBoxDialogField extends DialogField
       combo.select(index);
     } else
     {
-      fireDialogButtonPressed(this);
+      fireDialogFieldChanged(this);
     }
   }
 

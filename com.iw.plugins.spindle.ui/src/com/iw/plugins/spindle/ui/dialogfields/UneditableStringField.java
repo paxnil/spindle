@@ -37,8 +37,7 @@ import org.eclipse.swt.widgets.Label;
 
 /**
  * @author GWL
- * @version 
- * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
+ * @version Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
 public class UneditableStringField extends DialogField
 {
@@ -83,6 +82,11 @@ public class UneditableStringField extends DialogField
     return container;
   }
 
+  public boolean isVisible()
+  {
+    return super.isVisible() && textControl.isVisible();
+  }
+
   public Label getTextControl(Composite parent)
   {
     if (textControl == null)
@@ -108,7 +112,7 @@ public class UneditableStringField extends DialogField
       textControl.setText(value);
       if (update)
       {
-        fireDialogButtonPressed(this);
+        fireDialogFieldChanged(this);
       }
     }
   }

@@ -35,25 +35,25 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 
 /**
  * @author GWL
- * @version 
- * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
+ * @version Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
 public class DialogField implements IDialogFieldChangedListener
 {
-
+  private IStatus status = new SpindleStatus();
   private String labelText;
   private int labelWidth;
   private List listeners = new ArrayList();
-  protected IStatus status = new SpindleStatus();
   private Label labelControl;
 
   private boolean enabled = true;
@@ -76,6 +76,9 @@ public class DialogField implements IDialogFieldChangedListener
   public Control getControl(Composite parent)
   {
 
+    Assert
+        .isLegal(labelControl == null, "can't use FormLayout, already used GridLayout!");
+
     Composite container = new Composite(parent, SWT.NULL);
     FormLayout layout = new FormLayout();
     container.setLayout(layout);
@@ -90,6 +93,18 @@ public class DialogField implements IDialogFieldChangedListener
     labelControl.setLayoutData(formData);
 
     return container;
+  }
+
+  public void fillIntoGrid(Composite parent, int numcols)
+  {
+    Assert
+        .isLegal(labelControl == null, "can't use GridLayout, already used FormLayout!");
+    Assert.isTrue(numcols >= 1);
+
+    labelControl = getLabelControl(parent);
+    GridData data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+    data.horizontalSpan = 1;
+    labelControl.setLayoutData(data);
   }
 
   protected int getLabelWidth()
@@ -142,7 +157,7 @@ public class DialogField implements IDialogFieldChangedListener
     if (labelControl != null && !labelControl.isDisposed())
     {
       labelControl.setText(labelText);
-      fireDialogButtonPressed(this);
+      fireDialogFieldChanged(this);
     }
   }
 
@@ -241,7 +256,7 @@ public class DialogField implements IDialogFieldChangedListener
 
   /**
    * @see IDialogFieldChangedListener#dialogFieldStatusChanged(IStatus,
-   *      DialogField)
+   *              DialogField)
    */
   public void dialogFieldStatusChanged(IStatus status, DialogField field)
   {
@@ -250,6 +265,14 @@ public class DialogField implements IDialogFieldChangedListener
   public boolean setFocus()
   {
     return true;
+  }
+
+  /**
+   * @return
+   */
+  public  boolean isVisible()
+  {
+    return  labelControl != null && !labelControl.isDisposed() && labelControl.isVisible();
   }
 
 }

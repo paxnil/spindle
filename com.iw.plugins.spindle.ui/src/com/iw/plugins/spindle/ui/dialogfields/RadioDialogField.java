@@ -46,6 +46,7 @@ public class RadioDialogField extends DialogField
 
   private Button[] radioButtons;
   private String[] radioLabels;
+  private Composite composite;
   private int orientation = SWT.HORIZONTAL;
 
   public RadioDialogField(String label, String[] radioLabels, int orientation)
@@ -63,19 +64,22 @@ public class RadioDialogField extends DialogField
 
   public Control getControl(Composite parent)
   {
+    if (parent  == null)
+      return composite;
+    
     checkOrientation();
-    Composite container = new Composite(parent, SWT.NULL);
+    composite= new Composite(parent, SWT.NULL);
 
     FormLayout layout = new FormLayout();
-    container.setLayout(layout);
+    composite.setLayout(layout);
 
     FormData formData;
 
     if (orientation == SWT.HORIZONTAL)
     {
 
-      Label labelControl = getLabelControl(container);
-      Control[] radioControls = getRadioButtonControls(container);
+      Label labelControl = getLabelControl(composite);
+      Control[] radioControls = getRadioButtonControls(composite);
 
       formData = new FormData();
       formData.width = getLabelWidth();
@@ -100,7 +104,7 @@ public class RadioDialogField extends DialogField
     } else
     {
 
-      Composite labelComp = new Composite(container, SWT.NULL);
+      Composite labelComp = new Composite(composite, SWT.NULL);
       formData = new FormData();
       formData.width = getLabelWidth();
       formData.top = new FormAttachment(0, 0);
@@ -119,7 +123,7 @@ public class RadioDialogField extends DialogField
       formData.left = new FormAttachment(0, 0);
       labelControl.setLayoutData(formData);
 
-      Composite radioComp = new Composite(container, SWT.NULL);
+      Composite radioComp = new Composite(composite, SWT.NULL);
       formData = new FormData();
 
       formData.top = new FormAttachment(0, 0);
@@ -146,9 +150,16 @@ public class RadioDialogField extends DialogField
       }
     }
 
-    return container;
+    return composite;
   }
+  
+  
 
+  public boolean isVisible()
+  {  
+    return composite != null && !composite.isDisposed() && composite.isVisible();
+  }
+  
   public Control[] getRadioButtonControls(Composite parent)
   {
     if (radioButtons == null)

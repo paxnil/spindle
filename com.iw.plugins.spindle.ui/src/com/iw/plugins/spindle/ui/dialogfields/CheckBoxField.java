@@ -68,7 +68,14 @@ public class CheckBoxField extends DialogField
     super(label, labelWidth);
     fLabelFirst = labelFirst;
   }
+  
+  
 
+  public boolean isVisible()
+  {
+   
+    return super.isVisible() && fCheckboxControl.isVisible();
+  }
   public Control getControl(Composite parent)
   {
 
@@ -150,7 +157,7 @@ public class CheckBoxField extends DialogField
 
       fCheckboxControl.setSelection(value);
       if (fireEvent)
-        fireDialogButtonPressed(this);
+        fireDialogFieldChanged(this);
 
     }
   }

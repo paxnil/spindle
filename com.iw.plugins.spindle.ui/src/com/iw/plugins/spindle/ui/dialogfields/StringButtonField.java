@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.ui.dialogfields;
 
 import java.util.Iterator;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -34,6 +35,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -41,10 +43,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
+import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.ui.widgets.PixelConverter;
+
 /**
  * @author GWL
- * @version 
- * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
+ * @version Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
 public class StringButtonField extends StringField
 {
@@ -55,9 +59,18 @@ public class StringButtonField extends StringField
 
   public StringButtonField(String label)
   {
-    super(label);
+    this(label, -1);
   }
-
+  
+  public StringButtonField(String label, int labelWidth)
+  {
+    super(label, labelWidth);
+  }
+  
+  public boolean isVisible()
+  {   
+    return super.isVisible() && fButtonControl.isVisible();
+  }
   public void init(IRunnableContext context)
   {
     this.fRunnableContext = context;
@@ -69,10 +82,7 @@ public class StringButtonField extends StringField
         ? PlatformUI.getWorkbench().getProgressService() : fRunnableContext);
   }
 
-  public StringButtonField(String label, int labelWidth)
-  {
-    super(label, labelWidth);
-  }
+  
 
   public Control getControl(Composite parent)
   {
@@ -110,6 +120,28 @@ public class StringButtonField extends StringField
     buttonControl.setLayoutData(formData);
     return container;
 
+  }
+
+  public void fillIntoGrid(Composite parent, int numcols)
+  {
+    Assert.isTrue(numcols >= 3);
+    super.fillIntoGrid(parent, numcols - 1);
+
+    PixelConverter converter = new PixelConverter(parent);
+    int heightHint = converter
+        .convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
+    int widthHint = converter
+        .convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+
+    Button buttonControl = getButtonControl(parent);
+    GridData data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+    data.horizontalSpan = 1;
+    data.heightHint = heightHint;
+    data.widthHint = Math.max(widthHint, buttonControl.computeSize(
+        SWT.DEFAULT,
+        SWT.DEFAULT,
+        true).x);
+    buttonControl.setLayoutData(data);
   }
 
   public Button getButtonControl(Composite parent)
