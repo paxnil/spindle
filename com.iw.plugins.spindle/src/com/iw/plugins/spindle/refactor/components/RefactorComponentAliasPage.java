@@ -32,10 +32,8 @@ import net.sf.tapestry.parse.SpecificationParser;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -44,16 +42,12 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 
+import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
-import com.iw.plugins.spindle.ui.dialogfields.DialogField;
-import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
-import com.iw.plugins.spindle.ui.dialogfields.RadioDialogField;
-import com.iw.plugins.spindle.ui.dialogfields.StringButtonDefaultField;
 import com.iw.plugins.spindle.ui.dialogfields.StringField;
 import com.iw.plugins.spindle.wizards.TapestryWizardPage;
 
@@ -85,6 +79,10 @@ public class RefactorComponentAliasPage extends TapestryWizardPage {
     this.showButtons = showButtons;
     this.existingComponentAliases = existingComponentAliases;
     existingComponentAliases.remove(oldName);
+    
+    
+    this.setImageDescriptor(
+      ImageDescriptor.createFromURL(TapestryImages.getImageURL("component32.gif")));
   }
 
   public String getNewName() {
@@ -212,15 +210,7 @@ public class RefactorComponentAliasPage extends TapestryWizardPage {
       return;
     }
 
-    if (currentValue.equals(oldName)) {
-
-      setButtonsEnabled(false);
-
-    } else {
-
-      setButtonsEnabled(true);
-
-    }
+    ((RefactorComponentAliasWizard)getWizard()).newNameChanged(currentValue);
     setPageComplete(true);
 
   }
@@ -243,6 +233,18 @@ public class RefactorComponentAliasPage extends TapestryWizardPage {
    */
   public IRunnableWithProgress getRunnable(Object object) {
     return null;
+  }
+
+  /**
+   * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+   */
+  public void setVisible(boolean visible) {
+    super.setVisible(visible);
+    if (visible) {
+    	
+    	checkPageComplete(componentName.getTextControl(null));
+    	
+    }
   }
 
 }

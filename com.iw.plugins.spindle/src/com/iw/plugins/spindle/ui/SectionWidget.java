@@ -26,7 +26,7 @@
 
 
 
-package com.iw.plugins.spindle.wizards.migrate;
+package com.iw.plugins.spindle.ui;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;

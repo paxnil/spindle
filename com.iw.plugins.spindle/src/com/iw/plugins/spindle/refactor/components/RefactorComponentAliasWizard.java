@@ -38,9 +38,13 @@ import java.util.Set;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
@@ -66,17 +70,19 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
  * Copyright 2002, Intelligent Works Inc.
  * All Rights Reserved.
  */
-public class RefactorComponentAliasWizard extends Wizard {
+public class RefactorComponentAliasWizard extends Wizard implements ISelectionChangedListener {
 
   ITapestryProject project;
   String oldName;
   String newName;
   List existingComponentAliases;
   RefactorComponentAliasPage firstPage;
+  RefactorAliasScopePage secondPage;
   Map affectedComponents = new HashMap();
   Map editors = new HashMap();
   private boolean showSecondPage = true;
   private boolean canShow = true;
+  private boolean canFinish = false;
 
   static public RefactorComponentAliasWizard createWizard(
     ITapestryProject project,
@@ -142,6 +148,13 @@ public class RefactorComponentAliasWizard extends Wizard {
 
   }
 
+  public void newNameChanged(String value) {
+
+    canFinish = !oldName.equals(value);
+    getContainer().updateButtons();
+
+  }
+
   /**
    * Method doAnyRequiredSaves.
    * @return boolean
@@ -168,12 +181,10 @@ public class RefactorComponentAliasWizard extends Wizard {
       return true;
 
     }
-    
-    RequiredSaveEditorAction action = new RequiredSaveEditorAction(dirtyEditors);
-    
-    return action.save();
 
-    
+    RequiredSaveEditorAction action = new RequiredSaveEditorAction(dirtyEditors);
+
+    return action.save();
 
   }
 
@@ -227,13 +238,14 @@ public class RefactorComponentAliasWizard extends Wizard {
 
         monitor.beginTask("refactoring...", affectedComponents.size());
 
-        for (Iterator iter = affectedComponents.entrySet().iterator(); iter.hasNext();) {
+        List affected = getFinalAffectedComponents();
 
-          Map.Entry element = (Map.Entry) iter.next();
+        for (Iterator iter = affected.iterator(); iter.hasNext();) {
 
-          IStorage storage = (IStorage) element.getKey();
+          AffectedComponentHolder holder = (AffectedComponentHolder) iter.next();
+          IStorage storage = holder.model.getUnderlyingStorage();
+
           IEditorPart editor = Utils.getEditorFor(storage);
-          AffectedComponentHolder holder = (AffectedComponentHolder) element.getValue();
           boolean pulledFromWorkspace = false;
 
           TapestryComponentModel model;
@@ -278,14 +290,13 @@ public class RefactorComponentAliasWizard extends Wizard {
               Utils.saveModel(model, monitor);
 
             } else {
-			  
+
               editor.doSave(monitor);
               if (editor instanceof SpindleMultipageEditor) {
-              	
-              	((SpindleMultipageEditor)editor).showPage(SpindleMultipageEditor.SOURCE_PAGE);
-              	
+
+                ((SpindleMultipageEditor) editor).showPage(SpindleMultipageEditor.SOURCE_PAGE);
+
               }
-              
 
             }
 
@@ -307,11 +318,44 @@ public class RefactorComponentAliasWizard extends Wizard {
    */
   public void addPages() {
     super.addPages();
+        
     firstPage = new RefactorComponentAliasPage("FirstPage", oldName, showSecondPage, existingComponentAliases);
     addPage(firstPage);
     if (showSecondPage) {
 
+      List affected = new ArrayList();
+
+      for (Iterator iter = affectedComponents.keySet().iterator(); iter.hasNext();) {
+        Object key = (Object) iter.next();
+        affected.add(affectedComponents.get(key));
+      }
+
+      secondPage = new RefactorAliasScopePage("SecondPage", affected);
+      secondPage.addSelectionChangedListener(this);
+      addPage(secondPage);
+
     }
+  }
+
+  private List getFinalAffectedComponents() {
+
+    if (secondPage != null) {
+
+      return ((IStructuredSelection) secondPage.getSelection()).toList();
+
+    } else {
+
+      List affected = new ArrayList();
+
+      for (Iterator iter = affectedComponents.keySet().iterator(); iter.hasNext();) {
+        Object key = (Object) iter.next();
+        affected.add(affectedComponents.get(key));
+      }
+
+      return affected;
+
+    }
+
   }
 
   private void findAffectedComponents() throws CoreException {
@@ -322,8 +366,7 @@ public class RefactorComponentAliasWizard extends Wizard {
     TapestryLibraryModel libModel = (TapestryLibraryModel) project.getProjectModel();
     IEditorPart editor = Utils.getEditorFor(libModel.getUnderlyingStorage());
     if (editor != null && editor instanceof SpindleMultipageEditor) {
-    	
-     
+
       libModel = (TapestryLibraryModel) ((SpindleMultipageEditor) editor).getModel();
 
     }
@@ -346,7 +389,9 @@ public class RefactorComponentAliasWizard extends Wizard {
       String element = (String) iter.next();
       String tapestryPath = libSpec.getComponentSpecificationPath(element);
 
-      doModelCheck(manager, lookup, tapestryPath);
+      IPackageFragment fragment = lookup.findPackageFragment(tapestryPath);
+
+      doModelCheck(manager, lookup, tapestryPath, fragment);
 
     }
 
@@ -354,12 +399,18 @@ public class RefactorComponentAliasWizard extends Wizard {
       String element = (String) iter.next();
       String tapestryPath = libSpec.getPageSpecificationPath(element);
 
-      doModelCheck(manager, lookup, tapestryPath);
+      IPackageFragment fragment = lookup.findPackageFragment(tapestryPath);
+
+      doModelCheck(manager, lookup, tapestryPath, fragment);
 
     }
   }
 
-  private void doModelCheck(TapestryProjectModelManager manager, TapestryLookup lookup, String tapestryPath) {
+  private void doModelCheck(
+    TapestryProjectModelManager manager,
+    TapestryLookup lookup,
+    String tapestryPath,
+    IPackageFragment fragment) {
     TapestryComponentModel model = (TapestryComponentModel) getModelFor(manager, lookup, tapestryPath);
     if (model != null && model.isLoaded()) {
 
@@ -373,7 +424,7 @@ public class RefactorComponentAliasWizard extends Wizard {
 
           if (oldName.equals(contained.getType())) {
 
-            addAffectedComponent(model, id);
+            addAffectedComponent(model, id, fragment);
           }
 
         }
@@ -437,13 +488,13 @@ public class RefactorComponentAliasWizard extends Wizard {
    * @param componentModel
    * @param id
    */
-  private void addAffectedComponent(TapestryComponentModel componentModel, String id) {
+  private void addAffectedComponent(TapestryComponentModel componentModel, String id, IPackageFragment fragment) {
 
     AffectedComponentHolder existing = (AffectedComponentHolder) affectedComponents.get(componentModel.getUnderlyingStorage());
 
     if (existing == null) {
 
-      AffectedComponentHolder newHolder = new AffectedComponentHolder(componentModel);
+      AffectedComponentHolder newHolder = new AffectedComponentHolder(componentModel, fragment);
       newHolder.addId(id);
       affectedComponents.put(componentModel.getUnderlyingStorage(), newHolder);
 
@@ -458,10 +509,12 @@ public class RefactorComponentAliasWizard extends Wizard {
 
     public TapestryComponentModel model;
     private Set ids = new HashSet();
+    public IPackageFragment fragment;
 
-    public AffectedComponentHolder(TapestryComponentModel model) {
+    public AffectedComponentHolder(TapestryComponentModel model, IPackageFragment fragment) {
 
       this.model = model;
+      this.fragment = fragment;
 
     }
 
@@ -485,6 +538,22 @@ public class RefactorComponentAliasWizard extends Wizard {
       return this.model.equals(other.model);
     }
 
+  }
+
+  public void selectionChanged(SelectionChangedEvent event) {
+
+    IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+    canFinish = !selection.isEmpty() && !oldName.equals(firstPage.getNewName());
+    
+    getContainer().updateButtons();
+
+  }
+
+  /**
+   * @see org.eclipse.jface.wizard.IWizard#canFinish()
+   */
+  public boolean canFinish() {
+   return canFinish;
   }
 
 }

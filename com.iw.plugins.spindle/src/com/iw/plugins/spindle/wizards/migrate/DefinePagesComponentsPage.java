@@ -58,6 +58,7 @@ import org.eclipse.swt.widgets.Table;
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.spec.XMLUtil;
+import com.iw.plugins.spindle.ui.*;
 import com.iw.plugins.spindle.ui.TapestryStorageLabelProvider;
 import com.iw.plugins.spindle.ui.migrate.MigrationContext;
 

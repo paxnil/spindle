@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.wizards.migrate;
+package com.iw.plugins.spindle.refactor.components;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import com.iw.plugins.spindle.TapestryImages;
-import com.iw.plugins.spindle.ui.*;
+import com.iw.plugins.spindle.ui.SectionWidget;
 import com.iw.plugins.spindle.ui.migrate.MigrationContext;
 
 /**
@@ -52,26 +52,26 @@ import com.iw.plugins.spindle.ui.migrate.MigrationContext;
  * Copyright 2002, Intelligent Work Inc.
  * All Rights Reserved.
  */
-public class MigrationScopePage extends WizardPage implements ISelectionProvider, ISelectionChangedListener {
+public class RefactorAliasScopePage extends WizardPage implements ISelectionProvider, ISelectionChangedListener {
 
-  MigrationContext context;
-  MigrationScopeChooserWidget chooser;
+  RefactorAliasScopeChooserWidget chooser;
+  List affectedComponents;
 
   boolean isComplete = true;
+
+  ImageDescriptor descriptor;
 
   /**
    * Constructor for ConversionWelcomePage.
    * @param name
    */
-  public MigrationScopePage(String name, MigrationContext context) {
+  public RefactorAliasScopePage(String name, List affectedComponents) {
     super(name);
 
-    this.setImageDescriptor(
-      ImageDescriptor.createFromURL(TapestryImages.getImageURL("application32.gif")));
-    this.setDescription("Tune Migration Scope");
+    this.setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("component32.gif")));
+    this.setDescription("Preview of Component Alias refactoring");
 
-    this.context = context;
-
+    this.affectedComponents = affectedComponents;
   }
 
   /**
@@ -86,7 +86,7 @@ public class MigrationScopePage extends WizardPage implements ISelectionProvider
     composite.setLayout(layout);
     composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-    Section section = new Section("Deselect those files you want the Migrator to skip");
+    Section section = new Section("Deselect those you want to skip");
 
     Control sectionControl = section.createControl(composite);
 
@@ -104,14 +104,9 @@ public class MigrationScopePage extends WizardPage implements ISelectionProvider
    */
   public void selectionChanged(SelectionChangedEvent event) {
 
-    setPageComplete(!event.getSelection().isEmpty());
+    //setPageComplete(!event.getSelection().isEmpty());
     fireSelectionChanged();
 
-  }
-  
-  public List getPossibleUndefinedJWCs() {
-  	
-  	return chooser.getUndefinedFiles();
   }
 
   public ISelection getSelection() {
@@ -119,16 +114,16 @@ public class MigrationScopePage extends WizardPage implements ISelectionProvider
     return chooser.getSelection();
 
   }
-  
-    List selectionChangeListeners = new ArrayList();
+
+  List selectionChangeListeners = new ArrayList();
 
   private void fireSelectionChanged() {
 
     for (Iterator iter = selectionChangeListeners.iterator(); iter.hasNext();) {
-    	
+
       ISelectionChangedListener element = (ISelectionChangedListener) iter.next();
       element.selectionChanged(new SelectionChangedEvent(this, getSelection()));
-      
+
     }
 
   }
@@ -147,9 +142,6 @@ public class MigrationScopePage extends WizardPage implements ISelectionProvider
 
   }
 
-  /**
-   * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(ISelection)
-   */
   public void setSelection(ISelection selection) {
   }
 
@@ -178,7 +170,7 @@ public class MigrationScopePage extends WizardPage implements ISelectionProvider
       composite.setLayout(layout);
       composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-      chooser = new MigrationScopeChooserWidget(context, 380, -1, SWT.NONE);
+      chooser = new RefactorAliasScopeChooserWidget(affectedComponents, 380, -1, SWT.NONE);
 
       Control chooserControl = chooser.createControl(composite);
 

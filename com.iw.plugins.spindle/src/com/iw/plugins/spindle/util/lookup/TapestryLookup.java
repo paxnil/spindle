@@ -192,6 +192,25 @@ public class TapestryLookup implements ILookupAcceptor {
     }
     return (IResource) fragment.getParent().getUnderlyingResource();
   }
+  
+  public IPackageFragment findPackageFragment(String tapestryPath) {
+  	
+  	IStorage [] found = findByTapestryPath(tapestryPath, ACCEPT_ANY);
+  	
+  	if (found != null && found.length != 0) {
+  		
+      try {
+      	
+        return findPackageFragment(found[0]);
+        
+      } catch (JavaModelException e) {
+      }
+  		
+  	}
+  	
+  	return null;
+  	
+  }
 
   public IPackageFragment findPackageFragment(IStorage storage) throws JavaModelException {
     if (storage instanceof JarEntryFileFaker) {
