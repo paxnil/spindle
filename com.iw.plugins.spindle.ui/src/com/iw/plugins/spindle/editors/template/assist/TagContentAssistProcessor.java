@@ -30,19 +30,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.tapestry.parse.TemplateParser;
-import org.eclipse.jface.text.IDocument;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
@@ -101,19 +102,63 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
         List proposals = new ArrayList();
         Map attrmap = tag.getAttributesMap();
         String jwcid = null;
-        DocumentArtifact jwcidArt = (DocumentArtifact) attrmap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
-        if (jwcidArt != null)
-        {
-            jwcid = jwcidArt.getAttributeValue();
-        }
+        jwcid = getJwcid(attrmap);
 
         DocumentArtifact existingAttr = tag.getAttributeAt(documentOffset);
-        if (existingAttr != null && existingAttr.getOffset() < documentOffset)
+        if (baseState != DocumentArtifact.AFTER_ATT_VALUE
+            && existingAttr != null
+            && existingAttr.getOffset() < documentOffset)
         {
+            // no proposals if the attribute name is jwcid!
             if (TemplateParser.JWCID_ATTRIBUTE_NAME.equalsIgnoreCase(existingAttr.getName()))
+            {
                 return NoProposals;
-            //are we inside an attribute name?
-            computeAttributeNameReplacements(documentOffset, existingAttr, jwcid, attrmap.keySet(), proposals);
+            }
+
+            // if there's no jwcid already....
+            if (!attrmap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME)
+                && !attrmap.containsKey(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME))
+            {
+                if (existingAttr.getStateAt(documentOffset) == DocumentArtifact.TAG)
+                {
+
+                    String currentName = existingAttr.getContentTo(documentOffset, false).toLowerCase();
+
+                    if (TemplateParser.JWCID_ATTRIBUTE_NAME.startsWith(currentName))
+                    {
+                        return new ICompletionProposal[] {
+                             CompletionProposal.getAttributeProposal(
+                                TemplateParser.JWCID_ATTRIBUTE_NAME.substring(currentName.length()),
+                                TemplateParser.JWCID_ATTRIBUTE_NAME,
+                                "",
+                                null,
+                                false,
+                                documentOffset)};
+
+                    } else if (TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME.startsWith(currentName))
+                    {
+                        return new ICompletionProposal[] {
+                             CompletionProposal.getAttributeProposal(
+                                TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME.substring(currentName.length()),
+                                TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
+                                "",
+                                null,
+                                false,
+                                documentOffset)};
+                    }
+
+                    return NoProposals;
+                }
+            } else
+            {
+                // we need to find parameter name replacements
+                computeAttributeNameReplacements(
+                    documentOffset,
+                    existingAttr,
+                    jwcid,
+                    new HashSet(attrmap.keySet()),
+                    proposals);
+            }
 
         } else if (
             !attrmap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME)
@@ -133,22 +178,22 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
 
         } else
         {
-            computeAttributeProposals(documentOffset, addLeadingSpace, jwcid, attrmap.keySet(), proposals);
+            computeAttributeProposals(documentOffset, addLeadingSpace, jwcid, new HashSet(attrmap.keySet()), proposals);
         }
+
+        if (proposals.isEmpty())
+            return NoSuggestions;
 
         Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
 
-        proposals.add(new TestProposal(tag == null ? "null" : tag.getStateString(documentOffset) + tag.toString()));
-        proposals.add(new TestProposal(tag == null ? "null" : tag.getContentTo(documentOffset, false)));
         return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 
     }
-
-    private void computeAttributeProposals(
+    protected void computeAttributeProposals(
         int documentOffset,
         boolean addLeadingSpace,
         String jwcid,
-        Set existingAttributeNames,
+        HashSet existingAttributeNames,
         List proposals)
     {
 
@@ -157,180 +202,104 @@ public class TagContentAssistProcessor extends ContentAssistProcessor
         try
         {
             ContentAssistHelper helper = new ContentAssistHelper(fEditor);
-            helper.setJwcid(jwcid);
-            ContentAssistHelper.CAHelperParameterInfo[] infos = helper.findParameters(null, existingAttributeNames);
+            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
+            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+            helper.setJwcid(
+                jwcid,
+                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+            ContentAssistHelper.CAHelperResult[] infos = helper.findParameters(null, existingAttributeNames);
             for (int i = 0; i < infos.length; i++)
             {
-                found.put(infos[i].parameterName, infos[i].description);
+                CompletionProposal proposal =
+                    CompletionProposal.getAttributeProposal(
+                        infos[i].name,
+                        infos[i].name,
+                        CompletionProposal.DEFAULT_ATTR_VALUE,
+                        infos[i].description,
+                        addLeadingSpace,
+                        documentOffset);
+
+                if (infos[i].required)
+                    proposal.setImage(Images.getSharedImage("bullet_pink.gif"));
+                proposals.add(proposal);
+
+                // now why am I using a map here?
             }
         } catch (IllegalArgumentException e)
         {
-            return;
+            //do nothing
         }
-
-        if (!found.isEmpty())
-        {
-
-            for (Iterator iter = found.keySet().iterator(); iter.hasNext();)
-            {
-                String replacementWord = (String) iter.next();
-                String extra = (String) found.get(replacementWord);
-                proposals.add(
-                    CompletionProposal.getAttributeProposal(
-                        replacementWord,
-                        CompletionProposal.DEFAULT_ATTR_VALUE,
-                        extra,
-                        addLeadingSpace,
-                        documentOffset));
-            }
-        }
-
     }
 
-    private void computeAttributeNameReplacements(
+    protected void computeAttributeNameReplacements(
         int documentOffset,
         DocumentArtifact existingAttribute,
         String jwcid,
-        Set existingAttributeNames,
+        HashSet existingAttributeNames,
         List proposals)
     {
         String name = existingAttribute.getName();
         String fragment = existingAttribute.getContentTo(documentOffset, false);
         if (fragment.length() > name.length())
-        {
             return;
-        }
+
+        int replacementOffset = existingAttribute.getOffset();
+        int replacementLength = name.length();
 
         if (fragment.length() == 0)
-        {
             fragment = null;
-        }
-        Map matches = new HashMap();
-        Map replaces = new HashMap();
 
         try
         {
             // first get the matches
             ContentAssistHelper helper = new ContentAssistHelper(fEditor);
             helper.setJwcid(jwcid);
-            ContentAssistHelper.CAHelperParameterInfo[] infos = helper.findParameters(fragment, existingAttributeNames);
-            for (int i = 0; i < infos.length; i++)
-            {
-                matches.put(infos[i].parameterName, infos[i].description);
-            }
-            //then get the replaces
-            HashSet newSet = new HashSet(existingAttributeNames); 
-            newSet.addAll(matches.keySet());
 
-            infos = helper.findParameters(null, newSet);
+            ContentAssistHelper.CAHelperResult[] infos = helper.findParameters(fragment, existingAttributeNames);
             for (int i = 0; i < infos.length; i++)
             {
-                replaces.put(infos[i].parameterName, infos[i].description);
+                CompletionProposal proposal =
+                    new CompletionProposal(
+                        infos[i].name,
+                        replacementOffset,
+                        replacementLength,
+                        new Point(infos[i].name.length(), 0),
+                        infos[i].required
+                            ? Images.getSharedImage("bullet_pink.gif")
+                            : Images.getSharedImage("bullet.gif"),
+                        null,
+                        null,
+                        infos[i].description);
+
+                proposals.add(proposal);
+                existingAttributeNames.add(infos[i].name.toLowerCase());
             }
+
+            //then get the replaces
+
+            infos = helper.findParameters(null, existingAttributeNames);
+            for (int i = 0; i < infos.length; i++)
+            {
+                CompletionProposal proposal =
+                    new CompletionProposal(
+                        infos[i].name,
+                        replacementOffset,
+                        replacementLength,
+                        new Point(infos[i].name.length(), 0),
+                        infos[i].required
+                            ? Images.getSharedImage("bullet_weird.gif")
+                            : Images.getSharedImage("bullet_d.gif"),
+                        null,
+                        null,
+                        infos[i].description);
+
+                proposal.setYOrder(1);
+                proposals.add(proposal);
+            }
+
         } catch (IllegalArgumentException e)
         {
-            return;
+            //do nothing
         }
-
-        if (!matches.isEmpty())
-        {
-            int replacementOffset = existingAttribute.getOffset();
-            int replacementLength = name.length();
-            for (Iterator iter = matches.keySet().iterator(); iter.hasNext();)
-            {
-                String replacementWord = (String) iter.next();
-                proposals.add(
-                    new CompletionProposal(
-                        replacementWord,
-                        replacementOffset,
-                        replacementLength,
-                        new Point(replacementWord.length(), 0),
-                        null,
-                        replacementWord,
-                        null,
-                        (String) matches.get(replacementWord)));
-            }
-        }
-        if (!replaces.isEmpty())
-        {
-            int replacementOffset = existingAttribute.getOffset();
-            int replacementLength = name.length();
-            for (Iterator iter = replaces.keySet().iterator(); iter.hasNext();)
-            {
-                String replacementWord = (String) iter.next();
-                CompletionProposal prop =
-                    new CompletionProposal(
-                        replacementWord,
-                        replacementOffset,
-                        replacementLength,
-                        new Point(replacementWord.length(), 0),
-                        null,
-                        replacementWord + " (replace)",
-                        null,
-                        (String) replaces.get(replacementWord));
-                prop.setYOrder(1);
-                proposals.add(prop);
-            }
-        }
-    }
-
-    class TestProposal implements ICompletionProposal
-    {
-        String fLabel = "coming soon!";
-
-        public TestProposal()
-        {}
-
-        public TestProposal(String label)
-        {
-            fLabel = label;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
-         */
-        public void apply(IDocument document)
-        {}
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-         */
-        public String getAdditionalProposalInfo()
-        {
-            return "TAG";
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
-         */
-        public IContextInformation getContextInformation()
-        {
-            return null;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
-         */
-        public String getDisplayString()
-        {
-            return fLabel;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-         */
-        public Image getImage()
-        {
-            return null;
-        }
-
-        /* (non-Javadoc)
-         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-         */
-        public Point getSelection(IDocument document)
-        {
-            return null;
-        }
-
     }
 }

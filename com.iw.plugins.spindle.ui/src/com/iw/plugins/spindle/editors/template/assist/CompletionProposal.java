@@ -35,6 +35,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
@@ -54,43 +55,49 @@ public class CompletionProposal implements ICompletionProposal
         int z1;
         int z2;
         public int compare(Object o1, Object o2)
-        {   
-            
-            
+        {
+
             ICompletionProposal p1 = (ICompletionProposal) o1;
             ICompletionProposal p2 = (ICompletionProposal) o2;
-            
+
             s1 = p1.getDisplayString();
             s2 = p2.getDisplayString();
-            
+
             z1 = z2 = 0;
-            
+
             if (p1 instanceof CompletionProposal)
-                z1 = ((CompletionProposal)p1).fYOrder;
-                
+                z1 = ((CompletionProposal) p1).fYOrder;
+
             if (p2 instanceof CompletionProposal)
-                            z2 = ((CompletionProposal)p2).fYOrder; 
-                             
+                z2 = ((CompletionProposal) p2).fYOrder;
+
             return (z1 == z2) ? s1.compareTo(s2) : (z1 < z2 ? -1 : 1);
         }
     };
 
-    public static ICompletionProposal getAttributeProposal(
+    public static CompletionProposal getAttributeProposal(
         String attributeName,
         boolean addLeadingSpace,
         int replacementOffset)
     {
-        return getAttributeProposal(attributeName, DEFAULT_ATTR_VALUE, null, addLeadingSpace, replacementOffset);
+        return getAttributeProposal(
+            attributeName,
+            attributeName,
+            DEFAULT_ATTR_VALUE,
+            null,
+            addLeadingSpace,
+            replacementOffset);
     }
 
-    public static ICompletionProposal getAttributeProposal(
+    public static CompletionProposal getAttributeProposal(
         String attributeName,
+        String displayName,
         String defaultValue,
         String extraInfo,
         boolean addLeadingSpace,
         int replacementOffset)
     {
-        String replacementString = (addLeadingSpace ? " " : "") + attributeName + "=\'" + defaultValue + "\'";
+        String replacementString = (addLeadingSpace ? " " : "") + attributeName + "=\"" + defaultValue + "\"";
         Point replacementPoint =
             new Point((addLeadingSpace ? 1 : 0) + attributeName.length() + 2, defaultValue.length());
 
@@ -99,8 +106,8 @@ public class CompletionProposal implements ICompletionProposal
             replacementOffset,
             0,
             replacementPoint,
-            null,
-            attributeName,
+            Images.getSharedImage("bullet.gif"),
+            displayName,
             null,
             extraInfo);
     }
@@ -121,7 +128,7 @@ public class CompletionProposal implements ICompletionProposal
     private IContextInformation fContextInformation;
     /** The additional info of this proposal */
     private String fAdditionalProposalInfo;
-    
+
     protected int fYOrder = 0;
 
     /**
@@ -179,8 +186,9 @@ public class CompletionProposal implements ICompletionProposal
         fContextInformation = contextInformation;
         fAdditionalProposalInfo = additionalProposalInfo;
     }
-    
-    public void setYOrder(int order) {
+
+    public void setYOrder(int order)
+    {
         fYOrder = order;
     }
 
@@ -223,6 +231,11 @@ public class CompletionProposal implements ICompletionProposal
         return fImage;
     }
 
+    public void setImage(Image image)
+    {
+        fImage = image;
+    }
+
     /*
      * @see ICompletionProposal#getDisplayString()
      */
@@ -240,4 +253,5 @@ public class CompletionProposal implements ICompletionProposal
     {
         return fAdditionalProposalInfo;
     }
+
 }

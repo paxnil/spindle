@@ -145,7 +145,7 @@ public class SpecEditor extends Editor
         fReconciledSpec = null;
 
         if (fReconciler != null)
-            fReconciler.reconcile(collector, monitor);
+            fReconciler.reconcile(collector, monitor); 
 
         //        (() fOutline.setSpec(fReconciledSpec));
     }

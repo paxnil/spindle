@@ -29,10 +29,11 @@ package com.iw.plugins.spindle.editors.template.assist;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.MatchResult;
@@ -40,9 +41,11 @@ import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
+import org.apache.tapestry.INamespace;
 import org.apache.tapestry.parse.TemplateParser;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
+import org.apache.tapestry.spec.ILibrarySpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
@@ -54,44 +57,56 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
- *  TODO Add Type comment
+ *  Helper class for ContentAssistProcessors
+ * 
+ *  Knows how to extract tapestry information.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class ContentAssistHelper
+/*package*/
+class ContentAssistHelper
 {
 
-    private static Pattern _simpleIdPattern;
-    private static Pattern _implicitIdPattern;
-    private static PatternMatcher _patternMatcher;
+    private static Pattern SIMPLE_ID_PATTERN;
+    private static Pattern IMPLICIT_ID_PATTERN;
+    private static PatternMatcher PATTERN_MATCHER;
 
     static {
         Perl5Compiler compiler = new Perl5Compiler();
 
         try
         {
-            _simpleIdPattern = compiler.compile(TemplateParser.SIMPLE_ID_PATTERN);
-            _implicitIdPattern = compiler.compile(TemplateParser.IMPLICIT_ID_PATTERN);
+            SIMPLE_ID_PATTERN = compiler.compile(TemplateParser.SIMPLE_ID_PATTERN);
+            IMPLICIT_ID_PATTERN = compiler.compile(TemplateParser.IMPLICIT_ID_PATTERN);
         } catch (MalformedPatternException ex)
         {
             throw new Error(ex);
         }
 
-        _patternMatcher = new Perl5Matcher();
+        PATTERN_MATCHER = new Perl5Matcher();
     }
 
     private PluginComponentSpecification fSpecification;
     private ICoreNamespace fNamespace;
+    private ICoreNamespace fFrameworkNamespace;
+    private String fRawJwcid = null;
+    /** The id. Implicit or not. Never null*/
     private String fSimpleId = null;
+    /** implicit component - the full type including namespace qualifier */
     private String fFullType = null;
+    /** implicit component - the namespace qualifier */
     private String fLibraryId = null;
+    /** implicit component - the simple type name. Same as fFullType - fLibraryId */
     private String fSimpleType = null;
+    /** the spec of the component referred to directly or indirectly by a jwcid */
     private PluginComponentSpecification fContainedComponentSpecification = null;
+    /** not null iff fSimpleId is not null**/
+    private IContainedComponent fContainedComponent = null;
 
-    public ContentAssistHelper(TemplateEditor editor) throws IllegalArgumentException
+    ContentAssistHelper(TemplateEditor editor) throws IllegalArgumentException
     {
-        if (_simpleIdPattern == null)
+        if (SIMPLE_ID_PATTERN == null)
         {}
 
         fSpecification = (PluginComponentSpecification) editor.getComponent();
@@ -102,44 +117,58 @@ public class ContentAssistHelper
         Assert.isLegal(fNamespace != null && fSpecification != null);
     }
 
-    public void setJwcid(String jwcid)
+    void setJwcid(String jwcid)
     {
-        if (jwcid==null || jwcid.trim().length() == 0)
-            return;
-            
-        if (jwcid.equalsIgnoreCase(CoreTemplateParser.REMOVE_ID)
-            || jwcid.equalsIgnoreCase(CoreTemplateParser.CONTENT_ID))
+
+        if (jwcid == null || jwcid.trim().length() == 0)
             return;
 
-        if (_patternMatcher.matches(jwcid, _implicitIdPattern))
+        fRawJwcid = jwcid.trim();
+        if (fRawJwcid.equalsIgnoreCase(CoreTemplateParser.REMOVE_ID)
+            || fRawJwcid.equalsIgnoreCase(CoreTemplateParser.CONTENT_ID))
+            return;
+
+        if (PATTERN_MATCHER.matches(fRawJwcid, IMPLICIT_ID_PATTERN))
         {
-            MatchResult match = _patternMatcher.getMatch();
+            MatchResult match = PATTERN_MATCHER.getMatch();
 
             fSimpleId = match.group(CoreTemplateParser.IMPLICIT_ID_PATTERN_ID_GROUP);
             fFullType = match.group(CoreTemplateParser.IMPLICIT_ID_PATTERN_TYPE_GROUP);
 
-            String libraryId = match.group(CoreTemplateParser.IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP);
-            String simpleType = match.group(CoreTemplateParser.IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP);
+            fLibraryId = match.group(CoreTemplateParser.IMPLICIT_ID_PATTERN_LIBRARY_ID_GROUP);
+            fSimpleType = match.group(CoreTemplateParser.IMPLICIT_ID_PATTERN_SIMPLE_TYPE_GROUP);
 
         } else
         {
-            fSimpleId = jwcid;
+            if (PATTERN_MATCHER.matches(fRawJwcid, SIMPLE_ID_PATTERN))
+                fSimpleId = fRawJwcid;
 
         }
-        if (fSimpleId != null)
+    }
+
+    void setJwcid(String jwcid, ICoreNamespace frameworkNamespace)
+    {
+        setJwcid(jwcid);
+        fFrameworkNamespace = frameworkNamespace;
+    }
+
+    private void resolveContainedComponent()
+    {
+        if (fSimpleId != null && fFullType == null)
         {
-            IContainedComponent contained = fSpecification.getComponent(fSimpleId);
-            if (contained == null)
+            fContainedComponent = fSpecification.getComponent(fSimpleId);
+            if (fContainedComponent == null)
                 return;
-            String copyOf = contained.getCopyOf();
+            String copyOf = fContainedComponent.getCopyOf();
             if (copyOf != null)
             {
-                contained = fSpecification.getComponent(copyOf);
-                if (contained == null)
+                fContainedComponent = fSpecification.getComponent(copyOf);
+                if (fContainedComponent == null)
                     return;
             }
-            fContainedComponentSpecification = (PluginComponentSpecification) resolveComponentType(contained.getType());
-        } else
+            fContainedComponentSpecification =
+                (PluginComponentSpecification) resolveComponentType(fContainedComponent.getType());
+        } else if (fFullType != null)
         {
             fContainedComponentSpecification = (PluginComponentSpecification) resolveComponentType(fFullType);
         }
@@ -149,19 +178,30 @@ public class ContentAssistHelper
     {
         ComponentSpecificationResolver resolver = fNamespace.getComponentResolver();
         IComponentSpecification containedSpecification = resolver.resolve(type);
+        if (fFrameworkNamespace != null && containedSpecification == null)
+        {
+            resolver = fFrameworkNamespace.getComponentResolver();
+            containedSpecification = resolver.resolve(type);
+        }
         return containedSpecification;
     }
 
-    public CAHelperParameterInfo[] findParameters()
+    CAHelperResult[] findParameters()
     {
         return findParameters(null, null);
     }
 
-    public CAHelperParameterInfo[] findParameters(String match, Set existing)
+    CAHelperResult[] findParameters(String match, HashSet existing)
     {
+        resolveContainedComponent();
+
         if (fContainedComponentSpecification == null)
         {
-            return new CAHelperParameterInfo[] {};
+            return new CAHelperResult[] {};
+        }
+        if (fContainedComponent != null)
+        {
+            existing.addAll(fContainedComponent.getBindingNames());
         }
         List result = new ArrayList();
         Map parameterMap = fContainedComponentSpecification.getParameterMap();
@@ -177,19 +217,19 @@ public class ContentAssistHelper
 
             }
 
-            if (existing != null && existing.contains(name))
+            if (existing != null && existing.contains(name.toLowerCase()))
                 continue;
 
-            result.add(createParameterInfo(name, parameterSpec, fSpecification.getPublicId()));
+            result.add(createResult(name, parameterSpec, fSpecification.getPublicId()));
         }
-        return (CAHelperParameterInfo[]) result.toArray(new CAHelperParameterInfo[result.size()]);
+
+        return (CAHelperResult[]) result.toArray(new CAHelperResult[result.size()]);
 
     }
 
-    private Object createParameterInfo(String name, IParameterSpecification parameterSpec, String publicId)
+    private CAHelperResult createResult(String name, IParameterSpecification parameterSpec, String publicId)
     {
-        CAHelperParameterInfo result = new CAHelperParameterInfo();
-        result.parameterName = name;
+        CAHelperResult result = new CAHelperResult(name, null);
         String description = parameterSpec.getDescription();
 
         StringWriter swriter = new StringWriter();
@@ -202,13 +242,216 @@ public class ContentAssistHelper
         extraInfo.append("\n\n");
         extraInfo.append(swriter.toString());
         result.description = extraInfo.toString();
+        if (parameterSpec.isRequired())
+            result.required = true;
         return result;
     }
 
-    public static class CAHelperParameterInfo
+    CAHelperResult[] getSimpleIds()
     {
-        public String parameterName;
+        if (fSpecification == null)
+            return new CAHelperResult[] {};
+
+        List result = new ArrayList();
+        List ids = fSpecification.getComponentIds();
+        for (Iterator iter = ids.iterator(); iter.hasNext();)
+        {
+            String id = (String) iter.next();
+
+            result.add(new CAHelperResult(id, null));
+        }
+        return (CAHelperResult[]) result.toArray(new CAHelperResult[result.size()]);
+    }
+
+    CAHelperResult[] getLibraryIds()
+    {
+        if (fNamespace == null)
+            return new CAHelperResult[] {};
+
+        List result = new ArrayList();
+        List libIds = fNamespace.getChildIds();
+        for (Iterator iter = libIds.iterator(); iter.hasNext();)
+        {
+            String libId = (String) iter.next();
+            INamespace libNamespace = fNamespace.getChildNamespace(libId);
+            ILibrarySpecification libSpec = fNamespace.getSpecification();
+
+            String description = libSpec.getDescription();
+            result.add(new CAHelperResult(libId, description == null ? "no description available" : description));
+        }
+        return (CAHelperResult[]) result.toArray(new CAHelperResult[result.size()]);
+    }
+
+    /** return resuls for the current namespace **/
+    CAHelperResult[] getComponents()
+    {
+        List result = new ArrayList();
+
+        ILibrarySpecification libSpec = fNamespace.getSpecification();
+
+        List types = libSpec.getComponentTypes();
+
+        Map applicationTypes = new HashMap();
+
+        for (Iterator iter = types.iterator(); iter.hasNext();)
+        {
+            String typeId = (String) iter.next();
+            IComponentSpecification component = fNamespace.getComponentSpecification(typeId);
+            applicationTypes.put(typeId, createResult(typeId, typeId, component));
+        }
+
+        if (fFrameworkNamespace != null)
+        {
+            libSpec = fFrameworkNamespace.getSpecification();
+            types = libSpec.getComponentTypes();
+            for (Iterator iter = types.iterator(); iter.hasNext();)
+            {
+                String typeId = (String) iter.next();
+                if (applicationTypes.containsKey(typeId))
+                    continue;
+                IComponentSpecification component = fFrameworkNamespace.getComponentSpecification(typeId);
+                applicationTypes.put(typeId, createResult(typeId, typeId, component));
+            }
+        }
+
+        for (Iterator iter = applicationTypes.entrySet().iterator(); iter.hasNext();)
+        {
+            Map.Entry entries = (Map.Entry) iter.next();
+            result.add(entries.getValue());
+        }
+
+        return (CAHelperResult[]) result.toArray(new CAHelperResult[result.size()]);
+    }
+
+    CAHelperResult[] getChildNamespaceComponents(String libraryId)
+    {
+        if (fNamespace == null)
+            return new CAHelperResult[] {};
+
+        List result = new ArrayList();
+
+        INamespace childNamespace = fNamespace.getChildNamespace(libraryId);
+        if (childNamespace == null)
+            return new CAHelperResult[] {};
+
+        ILibrarySpecification childLibSpec = fNamespace.getSpecification();
+        List types = childLibSpec.getComponentTypes();
+        for (Iterator iter = types.iterator(); iter.hasNext();)
+        {
+            String typeId = (String) iter.next();
+            IComponentSpecification component = fNamespace.getComponentSpecification(typeId);
+            result.add(createResult(typeId, typeId, component));
+        }
+
+        return (CAHelperResult[]) result.toArray(new CAHelperResult[result.size()]);
+
+    }
+
+    CAHelperResult[] getChildNamespaceIds()
+    {
+        if (fNamespace == null)
+        {
+            return new CAHelperResult[] {};
+        }
+        List result = new ArrayList();
+        for (Iterator iter = fNamespace.getChildIds().iterator(); iter.hasNext();)
+        {
+            String id = (String) iter.next();
+
+            result.add(createResult(id, fNamespace.getSpecification()));
+
+        }
+        return (CAHelperResult[]) result.toArray(new CAHelperResult[result.size()]);
+    }
+
+    private CAHelperResult createResult(String libId, ILibrarySpecification namespaceSpec)
+    {
+        CAHelperResult result = new CAHelperResult(libId, null);
+
+        StringWriter swriter = new StringWriter();
+        PrintWriter pwriter = new PrintWriter(swriter);
+
+        pwriter.println(libId);
+        pwriter.println();
+        XMLUtil.writeLibrary(libId, namespaceSpec.getLibrarySpecificationPath(libId), pwriter, 0);
+
+        result.description = swriter.toString();
+        return result;
+    }
+
+    CAHelperResult[] getAllChildNamespaceComponents()
+    {
+        if (fNamespace == null)
+            return new CAHelperResult[] {};
+
+        List result = new ArrayList();
+
+        List libIds = fNamespace.getChildIds();
+        for (Iterator iter = libIds.iterator(); iter.hasNext();)
+        {
+            String libId = (String) iter.next();
+            ICoreNamespace childNamespace = (ICoreNamespace) fNamespace.getChildNamespace(libId);
+            List types = childNamespace.getComponentTypes();
+            ComponentSpecificationResolver resolver = childNamespace.getComponentResolver();
+
+            for (Iterator iter2 = types.iterator(); iter2.hasNext();)
+            {
+                String typeId = (String) iter2.next();
+                IComponentSpecification component = resolver.resolve(typeId);
+                result.add(createResult(libId + ":" + typeId, typeId + " - from '" + libId + "'", component));
+            }
+        }
+        return (CAHelperResult[]) result.toArray(new CAHelperResult[result.size()]);
+
+    }
+
+    private CAHelperResult createResult(String name, String displayName, IComponentSpecification componentSpec)
+    {
+        CAHelperResult result = new CAHelperResult(name, null);
+        result.displayName = displayName;
+        if (componentSpec != null)
+        {
+            StringWriter swriter = new StringWriter();
+            PrintWriter pwriter = new PrintWriter(swriter);
+            pwriter.println(name);
+            pwriter.println();
+            String description = componentSpec.getDescription();
+            pwriter.println(description == null ? "no description available" : description);
+            pwriter.println();
+            XMLUtil.writeComponentSpecificationHeader(pwriter, componentSpec, 0);
+            result.description = swriter.toString();
+        }
+
+        return result;
+    }
+
+    public static class CAHelperResult
+    {
+        CAHelperResult()
+        {}
+
+        CAHelperResult(String name, String description)
+        {
+            this.name = name;
+            this.displayName = name;
+            this.description = description;
+        }
+        public String name;
+        public String displayName;
         public String description;
+        public boolean required = false;
+    }
+
+    public String toString()
+    {
+        return "\n\tfull="
+            + fFullType
+            + "\n\tlib="
+            + fLibraryId
+            + "\n\tsimple="
+            + fSimpleType
+            + "\n\tsimpleId="
+            + fSimpleId;
     }
 
 }

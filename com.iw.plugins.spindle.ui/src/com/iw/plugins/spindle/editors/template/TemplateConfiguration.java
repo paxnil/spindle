@@ -244,7 +244,7 @@ public class TemplateConfiguration extends BaseSourceConfiguration
         assistant.enableAutoActivation(true);
         assistant.enableAutoInsert(false);
         assistant.setProposalSelectorBackground(UIPlugin.getDefault().getSharedTextColors().getColor(new RGB(254, 241, 233)));
-        assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+        assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));        
         assistant.install(sourceViewer);
 
         return assistant;

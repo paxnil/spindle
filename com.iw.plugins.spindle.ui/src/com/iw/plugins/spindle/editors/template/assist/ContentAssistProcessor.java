@@ -26,6 +26,9 @@
 
 package com.iw.plugins.spindle.editors.template.assist;
 
+import java.util.Map;
+
+import org.apache.tapestry.parse.TemplateParser;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.IDocument;
@@ -37,6 +40,8 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
@@ -50,7 +55,11 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 public abstract class ContentAssistProcessor implements IContentAssistProcessor
 {
     protected static final RuleBasedPartitionScanner SCANNER;
-    protected static final ICompletionProposal [] NoProposals = new ICompletionProposal[0];
+    protected static final ICompletionProposal[] NoProposals = new ICompletionProposal[0];
+    protected static final ICompletionProposal[] NoSuggestions =
+        new ICompletionProposal[] {
+            new ContentAssistProcessor.MessageProposal("no suggestions available"),
+            new ContentAssistProcessor.MessageProposal("")};
 
     static {
         SCANNER = new RuleBasedPartitionScanner();
@@ -75,11 +84,13 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
 
     public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        try        
+        try
         {
-            System.out.println("boo "+documentOffset);
             IDocument document = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
             fAssistParititioner.connect(document);
+            Point p = viewer.getSelectedRange();
+            if (p.y > 0)
+                return NoProposals;
 
             return doComputeCompletionProposals(viewer, documentOffset);
 
@@ -150,6 +161,75 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
         }
 
         return null;
+    }
+
+    protected String getJwcid(Map attributeMap)
+    {
+        DocumentArtifact jwcidArt = (DocumentArtifact) attributeMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
+        if (jwcidArt != null)
+            return jwcidArt.getAttributeValue();
+
+        return null;
+    }
+
+    public static class MessageProposal implements ICompletionProposal
+    {
+        String fLabel = "coming soon!";
+
+        public MessageProposal()
+        {}
+
+        public MessageProposal(String label)
+        {
+            fLabel = label;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
+         */
+        public void apply(IDocument document)
+        {}
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+         */
+        public String getAdditionalProposalInfo()
+        {
+            return null;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
+         */
+        public IContextInformation getContextInformation()
+        {
+            return null;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
+         */
+        public String getDisplayString()
+        {
+            return fLabel;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
+         */
+        public Image getImage()
+        {
+            return null;
+        }
+
+        /* (non-Javadoc)
+         * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
+         */
+        public Point getSelection(IDocument document)
+        {
+            return null;
+        }
+
     }
 
 }

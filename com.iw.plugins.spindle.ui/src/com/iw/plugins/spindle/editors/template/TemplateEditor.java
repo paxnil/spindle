@@ -110,6 +110,7 @@ public class TemplateEditor extends Editor
                 this,
                 ISourceViewer.CONTENTASSIST_PROPOSALS);
         action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+        markAsStateDependentAction(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, true);
         setAction("ContentAssistProposal", action);
 
     }
