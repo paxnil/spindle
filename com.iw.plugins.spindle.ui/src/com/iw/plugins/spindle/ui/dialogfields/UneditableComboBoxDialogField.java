@@ -105,11 +105,11 @@ public class UneditableComboBoxDialogField extends DialogField {
       final DialogField field = this;
       combo.addSelectionListener(new SelectionListener() {
         public void widgetSelected(SelectionEvent event) {
-          fireDialogButtonPressed(field);
+          fireDialogFieldChanged(field);
         }
 
         public void widgetDefaultSelected(SelectionEvent event) {
-          fireDialogButtonPressed(field);
+          fireDialogFieldChanged(field);
         }
 
       });
