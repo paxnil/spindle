@@ -57,6 +57,7 @@ import org.eclipse.swt.widgets.Control;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.dialogfields.DialogField;
 import com.iw.plugins.spindle.dialogfields.IDialogFieldChangedListener;
@@ -257,6 +258,7 @@ public class NewTapAppWizardPage extends TapestryWizardPage {
     String appname = fApplicationNameDialog.getTextValue();
     IType engineClass = fEngineDialogField.getType();
     application = ApplicationFactory.createApplication(root, pack, appname, engineClass, monitor);
+    TapestryPlugin.getTapestryModelManager().getModel(application);
   }
 
   public void createServletType(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException, CoreException {

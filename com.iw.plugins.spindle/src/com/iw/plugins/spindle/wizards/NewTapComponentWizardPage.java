@@ -272,7 +272,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
         if (monitor == null) {
           monitor = new NullProgressMonitor();
         }
-        if (doAutoAdd) {
+        if (doAutoAdd && useSelectedModel != null) {
           SpindleMultipageEditor targetEditor = (SpindleMultipageEditor) Utils.getEditorFor(useSelectedModel);
 
           if (!checkSaveEditor(targetEditor)) {
@@ -285,7 +285,6 @@ public class NewTapComponentWizardPage extends TapestryWizardPage {
             );
             return;
           }
-
           PluginApplicationSpecification spec = useSelectedModel.getApplicationSpec();
           boolean exists = false;
           if (addingNewComponent) {

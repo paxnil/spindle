@@ -59,37 +59,37 @@ public class DTDLableDecorator extends LabelProvider implements ILabelDecorator,
 
   private String getDTDString(ITapestryModel model) {
     if (!model.isLoaded()) {
-      return "undetermined";
+      try {
+        model.load();
+      } catch (CoreException e) {
+      }
+      if (!model.isLoaded()) {
+        return "undetermined";
+      }
     }
-    String DTDversion = model.getDTDVersion();    
+    String DTDversion = model.getDTDVersion();
     if (DTDversion == null) {
       return "?";
     }
     return DTDversion;
-  }
-
-  /**
-   * @see org.eclipse.jface.viewers.ILabelDecorator#decorateImage(Image, Object)
-   * we return null here as we are not decorating images (yet)
-   */
+  } /**
+      * @see org.eclipse.jface.viewers.ILabelDecorator#decorateImage(Image, Object)
+      * we return null here as we are not decorating images (yet)
+      */
   public Image decorateImage(Image image, Object element) {
     return null;
-  }
-
-  /**
-   * @see org.eclipse.jface.viewers.ILabelDecorator#decorateText(String, Object)
-   */
+  } /**
+      * @see org.eclipse.jface.viewers.ILabelDecorator#decorateText(String, Object)
+      */
   public String decorateText(String text, Object element) {
     ITapestryModel model = getTapestryModel(element);
     if (model != null) {
       return text + " (DTD " + getDTDString(model) + ")";
     }
     return null;
-  }
-
-  /**
-   * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
-   */
+  } /**
+      * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
+      */
   public void resourceChanged(IResourceChangeEvent event) {
     //first collect the label change events
     final IResource[] affectedResources = processDelta(event.getDelta());
@@ -108,12 +108,10 @@ public class DTDLableDecorator extends LabelProvider implements ILabelDecorator,
     try {
       delta.accept(new IResourceDeltaVisitor() {
         public boolean visit(IResourceDelta delta) throws CoreException {
-          IResource resource = delta.getResource();
-          //skip workspace root
+          IResource resource = delta.getResource(); //skip workspace root
           if (resource.getType() == IResource.ROOT) {
             return true;
-          }
-          //don't care about deletions
+          } //don't care about deletions
           if (delta.getKind() == IResourceDelta.REMOVED) {
             return false;
           }
@@ -129,9 +127,9 @@ public class DTDLableDecorator extends LabelProvider implements ILabelDecorator,
             ITapestryModel model = getTapestryModel(resource);
             if (model != null) {
               if (model.isLoaded()) {
-			  	model.reload();
+                model.reload();
               } else {
-              	model.load();
+                model.load();
               }
               affectedResources.add(resource);
               return false;
@@ -142,8 +140,7 @@ public class DTDLableDecorator extends LabelProvider implements ILabelDecorator,
       });
     } catch (CoreException e) {
       TapestryPlugin.getDefault().logException(e);
-    }
-    //convert event list to array
+    } //convert event list to array
     return (IResource[]) affectedResources.toArray(new IResource[affectedResources.size()]);
   }
 

@@ -22,7 +22,7 @@
       <library name="iw_tapestry.jar">
          <export name="*"/>
       </library>
-      <library name="net.sf.tapestry-2.1-beta-2.jar">
+      <library name="net.sf.tapestry-2.1.jar">
          <export name="*"/>
       </library>
    </runtime>
