@@ -25,8 +25,6 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors.formatter;
 
-import java.util.List;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TypedPosition;
@@ -42,7 +40,8 @@ import com.iw.plugins.spindle.UIPlugin;
  * (leaving them in a state where slave formatters can do thier work!).
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: DoctypeEditFormatWorker.java,v 1.1.2.1 2004/07/13 21:50:10
+ *                     glongman Exp $
  */
 public class DoctypeEditFormatWorker extends FormatWorker
 {
@@ -140,7 +139,8 @@ public class DoctypeEditFormatWorker extends FormatWorker
     int state = DOCTYPE;
     int delta;
     int publicLength = 0;
-    String lineIndent = getIndent(fInitialIndent, 1);
+    int rootlength = 0;
+    //    String lineIndent = getIndent(fInitialIndent, 1);
     String extraIndent = null;
     //skip the open bracket;
     LineInfo chunk = walker.nextChunk();
@@ -175,7 +175,7 @@ public class DoctypeEditFormatWorker extends FormatWorker
           break;
 
         case ROOT_TAG :
-
+          rootlength = chunk.data.length() + 1;
           chunk.setWriteOffset(chunk.offset);
           delta = -1 * chunk.delta;
           if (delta > 1)
@@ -190,10 +190,9 @@ public class DoctypeEditFormatWorker extends FormatWorker
           publicLength = chunk.data.length() + 1;
           chunk.setWriteOffset(chunk.offset);
           delta = -1 * chunk.delta;
-          if (delta > 0)
-            edit.addChild(new ReplaceEdit(chunk.offset, delta, fLineDelimiter
-                + lineIndent));
-          state = URL1;
+          if (delta > 1)
+            edit.addChild(new ReplaceEdit(chunk.offset + 1, delta - 1, ""));
+          state = URL2;
           chunk = walker.nextChunk();
           break;
 
@@ -217,8 +216,9 @@ public class DoctypeEditFormatWorker extends FormatWorker
           {
             if (extraIndent == null)
             {
-              StringBuffer buffer = new StringBuffer(lineIndent);
-              writeColumns(publicLength + 1, buffer);
+              //              StringBuffer buffer = new StringBuffer(lineIndent);
+              StringBuffer buffer = new StringBuffer();
+              writeColumns(2, buffer);
               extraIndent = buffer.toString();
             }
             edit.addChild(new ReplaceEdit(chunk.offset, delta, fLineDelimiter
