@@ -138,7 +138,7 @@ public class BeanInitializerEditorSection extends AbstractPropertySheetEditorSec
 
     newButton.setEnabled(selectedBean != null);
     deleteButton.setEnabled(selectedBean != null);
-    editButton.setEnabled(selectedBean != null);
+    inspectButton.setEnabled(selectedBean != null);
 
     updateNeeded = true;
     update();

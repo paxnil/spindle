@@ -39,6 +39,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -54,11 +55,10 @@ import com.iw.plugins.spindle.editors.SummarySourceViewer;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.IIdentifiable;
+import com.iw.plugins.spindle.ui.SectionWidget;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
-public abstract class BasePagesSummarySection
-  extends SpindleFormSection
-  implements IResourceChangeListener {
+public abstract class BasePagesSummarySection extends SpindleFormSection implements IResourceChangeListener {
 
   private FormEntry pageName;
   private FormEntry specText;
@@ -99,6 +99,7 @@ public abstract class BasePagesSummarySection
     labelName = "Specification";
     specText = new FormEntry(createText(container, labelName, factory));
     text = (Text) specText.getControl();
+    text.setEnabled(false);
     text.setEditable(false);
     text.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_BLUE));
 
@@ -110,61 +111,129 @@ public abstract class BasePagesSummarySection
     resolveFailedLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
     resolveFailedLabel.setVisible(false);
 
-    SashForm sashForm = new SashForm(container, SWT.BORDER);
+    SashForm sashForm = new SashForm(container, SWT.NO_TRIM);
     sashForm.setOrientation(SWT.VERTICAL);
     data = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
     data.horizontalSpan = 2;
     data.verticalSpan = 75;
     sashForm.setLayoutData(data);
-    sashForm.SASH_WIDTH = 10;
+    sashForm.SASH_WIDTH = 4;
 
-    sourceViewer = new SummarySourceViewer(sashForm);
-    data = new GridData();
-    data.horizontalAlignment = GridData.FILL;
-    data.verticalAlignment = GridData.FILL;
-    data.horizontalSpan = 2;
+    SpindleFormSection sourceSection = new SourceWidget((SpindleFormPage) getFormPage());
 
-    data.heightHint = 300;
-    sourceViewer.getControl().setLayoutData(data);
-    sourceViewer.setPopupListener(new IMenuListener() {
-      public void menuAboutToShow(IMenuManager manager) {
-        manager.removeAll();
-        Action openAction = new Action("Open") {
-          public void run() {
-            openTapestryEditor(sourceViewer.getCurrentStorage());
-          }
-        };
-        openAction.setEnabled(sourceViewer.getCurrentStorage() != null);
-        manager.add(openAction);
-      }
-    });
+    sourceSection.createControl(sashForm, factory);
 
-    htmlViewer = new SummaryHTMLViewer(sashForm);
-    data = new GridData();
-    data.horizontalAlignment = GridData.FILL;
-    data.verticalAlignment = GridData.FILL;
-    data.horizontalSpan = 2;
-    data.verticalSpan = 25;
-    data.heightHint = 300;
-    htmlViewer.getControl().setLayoutData(data);
-    htmlViewer.setPopupListener(new IMenuListener() {
-      public void menuAboutToShow(IMenuManager manager) {
-        manager.removeAll();
-        Action openAction = new Action("Open") {
-          public void run() {
-            openHtmlEditor(htmlViewer.getCurrentStorage());
-          }
-        };
-        openAction.setEnabled(htmlViewer.getCurrentStorage() != null);
-        manager.add(openAction);
-      }
-    });
+    SpindleFormSection templateSection = new HTMLWidget((SpindleFormPage) getFormPage());
+
+    templateSection.createControl(sashForm, factory);
+
+
 
     sashForm.setWeights(new int[] { 1, 1 });
 
     factory.paintBordersFor(container);
     TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(this);
     return container;
+  }
+
+  class SourceWidget extends SpindleFormSection {
+
+    /**
+     * Constructor for SourceWidget.
+     * @param page
+     */
+    public SourceWidget(SpindleFormPage page) {
+      super(page);
+      setCollapsable(false);
+      setHeaderPainted(true);
+      setDescriptionPainted(true);
+      setHeaderText("Specification Source (read only)");
+      setDescription(" ");
+    }
+    /**
+     * @see com.iw.plugins.spindle.ui.SectionWidget#createClient(Composite)
+     */
+    public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
+
+      Composite composite = new Composite(parent, SWT.BORDER);
+      GridData gd;
+      GridLayout layout = new GridLayout();
+      layout.marginHeight = 0;
+      layout.marginWidth = 0;
+      composite.setLayout(layout);
+      gd = new GridData(GridData.FILL_BOTH);
+      composite.setLayoutData(gd);
+
+      sourceViewer = new SummarySourceViewer(composite);
+      gd = new GridData(gd.FILL_BOTH | gd.GRAB_HORIZONTAL);
+      gd.horizontalSpan = 2;
+      sourceViewer.getControl().setLayoutData(gd);
+      sourceViewer.setPopupListener(new IMenuListener() {
+        public void menuAboutToShow(IMenuManager manager) {
+          manager.removeAll();
+          Action openAction = new Action("Open") {
+            public void run() {
+              openTapestryEditor(sourceViewer.getCurrentStorage());
+            }
+          };
+          openAction.setEnabled(sourceViewer.getCurrentStorage() != null);
+          manager.add(openAction);
+        }
+      });
+
+      return composite;
+    }
+
+  }
+
+  class HTMLWidget extends SpindleFormSection {
+
+    /**
+     * Constructor for SourceWidget.
+     * @param page
+     */
+    public HTMLWidget(SpindleFormPage page) {
+      super(page);
+      setCollapsable(false);
+      setHeaderPainted(true);
+      setDescriptionPainted(true);
+      setHeaderText("Template Source (read only)");
+      setDescription(" ");
+    }
+    /**
+     * @see com.iw.plugins.spindle.ui.SectionWidget#createClient(Composite)
+     */
+    public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
+
+      Composite composite = new Composite(parent, SWT.BORDER);
+      GridData gd;
+      GridLayout layout = new GridLayout();
+      layout.marginHeight = 0;
+      layout.marginWidth = 0;
+      composite.setLayout(layout);
+      gd = new GridData(GridData.FILL_BOTH);
+      composite.setLayoutData(gd);
+
+      htmlViewer = new SummaryHTMLViewer(composite);
+      gd = new GridData(gd.FILL_BOTH | gd.GRAB_HORIZONTAL);
+
+      htmlViewer.getControl().setLayoutData(gd);
+      htmlViewer.setPopupListener(new IMenuListener() {
+        public void menuAboutToShow(IMenuManager manager) {
+          manager.removeAll();
+          Action openAction = new Action("Open") {
+            public void run() {
+              openHtmlEditor(htmlViewer.getCurrentStorage());
+            }
+          };
+          openAction.setEnabled(htmlViewer.getCurrentStorage() != null);
+          manager.add(openAction);
+        }
+      });
+
+      return composite;
+    }
+
   }
 
   private void openTapestryEditor(IStorage storage) {
@@ -191,11 +260,11 @@ public abstract class BasePagesSummarySection
   protected abstract ILibrarySpecification getSpec();
 
   public void sectionChanged(FormSection source, int changeType, Object changeObject) {
-   
+
     if (changeObject instanceof IIdentifiable) {
-    	
+
       selectedPage = ((IIdentifiable) changeObject).getIdentifier();
-      
+
     } else {
 
       selectedPage = (String) changeObject;
@@ -218,8 +287,7 @@ public abstract class BasePagesSummarySection
         // we must resolve it from Framework.library
         TapestryProjectModelManager mgr;
         try {
-          mgr =
-            TapestryPlugin.getDefault().getTapestryModelManager(getModel().getUnderlyingStorage());
+          mgr = TapestryPlugin.getDefault().getTapestryModelManager(getModel().getUnderlyingStorage());
 
           ILibrarySpecification framework = mgr.getDefaultLibrary().getSpecification();
 
@@ -244,8 +312,7 @@ public abstract class BasePagesSummarySection
 
       specText.setValue(specificationPath, false);
 
-      if (specificationPath == null
-        || !(specificationPath.endsWith(".jwc") || specificationPath.endsWith(".page"))) {
+      if (specificationPath == null || !(specificationPath.endsWith(".jwc") || specificationPath.endsWith(".page"))) {
 
         resolveFailed(specificationPath);
         return;

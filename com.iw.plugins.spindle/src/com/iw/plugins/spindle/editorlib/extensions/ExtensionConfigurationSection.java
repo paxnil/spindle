@@ -80,7 +80,7 @@ public class ExtensionConfigurationSection extends AbstractPropertySheetEditorSe
     holderArray.removeAll(holderArray);
     boolean hasSelected = selectedExtension != null;
     newButton.setEnabled(hasSelected);
-    editButton.setEnabled(hasSelected);
+    inspectButton.setEnabled(hasSelected);
     deleteButton.setEnabled(hasSelected);
     if (!hasSelected) {
       setInput(holderArray);
@@ -106,7 +106,7 @@ public class ExtensionConfigurationSection extends AbstractPropertySheetEditorSe
     selectedExtension = (PluginExtensionSpecification) changeObject;
 
     newButton.setEnabled(selectedExtension != null);
-    editButton.setEnabled(selectedExtension != null);
+    inspectButton.setEnabled(selectedExtension != null);
     deleteButton.setEnabled(selectedExtension != null);
     updateNeeded = true;
     update();

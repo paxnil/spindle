@@ -319,6 +319,14 @@
                enablesFor="1"
                id="com.iw.plugins.spindle.project.popupMenus.project.convertToTapestryProject">
          </action>
+         <action
+               label="Jump to project lib/app"
+               class="com.iw.plugins.spindle.project.actions.JumpToTapestryProjectAction"
+               menubarPath="org.eclipse.ui.popupMenus.project.menu1/group1"
+               enablesFor="1"
+               id="com.iw.plugins.spindle.project.popupMenus.project.JumpToTapestryProjectAction">
+         </action>
+
       </objectContribution>
       <objectContribution
             objectClass="org.eclipse.core.resources.IFile"

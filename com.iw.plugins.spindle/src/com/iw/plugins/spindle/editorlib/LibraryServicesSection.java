@@ -367,7 +367,7 @@ public class LibraryServicesSection
       deleteButton.setEnabled(
         isEditable && selected != null && spec.canDeleteService(holder.identifier));
     }
-    editButton.setEnabled(isEditable && holder != null);
+    inspectButton.setEnabled(isEditable && holder != null);
     revertButton.setEnabled(
       isEditable && holder != null && spec.canRevertService(holder.identifier));
   }

@@ -398,12 +398,12 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
       return null;
     }
 
-    try {
-      model.load(stream);
-    } catch (CoreException e) {
-      e.printStackTrace();
-      TapestryPlugin.getDefault().logException(e);
-    }
+//    try {
+//      model.load(stream);
+//    } catch (CoreException e) {
+//      e.printStackTrace();
+//      TapestryPlugin.getDefault().logException(e);
+//    }
     try {
       stream.close();
     } catch (IOException e) {

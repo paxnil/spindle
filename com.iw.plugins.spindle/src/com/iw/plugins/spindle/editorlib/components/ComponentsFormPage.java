@@ -81,6 +81,7 @@ public class ComponentsFormPage extends SpindleFormPage {
     public ComponentsForm(ComponentsFormPage page) {
       super(page);
     }
+    
 
     public void stimulate(Object stimulus) {
       aliasSection.setSelection((String) stimulus);

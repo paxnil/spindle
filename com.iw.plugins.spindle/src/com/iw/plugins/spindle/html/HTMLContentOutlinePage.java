@@ -728,7 +728,7 @@ public class HTMLContentOutlinePage extends ContentOutlinePage implements IDocum
     public void configure(IFile model, String jwcid) {
       this.modelFile = model;
       this.jwcid = jwcid;
-      setText("Open component " + jwcid);
+      setText("Jump to: " + jwcid);
     }
 
     public void run() {

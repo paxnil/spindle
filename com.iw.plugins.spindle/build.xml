@@ -1,6 +1,6 @@
 <project name="builder" default="init" basedir=".">
 
-  <property name="version" value="1.1.0.beta4"/>
+  <property name="version" value="1.1.0.beta7"/>
   <property name="size" value="3232"/>
   <property name="tap_version" value="2.2"/>
   
@@ -13,6 +13,7 @@
 
   
   <target name="build-plugin-xml">
+  	<delete file="${basedir}/plugin.xml"/>
     <copy file="${templates}/plugin.xml.template" toFile="${basedir}/plugin.xml"/>
     <replace file="${basedir}/plugin.xml" token="@version@" value="${version}"/>
   </target>
@@ -67,11 +68,11 @@
   	<exec dir="${site-home}" executable="tar">
   		<arg line="-cvf spindle-distro-${version}.tar *"/>
 	</exec>
-<!--
+
   	<exec dir="${site-home}" executable="gzip">
   		<arg line="spindle-distro-${version}.tar"/>
 	</exec>
--->
+
   </target>
   
   <target name="release-build-dir" depends="clean-release">

@@ -86,7 +86,7 @@ public abstract class AbstractPropertySheetEditorSection
   private static DefaultTooltipProvider defaultTooltipProvider = new DefaultTooltipProvider();
 
   protected Button newButton;
-  protected Button editButton;
+  protected Button inspectButton;
   protected Button deleteButton;
   private TreeViewer treeViewer;
   private FormWidgetFactory factory;
@@ -180,8 +180,8 @@ public abstract class AbstractPropertySheetEditorSection
     if (deleteButton != null) {
       deleteAction.setEnabled(isEditable);
     }
-    if (editButton != null) {
-      editButton.setEnabled(isEditable);
+    if (inspectButton != null) {
+      inspectButton.setEnabled(isEditable);
     }
     if (deleteButton != null) {
       deleteButton.setEnabled(isEditable);
@@ -242,10 +242,10 @@ public abstract class AbstractPropertySheetEditorSection
         handleNew();
       }
     });
-    editButton = factory.createButton(buttonContainer, "Edit", SWT.PUSH);
+    inspectButton = factory.createButton(buttonContainer, "Inspect", SWT.PUSH);
     gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-    editButton.setLayoutData(gd);
-    editButton.addSelectionListener(new SelectionAdapter() {
+    inspectButton.setLayoutData(gd);
+    inspectButton.addSelectionListener(new SelectionAdapter() {
       public void widgetSelected(SelectionEvent e) {
         handleEdit();
       }
@@ -310,6 +310,7 @@ public abstract class AbstractPropertySheetEditorSection
   }
 
   public void setSelection(IStructuredSelection selection) {
+  	treeViewer.getControl().setFocus();
     treeViewer.setSelection(selection);
   }
 

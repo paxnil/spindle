@@ -297,7 +297,7 @@ public class TapestryProjectModelManager implements IResourceChangeListener, IRe
       info.model = createModel(element);
       info.consumer = consumer;
 
-    } else {
+    } else if (info.readOnlyModel == null) {
       // editable model already created or not editable - use read only
       info.readOnlyModel = createModel(element, false);
     }

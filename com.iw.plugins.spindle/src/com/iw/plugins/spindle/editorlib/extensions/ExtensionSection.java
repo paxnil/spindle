@@ -90,7 +90,7 @@ public class ExtensionSection
 
       fireSelectionNotification(null);
       deleteButton.setEnabled(false);
-      editButton.setEnabled(false);
+      inspectButton.setEnabled(false);
 
     } else {
 
@@ -103,7 +103,7 @@ public class ExtensionSection
       }
       newButton.setEnabled(isEditable);
       deleteButton.setEnabled(isEditable);
-      editButton.setEnabled(isEditable);
+      inspectButton.setEnabled(isEditable);
 
     }
   }

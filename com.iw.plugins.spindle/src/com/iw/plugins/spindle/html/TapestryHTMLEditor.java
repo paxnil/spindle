@@ -39,6 +39,7 @@ import java.util.Map;
 import net.sf.tapestry.parse.ITemplateParserDelegate;
 import net.sf.tapestry.parse.TemplateParseException;
 import net.sf.tapestry.parse.TemplateParser;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -51,9 +52,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
-import org.eclipse.jdt.internal.ui.workingsets.ClearWorkingSetAction;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
@@ -68,10 +71,11 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.pde.core.IModel;
 import org.eclipse.pde.internal.core.IModelProviderEvent;
 import org.eclipse.pde.internal.core.IModelProviderListener;
+import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.pde.internal.ui.editor.SystemFileDocumentProvider;
-import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
@@ -91,6 +95,8 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.editorjwc.JWCMultipageEditor;
+import com.iw.plugins.spindle.editorjwc.components.ComponentsFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.ModelUtils;
@@ -110,7 +116,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
   private Shell shell;
   private DebugToolTipHandler handler;
   private IEditorInput input;
-  private StyledText text;
+  private StyledText stext;
 
   private boolean duringInit = false;
 
@@ -134,7 +140,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
   public void createPartControl(Composite parent) {
     super.createPartControl(parent);
     shell = parent.getShell();
-    text = (StyledText) getSourceViewer().getTextWidget();
+    stext = (StyledText) getSourceViewer().getTextWidget();
 
     //    text.setKeyBinding(262144, ST.COPY);
     //    //text.setKeyBinding(131072, ST.CUT);
@@ -142,6 +148,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     // for debugging the partitioning only		
     //    		handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
     //    		handler.activateHoverHelp(text);
+
   }
 
   protected void doSetInput(IEditorInput input) throws CoreException {
@@ -177,8 +184,8 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
   }
 
   public void openTo(String jwcid) {
-  	
-	selectAndReveal(0,0);
+
+    selectAndReveal(0, 0);
     ITypedRegion[] partitions = null;
     IDocument document = getDocumentProvider().getDocument(getEditorInput());
     if (document == null) {
@@ -599,6 +606,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
 
   static public final String SAVE_HTML_TEMPLATE = "com.iw.plugins.spindle.html.saveTemplateAction";
   static public final String REVERT_HTML_TEMPLATE = "com.iw.plugins.spindle.html.revertTemplateAction";
+  static public final String JUMPTO = "com.iw.plugins.spindle.html.jumpToAction";
 
   /**
    * @see org.eclipse.ui.texteditor.AbstractTextEditor#createActions()
@@ -612,6 +620,9 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     action = new RevertTemplateAction("Revert the saved template to the default value");
     action.setActionDefinitionId(REVERT_HTML_TEMPLATE);
     setAction(REVERT_HTML_TEMPLATE, action);
+    action = new JumpToAction();
+    action.setActionDefinitionId(JUMPTO);
+    setAction(JUMPTO, action);
 
   }
 
@@ -622,6 +633,92 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     super.editorContextMenuAboutToShow(menu);
     addAction(menu, SAVE_HTML_TEMPLATE);
     addAction(menu, REVERT_HTML_TEMPLATE);
+    JumpToAction jumpTo = (JumpToAction) getAction(JUMPTO);
+    jumpTo.configure();
+    if (jumpTo.isEnabled()) {
+      menu.add(new Separator());
+      MenuManager jumpToMenu = new MenuManager("Jump to...");
+      addAction(jumpToMenu, JUMPTO);
+      menu.add(jumpToMenu);
+    }
+  }
+
+  /**
+   * @see org.eclipse.pde.internal.core.IModelProviderListener#modelsChanged(IModelProviderEvent)
+   */
+  public void modelsChanged(IModelProviderEvent event) {
+    boolean needParse = false;
+    IFile documentFile = (IFile) getEditorInput().getAdapter(IFile.class);
+    if (documentFile == null) {
+      return;
+    }
+
+    needParse = checkNeedParse(documentFile, event.getAddedModels());
+    if (!needParse) {
+      needParse = checkNeedParse(documentFile, event.getChangedModels());
+    }
+    if (!needParse) {
+      needParse = event.getRemovedModels().length > 0;
+    }
+    if (needParse) {
+      parseForProblems();
+    }
+  }
+
+  /**
+   * Method checkNeedParse.
+   * @param iModels
+   * @return boolean
+   */
+  private boolean checkNeedParse(IFile documentFile, IModel[] iModels) {
+    if (iModels == null) {
+      return false;
+    }
+    for (int i = 0; i < iModels.length; i++) {
+      ITapestryModel changedModel = (ITapestryModel) iModels[i];
+      try {
+        IFile changedFile = (IFile) changedModel.getUnderlyingStorage();
+        ITapestryModel model = ModelUtils.findComponentWithHTML(documentFile);
+        if (model == null) {
+          continue;
+        }
+        IFile file = (IFile) model.getUnderlyingStorage();
+
+        if (changedFile.equals(file)) {
+          return true;
+        }
+      } catch (ClassCastException e) {
+        continue;
+      }
+    }
+    return false;
+  }
+
+  private IFile findRelatedComponent() {
+
+    IFile documentFile = (IFile) getEditorInput().getAdapter(IFile.class);
+    if (documentFile != null) {
+
+      IContainer parent = documentFile.getParent();
+      String name = documentFile.getFullPath().removeFileExtension().lastSegment();
+
+      String fullName = name + ".jwc";
+      IFile componentResource = (IFile) parent.findMember(fullName);
+
+      if (componentResource == null) {
+
+        fullName = name + ".page";
+        componentResource = (IFile) parent.findMember(fullName);
+
+      }
+
+      if (componentResource != null && componentResource.exists()) {
+
+        return componentResource;
+
+      }
+    }
+    return null;
   }
 
   public class SaveHTMLTemplateAction extends Action {
@@ -683,55 +780,100 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
 
   }
 
-  /**
-   * @see org.eclipse.pde.internal.core.IModelProviderListener#modelsChanged(IModelProviderEvent)
-   */
-  public void modelsChanged(IModelProviderEvent event) {
-    boolean needParse = false;
-    IFile documentFile = (IFile) getEditorInput().getAdapter(IFile.class);
-    if (documentFile == null) {
-      return;
+  public class JumpToAction extends Action {
+
+    String jwcid = null;
+    IStorage relatedComponent = null;
+
+    /**
+     * Constructor for SaveHTMLTemplateAction.
+     * @param text
+     */
+    public JumpToAction() {
+      super();
     }
 
-    needParse = checkNeedParse(documentFile, event.getAddedModels());
-    if (!needParse) {
-      needParse = checkNeedParse(documentFile, event.getChangedModels());
-    }
-    if (!needParse) {
-      needParse = event.getRemovedModels().length > 0;
-    }
-    if (needParse) {
-      parseForProblems();
-    }
-  }
+    public void configure() {
 
-  /**
-   * Method checkNeedParse.
-   * @param iModels
-   * @return boolean
-   */
-  private boolean checkNeedParse(IFile documentFile, IModel[] iModels) {
-    if (iModels == null) {
-      return false;
-    }
-    for (int i = 0; i < iModels.length; i++) {
-      ITapestryModel changedModel = (ITapestryModel) iModels[i];
-      try {
-        IFile changedFile = (IFile) changedModel.getUnderlyingStorage();
-        ITapestryModel model = ModelUtils.findComponentWithHTML(documentFile);
-        if (model == null) {
-          continue;
-        }
-        IFile file = (IFile) model.getUnderlyingStorage();
+      setEnabled(false);
 
-        if (changedFile.equals(file)) {
-          return true;
-        }
-      } catch (ClassCastException e) {
-        continue;
+      IDocument document = getDocumentProvider().getDocument(getEditorInput());
+      if (document == null) {
+
+        return;
+
       }
+      
+	  Point p = stext.getSelection();
+
+      int offset = p.x;
+      
+      if (offset == 0) {
+      	
+      	offset = stext.getCaretOffset();
+      	
+      }
+
+      ITypedRegion region = document.getDocumentPartitioner().getPartition(offset);
+
+      jwcid = getJWCID(document, region);
+
+      relatedComponent = findRelatedComponent();
+
+      if (relatedComponent != null) {
+      	
+      	setText(relatedComponent.getName());
+
+        setEnabled(true);
+
+      }
+
     }
-    return false;
+
+    /**
+     * @see org.eclipse.jface.action.IAction#run()
+     */
+    public void run() {
+
+      IEditorPart editor = Utils.getEditorFor(relatedComponent);
+
+      if (editor != null) {
+
+        TapestryPlugin.getDefault().getActivePage().bringToTop(editor);
+
+      } else {
+
+        TapestryPlugin.openTapestryEditor(relatedComponent);
+
+        editor = Utils.getEditorFor(relatedComponent);
+
+      }
+
+      if (editor != null && editor instanceof JWCMultipageEditor) {
+
+        JWCMultipageEditor jwc = (JWCMultipageEditor) editor;
+
+        ITapestryModel model = (ITapestryModel) jwc.getModel();
+
+        if (!model.isLoaded()) {
+
+          jwc.showPage(jwc.SOURCE_PAGE);
+
+        } else {
+
+          IPDEEditorPage currentPage = (IPDEEditorPage) jwc.getCurrentPage();
+          ComponentsFormPage desiredPage = (ComponentsFormPage) jwc.getPage(jwc.COMPONENTS);
+
+          if (currentPage != desiredPage) {
+            jwc.showPage(jwc.COMPONENTS);
+          }
+          desiredPage.openTo(this.jwcid);
+        }
+
+      }
+
+    }
+
   }
 
 }

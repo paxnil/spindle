@@ -83,7 +83,7 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
     }
 
     newButton.setEnabled(selectedComponent != null);
-    editButton.setEnabled(selectedComponent != null);
+    inspectButton.setEnabled(selectedComponent != null);
     deleteButton.setEnabled(selectedComponent != null);
     updateNeeded = true;
     update();

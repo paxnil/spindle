@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorjwc.components;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -80,6 +81,7 @@ import com.iw.plugins.spindle.ui.ComponentAliasViewer;
 import com.iw.plugins.spindle.ui.CopyToClipboardAction;
 import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
 import com.iw.plugins.spindle.ui.IToolTipProvider;
+import com.iw.plugins.spindle.ui.OpenAliasDefinition;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
@@ -99,6 +101,7 @@ public class ComponentSelectionSection
   private Action deleteComponentAction = new DeleteComponentAction();
   private Action copyAction = new CopyComponentAction();
   private Action copyToAction = new CopyToAction();
+  private OpenAliasDefinition openAction = new OpenAliasDefinition();
 
   private ContainedComponentLabelProvider labelProvider = new ContainedComponentLabelProvider();
 
@@ -178,7 +181,7 @@ public class ComponentSelectionSection
       }
       newButton.setEnabled(isEditable);
       deleteButton.setEnabled(isEditable);
-      editButton.setEnabled(isEditable);
+      inspectButton.setEnabled(isEditable);
       copyButton.setEnabled(isEditable && component.getCopyOf() == null);
 
     }
@@ -218,7 +221,7 @@ public class ComponentSelectionSection
         if (component.getCopyOf() == null) {
           manager.add(new Separator());
           manager.add(copyAction);
-//          manager.add(copyToAction);
+          //          manager.add(copyToAction);
           MenuManager submenu = new MenuManager("Copy To Clipboard");
           Display d = getViewer().getControl().getDisplay();
           submenu.add(new CopyToClipboardAction(d, "jwcid=\"$value$\"", "value", component.getIdentifier()));
@@ -227,23 +230,53 @@ public class ComponentSelectionSection
         }
       }
     }
-    IStorage storage = (IStorage) getModel().getUnderlyingStorage();
-    if (storage instanceof IFile) {
-      List templates = Utils.findTemplatesFor((IFile) storage);
-      if (!templates.isEmpty()) {
+    try {
 
-        MenuManager jumpMenu = new MenuManager("Jump to..");
-        for (Iterator iter = templates.iterator(); iter.hasNext();) {
-          IFile element = (IFile) iter.next();
-          jumpMenu.add(new JumpToTemplateAction((IStorage) element, component.getIdentifier()));
-        }
-        manager.add(jumpMenu);
-      }
+      String alias = component.getType();
+
+      ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(getModel());
+      openAction.configure(project, alias);
+
+    } catch (CoreException e) {
 
     }
+    List templates = new ArrayList();
+    IStorage storage = (IStorage) getModel().getUnderlyingStorage();
+
+    if (storage instanceof IFile) {
+
+      templates = Utils.findTemplatesFor((IFile) storage);
+
+    }
+    if (!templates.isEmpty() || openAction.isEnabled()) {
+
+      MenuManager jumpMenu = new MenuManager("Jump to..");
+
+      if (openAction.isEnabled()) {
+
+        jumpMenu.add(openAction);
+
+      }
+
+      Iterator iter = templates.iterator();
+
+      if (iter.hasNext() && openAction.isEnabled()) {
+
+        jumpMenu.add(new Separator());
+
+      }
+
+      while (iter.hasNext()) {
+        IFile element = (IFile) iter.next();
+        jumpMenu.add(new JumpToTemplateAction((IStorage) element, component.getIdentifier()));
+      }
+      manager.add(jumpMenu);
+    }
+
     manager.add(new Separator());
     pAction.setEnabled(((IModel) getFormPage().getModel()).isEditable());
     manager.add(pAction);
+
   }
 
   private void handleCopy() {
@@ -344,9 +377,17 @@ public class ComponentSelectionSection
 
           TapestryComponentModel compModel = resolveContainedComponent(project, selectedComponent);
 
-          StringBuffer resultBuffer = new StringBuffer();
-          compModel.getComponentSpecification().getHelpText(type, resultBuffer);
-          message = resultBuffer.toString();
+          if (compModel == null) {
+
+            message = "could not resolve " + selectedComponent.getIdentifier();
+
+          } else {
+
+            StringBuffer resultBuffer = new StringBuffer();
+            compModel.getComponentSpecification().getHelpText(type, resultBuffer);
+            message = resultBuffer.toString();
+
+          }
 
         } catch (CoreException e) {
 
@@ -728,8 +769,7 @@ public class ComponentSelectionSection
       } else {
 
         TapestryPlugin.getDefault().openTapestryEditor(target);
-        
-        
+
         editor = Utils.getEditorFor(target);
 
         //might have failed - try the Workspace default editor

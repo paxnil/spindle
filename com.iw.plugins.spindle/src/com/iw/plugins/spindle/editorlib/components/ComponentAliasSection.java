@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -56,13 +57,18 @@ import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.refactor.components.ComponentAliasRefactorablePropertyDescriptor;
 import com.iw.plugins.spindle.refactor.components.RefactorComponentAliasPage;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
+import com.iw.plugins.spindle.ui.IToolTipHelpProvider;
+import com.iw.plugins.spindle.ui.IToolTipProvider;
+import com.iw.plugins.spindle.ui.OpenTapestryPath;
 import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
 import com.iw.plugins.spindle.util.SpindleStatus;
+import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 public class ComponentAliasSection
   extends AbstractPropertySheetEditorSection
@@ -70,6 +76,8 @@ public class ComponentAliasSection
 
   private Action newAliasAction = new NewAliasAction();
   private Action deleteAliasAction = new DeleteAliasAction();
+  private OpenTapestryPath openComponentAction =
+    new OpenTapestryPath(TapestryLookup.ACCEPT_COMPONENTS | TapestryLookup.FULL_TAPESTRY_PATH);
 
   /**
    * Constructor for ComponentAliasSection
@@ -92,6 +100,29 @@ public class ComponentAliasSection
         manager.add(new Separator());
         manager.add(deleteAliasAction);
         manager.add(new Separator());
+        try {
+          ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(getModel());
+          TapestryLookup lookup = project.getLookup();
+
+          IIdentifiable aliasHolder = (IIdentifiable) selected;
+          String alias = aliasHolder.getIdentifier();
+          IPluginLibrarySpecification spec = (IPluginLibrarySpecification) aliasHolder.getParent();
+          String tapestryPath = spec.getComponentSpecificationPath(alias);
+          if (tapestryPath != null) {
+          	
+            openComponentAction.configure(lookup, tapestryPath);
+            
+            if (openComponentAction.isEnabled()) {
+              MenuManager jumpMenu = new MenuManager("Jump To...");
+              jumpMenu.add(openComponentAction);
+              manager.add(jumpMenu);
+              manager.add(new Separator());
+            }
+
+          }
+        } catch (CoreException e) {
+        }
+
         pAction.setEnabled(((IModel) getFormPage().getModel()).isEditable());
         manager.add(pAction);
       }
@@ -104,7 +135,7 @@ public class ComponentAliasSection
 
       fireSelectionNotification(null);
       deleteButton.setEnabled(false);
-      editButton.setEnabled(false);
+      inspectButton.setEnabled(false);
 
     } else {
 
@@ -117,7 +148,7 @@ public class ComponentAliasSection
       }
       newButton.setEnabled(isEditable);
       deleteButton.setEnabled(isEditable);
-      editButton.setEnabled(isEditable);
+      inspectButton.setEnabled(isEditable);
 
     }
   }
@@ -194,11 +225,7 @@ public class ComponentAliasSection
 
     if (status.isError()) {
 
-      ErrorDialog.openError(
-        newButton.getShell(),
-        "Spindle Error",
-        "Could not add Component: " + potentialValue,
-        status);
+      ErrorDialog.openError(newButton.getShell(), "Spindle Error", "Could not add Component: " + potentialValue, status);
 
       return false;
 
@@ -288,32 +315,29 @@ public class ComponentAliasSection
           new ComponentAliasRefactorablePropertyDescriptor(
             "name",
             "Name",
-            TapestryPlugin.getDefault().getTapestryProjectFor(getModel()), 
+            TapestryPlugin.getDefault().getTapestryProjectFor(getModel()),
             getExistingComponentAliases());
       } catch (CoreException e) {
         nameDescriptor = new TextPropertyDescriptor("name", "Name");
       }
 
-      return new IPropertyDescriptor[] {
-        nameDescriptor,
-        new ComponentTypeDialogPropertyDescriptor("spec", "Spec", null, null)};
+      return new IPropertyDescriptor[] { nameDescriptor, new ComponentTypeDialogPropertyDescriptor("spec", "Spec", null, null)};
     }
 
     /**
      * Method getExistingComponentAliases.
      */
     private List getExistingComponentAliases() {
-    	
-    	TapestryLibraryModel model = (TapestryLibraryModel)getModel();
-    	IPluginLibrarySpecification spec = model.getSpecification();
-    	if (spec != null) {
-    		
-    		return spec.getComponentAliases();
-    	}
-    	
-    	return Collections.EMPTY_LIST;
-    }
 
+      TapestryLibraryModel model = (TapestryLibraryModel) getModel();
+      IPluginLibrarySpecification spec = model.getSpecification();
+      if (spec != null) {
+
+        return spec.getComponentAliases();
+      }
+
+      return Collections.EMPTY_LIST;
+    }
 
     public Object getEditableValue() {
       return identifier;

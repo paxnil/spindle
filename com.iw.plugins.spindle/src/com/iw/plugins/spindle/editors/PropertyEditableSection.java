@@ -88,7 +88,7 @@ public class PropertyEditableSection
     
     newButton.setEnabled(hasPropertyHolder);
     deleteButton.setEnabled(hasPropertyHolder);
-    editButton.setEnabled(hasPropertyHolder);
+    inspectButton.setEnabled(hasPropertyHolder);
 
 	if (!hasPropertyHolder) {
 		
@@ -106,8 +106,8 @@ public class PropertyEditableSection
     boolean editable = isModelEditable();
     newButton.setEnabled(editable);
     deleteButton.setEnabled(editable);
-    if (editButton != null) {
-      editButton.setEnabled(editable);
+    if (inspectButton != null) {
+      inspectButton.setEnabled(editable);
     }
     setInput(holderArray);
   }

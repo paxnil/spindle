@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -53,9 +54,11 @@ import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
+import com.iw.plugins.spindle.ui.OpenTapestryPath;
 import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
 import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
@@ -66,6 +69,8 @@ public abstract class BasePagesSection
 
   private Action newPageAction = new AddPageAction();
   private Action deletePageAction = new DeletePageAction();
+  private OpenTapestryPath openComponentAction =
+    new OpenTapestryPath(TapestryLookup.ACCEPT_PAGES | TapestryLookup.FULL_TAPESTRY_PATH);
 
   private TreeViewer viewer;
   /**
@@ -82,17 +87,51 @@ public abstract class BasePagesSection
 
   protected void fillContextMenu(IMenuManager manager) {
 
-    PageHolder pageSpec = (PageHolder) getSelected();
+    Object selected = getSelected();
     boolean isEditable = isModelEditable();
     if (isEditable) {
 
       manager.add(newPageAction);
 
-      if (pageSpec != null) {
+      if (selected != null) {
 
         manager.add(new Separator());
         manager.add(deletePageAction);
         manager.add(new Separator());
+        try {
+          ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(getModel());
+          TapestryLookup lookup = project.getLookup();
+
+          IIdentifiable pageHolder = (IIdentifiable) selected;
+          String pageName = pageHolder.getIdentifier();
+          IPluginLibrarySpecification spec = (IPluginLibrarySpecification) pageHolder.getParent();
+          String tapestryPath = spec.getPageSpecificationPath(pageName);
+
+          if (tapestryPath == null) {
+
+            // we must resolve it from Framework.library
+            TapestryProjectModelManager mgr;
+            try {
+              mgr = TapestryPlugin.getDefault().getTapestryModelManager(getModel().getUnderlyingStorage());
+
+              ILibrarySpecification framework = mgr.getDefaultLibrary().getSpecification();
+
+              tapestryPath = framework.getPageSpecificationPath(pageName);
+            } catch (CoreException e) {
+            }
+          }
+          if (tapestryPath != null) {
+            openComponentAction.configure(lookup, tapestryPath);
+            if (openComponentAction.isEnabled()) {
+              MenuManager jumpMenu = new MenuManager("Jump To...");
+              jumpMenu.add(openComponentAction);
+              manager.add(jumpMenu);
+              manager.add(new Separator());
+            }
+
+          }
+        } catch (CoreException e) {
+        }
         manager.add(pAction);
       }
     }
@@ -106,13 +145,13 @@ public abstract class BasePagesSection
     if (pageSpec == null) {
 
       fireSelectionNotification(null);
-      editButton.setEnabled(false);
+      inspectButton.setEnabled(false);
       deleteButton.setEnabled(false);
 
     } else {
 
       fireSelectionNotification(pageSpec.getIdentifier());
-      editButton.setEnabled(isEditable);
+      inspectButton.setEnabled(isEditable);
       deleteButton.setEnabled(isEditable);
 
       if ((hasFocus || updateSelection) && isEditable) {
@@ -130,7 +169,7 @@ public abstract class BasePagesSection
     IPluginLibrarySpecification libSpec = getSpec();
 
     List ids = libSpec.getPageNames();
-    
+
     try {
       TapestryProjectModelManager mgr;
       mgr = TapestryPlugin.getDefault().getTapestryModelManager(getModel().getUnderlyingStorage());
@@ -171,8 +210,8 @@ public abstract class BasePagesSection
     if (deleteButton != null) {
       deleteButton.setEnabled(isEditable);
     }
-    if (editButton != null) {
-      editButton.setEnabled(isEditable);
+    if (inspectButton != null) {
+      inspectButton.setEnabled(isEditable);
     }
     //selectFirst();
     updateNeeded = false;
@@ -203,11 +242,7 @@ public abstract class BasePagesSection
 
     if (status.isError()) {
 
-      ErrorDialog.openError(
-        newButton.getShell(),
-        "Spindle Error",
-        "Could not add Page: " + potentialValue,
-        status);
+      ErrorDialog.openError(newButton.getShell(), "Spindle Error", "Could not add Page: " + potentialValue, status);
 
       return false;
 
@@ -257,7 +292,8 @@ public abstract class BasePagesSection
             TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage()),
             "Choose Page",
             "Choose the Page to be added",
-            TapestryLookup.ACCEPT_PAGES, true);
+            TapestryLookup.ACCEPT_PAGES,
+            true);
 
         dialog.create();
         if (dialog.open() == dialog.OK) {
@@ -344,8 +380,7 @@ public abstract class BasePagesSection
     String path;
     IPluginLibrarySpecification parent;
 
-    private IPropertyDescriptor[] descriptors =
-      { new ComponentTypeDialogPropertyDescriptor("spec", "Spec", null, null)};
+    private IPropertyDescriptor[] descriptors = { new ComponentTypeDialogPropertyDescriptor("spec", "Spec", null, null)};
 
     public DefaultPageHolder(String name, String path, IPluginLibrarySpecification parent) {
       this.identifier = name;
@@ -482,9 +517,7 @@ public abstract class BasePagesSection
     }
 
     private IPropertyDescriptor[] descriptors =
-      {
-        new TextPropertyDescriptor("name", "Name"),
-        new ComponentTypeDialogPropertyDescriptor("spec", "Spec", null, null)};
+      { new TextPropertyDescriptor("name", "Name"), new ComponentTypeDialogPropertyDescriptor("spec", "Spec", null, null)};
 
     public void resetPropertyValue(Object key) {
     }

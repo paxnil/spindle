@@ -48,7 +48,7 @@ public class ExtensionPropertiesSection
     externalPropertyHolder = (IPropertyHolder) changeObject;
 
     newButton.setEnabled(externalPropertyHolder != null);
-    editButton.setEnabled(externalPropertyHolder != null);
+    inspectButton.setEnabled(externalPropertyHolder != null);
     deleteButton.setEnabled(externalPropertyHolder != null);
     updateNeeded = true;
     update();
