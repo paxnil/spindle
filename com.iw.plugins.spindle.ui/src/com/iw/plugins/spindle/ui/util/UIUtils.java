@@ -33,8 +33,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.formatter.IContentFormatter;
-import org.eclipse.jface.text.formatter.MultiPassContentFormatter;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -55,9 +53,9 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.editors.formatter.DoctypeEditFormatWorker;
 import com.iw.plugins.spindle.editors.formatter.FormattingPreferences;
 import com.iw.plugins.spindle.editors.formatter.MasterFormattingStrategy;
+import com.iw.plugins.spindle.editors.formatter.FixedMultiPassContentFormatter;
 import com.iw.plugins.spindle.editors.formatter.SlaveFormattingStrategy;
 import com.iw.plugins.spindle.editors.formatter.StartTagEditFormatWorker;
-import com.iw.plugins.spindle.editors.formatter.XMLContentFormatter;
 
 /**
  * Access to features exposed by the JDT UI plugin
@@ -257,7 +255,7 @@ public class UIUtils
   public static IContentFormatter createXMLContentFormatter(
       FormattingPreferences preferences)
   {
-    MultiPassContentFormatter formatter = new MultiPassContentFormatter(
+    FixedMultiPassContentFormatter formatter = new FixedMultiPassContentFormatter(
         XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY,
         IDocument.DEFAULT_CONTENT_TYPE);
 
