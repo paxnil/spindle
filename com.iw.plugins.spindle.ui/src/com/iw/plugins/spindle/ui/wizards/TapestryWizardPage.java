@@ -29,16 +29,13 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.UpdateStatusContainer;
+import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
  * @author GWL
@@ -164,29 +161,19 @@ public abstract class TapestryWizardPage extends WizardPage {
         break;
     }
   }
+  
+  
 
   protected void addControl(Control toBeAdded, Control parent, int verticalOffset) {
-    FormData formData = new FormData();
-    formData.top = new FormAttachment(parent, verticalOffset);
-    formData.left = new FormAttachment(0, 0);
-    formData.right = new FormAttachment(100, 0);
-    toBeAdded.setLayoutData(formData);
+    UIUtils.addFormControl(toBeAdded, parent, verticalOffset);
   }
 
   protected void addControl(Control toBeAdded, Control parent) {
-    addControl(toBeAdded, parent, 0);
+    UIUtils.addFormControl(toBeAdded, parent);
   }
 
-  public Control createSeparator(Composite container, Control parent) {
-    Label separator = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
-    FormData formData = new FormData();
-    if (parent != null) {
-      formData.top = new FormAttachment(parent, 10);
-    }
-    formData.left = new FormAttachment(0, 0);
-    formData.right = new FormAttachment(100, 0);
-    separator.setLayoutData(formData);
-    return separator;
+  protected Control createSeparator(Composite container, Control parent) {
+    return UIUtils.createFormSeparator(container, parent);
   }
 
   public IStatus getCurrentStatus() {

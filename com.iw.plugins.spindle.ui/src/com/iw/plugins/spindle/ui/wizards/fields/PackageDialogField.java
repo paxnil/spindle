@@ -204,7 +204,7 @@ public class PackageDialogField extends StringButtonDefaultField
         String str = (fragment == null) ? "" : fragment.getElementName();
         setTextValue(str);
         updatePackageStatusLabel();
-        fireDialogChanged(this);
+        fireDialogButtonPressed(this);
     }
 
     public IPackageFragment getPackageFragment()

@@ -175,22 +175,22 @@ public class RawTypeDialogField extends StringButtonField
     private IJavaSearchScope createSearchScope()
     {
         IJavaSearchScope result = null;
-//        IType hrootElement = null;
-//        try
-//        {
-//            if (hierarchyRoot != null)
-//            {
-//                hrootElement = resolveTypeName(hierarchyRoot);
-//            }
-//            if (hrootElement != null)
-//            {
-//                result = SearchEngine.createHierarchyScope(hrootElement);
-//            }
-//        } catch (JavaModelException jmex)
-//        {
-//            //ignore
-//            jmex.printStackTrace();
-//        }
+        IType hrootElement = null;
+        try
+        {
+            if (hierarchyRoot != null)
+            {
+                hrootElement = resolveTypeName(hierarchyRoot);
+            }
+            if (hrootElement != null)
+            {
+                result = SearchEngine.createHierarchyScope(hrootElement);
+            }
+        } catch (JavaModelException jmex)
+        {
+            //ignore
+            jmex.printStackTrace();
+        }
         if (result == null)
         {
             IJavaElement[] elements = new IJavaElement[] { jproject };

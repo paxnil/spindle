@@ -52,7 +52,7 @@ public class NewTapPageWizard extends NewTapComponentWizard
         }
         fPage1 = new NewTapPageWizardPage(workspace.getRoot(), "FirstPageWizardPage");
         addPage(fPage1);
-        fPage2 = new NewTapPageWizardClassPage(workspace.getRoot(), "SecondPageWizardPage", fPage1);
+        fPage2 = new TypeChooseWizardPage("SecondPageWizardPage", fPage1);
         addPage(fPage2);
     }
 

@@ -54,10 +54,11 @@ import com.iw.plugins.spindle.UIPlugin;
 
 /**
  * @author GWL
- * @version 
- * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
+ * @version Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
-public abstract class NewTapestryElementWizard extends BasicNewResourceWizard implements INewWizard
+public abstract class NewTapestryElementWizard extends BasicNewResourceWizard
+    implements
+      INewWizard
 {
 
   protected String prepopulateName = null;
@@ -142,16 +143,19 @@ public abstract class NewTapestryElementWizard extends BasicNewResourceWizard im
         if (jelem == null)
         {
           IResource resource = (IResource) adaptable.getAdapter(IResource.class);
-          IResource parent = resource.getParent();
-          jelem = (IJavaElement) ((IAdaptable) parent).getAdapter(IJavaElement.class);
-          if (jelem == null)
+          if (resource != null)
           {
-            if (resource != null)
+            IResource parent = resource.getParent();
+            jelem = (IJavaElement) ((IAdaptable) parent).getAdapter(IJavaElement.class);
+            if (jelem == null)
             {
-              IProject proj = resource.getProject();
-              if (proj != null)
+              if (resource != null)
               {
-                jelem = JavaCore.create(proj);
+                IProject proj = resource.getProject();
+                if (proj != null)
+                {
+                  jelem = JavaCore.create(proj);
+                }
               }
             }
           }
@@ -168,7 +172,10 @@ public abstract class NewTapestryElementWizard extends BasicNewResourceWizard im
   /**
    * @see org.eclipse.ui.IWorkbenchWizard#init(IWorkbench, IStructuredSelection)
    */
-  public void init(IWorkbench workbench, IStructuredSelection selection, String prepopulateName)
+  public void init(
+      IWorkbench workbench,
+      IStructuredSelection selection,
+      String prepopulateName)
   {
     super.init(workbench, selection);
     this.prepopulateName = prepopulateName;
