@@ -71,10 +71,6 @@ public class TemplateConfiguration extends BaseSourceConfiguration
     private ITextDoubleClickStrategy dcsTag;
     private ITextDoubleClickStrategy dcsAttValue;
 
-    /**
-     * @param colorManager
-     * @param editor
-     */
     public TemplateConfiguration(TemplateTextTools tools, TemplateEditor editor)
     {
         super(editor);

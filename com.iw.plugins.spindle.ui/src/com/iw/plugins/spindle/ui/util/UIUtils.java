@@ -32,6 +32,10 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
@@ -123,6 +127,71 @@ public class UIUtils
                 }
             }
         }
+        return null;
+    }
+
+    public static String findWordString(IDocument document, int offset)
+    {
+        try
+        {
+            IRegion region = findWord(document, offset);
+            if (region != null)
+                return document.get(region.getOffset(), region.getLength());
+        } catch (BadLocationException e)
+        {
+            //do nothing
+        }
+        return null;
+    }
+
+    public static IRegion findWord(IDocument document, int offset)
+    {
+
+        int start = -1;
+        int end = -1;
+
+        try
+        {
+
+            int pos = offset;
+            char c;
+
+            while (pos >= 0)
+            {
+                c = document.getChar(pos);
+                if (!Character.isJavaIdentifierPart(c))
+                    break;
+                --pos;
+            }
+
+            start = pos;
+
+            pos = offset;
+            int length = document.getLength();
+
+            while (pos < length)
+            {
+                c = document.getChar(pos);
+                if (!Character.isJavaIdentifierPart(c))
+                    break;
+                ++pos;
+            }
+
+            end = pos;
+
+        } catch (BadLocationException x)
+        {}
+
+        if (start > -1 && end > -1)
+        {
+            if (start == offset && end == offset)
+                return new Region(offset, 0);
+            else if (start == offset)
+                return new Region(start, end - start);
+            else
+                return new Region(start + 1, end - start - 1);
+        }
+
         return null;
     }
 

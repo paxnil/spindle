@@ -40,7 +40,6 @@ import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
@@ -53,16 +52,13 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
 import com.iw.plugins.spindle.editors.DefaultDoubleClickStrategy;
 import com.iw.plugins.spindle.editors.Editor;
-import com.iw.plugins.spindle.editors.spec.assist.CDATACompletionProposal;
+import com.iw.plugins.spindle.editors.spec.assist.AttributeCompletionProcessor;
+import com.iw.plugins.spindle.editors.spec.assist.CDATACompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.CommentCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.DeclCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.TagCompletionProcessor;
-import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
-import com.iw.plugins.spindle.editors.util.DocumentArtifact;
-
-
 
 /**
  *  SourceViewerConfiguration for the TemplateEditor
@@ -72,7 +68,7 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifact;
  */
 public class SpecConfiguration extends BaseSourceConfiguration
 {
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     private XMLTextTools fTextTools;
 
@@ -233,46 +229,16 @@ public class SpecConfiguration extends BaseSourceConfiguration
     public IContentAssistant getContentAssistant(ISourceViewer sourceViewer)
     {
         ContentAssistant assistant = getEditor().getContentAssistant();
-
-        ContentAssistProcessor commentProcessor = new CommentCompletionProcessor(fEditor);
-        
-        ContentAssistProcessor declProcessor = new DeclCompletionProcessor(fEditor);
-        
-        ContentAssistProcessor cdataProcessor = new CDATACompletionProposal(fEditor);
-        
-        ContentAssistProcessor defaultProcessor = new DefaultCompletionProcessor(fEditor);
-        
         ContentAssistProcessor tagProcessor = new TagCompletionProcessor(fEditor);
-
-        
-        ContentAssistProcessor standard = new ContentAssistProcessor(fEditor)
-        {
-            protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
-            {
-                DocumentArtifact artifact = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
-                DocumentArtifact root = null;
-                try
-                {
-                    root = DocumentArtifact.createTree(viewer.getDocument(), documentOffset);
-                } catch (BadLocationException e)
-                {
-                    // TODO remove
-                    e.printStackTrace();
-                }
-                DocumentArtifact prevSib = artifact.getPreviousSibling();
-                return new ICompletionProposal[] {
-                     new CompletionProposal.NullProposal(
-                        artifact.toString(),
-                        root == null ? "error" : root.fPublicId,
-                        documentOffset)};
-
-            }
-        };
-        
+        ContentAssistProcessor commentProcessor = new CommentCompletionProcessor(fEditor);
+        ContentAssistProcessor attributeProcessor = new AttributeCompletionProcessor(fEditor);
+        ContentAssistProcessor declProcessor = new DeclCompletionProcessor(fEditor);
+        ContentAssistProcessor defaultProcessor = new DefaultCompletionProcessor(fEditor);
+        ContentAssistProcessor cdataProcessor = new CDATACompletionProcessor(fEditor);
 
         assistant.setContentAssistProcessor(tagProcessor, XMLPartitionScanner.XML_TAG);
         assistant.setContentAssistProcessor(commentProcessor, XMLPartitionScanner.XML_COMMENT);
-        assistant.setContentAssistProcessor(standard, XMLPartitionScanner.XML_ATTRIBUTE);
+        assistant.setContentAssistProcessor(attributeProcessor, XMLPartitionScanner.XML_ATTRIBUTE);
         assistant.setContentAssistProcessor(declProcessor, XMLPartitionScanner.XML_DECL);
         assistant.setContentAssistProcessor(defaultProcessor, IDocument.DEFAULT_CONTENT_TYPE);
         assistant.setContentAssistProcessor(cdataProcessor, XMLPartitionScanner.XML_CDATA);

@@ -40,13 +40,13 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifact;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class CDATACompletionProposal extends SpecCompletionProcessor
+public class CDATACompletionProcessor extends SpecCompletionProcessor
 {
 
     /**
      * @param editor
      */
-    public CDATACompletionProposal(AbstractTextEditor editor)
+    public CDATACompletionProcessor(AbstractTextEditor editor)
     {
         super(editor);
     }

@@ -42,6 +42,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.wutka.dtd.DTD;
 import com.wutka.dtd.DTDAttribute;
@@ -61,13 +62,13 @@ import com.wutka.dtd.DTDSequence;
  */
 public class SpecAssistHelper
 {
-    private static final Integer DEFAULT_NEW_ELEMENT_PROPOSAL = new Integer(0);
-    private static final Integer OPTIONAL_NEW_ELEMENT_PROPOSAL = new Integer(1);
-    private static final Integer ELEMENT_ATTRIBUTES = new Integer(2);
-    private static final Integer ELEMENT_REQUIRED_ATTRIBUTES = new Integer(3);
-    private static final Integer ELEMENT_ATTRIBUTE_DEFAULT_VALUE = new Integer(4);
-    private static final Integer ELEMENT_ATTRIBUTE_ALLOWED_VALUES = new Integer(5);
-    private static final Integer ELEMENT_COMMENT = new Integer(6);
+    private static final String DEFAULT_NEW_ELEMENT_PROPOSAL = "DEFAULT_NEW_ELEMENT_PROPOSAL";
+    private static final String OPTIONAL_NEW_ELEMENT_PROPOSAL = "OPTIONAL_NEW_ELEMENT_PROPOSAL";
+    private static final String ELEMENT_ATTRIBUTES = "ELEMENT_ATTRIBUTES";
+    private static final String ELEMENT_REQUIRED_ATTRIBUTES = "ELEMENT_REQUIRED_ATTRIBUTES";
+    private static final String ELEMENT_ATTRIBUTE_DEFAULT_VALUE = "ELEMENT_ATTRIBUTE_DEFAULT_VALUE";
+    private static final String ELEMENT_ATTRIBUTE_ALLOWED_VALUES = "ELEMENT_ATTRIBUTE_ALLOWED_VALUES";
+    private static final String ELEMENT_COMMENT = "ELEMENT_ATTRIBUTE_ALLOWED_VALUES";
     /**
       * Map caching the results of all of the lookup methods in this class
       */
@@ -330,7 +331,8 @@ public class SpecAssistHelper
                 || elementName.equals("library")
                 || elementName.equals("component-specification")
                 || elementName.equals("page-specifiation")
-                || elementName.equals("description")))
+                || elementName.equals("description")
+                || elementName.equals("extension")))
         {
             // non empty only!
             defaultProposal = nonEmptyProposal;
@@ -388,8 +390,9 @@ public class SpecAssistHelper
         }
         return result;
     }
-    
-    public static List getAttributes(DTD dtd, String elementName) {
+
+    public static List getAttributes(DTD dtd, String elementName)
+    {
         return internalGetAttributes(dtd, elementName.toLowerCase());
     }
 
@@ -425,7 +428,11 @@ public class SpecAssistHelper
                         String attrName = (String) iter.next();
                         attributes.add(attrName);
                         DTDAttribute dtdattr = (DTDAttribute) attrTable.get(attrName);
+
                         String defaultValue = dtdattr.getDefaultValue();
+                        if (defaultValue == null)
+                            defaultValue = getTapestryDefaultValue(dtd, elementName, attrName);
+
                         if (dtdattr.decl == DTDDecl.REQUIRED)
                             required.add(attrName);
 
@@ -435,18 +442,21 @@ public class SpecAssistHelper
                         {
                             DTDEnumeration enum = (DTDEnumeration) type;
                             allowedValues = new ArrayList(((DTDEnumeration) type).getItemsVec());
+                        } else
+                        {
+                            allowedValues = null;
                         }
                         defaultKey =
                             new MultiKey(
                                 new Object[] { dtd, elementName, attrName, ELEMENT_ATTRIBUTE_DEFAULT_VALUE },
                                 false);
-                        DTDInfoMap.put(key, defaultValue != null ? defaultValue : "");
+                        DTDInfoMap.put(defaultKey, defaultValue != null ? defaultValue : "");
                         allowedValuesKey =
                             new MultiKey(
                                 new Object[] { dtd, elementName, attrName, ELEMENT_ATTRIBUTE_ALLOWED_VALUES },
                                 false);
                         DTDInfoMap.put(
-                            key,
+                            allowedValuesKey,
                             (allowedValues == null || allowedValues.isEmpty())
                                 ? Collections.EMPTY_LIST
                                 : Collections.unmodifiableList(allowedValues));
@@ -467,6 +477,33 @@ public class SpecAssistHelper
             return Collections.EMPTY_LIST;
 
         return attributes;
+    }
+
+    public static String getTapestryDefaultValue(DTD dtd, String elementName, String attrName)
+    {
+        return internalGetTapestryDefaultValue(dtd, elementName.toLowerCase(), attrName.toLowerCase());
+    }
+
+    private static String internalGetTapestryDefaultValue(DTD dtd, String elementName, String attrName)
+    {
+        String result = null;
+        if ("application".equals(elementName))
+        {
+            if ("engine-class".equals(attrName))
+                result = TapestryCore.getString("TapestryEngine.defaultEngine");
+
+        } else if ("component-specification".equals(elementName))
+        {
+            if ("class".equals(attrName))
+                result = TapestryCore.getString("TapestryComponentSpec.defaultSpec");
+
+        } else if ("page-specification".equals(elementName))
+        {
+            if ("class".equals(attrName))
+                result = TapestryCore.getString("TapestryPageSpec.defaultSpec");
+
+        }
+        return result;
     }
 
     /**
