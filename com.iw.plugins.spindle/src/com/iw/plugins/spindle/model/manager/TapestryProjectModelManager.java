@@ -715,7 +715,7 @@ public class TapestryProjectModelManager implements IResourceChangeListener, IRe
       if (!project.hasNature(JavaCore.NATURE_ID))
         return false;
     } catch (CoreException e) {
-      TapestryPlugin.getDefault().logException(e);
+//      TapestryPlugin.getDefault().logException(e);
       return false;
     }
     return true;

@@ -418,6 +418,10 @@ public class TapestryPlugin extends AbstractUIPlugin {
   static public SpecificationParser getParser() {
     return parser;
   }
+  
+  public void logStatus(IStatus status) {
+  	getLog().log(status);
+  }
 
   public void logException(Throwable e) {
     if (e instanceof InvocationTargetException) {
@@ -427,8 +431,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
     if (message == null)
       message = e.toString();
     Status status = new Status(IStatus.ERROR, getPluginId(), IStatus.OK, message, e);
-    ErrorDialog.openError(getActiveWorkbenchShell(), null, null, status);
-    ResourcesPlugin.getPlugin().getLog().log(status);
+    getLog().log(status);
   } /** 
                       * Sets default preference values. These values will be used
                       * until some preferences are actually set using Preference dialog.

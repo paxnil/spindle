@@ -87,12 +87,14 @@ import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.util.JarEditorInputWrapper;
 import com.iw.plugins.spindle.util.SpindleMultiStatus;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 
 public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
 
   private static String EDITOR_NAME = "SpindleMultipageEditor";
   private static String WRONG_EDITOR = EDITOR_NAME + ".wrongEditor";
+  private static String WRONG_LOCATION = EDITOR_NAME + ".wrongLocation";
   private boolean dirty = false;
   private boolean duringInit = false;
 
@@ -111,6 +113,21 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
       IStatus s = new Status(IStatus.ERROR, TapestryPlugin.getDefault().getPluginId(), IStatus.OK, message, null);
       throw new PartInitException(s);
     }
+    
+    
+    try {
+    	
+      checkValidLocation(input);
+      	
+    } catch (CoreException e) {
+    	
+      	String message = MessageUtil.getFormattedString(WRONG_LOCATION, input.getName());
+    	SpindleMultiStatus status = new SpindleMultiStatus(IStatus.ERROR, message);
+    	status.addStatus(e.getStatus());
+    	TapestryPlugin.getDefault().logException(e);
+    	throw new PartInitException(status);
+    }
+    
 
     if (input instanceof JarEntryEditorInput) {
       input = (IEditorInput) new JarEditorInputWrapper((JarEntryEditorInput) input);
@@ -167,7 +184,6 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
 
     if (documentProvider == null)
       return;
-      
 
     if (documentProvider.isDeleted(getEditorInput())) {
       if (isSaveAsAllowed()) {
@@ -199,9 +215,8 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
         TapestryPlugin.getDefault().logException(x);
       }
       try {
-      	
-   	    BaseTapestryModel tmodel = (BaseTapestryModel) model;
 
+        BaseTapestryModel tmodel = (BaseTapestryModel) model;
 
         tmodel.setDirty(false);
         tmodel.reload();
@@ -296,50 +311,61 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
 
   protected boolean isValidContentType(IEditorInput input) {
 
-    boolean result = false;
-    boolean inJarFile = false;
-
     if (input instanceof JarEntryEditorInput) {
       input = (IEditorInput) new JarEditorInputWrapper((JarEntryEditorInput) input);
-      inJarFile = true;
     }
 
     IFile file = (IFile) input.getAdapter(IFile.class);
     String name = file.getName().toLowerCase();
     String valid = getValidExtension();
 
-    if (name.endsWith(valid)) {
+    return name.endsWith(valid);
 
-      if (inJarFile) {
+  }
 
-        result = true;
+  protected void checkValidLocation(IEditorInput input) throws CoreException {
+    if (input instanceof JarEntryEditorInput) {
+      return;
+    }
 
-      } else {
+    IFile file = (IFile) input.getAdapter(IFile.class);
 
-        try {
+    SpindleStatus status = new SpindleStatus();
 
-          ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(file);
-          if (project != null) {
+    if (file == null) {
 
-            IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(file);
-            if (jproject != null) {
+      status.setError("Could not open editor...could not adapt the editor input into a file");
 
-              IFolder parentFolder = (IFolder) file.getParent();
-              IJavaElement element = JavaCore.create(parentFolder);
+      throw new CoreException(status);
+    }
 
-              result = element != null;
+    String filePath = file.getFullPath().toString();
 
-            }
+    ITapestryProject project = TapestryPlugin.getDefault().getTapestryProjectFor(file);
+    if (project == null) {
 
-          }
+      status.setError("Could not open editor.. "+filePath + " is not in a Tapestry Project");
+      throw new CoreException(status);
+    }
 
-        } catch (CoreException e) {
-        }
-      }
+    IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(file);
+
+    if (jproject == null) {
+
+      status.setError("Could not open editor..could not find the Java Project nature for " + filePath);
+      throw new CoreException(status);
 
     }
 
-    return result;
+    IFolder parentFolder = (IFolder) file.getParent();
+    IJavaElement element = JavaCore.create(parentFolder);
+
+    if (element == null || !element.exists()) {
+
+      status.setError("Could not open editor..could not locate " + file.getName() + " in the project src path");
+      throw new CoreException(status);
+    }
+
   }
 
   protected abstract String getValidExtension();
@@ -620,6 +646,5 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
    * @return Image
    */
   public abstract Image getDefaultHeadingImage();
-  
 
 }

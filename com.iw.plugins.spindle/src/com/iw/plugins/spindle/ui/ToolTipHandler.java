@@ -120,14 +120,14 @@ public class ToolTipHandler {
      */
     control.addMouseListener(new MouseAdapter() {
       public void mouseDown(MouseEvent e) {
-        if (tipShell.isVisible())
+        if (!tipShell.isDisposed() && tipShell.isVisible())
           tipShell.setVisible(false);
       }
     });
 
     control.addDisposeListener(new DisposeListener() {
       public void widgetDisposed(DisposeEvent e) {
-        if (tipShell.isVisible())
+        if (!tipShell.isDisposed() && tipShell.isVisible())
           tipShell.setVisible(false);
 
       }
@@ -138,7 +138,7 @@ public class ToolTipHandler {
      */
     control.addMouseTrackListener(new MouseTrackAdapter() {
       public void mouseExit(MouseEvent e) {
-        if (tipShell.isVisible())
+        if (!tipShell.isDisposed() && tipShell.isVisible())
           tipShell.setVisible(false);
         tipWidget = null;
       }
