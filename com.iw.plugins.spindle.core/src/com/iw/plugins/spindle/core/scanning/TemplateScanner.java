@@ -64,7 +64,7 @@ import com.iw.plugins.spindle.core.parser.template.CoreTemplateParser;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
-import com.iw.plugins.spindle.core.spec.PluginBindingSpecfication;
+import com.iw.plugins.spindle.core.spec.PluginBindingSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.core.util.Assert;
@@ -269,7 +269,7 @@ public class TemplateScanner extends AbstractScanner
         while (i.hasNext())
         {
             String name = (String) i.next();
-            PluginBindingSpecfication bspec = (PluginBindingSpecfication) contained.getBinding(name);
+            PluginBindingSpecification bspec = (PluginBindingSpecification) contained.getBinding(name);
             ISourceLocation location = getAttributeLocation(name, token.getEventInfo().getAttributeMap());
 
             BindingType bindingType = bspec.getType();
@@ -309,7 +309,7 @@ public class TemplateScanner extends AbstractScanner
     }
 
     private void validateImplicitExpressionBinding(
-        PluginBindingSpecfication bspec,
+        PluginBindingSpecification bspec,
         IComponentSpecification containedSpecification,
         ISourceLocation location)
         throws ScannerException
@@ -339,7 +339,7 @@ public class TemplateScanner extends AbstractScanner
     }
 
     private void validateImplicitStringBinding(
-        PluginBindingSpecfication bspec,
+        PluginBindingSpecification bspec,
         IComponentSpecification containedSpecification,
         ISourceLocation location)
     {
@@ -347,7 +347,7 @@ public class TemplateScanner extends AbstractScanner
     }
 
     private void validateImplicitStaticBinding(
-        PluginBindingSpecfication bspec,
+        PluginBindingSpecification bspec,
         IComponentSpecification containedSpecification,
         ISourceLocation location)
     {
@@ -484,8 +484,8 @@ public class TemplateScanner extends AbstractScanner
 
     private IBindingSpecification createImplicitBinding(TemplateAttribute attr)
     {
-        PluginBindingSpecfication result =
-            (PluginBindingSpecfication) fSpecificationFactory.createBindingSpecification();
+        PluginBindingSpecification result =
+            (PluginBindingSpecification) fSpecificationFactory.createBindingSpecification();
         result.setValue(attr.getValue());
         if (attr.getType() == AttributeType.OGNL_EXPRESSION)
         {

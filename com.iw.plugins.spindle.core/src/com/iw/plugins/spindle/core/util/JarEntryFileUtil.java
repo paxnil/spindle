@@ -28,6 +28,8 @@ package com.iw.plugins.spindle.core.util;
 
 import java.util.ArrayList;
 
+
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
@@ -64,9 +66,8 @@ public class JarEntryFileUtil
         int nameLength = entry.getName().length();
         if (content.length() == nameLength)
             return "";
-        int stop = content.lastIndexOf('/');
-        content = content.substring(0, stop);
-        return content.replaceAll("/", ".");
+        int stop = content.lastIndexOf('/');        
+        return StringUtils.replace(content.substring(0, stop), "/", ".");
     }
     public static IPackageFragmentRoot getPackageFragmentRoot(IJavaProject project, JarEntryFile entry)
         throws CoreException

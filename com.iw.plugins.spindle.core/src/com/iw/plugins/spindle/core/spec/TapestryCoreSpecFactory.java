@@ -71,7 +71,7 @@ public class TapestryCoreSpecFactory extends SpecFactory
 
     public IBindingSpecification createBindingSpecification()
     {
-        return new PluginBindingSpecfication();
+        return new PluginBindingSpecification();
     }
 
     public IComponentSpecification createComponentSpecification()

@@ -235,6 +235,17 @@ public class Markers
         {} // assume there are no problems
         return new IMarker[0];
     }
+    
+    public static IMarker[] getFatalProblemsFor(IResource resource)
+        {
+            try
+            {
+                if (resource != null && resource.exists())
+                    return resource.findMarkers(TAPESTRY_FATAL, false, IResource.DEPTH_INFINITE);
+            } catch (CoreException e)
+            {} // assume there are no problems
+            return new IMarker[0];
+        }
 
     public static void removeProblemsFor(IResource resource)
     {

@@ -50,6 +50,21 @@
    </clover-report>
 </target>
 
+<target name="with.tapestry" depends="init">
+	<!-- designate the install of eclipse to use
+		 and the location of a scratch dir that can be used
+		 to generate properties files
+	-->
+	<tap-ant-setup eclipse="${tap.ant.eclipse.dir}" scratch-dir="${tap.ant.scratch.dir}"/>
+</target>
+
+<target name="tapestry.projects" depends="with.tapestry">
+	<tap-ant-project name="test1" context-dir="${test1.context.dir}>
+		
+	</tap-ant-project>
+
+</target>
+
 
 <target name="init" unless="build.dir">
 	<loadproperties srcFile="build.properties"/>

@@ -35,18 +35,18 @@ import org.apache.tapestry.spec.IBindingSpecification;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public class PluginBindingSpecfication extends DescribableSpecification implements IBindingSpecification
+public class PluginBindingSpecification extends DescribableSpecification implements IBindingSpecification
 {
 
     private BindingType fBindingType;
     private String fValue;
 
-    public PluginBindingSpecfication()
+    public PluginBindingSpecification()
     {
         super(BaseSpecification.BINDING_SPEC);
     }
 
-    protected PluginBindingSpecfication(int type)
+    protected PluginBindingSpecification(int type)
     {
         super(type);
     }

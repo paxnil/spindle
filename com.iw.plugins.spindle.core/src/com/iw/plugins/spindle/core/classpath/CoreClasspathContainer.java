@@ -119,6 +119,10 @@ public class CoreClasspathContainer implements IClasspathContainer
                 } else if (jarName.startsWith("tapestry-contrib"))
                 {
                     sourceAttachmentPath = getSourceAttachmentPath(installUrl, "tapestry-contrib-src.jar");
+                } else {
+                    int index = jarName.lastIndexOf('-');
+                    String attachment = jarName.substring(0, index)+"-src.jar";
+                    sourceAttachmentPath = getSourceAttachmentPath(installUrl, attachment);
                 }
 
                 if (sourceAttachmentPath != null)
@@ -152,7 +156,7 @@ public class CoreClasspathContainer implements IClasspathContainer
     private static IPath getSourceAttachmentPath(URL installUrl, String srcJar)
         throws MalformedURLException, IOException
     {
-        URL temp = new URL(installUrl, srcJar);
+        URL temp = new URL(installUrl, "libsrc/"+srcJar);
         temp = Platform.resolve(temp);
         Path result = new Path(temp.getFile());
         return result;

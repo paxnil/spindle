@@ -34,7 +34,7 @@ import org.apache.tapestry.spec.IListenerBindingSpecification;
  * @version $Id$
  */
 public class PluginListenerBindingSpecification
-    extends PluginBindingSpecfication
+    extends PluginBindingSpecification
     implements IListenerBindingSpecification
 {
 
