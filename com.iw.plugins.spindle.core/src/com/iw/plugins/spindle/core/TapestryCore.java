@@ -33,6 +33,7 @@ import java.util.ResourceBundle;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
@@ -49,7 +50,7 @@ public class TapestryCore extends AbstractUIPlugin {
   public static final String PLUGIN_ID = "com.iw.plugins.spindle.core";
   public static final String NATURE_ID = PLUGIN_ID + ".tapestrynature";
   public static final String BUILDER_ID = PLUGIN_ID + ".tapestrybuilder";
-  
+
   //The shared instance.
   private static TapestryCore plugin;
   //Resource bundle.
@@ -62,9 +63,7 @@ public class TapestryCore extends AbstractUIPlugin {
     super(descriptor);
     plugin = this;
     try {
-      resourceBundle =
-        ResourceBundle.getBundle(
-          "com.iw.plugins.spindle.core.resources");
+      resourceBundle = ResourceBundle.getBundle("com.iw.plugins.spindle.core.resources");
     } catch (MissingResourceException x) {
       resourceBundle = null;
     }
@@ -154,7 +153,7 @@ public class TapestryCore extends AbstractUIPlugin {
     }
   }
 
-  public static void removeNatureToProject(IProject project, String natureId)
+  public static void removeNatureFromProject(IProject project, String natureId)
     throws CoreException {
     IProject proj = project.getProject(); // Needed if project is a IJavaProject
     IProjectDescription description = proj.getDescription();
@@ -182,5 +181,40 @@ public class TapestryCore extends AbstractUIPlugin {
       proj.setDescription(description, null);
     }
   }
+
+  /**
+  * Returns the Tapestry model.
+  * 
+  * @param root the given root
+  * @return the Tapestry model, or <code>null</code> if the root is null
+  */
+  public static ITapestryModel create(IWorkspaceRoot root) {
+    if (root == null) {
+      return null;
+    }
+    return TapestryModelManager.getTapestryModelManager().getTapestryModel();
+  }
+
+  /**
+   * Returns the Tapestry project corresponding to the given project.
+   * <p>
+   * Creating a Tapestry Project has the side effect of creating and opening all of the
+   * project's parents if they are not yet open.
+   * <p>
+   * Note that no check is done at this time on the existence of the tapestry nature of this project.
+   * 
+   * @param project the given project
+   * @return the Java project corresponding to the given project, null if the given project is null
+   */
+  public static ITapestryProject create(IProject project) {
+    if (project == null) {
+      return null;
+    }
+    TapestryModel tapestryModel =
+      TapestryModelManager.getTapestryModelManager().getTapestryModel();
+    return tapestryModel.getTapestryProject(project);
+  }
+
+ 
 
 }

@@ -31,6 +31,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 
 import org.apache.tapestry.parse.SpecificationParser;
+import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLParseException;
@@ -58,9 +59,11 @@ import com.iw.plugins.spindle.core.parser.xml.TapestryParserConfiguration;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public class Parser implements IOffsetResolver, XMLErrorHandler {
+public class Parser implements ISourceLocationResolver, XMLErrorHandler {
 
-  private Document document = null;
+  private Document eclipseDocument;
+  private DocumentImpl xmlDocument;
+
   private TapestryDOMParser parser = null;
   private ArrayList collectedExceptions;
 
@@ -77,6 +80,7 @@ public class Parser implements IOffsetResolver, XMLErrorHandler {
     if (parser == null) {
       TapestryParserConfiguration parserConfig = new TapestryParserConfiguration(this);
       parser = new TapestryDOMParser(parserConfig);
+      parser.setSourceResolver(this);
       try {
         parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
         parser.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
@@ -92,8 +96,8 @@ public class Parser implements IOffsetResolver, XMLErrorHandler {
 
   public int getLineOffset(int parserReportedLineNumber) {
     try {
-      if (document != null) {
-        return document.getLineOffset(parserReportedLineNumber - 1);
+      if (eclipseDocument != null) {
+        return eclipseDocument.getLineOffset(parserReportedLineNumber - 1);
       }
     } catch (BadLocationException e) {
       TapestryCore.log(e);
@@ -103,9 +107,21 @@ public class Parser implements IOffsetResolver, XMLErrorHandler {
 
   public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn) {
     int result = getLineOffset(parserReportedLineNumber);
-    int totalLength = document.getLength();
+    int lineCount = eclipseDocument.getNumberOfLines();
+    int totalLength = eclipseDocument.getLength();
     if (parserReportedColumn > 0) {
-      result = Math.min(totalLength - 2, result + parserReportedColumn - 1);
+      if (parserReportedLineNumber > lineCount) {
+        result = Math.min(totalLength - 2, result + parserReportedColumn - 1);
+      } else {
+        try {
+          int lastCharOnLine =
+            result + eclipseDocument.getLineLength(parserReportedLineNumber - 1) - 1;
+          result = Math.min(lastCharOnLine, result + parserReportedColumn - 1);
+        } catch (BadLocationException e) {
+        	TapestryCore.log(e);
+        }
+      }
+
     }
     return result;
   }
@@ -122,9 +138,10 @@ public class Parser implements IOffsetResolver, XMLErrorHandler {
   public Element parse(String content) throws IOException, DocumentParseException {
 
     collectedExceptions = new ArrayList();
-    document = new Document();
-    document.set(content);
+    eclipseDocument = new Document();
+    eclipseDocument.set(content);
     StringReader reader = new StringReader(content);
+    xmlDocument = null;
     Element result = null;
 
     try {
@@ -137,7 +154,8 @@ public class Parser implements IOffsetResolver, XMLErrorHandler {
       //      parser.setErrorHandler(this);
       checkParser();
       parser.parse(new InputSource(reader));
-      result = parser.getDocument().getDocumentElement();
+      xmlDocument = (DocumentImpl) parser.getDocument();
+      result = xmlDocument.getDocumentElement();
     } catch (SAXException e) {
 
       if (e instanceof SAXParseException) {
@@ -155,11 +173,22 @@ public class Parser implements IOffsetResolver, XMLErrorHandler {
     return result;
 
   }
-  
+
+  public DocumentImpl getParsedDocument() {
+    return xmlDocument;
+  }
+
+  public ElementSourceLocationInfo getSourceLocationInfo(Node node) {
+    if (xmlDocument != null) {
+      return (ElementSourceLocationInfo) xmlDocument.getUserData(node, TapestryCore.PLUGIN_ID);
+    }
+    return null;
+  }
+
   private void collect(DocumentParseException ex) {
-  	if (!collectedExceptions.contains(ex)) {
-  		collectedExceptions.add(ex);
-  	}
+    if (!collectedExceptions.contains(ex)) {
+      collectedExceptions.add(ex);
+    }
   }
 
   public DocumentParseException[] getCollectedExceptions() {
@@ -206,7 +235,7 @@ public class Parser implements IOffsetResolver, XMLErrorHandler {
       charEnd,
       ex);
   }
-  
+
   public boolean isElement(Node node, String elementName) {
     if (node.getNodeType() != Node.ELEMENT_NODE) {
       return false;
@@ -214,8 +243,8 @@ public class Parser implements IOffsetResolver, XMLErrorHandler {
     Element element = (Element) node;
     return element.getTagName().equals(elementName);
   }
-  
-   public String getValue(Node node) {
+
+  public String getValue(Node node) {
     StringBuffer buffer = new StringBuffer();
     for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
       Text text = (Text) child;
@@ -229,7 +258,6 @@ public class Parser implements IOffsetResolver, XMLErrorHandler {
 
     return result;
   }
-
 
   /**
    * @see org.apache.xerces.xni.parser.XMLErrorHandler#error(String, String, XMLParseException)

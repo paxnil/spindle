@@ -55,7 +55,7 @@
          point="org.eclipse.core.resources.builders">
       <builder>
          <run
-               class="com.iw.plugins.spindle.core.builder.TapestryBuilder">
+               class="com.iw.plugins.spindle.core.TapestryBuilder">
          </run>
       </builder>
    </extension>
@@ -73,5 +73,18 @@
             value="true">
       </persistent>
    </extension>
-
+   <extension
+         id="buildBroken"
+         name="Tapestry Build Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
 </plugin>

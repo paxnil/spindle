@@ -25,20 +25,25 @@ package com.iw.plugins.spindle.core.parser.xml;
  *
  * ***** END LICENSE BLOCK ***** */
 
-import org.apache.xerces.dom.DeferredDocumentImpl;
-import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.QName;
 import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLParserConfiguration;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
+
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.parser.ElementSourceLocationInfo;
+import com.iw.plugins.spindle.core.parser.ISourceLocationResolver;
+import com.iw.plugins.spindle.core.parser.xml.event.ElementXMLEventInfo;
 
 public class TapestryDOMParser extends DOMParser {
 
+  ISourceLocationResolver resolver;
+
+  /** custom Xerces Feature identifier*/
+  protected static final String AUGMENTATIONS =
+    "http://intelligentworks.com/xml/features/augmentations-location";
   /**
    * Constructor for MyDOMParser.
    */
@@ -54,97 +59,44 @@ public class TapestryDOMParser extends DOMParser {
     super(config);
   }
 
-  /**
-   * @see org.apache.xerces.xni.XMLDocumentHandler#startDocument(XMLLocator, String, Augmentations)
-   */
-  public void startDocument(XMLLocator locator, String encoding, Augmentations augs)
-    throws XNIException {
-    fInDocument = true;
-    if (!fDeferNodeExpansion) {
-      if (fDocumentClassName.equals(DEFAULT_DOCUMENT_CLASS_NAME)) {
-        fDocument = new LocationAwareDocument();
-        fDocumentImpl = (DocumentImpl) fDocument;
-        // REVISIT: when DOM Level 3 is REC rely on Document.support
-        //          instead of specific class
-        // set DOM error checking off
-        fDocumentImpl.setStrictErrorChecking(false);
-        // set actual encoding
-        fDocumentImpl.setActualEncoding(encoding);
-      } else {
-        // use specified document class
-        try {
-          Class documentClass = Class.forName(fDocumentClassName);
-          fDocument = (Document) documentClass.newInstance();
-          // if subclass of our own class that's cool too
-          Class defaultDocClass = Class.forName(DEFAULT_DOCUMENT_CLASS_NAME);
-          if (defaultDocClass.isAssignableFrom(documentClass)) {
-            fDocumentImpl = (DocumentImpl) fDocument;
-            // REVISIT: when DOM Level 3 is REC rely on
-            //          Document.support instead of specific class
-            // set DOM error checking off
-            fDocumentImpl.setStrictErrorChecking(false);
-          }
-        } catch (ClassNotFoundException e) {
-          // won't happen we already checked that earlier
-        } catch (Exception e) {
-          // REVISIT: Localize this message.
-          throw new RuntimeException(
-            "Failed to create document object of class: " + fDocumentClassName);
-        }
-      }
-      fCurrentNode = fDocument;
-    } else {
-      fDeferredDocumentImpl = new DeferredDocumentImpl(fNamespaceAware);
-      fDocument = fDeferredDocumentImpl;
-      fDocumentIndex = fDeferredDocumentImpl.createDeferredDocument();
-      fCurrentNodeIndex = fDocumentIndex;
-    }
-
+  public void setSourceResolver(ISourceLocationResolver resolver) {
+    this.resolver = resolver;
   }
 
   /**
    * @see org.apache.xerces.xni.XMLDocumentHandler#endElement(QName, Augmentations)
    */
   public void endElement(QName element, Augmentations augs) throws XNIException {
-    if (fCurrentNode instanceof ILocatable) {
-      XMLScanner.LocationItem location = (XMLScanner.LocationItem) augs.getItem(AUGMENTATIONS);
-      if (location != null) {
-        ((ILocatable) fCurrentNode).setLocation(location);
+    ElementXMLEventInfo eventInfo = (ElementXMLEventInfo) augs.getItem(AUGMENTATIONS);
+    if (eventInfo != null) {
+      if (resolver != null) {
+        ElementSourceLocationInfo resolvedInfo =
+          new ElementSourceLocationInfo(eventInfo, resolver);
+        fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID, resolvedInfo, null);
+      } else {
+        fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID, eventInfo, null);
       }
     }
+
     super.endElement(element, augs);
   }
 
   /**
-   * @see org.apache.xerces.xni.XMLDocumentHandler#startElement(QName, XMLAttributes, Augmentations)
+   * @see org.apache.xerces.xni.XMLDocumentHandler#emptyElement(QName, XMLAttributes, Augmentations)
    */
-  public void startElement(QName element, XMLAttributes attributes, Augmentations augs)
+  public void emptyElement(QName element, XMLAttributes attributes, Augmentations augs)
     throws XNIException {
-    super.startElement(element, attributes, augs);
-    int attrCount = attributes.getLength();
-    QName attrName = new QName();
-    NamedNodeMap map = fCurrentNode.getAttributes();
-    for (int i = 0; i < attrCount; i++) {
-      attributes.getName(i, attrName);
-      String rawname = attrName.rawname;
-      Augmentations attrAugs = attributes.getAugmentations(i);
-      if (attrAugs != null) {
-        XMLScanner.LocationItem locationItem =
-          (XMLScanner.LocationItem) attrAugs.getItem(AUGMENTATIONS);
-        if (locationItem != null) {
-          ILocatable attribute = (ILocatable) map.getNamedItem(rawname);
-          attribute.setLocation(locationItem);
-        }
+    ElementXMLEventInfo eventInfo = (ElementXMLEventInfo) augs.getItem(AUGMENTATIONS);
+    if (eventInfo != null) {
+      if (resolver != null) {
+        ElementSourceLocationInfo resolvedInfo =
+          new ElementSourceLocationInfo(eventInfo, resolver);
+        fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID, resolvedInfo, null);
+      } else {
+        fDocumentImpl.setUserData(fCurrentNode, TapestryCore.PLUGIN_ID, eventInfo, null);
       }
     }
+    super.emptyElement(element, attributes, augs);
   }
-
-  /** Feature identifier: notify built-in refereces. */
-  protected static final String AUGMENTATIONS =
-    "http://intelligentworks.com/xml/features/augmentations-location";
-
-  // recognized features and properties
-
-  // property identifiers
 
 }

@@ -26,13 +26,12 @@ package com.iw.plugins.spindle.core;
  * ***** END LICENSE BLOCK ***** */
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
-import com.iw.plugins.spindle.core.builder.ITapestryMarker;
 import com.iw.plugins.spindle.core.parser.DocumentParseException;
-import com.iw.plugins.spindle.core.parser.IOffsetResolver;
-import com.iw.plugins.spindle.core.parser.xml.ILocatable;
+import com.iw.plugins.spindle.core.parser.ISourceLocation;
 
 /**
  * Marker utililties
@@ -43,25 +42,29 @@ import com.iw.plugins.spindle.core.parser.xml.ILocatable;
 public class Markers {
 
   public static final String TAPESTRY_MARKER_TAG = ITapestryMarker.TAPESTRY_PROBLEM_MARKER;
+  public static final String TAPESTRY_BUILBROKEN_TAG = ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER;
 
-  public static void addProblemMarkerToResource(
-    IResource resource, String message, int severity, ILocatable source, IOffsetResolver resolver) {
+  public static void addTapestryProblemMarkerToResource(
+    IResource resource,
+    String message,
+    int severity,
+    ISourceLocation source) {
 
-    addProblemMarkerToResource(
+    addTapestryProblemMarkerToResource(
       resource,
       message,
       severity,
-      source.getStartLine(),
-      source.getCharStart(resolver),
-      source.getCharEnd(resolver));
+      source.getLineNumber(),
+      source.getCharStart(),
+      source.getCharEnd());
 
   }
 
-  public static void addProblemMarkerToResource(
+  public static void addTapestryProblemMarkerToResource(
     IResource resource,
     DocumentParseException exception) {
 
-    addProblemMarkerToResource(
+    addTapestryProblemMarkerToResource(
       resource,
       exception.getMessage(),
       exception.getSeverity(),
@@ -71,7 +74,7 @@ public class Markers {
 
   }
 
-  public static void addProblemMarkerToResource(
+  public static void addTapestryProblemMarkerToResource(
     IResource resource,
     String message,
     int severity,
@@ -81,6 +84,26 @@ public class Markers {
 
     addProblemMarkerToResource(
       resource,
+      TAPESTRY_MARKER_TAG,
+      message,
+      new Integer(severity),
+      new Integer(lineNumber),
+      new Integer(charStart),
+      new Integer(charEnd));
+  }
+  
+  public static void addProblemMarkerToResource(
+    IResource resource,
+    String markerTag,
+    String message,
+    int severity,
+    int lineNumber,
+    int charStart,
+    int charEnd) {
+
+    addProblemMarkerToResource(
+      resource,
+      markerTag,
       message,
       new Integer(severity),
       new Integer(lineNumber),
@@ -88,15 +111,17 @@ public class Markers {
       new Integer(charEnd));
   }
 
+ 
   public static void addProblemMarkerToResource(
     IResource resource,
+    String markerTag,
     String message,
     Integer severity,
     Integer lineNumber,
     Integer charStart,
     Integer charEnd) {
     try {
-      IMarker marker = resource.createMarker(TAPESTRY_MARKER_TAG);
+      IMarker marker = resource.createMarker(markerTag);
 
       marker.setAttributes(
         new String[] {
@@ -128,5 +153,26 @@ public class Markers {
     } catch (CoreException e) {
     } // assume there were no problems
   }
+
+  /**
+   * Method removeProblemsForProject.
+   * @param iProject
+   */
+  public static void removeProblemsForProject(IProject iProject) {
+    try {
+      if (iProject != null && iProject.exists())
+        iProject.deleteMarkers(Markers.TAPESTRY_MARKER_TAG, false, IResource.DEPTH_ZERO);
+    } catch (CoreException e) {
+    } // assume there were no problems
+  }
+
+  /**
+   * Method addBuildBrokenProblemMarkerToResource.
+   * @param iProject
+   * @param string
+   */
+  public static void addBuildBrokenProblemMarkerToResource(IProject iProject, String message) {
+    addProblemMarkerToResource(iProject, TAPESTRY_BUILBROKEN_TAG, message, IMarker.SEVERITY_ERROR, 0,0,0);
+    }
 
 }

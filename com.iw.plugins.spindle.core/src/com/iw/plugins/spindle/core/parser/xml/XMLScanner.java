@@ -77,6 +77,8 @@ import org.apache.xerces.xni.parser.XMLComponent;
 import org.apache.xerces.xni.parser.XMLComponentManager;
 import org.apache.xerces.xni.parser.XMLConfigurationException;
 
+import com.iw.plugins.spindle.core.parser.xml.event.ParserEventHandler;
+
 /**
  * This class is responsible for holding scanning methods common to
  * scanning the XML document structure and content as well as the DTD
@@ -202,20 +204,22 @@ public abstract class XMLScanner implements XMLComponent
 
     /** Augmentation switch */
     protected boolean fAugmentations;
+    
+    protected ParserEventHandler fEventHandler = new ParserEventHandler();
 
-    /** Beginning line number. */
-    protected int fBeginLineNumber;
-
-    /** Beginning column number. */
-    protected int fBeginColumnNumber;
-
-    /** Ending line number. */
-    protected int fEndLineNumber;
-
-    /** Ending column number. */
-    protected int fEndColumnNumber;
-
-    protected final LocationItem fLocationItem = new LocationItem();
+//    /** Beginning line number. */
+//    protected int fBeginLineNumber;
+//
+//    /** Beginning column number. */
+//    protected int fBeginColumnNumber;
+//
+//    /** Ending line number. */
+//    protected int fEndLineNumber;
+//
+//    /** Ending column number. */
+//    protected int fEndColumnNumber;
+//
+//    protected final LocationItem fLocationItem = new LocationItem();
 
     /** Augmentations. */
     protected final Augmentations fInfosetAugs = new AugmentationsImpl();
@@ -780,8 +784,7 @@ public abstract class XMLScanner implements XMLComponent
         }
 
         // end of unmunged attribute here
-		fEndLineNumber = fEntityManager.fCurrentEntity.lineNumber;
-		fEndColumnNumber = fEntityManager.fCurrentEntity.columnNumber - 1;
+        fEventHandler.attributeEnd(fEntityManager.fCurrentEntity.lineNumber,fEntityManager.fCurrentEntity.columnNumber - 1);
 //        System.out.println(
 //            "Ends attribute at line: "
 //                + fEndLineNumber
@@ -1361,70 +1364,70 @@ public abstract class XMLScanner implements XMLComponent
 
 
 
-    // features
-
-    /** Location info item.*/
-    class LocationItem implements XMLEnityEventInfo
-    {
-        /** Beginning line number. */
-        protected int fBeginLineNumber;
-
-        /** Beginning column number. */
-        protected int fBeginColumnNumber;
-
-        /** Ending line number. */
-        protected int fEndLineNumber;
-
-        /** Ending column number. */
-        protected int fEndColumnNumber;
-
-        /** Sets the values of this item. */
-        public void setValues(int beginLine, int beginColumn, int endLine, int endColumn)
-        {
-            fBeginLineNumber = beginLine;
-            fBeginColumnNumber = beginColumn;
-            fEndLineNumber = endLine;
-            fEndColumnNumber = endColumn;
-        }
-
-        /** @return the line number of the beginning of this event.*/
-        public int getBeginLineNumber()
-        {
-            return fBeginLineNumber;
-        }
-
-        /** @return the column number of the beginning of this event.*/
-        public int getBeginColumnNumber()
-        {
-            return fBeginColumnNumber;
-        }
-
-        /** @return the line number of the end of this event.*/
-        public int getEndLineNumber()
-        {
-            return fEndLineNumber;
-        }
-
-        /** @return the column number of the end of this event.*/
-        public int getEndColumnNumber()
-        {
-            return fEndColumnNumber;
-        }
-
-        /** @return a string representation of this object. */
-        public String toString()
-        {
-            StringBuffer str = new StringBuffer();
-            str.append(fBeginLineNumber);
-            str.append(':');
-            str.append(fBeginColumnNumber);
-            str.append(':');
-            str.append(fEndLineNumber);
-            str.append(':');
-            str.append(fEndColumnNumber);
-            return str.toString();
-        }
-
-    } // class LocationItem
+//    // features
+//
+//    /** Location info item.*/
+//    class LocationItem implements XMLEnityEventInfo
+//    {
+//        /** Beginning line number. */
+//        protected int fBeginLineNumber;
+//
+//        /** Beginning column number. */
+//        protected int fBeginColumnNumber;
+//
+//        /** Ending line number. */
+//        protected int fEndLineNumber;
+//
+//        /** Ending column number. */
+//        protected int fEndColumnNumber;
+//
+//        /** Sets the values of this item. */
+//        public void setValues(int beginLine, int beginColumn, int endLine, int endColumn)
+//        {
+//            fBeginLineNumber = beginLine;
+//            fBeginColumnNumber = beginColumn;
+//            fEndLineNumber = endLine;
+//            fEndColumnNumber = endColumn;
+//        }
+//
+//        /** @return the line number of the beginning of this event.*/
+//        public int getBeginLineNumber()
+//        {
+//            return fBeginLineNumber;
+//        }
+//
+//        /** @return the column number of the beginning of this event.*/
+//        public int getBeginColumnNumber()
+//        {
+//            return fBeginColumnNumber;
+//        }
+//
+//        /** @return the line number of the end of this event.*/
+//        public int getEndLineNumber()
+//        {
+//            return fEndLineNumber;
+//        }
+//
+//        /** @return the column number of the end of this event.*/
+//        public int getEndColumnNumber()
+//        {
+//            return fEndColumnNumber;
+//        }
+//
+//        /** @return a string representation of this object. */
+//        public String toString()
+//        {
+//            StringBuffer str = new StringBuffer();
+//            str.append(fBeginLineNumber);
+//            str.append(':');
+//            str.append(fBeginColumnNumber);
+//            str.append(':');
+//            str.append(fEndLineNumber);
+//            str.append(':');
+//            str.append(fEndColumnNumber);
+//            return str.toString();
+//        }
+//
+//    } // class LocationItem
 
 } // class XMLScanner

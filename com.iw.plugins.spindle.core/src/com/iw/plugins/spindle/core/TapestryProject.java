@@ -31,10 +31,12 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * The Tapestry project nature. Configures and Deconfigures the builder
@@ -42,7 +44,9 @@ import org.eclipse.jdt.core.JavaCore;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public class TapestryProject extends PlatformObject implements IProjectNature {
+public class TapestryProject
+  extends TapestryArtifact
+  implements IProjectNature, ITapestryProject {
 
   // Persistence properties of projects
   public static final String PROPERTIES_FILENAME = ".tapestryplugin";
@@ -61,6 +65,16 @@ public class TapestryProject extends PlatformObject implements IProjectNature {
   protected String projectType;
   protected String webContext;
   protected String appRoot;
+
+  public TapestryProject(IProject project, ITapestryArtifact parent) {
+    super(TAPESTRY_PROJECT, parent, project.getName());
+    this.project = project;
+  }
+
+  /** needed for project nature creation **/
+  public TapestryProject() {
+    super(TAPESTRY_PROJECT, null, null);
+  }
 
   /**
    * Gets the project.
@@ -92,16 +106,50 @@ public class TapestryProject extends PlatformObject implements IProjectNature {
     removeFromBuildSpec(TapestryCore.BUILDER_ID);
   }
 
-  /*
-   * @see IProjectNature#getProject()
-   */
-  public IJavaProject getJavaProject() {
-    return javaProject;
+  public boolean isOnOutputPath(IPath candidate) {
+    try {
+      IPath output = getJavaProject().getOutputLocation();
+      return pathCheck(output, candidate);
+    } catch (CoreException e) {
+    	TapestryCore.log(e);
+    }
+    return false;
   }
 
-  /*
-   * @see IProjectNature#setProject(IProject)
-   */
+  public boolean isOnSourcePath(IPath candidate) {
+    try {
+      IPackageFragmentRoot[] roots = getJavaProject().getPackageFragmentRoots();
+      for (int i = 0; i < roots.length; i++) {
+        if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
+          IPath rootpath = roots[i].getUnderlyingResource().getFullPath();
+          if (pathCheck(rootpath, candidate)) {
+            return true;
+          }
+        }
+
+      }
+    } catch (CoreException e) {
+    	TapestryCore.log(e);
+    }
+    return false;
+  }
+
+  private boolean pathCheck(IPath existing, IPath candidate) {
+    if (existing.equals(candidate)) {
+      return true;
+    }
+    if (candidate.segmentCount() < existing.segmentCount()) {
+      return false;
+    }
+    return existing.matchingFirstSegments(candidate) == existing.segmentCount();
+  }
+
+  
+  public IJavaProject getJavaProject() throws CoreException {
+    return (IJavaProject) getProject().getNature(JavaCore.NATURE_ID);
+  }
+
+  
   public void setJavaProject(IJavaProject javaProject) {
     this.javaProject = javaProject;
     this.setProject(javaProject.getProject());
@@ -109,9 +157,7 @@ public class TapestryProject extends PlatformObject implements IProjectNature {
 
   static public void addTapestryNature(IJavaProject project) {
     try {
-      TapestryCore.addNatureToProject(
-        project.getProject(),
-        TapestryCore.NATURE_ID);
+      TapestryCore.addNatureToProject(project.getProject(), TapestryCore.NATURE_ID);
     } catch (CoreException ex) {
       TapestryCore.log(ex.getMessage());
     }
@@ -119,9 +165,7 @@ public class TapestryProject extends PlatformObject implements IProjectNature {
 
   static public void removeTapestryNature(IJavaProject project) {
     try {
-      TapestryCore.removeNatureToProject(
-        project.getProject(),
-        TapestryCore.NATURE_ID);
+      TapestryCore.removeNatureFromProject(project.getProject(), TapestryCore.NATURE_ID);
 
       File properties = project.getProject().getLocation().append(PROPERTIES_FILENAME).toFile();
       if (properties.exists()) {
@@ -140,10 +184,7 @@ public class TapestryProject extends PlatformObject implements IProjectNature {
   static public TapestryProject create(IJavaProject javaProject) {
     TapestryProject result = null;
     try {
-      result =
-        (TapestryProject) javaProject.getProject().getNature(TapestryCore.NATURE_ID);
-      if (result != null)
-        result.setJavaProject(javaProject);
+      result = (TapestryProject) javaProject.getProject().getNature(TapestryCore.NATURE_ID);
     } catch (CoreException ex) {
       TapestryCore.log(ex.getMessage());
     }
@@ -199,6 +240,7 @@ public class TapestryProject extends PlatformObject implements IProjectNature {
 
   public void setAppRoot(String appRoot) {
     this.appRoot = appRoot;
+    appRootFolder = null;
   }
 
   /**
@@ -215,6 +257,7 @@ public class TapestryProject extends PlatformObject implements IProjectNature {
    */
   public void setWebContext(String context) {
     this.webContext = context;
+    webContextFolder = null;
   }
 
   /*
@@ -376,6 +419,62 @@ public class TapestryProject extends PlatformObject implements IProjectNature {
     // Commit the spec change into the project
     description.setBuildSpec(newCommands);
     getProject().setDescription(description, null);
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.core.ITapestryArtifact#getCorrespondingResource()
+   */
+  public IResource getCorrespondingResource() throws TapestryModelException {
+    return null;
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.core.ITapestryArtifact#getHandleIdentifier()
+   */
+  public String getHandleIdentifier() {
+    return null;
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.core.ITapestryArtifact#getPath()
+   */
+  public IPath getPath() {
+    return getProject().getFullPath();
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.core.ITapestryArtifact#getStorage()
+   */
+  public IStorage getStorage() {
+    return null;
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.core.ITapestryArtifact#getUnderlyingStorage()
+   */
+  public IStorage getUnderlyingStorage() throws TapestryModelException {
+    return null;
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.core.ITapestryArtifact#isReadOnly()
+   */
+  public boolean isReadOnly() {
+    return false;
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.core.ITapestryArtifact#isStructureKnown()
+   */
+  public boolean isStructureKnown() throws TapestryModelException {
+    return true;
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.core.ITapestryProject#createRoot(IFolder)
+   */
+  public ITapestryArtifact createRoot(IFolder folder) {
+    return null;
   }
 
 }

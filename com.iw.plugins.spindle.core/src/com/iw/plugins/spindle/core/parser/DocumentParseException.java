@@ -35,10 +35,10 @@ package com.iw.plugins.spindle.core.parser;
 
 public class DocumentParseException extends Exception {
 
-  private Integer severity;
-  private Integer lineNumber;
-  private Integer charStart;
-  private Integer charEnd;
+  private int severity;
+  private int lineNumber;
+  private int charStart;
+  private int charEnd;
 
   public DocumentParseException(
     String message,
@@ -48,17 +48,17 @@ public class DocumentParseException extends Exception {
     int charEnd,
     Throwable cause) {
     super(message, cause);
-    this.severity = new Integer(severity);
-    this.lineNumber = new Integer(lineNumber);
-    this.charStart = new Integer(charStart);
-    this.charEnd = new Integer(charEnd);
+    this.severity = severity;
+    this.lineNumber = lineNumber;
+    this.charStart = charStart;
+    this.charEnd = charEnd;
   }
 
   /**
    * Returns the charEnd.
    * @return Integer
    */
-  public Integer getCharEnd() {
+  public int getCharEnd() {
     return charEnd;
   }
 
@@ -66,7 +66,7 @@ public class DocumentParseException extends Exception {
    * Returns the charStart.
    * @return Integer
    */
-  public Integer getCharStart() {
+  public int getCharStart() {
     return charStart;
   }
 
@@ -74,7 +74,7 @@ public class DocumentParseException extends Exception {
    * Returns the lineNumber.
    * @return Integer
    */
-  public Integer getLineNumber() {
+  public int getLineNumber() {
     return lineNumber;
   }
 
@@ -82,7 +82,7 @@ public class DocumentParseException extends Exception {
    * Returns the severity.
    * @return Integer
    */
-  public Integer getSeverity() {
+  public int getSeverity() {
     return severity;
   }
 

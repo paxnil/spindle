@@ -25,9 +25,12 @@ package com.iw.plugins.spindle.core.resources;
  *
  * ***** END LICENSE BLOCK ***** */
 
+import java.io.InputStream;
+
 import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 
 /**
  * Extends <code>net.sf.tapestry.IResourceLocation<code> to record additional
@@ -64,8 +67,7 @@ import org.eclipse.core.resources.IStorage;
  */
 
 public interface IResourceDescriptor extends IResourceLocation {
-	
-  	
+
   /** the artifact lives in the source folders of its project **/
   public static final int CLASSPATH_SRC = 0;
   /** the artifact lives in a jar file in the build path of its project **/
@@ -84,21 +86,32 @@ public interface IResourceDescriptor extends IResourceLocation {
    * Jar files.
    */
   public IStorage getStorage();
-  
-  /**
-   * return true iff the descriptor points to an actual IResource rather than
-   * an IStorage (from a jar file)
-   */
+
   public boolean isWorkspaceResource();
   
+  public boolean isOnClasspath();
+  
+  public boolean isUnderContextRoot();
+  
+  public boolean isUnderApplicationRoot();
+
   /**
    * return the project that contains the artifact
    */
   public IProject getProject();
-  
+
   /**
-   * return the desriptor of the Tapestry artifact that owns this one.
+   * return the object that owns this one.
    */
-  public IResourceDescriptor getOwner();
-  
+  public Object getOwner();
+
+  /**
+   * Returns an open input stream on the contents of this descriptor.
+   * The caller is responsible for closing the stream when finished.
+   * 
+   *   @exception CoreException if the contents of this storage could 
+   *		not be accessed.   See any refinements for more information.  
+   */
+  public InputStream getContents() throws CoreException;
+
 }
