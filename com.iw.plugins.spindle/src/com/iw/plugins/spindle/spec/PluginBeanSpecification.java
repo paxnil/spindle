@@ -55,14 +55,18 @@ public class PluginBeanSpecification extends BeanSpecification implements Proper
 
   public void addInitializer(IBeanInitializer initer) {
     super.addInitializer(initer);
-    ((IPropertyChangeProvider) initer).addPropertyChangeListener(this);
+    if (initer instanceof IPropertyChangeProvider) {
+      ((IPropertyChangeProvider) initer).addPropertyChangeListener(this);
+    }
     propertySupport.firePropertyChange("beanInitializers", null, initializers);
   }
 
   public void removeInitializer(IBeanInitializer initer) {
     if (initer != null && initializers != null) {
       initializers.remove(initer);
-      ((IPropertyChangeProvider) initer).removePropertyChangeListener(this);
+      if (initer instanceof IPropertyChangeProvider) {
+        ((IPropertyChangeProvider) initer).removePropertyChangeListener(this);
+      }
       propertySupport.firePropertyChange("beanInitializers", null, initializers);
     }
   }

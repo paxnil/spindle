@@ -31,6 +31,7 @@ import java.io.StringWriter;
 import com.iw.plugins.spindle.util.Indenter;
 import com.iw.plugins.spindle.util.SourceWriter;
 import net.sf.tapestry.spec.ParameterSpecification;
+import net.sf.tapestry.spec.Direction;
 
 public class PluginParameterSpecification extends ParameterSpecification {
 	
@@ -78,7 +79,18 @@ public class PluginParameterSpecification extends ParameterSpecification {
     Indenter.printIndented(writer, indent, "<parameter name=\"" + name);
     writer.print("\" java-type=\"" + getType());
     writer.print("\" required=\"" + (isRequired() ? "yes" : "no"));
-    writer.print("\" direction=\"" + getDirection().getEnumerationId().toLowerCase());
+    Direction currentDir = getDirection();
+    String direction;
+    if (currentDir == Direction.CUSTOM) {
+      direction = "custom";
+    }
+    else if (currentDir == Direction.IN) {
+      direction = "in";
+    }
+    else {
+      direction = "custom";
+    }
+    writer.print("\" direction=\"" + direction);
     String description = getDescription();
     if (description == null || "".equals(description.trim())) {
     	writer.println("\"/>");

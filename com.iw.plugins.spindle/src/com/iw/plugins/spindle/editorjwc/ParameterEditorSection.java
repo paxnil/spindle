@@ -60,6 +60,8 @@ import com.iw.plugins.spindle.util.JavaListSelectionProvider;
 public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
 
   private ArrayList parameterHolders = new ArrayList();
+  private String[] directionLabels = { "custom", "in" };
+  private Direction[] directions = {Direction.CUSTOM, Direction.IN};
 
   /**
    * Constructor for ParameterEditorSection
@@ -246,12 +248,12 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
         }
       } else if ("direction".equals(key)) {
         Direction currentDir = spec.getDirection();
-        if (currentDir == Direction.CUSTOM) {
-          return "custom";
-        } else if (currentDir == Direction.IN) {
-          return "in";
+        for (int i = 0; i < directions.length; i++) {
+          if (currentDir == directions[i]) {
+            return new Integer(i);
+          }
         }
-        return "custom";
+        return new Integer(0);
       } else if ("description".equals(key)) {
         return spec.getDescription();
       }
@@ -266,7 +268,7 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
           new TextPropertyDescriptor("propertyName", "Property Name"),
           new TypeDialogPropertyDescriptor("type", "Type", model),
           new CheckboxPropertyDescriptor("required", "Required"),
-          new ComboBoxPropertyDescriptor("direction", "Direction", new String[] { "custom", "in" }, false),
+          new ComboBoxPropertyDescriptor("direction", "Direction", directionLabels, false),
           new DocumentationPropertyDescriptor("description", "Description", "Document parameter: " + this.name, null)
       };
       return descriptors;

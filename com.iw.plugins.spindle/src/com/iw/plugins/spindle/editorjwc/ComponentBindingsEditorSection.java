@@ -120,6 +120,7 @@ public class ComponentBindingsEditorSection extends AbstractPropertySheetEditorS
       newBindingAction.setEnabled(false);
       newFieldAction.setEnabled(false);
       newStaticAction.setEnabled(false);
+      newStringAction.setEnabled(false);
     }
     TreeViewerWithToolTips viewer = (TreeViewerWithToolTips) getViewer();
     viewer.setToolTipProvider(labelProvider);
@@ -373,6 +374,7 @@ public class BindingEditorLabelProvider
   private Image fieldBindingImage = TapestryImages.getSharedImage("bind-field.gif");
   private Image inheritedBindingImage = TapestryImages.getSharedImage("bind-inhert.gif");
   private Image staticBindingImage = TapestryImages.getSharedImage("bind-static.gif");
+    private Image stringBindingImage = TapestryImages.getSharedImage("bind-string.gif");
 
   private HashMap toolTipInfo = new HashMap();
 
@@ -496,6 +498,9 @@ public class BindingEditorLabelProvider
     if (type == BindingType.INHERITED) {
       return holder.name + " parameter-name = " + spec.getValue();
     }
+    if (type == BindingType.STRING) {
+      return holder.name + " key = " + spec.getValue();
+    }
 
     return null;
   }
@@ -526,6 +531,9 @@ public class BindingEditorLabelProvider
     }
     if (type == BindingType.STATIC) {
       return staticBindingImage;
+    }
+    if (type == BindingType.STRING) {
+      return stringBindingImage;
     }
     return null;
   }
@@ -647,6 +655,8 @@ protected class NewBindingButtonAction extends Action {
       newInheritedAction.run();
     } else if (type == BindingType.STATIC) {
       newStaticAction.run();
+    } else if (type == BindingType.STRING) {
+      newStringAction.run();
     }
   }
   private void createBinding(BindingType type, String parameterName) {
@@ -658,6 +668,8 @@ protected class NewBindingButtonAction extends Action {
       newInheritedAction.run(parameterName);
     } else if (type == BindingType.STATIC) {
       newStaticAction.run(parameterName);
+    } else if (type == BindingType.STRING) {
+      newStringAction.run(parameterName);
     }
   }
 }
@@ -706,12 +718,12 @@ class NewStringBindingAction
     super();
     setText("String Binding");
     defaultBindingName = "string";
-    setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("bind-static.gif")));
+    setImageDescriptor(ImageDescriptor.createFromURL(TapestryImages.getImageURL("bind-string.gif")));
 
   }
 
   public BindingType getType() {
-    return BindingType.STATIC;
+    return BindingType.STRING;
   }
 
 }

@@ -210,12 +210,14 @@ public class ChooseBindingTypeDialog extends ChooseFromListDialog {
     PluginComponentSpecification componentSpec = componentModel.getComponentSpecification();
     ArrayList availableParameters = new ArrayList();
     parameterMap.put(componentModel, availableParameters);
-    // lets find the parms not yet bound
-    Iterator parameterNames = new TreeSet(componentSpec.getParameterNames()).iterator();
-    while (parameterNames.hasNext()) {
-      String parameter = (String) parameterNames.next();
-      if (!existingBindingParameters.contains(parameter)) {
-        availableParameters.add(parameter);
+    if (componentSpec != null) {
+      // lets find the parms not yet bound
+      Iterator parameterNames = new TreeSet(componentSpec.getParameterNames()).iterator();
+      while (parameterNames.hasNext()) {
+        String parameter = (String) parameterNames.next();
+        if (!existingBindingParameters.contains(parameter)) {
+          availableParameters.add(parameter);
+        }
       }
     }
   }

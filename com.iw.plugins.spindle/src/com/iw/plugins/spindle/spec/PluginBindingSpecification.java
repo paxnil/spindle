@@ -59,6 +59,9 @@ public class PluginBindingSpecification extends BindingSpecification {
     } else if (type.equals(BindingType.DYNAMIC)) {
       writer.print("binding name=\"" + name);
       writer.print("\" property-path=\"");
+    } else if (type.equals(BindingType.STRING)) {
+      writer.print("string-binding name=\"" + name);
+      writer.print("\" key=\"");
     }
     writer.print(getValue());
     writer.println("\"/>");
