@@ -205,9 +205,9 @@ public class ProjectPropertyPage extends PropertyPage
         }
     }
 
-    private static final String PROJECT_TYPE_PROPERTY = TapestryCore.PLUGIN_ID + ".project-type";
-    private static final String CONTEXT_ROOT_PROPERTY = TapestryCore.PLUGIN_ID + ".context-root";
-    private static final String LIBRARY_SPEC_PROPERTY = TapestryCore.PLUGIN_ID + ".library-spec";
+    public static final String PROJECT_TYPE_PROPERTY = TapestryCore.PLUGIN_ID + ".project-type";
+    public static final String CONTEXT_ROOT_PROPERTY = TapestryCore.PLUGIN_ID + ".context-root";
+    public static final String LIBRARY_SPEC_PROPERTY = TapestryCore.PLUGIN_ID + ".library-spec";
 
     private static final int TEXT_FIELD_WIDTH = 30;
 

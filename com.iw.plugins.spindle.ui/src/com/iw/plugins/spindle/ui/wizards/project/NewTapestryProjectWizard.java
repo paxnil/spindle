@@ -78,26 +78,17 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
       */
     public boolean performFinish()
     {
-
         if (finishPage(fJavaPage.getRunnable()))
         {
-
-            IJavaProject project = fJavaPage.getJavaProject();
+            IJavaProject jproject = fJavaPage.getJavaProject();
             try
             {
-                project.open(null);
+                jproject.open(null);
+                finishPage(fMainPage.getRunnable(jproject));
             } catch (JavaModelException e)
-            {}
-
-            //         if (finishPage(tapestryPage.getRunnable(javaPage.getNewJavaProject()))) {
-            //           IFile file = (IFile) tapestryPage.getResource();
-            //           try {
-            //             selectAndReveal(file);
-            //             openResource(file);
-            //           } catch (Exception e) { // let pass, only reveal and open will fail
-            //           }
-            //         }
-
+            {
+                UIPlugin.log(e);
+            }
         }
         return true;
     }
@@ -109,6 +100,24 @@ public class NewTapestryProjectWizard extends NewTapestryElementWizard
     {
         fJavaPage.performCancel();
         return super.performCancel();
+    }
+
+    /**
+     * @return
+     */
+    public String getContextFolderName()
+    {
+        return fMainPage.getContextFolderName();
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.wizard.IWizard#canFinish()
+     */
+    public boolean canFinish()
+    {
+        if (getContainer().getCurrentPage() == fMainPage)
+            return false;
+        return super.canFinish();
     }
 
 }

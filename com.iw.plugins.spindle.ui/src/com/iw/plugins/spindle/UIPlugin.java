@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -56,6 +57,9 @@ import com.iw.plugins.spindle.ui.util.Revealer;
  */
 public class UIPlugin extends AbstractUIPlugin
 {
+    
+    public static final String P_HTML_TO_GENERATE = "com.iw.plugins.spindle.ui.defaulthtml";
+    
     private static ResourceBundle UIStrings;
 
     public static String getString(String key)
@@ -256,4 +260,13 @@ public class UIPlugin extends AbstractUIPlugin
         }
         return null;
     }
+    /* (non-Javadoc)
+     * @see org.eclipse.ui.plugin.AbstractUIPlugin#initializeDefaultPreferences(org.eclipse.jface.preference.IPreferenceStore)
+     */
+    protected void initializeDefaultPreferences(IPreferenceStore store)
+    {        
+        super.initializeDefaultPreferences(store);
+        store.setDefault(P_HTML_TO_GENERATE, getString("TAPESTRY.genHTMLSource"));
+    }
+
 }

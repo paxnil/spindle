@@ -189,14 +189,9 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
                 if (outputLocation == null)
                 {
 
-                    outputLocation = new Path(fCurrProject.getName() + "/WEB-INF/classes");
                     fCurrProject.open(null);
-                    IFolder folder = fCurrProject.getFolder("WEB-INF");
-                    if (!folder.exists())
-                        folder.create(true, true, null);
-                    folder = folder.getFolder("classes");
-                    if (!folder.exists())
-                        folder.create(true, true, null);
+                    outputLocation = createOutputLocation().getFullPath();
+                   
 
                 }
 
@@ -221,7 +216,7 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
         if (entries == null)
         {
             createSrcFolder();
-            return new IClasspathEntry[] { TAPESTRY_FRAMEWORK, createSrcClasspathEntry()};
+            return new IClasspathEntry[] { createSrcClasspathEntry(), TAPESTRY_FRAMEWORK};
 
         }
 
@@ -272,7 +267,6 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
         IFolder srcFolder = fCurrProject.getFolder("src");
         if (!srcFolder.exists())
         {
-
             try
             {
                 srcFolder.create(true, true, null);
@@ -281,6 +275,28 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
                 UIPlugin.log(e);
             }
         }
+    }
+
+    private IFolder getContextFolder() throws CoreException
+    {
+        NewTapestryProjectWizard wiz = (NewTapestryProjectWizard) getWizard();
+        String contextFolderName = wiz.getContextFolderName();
+        IFolder context = fCurrProject.getFolder(contextFolderName);
+        if (!context.exists())
+            context.create(true, true, null);
+        return context;
+    }
+
+    private IFolder createOutputLocation() throws CoreException
+    {
+        IFolder context = getContextFolder();
+        IFolder webInf = context.getFolder("WEB-INF");
+        if (!webInf.exists())
+            webInf.create(true, true, null);
+        IFolder classes = webInf.getFolder("classes");
+        if (!classes.exists())
+            classes.create(true, true, null);
+        return classes;
     }
 
     /**
@@ -395,18 +411,18 @@ public class NewTapestryProjectJavaPage extends JavaCapabilityConfigurationPage
                         0,
                         UIPlugin.getString("new-project-wizard-must-have-src-folder"),
                         null);
-            } 
-            
-//            else if (!hasTapestryFramework)
-//            {
-//                tapStatus =
-//                    new Status(
-//                        IStatus.ERROR,
-//                        TapestryCore.PLUGIN_ID,
-//                        0,
-//                        UIPlugin.getString("new-project-wizard-should-have-tapestry-folder"),
-//                        null);
-//            }
+            }
+
+            //            else if (!hasTapestryFramework)
+            //            {
+            //                tapStatus =
+            //                    new Status(
+            //                        IStatus.ERROR,
+            //                        TapestryCore.PLUGIN_ID,
+            //                        0,
+            //                        UIPlugin.getString("new-project-wizard-should-have-tapestry-folder"),
+            //                        null);
+            //            }
 
             if (tapStatus != null)
                 super.updateStatus(tapStatus);
