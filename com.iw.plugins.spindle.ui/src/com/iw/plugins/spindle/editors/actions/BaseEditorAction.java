@@ -30,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -70,8 +69,6 @@ import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
@@ -155,7 +152,8 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
 
     protected IType resolveType(String typeName)
     {
-        IJavaProject jproject = TapestryCore.getDefault().getJavaProjectFor(fEditor.getStorage());
+        IStorage storage = fEditor.getStorage();
+        IJavaProject jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
         if (jproject == null || typeName == null)
             return null;
 
@@ -629,18 +627,6 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
     {
         if (storage != null)
             UIPlugin.openTapestryEditor((IStorage) storage);
-    }
-
-    protected TapestryProject findTapestryProject(IClassFile file)
-    {
-        TapestryProject tproject = TapestryCore.getDefault().getTapestryProjectFor(file);
-        return tproject;
-    }
-
-    protected TapestryProject findTapestryProject(IFile file)
-    {
-        TapestryProject tproject = (TapestryProject)file.getAdapter(TapestryProject.class);    
-        return tproject;
-    }
+    }   
 
 }

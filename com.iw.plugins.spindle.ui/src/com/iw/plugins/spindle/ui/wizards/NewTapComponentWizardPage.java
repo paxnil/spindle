@@ -80,9 +80,9 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.actions.RequiredSaveEditorAction;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.ProjectPreferenceStore;
 import com.iw.plugins.spindle.core.TapestryException;
-import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.namespace.CoreNamespace;
@@ -340,7 +340,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
   private void findPreferenceStore()
   {
     fPreferenceStore = null;
-    TapestryProject tproject = fTapestryProjectDialogField.getTapestryProject();
+    ITapestryProject tproject = fTapestryProjectDialogField.getTapestryProject();
     if (tproject != null && tproject.getProject() != null)
     {
       IProject project = tproject.getProject();
@@ -627,7 +627,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     final String name = fComponentNameDialogField.getTextValue();
     final Shell useShell = getShell();
     final IFolder applicationLocation = fApplicationLocationField.getSpecLocation();
-    TapestryProject tproject = fTapestryProjectDialogField.getTapestryProject();
+    ITapestryProject tproject = fTapestryProjectDialogField.getTapestryProject();
     final IFolder webInf = tproject.getWebContextFolder().getFolder("WEB-INF");
 
     return new IRunnableWithProgress()
@@ -1004,7 +1004,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
    * 
    * @return String
    */
-  public TapestryProject getChosenProject()
+  public ITapestryProject getChosenProject()
   {
     return fTapestryProjectDialogField.getTapestryProject();
   }

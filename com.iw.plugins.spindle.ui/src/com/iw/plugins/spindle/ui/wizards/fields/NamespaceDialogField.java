@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -61,7 +61,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
 
   private INamespace fSelectedNamespace;
 
-  private TapestryProject fTapestryProject;
+  private ITapestryProject fTapestryProject;
 
   public NamespaceDialogField(String name, int labelWidth)
   {
@@ -187,7 +187,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
 
   private void populateNamespaces()
   {
-    TapestryProject newProject = fProjectField.getTapestryProject();
+    ITapestryProject newProject = fProjectField.getTapestryProject();
     if (newProject != null)
     {
       List libNames = new ArrayList();

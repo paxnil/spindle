@@ -47,7 +47,7 @@ import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.extensions.ComponentTypeResourceResolvers;
 import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
@@ -148,7 +148,7 @@ public class OpenDeclarationAction extends BaseSpecAction
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
-            TapestryProject project = (TapestryProject) storage.getAdapter(TapestryProject.class);
+            ITapestryProject project = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
             if (project == null)
                 return;
 
@@ -185,7 +185,7 @@ public class OpenDeclarationAction extends BaseSpecAction
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
-            TapestryProject project = (TapestryProject) storage.getAdapter(TapestryProject.class);
+            ITapestryProject project = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
             if (project == null)
                 return;
 
@@ -221,7 +221,7 @@ public class OpenDeclarationAction extends BaseSpecAction
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
-            TapestryProject project = (TapestryProject) storage.getAdapter(TapestryProject.class);
+            ITapestryProject project = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
             if (project == null)
                 return;
 

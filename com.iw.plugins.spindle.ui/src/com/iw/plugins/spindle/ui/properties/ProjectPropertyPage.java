@@ -80,6 +80,7 @@ import org.eclipse.ui.dialogs.ISelectionValidator;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
@@ -594,7 +595,7 @@ public class ProjectPropertyPage extends PropertyPage
         try
         {
 
-            TapestryProject prj = getTapestryProject();
+            ITapestryProject prj = getTapestryProject();
             if (prj != null)
             {
                 return prj.isValidatingWebXML();
@@ -627,7 +628,7 @@ public class ProjectPropertyPage extends PropertyPage
         try
         {
             QualifiedName key = new QualifiedName("", CONTEXT_ROOT_PROPERTY);
-            TapestryProject prj = getTapestryProject();
+            ITapestryProject prj = getTapestryProject();
             if (prj != null)
             {
                 if (DEBUG)

@@ -38,12 +38,10 @@ import net.sf.solareclipse.xml.ui.text.XMLTextTools;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -58,8 +56,6 @@ import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorRegistry;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -458,23 +454,24 @@ public class UIPlugin extends AbstractUIPlugin
     return PLUGIN_ID;
   }
 
-  public IProject getProjectFor(IEditorInput input)
-  {
-    if (input instanceof IFileEditorInput)
-      return ((IFileEditorInput) input).getFile().getProject();
-    if (input instanceof IStorageEditorInput)
-    {
-      try
-      {
-        return TapestryCore.getDefault().getProjectFor(
-            ((IStorageEditorInput) input).getStorage());
-      } catch (CoreException e)
-      {
-        log(e);
-      }
-    }
-    return null;
-  }
+//  public IProject getProjectFor(IEditorInput input)
+//  {
+//      
+//    if (input instanceof IFileEditorInput)
+//      return ((IFileEditorInput) input).getFile().getProject();
+//    if (input instanceof IStorageEditorInput)
+//    {
+//      try
+//      {
+//        return TapestryCore.getDefault().getProjectFor(
+//            ((IStorageEditorInput) input).getStorage());
+//      } catch (CoreException e)
+//      {
+//        log(e);
+//      }
+//    }
+//    return null;
+//  }
 
   public Shell getActiveWorkbenchShell()
   {

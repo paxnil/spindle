@@ -42,8 +42,7 @@ import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.extensions.ComponentTypeResourceResolvers;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.Assert;
@@ -155,8 +154,8 @@ public class JumpToJavaAction extends BaseJumpAction
                                 IStorage storage = ((IStorageEditorInput) fEditor.getEditorInput())
                                         .getStorage();
 
-                                TapestryProject tproject = (TapestryProject) storage
-                                        .getAdapter(TapestryProject.class);
+                                ITapestryProject tproject = (ITapestryProject) storage
+                                        .getAdapter(ITapestryProject.class);
 
                                 IResourceWorkspaceLocation specLocation;
                                 if (storage instanceof IFile)

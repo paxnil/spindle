@@ -48,8 +48,8 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryMarker;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.builder.State;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
@@ -68,7 +68,7 @@ public class TapestryProjectDialogField extends StringButtonField
 
   protected String fName;
   private IWorkspaceRoot fWorkspaceRoot;
-  private TapestryProject fCurrentTapestryProject;
+  private ITapestryProject fCurrentTapestryProject;
   private boolean fCurrentProjectIsBroken;
 
   public TapestryProjectDialogField(String name, IWorkspaceRoot root, int labelWidth)
@@ -91,7 +91,7 @@ public class TapestryProjectDialogField extends StringButtonField
   public void dialogFieldButtonPressed(DialogField field)
   {
 
-    TapestryProject chosen = chooseTapestryProject();
+    ITapestryProject chosen = chooseTapestryProject();
     if (chosen != null)
     {
       setTapestryProject(chosen, isEnabled());
@@ -114,14 +114,14 @@ public class TapestryProjectDialogField extends StringButtonField
     return getTextValue();
   }
 
-  public TapestryProject getTapestryProject()
+  public ITapestryProject getTapestryProject()
   {
     return fCurrentTapestryProject;
   }
 
-  public void setTapestryProject(TapestryProject project, boolean canBeModified)
+  public void setTapestryProject(ITapestryProject project, boolean canBeModified)
   {
-    TapestryProject old = fCurrentTapestryProject;
+    ITapestryProject old = fCurrentTapestryProject;
     fCurrentTapestryProject = project;
     String str = (project == null) ? "" : project.getProject().getFullPath().toString();
     setTextValue(str);
@@ -132,7 +132,7 @@ public class TapestryProjectDialogField extends StringButtonField
   {
     super.init(context);
     setButtonLabel(UIPlugin.getString(fName + ".button"));
-    TapestryProject tproject = null;
+    ITapestryProject tproject = null;
     IProject project = null;
     if (jelem != null)
       project = jelem.getJavaProject().getProject();
@@ -141,7 +141,7 @@ public class TapestryProjectDialogField extends StringButtonField
     {
       try
       {
-        tproject = (TapestryProject) project.getNature(TapestryCore.NATURE_ID);
+        tproject = (ITapestryProject) project.getNature(TapestryCore.NATURE_ID);
       } catch (CoreException e)
       {
         UIPlugin.log(e);
@@ -151,11 +151,11 @@ public class TapestryProjectDialogField extends StringButtonField
     setTapestryProject(tproject, true);
   }
 
-  private TapestryProject getTapestryNature(IProject project)
+  private ITapestryProject getTapestryNature(IProject project)
   {
     try
     {
-      return (TapestryProject) project.getNature(TapestryCore.NATURE_ID);
+      return (ITapestryProject) project.getNature(TapestryCore.NATURE_ID);
     } catch (CoreException e)
     {
       UIPlugin.log(e);
@@ -163,7 +163,7 @@ public class TapestryProjectDialogField extends StringButtonField
     return null;
   }
 
-  private TapestryProject chooseTapestryProject()
+  private ITapestryProject chooseTapestryProject()
   {
     IJavaProject thisProject = null;
     try
@@ -230,7 +230,7 @@ public class TapestryProjectDialogField extends StringButtonField
         IJavaProject jproject = (IJavaProject) element;
         try
         {
-          return (TapestryProject) jproject
+          return (ITapestryProject) jproject
               .getProject()
               .getNature(TapestryCore.NATURE_ID);
         } catch (CoreException e)
@@ -279,7 +279,7 @@ public class TapestryProjectDialogField extends StringButtonField
         return status;
       }
 
-      TapestryProject newProject = getTapestryNature(proj);
+      ITapestryProject newProject = getTapestryNature(proj);
       if (newProject == null)
       {
         status.setError(UIPlugin.getString(fName + ".error.NotATapestryProject", proj
@@ -324,12 +324,12 @@ public class TapestryProjectDialogField extends StringButtonField
     return status;
   }
 
-  private TapestryProject getTapestryProject(IProject project)
+  private ITapestryProject getTapestryProject(IProject project)
   {
 
     try
     {
-      return (TapestryProject) project.getNature(TapestryCore.NATURE_ID);
+      return (ITapestryProject) project.getNature(TapestryCore.NATURE_ID);
     } catch (CoreException e)
     {
       UIPlugin.log(e);

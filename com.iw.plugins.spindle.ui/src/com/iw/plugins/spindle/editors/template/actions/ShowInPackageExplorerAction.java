@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.editors.template.actions;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.core.BinaryType;
@@ -34,7 +33,6 @@ import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.ui.util.Revealer;
 
 /**
@@ -44,43 +42,41 @@ import com.iw.plugins.spindle.ui.util.Revealer;
  */
 public class ShowInPackageExplorerAction extends OpenDeclarationAction
 {
-  public static final String ACTION_ID = UIPlugin.PLUGIN_ID
-      + ".template.showInPackageExplorer";
+    public static final String ACTION_ID = UIPlugin.PLUGIN_ID + ".template.showInPackageExplorer";
 
-  public ShowInPackageExplorerAction()
-  {
-    super();
-    setText(UIPlugin.getString(ACTION_ID));
-    setId(ACTION_ID);
-  }
-
-  protected void foundResult(Object result, String key, Object moreInfo)
-  {
-    IJavaProject jproject = null;
-    if (result instanceof BinaryType || result instanceof JarEntryFile)
+    public ShowInPackageExplorerAction()
     {
-      IStorage storage = fEditor.getStorage();
-      if (storage instanceof IResource)
-        jproject = TapestryCore.getDefault().getJavaProjectFor((IResource) storage);
-
-      if (jproject != null)
-      {
-        Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
-            .getDefault()
-            .getActiveWorkbenchWindow(), jproject);
-      } else
-      {
-        Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
-            .getDefault()
-            .getActiveWorkbenchWindow());
-      }
-    } else
-    {
-      Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
-          .getDefault()
-          .getActiveWorkbenchWindow());
+        super();
+        setText(UIPlugin.getString(ACTION_ID));
+        setId(ACTION_ID);
     }
 
-  }
+    protected void foundResult(Object result, String key, Object moreInfo)
+    {
+        IJavaProject jproject = null;
+        if (result instanceof BinaryType || result instanceof JarEntryFile)
+        {
+            IStorage storage = fEditor.getStorage();
+            if (storage != null)
+                jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
+
+            if (jproject != null)
+            {
+                Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin.getDefault()
+                        .getActiveWorkbenchWindow(), jproject);
+            }
+            else
+            {
+                Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin.getDefault()
+                        .getActiveWorkbenchWindow());
+            }
+        }
+        else
+        {
+            Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin.getDefault()
+                    .getActiveWorkbenchWindow());
+        }
+
+    }
 
 }

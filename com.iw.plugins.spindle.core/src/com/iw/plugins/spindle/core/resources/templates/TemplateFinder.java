@@ -38,8 +38,8 @@ import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.runtime.CoreException;
 
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.I18NResourceAcceptor;
@@ -126,7 +126,7 @@ public class TemplateFinder
     public IResourceWorkspaceLocation[] getTemplates(IComponentSpecification specification,
             IProblemCollector collector) throws CoreException
     {
-        TapestryProject tapestryProject = getTapestryProject(specification);
+        ITapestryProject tapestryProject = getTapestryProject(specification);
         fContextRoot = (IResourceWorkspaceLocation) tapestryProject.getWebContextLocation();
         fProblemCollector = collector;
         fFindResults.clear();
@@ -135,12 +135,12 @@ public class TemplateFinder
                 .toArray(new IResourceWorkspaceLocation[fFindResults.size()]);
     }
 
-    private TapestryProject getTapestryProject(IComponentSpecification specification)
+    private ITapestryProject getTapestryProject(IComponentSpecification specification)
             throws CoreException
     {
         IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) specification
                 .getSpecificationLocation();
-        return (TapestryProject) location.getProject().getNature(TapestryCore.NATURE_ID);
+        return (ITapestryProject) location.getProject().getNature(TapestryCore.NATURE_ID);
     }
 
     /**

@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.editors.spec.actions;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
@@ -37,7 +36,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IStorageEditorInput;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.ui.util.Revealer;
 
 /**
@@ -70,13 +68,12 @@ public class ShowInPackageExplorerAction extends OpenDeclarationAction
   }
   protected void foundResult(Object result, String key, Object moreInfo)
   {
-    IJavaProject jproject = null;
+    
     if (result instanceof BinaryType || result instanceof JarEntryFile)
     {
       IStorage storage = fEditor.getStorage();
-      if (storage instanceof IResource)
-        jproject = TapestryCore.getDefault().getJavaProjectFor((IResource) storage);
-
+      IJavaProject jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
+     
       if (jproject != null)
       {
         Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin

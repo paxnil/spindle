@@ -49,7 +49,7 @@ import com.iw.plugins.spindle.core.util.Markers;
  * 
  * @author glongman@gmail.com
  */
-public class TapestryProject implements IProjectNature
+public class TapestryProject implements IProjectNature, ITapestryProject
 {
     static public void addTapestryNature(IJavaProject project, boolean forceOrder)
     {
@@ -70,7 +70,7 @@ public class TapestryProject implements IProjectNature
     {
         try
         {
-            TapestryProject tproject = create(project);
+            ITapestryProject tproject = create(project);
             TapestryCore.removeNatureFromProject(project.getProject(), TapestryCore.NATURE_ID);
         }
         catch (CoreException ex)
@@ -101,7 +101,7 @@ public class TapestryProject implements IProjectNature
      * @return a TapestryProject if this Project has the tapestry nature or null if Project doen't
      *         have the tapestry nature
      */
-    static public TapestryProject create(IProject project)
+    static public ITapestryProject create(IProject project)
     {
         IJavaProject javaProject = JavaCore.create(project);
         if (javaProject != null)

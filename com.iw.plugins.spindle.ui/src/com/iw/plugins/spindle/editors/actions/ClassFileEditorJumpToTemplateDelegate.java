@@ -26,6 +26,7 @@
 
 package com.iw.plugins.spindle.editors.actions;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.ui.IEditorInput;
 
@@ -36,8 +37,8 @@ import org.eclipse.ui.IEditorInput;
  */
 public class ClassFileEditorJumpToTemplateDelegate extends CUEditorJumpToTemplateDelegate
 {
-  protected Object getInputObject(IEditorInput input)
-  {
-    return input.getAdapter(IClassFile.class);
-  }
+    protected IAdaptable getInputObject(IEditorInput input)
+    {
+        return (IAdaptable) input.getAdapter(IClassFile.class);
+    }
 }

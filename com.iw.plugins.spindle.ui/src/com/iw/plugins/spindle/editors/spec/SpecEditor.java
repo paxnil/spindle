@@ -87,8 +87,8 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
@@ -318,7 +318,7 @@ public class SpecEditor extends Editor
     {
 
         IStorage storage = getStorage();
-        IProject project = (IProject)storage.getAdapter(TapestryProject.class);
+        IProject project = (IProject)storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map specs = manager.getSpecMap(project);
         if (specs != null)
@@ -334,7 +334,7 @@ public class SpecEditor extends Editor
     public IComponentSpecification getComponent()
     {
         IStorage storage = getStorage();
-        IProject project = (IProject)storage.getAdapter(TapestryProject.class);
+        IProject project = (IProject)storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map specs = manager.getSpecMap(project);
         if (specs != null)        
@@ -673,8 +673,8 @@ public class SpecEditor extends Editor
                 if ((input instanceof IFileEditorInput))
                 {
                     IFile file = ((IFileEditorInput) input).getFile();
-                    TapestryProject project = (TapestryProject) file
-                            .getAdapter(TapestryProject.class);
+                    ITapestryProject project = (ITapestryProject) file
+                            .getAdapter(ITapestryProject.class);
                     Object spec = getSpecification();
                     if (project != null && spec != null)
                     {

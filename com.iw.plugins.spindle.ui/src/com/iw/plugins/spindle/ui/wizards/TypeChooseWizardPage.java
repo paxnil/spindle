@@ -62,8 +62,8 @@ import org.eclipse.swt.widgets.Text;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
@@ -237,7 +237,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
 
   }
 
-  private IPackageFragmentRoot getFirstRoot(TapestryProject tproject)
+  private IPackageFragmentRoot getFirstRoot(ITapestryProject tproject)
   {
     if (tproject == null)
       return null;
@@ -672,7 +672,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
 
   private void tapestryProjectChanged()
   {
-    TapestryProject project = fFirstPageProjectField.getTapestryProject();
+    ITapestryProject project = fFirstPageProjectField.getTapestryProject();
     if (project == null)
     {
       setPackageFragmentRoot(null, false);

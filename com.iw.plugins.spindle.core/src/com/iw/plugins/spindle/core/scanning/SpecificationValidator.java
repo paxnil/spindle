@@ -44,8 +44,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.builder.FrameworkComponentValidator;
 import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
@@ -68,7 +68,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  */
 public class SpecificationValidator extends BaseValidator
 {
-    TapestryProject fTapestryProject;
+    ITapestryProject fTapestryProject;
 
     ContextRootLocation fContextRoot;
 
@@ -78,13 +78,13 @@ public class SpecificationValidator extends BaseValidator
 
     TypeFinder fTypeFinder;
 
-    public SpecificationValidator(TapestryProject project) throws CoreException
+    public SpecificationValidator(ITapestryProject project) throws CoreException
     {
         this(project, null, null);
     }
 
     /** not to be used by clients - for the builder * */
-    public SpecificationValidator(TapestryProject project, ContextRootLocation webContextRoot,
+    public SpecificationValidator(ITapestryProject project, ContextRootLocation webContextRoot,
             ClasspathRootLocation classpathRoot) throws CoreException
     {
         Assert.isNotNull(project);

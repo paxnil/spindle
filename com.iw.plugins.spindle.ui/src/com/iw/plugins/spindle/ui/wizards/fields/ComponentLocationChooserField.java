@@ -48,7 +48,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
@@ -135,7 +135,7 @@ public class ComponentLocationChooserField extends StringButtonField
     fTapestryProjectField = projectField;
     projectField.addListener(this);
     setButtonLabel(UIPlugin.getString(fName + ".button"));
-    TapestryProject tproject = fTapestryProjectField.getTapestryProject();
+    ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
     if (tproject == null)
     {
       setTextValue("");
@@ -205,7 +205,7 @@ public class ComponentLocationChooserField extends StringButtonField
         || !fTemplateLocationButton.getSelection() || !fGenTemplate.getSelection())
       return fResultLocation;
 
-    TapestryProject tproject = fTapestryProjectField.getTapestryProject();
+    ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
     return tproject.getWebContextFolder();
   }
 
@@ -318,7 +318,7 @@ public class ComponentLocationChooserField extends StringButtonField
     if (fTapestryProjectField.getStatus().isOK())
     {
 
-      TapestryProject tproject = fTapestryProjectField.getTapestryProject();
+      ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
       IProject project = tproject.getProject();
 
       IFolder webContext = tproject.getWebContextFolder().getFolder("WEB-INF");
@@ -384,7 +384,7 @@ public class ComponentLocationChooserField extends StringButtonField
 
     if (fForPage)
     {
-      TapestryProject tproject = fTapestryProjectField.getTapestryProject();
+      ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
       if (tproject != null)
         fTemplateLocationButton.setText(UIPlugin.getString(fName
             + ".templateInContextQuestion", tproject

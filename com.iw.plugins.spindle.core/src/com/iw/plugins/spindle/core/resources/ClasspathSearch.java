@@ -38,9 +38,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryModelException;
-import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 
@@ -54,7 +54,8 @@ public class ClasspathSearch implements ISearch
   protected HashMap fPackageFragments;
 
   protected IJavaProject fJavaProject;
-  protected TapestryProject fTapestryProject;
+  
+  protected ITapestryProject fTapestryProject;
 
   private boolean fInitialized = false;
 

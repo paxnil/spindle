@@ -39,7 +39,6 @@ import java.util.ResourceBundle;
 import org.apache.tapestry.spec.SpecFactory;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -47,16 +46,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -65,7 +58,6 @@ import org.osgi.framework.BundleContext;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
 import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
-import com.iw.plugins.spindle.core.resources.ClasspathSearch;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
@@ -566,92 +558,92 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         TapestryArtifactManager.getTapestryArtifactManager().invalidateBuildStates();
     }
 
-    public IProject getProjectFor(IStorage storage)
-    {
-        ClasspathSearch lookup = null;
-        if (storage instanceof JarEntryFile)
-        {
-            try
-            {
-                IWorkspace workspace = getWorkspace();
-                IProject[] projects = workspace.getRoot().getProjects();
-                for (int i = 0; i < projects.length; i++)
-                {
-                    if (!projects[i].isAccessible())
-                    {
-                        continue;
-                    }
-                    if (lookup == null)
-                    {
-                        lookup = new ClasspathSearch();
-                    }
-                    IJavaProject jproject = getJavaProjectFor(projects[i]);
-                    lookup.configure(jproject);
-                    if (lookup.projectContainsJarEntry((JarEntryFile) storage))
-                    {
-                        return projects[i];
-                    }
-                }
-            }
-            catch (CoreException jmex)
-            {
-                jmex.printStackTrace();
-            }
-            return null;
-        }
-        else if (storage instanceof IResource)
-        {
-            IResource resource = (IResource) storage;
-            if (resource.getType() == IResource.PROJECT)
-            {
-                return (IProject) resource;
-            }
-            else
-            {
-                return ((IResource) storage).getProject();
-            }
-        }
-        return null;
-    }
+//    public IProject getProjectFor(IStorage storage)
+//    {
+//        ClasspathSearch lookup = null;
+//        if (storage instanceof JarEntryFile)
+//        {
+//            try
+//            {
+//                IWorkspace workspace = getWorkspace();
+//                IProject[] projects = workspace.getRoot().getProjects();
+//                for (int i = 0; i < projects.length; i++)
+//                {
+//                    if (!projects[i].isAccessible())
+//                    {
+//                        continue;
+//                    }
+//                    if (lookup == null)
+//                    {
+//                        lookup = new ClasspathSearch();
+//                    }
+//                    IJavaProject jproject = IJavaProject(projects[i]);
+//                    lookup.configure(jproject);
+//                    if (lookup.projectContainsJarEntry((JarEntryFile) storage))
+//                    {
+//                        return projects[i];
+//                    }
+//                }
+//            }
+//            catch (CoreException jmex)
+//            {
+//                jmex.printStackTrace();
+//            }
+//            return null;
+//        }
+//        else if (storage instanceof IResource)
+//        {
+//            IResource resource = (IResource) storage;
+//            if (resource.getType() == IResource.PROJECT)
+//            {
+//                return (IProject) resource;
+//            }
+//            else
+//            {
+//                return ((IResource) storage).getProject();
+//            }
+//        }
+//        return null;
+//    }
 
-    public IJavaProject getJavaProjectFor(Object obj)
-    {
-        IProject project = null;
-        if (obj instanceof IProject)
-        {
-            project = (IProject) obj;
-        }
-        else if (obj instanceof IResource)
-        {
-            project = ((IResource) obj).getProject();
-        }
-        else if (obj instanceof IStorage)
-        {
-            project = getProjectFor((IStorage) obj);
-        }
-        else if (obj instanceof IEditorInput)
-        {
-            //TODO warning - will always return null if its a
-            // JarEntryEditorInput!
-            //Use Editor.getStorage() if you can.
-            project = getProjectFor((IStorage) ((IEditorInput) obj).getAdapter(IStorage.class));
-        }
-        if (project == null || !project.isOpen())
-        {
-            return null;
-        }
-
-        try
-        {
-            if (project.hasNature(JavaCore.NATURE_ID))
-                return (IJavaProject) JavaCore.create(project);
-        }
-        catch (CoreException e)
-        {
-            log(e);
-        }
-        return null;
-    }
+//    public IJavaProject getJavaProjectFor(Object obj)
+//    {
+//        IProject project = null;
+//        if (obj instanceof IProject)
+//        {
+//            project = (IProject) obj;
+//        }
+//        else if (obj instanceof IResource)
+//        {
+//            project = ((IResource) obj).getProject();
+//        }
+//        else if (obj instanceof IStorage)
+//        {
+//            project = getProjectFor((IStorage) obj);
+//        }
+//        else if (obj instanceof IEditorInput)
+//        {
+//            //TODO warning - will always return null if its a
+//            // JarEntryEditorInput!
+//            //Use Editor.getStorage() if you can.
+//            project = getProjectFor((IStorage) ((IEditorInput) obj).getAdapter(IStorage.class));
+//        }
+//        if (project == null || !project.isOpen())
+//        {
+//            return null;
+//        }
+//
+//        try
+//        {
+//            if (project.hasNature(JavaCore.NATURE_ID))
+//                return (IJavaProject) JavaCore.create(project);
+//        }
+//        catch (CoreException e)
+//        {
+//            log(e);
+//        }
+//        return null;
+//    }
 
 //    /**
 //     * @param file
@@ -664,50 +656,50 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
 //        return getTapestryProjectFor(getProjectFor(storage));
 //    }
 
-    /**
-     * @param file
-     * @return
-     */
-    public TapestryProject getTapestryProjectFor(IClassFile file)
-    {
-        if (file == null)
-            return null;
+//    /**
+//     * @param file
+//     * @return
+//     */
+//    public TapestryProject getTapestryProjectFor(IClassFile file)
+//    {
+//        if (file == null)
+//            return null;
+//
+//        return getTapestryProjectFor(getProjectFor(file));
+//
+//    }
 
-        return getTapestryProjectFor(getProjectFor(file));
-
-    }
-
-    private TapestryProject getTapestryProjectFor(IProject project)
-    {
-        if (project == null)
-            return null;
-
-        try
-        {
-            if (project.hasNature(TapestryCore.NATURE_ID))
-                return (TapestryProject) project.getNature(TapestryCore.NATURE_ID);
-        }
-        catch (CoreException e)
-        {
-            log(e);
-        }
-        return null;
-    }
-
-    /**
-     * @param file
-     * @return
-     */
-    private IProject getProjectFor(IClassFile file)
-    {
-        IJavaProject jproject = (IJavaProject) file.getParent().getAncestor(
-                IJavaElement.JAVA_PROJECT);
-        if (jproject == null)
-            return null;
-
-        return jproject.getProject(); 
-    }
-
+//    private TapestryProject getTapestryProjectFor(IProject project)
+//    {
+//        if (project == null)
+//            return null;
+//
+//        try
+//        {
+//            if (project.hasNature(TapestryCore.NATURE_ID))
+//                return (TapestryProject) project.getNature(TapestryCore.NATURE_ID);
+//        }
+//        catch (CoreException e)
+//        {
+//            log(e);
+//        }
+//        return null;
+//    }
+//
+//    /**
+//     * @param file
+//     * @return
+//     */
+//    private IProject getProjectFor(IClassFile file)
+//    {
+//        IJavaProject jproject = (IJavaProject) file.getParent().getAncestor(
+//                IJavaElement.JAVA_PROJECT);
+//        if (jproject == null)
+//            return null;
+//
+//        return jproject.getProject(); 
+//    }
+//
     public ProjectExternalMetadataLocator getExternalMetadataLocator()
     {
         if (externalMetadataLocator == null)

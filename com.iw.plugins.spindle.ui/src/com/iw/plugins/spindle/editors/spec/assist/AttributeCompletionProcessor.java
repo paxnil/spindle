@@ -55,8 +55,8 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.AbstractRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
@@ -628,7 +628,11 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
      */
     private List chooseJavaTypeNameProposals(boolean includeInterfaces, String hierarchyRoot)
     {
-        IJavaProject jproject = TapestryCore.getDefault().getJavaProjectFor(fEditor.getStorage());
+        IStorage storage = fEditor.getStorage();
+        if (storage == null)
+            return Collections.EMPTY_LIST;
+        
+        IJavaProject jproject = (IJavaProject)storage.getAdapter(IJavaProject.class);
         if (jproject == null)
             return Collections.EMPTY_LIST;
 
@@ -641,10 +645,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     private List chooseWorkspacePath(ChooseResourceProposal.Filter filter)
     {
         IStorage storage = fEditor.getStorage();
-        TapestryProject tproject = null;
+        ITapestryProject tproject = null;
         
         if (storage != null)        
-            tproject = (TapestryProject) storage.getAdapter(TapestryProject.class);
+            tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
         
         if (tproject == null)
             return Collections.EMPTY_LIST;
@@ -656,10 +660,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     private List chooseClasspathPath(ChooseResourceProposal.Filter filter)
     {
         IStorage storage = fEditor.getStorage();
-        TapestryProject tproject = null;
+        ITapestryProject tproject = null;
         
         if (storage != null)        
-            tproject = (TapestryProject) storage.getAdapter(TapestryProject.class);
+            tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
 
         if (tproject == null)
             return Collections.EMPTY_LIST;
@@ -681,10 +685,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     {
 
         IStorage storage = fEditor.getStorage();
-        TapestryProject tproject = null;
+        ITapestryProject tproject = null;
         
         if (storage != null)        
-            tproject = (TapestryProject) storage.getAdapter(TapestryProject.class);
+            tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
 
         if (tproject == null)
             return Collections.EMPTY_LIST;
@@ -754,10 +758,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     private List chooseAssetPath(boolean isContextPath)
     {
         IStorage storage = fEditor.getStorage();
-        TapestryProject tproject = null;
+        ITapestryProject tproject = null;
         
         if (storage != null)        
-            tproject = (TapestryProject) storage.getAdapter(TapestryProject.class);
+            tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
 
         if (tproject == null)
             return Collections.EMPTY_LIST;

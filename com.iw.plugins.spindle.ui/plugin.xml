@@ -649,7 +649,4 @@ the new Spindle
          <adapter type="org.eclipse.core.resources.IStorage"/>
       </factory>
    </extension>
-      
-      
-   
 </plugin>

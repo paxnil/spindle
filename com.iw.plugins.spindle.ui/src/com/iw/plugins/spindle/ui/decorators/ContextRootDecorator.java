@@ -36,8 +36,8 @@ import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryProject;
 
 /**
  * Decorator that indicates Tapestry projects
@@ -77,7 +77,7 @@ public class ContextRootDecorator extends AbstractDecorator
       try
       {
         IProject project = container.getProject();
-        TapestryProject tproject = (TapestryProject) project
+        ITapestryProject tproject = (ITapestryProject) project
             .getNature(TapestryCore.NATURE_ID);
         if (tproject != null)
         {
