@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+
+   <description>
+      Update site for the JettyLauncher plugin
+   </description>
+   <feature url="features/com.iw.features.jettylauncher_profile_1.0.5.jar" id="com.iw.features.jettylauncher_profile" version="1.0.5">
+      <category name="jettylauncher_profile"/>
+   </feature>
+   <feature url="features/com.iw.features.jettylauncher_1.0.5.jar" id="com.iw.features.jettylauncher" version="1.0.5">
+      <category name="jettylauncher"/>
+   </feature>
+   <category-def name="jettylauncher" label="Jetty Launcher"/>
+   <category-def name="jettylauncher_profile" label="Jetty Launcher - Profiler Edition"/>
+</site>
