@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="com.iw.plugins.spindle.ui"
+   name="Spindle UI"
+   version="0.0.1"
+   provider-name="Intelligent Works Inc."
+   class="com.iw.plugins.spindle.UIPlugin">
+
+   <runtime>
+      <library name="ui.jar"/>
+   </runtime>
+   <requires>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="com.iw.plugins.spindle.core"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.jdt.core"/>
+   </requires>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            name="Tapestry"
+            class="com.iw.plugins.spindle.ui.properties.ProjectPropertyPage"
+            id="CorePropertyPage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            lightweight="true"
+            location="TOP_RIGHT"
+            label="Indicator for Tapestry Projects"
+            state="true"
+            class="com.iw.plugins.spindle.ui.decorators.ProjectDecorator"
+            id="com.iw.plugins.spindle.ui.projectDecorator">
+         <enablement>
+            <objectClass
+                  name="org.eclipse.jdt.core.IJavaProject">
+            </objectClass>
+         </enablement>
+      </decorator>
+   </extension>
+
+</plugin>
