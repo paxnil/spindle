@@ -63,20 +63,14 @@ public class NamespaceResourceLookup
     {
         fLocations = new ArrayList();
         IResourceWorkspaceLocation base = (IResourceWorkspaceLocation) specification.getSpecificationLocation();
-        if (base.isOnClasspath())
+
+        fLocations.add(base);
+        if (servletName != null)
         {
-            fLocations.add(base);
-            fLocations.add(contextRoot);
-        } else
-        {
-            fLocations.add(base);
-            if (servletName != null)
-            {
-                fLocations.add(contextRoot.getRelativeLocation("/WEB-INF/" + servletName));
-            }
-            fLocations.add(contextRoot.getRelativeLocation("/WEB-INF/"));
-            fLocations.add(contextRoot);
+            fLocations.add(contextRoot.getRelativeLocation("/WEB-INF/" + servletName));
         }
+        fLocations.add(contextRoot.getRelativeLocation("/WEB-INF/"));
+        fLocations.add(contextRoot);
     }
 
     public IResourceWorkspaceLocation[] lookup(IResourceLocationAcceptor acceptor)

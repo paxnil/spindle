@@ -58,8 +58,8 @@ public class CoreNamespace implements ICoreNamespace
     private String fId;
     private String fExtendedId;
     private INamespace fParent;
-    private boolean fFrameworkNamespace;
-    private boolean fApplicationNamespace;
+    private boolean fIsFrameworkNamespace;
+    private boolean fIsApplicationNamespace;
 
     private ComponentLookup fComponentLookup;
     private PageLookup fPageLookup;
@@ -92,9 +92,9 @@ public class CoreNamespace implements ICoreNamespace
         this.fId = id;
         this.fSpecification = specification;
 
-        fApplicationNamespace = (id == null && specification instanceof IApplicationSpecification);
-        fFrameworkNamespace = FRAMEWORK_NAMESPACE.equals(id);
-        if (fFrameworkNamespace)
+        fIsApplicationNamespace = (id == null && specification instanceof IApplicationSpecification);
+        fIsFrameworkNamespace = FRAMEWORK_NAMESPACE.equals(id);
+        if (fIsFrameworkNamespace)
         {}
     }
 
@@ -111,7 +111,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public String getExtendedId()
     {
-        if (fApplicationNamespace)
+        if (fIsApplicationNamespace)
             return null;
 
         if (fExtendedId == null)
@@ -140,10 +140,10 @@ public class CoreNamespace implements ICoreNamespace
      */
     public String getNamespaceId()
     {
-        if (fFrameworkNamespace)
+        if (fIsFrameworkNamespace)
             return TapestryCore.getTapestryString("Namespace.framework-namespace");
 
-        if (fApplicationNamespace)
+        if (fIsApplicationNamespace)
             return TapestryCore.getTapestryString("Namespace.application-namespace");
 
         return TapestryCore.getTapestryString("Namespace.nested-namespace", getExtendedId());
@@ -308,7 +308,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public boolean isApplicationNamespace()
     {
-        return fApplicationNamespace;
+        return fIsApplicationNamespace;
     }
 
     /* (non-Javadoc)

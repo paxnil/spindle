@@ -314,7 +314,7 @@ public class NamespaceResolver
 
             NamespaceResourceLookup lookup = new NamespaceResourceLookup();
             IResourceWorkspaceLocation specLocation = (IResourceWorkspaceLocation) fResultNamespace.getSpecificationLocation();
-            if (fResultNamespace.isApplicationNamespace() && !specLocation.isOnClasspath())
+            if (fResultNamespace.isApplicationNamespace())
             {
                 lookup.configure(
                     (PluginApplicationSpecification) fResultNamespace.getSpecification(),

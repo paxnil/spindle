@@ -58,10 +58,10 @@ public abstract class AbstractLookup
         fWebInfAppLocation = null;
     }
 
-    public void configure(ICoreNamespace namespace, ICoreNamespace frameworkNamespace, String appNameFromWebXML)
+    public void configure(ICoreNamespace applicationNamespace, ICoreNamespace frameworkNamespace, String appNameFromWebXML)
     {
-        this.fNamespace = namespace;
-        this.fRootLocation = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
+        this.fNamespace = applicationNamespace;
+        this.fRootLocation = (IResourceWorkspaceLocation) applicationNamespace.getSpecificationLocation();
         fWebInfLocation = (IResourceWorkspaceLocation) fRootLocation.getRelativeLocation("WEB-INF");
         fWebInfAppLocation = (IResourceWorkspaceLocation) fWebInfLocation.getRelativeLocation(appNameFromWebXML);
     }
