@@ -63,9 +63,7 @@ import com.iw.plugins.spindle.core.util.CoreUtils;
  * TODO Not Used anymore - to be removed
  * 
  * @see com.iw.plugins.spindle.core.builder.IncrementalProjectBuild
- * 
- * @version $Id: IncrementalApplicationBuild.java,v 1.15 2004/06/10 15:50:11
- *                     glongman Exp $
+ *
  * @author glongman@gmail.com
  */
 public class IncrementalApplicationBuild extends FullBuild implements IIncrementalBuild
@@ -195,18 +193,22 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
       return false;
 
     fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
+    //ensure the last build didn't fail and that state version sync up.
     if (fLastState == null || fLastState.fBuildNumber < 0
         || fLastState.fVersion != State.VERSION)
       return false;
 
+    // The Tapestry framework library must exist in the state
     IResourceWorkspaceLocation frameworkLocation = (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot
         .getRelativeLocation("/org/apache/tapestry/Framework.library");
     if (!fLastState.fBinaryNamespaces.containsKey(frameworkLocation))
       return false;
 
+    //ensure the project classpath has not changed
     if (hasClasspathChanged())
       return false;
 
+    //the context root exist and be the same as the one used for the last build.
     ContextRootLocation contextRoot = fTapestryBuilder.fContextRoot;
     if (contextRoot != null)
     {
@@ -225,6 +227,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
         return false;
       }
 
+      //web.xml must exist
       IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot
           .getRelativeLocation("WEB-INF/web.xml");
 
@@ -236,6 +239,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
         return false;
       }
 
+      //and it must not have changed
       IResourceDelta webXMLDelta = fProjectDelta.findMember(resource
           .getProjectRelativePath());
 
@@ -245,17 +249,20 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
           System.out.println("inc build abort - web.xml changed since last build");
         return false;
       }
-
+      
+      //ensure the .application file did not change
       if (needFullBuildDueToAppSpecChange())
         return false;
 
     } else
     {
+      //must have a context root
       if (TapestryBuilder.DEBUG)
         System.out.println("inc build abort - no context root found in TapestryBuilder!");
       return false;
     }
     
+    //contrbuted veto-ers must give thier ok to inc build
     IncrementalBuildVetoController vetoController = new IncrementalBuildVetoController();
     
     if (vetoController.vetoIncrementalBuild(fProjectDelta))

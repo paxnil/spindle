@@ -149,13 +149,16 @@ public class ProjectExternalMetadataLocator implements IRegistryChangeListener
     {
         IFolder result = null;
         List locators = (List) fLocatorCache.get(natureId);
-
-        for (Iterator iter = locators.iterator(); iter.hasNext();)
+        if (locators != null)
         {
-            IProjectMetadataLocator loc = (IProjectMetadataLocator) iter.next();
-            result = loc.getWebContextRootFolder(natureId, project);
-            if (result != null)
-                break;
+
+            for (Iterator iter = locators.iterator(); iter.hasNext();)
+            {
+                IProjectMetadataLocator loc = (IProjectMetadataLocator) iter.next();
+                result = loc.getWebContextRootFolder(natureId, project);
+                if (result != null)
+                    break;
+            }
         }
         return result;
     }
@@ -167,7 +170,7 @@ public class ProjectExternalMetadataLocator implements IRegistryChangeListener
     {
         IExtensionRegistry registry = Platform.getExtensionRegistry();
         IExtensionPoint point = registry.getExtensionPoint(
-                TapestryCore.NATURE_ID,
+                TapestryCore.PLUGIN_ID,
                 "projectMetaDataLocator");
         if (point == null)
             return;

@@ -60,7 +60,6 @@ public class State
 
   String fProjectName;
   IResourceWorkspaceLocation fContextRoot;
-  String fLibraryLocation;
   byte fVersion = VERSION;
   int fBuildNumber;
   Map fBinaryNamespaces = new HashMap();
@@ -99,7 +98,7 @@ public class State
 
   //templates that do not contain implicit components and thus may not need
   // reparsing
-  //during a sunsequent incremental build.
+  //during a subsequent incremental build.
   List fCleanTemplates;
 
   /**
@@ -118,8 +117,7 @@ public class State
   State(TapestryBuilder builder)
   {
     fProjectName = builder.getProject().getName();
-    fContextRoot = builder.fTapestryProject.getWebContextLocation();
-    fLibraryLocation = builder.fTapestryProject.getLibrarySpecPath();
+    fContextRoot = builder.fContextRoot;
     fBuildNumber = 0;
   }
 
@@ -127,12 +125,11 @@ public class State
   {
     fBuildNumber = -1;
   }
-
+  // used by incremental builds only
   void copyFrom(State lastState)
   {
     fProjectName = lastState.fProjectName;
-    fContextRoot = lastState.fContextRoot;
-    fLibraryLocation = lastState.fLibraryLocation;
+    fContextRoot = lastState.fContextRoot; 
     fBuildNumber = lastState.fBuildNumber + 1;
     fBinaryNamespaces = new HashMap(lastState.fBinaryNamespaces);
     fBinarySpecificationMap = new HashMap(lastState.fBinarySpecificationMap);

@@ -26,30 +26,22 @@ package com.iw.plugins.spindle.core;
  *
  * ***** END LICENSE BLOCK ***** */
 
-import java.io.File;
-import java.io.IOException;
-import java.util.StringTokenizer;
-
 import org.eclipse.core.resources.ICommand;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
+import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
 import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.util.Files;
 import com.iw.plugins.spindle.core.util.Markers;
 
 /**
@@ -59,28 +51,73 @@ import com.iw.plugins.spindle.core.util.Markers;
  */
 public class TapestryProject implements IProjectNature
 {
+    static public void addTapestryNature(IJavaProject project, boolean forceOrder)
+    {
+        try
+        {
+            TapestryCore.addNatureToProject(
+                    project.getProject(),
+                    TapestryCore.NATURE_ID,
+                    forceOrder);
+        }
+        catch (CoreException ex)
+        {
+            TapestryCore.log(ex.getMessage());
+        }
+    }
 
-    // Persistence properties of projects
-    public static final String PROPERTIES_FILENAME = ".tapestryplugin";
+    static public void removeTapestryNature(IJavaProject project)
+    {
+        try
+        {
+            TapestryProject tproject = create(project);
+            TapestryCore.removeNatureFromProject(project.getProject(), TapestryCore.NATURE_ID);
+        }
+        catch (CoreException ex)
+        {
+            TapestryCore.log(ex.getMessage());
+        }
+    }
 
-    public static final String KEY_TYPE = "project-type";
+    /**
+     * @return a TapestryProject if this javaProject has the tapestry nature or null if Project has
+     *         not tapestry nature
+     */
+    static public TapestryProject create(IJavaProject javaProject)
+    {
+        TapestryProject result = null;
+        try
+        {
+            result = (TapestryProject) javaProject.getProject().getNature(TapestryCore.NATURE_ID);
+        }
+        catch (CoreException ex)
+        {
+            TapestryCore.log(ex.getMessage());
+        }
+        return result;
+    }
 
-    public static final String KEY_CONTEXT = "context-root";
-
-    public static final String KEY_LIBRARY = "library-spec";
-
-    public static final String KEY_VALIDATE = "validate-web-xml";
-
-    public static final int APPLICATION_PROJECT_TYPE = 0;
+    /**
+     * @return a TapestryProject if this Project has the tapestry nature or null if Project doen't
+     *         have the tapestry nature
+     */
+    static public TapestryProject create(IProject project)
+    {
+        IJavaProject javaProject = JavaCore.create(project);
+        if (javaProject != null)
+        {
+            return TapestryProject.create(javaProject);
+        }
+        else
+        {
+            return null;
+        }
+    }
 
     /**
      * The platform project this <code>TapestryProject</code> is based on
      */
     protected IProject fProject;
-
-    protected IJavaProject fJavaProject;
-
-    protected String fWebContext;
 
     protected IFolder fWebContextFolder;
 
@@ -88,8 +125,7 @@ public class TapestryProject implements IProjectNature
 
     protected boolean fUsingExternalMetadata = false;
 
-    /** @deprecated there is no project type anymore */
-    protected final int fProjectType = APPLICATION_PROJECT_TYPE;
+    protected boolean fMetadataLoaded = false;
 
     /** needed for project nature creation * */
     public TapestryProject()
@@ -97,21 +133,81 @@ public class TapestryProject implements IProjectNature
         super();
     }
 
-    /**
-     * Gets the project.
+    public void clearMetadata()
+    {
+        fMetadataLoaded = false;
+        fUsingExternalMetadata = false;
+    }
+
+    public synchronized void checkMetadata()
+    {
+        if (fMetadataLoaded)
+            return;
+        try
+        {
+            
+            fUsingExternalMetadata = loadMetadataFromExtensions();
+            if (!fUsingExternalMetadata) {
+                //load from default file (.tapestryplugin)
+                DefaultTapestryMetadata meta = new DefaultTapestryMetadata(getProject(), false);
+                fWebContextFolder = meta.getWebContextFolder();
+                fValidateWebXML = meta.isValidatingWebXML();
+            }
+        }
+        finally
+        {
+            fMetadataLoaded = true;
+        }
+    }
+
+    private boolean loadMetadataFromExtensions()
+    {
+        ProjectExternalMetadataLocator locator = TapestryCore.getDefault()
+                .getExternalMetadataLocator();
+        IProject project = getProject();
+        try
+        {
+            String[] natureIds = project.getDescription().getNatureIds();
+            for (int i = 0; i < natureIds.length; i++)
+            {
+                try
+                {
+                    IFolder folder = locator.getWebContextRootFolder(natureIds[i], project);
+                    if (folder != null && folder.exists())
+                    {
+                        fWebContextFolder = folder;
+                        fValidateWebXML = false;
+                        return true;
+                    }
+                }
+                catch (CoreException e1)
+                {
+                    // failed - skip to the next one
+                    e1.printStackTrace();
+                }
+            }
+        }
+        catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        }
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
      * 
-     * @return Returns a IProject
+     * @see org.eclipse.core.resources.IProjectNature#getProject()
      */
     public IProject getProject()
     {
         return fProject;
     }
 
-    /**
-     * Sets the project.
+    /*
+     * (non-Javadoc)
      * 
-     * @param project
-     *            The project to set
+     * @see org.eclipse.core.resources.IProjectNature#setProject(org.eclipse.core.resources.IProject)
      */
     public void setProject(IProject project)
     {
@@ -133,27 +229,13 @@ public class TapestryProject implements IProjectNature
     {
         removeFromBuildSpec(TapestryCore.BUILDER_ID);
         Markers.cleanProblemsForProject(getProject());
-        TapestryArtifactManager.getTapestryArtifactManager().clearBuildState(getProject());
-        clearProperties();
-    }
 
-    /**
-     * get rid of the .tapestryplugin file but only if we used it intially to load our metadata
-     */
-    private void clearProperties()
-    {
+        TapestryArtifactManager.getTapestryArtifactManager().clearBuildState(getProject());
+
         if (!fUsingExternalMetadata)
         {
-            IFile properties = getPropertiesFile();
-            if (properties != null && properties.exists())
-                try
-                {
-                    properties.delete(true, false, null);
-                }
-                catch (CoreException e)
-                {
-                    TapestryCore.log(e);
-                }
+            DefaultTapestryMetadata meta = new DefaultTapestryMetadata(getProject(), false);
+            meta.clearProperties();
         }
     }
 
@@ -210,176 +292,16 @@ public class TapestryProject implements IProjectNature
         return (IJavaProject) getProject().getNature(JavaCore.NATURE_ID);
     }
 
-    public void setJavaProject(IJavaProject javaProject)
-    {
-        this.fJavaProject = javaProject;
-        this.setProject(javaProject.getProject());
-    }
-
-    static public void addTapestryNature(IJavaProject project, boolean forceOrder)
-    {
-        try
-        {
-            TapestryCore.addNatureToProject(
-                    project.getProject(),
-                    TapestryCore.NATURE_ID,
-                    forceOrder);
-        }
-        catch (CoreException ex)
-        {
-            TapestryCore.log(ex.getMessage());
-        }
-    }
-
-    static public void removeTapestryNature(IJavaProject project)
-    {
-        try
-        {
-            TapestryCore.removeNatureFromProject(project.getProject(), TapestryCore.NATURE_ID);
-
-            File properties = project.getProject().getLocation().append(PROPERTIES_FILENAME)
-                    .toFile();
-            if (properties.exists())
-                properties.delete();
-
-        }
-        catch (CoreException ex)
-        {
-            TapestryCore.log(ex.getMessage());
-        }
-    }
-
-    /**
-     * @return a TapestryProject if this javaProject has the tapestry nature or null if Project has
-     *         not tapestry nature
-     */
-    static public TapestryProject create(IJavaProject javaProject)
-    {
-        TapestryProject result = null;
-        try
-        {
-            result = (TapestryProject) javaProject.getProject().getNature(TapestryCore.NATURE_ID);
-        }
-        catch (CoreException ex)
-        {
-            TapestryCore.log(ex.getMessage());
-        }
-        return result;
-    }
-
-    /**
-     * @return a TapestryProject if this Project has the tapestry nature or null if Project doen't
-     *         have the tapestry nature
-     */
-    static public TapestryProject create(IProject project)
-    {
-        IJavaProject javaProject = JavaCore.create(project);
-        if (javaProject != null)
-        {
-            return TapestryProject.create(javaProject);
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    private IFile getPropertiesFile()
-    {
-        return this.getProject().getFile(new Path(PROPERTIES_FILENAME));
-    }
-
-    private String readProperty(String key)
-    {
-        String result = null;
-        try
-        {
-            result = Files.readPropertyInXMLFile(getPropertiesFile(), key);
-        }
-        catch (IOException e)
-        {
-            TapestryCore.log(e);
-        }
-
-        if (result == null)
-            result = "";
-
-        return result;
-    }
-
-    private int readIntProperty(String key)
-    {
-        String result = readProperty(key);
-        if (result == null || result.trim().length() == 0)
-            return 0;
-
-        if (result != null)
-            return new Integer(result).intValue();
-
-        return -1;
-    }
-
-    //    public void setProjectType(int projectType)
-    //    {
-    //        this.fProjectType = projectType;
-    //    }
-    /**
-     * @deprecated there is no project type anymore
-     */
-    public int getProjectType()
-    {
-        return this.readIntProperty(KEY_TYPE);
-    }
-
-    /**
-     * Gets the web context path.
-     * 
-     * @return Returns a String
-     */
-    public String getWebContext()
-    {
-        return this.readProperty(KEY_CONTEXT);
-    }
-
     public boolean isValidatingWebXML()
     {
-        String value = this.readProperty(KEY_VALIDATE);
-        if (value == null || "".equals(value))
-            return true;
-
-        return new Boolean(value).booleanValue();
+        if (fUsingExternalMetadata)
+            return false;
+        checkMetadata();
+        return fValidateWebXML;
     }
-
-    /**
-     * Sets the webpath.
-     * 
-     * @param webpath
-     *            The webpath to set
-     */
-    public void setWebContext(String context)
-    {
-        this.fWebContext = context;
-        fWebContextFolder = null;
-    }
-
-    public String getLibrarySpecPath()
-    {
-        String path = this.readProperty(KEY_LIBRARY);
-        if ("NOT_SPECIFIED".equals(path))
-            return "";
-
-        return path;
-    }
-
-    public void setValidateWebXML(boolean flag)
-    {
-        fValidateWebXML = flag;
-    }
-
-    public IResourceWorkspaceLocation getLibraryLocation() throws CoreException
-    {
-        return (IResourceWorkspaceLocation) getClasspathRoot().getRelativeLocation(
-                getLibrarySpecPath());
+    
+    public boolean isUsingExternalMetadata() {
+       return fUsingExternalMetadata; 
     }
 
     public ClasspathRootLocation getClasspathRoot() throws CoreException
@@ -387,43 +309,9 @@ public class TapestryProject implements IProjectNature
         return new ClasspathRootLocation(getJavaProject());
     }
 
-    public void saveProperties()
-    {
-        // no change needed here as only the regular Spindle wizard and properties page use this!
-        // boolean isApplicationProject = APPLICATION_PROJECT_TYPE == fProjectType;
-        boolean isApplicationProject = true;
-        try
-        {
-            StringBuffer fileContent = new StringBuffer();
-            fileContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            fileContent.append("<tapestry-project-properties>\n");
-            fileContent.append("    <project-type>" + fProjectType + "</project-type>\n");
-            fileContent
-                    .append("    <validate-web-xml>" + fValidateWebXML + "</validate-web-xml>\n");
-            if (isApplicationProject)
-            {
-                fileContent.append("    <context-root>" + (fWebContext != null ? fWebContext : "")
-                        + "</context-root>\n");
-            }
-            else
-            {
-                throw new Error("unsupported project type!");
-            }
-            fileContent.append("</tapestry-project-properties>\n");
-            Files.toTextFile(getPropertiesFile(), fileContent.toString());
-        }
-        catch (Exception ex)
-        {
-            TapestryCore.log(ex.getMessage());
-        }
-    }
-
     public IFolder getWebContextFolder()
     {
-        if (fWebContextFolder == null) {
-            return initWebContextFolder();
-        }
-
+        checkMetadata();
         return fWebContextFolder;
     }
 
@@ -434,65 +322,6 @@ public class TapestryProject implements IProjectNature
             return null;
 
         return new ContextRootLocation(folder);
-    }
-
-    private IFolder initWebContextFolder()
-    {
-        
-        IFolder result = null;
-        try
-        {
-            result = initFolder(this.getWebContext(), false);
-        }
-        catch (CoreException e)
-        {
-            this.fWebContext = "/";
-        }
-        fWebContextFolder = result;
-        return result;
-    }
-
-    private void createFolder(IFolder folderHandle) throws CoreException
-    {
-        try
-        {
-            folderHandle.create(false, true, null);
-        }
-        catch (CoreException e)
-        {
-            // If the folder already existed locally, just refresh to get contents
-            if (e.getStatus().getCode() == IResourceStatus.PATH_OCCUPIED)
-            {
-                folderHandle.refreshLocal(IResource.DEPTH_INFINITE, null);
-
-            }
-            else
-            {
-                throw e;
-            }
-        }
-    }
-
-    private IFolder initFolder(String path, boolean create) throws CoreException
-    {
-        StringTokenizer tokenizer = new StringTokenizer(path, "/\\:");
-        IFolder folder = null;
-        while (tokenizer.hasMoreTokens())
-        {
-            String each = tokenizer.nextToken();
-            if (folder == null)
-            {
-                folder = fProject.getFolder(each);
-            }
-            else
-            {
-                folder = folder.getFolder(each);
-            }
-            if (create)
-                this.createFolder(folder);
-        }
-
-        return folder;
     }
 
     protected void addToBuildSpec(String builderID) throws CoreException

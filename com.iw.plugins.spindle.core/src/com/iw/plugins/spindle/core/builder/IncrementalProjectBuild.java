@@ -57,446 +57,436 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.Markers;
 
 /**
- * New Incremental Build - this one revalidates specs if thier underlying
- * resource has not changed. Note: templates are not revalidated, they are
- * parsed as per a regular build.
+ * New Incremental Build - this one revalidates specs if thier underlying resource has not changed.
+ * Note: templates are not revalidated, they are parsed as per a regular build.
  * 
  * @author glongman@gmail.com
- * @version $Id: IncrementalProjectBuild.java,v 1.2 2004/05/17 02:31:48 glongman
- *                     Exp $
  */
 public class IncrementalProjectBuild extends IncrementalApplicationBuild
 {
-  private IProblemCollector fProblemCollector = new ProblemCollector();
+    private IProblemCollector fProblemCollector = new ProblemCollector();
 
-  public IncrementalProjectBuild(TapestryBuilder builder, IResourceDelta projectDelta)
-  {
-    super(builder, projectDelta);
-  }
-
-  protected IApplicationSpecification resolveApplication(
-      Parser parser,
-      IStorage storage,
-      IResourceLocation location,
-      String encoding)
-  {
-    IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
-    PluginApplicationSpecification result = null;
-
-    if (!checkStorage(location, storage))
-      return null;
-
-    // pull the preexisting spec (if it exists) from the last build.
-    result = (PluginApplicationSpecification) fLastState.getSpecificationMap().get(
-        storage);
-
-    IFile file = null;
-
-    if (storage instanceof IFile)
+    public IncrementalProjectBuild(TapestryBuilder builder, IResourceDelta projectDelta)
     {
-      file = (IFile) storage;
-      if (result == null || result.isPlaceholder() || fileChanged(file))
-      {
-        Markers.removeProblemsFor(file);
-        return super.resolveApplication(parser, storage, location, encoding);
-      }
-    } else
-    {
-      //this can only happen if somebody added a library tag to the
-      // .application file
-      return super.resolveApplication(parser, storage, location, encoding);
+        super(builder, projectDelta);
     }
 
-    try
+    protected IApplicationSpecification resolveApplication(Parser parser, IStorage storage,
+            IResourceLocation location, String encoding)
     {
-      //revalidate the spec.
-      IScannerValidator useValidator = new BuilderValidator(this, fTypeFinder, true);
-      useValidator.addListener(this);
+        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
+        PluginApplicationSpecification result = null;
 
-      fProblemCollector.beginCollecting();
-      useValidator.setProblemCollector(fProblemCollector);
+        if (!checkStorage(location, storage))
+            return null;
 
-      Markers.removeTemporaryProblemsForResource(file);
-      try
-      {
-        result.validate(useValidator);
-      } finally
-      {
-        fProblemCollector.endCollecting();
-        useValidator.removeListener(this);
-      }
+        // pull the preexisting spec (if it exists) from the last build.
+        result = (PluginApplicationSpecification) fLastState.getSpecificationMap().get(storage);
 
-      Markers.recordProblems(useLocation, fProblemCollector.getProblems());
-    } catch (CoreException e)
-    {
-      TapestryCore.log(e);
-    } finally
-    {
-      finished(useLocation);
-    }
+        IFile file = null;
 
-    rememberSpecification(storage, result);
-    return result;
-  }
-
-  private boolean checkStorage(IResourceLocation location, IStorage storage)
-  {
-    if (storage == null)
-    {
-      finished(location);
-      return false;
-    }
-    return true;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.builder.Build#parseLibrary(com.iw.plugins.spindle.core.parser.Parser,
-   *              org.apache.tapestry.IResourceLocation, java.lang.String)
-   */
-  protected ILibrarySpecification resolveLibrarySpecification(
-      Parser parser,
-      IStorage storage,
-      IResourceLocation location,
-      String encoding)
-  {
-
-    IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
-    PluginLibrarySpecification result = null;
-
-    // to avoid double processing of specs that are accessible
-    // by multiple means in Tapestry
-    if (fProcessedLocations.containsKey(useLocation))
-      return (ILibrarySpecification) fProcessedLocations.get(useLocation);
-
-    if (!checkStorage(location, storage))
-      return null;
-
-    // pull the preexisting spec (if it exists) from the last build.
-    result = (PluginLibrarySpecification) fLastState.getSpecificationMap().get(storage);
-
-    IFile file = null;
-
-    if (storage instanceof IFile)
-    {
-      file = (IFile) storage;
-      if (result == null || result.isPlaceholder() || fileChanged(file))
-      {
-        Markers.removeProblemsFor(file);
-        return super.resolveLibrarySpecification(parser, storage, location, encoding);
-      }
-    } else
-    {
-      //this can only happen if somebody added a library tag to the
-      // .application file
-      return super.resolveLibrarySpecification(parser, storage, location, encoding);
-    }
-
-    try
-    {
-      //revalidate the spec.
-      IScannerValidator useValidator = new BuilderValidator(this, fTypeFinder, true);
-      useValidator.addListener(this);
-
-      fProblemCollector.beginCollecting();
-      useValidator.setProblemCollector(fProblemCollector);
-
-      Markers.removeTemporaryProblemsForResource(file);
-      try
-      {
-        result.validate(useValidator);
-      } finally
-      {
-        fProblemCollector.endCollecting();
-        useValidator.removeListener(this);
-      }
-
-      Markers.recordProblems(useLocation, fProblemCollector.getProblems());
-    } catch (CoreException e)
-    {
-      TapestryCore.log(e);
-    } finally
-    {
-      finished(useLocation);
-    }
-    rememberSpecification(storage, result);
-    fProcessedLocations.put(location, result);
-
-    return result;
-
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.builder.Build#resolveIComponentSpecification(com.iw.plugins.spindle.core.parser.Parser,
-   *              com.iw.plugins.spindle.core.namespace.ICoreNamespace,
-   *              com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation,
-   *              java.lang.String)
-   */
-  protected IComponentSpecification resolveIComponentSpecification(
-      Parser parser,
-      ICoreNamespace namespace,
-      IStorage storage,
-      IResourceWorkspaceLocation location,
-      String encoding)
-  {
-    PluginComponentSpecification result = null;
-
-    // to avoid double processing of specs that are accessible
-    // by multiple means in Tapestry
-    if (fProcessedLocations.containsKey(location))
-      return (IComponentSpecification) fProcessedLocations.get(location);
-
-    if (!checkStorage(location, storage))
-      return null;
-
-    // pull the preexisting spec (if it exists) from the last build.
-    result = (PluginComponentSpecification) fLastState.getSpecificationMap().get(storage);
-
-    IFile file = null;
-
-    if (storage instanceof IFile)
-    {
-      file = (IFile) storage;
-      if (result == null || result.isPlaceholder() || fileChanged(file))
-      {
-        Markers.removeProblemsFor(file);
-        return super.resolveIComponentSpecification(
-            parser,
-            namespace,
-            file,
-            location,
-            encoding);
-      }
-    } else
-    {
-      //this can only happen if somebody added a library tag to the
-      // .application file
-      return super.resolveIComponentSpecification(
-          parser,
-          namespace,
-          storage,
-          location,
-          encoding);
-    }
-
-    try
-    {
-      //revalidate the spec.
-      IScannerValidator useValidator = new BuilderValidator(this, fTypeFinder, true);
-      useValidator.addListener(this);
-
-      fProblemCollector.beginCollecting();
-      useValidator.setProblemCollector(fProblemCollector);
-
-      Markers.removeTemporaryProblemsForResource(file);
-      try
-      {
-        result.validate(useValidator);
-        result.setTemplateLocations(TapestryBuilder.scanForTemplates(
-            result,
-            fProblemCollector));
-        for (Iterator iter = result.getTemplateLocations().iterator(); iter.hasNext();)
+        if (storage instanceof IFile)
         {
-          IResourceWorkspaceLocation template = (IResourceWorkspaceLocation) iter.next();
-          try
-          {
-            IFile templateFile = (IFile) template.getStorage();
-            Markers.removeProblemsFor(templateFile);
-          } catch (ClassCastException e1)
-          {
-            //Ignore - its a binary resource;
-          }
+            file = (IFile) storage;
+            if (result == null || result.isPlaceholder() || fileChanged(file))
+            {
+                Markers.removeProblemsFor(file);
+                return super.resolveApplication(parser, storage, location, encoding);
+            }
+        }
+        else
+        {
+            //this can only happen if somebody added a library tag to the
+            // .application file
+            return super.resolveApplication(parser, storage, location, encoding);
         }
 
-      } finally
-      {
-        fProblemCollector.endCollecting();
-        useValidator.removeListener(this);
-      }
+        try
+        {
+            //revalidate the spec.
+            IScannerValidator useValidator = new BuilderValidator(this, fTypeFinder, true);
+            useValidator.addListener(this);
 
-      Markers.recordProblems(location, fProblemCollector.getProblems());
-    } catch (CoreException e)
-    {
-      TapestryCore.log(e);
-    } finally
-    {
-      finished(location);
-    }
-    rememberSpecification(storage, result);
-    fProcessedLocations.put(location, result);
+            fProblemCollector.beginCollecting();
+            useValidator.setProblemCollector(fProblemCollector);
 
-    return result;
-  }
+            Markers.removeTemporaryProblemsForResource(file);
+            try
+            {
+                result.validate(useValidator);
+            }
+            finally
+            {
+                fProblemCollector.endCollecting();
+                useValidator.removeListener(this);
+            }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.builder.Build#parseTemplates(com.iw.plugins.spindle.core.spec.PluginComponentSpecification)
-   */
-  protected void parseTemplates(PluginComponentSpecification spec)
-  {
+            Markers.recordProblems(useLocation, fProblemCollector.getProblems());
+        }
+        catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        }
+        finally
+        {
+            finished(useLocation);
+        }
 
-    List locs = spec.getTemplateLocations();
-    int count = locs.size();
-
-    for (int i = 0; i < count; i++)
-    {
-      IResourceWorkspaceLocation template = (IResourceWorkspaceLocation) locs.get(i);
-      IStorage templateStorage = template.getStorage();
-      if (templateStorage != null && templateStorage instanceof IResource)
-      {
-        Markers.removeProblemsFor((IResource) templateStorage);
-      }
+        rememberSpecification(storage, result);
+        return result;
     }
 
-    super.parseTemplates(spec);
-  }
-
-  /**
-   * Here we override to check if the template really needs to be parsed.
-   * 
-   * template must be clean and not have changed and its owner spec must no have
-   * changed
-   * 
-   * @param ownerSpec the specification that owns this template
-   * @param template the IStorage for the template
-   * @return true iff the template should be parsed (expensive)
-   */
-  protected boolean shouldParseTemplate(IStorage ownerSpec, IStorage template)
-  {
-    boolean mustParse = false;
-    boolean cleanLastBuild = fLastState.fCleanTemplates.contains(template);
-
-    if (template instanceof IFile)
+    private boolean checkStorage(IResourceLocation location, IStorage storage)
     {
-      IFile file = (IFile) template;
-      if (!cleanLastBuild || fileChanged(file))
-      {
-        mustParse = true;
-      } else if (ownerSpec instanceof IFile)
-      {
-        mustParse = fileChanged((IFile) ownerSpec);
-      }
-    }
-
-    if (!mustParse)
-      fCleanTemplates.add(template);
-
-    return mustParse;
-  }
-
-  /**
-   * @param file
-   * @return
-   */
-  private boolean fileChanged(IFile file)
-  {
-    IResourceDelta specDelta = fProjectDelta.findMember(file.getProjectRelativePath());
-
-    if (specDelta != null)
-      return specDelta.getKind() != IResourceDelta.NO_CHANGE;
-
-    return false;
-  }
-
-  class ProblemCollector implements IProblemCollector
-  {
-
-    private List fProblems = new ArrayList();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(int,
-     *              com.iw.plugins.spindle.core.source.ISourceLocation,
-     *              java.lang.String, boolean)
-     */
-    public void addProblem(
-        int severity,
-        ISourceLocation location,
-        String message,
-        boolean isTemporary)
-    {
-
-      addProblem(new DefaultProblem(
-          ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
-          severity,
-          message,
-          location.getLineNumber(),
-          location.getCharStart(),
-          location.getCharEnd(),
-          isTemporary));
-
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(org.eclipse.core.runtime.IStatus, com.iw.plugins.spindle.core.source.ISourceLocation, boolean)
-     */
-    public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
-    {
-      addProblem(new DefaultProblem(
-          ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
-          status,
-          location.getLineNumber(),
-          location.getCharStart(),
-          location.getCharEnd(),
-          isTemporary));
-    }
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(com.iw.plugins.spindle.core.source.IProblem)
-     */
-    public void addProblem(IProblem problem)
-    {
-      fProblems.add(problem);
+        if (storage == null)
+        {
+            finished(location);
+            return false;
+        }
+        return true;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.IProblemCollector#beginCollecting()
+     * @see com.iw.plugins.spindle.core.builder.Build#parseLibrary(com.iw.plugins.spindle.core.parser.Parser,
+     *      org.apache.tapestry.IResourceLocation, java.lang.String)
      */
-    public void beginCollecting()
+    protected ILibrarySpecification resolveLibrarySpecification(Parser parser, IStorage storage,
+            IResourceLocation location, String encoding)
     {
-      fProblems.clear();
+
+        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
+        PluginLibrarySpecification result = null;
+
+        // to avoid double processing of specs that are accessible
+        // by multiple means in Tapestry
+        if (fProcessedLocations.containsKey(useLocation))
+            return (ILibrarySpecification) fProcessedLocations.get(useLocation);
+
+        if (!checkStorage(location, storage))
+            return null;
+
+        // pull the preexisting spec (if it exists) from the last build.
+        result = (PluginLibrarySpecification) fLastState.getSpecificationMap().get(storage);
+
+        IFile file = null;
+
+        if (storage instanceof IFile)
+        {
+            file = (IFile) storage;
+            if (result == null || result.isPlaceholder() || fileChanged(file))
+            {
+                Markers.removeProblemsFor(file);
+                return super.resolveLibrarySpecification(parser, storage, location, encoding);
+            }
+        }
+        else
+        {
+            //this can only happen if somebody added a library tag to the
+            // .application file
+            return super.resolveLibrarySpecification(parser, storage, location, encoding);
+        }
+
+        try
+        {
+            //revalidate the spec.
+            IScannerValidator useValidator = new BuilderValidator(this, fTypeFinder, true);
+            useValidator.addListener(this);
+
+            fProblemCollector.beginCollecting();
+            useValidator.setProblemCollector(fProblemCollector);
+
+            Markers.removeTemporaryProblemsForResource(file);
+            try
+            {
+                result.validate(useValidator);
+            }
+            finally
+            {
+                fProblemCollector.endCollecting();
+                useValidator.removeListener(this);
+            }
+
+            Markers.recordProblems(useLocation, fProblemCollector.getProblems());
+        }
+        catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        }
+        finally
+        {
+            finished(useLocation);
+        }
+        rememberSpecification(storage, result);
+        fProcessedLocations.put(location, result);
+
+        return result;
+
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.IProblemCollector#endCollecting()
+     * @see com.iw.plugins.spindle.core.builder.Build#resolveIComponentSpecification(com.iw.plugins.spindle.core.parser.Parser,
+     *      com.iw.plugins.spindle.core.namespace.ICoreNamespace,
+     *      com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation, java.lang.String)
      */
-    public void endCollecting()
+    protected IComponentSpecification resolveIComponentSpecification(Parser parser,
+            ICoreNamespace namespace, IStorage storage, IResourceWorkspaceLocation location,
+            String encoding)
     {
-      // do nothing
+        PluginComponentSpecification result = null;
+
+        // to avoid double processing of specs that are accessible
+        // by multiple means in Tapestry
+        if (fProcessedLocations.containsKey(location))
+            return (IComponentSpecification) fProcessedLocations.get(location);
+
+        if (!checkStorage(location, storage))
+            return null;
+
+        // pull the preexisting spec (if it exists) from the last build.
+        result = (PluginComponentSpecification) fLastState.getSpecificationMap().get(storage);
+
+        IFile file = null;
+
+        if (storage instanceof IFile)
+        {
+            file = (IFile) storage;
+            if (result == null || result.isPlaceholder() || fileChanged(file))
+            {
+                Markers.removeProblemsFor(file);
+                return super.resolveIComponentSpecification(
+                        parser,
+                        namespace,
+                        file,
+                        location,
+                        encoding);
+            }
+        }
+        else
+        {
+            //this can only happen if somebody added a library tag to the
+            // .application file
+            return super.resolveIComponentSpecification(
+                    parser,
+                    namespace,
+                    storage,
+                    location,
+                    encoding);
+        }
+
+        try
+        {
+            //revalidate the spec.
+            IScannerValidator useValidator = new BuilderValidator(this, fTypeFinder, true);
+            useValidator.addListener(this);
+
+            fProblemCollector.beginCollecting();
+            useValidator.setProblemCollector(fProblemCollector);
+
+            Markers.removeTemporaryProblemsForResource(file);
+            try
+            {
+                result.validate(useValidator);
+                result.setTemplateLocations(TapestryBuilder.scanForTemplates(
+                        result,
+                        fProblemCollector));
+                for (Iterator iter = result.getTemplateLocations().iterator(); iter.hasNext();)
+                {
+                    IResourceWorkspaceLocation template = (IResourceWorkspaceLocation) iter.next();
+                    try
+                    {
+                        IFile templateFile = (IFile) template.getStorage();
+                        Markers.removeProblemsFor(templateFile);
+                    }
+                    catch (ClassCastException e1)
+                    {
+                        //Ignore - its a binary resource;
+                    }
+                }
+
+            }
+            finally
+            {
+                fProblemCollector.endCollecting();
+                useValidator.removeListener(this);
+            }
+
+            Markers.recordProblems(location, fProblemCollector.getProblems());
+        }
+        catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        }
+        finally
+        {
+            finished(location);
+        }
+        rememberSpecification(storage, result);
+        fProcessedLocations.put(location, result);
+
+        return result;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.source.IProblemCollector#getProblems()
+     * @see com.iw.plugins.spindle.core.builder.Build#parseTemplates(com.iw.plugins.spindle.core.spec.PluginComponentSpecification)
      */
-    public IProblem[] getProblems()
+    protected void parseTemplates(PluginComponentSpecification spec)
     {
-      return (IProblem[]) fProblems.toArray(new IProblem[fProblems.size()]);
+
+        List locs = spec.getTemplateLocations();
+        int count = locs.size();
+
+        for (int i = 0; i < count; i++)
+        {
+            IResourceWorkspaceLocation template = (IResourceWorkspaceLocation) locs.get(i);
+            IStorage templateStorage = template.getStorage();
+            if (templateStorage != null && templateStorage instanceof IResource)
+            {
+                Markers.removeProblemsFor((IResource) templateStorage);
+            }
+        }
+
+        super.parseTemplates(spec);
     }
 
-  }
+    /**
+     * Here we override to check if the template really needs to be parsed. template must be clean
+     * and not have changed and its owner spec must no have changed
+     * 
+     * @param ownerSpec
+     *            the specification that owns this template
+     * @param template
+     *            the IStorage for the template
+     * @return true iff the template should be parsed (expensive)
+     */
+    protected boolean shouldParseTemplate(IStorage ownerSpec, IStorage template)
+    {
+        boolean mustParse = false;
+        boolean cleanLastBuild = fLastState.fCleanTemplates.contains(template);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.builder.Build#recordBuildMiss(int,
-   *              org.eclipse.core.resources.IResource)
-   */
-  protected void recordBuildMiss(int missPriority, IResource resource)
-  {
-    Markers.removeProblemsFor(resource);
-    super.recordBuildMiss(missPriority, resource);
-  }
+        if (template instanceof IFile)
+        {
+            IFile file = (IFile) template;
+            if (!cleanLastBuild || fileChanged(file))
+            {
+                mustParse = true;
+            }
+            else if (ownerSpec instanceof IFile)
+            {
+                mustParse = fileChanged((IFile) ownerSpec);
+            }
+        }
+
+        if (!mustParse)
+            fCleanTemplates.add(template);
+
+        return mustParse;
+    }
+
+    /**
+     * @param file
+     * @return
+     */
+    private boolean fileChanged(IFile file)
+    {
+        IResourceDelta specDelta = fProjectDelta.findMember(file.getProjectRelativePath());
+
+        if (specDelta != null)
+            return specDelta.getKind() != IResourceDelta.NO_CHANGE;
+
+        return false;
+    }
+
+    class ProblemCollector implements IProblemCollector
+    {
+
+        private List fProblems = new ArrayList();
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(int,
+         *      com.iw.plugins.spindle.core.source.ISourceLocation, java.lang.String, boolean)
+         */
+        public void addProblem(int severity, ISourceLocation location, String message,
+                boolean isTemporary, int code)
+        {
+
+            addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity,
+                    message, location.getLineNumber(), location.getCharStart(), location
+                            .getCharEnd(), isTemporary, code));
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(org.eclipse.core.runtime.IStatus,
+         *      com.iw.plugins.spindle.core.source.ISourceLocation, boolean)
+         */
+        public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
+        {
+            addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, status, location
+                    .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary));
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(com.iw.plugins.spindle.core.source.IProblem)
+         */
+        public void addProblem(IProblem problem)
+        {
+            fProblems.add(problem);
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.iw.plugins.spindle.core.source.IProblemCollector#beginCollecting()
+         */
+        public void beginCollecting()
+        {
+            fProblems.clear();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.iw.plugins.spindle.core.source.IProblemCollector#endCollecting()
+         */
+        public void endCollecting()
+        {
+            // do nothing
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.iw.plugins.spindle.core.source.IProblemCollector#getProblems()
+         */
+        public IProblem[] getProblems()
+        {
+            return (IProblem[]) fProblems.toArray(new IProblem[fProblems.size()]);
+        }
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.builder.Build#recordBuildMiss(int,
+     *      org.eclipse.core.resources.IResource)
+     */
+    protected void recordBuildMiss(int missPriority, IResource resource)
+    {
+        Markers.removeProblemsFor(resource);
+        super.recordBuildMiss(missPriority, resource);
+    }
 
 }

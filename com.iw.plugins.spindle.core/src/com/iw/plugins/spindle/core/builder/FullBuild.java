@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.core.builder;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -110,7 +111,7 @@ public class FullBuild extends Build
   public void saveState()
   {
     State newState = new State(fTapestryBuilder);
-    newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
+//    newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
     newState.fLastKnownClasspath = fTapestryBuilder.fClasspath;
     newState.fJavaDependencies = fFoundTypes;
     newState.fMissingJavaTypes = fMissingTypes;
@@ -216,14 +217,14 @@ public class FullBuild extends Build
 
     } else
     {
-      String definedWebRoot = fTapestryBuilder.fTapestryProject.getWebContext();
-      if (definedWebRoot != null && !"".equals(definedWebRoot))
+      IFolder definedWebRoot = fTapestryBuilder.fTapestryProject.getWebContextFolder();
+      if (definedWebRoot != null)
       {
         Markers.addTapestryProblemMarkerToResource(
             fTapestryBuilder.getProject(),
             TapestryCore.getString(
                 TapestryBuilder.STRING_KEY + "missing-context",
-                definedWebRoot),
+                definedWebRoot.toString()),
             IMarker.SEVERITY_WARNING,
             0,
             0,
