@@ -69,6 +69,8 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
 import com.iw.plugins.spindle.editors.actions.JumpToJavaAction;
+import com.iw.plugins.spindle.editors.actions.JumpToNextAttributeAction;
+import com.iw.plugins.spindle.editors.actions.JumpToNextTagAction;
 import com.iw.plugins.spindle.editors.actions.JumpToSpecAction;
 import com.iw.plugins.spindle.editors.actions.JumpToTemplateAction;
 import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
@@ -200,7 +202,6 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
                 UIPlugin.getDefault().getPreferenceStore(),
                 XMLPlugin.getDefault().getPreferenceStore());
 
-       
         setPreferenceStore(fPreferenceStore);
         setRangeIndicator(new DefaultRangeIndicator());
         setKeyBindingScopes(new String[] { "com.iw.plugins.spindle.ui.editor.commands" });
@@ -229,6 +230,26 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
         // in this case the format command is not called if there is
         // a text selection in the editor
         markAsSelectionDependentAction("Format", true);
+
+        JumpToNextAttributeAction jumpNavNext = new JumpToNextAttributeAction(true);
+        jumpNavNext.setActiveEditor(this);
+        jumpNavNext.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeRight");
+        setAction("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeRight", jumpNavNext);
+
+        JumpToNextAttributeAction jumpNavPrevious = new JumpToNextAttributeAction(false);
+        jumpNavPrevious.setActiveEditor(this);
+        jumpNavPrevious.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft");
+        setAction("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft", jumpNavPrevious);
+
+        JumpToNextTagAction jumpNextTag = new JumpToNextTagAction(true);
+        jumpNextTag.setActiveEditor(this);
+        jumpNextTag.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeDown");
+        setAction("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeDown", jumpNextTag);
+
+        JumpToNextTagAction jumpPreviousTag = new JumpToNextTagAction(false);
+        jumpPreviousTag.setActiveEditor(this);
+        jumpPreviousTag.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp");
+        setAction("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp", jumpPreviousTag);
 
         BaseEditorAction jumpToJava = new JumpToJavaAction();
         jumpToJava.setActiveEditor(this);
@@ -375,7 +396,7 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
         return store.getBoolean(Editor.OVERVIEW_RULER);
     }
 
-    protected  ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles)
+    protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles)
     {
         ISharedTextColors sharedColors = UIPlugin.getDefault().getSharedTextColors();
         fOverviewRuler = new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);

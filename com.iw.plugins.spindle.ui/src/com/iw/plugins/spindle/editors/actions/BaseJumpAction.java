@@ -104,7 +104,7 @@ public abstract class BaseJumpAction extends BaseEditorAction
 
    
     private XMLDocumentPartitioner fPartitioner = null;
-    private IDocument fDocument = null;
+    protected IDocument fDocument = null;
     /**
      * 
      */
@@ -141,6 +141,7 @@ public abstract class BaseJumpAction extends BaseEditorAction
 
     public void run()
     {
+        super.run();
         try
         {
             doRun();

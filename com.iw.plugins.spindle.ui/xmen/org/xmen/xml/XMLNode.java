@@ -454,6 +454,9 @@ public class XMLNode extends TypedPosition implements Comparable
             int singleIndex = content.indexOf("\"");
             int doubleIndex = content.indexOf("'");
 
+            if (singleIndex < 0 && doubleIndex < 0)
+                return 0;
+
             if (singleIndex >= 0 && doubleIndex > 0)
             {
 
@@ -477,6 +480,9 @@ public class XMLNode extends TypedPosition implements Comparable
 
         if (index < 0)
             return null;
+            
+       if (index == 0)
+        return new Region(getOffset() , getLength());
 
         String value = getAttributeValue();
         if (value != null)
@@ -799,26 +805,26 @@ public class XMLNode extends TypedPosition implements Comparable
                 return Integer.toString(state);
         }
     } /**
-                                                                                                                                                                                                                                              * @return
-                                                                                                                                                                                                                                              */
+                                                                                                                                                                                                                                                                               * @return
+                                                                                                                                                                                                                                                                               */
     public XMLNode getCorrespondingNode()
     {
         return fCorrespondingNode;
     } /**
-                                                                                                                                                                                                                                                  * @return
-                                                                                                                                                                                                                                                  */
+                                                                                                                                                                                                                                                                                   * @return
+                                                                                                                                                                                                                                                                                   */
     public XMLNode getParent()
     {
         return fParent;
     } /**
-                                                                                                                                                                                                                                                  * @param artifact
-                                                                                                                                                                                                                                                  */
+                                                                                                                                                                                                                                                                                   * @param artifact
+                                                                                                                                                                                                                                                                                   */
     public void setCorrespondingNode(XMLNode artifact)
     {
         fCorrespondingNode = artifact;
     } /**
-                                                                                                                                                                                                                                                  * @param artifact
-                                                                                                                                                                                                                                                  */
+                                                                                                                                                                                                                                                                                   * @param artifact
+                                                                                                                                                                                                                                                                                   */
     public void setParent(XMLNode artifact)
     {
         fParent = artifact;

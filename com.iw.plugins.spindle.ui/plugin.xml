@@ -261,6 +261,58 @@
             id="com.iw.plugins.spindle.ui.editor.commands.format">
       </command>
       <command
+            name="Next Attribute"
+            description="Move right/down to the next attribute"
+            category="navigate"
+            id="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeRight">
+      </command>
+      <keyBinding
+            string="Ctrl+Alt+ARROW_RIGHT"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeRight"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+
+      <command
+            name="Previous Attribute"
+            description="Move left/up to the next attribute"
+            category="navigate"
+            id="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft">
+      </command>
+      <keyBinding
+            string="Ctrl+Alt+ARROW_LEFT"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+
+      <command
+            name="Next Tag"
+            description="Move down to the first attribute of the next tag"
+            category="navigate"
+            id="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeDown">
+      </command>
+      <keyBinding
+            string="Ctrl+Alt+ARROW_DOWN"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeDown"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+
+      <command
+            name="Previous Tag"
+            description="Move down to the first attribute of the previous tag"
+            category="navigate"
+            id="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp">
+      </command>
+      <keyBinding
+            string="Ctrl+Alt+ARROW_UP"
+            scope="com.iw.plugins.spindle.ui.editor.commands"
+            command="com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+
+      <command
             name="Jump to Java"
             description="Jump to the java source (if possible)"
             category="jump"
