@@ -29,10 +29,12 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.ui.widgets.UneditableComboBox;
 
 public class UneditableComboBoxDialogField extends DialogField
@@ -69,6 +71,8 @@ public class UneditableComboBoxDialogField extends DialogField
    */
   public Control getControl(Composite parent)
   {
+    Assert
+    .isLegal(combo == null, "can't use FormLayout, already used GridLayout!");
 
     Composite container = new Composite(parent, SWT.NULL);
     FormLayout layout = new FormLayout();
@@ -90,7 +94,17 @@ public class UneditableComboBoxDialogField extends DialogField
 
     return container;
   }
+  
+  
 
+  public void fillIntoGrid(Composite parent, int numcols)
+  {
+    super.fillIntoGrid(parent, numcols);
+    UneditableComboBox combo = getUneditableComboBoxControl(parent);
+    GridData data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+    data.horizontalSpan = numcols - 1;
+    combo.setLayoutData(data);
+  }
   /**
    * Get the combo
    */
