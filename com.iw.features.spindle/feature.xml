@@ -2,7 +2,7 @@
 <feature
       id="com.iw.features.spindle"
       label="Spindle 3, an Eclipse Plugin for Tapestry"
-      version="3.0.44"
+      version="3.0.53"
       provider-name="Intelligent Works Inc"
       image="spindle.gif">
 
@@ -42,47 +42,53 @@ All Rights Reserved
    </license>
 
    <url>
-      <update label="Spindle 3.0 Updates" url="http://data.intelligentworks.com"/>
+      <update label="Spindle Updates" url="http://spindle.sourceforge.net/updates"/>
    </url>
 
    <requires>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.apache.xerces"/>
+      <import plugin="org.apache.xerces" version="4.0.13" match="perfect"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.search"/>
       <import plugin="org.eclipse.jdt.launching"/>
    </requires>
 
    <plugin
-         id="com.iw.plugins.spindle.docs"
+         id="org.apache.xerces"
          download-size="0"
          install-size="0"
-         version="0.0.1"/>
+         version="4.0.13"/>
 
    <plugin
          id="net.sf.solareclipse.ui"
          download-size="0"
          install-size="0"
-         version="0.4.0.spindle-dep-3"/>
+         version="0.4.0.spindle-dep-4"/>
 
    <plugin
          id="net.sf.solareclipse.xml.ui"
          download-size="0"
          install-size="0"
-         version="0.4.0.spindle-dep-3"/>
+         version="0.4.0.spindle-dep-4"/>
 
    <plugin
          id="com.iw.plugins.spindle.core"
          download-size="0"
          install-size="0"
-         version="0.0.44"/>
+         version="0.0.53"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.docs"
+         download-size="0"
+         install-size="0"
+         version="0.0.2"/>
 
    <plugin
          id="com.iw.plugins.spindle.ui"
          download-size="0"
          install-size="0"
-         version="0.0.44"/>
+         version="0.0.53"/>
 
 </feature>

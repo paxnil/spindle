@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.docs"
    name="com.iw.plugins.spindle.docs"
-   version="0.0.1"
+   version="0.0.2"
    provider-name="Intelligent Works Incorporated">
 
    <runtime>

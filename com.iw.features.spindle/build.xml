@@ -3,20 +3,22 @@
 
 	<target name="init">
 		<property name="feature" value="com.iw.features.spindle"/>
-		<property name="feature.version.suffix" value="_3.0.44"/>
+		<property name="feature.version.suffix" value="_3.0.53"/>
 		<property name="feature.full.name" value="${feature}${feature.version.suffix}"/>
 		<property name="feature.temp.folder" value="${basedir}/feature.temp.folder"/>
 		<property name="feature.destination" value="${basedir}"/>
 	</target>
 
 	<target name="all.plugins" depends="init">
-		<ant antfile="build.xml" dir="../com.iw.plugins.spindle.core/" target="${target}"/>
+		<ant antfile="build.xml" dir="../org.apache.xerces/" target="${target}"/>
 		<ant antfile="build.xml" dir="../net.sf.solareclipse.ui/" target="${target}"/>
+		<ant antfile="build.xml" dir="../com.iw.plugins.spindle.core/" target="${target}"/>
 		<ant antfile="build.xml" dir="../net.sf.solareclipse.xml.ui/" target="${target}"/>
 		<ant antfile="build.xml" dir="../com.iw.plugins.spindle.ui/" target="${target}"/>
 		<ant antfile="build.xml" dir="../com.iw.plugins.spindle.docs/" target="${target}"/>
-		<ant antfile="build.xml" dir="../com.iw.plugins.spindle.core/" target="${target}"/>
+		<ant antfile="build.xml" dir="../org.apache.xerces/" target="${target}"/>
 		<ant antfile="build.xml" dir="../net.sf.solareclipse.ui/" target="${target}"/>
+		<ant antfile="build.xml" dir="../com.iw.plugins.spindle.core/" target="${target}"/>
 		<ant antfile="build.xml" dir="../net.sf.solareclipse.xml.ui/" target="${target}"/>
 		<ant antfile="build.xml" dir="../com.iw.plugins.spindle.ui/" target="${target}"/>
 		<ant antfile="build.xml" dir="../com.iw.plugins.spindle.docs/" target="${target}"/>
