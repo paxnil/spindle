@@ -32,7 +32,6 @@ import java.util.List;
 import ognl.Ognl;
 import ognl.OgnlException;
 
-import org.apache.tapestry.bean.AbstractBeanInitializer;
 import org.apache.tapestry.bean.IBeanInitializer;
 import org.apache.tapestry.spec.IBeanSpecification;
 import org.eclipse.core.resources.IStorage;

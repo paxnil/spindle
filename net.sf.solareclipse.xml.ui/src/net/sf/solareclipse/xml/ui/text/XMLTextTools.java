@@ -12,6 +12,9 @@
  **********************************************************************/
 package net.sf.solareclipse.xml.ui.text;
 
+import java.util.Map;
+
+import net.sf.solareclipse.text.AbstractTextTools;
 import net.sf.solareclipse.xml.internal.ui.text.DeclScanner;
 import net.sf.solareclipse.xml.internal.ui.text.DocumentPartitioner;
 import net.sf.solareclipse.xml.internal.ui.text.SingleTokenScanner;
@@ -20,17 +23,12 @@ import net.sf.solareclipse.xml.internal.ui.text.XMLCDATAScanner;
 import net.sf.solareclipse.xml.internal.ui.text.XMLPartitionScanner;
 import net.sf.solareclipse.xml.internal.ui.text.XMLTagScanner;
 
-import net.sf.solareclipse.text.AbstractTextTools;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.ITokenScanner;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
-
-import java.util.Map;
 
 /**
  * 
