@@ -26,6 +26,9 @@ package com.iw.plugins.spindle.ui.properties;
  * ***** END LICENSE BLOCK ***** */
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -42,10 +45,13 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -89,6 +95,8 @@ import com.iw.plugins.spindle.ui.util.Revealer;
 
 public class ProjectPropertyPage extends PropertyPage
 {
+
+    private static boolean DEBUG = false;
 
     abstract class Validator implements ISelectionValidator
     {
@@ -173,16 +181,16 @@ public class ProjectPropertyPage extends PropertyPage
 
     class DialogContextValidator extends Validator
     {
-        public String isValidString(String value)
-        {
-            return isValid(new Path(value));
-        }
 
         public String isValid(Object selection)
         {
             try
             {
                 IPath selected = (IPath) selection;
+
+                if (DEBUG)
+                    UIPlugin.log("validation path: " + selected);
+
                 IWorkspaceRoot root = UIPlugin.getWorkspace().getRoot();
 
                 IProject selectedProject = root.getProject(selected.segment(0));
@@ -192,18 +200,27 @@ public class ProjectPropertyPage extends PropertyPage
 
                 if (!project.equals(selectedProject))
                 {
+                    if (DEBUG)
+                        UIPlugin.log("validation failed: wrong project");
                     return UIPlugin.getString("property-page-wrong-project");
                 }
 
                 selected = (IPath) selected.removeFirstSegments(0);
                 if (isOnOutputPath(jproject, selected))
                 {
+                    if (DEBUG)
+                        UIPlugin.log("validation failed: path is in the compiler output folder");
                     return UIPlugin.getString("property-page-output-folder");
                 }
                 if (isOnSourcePath(jproject, selected))
                 {
+                    if (DEBUG)
+                        UIPlugin.log("validation failed: path is in the java source path");
                     return UIPlugin.getString("property-page-no-source-path");
                 }
+
+                if (DEBUG)
+                    UIPlugin.log("validation passed");
                 return null;
             } catch (CoreException e)
             {
@@ -229,7 +246,7 @@ public class ProjectPropertyPage extends PropertyPage
     //    private Text fLibrarySpec;
     //    private Button fBrowseLibrarySpecification;
 
-    private ApplicationContextValidator fContextValidator = new ApplicationContextValidator();
+    //    private ApplicationContextValidator fContextValidator = new ApplicationContextValidator();
     private DialogContextValidator fDialogContextValidator = new DialogContextValidator();
 
     /**
@@ -365,7 +382,7 @@ public class ProjectPropertyPage extends PropertyPage
         GridData data = new GridData(GridData.FILL_HORIZONTAL);
         data.widthHint = convertWidthInCharsToPixels(TEXT_FIELD_WIDTH);
         fWebContextRoot.setLayoutData(data);
-        fWebContextRoot.setText(this.getContextRootLocation());
+        fWebContextRoot.setText(getContextRootLocation());
         fWebContextRoot.setEnabled(isEnabled);
         fWebContextRoot.addModifyListener(new ModifyListener()
         {
@@ -385,6 +402,7 @@ public class ProjectPropertyPage extends PropertyPage
                 if (newValue != null)
                 {
                     fWebContextRoot.setText(newValue);
+                    isValid();
                 }
             }
         });
@@ -478,7 +496,7 @@ public class ProjectPropertyPage extends PropertyPage
             {
                 setErrorMessage(UIPlugin.getString("property-page-conflicts-with-old-spindle"));
                 disableAll();
-                return true;
+                return false;
             }
         } catch (CoreException e1)
         {
@@ -494,11 +512,33 @@ public class ProjectPropertyPage extends PropertyPage
         //        {
         //            case TapestryProject.APPLICATION_PROJECT_TYPE :
         String wcroot = fWebContextRoot.getText();
-        if ("/context".equals(wcroot.trim()))
+        if (wcroot == null || wcroot.trim().length() == 0)
+            return false;
+
+        wcroot = wcroot.trim();
+
+        if (!wcroot.startsWith("/"))
+            wcroot = "/" + wcroot;
+
+        IPath projPath = project.getFullPath();
+        String fullPath = projPath.toString() + wcroot;
+        if (!projPath.isValidPath(fullPath))
         {
-            return true;
+            setErrorMessage("not a valid path: " + fullPath); // TODO I10N
+            return false;
         }
-        String badApp = fContextValidator.isValidString((String) wcroot);
+        if (DEBUG)
+            UIPlugin.log("isValid() ->about to validate the context root: " + wcroot);
+        String badApp;
+        try
+        {
+            badApp = fDialogContextValidator.isValid(new Path(fullPath));
+        } catch (RuntimeException e2)
+        {
+            if (DEBUG)
+                UIPlugin.log("isValid() -> an exception ocurred");
+            throw e2;
+        }
         if (badApp != null)
         {
             setErrorMessage(badApp);
@@ -638,6 +678,9 @@ public class ProjectPropertyPage extends PropertyPage
 
     protected String getContextRootLocation()
     {
+        if (DEBUG)
+            UIPlugin.log("getting the context root");
+
         String result = "/context";
         try
         {
@@ -645,18 +688,44 @@ public class ProjectPropertyPage extends PropertyPage
             TapestryProject prj = getTapestryProject();
             if (prj != null)
             {
+                if (DEBUG)
+                    UIPlugin.log("tapestry project is not null - trying to get the context from it..");
                 result = prj.getWebContext();
                 if (result == null || "".equals(result.trim()))
                 {
+                    if (DEBUG)
+                        UIPlugin.log(
+                            "The tapestry project returned: '" + result + "' going to the workspace properties....");
+
                     result = getPropertyFromWorkspace(key);
+
+                    if (DEBUG)
+                        UIPlugin.log("got: " + result + " from the workspace properites.");
+
+                } else
+                {
+                    if (DEBUG)
+                        UIPlugin.log("got: " + result + " from the tapestry project");
                 }
             } else
             {
+                if (DEBUG)
+                    UIPlugin.log("No Tapeestry project, going to the workspace properties...");
+
                 result = getPropertyFromWorkspace(key);
+
+                if (DEBUG)
+                    UIPlugin.log("got: " + result + " from the workspace properites.");
             }
 
         } catch (CoreException ex)
-        {}
+        {
+            if (DEBUG)
+                UIPlugin.log("A CoreException occurred accessing the context root");
+        }
+
+        if (DEBUG)
+            UIPlugin.log("returning context root = " + result);
         return result;
     }
 
@@ -689,6 +758,8 @@ public class ProjectPropertyPage extends PropertyPage
      */
     protected Control createContents(Composite parent)
     {
+        if (DEBUG)
+            UIPlugin.log("Tapestry Properties Page creation started.");
         Composite composite = new Composite(parent, SWT.NONE);
         GridLayout layout = new GridLayout();
         composite.setLayout(layout);
@@ -701,6 +772,9 @@ public class ProjectPropertyPage extends PropertyPage
         addApplicationSection(composite);
         addSeparator(composite);
         //        addLibrarySection(composite);
+
+        if (DEBUG)
+            UIPlugin.log("Tapestry Properties Page creation done.");
         return composite;
     }
 
@@ -773,7 +847,7 @@ public class ProjectPropertyPage extends PropertyPage
             {
                 if (fIsTapestryProjectCheck.getSelection())
                 {
-                    if (getTapestryProject() == null) 
+                    if (getTapestryProject() == null)
                         TapestryProject.addTapestryNature(getJavaProject());
                     TapestryProject prj = getTapestryProject();
                     //                switch (fProjectTypeCombo.getSelectionIndex())
@@ -792,6 +866,36 @@ public class ProjectPropertyPage extends PropertyPage
                     //                        break;
                     //                }
                     prj.saveProperties();
+                    IJavaProject jproject = getJavaProject();
+                    try
+                    {
+                        if (jproject.findType(TapestryCore.getString("TapestryComponentSpec.specInterface")) == null)
+                        {
+                            MessageDialog dialog =
+                                new MessageDialog(
+                                    getShell(),
+                                    "Tapestry jars missing",
+                                    null,
+                                    "Add the Tapestry jars to the classpath?",
+                                    MessageDialog.INFORMATION,
+                                    new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL },
+                                    0);
+                            // OK is the default
+                            int result = dialog.open();
+                            if (result == 0)
+                            {
+                                List entries = Arrays.asList(jproject.getRawClasspath());
+                                ArrayList useEntries = new ArrayList(entries);
+                                useEntries.add(JavaCore.newContainerEntry(new Path(TapestryCore.CORE_CONTAINER)));
+                                jproject.setRawClasspath(
+                                    (IClasspathEntry[]) useEntries.toArray(new IClasspathEntry[entries.size()]),
+                                    monitor);
+                            }
+                        }
+                    } catch (JavaModelException e)
+                    {
+                        UIPlugin.log(e);
+                    }
 
                 } else
                 {
@@ -834,6 +938,16 @@ public class ProjectPropertyPage extends PropertyPage
     protected TapestryProject getTapestryProject() throws CoreException
     {
         return TapestryProject.create(getJavaProject());
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.dialogs.IDialogPage#dispose()
+     */
+    public void dispose()
+    {
+        if (DEBUG)
+            UIPlugin.log("Tapestry Property Page closed (disposed)\n\n\n");
+        super.dispose();
     }
 
 }

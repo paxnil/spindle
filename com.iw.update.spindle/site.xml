@@ -4,15 +4,30 @@
    <description>
       Eclipse update site for Spindle 3.0 alphas
    </description>
-   <feature url="features/com.iw.features.spindle_3.0.0.alpha1.jar" id="com.iw.features.spindle" version="3.0.0.alpha1">
+   <feature url="features/com.iw.features.spindle_3.0.4.jar" id="com.iw.features.spindle" version="3.0.4">
       <category name="spindle3_0"/>
+      <category name="older_alphas"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.5.jar" id="com.iw.features.spindle" version="3.0.5">
+      <category name="spindle3_0_latest"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.0.3.jar" id="com.iw.features.spindle" version="3.0.3">
+      <category name="older_alphas"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.0.2.jar" id="com.iw.features.spindle" version="3.0.2">
-      <category name="spindle3_0"/>
+      <category name="older_alphas"/>
    </feature>
-   <category-def name="spindle3_0" label="Spindle 3.0 alphas">
+   <feature url="features/com.iw.features.spindle_3.0.0.alpha1.jar" id="com.iw.features.spindle" version="3.0.0.alpha1">
+      <category name="older_alphas"/>
+   </feature>
+   <category-def name="spindle3_0_latest" label="Spindle 3.0 alpha latest">
       <description>
-         Here are the alpha releases of Spindle 3.0 supporting Tapestry 3.0
+         Here are the lateset alpha releases of Spindle 3.0 supporting Tapestry 3.0
+      </description>
+   </category-def>
+   <category-def name="older_alphas" label="Older Alpha releases">
+      <description>
+         Not the latest, or the greatest
       </description>
    </category-def>
 </site>
