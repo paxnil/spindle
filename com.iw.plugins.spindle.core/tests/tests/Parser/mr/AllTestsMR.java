@@ -47,6 +47,7 @@ public class AllTestsMR
 {
     public static final String[] ALL_RUNS = new String[] { MRBaseParserTest.DOM, MRBaseParserTest.PULL };
     public static final String[] DOM_ONLY = new String[] { MRBaseParserTest.DOM };
+    public static final String[] CURRENT_RUN = DOM_ONLY;
     
 
     public static void main(String[] args)
@@ -56,7 +57,8 @@ public class AllTestsMR
     {
         TestSuite suite = new TestSuite("MRTest for tests.Parser");
         //$JUnit-BEGIN$
-        suite.addTest(new MultipleRunTestSuite(BasicParserMRTest.class, DOM_ONLY));
+        suite.addTest(new MultipleRunTestSuite(BasicParserMRTest.class, CURRENT_RUN));
+        suite.addTest(new MultipleRunTestSuite(NodeTraversalMRTest.class, CURRENT_RUN));
         //$JUnit-END$
         return suite;
     }

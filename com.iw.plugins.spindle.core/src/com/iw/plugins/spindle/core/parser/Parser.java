@@ -166,14 +166,14 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         {
             domParseConfiguration = new TapestryParserConfiguration();
             domParser = new TapestryDOMParser(domParseConfiguration);
-            domParser.setSourceResolver(this);
-            domParseConfiguration.setDocumentHandler(domParser);
-            domParseConfiguration.setErrorHandler(this);
             domParseConfiguration.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
             domParseConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
             domParseConfiguration.setFeature("http://apache.org/xml/features/dom/include-ignorable-whitespace", false);
             domParseConfiguration.setFeature("http://xml.org/sax/features/validation", doValidation);
             domParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
+            domParser.setSourceResolver(this);
+            domParseConfiguration.setDocumentHandler(domParser);
+            domParseConfiguration.setErrorHandler(this);
             if (doValidation)
             {
                 domParseConfiguration.setProperty(

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+   <!DOCTYPE animals [
+   		<!ELEMENT animals (moose*, canine, feline, rodent) >   		
+   		<!ELEMENT moose (#PCDATA)> 
+   		<!ATTLIST moose 
+   			one CDATA #IMPLIED
+   			two CDATA #IMPLIED
+   			three CDATA #IMPLIED
+   			>
+        <!ELEMENT canine (dog) > 
+        <!ELEMENT dog EMPTY> 
+        <!ELEMENT feline (cat) > 
+        <!ELEMENT cat EMPTY> 
+        <!ELEMENT rodent (mouse) > 
+        <!ELEMENT mouse EMPTY> 
+   ]>
+<animals >
+	<moose>
+		Bullwinkle
+	</moose>
+	<moose one="AAAA" two="BBBB" three="CCCC"/>	
+	<canine>
+		<dog/>
+	</canine>
+	<feline>
+		<cat/>
+	</feline>
+	<rodent>
+		<mouse/>
+	</rodent>
+</animals>
