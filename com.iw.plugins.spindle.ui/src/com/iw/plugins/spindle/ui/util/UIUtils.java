@@ -303,4 +303,39 @@ public class UIUtils
     return formatter;
   }
 
+  /**
+   * Embodies the policy which line delimiter to use when inserting into a
+   * document. <br>
+   * <em>Copied from org.eclipse.jdt.internal.corext.codemanipulation.StubUtility</em>
+   */
+  public static  String getLineDelimiter(IDocument document) 
+  {
+    // new for: 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor
+    // inserts lines in wrong format
+    String lineDelim = null;
+    try
+    {
+      lineDelim = document.getLineDelimiter(0);
+    } catch (BadLocationException e)
+    {}
+    if (lineDelim == null)
+    {
+      String systemDelimiter = System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+      String[] lineDelims = document.getLegalLineDelimiters();
+      for (int i = 0; i < lineDelims.length; i++)
+      {
+        if (lineDelims[i].equals(systemDelimiter))
+        {
+          lineDelim = systemDelimiter;
+          break;
+        }
+      }
+      if (lineDelim == null)
+      {
+        lineDelim = lineDelims.length > 0 ? lineDelims[0] : systemDelimiter;
+      }
+    }
+    return lineDelim;
+  }
+
 }
