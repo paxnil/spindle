@@ -69,9 +69,13 @@ import com.iw.plugins.spindle.core.util.Assert;
 public class SpecificationValidator extends BaseValidator
 {
   TapestryProject fTapestryProject;
+
   ContextRootLocation fContextRoot;
+
   ClasspathRootLocation fClasspathRoot;
+
   boolean fPeformDeferredValidations = true;
+
   TypeFinder fTypeFinder;
 
   public SpecificationValidator(TapestryProject project,
@@ -103,7 +107,7 @@ public class SpecificationValidator extends BaseValidator
    * 
    * @see com.iw.plugins.spindle.core.scanning.BaseValidator#findType(java.lang.String)
    */
-  public IType  findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
+  public IType findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
   {
     IType result = null;
     try
@@ -206,7 +210,8 @@ public class SpecificationValidator extends BaseValidator
         component,
         info);
 
-    // if the contained is a framework component, extra validation might occur
+    // if the contained is a framework component, extra validation might
+    // occur
     // at the end of the
     // entire build!
     FrameworkComponentValidator.validateContainedComponent(
@@ -292,7 +297,8 @@ public class SpecificationValidator extends BaseValidator
 
       name = name.startsWith(getDummyStringPrefix()) ? "'name not found'" : name;
 
-      // If not allowing informal parameters, check that each binding matches
+      // If not allowing informal parameters, check that each binding
+      // matches
       // a formal parameter.
 
       if (formalOnly && !isFormal)
@@ -305,7 +311,8 @@ public class SpecificationValidator extends BaseValidator
         continue;
       }
 
-      // If an informal parameter that conflicts with a reserved name, then
+      // If an informal parameter that conflicts with a reserved name,
+      // then
       // skip it.
 
       if (!isFormal && containedSpecification.isReservedParameterName(name))
@@ -345,7 +352,7 @@ public class SpecificationValidator extends BaseValidator
    *      org.apache.tapestry.spec.IAssetSpecification,
    *      com.iw.plugins.spindle.core.parser.ISourceLocationInfo)
    */
- public boolean validateAsset(
+  public boolean validateAsset(
       IComponentSpecification specification,
       IAssetSpecification asset,
       ISourceLocationInfo sourceLocation) throws ScannerException
@@ -382,7 +389,7 @@ public class SpecificationValidator extends BaseValidator
     if (errorLoc == null)
       errorLoc = sourceLocation.getTagNameLocation();
 
-    if (assetPath == null)
+    if (assetPath == null && type != AssetType.EXTERNAL)
     {
       addProblem(IProblem.ERROR, errorLoc, TapestryCore.getString(
           "scan-component-missing-asset",
@@ -396,6 +403,24 @@ public class SpecificationValidator extends BaseValidator
     {
       return checkTemplateAsset(specification, asset);
     }
+
+    if (type == AssetType.EXTERNAL)
+    {
+      if (assetPath == null || assetPath.trim().length() == 0)
+      {
+        errorLoc = sourceLocation.getAttributeSourceLocation("URL");
+        if (errorLoc == null)
+          errorLoc = sourceLocation.getAttributeSourceLocation("url");
+        addProblem(IProblem.ERROR, errorLoc, TapestryCore.getString(
+            "scan-component-missing-external-url",
+            assetSpecName.startsWith(getDummyStringPrefix())
+                ? "not specified" : assetSpecName), true);
+        return false;
+      }
+      
+      return true;
+    }
+
     IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) root
         .getRelativeLocation(assetPath);
     String fileName = relative.getName();
@@ -587,11 +612,13 @@ public class SpecificationValidator extends BaseValidator
    * Note, one the cache Map is set, you can't change it.
    * 
    * @author glongman@intelligentworks.com
-    */
+   */
   public static class TypeFinder
   {
     IJavaProject project;
+
     Map cache;
+
     /**
      *  
      */
