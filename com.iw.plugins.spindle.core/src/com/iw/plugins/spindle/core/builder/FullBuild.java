@@ -189,7 +189,7 @@ public class FullBuild extends Build
         servletParser = null;
       }
       if (wxmlElement == null)
-        throw new BuilderException("Tapestry Build failed: could not parse web.xml");
+        throw new BrokenWebXMLException("Tapestry Build failed: could not parse web.xml. ");
 
       ServletInfo[] servletInfos = null;
       try
@@ -205,12 +205,12 @@ public class FullBuild extends Build
 
       if (servletInfos == null || servletInfos.length == 0)
       {
-        throw new BuilderException(TapestryCore.getString(TapestryBuilder.STRING_KEY
+        throw new BrokenWebXMLException(TapestryCore.getString(TapestryBuilder.STRING_KEY
             + "abort-no-valid-application-servlets-found"));
       }
       if (servletInfos.length > 1)
       {
-        throw new BuilderException(TapestryCore.getString(TapestryBuilder.STRING_KEY
+        throw new BrokenWebXMLException(TapestryCore.getString(TapestryBuilder.STRING_KEY
             + "abort-too-many-valid-servlets-found"));
       }
       fApplicationServlet = servletInfos[0];

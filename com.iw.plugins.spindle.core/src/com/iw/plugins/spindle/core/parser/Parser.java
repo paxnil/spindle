@@ -298,12 +298,14 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
             // there was a fatal error - return null
             // all the exceptions are collected already because I am an
             // XMLErrorHandler
             return null;
 
+        } catch (Throwable e1) {
+			e1.printStackTrace();
         }
         finally
         {
@@ -311,9 +313,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
 
         fXmlDocument = (DocumentImpl) fDomParser.getDocument();
-        if (fXmlDocument == null)
-            return null;
-
+		
         return fXmlDocument;
     }
 
