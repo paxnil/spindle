@@ -241,22 +241,11 @@ public class PluginComponentSpecification
     propertySupport.firePropertyChange(event);
     StringWriter writer = new StringWriter();
     
-    System.out.println("PLUGIN_COMPONENT_SPEC_CHANGED!" + this);
-    write(new PrintWriter(writer));
-    System.out.println(writer.toString());
+ 
   }
   
-  private StringWriter poo;
-
   public void write(PrintWriter writer) {
-  	if (poo == null) {
-  	poo = new StringWriter();	
-    System.out.println("WRITING TO DISK!" + this);
-    write(new PrintWriter(poo));
-    System.out.println(poo.toString());
-    poo = null;
-    
-  	}
+  	
   		
   	String DTDversion = getDTDVersion();
   	boolean isDTD12 = DTDversion != null && "1.2".equals(DTDversion);
