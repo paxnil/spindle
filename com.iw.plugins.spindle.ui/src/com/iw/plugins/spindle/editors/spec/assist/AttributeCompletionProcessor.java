@@ -383,12 +383,12 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
         if ("page".equals(fTagName) && "specification-path".equals(fAttributeName) && fIsAttributeTerminated)
             return chooseSpecPath(ChooseResourceProposal.INCLUDE_PAGE_EXTENSION);
-            
+
         if ("component-type".equals(fTagName) && "specification-path".equals(fAttributeName) && fIsAttributeTerminated)
-                    return chooseSpecPath(ChooseResourceProposal.INCLUDE_JWC_EXTENSION);
-                    
+            return chooseSpecPath(ChooseResourceProposal.INCLUDE_JWC_EXTENSION);
+
         if ("library".equals(fTagName) && "specification-path".equals(fAttributeName) && fIsAttributeTerminated)
-                            return chooseSpecPath(ChooseResourceProposal.INCLUDE_LIBRARY_EXTENSION);
+            return chooseClasspathPath(ChooseResourceProposal.INCLUDE_LIBRARY_EXTENSION);
 
         return Collections.EMPTY_LIST;
     }
@@ -616,6 +616,35 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         return result;
     }
 
+    private List chooseWorkspacePath(ChooseResourceProposal.Filter filter)
+    {
+        TapestryProject tproject = TapestryCore.getDefault().getTapestryProjectFor(fEditor.getStorage());
+
+        if (tproject == null)
+            return Collections.EMPTY_LIST;
+
+        return choosePath(filter, tproject.getWebContextLocation());
+    }
+
+    private List chooseClasspathPath(ChooseResourceProposal.Filter filter)
+    {
+        TapestryProject tproject = TapestryCore.getDefault().getTapestryProjectFor(fEditor.getStorage());
+
+        if (tproject == null)
+            return Collections.EMPTY_LIST;
+
+        try
+        {
+            return choosePath(filter, tproject.getClasspathRoot());
+
+        } catch (CoreException e)
+        {
+            UIPlugin.log(e);
+        }
+
+        return Collections.EMPTY_LIST;
+    }
+
     private List chooseSpecPath(ChooseResourceProposal.Filter filter)
     {
 
@@ -651,15 +680,20 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         {
             UIPlugin.log(e);
         }
+        
+        return choosePath(filter, root);
+    }
 
+    private List choosePath(ChooseResourceProposal.Filter filter, AbstractRootLocation root)
+    {
         if (root == null)
             return Collections.EMPTY_LIST;
 
         List result = new ArrayList();
-        
-        boolean state = UIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST);
-        fEditor.getContentAssistant().enableAutoInsert(true);
 
+        boolean state =
+            UIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST);
+        fEditor.getContentAssistant().enableAutoInsert(true);
 
         ChooseResourceProposal proposal =
             new ChooseResourceProposal(
@@ -709,10 +743,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             return Collections.EMPTY_LIST;
 
         List result = new ArrayList();
-        
-        boolean state = UIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST);
+
+        boolean state =
+            UIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST);
         fEditor.getContentAssistant().enableAutoInsert(true);
-        
 
         ChooseResourceProposal proposal =
             new ChooseResourceProposal(
