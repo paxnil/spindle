@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
+import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 
 /** came from ant ui * */
@@ -85,9 +86,9 @@ public abstract class AbstractPreferencePage extends PreferencePage
     }
   };
 
-  public AbstractPreferencePage()
+  public AbstractPreferencePage(String titleKey, String imageName)
   {
-    super();
+    super(UIPlugin.getString(titleKey), Images.getImageDescriptor(imageName));
     setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
     fOverlayStore = createOverlayStore();
   }

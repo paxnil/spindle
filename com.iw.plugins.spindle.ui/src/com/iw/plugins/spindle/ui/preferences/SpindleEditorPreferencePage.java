@@ -25,9 +25,9 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.preferences;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
-import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -38,6 +38,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -50,7 +51,7 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 /**
  * @author GWL
  * @version $Id: SpindleEditorPreferencePage.java,v 1.1 2004/05/05 19:24:58
- *          glongman Exp $
+ *                     glongman Exp $
  * 
  * Copryright 2002, Intelligent Works Inc. All Rights Reserved
  */
@@ -59,10 +60,6 @@ public class SpindleEditorPreferencePage extends PreferencePage
       IWorkbenchPreferencePage,
       IPropertyChangeListener
 {
-  private static final String EDITOR_DISPLAY_TAB_WIDTH = UIPlugin.PLUGIN_ID + ".EDITOR_DISPLAY_TAB_WIDTH";
-  private static final String FORMATTER_PRESERVE_BLANK_LINES = PreferenceConstants.FORMATTER_PRESERVE_BLANK_LINES;
-  private static final String FORMATTER_USE_TABS_TO_INDENT = UIPlugin.PLUGIN_ID
-        + ".FORMATTER_USE_TABS_TO_INDENT";
   private static final String AUTO_ACTIVATE_CONTENT_ASSIST = PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST;
 
   private static final String OFFER_XHTML = PreferenceConstants.TEMPLATE_EDITOR_HTML_SHOW_XHTML;
@@ -74,9 +71,6 @@ public class SpindleEditorPreferencePage extends PreferencePage
       new String[]{TemplateEditor.XHTML_NONE_LABEL, TemplateEditor.XHTML_NONE_LABEL},};
 
   private BooleanFieldEditor fAutoActivateContentAssist;
-  private IntegerFieldEditor fDisplayTabWidth;
-  private BooleanFieldEditor fPreserveBlankLines;
-  private BooleanFieldEditor fUseTabsForIndentation;
   private RadioGroupFieldEditor fOfferXHTML;
 
   /**
@@ -88,7 +82,7 @@ public class SpindleEditorPreferencePage extends PreferencePage
   {
     super(UIPlugin.getString("preference-editor-title"), Images
         .getImageDescriptor("applicationDialog.gif"));
-    setDescription(UIPlugin.getString("preference-editor-settings"));
+  
   }
 
   /**
@@ -100,89 +94,40 @@ public class SpindleEditorPreferencePage extends PreferencePage
 
   protected Control createContents(Composite parent)
   {
+    initializeDialogUnits(parent);
     Font font = parent.getFont();
     GridData gd;
 
     Composite top = new Composite(parent, SWT.LEFT);
     top.setFont(font);
+    int numColumns = 2;
+    Composite result = new Composite(parent, SWT.NONE);
+    GridLayout layout = new GridLayout();
+    layout.marginHeight = 0;
+    layout.marginWidth = 0;
+    top.setLayout(layout);
 
     // Sets the layout data for the top composite's
     // place in its parent's layout.
     top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-    createVerticalSpacer(top, 1);
+    Group group = createGroup(2, top, "Content Assist");
 
     fAutoActivateContentAssist = new BooleanFieldEditor(
         AUTO_ACTIVATE_CONTENT_ASSIST,
         UIPlugin.getString("preference-editor-auto-insert-assist"),
         BooleanFieldEditor.DEFAULT,
-        top);
+        group);
 
     fAutoActivateContentAssist.setPreferencePage(this);
     fAutoActivateContentAssist.setPreferenceStore(UIPlugin
         .getDefault()
         .getPreferenceStore());
     fAutoActivateContentAssist.load();
-    fAutoActivateContentAssist.setPropertyChangeListener(this);
-
-    createVerticalSpacer(top, 1);
-
-    createVerticalSpacer(top, 1);
-
-    Composite displayComp = new Composite(top, SWT.NONE);
-    GridLayout displayCompLayout = new GridLayout();
-    displayCompLayout.numColumns = 2;
-    displayCompLayout.marginHeight = 0;
-    displayCompLayout.marginWidth = 0;
-    displayComp.setLayout(displayCompLayout);
-    gd = new GridData(GridData.FILL_HORIZONTAL);
-    displayComp.setLayoutData(gd);
-    displayComp.setFont(font);
-
-    fDisplayTabWidth = new IntegerFieldEditor(EDITOR_DISPLAY_TAB_WIDTH, UIPlugin
-        .getString("preference-editor-tab-display-width"), displayComp, 4)
-    {
-      public void showErrorMessage(String message)
-      {
-        super.showErrorMessage(UIPlugin
-            .getString("preference-editor-tab-display-width-error"));
-      }
-    };
-    fDisplayTabWidth.setValidRange(1, 10);
-    fDisplayTabWidth.setPreferencePage(this);
-    fDisplayTabWidth.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
-    fDisplayTabWidth.load();
-    setValid(fDisplayTabWidth.isValid());
-    fDisplayTabWidth.setPropertyChangeListener(this);
-
-    createVerticalSpacer(top, 1);
-
-    fPreserveBlankLines = new BooleanFieldEditor(
-        FORMATTER_PRESERVE_BLANK_LINES,
-        UIPlugin.getString("preference-formatter-preserve-blank-lines"),
-        BooleanFieldEditor.DEFAULT,
-        top);
-
-    fPreserveBlankLines.setPreferencePage(this);
-    fPreserveBlankLines.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
-    fPreserveBlankLines.load();
-    fPreserveBlankLines.setPropertyChangeListener(this);
-
-    fUseTabsForIndentation = new BooleanFieldEditor(
-        FORMATTER_USE_TABS_TO_INDENT,
-        UIPlugin.getString("preference-formatter-use-tabs-for-indent"),
-        BooleanFieldEditor.DEFAULT,
-        top);
-
-    fUseTabsForIndentation.setPreferencePage(this);
-    fUseTabsForIndentation.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
-    fUseTabsForIndentation.load();
-    fUseTabsForIndentation.setPropertyChangeListener(this);
-
-    createVerticalSpacer(top, 1);
+    fAutoActivateContentAssist.setPropertyChangeListener(this);  
 
     fOfferXHTML = new RadioGroupFieldEditor(OFFER_XHTML, UIPlugin
-        .getString("preference-offer-xhtml-proposals"), 4, OFFER_XHTML_OPTIONS, top);
+        .getString("preference-offer-xhtml-proposals"), 4, OFFER_XHTML_OPTIONS, group);
 
     fOfferXHTML.setPreferencePage(this);
     fOfferXHTML.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
@@ -190,6 +135,27 @@ public class SpindleEditorPreferencePage extends PreferencePage
     fOfferXHTML.setPropertyChangeListener(this);
 
     return top;
+  }
+
+  protected Group createGroup(int numColumns, Composite parent, String text)
+  {
+    final Group group = new Group(parent, SWT.NONE);
+    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+    gd.horizontalSpan = numColumns;
+    //    gd.widthHint = 0;
+    group.setLayoutData(gd);
+    group.setFont(parent.getFont());
+
+    final GridLayout layout = new GridLayout(numColumns, false);
+    layout.verticalSpacing = convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+    layout.horizontalSpacing = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+    layout.marginHeight = 0;
+    layout.marginWidth = 0;
+    convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+
+    group.setLayout(layout);
+    group.setText(text);
+    return group;
   }
 
   /**
@@ -205,33 +171,16 @@ public class SpindleEditorPreferencePage extends PreferencePage
 
   protected void performDefaults()
   {
-    fDisplayTabWidth.loadDefault();
-    fPreserveBlankLines.loadDefault();
-    fUseTabsForIndentation.loadDefault();
-    fOfferXHTML.loadDefault();
     fAutoActivateContentAssist.loadDefault();
-
+    fOfferXHTML.loadDefault();
     super.performDefaults();
   }
 
   public boolean performOk()
   {
     fAutoActivateContentAssist.store();
-    fDisplayTabWidth.store();
-    fPreserveBlankLines.store();
-    fUseTabsForIndentation.store();
     fOfferXHTML.store();
     return super.performOk();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferencePage#isValid()
-   */
-  public boolean isValid()
-  {
-    return fDisplayTabWidth.isValid();
   }
 
   /*
@@ -248,8 +197,7 @@ public class SpindleEditorPreferencePage extends PreferencePage
       // If it is false, then the page is invalid in any case.
       if (newValue)
       {
-        setValid(fDisplayTabWidth.isValid() && fAutoActivateContentAssist.isValid()
-            && fPreserveBlankLines.isValid() && fUseTabsForIndentation.isValid());
+        setValid(fAutoActivateContentAssist.isValid() && fOfferXHTML.isValid());
       } else
       {
         setValid(newValue);

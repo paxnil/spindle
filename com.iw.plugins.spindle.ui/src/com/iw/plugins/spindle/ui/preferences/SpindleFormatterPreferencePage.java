@@ -39,14 +39,15 @@ import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.MarginPainter;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.formatter.IContentFormatter;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -60,7 +61,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
-import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.xmen.internal.ui.text.XMLReconciler;
 
 import com.iw.plugins.spindle.PreferenceConstants;
@@ -75,7 +75,8 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
  * SpindleFormatterPreferencePage
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: SpindleFormatterPreferencePage.java,v 1.1.2.1 2004/07/14
+ *                     21:15:47 glongman Exp $
  */
 public class SpindleFormatterPreferencePage extends AbstractPreferencePage
 {
@@ -93,7 +94,7 @@ public class SpindleFormatterPreferencePage extends AbstractPreferencePage
    */
   public SpindleFormatterPreferencePage()
   {
-    super();
+    super("preference-formatter-title", "applicationDialog.gif");
   }
   /*
    * (non-Javadoc)
@@ -112,11 +113,14 @@ public class SpindleFormatterPreferencePage extends AbstractPreferencePage
     layout.marginWidth = 0;
     result.setLayout(layout);
 
-    Group indentationGroup = createGroup(numColumns, result, "Indentation");
-    //TODO 118N
+    Group indentationGroup = createGroup(numColumns, result, UIPlugin
+        .getString("preference-formatter-indentation-group"));
 
-    String labelText = "Tab size:";
-    String[] errorMessages = new String[]{"no tab size specified", "invalid tab size"};
+    String labelText = UIPlugin.getString("preference-formatter-tab-size");
+    String[] errorMessages = new String[]{
+        UIPlugin.getString("preference-formatter-tab-size-error-1"),
+        UIPlugin.getString("preference-formatter-tab-size-error-2")};
+
     addTextField(
         indentationGroup,
         labelText,
@@ -125,13 +129,17 @@ public class SpindleFormatterPreferencePage extends AbstractPreferencePage
         0,
         errorMessages);
 
-    labelText = "Use tab character instead of spaces";
+    labelText = UIPlugin.getString("preference-formatter-use-tabs");
     addCheckBox(indentationGroup, labelText, PreferenceConstants.FORMATTER_TAB_CHAR, 1);
 
-    Group wrappingGroup = createGroup(numColumns, result, "Line wrapping and empty lines");
+    Group wrappingGroup = createGroup(numColumns, result, UIPlugin
+        .getString("preference-formatter-wrap-group"));
 
-    labelText = "Maximum line width";
-    errorMessages = new String[]{"no max line width specified", "invalid max line width"};
+    labelText = UIPlugin.getString("preference-formatter-max-line-width");
+    errorMessages = new String[]{
+        UIPlugin.getString("preference-formatter-max-line-width-error-1"),
+        UIPlugin.getString("preference-formatter-max-line-width-error-2")};
+
     addTextField(
         wrappingGroup,
         labelText,
@@ -140,10 +148,10 @@ public class SpindleFormatterPreferencePage extends AbstractPreferencePage
         0,
         errorMessages);
 
-    labelText = "Wrap long tags (start tags only)";
+    labelText = UIPlugin.getString("preference-formatter-wrap-long");
     addCheckBox(wrappingGroup, labelText, PreferenceConstants.FORMATTER_WRAP_LONG, 1);
 
-    labelText = "Collapse blank lines to one. (remove all blank line otherwise)";
+    labelText = UIPlugin.getString("preference-formatter-collapse-to-one-line");
     addCheckBox(
         wrappingGroup,
         labelText,
@@ -151,7 +159,7 @@ public class SpindleFormatterPreferencePage extends AbstractPreferencePage
         1);
 
     Label label = new Label(result, SWT.LEFT);
-    label.setText("Preview:");
+    labelText = UIPlugin.getString("preference-formatter-preview");
     label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
     Control previewer = createPreviewer(result);
@@ -166,7 +174,6 @@ public class SpindleFormatterPreferencePage extends AbstractPreferencePage
 
     return result;
   }
-
   protected OverlayPreferenceStore createOverlayStore()
   {
     List overlayKeys = new ArrayList();
@@ -294,16 +301,8 @@ public class SpindleFormatterPreferencePage extends AbstractPreferencePage
       prefs.setPreferenceStore(store);
       fFormatter = UIUtils.createXMLContentFormatter(prefs);
     }
-
-    try
-    {
-      fDocument.set(fContent);
-      fFormatter.format(fDocument, new Region(0, fDocument.getLength() - 1));
-    } catch (RuntimeException e)
-    {
-      e.printStackTrace();
-      throw (e); //TODO remove
-    }
+    fDocument.set(fContent);
+    fFormatter.format(fDocument, new Region(0, fDocument.getLength()));
   }
 
   /*
@@ -344,14 +343,17 @@ public class SpindleFormatterPreferencePage extends AbstractPreferencePage
         {
           if (FormattingPreferences.affectsFormatting(event))
           {
-           
+
             if (PreferenceConstants.FORMATTER_MAX_LINE_LENGTH.equals(event.getProperty()))
               fMarginPainter.setMarginRulerColumn(getOverlayStore().getInt(
                   PreferenceConstants.FORMATTER_MAX_LINE_LENGTH));
-            
-//            if (PreferenceConstants.FORMATTER_TAB_SIZE.equals(event.getProperty()))
-              
+
+            //            if
+            // (PreferenceConstants.FORMATTER_TAB_SIZE.equals(event.getProperty()))
+//            viewer.setRedraw(false);
             format(preferenceStore);
+//            viewer.setSelection(TextSelection.emptySelection());
+//            viewer.setRedraw(true);
           }
         }
       };

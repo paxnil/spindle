@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.preferences;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
@@ -36,6 +37,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -47,7 +49,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 /**
  * @author GWL
  * @version $Id: SpindleGeneralPreferencePage.java,v 1.5 2004/05/05 19:24:58
- *          glongman Exp $
+ *                     glongman Exp $
  * 
  * Copryright 2002, Intelligent Works Inc. All Rights Reserved
  */
@@ -76,7 +78,6 @@ public class SpindleGeneralPreferencePage extends PreferencePage
   {
     super(UIPlugin.getString("preference-general-title"), Images
         .getImageDescriptor("applicationDialog.gif"));
-    setDescription(UIPlugin.getString("preference-general-settings"));
   }
 
   /**
@@ -88,20 +89,27 @@ public class SpindleGeneralPreferencePage extends PreferencePage
 
   protected Control createContents(Composite parent)
   {
+    initializeDialogUnits(parent);
     Font font = parent.getFont();
     GridData gd;
 
     Composite top = new Composite(parent, SWT.LEFT);
     top.setFont(font);
+    int numColumns = 2;
+    Composite result = new Composite(parent, SWT.NONE);
+    GridLayout layout = new GridLayout();
+    layout.marginHeight = 0;
+    layout.marginWidth = 0;
+    top.setLayout(layout);
 
     // Sets the layout data for the top composite's
     // place in its parent's layout.
     top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-    createVerticalSpacer(top, 1);
+    Group group = createGroup(2, top, "Builder controls");
 
     fBuildMisses = new RadioGroupFieldEditor(BUILD_MISS, UIPlugin
-        .getString("preference-build-miss"), 4, CORE_STATUS_OPTIONS, top);
+        .getString("preference-build-miss"), 4, CORE_STATUS_OPTIONS, group);
 
     fBuildMisses.setPreferencePage(this);
     fBuildMisses.setPreferenceStore(TapestryCore.getDefault().getPreferenceStore());
@@ -109,28 +117,16 @@ public class SpindleGeneralPreferencePage extends PreferencePage
     setValid(fBuildMisses.isValid());
     fBuildMisses.setPropertyChangeListener(this);
 
-    createVerticalSpacer(top, 1);
+    //    createVerticalSpacer(group, 2);
 
     fHandleAssets = new RadioGroupFieldEditor(HANDLE_ASSETS, UIPlugin
-        .getString("preference-handle-assets"), 4, CORE_STATUS_OPTIONS, top);
+        .getString("preference-handle-assets"), 4, CORE_STATUS_OPTIONS, group);
 
     fHandleAssets.setPreferencePage(this);
     fHandleAssets.setPreferenceStore(TapestryCore.getDefault().getPreferenceStore());
     fHandleAssets.load();
     setValid(fHandleAssets.isValid());
     fHandleAssets.setPropertyChangeListener(this);
-
-    createVerticalSpacer(top, 1);
-
-    Composite displayComp = new Composite(top, SWT.NONE);
-    GridLayout displayCompLayout = new GridLayout();
-    displayCompLayout.numColumns = 2;
-    displayCompLayout.marginHeight = 0;
-    displayCompLayout.marginWidth = 0;
-    displayComp.setLayout(displayCompLayout);
-    gd = new GridData(GridData.FILL_HORIZONTAL);
-    displayComp.setLayoutData(gd);
-    displayComp.setFont(font);
 
     return top;
   }
@@ -184,6 +180,27 @@ public class SpindleGeneralPreferencePage extends PreferencePage
       boolean newValue = ((Boolean) event.getNewValue()).booleanValue();
       setValid(newValue);
     }
+  }
+
+  protected Group createGroup(int numColumns, Composite parent, String text)
+  {
+    final Group group = new Group(parent, SWT.NONE);
+    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+    gd.horizontalSpan = numColumns;
+    //    gd.widthHint = 0;
+    group.setLayoutData(gd);
+    group.setFont(parent.getFont());
+
+    final GridLayout layout = new GridLayout(numColumns, false);
+    layout.verticalSpacing = convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+    layout.horizontalSpacing = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+    layout.marginHeight = 0;
+    layout.marginWidth = 0;
+    convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+
+    group.setLayout(layout);
+    group.setText(text);
+    return group;
   }
 
 }
