@@ -136,11 +136,18 @@ public abstract class AbstractPropertySheetEditorSection
 
   public void initialize(Object input) {
     BaseTapestryModel model = (BaseTapestryModel) input;
+    boolean isEditable = model.isEditable();
     if (newButton != null) {
-      newButton.setEnabled(model.isEditable());
+      newButton.setEnabled(isEditable);
     }
     if (deleteButton != null) {
-      deleteAction.setEnabled(model.isEditable());
+      deleteAction.setEnabled(isEditable);
+    }
+    if (editButton != null) {
+    	editButton.setEnabled(isEditable);
+    }
+    if (deleteButton != null) {
+    	deleteButton.setEnabled(isEditable);
     }
     updateNeeded = true;
     if (canUpdate()) {

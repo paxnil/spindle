@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorjwc;
 
+import net.sf.tapestry.parse.SpecificationParser;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.action.Action;
 import org.eclipse.pde.core.IEditable;
@@ -113,6 +114,18 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     if (!model.isEditable()) {
       name += "  (READ ONLY)";
     }
+    
+    String dtdVersion = spec.getDTDVersion();
+    if (dtdVersion == null) {
+    	dtdVersion = "Unknown DTD or pre 1.1 DTD";
+    } else if ("1.1".equals(dtdVersion)) {
+    	dtdVersion = SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID;
+    } else if ("1.2".equals(dtdVersion)) {
+    	dtdVersion = SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID;
+    }
+    
+    dtdText.setText(dtdVersion);
+    
     getFormPage().getForm().setHeadingText(name);
     ((SpindleMultipageEditor) getFormPage().getEditor()).updateTitle();
     pathText.setText(path);

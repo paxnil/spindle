@@ -87,9 +87,7 @@ import com.iw.plugins.spindle.util.JavaListSelectionProvider;
 import com.iw.plugins.spindle.util.StringSorter;
 import net.sf.tapestry.spec.BeanLifecycle;
 
-public class BeanSelectionSection
-  extends SpindleFormSection
-  implements IModelChangedListener, ISelectionChangedListener {
+public class BeanSelectionSection extends SpindleFormSection implements IModelChangedListener, ISelectionChangedListener {
 
   private boolean updateNeeded = false;
   private boolean updateSelection = false;
@@ -123,6 +121,11 @@ public class BeanSelectionSection
     updateNeeded = true;
     update();
     model.addModelChangedListener(this);
+    
+    boolean isEditable = ((BaseTapestryModel) getModel()).isEditable();
+    newButton.setEnabled(isEditable);
+    deleteButton.setEnabled(isEditable);
+    editButton.setEnabled(isEditable);
 
   }
 
@@ -192,6 +195,8 @@ public class BeanSelectionSection
         getFormPage().setSelection(event.getSelection());
       }
     }
+	
+
   }
 
   /**
@@ -434,7 +439,6 @@ public class BeanSelectionSection
     }
   }
 
-
   class NewBeanAction extends Action {
     /**
      * Constructor for NewPropertyAction
@@ -450,8 +454,7 @@ public class BeanSelectionSection
     */
     public void run() {
       updateSelection = true;
-      NewBeanDialog dialog =
-        new NewBeanDialog(newButton.getShell(), getModel(), getSpec().getBeanNames());
+      NewBeanDialog dialog = new NewBeanDialog(newButton.getShell(), getModel(), getSpec().getBeanNames());
       dialog.create();
       if (dialog.open() == dialog.OK) {
         String name = dialog.getResultName();
@@ -505,8 +508,7 @@ public class BeanSelectionSection
     private String name;
     private PluginBeanSpecification beanSpec;
 
-    private BeanLifecycle[] lifecycles =
-      { BeanLifecycle.NONE, BeanLifecycle.PAGE, BeanLifecycle.REQUEST };
+    private BeanLifecycle[] lifecycles = { BeanLifecycle.NONE, BeanLifecycle.PAGE, BeanLifecycle.REQUEST };
 
     private String[] lifecycleLabels = { "None", "Page", "Request" };
 
@@ -543,8 +545,7 @@ public class BeanSelectionSection
           newName = oldName;
         } else if (alreadyHasBean(newName)) {
           newName = newName + "Copy";
-          PluginBeanSpecification copy =
-            new PluginBeanSpecification(beanSpec.getClassName(), beanSpec.getLifecycle());
+          PluginBeanSpecification copy = new PluginBeanSpecification(beanSpec.getClassName(), beanSpec.getLifecycle());
           getSpec().addBeanSpecification(newName, copy);
           forceDirty();
           update();

@@ -249,6 +249,7 @@ public class ComponentSelectionSection
       }
       newButton.setEnabled(isEditable);
       deleteButton.setEnabled(isEditable);
+      editButton.setEnabled(isEditable);
       copyButton.setEnabled(isEditable && holder.component.getCopyOf() == null);
       // lets pre-compute the alias lookup for the Tooltips (if required)
       String selectedType = holder.component.getType();

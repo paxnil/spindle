@@ -25,6 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorapp;
 
+import net.sf.tapestry.parse.SpecificationParser;
 import org.eclipse.pde.core.IEditable;
 import org.eclipse.pde.core.IModel;
 import org.eclipse.pde.core.IModelChangedEvent;
@@ -41,6 +42,7 @@ import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormSection;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 
 public class OverviewGeneralSection extends SpindleFormSection implements IModelChangedListener {
 
@@ -79,12 +81,22 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
 
   public void update(Object input) {
     TapestryApplicationModel model = (TapestryApplicationModel) input;
-    String name = model.getApplicationSpec().getName();
-
+    PluginApplicationSpecification spec = model.getApplicationSpec();
+    String name = spec.getName();
+    String dtdVersion = spec.getDTDVersion();
+    if (dtdVersion == null) {
+    	dtdVersion = "Unknown DTD or pre 1.1 DTD";
+    } else if ("1.1".equals(dtdVersion)) {
+    	dtdVersion = SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID;
+    } else if ("1.2".equals(dtdVersion)) {
+    	dtdVersion = SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID;
+    }
+   
     getFormPage().getForm().setHeadingText(name);
     ((SpindleMultipageEditor) getFormPage().getEditor()).updateTitle();
     nameText.setValue(model.getApplicationSpec().getName(), true);
     engineClassText.setValue(model.getApplicationSpec().getEngineClassName(), true);
+    dtdText.setText(dtdVersion);
     updateNeeded = false;
   }
 

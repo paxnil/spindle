@@ -126,7 +126,7 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
     if (inputObject instanceof IFile) {
       setTitle(((IFile) inputObject).getName());
     } else if (inputObject instanceof java.io.File) {
-      setTitle("system:" + ((java.io.File) inputObject).getName());
+      setTitle("system:" + ((java.io.File) inputObject).getName()); 
     } else {
       setTitle(input.toString());
     }
@@ -134,8 +134,13 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
     if (dirty) {
       doSave(new NullProgressMonitor());
     }
-    ((BaseTapestryModel) model).setDirty(false);
-
+    BaseTapestryModel tapModel = (BaseTapestryModel)model;
+    tapModel.setDirty(false);
+    
+    
+    if (!tapModel.isEditable()) {
+		tapModel.setEditable(!tapModel.getUnderlyingStorage().isReadOnly());
+    }
     duringInit = false;
   }
 

@@ -27,11 +27,14 @@ package com.iw.plugins.spindle.model;
 
 
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.pde.core.IEditable;
 import org.eclipse.pde.core.IModel;
 
 public interface ITapestryModel extends IModel, IEditable {
 
   public IStorage getUnderlyingStorage();
+  
+  public void reload() throws CoreException;
 
 }

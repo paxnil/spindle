@@ -362,6 +362,17 @@ public class PagesSection
       pagesHolders.add(holder);
     }
     viewer.setInput(pagesHolders);
+    
+    boolean isEditable = isModelEditable();
+    if (newButton != null) {
+    	newButton.setEnabled(isEditable);
+    }
+    if (deleteButton != null) {
+    	deleteButton.setEnabled(isEditable);
+    }
+    if (editButton != null) {
+    	editButton.setEnabled(isEditable);
+    }
     //selectFirst();
     updateNeeded = false;
   }

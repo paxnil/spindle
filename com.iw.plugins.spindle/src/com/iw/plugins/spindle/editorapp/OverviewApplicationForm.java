@@ -128,7 +128,7 @@ public class OverviewApplicationForm extends SpindleForm {
       }
       String name = model.getApplicationSpec().getName();
       if (model.isEditable() == false) {
-        name = MessageUtil.getFormattedString("TapistryApplicationForm.readonly", name);
+        name = MessageUtil.getFormattedString("TapistryApplicationForm.readonly", new String [] {name});
       }
       setHeadingText(name);
       ((Composite)getControl()).layout(true);

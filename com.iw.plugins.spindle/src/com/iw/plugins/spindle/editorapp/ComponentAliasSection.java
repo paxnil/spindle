@@ -296,6 +296,7 @@ public class ComponentAliasSection
       }
       newButton.setEnabled(isEditable);
       deleteButton.setEnabled(isEditable);
+      editButton.setEnabled(isEditable);
     } else {
       deleteButton.setEnabled(false);
     }

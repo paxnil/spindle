@@ -84,6 +84,10 @@ public class PropertyEditableSection
       PropertyHolder holder = new PropertyHolder(name, model.getProperty(name));
       propertyHolders.add(holder);
     }
+    boolean editable = isModelEditable();
+    if (editButton != null) {
+    	editButton.setEnabled(editable);
+    }
     setInput(propertyHolders);
     //selectFirst();
   }
