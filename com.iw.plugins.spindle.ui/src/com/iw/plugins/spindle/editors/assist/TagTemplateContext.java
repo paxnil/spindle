@@ -114,7 +114,7 @@ public class TagTemplateContext extends DocumentTemplateContext
   private int totalAttrCount;
 
   public TagTemplateContext(IDocument document, int completionOffset,
-      int completionLength, DTDProposalGenerator.ElementInfo info)
+      int completionLength, ProposalFactory.ElementProposalInfo info)
   {
     super(TAG_TEMPLATE_CONTEXT_TYPE, document, completionOffset, completionLength);
     Assert.isNotNull(info.attrvalues);
