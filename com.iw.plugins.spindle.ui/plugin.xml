@@ -47,5 +47,22 @@
          </enablement>
       </decorator>
    </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            lightweight="true"
+            location="TOP_RIGHT"
+            label="Indicator for the context root of Tapestry Projects"
+            state="true"
+            adaptable="true"
+            class="com.iw.plugins.spindle.ui.decorators.ContextRootDecorator"
+            id="com.iw.plugins.spindle.ui.contextDecorator">
+         <enablement>
+            <objectClass
+                  name="org.eclipse.core.resources.IFolder">
+            </objectClass>
+         </enablement>
+      </decorator>
+   </extension>
 
 </plugin>
