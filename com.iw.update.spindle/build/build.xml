@@ -5,132 +5,132 @@
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
          General
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   -->
-  <property name="prefix" value="com.iw.plugins.spindle"/>
-  <property name="solar.eclipse.prefix" value="net.sf.solareclipse"/>
-  <property name="xerces.prefix" value="org.apache.xerces"/>
-  <property name="load.properties" value="build/build.properties"/>
-  
-  <property name="status" value="Beta">
-  	
-  </property>
+   -->   
+  <property name="properties.file" value="build/build.properties" />
   <!-- 
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
          Properties related to the directory tree and 
          temporary directories used for the build
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    -->
-  <property name="target.dir" value="build/target"/>
-  <property name="site.dir" value="${target.dir}/site"/>
-  <property name="plugins.dir" value="plugins"/>
-  <property name="features.dir" value="features"/>
-  <property name="templates.dir" value="templates"/>
+  <property name="target.dir" value="build/target" />
+  <property name="site.dir" value="${target.dir}/site" />
+  <property name="plugins.dir" value="plugins" />
+  <property name="features.dir" value="features" />
+  <property name="templates.dir" value="templates" />
   <!-- 
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
          init - includes loading of properties from a file
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    -->
   <target name="init">
-<!--    
-  <target name="init" depends="load.properties">
-    <property name="core.jar" value="${prefix}.core_${version}.jar"/>
-    <property name="ui.jar" value="${prefix}.ui_${version}.jar"/>
-    <property name="doc.jar" value="${prefix}.doc_${doc.version}.jar"/>
--->
-  </target>
-  <target name="load.properties" if="properties.file">
-    <loadproperties srcfile="${properties.file}"/>
-    <echo message="version = ${version}"/>
-<!--    
-    <echo message="doc.version = ${doc.version}"/>
-    <echo message="solar.eclipse.ui.version = ${solar.eclipse.ui.version}"/>
-    <echo 
-      message="solar.eclipse.ui.xml.version = ${solar.eclipse.ui.xml.version}"/>
--->
+    <mkdir dir="${target.dir}" />
+	<loadproperties srcfile="${properties.file}" />
+    <echo message="version = ${version}" />
   </target>
   <target name="check.version" unless="version">
     <fail> -Dversion=blah is required! </fail>
+  </target>
+  <target name="check.version.groovy" unless="groovy.version">
+    <fail> -Dgroovy.version=blah is required! </fail>
   </target>
   <!-- 
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
          all - note that this will not cleanup afterwards, or deploy
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    -->
-  <target name="all" depends="init, check.version">
-    <antcall target="clean"/>
-    <mkdir dir="${target.dir}"/>
-    <antcall target="site"/>
-    <antcall target="build.xfer"/>
+  <target name="all" depends="init, check.version, check.version.groovy">    
+    <antcall target="site" />
   </target>
-
   <!-- 
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
          publish the results
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    -->
   <target name="deploy" depends="all">
-    <exec dir="${target.dir}" executable="pscp" outputproperty="results"
-      timeout="500000" >
-      <arg 
-        line="-l ${user} -pw ${password} xfer_${version}.tar.gz glongman@spindle.sourceforge.net:~glongman"/>
+    <exec dir="${target.dir}"
+          executable="pscp"
+          outputproperty="results"
+          timeout="500000">
+      <arg line="-l ${user} -pw ${password}  spindle.update.site.archive_${version}.zip glongman@spindle.sourceforge.net:~glongman" />
     </exec>
-    <echo message="${results}"/>
+    <echo message="${results}" />
   </target>
   <!-- 
-       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-         cleanup
-       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    -->
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       feature export - note this does not block!
+       You must call this one from inside eclipse and standalone
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   -->
+  <target name="init_feature_export">
+    <eclipse.convertPath resourcePath="com.iw.update.spindle/build/target/site"
+                         property="export.dest" />
+  </target>
+  <target name="feature_export" depends="init, init_feature_export">
+    <pde.exportFeatures features="com.iw.features.spindle"
+                        destination="${export.dest}"
+                        exportType="update"
+                        exportSource="true" />
+  </target>
+
   <target name="clean" depends="init" description="Delete all derived files.">
-    <delete dir="${target.dir}" quiet="true"/>
+    <delete>
+      <fileset dir="${target.dir}">
+        <include name="**/*.*" />
+      </fileset>
+    </delete>    
   </target>
   <!-- 
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        targets to build tar distro
+        targets to build zip distro
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     -->
-  <target name="site" depends="init, check.version">
-    <copy file="${templates.dir}/site.xml.template" tofile="${site.dir}/site.xml"/>
-    <copy file="${templates.dir}/index.html.template" 
-      tofile="${site.dir}/index.html"/>
-    <copy file="SpindleMasthead.jpg" tofile="${site.dir}/SpindleMasthead.jpg"/>
-    <replace file="${site.dir}/site.xml" token="@version@" value="${version}"/>
-    <replace file="${site.dir}/index.html" token="@version@" value="${version}"/>
-    <replace file="${site.dir}/index.html" token="@status@" value="${status}"/>
-    <tar tarfile="${target.dir}/com.iw.plugins.spindle_${version}.tar.gz" 
-      compression="gzip" >
-      <tarfileset dir="${basedir}">
-        <include name="features/com.iw.features.spindle*.jar"/>
-        <include name="plugins/com.iw.plugins.spindle*.jar"/>
-        <include name="plugins/net.sf.solareclipse*.jar"/>
-        <include name="plugins/org.apache.xerces*.jar"/>
-      </tarfileset>
-      <tarfileset dir="${site.dir}">
-        <include name="site.xml"/>
-        <include name="index.html"/>
-        <include name="SpindleMasthead.jpg"/>
-      </tarfileset>
-    </tar>
+  <target name="site" depends="init, check.version">    
+    <copy file="${templates.dir}/site.xml.template"
+          tofile="${site.dir}/site.xml" />
+    <copy file="${templates.dir}/index.html.template"
+          tofile="${site.dir}/index.html" />
+    <copy file="SpindleMasthead.jpg" tofile="${site.dir}/SpindleMasthead.jpg" />
+    <replace file="${site.dir}/site.xml" token="@version@" value="${version}" />
+    <replace file="${site.dir}/site.xml"
+             token="@groovy.version@"
+             value="${groovy.version}" />
+    <replace file="${site.dir}/index.html"
+             token="@version@"
+             value="${version}" />
+    <zip zipfile="${target.dir}/spindle.update.site.archive_${version}.zip">
+      <zipfileset dir="${site.dir}">
+        <include name="*.xml" />
+        <include name="*.htm*" />
+        <include name="*.jpg" />
+        <include name="**/*.jar" />
+      </zipfileset>
+    </zip>
+  </target>
+  <target name="site-dir" depends="init">
+    <mkdir dir="${site.dir}" />
   </target>
   <!-- 
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         target to build the transfer distro
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   -->
-  <target name="build.xfer" description="Construct the Transfer file." 
-    depends="init, site">
+  
+  <target name="build.xfer"
+          description="Construct the Transfer file."
+          depends="init, site">
     <tar tarfile="${target.dir}/xfer_${version}.tar.gz" compression="gzip">
       <tarfileset dir="${features.dir}">
-        <include name="com.iw.features.spindle*.jar"/>
+        <include name="com.iw.features.spindle*.jar" />
       </tarfileset>
       <tarfileset dir="${plugins.dir}">
-        <include name="com.iw.plugins.spindle*.jar"/>
-        <include name="net.sf.solareclipse*.jar"/>
-        <include name="org.apache.xerces*.jar"/>
+        <include name="com.iw.plugins.spindle*.jar" />
+        <include name="net.sf.solareclipse*.jar" />
+        <include name="org.apache.xerces*.jar" />
       </tarfileset>
       <tarfileset dir="${target.dir}">
-        <include name="com.iw.plugins.spindle*.gz"/>
+        <include name="com.iw.plugins.spindle*.gz" />
       </tarfileset>
     </tar>
   </target>
+   -->
 </project>

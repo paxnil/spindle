@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="net.sf.solareclipse.xml.ui"
+   name="XML Development Tools UI"
+   version="0.4.0.spindle-dep-6"
+   provider-name="SolarEclipse Project"
+   class="net.sf.solareclipse.xml.ui.XMLPlugin">
+
+   <runtime>
+      <library name="xmlui.jar">
+         <export name="*"/>
+      </library>      
+   </runtime>
+   <requires>
+      <import plugin="org.eclipse.core.runtime.compatibility"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="net.sf.solareclipse.ui"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.jface.text"/>      
+      
+   </requires>
+
+<!--
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="XML Syntax"
+            category="net.sf.solareclipse.ui.preferences.RootPreferencePage"
+            class="net.sf.solareclipse.xml.internal.ui.preferences.XMLSyntaxPreferencePage"
+            id="net.sf.solareclipse.xml.ui.preferences.XMLSyntaxPreferencePage">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="CSS Syntax"
+            category="net.sf.solareclipse.ui.preferences.RootPreferencePage"
+            class="net.sf.solareclipse.xml.internal.ui.preferences.CSSSyntaxPreferencePage"
+            id="net.sf.solareclipse.xml.ui.preferences.CSSSyntaxPreferencePage">
+      </page>
+   </extension>
+-->
+<!--
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="DTD Source Editor"
+            icon="icons/basic/obj16/xml.png"
+            extensions="dtd"
+            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            class="net.sf.solareclipse.xml.internal.ui.text.DTDEditor"
+            id="net.sf.solareclipse.xml.internal.ui.text.DTDEditor">
+      </editor>
+      <editor
+            name="XML Source Editor"
+            icon="icons/basic/obj16/xml.png"
+            extensions="xml,xsd,tld"
+            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            class="net.sf.solareclipse.xml.internal.ui.text.XMLEditor"
+            id="net.sf.solareclipse.xml.internal.ui.text.XMLEditor">
+      </editor>
+      <editor
+            name="HTML Source Editor"
+            icon="icons/basic/obj16/html.png"
+            extensions="htm,html"
+            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            class="net.sf.solareclipse.xml.internal.ui.text.HTMLEditor"
+            id="net.sf.solareclipse.xml.internal.ui.text.HTMLEditor">
+      </editor>
+      <editor
+            name="CSS Editor"
+            icon="icons/basic/obj16/css.png"
+            extensions="css"
+            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            class="net.sf.solareclipse.xml.internal.ui.text.CSSEditor"
+            id="net.sf.solareclipse.xml.internal.ui.text.CSSEditor">
+      </editor>
+   </extension>
+-->
+   <extension
+         point="org.eclipse.team.core.fileTypes">
+      <fileTypes
+            type="text"
+            extension="css">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="dtd">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="xsd">
+      </fileTypes>
+      <fileTypes
+            type="text"
+            extension="tld">
+      </fileTypes>
+   </extension>
+
+</plugin>

@@ -21,7 +21,7 @@
     <tr>
     <td>
 	 <br>
-	  <h1><font color="#c0c0c0">Spindle Filesystem Update Site - Spindle 3 - @status@ - build @version@ </font></h1>
+	  <h1><font color="#c0c0c0">Spindle Filesystem Update Site - Spindle - build @version@ </font></h1>
 	  
 	  <p>Welcome to the Spindle Update Site. This site contains the feature and plug-in versions for the Spindle project release you have downloaded and 
         extracted, published in the form expected by the Eclipse Update Manager. </p>

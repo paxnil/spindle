@@ -1,0 +1,16 @@
+CSS: Short preview.css and expose more aspects of the syntax
+
+CSS: #xxxxxx; color highlighting
+	NB! distinquish from TAG#id (see bellow)
+
+CSS: TAG.class, TAG#id, TAG[condition] selectors
+
+CSS: HTML (case insensitive), XHTML (case sensitive) and XML modes
+
+CSS: context-sensitive content assist
+
+CSS: more intelligent highlighting of keywords and HTML tags
+	(context-dependent); might be deferred until "tree-based"
+	partitioner is implemented
+
+JSP: move *.tld to JSP plugin
