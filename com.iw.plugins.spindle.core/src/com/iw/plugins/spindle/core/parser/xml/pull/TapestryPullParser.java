@@ -85,6 +85,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     private boolean rootElementSeen;
     private boolean documentIsDone;
     private DocumentImpl theDocument;
+    private PullParserNode lastElement;
 
     /**
      * @param config
@@ -148,8 +149,6 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
             throw new XNIException(e.getMessage());
         }
     }
-    
-    
 
     /* ***************************************************** 
      *    org.apache.xerces.xni.XMLDocumentHandler Stuff      
@@ -167,8 +166,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     /* (non-Javadoc)
      * @see org.apache.xerces.xni.XMLDocumentHandler#doctypeDecl(java.lang.String, java.lang.String, java.lang.String, org.apache.xerces.xni.Augmentations)
      */
-    public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs)
-        throws XNIException
+    public void doctypeDecl(String rootElement, String publicId, String systemId, Augmentations augs) throws XNIException
     {
 
         super.doctypeDecl(rootElement, publicId, systemId, augs);
@@ -210,6 +208,7 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
         super.endElement(element, augs);
         System.out.println("endElement: " + element.rawname);
         configuration.stopParsing();
+        lastElement = parseStack.pop();
     }
 
     /* (non-Javadoc)
@@ -228,21 +227,39 @@ public class TapestryPullParser extends XMLDocumentParser implements XMLErrorHan
     public void startElement(QName element, XMLAttributes attributes, Augmentations augs) throws XNIException
     {
         super.startElement(element, attributes, augs);
-        //        if(!dtdIsDone)
-        //        {}
-        //        else if (!rootElementSeen)
-        //        {
-        //            
-        //            rootElementSeen = true;
-        //            PullParserNode rootNode = new PullParserNode(this);
-        //            parseStack.push(rootNode);
-        //        } else
-        //        {
-        //            PullParserNode currentNode = new PullParserNode(this);
-        //            parseStack.push(currentNode);
-        //
-        //        }
+        if (!dtdIsDone)
+        {} else if (!rootElementSeen)
+        {
 
+            rootElementSeen = true;
+            parseStack.push(PullParserNode.createElementNode(this, null, element.rawname, attributes));
+        } else
+        {
+            PullParserNode parent = parseStack.peek();
+            PullParserNode temp = PullParserNode.createElementNode(this, parent, element.rawname, attributes);
+            if (parent.firstChild == null)
+            {
+                parent.setFirstChild(temp);
+
+            } else
+            {
+                PullParserNode temp2 = parent.firstChild;
+                if (parent.firstChild.nextSibling != null)
+                {
+                    
+                    while (temp2.nextSibling != null)
+                    {
+                        temp2 = temp2.nextSibling;
+                    }
+                }
+
+                temp.setPreviousSibling(temp2);
+                temp2.setNextSibling(temp);
+            }
+            parseStack.push(temp);
+
+        }
+        configuration.stopParsing();
         System.out.println("startElement: " + element.rawname);
         int length = attributes.getLength();
         for (int i = 0; i < length; i++)
