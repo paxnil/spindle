@@ -80,11 +80,13 @@ public class PluginParameterSpecification extends ParameterSpecification {
     writer.print("\" required=\"" + (isRequired() ? "yes" : "no"));
     if (isDTD12) {
       String propertyName = getPropertyName();
-      if (propertyName != null && !"".equals(propertyName)) {
+      if (propertyName != null && !"".equals(propertyName) && !propertyName.equals(name)) {
         writer.print("\" property-name=\"" + getPropertyName());
       }
-      writer.print("\" direction=\"");
-      writer.print(getDirection() == Direction.CUSTOM ? "custom" : "in");
+      if (getDirection() != Direction.CUSTOM) {
+        writer.print("\" direction=\"");
+        writer.print(getDirection() == Direction.CUSTOM ? "custom" : "in");
+      }
     }
     String description = getDescription();
     if (description == null || "".equals(description.trim())) {

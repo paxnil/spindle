@@ -87,7 +87,7 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
     Category CAT = Category.getInstance(AbstractDocumentParser.class);
     CAT.setPriority(Priority.DEBUG);
     CAT.addAppender(new ConsoleAppender(new PatternLayout("%c{1} [%p] %m%n"), "System.out"));
-    
+
   }
 
   /**
@@ -95,9 +95,9 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
    * @param modelDelegateExtensions
    */
   public void buildModelDelegates() {
-  	
-  	modelDelegates = new HashMap();
-  	
+
+    modelDelegates = new HashMap();
+
     IPluginRegistry registry = Platform.getPluginRegistry();
     IExtensionPoint point = registry.getExtensionPoint(TapestryPlugin.ID_PLUGIN, EXTENSION_ID);
     if (point != null) {
@@ -106,19 +106,21 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
       System.out.println("Found " + extensions.length + " extensions");
 
       for (int i = 0; i < extensions.length; i++) {
-      	
+
         IConfigurationElement[] elements = extensions[i].getConfigurationElements();
         for (int j = 0; j < elements.length; j++) {
 
           try {
             if ("manager".equals(elements[j].getName())) {
               String extension = elements[j].getAttribute("file-extension");
-              ITapestryModelManagerDelegate delegate = (ITapestryModelManagerDelegate) elements[j].createExecutableExtension("class");
-              
+              ITapestryModelManagerDelegate delegate =
+                (ITapestryModelManagerDelegate) elements[j].createExecutableExtension("class");
+
               if (modelDelegates.containsKey(extension)) {
-              	throw new IllegalArgumentException(extension+" is already registered with a Spindle Model Delegate");
+                throw new IllegalArgumentException(
+                  extension + " is already registered with a Spindle Model Delegate");
               }
-              
+
               modelDelegates.put(extension, delegate);
               delegate.registerParserFor(extension);
             }
@@ -130,13 +132,13 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
     }
 
   }
-  
+
   public AbstractDocumentParser getParserFor(String extension) {
-  	return (AbstractDocumentParser) parsers.get(extension);
+    return (AbstractDocumentParser) parsers.get(extension);
   }
-  
+
   public void registerParser(String extension, AbstractDocumentParser parser) {
-  	parsers.put(extension, parser);
+    parsers.put(extension, parser);
   }
 
   private ITapestryModelManagerDelegate getDelegate(IStorage storage) {
@@ -152,9 +154,7 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
     if (modelDelegates != null) {
       result = (ITapestryModelManagerDelegate) modelDelegates.get(extension);
     }
-    if (result == null) {
-    	throw new IllegalStateException("extension: "+extension+" does is not registered in Spindle");
-    }
+
     return result;
   }
 
@@ -236,17 +236,14 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
 
     TapestryPlugin.getDefault().getWorkspace().getRoot().getProjects();
     Collector lookupCollector = null;
+
     try {
       lookupCollector = new Collector();
       IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(storage);
       TapestryLookup lookup = new TapestryLookup();
       lookup.configure(jproject);
 
-      lookup.findAll(
-        "*",
-        true,
-        TapestryLookup.ACCEPT_APPLICATIONS | TapestryLookup.ACCEPT_COMPONENTS,
-        lookupCollector);
+      lookup.findAllManaged("*", true, lookupCollector);
     } catch (JavaModelException jmex) {
       jmex.printStackTrace();
     }
@@ -638,6 +635,14 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
   public ITapestryModel[] getModelsFor(List storages) {
     List models = getModelListFor(storages);
     return (ITapestryModel[]) models.toArray(new ITapestryModel[models.size()]);
+  }
+
+  /**
+   * Method getManagedExtensions.
+   * @return Set
+   */
+  public Set getManagedExtensions() {
+    return modelDelegates.keySet();
   }
 
 }
