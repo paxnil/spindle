@@ -37,6 +37,7 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
+import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
@@ -88,7 +89,7 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
 
       try
       {
-        connect(document);
+        collectPositions(document);
         TypedPositionWalker walker = new TypedPositionWalker(fTypedPositions, offset);
 
         XMLNode artifact = (XMLNode) walker.previous();
@@ -102,17 +103,17 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
           boolean inside = offset <= artifact.getOffset() && offset < artifact.getOffset() + artifact.getLength();
 
           String newType = null;
-          if (inside && type != XMLDocumentPartitioner.TEXT)
+          if (inside && type != ITypeConstants.TEXT)
           {
             doIndent(command, getIndent(document, artifact.getOffset()), 1);
 
-          } else if (type == XMLDocumentPartitioner.TEXT)
+          } else if (type == ITypeConstants.TEXT)
           {
             do
             {
               artifact = (XMLNode) walker.previous();
 
-            } while (artifact != null && artifact.getType() == XMLDocumentPartitioner.TEXT);
+            } while (artifact != null && artifact.getType() == ITypeConstants.TEXT);
           }
 
           if (artifact == null)
@@ -121,10 +122,10 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
           } else
           {
             type = artifact.getType();
-            if (type == XMLDocumentPartitioner.TAG)
+            if (type == ITypeConstants.TAG)
             {
               doIndent(command, getIndent(document, artifact.getOffset()), 1);
-            } else if (type == XMLDocumentPartitioner.ENDTAG)
+            } else if (type == ITypeConstants.ENDTAG)
             {
               XMLNode corr = artifact.getCorrespondingNode();
               if (corr != null)
@@ -141,10 +142,11 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
       {
         UIPlugin.log(e);
         super.customizeDocumentCommand(document, command);
-      } finally
-      {
-        disconnect();
-      }
+      } 
+//      finally
+//      {
+//        disconnect();
+//      }
     }
   }
 
@@ -181,26 +183,24 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
     return false;
   }
 
-  private void connect(IDocument d) throws BadLocationException, BadPositionCategoryException
+  private void collectPositions(IDocument d) throws BadLocationException, BadPositionCategoryException
   {
-//    fPartitioner.connect(d);
     Position[] pos = d.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
     Arrays.sort(pos, XMLNode.COMPARATOR);
     fTypedPositions = new TypedPosition[pos.length];
     System.arraycopy(pos, 0, fTypedPositions, 0, pos.length);
-    XMLNode.createTree(d, -1);
   }
 
-  private void disconnect()
-  {
-//    try
-//    {
-//      fPartitioner.disconnect();
-//    } catch (Exception e)
-//    {
-//      UIPlugin.log(e);
-//    }
-  }
+//  private void disconnect()
+//  {
+////    try
+////    {
+////      fPartitioner.disconnect();
+////    } catch (Exception e)
+////    {
+////      UIPlugin.log(e);
+////    }
+//  }
 
   /**
    * Returns the indentation of the line of the given offset.

@@ -172,14 +172,7 @@ public abstract class BaseJumpAction extends BaseEditorAction
 
     protected abstract void doRun();
 
-    protected void attachPartitioner()
-    {
-//   TODO remove     Assert.isTrue(fPartitioner == null);
-//        fPartitioner =
-//            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
-//        fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-//        fPartitioner.connect(fDocument);
-    }
+    
 
     protected IDocument getDocument()
     {

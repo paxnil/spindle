@@ -115,7 +115,7 @@ public class JumpToNextAttributeAction extends BaseJumpAction implements IDocume
 
     protected void buildRegionList(IDocument document)
     {
-        attachPartitioner();
+       
 
         Position[] positions = null;
         try
