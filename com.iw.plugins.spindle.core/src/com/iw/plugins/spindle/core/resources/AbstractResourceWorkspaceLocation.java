@@ -29,7 +29,6 @@ package com.iw.plugins.spindle.core.resources;
 import java.net.URL;
 
 import org.apache.tapestry.IResourceLocation;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 /**
@@ -41,55 +40,51 @@ import org.eclipse.core.runtime.Path;
 public abstract class AbstractResourceWorkspaceLocation implements IResourceWorkspaceLocation
 {
 
-    private IPath _path;
+    private String path;
+    private String name;
+    protected AbstractRootLocation root;
 
-    protected AbstractResourceWorkspaceLocation(String path)
+    protected AbstractResourceWorkspaceLocation(AbstractRootLocation root, String path)
     {
-        _path = new Path(path);
+        Path p = new Path(path);
+        this.path = p.removeLastSegments(1).addTrailingSeparator().toString();
+        this.name = p.lastSegment();
     }
 
     public String getName()
     {
-        return _path.lastSegment();
-    }
-
-    private IPath getFolderPath()
-    {
-        return _path.removeLastSegments(1);
+        return name;
     }
 
     public IResourceLocation getRelativeLocation(String name)
     {
         if (exists())
         {
-
             if (name.startsWith("/"))
             {
-                if (name.equals(_path))
+                if (name.equals(path))
+                {
                     return this;
-
-                return buildNewResourceLocation(name);
+                } else
+                {
+                    return root.getRelativeLocation(name);
+                }
             }
 
             if (name.equals(getName()))
+            {
                 return this;
+            }
 
-            return buildNewResourceLocation(getFolderPath().append(name).toString());
+            return root.getRelativeLocation(getPath()+name);
         }
         return null;
     }
 
     public String getPath()
     {
-        return _path.toString();
+        return path;
     }
-
-    protected IPath getIPath()
-    {
-        return _path;
-    }
-
-    protected abstract IResourceLocation buildNewResourceLocation(String path);
 
     /**
      *  Returns true if the other object is an instance of the
@@ -104,13 +99,13 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
 
         if (obj.getClass().equals(getClass()))
         {
-            AbstractResourceWorkspaceLocation otherLocation = (AbstractResourceWorkspaceLocation) obj;
-
-            return _path.equals(otherLocation._path);
+            AbstractResourceWorkspaceLocation other = (AbstractResourceWorkspaceLocation) obj;            
+            boolean result = this.root.equals(other.root) && this.path.equals(other.path);            
         }
 
         return false;
     }
+
     /* (non-Javadoc)
      * 
      * TODO what do we do with this? nothing?
@@ -120,6 +115,14 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
     public URL getResourceURL()
     {
         throw new Error("not implemented, yet");
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isOnClasspath()
+     */
+    public boolean isOnClasspath()
+    {
+        return root.isOnClasspath();
     }
 
 }

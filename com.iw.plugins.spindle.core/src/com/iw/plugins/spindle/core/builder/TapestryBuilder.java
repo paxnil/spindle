@@ -56,8 +56,9 @@ import org.eclipse.jdt.internal.core.JavaProject;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
+import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.resources.RootLocation;
 import com.iw.plugins.spindle.core.util.Markers;
 
 /**
@@ -83,7 +84,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     public static final String ABORT_INVALID_OUTPUT_LOCATION = STRING_KEY + "abort-invalid-output-location";
     public static final String ABORT_NO_OUTPUT_LOCATION = STRING_KEY + "abort-no-output-location";
     public static final String ABORT_MISSING_LIBRARY_SPEC = STRING_KEY + "abort-missing-library-spec";
-    public static final String ABORT_LIBRARY_SPEC_NOT_ON_SOURCE_PATH = STRING_KEY + "-abort-library-spec-not-on-classpath";
+    public static final String ABORT_LIBRARY_SPEC_NOT_ON_SOURCE_PATH =
+        STRING_KEY + "-abort-library-spec-not-on-classpath";
     public static final String ABORT_LIBRARY_SPEC_IN_WRONG_PROJECT = STRING_KEY + "abort-library-not-in-this-project";
     public static final String ABORT_APPLICATION_NO_SERVLETS = STRING_KEY + "abort-no-valid-application-servlets-found";
     public static final String ABORT_APPLICATION_ONE_SERVLET_ONLY = STRING_KEY + "abort-too-many-valid-servlets-found";
@@ -94,7 +96,12 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     public static final String TEMPLATE_EXTENSION = "html";
     public static final String SCRIPT_EXTENSION = "script";
     public static final String[] KnownExtensions =
-        new String[] { APPLICATION_EXTENSION, COMPONENT_EXTENSION, PAGE_EXTENSION, TEMPLATE_EXTENSION, SCRIPT_EXTENSION };
+        new String[] {
+            APPLICATION_EXTENSION,
+            COMPONENT_EXTENSION,
+            PAGE_EXTENSION,
+            TEMPLATE_EXTENSION,
+            SCRIPT_EXTENSION };
     public static final String APP_SPEC_PATH_PARAM = "org.apache.tapestry.application-specification";
     public static final String ENGINE_CLASS_PARAM = "org.apache.tapestry.engine-class";
 
@@ -104,8 +111,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     IJavaProject javaProject;
     TapestryProject tapestryProject;
     IWorkspaceRoot workspaceRoot;
-    RootLocation contextRoot;
-    RootLocation classpathRoot;
+    ContextRootLocation contextRoot;
+    ClasspathRootLocation classpathRoot;
     int projectType;
 
     private IBuild build;
@@ -142,7 +149,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         }
 
         if (true)
-            System.out.println("\nStarting build of " + currentProject.getName() + " @ " + new Date(System.currentTimeMillis()));
+            System.out.println(
+                "\nStarting build of " + currentProject.getName() + " @ " + new Date(System.currentTimeMillis()));
         this.notifier = new BuildNotifier(monitor, currentProject);
         notifier.begin();
         boolean ok = false;
@@ -229,7 +237,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         }
         IProject[] requiredProjects = getRequiredProjects(true);
         if (DEBUG)
-            System.out.println("Finished build of " + currentProject.getName() + " @ " + new Date(System.currentTimeMillis()));
+            System.out.println(
+                "Finished build of " + currentProject.getName() + " @ " + new Date(System.currentTimeMillis()));
         return requiredProjects;
     }
 
@@ -366,11 +375,14 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             IResource resource = javaProject.getUnderlyingResource();
             IMarker[] jprojectMarkers = new IMarker[0];
             if (resource != null && resource.exists())
-                jprojectMarkers = resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_ZERO);
+                jprojectMarkers =
+                    resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_ZERO);
             if (jprojectMarkers.length > 0)
             {
                 Markers.removeProblemsForProject(getProject());
-                Markers.addBuildBrokenProblemMarkerToResource(getProject(), TapestryCore.getString(JAVA_BUILDER_FAILED));
+                Markers.addBuildBrokenProblemMarkerToResource(
+                    getProject(),
+                    TapestryCore.getString(JAVA_BUILDER_FAILED));
                 return false;
             }
         } catch (CoreException e)
@@ -393,7 +405,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         } catch (JavaModelException e1)
         {
             Markers.removeProblemsFor(currentProject);
-            Markers.addBuildBrokenProblemMarkerToResource(currentProject, TapestryCore.getString(ABORT_NO_OUTPUT_LOCATION));
+            Markers.addBuildBrokenProblemMarkerToResource(
+                currentProject,
+                TapestryCore.getString(ABORT_NO_OUTPUT_LOCATION));
             return false;
         }
 
@@ -435,7 +449,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 return false;
             }
 
-            IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation)contextRoot.getRelativeLocation("WEB-INF/web.xml");
+            IResourceWorkspaceLocation webXML =
+                (IResourceWorkspaceLocation) contextRoot.getRelativeLocation("WEB-INF/web.xml");
             if (!webXML.exists())
             {
                 Markers.removeProblemsFor(currentProject); // make this the only problem for this project
@@ -502,7 +517,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         try
         {
             javaProject = (IJavaProject) currentProject.getNature(JavaCore.NATURE_ID);
-            classpathRoot = new RootLocation(javaProject);
+            classpathRoot = new ClasspathRootLocation(javaProject);
         } catch (CoreException e)
         {
             TapestryCore.log(e);
@@ -510,7 +525,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         try
         {
             tapestryProject = (TapestryProject) currentProject.getNature(TapestryCore.NATURE_ID);
-            contextRoot = new RootLocation(tapestryProject.getWebContextFolder());
+            contextRoot = new ContextRootLocation(tapestryProject.getWebContextFolder());
         } catch (CoreException e)
         {
             TapestryCore.log(e);

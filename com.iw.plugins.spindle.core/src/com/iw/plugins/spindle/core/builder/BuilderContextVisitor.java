@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
-import com.iw.plugins.spindle.core.resources.ContextResourceWorkspaceLocation;
 
 public class BuilderContextVisitor implements IResourceVisitor
 {
@@ -134,7 +133,7 @@ public class BuilderContextVisitor implements IResourceVisitor
             String extension = resource.getFileExtension();
             if (knownExtensions.contains(extension))
             {
-                IResourceLocation location = new ContextResourceWorkspaceLocation(contextLocation, resource);
+                IResourceLocation location = build.tapestryBuilder.contextRoot.getRelativeLocation(resource);
                 collector.add(location);
                 debug(location, true);
             }

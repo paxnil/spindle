@@ -35,10 +35,13 @@ import org.apache.tapestry.ILocation;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.Tapestry;
+import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.spec.lookup.ComponentLookup;
+import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
 
 /**
  *  Tapestry Core implementation of org.apache.tapestry.INamespace
@@ -51,14 +54,19 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 public class CoreNamespace implements ICoreNamespace
 {
 
-    private ILibrarySpecification _specification;
-    private String _id;
-    private String _extendedId;
+    private ILibrarySpecification specification;
+    private String id;
+    private String extendedId;
     private INamespace parent;
-    private boolean _frameworkNamespace;
-    private boolean _applicationNamespace;
+    private boolean frameworkNamespace;
+    private boolean applicationNamespace;
 
-    private Map _pages = new HashMap();
+    private ComponentLookup componentLookup;
+    private PageLookup pageLookup;
+    
+    private String appNameFromWebXML;
+
+    private Map pages = new HashMap();
 
     /**
      *  Map of {@link ComponentSpecification} keyed on
@@ -66,32 +74,30 @@ public class CoreNamespace implements ICoreNamespace
      * 
      **/
 
-    private Map _components = new HashMap();
+    private Map components = new HashMap();
 
     /**
      *  Map, keyed on id, of {@link INamespace}.
      * 
      **/
 
-    private Map _children = new HashMap();
+    private Map children = new HashMap();
 
     public CoreNamespace(String id, ILibrarySpecification specification)
     {
-        _id = id;        
-        _specification = specification;
+        this.id = id;
+        this.specification = specification;
 
-        _applicationNamespace = (_id == null);
-        _frameworkNamespace = FRAMEWORK_NAMESPACE.equals(_id);
+        applicationNamespace = (id == null && specification instanceof IApplicationSpecification);
+        frameworkNamespace = FRAMEWORK_NAMESPACE.equals(id);
     }
     
-    
-
     /* (non-Javadoc)
      * @see org.apache.tapestry.INamespace#getId()
      */
     public String getId()
     {
-        return _id;
+        return id;
     }
 
     /* (non-Javadoc)
@@ -99,24 +105,24 @@ public class CoreNamespace implements ICoreNamespace
      */
     public String getExtendedId()
     {
-        if (_applicationNamespace)
+        if (applicationNamespace)
         {
             return null;
         }
 
-        if (_extendedId == null)
+        if (extendedId == null)
         {
-            _extendedId = buildExtendedId();
+            extendedId = buildExtendedId();
         }
 
-        return _extendedId;
+        return extendedId;
     }
 
     private String buildExtendedId()
     {
         if (parent == null)
         {
-            return _id;
+            return id;
         }
 
         String parentId = parent.getExtendedId();
@@ -125,10 +131,10 @@ public class CoreNamespace implements ICoreNamespace
 
         if (parentId == null)
         {
-            return _id;
+            return id;
         }
 
-        return parentId + "." + _id;
+        return parentId + "." + id;
     }
 
     /* (non-Javadoc)
@@ -136,12 +142,12 @@ public class CoreNamespace implements ICoreNamespace
      */
     public String getNamespaceId()
     {
-        if (_frameworkNamespace)
+        if (frameworkNamespace)
         {
             return Tapestry.getString("Namespace.framework-namespace");
         }
 
-        if (_applicationNamespace)
+        if (applicationNamespace)
         {
             return Tapestry.getString("Namespace.application-namespace");
         }
@@ -156,8 +162,9 @@ public class CoreNamespace implements ICoreNamespace
     {
         return parent;
     }
-    
-    public void setParentNamespace(ICoreNamespace parent){
+
+    public void setParentNamespace(ICoreNamespace parent)
+    {
         this.parent = parent;
     }
 
@@ -166,7 +173,31 @@ public class CoreNamespace implements ICoreNamespace
      */
     public INamespace getChildNamespace(String id)
     {
-        return (INamespace) _children.get(id);
+        String firstId = id;
+        String nextIds = null;
+
+        // Split the id into first and next if it is a dot separated sequence
+        int index = id.indexOf('.');
+        if (index >= 0)
+        {
+            firstId = id.substring(0, index);
+            nextIds = id.substring(index + 1);
+        }
+
+        // Get the first namespace
+        INamespace result = (INamespace) children.get(firstId);
+
+        if (result == null)
+        {
+            return result;
+        }
+
+        // If the id is a dot separated sequence, recurse to find 
+        // the needed namespace
+        if (result != null && nextIds != null)
+            result = result.getChildNamespace(nextIds);
+
+        return result;
     }
 
     /* (non-Javadoc)
@@ -174,7 +205,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public List getChildIds()
     {
-        return _specification.getLibraryIds();
+        return specification.getLibraryIds();
     }
 
     /* (non-Javadoc)
@@ -182,7 +213,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public IComponentSpecification getPageSpecification(String name)
     {
-        return (IComponentSpecification) _pages.get(name);
+        return (IComponentSpecification) pages.get(name);
     }
 
     /* (non-Javadoc)
@@ -190,7 +221,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public boolean containsPage(String name)
     {
-        return _pages.containsKey(name);
+        return pages.containsKey(name);
     }
 
     /* (non-Javadoc)
@@ -198,7 +229,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public List getPageNames()
     {
-        return new ArrayList(_pages.keySet());
+        return new ArrayList(pages.keySet());
     }
 
     /* (non-Javadoc)
@@ -206,7 +237,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public IComponentSpecification getComponentSpecification(String name)
     {
-        return (IComponentSpecification) _components.get(name);
+        return (IComponentSpecification) components.get(name);
     }
 
     /* (non-Javadoc)
@@ -214,7 +245,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public boolean containsComponentType(String type)
     {
-        return _components.containsKey(type);
+        return components.containsKey(type);
     }
 
     /* (non-Javadoc)
@@ -222,7 +253,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public List getComponentTypes()
     {
-        return new ArrayList(_components.keySet());
+        return new ArrayList(components.keySet());
     }
 
     /* (non-Javadoc)
@@ -230,7 +261,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public String getServiceClassName(String name)
     {
-        return _specification.getServiceClassName(name);
+        return specification.getServiceClassName(name);
     }
 
     /* (non-Javadoc)
@@ -238,7 +269,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public List getServiceNames()
     {
-        return _specification.getServiceNames();
+        return specification.getServiceNames();
     }
 
     /* (non-Javadoc)
@@ -246,7 +277,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public ILibrarySpecification getSpecification()
     {
-        return _specification;
+        return specification;
     }
 
     /* (non-Javadoc)
@@ -269,7 +300,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public IResourceLocation getSpecificationLocation()
     {
-        return _specification.getSpecificationLocation();
+        return specification.getSpecificationLocation();
     }
 
     /* (non-Javadoc)
@@ -277,7 +308,7 @@ public class CoreNamespace implements ICoreNamespace
      */
     public boolean isApplicationNamespace()
     {
-        return _applicationNamespace;
+        return applicationNamespace;
     }
 
     /* (non-Javadoc)
@@ -285,13 +316,13 @@ public class CoreNamespace implements ICoreNamespace
      */
     public void installPageSpecification(String pageName, IComponentSpecification specification)
     {
-        _pages.put(pageName, specification);
+        pages.put(pageName, specification);
         ((PluginComponentSpecification) specification).setNamespace(this);
     }
 
     public IComponentSpecification deinstallPageSpecification(String pageName)
     {
-        PluginComponentSpecification result = (PluginComponentSpecification) _pages.get(pageName);
+        PluginComponentSpecification result = (PluginComponentSpecification) pages.get(pageName);
         if (result != null)
         {
             result.setNamespace(null);
@@ -303,13 +334,13 @@ public class CoreNamespace implements ICoreNamespace
 
     public synchronized void installComponentSpecification(String type, IComponentSpecification specification)
     {
-        _components.put(type, specification);
+        components.put(type, specification);
         ((PluginComponentSpecification) specification).setNamespace(this);
     }
 
     public IComponentSpecification deinstallComponentSpecification(String type)
     {
-        PluginComponentSpecification result = (PluginComponentSpecification) _components.get(type);
+        PluginComponentSpecification result = (PluginComponentSpecification) components.get(type);
         if (result != null)
         {
             result.setNamespace(null);
@@ -322,33 +353,76 @@ public class CoreNamespace implements ICoreNamespace
      */
     public ILocation getLocation()
     {
-        if (_specification == null)
+        if (specification == null)
             return null;
 
-        return _specification.getLocation();
+        return specification.getLocation();
     }
-
-   
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#deinstallChildNamesspace(java.lang.String)
      */
     public INamespace deinstallChildNamespace(String id)
     {
-       CoreNamespace result = (CoreNamespace)_children.get(id);
-       if (result != null) {
-           result.setParentNamespace(null);
-       }
-       return result;
+        CoreNamespace result = (CoreNamespace) children.get(id);
+        if (result != null)
+        {
+            result.setParentNamespace(null);
+        }
+        return result;
     }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#installChildNamespace(org.apache.tapestry.INamespace)
      */
-    public void installChildNamespace(INamespace child)
+    public void installChildNamespace(String id, INamespace child)
     {
-        // TODO Auto-generated method stub
+        children.put(id, child);
+        ((ICoreNamespace) child).setParentNamespace(this);
+    }
 
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#getComponentLookup()
+     */
+    public ComponentLookup getComponentLookup(ICoreNamespace framework)
+    {
+        if (componentLookup == null)
+        {
+            componentLookup = new ComponentLookup();
+            if (isApplicationNamespace())
+            {
+                componentLookup.configure(this, framework, appNameFromWebXML);
+            } else
+            {
+                componentLookup.configure(this, framework);
+            }
+        }
+        return componentLookup;
+    }
+
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.namespace.ICoreNamespace#getPageLookup()
+     */
+    public PageLookup getPageLookup(ICoreNamespace framework)
+    {
+        if (pageLookup == null)
+        {
+            pageLookup = new PageLookup();
+            if (isApplicationNamespace())
+            {
+                pageLookup.configure(this, framework, appNameFromWebXML);
+            } else
+            {
+                pageLookup.configure(this, framework);
+            }
+        }
+        return pageLookup;
+    }
+
+    
+    public void setAppNameFromWebXML(String name)
+    {
+        appNameFromWebXML = name;
     }
 
 }

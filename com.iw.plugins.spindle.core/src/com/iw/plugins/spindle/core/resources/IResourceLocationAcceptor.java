@@ -24,37 +24,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.namespace;
-
-import org.apache.tapestry.INamespace;
-import org.apache.tapestry.spec.IComponentSpecification;
-
-import com.iw.plugins.spindle.core.spec.lookup.ComponentLookup;
-import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
+package com.iw.plugins.spindle.core.resources;
 
 /**
- *  Extends org.apache.tapestry.INamespace to allow
- *  for the de-installation of pages and components.
+ *  A requestor that is invoked by the seek method in IResourceWorkspaceLocation.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface ICoreNamespace extends INamespace
+public interface IResourceLocationAcceptor
 {
-    public void setParentNamespace(ICoreNamespace parent);
-
-    public IComponentSpecification deinstallPageSpecification(String pageName);
-
-    public IComponentSpecification deinstallComponentSpecification(String type);
-
-    public void installChildNamespace(String id, INamespace child);
-
-    public INamespace deinstallChildNamespace(String id);
-
-    public ComponentLookup getComponentLookup(ICoreNamespace framework);
-
-    public PageLookup getPageLookup(ICoreNamespace framework);
-
-    public void setAppNameFromWebXML(String name);
-
+    /** should return false to cancel the operation */
+    public boolean accept(IResourceWorkspaceLocation location);
 }

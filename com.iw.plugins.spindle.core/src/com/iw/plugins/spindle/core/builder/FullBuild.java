@@ -42,10 +42,9 @@ import org.eclipse.jdt.core.IType;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.util.CoreLookup;
-import com.iw.plugins.spindle.core.builder.util.ILookupRequestor;
-import com.iw.plugins.spindle.core.resources.ClasspathResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.search.AbstractTapestrySearchAcceptor;
+import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.util.Markers;
 
@@ -93,7 +92,7 @@ public class FullBuild extends Build
             {
                 throw new BuilderException(TapestryCore.getString(TapestryBuilder.ABORT_APPLICATION_ONE_SERVLET_ONLY));
             }
-//            goofTest();
+            //            goofTest();
             notifier.updateProgressDelta(0.1f);
 
             notifier.subTask(TapestryCore.getString(TapestryBuilder.LOCATING_ARTIFACTS));
@@ -124,11 +123,11 @@ public class FullBuild extends Build
      */
     private void goofTest()
     {
-       IResourceLocation goof = tapestryBuilder.classpathRoot.getRelativeLocation("com/Framework.library");
-       parseLibrary(goof);
-       goof = tapestryBuilder.contextRoot.getRelativeLocation("com/ExampleLayout.application");
-       parseApplication(goof);
-        
+        IResourceLocation goof = tapestryBuilder.classpathRoot.getRelativeLocation("com/Framework.library");
+        parseLibrary(goof);
+        goof = tapestryBuilder.contextRoot.getRelativeLocation("com/ExampleLayout.application");
+        parseApplication(goof);
+
     }
 
     /**
@@ -147,41 +146,65 @@ public class FullBuild extends Build
      */
     private void findAllArtifactsInClasspath(final ArrayList found)
     {
-        CoreLookup lookup = new CoreLookup();
+        ISearch searcher = null;
         try
         {
-            lookup.configure(tapestryBuilder.tapestryProject);
-            lookup.findAll(new ArtifactCollector()
+            searcher = tapestryBuilder.classpathRoot.getSearch();
+        } catch (CoreException e)
+        {
+            TapestryCore.log(e);
+        }
+        if (searcher != null)
+        {
+            searcher.search(new ArtifactCollector()
             {
-                public void accept(IStorage storage, Object parent)
+                public boolean acceptTapestry(Object parent, IStorage storage)
                 {
+                    IPackageFragment fragment = (IPackageFragment) parent;
                     IResourceWorkspaceLocation location =
-                        new ClasspathResourceWorkspaceLocation((IPackageFragment) parent, storage);
+                        tapestryBuilder.classpathRoot.getRelativeLocation(fragment, storage);
                     found.add(location);
                     if (TapestryBuilder.DEBUG)
                     {
                         System.out.println(location);
                     }
+                    return keepGoing();
                 }
             });
-        } catch (CoreException e)
-        {
-            TapestryCore.log(e);
-            e.printStackTrace();
         }
     }
 
     /**
      * Method findAllArtifactsInProjectProper.
      */
-    private void findAllArtifactsInWebContext(ArrayList found)
+    private void findAllArtifactsInWebContext(final ArrayList found)
     {
+        ISearch searcher = null;
         try
         {
-            tapestryBuilder.getProject().accept(new BuilderContextVisitor(this, found), IResource.DEPTH_INFINITE, false);
+            searcher = tapestryBuilder.contextRoot.getSearch();
         } catch (CoreException e)
         {
             TapestryCore.log(e);
+        }
+        if (searcher != null)
+        {
+            searcher.search(new ArtifactCollector()
+            {
+                public boolean acceptTapestry(Object parent, IStorage storage)
+                {
+
+                    IResourceWorkspaceLocation location =
+                        tapestryBuilder.contextRoot.getRelativeLocation((IResource) storage);
+                    found.add(location);
+                    if (TapestryBuilder.DEBUG)
+                    {
+                        System.out.println(location);
+                    }
+                    return keepGoing();
+
+                }
+            });
         }
     }
 
@@ -219,7 +242,7 @@ public class FullBuild extends Build
             {
                 WebXMLScanner wscanner = new WebXMLScanner(this);
                 servletInfos = wscanner.scanServletInformation(wxmlElement);
-                IResource resource = (IResource)webXML.getStorage();
+                IResource resource = (IResource) webXML.getStorage();
                 Markers.addTapestryProblemMarkersToResource(resource, wscanner.getProblems());
             } catch (ScannerException e)
             {
@@ -251,24 +274,25 @@ public class FullBuild extends Build
 
     }
 
-    private abstract class ArtifactCollector implements ILookupRequestor
+    private abstract class ArtifactCollector extends AbstractTapestrySearchAcceptor
     {
-        public boolean isCancelled()
+
+        public ArtifactCollector()
+        {
+            super(AbstractTapestrySearchAcceptor.ACCEPT_ANY);
+        }
+
+        public boolean keepGoing()
         {
             try
             {
                 tapestryBuilder.notifier.checkCancel();
             } catch (OperationCanceledException e)
             {
-                return true;
+                return false;
             }
-            return false;
+            return true;
         }
-        public void accept(IStorage storage, Object parent)
-        {
-            System.out.println(storage);
-        }
-
     }
 
     public class ServletInfo

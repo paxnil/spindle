@@ -23,13 +23,19 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.core.builder.util;
 
-import org.eclipse.core.resources.IStorage;
+package com.iw.plugins.spindle.core.resources.search;
 
-public interface ILookupRequestor
+import org.eclipse.core.runtime.CoreException;
+
+/**
+ *  TODO Add Type comment
+ * 
+ * @author glongman@intelligentworks.com
+ * @version $Id$
+ */
+public interface ISearch
 {
-    public boolean isCancelled();
-
-    public void accept(IStorage storage, Object parent);
+    public abstract void configure(Object root) throws CoreException;
+    public abstract void search(ISearchAcceptor acceptor);
 }

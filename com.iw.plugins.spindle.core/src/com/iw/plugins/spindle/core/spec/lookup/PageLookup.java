@@ -24,37 +24,41 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.namespace;
+package com.iw.plugins.spindle.core.spec.lookup;
 
-import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.IComponentSpecification;
 
-import com.iw.plugins.spindle.core.spec.lookup.ComponentLookup;
-import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
+import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 
 /**
- *  Extends org.apache.tapestry.INamespace to allow
- *  for the de-installation of pages and components.
+ *  Lookup class for ComponentSpecifications
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface ICoreNamespace extends INamespace
+public class PageLookup extends AbstractLookup
 {
-    public void setParentNamespace(ICoreNamespace parent);
+    protected IComponentSpecification lookupSpecification(String libraryId, String pageName)
+    {
+        ICoreNamespace useNamespace = getNamespace();
 
-    public IComponentSpecification deinstallPageSpecification(String pageName);
+        IComponentSpecification result = null;
 
-    public IComponentSpecification deinstallComponentSpecification(String type);
+        if (libraryId != null)
+        {
+            useNamespace = (ICoreNamespace) useNamespace.getChildNamespace(libraryId);
+        }
 
-    public void installChildNamespace(String id, INamespace child);
+        result = useNamespace.getPageSpecification(pageName);
 
-    public INamespace deinstallChildNamespace(String id);
-
-    public ComponentLookup getComponentLookup(ICoreNamespace framework);
-
-    public PageLookup getPageLookup(ICoreNamespace framework);
-
-    public void setAppNameFromWebXML(String name);
-
+        if (result == null && libraryId == null)
+        {
+            useNamespace = getFrameworkNamespace();
+            if (useNamespace != null)
+            {
+                return getFrameworkNamespace().getPageSpecification(pageName);
+            }
+        }
+        return result;
+    }
 }

@@ -46,6 +46,7 @@ import com.iw.plugins.spindle.core.scanning.ApplicationScanner;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;
 import com.iw.plugins.spindle.core.scanning.LibraryScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Markers;
 import com.iw.plugins.spindle.core.util.Utils;
 /**
@@ -334,7 +335,7 @@ public abstract class Build implements IBuild
         return result;
     }
 
-    private IComponentSpecification resolveIComponentSpecification(
+    protected IComponentSpecification resolveIComponentSpecification(
         ICoreNamespace namespace,
         IResourceWorkspaceLocation location)
     {
@@ -357,6 +358,7 @@ public abstract class Build implements IBuild
                                     parser,
                                     new BuilderValidator(this, namespace),
                                     node);
+                            ((PluginComponentSpecification)result).setNamespace(namespace);
                         } catch (ScannerException e1)
                         {
                             e1.printStackTrace();

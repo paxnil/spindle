@@ -24,37 +24,53 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.namespace;
+package com.iw.plugins.spindle.core.resources;
 
-import org.apache.tapestry.INamespace;
-import org.apache.tapestry.spec.IComponentSpecification;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Locale;
 
-import com.iw.plugins.spindle.core.spec.lookup.ComponentLookup;
-import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
+import org.apache.tapestry.IResourceLocation;
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
+
 
 /**
- *  Extends org.apache.tapestry.INamespace to allow
- *  for the de-installation of pages and components.
+ *  Abstract base class for root locations
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface ICoreNamespace extends INamespace
+public abstract class AbstractRootLocation implements IResourceWorkspaceLocation
 {
-    public void setParentNamespace(ICoreNamespace parent);
 
-    public IComponentSpecification deinstallPageSpecification(String pageName);
+    public IStorage getStorage()
+    {
+        throw new RuntimeException("can't get the storage from root!");
+    }
 
-    public IComponentSpecification deinstallComponentSpecification(String type);
+    public InputStream getContents() throws CoreException
+    {
+        throw new RuntimeException("can't get the contents from root!");
+    }
 
-    public void installChildNamespace(String id, INamespace child);
+    public IResourceLocation getLocalization(Locale arg0)
+    {
+        throw new RuntimeException("can't get the localization from root!");
+    }
 
-    public INamespace deinstallChildNamespace(String id);
+    public String getName()
+    {
+        return "";
+    }
 
-    public ComponentLookup getComponentLookup(ICoreNamespace framework);
+    public String getPath()
+    {
+        return "/";
+    }
 
-    public PageLookup getPageLookup(ICoreNamespace framework);
-
-    public void setAppNameFromWebXML(String name);
-
+    public URL getResourceURL()
+    {
+        return null;
+    }    
 }

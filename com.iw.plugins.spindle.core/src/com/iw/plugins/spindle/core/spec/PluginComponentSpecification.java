@@ -502,5 +502,9 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     {
         this.namespace = namespace;
     }
+    
+    public List getTemplateLocations() {
+        return null;
+    }
 
 }

@@ -31,20 +31,14 @@ import java.util.Locale;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.tapestry.IResourceLocation;
-import org.apache.tapestry.util.LocalizedNameGenerator;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JavaProject;
-import org.eclipse.jdt.internal.core.NameLookup;
 
-import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.resources.search.ISearch;
 
 /**
  *  Implementation of IResourceWorkspaceLocation
@@ -56,104 +50,19 @@ import com.iw.plugins.spindle.core.TapestryCore;
 public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspaceLocation
 {
 
-    IPackageFragment fragment;
-
-    public ClasspathResourceWorkspaceLocation(IJavaProject jproject, String path)
+    protected ClasspathResourceWorkspaceLocation(ClasspathRootLocation root, String path)
     {
-        super(path);
-        initialize(jproject);
+        super(root, path);
     }
 
-    public ClasspathResourceWorkspaceLocation(IPackageFragment fragment, IStorage storage)
+    protected ClasspathResourceWorkspaceLocation(ClasspathRootLocation root, IStorage storage)
     {
-        this(fragment.getJavaProject(), createPath(fragment, storage));
-    }
-
-    private static String createPath(IPackageFragment fragment, IStorage storage)
-    {
-        return "/" + fragment.getElementName().replace('.', '/') + "/" + storage.getName();
-    }
-
-    private void initialize(IJavaProject jproject)
-    {
-        IPath path = getIPath().makeRelative();
-        IPath prefix = path.removeLastSegments(1);
-
-        String packageName = prefix.toString();
-        packageName = packageName.replace('/', '.');
-
-        IPackageFragment[] fragments = null;
-        try
-        {
-            NameLookup lookup = ((JavaProject) jproject).getNameLookup();
-            fragments = lookup.findPackageFragments(packageName, false);
-
-        } catch (JavaModelException e)
-        {
-            TapestryCore.log(e);
-        }
-
-        if (fragments != null && fragments.length >= 0)
-        {
-            for (int i = 0; i < fragments.length; i++)
-            {
-                Object[] contents = getNonJavaResources(fragments[i]);
-
-                for (int j = 0; j < contents.length; j++)
-                {
-                    IStorage storage = (IStorage) contents[j];
-                    if (storage.getName().equals(getName()))
-                    {
-                        fragment = fragments[i];
-                        return;
-                    }
-                }
-            }
-
-        }
+        super(root, root.findRelativePath(storage));
     }
 
     public boolean exists()
     {
-        return fragment != null;
-    }
-
-    private Object[] getNonJavaResources(IPackageFragment fragment)
-    {
-        try
-        {
-            return fragment.getNonJavaResources();
-        } catch (JavaModelException e)
-        {
-            TapestryCore.log(e);
-        }
-        return null;
-    }
-
-    private IStorage findStorage(String name)
-    {
-        if (fragment != null)
-        {
-
-            Object[] nonJavaResources = getNonJavaResources(fragment);
-            for (int i = 0; i < nonJavaResources.length; i++)
-            {
-                IStorage storage = (IStorage) nonJavaResources[i];
-                if (storage.getName().equals(name))
-                {
-                    return storage;
-                }
-            }
-        }
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.AbstractResourceWorkspaceLocation#buildNewResourceLocation(java.lang.String)
-     */
-    protected IResourceLocation buildNewResourceLocation(String path)
-    {
-        return new ClasspathResourceWorkspaceLocation(fragment.getJavaProject(), path);
+        return getStorage() != null;
     }
 
     /* (non-Javadoc)
@@ -161,7 +70,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public IStorage getStorage()
     {
-        return findStorage(getName());
+        return ((ClasspathRootLocation) root).findStorage(this);
     }
 
     /* (non-Javadoc)
@@ -169,17 +78,10 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public boolean isWorkspaceResource()
     {
-        if (fragment != null)
+        IStorage storage = getStorage();
+        if (storage != null)
         {
-            try
-            {
-                IPackageFragmentRoot root =
-                    (IPackageFragmentRoot) fragment.getJavaProject().getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-                return root.getKind() == IPackageFragmentRoot.K_SOURCE;
-            } catch (JavaModelException e)
-            {
-                TapestryCore.log(e);
-            }
+            return storage instanceof IResource;
         }
         return false;
     }
@@ -189,6 +91,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public IProject getProject()
     {
+        IPackageFragment fragment = ((ClasspathRootLocation) root).findExactPackageFragment(this);
         return fragment == null ? null : fragment.getJavaProject().getProject();
     }
 
@@ -197,7 +100,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public InputStream getContents() throws CoreException
     {
-        IStorage storage = findStorage(getName());
+        IStorage storage = getStorage();
         if (storage != null)
         {
             return storage.getContents();
@@ -210,28 +113,8 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
      */
     public IResourceLocation getLocalization(Locale locale)
     {
-        if (fragment != null)
-        {
-
-            LocalizedClasspathResourceFinder finder = new LocalizedClasspathResourceFinder();
-
-            String path = getPath();
-            String localizedPath = finder.resolve(locale);
-
-            if (localizedPath == null)
-            {
-
-                return null;
-            }
-
-            if (path.equals(localizedPath))
-            {
-                return this;
-            }
-
-            return new ClasspathResourceWorkspaceLocation(fragment.getJavaProject(), localizedPath);
-        }
-        return null;
+        // TODO implement later
+        throw new RuntimeException("not implemented");
     }
 
     public int hashCode()
@@ -239,67 +122,57 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
         HashCodeBuilder builder = new HashCodeBuilder(5591, 1009);
 
         builder.append(getPath());
+        builder.append(root);
 
         return builder.toHashCode();
     }
 
     public String toString()
     {
-        return "classpath:" + getPath();
+        String name = getName();
+        return "classpath:" + name != null ? name : "";
     }
 
-    public class LocalizedClasspathResourceFinder
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)
+     */
+    public void lookup(IResourceLocationAcceptor requestor) throws CoreException
     {
-
-        /**
-         *  Resolves the resource, returning a path representing
-         *  the closest match (with respect to the provided locale).
-         *  Returns null if no match.
-         * 
-         *  <p>The provided path is split into a base path
-         *  and a suffix (at the last period character).  The locale
-         *  will provide different suffixes to the base path
-         *  and the first match is returned.
-         * 
-         **/
-        Object[] nonJavaResources;
-
-        public LocalizedClasspathResourceFinder()
+        String packageName = ((ClasspathRootLocation) root).toPackageName(getPath());
+        IPackageFragment[] fragments = ((ClasspathRootLocation) root).getAllPackageFragments(packageName);
+        for (int i = 0; i < fragments.length; i++)
         {
-            nonJavaResources = getNonJavaResources(fragment);
-        }
-
-        public String resolve(Locale locale)
-        {
-            if (nonJavaResources == null || nonJavaResources.length == 0)
+            Object[] nonJavaResources = null;
+            try
             {
-                return null;
+                nonJavaResources = fragments[i].getNonJavaResources();
+            } catch (JavaModelException e)
+            {}
+            if (nonJavaResources == null)
+            {
+                continue;
             }
-
-            IPath path = getIPath();
-            String suffix = path.removeFileExtension().lastSegment();
-
-            LocalizedNameGenerator generator = new LocalizedNameGenerator("", locale, suffix);
-
-            while (generator.more())
+            for (int j = 0; j < nonJavaResources.length; j++)
             {
-                String candidate = generator.next();
-
-                if (isExistingResource(candidate))
+                IStorage storage = (IStorage) nonJavaResources[j];
+                IResourceWorkspaceLocation loc =
+                    new ClasspathResourceWorkspaceLocation(
+                        ((ClasspathRootLocation) root),
+                        getPath() + storage.getName());
+                if (!requestor.accept(loc))
                 {
-
-                    return "/" + fragment.getElementName().replace('.', '/') + "/" + candidate;
+                    break;
                 }
             }
-
-            return null;
         }
+    }
 
-        private boolean isExistingResource(String candidate)
-        {
-            return findStorage(candidate) != null;
-        }
-
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getSearch()
+     */
+    public ISearch getSearch() throws CoreException
+    {
+        return root.getSearch();
     }
 
 }

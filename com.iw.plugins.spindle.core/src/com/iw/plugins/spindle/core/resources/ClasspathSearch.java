@@ -23,16 +23,13 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.core.builder.util;
+package com.iw.plugins.spindle.core.resources;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
@@ -45,41 +42,13 @@ import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.core.TapestryModelException;
 import com.iw.plugins.spindle.core.TapestryProject;
-import com.iw.plugins.spindle.core.builder.TapestryBuilder;
+import com.iw.plugins.spindle.core.resources.search.ISearch;
+import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 
 // does not stay up to date as time goes on!
 
-public class CoreLookup
+public class ClasspathSearch implements ISearch
 {
-
-    public int ACCEPT_NONE = 0x0100000;
-
-    public int ACCEPT_LIBRARIES = 0x0000001;
-
-    /**
-    * Accept flag for specifying components.
-    */
-    public int ACCEPT_COMPONENTS = 0x00000002;
-    /**
-     * Accept flag for specifying application.
-     */
-    public int ACCEPT_APPLICATIONS = 0x00000004;
-    /**
-     *  Accept flag for specifying HTML files
-     */
-    public int ACCEPT_HTML = 0x00000008;
-    /**
-     *  Accept flag for specifying page files
-     */
-    public int ACCEPT_PAGES = 0x00000010;
-    /**
-     *  Accept flag for specifying script files
-     */
-    public int ACCEPT_SCRIPT = 0x00000020;
-    /**
-     *  Accept flag for specifying any tapestry files
-     */
-    public int ACCEPT_ANY = 0x00000100;
 
     protected IPackageFragmentRoot[] packageFragmentRoots = null;
 
@@ -90,15 +59,12 @@ public class CoreLookup
 
     private boolean initialized = false;
 
-    private List seekExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
-
-    public CoreLookup()
+    public ClasspathSearch()
     {}
 
-    public void configure(TapestryProject project) throws CoreException
+    public void configure(Object root) throws CoreException
     {
-        this.tproject = project;
-        this.jproject = project.getJavaProject();
+        this.jproject = (IJavaProject) root;
         configureClasspath();
         initialized = true;
     }
@@ -171,12 +137,7 @@ public class CoreLookup
         return fragments;
     }
 
-    public void findAll(ILookupRequestor requestor)
-    {
-        findAllInClasspath(requestor, ACCEPT_ANY);
-    }
-
-    public void findAllInClasspath(ILookupRequestor requestor, int flags)
+    public void search(ISearchAcceptor acceptor)
     {
         if (!initialized)
         {
@@ -185,8 +146,7 @@ public class CoreLookup
         int count = packageFragmentRoots.length;
         for (int i = 0; i < count; i++)
         {
-            if (requestor.isCancelled())
-                return;
+
             IPackageFragmentRoot root = packageFragmentRoots[i];
             IJavaElement[] packages = null;
             try
@@ -200,9 +160,8 @@ public class CoreLookup
             {
                 for (int j = 0, packageCount = packages.length; j < packageCount; j++)
                 {
-                    if (requestor.isCancelled())
-                        return;
-                    if (seekInPackage((IPackageFragment) packages[j], requestor, flags))
+                    boolean keepGoing = searchInPackage((IPackageFragment) packages[j], acceptor);
+                    if (!keepGoing)
                     {
                         return;
                     }
@@ -211,46 +170,14 @@ public class CoreLookup
         }
     }
 
-    public boolean seekInFolder(IFolder folder, ILookupRequestor requestor, int flags, boolean childFoldersInError)
-    {
-        if (!initialized)
-        {
-            throw new Error("not initialized");
-        }
-        if (folder.exists())
-        {
-            try
-            {
-                IResource[] members = folder.members();
-                for (int i = 0; i < members.length; i++)
-                {
-                    if ((members[i] instanceof IFile))
-                    {
-                        if (acceptAsTapestry((IStorage) members[i], folder, requestor, flags))
-                        {
-                            requestor.accept((IStorage) members[i], folder);
-                        }
-                    } else if (members[i] instanceof IFolder && childFoldersInError)
-                    {
-                        seekInFolder((IFolder) members[i], requestor, ACCEPT_NONE, true);
-                    }
-                }
-            } catch (CoreException e)
-            {
-                // ignore it
-            }
-        }
-        return false;
-    }
-
-    public boolean seekInPackage(IPackageFragment pkg, ILookupRequestor requestor, int flags)
+    protected boolean searchInPackage(IPackageFragment pkg, ISearchAcceptor acceptor)
     {
 
         if (!initialized)
         {
             throw new Error("not initialized");
         }
-        boolean stopLooking = false;
+        boolean keepGoing = true;
 
         IPackageFragmentRoot root = (IPackageFragmentRoot) pkg.getParent();
 
@@ -261,23 +188,22 @@ public class CoreLookup
             switch (packageFlavor)
             {
                 case IPackageFragmentRoot.K_BINARY :
-                    stopLooking = seekInBinaryPackage(pkg, requestor, flags);
+                    keepGoing = searchInBinaryPackage(pkg, acceptor);
                     break;
                 case IPackageFragmentRoot.K_SOURCE :
-                    stopLooking = seekInSourcePackage(pkg, requestor, flags);
+                    keepGoing = searchInSourcePackage(pkg, acceptor);
                     break;
                 default :
-                    return stopLooking;
+                    return keepGoing;
             }
         } catch (JavaModelException e)
-        {
-            return stopLooking;
-        }
-        return stopLooking;
+        {}
+        return keepGoing;
     }
 
-    protected boolean seekInBinaryPackage(IPackageFragment pkg, ILookupRequestor requestor, int flags)
+    protected boolean searchInBinaryPackage(IPackageFragment pkg, ISearchAcceptor requestor)
     {
+        boolean keepGoing = true;
         Object[] jarFiles = null;
         try
         {
@@ -289,11 +215,6 @@ public class CoreLookup
         int length = jarFiles.length;
         for (int i = 0; i < length; i++)
         {
-            if (requestor.isCancelled())
-            {
-                return true;
-            }
-
             JarEntryFile jarFile = null;
             try
             {
@@ -303,17 +224,18 @@ public class CoreLookup
                 //skip it
                 continue;
             }
-            if (acceptAsTapestry(jarFile, pkg, requestor, flags))
-            {
-                requestor.accept((IStorage) jarFile, pkg);
-            }
+
+            keepGoing = requestor.accept(pkg, (IStorage) jarFile);
+
         }
-        return false;
+        return keepGoing;
     }
 
-    protected boolean seekInSourcePackage(IPackageFragment pkg, ILookupRequestor requestor, int flags)
+    protected boolean searchInSourcePackage(IPackageFragment pkg, ISearchAcceptor requestor)
     {
         Object[] files = null;
+
+        boolean keepGoing = true;
         try
         {
             files = getSourcePackageResources(pkg);
@@ -329,10 +251,7 @@ public class CoreLookup
         int length = files.length;
         for (int i = 0; i < length; i++)
         {
-            if (requestor.isCancelled())
-            {
-                return true;
-            }
+
             IFile file = null;
             try
             {
@@ -342,12 +261,11 @@ public class CoreLookup
                 // skip it
                 continue;
             }
-            if (acceptAsTapestry(file, pkg, requestor, flags))
-            {
-                requestor.accept((IStorage) file, pkg);
-            }
+
+            keepGoing = requestor.accept(pkg, (IStorage) file);
+
         }
-        return false;
+        return keepGoing;
     }
 
     /**
@@ -380,44 +298,6 @@ public class CoreLookup
 
         }
         return result;
-    }
-
-    public boolean acceptAsTapestry(IStorage s, Object parent, ILookupRequestor requestor, int acceptFlags)
-    {
-        String extension = s.getFullPath().getFileExtension();
-        if (!seekExtensions.contains(extension))
-        {
-            return false;
-        }
-        if ((acceptFlags & ACCEPT_ANY) != 0)
-        {
-            return true;
-        }
-        if ("jwc".equals(extension) && (acceptFlags & ACCEPT_COMPONENTS) == 0)
-        {
-            return false;
-        }
-        if ("application".equals(extension) && (acceptFlags & ACCEPT_APPLICATIONS) == 0)
-        {
-            return false;
-        }
-        if ("html".equals(extension) && (acceptFlags & ACCEPT_HTML) == 0)
-        {
-            return false;
-        }
-        if ("library".equals(extension) && (acceptFlags & ACCEPT_LIBRARIES) == 0)
-        {
-            return false;
-        }
-        if ("page".equals(extension) && (acceptFlags & ACCEPT_PAGES) == 0)
-        {
-            return false;
-        }
-        if ("script".equals(extension) && (acceptFlags & ACCEPT_SCRIPT) == 0)
-        {
-            return false;
-        }
-        return true;
     }
 
 }

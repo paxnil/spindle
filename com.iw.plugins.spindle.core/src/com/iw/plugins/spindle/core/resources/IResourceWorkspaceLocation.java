@@ -32,6 +32,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
+import com.iw.plugins.spindle.core.resources.search.ISearch;
+
 /**
  * Extends <code>org.apache.tapestry.IResourceLocation<code> to record additional
  * bits of information describing a Tapestry artifact found in the workspace.
@@ -43,7 +45,7 @@ import org.eclipse.core.runtime.CoreException;
 
 public interface IResourceWorkspaceLocation extends IResourceLocation
 {
-    
+
     public boolean exists();
 
     /**
@@ -55,12 +57,13 @@ public interface IResourceWorkspaceLocation extends IResourceLocation
     public IStorage getStorage();
 
     public boolean isWorkspaceResource();
+    
+    public boolean isOnClasspath();
 
     /**
      * return the project that contains the artifact
      */
     public IProject getProject();
-
 
     /**
      * Returns an open input stream on the contents of this descriptor.
@@ -70,5 +73,25 @@ public interface IResourceWorkspaceLocation extends IResourceLocation
      *		not be accessed.   See any refinements for more information.  
      */
     public InputStream getContents() throws CoreException;
+
+    /**
+     * iterate over all the direct descendants of this location
+     * passing each to the requestor
+     * 
+     * does not include folders
+     * 
+     * @param requestor an instance of IResourceLocationRequestor
+     * @throws CoreException
+     */
+    public void lookup(IResourceLocationAcceptor requestor) throws CoreException;
+    
+    /**
+     * return a propertly configured instance of ISearch
+     * 
+     * @throws CoreException if the search could not configured
+     */
+    
+    public ISearch getSearch() throws CoreException;
+    
 
 }

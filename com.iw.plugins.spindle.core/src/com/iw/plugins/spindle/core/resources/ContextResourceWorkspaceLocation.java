@@ -31,18 +31,15 @@ import java.util.Locale;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.tapestry.IResourceLocation;
-import org.apache.tapestry.util.LocalizedNameGenerator;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+
+import com.iw.plugins.spindle.core.resources.search.ISearch;
 
 /**
  *  Implementation of IResourceWorkspaceLocation
@@ -54,58 +51,24 @@ import org.eclipse.core.runtime.Path;
 public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceLocation
 {
 
-    private static String findPath(IFolder context, IResource resource)
+    protected ContextResourceWorkspaceLocation(ContextRootLocation root, String path)
     {
-
-        IPath contextPath = context.getFullPath();
-        IPath resourcePath = resource.getFullPath();
-        IPath chopped = resourcePath.removeFirstSegments(contextPath.segmentCount()).makeAbsolute();
-        return chopped.toString();
+        super(root, path);
     }
 
-    private IFolder contextRoot;
-
-    /**
-     * @param path
-     */
-    public ContextResourceWorkspaceLocation(IFolder contextRoot, String path)
+    public ContextResourceWorkspaceLocation(ContextRootLocation root, IResource resource)
     {
-        super(path);
-        this.contextRoot = contextRoot;        
+        this(root, root.findRelativePath(resource));
     }
 
-    public ContextResourceWorkspaceLocation(IFolder contextLocation, IResource resource)
+    public boolean exists()
     {
-        this(contextLocation, findPath(contextLocation, resource));
-
-    }
-    
-    public boolean exists() {
         return getStorage() != null;
     }
 
-    private IFile getWorkspaceFile(IPath path)
+    private IContainer getContainer()
     {
-        IWorkspace workspace = ResourcesPlugin.getWorkspace();
-        IWorkspaceRoot root = workspace.getRoot();
-        IFile file = root.getFile(path);
-        if (file != null && file.exists()) {
-            return file;
-        }
-        return null;
-    }
-
-    private IPath getCompletePath()
-    {
-        return contextRoot.getFullPath().append(getPath());
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.AbstractResourceWorkspaceLocation#buildNewResourceLocation(java.lang.String)
-     */
-    protected IResourceLocation buildNewResourceLocation(String path)
-    {
-        return new ContextResourceWorkspaceLocation(contextRoot, path);
+        return ((ContextRootLocation) root).getContainer(this);
     }
 
     /* (non-Javadoc)
@@ -113,7 +76,12 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
      */
     public IStorage getStorage()
     {
-        return getWorkspaceFile(getCompletePath());
+        IContainer container = getContainer();
+        if (container != null && getName() != null)
+        {
+            return (IStorage) container.getFile(new Path(getName()));
+        }
+        return null;
     }
 
     /* (non-Javadoc)
@@ -129,7 +97,7 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
      */
     public IProject getProject()
     {
-        IFile found = getWorkspaceFile(getCompletePath());
+        IFile found = (IFile) getStorage();
         return found.getProject();
     }
 
@@ -138,11 +106,12 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
      */
     public InputStream getContents() throws CoreException
     {
-        IFile found = getWorkspaceFile(getCompletePath());
-        if (found != null && found.exists())
+        IStorage storage = getStorage();
+        if (storage != null)
         {
-            return found.getContents();
+            return storage.getContents();
         }
+
         return null;
     }
 
@@ -151,23 +120,8 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
      */
     public IResourceLocation getLocalization(Locale locale)
     {
-        LocalizedContextResourceFinder finder = new LocalizedContextResourceFinder();
-
-        String path = getPath();
-        String localizedPath = finder.resolve(locale);
-
-        if (localizedPath == null)
-        {
-
-            return null;
-        }
-
-        if (path.equals(localizedPath))
-        {
-            return this;
-        }
-
-        return new ContextResourceWorkspaceLocation(contextRoot, localizedPath);
+        // TODO implement later
+        throw new RuntimeException("not implemented");
     }
 
     public int hashCode()
@@ -175,56 +129,46 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
         HashCodeBuilder builder = new HashCodeBuilder(5589, 1117);
 
         builder.append(getPath());
+        builder.append(root);
 
         return builder.toHashCode();
     }
 
     public String toString()
     {
-        return "context:" + getPath();
+        String name = getName();
+        return "context:" + name != null ? name : "";
+
     }
 
-    public class LocalizedContextResourceFinder
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)
+     */
+    public void lookup(IResourceLocationAcceptor requestor) throws CoreException
     {
-
-        /**
-         *  Resolves the resource, returning a path representing
-         *  the closest match (with respect to the provided locale).
-         *  Returns null if no match.
-         * 
-         *  <p>The provided path is split into a base path
-         *  and a suffix (at the last period character).  The locale
-         *  will provide different suffixes to the base path
-         *  and the first match is returned.
-         * 
-         **/
-
-        public String resolve(Locale locale)
+        IContainer container = getContainer();
+        if (container != null && container.exists())
         {
-            IPath contextPath = contextRoot.getFullPath();
-            IPath basePath = contextPath.removeLastSegments(1).addTrailingSeparator();
-            IPath temp = contextPath.removeFileExtension();
-            String suffix = temp.lastSegment();
-
-            LocalizedNameGenerator generator = new LocalizedNameGenerator(basePath.toString(), locale, suffix);
-
-            while (generator.more())
+            IResource[] members = container.members(false);
+            for (int i = 0; i < members.length; i++)
             {
-                String candidatePath = generator.next();
-
-                if (isExistingResource(new Path(candidatePath)))
-                    return candidatePath;
+                if (members[i] instanceof IContainer)
+                {
+                    continue;
+                }
+                if (!requestor.accept((IResourceWorkspaceLocation) getRelativeLocation(members[i].getName())))
+                {
+                    break;
+                }
             }
-
-            return null;
-        }
-
-        private boolean isExistingResource(IPath path)
-        {
-
-            IFile found = getWorkspaceFile(path);
-            return found != null && found.exists();
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getSearch()
+     */
+    public ISearch getSearch() throws CoreException
+    {
+        return root.getSearch();
+    }
 }

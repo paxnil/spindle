@@ -24,37 +24,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.namespace;
+package com.iw.plugins.spindle.core.resources.search;
 
-import org.apache.tapestry.INamespace;
-import org.apache.tapestry.spec.IComponentSpecification;
-
-import com.iw.plugins.spindle.core.spec.lookup.ComponentLookup;
-import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
+import org.eclipse.core.resources.IStorage;
 
 /**
- *  Extends org.apache.tapestry.INamespace to allow
- *  for the de-installation of pages and components.
+ *  An acceptor that is invoked by the find methods in ClasspathRootLocation.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public interface ICoreNamespace extends INamespace
+public interface ISearchAcceptor
 {
-    public void setParentNamespace(ICoreNamespace parent);
 
-    public IComponentSpecification deinstallPageSpecification(String pageName);
-
-    public IComponentSpecification deinstallComponentSpecification(String type);
-
-    public void installChildNamespace(String id, INamespace child);
-
-    public INamespace deinstallChildNamespace(String id);
-
-    public ComponentLookup getComponentLookup(ICoreNamespace framework);
-
-    public PageLookup getPageLookup(ICoreNamespace framework);
-
-    public void setAppNameFromWebXML(String name);
+    /** return false to stop the find! **/
+    public boolean accept(Object parent, IStorage storage);
 
 }
