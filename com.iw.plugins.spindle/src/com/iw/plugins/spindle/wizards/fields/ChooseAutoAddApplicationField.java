@@ -43,7 +43,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
@@ -93,7 +93,7 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
     this.isComponentWizard = isComponentWizard;
     try {
     	
-      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+      TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager();
       mgr.getAllModels(element.getAdapter(IStorage.class), "application");
       IJavaProject project =
         (IJavaProject) Utils.findElementOfKind(element, IJavaElement.JAVA_PROJECT);
@@ -145,7 +145,7 @@ public class ChooseAutoAddApplicationField extends UneditableComboBoxDialogField
           if (found == null || found.length == 0) {
             return;
           }
-          TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+          TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager();
           previouslySelectedModel =
             TapestryPlugin.getTapestryModelManager().getReadOnlyModel(found[0]);
           if (previouslySelectedModel == null) {

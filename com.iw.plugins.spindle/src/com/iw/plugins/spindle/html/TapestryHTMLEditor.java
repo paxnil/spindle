@@ -94,7 +94,7 @@ import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.ModelUtils;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.ui.ToolTipHandler;
 import com.iw.plugins.spindle.ui.text.ColorManager;
@@ -125,7 +125,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     duringInit = true;
     setDocumentProvider(createDocumentProvider(input));
     super.init(site, input);
-    TapestryPlugin.getTapestryModelManager().addModelProviderListener(this);
+//    TapestryPlugin.getTapestryModelManager(input.getAdapter(IStorage.class)).addModelProviderListener(this);
     duringInit = false;
 
   }
@@ -177,7 +177,7 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
 
   public void dispose() {
     colorManager.dispose();
-    TapestryPlugin.getTapestryModelManager().removeModelProviderListener(this);
+//    TapestryPlugin.getTapestryModelManager().removeModelProviderListener(this);
     super.dispose();
   }
 
@@ -456,8 +456,11 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
 
       } else {
 
-        TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
-        model = (TapestryComponentModel) mgr.getReadOnlyModel(underlier);
+       try {
+           TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(underlier);
+            model = (TapestryComponentModel) mgr.getReadOnlyModel(underlier);
+        } catch (CoreException e) {
+        }
 
       }
       if (model != null) {

@@ -43,7 +43,7 @@ import net.sf.tapestry.spec.LibrarySpecification;
 import net.sf.tapestry.util.IPropertyHolder;
 
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 
 public class PluginLibrarySpecification
   extends LibrarySpecification

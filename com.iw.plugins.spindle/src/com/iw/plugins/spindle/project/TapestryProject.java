@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,10 +22,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.ui.internal.dialogs.ProjectPerspectiveChoiceDialog;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -33,7 +37,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import com.iw.plugins.spindle.model.TapestryLibraryModel;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
@@ -48,9 +55,12 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
  */
 public class TapestryProject implements IProjectNature, ITapestryProject {
 
-  private String applicationPath;
+  private IPath projectModelPath;
   private String projectName;
   private IProject project;
+  private IStorage projectResource;
+
+  private TapestryProjectModelManager modelManager;
 
   private boolean dirty; // has the application changed?
 
@@ -59,7 +69,8 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
    */
   public void configure() throws CoreException {
 
-    // we do nothing - for now
+    // called when this nature is added to a project
+    // should instantiate the model manager.
   }
 
   /**
@@ -86,14 +97,6 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
   }
 
   /**
-   * Returns the applicationPath.
-   * @return String
-   */
-  public String getApplicationPath() {
-    return applicationPath;
-  }
-
-  /**
    * Returns the dirty.
    * @return boolean
    */
@@ -101,21 +104,12 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     return dirty;
   }
 
-  public TapestryLookup getLookup() throws JavaModelException {
+  public TapestryLookup getLookup() throws CoreException {
 
     TapestryLookup lookup = new TapestryLookup();
     lookup.configure(TapestryPlugin.getDefault().getJavaProjectFor(project));
 
     return lookup;
-  }
-
-  /**
-   * Sets the applicationPath.
-   * @param applicationPath The applicationPath to set
-   */
-  public void setApplicationPath(String applicationPath) {
-    this.applicationPath = applicationPath;
-    dirty = true;
   }
 
   /**
@@ -126,76 +120,184 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     this.dirty = dirty;
   }
 
-  protected String readApplicationPath(String xmlSpec) throws IOException {
+  /**
+   * @see com.iw.plugins.spindle.project.ITapestryProject#getModelManager()
+   */
+  public synchronized TapestryProjectModelManager getModelManager() throws CoreException {
 
-    IPath projectPath = getProject().getFullPath();
-    StringReader reader = new StringReader(xmlSpec);
-    Element configElement;
+    if (modelManager == null) {
 
-    String path = null;
+      createModelManager();
+
+    }
+
+    return modelManager;
+
+  }
+
+  private void createModelManager() throws CoreException {
+
+    modelManager = new TapestryProjectModelManager(getProject());
+
+    modelManager.buildModelDelegates();
+
+    modelManager.getReadOnlyModel(getProjectStorage());
+
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.project.ITapestryProject#setProjectStorage(IStorage)
+   */
+  public void setProjectStorage(IStorage file) throws CoreException {
+
+    projectResource = file;
 
     try {
 
-      DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      configElement = parser.parse(new InputSource(reader)).getDocumentElement();
+      saveProperties(saveProjectResourcePathAsXML(projectResource));
 
-    } catch (SAXException e) {
+    } catch (IOException e) {
 
-      throw new IOException("bad file format");
-    } catch (ParserConfigurationException e) {
+      TempStatus status = new TempStatus(e, "Could not save .spindle file");
 
-      reader.close();
-      throw new IOException("bad file format");
-    } finally {
-
-      reader.close();
+      throw new CoreException(status);
     }
 
-    if (!configElement.getNodeName().equalsIgnoreCase("spindle")) {
-      throw new IOException("bad file format");
-    }
+  }
 
-    NodeList list = configElement.getChildNodes();
-    int length = list.getLength();
+  public synchronized IStorage getProjectStorage() throws CoreException {
 
-    for (int i = 0; i < length; ++i) {
-      Node node = list.item(i);
-      short type = node.getNodeType();
-      if (type == Node.ELEMENT_NODE) {
-        Element element = (Element) node;
+    if (projectResource == null) {
 
-        if (element.getNodeName().equalsIgnoreCase("application")) {
+      IProject project = getProject();
 
-          path = element.getAttribute("path"); //$NON-NLS-1$
+      String projectPath = project.getFullPath().toString();
+      
+      try {
 
+        Path path = new Path(readProperties());
+
+        //        String xmlStuff = readProperties();
+        //
+        //        Path path = new Path(readApplicationPath(xmlStuff));
+
+        IFile file = TapestryPlugin.getDefault().getWorkspace().getRoot().getFile(path);
+
+        if (!file.exists() || !file.getProject().equals(project)) {
+
+          TempStatus status = new TempStatus(path.toString() + "does not exist in " + projectPath);
+
+          throw new CoreException(status);
         }
+
+        projectResource = (IStorage) file;
+
+      } catch (IOException e) {
+
+        TempStatus status = new TempStatus(e, "Could not read " + projectPath + "/.spindle file");
+
+        throw new CoreException(status);
+
       }
     }
-    return path;
+
+    return projectResource;
+
   }
 
-  protected String saveApplicationPathAsXML(String applicationPath) throws IOException {
+  // not called because of the conflicting org.wc3.dom stuff
+//  protected String readApplicationPath(String xmlSpec) throws IOException {
+//
+//    IPath projectPath = getProject().getFullPath();
+//    StringReader reader = new StringReader(xmlSpec);
+//    Element configElement;
+//
+//    String path = null;
+//
+//    try {
+//
+//      DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+//      configElement = parser.parse(new InputSource(reader)).getDocumentElement();
+//
+//    } catch (SAXException e) {
+//
+//      throw new IOException("bad file format");
+//    } catch (ParserConfigurationException e) {
+//
+//      reader.close();
+//      throw new IOException("bad file format");
+//    } finally {
+//
+//      reader.close();
+//    }
+//
+//    if (!configElement.getNodeName().equalsIgnoreCase("spindle")) {
+//      throw new IOException("bad file format");
+//    }
+//
+//    NodeList list = configElement.getChildNodes();
+//    int length = list.getLength();
+//
+//    for (int i = 0; i < length; ++i) {
+//      Node node = list.item(i);
+//      short type = node.getNodeType();
+//      if (type == Node.ELEMENT_NODE) {
+//        Element element = (Element) node;
+//
+//        if (element.getNodeName().equalsIgnoreCase("application")) {
+//
+//          path = element.getAttribute("path"); //$NON-NLS-1$
+//
+//        }
+//      }
+//    }
+//    return path;
+//  }
 
-    Document doc = new DocumentImpl();
-    Element configElement = doc.createElement("spindle");
-    doc.appendChild(configElement);
+  protected String saveProjectResourcePathAsXML(IStorage storage) throws IOException {
 
-    Element appPathElement = doc.createElement("application");
-    appPathElement.setAttribute("path", applicationPath);
-    configElement.appendChild(appPathElement);
+    StringBuffer buffer = new StringBuffer();
+    buffer.append("# Spindle project kludge");
+    buffer.append("\n#\n");
+    buffer.append("# To get around problem of having multiple versions");
+    buffer.append("\n");
+    buffer.append("# of org.wc3.dom in the same plugin");
+    buffer.append("\n");
+    buffer.append("\n");
+    buffer.append(TapestryPlugin.NATURE_ID);
+    buffer.append("=");
+    buffer.append(storage.getFullPath().toString());
 
-    ByteArrayOutputStream s = new ByteArrayOutputStream();
-    OutputFormat format = new OutputFormat();
-    format.setIndenting(true);
-    format.setLineSeparator(System.getProperty("line.separator"));
+    return buffer.toString();
 
-    Serializer serializer =
-      SerializerFactory.getSerializerFactory(Method.XML).makeSerializer(
-        new OutputStreamWriter(s, "UTF8"),
-        format);
-    serializer.asDOMSerializer().serialize(doc);
-    return s.toString("UTF8");
   }
+
+  //  protected String saveApplicationPathAsXML(IStorage storage) throws IOException {
+  //
+  //    IPath path = storage.getFullPath();
+  //
+  //    String projectResourcePath = path.toString();
+  //
+  //    Document doc = new DocumentImpl();
+  //    Element configElement = doc.createElement("spindle");
+  //    doc.appendChild(configElement);
+  //
+  //    Element appPathElement = doc.createElement("application");
+  //    appPathElement.setAttribute("path", projectResourcePath);
+  //    configElement.appendChild(appPathElement);
+  //
+  //    ByteArrayOutputStream s = new ByteArrayOutputStream();
+  //    OutputFormat format = new OutputFormat();
+  //    format.setIndenting(true);
+  //    format.setLineSeparator(System.getProperty("line.separator"));
+  //
+  //    Serializer serializer =
+  //      SerializerFactory.getSerializerFactory(Method.XML).makeSerializer(
+  //        new OutputStreamWriter(s, "UTF8"),
+  //        format);
+  //    serializer.asDOMSerializer().serialize(doc);
+  //    return s.toString("UTF8");
+  //  }
 
   public void saveProperties(String xmlValue) throws CoreException {
 
@@ -217,7 +319,14 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     IFile rscFile = getProject().getFile(propertyFileName);
     if (rscFile.exists()) {
       property = new String(getResourceContentsAsByteArray(rscFile));
+
+      // Ugly hack follows
+
+      Properties props = new Properties();
+      props.load(rscFile.getContents());
+      property = props.getProperty(TapestryPlugin.NATURE_ID);
     }
+
     return property;
   }
 
@@ -230,7 +339,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
       stream = new BufferedInputStream(file.getContents(true));
 
-      return getInputStreamAsByteArray(stream, -1);
+      return Utils.getInputStreamAsByteArray(stream, -1);
 
     } catch (IOException e) {
 
@@ -247,61 +356,25 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     }
   }
 
-  public byte[] getInputStreamAsByteArray(InputStream stream, int length)
-    throws IOException {
-    byte[] contents;
-    if (length == -1) {
-      contents = new byte[0];
-      int contentsLength = 0;
-      int bytesRead = -1;
-      do {
-        int available = stream.available();
-
-        // resize contents if needed
-        if (contentsLength + available > contents.length) {
-          System.arraycopy(
-            contents,
-            0,
-            contents = new byte[contentsLength + available],
-            0,
-            contentsLength);
-        }
-
-        // read as many bytes as possible
-        bytesRead = stream.read(contents, contentsLength, available);
-
-        if (bytesRead > 0) {
-          // remember length of contents
-          contentsLength += bytesRead;
-        }
-      } while (bytesRead > 0);
-
-      // resize contents if necessary
-      if (contentsLength < contents.length) {
-        System.arraycopy(contents, 0, contents = new byte[contentsLength], 0, contentsLength);
-      }
-    } else {
-      contents = new byte[length];
-      int len = 0;
-      int readSize = 0;
-      while ((readSize != -1) && (len != length)) {
-        // See PR 1FMS89U
-        // We record first the read size. In this case len is the actual read size.
-        len += readSize;
-        readSize = stream.read(contents, len, length - len);
-      }
-    }
-
-    return contents;
-  }
-
   public class TempStatus implements IStatus {
 
     Throwable exception;
+    String message;
+
+    public TempStatus(String message) {
+      this.message = message;
+    }
 
     public TempStatus(Throwable e) {
       this.exception = e;
     }
+
+    public TempStatus(Throwable e, String message) {
+
+      this(e);
+      this.message = message;
+    }
+
     /**
     * @see org.eclipse.core.runtime.IStatus#getChildren()
     */
@@ -310,7 +383,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     }
 
     /**
-     * @see org.eclipse.core.runtime.IStatus#getCode()
+     * @see org.eclipse.core.runtime.IStatus#getCode() 
      */
     public int getCode() {
       return IStatus.ERROR;
@@ -327,7 +400,11 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
      * @see org.eclipse.core.runtime.IStatus#getMessage()
      */
     public String getMessage() {
-      return exception.getMessage();
+      StringBuffer buffer = new StringBuffer();
+      buffer.append(message == null ? "Exception occurred" : message);
+      buffer.append(" : ");
+      buffer.append(exception == null ? "no exception message" : exception.getLocalizedMessage());
+      return buffer.toString();
     }
 
     /**
@@ -365,13 +442,6 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
       return false;
     }
 
-  }
-
-  /**
-   * @see com.iw.plugins.spindle.project.ITapestryProject#getApplicationModel()
-   */
-  public TapestryApplicationModel getApplicationModel() {
-    return null;
   }
 
 }

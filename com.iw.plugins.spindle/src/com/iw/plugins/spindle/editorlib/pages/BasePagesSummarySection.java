@@ -29,6 +29,7 @@ import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
@@ -52,7 +53,7 @@ import com.iw.plugins.spindle.editors.SpindleFormSection;
 import com.iw.plugins.spindle.editors.SummaryHTMLViewer;
 import com.iw.plugins.spindle.editors.SummarySourceViewer;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
@@ -82,6 +83,7 @@ public abstract class BasePagesSummarySection
    * @see FormSection#createClient(Composite, FormWidgetFactory)
    */
   public Composite createClientContainer(Composite parent, FormWidgetFactory factory) {
+  	
     container = factory.createComposite(parent);
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;
@@ -210,7 +212,7 @@ public abstract class BasePagesSummarySection
 
         // we must resolve it from Framework.library
         ILibrarySpecification framework =
-          TapestryModelManager.getDefaultLibrary().getSpecification();
+          TapestryProjectModelManager.getDefaultLibraryModel().getSpecification();
 
         specificationPath = framework.getPageSpecificationPath(selectedPage);
       }
@@ -225,37 +227,53 @@ public abstract class BasePagesSummarySection
 
     } else {
 
+      TapestryLookup lookup = new TapestryLookup();
+
       pageName.setValue(selectedPage, false);
 
       specText.setValue(specificationPath, false);
 
-      if (specificationPath == null || !(specificationPath.endsWith(".jwc") || specificationPath.endsWith("page"))) {
+      if (specificationPath == null
+        || !(specificationPath.endsWith(".jwc") || specificationPath.endsWith("page"))) {
+        	
         resolveFailed(specificationPath);
         return;
       }
 
       ITapestryModel model = (ITapestryModel) getModel();
       IStorage thisStorage = model.getUnderlyingStorage();
-      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisStorage);
-      if (jproject == null) {
-        resolveFailed(specificationPath);
-      }
-      TapestryLookup lookup = new TapestryLookup();
       try {
+      	
+        IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisStorage);
+        if (jproject == null) {
+
+          resolveFailed(specificationPath);
+          
+        }
+        
         lookup.configure(jproject);
-      } catch (JavaModelException jmex) {
+        
+      } catch (CoreException jmex) {
+
         resolveFailed(specificationPath);
+
       }
       IStorage[] found = lookup.findPage(specificationPath);
+      
       if (found.length != 1) {
+      	
         resolveFailed(specificationPath);
         return;
+        
       }
       sourceViewer.update(null, found[0]);
       IStorage[] htmlStorage = lookup.findHtmlFor(specificationPath);
+      
       if (htmlStorage.length != 1) {
+      	
         htmlViewer.updateNotFound();
         return;
+        
       }
       htmlViewer.update(null, htmlStorage[0]);
       container.layout(true);

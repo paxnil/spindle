@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.editorjwc;
 
 import net.sf.tapestry.parse.SpecificationParser;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -39,6 +40,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.pde.core.IEditable;
@@ -220,7 +222,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
 
     PluginComponentSpecification componentSpec =
       (PluginComponentSpecification) model.getComponentSpecification();
-      
+
     boolean isPage = componentSpec == null ? false : componentSpec.isPageSpecification();
 
     if (!isPage) {
@@ -265,26 +267,26 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     openSpecClassAction.setEnabled(engineClass != null && !"".equals(engineClass.trim()));
     TapestryComponentModel model = (TapestryComponentModel) getFormPage().getModel();
     chooseComponentSpecAction.setEnabled(model.isEditable());
-    
+
     int DTDVersion = XMLUtil.getDTDVersion(model.getPublicId());
 
     manager.add(openSpecClassAction);
-    
+
     if (allowBody != null) {
-    	
+
       manager.add(chooseComponentSpecAction);
-      
+
       if (DTDVersion < XMLUtil.DTD_1_3) {
-      	
-      	manager.add(choosePageSpecAction);
+
+        manager.add(choosePageSpecAction);
       }
-      
+
     } else {
-    	
+
       manager.add(choosePageSpecAction);
-      
+
     }
-    
+
   }
 
   public boolean isDirty() {
@@ -306,9 +308,9 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
   private void forceDirty() {
     setDirty(true);
     IModel model = (IModel) getFormPage().getModel();
-    
+
     if (model instanceof IEditable) {
-    	
+
       IEditable editable = (IEditable) model;
       editable.setDirty(true);
       getFormPage().getEditor().fireSaveNeeded();
@@ -332,7 +334,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
 
   public void modelChanged(IModelChangedEvent event) {
     if (event.getChangeType() == IModelChangedEvent.WORLD_CHANGED) {
-    	
+
       updateNeeded = true;
     }
   }
@@ -354,9 +356,9 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     public void run() {
       String engineClass = componentClassText.getValue();
       ITapestryModel model = (ITapestryModel) getFormPage().getModel();
-      IJavaProject jproject =
-        TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
       try {
+        IJavaProject jproject =
+          TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
         IType type = Utils.findType(jproject, engineClass);
         JavaUI.openInEditor(type);
       } catch (Exception e) {
@@ -393,14 +395,14 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
 
     protected IType chooseType(String title, String message) {
       ITapestryModel model = (ITapestryModel) getFormPage().getModel();
-      IJavaProject jproject =
-        TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
-      if (jproject == null) {
-        return null;
-      }
-      IJavaSearchScope scope = createSearchScope(jproject);
       Shell shell = componentClassText.getControl().getShell();
       try {
+        IJavaProject jproject =
+          TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
+        if (jproject == null) {
+          return null;
+        }
+        IJavaSearchScope scope = createSearchScope(jproject);
 
         SelectionDialog dialog =
           JavaUI.createTypeDialog(
@@ -417,8 +419,8 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
         if (dialog.open() == dialog.OK) {
           return (IType) dialog.getResult()[0]; //FirstResult();
         }
-      } catch (JavaModelException jmex) {
-        TapestryPlugin.getDefault().logException(jmex);
+      } catch (CoreException jmex) {
+        ErrorDialog.openError(shell, "Spindle error", "unable to continue", jmex.getStatus());
       }
       return null;
     }

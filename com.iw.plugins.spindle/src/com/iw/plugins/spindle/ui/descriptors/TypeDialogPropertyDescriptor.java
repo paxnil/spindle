@@ -26,12 +26,15 @@
 package com.iw.plugins.spindle.ui.descriptors;
 
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import com.iw.plugins.spindle.TapestryPlugin;
@@ -62,9 +65,12 @@ public class TypeDialogPropertyDescriptor extends PropertyDescriptor implements 
   }
 
   private IPackageFragmentRoot getRoot(ITapestryModel model) {
+  	
   	IStorage storage = model.getUnderlyingStorage();
   	TapestryLookup lookup = new TapestryLookup();
+  	
   	try {
+  		
   		lookup.configure(TapestryPlugin.getDefault().getJavaProjectFor(storage));
   		
   		IPackageFragment fragment = lookup.findPackageFragment(storage);
@@ -73,8 +79,12 @@ public class TypeDialogPropertyDescriptor extends PropertyDescriptor implements 
   		
   		return (IPackageFragmentRoot)possibleRoot;
   		
-  	} catch (JavaModelException jmex) {
-  	}
+      } catch (CoreException e) {
+      	
+      	Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchWindow().getShell();
+      	
+      	ErrorDialog.openError(shell, "Spindle error", "can't find java project root", e.getStatus());
+      }
   	return null;
   }
 

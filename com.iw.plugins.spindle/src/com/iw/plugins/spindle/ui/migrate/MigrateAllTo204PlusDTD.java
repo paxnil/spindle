@@ -51,7 +51,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
@@ -146,7 +146,7 @@ public class MigrateAllTo204PlusDTD extends Action implements IWorkbenchWindowAc
     final ITapestryModel[] useModelsToSave = migratedModelsToSave;
     return new IRunnableWithProgress() {
       public void run(IProgressMonitor pm) {      	
-      	TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+      	TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager();
         pm.beginTask(MessageUtil.getFormattedString(NAME+".migrationCount", Integer.toString(migratedModelsToSave.length)), 1); //$NON-NLS-1$
         for (int i = 0; i < useModelsToSave.length; i++) {
           Utils.saveModel(useModelsToSave[i], pm);
@@ -199,48 +199,6 @@ public class MigrateAllTo204PlusDTD extends Action implements IWorkbenchWindowAc
     action.setEnabled(jproject != null);
   }
 
-  protected class MigrationWorker implements ITapestryLookupRequestor {
-
-    List results = new ArrayList();
-    TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
-    IModelMigrator migrator;
-    /**
-     * Constructor for MigrationLookupRequestor.
-     */
-    public MigrationWorker(IModelMigrator migrator) {
-      this.migrator = migrator;
-    }
-
-    /**
-    * @see com.iw.plugins.spindle.util.ITapestryLookupRequestor#accept(IStorage, IPackageFragment)
-    */
-    public boolean accept(IStorage storage, IPackageFragment frgament) {
-      if (storage.isReadOnly()) {
-      	return false;
-      }
-      mgr.connect(storage, MigrateAllTo204PlusDTD.this);
-      ITapestryModel model = mgr.getEditableModel(storage, MigrateAllTo204PlusDTD.this);
-      if (model == null || !model.isEditable()) {
-      	mgr.disconnect(storage, MigrateAllTo204PlusDTD.this);
-      	return false;
-      }
-      if (model.isLoaded() && migrator.migrate(model)) {
-        results.add(model);
-      }
-      return true;
-    }
-
-    /**
-     * @see com.iw.plugins.spindle.util.ITapestryLookupRequestor#isCancelled()
-     */
-    public boolean isCancelled() {
-      return false;
-    }
-
-    public ITapestryModel[] getResults() {
-      return (ITapestryModel[]) results.toArray(new ITapestryModel[results.size()]);
-    }
-
-  }
+   
 
 }

@@ -183,26 +183,26 @@ public class Utils {
     return null;
   }
 
-  public static List getApplicationsWithAlias(String alias) {
-    ArrayList result = new ArrayList();
-    Iterator iter = ModelUtils.getApplicationModels();
-    while (iter.hasNext()) {
-      TapestryApplicationModel model = (TapestryApplicationModel) iter.next();
-      if (!model.isLoaded()) {
-        try {
-          model.load();
-        } catch (Exception e) {
-          continue;
-        }
-      }
-      PluginApplicationSpecification spec =
-        (PluginApplicationSpecification) model.getSpecification();
-      if (spec != null && spec.getComponentSpecificationPath(alias) != null) {
-        result.add(model);
-      }
-    }
-    return result;
-  }
+//  public static List getApplicationsWithAlias(String alias) {
+//    ArrayList result = new ArrayList();
+//    Iterator iter = ModelUtils.getApplicationModels();
+//    while (iter.hasNext()) {
+//      TapestryApplicationModel model = (TapestryApplicationModel) iter.next();
+//      if (!model.isLoaded()) {
+//        try {
+//          model.load();
+//        } catch (Exception e) {
+//          continue;
+//        }
+//      }
+//      PluginApplicationSpecification spec =
+//        (PluginApplicationSpecification) model.getSpecification();
+//      if (spec != null && spec.getComponentSpecificationPath(alias) != null) {
+//        result.add(model);
+//      }
+//    }
+//    return result;
+//  }
 
   // assumes target ComponentModel is loaded.
   // this could use some refactoring for sure!
@@ -487,6 +487,53 @@ public class Utils {
       } catch (IOException e) {
       }
     }
+  }
+  
+  public static byte[] getInputStreamAsByteArray(InputStream stream, int length) throws IOException {
+    byte[] contents;
+    if (length == -1) {
+      contents = new byte[0];
+      int contentsLength = 0;
+      int bytesRead = -1;
+      do {
+        int available = stream.available();
+
+        // resize contents if needed
+        if (contentsLength + available > contents.length) {
+          System.arraycopy(
+            contents,
+            0,
+            contents = new byte[contentsLength + available],
+            0,
+            contentsLength);
+        }
+
+        // read as many bytes as possible
+        bytesRead = stream.read(contents, contentsLength, available);
+
+        if (bytesRead > 0) {
+          // remember length of contents
+          contentsLength += bytesRead;
+        }
+      } while (bytesRead > 0);
+
+      // resize contents if necessary
+      if (contentsLength < contents.length) {
+        System.arraycopy(contents, 0, contents = new byte[contentsLength], 0, contentsLength);
+      }
+    } else {
+      contents = new byte[length];
+      int len = 0;
+      int readSize = 0;
+      while ((readSize != -1) && (len != length)) {
+        // See PR 1FMS89U
+        // We record first the read size. In this case len is the actual read size.
+        len += readSize;
+        readSize = stream.read(contents, len, length - len);
+      }
+    }
+
+    return contents;
   }
 
 }

@@ -48,7 +48,7 @@ import com.iw.plugins.spindle.editors.AbstractIdentifiableLabelProvider;
 import com.iw.plugins.spindle.editors.AbstractPropertySheetEditorSection;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.BaseTapestryModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPluginLibrarySpecification;
 import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
@@ -122,7 +122,7 @@ public abstract class BasePagesSection
 
     IPluginLibrarySpecification libSpec = getSpec();
 
-    IPluginLibrarySpecification defaultSpec = TapestryModelManager.getDefaultLibrary().getSpecification();
+    IPluginLibrarySpecification defaultSpec = TapestryProjectModelManager.getDefaultLibraryModel().getSpecification();
 
     List ids = libSpec.getPageNames();
     ArrayList defaultIds = (ArrayList) ((ArrayList) defaultSpec.getPageNames()).clone();

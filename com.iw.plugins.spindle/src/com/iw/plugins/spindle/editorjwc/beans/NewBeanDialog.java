@@ -30,6 +30,7 @@ import java.util.Collection;
 import net.sf.tapestry.spec.BeanLifecycle;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -54,6 +55,7 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.PluginBeanSpecification;
 import com.iw.plugins.spindle.ui.AbstractDialog;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
@@ -82,7 +84,8 @@ public class NewBeanDialog extends AbstractDialog {
   private PluginBeanSpecification resultBeanSpec;
 
   private String[] comboChoices = { "None", "Page", "Request" };
-  private BeanLifecycle[] lifecyclechoices = { BeanLifecycle.NONE, BeanLifecycle.PAGE, BeanLifecycle.REQUEST };
+  private BeanLifecycle[] lifecyclechoices =
+    { BeanLifecycle.NONE, BeanLifecycle.PAGE, BeanLifecycle.REQUEST };
 
   /**
    * Constructor for PageRefDialog
@@ -115,7 +118,8 @@ public class NewBeanDialog extends AbstractDialog {
     beanClassname.addListener(adapter);
     Control beanClassnameControl = beanClassname.getControl(container);
 
-    lifecycleCombo = new UneditableComboBoxDialogField("Bean Lifecycle:", FIELD_WIDTH, comboChoices);
+    lifecycleCombo =
+      new UneditableComboBoxDialogField("Bean Lifecycle:", FIELD_WIDTH, comboChoices);
     lifecycleCombo.addListener(adapter);
     Control lifecycleControl = lifecycleCombo.getControl(container);
 
@@ -141,18 +145,42 @@ public class NewBeanDialog extends AbstractDialog {
   }
 
   protected void calculateRoot(ITapestryModel model) {
-    IStorage underlier = model.getUnderlyingStorage();
-    IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(underlier);
-    TapestryLookup lookup = new TapestryLookup();
+
     try {
-      lookup.configure(jproject);
-      IPackageFragment frag = lookup.findPackageFragment(underlier);
-      Assert.isNotNull(frag);
-      root = (IPackageFragmentRoot) frag.getParent();
+
+      IStorage underlier = model.getUnderlyingStorage();
+
+      ITapestryProject tproject = TapestryPlugin.getDefault().getTapestryProjectFor(underlier);
+
+      if (tproject != null) {
+
+        TapestryLookup lookup = tproject.getLookup();
+
+        IPackageFragment frag = lookup.findPackageFragment(underlier);
+
+        Assert.isNotNull(frag);
+
+        root = (IPackageFragmentRoot) frag.getParent();
+
+      }
+
       Assert.isNotNull(root);
-    } catch (JavaModelException jmex) {
-      TapestryPlugin.getDefault().logException(jmex);
+
+    } catch (CoreException e) {
+
     }
+
+    //    IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(underlier);
+    //    TapestryLookup lookup = new TapestryLookup();
+    //    try {
+    //      lookup.configure(jproject);
+    //      IPackageFragment frag = lookup.findPackageFragment(underlier);
+    //      Assert.isNotNull(frag);
+    //      root = (IPackageFragmentRoot) frag.getParent();
+    //      Assert.isNotNull(root);
+    //    } catch (JavaModelException jmex) {
+    //      TapestryPlugin.getDefault().logException(jmex);
+    //    }
   }
 
   /**
@@ -197,7 +225,8 @@ public class NewBeanDialog extends AbstractDialog {
       resultBeanSpec = null;
       return false;
     }
-    resultBeanSpec = new PluginBeanSpecification(classname, lifecyclechoices[lifecycleCombo.getSelectedIndex()]);
+    resultBeanSpec =
+      new PluginBeanSpecification(classname, lifecyclechoices[lifecycleCombo.getSelectedIndex()]);
     return true;
   }
 

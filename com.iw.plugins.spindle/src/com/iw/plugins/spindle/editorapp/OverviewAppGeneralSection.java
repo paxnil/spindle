@@ -26,6 +26,8 @@
 package com.iw.plugins.spindle.editorapp;
 
 import net.sf.tapestry.parse.SpecificationParser;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -38,6 +40,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.pde.core.IEditable;
@@ -64,7 +67,9 @@ import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.util.Utils;
 
-public class OverviewAppGeneralSection extends SpindleFormSection implements IModelChangedListener {
+public class OverviewAppGeneralSection
+  extends SpindleFormSection
+  implements IModelChangedListener {
 
   private Text dtdText;
   private FormEntry nameText;
@@ -128,18 +133,18 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
     container.setLayout(layout);
 
     final TapestryApplicationModel model = (TapestryApplicationModel) getFormPage().getModel();
-	
+
     String labelName = "DTD";
     dtdText = createText(container, labelName, factory);
     dtdText.setText("xml has problems");
     dtdText.setEnabled(false);
 
-
     labelName = "Application Name";
     nameText = new FormEntry(createText(container, labelName, factory));
     nameText.addFormTextListener(new IFormTextListener() {
       public void textValueChanged(FormEntry text) {
-      	PluginApplicationSpecification appSpec = (PluginApplicationSpecification)model.getSpecification();
+        PluginApplicationSpecification appSpec =
+          (PluginApplicationSpecification) model.getSpecification();
         String name = appSpec.getName();
         appSpec.setName(text.getValue());
         if (model.isEditable() == false) {
@@ -157,12 +162,16 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
     engineClassText = new FormEntry(createText(container, labelName, factory));
     engineClassText.addFormTextListener(new IFormTextListener() {
       public void textValueChanged(FormEntry text) {
-      	PluginApplicationSpecification appSpec = (PluginApplicationSpecification)model.getSpecification();
+        PluginApplicationSpecification appSpec =
+          (PluginApplicationSpecification) model.getSpecification();
         if (model.isEditable() == false) {
-        
+
           String name = appSpec.getEngineClassName();
           appSpec.setEngineClassName(text.getValue());
-          name = MessageUtil.getFormattedString("{0} can't change engine class, application is READON", name);
+          name =
+            MessageUtil.getFormattedString(
+              "{0} can't change engine class, application is READON",
+              name);
           getFormPage().getForm().setHeadingText(name);
           return;
         }
@@ -248,12 +257,16 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
     public void run() {
       String engineClass = engineClassText.getValue();
       ITapestryModel model = (ITapestryModel) getFormPage().getModel();
-      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
       try {
+        IJavaProject jproject =
+          TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
         IType type = Utils.findType(jproject, engineClass);
         JavaUI.openInEditor(type);
       } catch (Exception e) {
-      	MessageDialog.openError(engineClassText.getControl().getShell(), "Error opening editor", "could not open an editor for "+engineClass);      
+        MessageDialog.openError(
+          engineClassText.getControl().getShell(),
+          "Error opening editor",
+          "could not open an editor for " + engineClass);
       }
     }
   }
@@ -281,13 +294,14 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
 
     private IType chooseType() {
       ITapestryModel model = (ITapestryModel) getFormPage().getModel();
-      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
-      if (jproject == null) {
-        return null;
-      }
-      IJavaSearchScope scope = createSearchScope(jproject);
       Shell shell = engineClassText.getControl().getShell();
       try {
+        IJavaProject jproject =
+          TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
+        if (jproject == null) {
+          return null;
+        }
+        IJavaSearchScope scope = createSearchScope(jproject);
 
         SelectionDialog dialog =
           JavaUI.createTypeDialog(
@@ -299,13 +313,14 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
 
         dialog.setTitle("Choose Engine Class");
         String message = "choose Engine class";
-        dialog.setMessage(hierarchyRoot == null ? message : message + " (implements " + hierarchyRoot + ")");
+        dialog.setMessage(
+          hierarchyRoot == null ? message : message + " (implements " + hierarchyRoot + ")");
 
         if (dialog.open() == dialog.OK) {
           return (IType) dialog.getResult()[0]; //FirstResult();
         }
-      } catch (JavaModelException jmex) {
-        TapestryPlugin.getDefault().logException(jmex);
+      } catch (CoreException jmex) {
+        ErrorDialog.openError(shell, "Spindle error", "unable to continue", jmex.getStatus());
       }
       return null;
     }

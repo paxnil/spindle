@@ -27,20 +27,28 @@ package com.iw.plugins.spindle;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import net.sf.tapestry.parse.SpecificationParser;
+import net.sf.tapestry.util.xml.AbstractDocumentParser;
+import org.apache.log4j.Category;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.Priority;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
@@ -61,11 +69,11 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
-import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.TapestryPluginSpecFactory;
+import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
 import com.iw.plugins.spindle.ui.text.ColorManager;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
@@ -80,13 +88,18 @@ public class TapestryPlugin extends AbstractUIPlugin {
 
   private static TapestryPlugin instance;
   private static SpecificationParser parser;
-  private static TapestryModelManager modelManager = null;
-  
+  private static TapestryProjectModelManager modelManager = null;
+
   static public final String ID_PLUGIN = "com.iw.plugins.spindle";
+  static public final String NATURE_ID = ID_PLUGIN + ".project.TapestryProject";
 
   public static TapestryApplicationModel selectedApplication = null;
-  
+
   static private Map editorIdLookup;
+
+  static private HashMap parsers = new HashMap();
+
+  private static List managedExtensions = new ArrayList();
 
   /**
    * Creates the Tapestry plugin and caches its default instance
@@ -97,19 +110,48 @@ public class TapestryPlugin extends AbstractUIPlugin {
     super(descriptor);
     if (instance == null)
       instance = this;
+
+    Category CAT = Category.getInstance(AbstractDocumentParser.class);
+    CAT.setPriority(Priority.DEBUG);
+    CAT.addAppender(new ConsoleAppender(new PatternLayout("%c{1} [%p] %m%n"), "System.out"));
+
   }
 
   static {
     parser = new SpecificationParser();
     parser.setFactory(new TapestryPluginSpecFactory());
-    
+
     String ID_PLUGIN = "com.iw.plugins.spindle";
     editorIdLookup = new HashMap();
-    editorIdLookup.put("application", ID_PLUGIN+".editors.app_editor");
-    editorIdLookup.put("library", ID_PLUGIN+".editors.library_editor");
-    editorIdLookup.put("jwc", ID_PLUGIN+".editors.jwc_editor");
-    editorIdLookup.put("page", ID_PLUGIN+".editors.page_editor");
-        
+    editorIdLookup.put("application", ID_PLUGIN + ".editors.app_editor");
+    editorIdLookup.put("library", ID_PLUGIN + ".editors.library_editor");
+    editorIdLookup.put("jwc", ID_PLUGIN + ".editors.jwc_editor");
+    editorIdLookup.put("page", ID_PLUGIN + ".editors.page_editor");
+
+  }
+
+  static public void registerParser(String extension, AbstractDocumentParser parser) {
+    parsers.put(extension, parser);
+  }
+
+  public static List getManagedExtensions() {
+
+    return Collections.unmodifiableList(managedExtensions);
+
+  }
+
+  public static void registerManagedExtension(String extension) {
+
+    if (!managedExtensions.contains(extension)) {
+
+      managedExtensions.add(extension);
+
+    }
+
+  }
+
+  static public AbstractDocumentParser getParserFor(String extension) {
+    return (AbstractDocumentParser) parsers.get(extension);
   }
 
   /**
@@ -118,28 +160,101 @@ public class TapestryPlugin extends AbstractUIPlugin {
    * @return the default TapestryPlugin instance
    */
   static public TapestryPlugin getDefault() {
+
     return instance;
+
   }
 
-  
+  public ITapestryProject getTapestryProjectFor(Object element) throws CoreException {
 
-  public IResource getParentResourceFor(IStorage storage) {
-    if (storage instanceof IResource) {
-      return (IResource) ((IResource) storage).getParent();
+    ITapestryProject result = null;
+
+    IProject project = null;
+
+    if (element instanceof IResource) {
+
+      project = ((IResource) element).getProject();
+
+    } else if (element instanceof IStorage) {
+
+      project = getProjectFor((IStorage) element);
+
+    } else if (element instanceof IJavaProject) {
+
+      project = ((IJavaProject) element).getProject();
+
     }
-    if (storage instanceof JarEntryFile) {
-      try {
-        TapestryLookup lookup = new TapestryLookup();
-        lookup.configure(getJavaProjectFor(storage));
-        return lookup.findParentResource(storage);
-      } catch (JavaModelException jmex) {
-        jmex.printStackTrace();
-      }
+
+    if (project != null && project.isOpen() && project.hasNature(NATURE_ID)) {
+
+      result = (ITapestryProject) project.getNature(NATURE_ID);
     }
-    return null;
+
+    if (result == null) {
+
+      DialogFieldStatus status = new DialogFieldStatus();
+      status.setError(
+        project.getFullPath().toString() + " is not open or is not a Tapestry project");
+
+      throw new CoreException(status);
+
+    }
+
+    return result;
   }
 
-  public IJavaProject getJavaProjectFor(Object obj) {
+  public ITapestryProject addTapestryProjectNatureTo(
+    IJavaProject jproject,
+    IProgressMonitor monitor)
+    throws CoreException {
+
+    IProject project = jproject.getProject();
+
+    if (project.hasNature(NATURE_ID)) {
+
+      return null;
+
+    }
+
+    IProjectDescription description = project.getDescription();
+
+    String[] natures = description.getNatureIds();
+
+    String[] newNatures = new String[natures.length + 1];
+
+    System.arraycopy(natures, 0, newNatures, 0, natures.length);
+
+    newNatures[natures.length] = NATURE_ID;
+
+    description.setNatureIds(newNatures);
+
+    project.setDescription(description, monitor);
+
+    return getTapestryProjectFor(jproject);
+
+  }
+
+  //  public IResource getParentResourceFor(IStorage storage) {
+  //    if (storage instanceof IResource) {
+  //      return (IResource) ((IResource) storage).getParent();
+  //    }
+  //    if (storage instanceof JarEntryFile) {
+  //
+  //      try {
+  //
+  //        TapestryLookup lookup = new TapestryLookup();
+  //        lookup.configure(getJavaProjectFor(storage));
+  //        return lookup.findParentResource(storage);
+  //
+  //      } catch (CoreException jmex) {
+  //
+  //        jmex.printStackTrace();
+  //      }
+  //    }
+  //    return null;
+  //  }
+
+  public IJavaProject getJavaProjectFor(Object obj) throws CoreException {
     IProject project = null;
     if (obj instanceof IProject) {
       project = (IProject) obj;
@@ -149,6 +264,10 @@ public class TapestryPlugin extends AbstractUIPlugin {
       project = getProjectFor((IStorage) obj);
     }
     if (project == null) {
+      return null;
+    }
+
+    if (!project.hasNature(JavaCore.NATURE_ID)) {
       return null;
     }
     return JavaCore.create(project);
@@ -162,15 +281,19 @@ public class TapestryPlugin extends AbstractUIPlugin {
         IWorkspace workspace = getWorkspace();
         IProject[] projects = workspace.getRoot().getProjects();
         for (int i = 0; i < projects.length; i++) {
+          if (!projects[i].isOpen()) {
+            continue;
+          }
           if (lookup == null) {
             lookup = new TapestryLookup();
           }
-          lookup.configure(getJavaProjectFor(projects[i]));
+          IJavaProject jproject = getJavaProjectFor(projects[i]);
+          lookup.configure(jproject);
           if (lookup.projectContainsJarEntry((JarEntryFile) storage)) {
             return projects[i];
           }
         }
-      } catch (JavaModelException jmex) {
+      } catch (CoreException jmex) {
         jmex.printStackTrace();
       }
       return null;
@@ -189,12 +312,10 @@ public class TapestryPlugin extends AbstractUIPlugin {
     return ResourcesPlugin.getWorkspace();
   }
 
-  public static synchronized TapestryModelManager getTapestryModelManager() {
-    if (modelManager == null) {
-      modelManager = new TapestryModelManager();
-      modelManager.buildModelDelegates();
-    }
-    return modelManager;
+  public static synchronized TapestryProjectModelManager getTapestryModelManager(IStorage storage)
+    throws CoreException {
+    ITapestryProject tproject = getDefault().getTapestryProjectFor(storage);
+    return tproject.getModelManager();
   }
 
   public Object[] getAllTapestryElementsFromWorkspace() throws CoreException {
@@ -257,9 +378,9 @@ public class TapestryPlugin extends AbstractUIPlugin {
     ErrorDialog.openError(getActiveWorkbenchShell(), null, null, status);
     ResourcesPlugin.getPlugin().getLog().log(status);
   } /** 
-      * Sets default preference values. These values will be used
-      * until some preferences are actually set using Preference dialog.
-      */
+           * Sets default preference values. These values will be used
+           * until some preferences are actually set using Preference dialog.
+           */
   protected void initializeDefaultPreferences(IPreferenceStore store) {
     ColorManager.initializeDefaults(store);
     NewTapComponentWizardPage.initializeDefaults(store);
@@ -267,36 +388,35 @@ public class TapestryPlugin extends AbstractUIPlugin {
 
   static public void openTapestryEditor(IStorage storage) {
     String editorId = null;
-    
-    
+
     String extension = storage.getFullPath().getFileExtension();
-    
-    editorId = (String)editorIdLookup.get(extension);
-    
+
+    editorId = (String) editorIdLookup.get(extension);
+
     if (editorId == null) {
-    	
-    	return;
+
+      return;
     }
-    
+
     IEditorInput input = null;
-    
+
     if (storage instanceof JarEntryFile) {
-    	
+
       input = new JarEntryEditorInput(storage);
-      
+
     } else {
-    	
+
       input = new FileEditorInput((IFile) storage);
-      
+
     }
     try {
-    	
+
       TapestryPlugin.getDefault().getActivePage().openEditor(input, editorId);
-      
+
     } catch (PartInitException piex) {
-    	
+
       TapestryPlugin.getDefault().logException(piex);
-      
+
     }
   }
 

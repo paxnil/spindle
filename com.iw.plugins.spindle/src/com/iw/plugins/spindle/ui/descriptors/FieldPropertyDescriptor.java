@@ -26,7 +26,9 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.descriptors;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -83,13 +85,24 @@ public class FieldPropertyDescriptor
      */
     protected Object openDialogBox(Control cellEditorWindow) {
       Object value = getValue();
-      IJavaProject jproject =
-        TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
-      PublicStaticFieldSelectionDialog dialog =
-        new PublicStaticFieldSelectionDialog(cellEditorWindow.getShell(), jproject, (String) value);
-      dialog.create();
-      if (dialog.open() == dialog.OK) {
-        return dialog.getDialogResult();
+      try {
+      	
+        IJavaProject jproject =
+          TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
+          
+        PublicStaticFieldSelectionDialog dialog =
+          new PublicStaticFieldSelectionDialog(cellEditorWindow.getShell(), jproject, (String) value);
+          
+        dialog.create();
+                
+        if (dialog.open() == dialog.OK) {
+        	
+          return dialog.getDialogResult();
+          
+        }
+      } catch (CoreException e) {
+      	
+      	ErrorDialog.openError(cellEditorWindow.getShell(), "Spindle error", "can't continue", e.getStatus());
       }
 
       return value;

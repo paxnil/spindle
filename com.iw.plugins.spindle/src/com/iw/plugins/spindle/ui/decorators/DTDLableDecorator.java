@@ -1,4 +1,4 @@
-package com.iw.plugins.spindle.ui;
+package com.iw.plugins.spindle.ui.decorators;
 
 import java.util.ArrayList;
 
@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Display;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.XMLUtil;
 
 /**
@@ -51,9 +51,16 @@ public class DTDLableDecorator
         resource = (IStorage) ((IAdaptable) element).getAdapter(IStorage.class);
       }
     }
-    if (resource != null) {
-      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
-      return TapestryPlugin.getTapestryModelManager().getReadOnlyModel(resource);
+    try {
+
+      if (resource != null) {
+
+        TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(resource);
+        return mgr.getReadOnlyModel(resource);
+
+      }
+
+    } catch (CoreException e) {
     }
     return null;
   }
@@ -68,29 +75,33 @@ public class DTDLableDecorator
         return "undetermined - could not load model";
       }
     }
-    
-    int DTDVersion = XMLUtil.getDTDVersion(model.getPublicId());
-    
-    switch (DTDVersion) {
-    	
-    	case XMLUtil.DTD_1_1: return "1.1";
-    	
-    	case XMLUtil.DTD_1_2: return "1.2";
-    	
-    	case XMLUtil.DTD_1_3: return "1.3";
 
-		default : return "?";
+    int DTDVersion = XMLUtil.getDTDVersion(model.getPublicId());
+
+    switch (DTDVersion) {
+
+      case XMLUtil.DTD_1_1 :
+        return "1.1";
+
+      case XMLUtil.DTD_1_2 :
+        return "1.2";
+
+      case XMLUtil.DTD_1_3 :
+        return "1.3";
+
+      default :
+        return "?";
     }
 
   } /**
-       * @see org.eclipse.jface.viewers.ILabelDecorator#decorateImage(Image, Object)
-       * we return null here as we are not decorating images (yet)
-       */
+         * @see org.eclipse.jface.viewers.ILabelDecorator#decorateImage(Image, Object)
+         * we return null here as we are not decorating images (yet)
+         */
   public Image decorateImage(Image image, Object element) {
     return null;
   } /**
-       * @see org.eclipse.jface.viewers.ILabelDecorator#decorateText(String, Object)
-       */
+         * @see org.eclipse.jface.viewers.ILabelDecorator#decorateText(String, Object)
+         */
   public String decorateText(String text, Object element) {
     ITapestryModel model = getTapestryModel(element);
     if (model != null) {
@@ -98,8 +109,8 @@ public class DTDLableDecorator
     }
     return null;
   } /**
-       * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
-       */
+         * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
+         */
   public void resourceChanged(IResourceChangeEvent event) {
     //first collect the label change events
     final IResource[] affectedResources = processDelta(event.getDelta());
@@ -116,22 +127,33 @@ public class DTDLableDecorator
   protected IResource[] processDelta(IResourceDelta delta) {
     final ArrayList affectedResources = new ArrayList();
     try {
+    	
       delta.accept(new IResourceDeltaVisitor() {
+      	
         public boolean visit(IResourceDelta delta) throws CoreException {
-          TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+        	
           IResource resource = delta.getResource(); //skip workspace root
           boolean result = true;
+          
           if (resource.getType() == IResource.ROOT) {
+          	
             return true;
+            
           } //don't care about deletions
           if (delta.getKind() == IResourceDelta.REMOVED) {
+          	
             return false;
+            
           }
           IStorage storage = null;
           try {
+          	
             storage = (IStorage) resource;
+            
           } catch (Exception e) {
+          	
             if (resource instanceof IAdaptable) {
+            	
               storage = (IStorage) ((IAdaptable) resource).getAdapter(IStorage.class);
             }
           }
@@ -139,10 +161,15 @@ public class DTDLableDecorator
 
             ITapestryModel model = getTapestryModel(resource);
             if (model != null) {
+            	
               if (model.isLoaded()) {
+              	
                 model.reload();
+                
               } else {
+              	
                 model.load();
+                
               }
               affectedResources.add(resource);
               result = false;

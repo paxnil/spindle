@@ -70,7 +70,8 @@ import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ModelUtils;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.spec.PluginContainedComponent;
@@ -277,9 +278,9 @@ public class ComponentSelectionSection
 
       PluginContainedComponent component = (PluginContainedComponent) element;
       String type = component.getType();
-      
+
       if (type != null && !type.endsWith(".jwc")) {
-      	
+
         return componentAliasImage;
       }
       return componentImage;
@@ -289,88 +290,88 @@ public class ComponentSelectionSection
 
     public String getToolTipText(Object object) {
 
-      //      return TOOL_TIPS_OFF;
+      return TOOL_TIPS_OFF;
 
-      PluginContainedComponent selectedComponent = (PluginContainedComponent) object;
-      String identifier = selectedComponent.getIdentifier();
-      String aliasOrType = selectedComponent.getType();
-      String copyOf = selectedComponent.getCopyOf();
-      if (copyOf != null && !"".equals(copyOf.trim())) {
-        return identifier + " is copy-of " + copyOf;
-      }
-      StringBuffer buffer =
-        new StringBuffer(identifier + " type = " + (aliasOrType == null ? "" : aliasOrType) + "\n");
-      if (!isSelected(selectedComponent)) {
-        buffer.append("Select this contained component for more tooltip info");
-        return buffer.toString();
-      }
-      // empty means no alias!
-      if (precomputedAliasInfo.isEmpty()) {
-        // the type is not an alias
-        String type = aliasOrType;
-        if (type == null || type.equals("")) {
-          buffer.append("No Type found for contained component: " + identifier);
-          return buffer.toString();
-        }
-        TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
-        TapestryComponentModel component = ModelUtils.findComponent(type, getModel());
-
-        if (component == null) {
-          buffer.append(identifier + "'s type: " + type + " not found.");
-          return buffer.toString();
-        } else if (!component.isLoaded()) {
-          try {
-            component.load();
-          } catch (Exception e) {
-            buffer.append("Could not load component: " + type + ". There could be a parse error.");
-            return buffer.toString();
-          }
-        }
-        PluginComponentSpecification componentSpec = component.getComponentSpecification();
-        componentSpec.getHelpText(identifier, buffer);
-        return buffer.toString();
-
-      } else {
-        // the type IS an alias        
-        String alias = aliasOrType;
-        Object[] keys = precomputedAliasInfo.keySet().toArray();
-        if (keys.length == 0) {
-          buffer.append("Alias '" + alias + "' not found in an application.");
-          return buffer.toString();
-        } else {
-          TapestryApplicationModel firstModel = ((TapestryApplicationModel) keys[0]);
-          TapestryComponentModel cmodel =
-            (TapestryComponentModel) precomputedAliasInfo.get(keys[0]);
-          if (!cmodel.isLoaded()) {
-            try {
-              cmodel.load();
-            } catch (CoreException e) {
-            }
-          }
-          PluginComponentSpecification firstComponent =
-            (PluginComponentSpecification) cmodel.getComponentSpecification();
-          buffer.append(
-            "Found alias '"
-              + alias
-              + "' in application '"
-              + firstModel.getUnderlyingStorage().getFullPath()
-              + "\n");
-          buffer.append(
-            alias + " maps to " + firstModel.getSpecification().getComponentSpecificationPath(alias) + "\n");
-          if (keys.length > 1) {
-            buffer.append(
-              "press F1 to check "
-                + (keys.length - 1)
-                + " other application(s) that have alias '"
-                + alias
-                + "'.\n");
-          }
-          if (firstComponent != null) {
-            firstComponent.getHelpText(alias, buffer);
-          }
-          return buffer.toString();
-        }
-      }
+      //      PluginContainedComponent selectedComponent = (PluginContainedComponent) object;
+      //      String identifier = selectedComponent.getIdentifier();
+      //      String aliasOrType = selectedComponent.getType();
+      //      String copyOf = selectedComponent.getCopyOf();
+      //      if (copyOf != null && !"".equals(copyOf.trim())) {
+      //        return identifier + " is copy-of " + copyOf;
+      //      }
+      //      StringBuffer buffer =
+      //        new StringBuffer(identifier + " type = " + (aliasOrType == null ? "" : aliasOrType) + "\n");
+      //      if (!isSelected(selectedComponent)) {
+      //        buffer.append("Select this contained component for more tooltip info");
+      //        return buffer.toString();
+      //      }
+      //      // empty means no alias!
+      //      if (precomputedAliasInfo.isEmpty()) {
+      //        // the type is not an alias
+      //        String type = aliasOrType;
+      //        if (type == null || type.equals("")) {
+      //          buffer.append("No Type found for contained component: " + identifier);
+      //          return buffer.toString();
+      //        }
+      //        TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager();
+      //        TapestryComponentModel component = ModelUtils.findComponent(type, getModel());
+      //
+      //        if (component == null) {
+      //          buffer.append(identifier + "'s type: " + type + " not found.");
+      //          return buffer.toString();
+      //        } else if (!component.isLoaded()) {
+      //          try {
+      //            component.load();
+      //          } catch (Exception e) {
+      //            buffer.append("Could not load component: " + type + ". There could be a parse error.");
+      //            return buffer.toString();
+      //          }
+      //        }
+      //        PluginComponentSpecification componentSpec = component.getComponentSpecification();
+      //        componentSpec.getHelpText(identifier, buffer);
+      //        return buffer.toString();
+      //
+      //      } else {
+      //        // the type IS an alias        
+      //        String alias = aliasOrType;
+      //        Object[] keys = precomputedAliasInfo.keySet().toArray();
+      //        if (keys.length == 0) {
+      //          buffer.append("Alias '" + alias + "' not found in an application.");
+      //          return buffer.toString();
+      //        } else {
+      //          TapestryApplicationModel firstModel = ((TapestryApplicationModel) keys[0]);
+      //          TapestryComponentModel cmodel =
+      //            (TapestryComponentModel) precomputedAliasInfo.get(keys[0]);
+      //          if (!cmodel.isLoaded()) {
+      //            try {
+      //              cmodel.load();
+      //            } catch (CoreException e) {
+      //            }
+      //          }
+      //          PluginComponentSpecification firstComponent =
+      //            (PluginComponentSpecification) cmodel.getComponentSpecification();
+      //          buffer.append(
+      //            "Found alias '"
+      //              + alias
+      //              + "' in application '"
+      //              + firstModel.getUnderlyingStorage().getFullPath()
+      //              + "\n");
+      //          buffer.append(
+      //            alias + " maps to " + firstModel.getSpecification().getComponentSpecificationPath(alias) + "\n");
+      //          if (keys.length > 1) {
+      //            buffer.append(
+      //              "press F1 to check "
+      //                + (keys.length - 1)
+      //                + " other application(s) that have alias '"
+      //                + alias
+      //                + "'.\n");
+      //          }
+      //          if (firstComponent != null) {
+      //            firstComponent.getHelpText(alias, buffer);
+      //          }
+      //          return buffer.toString();
+      //        }
+      //      }
     }
 
     public Image getToolTipImage(Object object) {
@@ -447,13 +448,23 @@ public class ComponentSelectionSection
     * @see Action#run()
     */
     public void run() {
-      IJavaProject jproject =
-        TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage());
+      ITapestryProject tproject;
+      try {
+        tproject =
+          TapestryPlugin.getDefault().getTapestryProjectFor(getModel().getUnderlyingStorage());
+      } catch (CoreException e) {
+
+        MessageDialog.openError(
+          newButton.getShell(),
+          "Spindle project error",
+          "Not in Tapestry project");
+        return;
+      }
 
       ChooseComponentDialog dialog =
         new ChooseComponentDialog(
           newButton.getShell(),
-          jproject,
+          tproject,
           "Copy To",
           "Choose a target for the copy",
           true,
@@ -577,14 +588,20 @@ public class ComponentSelectionSection
       IStorage storage,
       String name) {
       String consumer = "PerformCopyToInWorkspace";
-      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
 
-      mgr.connect(storage, consumer, true);
+      TapestryProjectModelManager mgr = null;
+      TapestryComponentModel model = null;
 
-      TapestryComponentModel model =
-        (TapestryComponentModel) mgr.getEditableModel(storage, consumer);
+      try {
 
-      if (!model.isEditable()) {
+        mgr = TapestryPlugin.getTapestryModelManager(storage);
+        mgr.connect(storage, consumer, true);
+        model = (TapestryComponentModel) mgr.getEditableModel(storage, consumer);
+
+      } catch (CoreException e) {
+      }
+
+      if (model == null || !model.isEditable()) {
         MessageDialog.openError(
           newButton.getShell(),
           "Copy To action aborted",
@@ -600,7 +617,11 @@ public class ComponentSelectionSection
 
       }
 
-      mgr.disconnect(storage, consumer);
+      if (mgr != null) {
+
+        mgr.disconnect(storage, consumer);
+
+      }
     }
 
     private void parseError() {

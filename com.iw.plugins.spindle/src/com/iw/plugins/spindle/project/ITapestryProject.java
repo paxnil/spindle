@@ -1,6 +1,10 @@
 package com.iw.plugins.spindle.project;
 
-import com.iw.plugins.spindle.model.TapestryApplicationModel;
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
+
+import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
 /**
@@ -11,9 +15,13 @@ import com.iw.plugins.spindle.util.lookup.TapestryLookup;
  * All Rights Reserved.
  */
 public interface ITapestryProject {
-	
-	public TapestryApplicationModel getApplicationModel();
-	
-	public TapestryLookup getLookup();
+
+  public TapestryLookup getLookup() throws CoreException;
+
+  public TapestryProjectModelManager getModelManager() throws CoreException;
+
+  public void setProjectStorage(IStorage file) throws CoreException;
+  
+  public IStorage getProjectStorage() throws CoreException;
 
 }

@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editorlib.components;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.Action;
@@ -201,40 +202,62 @@ public class ComponentAliasSummarySection
   private void updateSummary() {
     resolveFailedLabel.setVisible(false);
     if (selectedAlias == null) {
+    	
       componentName.setValue("", false);
       specText.setValue("", false);
       sourceViewer.updateNotFound();
       htmlViewer.updateNotFound();
+      
     } else {
+    	
+      TapestryLookup lookup = new TapestryLookup();
       componentName.setValue(selectedAlias, false);
-      String specificationPath = getModel().getSpecification().getComponentSpecificationPath(selectedAlias);
+      
+      String specificationPath =
+        getModel().getSpecification().getComponentSpecificationPath(selectedAlias);
+        
       specText.setValue(specificationPath, false);
+      
       if (!specificationPath.endsWith(".jwc")) {
+      	
         resolveFailed(specificationPath);
         return;
+        
       }
       ITapestryModel model = (ITapestryModel) getModel();
       IStorage thisStorage = model.getUnderlyingStorage();
-      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisStorage);
-      if (jproject == null) {
-        resolveFailed(specificationPath);
-      }
-      TapestryLookup lookup = new TapestryLookup();
       try {
+      	
+        IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(thisStorage);
+        
+        if (jproject == null) {
+        	
+          resolveFailed(specificationPath);
+          
+        }
         lookup.configure(jproject);
-      } catch (JavaModelException jmex) {
+        
+      } catch (CoreException jmex) {
+      	
         resolveFailed(specificationPath);
+        
       }
       IStorage[] found = lookup.findComponent(specificationPath);
+      
       if (found.length != 1) {
+      	
         resolveFailed(specificationPath);
         return;
+        
       }
       sourceViewer.update(null, found[0]);
       IStorage[] htmlStorage = lookup.findHtmlFor(specificationPath);
+      
       if (htmlStorage.length != 1) {
+      	
         htmlViewer.updateNotFound();
         return;
+        
       }
       htmlViewer.update(null, htmlStorage[0]);
       container.layout(true);
@@ -258,7 +281,5 @@ public class ComponentAliasSummarySection
 
     updateSummary();
   }
-
-  
 
 }

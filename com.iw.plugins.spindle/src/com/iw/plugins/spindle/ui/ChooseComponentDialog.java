@@ -35,6 +35,7 @@ import java.util.TreeSet;
 
 import net.sf.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -43,6 +44,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -67,7 +69,8 @@ import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.util.ITapestryLookupRequestor;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
@@ -99,7 +102,7 @@ public class ChooseComponentDialog extends AbstractDialog {
     */
   public ChooseComponentDialog(
     Shell shell,
-    IJavaProject project,
+    ITapestryProject project,
     String windowTitle,
     String description,
     boolean showAliases) {
@@ -107,12 +110,20 @@ public class ChooseComponentDialog extends AbstractDialog {
     updateWindowTitle(windowTitle);
     updateMessage(description);
     ignoreAliasesAndPages = !showAliases;
-    configure(project);
+    Assert.isNotNull(project);
+    try {
+    	
+      lookup = project.getLookup();
+      
+    } catch (CoreException e) {
+    	
+    	e.printStackTrace();
+    }
   }
 
   public ChooseComponentDialog(
     Shell shell,
-    IJavaProject project,
+    ITapestryProject project,
     String windowTitle,
     String description,
     boolean showAliases,
@@ -176,17 +187,6 @@ public class ChooseComponentDialog extends AbstractDialog {
     }
 
     return container;
-  }
-
-  public void configure(IJavaProject project) {
-    lookup = new TapestryLookup();
-    try {
-      lookup.configure(project);
-    } catch (JavaModelException jmex) {
-      TapestryPlugin.getDefault().logException(jmex);
-      lookup = null;
-    }
-
   }
 
   protected void scan() {
@@ -517,7 +517,7 @@ public class ChooseComponentDialog extends AbstractDialog {
     private String tryConvertToAlias(IStorage storage) throws PageNotComponentException {
     	
       TapestryApplicationModel selectedApp = TapestryPlugin.selectedApplication;
-      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+      TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager();
       
       String result = null;
       TapestryComponentModel cmodel = null;

@@ -27,6 +27,7 @@ package com.iw.plugins.spindle.editorlib.components;
 
 import java.util.Collection;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.swt.SWT;
@@ -40,6 +41,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editorlib.pages.*;
 import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.AbstractDialog;
 import com.iw.plugins.spindle.ui.ChooseComponentDialog;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
@@ -53,7 +55,7 @@ public class ComponentRefDialog extends AbstractDialog {
   private StringField pageName;
   private StringButtonField pageRef;
   private ITapestryModel model;
-  private IJavaProject jproject;
+  private ITapestryProject tproject;
   private DialogAdapter adapter = new DialogAdapter();
 
   private Collection existingNames;
@@ -71,7 +73,16 @@ public class ComponentRefDialog extends AbstractDialog {
     String description = (editing ? "This will replace the existing reference" : "Enter the new information");
     updateWindowTitle(windowTitle);
     updateMessage(description);
-    jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
+    
+    try {
+    	
+      tproject = TapestryPlugin.getDefault().getTapestryProjectFor(model.getUnderlyingStorage());
+      
+    } catch (CoreException e) {
+    	
+    	e.printStackTrace();
+    	
+    }
     this.existingNames = existingNames;
   }
 
@@ -182,7 +193,7 @@ public class ComponentRefDialog extends AbstractDialog {
      * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
      */
     public void dialogFieldButtonPressed(DialogField field) {
-      ChooseComponentDialog dialog = new ChooseComponentDialog(getShell(), jproject, "Component Aliasing", "Choose a component", false);
+      ChooseComponentDialog dialog = new ChooseComponentDialog(getShell(), tproject, "Component Aliasing", "Choose a component", false);
       dialog.create();
       int result = dialog.open();
       if (result == PageRefDialog.OK) {

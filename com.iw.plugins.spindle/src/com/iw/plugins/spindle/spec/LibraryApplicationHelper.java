@@ -12,7 +12,7 @@ import net.sf.tapestry.spec.ExtensionSpecification;
 import net.sf.tapestry.spec.ILibrarySpecification;
 
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 
 /**
  * @author gwl
@@ -72,7 +72,7 @@ public class LibraryApplicationHelper {
    */
   public List getDefaultServiceNames() {
 
-    TapestryLibraryModel defaultLib = TapestryModelManager.getDefaultLibrary();
+    TapestryLibraryModel defaultLib = TapestryProjectModelManager.getDefaultLibraryModel();
 
     if (defaultLib != null) {
 
@@ -168,7 +168,7 @@ public class LibraryApplicationHelper {
 
   private String findKeyInDefaultPageMap(String specificationPath) {
 
-    ILibrarySpecification defaultLib = TapestryModelManager.getDefaultLibrary().getSpecification();
+    ILibrarySpecification defaultLib = TapestryProjectModelManager.getDefaultLibraryModel().getSpecification();
 
     if (defaultLib != null) {
 
@@ -205,7 +205,7 @@ public class LibraryApplicationHelper {
   }
 
   private String findKeyInDefaultComponentMap(String value) {
-    ILibrarySpecification defaultLib = TapestryModelManager.getDefaultLibrary().getSpecification();
+    ILibrarySpecification defaultLib = TapestryProjectModelManager.getDefaultLibraryModel().getSpecification();
 
     if (defaultLib != null) {
 

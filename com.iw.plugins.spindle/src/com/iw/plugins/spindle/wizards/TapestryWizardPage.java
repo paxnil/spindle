@@ -25,7 +25,10 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.wizards;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
@@ -52,7 +55,7 @@ public abstract class TapestryWizardPage extends WizardPage {
   private UpdateStatusContainer statusContainer = new UpdateStatusContainer();
 
   private boolean fPageVisible;
-
+  
   public TapestryWizardPage(String name) {
     super(name);
     fPageVisible = false;
@@ -192,4 +195,14 @@ public abstract class TapestryWizardPage extends WizardPage {
   }
 
  
+  public abstract IResource getResource();
+  
+  public abstract IRunnableWithProgress getRunnable(Object object);
+
+  /**
+   * @see org.eclipse.jface.dialogs.IDialogPage#createControl(Composite)
+   */
+  public void createControl(Composite parent) {
+  }
+
 }

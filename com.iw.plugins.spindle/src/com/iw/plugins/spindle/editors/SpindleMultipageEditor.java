@@ -44,6 +44,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -57,6 +58,7 @@ import org.eclipse.pde.internal.ui.editor.PDEEditorContributor;
 import org.eclipse.pde.internal.ui.editor.PDEMultiPageXMLEditor;
 import org.eclipse.pde.internal.ui.editor.SystemFileEditorInput;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -78,7 +80,8 @@ import com.iw.plugins.spindle.model.BaseTapestryModel;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.util.JarEditorInputWrapper;
 import com.iw.plugins.spindle.util.Utils;
 
@@ -206,7 +209,7 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
           IWorkbenchPage page = window.getActivePage();
           if (page != null) {
             try {
-              page.showView(PlatformUI.PLUGIN_ID+".views.TaskList");
+              page.showView(PlatformUI.PLUGIN_ID + ".views.TaskList");
             } catch (PartInitException e) {
               ErrorDialog.openError(window.getShell(), "Could not show the Task View!", //$NON-NLS-1$
               e.getMessage(), e.getStatus());
@@ -300,7 +303,30 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
 
   protected ITapestryModel createResourceModel(IStorage storage) {
     InputStream stream = null;
-    TapestryModelManager modelProvider = TapestryPlugin.getTapestryModelManager();
+
+    ITapestryProject tproject = null;
+    TapestryProjectModelManager modelProvider = null;
+    try {
+
+      tproject = TapestryPlugin.getDefault().getTapestryProjectFor(storage);
+
+      if (tproject != null) {
+        modelProvider = tproject.getModelManager();
+      }
+
+    } catch (CoreException e) {
+
+      Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchShell();
+
+      if (shell == null) {
+
+        shell = new Shell();
+      }
+
+      ErrorDialog.openError(shell, "Spindle Editor Problem", "Could not open", e.getStatus());
+
+    }
+
     modelProvider.connect(storage, this);
     BaseTapestryModel model = (BaseTapestryModel) modelProvider.getEditableModel(storage, this);
     if (!model.isInSync() || model.isDirty()) {
@@ -509,8 +535,19 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
   public void dispose() {
     super.dispose();
     ITapestryModel model = (ITapestryModel) getModel();
-    if (model != null) {
-      TapestryPlugin.getTapestryModelManager().disconnect(model.getUnderlyingStorage(), this);
+    try {
+      if (model != null) {
+        IStorage storage = model.getUnderlyingStorage();
+        TapestryPlugin.getTapestryModelManager(storage).disconnect(storage, this);
+      }
+    } catch (CoreException e) {
+
+      Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchShell();
+      ErrorDialog.openError(
+        shell,
+        "Tapestry Editor Error",
+        "Critical Error closing editor!",
+        e.getStatus());
     }
   }
 

@@ -57,7 +57,7 @@ public class LibraryManagerDelegate extends AbstractDelegate {
    * @see com.iw.plugins.spindle.model.manager.ITapestryModelManagerDelegate#registerParserFor(String)
    */
   public void registerParserFor(String extension) {  	
-  	TapestryPlugin.getTapestryModelManager().registerParser(extension, TapestryPlugin.getParser());
+  	TapestryPlugin.registerParser(extension, TapestryPlugin.getParser());
   }
 
 }

@@ -27,8 +27,10 @@ package com.iw.plugins.spindle.editorlib.pages;
 
 import java.util.Collection;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -39,6 +41,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.AbstractDialog;
 import com.iw.plugins.spindle.ui.ChooseComponentDialog;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
@@ -52,7 +55,6 @@ public class PageRefDialog extends AbstractDialog {
   private StringField pageName;
   private StringButtonField pageRef;
   private ITapestryModel model;
-  private IJavaProject jproject;
   private DialogAdapter adapter = new DialogAdapter();
 
   private Collection existingNames;
@@ -70,7 +72,6 @@ public class PageRefDialog extends AbstractDialog {
     String description = (editing ? "This will replace the existing reference" : "Enter the new information");
     updateWindowTitle(windowTitle);
     updateMessage(description);
-    jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
     this.existingNames = existingNames;
   }
 
@@ -185,8 +186,25 @@ public class PageRefDialog extends AbstractDialog {
      * @see IDialogFieldChangedListener#dialogFieldButtonPressed(DialogField)
      */
     public void dialogFieldButtonPressed(DialogField field) {
+    	
+    ITapestryProject tproject;
+    
+    try {
+    	
+      tproject = TapestryPlugin.getDefault().getTapestryProjectFor(model.getUnderlyingStorage());
+      
+    } catch (CoreException e) {
+
+      ErrorDialog.openError(
+        getShell(),
+        "Spindle project error",
+        "Can't find the Tapestry project",
+        e.getStatus());
+        
+      return;
+    }
       ChooseComponentDialog dialog =
-        new ChooseComponentDialog(getShell(), jproject, "Page Component Reference", "Choose a page component", false);
+        new ChooseComponentDialog(getShell(), tproject, "Page Component Reference", "Choose a page component", false);
       dialog.create();
       int result = dialog.open();
       if (result == PageRefDialog.OK) {

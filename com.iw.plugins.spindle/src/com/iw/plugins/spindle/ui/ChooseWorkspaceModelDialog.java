@@ -159,6 +159,8 @@ public class ChooseWorkspaceModelDialog extends AbstractDialog {
     return result;
 
   }
+  
+  private ChooseWorkspaceModelWidget
 
   private Text nameText;
   private Table applications;

@@ -2,6 +2,7 @@ package com.iw.plugins.spindle.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -12,6 +13,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -282,7 +284,7 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage {
   /**
   * @see NewElementWizardPage#getRunnable()
   */
-  public IRunnableWithProgress getRunnable() {
+  public IRunnableWithProgress getRunnable(Object object) {
     return new IRunnableWithProgress() {
       public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
@@ -321,6 +323,19 @@ public class NewTapComponentWizardClassPage extends TapestryWizardPage {
    */
   public IType getFinalSpecClass() {
     return finalSpecClass;
+  }
+  
+  public IResource getResource() {
+  	
+  	IResource result = null;
+  	
+   try {
+      result = finalSpecClass.getUnderlyingResource();
+      
+    } catch (JavaModelException e) {
+    } 	
+    
+  	return result;
   }
 
   private class FieldEventsAdapter implements IDialogFieldChangedListener {

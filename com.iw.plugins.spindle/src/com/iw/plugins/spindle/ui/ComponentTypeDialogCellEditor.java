@@ -25,13 +25,16 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
+import com.iw.plugins.spindle.project.ITapestryProject;
 
 public class ComponentTypeDialogCellEditor extends EditableDialogCellEditor {
 
@@ -43,15 +46,19 @@ public class ComponentTypeDialogCellEditor extends EditableDialogCellEditor {
   /**
    * Constructor for TypeDialogCellEditor
    */
-  public ComponentTypeDialogCellEditor(Composite parent, ITapestryModel model, String title, String message) {
+  public ComponentTypeDialogCellEditor(
+    Composite parent,
+    ITapestryModel model,
+    String title,
+    String message) {
     super(parent);
     this.model = model;
     if (title != null) {
-    	this.title = title;
+      this.title = title;
     }
     if (message != null) {
-    	this.message = message;
-    }    
+      this.message = message;
+    }
   }
 
   /**
@@ -59,14 +66,24 @@ public class ComponentTypeDialogCellEditor extends EditableDialogCellEditor {
    */
   protected Object openDialogBox(Control cellEditorWindow) {
     Object value = getValue();
-    IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
-    ChooseComponentDialog dialog =
-      new ChooseComponentDialog(
+    ITapestryProject tproject;
+    
+    try {
+    	
+      tproject = TapestryPlugin.getDefault().getTapestryProjectFor(model.getUnderlyingStorage());
+    } catch (CoreException e) {
+
+      ErrorDialog.openError(
         cellEditorWindow.getShell(),
-        jproject,
-        title,
-        message, true);
+        "Spindle project error",
+        "Can't find the Tapestry project",
+        e.getStatus());
         
+      return value;
+    }
+    ChooseComponentDialog dialog =
+      new ChooseComponentDialog(cellEditorWindow.getShell(), tproject, title, message, true);
+
     if (dialog.open() == dialog.OK) {
       return dialog.getResultComponent();
     }

@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.wizards;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -229,7 +230,7 @@ public class NewTapAppWizardPage extends TapestryWizardPage {
   /**
    * @see NewElementWizardPage#getRunnable()
    */
-  public IRunnableWithProgress getRunnable() {
+  public IRunnableWithProgress getRunnable(Object object) {
     return new IRunnableWithProgress() {
       public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         try {
@@ -319,7 +320,7 @@ public class NewTapAppWizardPage extends TapestryWizardPage {
     return generatedServletType;
   }
 
-  public IFile getApplication() {
+  public IResource getResource() {
     return application;
   }
 

@@ -25,7 +25,6 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.wizards;
 
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.swt.widgets.Composite;
@@ -33,12 +32,9 @@ import org.eclipse.swt.widgets.Composite;
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
 
-
 public class NewTapAppWizard extends NewTapestryElementWizard {
 
-  
   private NewTapAppWizardPage fPage1;
-
 
   public NewTapAppWizard() {
     super();
@@ -46,9 +42,7 @@ public class NewTapAppWizard extends NewTapestryElementWizard {
     //setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
     setWindowTitle(MessageUtil.getString("NewTapAppWizard.windowtitle"));
 
-
   }
-
 
   /**
    * @see Wizard#createPages
@@ -61,36 +55,31 @@ public class NewTapAppWizard extends NewTapestryElementWizard {
     }
     fPage1 = new NewTapAppWizardPage(workspace.getRoot());
     addPage(fPage1);
-   
+
     //    fPage2 = new NewTapAppWizardPage2(KludgeName, workspace.getRoot());
     //    addPage(fPage2);
     //    fPage2.init(getSelection());
   }
 
-
   /**
    * @see Wizard#performFinish()
    */
   public boolean performFinish() {
-    if (finishPage(fPage1.getRunnable())) {
-      IFile file = fPage1.getApplication(); 
+    if (finishPage(fPage1.getRunnable(null))) {
+      IFile file = (IFile) fPage1.getResource();
       try {
         selectAndReveal(file);
         openResource(file);
       } catch (Exception e) {
-
 
         // let pass, only reveal and open will fail
       }
     }
     fPage1.performFinish();
 
-
     return true;
 
-
   }
-
 
   /**
    * @see IWizard#createPageControls(Composite)
@@ -99,7 +88,5 @@ public class NewTapAppWizard extends NewTapestryElementWizard {
     super.createPageControls(pageContainer);
     fPage1.init(getInitElement());
   }
-
-  
 
 }

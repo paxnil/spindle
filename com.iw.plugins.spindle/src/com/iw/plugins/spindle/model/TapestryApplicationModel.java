@@ -74,7 +74,7 @@ public class TapestryApplicationModel extends TapestryLibraryModel implements Pr
         try {
 
           SpecificationParser parser =
-            (SpecificationParser) TapestryPlugin.getTapestryModelManager().getParserFor(
+            (SpecificationParser) TapestryPlugin.getParserFor(
               "application");
           librarySpecification =
             (PluginApplicationSpecification) parser.parseApplicationSpecification(

@@ -69,7 +69,8 @@ import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.ui.ChooseComponentDialog;
 import com.iw.plugins.spindle.ui.RequiredSaveEditorAction;
@@ -166,9 +167,12 @@ public class HTMLContentOutlinePage
 
     if (model == null) { // not found in an editor!
 
-      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
-      mgr.connect(file, consumer, writeable);
-      model = (TapestryComponentModel) mgr.getEditableModel(file, consumer);
+      try {
+        TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(file);
+        mgr.connect(file, consumer, writeable);
+        model = (TapestryComponentModel) mgr.getEditableModel(file, consumer);
+      } catch (CoreException e) {
+      }
 
     }
 
@@ -189,8 +193,13 @@ public class HTMLContentOutlinePage
       }
     }
     IFile file = findRelatedComponent();
-    TapestryComponentModel model =
-      (TapestryComponentModel) TapestryPlugin.getTapestryModelManager().getReadOnlyModel(file);
+    TapestryComponentModel model = null;
+    try {
+      model =
+        (TapestryComponentModel) TapestryPlugin.getTapestryModelManager(file).getReadOnlyModel(
+          file);
+    } catch (CoreException e) {
+    }
     boolean canCreate = (model != null);
     if (canCreate) {
 
@@ -527,10 +536,17 @@ public class HTMLContentOutlinePage
     }
 
     private void createInWorkspace() {
+      TapestryComponentModel foundModel = null;
       String consumer = "CreateContainedComponentInWorkspace";
-      TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
+      TapestryProjectModelManager mgr = null;
+      try {
+        mgr = TapestryPlugin.getTapestryModelManager(modelFile);
+        foundModel = getTargetModel(modelFile, consumer, true);
 
-      final TapestryComponentModel model = getTargetModel(modelFile, consumer, true);
+      } catch (CoreException e) {
+      }
+
+      final TapestryComponentModel model = foundModel;
       if (model == null) {
         return;
       }
@@ -558,7 +574,7 @@ public class HTMLContentOutlinePage
 
       }
 
-      if (model != null) {
+      if (mgr != null && model != null) {
         mgr.disconnect(modelFile, consumer);
       }
 
@@ -566,18 +582,33 @@ public class HTMLContentOutlinePage
 
     private String chooseTargetFor(TapestryComponentModel model) {
       String chosen = null;
-      IJavaProject jproject =
-        TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
+      ITapestryProject tproject;
+
+      try {
+
+        tproject = TapestryPlugin.getDefault().getTapestryProjectFor(model.getUnderlyingStorage());
+      } catch (CoreException e) {
+
+        ErrorDialog.openError(
+          getTreeViewer().getControl().getShell(),
+          "Spindle project error",
+          "Can't find the Tapestry project",
+          e.getStatus());
+
+        return null;
+      }
       ChooseComponentDialog dialog =
         new ChooseComponentDialog(
           getTreeViewer().getControl().getShell(),
-          jproject,
+          tproject,
           "Create in " + documentFile.getFullPath().removeFileExtension().lastSegment() + ".jwc",
           "Choose the Contained Component to create",
           true,
           TapestryLookup.ACCEPT_COMPONENTS);
+
       dialog.create();
       if (dialog.open() == dialog.OK) {
+
         chosen = dialog.getResultComponent();
 
       }
@@ -592,6 +623,7 @@ public class HTMLContentOutlinePage
           IStatus.OK,
           "Abort, target component has parse errors",
           null);
+
       ErrorDialog.openError(
         TapestryPlugin.getDefault().getActiveWorkbenchShell(),
         null,

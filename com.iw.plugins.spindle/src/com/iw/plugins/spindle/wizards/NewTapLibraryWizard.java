@@ -72,8 +72,8 @@ public class NewTapLibraryWizard extends NewTapestryElementWizard {
    * @see Wizard#performFinish()
    */
   public boolean performFinish() {
-    if (finishPage(fPage1.getRunnable())) {
-      IFile file = fPage1.getLibrary(); 
+    if (finishPage(fPage1.getRunnable(null))) {
+      IFile file = (IFile)fPage1.getResource(); 
       try {
         selectAndReveal(file);
         openResource(file);

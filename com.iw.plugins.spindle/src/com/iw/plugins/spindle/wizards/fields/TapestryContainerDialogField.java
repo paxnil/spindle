@@ -46,7 +46,8 @@ import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.ChooseWorkspaceModelDialog;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogFieldStatus;
@@ -69,6 +70,8 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
   private ContainerDialogField container;
   private TapestryLibraryModel currentModel;
   private IPackageFragment selectedPackage;
+
+  private ITapestryProject tproject;
 
   public TapestryContainerDialogField(String name, int labelWidth) {
     super(MessageUtil.getString(name + ".label"), labelWidth);
@@ -94,7 +97,14 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
     setButtonLabel(MessageUtil.getString(name + ".button"));
     setTextValue("");
 
-    checkPreviouslySelectedApplication(container.getPackageFragmentRoot().getJavaProject());
+    try {
+      tproject =
+        TapestryPlugin.getDefault().getTapestryProjectFor(
+          container.getPackageFragmentRoot().getJavaProject());
+
+      checkPreviouslySelectedApplication(tproject);
+    } catch (CoreException e) {
+    }
 
   }
 
@@ -237,7 +247,7 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
     checkButtonEnabled();
   }
 
-  private void checkPreviouslySelectedApplication(IJavaProject project) {
+  private void checkPreviouslySelectedApplication(ITapestryProject tproject) {
 
     IPreferenceStore pstore = TapestryPlugin.getDefault().getPreferenceStore();
     String previouslySelected = pstore.getString(NewTapComponentWizardPage.P_ADD_TO_APPLICATION);
@@ -249,8 +259,7 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
       if (path.isValidPath(previouslySelected)) {
 
         try {
-          TapestryLookup lookup = new TapestryLookup();
-          lookup.configure(project);
+          TapestryLookup lookup = tproject.getLookup();
           FinderRequest request = new FinderRequest();
 
           lookup.findAll(
@@ -265,10 +274,14 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
           if (found == null || found.length == 0) {
             return;
           }
-          TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
-          TapestryLibraryModel foundModel =
-            (TapestryLibraryModel) TapestryPlugin.getTapestryModelManager().getReadOnlyModel(
-              found[0]);
+          TapestryLibraryModel foundModel = null;
+
+          try {
+            TapestryProjectModelManager mgr = tproject.getModelManager();
+            foundModel = (TapestryLibraryModel) mgr.getReadOnlyModel(found[0]);
+
+          } catch (CoreException e) {
+          }
           if (foundModel == null) {
             selectedPackage = null;
           } else {
@@ -276,7 +289,7 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
             setContainerModel(foundModel);
           }
 
-        } catch (JavaModelException e) {
+        } catch (CoreException e) {
           e.printStackTrace();
           TapestryPlugin.getDefault().logException(e);
         }
@@ -330,10 +343,14 @@ public class TapestryContainerDialogField extends UneditableStringButtonField {
     }
 
     public ArrayList getModelResults() {
-      if (storages == null) {
+      try {
+
+        return tproject.getModelManager().getModelListFor(storages);
+        
+      } catch (CoreException e) {
         return new ArrayList();
+
       }
-      return TapestryPlugin.getTapestryModelManager().getModelListFor(storages);
     }
   }
 

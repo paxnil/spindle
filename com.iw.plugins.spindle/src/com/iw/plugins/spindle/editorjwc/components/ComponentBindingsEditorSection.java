@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.update.ui.forms.internal.FormSection;
@@ -39,7 +40,7 @@ import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.model.ModelUtils;
 import com.iw.plugins.spindle.model.TapestryApplicationModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
-import com.iw.plugins.spindle.model.manager.TapestryModelManager;
+import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.spec.IBindingHolder;
 import com.iw.plugins.spindle.spec.PluginBindingSpecification;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
@@ -95,38 +96,51 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
 
   protected ChooseBindingTypeDialog getDialog() {
 
-    TapestryModelManager mgr = TapestryPlugin.getTapestryModelManager();
-    TapestryComponentModel cmodel = null;
     ChooseBindingTypeDialog dialog = null;
-    Shell shell = newButton.getShell();
+    try {
+      TapestryProjectModelManager mgr =
+        TapestryPlugin.getTapestryModelManager(getModel().getUnderlyingStorage());
+      TapestryComponentModel cmodel = null;
+      Shell shell = newButton.getShell();
 
-    PluginContainedComponent containedComponent = (PluginContainedComponent) selectedComponent;
+      PluginContainedComponent containedComponent = (PluginContainedComponent) selectedComponent;
 
-    Set existingBindingParms = getExistingBindingParameters();
+      Set existingBindingParms = getExistingBindingParameters();
 
-    if (precomputedAliasInfo.isEmpty()) {
+      if (precomputedAliasInfo.isEmpty()) {
 
-      String selectedType = containedComponent.getType();
+        String selectedType = containedComponent.getType();
 
-      if (selectedComponent != null) {
+        if (selectedComponent != null) {
 
-        cmodel = ModelUtils.findComponent(selectedType, getModel());
+          cmodel = ModelUtils.findComponent(selectedType, getModel());
 
-        if (cmodel != null) {
-          dialog = new ChooseBindingTypeDialog(shell, cmodel, existingBindingParms, DTDVersion >= XMLUtil.DTD_1_2);
+          if (cmodel != null) {
+            dialog =
+              new ChooseBindingTypeDialog(
+                shell,
+                cmodel,
+                existingBindingParms,
+                DTDVersion >= XMLUtil.DTD_1_2);
+          } else {
+            dialog = new ChooseBindingTypeDialog(shell, DTDVersion >= XMLUtil.DTD_1_2);
+          }
+
         } else {
-          dialog = new ChooseBindingTypeDialog(shell, DTDVersion >= XMLUtil.DTD_1_2);
-        }
 
+          dialog = null;
+
+        }
       } else {
 
-        dialog = null;
-
+        dialog =
+          new ChooseBindingTypeDialog(
+            shell,
+            precomputedAliasInfo,
+            existingBindingParms,
+            DTDVersion >= XMLUtil.DTD_1_2);
       }
-    } else {
-
-      dialog =
-        new ChooseBindingTypeDialog(shell, precomputedAliasInfo, existingBindingParms, DTDVersion >= XMLUtil.DTD_1_2);
+    } catch (CoreException e) {
     }
 
     return dialog;
@@ -218,7 +232,10 @@ public class ComponentBindingsEditorSection extends BaseBindingsEditorSection {
               + firstModel.getUnderlyingStorage().getFullPath()
               + "\n");
           buffer.append(
-            alias + " maps to " + firstModel.getSpecification().getComponentSpecificationPath(alias) + "\n");
+            alias
+              + " maps to "
+              + firstModel.getSpecification().getComponentSpecificationPath(alias)
+              + "\n");
           if (keyArray.length > 1) {
             buffer.append(
               "press F1 to check "

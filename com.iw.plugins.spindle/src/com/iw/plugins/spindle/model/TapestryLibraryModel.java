@@ -85,7 +85,7 @@ public class TapestryLibraryModel extends BaseTapestryModel implements PropertyC
         try {
 
           SpecificationParser parser =
-            (SpecificationParser) TapestryPlugin.getTapestryModelManager().getParserFor(
+            (SpecificationParser) TapestryPlugin.getParserFor(
               "application");
           librarySpecification =
             (PluginLibrarySpecification) parser.parseLibrarySpecification(

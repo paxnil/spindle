@@ -62,9 +62,9 @@ public class NewTapComponentWizard extends NewTapestryElementWizard {
    */
   public boolean performFinish() {
     if (finishPage(fPage1.getAutoAddRunnable())) {
-      if (finishPage(fPage2.getRunnable())) {
+      if (finishPage(fPage2.getRunnable(null))) {
         if (finishPage(fPage1.getRunnable(fPage2.getFinalSpecClass()))) {
-          IFile file = fPage1.getComponent();
+          IFile file = (IFile)fPage1.getResource();
           try {
             selectAndReveal(file);
             openResource(file);

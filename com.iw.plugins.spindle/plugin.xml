@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle"
    name="Spindle, an Eclipse Plugin for Tapestry (tapestry.sourceforge.net)"
-   version="1.0.3"
+   version="1.1.0"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.TapestryPlugin">
 
@@ -30,6 +30,7 @@
       </library>
    </runtime>
    <requires>
+      <import plugin="org.apache.xerces"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
@@ -39,14 +40,13 @@
       <import plugin="org.eclipse.pde.ui"/>
       <import plugin="org.eclipse.pde.core"/>
       <import plugin="org.eclipse.update.ui.forms"/>
-      <import plugin="org.apache.xerces"/>
    </requires>
 
 
    <extension-point id="modelManagers" name="Internal Model Manager Point" schema="schema/modelManagers.exsd"/>
 
    <extension
-         id="spindlenature"
+         id="project.TapestryProject"
          name="SpindleProjectNature"
          point="org.eclipse.core.resources.natures">
       <runtime>
@@ -59,8 +59,8 @@
          point="org.eclipse.ui.projectNatureImages">
       <image
             icon="icons/full/application16.gif"
-            natureId="com.iw.plugins.spindle.spindlenature"
-            id="org.eclipse.ui.spindleProjectNatureImage">
+            natureId="project.TapestryProject"
+            id="com.iw.plugins.spindle.project.TapestryProject.image">
       </image>
    </extension>
    <extension
@@ -144,10 +144,25 @@
             adaptable="true"
             label="Spindle DTD Decorator"
             state="true"
-            class="com.iw.plugins.spindle.ui.DTDLableDecorator"
+            class="com.iw.plugins.spindle.ui.decorators.DTDLableDecorator"
             id="com.iw.plugins.spindle.DTDVersionDecorator">
          <description>
             Adds the DTD version to .jwc and .application files in the package explorer
+         </description>
+      </decorator>
+   </extension>
+   
+      <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            adaptable="true"
+            label="Spindle Project Decorator"
+            state="true"
+            class="com.iw.plugins.spindle.ui.decorators.TapestryProjectLableDecorator"
+            id="com.iw.plugins.spindle.TapestryProjectLableDecorator">
+         <description>
+            Describes the Tapestry resource associated with a Tapestry project
          </description>
       </decorator>
    </extension>
@@ -189,10 +204,12 @@
             class="com.iw.plugins.spindle.html.TapestryHTMLEditor"
             id="com.iw.plugins.spindle.editors.html">
       </editor>
+      <!--             icon="icons/full/library16.gif" -->
+
       <editor
             name="Spindle Editor for Tapestry Libraries"
             default="true"
-            icon="icons/full/library16.gif"
+            icon="icons/full/application32.gif"
             filenames="*.library"
             contributorClass="com.iw.plugins.spindle.editorlib.LibraryMultipageEditorContributor"
             class="com.iw.plugins.spindle.editorlib.LibraryMultipageEditor"
@@ -263,35 +280,34 @@
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
-         
       <objectContribution
-            objectClass="org.eclipse.core.resources.IProject"
-            id="com.iw.plugins.spindle.popupMenus">
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="com.iw.plugins.spindle.project.popupMenus.project">
          <menu
                label="Spindle"
-               id="com.iw.plugins.spindle.popupMenus.createComponents">
+               id="org.eclipse.ui.popupMenus.project.menu1">
             <separator
                   name="group1">
             </separator>
          </menu>
          <action
-               label="Create Tapestry Component"
-               icon="icons/full/component16_dark.gif"
-               class="com.iw.plugins.spindle.wizards.extra.CreateComponentFromTemplateAction"
-               menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
-               enablesFor="+"
-               id="com.iw.plugins.spindle.popupMenus.createComponents.componentFromTemplate">
-         </action>
+               label="Migrate to Tapestry DTD 1.3"
+               icon="icons/full/migrate16_dark.gif"
+               class="com.iw.plugins.spindle.project.actions.MigrateToTapestryDTD13"
+               menubarPath="org.eclipse.ui.popupMenus.project.menu1/group1"
+               enablesFor="1"
+               id="com.iw.plugins.spindle.project.popupMenus.project.migrateToTapestryDTD13">
+          </action>
          <action
-               label="Create Tapestry Page"
-               icon="icons/full/page16.gif"
-               class="com.iw.plugins.spindle.wizards.extra.CreatePageFromTemplateAction"
-               menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
-               enablesFor="+"
-               id="com.iw.plugins.spindle.popupMenus.createComponents.pageFromTemplate">
+               label="Convert to Tapestry Project"
+               icon="icons/full/application16_dark.gif"
+               class="com.iw.plugins.spindle.project.actions.ConvertToTapestryProjectAction"
+               menubarPath="org.eclipse.ui.popupMenus.project.menu1/group1"
+               enablesFor="1"
+               id="com.iw.plugins.spindle.project.popupMenus.project.convertToTapestryProject">
          </action>
+          
       </objectContribution>
-       
       <objectContribution
             objectClass="org.eclipse.core.resources.IFile"
             nameFilter="*.html"

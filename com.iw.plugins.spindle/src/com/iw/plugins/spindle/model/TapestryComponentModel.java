@@ -92,7 +92,7 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
           String extension = element.getFullPath().getFileExtension();
 
           SpecificationParser parser =
-            (SpecificationParser) TapestryPlugin.getTapestryModelManager().getParserFor(extension);
+            (SpecificationParser) TapestryPlugin.getParserFor(extension);
 
           if (extension.equals("jwc")) {
 
@@ -271,13 +271,15 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
 
   public String getSpecificationLocation() {
     IStorage underlier = getUnderlyingStorage();
-    IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(underlier);
     IPackageFragment fragment = null;
     TapestryLookup lookup = new TapestryLookup();
     try {
+    	
+      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(underlier);
       lookup.configure(jproject);
       fragment = lookup.findPackageFragment(underlier);
-    } catch (JavaModelException jmex) {
+      
+    } catch (CoreException jmex) {
     }
     String tapestryName = "";
     if (fragment != null) {
