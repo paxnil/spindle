@@ -20,6 +20,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
@@ -78,6 +79,14 @@ public class ProjectPreferenceStore implements IPersistentPreferenceStore
       try
       {
         store.load();
+        for (Iterator iter = store.properties.keySet().iterator(); iter.hasNext();)
+        {
+          String name = (String) iter.next();
+          String value = store.properties.getProperty(name);
+
+          if (store.backingStore.getString(name).equals(value))
+            store.properties.remove(name);
+        }
       } catch (IOException e)
       {
         TapestryCore.log(e);
@@ -380,7 +389,14 @@ public class ProjectPreferenceStore implements IPersistentPreferenceStore
    */
   public boolean isDefault(String name)
   {
-    return (!properties.containsKey(name));
+    if (!properties.containsKey(name))
+      return true;
+
+    String value = properties.getProperty(name, null);
+    if (value == null)
+      return true;
+
+    return value.equals(backingStore.getString(name));
   }
   /**
    * Prints the contents of this preference store to the given print stream.
@@ -570,7 +586,7 @@ public class ProjectPreferenceStore implements IPersistentPreferenceStore
     properties.remove(name);
     dirty = true;
     Object newValue = null;
-    if (defaultProperties != null)
+    if (backingStore != null)
       newValue = backingStore.getString(name);
     // XXX this is hacked for String only
     firePropertyChangeEvent(name, oldValue, newValue);
