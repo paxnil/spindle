@@ -73,7 +73,7 @@ public class TypeDialogCellEditor extends DialogCellEditor {
     IType hrootElement = null;
     try {
       if (hierarchyRoot != null) {
-        hrootElement = Utils.findType(jproject, hierarchyRoot);
+        hrootElement = jproject.findType(hierarchyRoot);
       }
       if (hrootElement != null) {
         result = new HierarchyScope(hrootElement, jproject);

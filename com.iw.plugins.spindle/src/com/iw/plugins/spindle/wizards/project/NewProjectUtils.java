@@ -53,28 +53,28 @@ import com.iw.plugins.spindle.util.Utils;
  */
 public class NewProjectUtils {
 
-  public static void fixClasspath(IJavaProject project, IProgressMonitor monitor)
+  public static void fixClasspath(IJavaProject jproject, IProgressMonitor monitor)
     throws InterruptedException, CoreException {
 
-    IType checkTapVersion = Utils.findType(project, "net.sf.tapestry.ILibrarySpecification");
+    IType checkTapVersion = jproject.findType( "net.sf.tapestry.ILibrarySpecification");
 
     if (checkTapVersion == null) {
 
-      addToClasspath("net.sf.tapestry-2.2.jar", project, monitor);
+      addToClasspath("net.sf.tapestry-2.2.jar", jproject, monitor);
 
     }
 
-    IType checkServlet = Utils.findType(project, "javax.servlet.http.HttpServlet");
+    IType checkServlet =jproject.findType( "javax.servlet.http.HttpServlet");
 
     if (checkServlet == null) {
 
-      addToClasspath("javax.servlet.jar", project, monitor);
+      addToClasspath("javax.servlet.jar", jproject, monitor);
 
     }
 
   }
 
-  private static void addToClasspath(String jarFileName, IJavaProject project, IProgressMonitor monitor)
+  private static void addToClasspath(String jarFileName, IJavaProject jproject, IProgressMonitor monitor)
     throws InterruptedException, CoreException {
 
     URL installUrl = TapestryPlugin.getDefault().getDescriptor().getInstallURL();
@@ -95,7 +95,7 @@ public class NewProjectUtils {
 
     }
 
-    IClasspathEntry[] classpath = project.getRawClasspath();
+    IClasspathEntry[] classpath = jproject.getRawClasspath();
 
     IClasspathEntry[] newClasspath = new IClasspathEntry[classpath.length + 1];
 
@@ -110,7 +110,7 @@ public class NewProjectUtils {
         null,
         false);
 
-    project.setRawClasspath(newClasspath, monitor);
+    jproject.setRawClasspath(newClasspath, monitor);
 
   }
 

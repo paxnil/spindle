@@ -64,6 +64,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -97,7 +98,10 @@ public class Utils {
 
     // get all the view and editor parts
     List parts = new ArrayList();
-    parts.addAll(Arrays.asList(page.getViews()));
+    IViewReference[] viewRefs = page.getViewReferences();
+    for (int i = 0; i < viewRefs.length; i++) {
+      parts.add(viewRefs[i].getPart(false));
+    }
     IEditorReference refs[] = page.getEditorReferences();
     for (int i = 0; i < refs.length; i++) {
       if (refs[i].getPart(false) != null)
@@ -105,9 +109,8 @@ public class Utils {
     }
 
     final ISelection selection = new StructuredSelection(resource);
-    Iterator enum = parts.iterator();
-    while (enum.hasNext()) {
-      IWorkbenchPart part = (IWorkbenchPart) enum.next();
+    for (Iterator iter = parts.iterator(); iter.hasNext();) {
+      IWorkbenchPart part = (IWorkbenchPart) iter.next();
 
       // get the part's ISetSelectionTarget implementation
       ISetSelectionTarget target = null;
@@ -325,128 +328,134 @@ public class Utils {
     return jproject.findPackageFragmentRoot(rootPath) != null;
   }
 
-  /** 
-   * Finds a type by its qualified type name (dot separated).
-   * @param jproject The java project to search in
-   * @param str The fully qualified name (type name with enclosing type names and package (all separated by dots))
-   * @return The type found, or null if not existing
-   * The method only finds top level types and its inner types. Waiting for a Java Core solution
-   */
-  public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
-    String pathStr = fullyQualifiedName.replace('.', '/') + ".java"; //$NON-NLS-1$
-    IJavaElement jelement = jproject.findElement(new Path(pathStr));
-    if (jelement == null) {
-      // try to find it as inner type
-      String qualifier = Signature.getQualifier(fullyQualifiedName);
-      if (qualifier.length() > 0) {
-        IType type = findType(jproject, qualifier); // recursive!
-        if (type != null) {
-          IType res = type.getType(Signature.getSimpleName(fullyQualifiedName));
-          if (res.exists()) {
-            return res;
-          }
-        }
-      }
-    } else if (jelement.getElementType() == IJavaElement.COMPILATION_UNIT) {
-      String simpleName = Signature.getSimpleName(fullyQualifiedName);
-      return ((ICompilationUnit) jelement).getType(simpleName);
-    } else if (jelement.getElementType() == IJavaElement.CLASS_FILE) {
-      return ((IClassFile) jelement).getType();
-    }
-    return null;
-  }
+  //  /** 
+  //   * Finds a type by its qualified type name (dot separated).
+  //   * @param jproject The java project to search in
+  //   * @param str The fully qualified name (type name with enclosing type names and package (all separated by dots))
+  //   * @return The type found, or null if not existing
+  //   * The method only finds top level types and its inner types. Waiting for a Java Core solution
+  //   */
+  //  public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
+  //    String pathStr = fullyQualifiedName.replace('.', '/') + ".java"; //$NON-NLS-1$
+  //    IJavaElement jelement = jproject.findElement(new Path(pathStr));
+  //    if (jelement == null) {
+  //      // try to find it as inner type
+  //      String qualifier = Signature.getQualifier(fullyQualifiedName);
+  //      if (qualifier.length() > 0) {
+  //        IType type = findType(jproject, qualifier); // recursive!
+  //        if (type != null) {
+  //          IType res = type.getType(Signature.getSimpleName(fullyQualifiedName));
+  //          if (res.exists()) {
+  //            return res;
+  //          }
+  //        }
+  //      }
+  //    } else if (jelement.getElementType() == IJavaElement.COMPILATION_UNIT) {
+  //      String simpleName = Signature.getSimpleName(fullyQualifiedName);
+  //      return ((ICompilationUnit) jelement).getType(simpleName);
+  //    } else if (jelement.getElementType() == IJavaElement.CLASS_FILE) {
+  //      return ((IClassFile) jelement).getType();
+  //    }
+  //    return null;
+  //  }
 
-  /** 
-   * Finds a type by package and type name.
-   * @param jproject the java project to search in
-   * @param pack The package name
-   * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
-   * @return the type found, or null if not existing
-   * The method only finds top level types and its inner types. Waiting for a Java Core solution
-   */
-  public static IType findType(IJavaProject jproject, String pack, String typeQualifiedName) throws JavaModelException {
-    // should be supplied from java core
-    int dot = typeQualifiedName.indexOf('.');
-    if (dot == -1) {
-      return findType(jproject, concatenateName(pack, typeQualifiedName));
-    }
-    IPath packPath;
-    if (pack.length() > 0) {
-      packPath = new Path(pack.replace('.', '/'));
-    } else {
-      packPath = new Path(""); //$NON-NLS-1$
-    }
-    // fixed for 1GEXEI6: ITPJUI:ALL - Incorrect error message on class creation wizard
-    IPath path = packPath.append(typeQualifiedName.substring(0, dot) + ".java"); //$NON-NLS-1$
-    IJavaElement elem = jproject.findElement(path);
-    if (elem instanceof ICompilationUnit) {
-      return findTypeInCompilationUnit((ICompilationUnit) elem, typeQualifiedName);
-    } else if (elem instanceof IClassFile) {
-      path = packPath.append(typeQualifiedName.replace('.', '$') + ".class"); //$NON-NLS-1$
-      elem = jproject.findElement(path);
-      if (elem instanceof IClassFile) {
-        return ((IClassFile) elem).getType();
-      }
-    }
-    return null;
-  }
+  //  /** 
+  //   * Finds a type by package and type name.
+  //   * @param jproject the java project to search in
+  //   * @param pack The package name
+  //   * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
+  //   * @return the type found, or null if not existing
+  //   * The method only finds top level types and its inner types. Waiting for a Java Core solution
+  //   * 
+  //   * @deprecated
+  //   */
+  //  public static IType findType(IJavaProject jproject, String pack, String typeQualifiedName) throws JavaModelException {
+  //    // should be supplied from java core
+  //    int dot = typeQualifiedName.indexOf('.');
+  //    if (dot == -1) {
+  //      return findType(jproject, concatenateName(pack, typeQualifiedName));
+  //    }
+  //    IPath packPath;
+  //    if (pack.length() > 0) {
+  //      packPath = new Path(pack.replace('.', '/'));
+  //    } else {
+  //      packPath = new Path(""); //$NON-NLS-1$
+  //    }
+  //    // fixed for 1GEXEI6: ITPJUI:ALL - Incorrect error message on class creation wizard
+  //    IPath path = packPath.append(typeQualifiedName.substring(0, dot) + ".java"); //$NON-NLS-1$
+  //    IJavaElement elem = jproject.findElement(path);
+  //    if (elem instanceof ICompilationUnit) {
+  //      return findTypeInCompilationUnit((ICompilationUnit) elem, typeQualifiedName);
+  //    } else if (elem instanceof IClassFile) {
+  //      path = packPath.append(typeQualifiedName.replace('.', '$') + ".class"); //$NON-NLS-1$
+  //      elem = jproject.findElement(path);
+  //      if (elem instanceof IClassFile) {
+  //        return ((IClassFile) elem).getType();
+  //      }
+  //    }
+  //    return null;
+  //  }
 
-  /** 
-   * Finds a type in a compilation unit. Typical usage is to find the corresponding
-   * type in a working copy.
-   * @param cu the compilation unit to search in
-   * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
-   * @return the type found, or null if not existing
-   */
-  public static IType findTypeInCompilationUnit(ICompilationUnit cu, String typeQualifiedName) throws JavaModelException {
-    IType[] types = cu.getAllTypes();
-    for (int i = 0; i < types.length; i++) {
-      String currName = getTypeQualifiedName(types[i]);
-      if (typeQualifiedName.equals(currName)) {
-        return types[i];
-      }
-    }
-    return null;
-  }
-
-  /**
-  * Concatenates two names. Uses a dot for separation.
-  * Both strings can be empty or <code>null</code>.
-  */
-  public static String concatenateName(String name1, String name2) {
-    StringBuffer buf = new StringBuffer();
-    if (name1 != null && name1.length() > 0) {
-      buf.append(name1);
-    }
-    if (name2 != null && name2.length() > 0) {
-      if (buf.length() > 0) {
-        buf.append('.');
-      }
-      buf.append(name2);
-    }
-    return buf.toString();
-  }
-
-  /**
-   * Returns the qualified type name of the given type using '.' as separators.
-   * This is a replace for IType.getTypeQualifiedName()
-   * which uses '$' as separators. As '$' is also a valid character in an id
-   * this is ambiguous. JavaCore PR: 1GCFUNT
-   */
-  public static String getTypeQualifiedName(IType type) {
-    StringBuffer buf = new StringBuffer();
-    getTypeQualifiedName(type, buf);
-    return buf.toString();
-  }
-
-  private static void getTypeQualifiedName(IType type, StringBuffer buf) {
-    IType outerType = type.getDeclaringType();
-    if (outerType != null) {
-      getTypeQualifiedName(outerType, buf);
-      buf.append('.');
-    }
-    buf.append(type.getElementName());
-  }
+  //  /** 
+  //   * Finds a type in a compilation unit. Typical usage is to find the corresponding
+  //   * type in a working copy.
+  //   * @param cu the compilation unit to search in
+  //   * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
+  //   * @return the type found, or null if not existing
+  //   * 
+  //   * @deprecated
+  //   */
+  //  public static IType findTypeInCompilationUnit(ICompilationUnit cu, String typeQualifiedName) throws JavaModelException {
+  //    IType[] types = cu.getAllTypes();
+  //    for (int i = 0; i < types.length; i++) {
+  //      String currName = getTypeQualifiedName(types[i]);
+  //      if (typeQualifiedName.equals(currName)) {
+  //        return types[i];
+  //      }
+  //    }
+  //    return null;
+  //  }
+  //
+  //  /**
+  //  * Concatenates two names. Uses a dot for separation.
+  //  * Both strings can be empty or <code>null</code>.
+  //  */
+  //  public static String concatenateName(String name1, String name2) {
+  //    StringBuffer buf = new StringBuffer();
+  //    if (name1 != null && name1.length() > 0) {
+  //      buf.append(name1);
+  //    }
+  //    if (name2 != null && name2.length() > 0) {
+  //      if (buf.length() > 0) {
+  //        buf.append('.');
+  //      }
+  //      buf.append(name2);
+  //    }
+  //    return buf.toString();
+  //  }
+  //
+  //  /**
+  //   * Returns the qualified type name of the given type using '.' as separators.
+  //   * This is a replace for IType.getTypeQualifiedName()
+  //   * which uses '$' as separators. As '$' is also a valid character in an id
+  //   * this is ambiguous. JavaCore PR: 1GCFUNT
+  //   * 
+  //   * @deprecated
+  //   */
+  //  public static String getTypeQualifiedName(IType type) {
+  //    StringBuffer buf = new StringBuffer();
+  //    getTypeQualifiedName(type, buf);
+  //    return buf.toString();
+  //  }
+  //
+  //  private static void getTypeQualifiedName(IType type, StringBuffer buf) {
+  //    IType outerType = type.getDeclaringType();
+  //    if (outerType != null) {
+  //      getTypeQualifiedName(outerType, buf);
+  //      buf.append('.');
+  //    }
+  //    buf.append(type.getElementName());
+  //  }
 
   /**
    * Evaluates if a member (possible from another package) is visible from
@@ -467,7 +476,7 @@ public class Utils {
     return (pack != null && pack.equals(otherpack));
   }
 
-  public static String codeFormat(String sourceString, int initialIndentationLevel, String lineDelim) {
+  public static String formatJavaCode(String sourceString, int initialIndentationLevel, String lineDelim) {
     ICodeFormatter formatter = ToolFactory.createDefaultCodeFormatter(null);
     return formatter.format(sourceString, initialIndentationLevel, null, lineDelim) + lineDelim;
   }
@@ -729,9 +738,9 @@ public class Utils {
 
       if (model != null && model.isLoaded()) {
 
-        IJavaProject project = TapestryPlugin.getDefault().getJavaProjectFor(jwcOrPageStorage);
+        IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(jwcOrPageStorage);
 
-        return Utils.findType(project, model.getComponentSpecification().getComponentClassName());
+        return jproject.findType(model.getComponentSpecification().getComponentClassName());
       }
 
     } catch (CoreException e) {

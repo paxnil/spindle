@@ -203,7 +203,7 @@ public class PublicStaticFieldSelectionDialog extends AbstractDialog {
       IType type = null;
 
       try {
-        type = Utils.findType(jproject, qualifiedClass);
+        type = jproject.findType(qualifiedClass);
       } catch (JavaModelException e) {
         TapestryPlugin.getDefault().logException(e);
       }

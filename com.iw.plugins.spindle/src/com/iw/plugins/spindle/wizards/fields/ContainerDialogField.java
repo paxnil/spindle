@@ -62,18 +62,18 @@ public class ContainerDialogField extends StringButtonField {
   protected String name;
   private IWorkspaceRoot workspaceRoot;
   private IPackageFragmentRoot currentRoot;
+  private boolean thisProjectOnly;
 
-  
-  /**
-   * Constructor for ContainerDialogField.
-   * @param label
-   * @param labelWidth
-   */
-  public ContainerDialogField(String name, IWorkspaceRoot root,int labelWidth) {
-    super(MessageUtil.getString(name +".label"), labelWidth);
+  public ContainerDialogField(String name, IWorkspaceRoot root, int labelWidth) {
+    this(name, root, labelWidth, true);
+  }
+
+  public ContainerDialogField(String name, IWorkspaceRoot root, int labelWidth, boolean thisProjectOnly) {
+    super(MessageUtil.getString(name + ".label"), labelWidth);
     this.name = name;
-    workspaceRoot = root;    
+    workspaceRoot = root;
     currentRoot = null;
+    this.thisProjectOnly = thisProjectOnly;
   }
 
   /**
@@ -81,7 +81,7 @@ public class ContainerDialogField extends StringButtonField {
    */
   public ContainerDialogField(String name, IWorkspaceRoot root) {
     this(name, root, -1);
-    
+
   }
 
   /**
@@ -102,14 +102,11 @@ public class ContainerDialogField extends StringButtonField {
       setStatus(containerChanged());
     }
 
-    
   }
 
   public String getContainerText() {
     return getTextValue();
   }
-
- 
 
   public IPackageFragmentRoot getPackageFragmentRoot() {
     return currentRoot;
@@ -120,12 +117,12 @@ public class ContainerDialogField extends StringButtonField {
     currentRoot = root;
     String str = (root == null) ? "" : root.getPath().toString();
     setTextValue(str);
-    setEnabled(canBeModified);    
+    setEnabled(canBeModified);
   }
 
   public void init(IJavaElement elem, IRunnableContext context) {
     super.init(context);
-    
+
     setButtonLabel(MessageUtil.getString(name + ".button"));
 
     IPackageFragmentRoot initRoot = null;
@@ -155,16 +152,22 @@ public class ContainerDialogField extends StringButtonField {
   }
 
   private IPackageFragmentRoot chooseSourceContainer(IJavaElement initElement) {
-  	
+
     final IJavaProject thisProject = initElement.getJavaProject();
     Class[] acceptedClasses = new Class[] { IPackageFragmentRoot.class, IJavaProject.class };
     ISelectionStatusValidator validator = new TypedElementSelectionValidator(acceptedClasses, false) {
       public boolean isSelectedValid(Object element) {
         try {
-          if (element instanceof IJavaProject && thisProject.equals((IJavaProject)element)) {
-          	
+          boolean accepted = false;
+          if (thisProjectOnly) {
+            accepted = element instanceof IJavaProject && thisProject.equals((IJavaProject) element);
+          } else {
+            accepted = element instanceof IJavaProject;
+          }
+          if (accepted) {
+
             IJavaProject jproject = (IJavaProject) element;
-            IPath path = jproject.getProject().getFullPath(); 
+            IPath path = jproject.getProject().getFullPath();
             return (jproject.findPackageFragmentRoot(path) != null);
           } else if (element instanceof IPackageFragmentRoot) {
             return (((IPackageFragmentRoot) element).getKind() == IPackageFragmentRoot.K_SOURCE);
@@ -180,12 +183,12 @@ public class ContainerDialogField extends StringButtonField {
     acceptedClasses = new Class[] { IJavaModel.class, IPackageFragmentRoot.class, IJavaProject.class };
     ViewerFilter filter = new TypedViewerFilter(acceptedClasses) {
       public boolean select(Viewer viewer, Object parent, Object element) {
-      	
-      	if (element instanceof IJavaProject) {
-      		
-      		return thisProject.equals((IJavaProject)element);
-      		
-      	}
+
+        if (element instanceof IJavaProject) {
+
+          return thisProject.equals((IJavaProject) element);
+
+        }
         if (element instanceof IPackageFragmentRoot) {
           try {
             return (((IPackageFragmentRoot) element).getKind() == IPackageFragmentRoot.K_SOURCE);

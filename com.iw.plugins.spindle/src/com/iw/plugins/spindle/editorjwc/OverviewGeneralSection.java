@@ -363,18 +363,18 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
     * @see Action#run()
     */
     public void run() {
-      String engineClass = componentClassText.getValue();
+      String componentClass = componentClassText.getValue();
       ITapestryModel model = (ITapestryModel) getFormPage().getModel();
       try {
         IJavaProject jproject =
           TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
-        IType type = Utils.findType(jproject, engineClass);
+        IType type = jproject.findType(componentClass);
         JavaUI.openInEditor(type);
       } catch (Exception e) {
         MessageDialog.openError(
           componentClassText.getControl().getShell(),
           "Error opening editor",
-          "could not open an editor for " + engineClass);
+          "could not open an editor for " + componentClass);
       }
     }
   }
@@ -440,7 +440,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
       IType hrootElement = null;
       try {
         if (hierarchyRoot != null) {
-          hrootElement = Utils.findType(jproject, hierarchyRoot);
+          hrootElement = jproject.findType(hierarchyRoot);
         }
         if (hrootElement != null) {
 //          result = SearchEngine.createHierarchyScope(hrootElement);

@@ -80,7 +80,7 @@ public class RawTypeDialogField extends StringButtonField {
     super.init(context);
     this.jproject = jproject;
     try {
-      requiredType = Utils.findType(jproject, hierarchyRoot);
+      requiredType = resolveTypeName( hierarchyRoot);
     } catch (JavaModelException e) {
       TapestryPlugin.getDefault().logException(e);
     }
@@ -154,7 +154,7 @@ public class RawTypeDialogField extends StringButtonField {
     IType hrootElement = null;
     try {
       if (hierarchyRoot != null) {
-        hrootElement = Utils.findType(jproject, hierarchyRoot);
+        hrootElement = resolveTypeName( hierarchyRoot);
       }
       if (hrootElement != null) {
         result = SearchEngine.createHierarchyScope(hrootElement);
@@ -193,7 +193,7 @@ public class RawTypeDialogField extends StringButtonField {
   }
 
   protected IType resolveTypeName(String typeName) throws JavaModelException {
-    return Utils.findType(jproject, typeName);
+    return jproject.findType( typeName);
   }
 
   public IType getType() {

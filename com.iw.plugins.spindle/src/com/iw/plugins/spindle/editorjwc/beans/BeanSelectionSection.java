@@ -103,7 +103,7 @@ public class BeanSelectionSection
     try {
       IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(getModel().getUnderlyingStorage());
       if (jproject != null) {
-        IType beanClass = Utils.findType(jproject, bean.getClassName());
+        IType beanClass = jproject.findType( bean.getClassName());
         if (beanClass != null) {
 
           manager.add(new Separator());

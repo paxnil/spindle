@@ -145,7 +145,7 @@ public class TypeDialogField extends StringButtonField {
     IType hrootElement = null;
     try {
       if (hierarchyRoot != null) {
-        hrootElement = Utils.findType(jproject, hierarchyRoot);
+        hrootElement = jproject.findType(hierarchyRoot);
       }
       if (hrootElement != null) {
         result = SearchEngine.createHierarchyScope(hrootElement);
@@ -198,16 +198,16 @@ public class TypeDialogField extends StringButtonField {
       String packName = currPack.getElementName();
       // search in own package
       if (!currPack.isDefaultPackage()) {
-        type = Utils.findType(jproject, packName, typeName);
+      	type = jproject.findType(packName, typeName);        
       }
       // search in java.lang
       if (type == null && !"java.lang".equals(packName)) {
-        type = Utils.findType(jproject, "java.lang", typeName);
+        type = jproject.findType("java.lang", typeName);
       }
     }
     // search fully qualified
     if (type == null) {
-      type = Utils.findType(jproject, typeName);
+      type = jproject.findType(typeName);
     }
     //}
     return type;

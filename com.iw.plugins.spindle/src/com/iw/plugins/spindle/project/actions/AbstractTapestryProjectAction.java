@@ -131,7 +131,7 @@ public abstract class AbstractTapestryProjectAction
 
     try {
 
-      return Utils.findType(project, "javax.servlet.Servlet") != null;
+      return project.findType("javax.servlet.Servlet") != null;
     } catch (JavaModelException e) {
 
       Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchShell();
@@ -149,7 +149,7 @@ public abstract class AbstractTapestryProjectAction
 
     try {
 
-      return Utils.findType(project, "net.sf.tapestry.spec.IApplicationSpecification") != null;
+      return project.findType( "net.sf.tapestry.spec.IApplicationSpecification") != null;
 
     } catch (JavaModelException e) {
 

@@ -285,7 +285,7 @@ public class ApplicationWizardPage extends NewTapestryProjectPage {
       IPackageFragment pack = root.createPackageFragment(packageName, true, monitor);
 
       String servletClass = fServletClassDialog.getTextValue();
-      IType servletSuperclass = Utils.findType(project, "net.sf.tapestry.ApplicationServlet");
+      IType servletSuperclass = project.findType("net.sf.tapestry.ApplicationServlet");
       generatedServletType =
         ApplicationClassFactory.createClass(
           root,
@@ -320,7 +320,7 @@ public class ApplicationWizardPage extends NewTapestryProjectPage {
     method.setBody(getAppMethodBody());
 
     String newContents =
-      Utils.codeFormat(unit.getContents(), 0, StubUtility.getLineDelimiterUsed(parentCU));
+      Utils.formatJavaCode(unit.getContents(), 0, StubUtility.getLineDelimiterUsed(parentCU));
     parentCU.getBuffer().setContents(newContents);
     parentCU.save(monitor, true);
   }

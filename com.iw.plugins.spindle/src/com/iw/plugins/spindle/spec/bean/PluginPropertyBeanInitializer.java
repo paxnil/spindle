@@ -37,6 +37,13 @@ import com.iw.plugins.spindle.spec.IIdentifiable;
 import com.iw.plugins.spindle.spec.IPropertyChangeProvider;
 import com.iw.plugins.spindle.spec.PluginBeanSpecification;
 
+/**
+ * @author GWL
+ * @version $Id$
+ * @deprecated
+ * Copryright 2002, Intelligent Works Inc.
+ * All Rights Reserved
+ */
 public class PluginPropertyBeanInitializer
   extends PropertyBeanInitializer
   implements IPropertyChangeProvider, IIdentifiable, IPropertySource {

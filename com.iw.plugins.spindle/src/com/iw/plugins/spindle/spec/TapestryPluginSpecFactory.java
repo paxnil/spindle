@@ -82,6 +82,7 @@ public class TapestryPluginSpecFactory extends SpecFactory {
     return new PluginParameterSpecification();
   }
 
+  /** @deprecated **/
   public IBeanInitializer createPropertyBeanInitializer(String propertyName, String propertyPath) {
     return new PluginPropertyBeanInitializer(propertyName, propertyPath);
   }

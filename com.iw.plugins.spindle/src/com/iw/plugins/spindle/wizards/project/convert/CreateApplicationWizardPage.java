@@ -301,7 +301,7 @@ public class CreateApplicationWizardPage extends TapestryWizardPage {
     }
     method.setBody(getAppMethodBody());
 
-    String newContents = Utils.codeFormat(unit.getContents(), 0, StubUtility.getLineDelimiterUsed(parentCU));
+    String newContents = Utils.formatJavaCode(unit.getContents(), 0, StubUtility.getLineDelimiterUsed(parentCU));
     parentCU.getBuffer().setContents(newContents);
     parentCU.save(monitor, true);
   }

@@ -264,7 +264,7 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
       ITapestryModel model = (ITapestryModel) getFormPage().getModel();
       try {
         IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(model.getUnderlyingStorage());
-        IType type = Utils.findType(jproject, engineClass);
+        IType type = jproject.findType(engineClass);
         JavaUI.openInEditor(type);
       } catch (Exception e) {
         MessageDialog.openError(
@@ -333,7 +333,7 @@ public class OverviewAppGeneralSection extends SpindleFormSection implements IMo
       IType hrootElement = null;
       try {
         if (hierarchyRoot != null) {
-          hrootElement = Utils.findType(jproject, hierarchyRoot);
+          hrootElement = jproject.findType(hierarchyRoot);
         }
         if (hrootElement != null) {
           //          result = SearchEngine.createHierarchyScope(hrootElement);
