@@ -1,6 +1,6 @@
 <project name="builder" default="init" basedir=".">
 
-  <property name="version" value="1.1.0.rc2"/>
+  <property name="version" value="1.1.0.rc3"/>
   <property name="size" value="3277"/>
   <property name="tap_version" value="2.2"/>
   
