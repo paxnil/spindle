@@ -25,9 +25,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.preferences;
 
-import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
-import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -43,10 +41,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.iw.plugins.spindle.Images;
-import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
 /**
  * @author GWL
@@ -59,9 +55,6 @@ public class SpindleGeneralPreferencePage
     extends PreferencePage
     implements IWorkbenchPreferencePage, IPropertyChangeListener
 {
-    private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
-    private static final String FORMATTER_PRESERVE_BLANK_LINES = PreferenceConstants.FORMATTER_PRESERVE_BLANK_LINES;
-    private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
     private static final String BUILD_MISS = TapestryCore.BUILDER_MARKER_MISSES;
     private static final String HANDLE_ASSETS = TapestryCore.BUILDER_HANDLE_ASSETS;
     private static final String[][] CORE_STATUS_OPTIONS =
@@ -71,22 +64,10 @@ public class SpindleGeneralPreferencePage
             new String[] { TapestryCore.CORE_STATUS_ERROR, TapestryCore.CORE_STATUS_ERROR },
             new String[] { TapestryCore.CORE_STATUS_IGNORE, TapestryCore.CORE_STATUS_IGNORE }
     };
-    private static final String OFFER_XHTML = PreferenceConstants.TEMPLATE_EDITOR_HTML_SHOW_XHTML;
-    private static final String[][] OFFER_XHTML_OPTIONS =
-        new String[][] {
-            new String[] { TemplateEditor.XHTML_STRICT_LABEL, TemplateEditor.XHTML_STRICT_LABEL },
-            new String[] { TemplateEditor.XHTML_TRANSITIONAL_LABEL, TemplateEditor.XHTML_TRANSITIONAL_LABEL },
-            new String[] { TemplateEditor.XHTML_FRAMES_LABEL, TemplateEditor.XHTML_FRAMES_LABEL },
-            new String[] { TemplateEditor.XHTML_NONE_LABEL, TemplateEditor.XHTML_NONE_LABEL },
-            };
 
     private RadioGroupFieldEditor fBuildMisses;
     private RadioGroupFieldEditor fHandleAssets;
-    private IntegerFieldEditor fDisplayTabWidth;
-    private BooleanFieldEditor fPreserveBlankLines;
-    private BooleanFieldEditor fUseTabsForIndentation;
-    private RadioGroupFieldEditor fOfferXHTML;
-
+ 
     /**
      * Constructor for SpindleRefactorPreferencePage.
      * @param style
@@ -159,97 +140,7 @@ public class SpindleGeneralPreferencePage
         displayComp.setLayoutData(gd);
         displayComp.setFont(font);
 
-        fDisplayTabWidth =
-            new IntegerFieldEditor(
-                EDITOR_DISPLAY_TAB_WIDTH,
-                UIPlugin.getString("preference-editor-tab-display-width"),
-                displayComp,
-                4)
-        {
-            public void showErrorMessage(String message)
-            {
-                super.showErrorMessage(UIPlugin.getString("preference-editor-tab-display-width-error"));
-            }
-        };
-        fDisplayTabWidth.setValidRange(1, 10);
-        fDisplayTabWidth.setPreferencePage(this);
-        fDisplayTabWidth.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
-        fDisplayTabWidth.load();
-        setValid(fDisplayTabWidth.isValid());
-        fDisplayTabWidth.setPropertyChangeListener(this);
 
-        createVerticalSpacer(top, 1);
-
-        fPreserveBlankLines =
-            new BooleanFieldEditor(
-                FORMATTER_PRESERVE_BLANK_LINES,
-                UIPlugin.getString("preference-formatter-preserve-blank-lines"),
-                BooleanFieldEditor.DEFAULT,
-                top);
-
-        fPreserveBlankLines.setPreferencePage(this);
-        fPreserveBlankLines.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
-        fPreserveBlankLines.load();
-        fPreserveBlankLines.setPropertyChangeListener(this);
-
-        fUseTabsForIndentation =
-            new BooleanFieldEditor(
-                FORMATTER_USE_TABS_TO_INDENT,
-                UIPlugin.getString("preference-formatter-use-tabs-for-indent"),
-                BooleanFieldEditor.DEFAULT,
-                top);
-
-        fUseTabsForIndentation.setPreferencePage(this);
-        fUseTabsForIndentation.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
-        fUseTabsForIndentation.load();
-        fUseTabsForIndentation.setPropertyChangeListener(this);
-
-        createVerticalSpacer(top, 1);
-
-        fOfferXHTML =
-            new RadioGroupFieldEditor(
-                OFFER_XHTML,
-                UIPlugin.getString("preference-offer-xhtml-proposals"),
-                4,
-                OFFER_XHTML_OPTIONS,
-                top);
-
-        fOfferXHTML.setPreferencePage(this);
-        fOfferXHTML.setPreferenceStore(UIPlugin.getDefault().getPreferenceStore());
-        fOfferXHTML.load();
-        setValid(fBuildMisses.isValid());
-        setValid(fHandleAssets.isValid());
-        fOfferXHTML.setPropertyChangeListener(this);
-
-        //        createVerticalSpacer(top, 1);
-        //
-        //        Composite clearCacheComp = new Composite(top, SWT.NONE);
-        //        GridLayout clearCacheLayout = new GridLayout();
-        //        clearCacheLayout.numColumns = 2;
-        //        clearCacheLayout.marginHeight = 0;
-        //        clearCacheLayout.marginWidth = 0;
-        //        clearCacheComp.setLayout(clearCacheLayout);
-        //        gd = new GridData(GridData.FILL_HORIZONTAL);
-        //        clearCacheComp.setLayoutData(gd);
-        //        clearCacheComp.setFont(font);
-        //
-        //        Label clearCacheLabel = new Label(clearCacheComp, SWT.NONE);
-        //        clearCacheLabel.setText(UIPlugin.getString("preference-clear-dtd-cache-label"));
-        //        gd = new GridData(GridData.FILL_HORIZONTAL);
-        //        gd.horizontalSpan = 1;
-        //        clearCacheLabel.setLayoutData(gd);
-        //        clearCacheLabel.setFont(font);
-        //
-        //        Button clearCacheButton = new Button(clearCacheComp, SWT.NULL);
-        //        clearCacheButton.setText(UIPlugin.getString("preference-clear-dtd-cache-button"));
-        //        gd = new GridData(GridData.FILL);
-        //        clearCacheButton.addSelectionListener(new SelectionAdapter()
-        //        {
-        //            public void widgetSelected(SelectionEvent evt)
-        //            {
-        //                TapestryCore.getDefault().clearDTDCache();
-        //            }
-        //        });
 
         return top;
     }
@@ -269,11 +160,7 @@ public class SpindleGeneralPreferencePage
     {
         fBuildMisses.loadDefault();
         fHandleAssets.loadDefault();
-        fDisplayTabWidth.loadDefault();
-        fPreserveBlankLines.loadDefault();
-        fUseTabsForIndentation.loadDefault();
-        fOfferXHTML.loadDefault();
-
+ 
         super.performDefaults();
     }
 
@@ -281,11 +168,8 @@ public class SpindleGeneralPreferencePage
     {
         fBuildMisses.store();
         fHandleAssets.store();
-        fDisplayTabWidth.store();
-        fPreserveBlankLines.store();
-        fUseTabsForIndentation.store();
-        fOfferXHTML.store();
-        return super.performOk();
+        
+         return super.performOk();
     }
 
     /* (non-Javadoc)
@@ -293,7 +177,7 @@ public class SpindleGeneralPreferencePage
      */
     public boolean isValid()
     {
-        return fDisplayTabWidth.isValid();
+        return true;
     }
 
     /* (non-Javadoc)
@@ -304,16 +188,7 @@ public class SpindleGeneralPreferencePage
         if (event.getProperty().equals(FieldEditor.IS_VALID))
         {
             boolean newValue = ((Boolean) event.getNewValue()).booleanValue();
-            // If the new value is true then we must check all field editors.
-            // If it is false, then the page is invalid in any case.
-            if (newValue)
-            {
-                setValid(
-                    fDisplayTabWidth.isValid() && fPreserveBlankLines.isValid() && fUseTabsForIndentation.isValid());
-            } else
-            {
-                setValid(newValue);
-            }
+            setValid(newValue);
         }
     }
 

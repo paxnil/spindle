@@ -44,6 +44,8 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 public class PreferenceConstants
 {
 
+    public static String AUTO_ACTIVATE_CONTENT_ASSIST= UIPlugin.PLUGIN_ID + ".AUTO_ACTIVATE_CONTENT_ASSIST";
+
     public static String EDITOR_OVERVIEW_RULER = UIPlugin.PLUGIN_ID + ".EDITOR_OVERVIEW_RULER";
 
     public static final String EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER =
@@ -174,6 +176,7 @@ public class PreferenceConstants
         store.setDefault(FORMATTER_PRESERVE_BLANK_LINES, true);
         store.setDefault(FORMATTER_USE_TABS_TO_INDENT, false);
         store.setDefault(TEMPLATE_EDITOR_HTML_SHOW_XHTML, TemplateEditor.XHTML_NONE_LABEL);
+        store.setDefault(AUTO_ACTIVATE_CONTENT_ASSIST, true);
 
     }
 
