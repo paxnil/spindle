@@ -3,7 +3,7 @@
 <plugin
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
-   version="0.1.0"
+   version="0.1.3"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.core.TapestryCore">
 
