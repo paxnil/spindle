@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,6 +72,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
      **/
 
     protected Map fAssets;
+    private List fAssetObjects;
 
     /**
      *  Defines all formal parameters.  Keyed on parameter name, value is
@@ -164,46 +166,47 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
     {
         super(BasePropertyHolder.COMPONENT_SPEC);
     }
-    
+
     /**
      * Create a new specification configured the same as the parent, but with no children info
      * @param other the spec we are copying config info from
      */
     public PluginComponentSpecification(PluginComponentSpecification other)
-   {
-       super(BasePropertyHolder.COMPONENT_SPEC);
-       fComponentClassName = other.fComponentClassName;
-       fPageSpecification = other.fPageSpecification;
-       fPublicId = other.fPublicId;
-       setLocation(other.getLocation());
-       setSpecificationLocation(other.getSpecificationLocation());
-       fAllowBody = other.fAllowBody;
-       fAllowInformalParameters = other.fAllowInformalParameters;       
-   }
+    {
+        super(BasePropertyHolder.COMPONENT_SPEC);
+        fComponentClassName = other.fComponentClassName;
+        fPageSpecification = other.fPageSpecification;
+        fPublicId = other.fPublicId;
+        setLocation(other.getLocation());
+        setSpecificationLocation(other.getSpecificationLocation());
+        fAllowBody = other.fAllowBody;
+        fAllowInformalParameters = other.fAllowInformalParameters;
+    }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#addAsset(java.lang.String, org.apache.tapestry.spec.IAssetSpecification)
      */
     public void addAsset(String name, IAssetSpecification asset)
     {
-        if (fAssets == null)
-            fAssets = new IIdentifiableMap(this, "assets");
+        if (fAssetObjects == null)
+        {
+            fAssetObjects = new ArrayList();
+            fAssets = new HashMap();
+        }
 
-        fAssets.put(name, asset);
+        if (fAssetObjects.contains(asset))
+        {
+            throw new IllegalStateException("tried to add the same asset specification twice!");
+        }
 
-    }
+        PluginAssetSpecification pAsset = (PluginAssetSpecification) asset;
+        pAsset.setIdentifier(name);
 
-    public void removeAsset(String name)
-    {
-        remove(fAssets, name);
-    }
+        fAssetObjects.add(asset);
+        
+        if (!fAssets.containsKey(name))
+            fAssets.put(name, asset);
 
-    public void setAsset(String name, IAssetSpecification asset)
-    {
-        if (fAssets == null)
-            fAssets = new IIdentifiableMap(this, "assets");
-
-        fAssets.put(name, asset);
     }
 
     /* (non-Javadoc)
@@ -442,7 +445,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements I
             return Collections.EMPTY_SET;
 
         return fReservedParameterNames;
-    } 
+    }
 
     /* (non-Javadoc)
      * @see org.apache.tapestry.spec.IComponentSpecification#getPublicId()
