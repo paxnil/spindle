@@ -69,6 +69,7 @@ import com.iw.plugins.spindle.spec.TapestryPluginFactory;
 import com.iw.plugins.spindle.ui.text.ColorManager;
 import com.iw.plugins.spindle.util.TapestryLookup;
 import com.iw.plugins.spindle.util.Utils;
+import com.iw.plugins.spindle.wizards.NewTapComponentWizardPage;
 import com.primix.tapestry.parse.SpecificationParser;
 
 /**
@@ -328,6 +329,7 @@ public class TapestryPlugin extends AbstractUIPlugin {
      */
   protected void initializeDefaultPreferences(IPreferenceStore store) {
 		ColorManager.initializeDefaults(store);
+		NewTapComponentWizardPage.initializeDefaults(store);      
 	}
 
   static public void openTapestryEditor(BaseTapestryModel model) {

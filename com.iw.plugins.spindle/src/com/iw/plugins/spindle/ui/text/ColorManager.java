@@ -40,6 +40,7 @@ public class ColorManager implements ISpindleColorManager, IColorConstants {
 
 	private void initialize() {
 		IPreferenceStore pstore = PDEPlugin.getDefault().getPreferenceStore();
+		
 		putColor(pstore, P_JWCID);
 		putColor(pstore, P_DEFAULT);
 		putColor(pstore, P_PROC_INSTR);

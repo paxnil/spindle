@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Category;
 import org.apache.log4j.ConsoleAppender;
@@ -599,5 +600,35 @@ public class TapestryModelManager implements IModelProvider, IModelChangedListen
 			return result;
 		}
 	}
+
+  /**
+   * Method getModelsFor
+   * @param appResources
+   * @return an array of models found for the parameter IStorages
+   */
+  public ITapestryModel [] getModelsFor(IStorage[] appResources) {
+  	ArrayList result = new ArrayList();
+    for (int i = 0; i < appResources.length; i++) {
+      ITapestryModel foundModel = getModel(appResources[i]);
+      if (foundModel != null) {
+      	result.add(foundModel);
+      }
+    }
+    return (ITapestryModel [])result.toArray(new ITapestryModel[result.size()]);
+  }
+
+  /**
+   * Method getModelListFor.
+   * @param storages
+   * @return ArrayList
+   */
+  public ArrayList getModelListFor(ArrayList storages) {
+    ITapestryModel [] models = getModelsFor((IStorage [])storages.toArray(new IStorage [storages.size()]));
+    ArrayList result = new ArrayList(models.length);
+    for (int i = 0; i < models.length; i++) {
+      result.add(models[i]);
+    }
+    return result;
+  }
 
 }

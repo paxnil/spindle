@@ -148,7 +148,7 @@ public class TapestryLookup {
     findAll(tapestryPath, false, ACCEPT_APPLICATIONS | FULL_TAPESTRY_PATH, request);
     return request.getResults();
   }
-
+  
   public IStorage[] findHtmlFor(String tapestryPath) {
     if (!tapestryPath.endsWith(".jwc")) {
       return new IStorage[0];
@@ -460,4 +460,6 @@ public class TapestryLookup {
       }
     }
   }
+  
+  
 }

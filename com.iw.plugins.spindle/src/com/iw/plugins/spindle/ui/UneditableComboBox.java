@@ -53,6 +53,7 @@ public class UneditableComboBox extends Composite {
     if ((style & SWT.FLAT) != 0)
       labelStyle |= SWT.FLAT;
     label = new Label(this, labelStyle);
+    label.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
     popup = new Shell(getShell(), SWT.NO_TRIM);
 
@@ -944,6 +945,12 @@ public class UneditableComboBox extends Composite {
         parent.setFocus();
     }
   }
+  
+  public void setEnabled(boolean flag) {
+  	label.setEnabled(flag);
+  	arrow.setEnabled(flag);
+  }
+  
   void labelEvent(Event event) {
     switch (event.type) {
       case SWT.FocusIn :
