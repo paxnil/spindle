@@ -53,7 +53,9 @@
       <library name="dtdparser.jar">
          <export name="*"/>
       </library>
-      <library name="commons-codec-1.2.jar"/>
+      <library name="commons-codec-1.2.jar">
+         <export name="*"/>
+      </library>
    </runtime>
    <requires>
       <import plugin="org.eclipse.ui.ide" export="true"/>
