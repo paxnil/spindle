@@ -37,11 +37,12 @@
             location="TOP_RIGHT"
             label="Indicator for Tapestry Projects"
             state="true"
+            adaptable="true"
             class="com.iw.plugins.spindle.ui.decorators.ProjectDecorator"
             id="com.iw.plugins.spindle.ui.projectDecorator">
          <enablement>
             <objectClass
-                  name="org.eclipse.jdt.core.IJavaProject">
+                  name="org.eclipse.core.resources.IProject">
             </objectClass>
          </enablement>
       </decorator>

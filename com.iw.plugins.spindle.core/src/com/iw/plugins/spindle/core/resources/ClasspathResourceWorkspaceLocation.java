@@ -127,12 +127,6 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
         return builder.toHashCode();
     }
 
-    public String toString()
-    {
-        String name = getName();
-        return "classpath:" + name != null ? name : "";
-    }
-
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)
      */

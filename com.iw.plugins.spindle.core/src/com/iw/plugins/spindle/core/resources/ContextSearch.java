@@ -97,7 +97,8 @@ public class ContextSearch implements ISearch
         {
             if (resource instanceof IFile)
             {
-                if (!acceptor.accept(resource.getParent(), (IStorage) resource));
+                boolean keepGoing = acceptor.accept(resource.getParent(), (IStorage) resource); 
+                if (!keepGoing) 
                 {
                     throw new StopSearchingException();
                 }

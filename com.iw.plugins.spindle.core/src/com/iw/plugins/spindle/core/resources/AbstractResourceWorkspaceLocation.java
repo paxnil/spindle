@@ -46,8 +46,9 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
 
     protected AbstractResourceWorkspaceLocation(AbstractRootLocation root, String path)
     {
+        this.root = root;
         Path p = new Path(path);
-        this.path = p.removeLastSegments(1).addTrailingSeparator().toString();
+        this.path = p.removeLastSegments(1).addTrailingSeparator().makeRelative().toString();
         this.name = p.lastSegment();
     }
 
@@ -100,7 +101,7 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
         if (obj.getClass().equals(getClass()))
         {
             AbstractResourceWorkspaceLocation other = (AbstractResourceWorkspaceLocation) obj;            
-            boolean result = this.root.equals(other.root) && this.path.equals(other.path);            
+            return this.root.equals(other.root) && this.path.equals(other.path);            
         }
 
         return false;
@@ -123,6 +124,15 @@ public abstract class AbstractResourceWorkspaceLocation implements IResourceWork
     public boolean isOnClasspath()
     {
         return root.isOnClasspath();
+    }
+    
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(root.toString());
+        buffer.append(":");
+        buffer.append(path);
+        buffer.append(name);
+        return buffer.toString();
     }
 
 }

@@ -134,12 +134,6 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
         return builder.toHashCode();
     }
 
-    public String toString()
-    {
-        String name = getName();
-        return "context:" + name != null ? name : "";
-
-    }
 
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)

@@ -169,4 +169,9 @@ public class ContextRootLocation extends AbstractRootLocation
         return false;
     }
 
+    public String toString()
+    {
+        return "ctx(" + rootFolder.getFullPath() + ")/";
+    }
+
 }

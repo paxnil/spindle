@@ -95,13 +95,15 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     public static final String PAGE_EXTENSION = "page";
     public static final String TEMPLATE_EXTENSION = "html";
     public static final String SCRIPT_EXTENSION = "script";
+    public static final String LIBRARY_EXTENSION = "library";
     public static final String[] KnownExtensions =
         new String[] {
             APPLICATION_EXTENSION,
             COMPONENT_EXTENSION,
             PAGE_EXTENSION,
             TEMPLATE_EXTENSION,
-            SCRIPT_EXTENSION };
+            SCRIPT_EXTENSION,
+            LIBRARY_EXTENSION };
     public static final String APP_SPEC_PATH_PARAM = "org.apache.tapestry.application-specification";
     public static final String ENGINE_CLASS_PARAM = "org.apache.tapestry.engine-class";
 

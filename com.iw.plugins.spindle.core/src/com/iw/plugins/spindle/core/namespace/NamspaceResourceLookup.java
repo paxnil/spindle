@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.TapestryCore;

@@ -316,5 +316,10 @@ public class ClasspathRootLocation extends AbstractRootLocation
     {
         return true;
     }
+    
+    public String toString() {
+        return "cp("+javaProject.getProject().getName()+")/";
+    }
+    
 
 }

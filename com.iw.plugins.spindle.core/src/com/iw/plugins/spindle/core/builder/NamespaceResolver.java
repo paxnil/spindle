@@ -207,17 +207,15 @@ public class NamespaceResolver
         {
             resultNamespace.setAppNameFromWebXML(applicationNameFromWebXML);
         }
-        temporaryNamespace = new TemporaryNamespace();
         if (resultNamespace != null)
         {
-
+            temporaryNamespace = new TemporaryNamespace();
             resolveChildNamespaces();
             resolveComponents();
             List definitelyNotSpeclessPages = getAllComponentTemplates();
             resolvePages(definitelyNotSpeclessPages);
         }
         working = false;
-
     }
 
     private List getAllComponentTemplates()
