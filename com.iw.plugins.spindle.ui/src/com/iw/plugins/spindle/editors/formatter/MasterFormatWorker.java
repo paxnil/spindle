@@ -40,7 +40,7 @@ import org.xmen.xml.XMLNode;
  * (leaving them in a state where slave formatters can do thier work!).
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class MasterFormatWorker extends PositionUpdatingFormatWorker
 {

@@ -91,7 +91,7 @@ import com.iw.plugins.spindle.ui.util.Revealer;
  * </p>
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 
 public class ProjectPropertyPage extends PropertyPage

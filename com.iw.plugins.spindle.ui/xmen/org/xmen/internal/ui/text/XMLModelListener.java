@@ -30,7 +30,7 @@ package org.xmen.internal.ui.text;
  * changes.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public interface XMLModelListener
 {

@@ -41,7 +41,7 @@ import org.xmen.internal.ui.text.XMLDocumentPartitioner;
  * MasterFormattingStrategy the master xml formatting Strategy
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class MasterFormattingStrategy extends ContextBasedFormattingStrategy
     implements

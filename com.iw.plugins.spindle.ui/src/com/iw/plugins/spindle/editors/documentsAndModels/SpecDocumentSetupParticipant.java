@@ -37,7 +37,7 @@ import com.iw.plugins.spindle.editors.spec.SpecAnnotationModel;
  * SpecDocumentSetupParticipant adds setup for syntax coloring and annotations
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class SpecDocumentSetupParticipant extends BaseDocumentSetupParticipant
 {

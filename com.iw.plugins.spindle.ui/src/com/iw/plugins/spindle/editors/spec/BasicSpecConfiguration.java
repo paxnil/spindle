@@ -43,7 +43,7 @@ import com.iw.plugins.spindle.editors.Editor;
  * Subclasses extend to add neat things like formatting etc.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public class BasicSpecConfiguration extends BaseSourceConfiguration
 {

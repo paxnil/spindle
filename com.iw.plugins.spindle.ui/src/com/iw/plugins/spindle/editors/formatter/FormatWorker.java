@@ -39,7 +39,7 @@ import org.xmen.xml.XMLNode;
  * BaseFormatWorker gives access to the LineInfo type to subclasses.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * 
  */
 public abstract class FormatWorker
 {
