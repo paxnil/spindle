@@ -285,7 +285,7 @@ public class SpecEditor extends Editor
       if (type == ITypeConstants.ENDTAG)
       {
         XMLNode corr = artifact.getCorrespondingNode();
-        if (corr != null)
+        if (corr != null) 
         {
           int start = corr.getOffset();
           int endStart = artifact.getOffset();

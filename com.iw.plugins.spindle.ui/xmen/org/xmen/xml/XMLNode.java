@@ -145,19 +145,21 @@ public class XMLNode extends TypedPosition
     return ITypeConstants.TAG.equals(type) || ITypeConstants.EMPTYTAG.equals(type)
         || ITypeConstants.ENDTAG.equals(type);
   }
-  
-  public boolean isTag() {
+
+  public boolean isTag()
+  {
     return ITypeConstants.TAG.equals(getType());
   }
-  
-  public boolean isEmptyTag() {
+
+  public boolean isEmptyTag()
+  {
     return ITypeConstants.EMPTYTAG.equals(getType());
   }
 
   public boolean isTagOrEmptyTag()
   {
     String type = getType();
-    return ITypeConstants.TAG.equals(type) || ITypeConstants.EMPTYTAG.equals(type); 
+    return ITypeConstants.TAG.equals(type) || ITypeConstants.EMPTYTAG.equals(type);
   }
 
   public boolean isText()
@@ -660,14 +662,13 @@ public class XMLNode extends TypedPosition
 
     if (!attributeHasValue())
       return null;
-
-    int index = getAttributeValueStart();
-
-    if (index < 0)
-      return null;
-
     try
     {
+      int index = getAttributeValueStart();
+
+      if (index < 0)
+        return null;
+
       String content = document.get(getOffset(), getLength());
       content = content.substring(index).trim();
 
@@ -696,31 +697,25 @@ public class XMLNode extends TypedPosition
     return false;
   }
 
-  private int getAttributeValueStart()
+  private int getAttributeValueStart() throws BadLocationException
   {
     int index = 0;
-    try
+
+    String content = document.get(getOffset(), getLength());
+
+    int singleIndex = content.indexOf("\"");
+    int doubleIndex = content.indexOf("'");
+
+    if (singleIndex < 0 && doubleIndex < 0)
+      return 0;
+
+    if (singleIndex >= 0 && doubleIndex > 0)
     {
-      String content = document.get(getOffset(), getLength());
 
-      int singleIndex = content.indexOf("\"");
-      int doubleIndex = content.indexOf("'");
-
-      if (singleIndex < 0 && doubleIndex < 0)
-        return 0;
-
-      if (singleIndex >= 0 && doubleIndex > 0)
-      {
-
-        index = Math.min(singleIndex, doubleIndex);
-      } else
-      {
-        index = Math.max(singleIndex, doubleIndex);
-      }
-
-    } catch (BadLocationException e)
+      index = Math.min(singleIndex, doubleIndex);
+    } else
     {
-      UIPlugin.log(e);
+      index = Math.max(singleIndex, doubleIndex);
     }
 
     return index;
@@ -728,17 +723,23 @@ public class XMLNode extends TypedPosition
 
   public IRegion getAttributeValueRegion()
   {
-    int index = getAttributeValueStart();
+    try
+    {
+      int index = getAttributeValueStart();
 
-    if (index < 0)
-      return null;
+      if (index < 0)
+        return null;
 
-    if (index == 0)
-      return new Region(getOffset(), getLength());
+      if (index == 0)
+        return new Region(getOffset(), getLength());
 
-    String value = getAttributeValue();
-    if (value != null)
-      return new Region(getOffset() + index + 1, value.length());
+      String value = getAttributeValue();
+      if (value != null)
+        return new Region(getOffset() + index + 1, value.length());
+    } catch (BadLocationException e)
+    {
+      // eat it
+    }
 
     return null;
   }
