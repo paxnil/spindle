@@ -3,7 +3,7 @@
 <fragment
    id="com.iw.plugins.spindle.ui.contrib"
    name="UI Contrib Fragment"
-   version="3.1.20"
+   version="3.1.21"
    provider-name="Geoffrey Longman"
    plugin-id="com.iw.plugins.spindle.ui"
    plugin-version="3.1.19"
