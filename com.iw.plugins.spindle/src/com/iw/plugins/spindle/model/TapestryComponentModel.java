@@ -88,8 +88,7 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
 
           String extension = element.getFullPath().getFileExtension();
 
-          SpecificationParser parser =
-            (SpecificationParser) TapestryPlugin.getParserFor(extension);
+          SpecificationParser parser = (SpecificationParser) TapestryPlugin.getParserFor(extension);
 
           if (extension.equals("jwc")) {
 
@@ -115,11 +114,8 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
           editable = !element.isReadOnly();
           fireModelObjectChanged(componentSpec, "componentSpec");
         } catch (DocumentParseException dpex) {
-          addProblemMarker(
-            dpex.getMessage(),
-            dpex.getLineNumber(),
-            dpex.getColumn(),
-            IMarker.SEVERITY_ERROR);
+        	
+          addProblemMarker(dpex);
           loaded = false;
         }
       }
@@ -271,11 +267,11 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
     IPackageFragment fragment = null;
     TapestryLookup lookup = new TapestryLookup();
     try {
-    	
+
       IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(underlier);
       lookup.configure(jproject);
       fragment = lookup.findPackageFragment(underlier);
-      
+
     } catch (CoreException jmex) {
     }
     String tapestryName = "";
@@ -324,11 +320,11 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
    * @see com.iw.plugins.spindle.model.ITapestryModel#setPublicId(String)
    */
   public void setPublicId(String value) {
-  	
-  	if (componentSpec != null) {
-  		
-  		componentSpec.setPublicId(value);
-  	}
+
+    if (componentSpec != null) {
+
+      componentSpec.setPublicId(value);
+    }
   }
 
 }

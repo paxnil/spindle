@@ -68,6 +68,7 @@ public class ConvertToTapestryProjectWizard extends NewTapestryElementWizard {
   public ConvertToTapestryProjectWizard() {
     super();
     setWindowTitle("Convert to Tapestry Project");
+    setNeedsProgressMonitor(true);
 
   }
 
@@ -126,54 +127,46 @@ public class ConvertToTapestryProjectWizard extends NewTapestryElementWizard {
     IFile projectResourceFile = null;
 
     if (runnablePage == welcomePage) {
-    	
+
       if (welcomePage.getState() == ONE_EXISTS) {
 
-      	projectResourceFile = (IFile) welcomePage.getResource();
-      	
+        projectResourceFile = (IFile) welcomePage.getResource();
+
       } else {
-      	
-      	projectResourceFile = (IFile) chooseExistingPage.getResource();
-      	
+
+        projectResourceFile = (IFile) chooseExistingPage.getResource();
+
       }
 
-    } else if (finishPage(runnablePage.getRunnable(null))) {   
+    } else if (finishPage(runnablePage.getRunnable(null))) {
 
       projectResourceFile = (IFile) runnablePage.getResource();
 
     }
 
-    try {
+    if (finishPage(welcomePage.getRunnable(projectResourceFile))) {
 
-      addJavaProjectNature(projectResourceFile);
+      if (questionPage.getAnswer()) {
 
-    } catch (CoreException e) {
+        runMigration();
 
-      ErrorDialog.openError(
-        getShell(),
-        "Conversion Failed",
-        "Could not add Tapestry Project Nature",
-        e.getStatus());
+      } else {
 
-      return false;
+        try {
+
+          selectAndReveal(projectResourceFile);
+          openResource(projectResourceFile);
+
+        } catch (Exception e) {
+          // let pass, only reveal and open will fail
+        }
+      }
+
+      return true;
+
     }
 
-    if (questionPage.getAnswer()) {
-
-      runMigration();
-
-    }
-
-    try {
-
-//      selectAndReveal(projectResourceFile);
-//      openResource(projectResourceFile);
-//
-    } catch (Exception e) {
-      // let pass, only reveal and open will fail
-    }
-
-    return true;
+    return false;
   }
 
   /**
@@ -183,11 +176,6 @@ public class ConvertToTapestryProjectWizard extends NewTapestryElementWizard {
   private void addJavaProjectNature(IStorage file) throws CoreException {
 
     IJavaProject jproject = (IJavaProject) getSelection().getFirstElement();
-
-    ITapestryProject tproject =
-      TapestryPlugin.getDefault().addTapestryProjectNatureTo(jproject, null);
-
-    tproject.setProjectStorage(file);
 
   }
 

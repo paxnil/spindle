@@ -98,21 +98,10 @@ public class ParameterEditorSection extends AbstractPropertySheetEditorSection {
       String type = parameterSpec.getType();
       type = type == null ? "" : type;
       StringBuffer buf = new StringBuffer();
-      buf.append("name = ");
       buf.append(parameterSpec.getIdentifier());
-      buf.append((!"".equals(parameterSpec.getType()) ? " type = " + type : ""));
-      buf.append((parameterSpec.isRequired() ? " REQUIRED" : ""));
+      buf.append((parameterSpec.isRequired() ? " (REQUIRED)" : ""));
 
-      if (true) {
-        String property = parameterSpec.getPropertyName();
 
-        if (property != null) {
-
-          buf.append(" property = " + property);
-        }
-        buf.append(" direction = ");
-        buf.append(parameterSpec.getDirection() == Direction.CUSTOM ? "custom" : "in");
-      }
       return buf.toString();
     }
 

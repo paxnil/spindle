@@ -203,6 +203,7 @@ public class PluginComponentSpecification
       addParameter(name, spec);
     } else {
       _parameters.put(name, spec);
+      addReservedParameterName(name);
       spec.setIdentifier(name);
       spec.setParent(this);
     }
@@ -569,7 +570,13 @@ public class PluginComponentSpecification
    * @see net.sf.tapestry.spec.ComponentSpecification#addParameter(String, ParameterSpecification)
    */
   public void addParameter(String name, ParameterSpecification spec) {
-    super.addParameter(name, spec);
+    if (_parameters == null) {
+    	
+      _parameters = new HashMap();
+      
+    }
+
+    _parameters.put(name, spec);
     PluginParameterSpecification pluginParam = (PluginParameterSpecification) spec;
     pluginParam.setIdentifier(name);
     pluginParam.setParent(this);

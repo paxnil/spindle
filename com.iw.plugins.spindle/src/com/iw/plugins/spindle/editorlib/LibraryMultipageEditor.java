@@ -48,7 +48,6 @@ public class LibraryMultipageEditor extends SpindleMultipageEditor {
   public static final String PAGES = "PAGES";
   public static final String EXTENSIONS = "EXTENSIONS";
   public static final String DOCUMENTATION = "DOCUMENTATION";
-  public static final String SOURCE_PAGE = "SOURCEPAGE";
 
   /**
    * Constructor for TapestryMultipageEditor
@@ -97,8 +96,7 @@ public class LibraryMultipageEditor extends SpindleMultipageEditor {
     addPage(
       DOCUMENTATION,
       new DocumentationFormPage(this, MessageUtil.getString("LibMultipageEditor.DocTabLabel")));
-    addPage(SpindleMultipageEditor.SOURCE_PAGE, new XMLEditorPage(this));
-
+	super.createPages();
   }
 
   protected boolean isValidContentType(IEditorInput input) {

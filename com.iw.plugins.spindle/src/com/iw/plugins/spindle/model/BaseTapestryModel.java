@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.tapestry.util.IPropertyHolder;
+import net.sf.tapestry.util.xml.DocumentParseException;
+import net.sf.tapestry.util.xml.InvalidStringException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -105,7 +107,6 @@ public abstract class BaseTapestryModel
 
   protected void removeAllProblemMarkers() {
 
-   
     IStorage storage = getUnderlyingStorage();
     if (storage instanceof IResource) {
       IMarker[] found = findProblemMarkers();
@@ -127,15 +128,37 @@ public abstract class BaseTapestryModel
       try {
         return ((IResource) storage).findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ONE);
       } catch (CoreException corex) {
-      	corex.printStackTrace();
+        corex.printStackTrace();
       }
     }
     return new IMarker[0];
   }
 
-  protected void addProblemMarker(String message, int line, int column, int severity) {
+  protected void addProblemMarker(DocumentParseException exception) {
 
-    
+    if (exception instanceof InvalidStringException) {
+
+      InvalidStringException invalidEx = (InvalidStringException) exception;
+
+      addBadWordProblemMarker(
+        invalidEx.getMessage(),
+        IMarker.SEVERITY_ERROR,
+        invalidEx.getInvalidString(),
+        invalidEx.getPattern());
+
+    } else {
+
+      addProblemMarker(
+        exception.getMessage(),
+        exception.getLineNumber(),
+        Math.max(exception.getColumn(), 0),
+        IMarker.SEVERITY_ERROR);
+
+    }
+
+  }
+
+  protected void addProblemMarker(String message, int line, int column, int severity) {
 
     IStorage storage = getUnderlyingStorage();
     if (storage instanceof IResource) {
@@ -144,12 +167,35 @@ public abstract class BaseTapestryModel
         attributes.put(IMarker.MESSAGE, message);
         attributes.put(IMarker.SEVERITY, new Integer(severity));
         attributes.put(IMarker.LINE_NUMBER, new Integer(line));
-        attributes.put(IMarker.CHAR_START, new Integer(column));
-        attributes.put(IMarker.CHAR_END, new Integer(column + 1));
+//        attributes.put(IMarker.CHAR_START, new Integer(column));
+//        attributes.put(IMarker.CHAR_END, new Integer(column + 1));
         MarkerUtilities.createMarker(
           (IResource) storage,
           attributes,
           "com.iw.plugins.spindle.tapestryproblem");
+      } catch (CoreException corex) {
+      }
+    }
+
+  }
+
+  protected void addBadWordProblemMarker(String message, int severity, String badWord, String pattern) {
+
+    IStorage storage = getUnderlyingStorage();
+    if (storage instanceof IResource) {
+      try {
+        Map attributes = new HashMap();
+        attributes.put(IMarker.MESSAGE, message);
+        attributes.put(IMarker.SEVERITY, new Integer(severity));
+        attributes.put(IMarker.LINE_NUMBER, new Integer(1));
+//        attributes.put(IMarker.CHAR_START, new Integer(0));
+//        attributes.put(IMarker.CHAR_END, new Integer(1));
+        attributes.put("invalidString", badWord);
+        attributes.put("pattern", pattern);
+        MarkerUtilities.createMarker(
+          (IResource) storage,
+          attributes,
+          "com.iw.plugins.spindle.badwordproblem");
       } catch (CoreException corex) {
       }
     }

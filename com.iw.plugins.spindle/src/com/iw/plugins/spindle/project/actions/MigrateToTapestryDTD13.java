@@ -117,11 +117,23 @@ public class MigrateToTapestryDTD13 extends AbstractTapestryProjectAction {
       return;
     }
 
+    if (!checkHasServletJars(jproject)) {
+
+      MessageDialog.openInformation(
+        shell,
+        "Conversion Problem",
+        "Can't continue with conversion.\n\nAdd:\n\n javax.servlet.jar\n\n to the project build path.\n\nThen try converting again");
+
+      return;
+    }
+
+
     if (!checkHasTapestryJars(jproject)) {
 
-      reportProblem(
+      MessageDialog.openInformation(
         shell,
-        "Can't continue with migration.\nAdd:\n\n javax.servlet.jar; and\n net.sf.tapestry.jar (2.2 or better)\n\n to the project build path.\n\nThen try converting again");
+        "Conversion Problem",
+        "Can't continue with conversion.\n\nAdd:\n\n net.sf.tapestry.jar (2.2 or better)\n\n to the project build path.\n\nThen try converting again");
 
       return;
     }

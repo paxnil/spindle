@@ -25,6 +25,8 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.spec;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -49,6 +51,26 @@ public class PluginParameterSpecification
 
   private IParameterHolder parent;
   private String identifier;
+  private PropertyChangeSupport support;
+
+  public PluginParameterSpecification() {
+
+    super();
+    support = new PropertyChangeSupport(this);
+
+  }
+
+  public void addPropertyChangeListener(PropertyChangeListener listener) {
+
+    support.addPropertyChangeListener(listener);
+
+  }
+
+  public void removePropertyChangeListener(PropertyChangeListener listener) {
+
+    support.removePropertyChangeListener(listener);
+
+  }
 
   /**
   * Returns the identifier.
@@ -89,43 +111,50 @@ public class PluginParameterSpecification
   public String getHelpText(String name) {
     StringWriter swriter = new StringWriter();
     SourceWriter writer = new SourceWriter(swriter);
-    write(name, writer, 0, ((ComponentSpecification)parent).getPublicId());
+    write(name, writer, 0, ((ComponentSpecification) parent).getPublicId());
     return swriter.toString();
   }
 
   // e.g. -- <parameter name="book" java-type="com.primix.vlib.ejb.Book" required="yes" parameterName="poo" direction="in"/>
   public void write(String name, PrintWriter writer, int indent, String publicId) {
-  	
+
     boolean isDTD12OrBetter = XMLUtil.getDTDVersion(publicId) >= XMLUtil.DTD_1_2;
-  	
-    Indenter.printIndented(writer, indent, "<parameter name=\"" + name);
-    writer.print("\" java-type=\"" + getType());
-    writer.print("\" required=\"" + (isRequired() ? "yes" : "no"));
-    
+
+    Indenter.printlnIndented(writer, indent, "<parameter");
+    Indenter.printIndented(writer, indent + 1, "name=\"" + name);
+    writer.println("\"");
+    Indenter.printIndented(writer, indent + 1, "java-type=\"" + getType());
+    writer.println("\"");
+
     if (isDTD12OrBetter) {
-    	
+
       String propertyName = getPropertyName();
-      
+
       if (propertyName != null && !"".equals(propertyName) && !propertyName.equals(name)) {
-      	
-        writer.print("\" property-name=\"" + getPropertyName());
+
+        Indenter.printIndented(writer, indent + 1, "property-name=\"" + getPropertyName());
+        writer.println("\"");
+
       }
-      if (getDirection() != Direction.CUSTOM) {
-      	
-        writer.print("\" direction=\"");
-        writer.print(getDirection() == Direction.CUSTOM ? "custom" : "in");
-        
-      }
+
+      Indenter.printIndented(writer, indent + 1, "direction=\"");
+      writer.print(getDirection() == Direction.CUSTOM ? "custom" : "in");
+      writer.println("\"");
+
     }
+
+    Indenter.printIndented(writer, indent + 1, "required=\"" + (isRequired() ? "yes" : "no"));
+    writer.print("\"");
+
     String description = getDescription();
-    
+
     if (description == null || "".equals(description.trim())) {
-    	
-      writer.println("\"/>");
-      
+
+      writer.println("/>");
+
     } else {
-    	
-      writer.println("\">");
+
+      writer.println(">");
       XMLUtil.writeDescription(writer, indent + 1, description, false);
       Indenter.printlnIndented(writer, indent, "</parameter>");
     }
@@ -150,10 +179,10 @@ public class PluginParameterSpecification
 
   public void setPropertyValue(Object key, Object value) {
     IParameterHolder componentSpec = parent;
+    String oldName = this.identifier;
 
     if ("name".equals(key)) {
 
-      String oldName = this.identifier;
       String newName = (String) value;
 
       if ("".equals(newName.trim())) {
@@ -166,8 +195,6 @@ public class PluginParameterSpecification
       }
 
       this.identifier = newName;
-      componentSpec.removeParameter(oldName);
-      componentSpec.setParameter(this.identifier, this);
 
     } else if ("propertyName".equals(key)) {
 
@@ -207,6 +234,13 @@ public class PluginParameterSpecification
         return;
       }
     }
+
+    if (this.identifier.equals(oldName)) {
+
+      componentSpec.removeParameter(oldName);
+
+    }
+    componentSpec.setParameter(this.identifier, this);
   }
 
   public boolean isPropertySet(Object key) {
@@ -221,46 +255,46 @@ public class PluginParameterSpecification
 
   public Object getPropertyValue(Object key) {
     if ("name".equals(key)) {
-    	
+
       return this.identifier;
-      
+
     } else if ("propertyName".equals(key)) {
-    	
+
       return getPropertyName();
-      
+
     } else if ("type".equals(key)) {
-    	
+
       return getType();
-      
+
     } else if ("required".equals(key)) {
-    	
+
       if (isRequired()) {
-      	
+
         return Boolean.TRUE;
-        
+
       } else {
-      	
+
         return Boolean.FALSE;
       }
-      
+
     } else if ("direction".equals(key)) {
-    	
+
       Direction currentDir = getDirection();
-      
+
       for (int i = 0; i < directions.length; i++) {
-      	
+
         if (currentDir == directions[i]) {
-        	
+
           return new Integer(i);
         }
       }
-      
+
       return new Integer(0);
-      
+
     } else if ("description".equals(key)) {
-    	
+
       return getDescription();
-      
+
     }
     return null;
   }

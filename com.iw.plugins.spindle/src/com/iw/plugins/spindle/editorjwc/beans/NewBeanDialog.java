@@ -57,6 +57,7 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.spec.PluginBeanSpecification;
+import com.iw.plugins.spindle.spec.XMLUtil;
 import com.iw.plugins.spindle.ui.AbstractDialog;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
@@ -82,10 +83,13 @@ public class NewBeanDialog extends AbstractDialog {
 
   private String resultName;
   private PluginBeanSpecification resultBeanSpec;
+  
+  private int DTDVersion;
 
-  private String[] comboChoices = { "None", "Page", "Request" };
+  private String[] pre13comboChoices = { "None", "Page", "Request" };
+  private String[] comboChoices = { "None", "Page", "Request", "Render" };
   private BeanLifecycle[] lifecyclechoices =
-    { BeanLifecycle.NONE, BeanLifecycle.PAGE, BeanLifecycle.REQUEST };
+    { BeanLifecycle.NONE, BeanLifecycle.PAGE, BeanLifecycle.REQUEST, BeanLifecycle.RENDER };
 
   /**
    * Constructor for PageRefDialog
@@ -98,6 +102,7 @@ public class NewBeanDialog extends AbstractDialog {
     updateMessage(description);
     calculateRoot(model);
     this.existingNames = existingBeanNames;
+    DTDVersion = XMLUtil.getDTDVersion(model.getPublicId());
   }
 
   /**
@@ -117,9 +122,16 @@ public class NewBeanDialog extends AbstractDialog {
     beanClassname = new StringButtonField("Bean Class:", FIELD_WIDTH);
     beanClassname.addListener(adapter);
     Control beanClassnameControl = beanClassname.getControl(container);
+    
+    String [] choices = comboChoices;
 
+	if (DTDVersion < XMLUtil.DTD_1_3) {
+		
+		choices = pre13comboChoices;
+		
+	}
     lifecycleCombo =
-      new UneditableComboBoxDialogField("Bean Lifecycle:", FIELD_WIDTH, comboChoices);
+      new UneditableComboBoxDialogField("Bean Lifecycle:", FIELD_WIDTH, choices);
     lifecycleCombo.addListener(adapter);
     Control lifecycleControl = lifecycleCombo.getControl(container);
 

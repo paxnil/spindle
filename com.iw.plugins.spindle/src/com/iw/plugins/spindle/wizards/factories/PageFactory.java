@@ -46,14 +46,22 @@ import com.iw.plugins.spindle.spec.PluginComponentSpecification;
 
 public class PageFactory {
 
-  private PageFactory() {
+  public static IFile createPage(
+    IPackageFragmentRoot root,
+    IPackageFragment pack,
+    String componentName,
+    IType specClass,
+    IProgressMonitor monitor)
+    throws CoreException, InterruptedException {
+
+    return createPage(root, pack, componentName, specClass.getFullyQualifiedName(), monitor);
   }
 
   public static IFile createPage(
     IPackageFragmentRoot root,
     IPackageFragment pack,
     String componentName,
-    IType specClass,
+    String specClass,
     IProgressMonitor monitor)
     throws CoreException, InterruptedException {
 
@@ -72,7 +80,7 @@ public class PageFactory {
     IContainer folder = (IContainer) pack.getUnderlyingResource();
     IFile file = folder.getFile(new Path(componentName + ".page"));
 
-    String qualifiedSpecClassname = specClass.getFullyQualifiedName();
+    String qualifiedSpecClassname = specClass;
     InputStream contents =
       new ByteArrayInputStream(getComponentContent(qualifiedSpecClassname).getBytes());
     file.create(contents, false, new SubProgressMonitor(monitor, 1));

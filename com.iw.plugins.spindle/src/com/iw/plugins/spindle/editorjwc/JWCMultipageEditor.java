@@ -30,7 +30,6 @@ import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 
-
 import com.iw.plugins.spindle.MessageUtil;
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.editorjwc.beans.*;
@@ -42,7 +41,7 @@ import com.iw.plugins.spindle.model.TapestryComponentModel;
 
 //Commented out Dependency Page until replacement available
 
-public class JWCMultipageEditor extends SpindleMultipageEditor { 
+public class JWCMultipageEditor extends SpindleMultipageEditor {
 
   public static final String OVERVIEW = "OVERVIEW";
   public static final String DEPENDS = "DEPENDS";
@@ -78,21 +77,23 @@ public class JWCMultipageEditor extends SpindleMultipageEditor {
   protected void createPages() {
     firstPageId = OVERVIEW;
     formWorkbook.setFirstPageSelected(true);
+
     addPage(
       OVERVIEW,
       new OverviewFormPage(this, MessageUtil.getString("JWCMultipageEditor.OverviewTabLabel")));
-//    addPage(
-//      DEPENDS,
-//      new DependencyFormPage(this, MessageUtil.getString("JWCMultipageEditor.DependenciesTabLabel")));
+    //    addPage(
+    //      DEPENDS,
+    //      new DependencyFormPage(this, MessageUtil.getString("JWCMultipageEditor.DependenciesTabLabel")));
     addPage(
       COMPONENTS,
       new ComponentsFormPage(this, MessageUtil.getString("JWCMultipageEditor.ComponentsTabLabel")));
-    addPage(BEANS, new BeansFormPage(this, MessageUtil.getString("JWCMultipageEditor.BeansTabLabel")));
+    addPage(
+      BEANS,
+      new BeansFormPage(this, MessageUtil.getString("JWCMultipageEditor.BeansTabLabel")));
     addPage(
       DOCUMENTATION,
       new DocumentationFormPage(this, MessageUtil.getString("JWCMultipageEditor.DocTabLabel")));
-    addPage(SpindleMultipageEditor.SOURCE_PAGE, new XMLEditorPage(this));
-
+    super.createPages();
   }
 
   public boolean isModelCorrect(Object model) {
@@ -114,10 +115,10 @@ public class JWCMultipageEditor extends SpindleMultipageEditor {
     String name = input.getName().toLowerCase();
     return name.endsWith(MessageUtil.getString("JWCMultipageEditor.ValidContentType"));
   }
-  
-    /**
-   * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()
-   */
+
+  /**
+  * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()
+  */
   public Image getDefaultHeadingImage() {
     return TapestryImages.getSharedImage("component_banner.gif");
   }

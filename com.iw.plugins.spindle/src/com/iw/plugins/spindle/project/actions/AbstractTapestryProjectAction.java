@@ -24,8 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.project.actions;
 
 import org.eclipse.core.resources.IProject;
@@ -72,7 +70,7 @@ public abstract class AbstractTapestryProjectAction
   public void setActivePart(IAction action, IWorkbenchPart targetPart) {
     part = targetPart;
   }
-  
+
   /**
    * @see org.eclipse.ui.IActionDelegate#selectionChanged(IAction, ISelection)
    */
@@ -104,19 +102,18 @@ public abstract class AbstractTapestryProjectAction
 
   private boolean checkProjectIsOpenAndHasJavaNature(IStructuredSelection selection) {
 
+    IJavaProject jproject = (IJavaProject) selection.getFirstElement();
 
-      IJavaProject jproject = (IJavaProject) selection.getFirstElement();
-      
-      IProject project = jproject.getProject();
+    IProject project = jproject.getProject();
 
-      return project.isOpen(); 
+    return project.isOpen();
 
   }
 
   protected boolean checkSelection(IStructuredSelection selection) {
 
     IJavaProject jproject = (IJavaProject) selection.getFirstElement();
-    
+
     IProject project = jproject.getProject();
 
     try {
@@ -129,24 +126,42 @@ public abstract class AbstractTapestryProjectAction
     }
 
   }
-  
-  protected boolean checkHasTapestryJars(IJavaProject project) {
-  	
+
+  protected boolean checkHasServletJars(IJavaProject project) {
+
     try {
-    	
-      if (Utils.findType(project, "javax.servlet.Servlet") != null) {
-      
-        return Utils.findType(project, "net.sf.tapestry.spec.IApplicationSpecification") != null;  	
-        
-      }
-      
+
+      return Utils.findType(project, "javax.servlet.Servlet") != null;
     } catch (JavaModelException e) {
-    	
-    	Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchShell();
-    	ErrorDialog.openError(shell, "Spindle error", "could not determine if required jars are present", e.getStatus());
+
+      Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchShell();
+      ErrorDialog.openError(
+        shell,
+        "Spindle error",
+        "could not determine if required servlet jar is present",
+        e.getStatus());
     }
-  	
-  	return false;
+    return false;
+
+  }
+
+  protected boolean checkHasTapestryJars(IJavaProject project) {
+
+    try {
+
+      return Utils.findType(project, "net.sf.tapestry.spec.IApplicationSpecification") != null;
+
+    } catch (JavaModelException e) {
+
+      Shell shell = TapestryPlugin.getDefault().getActiveWorkbenchShell();
+      ErrorDialog.openError(
+        shell,
+        "Spindle error",
+        "could not determine if required tapestry jar is present",
+        e.getStatus());
+    }
+
+    return false;
   }
 
   private String getName(IProject project) {
@@ -154,8 +169,7 @@ public abstract class AbstractTapestryProjectAction
     IPath path = project.getFullPath();
     path = path.removeFileExtension();
     return path.lastSegment();
-    
-  }
 
+  }
 
 }

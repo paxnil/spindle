@@ -24,8 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.project;
 
 import java.io.ByteArrayInputStream;
@@ -37,16 +35,23 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.MessageDialog;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryLibraryModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com.iw.plugins.spindle.util.SpindleStatus;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.util.lookup.TapestryLookup;
 
@@ -68,7 +73,17 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
   private TapestryProjectModelManager modelManager;
 
+  private ProjectResourceChangeListener listener = null;
+
   private boolean dirty; // has the application changed?
+
+  /**
+   * Constructor for TapestryProject.
+   */
+  public TapestryProject() {
+    super();
+
+  }
 
   /**
    * @see org.eclipse.core.resources.IProjectNature#configure()
@@ -118,6 +133,25 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     return lookup;
   }
 
+  private void reset() {
+
+    modelManager.shutdown();
+    modelManager = null;
+    projectResource = null;
+
+  }
+
+  private void handleProjectStorageRemoved() {
+
+    MessageDialog.openInformation(
+      TapestryPlugin.getDefault().getActiveWorkbenchShell(),
+      "Spindle problem",
+      "you have deleted the Application or Library associated with project: "
+        + getProject().getName()
+        + ".\nSpindle behaviour from this point on is undefined.");
+
+  }
+
   /**
    * Sets the dirty.
    * @param dirty The dirty to set
@@ -130,6 +164,15 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
    * @see com.iw.plugins.spindle.project.ITapestryProject#getModelManager()
    */
   public synchronized TapestryProjectModelManager getModelManager() throws CoreException {
+
+    if (listener == null) {
+
+      listener = new ProjectResourceChangeListener();
+      ResourcesPlugin.getWorkspace().addResourceChangeListener(
+        listener,
+        IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_CLOSE);
+
+    }
 
     if (modelManager == null) {
 
@@ -164,7 +207,8 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
     } catch (IOException e) {
 
-      TempStatus status = new TempStatus(e, "Could not save .spindle file");
+      SpindleStatus status = new SpindleStatus(e);
+      status.setError("Could not save .spindle file");
 
       throw new CoreException(status);
     }
@@ -233,7 +277,17 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
       try {
 
-        Path path = new Path(readProperties());
+        String properties = readProperties();
+        if (properties == null) {
+
+          SpindleStatus status = new SpindleStatus();
+          status.setError(".spindle file does not exist");
+
+          throw new CoreException(status);
+
+        }
+
+        Path path = new Path(properties);
 
         //        String xmlStuff = readProperties();
         //
@@ -243,7 +297,10 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
         if (!file.exists() || !file.getProject().equals(project)) {
 
-          TempStatus status = new TempStatus(path.toString() + "does not exist in " + projectPath);
+          SpindleStatus status =
+            new SpindleStatus(
+              SpindleStatus.ERROR,
+              path.toString() + "does not exist in " + projectPath);
 
           throw new CoreException(status);
         }
@@ -252,7 +309,8 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
 
       } catch (IOException e) {
 
-        TempStatus status = new TempStatus(e, "Could not read " + projectPath + "/.spindle file");
+        SpindleStatus status = new SpindleStatus(e);
+        status.setError("Could not read " + projectPath + "/.spindle file");
 
         throw new CoreException(status);
 
@@ -388,94 +446,119 @@ public class TapestryProject implements IProjectNature, ITapestryProject {
     return property;
   }
 
-  public class TempStatus implements IStatus {
-
-    Throwable exception;
-    String message;
-
-    public TempStatus(String message) {
-      this.message = message;
-    }
-
-    public TempStatus(Throwable e) {
-      this.exception = e;
-    }
-
-    public TempStatus(Throwable e, String message) {
-
-      this(e);
-      this.message = message;
-    }
+  class ProjectResourceChangeListener implements IResourceChangeListener, IResourceDeltaVisitor {
 
     /**
-    * @see org.eclipse.core.runtime.IStatus#getChildren()
+    * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(IResourceChangeEvent)
     */
-    public IStatus[] getChildren() {
-      return new IStatus[0];
+    public void resourceChanged(IResourceChangeEvent event) {
+
+      if (event.getType() == IResourceChangeEvent.PRE_CLOSE) {
+
+        IProject closing = (IProject) event.getResource();
+        if (closing.equals(getProject())) {
+
+          reset();
+
+        }
+
+      } else if (event.getType() == IResourceChangeEvent.POST_CHANGE) {
+
+        if (getProject() != null) {
+
+          if (getProject().isOpen()) {
+
+            IResource projectResource = null;
+            try {
+
+              projectResource = (IResource) getProjectStorage();
+            } catch (CoreException e) {
+            }
+
+            if (projectResource != null) {
+
+              IResourceDelta projectDelta =
+                event.getDelta().findMember(projectResource.getFullPath());
+              if (projectDelta != null) {
+
+                handleProjectResourcePresentCase(projectResource, projectDelta);
+              }
+
+            } else {
+
+              try {
+
+                event.getDelta().accept(this);
+              } catch (CoreException e) {
+
+              }
+
+            }
+          }
+        }
+      }
     }
 
     /**
-     * @see org.eclipse.core.runtime.IStatus#getCode() 
-     */
-    public int getCode() {
-      return IStatus.ERROR;
+    * @see org.eclipse.core.resources.IResourceDeltaVisitor#visit(IResourceDelta)
+    */
+    public boolean visit(IResourceDelta delta) throws CoreException {
+
+      IResource resource = delta.getResource();
+      int flags = delta.getFlags();
+      if (resource.getProject().equals(getProject())) {
+
+        String extension = resource.getFullPath().getFileExtension();
+        if ("application".equals(extension) || "library".equals(extension)) {
+
+          if ((flags & IResourceDelta.ADDED) != 0) {
+
+            setProjectStorage((IStorage) resource);
+            return false;
+          }
+
+        }
+
+      }
+
+      return true;
     }
 
     /**
-     * @see org.eclipse.core.runtime.IStatus#getException()
-     */
-    public Throwable getException() {
-      return exception;
-    }
+    * Method handleProjectResourcePresentCase.
+    * @param delta
+    * @return boolean
+    */
+    private void handleProjectResourcePresentCase(
+      IResource projectResource,
+      IResourceDelta delta) {
 
-    /**
-     * @see org.eclipse.core.runtime.IStatus#getMessage()
-     */
-    public String getMessage() {
-      StringBuffer buffer = new StringBuffer();
-      buffer.append(message == null ? "Exception occurred" : message);
-      buffer.append(" : ");
-      buffer.append(exception == null ? "no exception message" : exception.getLocalizedMessage());
-      return buffer.toString();
-    }
+      IResource resource = delta.getResource();
+      if (projectResource.equals(resource)) {
 
-    /**
-     * @see org.eclipse.core.runtime.IStatus#getPlugin()
-     */
-    public String getPlugin() {
-      return TapestryPlugin.ID_PLUGIN;
-    }
+        int flags = delta.getFlags();
+        if ((flags & IResourceDelta.MOVED_TO) != 0) {
 
-    /**
-     * @see org.eclipse.core.runtime.IStatus#getSeverity()
-     */
-    public int getSeverity() {
-      return IStatus.ERROR;
-    }
+          IPath movedTo = delta.getMovedToPath();
+          IResource newStorage = ResourcesPlugin.getWorkspace().getRoot().findMember(movedTo);
 
-    /**
-     * @see org.eclipse.core.runtime.IStatus#isMultiStatus()
-     */
-    public boolean isMultiStatus() {
-      return false;
-    }
+          if (!newStorage.getProject().equals(getProject())) {
 
-    /**
-     * @see org.eclipse.core.runtime.IStatus#isOK()
-     */
-    public boolean isOK() {
-      return false;
-    }
+            handleProjectStorageRemoved();
 
-    /**
-     * @see org.eclipse.core.runtime.IStatus#matches(int)
-     */
-    public boolean matches(int severityMask) {
-      return false;
-    }
+          } else {
 
+            try {
+
+              setProjectStorage((IStorage) newStorage);
+
+            } catch (CoreException e) {
+            }
+          }
+
+        }
+
+      }
+    }
   }
-
-
-
 }

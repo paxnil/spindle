@@ -241,7 +241,7 @@ public class OverviewGeneralSection extends SpindleFormSection implements IModel
       });
       ((Button) allowBody.getControl()).setBackground(factory.getBackgroundColor());
 
-      labelName = "Allow Informal Paramters";
+      labelName = "Allow Informal Parameters";
       informalsLabel = factory.createLabel(container, labelName);
       allowInformalParameters = new FormCheckbox(container, null);
       allowInformalParameters.addFormCheckboxListener(new IFormCheckboxListener() {

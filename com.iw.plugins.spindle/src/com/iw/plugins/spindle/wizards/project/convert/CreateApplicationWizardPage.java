@@ -65,6 +65,7 @@ import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.wizards.TapestryWizardPage;
 import com.iw.plugins.spindle.wizards.factories.ApplicationClassFactory;
 import com.iw.plugins.spindle.wizards.factories.ApplicationFactory;
+import com.iw.plugins.spindle.wizards.factories.PageFactory;
 import com.iw.plugins.spindle.wizards.fields.ApplicationNameField;
 import com.iw.plugins.spindle.wizards.fields.ApplicationServletClassDialog;
 import com.iw.plugins.spindle.wizards.fields.ContainerDialogField;
@@ -259,6 +260,13 @@ public class CreateApplicationWizardPage extends TapestryWizardPage {
     String appname = fApplicationNameDialog.getTextValue();
     IType engineClass = fEngineDialogField.getType();
     application = ApplicationFactory.createApplication(root, pack, appname, engineClass, monitor);
+    
+    // create the home page 
+    
+    IPackageFragment homePageFragment = root.createPackageFragment(pack.getElementName()+".pages", true, monitor);
+
+    
+    PageFactory.createPage(root, homePageFragment, "Home", "net.sf.tapestry.html.BasePage", monitor);
     //TapestryPlugin.getTapestryModelManager().getModel(application);
   }
 

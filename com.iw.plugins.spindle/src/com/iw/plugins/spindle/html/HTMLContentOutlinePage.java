@@ -67,6 +67,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import com.iw.plugins.spindle.TapestryImages;
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
+import com.iw.plugins.spindle.model.ITapestryModel;
 import com.iw.plugins.spindle.model.TapestryComponentModel;
 import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.ITapestryProject;
@@ -192,43 +193,93 @@ public class HTMLContentOutlinePage
       }
     }
     IFile file = findRelatedComponent();
-    TapestryComponentModel model = null;
-    try {
-      model =
-        (TapestryComponentModel) TapestryPlugin.getTapestryModelManager(file).getReadOnlyModel(
-          file);
-    } catch (CoreException e) {
-    }
+    TapestryComponentModel model = getComponentModel(file);
+   
+   
     boolean canCreate = (model != null);
     if (canCreate) {
 
-      PluginComponentSpecification spec =
-        (PluginComponentSpecification) model.getComponentSpecification();
-
-      canCreate = (spec != null && spec.getComponent(selectedJwcid) == null);
+      canCreate = !alreadyHasJWCID(selectedJwcid, file);
       if (canCreate) {
 
         createAction.configure(file, selectedJwcid);
         manager.add(createAction);
 
-      } else {
-
-        alreadyHasAction.configure(selectedJwcid);
-        manager.add(alreadyHasAction);
       }
     }
 
   }
+
+  private boolean alreadyHasJWCID(String jwcid, IFile componentResource) {
+  	
+  	if (jwcid == null || "".equals(jwcid.trim()) || componentResource == null) {
+  		
+  		return false;
+  		
+  	}
+
+    TapestryComponentModel model = getComponentModel(componentResource);
+   
+   
+    if (model != null) {
+    	
+      PluginComponentSpecification spec =
+        (PluginComponentSpecification) model.getComponentSpecification();
+
+      if (spec != null) {
+        return spec.getComponent(jwcid) != null;
+      }
+    }
+
+    return false;
+
+  }
+  
+  private TapestryComponentModel getComponentModel(IFile file) {
+  	
+   try {
+      TapestryProjectModelManager mgr = TapestryPlugin.getTapestryModelManager(file);
+      	
+      	IEditorPart part = Utils.getEditorFor(file);
+      	
+      	if (part != null && part instanceof SpindleMultipageEditor) {
+      		
+      		return (TapestryComponentModel)((SpindleMultipageEditor)part).getModel();
+      		
+      	} else {
+      		
+      		return (TapestryComponentModel)mgr.getReadOnlyModel(file);
+      	
+      	}
+    } catch (CoreException e) {
+    	
+    	return null;
+    }
+  	
+  }
+  		
+  		
 
   private IFile findRelatedComponent() {
     if (documentFile != null) {
 
       IContainer parent = documentFile.getParent();
       String name = documentFile.getFullPath().removeFileExtension().lastSegment();
-      String jwcName = name + ".jwc";
-      IFile componentResource = (IFile) parent.findMember(jwcName);
+
+      String fullName = name + ".jwc";
+      IFile componentResource = (IFile) parent.findMember(fullName);
+
+      if (componentResource == null) {
+
+        fullName = name + ".page";
+        componentResource = (IFile) parent.findMember(fullName);
+
+      }
+
       if (componentResource != null && componentResource.exists()) {
+
         return componentResource;
+
       }
     }
     return null;
@@ -385,6 +436,7 @@ public class HTMLContentOutlinePage
   }
 
   protected class LabelProvider implements ILabelProvider {
+    Image notCreatedImage = TapestryImages.getSharedImage("property16.gif");
     Image jwcImage = TapestryImages.getSharedImage("component16.gif");
     /**
      * Constructor for LabelProvider
@@ -396,8 +448,22 @@ public class HTMLContentOutlinePage
     /**
     * @see ILabelProvider#getImage(Object)
     */
-    public Image getImage(Object arg0) {
-      return jwcImage;
+    public Image getImage(Object element) {
+    	
+      String jwcid = null;
+    	
+      try {
+        jwcid = getJWCID((ITypedRegion)element);
+      } catch (Exception e) {
+      }
+      
+      if (jwcid != null && alreadyHasJWCID(jwcid, findRelatedComponent())) {
+      	
+      	return jwcImage;
+      	
+      }
+
+      return notCreatedImage;
     }
 
     /**
@@ -489,6 +555,8 @@ public class HTMLContentOutlinePage
         if (editor != null) {
           editor.parseForProblems();
         }
+        
+        getTreeViewer().setInput("dummy");
 
       } catch (ClassCastException e) {
         MessageDialog.openError(
@@ -525,13 +593,12 @@ public class HTMLContentOutlinePage
         return;
       }
       Utils.createContainedComponentIn(jwcid, chosen, model);
+      
       if (targetEditor == null) {
+      	
         TapestryPlugin.openTapestryEditor(model.getUnderlyingStorage());
       }
-      //    } catch (Exception e) {
-      //      e.printStackTrace();
-      //      TapestryPlugin.getDefault().logException(e);
-      //    }
+     
     }
 
     private void createInWorkspace() {

@@ -70,12 +70,23 @@ public class ConvertToTapestryProjectAction extends AbstractTapestryProjectActio
     IJavaProject jproject = (IJavaProject) selection.getFirstElement();
     IProject project = jproject.getProject();
 
+    if (!checkHasServletJars(jproject)) {
+
+      MessageDialog.openInformation(
+        shell,
+        "Conversion Problem",
+        "Can't continue with conversion.\n\nAdd:\n\n javax.servlet.jar\n\n to the project build path.\n\nThen try converting again");
+
+      return;
+    }
+
+
     if (!checkHasTapestryJars(jproject)) {
 
       MessageDialog.openInformation(
         shell,
         "Conversion Problem",
-        "Can't continue with conversion.\n\nAdd:\n\n javax.servlet.jar; and\n net.sf.tapestry.jar (2.2 or better)\n\n to the project build path.\n\nThen try converting again");
+        "Can't continue with conversion.\n\nAdd:\n\n net.sf.tapestry.jar (2.2 or better)\n\n to the project build path.\n\nThen try converting again");
 
       return;
     }

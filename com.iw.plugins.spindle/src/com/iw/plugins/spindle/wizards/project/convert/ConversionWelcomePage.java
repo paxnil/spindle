@@ -26,13 +26,17 @@
 package com.iw.plugins.spindle.wizards.project.convert;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -45,6 +49,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.update.ui.forms.internal.engine.FormEngine;
 
 import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.project.ITapestryProject;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.RadioDialogField;
@@ -76,7 +82,8 @@ public class ConversionWelcomePage
   private int count = 0;
 
   private IStorage[] foundModelStorages = new IStorage[0];
-  ;
+
+  private IFile singleStorage = null;
   /**
    * Constructor for ConversionWelcomePage.
    * @param name
@@ -97,7 +104,7 @@ public class ConversionWelcomePage
 
     applicationOrLibrary.addListener(this);
 
-	this.selection = selection;
+    this.selection = selection;
     setup();
   }
 
@@ -136,6 +143,7 @@ public class ConversionWelcomePage
     if (count == 1) {
 
       state = ConvertToTapestryProjectWizard.ONE_EXISTS;
+      singleStorage = (IFile) foundModelStorages[0];
 
     } else if (count > 1) {
 
@@ -231,19 +239,35 @@ public class ConversionWelcomePage
 
     if (state == ConvertToTapestryProjectWizard.ONE_EXISTS) {
 
-      message =
-        replace("$INSERT_TAPESTRY_MODEL$", message, foundModelStorages[0].getFullPath().toString());
+      message = replace("{0}", message, foundModelStorages[0].getFullPath().toString());
 
     }
     return message;
   }
 
-  private String replace(String template, String message, String replaceWith) {
-    return message;
-  }
+  /**
+   * Method replace.
+   * @param string
+   * @param message
+   * @param string1
+   * @return String
+   */
+  private String replace(String variable, String message, String value) {
 
-  private String replace(String string, String message, IStorage iStorage) {
-    return null;
+    int start = message.indexOf(variable);
+    if (start >= 0) {
+
+      StringBuffer result = new StringBuffer();
+      int end = start + variable.length();
+      result.append(message.substring(0, start));
+      result.append(value);
+      result.append(message.substring(end));
+      return result.toString();
+
+    }
+
+    return message;
+
   }
 
   /**
@@ -251,15 +275,35 @@ public class ConversionWelcomePage
    * @return IRunnableWithProgress
    */
   public IRunnableWithProgress getRunnable(Object object) {
-    return null;
-  }
 
-  /**
-   * Method getProjectResource.
-   * @return IFile
-   */
-  public IFile getProjectResource() {
-    return null;
+    final IFile file = (IFile) object;
+    final IJavaProject jproject = (IJavaProject) selection.getFirstElement();
+
+    return new IRunnableWithProgress() {
+
+      public void run(IProgressMonitor monitor)
+        throws InvocationTargetException, InterruptedException {
+
+        try {
+          ITapestryProject tproject =
+            TapestryPlugin.getDefault().addTapestryProjectNatureTo(jproject, null);
+
+          tproject.setProjectStorage(file);
+        } catch (CoreException e) {
+
+          ErrorDialog.openError(
+            getShell(),
+            "Conversion Failed",
+            "Could not add Tapestry Project Nature",
+            e.getStatus());
+
+          throw new InterruptedException();
+
+        }
+
+      }
+    };
+
   }
 
   /**
@@ -274,7 +318,7 @@ public class ConversionWelcomePage
    * @see com.iw.plugins.spindle.wizards.TapestryWizardPage#getResource()
    */
   public IResource getResource() {
-    return null;
+    return singleStorage;
   }
 
   /**

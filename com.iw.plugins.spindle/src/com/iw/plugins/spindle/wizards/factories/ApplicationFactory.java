@@ -108,7 +108,7 @@ public class ApplicationFactory {
     appSpec.setPublicId(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID);
     appSpec.setName(appname);
     appSpec.setEngineClassName(qualifiedEngineClassname);
-    String path = "/" + packageFragment.replace('.', '/') + "/Home.jwc";
+    String path = "/" + packageFragment.replace('.', '/') + "/pages/Home.page";
     appSpec.setPageSpecificationPath("Home", path);
     StringWriter swriter = new StringWriter();
     PrintWriter pwriter = new PrintWriter(swriter);

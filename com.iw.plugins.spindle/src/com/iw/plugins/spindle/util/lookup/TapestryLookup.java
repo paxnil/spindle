@@ -493,6 +493,12 @@ public class TapestryLookup implements ILookupAcceptor {
     } catch (CoreException npe) {
       return false; // the package is not present
     }
+    
+    if (files == null) {
+    	
+    	return false;
+    	
+    }
     int length = files.length;
 
     for (int i = 0; i < length; i++) {

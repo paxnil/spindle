@@ -199,11 +199,7 @@ public class TapestryLibraryModel extends BaseTapestryModel implements PropertyC
 
         } catch (DocumentParseException dpex) {
 
-          addProblemMarker(
-            dpex.getMessage(),
-            dpex.getLineNumber(),
-            dpex.getColumn(),
-            IMarker.SEVERITY_ERROR);
+          addProblemMarker(dpex);
           loaded = false;
 
         }

@@ -1,6 +1,6 @@
 <project name="builder" default="init" basedir=".">
 
-  <property name="version" value="1.0.3"/>
+  <property name="version" value="1.1alpha1"/>
   
   <target name="init">
     <available property="buildReleaseAvailable" file="${basedir}/buildRelease"/>
@@ -13,6 +13,9 @@
     	 <exclude name="**/*.gif"/>
     	 <exclude name="**/*.jpg"/>
     	 <exclude name="**/*.png"/>
+    	 <exclude name="**/*.txt"/>
+    	 <exclude name="**/*.html"/>
+    	 <exclude name="**/scratchpad/*.*"/>
     	 </fileset>
   	</jar> 
   </target>
@@ -20,7 +23,9 @@
   <target name="build-src-jar">
   	<delete file="${basedir}/*-src.jar"/>
   	<jar jarfile="${basedir}/spindle-${version}-src.jar">
-  		<fileset dir="${basedir}/src"/>    	
+  		<fileset dir="${basedir}/src"> 
+    	 <exclude name="**/scratchpad/*.*"/>
+  		</fileset>   	
   	</jar> 
   </target>
   
@@ -34,10 +39,12 @@
     <copy toDir="buildRelease/com.iw.plugins.spindle">
       <fileset dir="${basedir}">
         <exclude name="spindle.jar"/>
+        <exclude name="*.jardesc"/>
   	    <include name="*.jar"/>
   	    <include name="plugin.xml"/>
   	    <include name="*.html"/> 
-  	    <include name="*.txt"/>  	    
+  	    <include name="*.txt"/> 
+  	    <include name="*.jpg"/> 	    
   	  </fileset>    
     </copy>
     <copy toDir="${basedir}/buildRelease/com.iw.plugins.spindle/icons">

@@ -67,6 +67,7 @@ import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.util.Utils;
 import com.iw.plugins.spindle.wizards.factories.ApplicationClassFactory;
 import com.iw.plugins.spindle.wizards.factories.ApplicationFactory;
+import com.iw.plugins.spindle.wizards.factories.PageFactory;
 
 public class ApplicationWizardPage extends NewTapestryProjectPage {
 
@@ -255,6 +256,11 @@ public class ApplicationWizardPage extends NewTapestryProjectPage {
 
     application =
       ApplicationFactory.createApplication(root, applicationPackage, appname, engineClass, monitor);
+      
+    IPackageFragment homePageFragment = root.createPackageFragment(applicationPackage.getElementName()+".pages", true, monitor);
+      
+    PageFactory.createPage(root, homePageFragment, "Home", "net.sf.tapestry.html.BasePage", monitor);
+
 
     ITapestryProject tproject =
       TapestryPlugin.getDefault().addTapestryProjectNatureTo(project, monitor);

@@ -135,9 +135,9 @@ public class TapestryHTMLEditor extends TextEditor implements IAdaptable, IModel
     shell = parent.getShell();
     text = (StyledText) getSourceViewer().getTextWidget();
 
-    text.setKeyBinding(262144, ST.COPY);
-    //text.setKeyBinding(131072, ST.CUT);
-    text.setKeyBinding(131072, ST.COPY);
+//    text.setKeyBinding(262144, ST.COPY);
+//    //text.setKeyBinding(131072, ST.CUT);
+//    text.setKeyBinding(131072, ST.COPY);
     // for debugging the partitioning only		
 //    		handler = new DebugToolTipHandler(shell, getDocumentProvider().getDocument(input));
 //    		handler.activateHoverHelp(text);

@@ -43,7 +43,9 @@ import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.util.SourceWriter;
 
-public class TapestryApplicationModel extends TapestryLibraryModel implements PropertyChangeListener {
+public class TapestryApplicationModel
+  extends TapestryLibraryModel
+  implements PropertyChangeListener {
 
   /**
    * Constructor for TapestryApplicationModel
@@ -52,13 +54,13 @@ public class TapestryApplicationModel extends TapestryLibraryModel implements Pr
     super(storage);
   }
 
-
   public void load(final InputStream source) throws CoreException {
-  	final TapestryApplicationModel thisModel = this;
+    final TapestryApplicationModel thisModel = this;
     TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) {
-      	
-      	PluginApplicationSpecification pluginSpec = (PluginApplicationSpecification)librarySpecification;
+
+        PluginApplicationSpecification pluginSpec =
+          (PluginApplicationSpecification) librarySpecification;
 
         removeAllProblemMarkers();
         if (librarySpecification != null) {
@@ -69,15 +71,14 @@ public class TapestryApplicationModel extends TapestryLibraryModel implements Pr
         try {
 
           SpecificationParser parser =
-            (SpecificationParser) TapestryPlugin.getParserFor(
-              "application");
+            (SpecificationParser) TapestryPlugin.getParserFor("application");
           librarySpecification =
             (PluginApplicationSpecification) parser.parseApplicationSpecification(
               source,
               getUnderlyingStorage().getName(),
               null);
-              
-          pluginSpec = (PluginApplicationSpecification)librarySpecification;
+
+          pluginSpec = (PluginApplicationSpecification) librarySpecification;
           pluginSpec.addPropertyChangeListener(TapestryApplicationModel.this);
           loaded = true;
           editable = !(getUnderlyingStorage().isReadOnly());
@@ -89,11 +90,8 @@ public class TapestryApplicationModel extends TapestryLibraryModel implements Pr
 
         } catch (DocumentParseException dpex) {
 
-          addProblemMarker(
-            dpex.getMessage(),
-            dpex.getLineNumber(),
-            dpex.getColumn(),
-            IMarker.SEVERITY_ERROR);
+          addProblemMarker(dpex);
+
           loaded = false;
 
         }
@@ -111,8 +109,6 @@ public class TapestryApplicationModel extends TapestryLibraryModel implements Pr
     spec.write(new SourceWriter(stringwriter));
     writer.print(stringwriter.toString());
   }
-
-
 
   public ReferenceInfo resolveReferences(boolean reverse) {
     return null;
@@ -255,28 +251,28 @@ public class TapestryApplicationModel extends TapestryLibraryModel implements Pr
   //    return new ReferenceInfo(resolved, new ArrayList(), true);
   //  }
 
-//  public boolean containsReference(String name) {
-//    PluginApplicationSpecification spec = (PluginApplicationSpecification)getSpecification();
-//    Iterator aliases = spec.getComponentMapAliases().iterator();
-//    while (aliases.hasNext()) {
-//      String alias = (String) aliases.next();
-//      if (spec.getComponentSpecificationPath(alias).equals(name)) {
-//        return true;
-//      }
-//    }
-//    Iterator pages = spec.getPageNames().iterator();
-//    while (pages.hasNext()) {
-//      String pageName = (String) pages.next();
-//
-//      String path =  spec.getPageSpecificationPath(pageName);
-//      if (path.equals(name)) {
-//        return true;
-//      }
-//    }
-//    return false;
-//  }
+  //  public boolean containsReference(String name) {
+  //    PluginApplicationSpecification spec = (PluginApplicationSpecification)getSpecification();
+  //    Iterator aliases = spec.getComponentMapAliases().iterator();
+  //    while (aliases.hasNext()) {
+  //      String alias = (String) aliases.next();
+  //      if (spec.getComponentSpecificationPath(alias).equals(name)) {
+  //        return true;
+  //      }
+  //    }
+  //    Iterator pages = spec.getPageNames().iterator();
+  //    while (pages.hasNext()) {
+  //      String pageName = (String) pages.next();
+  //
+  //      String path =  spec.getPageSpecificationPath(pageName);
+  //      if (path.equals(name)) {
+  //        return true;
+  //      }
+  //    }
+  //    return false;
+  //  }
 
-  public List getPropertyNames() { 
+  public List getPropertyNames() {
     return getSpecification().getPropertyNames();
   }
 
@@ -289,6 +285,5 @@ public class TapestryApplicationModel extends TapestryLibraryModel implements Pr
       getSpecification().setProperty(name, value);
     }
   }
-
 
 }

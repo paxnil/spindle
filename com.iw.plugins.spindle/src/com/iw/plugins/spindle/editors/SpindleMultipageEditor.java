@@ -218,6 +218,9 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
       }
       dirty = false;
     }
+    
+//    TapestrySourcePage sourcePage = (TapestrySourcePage)getPage(SOURCE_PAGE);
+//    sourcePage.checkProblemMarkers();
   }
 
   /**
@@ -525,6 +528,9 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
    * @see org.eclipse.pde.internal.ui.editor.PDEMultiPageEditor#createPages()
    */
   protected void createPages() {
+
+    addPage(SpindleMultipageEditor.SOURCE_PAGE, new XMLEditorPage(this));
+
   }
 
   /**
@@ -539,7 +545,6 @@ public abstract class SpindleMultipageEditor extends PDEMultiPageXMLEditor {
         TapestryPlugin.getTapestryModelManager(storage).disconnect(storage, this);
       }
     } catch (CoreException e) {
-
 
     }
   }

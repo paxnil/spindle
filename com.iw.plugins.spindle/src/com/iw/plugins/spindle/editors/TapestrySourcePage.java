@@ -25,13 +25,28 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editors;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.Position;
 import org.eclipse.pde.internal.ui.editor.PDESourcePage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.texteditor.MarkerUtilities;
+import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
+import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.update.ui.forms.internal.IFormPage;
 
 import com.iw.plugins.spindle.TapestryPlugin;
@@ -57,7 +72,7 @@ import com.iw.plugins.spindle.model.BaseTapestryModel;
 
 public abstract class TapestrySourcePage extends PDESourcePage {
 
-  public TapestrySourcePage(SpindleMultipageEditor editor) { 
+  public TapestrySourcePage(SpindleMultipageEditor editor) {
     super(editor);
   }
 
@@ -75,6 +90,7 @@ public abstract class TapestrySourcePage extends PDESourcePage {
         firePropertyChange(PROP_DIRTY);
       }
     });
+
   }
 
   public boolean becomesInvisible(IFormPage newPage) {
@@ -96,4 +112,105 @@ public abstract class TapestrySourcePage extends PDESourcePage {
       "Source Error:",
       "The Source page has errors. Other pages cannot be used until these errors are corrected.");
   }
+
+  public void becomesVisible(IFormPage previousPage) {
+    super.becomesVisible(previousPage);
+
+    try {
+
+      ((ResourceMarkerAnnotationModel) getSourceViewer().getAnnotationModel()).updateMarkers(
+        getDocumentProvider().getDocument(getEditorInput()));
+
+    } catch (CoreException e) {
+    }
+
+  }
+
+  //  public void checkProblemMarkers() {
+  //
+  //    IEditorInput input = getEditor().getEditorInput();
+  //    IResource file = (IResource) input.getAdapter(IResource.class);
+  //
+  //    if (file == null || file.isReadOnly()) {
+  //
+  //      return;
+  //
+  //    }
+  //
+  //    IMarker[] badStringMarkers = findBadStringMarkers(file);
+  //
+  //    if (badStringMarkers.length > 0) {
+  //
+  //      transmorgifyMarkers(file, badStringMarkers);
+  //
+  //    }
+  //
+  //    return;
+  //  }
+  //
+  //  private IMarker[] findBadStringMarkers(IResource resource) {
+  //    try {
+  //      return (resource.findMarkers("com.iw.plugins.spindle.badwordproblem", false, IResource.DEPTH_ONE));
+  //    } catch (CoreException corex) {
+  //    }
+  //
+  //    return new IMarker[0];
+  //  }
+
+  //  private void transmorgifyMarkers(IResource resource, IMarker[] markers) {
+  //
+  //    IDocument document = getDocumentProvider().getDocument(getEditorInput());
+  //
+  //    for (int i = 0; i < markers.length; i++) {
+  //
+  //      int searchOffset = 0;
+  //      int currentOffset;
+  //      String invalidString;
+  //      try {
+  //
+  //        invalidString = (String) markers[i].getAttribute("invalidString");
+  //
+  //        currentOffset = document.search(searchOffset, invalidString, true, true, true);
+  //
+  //      } catch (Exception e) {
+  //
+  //        continue;
+  //
+  //      }
+  //
+  //      while (currentOffset > 0) {
+  //
+  //        searchOffset = currentOffset + invalidString.length();
+  //
+  //        try {
+  //
+  //          ((ResourceMarkerAnnotationModel) getSourceViewer().getAnnotationModel()).updateMarker(
+  //            markers[i],
+  //            document,
+  //            new Position(currentOffset));
+  //
+  //        } catch (CoreException e) {
+  //        }
+  //
+  //        try {
+  //
+  //          currentOffset = document.search(searchOffset, invalidString, true, true, true);
+  //
+  //        } catch (BadLocationException e) {
+  //
+  //          break;
+  //        }
+  //
+  //      }
+  //
+  //    }
+  //  }
+
+  /**
+   * @see org.eclipse.pde.internal.ui.editor.PDESourcePage#createContentOutlinePage()
+   */
+  public IContentOutlinePage createContentOutlinePage() {
+    return null;
+  }
+
 }

@@ -60,8 +60,7 @@ public class TapestryProjectLableDecorator
   private ImageDescriptorRegistry imageDescriptorRegistry;
 
   // these are shared, no need to dispose in this class
-  private Image applicationImage = TapestryImages.getSharedImage("application16.gif");
-  private Image libraryImage = TapestryImages.getSharedImage("library16.gif");
+  private Image applicationImage = TapestryImages.getSharedImage("tapestry_project16.gif");
 
   /**
    * Constructor for DTDLableDecorator.
@@ -103,21 +102,13 @@ public class TapestryProjectLableDecorator
     } catch (CoreException e) {
 
     }
-
-    if (storage != null && storage.getName().endsWith(".library")) {
-
-      useDecorator = libraryImage;
-
+    
+    if (storage == null) {
+    	
+    	return null;
     }
 
-    ImageDescriptor baseImage = new ImageImageDescriptor(image);
-
-    Rectangle baseBounds = image.getBounds();
-
-    TapestryProjectImageDescriptor synthetic =
-      new TapestryProjectImageDescriptor(baseImage, useDecorator, baseBounds);
-
-    return imageDescriptorRegistry.get(synthetic);
+    return applicationImage;
 
   }
 
@@ -156,7 +147,7 @@ public class TapestryProjectLableDecorator
 
     if (storage == null) {
 
-      return text + " (Invalid Tapestry Project)";
+      return text;
     }
 
     return text + " (" + storage.getName() + ")";

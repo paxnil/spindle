@@ -147,6 +147,7 @@ public class MigrateComponentModel extends MigrationWorkUnit {
         TapestryComponentModel cmodel = (TapestryComponentModel)sourceModel;
         PluginComponentSpecification spec = (PluginComponentSpecification)cmodel.getComponentSpecification();
         spec.setPageSpecification(true);
+        setDirty(true);
         
 
       }

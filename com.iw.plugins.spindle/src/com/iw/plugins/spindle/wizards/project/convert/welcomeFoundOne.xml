@@ -34,7 +34,7 @@ This project's associated Tapestry file will be:
 
 </p>
 <li>
-$INSERT_TAPESTRY_MODEL$
+{0}
 </li>
 <p>
 

@@ -4,21 +4,39 @@ import java.util.ArrayList;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
+import org
+  .eclipse
+  .core
+  .resources
+  .IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org
+  .eclipse
+  .core
+  .resources
+  .IResourceDeltaVisitor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org
+  .eclipse
+  .jface
+  .viewers
+  .LabelProviderChangedEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.model.ITapestryModel;
-import com.iw.plugins.spindle.model.manager.TapestryProjectModelManager;
+import com
+  .iw
+  .plugins
+  .spindle
+  .model
+  .manager
+  .TapestryProjectModelManager;
 import com.iw.plugins.spindle.project.TapestryProject;
 import com.iw.plugins.spindle.spec.XMLUtil;
 
@@ -35,9 +53,12 @@ public class DTDLableDecorator
    * Constructor for DTDLableDecorator.
    */
   public DTDLableDecorator() {
-    TapestryPlugin.getDefault().getWorkspace().addResourceChangeListener(
-      this,
-      IResourceChangeEvent.POST_AUTO_BUILD);
+    TapestryPlugin
+      .getDefault()
+      .getWorkspace()
+      .addResourceChangeListener(
+        this,
+        IResourceChangeEvent.POST_AUTO_BUILD);
   }
 
   private ITapestryModel getTapestryModel(Object element) {
@@ -46,7 +67,10 @@ public class DTDLableDecorator
       storage = (IStorage) element;
     } catch (Exception e) {
       if (element instanceof IAdaptable) {
-        storage = (IStorage) ((IAdaptable) element).getAdapter(IStorage.class);
+        storage =
+          (IStorage)
+            ((IAdaptable) element).getAdapter(
+            IStorage.class);
       }
     }
     try {
@@ -54,11 +78,15 @@ public class DTDLableDecorator
       if (storage != null) {
 
         TapestryProject tproject =
-          (TapestryProject) TapestryPlugin.getDefault().getTapestryProjectFor(storage);
+          (TapestryProject) TapestryPlugin
+            .getDefault()
+            .getTapestryProjectFor(storage);
 
-        if (tproject != null && tproject.getProject().isOpen()) {
+        if (tproject != null
+          && tproject.getProject().isOpen()) {
 
-          TapestryProjectModelManager mgr = tproject.getModelManager();
+          TapestryProjectModelManager mgr =
+            tproject.getModelManager();
           return mgr.getReadOnlyModel(storage, true);
 
         }
@@ -71,17 +99,13 @@ public class DTDLableDecorator
   }
 
   private String getDTDString(ITapestryModel model) {
+
     if (!model.isLoaded()) {
-      try {
-        model.load();
-      } catch (CoreException e) {
-      }
-      if (!model.isLoaded()) {
-        return "undetermined - could not load model";
-      }
+      return "undetermined - might have parse errors";
     }
 
-    int DTDVersion = XMLUtil.getDTDVersion(model.getPublicId());
+    int DTDVersion =
+      XMLUtil.getDTDVersion(model.getPublicId());
 
     switch (DTDVersion) {
 
@@ -98,25 +122,31 @@ public class DTDLableDecorator
         return "?";
     }
 
-  } 
-  
-  public Image decorateImage(Image image, Object element) {
+  }
+
+  public Image decorateImage(
+    Image image,
+    Object element) {
     return null;
-  } 
-  
-  
-  public String decorateText(String text, Object element) {
+  }
+
+  public String decorateText(
+    String text,
+    Object element) {
     ITapestryModel model = getTapestryModel(element);
     if (model != null) {
-      return text + " (DTD " + getDTDString(model) + ")";
+      return text
+        + " (DTD "
+        + getDTDString(model)
+        + ")";
     }
     return null;
   }
-  
-  
+
   public void resourceChanged(IResourceChangeEvent event) {
     //first collect the label change events
-    final IResource[] affectedResources = processDelta(event.getDelta());
+    final IResource[] affectedResources =
+      processDelta(event.getDelta());
     //now post the change events to the UI thread
     if (affectedResources.length > 0) {
       Display.getDefault().asyncExec(new Runnable() {
@@ -128,14 +158,17 @@ public class DTDLableDecorator
   }
 
   protected IResource[] processDelta(IResourceDelta delta) {
-    final ArrayList affectedResources = new ArrayList();
+    final ArrayList affectedResources =
+      new ArrayList();
     try {
 
       delta.accept(new IResourceDeltaVisitor() {
 
-        public boolean visit(IResourceDelta delta) throws CoreException {
+        public boolean visit(IResourceDelta delta)
+          throws CoreException {
 
-          IResource resource = delta.getResource(); //skip workspace root
+          IResource resource = delta.getResource();
+          //skip workspace root
           boolean result = true;
 
           if (resource.getType() == IResource.ROOT) {
@@ -143,7 +176,8 @@ public class DTDLableDecorator
             return true;
 
           } //don't care about deletions
-          if (delta.getKind() == IResourceDelta.REMOVED) {
+          if (delta.getKind()
+            == IResourceDelta.REMOVED) {
 
             return false;
 
@@ -157,25 +191,24 @@ public class DTDLableDecorator
 
             if (resource instanceof IAdaptable) {
 
-              storage = (IStorage) ((IAdaptable) resource).getAdapter(IStorage.class);
+              storage =
+                (IStorage)
+                  ((IAdaptable) resource).getAdapter(
+                  IStorage.class);
             }
           }
           if (resource != null) {
 
-            ITapestryModel model = getTapestryModel(resource);
+            ITapestryModel model =
+              getTapestryModel(resource);
             if (model != null) {
 
               if (model.isLoaded()) {
 
-                model.reload();
-
-              } else {
-
-                model.load();
-
+                affectedResources.add(resource);
+                result = true;
               }
-              affectedResources.add(resource);
-              result = false;
+
             }
 
           }
@@ -185,11 +218,15 @@ public class DTDLableDecorator
     } catch (CoreException e) {
       TapestryPlugin.getDefault().logException(e);
     } //convert event list to array
-    return (IResource[]) affectedResources.toArray(new IResource[affectedResources.size()]);
+    return (IResource[]) affectedResources.toArray(
+      new IResource[affectedResources.size()]);
   }
 
   void fireLabelUpdates(final IResource[] affectedResources) {
-    LabelProviderChangedEvent event = new LabelProviderChangedEvent(this, affectedResources);
+    LabelProviderChangedEvent event =
+      new LabelProviderChangedEvent(
+        this,
+        affectedResources);
     fireLabelProviderChanged(event);
   }
 }
