@@ -25,23 +25,15 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorapp;
 
-import org.eclipse.pde.internal.ui.editor.IPDEEditorPage;
-import org.eclipse.ui.IEditorInput;
+import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.MessageUtil;
-import com.iw.plugins.spindle.editors.DocumentationFormPage;
+import com.iw.plugins.spindle.TapestryImages;
+import com.iw.plugins.spindle.editorlib.LibraryMultipageEditor;
+import com.iw.plugins.spindle.editors.SpindleFormPage;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
-import com.iw.plugins.spindle.editors.XMLEditorPage;
 
-//Commented out Dependency Page until replacement available
-public class APPMultipageEditor extends SpindleMultipageEditor {
-
-  public static final String OVERVIEW = "OVERVIEW";
-  public static final String DEPENDS = "DEPENDS";
-  public static final String COMPONENTS = "COMPONENTS";
-  public static final String PAGES = "PAGES";
-  public static final String DOCUMENTATION = "DOCUMENTATION";
-  public static final String SOURCE_PAGE = "SOURCEPAGE";
+public class APPMultipageEditor extends LibraryMultipageEditor {
 
   /**
    * Constructor for TapestryMultipageEditor
@@ -50,49 +42,23 @@ public class APPMultipageEditor extends SpindleMultipageEditor {
     super();
   }
 
-  /**
-   * @see PDEMultiPageEditor#getSourcePageId()
-   */
-  protected String getSourcePageId() {
-    return SOURCE_PAGE;
+  protected SpindleFormPage getOverviewPage(SpindleMultipageEditor editor) {
+    return new OverviewApplicationFormPage(
+      this,
+      MessageUtil.getString("AppMultipageEditor.OverviewTabLabel"));
   }
+  
+  protected String getValidExtension() {
 
-  /**
-   * @see PDEMultiPageEditor#getHomePage()
-   */
-  public IPDEEditorPage getHomePage() {
-    return getPage(OVERVIEW);
-  }
-
-  /**
-   * @see PDEMultiPageEditor#createPages()
-   */
-  protected void createPages() {
-    firstPageId = OVERVIEW;
-    formWorkbook.setFirstPageSelected(true);
-    addPage(
-      OVERVIEW,
-      new OverviewApplicationFormPage(
-        this,
-        MessageUtil.getString("AppMultipageEditor.OverviewTabLabel")));
-//    addPage(
-//      DEPENDS,
-//      new DependencyFormPage(this, MessageUtil.getString("AppMultipageEditor.DependenciesTabLabel")));
-    addPage(
-      COMPONENTS,
-      new ComponentsFormPage(this, MessageUtil.getString("AppMultipageEditor.ComponentsTabLabel")));
-    addPage(PAGES, new PagesFormPage(this, MessageUtil.getString("AppMultipageEditor.PagesTabLabel")));
-    addPage(
-      DOCUMENTATION,
-      new DocumentationFormPage(this, MessageUtil.getString("AppMultipageEditor.DocTabLabel")));
-    addPage(SpindleMultipageEditor.SOURCE_PAGE, new XMLEditorPage(this));
+    return MessageUtil.getString("AppMultipageEditor.ValidContentType");
 
   }
-
-  protected boolean isValidContentType(IEditorInput input) {
-    String name = input.getName().toLowerCase();
-    return name.endsWith(MessageUtil.getString("AppMultipageEditor.ValidContentType"));
-
-  }       
+  
+  /**
+   * @see com.iw.plugins.spindle.editors.SpindleMultipageEditor#getDefaultHeadingImage()
+   */
+  public Image getDefaultHeadingImage() {
+    return TapestryImages.getSharedImage("application_banner.gif");
+  }
 
 }

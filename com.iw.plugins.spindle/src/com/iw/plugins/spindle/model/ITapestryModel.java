@@ -25,22 +25,36 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.model;
 
-
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.pde.core.IEditable;
 import org.eclipse.pde.core.IModel;
+import org.eclipse.pde.core.IModelChangedListener;
+
+import com.iw.plugins.spindle.project.ITapestryProject;
 
 public interface ITapestryModel extends IModel, IEditable {
 
   public IStorage getUnderlyingStorage();
-  
+
   public void reload() throws CoreException;
-  
-  public String getDTDVersion();
-  
+
+  //  /** @deprecated */
+  //  public String getDTDVersion();
+
+  public ITapestryProject getProject() throws CoreException;
+
+  public String getPublicId();
+
   public String toXML();
-  
+
   public void setEditable(boolean flag);
+
+  public void addModelChangedListener(IModelChangedListener listener);
+
+  public void removeModelChangedListener(IModelChangedListener listener);
+
+
+  public void setPublicId(String value);
 
 }

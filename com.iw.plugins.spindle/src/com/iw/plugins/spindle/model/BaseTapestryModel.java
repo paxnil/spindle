@@ -26,27 +26,30 @@
 package com.iw.plugins.spindle.model;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import net.sf.tapestry.util.IPropertyHolder;
 import net.sf.tapestry.util.xml.DocumentParseException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.pde.core.IEditable;
 import org.eclipse.pde.core.ModelChangedEvent;
+import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import com.iw.plugins.spindle.TapestryPlugin;
+import com.iw.plugins.spindle.project.ITapestryProject;
 
-public abstract class BaseTapestryModel extends AbstractModel implements IEditable {
+public abstract class BaseTapestryModel
+  extends AbstractModel
+  implements IEditable, IPropertyHolder {
 
   protected boolean editable = true;
   protected boolean dirty = false;
@@ -97,12 +100,12 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
     return storageResource;
   }
 
-
   public void setOutOfSynch(boolean flag) {
     outOfSynch = flag;
   }
 
   protected void removeAllProblemMarkers() {
+
     IStorage storage = getUnderlyingStorage();
     if (storage instanceof IResource) {
       IMarker[] found = findProblemMarkers();
@@ -110,6 +113,8 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
         try {
           found[i].delete();
         } catch (CoreException corex) {
+
+          corex.printStackTrace();
         }
       }
     }
@@ -119,25 +124,77 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
   public IMarker[] findProblemMarkers() {
     IStorage storage = getUnderlyingStorage();
     if (storage instanceof IResource) {
-      String type = "com.iw.plugins.spindle.tapestryproblem";
       try {
-        return ((IResource) storage).findMarkers(type, true, 0);
+        return ((IResource) storage).findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ONE);
       } catch (CoreException corex) {
+        corex.printStackTrace();
       }
     }
     return new IMarker[0];
   }
 
+  protected void addProblemMarker(DocumentParseException exception) {
+
+//    if (exception instanceof InvalidStringException) {
+//
+//      InvalidStringException invalidEx = (InvalidStringException) exception;
+//
+//      addBadWordProblemMarker(
+//        invalidEx.getMessage(),
+//        IMarker.SEVERITY_ERROR,
+//        invalidEx.getInvalidString(),
+//        invalidEx.getPattern());
+//
+//    } else {
+
+      addProblemMarker(
+        exception.getMessage(),
+        exception.getLineNumber(),
+        Math.max(exception.getColumn(), 0),
+        IMarker.SEVERITY_ERROR);
+
+//    }
+
+  }
+
   protected void addProblemMarker(String message, int line, int column, int severity) {
+
     IStorage storage = getUnderlyingStorage();
     if (storage instanceof IResource) {
       try {
-        IMarker marker = ((IResource) storage).createMarker("com.iw.plugins.spindle.tapestryproblem");
-        marker.setAttribute(IMarker.MESSAGE, message);
-        marker.setAttribute(IMarker.SEVERITY, severity);
-        marker.setAttribute(IMarker.LINE_NUMBER, new Integer(line));
-        marker.setAttribute(IMarker.CHAR_START, column);
-        marker.setAttribute(IMarker.CHAR_END, column + 1);
+        Map attributes = new HashMap();
+        attributes.put(IMarker.MESSAGE, message);
+        attributes.put(IMarker.SEVERITY, new Integer(severity));
+        attributes.put(IMarker.LINE_NUMBER, new Integer(line));
+//        attributes.put(IMarker.CHAR_START, new Integer(column));
+//        attributes.put(IMarker.CHAR_END, new Integer(column + 1));
+        MarkerUtilities.createMarker(
+          (IResource) storage,
+          attributes,
+          "com.iw.plugins.spindle.tapestryproblem");
+      } catch (CoreException corex) {
+      }
+    }
+
+  }
+
+  protected void addBadWordProblemMarker(String message, int severity, String badWord, String pattern) {
+
+    IStorage storage = getUnderlyingStorage();
+    if (storage instanceof IResource) {
+      try {
+        Map attributes = new HashMap();
+        attributes.put(IMarker.MESSAGE, message);
+        attributes.put(IMarker.SEVERITY, new Integer(severity));
+        attributes.put(IMarker.LINE_NUMBER, new Integer(1));
+//        attributes.put(IMarker.CHAR_START, new Integer(0));
+//        attributes.put(IMarker.CHAR_END, new Integer(1));
+        attributes.put("invalidString", badWord);
+        attributes.put("pattern", pattern);
+        MarkerUtilities.createMarker(
+          (IResource) storage,
+          attributes,
+          "com.iw.plugins.spindle.badwordproblem");
       } catch (CoreException corex) {
       }
     }
@@ -158,11 +215,12 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
         contents = storageResource.getContents();
         load(contents);
         setTimeStamp(Long.MAX_VALUE);
-      }            
+      }
     }
   }
 
   public void reload() throws CoreException {
+    removeAllProblemMarkers();
     reload(storageResource.getContents());
   }
 
@@ -173,11 +231,13 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
 
   public abstract ReferenceInfo resolveReferences(boolean reverse);
 
-  public abstract Set getPropertyNames();
+  public abstract List getPropertyNames();
 
   public abstract String getProperty(String name);
 
   public abstract void setProperty(String name, String value);
+
+  public abstract void removeProperty(String name);
 
   /**
   	* @see IAdaptable#getAdapter(Class)
@@ -215,8 +275,13 @@ public abstract class BaseTapestryModel extends AbstractModel implements IEditab
     return swriter.toString();
   }
 
+  /**
+   * @see com.iw.plugins.spindle.model.ITapestryModel#getProject()
+   */
+  public ITapestryProject getProject() throws CoreException {
 
+    return TapestryPlugin.getDefault().getTapestryProjectFor(getUnderlyingStorage());
 
-
+  }
 
 }

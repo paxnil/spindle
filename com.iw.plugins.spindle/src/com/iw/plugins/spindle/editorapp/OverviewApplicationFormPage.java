@@ -25,38 +25,19 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.editorapp;
 
-import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.eclipse.ui.views.properties.IPropertySheetPage;
-import org.eclipse.update.ui.forms.internal.AbstractSectionForm;
-
+import com.iw.plugins.spindle.editorlib.OverviewLibFormPage;
 import com.iw.plugins.spindle.editors.SpindleFormPage;
+import com.iw.plugins.spindle.editors.SpindleFormSection;
 import com.iw.plugins.spindle.editors.SpindleMultipageEditor;
-import com.iw.plugins.spindle.editors.SpindlePropertySheet;
 
-public class OverviewApplicationFormPage extends SpindleFormPage {
+public class OverviewApplicationFormPage extends OverviewLibFormPage {
 
   public OverviewApplicationFormPage(SpindleMultipageEditor editor, String title) {
     super(editor, title);
   }
 
-  /**
-   * @see PDEFormPage#createForm()
-   */
-  protected AbstractSectionForm createForm() {
-    return new OverviewApplicationForm(this);
+  protected SpindleFormSection getGeneralSection(SpindleFormPage page) {
+    return new OverviewAppGeneralSection(page);
   }
 
-  /**
-   * @see PDEFormPage#createContentOutlinePage()
-   */
-  /**
-   * @see PDEFormPage#createContentOutlinePage()
-   */
-  public IContentOutlinePage createContentOutlinePage() {
-    return new AppFormOutlinePage(this);
-  }
-
-  public IPropertySheetPage createPropertySheetPage() {
-    return new SpindlePropertySheet();
-  }
 }

@@ -33,23 +33,46 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import net.sf.tapestry.spec.BindingSpecification;
 import net.sf.tapestry.spec.ContainedComponent;
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
+import com.iw.plugins.spindle.ui.descriptors.ComponentTypeDialogPropertyDescriptor;
 import com.iw.plugins.spindle.util.Indenter;
 
-public class PluginContainedComponent extends ContainedComponent {
+public class PluginContainedComponent
+  extends ContainedComponent
+  implements IBindingHolder, IIdentifiable, IPropertySource {
 
   private PropertyChangeSupport propertySupport;
 
+  private String identifier;
+  private PluginComponentSpecification parent;
+
   public PluginContainedComponent() {
-    propertySupport = new PropertyChangeSupport(this); 
+    propertySupport = new PropertyChangeSupport(this);
+  }
+  
+   /**
+   * Method getDTDVersion.
+   * @return String
+   */
+  public int getDTDVersion() {
+    return XMLUtil.getDTDVersion(parent.getPublicId());
   }
 
-  public void setBinding(String name, PluginBindingSpecification spec) {
+  public void setBinding(String name, BindingSpecification spec) {
     if (bindings == null) {
       bindings = new HashMap(7);
     }
     bindings.put(name, spec);
+
+    PluginBindingSpecification pluginSpec = (PluginBindingSpecification) spec;
+    pluginSpec.setIdentifier(name);
+    pluginSpec.setParent(this);
+
     propertySupport.firePropertyChange("bindings", null, bindings);
   }
 
@@ -68,32 +91,230 @@ public class PluginContainedComponent extends ContainedComponent {
     propertySupport.removePropertyChangeListener(listener);
   }
 
+  public void write(String name, PrintWriter writer, int indent, String publicId) {
 
-  // e.g.  <component id="link" type="Direct">
-  public void write(String name, PrintWriter writer, int indent, boolean isDTD12) {
     Indenter.printIndented(writer, indent, "<component id=\"" + name);
+    
     if (getCopyOf() != null) {
+    	
       writer.print("\" copy-of=\"" + getCopyOf());
       writer.println("\"/>");
       return;
+      
     } else {
+    	
       writer.print("\" type=\"" + getType());
       writer.print("\"");
+      
       Collection bns = getBindingNames();
+      
       if (bns != null) {
+      	
         if (bns.isEmpty()) {
+        	
           writer.println("/>");
           return;
+          
         } else {
+        	
           writer.println(">");
+          
           Iterator bindingNames = new TreeSet(bns).iterator();
+          
           while (bindingNames.hasNext()) {
+          	
             String bindingName = (String) bindingNames.next();
-            ((PluginBindingSpecification) getBinding(bindingName)).write(bindingName, writer, indent + 1, isDTD12);
+            
+            PluginBindingSpecification binding =
+              (PluginBindingSpecification) getBinding(bindingName);
+              
+            binding.write(bindingName, writer, indent + 1, publicId);
           }
         }
       }
       Indenter.printlnIndented(writer, indent, "</component>");
     }
   }
+
+  /**
+   * Returns the identifier.
+   * @return String
+   */
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  /**
+   * Returns the parent.
+   * @return PluginComponentSpecification
+   */
+  public Object getParent() {
+    return parent;
+  }
+
+  /**
+   * Sets the identifier.
+   * @param identifier The identifier to set
+   */
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
+
+  /**
+   * Sets the parent.
+   * @param parent The parent to set
+   */
+  public void setParent(Object parent) {
+    this.parent = (PluginComponentSpecification) parent;
+  }
+
+  public void resetPropertyValue(Object key) {
+  }
+
+  public void setPropertyValue(Object key, Object value) {
+
+    PluginComponentSpecification parentComponent = (PluginComponentSpecification) parent;
+    if ("id".equals(key)) {
+      String oldId = this.identifier;
+      String newId = (String) value;
+      if ("".equals(newId.trim())) {
+
+        newId = oldId;
+
+      } else {
+
+        Object componentObject = parentComponent.getComponent(newId);
+
+        if (componentObject != null && componentObject.getClass() != ContainedComponent.class) {
+
+          newId = newId + "Copy";
+          PluginContainedComponent copy = copy();
+          parentComponent.addComponent(newId, copy);
+          return;
+
+        }
+      }
+      this.identifier = newId;
+      parentComponent.removeComponent(oldId);
+
+    } else if ("type".equals(key)) {
+
+      setType((String) value);
+    } else if ("copy-of".equals(key)) {
+
+      if (!"".equals(((String) value).trim())) {
+
+        setCopyOf((String) value);
+      }
+    }
+
+    parentComponent.setComponent(this.identifier, this);
+  }
+
+  private PluginContainedComponent copy() {
+    PluginContainedComponent result = new PluginContainedComponent();
+
+    if (getCopyOf() != null) {
+
+      result.setCopyOf(getCopyOf());
+
+    } else {
+
+      result.setType(getType());
+
+    }
+    return result;
+  }
+
+  public boolean isPropertySet(Object key) {
+    if ("id".equals(key)) {
+
+      return true;
+
+    } else if ("type".equals(key)) {
+
+      return getType() != null;
+
+    } else if ("copy-of".equals(key)) {
+
+      return getCopyOf() != null;
+
+    }
+
+    return true;
+
+  }
+
+  public Object getPropertyValue(Object key) {
+    if ("id".equals(key)) {
+
+      return identifier;
+
+    } else if ("type".equals(key)) {
+
+      return getType();
+
+    } else if ("copy-of".equals(key)) {
+
+      return getCopyOf();
+
+    }
+    return null;
+  }
+
+  private IPropertyDescriptor[] normal =
+    new IPropertyDescriptor[] {
+      new TextPropertyDescriptor("id", "ID"),
+      new ComponentTypeDialogPropertyDescriptor(
+        "type",
+        "Type",
+        "Choose a Tapestry Component",
+        "For now, to use aliases you can't use this dialog, exit then type the alias you wish")};
+
+  private IPropertyDescriptor[] copyof =
+    new IPropertyDescriptor[] {
+      new TextPropertyDescriptor("id", "ID"),
+      new TextPropertyDescriptor("copy-of", "Copy Of"),
+      };
+
+  public IPropertyDescriptor[] getPropertyDescriptors() {
+    if (getCopyOf() == null) {
+
+      return normal;
+    } else {
+      return copyof;
+    }
+  }
+
+  public Object getEditableValue() {
+    return identifier;
+  }
+
+  /**
+   * Method deepCopy.
+   * @return PluginContainedComponent
+   */
+  public PluginContainedComponent deepCopy() {
+    PluginContainedComponent result = new PluginContainedComponent();
+
+    result.setIdentifier(this.identifier);
+    if (getCopyOf() != null) {
+
+      result.setCopyOf(getCopyOf());
+
+    } else {
+
+      result.setType(getType());
+      for (Iterator iter = getBindingNames().iterator(); iter.hasNext();) {
+
+        PluginBindingSpecification binding = (PluginBindingSpecification) iter.next();
+        result.setBinding(binding.getIdentifier(), binding.deepCopy());
+      }
+    }
+
+    return result;
+  }
+
+ 
+
 }

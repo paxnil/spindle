@@ -25,28 +25,21 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.model;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import net.sf.tapestry.parse.SpecificationParser;
 import net.sf.tapestry.util.xml.DocumentParseException;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.TapestryPlugin;
 import com.iw.plugins.spindle.spec.PluginComponentSpecification;
@@ -77,34 +70,51 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
    * @see AbstractModel#load()
    */
   public void load(final InputStream source) throws CoreException {
+
+    final TapestryComponentModel thisModel = this;
+
     TapestryPlugin.getDefault().getWorkspace().run(new IWorkspaceRunnable() {
       public void run(IProgressMonitor monitor) {
 
         removeAllProblemMarkers();
         if (componentSpec != null) {
           componentSpec.removePropertyChangeListener(TapestryComponentModel.this);
+          componentSpec.setParent(null);
           componentSpec = null;
         }
         try {
           IStorage element = getUnderlyingStorage();
-          SpecificationParser parser =
-            (SpecificationParser) TapestryPlugin.getTapestryModelManager().getParserFor(
-              "application");
-          componentSpec =
-            (PluginComponentSpecification) TapestryPlugin.getParser().parseComponentSpecification(
-              source,
-              element.getName());
-          componentSpec.setName(element.getName());
+
+          String extension = element.getFullPath().getFileExtension();
+
+          SpecificationParser parser = (SpecificationParser) TapestryPlugin.getParserFor(extension);
+
+          if (extension.equals("jwc")) {
+
+            componentSpec =
+              (PluginComponentSpecification) TapestryPlugin
+                .getParser()
+                .parseComponentSpecification(
+                source,
+                element.getName());
+
+          } else if (extension.equals("page")) {
+
+            componentSpec =
+              (PluginComponentSpecification) TapestryPlugin.getParser().parsePageSpecification(
+                source,
+                element.getName());
+
+          }
+          componentSpec.setIdentifier(element.getName());
+          componentSpec.setParent(thisModel);
           componentSpec.addPropertyChangeListener(TapestryComponentModel.this);
           loaded = true;
           editable = !element.isReadOnly();
           fireModelObjectChanged(componentSpec, "componentSpec");
         } catch (DocumentParseException dpex) {
-          addProblemMarker(
-            dpex.getMessage(),
-            dpex.getLineNumber(),
-            dpex.getColumn(),
-            IMarker.SEVERITY_ERROR);
+        	
+          addProblemMarker(dpex);
           loaded = false;
         }
       }
@@ -253,13 +263,15 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
 
   public String getSpecificationLocation() {
     IStorage underlier = getUnderlyingStorage();
-    IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(underlier);
     IPackageFragment fragment = null;
     TapestryLookup lookup = new TapestryLookup();
     try {
+
+      IJavaProject jproject = TapestryPlugin.getDefault().getJavaProjectFor(underlier);
       lookup.configure(jproject);
       fragment = lookup.findPackageFragment(underlier);
-    } catch (JavaModelException jmex) {
+
+    } catch (CoreException jmex) {
     }
     String tapestryName = "";
     if (fragment != null) {
@@ -270,8 +282,8 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
     return tapestryName + "/" + underlier.getName();
   }
 
-  public Set getPropertyNames() {
-    return new TreeSet(getComponentSpecification().getPropertyNames());
+  public List getPropertyNames() {
+    return getComponentSpecification().getPropertyNames();
   }
 
   public String getProperty(String name) {
@@ -284,15 +296,34 @@ public class TapestryComponentModel extends BaseTapestryModel implements Propert
     }
   }
 
-  /**
-  * @see com.iw.plugins.spindle.model.ITapestryModel#getDTDVersion()
-  */
-  public String getDTDVersion() {
-    PluginComponentSpecification spec = getComponentSpecification();
-    if (spec != null) {
-      return spec.getDTDVersion();
+  public void removeProperty(String name) {
+
+    if (isEditable()) {
+
+      getComponentSpecification().removeProperty(name);
     }
-    return null;
+
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.model.ITapestryModel#getPublicId()
+   */
+  public String getPublicId() {
+    if (componentSpec != null) {
+      return componentSpec.getPublicId();
+    }
+    return "";
+  }
+
+  /**
+   * @see com.iw.plugins.spindle.model.ITapestryModel#setPublicId(String)
+   */
+  public void setPublicId(String value) {
+
+    if (componentSpec != null) {
+
+      componentSpec.setPublicId(value);
+    }
   }
 
 }

@@ -1,0 +1,358 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Spindle 1.1alpha Overview</title>
+                                                                        
+                                                                        
+                                     
+  <style type="text/css">
+ BODY, P, DIV, TD, TR, OL, UL, LI,  A {
+     font-family: Verdana, Tahoma, Arial, Helvetica;
+  font-size : 12px;
+   }
+   
+    TT {
+ font-size : 130%;
+    }
+</style>
+</head>
+  <body bgcolor="#ffffff" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<h1><img src="headerBkgII.jpg" alt="Spindle logo" width="1000" height="80">
+<br>
+</h1>
+<h1><br>
+</h1>
+<h1> Spindle 1.1.0 Overview</h1>
+<h2>Table of Contents</h2>
+<ol>
+  <li><a href="#1">Why there is a Spindle 1.1.0 Overview?</a></li>
+  <li><a href="#2">What has changed in Tapestry 2.2 that affects Spindle.</a></li>
+  <li><a href="#3">How Spindle has changed to support Tapestry 2.2</a></li>
+  <ul>
+    <li><a href="#tp">Tapetsry Projects</a></li>
+    <li><a href="#restrict">Restrictions</a> (and reasons for the restrictions)</li>
+    <li><a href="#how">How one can thrive under these restrictions</a></li>
+  </ul>
+  <li><a href="#world">Bringing existing Projects into the new Spindle 1.1.0
+ World</a></li>
+  <ul>
+    <li><a href="#convert">Converting Projects into Tapestry Projects</a></li>
+    <li><a href="#migrate">Migrating Projects to Tapestry 2.2</a><br>
+    </li>
+  </ul>
+</ol>
+<h2><a name="1"></a>Why is there a Spindle 1.1.0 Overview</h2>
+          There have been changes to Tapestry as it evolved from 2.1 to 2.2.
+  Namespaces    and Libraries, Extensions &nbsp;among them. Supporting these
+  changes in  a  way that keeps Spindle useful is not a trivial exercise.
+It  involves fundamental    changes to the way that users interact with Tapestry
+  using Spindle. <br>
+<br>
+          1.1.0 is the first stab at evolving Spindle to support Tapestry
+  2.2   Being  alpha, we don't advertise (and we hope you don't expect) that
+  it will  be perfect. In fact we expect it to have many problems from a
+useability    standpoint. Spindle 1.1.0 is designed to elicit comment,
+we'll explain    the challenges and include in the release what we think
+are the solutions.    <br>
+<br>
+          Frankly the problem is not trivial and the more input the better
+ the   end   result will be.<br>
+<br>
+<h2><a name="2"></a>What has changed in Tapestry 2.2 that affects Spindle</h2>
+<br>
+          First explained are the changes to Tapestry 2.2 that aren't that
+ difficult     to explain, or implement. Then we'll get into the hairy stuff.<br>
+          This section describes Tapestry concepts like Libraries, Extensions,
+   and   Namespaces in very general terms. For precise information about
+these<br>
+          concepts, we refer you to the Tapestry <a href="http://tapestry.sourceforge.net/doc_frame.html">
+         documentation.</a><br>
+<br>
+          Libraries - Libraries are "bundles" of Tapestry stuff that can
+be  shared    between Applications and even between other Libraries. Libraries, 
+ unlike   Applications, are non-executable in that they do not have an engine 
+ class,   they have no name until one is defined by adding it to an Application.
+  They   declare pages, component aliases, have properties, and Extensions
+ (see next).   <br>
+<br>
+          Extensions - Tapestry 2.2 has functionality to declare extensions 
+ at  the   Application and Library level. Like an application, or library&nbsp;
+   level   Bean that has only one lifecycle, the life of the Application
+or   Library.<br>
+<br>
+          The easy part of supporting the above is modifying the existing 
+Application     editor to support Libraries and Extensions, and adding an 
+new Library Editor. &nbsp;Also, the Component editor has been    split into 
+a Component and a Page editor. Distinctive graphics have been   designed by
+the folks at <a href="http://www.romulin.com"> Romulin</a> so that it   is immediately 
+obvoius which editor one is looking at.<br>
+<br>
+          Preliminary versions of the graphics can bee seen <a href="all_screenshot.jpg">
+          here</a>.<br>
+<br>
+         Namespaces - adding a library to an application defines a Namespace
+  that   is used to access the resources in that library. For example, say
+ we had  a library called CoolComponents.library which contained one component
+  , TotallyExcellentGrid.<br>
+<br>
+         In order to use TotallyExcellentGrid in our application, we delcare
+  in  our  .application file a library 'Cool' which refers to CoolComponents.library. 
+    'Cool' is now the namespace that tells Tapestry how to find the TotallyExcellentGrid.<br>
+<br>
+<pre>&lt;application name="MyApplication" engine-class="net.sf.tapestry.engine.SimpleEngine"&gt;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &lt;library id="Cool" specification-path="/cool/package/CoolComponents.library"&gt;<br>
+ &lt;/application&gt;
+</pre>
+        Now to refer to TotallyExcellentGrid in our specifications, we prefiix
+   references  to it with the Namespace we have defined &nbsp;(in this case
+  'Cool').<br>
+<br>
+<pre>&lt;component id="DataGrid" type="Cool:TotallyExcellentGrid" /&gt;<br><br></pre>
+    Namespaces impact Spindle to a great degree because they are defined
+in  the application. That means Spindle must&nbsp; know which application
+any  page or component is a member of in order to be able to resolve Namespaces. 
+ Tapestry itself does not mandate that components exist in only one application 
+ or library. There is also no formal declaration of membership in an application
+  or library in the specifications for pages and components. Thus, <i>Spindle
+  cannot resolve Namespaces as it was built before 1.1.0</i>.<br>
+<br>
+    The next section describes how Spindle 1.1.0 adresses Namespaces.<br>
+<br>
+<h2><a name="3"></a>How Spindle has changed to support Tapestry 2.2</h2>
+    When editing a Tapestry specification, each editor or Spindle feature 
+that  must resolve a Namespace needs some context information. That context 
+information  is the Application or Library in which the specification (Component 
+or Page)  is defined.<br>
+<br>
+    As has been previously stated, the Tapestry specifications do not give
+ Pages  and Components the ability to declare membership in an Application
+ or Library.  Spindle 1.1.0 addresses this problem by introducing the
+concept  of a Tapestry  Project. A Tapestry project is a 'flavour' of Eclipse's
+Java  Project that  is designed to allow Spindle to resolve Namespaces.<br>
+<br>
+<h3><a name="tp"></a>Tapetsry Projects</h3>
+    A Tapestry Project is an Eclipse project that knows about an Application
+ or Library.  More specifically:<br>
+<br>
+<ul>
+  <li>a Tapestry Application Project knows about an Application</li>
+  <li>a Tapestry Library project knows about a Library</li>
+</ul>
+  Spindle projects are extended&nbsp; Java Projects, so all the Java IDE
+functionality  is available to users. <br>
+<br>
+  These new projects ensure that Spindle functionality that needs to resolve
+ Namespaces can always refer to the Project to resolve them. Some restrictions
+ apply to Tapestry Projects (see below) . <br>
+<br>
+    The result is that Spindle 1.1.0 requires that Applications and Libraries
+  exist in these projects. Effort has been made to disable all Spindle functionality
+  for Tapestry files that exists outside of these new Project flavours. Otherwise
+  it will break in numerous and interesting ways. <br>
+<br>
+    Spindle stores the relationship between a Tapestry Project and its Application
+  or Library in a file, stored in the project root, called <tt>.spindle</tt>
+    . Normally, one should not edit the <tt>.spindle</tt> file.<br>
+<br>
+<h3><a name="restrict"></a>Restrictions (and reasons for the restrictions)</h3>
+  There are some restrictions imposed on users of Tapestry Projects:<br>
+<br>
+<ul>
+  <li><b>One and only one Application or Library can be associated with a
+ Tapestry Project</b>.</li>
+</ul>
+<ul>
+  <li><b>Pages and Components that exist in a Tapestry Project are assumed
+ to be exclusive members of that project's Application or Library</b></li>
+</ul>
+  If you have a Tapestry Project that is associated with an Application or
+ Library, you should not add another Application or Library to that project. 
+ If you do, Spindle will ignore it.<br>
+<br>
+   Its definitely the case that in the past people have built more than one 
+ Application that share one or more components. Before Tapestry 2.2 there 
+was no concept of a Library of components so this was the only way to share. 
+Now that Tapestry *does* have libraries, they should be used to do this sharing.<br>
+<br>
+  The reason for these restriction revolves around the need for Spindle to
+ resolve Namespaces. Without these restrictions Spindle can't to it.<br>
+<br>
+<h3><a name="how"></a>How one can thrive under these restrictions</h3>
+  Admittedly, the restrictions imposed above appear to impose a burdon on 
+developers. Its is a change from building everything in one project for sure. 
+But it is possible to thrive under the rsetrictions and we hope that it will 
+become apparent that abiding by these will result in a structure of projects 
+that clearly separates Libraries and Applications into more manageable chunks.<br>
+<br>
+  There are two scenarios that developers will encounter most often:<br>
+<br>
+<ul>
+  <li>Bulding Applications using no 3rdParty Libraries or with Libraries
+distributed in Jar files.</li>
+</ul>
+<ul>
+  <li>Building Applications/Libraries that include other libraries that are
+ themselves being developed at the same time.</li>
+</ul>
+<br>
+  The first case is simple. If one is not using any 3rdParty libraries, then
+ developers will see no difference using the new Spindle.<br>
+<br>
+  If one is using 3rdParty Libraries that are distributed in Jar files, simply
+ add the Jar file to the project build path. That's it, in this case Spindle
+ will also work the same as before as the restirctions will not come into
+play.<br>
+<br>
+  In the second case, developing &nbsp;Applications or Libraries that depend
+ on other Libraries that are themselves under development in Eclipse is easy
+ too. Just add the Tapestry Projects for any dependant Libraires to the build
+ path of the Tapestry Project that refers to them!<br>
+<br>
+  As Pages and Components are assumed to be exclusively owned by the Tapestry
+ Project they reside in, one should separate those that were shared before
+ into thier own Library. Kinda what libraries are designed for anyways!<br>
+<br>
+<h2><a name="world"></a>Bringing existing Projects into the new Spindle 1.1.0
+ World.</h2>
+<b>S<i>imply installing Spindle 1.1.0 is not sufficent if one already
+has Java Projects containing Tapestry stuff</i></b>. Spindle will ignore
+Java Projects and all Spindle functionality including the editors will not
+work unless your Tapestry stuff is found in a Tapestry Project. <br>
+<br>
+  Spindle 1.1.0 includes two services to help you turn you existing Projects
+ into Tapestry Projects and migrate them to Tapestry 2.2 (if necessary).<br>
+<br>
+<h3><a name="convert"></a>Converting Projects into Tapestry Projects</h3>
+  Its easy to convert existing Java Projects into Tapestry Projects. You
+can  even do this if the Java Project does not contain an Application or
+Library  (you will be asked to create one).<br>
+<br>
+  To invoke the conversion utility select, in the Package Explorer, the project.
+ Right click on it, choosing Spindle -&gt; Convert to Tapestry Project<br>
+<br>
+  You will be given options depending on:<br>
+<br>
+<ul>
+  <li>If the Project has one and only one Application or Library there are
+ no options, click "Finish" to convert.</li>
+  <li>If the Project has more than one Application or Library (choose from
+ several), the user will be prompted to select one, click "Finish" to convert.</li>
+  <li>If no Application or Library exists in the project, the user will be
+ given the choice of creating an Application or Library. After filling out
+ the required information for thier choice, users can click "Finish:.</li>
+</ul>
+  And now you have a Tapestry Project.<br>
+<br>
+<b>Note: <br>
+<br>
+ The "choose from several option" is a quick way to convert a project that 
+has more than one Application or Library in it. Spindle will ignore</b><b>
+   (possibly forever</b><b>) the Apps/Libs not chosen. It is recommended
+that  users split those "unchosens" into their own Tapestry Projects. The
+best way to do this is to create a new Java Project, move files into it,
+and then convert it.</b><br>
+<br>
+<h3><a name="migrate"></a>Migrating Projects to Tapestry 2.2</h3>
+  Tapestry 2.2 introduces a new DTD for specification files. While Tapestry
+ and teh Spindle editors are backwards compatible, new features introduced
+ in Tapestry 2.2 will not be available unless your files are migrated to
+use  the new DTD. <b>Its is recommended that users migrate the specifications
+in thier projects to the new DTD for Tapestry 2.2</b><br>
+<br>
+  Spindle1.1.0 makes this easy by using the Migration Tool.<br>
+<br>
+  There are some preconditions that need to be meed before the Migration
+Tool  will work:<br>
+<br>
+<ul>
+  <li>The Project must be a Tapestry Project (<a href="#convert">convert
+first</a> ).</li>
+  <li>The Project must have a 2.2 version of the Tapestry jar in its build
+ path (net.sf.tapestry.jar).</li>
+  <li>The Tapestry specification files must have no parse errors at the time
+ Migration is invoked.</li>
+  <li>There must only be one Application or Library file in the project and
+ than file must be the one known by the project.<br>
+  </li>
+</ul>
+  If any of these preconditions are not met, the Migration Tool will exit 
+with an information dialog describing the nature of the problem. Simply fix 
+the problem and invoke the Migration Tool again.<br>
+<br>
+  The Migration Tool has the ability to perform the following functions:<br>
+<br>
+<ul>
+  <li><i>Bump up the DTD version of&nbsp; a specification to Tapestry DTD 
+1.3 (required)</i></li>
+</ul>
+<br>
+<ul>
+  <li><i>Fix Component References (optional)</i></li>
+</ul>
+<blockquote>That is, scan the project and find any components/pages using
+ hardcoded paths in thier declarations of contained component like:<br>
+  <pre>&lt;component id="insertSomething" type="/net/sf/tapestry/components/Insert.jwc"/&gt;</pre>
+ These are no longer allowed as of Tapestry 2.2. The Migration tool will
+replace the hardcoded path with an appropriate alias, creating one if necessary<br>
+  <br>
+  </blockquote>
+  <ul>
+    <li><i>Change the file extension of pages from '.jwc' to '.page' as required 
+by Tapestry 2.2 (optional)</i></li>
+  </ul>
+  <blockquote>If there are .jwc files that the Migration Tool can't determine 
+as pages by inference, the Tool will give the option to the user of designating 
+which files, if any, should be treated as pages.<br>
+    <br>
+    </blockquote>
+    <ul>
+      <li><i>Add declarations for "lost children" to the Project Application/Library 
+(depends on scope)</i></li>
+    </ul>
+    <blockquote>If the Migration Tool finds a .jwc (or .page) file<i> in its
+scope</i> that is not defined in the Project Application/Library, it will
+add such a declaration.<br>
+      </blockquote>
+      <br>
+      <br>
+ The Migration Tool also gives the user the ability to limit the scope of 
+the Migration (the user can exclude files from consideration).<br>
+      <br>
+      <b>Note: <br>
+      <br>
+ When first trying out the Migration Tool, it is recommended that users limit 
+the scope of the Migration to a few files so they can get a handle on what 
+is going on.<br>
+ This is a good idea as there is no "bulk undo" for Migration. You can undo 
+the changes on individual&nbsp; files by using the "Replace from Local History" 
+feature in Eclipse (consult Eclipse documentation). If you have loaded your 
+project into Eclipse from a version control system (like CVS), then you might 
+use whatever facility provided (if any) by that system to do the equivalent 
+of a "bulk undo".</b><br>
+      <br>
+      <b>Note: <br>
+      <br>
+ Its ok to run the Migration Tool more than once on a project. If the Tool 
+does not detect the need for any one file in its scope to be changed, it will
+ignore it.</b><br>
+      <br>
+      <br>
+      <br>
+ To invoke the Migration Tool, right click on the project, select Spindle-&gt;Migration 
+Tool. A wizard will appear. <br>
+      <br>
+      <br>
+      <blockquote><br>
+        </blockquote>
+        <br>
+        <br>
+    &nbsp;<br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        </body>
+        </html>
