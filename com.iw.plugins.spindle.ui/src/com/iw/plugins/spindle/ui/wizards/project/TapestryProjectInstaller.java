@@ -315,7 +315,7 @@ public class TapestryProjectInstaller {
 		if (hasTapestryFrameworkLibrary(entries))
 			return entries;
 
-		List allEntries = Arrays.asList(entries);
+		List allEntries = new ArrayList(Arrays.asList(entries));
 
 		allEntries.add(TapestryProjectInstallData.TAPESTRY_FRAMEWORK);
 
