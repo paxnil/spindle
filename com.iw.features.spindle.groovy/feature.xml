@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.iw.features.spindle.groovy"
-      label="Groovestry support for Spindle 3, an Eclipse Plugin for Tapestry"
-      version="1.0.0"
+      id="com.iw.features.spindle"
+      label="Spindle 3, an Eclipse Plugin for Tapestry"
+      version="3.1.15"
       provider-name="Intelligent Works Inc"
       image="spindle.gif">
 
    <description url="http://spindle.sourceforge.net">
       Spindle 3 provides IDE support for Web Applications built with
 Tapestry Web Components (http://jakarta.apache.org/tapestry).
-
-      This feature is an add on that allows support for Tapestry project
-      built using the Groovestry extension. (http://grovestry.sourceforge.net)
    </description>
 
    <copyright>
@@ -37,7 +34,7 @@ All Rights Reserved
  *
  * The Initial Developer of the Original Code is
  * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2002
  * the Initial Developer. All Rights Reserved.
  *
  *
@@ -45,18 +42,60 @@ All Rights Reserved
    </license>
 
    <url>
-      <update label="Spindle Updates" url="http://spindle.sourceforge.net/unstable"/>
+      <update label="Spindle Updates" url="http://spindle.sourceforge.net/updates"/>
    </url>
 
    <requires>
-      <import feature="com.iw.features.spindle" version="3.1.9" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.runtime" version="3.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.runtime.compatibility"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.search"/>
+      <import plugin="org.eclipse.jdt.launching"/>
+      <import plugin="org.eclipse.compare"/>
    </requires>
 
    <plugin
-         id="com.iw.plugins.spindle.core.groovy"
+         id="org.apache.xerces"
          download-size="0"
          install-size="0"
-         version="1.0.0"
-         fragment="true"/>
+         version="4.0.13"/>
+
+   <plugin
+         id="net.sf.solareclipse.ui"
+         download-size="0"
+         install-size="0"
+         version="0.4.0.spindle-dep-6"/>
+
+   <plugin
+         id="net.sf.solareclipse.xml.ui"
+         download-size="0"
+         install-size="0"
+         version="0.4.0.spindle-dep-6"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.core"
+         download-size="0"
+         install-size="0"
+         version="0.1.14"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.ui"
+         download-size="0"
+         install-size="0"
+         version="0.1.14"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.docs"
+         download-size="0"
+         install-size="0"
+         version="0.1.1"/>
 
 </feature>
