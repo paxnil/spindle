@@ -158,10 +158,14 @@ public abstract class Editor extends StatusTextEditor implements IAdaptable, IRe
     protected final static String UNKNOWN_INDICATION_IN_OVERVIEW_RULER =
         PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
 
+    /** Preference key to show/hide the overview ruler */
     protected final static String OVERVIEW_RULER = PreferenceConstants.EDITOR_OVERVIEW_RULER;
 
+    /** contect menu groups for additions */
     protected final static String NAV_GROUP = UIPlugin.PLUGIN_ID + ".navigationGroup";
+    protected final static String SOURCE_GROUP = UIPlugin.PLUGIN_ID + ".sourceGroup";
 
+   /** jump action ids */
     protected final static String JUMP_JAVA_ACTION_ID = UIPlugin.PLUGIN_ID + ".editor.commands.jump.java";
     protected final static String JUMP_SPEC_ACTION_ID = UIPlugin.PLUGIN_ID + ".editor.commands.jump.spec";
     protected final static String JUMP_TEMPLATE_ACTION_ID = UIPlugin.PLUGIN_ID + ".editor.commands.jump.template";

@@ -140,7 +140,7 @@ public class DocumentArtifactRule implements IPredicateRule
         boolean escaped = false;
         c = scanner.read();
         do
-        {            
+        {
             if (!escaped && (isTagScan && c == '<'))
             {
                 scanner.unread();
@@ -168,6 +168,34 @@ public class DocumentArtifactRule implements IPredicateRule
             c = scanner.read();
         } while (c != -1);
 
+        return c;
+    }
+
+    private int scanEndTag(ICharacterScanner scanner)
+    {
+        int c;
+        int i = 0;
+        boolean nameStarted = false;
+        c = scanner.read();
+        do
+        {
+            switch (c)
+            {
+                case '>' :                    
+                    break;
+                default :
+                    if (Character.isWhitespace((char)c)) {
+                        if (!nameStarted) {
+                            scanner.unread();
+                            return c;
+                        }
+                            
+                    } else {
+                        nameStarted = true;
+                    }
+                    break;
+            }
+        } while (c != -1);
         return c;
     }
 

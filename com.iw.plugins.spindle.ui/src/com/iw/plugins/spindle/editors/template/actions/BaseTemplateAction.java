@@ -32,7 +32,6 @@ import org.eclipse.jface.text.IDocument;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
@@ -56,7 +55,7 @@ public abstract class BaseTemplateAction extends BaseEditorAction
     {
         super();
         fPartitioner =
-            new DocumentArtifactPartitioner(ContentAssistProcessor.SCANNER, DocumentArtifactPartitioner.TYPES);
+            new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
     }
 
     public BaseTemplateAction(String text)

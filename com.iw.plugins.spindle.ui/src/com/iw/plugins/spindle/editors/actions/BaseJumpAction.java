@@ -26,13 +26,18 @@
 
 package com.iw.plugins.spindle.editors.actions;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
+import com.iw.plugins.spindle.ui.util.WrappedImageDescriptor;
 
 /**
  *  TODO Add Type comment
@@ -43,6 +48,61 @@ import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 public abstract class BaseJumpAction extends BaseEditorAction
 {
 
+    static protected ILabelProvider LABEL_PROVIDER = new LabelProvider();
+
+    static private class LabelProvider implements ILabelProvider
+    {
+        ILabelProvider javaElementProvider;
+        public LabelProvider()
+        {
+            super();
+            javaElementProvider =
+                new JavaElementLabelProvider(
+                    JavaElementLabelProvider.SHOW_DEFAULT
+                        | JavaElementLabelProvider.SHOW_QUALIFIED
+                        | JavaElementLabelProvider.SHOW_ROOT);
+        }
+
+        public Image getImage(Object element)
+        {
+            if (element instanceof IJavaElement)
+            {
+                return javaElementProvider.getImage(element);
+            } else
+            {
+                return null;
+            }
+        }
+
+        public String getText(Object element)
+        {
+            if (element instanceof IJavaElement)
+            {
+                return javaElementProvider.getText(element);
+            } else
+            {
+                return null;
+            }
+        }
+
+        public void addListener(ILabelProviderListener listener)
+        {}
+
+        public void dispose()
+        {
+            javaElementProvider.dispose();
+        }
+
+        public boolean isLabelProperty(Object element, String property)
+        {
+            return false;
+        }
+
+        public void removeListener(ILabelProviderListener listener)
+        {}
+    }
+
+   
     private DocumentArtifactPartitioner fPartitioner = null;
     private IDocument fDocument = null;
     /**
@@ -101,8 +161,9 @@ public abstract class BaseJumpAction extends BaseEditorAction
                 fPartitioner.disconnect();
         } catch (RuntimeException e1)
         {
-           UIPlugin.log(e1);
-        } finally {
+            UIPlugin.log(e1);
+        } finally
+        {
             fPartitioner = null;
             fDocument = null;
         }
@@ -114,8 +175,8 @@ public abstract class BaseJumpAction extends BaseEditorAction
     {
         Assert.isTrue(fPartitioner == null);
         fPartitioner =
-            new DocumentArtifactPartitioner(ContentAssistProcessor.SCANNER, DocumentArtifactPartitioner.TYPES);
-        fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());        
+            new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
+        fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
         fPartitioner.connect(fDocument);
     }
 
@@ -123,6 +184,12 @@ public abstract class BaseJumpAction extends BaseEditorAction
     {
         Assert.isTrue(fDocument != null);
         return fDocument;
+    }
+    
+    protected ImageDescriptor getImageDescriptorFor(Image image) {
+        if (image == null)
+            return null;
+        return new WrappedImageDescriptor(image);
     }
 
 }

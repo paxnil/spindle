@@ -32,7 +32,9 @@ import java.util.List;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.swt.graphics.Point;
 
+import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
@@ -61,9 +63,9 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
         if (artifact.getOffset() + artifact.getLength() == documentOffset)
             artifact = artifact.getNextArtifact();
 
-		DocumentArtifact nextArtifact = artifact.getNextArtifact();
+        DocumentArtifact nextArtifact = artifact.getNextArtifact();
         if (nextArtifact.getType() != DocumentArtifactPartitioner.ENDTAG)
-        	artifact = nextArtifact;
+            artifact = nextArtifact;
 
         List proposals = new ArrayList();
 
@@ -78,8 +80,45 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
                 proposals.add(p);
             }
         }
-		proposals.add(SpecTapestryAccess.getDefaultInsertCommentProposal(documentOffset, 0));
+        ICompletionProposal endTagProposal = computeEndTagProposal(viewer, documentOffset);
+        if (endTagProposal != null)
+            proposals.add(0,endTagProposal);
+        proposals.add(SpecTapestryAccess.getDefaultInsertCommentProposal(documentOffset, 0));
 
         return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+    }
+
+    /**
+     * @param documentOffset
+     * @return
+     */
+    private ICompletionProposal computeEndTagProposal(ITextViewer viewer, int documentOffset)
+    {
+        DocumentArtifact artifact = DocumentArtifact.getArtifactAt(viewer.getDocument(), documentOffset);
+        DocumentArtifact parentArtifact = artifact.getParent();
+        if (parentArtifact == null
+            || parentArtifact.getType().equals("/")
+            || parentArtifact.getType() != DocumentArtifactPartitioner.TAG)
+            return null;
+
+        String parentName = parentArtifact.getName();
+        if (parentName == null)
+            return null;
+        ;
+
+        DocumentArtifact corr = parentArtifact.getCorrespondingNode();
+        String corrName = null;
+        if (corr != null)
+            corrName = corr.getName();
+
+        if (corr == null || (corrName != null && !corrName.equals(parentName)))
+            return new CompletionProposal(
+                "</" + parentName + ">",
+                documentOffset,
+                0,
+                new Point(parentName.length() + 3, 0),
+                Images.getSharedImage("bullet.gif"), null, null, null);
+
+        return null;
     }
 }

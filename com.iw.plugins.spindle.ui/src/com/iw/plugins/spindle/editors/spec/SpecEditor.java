@@ -98,7 +98,6 @@ import com.iw.plugins.spindle.editors.multi.IMultiPage;
 import com.iw.plugins.spindle.editors.multi.MultiPageSpecEditor;
 import com.iw.plugins.spindle.editors.spec.actions.OpenDeclarationAction;
 import com.iw.plugins.spindle.editors.spec.actions.ShowInPackageExplorerAction;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 
@@ -303,7 +302,7 @@ public class SpecEditor extends Editor implements IMultiPage
      */
     protected SourceViewerConfiguration createSourceViewerConfiguration()
     {
-        return new SpecConfiguration(UIPlugin.getDefault().getXMLTextTools(), this);
+        return new SpecConfiguration(UIPlugin.getDefault().getXMLTextTools(), this, UIPlugin.getDefault().getPreferenceStore());
     }
 
     /**
@@ -360,7 +359,7 @@ public class SpecEditor extends Editor implements IMultiPage
     {
         if (fOutlinePartitioner == null)
             fOutlinePartitioner =
-                new DocumentArtifactPartitioner(ContentAssistProcessor.SCANNER, DocumentArtifactPartitioner.TYPES);
+                new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
         try
         {
             IDocument document = getDocumentProvider().getDocument(getEditorInput());
@@ -772,9 +771,9 @@ public class SpecEditor extends Editor implements IMultiPage
     protected void editorContextMenuAboutToShow(IMenuManager menu)
     {
         super.editorContextMenuAboutToShow(menu);
-        if (!(getStorage() instanceof JarEntryFile))
+        menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
+       if (!(getStorage() instanceof JarEntryFile))
         {
-            menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
             addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
             addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
         }
@@ -784,6 +783,10 @@ public class SpecEditor extends Editor implements IMultiPage
             fJumpActions[i].editorContextMenuAboutToShow(moreNav);
         }
         menu.appendToGroup(NAV_GROUP, moreNav);
+        menu.insertAfter(ITextEditorActionConstants.GROUP_EDIT, new GroupMarker(SOURCE_GROUP));
+        MenuManager sourceMenu = new MenuManager("Source");
+        sourceMenu.add(getAction("Format"));
+        menu.appendToGroup(SOURCE_GROUP, sourceMenu);
     }
 
     /* (non-Javadoc)

@@ -51,7 +51,7 @@ public class ShowInPackageExplorerAction extends OpenDeclarationAction
     {
         super();
         //      TODO I10N
-        setText("Show In Package Explorer");
+        setText("&Show In Package Explorer");
         setId(ACTION_ID);
     }
 

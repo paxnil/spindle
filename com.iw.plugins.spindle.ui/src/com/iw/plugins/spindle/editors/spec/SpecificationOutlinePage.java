@@ -336,9 +336,12 @@ public class SpecificationOutlinePage extends ContentOutlinePage
                 try
                 {
                     ISelection oldSelection = getSelection();
-                    treeViewer.setInput(fRoot);
-                    //                    treeViewer.refresh();
-                    treeViewer.setSelection(oldSelection);
+                    if (treeViewer != null && !treeViewer.getControl().isDisposed())
+                    {
+                        treeViewer.setInput(fRoot);
+                        //                    treeViewer.refresh();
+                        treeViewer.setSelection(oldSelection);
+                    }
                 } catch (RuntimeException e)
                 {
                     UIPlugin.log(e);
@@ -414,7 +417,7 @@ public class SpecificationOutlinePage extends ContentOutlinePage
                 if (found != null)
                 {
                     treeViewer.setSelection(new StructuredSelection(found));
-                } else
+                } else if (treeViewer != null && !treeViewer.getControl().isDisposed())
                 {
                     treeViewer.setSelection(StructuredSelection.EMPTY);
                 }

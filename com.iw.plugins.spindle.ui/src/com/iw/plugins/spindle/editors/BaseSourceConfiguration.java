@@ -26,6 +26,7 @@
 package com.iw.plugins.spindle.editors;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -37,16 +38,19 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.ui.util.ToolTipHandler;
 
 public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
 {
 
     protected Editor fEditor;
+    protected IPreferenceStore fPreferenceStore;
 
-    public BaseSourceConfiguration(Editor editor)
+    public BaseSourceConfiguration(Editor editor, IPreferenceStore preferenceStore)
     {
         fEditor = editor;
+        fPreferenceStore = preferenceStore;
     }
 
     /*
@@ -95,6 +99,14 @@ public abstract class BaseSourceConfiguration extends SourceViewerConfiguration
                 return new DefaultInformationControl(parent, SWT.NONE, new ToolTipHandler.TooltipPresenter());                
             }
         };
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTabWidth(org.eclipse.jface.text.source.ISourceViewer)
+     */
+    public int getTabWidth(ISourceViewer sourceViewer)
+    {
+       return fPreferenceStore.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
     }
 
 }

@@ -162,6 +162,7 @@ public class JumpToJavaAction extends BaseJumpAction
         {
             Assert.isNotNull(type);
             this.type = type;
+            setImageDescriptor(getImageDescriptorFor(BaseJumpAction.LABEL_PROVIDER.getImage(type)));
             setText(type.getFullyQualifiedName());
         }
 

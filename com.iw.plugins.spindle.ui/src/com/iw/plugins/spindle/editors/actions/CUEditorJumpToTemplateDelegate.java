@@ -91,6 +91,7 @@ public class CUEditorJumpToTemplateDelegate extends CUEditorJumpToSpecDelegate i
         protected Image getImage(IResourceWorkspaceLocation location)
         {
             return Images.getSharedImage("html16.gif");
-        }
+        }      
+
     }
 }

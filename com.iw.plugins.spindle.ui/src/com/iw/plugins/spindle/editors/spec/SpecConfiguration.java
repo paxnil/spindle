@@ -32,6 +32,7 @@ import net.sf.solareclipse.xml.internal.ui.text.TagDoubleClickStrategy;
 import net.sf.solareclipse.xml.internal.ui.text.XMLPartitionScanner;
 import net.sf.solareclipse.xml.ui.text.XMLTextTools;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -41,9 +42,11 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.formatter.IContentFormatter;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
+import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -52,6 +55,8 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
 import com.iw.plugins.spindle.editors.DefaultDoubleClickStrategy;
 import com.iw.plugins.spindle.editors.Editor;
+import com.iw.plugins.spindle.editors.XMLContentFormatter;
+import com.iw.plugins.spindle.editors.XMLFormattingStrategy;
 import com.iw.plugins.spindle.editors.spec.assist.AttributeCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.CDATACompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.CommentCompletionProcessor;
@@ -81,9 +86,9 @@ public class SpecConfiguration extends BaseSourceConfiguration
      * @param colorManager
      * @param editor
      */
-    public SpecConfiguration(XMLTextTools tools, Editor editor)
+    public SpecConfiguration(XMLTextTools tools, Editor editor, IPreferenceStore preferenceStore)
     {
-        super(editor);
+        super(editor, preferenceStore);
         fTextTools = tools;
         fDefaultDoubleClick = new DefaultDoubleClickStrategy();
         dcsSimple = new SimpleDoubleClickStrategy();
@@ -135,6 +140,15 @@ public class SpecConfiguration extends BaseSourceConfiguration
             XMLPartitionScanner.DTD_INTERNAL_COMMENT,
             XMLPartitionScanner.DTD_INTERNAL_DECL,
             };
+    }
+    
+    public IContentFormatter getContentFormatter(ISourceViewer sourceViewer)
+    {
+        IContentFormatter formatter = new XMLContentFormatter(
+            new XMLFormattingStrategy(),
+            new String[] {DefaultPartitioner.CONTENT_TYPES_CATEGORY,}, UIPlugin.getDefault().getPreferenceStore());
+        
+        return formatter;
     }
 
     /*

@@ -60,6 +60,7 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.actions.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.resources.ContextResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
@@ -242,32 +243,44 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         };
     }
 
-//    public void createComponentResource(IProgressMonitor monitor, IType specClass)
-//        throws InterruptedException, CoreException
-//    {
-//        fComponentFile =
-//                                ComponentFactory.createComponent(
-//                                    location,
-//                                    fComponentNameDialogField.getTextValue(),
-//                                    useClass,
-//                                    new SubProgressMonitor(monitor, 1));
-//    }
+    //    public void createComponentResource(IProgressMonitor monitor, IType specClass)
+    //        throws InterruptedException, CoreException
+    //    {
+    //        fComponentFile =
+    //                                ComponentFactory.createComponent(
+    //                                    location,
+    //                                    fComponentNameDialogField.getTextValue(),
+    //                                    useClass,
+    //                                    new SubProgressMonitor(monitor, 1));
+    //    }
 
     protected void createComponentResource(IProgressMonitor monitor, final IType specClass)
         throws CoreException, InterruptedException
     {
         INamespace useNamespace = fNamespaceDialogField.getSelectedNamespace();
-        IResourceWorkspaceLocation location =
-            (IResourceWorkspaceLocation) useNamespace.getSpecificationLocation();
-                
-        fComponentFile =
-            ComponentFactory.createComponent(
-                location,
-                fComponentNameDialogField.getTextValue(),
-                specClass,
-                new SubProgressMonitor(monitor, 1));
-    }
+        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) useNamespace.getSpecificationLocation();
 
+        if (!location.exists() || location.getStorage() == null)
+        {
+            ContextResourceWorkspaceLocation ctxLoc = (ContextResourceWorkspaceLocation) location;
+            IContainer container = (IContainer) ctxLoc.getResource();
+            fComponentFile =
+                ComponentFactory.createComponent(
+                    container,
+                    fComponentNameDialogField.getTextValue(),
+                    specClass,
+                    new SubProgressMonitor(monitor, 1));
+        } else
+        {
+
+            fComponentFile =
+                ComponentFactory.createComponent(
+                    location,
+                    fComponentNameDialogField.getTextValue(),
+                    specClass,
+                    new SubProgressMonitor(monitor, 1));
+        }
+    }
 
     // TODO stubbed out for now
     public IRunnableWithProgress getAutoAddRunnable()
@@ -459,7 +472,15 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         IResourceWorkspaceLocation namespaceLocation =
             (IResourceWorkspaceLocation) fNamespaceDialogField.getSelectedNamespace().getSpecificationLocation();
         IFile namespaceFile = (IFile) namespaceLocation.getStorage();
-        IContainer container = (IContainer) namespaceFile.getParent();
+        IContainer container = null;
+        if (namespaceFile == null)
+        {
+            ContextResourceWorkspaceLocation ctxLoc = (ContextResourceWorkspaceLocation) namespaceLocation;
+            container = (IContainer) ctxLoc.getResource();
+        } else
+        {
+            container = (IContainer) namespaceFile.getParent();
+        }
         IFile newFile = container.getFile(new Path("/" + fileName));
 
         if (newFile.exists())

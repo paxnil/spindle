@@ -31,6 +31,7 @@ import net.sf.solareclipse.xml.internal.ui.text.AttValueDoubleClickStrategy;
 import net.sf.solareclipse.xml.internal.ui.text.SimpleDoubleClickStrategy;
 import net.sf.solareclipse.xml.internal.ui.text.TagDoubleClickStrategy;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -71,9 +72,9 @@ public class TemplateConfiguration extends BaseSourceConfiguration
     private ITextDoubleClickStrategy dcsTag;
     private ITextDoubleClickStrategy dcsAttValue;
 
-    public TemplateConfiguration(TemplateTextTools tools, TemplateEditor editor)
+    public TemplateConfiguration(TemplateTextTools tools, TemplateEditor editor, IPreferenceStore preferenceStore)
     {
-        super(editor);
+        super(editor, preferenceStore);
         fTextTools = tools;
         dcsDefault = new TextDoubleClickStrategy();
         dcsSimple = new SimpleDoubleClickStrategy();

@@ -2,7 +2,7 @@
 <plugin
    id="com.iw.plugins.spindle.ui"
    name="Spindle UI plugin"
-   version="0.0.19"
+   version="0.0.21"
    provider-name="Intelligent Works Inc."
    class="com.iw.plugins.spindle.UIPlugin">
 
@@ -73,7 +73,7 @@
          point="org.eclipse.ui.preferencePages">
       <page
             name="Spindle 3.0"
-            class="com.iw.plugins.spindle.ui.preferences.SpindleDTDCachingPreferencePage"
+            class="com.iw.plugins.spindle.ui.preferences.SpindleGeneralPreferencePage"
             id="SpindlePreferences">
       </page>
    </extension>
@@ -258,31 +258,31 @@
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <keyBinding
-            string="F8"
+            string="Alt+F8"
             scope="com.iw.plugins.spindle.ui.editor.commands"
             command="com.iw.plugins.spindle.ui.editor.commands.jump.java"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <keyBinding
-            string="F7"
+            string="Alt+F7"
             scope="com.iw.plugins.spindle.ui.editor.commands"
             command="com.iw.plugins.spindle.ui.editor.commands.jump.spec"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <keyBinding
-            string="F6"
+            string="Alt+F6"
             scope="com.iw.plugins.spindle.ui.editor.commands"
             command="com.iw.plugins.spindle.ui.editor.commands.jump.template"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <keyBinding
-            string="F7"
+            string="Alt+F7"
             scope="org.eclipse.jdt.ui.javaEditorScope"
             command="com.iw.plugins.spindle.ui.editor.commands.jump.spec"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <keyBinding
-            string="F6"
+            string="Alt+F6"
             scope="org.eclipse.jdt.ui.javaEditorScope"
             command="com.iw.plugins.spindle.ui.editor.commands.jump.template"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">

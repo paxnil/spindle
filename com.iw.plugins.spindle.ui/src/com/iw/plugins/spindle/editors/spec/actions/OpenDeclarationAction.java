@@ -50,7 +50,6 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.spec.assist.SpecTapestryAccess;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 import com.iw.plugins.spindle.ui.util.UIUtils;
@@ -69,7 +68,7 @@ public class OpenDeclarationAction extends BaseSpecAction
     {
         super();
         //      TODO I10N
-        setText("Open Declaration");
+        setText("&Open Declaration");
         setId(ACTION_ID);
     }
 
@@ -158,7 +157,7 @@ public class OpenDeclarationAction extends BaseSpecAction
             handleRelativeLookup(artifact, "specification-path");
 
         else if ("library".equals(name))
-            handleRelativeLookup(artifact, "specification-path");
+            handleLibraryLookup(artifact);
 
         else if ("parameter".equals(name))
         {
@@ -171,6 +170,53 @@ public class OpenDeclarationAction extends BaseSpecAction
             }
         }
 
+    }
+
+    /**
+     * @param artifact
+     * @param string
+     */
+    private void handleLibraryLookup(DocumentArtifact artifact)
+    {
+        DocumentArtifact attribute = artifact.getAttributeAt(fDocumentOffset);
+        if (attribute == null)
+            return;
+
+        String name = attribute.getName();
+
+        if (name == null)
+            return;
+
+        if (!"specification-path".equals(name.toLowerCase()))
+            return;
+
+        String path = attribute.getAttributeValue();
+        if (path == null)
+            return;
+
+        //here we are doing a classpath lookup,
+        //need to get access to the ClasspathRoot
+        IStorage storage = fEditor.getStorage();
+        if (storage != null)
+        {
+            TapestryProject project = TapestryCore.getDefault().getTapestryProjectFor(storage);
+            if (project == null)
+                return;
+
+            try
+            {
+                ClasspathRootLocation root = project.getClasspathRoot();
+                if (root == null)
+                    return;
+
+                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root.getRelativeLocation(path);
+                if (location != null && location.exists())
+                    foundResult(location.getStorage(), null, null);
+            } catch (CoreException e)
+            {
+                UIPlugin.log(e);
+            }
+        }        
     }
 
     /**
@@ -443,13 +489,13 @@ public class OpenDeclarationAction extends BaseSpecAction
     {
         IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
         DocumentArtifactPartitioner partitioner =
-            new DocumentArtifactPartitioner(ContentAssistProcessor.SCANNER, DocumentArtifactPartitioner.TYPES);
+            new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
         try
         {
             DocumentArtifact reveal = null;
             partitioner.connect(document);
             Position[] pos = null;
-            pos = document.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
+            pos = document.getPositions(partitioner.getPositionCategory());
             for (int i = 0; i < pos.length; i++)
             {
                 DocumentArtifact artifact = (DocumentArtifact) pos[i];

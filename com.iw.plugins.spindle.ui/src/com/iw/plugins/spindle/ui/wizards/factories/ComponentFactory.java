@@ -47,17 +47,14 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
 public class ComponentFactory
 {
     public static IFile createComponent(
-        IResourceWorkspaceLocation namespaceLocation,
+        IContainer container,
         String componentName,
         IType specClass,
         IProgressMonitor monitor)
         throws CoreException, InterruptedException
     {
-
         monitor.beginTask(UIPlugin.getString("ApplicationFactory.operationdesc", componentName), 3);
         String fileName = componentName + ".jwc";
-        IFile namespaceFile = (IFile) namespaceLocation.getStorage();
-        IContainer container = (IContainer) namespaceFile.getParent();
         IFile newFile = container.getFile(new Path("/" + fileName));
 
         monitor.worked(1);
@@ -69,6 +66,17 @@ public class ComponentFactory
         monitor.worked(1);
         monitor.done();
         return newFile;
+    }
+    public static IFile createComponent(
+        IResourceWorkspaceLocation namespaceLocation,
+        String componentName,
+        IType specClass,
+        IProgressMonitor monitor)
+        throws CoreException, InterruptedException
+    {
+        IFile namespaceFile = (IFile) namespaceLocation.getStorage();
+        IContainer container = (IContainer) namespaceFile.getParent();
+        return createComponent(container, componentName, specClass, monitor);
     }
 
     static private String getComponentContent(String qualifiedSpecClassname)

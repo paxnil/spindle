@@ -54,7 +54,7 @@ import com.iw.plugins.spindle.UIPlugin;
  */
 public class DocumentArtifact extends TypedPosition implements Comparable
 {
-    private static final Comparator COMPARATOR = new Comparator()
+    public static final Comparator COMPARATOR = new Comparator()
     {
         public int compare(Object o1, Object o2)
         {
@@ -90,10 +90,15 @@ public class DocumentArtifact extends TypedPosition implements Comparable
     public static synchronized DocumentArtifact createTree(IDocument document, int stopOffset)
         throws BadLocationException
     {
+        return createTree(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY, document, stopOffset);
+    }
+    public static synchronized DocumentArtifact createTree(String postionCategory, IDocument document, int stopOffset)
+        throws BadLocationException
+    {
         Position[] pos = null;
         try
         {
-            pos = document.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
+            pos = document.getPositions(postionCategory);
         } catch (BadPositionCategoryException e)
         {
             e.printStackTrace();
@@ -136,9 +141,14 @@ public class DocumentArtifact extends TypedPosition implements Comparable
 
     public static DocumentArtifact getArtifactAt(IDocument doc, int offset)
     {
+        return getArtifactAt(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY, doc, offset);
+    }
+
+    public static DocumentArtifact getArtifactAt(String positionCategory, IDocument doc, int offset)
+    {
         try
         {
-            Position[] pos = doc.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
+            Position[] pos = doc.getPositions(positionCategory);
             for (int i = 0; i < pos.length; i++)
             {
                 if (offset >= pos[i].getOffset() && offset <= pos[i].getOffset() + pos[i].getLength())
@@ -222,6 +232,18 @@ public class DocumentArtifact extends TypedPosition implements Comparable
             // do nothing
         }
         return "";
+    }
+
+    public boolean isMultiLine()
+    {
+        try
+        {
+            return fDocument.getLineOfOffset(getOffset()) < fDocument.getLineOfOffset(getOffset() + getLength());
+        } catch (BadLocationException e)
+        {
+            UIPlugin.log(e);
+        }
+        return false;
     }
 
     public String getContentFrom(int from)
@@ -423,7 +445,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         {
             String content = fDocument.get(getOffset(), getLength());
             content = content.substring(index).trim();
-            
+
             if (content.length() < 2)
                 return "";
 
@@ -802,26 +824,26 @@ public class DocumentArtifact extends TypedPosition implements Comparable
                 return Integer.toString(state);
         }
     } /**
-                                                                                                                                                                                                                               * @return
-                                                                                                                                                                                                                               */
+                                                                                                                                                                                                                                        * @return
+                                                                                                                                                                                                                                        */
     public DocumentArtifact getCorrespondingNode()
     {
         return fCorrespondingNode;
     } /**
-                                                                                                                                                                                                                                   * @return
-                                                                                                                                                                                                                                   */
+                                                                                                                                                                                                                                            * @return
+                                                                                                                                                                                                                                            */
     public DocumentArtifact getParent()
     {
         return fParent;
     } /**
-                                                                                                                                                                                                                                   * @param artifact
-                                                                                                                                                                                                                                   */
+                                                                                                                                                                                                                                            * @param artifact
+                                                                                                                                                                                                                                            */
     public void setCorrespondingNode(DocumentArtifact artifact)
     {
         fCorrespondingNode = artifact;
     } /**
-                                                                                                                                                                                                                                   * @param artifact
-                                                                                                                                                                                                                                   */
+                                                                                                                                                                                                                                            * @param artifact
+                                                                                                                                                                                                                                            */
     public void setParent(DocumentArtifact artifact)
     {
         fParent = artifact;
@@ -866,8 +888,7 @@ public class DocumentArtifact extends TypedPosition implements Comparable
             }
 
             String type = artifact.getType();
-            if (type == DocumentArtifactPartitioner.TAG
-                || type == DocumentArtifactPartitioner.EMPTYTAG)
+            if (type == DocumentArtifactPartitioner.TAG || type == DocumentArtifactPartitioner.EMPTYTAG)
             {
                 result.addAll(0, artifact.getAttributes());
             } else if (type == DocumentArtifactPartitioner.DECL)
@@ -884,48 +905,48 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         return getContent().trim().length() == 0;
     }
 
-    // Tags only - if you have an end tag - pass its corresponding tag
-    public DocumentArtifact findLastChild()
-    {
-        if (fParent == null)
-            throw new IllegalStateException("create tree first");
-
-        String type = getType();
-        if (type == DocumentArtifactPartitioner.TAG)
-            return null;
-
-        Position[] pos = null;
-        try
-        {
-            pos = fDocument.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
-        } catch (BadPositionCategoryException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-        Arrays.sort(pos, COMPARATOR);
-        int index = 0;
-        while (pos[index] != this)
-            index++;
-        DocumentArtifact result = null;
-        DocumentArtifact next = null;
-        if (index > 0 && index < pos.length)
-        {
-            for (int i = index + 1; i < pos.length; i++)
-            {
-                next = (DocumentArtifact) pos[i];
-                if (next.getParent() == fParent)
-                    break;
-                if (next.getType() != DocumentArtifactPartitioner.TAG
-                    || next.getType() != DocumentArtifactPartitioner.EMPTYTAG
-                    || next.getParent() != this)
-                    continue;
-                result = next;
-            }
-        }
-
-        return result;
-    }
+    //    // Tags only - if you have an end tag - pass its corresponding tag
+    //    public DocumentArtifact findLastChild()
+    //    {
+    //        if (fParent == null)
+    //            throw new IllegalStateException("create tree first");
+    //
+    //        String type = getType();
+    //        if (type == DocumentArtifactPartitioner.TAG)
+    //            return null;
+    //
+    //        Position[] pos = null;
+    //        try
+    //        {
+    //            pos = fDocument.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
+    //        } catch (BadPositionCategoryException e)
+    //        {
+    //            e.printStackTrace();
+    //            return null;
+    //        }
+    //        Arrays.sort(pos, COMPARATOR);
+    //        int index = 0;
+    //        while (pos[index] != this)
+    //            index++;
+    //        DocumentArtifact result = null;
+    //        DocumentArtifact next = null;
+    //        if (index > 0 && index < pos.length)
+    //        {
+    //            for (int i = index + 1; i < pos.length; i++)
+    //            {
+    //                next = (DocumentArtifact) pos[i];
+    //                if (next.getParent() == fParent)
+    //                    break;
+    //                if (next.getType() != DocumentArtifactPartitioner.TAG
+    //                    || next.getType() != DocumentArtifactPartitioner.EMPTYTAG
+    //                    || next.getParent() != this)
+    //                    continue;
+    //                result = next;
+    //            }
+    //        }
+    //
+    //        return result;
+    //    }
 
     public DocumentArtifact getPreviousSibling()
     {
@@ -964,7 +985,9 @@ public class DocumentArtifact extends TypedPosition implements Comparable
         return getArtifactAt(fDocument, getOffset() + getLength() + 1);
     }
 
-    /** may be the prev sibling or the parent */
+    /** may be the prev sibling or the parent
+     *  TODO remove 
+     */
     public DocumentArtifact getPreviousSiblingTag(String allowed)
     {
         if (fParent == null || fParent.getType().equals("/") || allowed == null)

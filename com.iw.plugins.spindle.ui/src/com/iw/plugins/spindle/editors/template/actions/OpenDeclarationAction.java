@@ -45,7 +45,6 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.editors.template.assist.TemplateTapestryAccess;
-import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DocumentArtifact;
 import com.iw.plugins.spindle.editors.util.DocumentArtifactPartitioner;
 import com.iw.plugins.spindle.ui.util.UIUtils;
@@ -209,13 +208,13 @@ public class OpenDeclarationAction extends BaseTemplateAction
     {
         IDocument document = editor.getDocumentProvider().getDocument(editor.getEditorInput());
         DocumentArtifactPartitioner partitioner =
-            new DocumentArtifactPartitioner(ContentAssistProcessor.SCANNER, DocumentArtifactPartitioner.TYPES);
+            new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
         try
         {
             DocumentArtifact reveal = null;
             partitioner.connect(document);
             Position[] pos = null;
-            pos = document.getPositions(DocumentArtifactPartitioner.CONTENT_TYPES_CATEGORY);
+            pos = document.getPositions(partitioner.getPositionCategory());
             for (int i = 0; i < pos.length; i++)
             {
                 DocumentArtifact artifact = (DocumentArtifact) pos[i];

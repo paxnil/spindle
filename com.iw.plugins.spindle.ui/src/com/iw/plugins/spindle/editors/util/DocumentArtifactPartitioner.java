@@ -44,7 +44,9 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.TypedRegion;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
+import org.eclipse.jface.text.rules.IPredicateRule;
 import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
 
 import com.iw.plugins.spindle.UIPlugin;
 
@@ -68,6 +70,13 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
     public static final String[] TYPES =
         { IDocument.DEFAULT_CONTENT_TYPE, TAG, TEXT, PI, DECL, COMMENT, ENDTAG, EMPTYTAG };
 
+    public static RuleBasedPartitionScanner SCANNER;
+
+    static {
+        DocumentArtifactPartitioner.SCANNER = new RuleBasedPartitionScanner();
+        DocumentArtifactPartitioner.SCANNER.setPredicateRules(new IPredicateRule[] { new DocumentArtifactRule()});
+    }
+
     public static final String CONTENT_TYPES_CATEGORY = "__artifacts_category";
     protected IPartitionTokenScanner fScanner;
     protected String fLegalContentTypes[];
@@ -77,20 +86,30 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
     protected int fStartOffset;
     protected int fEndOffset;
     protected int fDeleteOffset;
+    protected String fCategory;
 
-    public DocumentArtifactPartitioner(IPartitionTokenScanner scanner, String legalContentTypes[])
+    public DocumentArtifactPartitioner( IPartitionTokenScanner scanner, String legalContentTypes[]) {
+        this(CONTENT_TYPES_CATEGORY, scanner, legalContentTypes);
+    }
+    
+    public DocumentArtifactPartitioner(String useCategory,IPartitionTokenScanner scanner, String legalContentTypes[])
     {
-        fPositionUpdater = new DefaultPositionUpdater(CONTENT_TYPES_CATEGORY);
+        fCategory = useCategory;
+        fPositionUpdater = new DefaultPositionUpdater(fCategory);
         fScanner = scanner;
         fLegalContentTypes = legalContentTypes;
+    }
+    
+    public String getPositionCategory() {
+        return fCategory;
     }
 
     public void connect(IDocument document)
     {
         Assert.isNotNull(document);
-        Assert.isTrue(!document.containsPositionCategory(CONTENT_TYPES_CATEGORY));
+        Assert.isTrue(!document.containsPositionCategory(fCategory));
         fDocument = document;
-        fDocument.addPositionCategory(CONTENT_TYPES_CATEGORY);
+        fDocument.addPositionCategory(fCategory);
         initialize();
     }
 
@@ -110,7 +129,7 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
                             fScanner.getTokenLength(),
                             contentType,
                             fDocument);
-                    fDocument.addPosition(CONTENT_TYPES_CATEGORY, p);
+                    fDocument.addPosition(fCategory, p);
                 }
             }
 
@@ -123,7 +142,7 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
     {
         try
         {
-            fDocument.removePositionCategory(CONTENT_TYPES_CATEGORY);
+            fDocument.removePositionCategory(fCategory);
         } catch (BadPositionCategoryException e)
         {}
     }
@@ -189,12 +208,12 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
         try
         {
             IDocument d = e.getDocument();
-            Position category[] = d.getPositions(CONTENT_TYPES_CATEGORY);
+            Position category[] = d.getPositions(fCategory);
             IRegion line = d.getLineInformationOfOffset(e.getOffset());
             int reparseStart = line.getOffset();
             int partitionStart = -1;
             String contentType = null;
-            int first = d.computeIndexInCategory(CONTENT_TYPES_CATEGORY, reparseStart);
+            int first = d.computeIndexInCategory(fCategory, reparseStart);
             if (first > 0)
             {
                 TypedPosition partition = (TypedPosition) category[first - 1];
@@ -225,10 +244,10 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
                 if (!p.isDeleted)
                     continue;
                 rememberDeletedOffset(e.getOffset());
-                d.removePosition(CONTENT_TYPES_CATEGORY, p);
+                d.removePosition(fCategory, p);
             }
 
-            category = d.getPositions(CONTENT_TYPES_CATEGORY);
+            category = d.getPositions(fCategory);
             fScanner.setPartialRange(d, reparseStart, d.getLength() - reparseStart, contentType, partitionStart);
             int lastScannedPosition = reparseStart;
             for (IToken token = fScanner.nextToken(); !token.isEOF();)
@@ -247,15 +266,15 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
                         TypedPosition p = (TypedPosition) category[first];
                         if (lastScannedPosition < ((Position) (p)).offset + ((Position) (p)).length
                             && (!p.overlapsWith(start, length)
-                                || d.containsPosition(CONTENT_TYPES_CATEGORY, start, length)
+                                || d.containsPosition(fCategory, start, length)
                                 && contentType.equals(p.getType())))
                             break;
                         rememberRegion(((Position) (p)).offset, ((Position) (p)).length);
                         p.delete();
-                        d.removePosition(CONTENT_TYPES_CATEGORY, p);
+                        d.removePosition(fCategory, p);
                     }
 
-                    if (d.containsPosition(CONTENT_TYPES_CATEGORY, start, length))
+                    if (d.containsPosition(fCategory, start, length))
                     {
                         if (lastScannedPosition > e.getOffset())
                             return createRegion();
@@ -266,7 +285,7 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
                         try
                         {
                             d.addPosition(
-                                CONTENT_TYPES_CATEGORY,
+                            fCategory,
                                 new DocumentArtifact(start, length, contentType, fDocument));
                             rememberRegion(start, length);
                         } catch (BadLocationException e1)
@@ -281,13 +300,13 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
 
             if (lastScannedPosition != reparseStart)
                 lastScannedPosition++;
-            for (first = d.computeIndexInCategory(CONTENT_TYPES_CATEGORY, lastScannedPosition);
+            for (first = d.computeIndexInCategory(fCategory, lastScannedPosition);
                 first < category.length;
                 )
             {
                 TypedPosition p = (TypedPosition) category[first++];
                 p.delete();
-                d.removePosition(CONTENT_TYPES_CATEGORY, p);
+                d.removePosition(fCategory, p);
                 rememberRegion(((Position) (p)).offset, ((Position) (p)).length);
             }
         } catch (BadPositionCategoryException e1)
@@ -304,8 +323,8 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
     {
         try
         {
-            int index = fDocument.computeIndexInCategory(CONTENT_TYPES_CATEGORY, offset);
-            Position category[] = fDocument.getPositions(CONTENT_TYPES_CATEGORY);
+            int index = fDocument.computeIndexInCategory(fCategory, offset);
+            Position category[] = fDocument.getPositions(fCategory);
             if (category.length == 0)
                 return null;
             if (index < category.length && offset == category[index].offset)
@@ -339,10 +358,10 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
     {
         try
         {
-            Position category[] = fDocument.getPositions(CONTENT_TYPES_CATEGORY);
+            Position category[] = fDocument.getPositions(fCategory);
             if (category == null || category.length == 0)
                 return new TypedRegion(0, fDocument.getLength(), "__dftl_partition_content_type");
-            int index = fDocument.computeIndexInCategory(CONTENT_TYPES_CATEGORY, offset);
+            int index = fDocument.computeIndexInCategory(fCategory, offset);
             if (index < category.length)
             {
                 TypedPosition next = (TypedPosition) category[index];
@@ -385,7 +404,7 @@ public class DocumentArtifactPartitioner implements IDocumentPartitioner, IDocum
         try
         {
             int endOffset = offset + length;
-            Position category[] = fDocument.getPositions(CONTENT_TYPES_CATEGORY);
+            Position category[] = fDocument.getPositions(fCategory);
             TypedPosition previous = null;
             TypedPosition current = null;
             Position gap = null;

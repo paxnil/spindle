@@ -134,10 +134,10 @@ public class TemplateEditor extends Editor
     protected void editorContextMenuAboutToShow(IMenuManager menu)
     {
         super.editorContextMenuAboutToShow(menu);
-        if (!(getStorage() instanceof JarEntryFile))
+        menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
+       if (!(getStorage() instanceof JarEntryFile))
         {
-            menu.insertBefore(ITextEditorActionConstants.GROUP_UNDO, new GroupMarker(NAV_GROUP));
-            addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
+             addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
             addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
         }
         IMenuManager moreNav = new MenuManager("Jump");
@@ -185,7 +185,7 @@ public class TemplateEditor extends Editor
      */
     protected SourceViewerConfiguration createSourceViewerConfiguration()
     {
-        return new TemplateConfiguration(UIPlugin.getDefault().getTemplateTextTools(), this);
+        return new TemplateConfiguration(UIPlugin.getDefault().getTemplateTextTools(), this,  UIPlugin.getDefault().getPreferenceStore());
     }
 
     public ICoreNamespace getNamespace()

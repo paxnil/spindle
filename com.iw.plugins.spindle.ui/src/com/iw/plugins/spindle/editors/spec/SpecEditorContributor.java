@@ -40,7 +40,8 @@ public class SpecEditorContributor extends TextEditorActionContributor
     private void doSetActiveEditor(IEditorPart part)
     {
         super.setActiveEditor(part);
-        fContentAssistProposal.setAction(getAction((ITextEditor) part, "ContentAssistProposal"));
+        if (part instanceof ITextEditor)
+            fContentAssistProposal.setAction(getAction((ITextEditor) part, "ContentAssistProposal"));
     }
 
     /*

@@ -36,8 +36,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.jface.text.rules.IPredicateRule;
-import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -52,7 +50,6 @@ import com.iw.plugins.spindle.editors.Editor;
  */
 public abstract class ContentAssistProcessor implements IContentAssistProcessor
 {
-    public static final RuleBasedPartitionScanner SCANNER;
     protected static final ICompletionProposal[] NoProposals = new ICompletionProposal[0];
     protected static final ICompletionProposal[] NoSuggestions =
         new ICompletionProposal[] {
@@ -60,11 +57,6 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
             new ContentAssistProcessor.MessageProposal("")};
 
     protected static final IContextInformation[] NoInformation = new IContextInformation[0];
-
-    static {
-        SCANNER = new RuleBasedPartitionScanner();
-        SCANNER.setPredicateRules(new IPredicateRule[] { new DocumentArtifactRule()});
-    }
 
     protected Editor fEditor;
     protected IPreferenceStore fPreferenceStore = UIPlugin.getDefault().getPreferenceStore();
@@ -74,7 +66,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor
     public ContentAssistProcessor(Editor editor)
     {
         this.fEditor = editor;
-        fAssistParititioner = new DocumentArtifactPartitioner(SCANNER, DocumentArtifactPartitioner.TYPES);
+        fAssistParititioner = new DocumentArtifactPartitioner(DocumentArtifactPartitioner.SCANNER, DocumentArtifactPartitioner.TYPES);
     }
 
     protected void startCompute()
