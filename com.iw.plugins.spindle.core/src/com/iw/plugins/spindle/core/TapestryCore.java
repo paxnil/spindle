@@ -72,42 +72,24 @@ import com.iw.plugins.spindle.core.spec.TapestryCoreSpecFactory;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeListener
+public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeListener, PreferenceConstants
 {
-
   /**
    * Used by label decorators to listen to Core changes
    */
   public static interface ICoreListener
   {
-
     public void coreChanged();
-
   }
 
   private static ResourceBundle TapestryStrings;
   private static ResourceBundle SpindleCoreStrings;
-
   public static final String PLUGIN_ID = "com.iw.plugins.spindle.core";
   public static final String NATURE_ID = PLUGIN_ID + ".tapestrynature";
   public static final String BUILDER_ID = PLUGIN_ID + ".tapestrybuilder";
-
-  public static final String CACHE_GRAMMAR_PREFERENCE = PLUGIN_ID + ".cachinggrammars";
   public static final String CORE_CONTAINER = PLUGIN_ID + ".TAPESTRY_FRAMEWORK";
-
   public static final String SERVLET_2_2_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
   public static final String SERVLET_2_3_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN";
-
-  public static final String BUILDER_MARKER_MISSES = PLUGIN_ID + ".BUILDER_MARKER_MISSES";
-  public static final String BUILDER_HANDLE_ASSETS = PLUGIN_ID + ".BUILDER_HANDLE_ASSETS";
-
-  public static final String CORE_STATUS_INFO = "info";
-  public static final String CORE_STATUS_WARN = "warn";
-  public static final String CORE_STATUS_ERROR = "error";
-  public static final String CORE_STATUS_IGNORE = "ignore";
-
-  public static final String[] CORE_STATUS_ARRAY = new String[]{CORE_STATUS_INFO, CORE_STATUS_WARN, CORE_STATUS_ERROR,
-      CORE_STATUS_IGNORE};
 
   /**
    * SpecFactory instance used by the Scanners
@@ -456,19 +438,6 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
   public static void setCachingDTDGrammars(boolean flag)
   {
     getDefault().getPreferenceStore().setValue(CACHE_GRAMMAR_PREFERENCE, flag);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.ui.plugin.AbstractUIPlugin#initializeDefaultPreferences(org.eclipse.jface.preference.IPreferenceStore)
-   */
-  protected void initializeDefaultPreferences(IPreferenceStore store)
-  {
-    store.setDefault(CACHE_GRAMMAR_PREFERENCE, true);
-    store.setDefault(BUILDER_MARKER_MISSES, CORE_STATUS_WARN);
-    store.setDefault(BUILDER_HANDLE_ASSETS, CORE_STATUS_WARN);
-    store.addPropertyChangeListener(this);
   }
 
   public int getBuildMissPriority()
