@@ -53,7 +53,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.BaseSourceConfiguration;
-import com.iw.plugins.spindle.editors.XMLAutoIndentStrategy;
+import com.iw.plugins.spindle.editors.formatter.XMLAutoIndentStrategy;
 import com.iw.plugins.spindle.editors.template.assist.AttributeContentAssistProcessor;
 import com.iw.plugins.spindle.editors.template.assist.DefaultContentAssistProcessor;
 import com.iw.plugins.spindle.editors.template.assist.JWCIDContentAssistProcessor;
