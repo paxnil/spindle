@@ -194,7 +194,7 @@
                icon="icons/full/component16_dark.gif"
                class="com.iw.plugins.spindle.wizards.extra.CreateComponentFromTemplateAction"
                menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
-               enablesFor="1"
+               enablesFor="+"
                id="com.iw.plugins.spindle.popupMenus.createComponents.componentFromTemplate">
          </action>
          <action
@@ -202,7 +202,7 @@
                icon="icons/full/page16.gif"
                class="com.iw.plugins.spindle.wizards.extra.CreatePageFromTemplateAction"
                menubarPath="com.iw.plugins.spindle.popupMenus.createComponents/group1"
-               enablesFor="1"
+               enablesFor="+"
                id="com.iw.plugins.spindle.popupMenus.createComponents.pageFromTemplate">
          </action>
       </objectContribution>

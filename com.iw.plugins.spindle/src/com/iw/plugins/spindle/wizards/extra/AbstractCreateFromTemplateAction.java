@@ -1,5 +1,7 @@
 package com.iw.plugins.spindle.wizards.extra;
 
+import java.util.Iterator;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
@@ -24,10 +26,11 @@ import com.iw.plugins.spindle.wizards.NewTapestryElementWizard;
  * @author gwl
  * @version $Id$
  */
-public abstract class AbstractCreateFromTemplateAction extends Action implements IObjectActionDelegate {
+public abstract class AbstractCreateFromTemplateAction
+  extends Action
+  implements IObjectActionDelegate {
 
   private IWorkbenchPart part;
-  private String name;
   private IStructuredSelection selection;
 
   /**
@@ -48,10 +51,29 @@ public abstract class AbstractCreateFromTemplateAction extends Action implements
    * @see org.eclipse.ui.IActionDelegate#run(IAction)
    */
   public void run(IAction action) {
-    NewTapestryElementWizard wizard = getWizard();
-    wizard.init(PlatformUI.getWorkbench(), selection, name);
-    WizardDialog wdialog = new WizardDialog(TapestryPlugin.getDefault().getActiveWorkbenchShell(), wizard);
-    wdialog.open();
+  	
+    if (selection != null) {
+
+      try {
+      	
+        for (Iterator iter = selection.iterator(); iter.hasNext();) {
+
+          IFile file = (IFile) iter.next();
+
+          NewTapestryElementWizard wizard = getWizard();
+
+          wizard.init(PlatformUI.getWorkbench(), selection, getName(file));
+
+          WizardDialog wdialog =
+            new WizardDialog(TapestryPlugin.getDefault().getActiveWorkbenchShell(), wizard);
+
+          wdialog.open();
+
+        }
+      } catch (ClassCastException e) {
+      	// do nothing
+      }
+    }
   }
 
   protected abstract NewTapestryElementWizard getWizard();
@@ -61,32 +83,66 @@ public abstract class AbstractCreateFromTemplateAction extends Action implements
    */
   public void selectionChanged(IAction action, ISelection sel) {
     boolean enable = false;
-    name = null;
-    selection = null;
+    this.selection = null;
+    
+    IStructuredSelection selection = null;
 
     if (sel instanceof IStructuredSelection) {
 
-      IStructuredSelection selection = (IStructuredSelection) sel;
+      selection = (IStructuredSelection) sel;
 
-      if (!selection.isEmpty() && selection.size() == 1) {
+      if (!selection.isEmpty()) {
 
-        Object selected = selection.getFirstElement();
-        this.selection = selection;
-
-        if (selected instanceof IFile) {
-
-          IFile candidateFile = (IFile) selected;
-
-          if (!checkJWCExists(candidateFile)) {
-            
-            enable = true;
-          }
-        }
-
+        enable = checkSelection(selection);
       }
 
     }
+    if (enable) {
+
+      this.selection = selection;
+    }
     action.setEnabled(enable);
+  }
+
+  /**
+   * Method checkMultiSelection.
+   * @param selection
+   * @return boolean
+   */
+  private boolean checkSelection(IStructuredSelection selection) {
+    boolean result = true;
+
+    if (selection == null || selection.isEmpty()) {
+
+      result = false;
+
+    } else {
+
+      try {
+
+        for (Iterator iter = selection.iterator(); iter.hasNext();) {
+
+          IFile candidateFile = (IFile) iter.next();
+
+          if (checkJWCExists(candidateFile)) {
+
+            result = false;
+          }
+
+        }
+      } catch (ClassCastException e) {
+
+        result = false;
+      }
+    }
+    return result;
+  }
+
+  private String getName(IFile file) {
+
+    IPath path = file.getFullPath();
+    path = path.removeFileExtension();
+    return path.lastSegment();
   }
 
   /**
@@ -94,16 +150,17 @@ public abstract class AbstractCreateFromTemplateAction extends Action implements
    * @param file
    * @return boolean
    */
-  private boolean checkJWCExists(IFile file) {  	
+  private boolean checkJWCExists(IFile file) {
+
     IContainer folder = file.getParent();
-    IPath path = file.getFullPath();
-    path = path.removeFileExtension();
-    String name = path.lastSegment();
-    if (folder.findMember(name+".jwc") != null) {    	
-    	return true;
+    String name = getName(file);
+
+    if (folder.findMember(name + ".jwc") != null) {
+
+      return true;
     }
-    this.name = name;
-    return false;    
+
+    return false;
   }
 
 }
