@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.editors.spec.assist;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
@@ -186,14 +187,18 @@ public class ChooseResourceProposal implements ICompletionProposal
     private Filter fileExclusionFilter = NEVER_MATCH;
     private Filter extensionExclusionFilter = NEVER_MATCH;
     private Filter extensionInclusionFilter = ALWAYS_MATCH;
+    private boolean previousCAState;
+    private boolean allowRelativePaths;
 
     public ChooseResourceProposal(
         SpecEditor specEditor,
+        boolean previousCAState,
         AbstractRootLocation rootObject,
         int documentOffset,
         int replacementOffset,
         int replacementLength)
     {
+        this.previousCAState = previousCAState;
         Assert.isNotNull(specEditor);
         Assert.isNotNull(rootObject);
         editor = specEditor;
@@ -253,6 +258,14 @@ public class ChooseResourceProposal implements ICompletionProposal
     {
         return extensionInclusionFilter;
     }
+    
+    public void setAllowRelativePaths(boolean flag) {
+        allowRelativePaths = flag;
+    }
+    
+    public boolean getAllowRelativePaths() {
+        return allowRelativePaths;
+    }
 
     /* (non-Javadoc)
      * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
@@ -273,9 +286,14 @@ public class ChooseResourceProposal implements ICompletionProposal
             try
             {
                 document.replace(replacementOffset, replacementLength, chosenAsset);
+                
             } catch (BadLocationException x)
             {
                 // ignore
+            } finally {
+                ContentAssistant assistant = editor.getContentAssistant();
+                if (assistant != null)
+                    assistant.enableAutoInsert(previousCAState);
             }
 
         }

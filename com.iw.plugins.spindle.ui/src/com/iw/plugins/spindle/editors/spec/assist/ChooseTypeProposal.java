@@ -64,7 +64,7 @@ public class ChooseTypeProposal implements ICompletionProposal
     int documentOffset;
     int replacementOffset;
     int replacementLength;
-
+ 
     public ChooseTypeProposal(
         IJavaProject project,
         boolean includeInterfaces,

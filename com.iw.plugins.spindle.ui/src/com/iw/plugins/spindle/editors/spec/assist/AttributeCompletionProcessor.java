@@ -64,6 +64,7 @@ import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
+import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
@@ -655,10 +656,15 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             return Collections.EMPTY_LIST;
 
         List result = new ArrayList();
+        
+        boolean state = UIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST);
+        fEditor.getContentAssistant().enableAutoInsert(true);
+
 
         ChooseResourceProposal proposal =
             new ChooseResourceProposal(
                 (SpecEditor) fEditor,
+                state,
                 root,
                 fDocumentOffset,
                 fValueLocation.x,
@@ -674,6 +680,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         }
 
         proposal.setExtensionInclusionFilter(filter);
+        proposal.setAllowRelativePaths(true);
 
         result.add(proposal);
         return result;
@@ -702,10 +709,15 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
             return Collections.EMPTY_LIST;
 
         List result = new ArrayList();
+        
+        boolean state = UIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST);
+        fEditor.getContentAssistant().enableAutoInsert(true);
+        
 
         ChooseResourceProposal proposal =
             new ChooseResourceProposal(
                 (SpecEditor) fEditor,
+                state,
                 root,
                 fDocumentOffset,
                 fValueLocation.x,
@@ -721,6 +733,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         }
 
         proposal.setExtensionExclusionFilter(proposal.ASSET_EXCLUDE_EXTENSIONS);
+        proposal.setAllowRelativePaths(false);
 
         result.add(proposal);
         return result;
