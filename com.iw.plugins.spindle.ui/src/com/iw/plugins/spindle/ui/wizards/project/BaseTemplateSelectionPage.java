@@ -65,7 +65,7 @@ import com.iw.plugins.spindle.ui.preferences.WizardTemplatesPreferencePage;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 import com.iw.plugins.spindle.ui.widgets.PreferenceTemplateSelector;
 import com.iw.plugins.spindle.ui.wizards.TapestryWizardPage;
-import com.iw.plugins.spindle.ui.wizards.factories.ITemplateSource;
+import com.iw.plugins.spindle.ui.wizards.factories.IFactoryTemplateSource;
 import com.iw.plugins.spindle.ui.wizards.factories.PageFactory;
 import com.iw.plugins.spindle.ui.wizards.factories.TapestryTemplateFactory;
 import com.iw.plugins.spindle.ui.wizards.factories.TemplateFactory;
@@ -77,7 +77,7 @@ import com.iw.plugins.spindle.ui.wizards.factories.TemplateFactory;
  * @author glongman@gmail.com
  *  
  */
-public class TemplateSelectionPage extends TapestryWizardPage implements ITemplateSource
+public class BaseTemplateSelectionPage extends TapestryWizardPage implements IFactoryTemplateSource
 {
 
   class Listener implements ISelectionChangedListener, IPropertyChangeListener
@@ -119,16 +119,13 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
 
   private Group fProjectTemplateGroup;
   private Listener fListener;
-
+  
   String PAGE_NAME;
 
-  private NewTapestryProjectWizard fWizard;
-
-  public TemplateSelectionPage(NewTapestryProjectWizard wizard, String name)
+  public BaseTemplateSelectionPage(String name)
   {
     super(name);
-    fWizard = wizard;
-
+        
     PAGE_NAME = name;
     //    this.setImageDescriptor(ImageDescriptor.createFromURL(Images.getImageURL(UIPlugin
     //        .getString(PAGE_NAME + ".image"))));
@@ -160,18 +157,6 @@ public class TemplateSelectionPage extends TapestryWizardPage implements ITempla
         fProjectPreferences);
 
     fListener = new Listener();
-  }
-
-  public void setVisible(boolean visible)
-  {
-    super.setVisible(visible);
-    if (visible)
-    {
-      fWizard.entering(this);
-    } else
-    {
-      fWizard.leaving(this);
-    }
   }
 
   /*

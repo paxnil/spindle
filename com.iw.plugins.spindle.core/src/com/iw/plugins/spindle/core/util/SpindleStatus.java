@@ -36,6 +36,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 public class SpindleStatus implements IStatus
 {
 
+	public static final IStatus OK_STATUS = new SpindleStatus();
     private String statusMessage;
 
     private int severity;

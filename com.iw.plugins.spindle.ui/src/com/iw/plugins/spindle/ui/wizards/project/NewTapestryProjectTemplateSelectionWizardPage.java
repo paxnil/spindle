@@ -23,22 +23,28 @@
  *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.ui.wizards.factories;
-
-import org.eclipse.jface.text.templates.Template;
+package com.iw.plugins.spindle.ui.wizards.project;
 
 /**
- * and interface to obtain a particular template for a particular template context id.
- * 
- * Which template is returned is, of cource, determined by the implementor
  * 
  * @author glongman@gmail.com
- * 
+ *  
  */
-public interface ITemplateSource
-{
-  	Template getTemplate(TemplateFactory factory);
-  	
-  	Template getTemplate(String templateContextId);
-  	
+public class NewTapestryProjectTemplateSelectionWizardPage extends
+		BaseTemplateSelectionPage {
+
+	public NewTapestryProjectTemplateSelectionWizardPage(String name) {
+		super(name);
+
+	}
+
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		NewTapestryProjectWizard wiz = (NewTapestryProjectWizard) getWizard();
+		if (visible) {
+			wiz.entering(this);
+		} else {
+			wiz.leaving(this);
+		}
+	}
 }

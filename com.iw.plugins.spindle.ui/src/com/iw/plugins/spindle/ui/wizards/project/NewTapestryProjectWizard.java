@@ -26,141 +26,180 @@
 
 package com.iw.plugins.spindle.ui.wizards.project;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.ui.wizards.NewTapestryElementWizard;
+import com.iw.plugins.spindle.ui.wizards.factories.ApplicationFactory;
+import com.iw.plugins.spindle.ui.wizards.factories.PageFactory;
+import com.iw.plugins.spindle.ui.wizards.factories.TapestryTemplateFactory;
 
 /**
  * Wizard for creating new Tapestry projects.
  * 
  * @author glongman@gmail.com
  */
-public class NewTapestryProjectWizard extends NewTapestryElementWizard
-{
-  private NewTapestryProjectPage fMainPage;
-  private NewTapestryProjectJavaPage fJavaPage;
-  private TemplateSelectionPage fTemplatePage;
+public class NewTapestryProjectWizard extends NewTapestryElementWizard {
+	private NewTapestryProjectPage fMainPage;
 
-  private IWizardPage fEntering = null;
+	private NewTapestryProjectJavaPage fJavaPage;
 
-  private boolean beenThere = false;
+	private NewTapestryProjectTemplateSelectionWizardPage fTemplatePage;
 
-  public NewTapestryProjectWizard()
-  {
-    super();
-    setNeedsProgressMonitor(true);
-    setWindowTitle(UIPlugin.getString("new-project-wizard-window-title"));
-  }
+	private IWizardPage fEntering = null;
 
-  public void entering(IWizardPage page)
-  {
-    fEntering = page;
-  }
+	private boolean beenThere = false;
 
-  public void leaving(IWizardPage page)
-  {
-    if (page == fMainPage && fEntering == fJavaPage )
-    {
-      	fJavaPage.changeToNewProject();
-    } else if (page == fJavaPage && fEntering == fMainPage )
-    {
-      	fJavaPage.removeProject();
-    }
-  }
-  /**
-   * @see Wizard#createPages
-   */
-  public void addPages()
-  {
+	private TapestryProjectInstallData fInstallData;
 
-    ImageDescriptor descriptor = Images.getImageDescriptor("applicationDialog.gif"); 
+	public NewTapestryProjectWizard() {
+		super();
+		setNeedsProgressMonitor(true);
+		setWindowTitle(UIPlugin.getString("new-project-wizard-window-title"));
+		fInstallData = new TapestryProjectInstallData();
+		fInstallData.setWritingMetaData(true);
+	}
 
-    fTemplatePage = new TemplateSelectionPage(this, "FileGeneration");
+	public void entering(IWizardPage page) {
+		fEntering = page;
+	}
 
-    fMainPage = new NewTapestryProjectPage(UIPlugin
-        .getString("new-project-wizard-page-title"), this, fTemplatePage);
+	public void leaving(IWizardPage page) {
+		if (page == fMainPage && fEntering == fJavaPage) {
+			fJavaPage.changeToNewProject();
+		} else if (page == fJavaPage && fEntering == fMainPage) {
+			fJavaPage.removeProject();
+		}
+	}
 
-    fMainPage.setImageDescriptor(descriptor);
-    fMainPage.setDescription(UIPlugin.getString("new-project-wizard-page-title"));
+	/**
+	 * @see Wizard#createPages
+	 */
+	public void addPages() {
 
-    addPage(fMainPage);
+		ImageDescriptor descriptor = Images
+				.getImageDescriptor("applicationDialog.gif");
 
-    fJavaPage = new NewTapestryProjectJavaPage(this, fMainPage);
-    fJavaPage.setImageDescriptor(descriptor);
-    addPage(fJavaPage);
+		fTemplatePage = new NewTapestryProjectTemplateSelectionWizardPage(
+				"FileGeneration");
 
-    // bug [ 843021 ] Is this what 3 Beta is supposed to do
-    // for some reason sometimes the page's wizard is not set
-    //
-    // should have been set by addPagr()
-    fJavaPage.setWizard(this);
-    addPage(fTemplatePage);
+		fMainPage = new NewTapestryProjectPage(UIPlugin
+				.getString("new-project-wizard-page-title"), this, fInstallData);
 
-  }
+		fMainPage.setImageDescriptor(descriptor);
+		fMainPage.setDescription(UIPlugin
+				.getString("new-project-wizard-page-title"));
 
-  /**
-   * @see Wizard#performFinish()
-   */
-  public boolean performFinish()
-  {
-    if (finishPage(fJavaPage.getRunnable()))
-    {
-      IJavaProject jproject = fJavaPage.getJavaProject();
-      try
-      {
-        jproject.open(null);
-        finishPage(fMainPage.getRunnable(jproject));
-        finishPage(fTemplatePage.getRunnable(jproject.getProject()));
-        IResource[] reveal = fMainPage.getReveal();
-        for (int i = 0; i < reveal.length; i++)
-        {
-          selectAndReveal(reveal[i]);
-        }
-      } catch (JavaModelException e)
-      {
-        UIPlugin.log(e);
-      }
-    }
-    return true;
-  }
+		addPage(fMainPage);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see IWizard#performCancel()
-   */
-  public boolean performCancel()
-  {
-    fJavaPage.performCancel();
-    return super.performCancel();
-  }
+		fJavaPage = new NewTapestryProjectJavaPage(fMainPage, fInstallData);
+		fJavaPage.setImageDescriptor(descriptor);
+		addPage(fJavaPage);
 
-  /**
-   * @return
-   */
-  public String getContextFolderName()
-  {
-    return fMainPage.getContextFolderName();
-  }
+		// bug [ 843021 ] Is this what 3 Beta is supposed to do
+		// for some reason sometimes the page's wizard is not set
+		//
+		// should have been set by addPagr()
+		fJavaPage.setWizard(this);
+		addPage(fTemplatePage);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.wizard.IWizard#canFinish()
-   */
-  public boolean canFinish()
-  {
-    IWizardPage currentPage = getContainer().getCurrentPage();
-    if (currentPage == fMainPage)
-      return false;
-    return super.canFinish() && fTemplatePage.isPageComplete();
-  }
+	}
+
+	/**
+	 * @see Wizard#performFinish()
+	 */
+	public boolean performFinish() {
+		if (finishPage(fJavaPage.getRunnable())) {
+			IJavaProject jproject = fJavaPage.getJavaProject();
+			fInstallData.setProject(jproject.getProject());
+			fInstallData.setApplicationFactory(new ApplicationFactory());
+			fInstallData.setPageFactory(new PageFactory());
+			fInstallData.setTemplateFactory(new TapestryTemplateFactory());
+			fInstallData.setTemplateSource(fTemplatePage);
+
+			IRunnableWithProgress operation = new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					ArrayList created = new ArrayList();
+
+					IStatus status = new SpindleStatus();
+					monitor.beginTask("", 100);
+
+					TapestryProjectInstaller installer = new TapestryProjectInstaller(
+							fInstallData);
+
+					status = installer.configureTapestryProject(created,
+							new SubProgressMonitor(monitor, 50));
+
+					if (!status.isOK()) {
+						ErrorDialog.openError(null,
+								"Tapestry Install Problems",
+								"Unable to create all Tapestry files.", status);
+						return;
+					}
+
+					status = installer
+							.addTapestryNature(new SubProgressMonitor(monitor,
+									50));
+
+					if (!status.isOK()) {
+						ErrorDialog.openError(null,
+								"Tapestry Install Problems",
+								"Unable to install the Tapestry nature.",
+								status);
+
+						return;
+					}
+
+					for (Iterator iter = created.iterator(); iter.hasNext();) {
+						IResource element = (IResource) iter.next();
+						selectAndReveal(element);
+					}
+
+				}
+			};
+			finishPage(operation);
+			finishPage(fTemplatePage.getRunnable(fInstallData.getProject()));
+
+		}
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see IWizard#performCancel()
+	 */
+	public boolean performCancel() {
+		fJavaPage.performCancel();
+		return super.performCancel();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.wizard.IWizard#canFinish()
+	 */
+	public boolean canFinish() {
+		IWizardPage currentPage = getContainer().getCurrentPage();
+		if (currentPage == fMainPage)
+			return false;
+		return super.canFinish() && fTemplatePage.isPageComplete();
+	}
 
 }

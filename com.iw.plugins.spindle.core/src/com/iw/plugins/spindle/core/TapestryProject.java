@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -43,6 +44,7 @@ import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
 import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.util.Markers;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 
 /**
  * The Tapestry project nature. Configures and Deconfigures the builder
@@ -51,22 +53,31 @@ import com.iw.plugins.spindle.core.util.Markers;
  */
 public class TapestryProject implements IProjectNature, ITapestryProject
 {
-    static public void addTapestryNature(IJavaProject project, boolean forceOrder)
+	static public IStatus addTapestryNature(IJavaProject project, boolean forceOrder)
     {
+    	return addTapestryNature(project.getProject(), forceOrder);      
+    }
+	
+    static public IStatus addTapestryNature(IProject project, boolean forceOrder)
+    {
+    	
         try
         {
             TapestryCore.addNatureToProject(
-                    project.getProject(),
+                    project,
                     TapestryCore.NATURE_ID,
                     forceOrder);
         }
         catch (CoreException ex)
         {
+        	
             TapestryCore.log(ex.getMessage());
+            return ex.getStatus();
         }
+        return  SpindleStatus.OK_STATUS;
     }
 
-    static public void removeTapestryNature(IJavaProject project)
+    static public IStatus removeTapestryNature(IJavaProject project)
     {
         try
         {
@@ -76,7 +87,9 @@ public class TapestryProject implements IProjectNature, ITapestryProject
         catch (CoreException ex)
         {
             TapestryCore.log(ex.getMessage());
+            return ex.getStatus();
         }
+        return  SpindleStatus.OK_STATUS;
     }
 
     /**

@@ -118,6 +118,21 @@ public class DOMValidator implements IProblemCollector
 
             DTDS.put(publicId, new DTDParser(new InputStreamReader(source.getByteStream()),
                     SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, debug).parse());
+            
+            //Servlet 2.3
+            
+            publicId = TapestryCore.SERVLET_2_3_PUBLIC_ID;
+
+            resourceIdentifier = new XMLResourceIdentifierImpl(publicId, null, null, null);
+
+            source = TapestryEntityResolver.doResolveEntity(resourceIdentifier);
+            if (source == null)
+                throw new Error(errorMessage);
+
+            DTDS.put(publicId, new DTDParser(new InputStreamReader(source.getByteStream()),
+            		TapestryCore.SERVLET_2_3_PUBLIC_ID, debug).parse());
+            
+            
 
         }
         catch (IOException e)
