@@ -43,206 +43,219 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.UIPlugin;
 
 /**
- *  Jump to the next attribute in the document
+ * Jump to the next attribute in the document
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: JumpToNextAttributeAction.java,v 1.3 2004/06/10 15:50:48
+ *          glongman Exp $
  */
-public class JumpToNextAttributeAction extends BaseJumpAction implements IDocumentListener
+public class JumpToNextAttributeAction extends BaseJumpAction
+    implements
+      IDocumentListener
 {
 
-    private boolean fForward;
-    protected IRegion[] fRegions;
-    private IDocument fStoredDocument;
+  private boolean fForward;
+  protected IRegion[] fRegions;
+  private IDocument fStoredDocument;
 
-    /**
-     * 
-     */
-    public JumpToNextAttributeAction(boolean forward)
+  /**
+   *  
+   */
+  public JumpToNextAttributeAction(boolean forward)
+  {
+    super();
+    fForward = forward;
+  }
+
+  /**
+   * @param text
+   */
+  public JumpToNextAttributeAction(String text, boolean forward)
+  {
+    super(text);
+    fForward = forward;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.actions.BaseJumpAction#doRun()
+   */
+  protected void doRun()
+  {
+    fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+
+    IDocument currentDocument = getDocument();
+
+    if (currentDocument != fStoredDocument)
     {
-        super();
-        fForward = forward;
+      if (fStoredDocument != null)
+        fStoredDocument.removeDocumentListener(this);
+
+      fStoredDocument = currentDocument;
+      fStoredDocument.addDocumentListener(this);
+
+      buildRegionList(fStoredDocument);
+
+    } else if (fRegions == null)
+    {
+      buildRegionList(fStoredDocument);
     }
 
-    /**
-      * @param text
-      */
-    public JumpToNextAttributeAction(String text, boolean forward)
+    IRegion attributeRegion = null;
+    if (fForward)
     {
-        super(text);
-        fForward = forward;
+      attributeRegion = getNextAttributeRegion(fDocumentOffset);
+    } else
+    {
+      attributeRegion = getPreviousAttributeRegion(fDocumentOffset, fStoredDocument
+          .getLength() - 1);
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.actions.BaseJumpAction#doRun()
-     */
-    protected void doRun()
+    if (attributeRegion != null)
     {
-        fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-
-        IDocument currentDocument = getDocument();
-
-        if (currentDocument != fStoredDocument)
-        {
-            if (fStoredDocument != null)
-                fStoredDocument.removeDocumentListener(this);
-
-            fStoredDocument = currentDocument;
-            fStoredDocument.addDocumentListener(this);
-
-            buildRegionList(fStoredDocument);
-
-        } else if (fRegions == null)
-        {
-            buildRegionList(fStoredDocument);
-        }
-
-        IRegion attributeRegion = null;
-        if (fForward)
-        {
-            attributeRegion = getNextAttributeRegion(fDocumentOffset);
-        } else
-        {
-            attributeRegion = getPreviousAttributeRegion(fDocumentOffset, fStoredDocument.getLength() - 1);
-        }
-
-        if (attributeRegion != null)
-        {
-            fEditor.selectAndReveal(attributeRegion.getOffset(), attributeRegion.getLength());
-        }
-
+      fEditor.selectAndReveal(attributeRegion.getOffset(), attributeRegion.getLength());
     }
 
-    protected void buildRegionList(IDocument document)
+  }
+
+  protected void buildRegionList(IDocument document)
+  {
+    attachPartitioner();
+
+    Position[] positions = null;
+    try
     {
-        attachPartitioner();
-
-        Position[] positions = null;
-        try
-        {
-            positions = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
-        } catch (BadPositionCategoryException e)
-        {
-            UIPlugin.log(e);
-            return;
-        }
-
-        Arrays.sort(positions, XMLNode.COMPARATOR);
-
-        ArrayList regionCollector = new ArrayList();
-
-        List attributes = null;
-
-        for (int i = 0; i < positions.length; i++)
-        {
-            XMLNode node = (XMLNode) positions[i];
-            attributes = node.getAttributes();
-            if (attributes.isEmpty())
-                continue;
-
-            for (Iterator iter = attributes.iterator(); iter.hasNext();)
-            {
-                XMLNode attribute = (XMLNode) iter.next();
-                regionCollector.add(attribute.getAttributeValueRegion());
-            }
-        }
-
-        fRegions = (IRegion[]) regionCollector.toArray(new IRegion[regionCollector.size()]);
-
+      positions = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
+    } catch (BadPositionCategoryException e)
+    {
+      UIPlugin.log(e);
+      return;
     }
 
-    /**
-     * @param document
-     * @return
-     */
-    private IRegion getNextAttributeRegion(int documentOffset)
+    Arrays.sort(positions, XMLNode.COMPARATOR);
+
+    ArrayList regionCollector = new ArrayList();
+
+    List attributes = null;
+
+    for (int i = 0; i < positions.length; i++)
     {
-        int startIndex = findIndexForOffset(fRegions, documentOffset, true);
+      XMLNode node = (XMLNode) positions[i];
+      attributes = node.getAttributes();
+      if (attributes.isEmpty())
+        continue;
 
-        if (startIndex == -1)
-            startIndex = findIndexForOffset(fRegions, 0, true);
-
-        if (startIndex >= 0)
-            return fRegions[startIndex];
-
-        return null;
+      for (Iterator iter = attributes.iterator(); iter.hasNext();)
+      {
+        XMLNode attribute = (XMLNode) iter.next();
+        regionCollector.add(attribute.getAttributeValueRegion());
+      }
     }
 
-    /**
-     * @param document
-     * @return
-     */
-    private IRegion getPreviousAttributeRegion(int documentOffset, int lastDocumentOffset)
+    fRegions = (IRegion[]) regionCollector.toArray(new IRegion[regionCollector.size()]);
+
+  }
+
+  /**
+   * @param document
+   * @return
+   */
+  private IRegion getNextAttributeRegion(int documentOffset)
+  {
+    int startIndex = findIndexForOffset(fRegions, documentOffset, true);
+
+    if (startIndex == -1)
+      startIndex = findIndexForOffset(fRegions, 0, true);
+
+    if (startIndex >= 0)
+      return fRegions[startIndex];
+
+    return null;
+  }
+
+  /**
+   * @param document
+   * @return
+   */
+  private IRegion getPreviousAttributeRegion(int documentOffset, int lastDocumentOffset)
+  {
+    int startIndex = findIndexForOffset(fRegions, documentOffset, false);
+
+    if (startIndex == -1)
+      startIndex = findIndexForOffset(fRegions, lastDocumentOffset, false);
+
+    if (startIndex >= 0)
+      return fRegions[startIndex];
+
+    return null;
+  }
+
+  public boolean overlaps(int offset, IRegion region)
+  {
+    int rOffset = region.getOffset();
+    int rLength = region.getLength();
+    int rEnd = rOffset + rLength;
+
+    if (rLength > 0)
+      return rOffset <= offset && offset <= rEnd;
+
+    return offset == rOffset;
+  }
+
+  private int findIndexForOffset(
+      IRegion[] regions,
+      int documentOffset,
+      boolean lookingForward)
+  {
+    int count = regions.length;
+    if (lookingForward)
     {
-        int startIndex = findIndexForOffset(fRegions, documentOffset, false);
+      for (int i = 0; i < count; i++)
+      {
+        int offset = regions[i].getOffset();
 
-        if (startIndex == -1)
-            startIndex = findIndexForOffset(fRegions, lastDocumentOffset, false);
-
-        if (startIndex >= 0)
-            return fRegions[startIndex];
-
-        return null;
-    }
-
-    public boolean overlaps(int offset, IRegion region)
+        if (!overlaps(documentOffset, regions[i]) && offset > documentOffset)
+          return i;
+        //            } else if (fDocumentOffset <= end)
+        //        {
+        //            return i;
+        //        }
+      }
+    } else
     {
-        int rOffset = region.getOffset();
-        int rLength = region.getLength();
-        int rEnd = rOffset + rLength;
+      for (int i = count - 1; i >= 0; i -= 1)
+      {
+        int end = regions[i].getOffset() + regions[i].getLength();
 
-        if (rLength > 0)
-            return rOffset <= offset && offset <= rEnd;
+        if (overlaps(documentOffset, regions[i]))
+          continue;
 
-        return offset == rOffset;
+        if (end <= documentOffset)
+          return i;
+      }
     }
+    return -1;
+  }
 
-    private int findIndexForOffset(IRegion[] regions, int documentOffset, boolean lookingForward)
-    {
-        int count = regions.length;
-        if (lookingForward)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                int offset = regions[i].getOffset();
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
+   */
+  public void documentAboutToBeChanged(DocumentEvent event)
+  {
+    // do nothing
+  }
 
-                if (!overlaps(documentOffset, regions[i]) && offset > documentOffset)
-                    return i;
-                //            } else if (fDocumentOffset <= end)
-                //        {
-                //            return i;
-                //        }
-            }
-        } else
-        {
-            for (int i = count - 1; i >= 0; i -= 1)
-            {
-                int end = regions[i].getOffset() + regions[i].getLength();
-
-                if (overlaps(documentOffset, regions[i]))
-                    continue;
-                    
-                if (end <= documentOffset)
-                    return i;
-            }
-        }
-        return -1;
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
-     */
-    public void documentAboutToBeChanged(DocumentEvent event)
-    {
-        // do nothing
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
-     */
-    public void documentChanged(DocumentEvent event)
-    {
-        fRegions = null;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
+   */
+  public void documentChanged(DocumentEvent event)
+  {
+    fRegions = null;
+  }
 
 }

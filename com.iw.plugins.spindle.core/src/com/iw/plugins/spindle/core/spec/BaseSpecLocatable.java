@@ -30,7 +30,7 @@ import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceLocation;
 
 /**
- *  Superclass for Top level spec classes
+ * Superclass for Top level spec classes
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -38,34 +38,31 @@ import org.apache.tapestry.IResourceLocation;
 public abstract class BaseSpecLocatable extends BasePropertyHolder
 {
 
-    IResourceLocation fSpecificationLocation;
+  IResourceLocation fSpecificationLocation;
 
-    public BaseSpecLocatable(int type)
-    {
-        super(type);
-    }
+  public BaseSpecLocatable(int type)
+  {
+    super(type);
+  }
 
-    /**
-     * @return
-     */
-    public IResourceLocation getSpecificationLocation()
-    {
-        return fSpecificationLocation;
-    }
+  /**
+   * @return
+   */
+  public IResourceLocation getSpecificationLocation()
+  {
+    return fSpecificationLocation;
+  }
 
-    /**
-     * @param location
-     */
-    public void setSpecificationLocation(IResourceLocation location)
-    {
-        this.fSpecificationLocation = location;
-    }
-    
-    public abstract INamespace getNamespace();
+  /**
+   * @param location
+   */
+  public void setSpecificationLocation(IResourceLocation location)
+  {
+    this.fSpecificationLocation = location;
+  }
 
-    public abstract void setNamespace(INamespace ns);
+  public abstract INamespace getNamespace();
 
-    
-   
+  public abstract void setNamespace(INamespace ns);
 
 }

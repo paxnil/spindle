@@ -33,221 +33,227 @@ import com.iw.plugins.spindle.core.TapestryCore;
 /**
  * @author GWL
  * @version 
- *
- * Copyright 2002, Intelligent Works Incoporated
- * All Rights Reserved
+ * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
 public class SpindleStatus implements IStatus
 {
 
-    private String statusMessage;
-    private int severity;
+  private String statusMessage;
+  private int severity;
 
-    /**
-     * Compares two instances of <code>IStatus</code>. The more severe is returned:
-     * An error is more severe than a warning, and a warning is more severe
-     * than ok. If the two stati have the same severity, the second is returned.
-     */
-    public static IStatus getMoreSevere(IStatus s1, IStatus s2)
+  /**
+   * Compares two instances of <code>IStatus</code>. The more severe is
+   * returned: An error is more severe than a warning, and a warning is more
+   * severe than ok. If the two stati have the same severity, the second is
+   * returned.
+   */
+  public static IStatus getMoreSevere(IStatus s1, IStatus s2)
+  {
+    if (s1.getSeverity() > s2.getSeverity())
     {
-        if (s1.getSeverity() > s2.getSeverity())
-        {
-            return s1;
-        } else
-        {
-            return s2;
-        }
+      return s1;
+    } else
+    {
+      return s2;
     }
+  }
 
-    /**
-     * Finds the most severe status from a array of stati.
-     * An error is more severe than a warning, and a warning is more severe
-     * than ok.
-     */
-    public static IStatus getMostSevere(IStatus[] status)
+  /**
+   * Finds the most severe status from a array of stati. An error is more severe
+   * than a warning, and a warning is more severe than ok.
+   */
+  public static IStatus getMostSevere(IStatus[] status)
+  {
+    IStatus max = new SpindleStatus();
+    for (int i = 0; i < status.length; i++)
     {
-        IStatus max = new SpindleStatus();
-        for (int i = 0; i < status.length; i++)
-        {
-            IStatus curr = status[i];
-            if (curr.matches(IStatus.ERROR))
-            {
-                return curr;
-            }
-            if (max == null || curr.getSeverity() > max.getSeverity())
-            {
-                max = curr;
-            }
-        }
-        return max;
+      IStatus curr = status[i];
+      if (curr.matches(IStatus.ERROR))
+      {
+        return curr;
+      }
+      if (max == null || curr.getSeverity() > max.getSeverity())
+      {
+        max = curr;
+      }
     }
+    return max;
+  }
 
-    /**
-     * Creates a status set to OK (no message)
-     */
-    public SpindleStatus()
-    {
-        this(OK, null);
-    }
+  /**
+   * Creates a status set to OK (no message)
+   */
+  public SpindleStatus()
+  {
+    this(OK, null);
+  }
 
-    /**
-     * Creates a status .
-     * @param severity The status severity: ERROR, WARNING, INFO and OK.
-     * @param message The message of the status. Applies only for ERROR,
-     * WARNING and INFO.
-     */
-    public SpindleStatus(int severity, String message)
-    {
-        statusMessage = message;
-        this.severity = severity;
-    }
+  /**
+   * Creates a status .
+   * 
+   * @param severity The status severity: ERROR, WARNING, INFO and OK.
+   * @param message The message of the status. Applies only for ERROR, WARNING
+   *          and INFO.
+   */
+  public SpindleStatus(int severity, String message)
+  {
+    statusMessage = message;
+    this.severity = severity;
+  }
 
-    public SpindleStatus(Throwable exception)
-    {
-        statusMessage = exception.getMessage();
-        this.severity = ERROR;
-    }
+  public SpindleStatus(Throwable exception)
+  {
+    statusMessage = exception.getMessage();
+    this.severity = ERROR;
+  }
 
-    /**
-     *  Returns if the status' severity is OK.
-     */
-    public boolean isOK()
-    {
-        return severity == IStatus.OK;
-    }
+  /**
+   * Returns if the status' severity is OK.
+   */
+  public boolean isOK()
+  {
+    return severity == IStatus.OK;
+  }
 
-    /**
-     *  Returns if the status' severity is WARNING.
-     */
-    public boolean isWarning()
-    {
-        return severity == IStatus.WARNING;
-    }
+  /**
+   * Returns if the status' severity is WARNING.
+   */
+  public boolean isWarning()
+  {
+    return severity == IStatus.WARNING;
+  }
 
-    /**
-     *  Returns if the status' severity is INFO.
-     */
-    public boolean isInfo()
-    {
-        return severity == IStatus.INFO;
-    }
+  /**
+   * Returns if the status' severity is INFO.
+   */
+  public boolean isInfo()
+  {
+    return severity == IStatus.INFO;
+  }
 
-    /**
-     *  Returns if the status' severity is ERROR.
-     */
-    public boolean isError()
-    {
-        return severity == IStatus.ERROR;
-    }
+  /**
+   * Returns if the status' severity is ERROR.
+   */
+  public boolean isError()
+  {
+    return severity == IStatus.ERROR;
+  }
 
-    /**
-     * @see IStatus#getMessage
-     */
-    public String getMessage()
-    {
-        return statusMessage;
-    }
+  /**
+   * @see IStatus#getMessage
+   */
+  public String getMessage()
+  {
+    return statusMessage;
+  }
 
-    /**
-     * Sets the status to ERROR.
-     * @param The error message (can be empty, but not null)
-     */
-    public void setError(String errorMessage)
-    {
-        Assert.isNotNull(errorMessage);
-        statusMessage = errorMessage;
-        severity = IStatus.ERROR;
-    }
+  /**
+   * Sets the status to ERROR.
+   * 
+   * @param The error message (can be empty, but not null)
+   */
+  public void setError(String errorMessage)
+  {
+    Assert.isNotNull(errorMessage);
+    statusMessage = errorMessage;
+    severity = IStatus.ERROR;
+  }
 
-    /**
-     * Sets the status to WARNING.
-     * @param The warning message (can be empty, but not null)
-     */
-    public void setWarning(String warningMessage)
-    {
-        Assert.isNotNull(warningMessage);
-        statusMessage = warningMessage;
-        severity = IStatus.WARNING;
-    }
+  /**
+   * Sets the status to WARNING.
+   * 
+   * @param The warning message (can be empty, but not null)
+   */
+  public void setWarning(String warningMessage)
+  {
+    Assert.isNotNull(warningMessage);
+    statusMessage = warningMessage;
+    severity = IStatus.WARNING;
+  }
 
-    /**
-     * Sets the status to INFO.
-     * @param The info message (can be empty, but not null)
-     */
-    public void setInfo(String infoMessage)
-    {
-        Assert.isNotNull(infoMessage);
-        statusMessage = infoMessage;
-        severity = IStatus.INFO;
-    }
+  /**
+   * Sets the status to INFO.
+   * 
+   * @param The info message (can be empty, but not null)
+   */
+  public void setInfo(String infoMessage)
+  {
+    Assert.isNotNull(infoMessage);
+    statusMessage = infoMessage;
+    severity = IStatus.INFO;
+  }
 
-    /**
-     * Sets the status to OK.
-     */
-    public void setOK()
-    {
-        statusMessage = null;
-        severity = IStatus.OK;
-    }
+  /**
+   * Sets the status to OK.
+   */
+  public void setOK()
+  {
+    statusMessage = null;
+    severity = IStatus.OK;
+  }
 
-    /*
-     * @see IStatus#matches(int)
-     */
-    public boolean matches(int severityMask)
-    {
-        return (severity & severityMask) != 0;
-    }
+  /*
+   * @see IStatus#matches(int)
+   */
+  public boolean matches(int severityMask)
+  {
+    return (severity & severityMask) != 0;
+  }
 
-    /**
-     * Returns always <code>false</code>.
-     * @see IStatus#isMultiStatus()
-     */
-    public boolean isMultiStatus()
-    {
-        return false;
-    }
+  /**
+   * Returns always <code>false</code>.
+   * 
+   * @see IStatus#isMultiStatus()
+   */
+  public boolean isMultiStatus()
+  {
+    return false;
+  }
 
-    /*
-     * @see IStatus#getSeverity()
-     */
-    public int getSeverity()
-    {
-        return severity;
-    }
+  /*
+   * @see IStatus#getSeverity()
+   */
+  public int getSeverity()
+  {
+    return severity;
+  }
 
-    /*
-     * @see IStatus#getPlugin()
-     */
-    public String getPlugin()
-    {
-        return TapestryCore.PLUGIN_ID;
-    }
+  /*
+   * @see IStatus#getPlugin()
+   */
+  public String getPlugin()
+  {
+    return TapestryCore.PLUGIN_ID;
+  }
 
-    /**
-     * Returns always <code>null</code>.
-     * @see IStatus#getException()
-     */
-    public Throwable getException()
-    {
-        return null;
-    }
+  /**
+   * Returns always <code>null</code>.
+   * 
+   * @see IStatus#getException()
+   */
+  public Throwable getException()
+  {
+    return null;
+  }
 
-    /**
-     * Returns always the error severity.
-     * @see IStatus#getCode()
-     */
-    public int getCode()
-    {
-        return severity;
-    }
+  /**
+   * Returns always the error severity.
+   * 
+   * @see IStatus#getCode()
+   */
+  public int getCode()
+  {
+    return severity;
+  }
 
-    /**
-     * Returns always <code>null</code>.
-     * @see IStatus#getChildren()
-     */
-    public IStatus[] getChildren()
-    {
-        return new IStatus[0];
-    }
+  /**
+   * Returns always <code>null</code>.
+   * 
+   * @see IStatus#getChildren()
+   */
+  public IStatus[] getChildren()
+  {
+    return new IStatus[0];
+  }
 
 }

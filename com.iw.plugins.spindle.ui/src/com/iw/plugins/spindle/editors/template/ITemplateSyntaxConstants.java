@@ -29,15 +29,16 @@ package com.iw.plugins.spindle.editors.template;
 import net.sf.solareclipse.xml.ui.text.IXMLSyntaxConstants;
 
 /**
- *  Extend xml syntax constants to include jwcid attibute name
+ * Extend xml syntax constants to include jwcid attibute name
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ITemplateSyntaxConstants.java,v 1.1 2003/09/04 07:44:55
+ *          glongman Exp $
  */
 public interface ITemplateSyntaxConstants extends IXMLSyntaxConstants
 {
 
-    String TAPESTRY_ATT_NAME="jwcid_attribute";
-    String TAPESTRY_ATT_VALUE="jwcid_attribute_value";
+  String TAPESTRY_ATT_NAME = "jwcid_attribute";
+  String TAPESTRY_ATT_VALUE = "jwcid_attribute_value";
 
 }

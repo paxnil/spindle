@@ -89,12 +89,12 @@ public class XMLUtil
 
   static public final int DTD_SERVLET_2_3 = 6;
 
-  static public final int[] ALLOWED_SPEC_DTDS = new int[] { DTD_1_3, DTD_3_0 };
+  static public final int[] ALLOWED_SPEC_DTDS = new int[]{DTD_1_3, DTD_3_0};
 
   static public final String SPEC_DTD_ERROR_KEY = "error-invalid-spec-public-id";
 
-  static public final int[] ALLOWED_SERVLET_DTDS = new int[] { DTD_SERVLET_2_2,
-      DTD_SERVLET_2_3 };
+  static public final int[] ALLOWED_SERVLET_DTDS = new int[]{DTD_SERVLET_2_2,
+      DTD_SERVLET_2_3};
 
   static public final String SERVLET_DTD_ERROR_KEY = "error-invalid-servlet-public-id";
 
@@ -122,18 +122,18 @@ public class XMLUtil
     switch (DTDVersion)
     {
 
-    //  		case DTD_1_1: return SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID;
-    //  		
-    //  		case DTD_1_2: return SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID;
+      //  		case DTD_1_1: return SpecificationParser.TAPESTRY_DTD_1_1_PUBLIC_ID;
+      //  		
+      //  		case DTD_1_2: return SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID;
 
-    case DTD_1_3:
-      return SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID;
-    case DTD_3_0:
-      return SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID;
-    case DTD_SERVLET_2_2:
-      return TapestryCore.SERVLET_2_2_PUBLIC_ID;
-    case DTD_SERVLET_2_3:
-      return TapestryCore.SERVLET_2_3_PUBLIC_ID;
+      case DTD_1_3 :
+        return SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID;
+      case DTD_3_0 :
+        return SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID;
+      case DTD_SERVLET_2_2 :
+        return TapestryCore.SERVLET_2_2_PUBLIC_ID;
+      case DTD_SERVLET_2_3 :
+        return TapestryCore.SERVLET_2_3_PUBLIC_ID;
 
     }
 
@@ -156,41 +156,41 @@ public class XMLUtil
 
     switch (specification.getSpecificationType())
     {
-    case BaseSpecification.LIBRARY_SPEC:
-      writeLibrarySpecification(
-          indenter,
-          (PluginLibrarySpecification) specification,
-          indent);
-      break;
+      case BaseSpecification.LIBRARY_SPEC :
+        writeLibrarySpecification(
+            indenter,
+            (PluginLibrarySpecification) specification,
+            indent);
+        break;
 
-    case BaseSpecification.APPLICATION_SPEC:
-      writeApplicationSpecification(
-          indenter,
-          (PluginApplicationSpecification) specification,
-          indent);
-      break;
-    case BaseSpecification.EXTENSION_CONFIGURATION:
-      writeExtensionConfiguration(
-          indenter,
-          (PluginExtensionConfiguration) specification,
-          indent);
-      break;
+      case BaseSpecification.APPLICATION_SPEC :
+        writeApplicationSpecification(
+            indenter,
+            (PluginApplicationSpecification) specification,
+            indent);
+        break;
+      case BaseSpecification.EXTENSION_CONFIGURATION :
+        writeExtensionConfiguration(
+            indenter,
+            (PluginExtensionConfiguration) specification,
+            indent);
+        break;
 
-    case BaseSpecification.EXTENSION_SPEC:
-      writeExtensionSpecification(
-          indenter,
-          (PluginExtensionSpecification) specification,
-          indent);
-      break;
+      case BaseSpecification.EXTENSION_SPEC :
+        writeExtensionSpecification(
+            indenter,
+            (PluginExtensionSpecification) specification,
+            indent);
+        break;
 
-    case BaseSpecification.COMPONENT_SPEC:
-      writeComponentSpecification(
-          indenter,
-          (PluginComponentSpecification) specification,
-          indent);
-      break;
-    default:
-      throw new IllegalStateException("unknown spec type!");
+      case BaseSpecification.COMPONENT_SPEC :
+        writeComponentSpecification(
+            indenter,
+            (PluginComponentSpecification) specification,
+            indent);
+        break;
+      default :
+        throw new IllegalStateException("unknown spec type!");
 
     }
   }
@@ -941,21 +941,21 @@ public class XMLUtil
     {
       switch (characters[i])
       {
-      case '<':
-        buffer.append("&lt;");
-        break;
+        case '<' :
+          buffer.append("&lt;");
+          break;
 
-      case '>':
-        buffer.append("&gt;");
-        break;
+        case '>' :
+          buffer.append("&gt;");
+          break;
 
-      case '&':
-        buffer.append("&amp;");
-        break;
+        case '&' :
+          buffer.append("&amp;");
+          break;
 
-      default:
-        buffer.append(characters[i]);
-        break;
+        default :
+          buffer.append(characters[i]);
+          break;
       }
     }
     return buffer.toString();
@@ -1035,7 +1035,7 @@ public class XMLUtil
 
     indenter.println("<web-app>");
     indenter.printlnIndented(1, "<display-name>" + servletName + "</display-name>");
-    
+
     if (TapestryCore.SERVLET_2_3_PUBLIC_ID.equals(publicId) && writeFilter)
       writeTapestryFilter("org.apache.tapestry.RedirectFilter", writer, 1); //TODO
     // add
@@ -1200,8 +1200,7 @@ public class XMLUtil
         writeMultiLine(indenter, description);
         indenter.println("]]>");
         indenter.printlnIndented(indent, "</description>");
-      }
-      ;
+      };
     }
   }
 
@@ -1392,34 +1391,34 @@ public class XMLUtil
 
     switch (DTDVersion)
     {
-    case XMLUtil.DTD_1_1:
-      indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
-      break;
+      case XMLUtil.DTD_1_1 :
+        indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
+        break;
 
-    case XMLUtil.DTD_1_2:
-      indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
-      break;
+      case XMLUtil.DTD_1_2 :
+        indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
+        break;
 
-    case XMLUtil.DTD_1_3:
-      indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd\">");
-      break;
+      case XMLUtil.DTD_1_3 :
+        indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd\">");
+        break;
 
-    case XMLUtil.DTD_3_0:
-      indenter
-          .println("      \"http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd\">");
-      break;
+      case XMLUtil.DTD_3_0 :
+        indenter
+            .println("      \"http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd\">");
+        break;
 
-    case XMLUtil.DTD_SERVLET_2_2:
-      indenter.println("      \"http://java.sun.com/j2ee/dtds/web-app_2_2.dtd\">");
-      break;
+      case XMLUtil.DTD_SERVLET_2_2 :
+        indenter.println("      \"http://java.sun.com/j2ee/dtds/web-app_2_2.dtd\">");
+        break;
 
-    case XMLUtil.DTD_SERVLET_2_3:
-      indenter.println("      \"http://java.sun.com/dtd/web-app_2_3.dtd\">");
-      break;
+      case XMLUtil.DTD_SERVLET_2_3 :
+        indenter.println("      \"http://java.sun.com/dtd/web-app_2_3.dtd\">");
+        break;
 
-    default:
-      Assert.isTrue(false, "unknown DTD: " + publicId);
-      break;
+      default :
+        Assert.isTrue(false, "unknown DTD: " + publicId);
+        break;
     }
 
     indenter.println(TapestryCore.getString("TAPESTRY.xmlComment"));

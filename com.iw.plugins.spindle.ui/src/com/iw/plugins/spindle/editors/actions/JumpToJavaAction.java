@@ -51,125 +51,131 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 public class JumpToJavaAction extends BaseJumpAction
 {
 
-    public JumpToJavaAction()
+  public JumpToJavaAction()
+  {
+    super();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.actions.BaseJumpAction#doRun()
+   */
+  protected void doRun()
+  {
+    IType javaType = findType();
+    if (javaType == null)
+      return;
+    reveal(javaType);
+  }
+
+  protected IType findType()
+  {
+    IType javaType;
+    if (fEditor instanceof TemplateEditor)
     {
-        super();
+      javaType = getTypeFromTemplate();
+    } else
+    {
+      javaType = getTypeFromSpec();
     }
+    return javaType;
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.actions.BaseJumpAction#doRun()
-     */
-    protected void doRun()
+  private IType getTypeFromTemplate()
+  {
+    IComponentSpecification componentSpec = (IComponentSpecification) fEditor
+        .getSpecification();
+    if (componentSpec != null)
     {
-        IType javaType = findType();
-        if (javaType == null)
-            return;
-        reveal(javaType);
+      String typeName = componentSpec.getComponentClassName();
+      return resolveType(typeName);
+
     }
+    return null;
+  }
 
-    protected IType findType()
+  private IType getTypeFromSpec()
+  {
+    try
     {
-        IType javaType;
-        if (fEditor instanceof TemplateEditor)
+      attachPartitioner();
+      XMLNode root = XMLNode.createTree(getDocument(), -1);
+      List children = root.getChildren();
+      for (Iterator iter = children.iterator(); iter.hasNext();)
+      {
+        XMLNode child = (XMLNode) iter.next();
+        String type = child.getType();
+        if (type == XMLDocumentPartitioner.TAG || type == XMLDocumentPartitioner.EMPTYTAG)
         {
-            javaType = getTypeFromTemplate();
-        } else
-        {
-            javaType = getTypeFromSpec();
-        }
-        return javaType;
-    }
-
-    private IType getTypeFromTemplate()
-    {
-        IComponentSpecification componentSpec = (IComponentSpecification) fEditor.getSpecification();
-        if (componentSpec != null)
-        {
-            String typeName = componentSpec.getComponentClassName();
-            return resolveType(typeName);
-
-        }
-        return null;
-    }
-
-    private IType getTypeFromSpec()
-    {
-        try
-        {
-            attachPartitioner();
-            XMLNode root = XMLNode.createTree(getDocument(), -1);
-            List children = root.getChildren();
-            for (Iterator iter = children.iterator(); iter.hasNext();)
+          String name = child.getName();
+          if (name == null)
+            return null;
+          name = name.toLowerCase();
+          Map attrMap;
+          if (name.equals("component-specification") || name.equals("page-specification"))
+          {
+            attrMap = child.getAttributesMap();
+            XMLNode attribute = (XMLNode) attrMap.get("class");
+            if (attribute != null)
             {
-                XMLNode child = (XMLNode) iter.next();
-                String type = child.getType();
-                if (type == XMLDocumentPartitioner.TAG || type == XMLDocumentPartitioner.EMPTYTAG)
-                {
-                    String name = child.getName();
-                    if (name == null)
-                        return null;
-                    name = name.toLowerCase();
-                    Map attrMap;
-                    if (name.equals("component-specification") || name.equals("page-specification"))
-                    {
-                        attrMap = child.getAttributesMap();
-                        XMLNode attribute = (XMLNode) attrMap.get("class");
-                        if (attribute != null)
-                        {
-                            String attrValue = attribute.getAttributeValue();
-                            if (attrValue != null)
-                                return resolveType(attrValue);
-                        }
-
-                    } else if (name.equals("application"))
-                    {
-                        attrMap = child.getAttributesMap();
-                        XMLNode attribute = (XMLNode) attrMap.get("engine-class");
-                        if (attribute != null)
-                        {
-                            String attrValue = attribute.getAttributeValue();
-                            if (attrValue != null)
-                                return resolveType(attrValue);
-                        }
-                    }
-                }
+              String attrValue = attribute.getAttributeValue();
+              if (attrValue != null)
+                return resolveType(attrValue);
             }
-        } catch (BadLocationException e)
-        {
-            UIPlugin.log(e);
-        } finally
-        {
-            detachPartitioner();
-        }
-        return null;
-    }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
-     */
-    public  void editorContextMenuAboutToShow(IMenuManager menu)
+          } else if (name.equals("application"))
+          {
+            attrMap = child.getAttributesMap();
+            XMLNode attribute = (XMLNode) attrMap.get("engine-class");
+            if (attribute != null)
+            {
+              String attrValue = attribute.getAttributeValue();
+              if (attrValue != null)
+                return resolveType(attrValue);
+            }
+          }
+        }
+      }
+    } catch (BadLocationException e)
     {
-        IType javaType = findType();
-        if (javaType != null)
-            menu.add(new MenuOpenTypeAction(javaType));
-    }
-
-    class MenuOpenTypeAction extends Action
+      UIPlugin.log(e);
+    } finally
     {
-        IType type;
-
-        public MenuOpenTypeAction(IType type)
-        {
-            Assert.isNotNull(type);
-            this.type = type;
-            setImageDescriptor(getImageDescriptorFor(BaseJumpAction.LABEL_PROVIDER.getImage(type)));
-            setText(type.getFullyQualifiedName());
-        }
-
-        public void run()
-        {
-            reveal(type);
-        }
+      detachPartitioner();
     }
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+   */
+  public void editorContextMenuAboutToShow(IMenuManager menu)
+  {
+    IType javaType = findType();
+    if (javaType != null)
+      menu.add(new MenuOpenTypeAction(javaType));
+  }
+
+  class MenuOpenTypeAction extends Action
+  {
+    IType type;
+
+    public MenuOpenTypeAction(IType type)
+    {
+      Assert.isNotNull(type);
+      this.type = type;
+      setImageDescriptor(getImageDescriptorFor(BaseJumpAction.LABEL_PROVIDER
+          .getImage(type)));
+      setText(type.getFullyQualifiedName());
+    }
+
+    public void run()
+    {
+      reveal(type);
+    }
+  }
 
 }

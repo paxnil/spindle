@@ -63,7 +63,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
 
   public NamespaceDialogField(String name, int labelWidth)
   {
-    super(UIPlugin.getString(name + ".label"), labelWidth, new String[] {});
+    super(UIPlugin.getString(name + ".label"), labelWidth, new String[]{});
     this.fName = name;
   }
 
@@ -107,7 +107,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
   private void clearNamespaces()
   {
     fValidNamespaces.clear();
-    setValues(new String[] {});
+    setValues(new String[]{});
     select(-1);
   }
 

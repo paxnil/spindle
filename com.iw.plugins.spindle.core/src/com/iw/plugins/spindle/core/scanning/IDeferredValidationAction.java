@@ -29,12 +29,13 @@ package com.iw.plugins.spindle.core.scanning;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 
 /**
- *  A validation that can be executed later
+ * A validation that can be executed later
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: IDeferredValidationAction.java,v 1.2 2003/09/15 01:13:33
+ *          glongman Exp $
  */
 public interface IDeferredValidationAction
 {
-    public void execute(IProblemCollector collector);
+  public void execute(IProblemCollector collector);
 }

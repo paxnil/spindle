@@ -14,13 +14,18 @@ import java.util.Iterator;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
-public class ProblemMarkerAnnotation extends MarkerAnnotation implements IProblemAnnotation
+public class ProblemMarkerAnnotation extends MarkerAnnotation
+    implements
+      IProblemAnnotation
 {
 
   public static final String TAPESTRY_MARKER_TYPE_PREFIX = "com.iw.plugins.spindle";
-  public static final String ERROR_ANNOTATION_TYPE = TAPESTRY_MARKER_TYPE_PREFIX + ".ui.error";
-  public static final String WARNING_ANNOTATION_TYPE = TAPESTRY_MARKER_TYPE_PREFIX + ".ui.warning";
-  public static final String INFO_ANNOTATION_TYPE = TAPESTRY_MARKER_TYPE_PREFIX + ".ui.info";
+  public static final String ERROR_ANNOTATION_TYPE = TAPESTRY_MARKER_TYPE_PREFIX
+      + ".ui.error";
+  public static final String WARNING_ANNOTATION_TYPE = TAPESTRY_MARKER_TYPE_PREFIX
+      + ".ui.warning";
+  public static final String INFO_ANNOTATION_TYPE = TAPESTRY_MARKER_TYPE_PREFIX
+      + ".ui.info";
   public static final String TASK_ANNOTATION_TYPE = "org.eclipse.ui.workbench.texteditor.task";
 
   private IProblemAnnotation fOverlay;
@@ -115,8 +120,7 @@ public class ProblemMarkerAnnotation extends MarkerAnnotation implements IProble
   /**
    * Overlays this annotation with the given annotation.
    * 
-   * @param annotation
-   *          that is overlaid by this annotation
+   * @param annotation that is overlaid by this annotation
    */
   public void setOverlay(IProblemAnnotation annotation)
   {

@@ -11,50 +11,49 @@ import com.iw.plugins.spindle.UIPlugin;
 public class TemplateEditorContributor extends TextEditorActionContributor
 {
 
-    protected RetargetTextEditorAction fContentAssistProposal;
+  protected RetargetTextEditorAction fContentAssistProposal;
 
-    /**
-     * Creates a multi-page contributor.
-     */
-    public TemplateEditorContributor()
-    {
-        super();
+  /**
+   * Creates a multi-page contributor.
+   */
+  public TemplateEditorContributor()
+  {
+    super();
 
-        fContentAssistProposal =
-            new RetargetTextEditorAction(
-                UIPlugin.getDefault().getResourceBundle(),
-                "ContentAssistProposal.");
-        fContentAssistProposal.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+    fContentAssistProposal = new RetargetTextEditorAction(UIPlugin
+        .getDefault()
+        .getResourceBundle(), "ContentAssistProposal.");
+    fContentAssistProposal
+        .setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
 
-    }
+  }
 
-    
-    private void doSetActiveEditor(IEditorPart part)
-    {
-        super.setActiveEditor(part);
+  private void doSetActiveEditor(IEditorPart part)
+  {
+    super.setActiveEditor(part);
 
-        ITextEditor editor = null;
-        if (part instanceof ITextEditor)
-            editor = (ITextEditor) part;
+    ITextEditor editor = null;
+    if (part instanceof ITextEditor)
+      editor = (ITextEditor) part;
 
-        fContentAssistProposal.setAction(getAction(editor, "ContentAssistProposal"));
-    }
+    fContentAssistProposal.setAction(getAction(editor, "ContentAssistProposal"));
+  }
 
-    /*
-     * @see IEditorActionBarContributor#setActiveEditor(IEditorPart)
-     */
-    public void setActiveEditor(IEditorPart part)
-    {
-        super.setActiveEditor(part);
-        doSetActiveEditor(part);
-    }
+  /*
+   * @see IEditorActionBarContributor#setActiveEditor(IEditorPart)
+   */
+  public void setActiveEditor(IEditorPart part)
+  {
+    super.setActiveEditor(part);
+    doSetActiveEditor(part);
+  }
 
-    /*
-     * @see IEditorActionBarContributor#dispose()
-     */
-    public void dispose()
-    {
-        doSetActiveEditor(null);
-        super.dispose();
-    }
+  /*
+   * @see IEditorActionBarContributor#dispose()
+   */
+  public void dispose()
+  {
+    doSetActiveEditor(null);
+    super.dispose();
+  }
 }

@@ -50,176 +50,188 @@ import com.iw.plugins.spindle.core.util.Markers;
 public class FullBuild extends Build
 {
 
-    protected ServletInfo fApplicationServlet;
-    /**
-     * Constructor for FullBuilder.
-     */
-    public FullBuild(TapestryBuilder builder)
+  protected ServletInfo fApplicationServlet;
+  /**
+   * Constructor for FullBuilder.
+   */
+  public FullBuild(TapestryBuilder builder)
+  {
+    super(builder);
+  }
+
+  /**
+   * Use the parser to find declared applications in web.xml
+   * 
+   * @param parser
+   * @throws CoreException
+   */
+  protected void preBuild() throws CoreException
+  {
+    setDependencyListener(new BuilderDependencyListener());
+    findDeclaredApplication();
+  }
+
+  protected void postBuild()
+  {
+    BuilderDependencyListener listener = (BuilderDependencyListener) getDependencyListener();
+    if (fTapestryBuilder.DEBUG)
     {
-        super(builder);
+      listener.dump();
+    }
+  }
+
+  /**
+   * Resolve the Tapesty framework namespace
+   */
+  protected void resolveFramework(Parser parser)
+  {
+    IResourceWorkspaceLocation frameworkLocation = (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot
+        .getRelativeLocation("/org/apache/tapestry/Framework.library");
+    FrameworkResolver resolver = new FrameworkResolver(this, parser, frameworkLocation);
+    fFrameworkNamespace = resolver.resolve();
+    //        fFrameworkNamespace =
+    // fNSResolver.resolveFrameworkNamespace(frameworkLocation);
+  }
+
+  /**
+   * Resolve the application namespace
+   *  
+   */
+  protected void doBuild(Parser parser)
+  {
+    ApplicationResolver resolver = new ApplicationResolver(
+        this,
+        parser,
+        fFrameworkNamespace,
+        fApplicationServlet);
+    fApplicationNamespace = resolver.resolve();
+  }
+
+  public void saveState()
+  {
+    State newState = new State(fTapestryBuilder);
+    newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
+    newState.fLastKnownClasspath = fTapestryBuilder.fClasspath;
+    newState.fJavaDependencies = fFoundTypes;
+    newState.fMissingJavaTypes = fMissingTypes;
+    newState.fTemplateMap = fTemplateMap;
+    newState.fFileSpecificationMap = fFileSpecificationMap;
+    newState.fBinarySpecificationMap = fBinarySpecificationMap;
+    newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
+    newState.fApplicationServlet = fApplicationServlet;
+    newState.fPrimaryNamespace = fApplicationNamespace;
+    newState.fFrameworkNamespace = fFrameworkNamespace;
+    newState.fCleanTemplates = fCleanTemplates;
+
+    // save the processed binary libraries
+    saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
+    TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
+        fTapestryBuilder.fCurrentProject,
+        newState);
+  }
+
+  protected void saveBinaryLibraries(
+      ICoreNamespace framework,
+      ICoreNamespace namespace,
+      State state)
+  {
+    saveBinaryLibraries(framework, state);
+    saveBinaryLibraries(namespace, state);
+  }
+
+  private void saveBinaryLibraries(ICoreNamespace namespace, State state)
+  {
+    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+        .getSpecificationLocation();
+    if (location.isBinary())
+      state.fBinaryNamespaces.put(location, namespace);
+
+    for (Iterator iter = namespace.getChildIds().iterator(); iter.hasNext();)
+    {
+      String id = (String) iter.next();
+      ICoreNamespace child = (ICoreNamespace) namespace.getChildNamespace(id);
+      if (child != null)
+        saveBinaryLibraries(child, state);
+    }
+  }
+
+  public void cleanUp()
+  {
+    super.cleanUp();
+  }
+
+  protected void findDeclaredApplication() throws CoreException
+  {
+    Parser servletParser = new Parser();
+    servletParser.setDoValidation(true);
+    // uses a validating parser here.
+    // Parser does not validate by default.
+    // Scanners use the Spindle validator.
+
+    IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot
+        .getRelativeLocation("WEB-INF/web.xml");
+    IStorage storage = webXML.getStorage();
+    //        IFile webXML = tapestryBuilder.contextRoot.getFile("WEB-INF/web.xml");
+    if (storage != null)
+    {
+      Document wxmlElement = null;
+      try
+      {
+        fTapestryBuilder.fNotifier.subTask(TapestryCore.getString(
+            TapestryBuilder.STRING_KEY + "scanning",
+            webXML.toString()));
+        wxmlElement = parseToDocument(servletParser, storage, webXML, null);
+      } catch (IOException e1)
+      {
+        TapestryCore.log(e1);
+      } finally
+      {
+        servletParser = null;
+      }
+      if (wxmlElement == null)
+        throw new BuilderException("Tapestry Build failed: could not parse web.xml");
+
+      ServletInfo[] servletInfos = null;
+      try
+      {
+        WebXMLScanner wscanner = new WebXMLScanner(this);
+        servletInfos = wscanner.scanServletInformation(wxmlElement);
+        IResource resource = (IResource) webXML.getStorage();
+        Markers.addTapestryProblemMarkersToResource(resource, wscanner.getProblems());
+      } catch (ScannerException e)
+      {
+        TapestryCore.log(e);
+      }
+
+      if (servletInfos == null || servletInfos.length == 0)
+      {
+        throw new BuilderException(TapestryCore.getString(TapestryBuilder.STRING_KEY
+            + "abort-no-valid-application-servlets-found"));
+      }
+      if (servletInfos.length > 1)
+      {
+        throw new BuilderException(TapestryCore.getString(TapestryBuilder.STRING_KEY
+            + "abort-too-many-valid-servlets-found"));
+      }
+      fApplicationServlet = servletInfos[0];
+
+    } else
+    {
+      String definedWebRoot = fTapestryBuilder.fTapestryProject.getWebContext();
+      if (definedWebRoot != null && !"".equals(definedWebRoot))
+      {
+        Markers.addTapestryProblemMarkerToResource(
+            fTapestryBuilder.getProject(),
+            TapestryCore.getString(
+                TapestryBuilder.STRING_KEY + "missing-context",
+                definedWebRoot),
+            IMarker.SEVERITY_WARNING,
+            0,
+            0,
+            0);
+      }
     }
 
-    /**
-     * Use the parser to find declared applications in web.xml
-     * @param parser
-     * @throws CoreException
-     */
-    protected void preBuild() throws CoreException
-    {
-        setDependencyListener(new BuilderDependencyListener());
-        findDeclaredApplication();
-    }
-
-    protected void postBuild()
-    {
-        BuilderDependencyListener listener = (BuilderDependencyListener) getDependencyListener();
-        if (fTapestryBuilder.DEBUG)
-        {
-            listener.dump();
-        }
-    }
-
-    /**
-     * Resolve the Tapesty framework namespace
-     */
-    protected void resolveFramework(Parser parser)
-    {
-        IResourceWorkspaceLocation frameworkLocation =
-            (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot.getRelativeLocation(
-                "/org/apache/tapestry/Framework.library");
-        FrameworkResolver resolver = new FrameworkResolver(this, parser, frameworkLocation);
-        fFrameworkNamespace = resolver.resolve();
-        //        fFrameworkNamespace = fNSResolver.resolveFrameworkNamespace(frameworkLocation);
-    }
-
-    /**
-     * Resolve the application namespace
-     *
-     */
-    protected void doBuild(Parser parser)
-    {
-        ApplicationResolver resolver = new ApplicationResolver(this, parser, fFrameworkNamespace, fApplicationServlet);
-        fApplicationNamespace = resolver.resolve();
-    }
-
-    public void saveState()
-    {
-        State newState = new State(fTapestryBuilder);
-        newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
-        newState.fLastKnownClasspath = fTapestryBuilder.fClasspath;
-        newState.fJavaDependencies = fFoundTypes;
-        newState.fMissingJavaTypes = fMissingTypes;
-        newState.fTemplateMap = fTemplateMap;
-        newState.fFileSpecificationMap = fFileSpecificationMap;
-        newState.fBinarySpecificationMap= fBinarySpecificationMap;
-        newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
-        newState.fApplicationServlet = fApplicationServlet;
-        newState.fPrimaryNamespace = fApplicationNamespace;
-        newState.fFrameworkNamespace = fFrameworkNamespace;
-        newState.fCleanTemplates = fCleanTemplates;
-
-        // save the processed binary libraries
-        saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
-        TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
-            fTapestryBuilder.fCurrentProject,
-            newState);
-    }
-
-    protected void saveBinaryLibraries(ICoreNamespace framework, ICoreNamespace namespace, State state)
-    {
-        saveBinaryLibraries(framework, state);
-        saveBinaryLibraries(namespace, state);
-    }
-
-    private void saveBinaryLibraries(ICoreNamespace namespace, State state)
-    {
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
-        if (location.isBinary())
-            state.fBinaryNamespaces.put(location, namespace);
-
-        for (Iterator iter = namespace.getChildIds().iterator(); iter.hasNext();)
-        {
-            String id = (String) iter.next();
-            ICoreNamespace child = (ICoreNamespace) namespace.getChildNamespace(id);
-            if (child != null)
-                saveBinaryLibraries(child, state);
-        }
-    }
-
-    public void cleanUp()
-    {
-        super.cleanUp();
-    }
-
-    protected void findDeclaredApplication() throws CoreException
-    {
-        Parser servletParser = new Parser();
-        servletParser.setDoValidation(true);
-        // uses a validating parser here.
-        // Parser does not validate by default.
-        // Scanners use the Spindle validator.
-
-        IResourceWorkspaceLocation webXML =
-            (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot.getRelativeLocation("WEB-INF/web.xml");
-        IStorage storage = webXML.getStorage();
-        //        IFile webXML = tapestryBuilder.contextRoot.getFile("WEB-INF/web.xml");
-        if (storage != null)
-        {
-            Document wxmlElement = null;
-            try
-            {
-                fTapestryBuilder.fNotifier.subTask(
-                    TapestryCore.getString(TapestryBuilder.STRING_KEY + "scanning", webXML.toString()));
-                wxmlElement = parseToDocument(servletParser, storage, webXML, null);
-            } catch (IOException e1)
-            {
-                TapestryCore.log(e1);
-            } finally
-            {
-                servletParser = null;
-            }
-            if (wxmlElement == null)
-                throw new BuilderException("Tapestry Build failed: could not parse web.xml");
-
-            ServletInfo[] servletInfos = null;
-            try
-            {
-                WebXMLScanner wscanner = new WebXMLScanner(this);
-                servletInfos = wscanner.scanServletInformation(wxmlElement);
-                IResource resource = (IResource) webXML.getStorage();
-                Markers.addTapestryProblemMarkersToResource(resource, wscanner.getProblems());
-            } catch (ScannerException e)
-            {
-                TapestryCore.log(e);
-            }
-
-            if (servletInfos == null || servletInfos.length == 0)
-            {
-                throw new BuilderException(
-                    TapestryCore.getString(TapestryBuilder.STRING_KEY + "abort-no-valid-application-servlets-found"));
-            }
-            if (servletInfos.length > 1)
-            {
-                throw new BuilderException(
-                    TapestryCore.getString(TapestryBuilder.STRING_KEY + "abort-too-many-valid-servlets-found"));
-            }
-            fApplicationServlet = servletInfos[0];
-
-        } else
-        {
-            String definedWebRoot = fTapestryBuilder.fTapestryProject.getWebContext();
-            if (definedWebRoot != null && !"".equals(definedWebRoot))
-            {
-                Markers.addTapestryProblemMarkerToResource(
-                    fTapestryBuilder.getProject(),
-                    TapestryCore.getString(TapestryBuilder.STRING_KEY + "missing-context", definedWebRoot),
-                    IMarker.SEVERITY_WARNING,
-                    0,
-                    0,
-                    0);
-            }
-        }
-
-    }
+  }
 
 }

@@ -38,7 +38,7 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 
 /**
- *  A search for looking into resource deltas!
+ * A search for looking into resource deltas!
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -46,36 +46,42 @@ import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
 public class ResourceDeltaSearch implements ISearch, IResourceDeltaVisitor
 {
 
-    IResourceDelta fDelta;
-    ISearchAcceptor fAcceptor;
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.search.ISearch#configure(java.lang.Object)
-     */
-    public void configure(Object root) throws CoreException
-    {
-        fDelta = (IResourceDelta)root;
-    }
+  IResourceDelta fDelta;
+  ISearchAcceptor fAcceptor;
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.search.ISearch#configure(java.lang.Object)
+   */
+  public void configure(Object root) throws CoreException
+  {
+    fDelta = (IResourceDelta) root;
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.search.ISearch#search(com.iw.plugins.spindle.core.resources.search.ISearchAcceptor)
-     */
-    public void search(ISearchAcceptor acceptor)
-    {
-        fAcceptor = acceptor;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.search.ISearch#search(com.iw.plugins.spindle.core.resources.search.ISearchAcceptor)
+   */
+  public void search(ISearchAcceptor acceptor)
+  {
+    fAcceptor = acceptor;
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse.core.resources.IResourceDelta)
-     */
-    public boolean visit(IResourceDelta delta) throws CoreException
-    {
-        IResource resource = delta.getResource();
-        
-        if (resource instanceof IProject || resource instanceof IFolder)
-            return true;
-            
-        return fAcceptor.accept(delta, (IStorage) resource);
-        
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse.core.resources.IResourceDelta)
+   */
+  public boolean visit(IResourceDelta delta) throws CoreException
+  {
+    IResource resource = delta.getResource();
+
+    if (resource instanceof IProject || resource instanceof IFolder)
+      return true;
+
+    return fAcceptor.accept(delta, (IStorage) resource);
+
+  }
 
 }

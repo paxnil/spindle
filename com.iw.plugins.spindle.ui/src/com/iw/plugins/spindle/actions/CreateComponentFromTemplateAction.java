@@ -24,33 +24,36 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.actions;
 
 import com.iw.plugins.spindle.ui.wizards.NewTapComponentWizard;
 import com.iw.plugins.spindle.ui.wizards.NewTapestryElementWizard;
 
 /**
- * Copyright 2002 Intelligent Works Inc.
- * All rights reserved
+ * Copyright 2002 Intelligent Works Inc. All rights reserved
  * 
  * @author gwl
- * @version $Id$
+ * @version $Id: CreateComponentFromTemplateAction.java,v 1.1 2003/10/29
+ *          12:33:56 glongman Exp $
  */
-public class CreateComponentFromTemplateAction extends AbstractTapestryResourceWizardAction {
+public class CreateComponentFromTemplateAction
+    extends
+      AbstractTapestryResourceWizardAction
+{
 
   /**
    * Constructor for CreateComponentFromTemplateAction.
    */
-  public CreateComponentFromTemplateAction() {
+  public CreateComponentFromTemplateAction()
+  {
     super();
   }
 
   /**
    * @see com.iw.plugins.spindle.wizards.extra.AbstractCreateFromTemplateAction#getWizard()
    */
-  protected NewTapestryElementWizard getWizard() {
+  protected NewTapestryElementWizard getWizard()
+  {
     return new NewTapComponentWizard();
   }
 

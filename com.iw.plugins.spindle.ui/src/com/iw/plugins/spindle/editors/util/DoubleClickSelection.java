@@ -31,48 +31,49 @@ import java.util.List;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 /**
- *  TODO Add Type comment
+ * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: DoubleClickSelection.java,v 1.1 2003/11/21 17:41:23 glongman
+ *          Exp $
  */
 public class DoubleClickSelection extends StructuredSelection
 {
 
-    /**
-     * 
-     */
-    public DoubleClickSelection()
-    {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+  /**
+   *  
+   */
+  public DoubleClickSelection()
+  {
+    super();
+    // TODO Auto-generated constructor stub
+  }
 
-    /**
-     * @param elements
-     */
-    public DoubleClickSelection(Object[] elements)
-    {
-        super(elements);
-        // TODO Auto-generated constructor stub
-    }
+  /**
+   * @param elements
+   */
+  public DoubleClickSelection(Object[] elements)
+  {
+    super(elements);
+    // TODO Auto-generated constructor stub
+  }
 
-    /**
-     * @param element
-     */
-    public DoubleClickSelection(Object element)
-    {
-        super(element);
-        // TODO Auto-generated constructor stub
-    }
+  /**
+   * @param element
+   */
+  public DoubleClickSelection(Object element)
+  {
+    super(element);
+    // TODO Auto-generated constructor stub
+  }
 
-    /**
-     * @param elements
-     */
-    public DoubleClickSelection(List elements)
-    {
-        super(elements);
-        // TODO Auto-generated constructor stub
-    }
+  /**
+   * @param elements
+   */
+  public DoubleClickSelection(List elements)
+  {
+    super(elements);
+    // TODO Auto-generated constructor stub
+  }
 
 }

@@ -44,71 +44,75 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 public class JumpToSpecAction extends BaseJumpAction
 {
 
-    public JumpToSpecAction()
+  public JumpToSpecAction()
+  {
+    super();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.action.IAction#run()
+   */
+  protected void doRun()
+  {
+    IResourceWorkspaceLocation location = getSpecLocation();
+    if (location == null && fEditor instanceof TemplateEditor)
     {
-        super();
+
+      MessageDialog.openInformation(
+          fEditor.getEditorSite().getShell(),
+          "Operation Aborted",
+          "Unable to Jump to Specifications from  a jar based Template");
+      return;
+    }
+    reveal(location);
+  }
+
+  protected IResourceWorkspaceLocation getSpecLocation()
+  {
+    if (!(fEditor instanceof TemplateEditor))
+      return null;
+
+    BaseSpecLocatable spec = (BaseSpecLocatable) fEditor.getSpecification();
+    if (spec != null)
+      return (IResourceWorkspaceLocation) spec.getSpecificationLocation();
+
+    return null;
+
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+   */
+  public void editorContextMenuAboutToShow(IMenuManager menu)
+  {
+    IResourceWorkspaceLocation location = getSpecLocation();
+    if (location != null)
+    {
+      Action action = new MenuOpenSpecAction(location);
+      menu.add(action);
+      action.setEnabled(location.getStorage() != null);
+    }
+  }
+
+  class MenuOpenSpecAction extends Action
+  {
+    IResourceWorkspaceLocation location;
+
+    public MenuOpenSpecAction(IResourceWorkspaceLocation location)
+    {
+      Assert.isNotNull(location);
+      this.location = location;
+      setText(location.getName());
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.action.IAction#run()
-     */
-    protected void doRun()
+    public void run()
     {
-        IResourceWorkspaceLocation location = getSpecLocation();
-        if (location == null && fEditor instanceof TemplateEditor)
-        {
-
-            MessageDialog.openInformation(
-                fEditor.getEditorSite().getShell(),
-                "Operation Aborted",
-                "Unable to Jump to Specifications from  a jar based Template");
-            return;
-        }
-        reveal(location);
+      reveal(location);
     }
-
-    protected IResourceWorkspaceLocation getSpecLocation()
-    {
-        if (!(fEditor instanceof TemplateEditor))
-            return null;
-
-        BaseSpecLocatable spec = (BaseSpecLocatable) fEditor.getSpecification();
-        if (spec != null)
-            return (IResourceWorkspaceLocation) spec.getSpecificationLocation();
-
-        return null;
-
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
-     */
-    public void editorContextMenuAboutToShow(IMenuManager menu)
-    {
-        IResourceWorkspaceLocation location = getSpecLocation();
-        if (location != null)
-        {
-            Action action = new MenuOpenSpecAction(location);
-            menu.add(action);
-            action.setEnabled(location.getStorage() != null);
-        }
-    }
-
-    class MenuOpenSpecAction extends Action
-    {
-        IResourceWorkspaceLocation location;
-
-        public MenuOpenSpecAction(IResourceWorkspaceLocation location)
-        {
-            Assert.isNotNull(location);
-            this.location = location;
-            setText(location.getName());
-        }
-
-        public void run()
-        {
-            reveal(location);
-        }
-    }
+  }
 
 }

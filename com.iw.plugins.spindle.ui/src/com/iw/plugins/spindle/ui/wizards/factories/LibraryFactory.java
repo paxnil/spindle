@@ -50,64 +50,65 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
 /**
  * @author gwl
  * @version $Id$
- *
- * Copyright 2002, Intelligent Work Inc.
- * All Rights Reserved.
+ * 
+ * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
  */
 public class LibraryFactory
 {
 
-    /**
-     * Method createLibrary.
-     * @param root
-     * @param pack
-     * @param appname
-     * @param monitor
-     * @return IFile
-     */
-    public static IFile createLibrary(
-        IPackageFragmentRoot root,
-        IPackageFragment pack,
-        String libraryName,
-        IProgressMonitor monitor)
-        throws CoreException, InterruptedException
+  /**
+   * Method createLibrary.
+   * 
+   * @param root
+   * @param pack
+   * @param appname
+   * @param monitor
+   * @return IFile
+   */
+  public static IFile createLibrary(
+      IPackageFragmentRoot root,
+      IPackageFragment pack,
+      String libraryName,
+      IProgressMonitor monitor) throws CoreException, InterruptedException
+  {
+
+    monitor.beginTask(
+        UIPlugin.getString("ApplicationFactory.operationdesc", libraryName),
+        10);
+    if (pack == null)
     {
-
-        monitor.beginTask(UIPlugin.getString("ApplicationFactory.operationdesc", libraryName), 10);
-        if (pack == null)
-        {
-            pack = root.getPackageFragment("");
-        }
-        if (!pack.exists())
-        {
-            String packName = pack.getElementName();
-            pack = root.createPackageFragment(packName, true, null);
-            pack.save(new SubProgressMonitor(monitor, 1), true);
-        }
-        monitor.worked(1);
-        IContainer folder = (IContainer) pack.getUnderlyingResource();
-        IFile file = folder.getFile(new Path(libraryName + ".library"));
-
-        InputStream contents = new ByteArrayInputStream(getLibraryContent().getBytes());
-        file.create(contents, false, new SubProgressMonitor(monitor, 1));
-        monitor.worked(1);
-        monitor.done();
-        return file;
+      pack = root.getPackageFragment("");
     }
-
-    static private String getLibraryContent() throws CoreException, InterruptedException
+    if (!pack.exists())
     {
-
-        PluginLibrarySpecification librarySpec = new PluginLibrarySpecification();
-        librarySpec.setPublicId(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID);
-        IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-        boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
-        int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
-        StringWriter swriter = new StringWriter();
-        IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
-        XMLUtil.writeLibrarySpecification(iwriter, librarySpec, 0);
-        iwriter.flush();
-        return swriter.toString();
+      String packName = pack.getElementName();
+      pack = root.createPackageFragment(packName, true, null);
+      pack.save(new SubProgressMonitor(monitor, 1), true);
     }
+    monitor.worked(1);
+    IContainer folder = (IContainer) pack.getUnderlyingResource();
+    IFile file = folder.getFile(new Path(libraryName + ".library"));
+
+    InputStream contents = new ByteArrayInputStream(getLibraryContent().getBytes());
+    file.create(contents, false, new SubProgressMonitor(monitor, 1));
+    monitor.worked(1);
+    monitor.done();
+    return file;
+  }
+
+  static private String getLibraryContent() throws CoreException, InterruptedException
+  {
+
+    PluginLibrarySpecification librarySpec = new PluginLibrarySpecification();
+    librarySpec.setPublicId(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID);
+    IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+    boolean useTabs = store.getBoolean(PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT);
+    int tabSize = store.getInt(PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH);
+    StringWriter swriter = new StringWriter();
+    IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
+    XMLUtil.writeLibrarySpecification(iwriter, librarySpec, 0);
+    iwriter.flush();
+    return swriter.toString();
+  }
 
 }

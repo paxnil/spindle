@@ -45,7 +45,9 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 
-public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemCollector
+public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationModel
+    implements
+      IProblemCollector
 {
 
   /**
@@ -186,8 +188,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
           start = fDocument.getLineOffset(line - 1);
           end = start;
         } catch (BadLocationException x)
-        {
-        }
+        {}
       }
     }
 
@@ -386,7 +387,10 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
   /*
    * @see AnnotationModel#addAnnotation(Annotation, Position, boolean)
    */
-  protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged) throws BadLocationException
+  protected void addAnnotation(
+      Annotation annotation,
+      Position position,
+      boolean fireModelChanged) throws BadLocationException
   {
     super.addAnnotation(annotation, position, fireModelChanged);
 
@@ -450,10 +454,20 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
    * @see com.iw.plugins.spindle.core.parser.IProblemCollector#addProblem(int,
    *      com.iw.plugins.spindle.core.parser.ISourceLocation, java.lang.String)
    */
-  public void addProblem(int severity, ISourceLocation location, String message, boolean isTemporary)
+  public void addProblem(
+      int severity,
+      ISourceLocation location,
+      String message,
+      boolean isTemporary)
   {
-    addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity, message, location.getLineNumber(), location
-        .getCharStart(), location.getCharEnd(), isTemporary));
+    addProblem(new DefaultProblem(
+        ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+        severity,
+        message,
+        location.getLineNumber(),
+        location.getCharStart(),
+        location.getCharEnd(),
+        isTemporary));
   }
 
   /*
@@ -477,7 +491,8 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
   {
     if (fCollectedProblems == null)
       return new IProblem[0];
-    return (IProblem[]) fCollectedProblems.toArray(new IProblem[fCollectedProblems.size()]);
+    return (IProblem[]) fCollectedProblems
+        .toArray(new IProblem[fCollectedProblems.size()]);
   }
 
 };

@@ -29,7 +29,7 @@ package com.iw.plugins.spindle.core.source;
 import org.eclipse.core.resources.IMarker;
 
 /**
- *  Default impl of IProblem
+ * Default impl of IProblem
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -37,125 +37,138 @@ import org.eclipse.core.resources.IMarker;
 public class DefaultProblem implements IProblem
 {
 
-    private int fCharEnd;
+  private int fCharEnd;
 
-    private int fCharStart;
+  private int fCharStart;
 
-    private int fLineNumber;
+  private int fLineNumber;
 
-    private String fMessage;
+  private String fMessage;
 
-    private int fSeverity;
+  private int fSeverity;
 
-    private String fType;
-    
-    private boolean fTemporary;
+  private String fType;
 
-    /**
-     * 
-     */
-    public DefaultProblem(String type, int severity, String message, int lineNumber, int charStart, int charEnd, boolean isTemporary)
+  private boolean fTemporary;
+
+  /**
+   *  
+   */
+  public DefaultProblem(String type, int severity, String message, int lineNumber,
+      int charStart, int charEnd, boolean isTemporary)
+  {
+    fType = type;
+    fSeverity = severity;
+    fMessage = message;
+    fLineNumber = lineNumber;
+    fCharStart = charStart;
+    fCharEnd = charEnd;
+    fTemporary = isTemporary;
+  }
+
+  public String toString()
+  {
+    String name = getClass().getName();
+    int index = name.lastIndexOf(".");
+    if (index > 0)
+      name = name.substring(index + 1);
+
+    StringBuffer buffer = new StringBuffer(name);
+    buffer.append("[");
+    switch (fSeverity)
     {
-        fType = type;
-        fSeverity = severity;
-        fMessage = message;
-        fLineNumber = lineNumber;
-        fCharStart = charStart;
-        fCharEnd = charEnd;
-        fTemporary = isTemporary;
+      case IMarker.SEVERITY_ERROR :
+        buffer.append("ERROR");
+        break;
+      case IMarker.SEVERITY_WARNING :
+        buffer.append("WARNING");
+        break;
+      case IMarker.SEVERITY_INFO :
+        buffer.append("INFO");
+        break;
+
+      default :
+        buffer.append("NOT SET");
+        break;
     }
+    buffer.append(", ");
+    buffer.append("L=");
+    buffer.append(getLineNumber());
+    buffer.append(", ");
+    buffer.append("CS=");
+    buffer.append(getCharStart());
+    buffer.append(", ");
+    buffer.append("CE=");
+    buffer.append(getCharEnd());
+    buffer.append(", ");
+    buffer.append(getMessage());
+    buffer.append("]");
+    return buffer.toString();
+  }
 
-    public String toString()
-    {
-        String name = getClass().getName();
-        int index = name.lastIndexOf(".");
-        if (index > 0)
-            name = name.substring(index + 1);
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.parser.IProblem#getCharEnd()
+   */
+  public int getCharEnd()
+  {
+    return fCharEnd;
+  }
 
-        StringBuffer buffer = new StringBuffer(name);
-        buffer.append("[");
-        switch (fSeverity)
-        {
-            case IMarker.SEVERITY_ERROR :
-                buffer.append("ERROR");
-                break;
-            case IMarker.SEVERITY_WARNING :
-                buffer.append("WARNING");
-                break;
-            case IMarker.SEVERITY_INFO :
-                buffer.append("INFO");
-                break;
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.parser.IProblem#getCharStart()
+   */
+  public int getCharStart()
+  {
+    return fCharStart;
+  }
 
-            default :
-                buffer.append("NOT SET");
-                break;
-        }
-        buffer.append(", ");
-        buffer.append("L=");
-        buffer.append(getLineNumber());
-        buffer.append(", ");
-        buffer.append("CS=");
-        buffer.append(getCharStart());
-        buffer.append(", ");
-        buffer.append("CE=");
-        buffer.append(getCharEnd());
-        buffer.append(", ");
-        buffer.append(getMessage());
-        buffer.append("]");
-        return buffer.toString();
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.parser.IProblem#getLineNumber()
+   */
+  public int getLineNumber()
+  {
+    return fLineNumber;
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.parser.IProblem#getCharEnd()
-     */
-    public int getCharEnd()
-    {
-        return fCharEnd;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.parser.IProblem#getMessage()
+   */
+  public String getMessage()
+  {
+    return fMessage;
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.parser.IProblem#getCharStart()
-     */
-    public int getCharStart()
-    {
-        return fCharStart;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.parser.IProblem#getSeverity()
+   */
+  public int getSeverity()
+  {
+    return fSeverity;
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.parser.IProblem#getLineNumber()
-     */
-    public int getLineNumber()
-    {
-        return fLineNumber;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.parser.IProblem#getType()
+   */
+  public String getType()
+  {
+    return fType;
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.parser.IProblem#getMessage()
-     */
-    public String getMessage()
-    {
-        return fMessage;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.parser.IProblem#getSeverity()
-     */
-    public int getSeverity()
-    {
-        return fSeverity;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.parser.IProblem#getType()
-     */
-    public String getType()
-    {
-        return fType;
-    }
-
-    public boolean isTemporary()
-    {
-        return fTemporary;
-    }
+  public boolean isTemporary()
+  {
+    return fTemporary;
+  }
 
 }

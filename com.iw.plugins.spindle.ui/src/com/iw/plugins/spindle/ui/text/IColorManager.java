@@ -30,12 +30,13 @@ import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.swt.graphics.Color;
 
 /**
- *  Extension to ISharedTextColors that allows a color to be found by a String key
+ * Extension to ISharedTextColors that allows a color to be found by a String
+ * key
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public interface IColorManager extends ISharedTextColors
 {
-    public Color getColor(String key);
+  public Color getColor(String key);
 }

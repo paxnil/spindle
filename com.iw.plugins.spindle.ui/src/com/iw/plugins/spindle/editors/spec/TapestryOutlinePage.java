@@ -80,8 +80,10 @@ import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
  */
 public class TapestryOutlinePage extends ContentOutlinePage
 {
-  public static final String ALPHA_PREFERENCE = UIPlugin.PLUGIN_ID + ".tapestry-outline-sort-alpha";
-  public static final String CATEGORY_PREFERENCE = UIPlugin.PLUGIN_ID + ".tapestry-outline-sort-category";
+  public static final String ALPHA_PREFERENCE = UIPlugin.PLUGIN_ID
+      + ".tapestry-outline-sort-alpha";
+  public static final String CATEGORY_PREFERENCE = UIPlugin.PLUGIN_ID
+      + ".tapestry-outline-sort-category";
 
   public static void initializeDefaultPreferences(IPreferenceStore store)
   {
@@ -101,7 +103,7 @@ public class TapestryOutlinePage extends ContentOutlinePage
   private TapestryOutlinePage.ToggleCatSortAction fToggleCatSort = new TapestryOutlinePage.ToggleCatSortAction();
 
   private Object fSavedInput; // the input might have been posted before the
-                              // control was created!
+  // control was created!
 
   public TapestryOutlinePage(SpecEditor editor)
   {
@@ -131,13 +133,14 @@ public class TapestryOutlinePage extends ContentOutlinePage
           fireSelectionChanged(new DoubleClickSelection(selection.getFirstElement()));
       }
     });
-    UIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener()
-    {
-      public void propertyChange(PropertyChangeEvent event)
-      {
-        adaptToPreferenceChange(event);
-      }
-    });
+    UIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(
+        new IPropertyChangeListener()
+        {
+          public void propertyChange(PropertyChangeEvent event)
+          {
+            adaptToPreferenceChange(event);
+          }
+        });
     setInput(fSavedInput);
   }
 
@@ -320,7 +323,8 @@ public class TapestryOutlinePage extends ContentOutlinePage
             String bname = (String) iter.next();
             results.add(component.getBeanSpecification(bname));
           }
-          for (Iterator iter = component.getPropertySpecificationNames().iterator(); iter.hasNext();)
+          for (Iterator iter = component.getPropertySpecificationNames().iterator(); iter
+              .hasNext();)
           {
             String propName = (String) iter.next();
             results.add(component.getPropertySpecification(propName));
@@ -344,7 +348,8 @@ public class TapestryOutlinePage extends ContentOutlinePage
     {
 
       String identifier = ((IIdentifiable) obj).getIdentifier();
-      if (identifier == null || identifier.equals(BaseValidator.DefaultDummyString) || identifier.trim().length() == 0)
+      if (identifier == null || identifier.equals(BaseValidator.DefaultDummyString)
+          || identifier.trim().length() == 0)
         return "[no value]";
       return identifier;
     }
@@ -475,8 +480,10 @@ public class TapestryOutlinePage extends ContentOutlinePage
       if (cat1 != cat2)
         return cat1 - cat2;
 
-      ISourceLocationInfo l1 = (ISourceLocationInfo) ((BaseSpecification) e1).getLocation();
-      ISourceLocationInfo l2 = (ISourceLocationInfo) ((BaseSpecification) e2).getLocation();
+      ISourceLocationInfo l1 = (ISourceLocationInfo) ((BaseSpecification) e1)
+          .getLocation();
+      ISourceLocationInfo l2 = (ISourceLocationInfo) ((BaseSpecification) e2)
+          .getLocation();
       int offset1 = l1.getOffset();
       int offset2 = l2.getOffset();
       return (offset1 > offset2) ? 1 : ((offset1 < offset2) ? -1 : 0);
@@ -605,7 +612,10 @@ public class TapestryOutlinePage extends ContentOutlinePage
    *      org.eclipse.jface.action.IToolBarManager,
    *      org.eclipse.jface.action.IStatusLineManager)
    */
-  public void makeContributions(IMenuManager menuManager, IToolBarManager toolBarManager, IStatusLineManager statusLineManager)
+  public void makeContributions(
+      IMenuManager menuManager,
+      IToolBarManager toolBarManager,
+      IStatusLineManager statusLineManager)
   {
     toolBarManager.add(fToggleAlphaSort);
     toolBarManager.add(fToggleCatSort);

@@ -33,112 +33,124 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *  Base class for Spec classes that have properties
+ * Base class for Spec classes that have properties
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class BasePropertyHolder extends DescribableSpecification implements IPluginPropertyHolder
+public abstract class BasePropertyHolder extends DescribableSpecification
+    implements
+      IPluginPropertyHolder
 {
-    Map fProperties;
+  Map fProperties;
 
-    /**
-     *  The locations and values of all reserved property declarations in a the document for this holder.
-     *  Immutable after a parse/scan episode.
-     */
-    List fPropertyDeclarations;
+  /**
+   * The locations and values of all reserved property declarations in a the
+   * document for this holder. Immutable after a parse/scan episode.
+   */
+  List fPropertyDeclarations;
 
-    /**
-     * 
-     */
-    public BasePropertyHolder(int type)
+  /**
+   *  
+   */
+  public BasePropertyHolder(int type)
+  {
+    super(type);
+
+  }
+
+  public void addPropertyDeclaration(PluginPropertyDeclaration declaration)
+  {
+    if (fPropertyDeclarations == null)
     {
-        super(type);
-
+      fPropertyDeclarations = new ArrayList();
+      fProperties = new HashMap();
     }
 
-    public void addPropertyDeclaration(PluginPropertyDeclaration declaration)
-    {
-        if (fPropertyDeclarations == null)
-        {
-            fPropertyDeclarations = new ArrayList();
-            fProperties = new HashMap();
-        }
+    fPropertyDeclarations.add(declaration);
 
-        fPropertyDeclarations.add(declaration);
+    if (!fProperties.containsKey(declaration.getKey()))
+      fProperties.put(declaration.getKey(), declaration);
 
-        if (!fProperties.containsKey(declaration.getKey()))
-            fProperties.put(declaration.getKey(), declaration);
+  }
 
-    }
+  public List getPropertyDeclarations()
+  {
+    if (fPropertyDeclarations == null)
+      return Collections.EMPTY_LIST;
+    return fPropertyDeclarations;
+  }
 
-    public List getPropertyDeclarations()
-    {
-        if (fPropertyDeclarations == null)
-            return Collections.EMPTY_LIST;
-        return fPropertyDeclarations;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.util.IPropertyHolder#getPropertyNames()
+   */
+  public List getPropertyNames()
+  {
+    if (fProperties == null)
+      return Collections.EMPTY_LIST;
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.util.IPropertyHolder#getPropertyNames()
-     */
-    public List getPropertyNames()
-    {
-        if (fProperties == null)
-            return Collections.EMPTY_LIST;
+    List result = new ArrayList(fProperties.keySet());
 
-        List result = new ArrayList(fProperties.keySet());
+    return result;
+  }
 
-        return result;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.util.IPropertyHolder#setProperty(java.lang.String,
+   *      java.lang.String)
+   */
+  public void setProperty(String name, String value)
+  {
+    throw new IllegalStateException("not used in SPindle!");
+    //        if (value == null)
+    //        {
+    //            removeProperty(name);
+    //            return;
+    //        }
+    //
+    //        if (fProperties == null)
+    //            fProperties = new PropertyFiringMap(this, "properties");
+    //
+    //        fProperties.put(name, value);
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.util.IPropertyHolder#setProperty(java.lang.String, java.lang.String)
-     */
-    public void setProperty(String name, String value)
-    {
-        throw new IllegalStateException("not used in SPindle!");
-        //        if (value == null)
-        //        {
-        //            removeProperty(name);
-        //            return;
-        //        }
-        //
-        //        if (fProperties == null)
-        //            fProperties = new PropertyFiringMap(this, "properties");
-        //
-        //        fProperties.put(name, value);
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.util.IPropertyHolder#removeProperty(java.lang.String)
+   */
+  public void removeProperty(String name)
+  {
+    throw new IllegalStateException("not used in SPindle!");
+    //        remove(fProperties, name);
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.util.IPropertyHolder#removeProperty(java.lang.String)
-     */
-    public void removeProperty(String name)
-    {
-        throw new IllegalStateException("not used in SPindle!");
-        //        remove(fProperties, name);
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.util.IPropertyHolder#getProperty(java.lang.String)
+   */
+  public String getProperty(String name)
+  {
+    if (fProperties == null)
+      return null;
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.util.IPropertyHolder#getProperty(java.lang.String)
-     */
-    public String getProperty(String name)
-    {
-        if (fProperties == null)
-            return null;
+    PluginPropertyDeclaration declaration = (PluginPropertyDeclaration) fProperties
+        .get(name);
+    if (declaration == null)
+      return null;
+    return declaration.getValue();
+  }
 
-        PluginPropertyDeclaration declaration = (PluginPropertyDeclaration) fProperties.get(name);
-        if (declaration == null)
-            return null;
-        return declaration.getValue();
-    }
+  PluginPropertyDeclaration getPropertyDeclaration(String name)
+  {
+    if (fProperties == null)
+      return null;
 
-    PluginPropertyDeclaration getPropertyDeclaration(String name)
-    {
-        if (fProperties == null)
-            return null;
-
-        return (PluginPropertyDeclaration) fProperties.get(name);
-    }
+    return (PluginPropertyDeclaration) fProperties.get(name);
+  }
 
 }

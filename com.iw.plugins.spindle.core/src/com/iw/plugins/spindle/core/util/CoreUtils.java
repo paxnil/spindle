@@ -131,7 +131,7 @@ public class CoreUtils
   {
     Assert.isNotNull(candidate);
     Assert.isNotNull(baseType);
- 
+
     boolean match = false;
     ITypeHierarchy hierarchy = candidate.newSupertypeHierarchy(null);
     if (hierarchy.exists())
@@ -187,7 +187,7 @@ public class CoreUtils
     }
     return match;
   }
-  
+
   public static boolean implementsInterface(IType candidate, IType iface) throws JavaModelException
   {
     return implementsInterface(candidate, iface.getFullyQualifiedName());

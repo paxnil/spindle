@@ -47,187 +47,206 @@ import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 
 /**
- *  Implementation of IResourceWorkspaceLocation
- *  for resources found within classpath. 
+ * Implementation of IResourceWorkspaceLocation for resources found within
+ * classpath.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ClasspathResourceWorkspaceLocation.java,v 1.12 2004/05/17
+ *          02:31:49 glongman Exp $
  */
 public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspaceLocation
 {
 
-    protected ClasspathResourceWorkspaceLocation(ClasspathRootLocation root, String path)
-    {
-        super(root, path);
-    }
+  protected ClasspathResourceWorkspaceLocation(ClasspathRootLocation root, String path)
+  {
+    super(root, path);
+  }
 
-    protected ClasspathResourceWorkspaceLocation(ClasspathRootLocation root, IStorage storage)
-    {
-        super(root, root.findRelativePath(storage));
-    }
+  protected ClasspathResourceWorkspaceLocation(ClasspathRootLocation root,
+      IStorage storage)
+  {
+    super(root, root.findRelativePath(storage));
+  }
 
-    public boolean exists()
+  public boolean exists()
+  {
+    IStorage storage = getStorage();
+    if (storage != null)
     {
-        IStorage storage = getStorage();
-        if (storage != null)
+      if (storage instanceof IResource)
+      {
+        IResource resource = (IResource) storage;
+        return resource.exists();
+      } else
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getStorage()
+   */
+  public IStorage getStorage()
+  {
+    //if we are in a build, the storages get cached for speed.
+    Map cache = TapestryBuilder.getStorageCache();
+
+    if (cache != null && cache.containsKey(this))
+      return (IStorage) cache.get(this);
+
+    IStorage result = ((ClasspathRootLocation) fRoot).findStorage(this);
+
+    if (cache != null)
+      cache.put(this, result);
+
+    return result;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isWorkspaceResource()
+   */
+  public boolean isWorkspaceResource()
+  {
+    IStorage storage = getStorage();
+    if (storage != null)
+    {
+      return storage instanceof IResource;
+    }
+    return false;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
+   */
+  public boolean isBinary()
+  {
+    IStorage storage = getStorage();
+    if (storage == null)
+      return false;
+
+    if (storage instanceof JarEntryFile)
+      return true;
+
+    return false;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getProject()
+   */
+  public IProject getProject()
+  {
+    IPackageFragment fragment = ((ClasspathRootLocation) fRoot)
+        .findExactPackageFragment(this);
+    return fragment == null ? null : fragment.getJavaProject().getProject();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getContents()
+   */
+  public InputStream getContents() throws CoreException
+  {
+    IStorage storage = getStorage();
+    if (storage != null)
+      return storage.getContents();
+
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.IResourceLocation#getLocalization(java.util.Locale)
+   */
+  public IResourceLocation getLocalization(Locale locale)
+  {
+    // TODO implement later
+    throw new RuntimeException("not implemented");
+  }
+
+  //    public int hashCode()
+  //    {
+  //        HashCodeBuilder builder = new HashCodeBuilder(5591, 1009);
+  //
+  //        builder.append(getPath());
+  //        builder.append(getName());
+  //        builder.append(fRoot);
+  //
+  //        return builder.toHashCode();
+  //    }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)
+   */
+  public void lookup(IResourceLocationAcceptor requestor) throws CoreException
+  {
+    String packageName = ((ClasspathRootLocation) fRoot).toPackageName(getPath());
+    IPackageFragment[] fragments = ((ClasspathRootLocation) fRoot)
+        .getAllPackageFragments(packageName);
+    for (int i = 0; i < fragments.length; i++)
+    {
+      Object[] nonJavaResources = null;
+      try
+      {
+        if (fragments[i].isReadOnly())
         {
-            if (storage instanceof IResource)
-            {
-                IResource resource = (IResource) storage;
-                return resource.exists();
-            } else
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getStorage()
-     */
-    public IStorage getStorage()
-    {
-        //if we are in a build, the storages get cached for speed.
-        Map cache = TapestryBuilder.getStorageCache();
-        
-        if (cache != null && cache.containsKey(this))
-            return (IStorage) cache.get(this);
-            
-        IStorage result =  ((ClasspathRootLocation) fRoot).findStorage(this);
-        
-        if (cache != null)
-            cache.put(this, result);
-            
-       return result;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isWorkspaceResource()
-     */
-    public boolean isWorkspaceResource()
-    {
-        IStorage storage = getStorage();
-        if (storage != null)
+          //TODO - is this the correct check for a package in a jar file?
+          nonJavaResources = fragments[i].getNonJavaResources();
+        } else
         {
-            return storage instanceof IResource;
-        }
-        return false;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
-     */
-    public boolean isBinary()
-    {
-        IStorage storage = getStorage();
-        if (storage == null)
-            return false;
-
-        if (storage instanceof JarEntryFile)
-            return true;
-
-        return false;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getProject()
-     */
-    public IProject getProject()
-    {
-        IPackageFragment fragment = ((ClasspathRootLocation) fRoot).findExactPackageFragment(this);
-        return fragment == null ? null : fragment.getJavaProject().getProject();
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getContents()
-     */
-    public InputStream getContents() throws CoreException
-    {
-        IStorage storage = getStorage();
-        if (storage != null)
-            return storage.getContents();
-
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.IResourceLocation#getLocalization(java.util.Locale)
-     */
-    public IResourceLocation getLocalization(Locale locale)
-    {
-        // TODO implement later
-        throw new RuntimeException("not implemented");
-    }
-
-    //    public int hashCode()
-    //    {
-    //        HashCodeBuilder builder = new HashCodeBuilder(5591, 1009);
-    //
-    //        builder.append(getPath());
-    //        builder.append(getName());
-    //        builder.append(fRoot);
-    //
-    //        return builder.toHashCode();
-    //    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)
-     */
-    public void lookup(IResourceLocationAcceptor requestor) throws CoreException
-    {
-        String packageName = ((ClasspathRootLocation) fRoot).toPackageName(getPath());
-        IPackageFragment[] fragments = ((ClasspathRootLocation) fRoot).getAllPackageFragments(packageName);
-        for (int i = 0; i < fragments.length; i++)
-        {
-            Object[] nonJavaResources = null;
-            try
+          IContainer container = (IContainer) fragments[i].getUnderlyingResource();
+          if (container != null && container.exists())
+          {
+            IResource[] members = container.members(false);
+            ArrayList resultList = new ArrayList();
+            for (int j = 0; j < members.length; j++)
             {
-                if (fragments[i].isReadOnly())
-                {
-                    //TODO - is this the correct check for a package in a jar file?
-                    nonJavaResources = fragments[i].getNonJavaResources();
-                } else
-                {
-                    IContainer container = (IContainer) fragments[i].getUnderlyingResource();
-                    if (container != null && container.exists())
-                    {
-                        IResource[] members = container.members(false);
-                        ArrayList resultList = new ArrayList();
-                        for (int j = 0; j < members.length; j++)
-                        {
-                            if (members[j] instanceof IFile)
-                                resultList.add(members[j]);
-                        }
-                        nonJavaResources = resultList.toArray();
-                    }
-                }
-            } catch (JavaModelException e)
-            {
-                TapestryCore.log(e);
+              if (members[j] instanceof IFile)
+                resultList.add(members[j]);
             }
-            if (nonJavaResources == null)
-                continue;
-
-            for (int j = 0; j < nonJavaResources.length; j++)
-            {
-                IStorage storage = (IStorage) nonJavaResources[j];
-                IResourceWorkspaceLocation loc =
-                    new ClasspathResourceWorkspaceLocation(
-                        ((ClasspathRootLocation) fRoot),
-                        getPath() + storage.getName());
-                if (!requestor.accept(loc))
-                    break;
-            }
+            nonJavaResources = resultList.toArray();
+          }
         }
-    }
+      } catch (JavaModelException e)
+      {
+        TapestryCore.log(e);
+      }
+      if (nonJavaResources == null)
+        continue;
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getSearch()
-     */
-    public ISearch getSearch() throws CoreException
-    {
-        return fRoot.getSearch();
+      for (int j = 0; j < nonJavaResources.length; j++)
+      {
+        IStorage storage = (IStorage) nonJavaResources[j];
+        IResourceWorkspaceLocation loc = new ClasspathResourceWorkspaceLocation(
+            ((ClasspathRootLocation) fRoot),
+            getPath() + storage.getName());
+        if (!requestor.accept(loc))
+          break;
+      }
     }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getSearch()
+   */
+  public ISearch getSearch() throws CoreException
+  {
+    return fRoot.getSearch();
+  }
 
 }

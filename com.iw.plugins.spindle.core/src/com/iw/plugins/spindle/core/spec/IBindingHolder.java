@@ -24,8 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.core.spec;
 
 import java.util.Collection;
@@ -35,18 +33,18 @@ import org.apache.tapestry.spec.BindingSpecification;
 /**
  * @author gwl
  * @version $Id$
- *
- * Copyright 2002, Intelligent Work Inc.
- * All Rights Reserved.
+ * 
+ * Copyright 2002, Intelligent Work Inc. All Rights Reserved.
  */
-public interface IBindingHolder {
-	
+public interface IBindingHolder
+{
+
   public Collection getBindingNames();
 
   public BindingSpecification getBinding(String name);
 
   public void setBinding(String name, BindingSpecification binding);
 
-  public void removeBinding(String name);	
+  public void removeBinding(String name);
 
 }

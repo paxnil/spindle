@@ -29,8 +29,8 @@ package com.iw.plugins.spindle.core.builder;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
 /**
- *  Various components in the build will fire simple events when the Tapestry artifacts they are working
- *  on have dependencies on other things.
+ * Various components in the build will fire simple events when the Tapestry
+ * artifacts they are working on have dependencies on other things.
  * <p>
  * What's tracked:
  * <ul>
@@ -38,10 +38,12 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
  * <li>Workspace resource dependencies</li>
  * </ul>
  * <p>
- * These are raw dependencies, the type or resource dependency may not even exist.
+ * These are raw dependencies, the type or resource dependency may not even
+ * exist.
  * 
- *  Implementers must decide what to with dependancies for binary artifacts. I think
- *  that in most cases these dependencies should be ignored as binary artifacts never change.
+ * Implementers must decide what to with dependancies for binary artifacts. I
+ * think that in most cases these dependencies should be ignored as binary
+ * artifacts never change.
  * 
  * 
  * @author glongman@intelligentworks.com
@@ -49,16 +51,22 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
  */
 public interface IDependencyListener
 {
-    /**
-     *  Notification that a dependant has a type dependency.
-     * @param dependant the location of the dependant.
-     * @param fullyQualifiedTypeName the fully qualified type name.
-     */
-    void foundTypeDependency(IResourceWorkspaceLocation dependant, String fullyQualifiedTypeName);
-    /**
-     *  Notification that a dependant has a dependency on another resource.
-     * @param dependant  the location of the dependant.
-     * @param dependancy  the location of the dependancy.
-     */
-    void foundResourceDependency(IResourceWorkspaceLocation dependant, IResourceWorkspaceLocation dependancy);
+  /**
+   * Notification that a dependant has a type dependency.
+   * 
+   * @param dependant the location of the dependant.
+   * @param fullyQualifiedTypeName the fully qualified type name.
+   */
+  void foundTypeDependency(
+      IResourceWorkspaceLocation dependant,
+      String fullyQualifiedTypeName);
+  /**
+   * Notification that a dependant has a dependency on another resource.
+   * 
+   * @param dependant the location of the dependant.
+   * @param dependancy the location of the dependancy.
+   */
+  void foundResourceDependency(
+      IResourceWorkspaceLocation dependant,
+      IResourceWorkspaceLocation dependancy);
 }

@@ -73,339 +73,373 @@ import com.iw.plugins.spindle.editors.util.ContentAssistProcessor;
 import com.iw.plugins.spindle.editors.util.DeclCompletionProcessor;
 
 /**
- *  SourceViewerConfiguration for the TemplateEditor
+ * SourceViewerConfiguration for the TemplateEditor
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public class SpecConfiguration extends BaseSourceConfiguration
 {
-    public static final boolean DEBUG = false;
+  public static final boolean DEBUG = false;
 
-    private XMLTextTools fTextTools;
+  private XMLTextTools fTextTools;
 
-    private ITextDoubleClickStrategy fDefaultDoubleClick;
-    private ITextDoubleClickStrategy dcsSimple;
-    private ITextDoubleClickStrategy dcsTag;
-    private ITextDoubleClickStrategy dcsAttValue;
+  private ITextDoubleClickStrategy fDefaultDoubleClick;
+  private ITextDoubleClickStrategy dcsSimple;
+  private ITextDoubleClickStrategy dcsTag;
+  private ITextDoubleClickStrategy dcsAttValue;
 
-    /**
-     * @param colorManager
-     * @param editor
-     */
-    public SpecConfiguration(XMLTextTools tools, Editor editor, IPreferenceStore preferenceStore)
+  /**
+   * @param colorManager
+   * @param editor
+   */
+  public SpecConfiguration(XMLTextTools tools, Editor editor,
+      IPreferenceStore preferenceStore)
+  {
+    super(editor, preferenceStore);
+    fTextTools = tools;
+    fDefaultDoubleClick = new DefaultDoubleClickStrategy();
+    dcsSimple = new SimpleDoubleClickStrategy();
+    dcsTag = new TagDoubleClickStrategy();
+    dcsAttValue = new AttValueDoubleClickStrategy();
+  }
+
+  /*
+   * @see SourceViewerConfiguration#getDoubleClickStrategy(ISourceViewer,
+   *      String)
+   */
+  public ITextDoubleClickStrategy getDoubleClickStrategy(
+      ISourceViewer sourceViewer,
+      String contentType)
+  {
+    if (XMLPartitionScanner.XML_COMMENT.equals(contentType))
+      return dcsSimple;
+
+    if (XMLPartitionScanner.XML_PI.equals(contentType))
+      return dcsSimple;
+
+    if (XMLPartitionScanner.XML_TAG.equals(contentType))
+      return dcsTag;
+
+    if (XMLPartitionScanner.XML_ATTRIBUTE.equals(contentType))
+      return dcsAttValue;
+
+    if (XMLPartitionScanner.XML_CDATA.equals(contentType))
+      return dcsSimple;
+
+    if (contentType.startsWith(XMLPartitionScanner.DTD_INTERNAL))
+      return dcsSimple;
+
+    return fDefaultDoubleClick;
+  }
+
+  /*
+   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getConfiguredContentTypes(ISourceViewer)
+   */
+  public String[] getConfiguredContentTypes(ISourceViewer sourceViewer)
+  {
+    return new String[]{IDocument.DEFAULT_CONTENT_TYPE, XMLPartitionScanner.XML_PI,
+        XMLPartitionScanner.XML_COMMENT, XMLPartitionScanner.XML_DECL,
+        XMLPartitionScanner.XML_TAG, XMLPartitionScanner.XML_ATTRIBUTE,
+        XMLPartitionScanner.XML_CDATA, XMLPartitionScanner.DTD_INTERNAL,
+        XMLPartitionScanner.DTD_INTERNAL_PI, XMLPartitionScanner.DTD_INTERNAL_COMMENT,
+        XMLPartitionScanner.DTD_INTERNAL_DECL,};
+  }
+
+  public IContentFormatter getContentFormatter(ISourceViewer sourceViewer)
+  {
+    IContentFormatter formatter = new XMLContentFormatter(
+        new XMLFormattingStrategy(),
+        new String[]{DefaultPartitioner.CONTENT_TYPES_CATEGORY,},
+        UIPlugin.getDefault().getPreferenceStore());
+
+    return formatter;
+  }
+
+  /*
+   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getPresentationReconciler(ISourceViewer)
+   */
+  public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer)
+  {
+    PresentationReconciler reconciler = new PresentationReconciler();
+
+    DefaultDamagerRepairer dr;
+
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLTextScanner());
+    reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
+    reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
+
+    dr = new DefaultDamagerRepairer(fTextTools.getDTDTextScanner());
+    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL);
+    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL);
+
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLPIScanner());
+
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_PI);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_PI);
+    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
+    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
+
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLCommentScanner());
+
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_COMMENT);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_COMMENT);
+    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
+    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
+
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLDeclScanner());
+
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_DECL);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_DECL);
+    reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
+    reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
+
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLTagScanner());
+
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_TAG);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_TAG);
+
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
+
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLAttributeScanner());
+
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
+
+    dr = new DefaultDamagerRepairer(fTextTools.getXMLCDATAScanner());
+
+    reconciler.setDamager(dr, XMLPartitionScanner.XML_CDATA);
+    reconciler.setRepairer(dr, XMLPartitionScanner.XML_CDATA);
+
+    return reconciler;
+  }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTextHover(org.eclipse.jface.text.source.ISourceViewer,
+   *      java.lang.String)
+   */
+  public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType)
+  {
+    if (getEditor() == null)
+      return super.getTextHover(sourceViewer, contentType);
+
+    if (DEBUG)
     {
-        super(editor, preferenceStore);
-        fTextTools = tools;
-        fDefaultDoubleClick = new DefaultDoubleClickStrategy();
-        dcsSimple = new SimpleDoubleClickStrategy();
-        dcsTag = new TagDoubleClickStrategy();
-        dcsAttValue = new AttValueDoubleClickStrategy();
-    }
-
-    /*
-     * @see SourceViewerConfiguration#getDoubleClickStrategy(ISourceViewer, String)
-     */
-    public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType)
-    {
-        if (XMLPartitionScanner.XML_COMMENT.equals(contentType))
-            return dcsSimple;
-
-        if (XMLPartitionScanner.XML_PI.equals(contentType))
-            return dcsSimple;
-
-        if (XMLPartitionScanner.XML_TAG.equals(contentType))
-            return dcsTag;
-
-        if (XMLPartitionScanner.XML_ATTRIBUTE.equals(contentType))
-            return dcsAttValue;
-
-        if (XMLPartitionScanner.XML_CDATA.equals(contentType))
-            return dcsSimple;
-
-        if (contentType.startsWith(XMLPartitionScanner.DTD_INTERNAL))
-            return dcsSimple;
-
-        return fDefaultDoubleClick;
-    }
-
-    /*
-     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getConfiguredContentTypes(ISourceViewer)
-     */
-    public String[] getConfiguredContentTypes(ISourceViewer sourceViewer)
-    {
-        return new String[] {
-            IDocument.DEFAULT_CONTENT_TYPE,
-            XMLPartitionScanner.XML_PI,
-            XMLPartitionScanner.XML_COMMENT,
-            XMLPartitionScanner.XML_DECL,
-            XMLPartitionScanner.XML_TAG,
-            XMLPartitionScanner.XML_ATTRIBUTE,
-            XMLPartitionScanner.XML_CDATA,
-            XMLPartitionScanner.DTD_INTERNAL,
-            XMLPartitionScanner.DTD_INTERNAL_PI,
-            XMLPartitionScanner.DTD_INTERNAL_COMMENT,
-            XMLPartitionScanner.DTD_INTERNAL_DECL,
-            };
-    }
-
-    public IContentFormatter getContentFormatter(ISourceViewer sourceViewer)
-    {
-        IContentFormatter formatter =
-            new XMLContentFormatter(
-                new XMLFormattingStrategy(),
-                new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY, },
-                UIPlugin.getDefault().getPreferenceStore());
-
-        return formatter;
-    }
-
-    /*
-     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getPresentationReconciler(ISourceViewer)
-     */
-    public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer)
-    {
-        PresentationReconciler reconciler = new PresentationReconciler();
-
-        DefaultDamagerRepairer dr;
-
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLTextScanner());
-        reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
-        reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
-
-        dr = new DefaultDamagerRepairer(fTextTools.getDTDTextScanner());
-        reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL);
-        reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL);
-
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLPIScanner());
-
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_PI);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_PI);
-        reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
-        reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_PI);
-
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLCommentScanner());
-
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_COMMENT);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_COMMENT);
-        reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
-        reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_COMMENT);
-
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLDeclScanner());
-
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_DECL);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_DECL);
-        reconciler.setDamager(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
-        reconciler.setRepairer(dr, XMLPartitionScanner.DTD_INTERNAL_DECL);
-
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLTagScanner());
-
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_TAG);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_TAG);
-
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLAttributeScanner());
-
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_ATTRIBUTE);
-
-        dr = new DefaultDamagerRepairer(fTextTools.getXMLCDATAScanner());
-
-        reconciler.setDamager(dr, XMLPartitionScanner.XML_CDATA);
-        reconciler.setRepairer(dr, XMLPartitionScanner.XML_CDATA);
-
-        return reconciler;
-    }
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTextHover(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
-     */
-    public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType)
-    {
-        if (getEditor() == null)
-            return super.getTextHover(sourceViewer, contentType);
-
-        if (DEBUG)
+      return new ITextHover()
+      {
+        public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion)
         {
-            return new ITextHover()
-            {
-                public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion)
-                {
-                    try
-                    {
-                        IDocumentProvider provider = getEditor().getDocumentProvider();
-                        IDocument doc = provider.getDocument(getEditor().getEditorInput());
-                        return doc.getPartition(hoverRegion.getOffset()).getType();
-                    } catch (BadLocationException e)
-                    {
-                        return "bad location: " + hoverRegion;
-                    }
-                }
-
-                public IRegion getHoverRegion(ITextViewer textViewer, int offset)
-                {
-                    return new Region(offset, 1);
-                }
-            };
+          try
+          {
+            IDocumentProvider provider = getEditor().getDocumentProvider();
+            IDocument doc = provider.getDocument(getEditor().getEditorInput());
+            return doc.getPartition(hoverRegion.getOffset()).getType();
+          } catch (BadLocationException e)
+          {
+            return "bad location: " + hoverRegion;
+          }
         }
-        return super.getTextHover(sourceViewer, contentType);
-    }
 
-    public IContentAssistant getContentAssistant(ISourceViewer sourceViewer)
-    {
-        if (getEditor() == null)
-            return super.getContentAssistant(sourceViewer);
-
-        ContentAssistant assistant = getEditor().getContentAssistant();
-        ContentAssistProcessor tagProcessor = new TagCompletionProcessor(fEditor);
-        ContentAssistProcessor commentProcessor = new CommentCompletionProcessor(fEditor);
-        ContentAssistProcessor attributeProcessor = new AttributeCompletionProcessor(fEditor);
-        ContentAssistProcessor declProcessor = new DeclCompletionProcessor(fEditor);
-        ContentAssistProcessor defaultProcessor = new DefaultCompletionProcessor(fEditor);
-        ContentAssistProcessor cdataProcessor = new CDATACompletionProcessor(fEditor);
-
-        assistant.setContentAssistProcessor(tagProcessor, XMLPartitionScanner.XML_TAG);
-        assistant.setContentAssistProcessor(commentProcessor, XMLPartitionScanner.XML_COMMENT);
-        assistant.setContentAssistProcessor(attributeProcessor, XMLPartitionScanner.XML_ATTRIBUTE);
-        assistant.setContentAssistProcessor(declProcessor, XMLPartitionScanner.XML_DECL);
-        assistant.setContentAssistProcessor(defaultProcessor, IDocument.DEFAULT_CONTENT_TYPE);
-        assistant.setContentAssistProcessor(cdataProcessor, XMLPartitionScanner.XML_CDATA);
-        assistant.enableAutoActivation(true);
-        assistant.setProposalSelectorBackground(
-            UIPlugin.getDefault().getSharedTextColors().getColor(new RGB(254, 241, 233)));
-        assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
-        assistant.install(sourceViewer);
-
-        return assistant;
-    }
-
-    /**
-     * Returns the xml outline presenter control creator. The creator is a factory creating outline
-     * presenter controls for the given source viewer. This implementation always returns a creator
-     * for <code>XMLOutlineInformationControl</code> instances.
-     * 
-     * @param sourceViewer the source viewer to be configured by this configuration
-     * @return an information control creator
-     */
-    private IInformationControlCreator getXMLOutlinePresenterControlCreator(ISourceViewer sourceViewer)
-    {
-
-        return new IInformationControlCreator()
+        public IRegion getHoverRegion(ITextViewer textViewer, int offset)
         {
-            public IInformationControl createInformationControl(Shell parent)
-            {
-                int shellStyle = SWT.RESIZE;
-                int treeStyle = SWT.V_SCROLL | SWT.H_SCROLL;
-                return new XMLOutlineInformationControl(parent, shellStyle, treeStyle, (SpecEditor) getEditor());
-            }
-        };
+          return new Region(offset, 1);
+        }
+      };
     }
+    return super.getTextHover(sourceViewer, contentType);
+  }
 
-    /**
-     * Returns the structure outline presenter control creator. The creator is a factory creating outline
-     * presenter controls for the given source viewer. This implementation always returns a creator
-     * for <code>XMLOutlineInformationControl</code> instances.
-     * 
-     * @param sourceViewer the source viewer to be configured by this configuration
-     * @return an information control creator
-     */
-    private IInformationControlCreator getStructureOutlinePresenterControlCreator(ISourceViewer sourceViewer)
-    {
-        return new IInformationControlCreator()
-        {
-            public IInformationControl createInformationControl(Shell parent)
-            {
-                int shellStyle = SWT.RESIZE;
-                int treeStyle = SWT.V_SCROLL | SWT.H_SCROLL;
-                return new StructureOutlineInformationControl(parent, shellStyle, treeStyle, (SpecEditor) getEditor());
-            }
-        };
-    }
+  public IContentAssistant getContentAssistant(ISourceViewer sourceViewer)
+  {
+    if (getEditor() == null)
+      return super.getContentAssistant(sourceViewer);
 
-    /**
-        * Returns the asset choosercontrol creator. The creator is a factory creating 
-        * presenter controls for the given source viewer. This implementation always returns a creator
-        * for <code>AssetChooserInformationControl</code> instances.
-        * 
-        * @param sourceViewer the source viewer to be configured by this configuration
-        * @return an information control creator
-        */
-    private IInformationControlCreator getAssetChooserControlCreator(ISourceViewer sourceViewer)
-    {
-        return new IInformationControlCreator()
-        {
-            public IInformationControl createInformationControl(Shell parent)
-            {
-                int shellStyle = SWT.RESIZE;
-                int treeStyle = SWT.V_SCROLL | SWT.H_SCROLL;
-                return new ResourceChooserInformationControl(parent, shellStyle, treeStyle, (SpecEditor) getEditor());
-            }
-        };
-    }
+    ContentAssistant assistant = getEditor().getContentAssistant();
+    ContentAssistProcessor tagProcessor = new TagCompletionProcessor(fEditor);
+    ContentAssistProcessor commentProcessor = new CommentCompletionProcessor(fEditor);
+    ContentAssistProcessor attributeProcessor = new AttributeCompletionProcessor(fEditor);
+    ContentAssistProcessor declProcessor = new DeclCompletionProcessor(fEditor);
+    ContentAssistProcessor defaultProcessor = new DefaultCompletionProcessor(fEditor);
+    ContentAssistProcessor cdataProcessor = new CDATACompletionProcessor(fEditor);
 
-    /**
-     * Returns the outline presenter which will determine and shown
-     * information requested for the current cursor position.
-     *
-     * @param sourceViewer the source viewer to be configured by this configuration
-     * @return an information presenter
-      */
-    public IInformationPresenter getXMLOutlinePresenter(ISourceViewer sourceViewer)
-    {
-        InformationPresenter presenter = new InformationPresenter(getXMLOutlinePresenterControlCreator(sourceViewer));
-        presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
-        IInformationProvider provider = new SpecEditor.SpecEditorInformationProvider((SpecEditor) getEditor(), false);
-        presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_TAG);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_COMMENT);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_ATTRIBUTE);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_DECL);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_CDATA);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_PI);
-        presenter.setSizeConstraints(40, 20, true, false);
-        return presenter;
-    }
+    assistant.setContentAssistProcessor(tagProcessor, XMLPartitionScanner.XML_TAG);
+    assistant
+        .setContentAssistProcessor(commentProcessor, XMLPartitionScanner.XML_COMMENT);
+    assistant.setContentAssistProcessor(
+        attributeProcessor,
+        XMLPartitionScanner.XML_ATTRIBUTE);
+    assistant.setContentAssistProcessor(declProcessor, XMLPartitionScanner.XML_DECL);
+    assistant.setContentAssistProcessor(defaultProcessor, IDocument.DEFAULT_CONTENT_TYPE);
+    assistant.setContentAssistProcessor(cdataProcessor, XMLPartitionScanner.XML_CDATA);
+    assistant.enableAutoActivation(true);
+    assistant.setProposalSelectorBackground(UIPlugin
+        .getDefault()
+        .getSharedTextColors()
+        .getColor(new RGB(254, 241, 233)));
+    assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+    assistant.install(sourceViewer);
 
-    /**
-     * Returns the outline presenter which will determine and shown
-     * information requested for the current cursor position.
-     *
-     * @param sourceViewer the source viewer to be configured by this configuration
-     * @return an information presenter
-      */
-    public IInformationPresenter getStructureOutlinePresenter(ISourceViewer sourceViewer)
-    {
-        InformationPresenter presenter =
-            new InformationPresenter(getStructureOutlinePresenterControlCreator(sourceViewer));
-        presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
-        IInformationProvider provider = new SpecEditor.SpecEditorInformationProvider((SpecEditor) getEditor(), true);
-        presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_TAG);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_COMMENT);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_ATTRIBUTE);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_DECL);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_CDATA);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_PI);
-        presenter.setSizeConstraints(40, 20, true, true);
-        return presenter;
-    }
+    return assistant;
+  }
 
-    public IInformationPresenter getAssetChooserPresenter(ISourceViewer sourceViewer)
+  /**
+   * Returns the xml outline presenter control creator. The creator is a factory
+   * creating outline presenter controls for the given source viewer. This
+   * implementation always returns a creator for
+   * <code>XMLOutlineInformationControl</code> instances.
+   * 
+   * @param sourceViewer the source viewer to be configured by this
+   *          configuration
+   * @return an information control creator
+   */
+  private IInformationControlCreator getXMLOutlinePresenterControlCreator(
+      ISourceViewer sourceViewer)
+  {
+
+    return new IInformationControlCreator()
     {
-        InformationPresenter presenter =
-            new InformationPresenter(getAssetChooserControlCreator(sourceViewer));
-        presenter.setAnchor(InformationPresenter.ANCHOR_BOTTOM);
-        IInformationProvider provider = new SpecEditor.SpecEditorInformationProvider((SpecEditor) getEditor(), false);
-        presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_TAG);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_COMMENT);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_ATTRIBUTE);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_DECL);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_CDATA);
-        presenter.setInformationProvider(provider, XMLPartitionScanner.XML_PI);
-        presenter.setSizeConstraints(40, 20, true, true);
-        return presenter;
-    }
+      public IInformationControl createInformationControl(Shell parent)
+      {
+        int shellStyle = SWT.RESIZE;
+        int treeStyle = SWT.V_SCROLL | SWT.H_SCROLL;
+        return new XMLOutlineInformationControl(
+            parent,
+            shellStyle,
+            treeStyle,
+            (SpecEditor) getEditor());
+      }
+    };
+  }
+
+  /**
+   * Returns the structure outline presenter control creator. The creator is a
+   * factory creating outline presenter controls for the given source viewer.
+   * This implementation always returns a creator for
+   * <code>XMLOutlineInformationControl</code> instances.
+   * 
+   * @param sourceViewer the source viewer to be configured by this
+   *          configuration
+   * @return an information control creator
+   */
+  private IInformationControlCreator getStructureOutlinePresenterControlCreator(
+      ISourceViewer sourceViewer)
+  {
+    return new IInformationControlCreator()
+    {
+      public IInformationControl createInformationControl(Shell parent)
+      {
+        int shellStyle = SWT.RESIZE;
+        int treeStyle = SWT.V_SCROLL | SWT.H_SCROLL;
+        return new StructureOutlineInformationControl(
+            parent,
+            shellStyle,
+            treeStyle,
+            (SpecEditor) getEditor());
+      }
+    };
+  }
+
+  /**
+   * Returns the asset choosercontrol creator. The creator is a factory creating
+   * presenter controls for the given source viewer. This implementation always
+   * returns a creator for <code>AssetChooserInformationControl</code>
+   * instances.
+   * 
+   * @param sourceViewer the source viewer to be configured by this
+   *          configuration
+   * @return an information control creator
+   */
+  private IInformationControlCreator getAssetChooserControlCreator(
+      ISourceViewer sourceViewer)
+  {
+    return new IInformationControlCreator()
+    {
+      public IInformationControl createInformationControl(Shell parent)
+      {
+        int shellStyle = SWT.RESIZE;
+        int treeStyle = SWT.V_SCROLL | SWT.H_SCROLL;
+        return new ResourceChooserInformationControl(
+            parent,
+            shellStyle,
+            treeStyle,
+            (SpecEditor) getEditor());
+      }
+    };
+  }
+
+  /**
+   * Returns the outline presenter which will determine and shown information
+   * requested for the current cursor position.
+   * 
+   * @param sourceViewer the source viewer to be configured by this
+   *          configuration
+   * @return an information presenter
+   */
+  public IInformationPresenter getXMLOutlinePresenter(ISourceViewer sourceViewer)
+  {
+    InformationPresenter presenter = new InformationPresenter(
+        getXMLOutlinePresenterControlCreator(sourceViewer));
+    presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
+    IInformationProvider provider = new SpecEditor.SpecEditorInformationProvider(
+        (SpecEditor) getEditor(),
+        false);
+    presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_TAG);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_COMMENT);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_ATTRIBUTE);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_DECL);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_CDATA);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_PI);
+    presenter.setSizeConstraints(40, 20, true, false);
+    return presenter;
+  }
+
+  /**
+   * Returns the outline presenter which will determine and shown information
+   * requested for the current cursor position.
+   * 
+   * @param sourceViewer the source viewer to be configured by this
+   *          configuration
+   * @return an information presenter
+   */
+  public IInformationPresenter getStructureOutlinePresenter(ISourceViewer sourceViewer)
+  {
+    InformationPresenter presenter = new InformationPresenter(
+        getStructureOutlinePresenterControlCreator(sourceViewer));
+    presenter.setAnchor(InformationPresenter.ANCHOR_GLOBAL);
+    IInformationProvider provider = new SpecEditor.SpecEditorInformationProvider(
+        (SpecEditor) getEditor(),
+        true);
+    presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_TAG);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_COMMENT);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_ATTRIBUTE);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_DECL);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_CDATA);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_PI);
+    presenter.setSizeConstraints(40, 20, true, true);
+    return presenter;
+  }
+
+  public IInformationPresenter getAssetChooserPresenter(ISourceViewer sourceViewer)
+  {
+    InformationPresenter presenter = new InformationPresenter(
+        getAssetChooserControlCreator(sourceViewer));
+    presenter.setAnchor(InformationPresenter.ANCHOR_BOTTOM);
+    IInformationProvider provider = new SpecEditor.SpecEditorInformationProvider(
+        (SpecEditor) getEditor(),
+        false);
+    presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_TAG);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_COMMENT);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_ATTRIBUTE);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_DECL);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_CDATA);
+    presenter.setInformationProvider(provider, XMLPartitionScanner.XML_PI);
+    presenter.setSizeConstraints(40, 20, true, true);
+    return presenter;
+  }
 
 }

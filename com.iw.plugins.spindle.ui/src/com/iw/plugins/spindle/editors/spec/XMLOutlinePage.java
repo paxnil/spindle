@@ -49,9 +49,8 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.util.DoubleClickSelection;
 import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
 
-
 /**
- *  TODO Add Type comment
+ * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -59,222 +58,227 @@ import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
 public class XMLOutlinePage extends ContentOutlinePage
 {
 
-    
-    public class OutlineContentProvider implements ITreeContentProvider
+  public class OutlineContentProvider implements ITreeContentProvider
+  {
+    public Object[] getElements(Object obj)
     {
-        public Object[] getElements(Object obj)
-        {
-            if (fRoot != null)
-            {
-                Object[] result = fRoot.getChildren(fRoot);
-                addAll(result);
-                return result;
-            }
-            return new Object[] {};
-        }
-        public Object[] getChildren(Object obj)
-        {
-            if (obj instanceof XMLNode)
-            {
-                Object[] result = ((XMLNode) obj).getChildren(obj);
-                addAll(result);
-                return result;
-            }
-
-            return new Object[0];
-        }
-        public boolean hasChildren(Object obj)
-        {
-            return getChildren(obj).length > 0;
-        }
-        public Object getParent(Object obj)
-        {
-            if (obj == fRoot)
-                return null;
-            return ((XMLNode) obj).getParent();
-        }
-        public void dispose()
-        {}
-
-        private void addAll(Object[] elements)
-        {
-            if (elements == null || elements.length == 0)
-                return;
-
-            if (fFlatChildren.length == 0)
-            {
-                fFlatChildren = elements;
-                fCorresponders = new Object[elements.length];
-                for (int i = 0; i < elements.length; i++)
-                    fCorresponders[i] = ((XMLNode) elements[i]).getCorrespondingNode();
-                return;
-            }
-
-            Object[] expandedFlat = new Object[fFlatChildren.length + elements.length];
-            System.arraycopy(fFlatChildren, 0, expandedFlat, 0, fFlatChildren.length);
-            System.arraycopy(elements, 0, expandedFlat, fFlatChildren.length, elements.length);
-            Object[] expandedCorresponders = new Object[fCorresponders.length + elements.length];
-            System.arraycopy(fCorresponders, 0, expandedCorresponders, 0, fCorresponders.length);
-            for (int i = 0; i < elements.length; i++)
-            {
-                expandedCorresponders[fCorresponders.length + i] = ((XMLNode) elements[i]).getCorrespondingNode();
-            }
-
-            fFlatChildren = expandedFlat;
-            fCorresponders = expandedCorresponders;
-
-        }
-        public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
-        {
-            fFlatChildren = new XMLNode[0];
-            fCorresponders = new XMLNode[0];
-        }
-
+      if (fRoot != null)
+      {
+        Object[] result = fRoot.getChildren(fRoot);
+        addAll(result);
+        return result;
+      }
+      return new Object[]{};
     }
-
-    private SpecEditor fEditor;
-    private Tree fTree;
-    private TreeViewer treeViewer;
-    private XMLNode fRoot;
-    private Object[] fFlatChildren = new XMLNode[0];
-    private Object[] fCorresponders = new XMLNode[0];
-
-    public XMLOutlinePage(SpecEditor editor)
+    public Object[] getChildren(Object obj)
     {
-        fEditor = editor;
-    }
+      if (obj instanceof XMLNode)
+      {
+        Object[] result = ((XMLNode) obj).getChildren(obj);
+        addAll(result);
+        return result;
+      }
 
-    public void createControl(Composite parent)
+      return new Object[0];
+    }
+    public boolean hasChildren(Object obj)
     {
-        fTree = new Tree(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        treeViewer = new TreeViewer(fTree);
-        treeViewer.addSelectionChangedListener(this);
-        treeViewer.setContentProvider(createContentProvider());
-        treeViewer.setLabelProvider(createLabelProvider());
-        treeViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
-        treeViewer.setUseHashlookup(true);
-        treeViewer.addDoubleClickListener(new IDoubleClickListener()
-        {
-            public void doubleClick(DoubleClickEvent event)
-            {
-                IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
-                if (!selection.isEmpty())
-                    fireSelectionChanged(new DoubleClickSelection(selection.getFirstElement()));
-            }
-        });
-        setInput(fRoot);
+      return getChildren(obj).length > 0;
     }
-
+    public Object getParent(Object obj)
+    {
+      if (obj == fRoot)
+        return null;
+      return ((XMLNode) obj).getParent();
+    }
     public void dispose()
     {
-        super.dispose();
     }
 
-    public void setInput(final Object input)
+    private void addAll(Object[] elements)
     {
-        if (input == null)
-            return;
+      if (elements == null || elements.length == 0)
+        return;
 
-        fRoot = (XMLNode) input;
+      if (fFlatChildren.length == 0)
+      {
+        fFlatChildren = elements;
+        fCorresponders = new Object[elements.length];
+        for (int i = 0; i < elements.length; i++)
+          fCorresponders[i] = ((XMLNode) elements[i]).getCorrespondingNode();
+        return;
+      }
 
-        if (fTree == null || fTree.isDisposed())
-            return;
+      Object[] expandedFlat = new Object[fFlatChildren.length + elements.length];
+      System.arraycopy(fFlatChildren, 0, expandedFlat, 0, fFlatChildren.length);
+      System.arraycopy(elements, 0, expandedFlat, fFlatChildren.length, elements.length);
+      Object[] expandedCorresponders = new Object[fCorresponders.length + elements.length];
+      System
+          .arraycopy(fCorresponders, 0, expandedCorresponders, 0, fCorresponders.length);
+      for (int i = 0; i < elements.length; i++)
+      {
+        expandedCorresponders[fCorresponders.length + i] = ((XMLNode) elements[i])
+            .getCorrespondingNode();
+      }
 
-        Display d = fTree.getDisplay();
-        d.asyncExec(new Runnable()
+      fFlatChildren = expandedFlat;
+      fCorresponders = expandedCorresponders;
+
+    }
+    public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
+    {
+      fFlatChildren = new XMLNode[0];
+      fCorresponders = new XMLNode[0];
+    }
+
+  }
+
+  private SpecEditor fEditor;
+  private Tree fTree;
+  private TreeViewer treeViewer;
+  private XMLNode fRoot;
+  private Object[] fFlatChildren = new XMLNode[0];
+  private Object[] fCorresponders = new XMLNode[0];
+
+  public XMLOutlinePage(SpecEditor editor)
+  {
+    fEditor = editor;
+  }
+
+  public void createControl(Composite parent)
+  {
+    fTree = new Tree(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+    treeViewer = new TreeViewer(fTree);
+    treeViewer.addSelectionChangedListener(this);
+    treeViewer.setContentProvider(createContentProvider());
+    treeViewer.setLabelProvider(createLabelProvider());
+    treeViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
+    treeViewer.setUseHashlookup(true);
+    treeViewer.addDoubleClickListener(new IDoubleClickListener()
+    {
+      public void doubleClick(DoubleClickEvent event)
+      {
+        IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
+        if (!selection.isEmpty())
+          fireSelectionChanged(new DoubleClickSelection(selection.getFirstElement()));
+      }
+    });
+    setInput(fRoot);
+  }
+
+  public void dispose()
+  {
+    super.dispose();
+  }
+
+  public void setInput(final Object input)
+  {
+    if (input == null)
+      return;
+
+    fRoot = (XMLNode) input;
+
+    if (fTree == null || fTree.isDisposed())
+      return;
+
+    Display d = fTree.getDisplay();
+    d.asyncExec(new Runnable()
+    {
+      public void run()
+      {
+        try
         {
-            public void run()
-            {
-                try
-                {
-                    ISelection oldSelection = getSelection();
+          ISelection oldSelection = getSelection();
 
-                    treeViewer.setInput(fRoot);
-                    treeViewer.setSelection(oldSelection);
+          treeViewer.setInput(fRoot);
+          treeViewer.setSelection(oldSelection);
 
-                } catch (RuntimeException e)
-                {
-                    UIPlugin.log(e);
-                }
-            }
-        });
-    }
-
-    protected ITreeContentProvider createContentProvider()
-    {
-        return new OutlineContentProvider();
-    }
-
-    protected ILabelProvider createLabelProvider()
-    {
-        return new XMLNodeLabelProvider();
-    }
-
-    public Control getControl()
-    {
-        return treeViewer != null ? treeViewer.getControl() : null;
-    }
-
-    public void setFocus()
-    {
-        if (treeViewer != null)
-            treeViewer.getTree().setFocus();
-    }
-
-    public ISelection getSelection()
-    {
-        if (treeViewer == null)
-            return StructuredSelection.EMPTY;
-        return treeViewer.getSelection();
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
-     */
-    public void setSelection(ISelection selection)
-    {
-        if (!selection.isEmpty() && selection instanceof IStructuredSelection)
+        } catch (RuntimeException e)
         {
-            Object selected = ((IStructuredSelection) selection).getFirstElement();
-            if (selected instanceof IRegion && fRoot != null)
-            {
-                int documentOffset = ((IRegion) selected).getOffset();
-                Object found = null;
-                for (int i = 0; i < fFlatChildren.length; i++)
-                {
-                    Position p = (Position) fFlatChildren[i];
-                    if (p.offset <= documentOffset && documentOffset < p.offset + p.length)
-                    {
-                        found = p;
-                    }
-                }
-                if (found == null)
-                {
-                    int index = 0;
-                    boolean exists = false;
-                    for (; index < fCorresponders.length; index++)
-                    {
-                        Position p = (Position) fCorresponders[index];
-                        if (p != null && p.offset <= documentOffset && documentOffset < p.offset + p.length)
-                        {
-                            exists = true;
-                            break;
-                        }
-                    }
-                    if (exists)
-                        found = fFlatChildren[index];
-                }
-                if (found != null)
-                {
-                    treeViewer.setSelection(new StructuredSelection(found));
-                } else if (treeViewer != null && !treeViewer.getControl().isDisposed())
-                {
-                    treeViewer.setSelection(StructuredSelection.EMPTY);
-                }
-            }
-            super.setSelection(selection);
+          UIPlugin.log(e);
         }
+      }
+    });
+  }
 
+  protected ITreeContentProvider createContentProvider()
+  {
+    return new OutlineContentProvider();
+  }
+
+  protected ILabelProvider createLabelProvider()
+  {
+    return new XMLNodeLabelProvider();
+  }
+
+  public Control getControl()
+  {
+    return treeViewer != null ? treeViewer.getControl() : null;
+  }
+
+  public void setFocus()
+  {
+    if (treeViewer != null)
+      treeViewer.getTree().setFocus();
+  }
+
+  public ISelection getSelection()
+  {
+    if (treeViewer == null)
+      return StructuredSelection.EMPTY;
+    return treeViewer.getSelection();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
+   */
+  public void setSelection(ISelection selection)
+  {
+    if (!selection.isEmpty() && selection instanceof IStructuredSelection)
+    {
+      Object selected = ((IStructuredSelection) selection).getFirstElement();
+      if (selected instanceof IRegion && fRoot != null)
+      {
+        int documentOffset = ((IRegion) selected).getOffset();
+        Object found = null;
+        for (int i = 0; i < fFlatChildren.length; i++)
+        {
+          Position p = (Position) fFlatChildren[i];
+          if (p.offset <= documentOffset && documentOffset < p.offset + p.length)
+          {
+            found = p;
+          }
+        }
+        if (found == null)
+        {
+          int index = 0;
+          boolean exists = false;
+          for (; index < fCorresponders.length; index++)
+          {
+            Position p = (Position) fCorresponders[index];
+            if (p != null && p.offset <= documentOffset
+                && documentOffset < p.offset + p.length)
+            {
+              exists = true;
+              break;
+            }
+          }
+          if (exists)
+            found = fFlatChildren[index];
+        }
+        if (found != null)
+        {
+          treeViewer.setSelection(new StructuredSelection(found));
+        } else if (treeViewer != null && !treeViewer.getControl().isDisposed())
+        {
+          treeViewer.setSelection(StructuredSelection.EMPTY);
+        }
+      }
+      super.setSelection(selection);
     }
+
+  }
 
 }

@@ -29,29 +29,32 @@ package com.iw.plugins.spindle.actions;
 import org.eclipse.jface.action.IAction;
 
 /**
- *  TODO Add Type comment
+ * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: QuickCreatePageFromTemplateAction.java,v 1.1 2003/10/29
+ *          12:33:56 glongman Exp $
  */
 public class QuickCreatePageFromTemplateAction extends AbstractTapestryResourceAction
 {
 
-    /**
-     * Constructor for CreatePageFromTemplateAction.
-     */
-    public QuickCreatePageFromTemplateAction()
-    {
-        super();
-    }
+  /**
+   * Constructor for CreatePageFromTemplateAction.
+   */
+  public QuickCreatePageFromTemplateAction()
+  {
+    super();
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
-     */
-    public void run(IAction action)
-    {
-        // TODO Auto-generated method stub
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
+   */
+  public void run(IAction action)
+  {
+    // TODO Auto-generated method stub
 
-    }
+  }
 
 }

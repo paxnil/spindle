@@ -40,19 +40,19 @@ import com.iw.plugins.spindle.ui.util.UIUtils;
 /**
  * @author GWL
  * @version 
- *
- * Copyright 2002, Intelligent Works Incoporated
- * All Rights Reserved
+ * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
-public abstract class TapestryWizardPage extends WizardPage {
+public abstract class TapestryWizardPage extends WizardPage
+{
 
   private IStatus fCurrStatus = new SpindleStatus();
 
   private UpdateStatusContainer statusContainer = new UpdateStatusContainer();
 
   private boolean fPageVisible;
-  
-  public TapestryWizardPage(String name) {
+
+  public TapestryWizardPage(String name)
+  {
     super(name);
     fPageVisible = false;
   }
@@ -62,11 +62,13 @@ public abstract class TapestryWizardPage extends WizardPage {
   /*
    * @see WizardPage#becomesVisible
    */
-  public void setVisible(boolean visible) {
+  public void setVisible(boolean visible)
+  {
     super.setVisible(visible);
     fPageVisible = visible;
     // policy: wizards are not allowed to come up with an error message
-    if (visible && (fCurrStatus != null && fCurrStatus.matches(IStatus.ERROR))) {
+    if (visible && (fCurrStatus != null && fCurrStatus.matches(IStatus.ERROR)))
+    {
       SpindleStatus status = new SpindleStatus();
       status.setError(""); //$NON-NLS-1$
       fCurrStatus = status;
@@ -74,72 +76,87 @@ public abstract class TapestryWizardPage extends WizardPage {
     updateStatus(fCurrStatus);
   }
 
-  protected void updateStatus() {
+  protected void updateStatus()
+  {
     updateStatus(statusContainer.getStatus(true));
   }
 
   /**
    * Updates the status line and the ok button depending on the status
    */
-  protected void updateStatus(IStatus status) {
+  protected void updateStatus(IStatus status)
+  {
 
     fCurrStatus = statusContainer.getStatus(true);
 
     setPageComplete(fCurrStatus != null && !fCurrStatus.matches(IStatus.ERROR));
-    if (fPageVisible) {
+    if (fPageVisible)
+    {
       applyToStatusLine(this, fCurrStatus);
     }
   }
 
   /**
-   * Updates the status line and the ok button depending on the most severe error.
-   * In case of two errors with the same severity, the status with lower index is taken.
+   * Updates the status line and the ok button depending on the most severe
+   * error. In case of two errors with the same severity, the status with lower
+   * index is taken.
    */
-  protected void updateStatus(IStatus[] status) {
+  protected void updateStatus(IStatus[] status)
+  {
     updateStatus(statusContainer.getStatus(true));
   }
 
-  public IStatus getMoreSevere(IStatus s1, IStatus s2) {
-    if (s1.getSeverity() > s2.getSeverity()) {
+  public IStatus getMoreSevere(IStatus s1, IStatus s2)
+  {
+    if (s1.getSeverity() > s2.getSeverity())
+    {
       return s1;
     }
     return s2;
 
   }
 
-  public void connect(DialogField field) {
+  public void connect(DialogField field)
+  {
     statusContainer.add(field);
   }
 
-  public void disconnect(DialogField field) {
+  public void disconnect(DialogField field)
+  {
     statusContainer.remove(field);
   }
 
   /**
-   * Finds the most severe status from a array of stati.
-   * An error is more severe than a warning, and a warning is more severe
-   * than ok.
+   * Finds the most severe status from a array of stati. An error is more severe
+   * than a warning, and a warning is more severe than ok.
    */
-  public IStatus getMostSevere(IStatus[] status) {
+  public IStatus getMostSevere(IStatus[] status)
+  {
     IStatus max = null;
-    for (int i = 0; i < status.length; i++) {
+    for (int i = 0; i < status.length; i++)
+    {
       IStatus curr = status[i];
-      if (curr.matches(IStatus.ERROR)) {
+      if (curr.matches(IStatus.ERROR))
+      {
         return curr;
       }
-      if (max == null || curr.getSeverity() > max.getSeverity()) {
+      if (max == null || curr.getSeverity() > max.getSeverity())
+      {
         max = curr;
       }
     }
     return max;
   }
 
-  public void applyToStatusLine(WizardPage page, IStatus status) {
-    if (status == null) {
+  public void applyToStatusLine(WizardPage page, IStatus status)
+  {
+    if (status == null)
+    {
       return;
     }
     String message = status.getMessage();
-    switch (status.getSeverity()) {
+    switch (status.getSeverity())
+    {
       case IStatus.OK :
         page.setErrorMessage(null);
         page.setMessage(message, NONE);
@@ -153,7 +170,8 @@ public abstract class TapestryWizardPage extends WizardPage {
         page.setMessage(message, INFORMATION);
         break;
       default :
-        if (message.length() == 0) {
+        if (message.length() == 0)
+        {
           message = null;
         }
         page.setErrorMessage(message);
@@ -161,34 +179,36 @@ public abstract class TapestryWizardPage extends WizardPage {
         break;
     }
   }
-  
-  
 
-  protected void addControl(Control toBeAdded, Control parent, int verticalOffset) {
+  protected void addControl(Control toBeAdded, Control parent, int verticalOffset)
+  {
     UIUtils.addFormControl(toBeAdded, parent, verticalOffset);
   }
 
-  protected void addControl(Control toBeAdded, Control parent) {
+  protected void addControl(Control toBeAdded, Control parent)
+  {
     UIUtils.addFormControl(toBeAdded, parent);
   }
 
-  protected Control createSeparator(Composite container, Control parent) {
+  protected Control createSeparator(Composite container, Control parent)
+  {
     return UIUtils.createFormSeparator(container, parent);
   }
 
-  public IStatus getCurrentStatus() {
+  public IStatus getCurrentStatus()
+  {
     return fCurrStatus;
   }
 
- 
   public abstract IResource getResource();
-  
+
   public abstract IRunnableWithProgress getRunnable(Object object);
 
   /**
    * @see org.eclipse.jface.dialogs.IDialogPage#createControl(Composite)
    */
-  public void createControl(Composite parent) {
+  public void createControl(Composite parent)
+  {
   }
 
 }

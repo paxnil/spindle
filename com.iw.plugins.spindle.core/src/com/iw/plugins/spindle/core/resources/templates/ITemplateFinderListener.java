@@ -27,15 +27,16 @@
 package com.iw.plugins.spindle.core.resources.templates;
 
 /**
- *  Interface that allows listeners to record all the
- *  template extensions used in a project.
- *  <p>
- *  Used by the builders to record template extensions in thier state objects
+ * Interface that allows listeners to record all the template extensions used in
+ * a project.
+ * <p>
+ * Used by the builders to record template extensions in thier state objects
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ITemplateFinderListener.java,v 1.1 2003/06/26 12:32:40 glongman
+ *          Exp $
  */
 public interface ITemplateFinderListener
 {
-    public void templateExtensionSeen(String extension);
+  public void templateExtensionSeen(String extension);
 }

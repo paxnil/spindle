@@ -27,15 +27,15 @@
 package com.iw.plugins.spindle.core.parser.validator;
 
 /**
- *  Exceptions thrown while validating a DOM tree
+ * Exceptions thrown while validating a DOM tree
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public class ValidatorException extends Exception
 {
-    public ValidatorException(String s)
-    {
-        super(s);
-    }
+  public ValidatorException(String s)
+  {
+    super(s);
+  }
 }

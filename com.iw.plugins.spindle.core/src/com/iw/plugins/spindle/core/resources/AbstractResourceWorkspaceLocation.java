@@ -33,143 +33,157 @@ import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.runtime.Path;
 
 /**
- *  Abstract base class for implementations of IResourceWorkspaceLocations.
+ * Abstract base class for implementations of IResourceWorkspaceLocations.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: AbstractResourceWorkspaceLocation.java,v 1.13 2003/11/21
+ *          17:46:26 glongman Exp $
  */
-public abstract class AbstractResourceWorkspaceLocation implements IResourceWorkspaceLocation
+public abstract class AbstractResourceWorkspaceLocation
+    implements
+      IResourceWorkspaceLocation
 {
-    
-   
 
-    private String fPath;
-    private String fName;
-    protected AbstractRootLocation fRoot;
+  private String fPath;
+  private String fName;
+  protected AbstractRootLocation fRoot;
 
-    protected AbstractResourceWorkspaceLocation(AbstractRootLocation root, String path)
+  protected AbstractResourceWorkspaceLocation(AbstractRootLocation root, String path)
+  {
+    this.fRoot = root;
+    Path p = new Path(path);
+    if (path.endsWith("/"))
     {
-        this.fRoot = root;
-        Path p = new Path(path);
-        if (path.endsWith("/"))
-        {
-            fPath = p.removeTrailingSeparator().toString();
-            fName = "";
+      fPath = p.removeTrailingSeparator().toString();
+      fName = "";
 
-        } else
-        {
-            this.fPath = p.removeLastSegments(1).addTrailingSeparator().makeRelative().toString();
-            fName = p.lastSegment();
-        }
-
-    }
-
-    public String getName()
+    } else
     {
-        return fName;
+      this.fPath = p
+          .removeLastSegments(1)
+          .addTrailingSeparator()
+          .makeRelative()
+          .toString();
+      fName = p.lastSegment();
     }
 
-    public IResourceLocation getRelativeLocation(String name)
+  }
+
+  public String getName()
+  {
+    return fName;
+  }
+
+  public IResourceLocation getRelativeLocation(String name)
+  {
+    if (name.startsWith("/"))
     {
-        if (name.startsWith("/"))
-        {
-            if (name.equals(fPath))
-            {
-                return this;
-            } else
-            {
-                return fRoot.getRelativeLocation(name);
-            }
-        }
-
-        if (name.equals(getName()))
-            return this;
-
-        return fRoot.getRelativeLocation(getPath() + "/" + name);
-
+      if (name.equals(fPath))
+      {
+        return this;
+      } else
+      {
+        return fRoot.getRelativeLocation(name);
+      }
     }
 
-    public String getPath()
+    if (name.equals(getName()))
+      return this;
+
+    return fRoot.getRelativeLocation(getPath() + "/" + name);
+
+  }
+
+  public String getPath()
+  {
+    return fPath;
+  }
+
+  /**
+   * Returns true if the other object is an instance of the same class, and the
+   * paths are equal.
+   *  
+   */
+  public boolean equals(Object obj)
+  {
+    if (obj == null)
+      return false;
+
+    if (obj.getClass().equals(getClass()))
     {
-        return fPath;
+      AbstractResourceWorkspaceLocation other = (AbstractResourceWorkspaceLocation) obj;
+      return this.fRoot.equals(other.fRoot) && this.fPath.equals(other.fPath)
+          && this.fName.equals(other.fName);
     }
 
-    /**
-     *  Returns true if the other object is an instance of the
-     *  same class, and the paths are equal.
-     * 
-     **/
-    public boolean equals(Object obj)
-    {
-        if (obj == null)
-            return false;
+    return false;
+  }
 
-        if (obj.getClass().equals(getClass()))
-        {
-            AbstractResourceWorkspaceLocation other = (AbstractResourceWorkspaceLocation) obj;
-            return this.fRoot.equals(other.fRoot) && this.fPath.equals(other.fPath) && this.fName.equals(other.fName);
-        }
+  /*
+   * (non-Javadoc)
+   * 
+   * 
+   * @see org.apache.tapestry.IResourceLocation#getResourceURL()
+   */
+  public URL getResourceURL()
+  {
+    throw new Error("Not useful in an Eclipse environment");
+  }
 
-        return false;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isOnClasspath()
+   */
+  public boolean isOnClasspath()
+  {
+    return fRoot.isOnClasspath();
+  }
 
-    /* (non-Javadoc)
-     * 
-     * 
-     * @see org.apache.tapestry.IResourceLocation#getResourceURL()
-     */
-    public URL getResourceURL()
-    {
-        throw new Error("Not useful in an Eclipse environment");
-    }
+  public String toString()
+  {
+    StringBuffer buffer = new StringBuffer();
+    buffer.append(fRoot.toString());
+    buffer.append(": ");
+    buffer.append(fPath);
+    buffer.append(fName);
+    return buffer.toString();
+  }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isOnClasspath()
-     */
-    public boolean isOnClasspath()
-    {
-        return fRoot.isOnClasspath();
-    }
-    
-    
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.IResourceLocation#getLocalization(java.util.Locale)
+   */
+  public IResourceLocation getLocalization(Locale locale)
+  {
+    throw new Error("Not useful in an Eclipse environment");
+  }
 
-    public String toString()
-    {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append(fRoot.toString());
-        buffer.append(": ");
-        buffer.append(fPath);
-        buffer.append(fName);
-        return buffer.toString();
-    }
+  String toHashString()
+  {
+    return fPath + (fName == null ? "" : fName);
+  }
 
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.IResourceLocation#getLocalization(java.util.Locale)
-     */
-    public IResourceLocation getLocalization(Locale locale)
-    {
-        throw new Error("Not useful in an Eclipse environment");
-    }
-    
-    String toHashString() {
-        return fPath + (fName == null ? "" :  fName);
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  public int hashCode()
+  {
+    return (fRoot.toHashString() + toHashString()).hashCode();
+  }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
-    public int hashCode()
-    {        
-        return (fRoot.toHashString() + toHashString()).hashCode();
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.IResourceLocation#getLocale()
-     */
-    public Locale getLocale()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.IResourceLocation#getLocale()
+   */
+  public Locale getLocale()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
 }

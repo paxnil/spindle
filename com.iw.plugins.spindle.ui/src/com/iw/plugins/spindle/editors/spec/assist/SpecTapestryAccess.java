@@ -33,7 +33,7 @@ import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.UITapestryAccess;
 
 /**
- *  Contains Helper methods for content assist in specs
+ * Contains Helper methods for content assist in specs
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -41,13 +41,13 @@ import com.iw.plugins.spindle.editors.UITapestryAccess;
 public class SpecTapestryAccess extends UITapestryAccess
 {
 
-    private IComponentSpecification fComponentSpecification;
-    public SpecTapestryAccess(Editor editor) throws IllegalArgumentException
-    {
-        super(editor);
-        Object spec = editor.getSpecification();
-        Assert.isLegal(spec != null);
-        if (spec instanceof IComponentSpecification)
-            fComponentSpecification = (IComponentSpecification) spec;
-    }
+  private IComponentSpecification fComponentSpecification;
+  public SpecTapestryAccess(Editor editor) throws IllegalArgumentException
+  {
+    super(editor);
+    Object spec = editor.getSpecification();
+    Assert.isLegal(spec != null);
+    if (spec instanceof IComponentSpecification)
+      fComponentSpecification = (IComponentSpecification) spec;
+  }
 }

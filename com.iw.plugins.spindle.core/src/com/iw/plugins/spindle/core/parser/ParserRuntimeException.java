@@ -30,81 +30,93 @@ import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.parser.XMLParseException;
 
 /**
- *  Runtime exception thrown by PullParser when a fatal error occurs
+ * Runtime exception thrown by PullParser when a fatal error occurs
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ParserRuntimeException.java,v 1.2 2003/05/30 20:40:33 glongman
+ *          Exp $
  */
 public class ParserRuntimeException extends XMLParseException
 {
 
-    /**
-     * @param locator
-     * @param message
+  /**
+   * @param locator
+   * @param message
+   */
+  public ParserRuntimeException(XMLParseException exception)
+  {
+    super(new XMLLocatorWrapper(exception), exception.getMessage());
+  }
+
+  static class XMLLocatorWrapper implements XMLLocator
+  {
+
+    private XMLParseException fWrapped;
+
+    public XMLLocatorWrapper(XMLParseException exception)
+    {
+      this.fWrapped = exception;
+    }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.xerces.xni.XMLLocator#getColumnNumber()
      */
-    public ParserRuntimeException(XMLParseException exception)
+    public int getColumnNumber()
     {
-        super(new XMLLocatorWrapper(exception), exception.getMessage());
+      return fWrapped.getColumnNumber();
     }
 
-    static class XMLLocatorWrapper implements XMLLocator
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.xerces.xni.XMLLocator#getLineNumber()
+     */
+    public int getLineNumber()
     {
-        
-        private XMLParseException fWrapped;
-        
-        public XMLLocatorWrapper(XMLParseException exception) {
-            this.fWrapped = exception;
-        }
-        /* (non-Javadoc)
-        * @see org.apache.xerces.xni.XMLLocator#getColumnNumber()
-        */
-        public int getColumnNumber()
-        {
-            return fWrapped.getColumnNumber();
-        }
-
-        /* (non-Javadoc)
-         * @see org.apache.xerces.xni.XMLLocator#getLineNumber()
-         */
-        public int getLineNumber()
-        {
-             return fWrapped.getLineNumber();
-        }
-
-        /* (non-Javadoc)
-         * @see org.apache.xerces.xni.XMLResourceIdentifier#getBaseSystemId()
-         */
-        public String getBaseSystemId()
-        {
-            return fWrapped.getBaseSystemId();
-        }
-
-        /* (non-Javadoc)
-         * @see org.apache.xerces.xni.XMLResourceIdentifier#getExpandedSystemId()
-         */
-        public String getExpandedSystemId()
-        {
-            return fWrapped.getExpandedSystemId();
-        }
-
-        /* (non-Javadoc)
-         * @see org.apache.xerces.xni.XMLResourceIdentifier#getLiteralSystemId()
-         */
-        public String getLiteralSystemId()
-        {
-            return fWrapped.getLiteralSystemId();
-        }
-
-        /* (non-Javadoc)
-         * @see org.apache.xerces.xni.XMLResourceIdentifier#getPublicId()
-         */
-        public String getPublicId()
-        {
-            return fWrapped.getPublicId();
-        }
-        
-       
-
+      return fWrapped.getLineNumber();
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.xerces.xni.XMLResourceIdentifier#getBaseSystemId()
+     */
+    public String getBaseSystemId()
+    {
+      return fWrapped.getBaseSystemId();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.xerces.xni.XMLResourceIdentifier#getExpandedSystemId()
+     */
+    public String getExpandedSystemId()
+    {
+      return fWrapped.getExpandedSystemId();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.xerces.xni.XMLResourceIdentifier#getLiteralSystemId()
+     */
+    public String getLiteralSystemId()
+    {
+      return fWrapped.getLiteralSystemId();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.xerces.xni.XMLResourceIdentifier#getPublicId()
+     */
+    public String getPublicId()
+    {
+      return fWrapped.getPublicId();
+    }
+
+  }
 
 }

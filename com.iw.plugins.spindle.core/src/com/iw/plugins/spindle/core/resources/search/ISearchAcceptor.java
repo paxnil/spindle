@@ -29,7 +29,7 @@ package com.iw.plugins.spindle.core.resources.search;
 import org.eclipse.core.resources.IStorage;
 
 /**
- *  An acceptor that is invoked by the find methods in ClasspathRootLocation.
+ * An acceptor that is invoked by the find methods in ClasspathRootLocation.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -37,7 +37,7 @@ import org.eclipse.core.resources.IStorage;
 public interface ISearchAcceptor
 {
 
-    /** return false to stop the find! **/
-    public boolean accept(Object parent, IStorage storage);
+  /** return false to stop the find! * */
+  public boolean accept(Object parent, IStorage storage);
 
 }

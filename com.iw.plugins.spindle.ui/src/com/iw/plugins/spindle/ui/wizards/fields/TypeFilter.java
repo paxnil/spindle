@@ -32,7 +32,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
- *  Allows views to filter by type.
+ * Allows views to filter by type.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -40,44 +40,47 @@ import com.iw.plugins.spindle.core.util.Assert;
 public class TypeFilter extends ViewerFilter
 {
 
-    private Class[] fAcceptedTypes;
-    private Object[] fRejected;
+  private Class[] fAcceptedTypes;
+  private Object[] fRejected;
 
-    public TypeFilter(Class[] acceptedTypes)
-    {
-        this(acceptedTypes, null);
-    }
+  public TypeFilter(Class[] acceptedTypes)
+  {
+    this(acceptedTypes, null);
+  }
 
-    public TypeFilter(Class[] acceptedTypes, Object[] rejectedElements)
-    {
-        Assert.isNotNull(acceptedTypes);
-        fAcceptedTypes = acceptedTypes;
-        fRejected = rejectedElements;
-    }
+  public TypeFilter(Class[] acceptedTypes, Object[] rejectedElements)
+  {
+    Assert.isNotNull(acceptedTypes);
+    fAcceptedTypes = acceptedTypes;
+    fRejected = rejectedElements;
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-     */
-    public boolean select(Viewer viewer, Object parentElement, Object element)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer,
+   *      java.lang.Object, java.lang.Object)
+   */
+  public boolean select(Viewer viewer, Object parentElement, Object element)
+  {
+    if (fRejected != null)
     {
-        if (fRejected != null)
+      for (int i = 0; i < fRejected.length; i++)
+      {
+        if (element.equals(fRejected[i]))
         {
-            for (int i = 0; i < fRejected.length; i++)
-            {
-                if (element.equals(fRejected[i]))
-                {
-                    return false;
-                }
-            }
+          return false;
         }
-        for (int i = 0; i < fAcceptedTypes.length; i++)
-        {
-            if (fAcceptedTypes[i].isInstance(element))
-            {
-                return true;
-            }
-        }
-        return false;
+      }
     }
+    for (int i = 0; i < fAcceptedTypes.length; i++)
+    {
+      if (fAcceptedTypes[i].isInstance(element))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
 
 }

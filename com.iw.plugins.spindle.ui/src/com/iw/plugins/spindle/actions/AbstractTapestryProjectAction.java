@@ -40,106 +40,109 @@ import org.eclipse.ui.IWorkbenchPart;
 import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
- * Copyright 2002 Intelligent Works Inc.
- * All rights reserved
+ * Copyright 2002 Intelligent Works Inc. All rights reserved
  * 
  * @author gwl
- * @version $Id$
+ * @version $Id: AbstractTapestryProjectAction.java,v 1.1 2003/10/29 12:33:56
+ *          glongman Exp $
  */
-public abstract class AbstractTapestryProjectAction extends Action implements IObjectActionDelegate
+public abstract class AbstractTapestryProjectAction extends Action
+    implements
+      IObjectActionDelegate
 {
 
-    private IWorkbenchPart part;
-    protected IStructuredSelection selection;
+  private IWorkbenchPart part;
+  protected IStructuredSelection selection;
 
-    /**
-     * Constructor for AbstractCreateFromTemplateAction.
-     */
-    public AbstractTapestryProjectAction()
+  /**
+   * Constructor for AbstractCreateFromTemplateAction.
+   */
+  public AbstractTapestryProjectAction()
+  {
+    super();
+  }
+
+  /**
+   * @see org.eclipse.ui.IObjectActionDelegate#setActivePart(IAction,
+   *      IWorkbenchPart)
+   */
+  public void setActivePart(IAction action, IWorkbenchPart targetPart)
+  {
+    part = targetPart;
+  }
+
+  /**
+   * @see org.eclipse.ui.IActionDelegate#selectionChanged(IAction, ISelection)
+   */
+  public void selectionChanged(IAction action, ISelection sel)
+  {
+    boolean enable = false;
+    this.selection = null;
+
+    IStructuredSelection selection = null;
+
+    if (sel instanceof IStructuredSelection)
     {
-        super();
-    }
 
-    /**
-     * @see org.eclipse.ui.IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
-     */
-    public void setActivePart(IAction action, IWorkbenchPart targetPart)
-    {
-        part = targetPart;
-    }
+      selection = (IStructuredSelection) sel;
 
-    /**
-     * @see org.eclipse.ui.IActionDelegate#selectionChanged(IAction, ISelection)
-     */
-    public void selectionChanged(IAction action, ISelection sel)
-    {
-        boolean enable = false;
-        this.selection = null;
+      if (selection != null && !selection.isEmpty() && selection.size() == 1)
+      {
 
-        IStructuredSelection selection = null;
-
-        if (sel instanceof IStructuredSelection)
+        if (checkProjectIsOpenAndHasJavaNature(selection))
         {
 
-            selection = (IStructuredSelection) sel;
-
-            if (selection != null && !selection.isEmpty() && selection.size() == 1)
-            {
-
-                if (checkProjectIsOpenAndHasJavaNature(selection))
-                {
-
-                    enable = checkSelection(selection);
-                }
-            }
-
+          enable = checkSelection(selection);
         }
-        if (enable)
-        {
+      }
 
-            this.selection = selection;
-        }
-        action.setEnabled(enable);
     }
-
-    private boolean checkProjectIsOpenAndHasJavaNature(IStructuredSelection selection)
+    if (enable)
     {
 
-        IJavaProject jproject = (IJavaProject) selection.getFirstElement();
-
-        IProject project = jproject.getProject();
-
-        return project.isOpen();
-
+      this.selection = selection;
     }
+    action.setEnabled(enable);
+  }
 
-    protected boolean checkSelection(IStructuredSelection selection)
+  private boolean checkProjectIsOpenAndHasJavaNature(IStructuredSelection selection)
+  {
+
+    IJavaProject jproject = (IJavaProject) selection.getFirstElement();
+
+    IProject project = jproject.getProject();
+
+    return project.isOpen();
+
+  }
+
+  protected boolean checkSelection(IStructuredSelection selection)
+  {
+
+    IJavaProject jproject = (IJavaProject) selection.getFirstElement();
+
+    IProject project = jproject.getProject();
+
+    try
     {
 
-        IJavaProject jproject = (IJavaProject) selection.getFirstElement();
+      return !project.hasNature(TapestryCore.NATURE_ID);
 
-        IProject project = jproject.getProject();
-
-        try
-        {
-
-            return !project.hasNature(TapestryCore.NATURE_ID);
-
-        } catch (CoreException e)
-        {
-
-            return false;
-        }
-
-    }
-
-    private String getName(IProject project)
+    } catch (CoreException e)
     {
 
-        IPath path = project.getFullPath();
-        path = path.removeFileExtension();
-        return path.lastSegment();
-
+      return false;
     }
+
+  }
+
+  private String getName(IProject project)
+  {
+
+    IPath path = project.getFullPath();
+    path = path.removeFileExtension();
+    return path.lastSegment();
+
+  }
 
 }

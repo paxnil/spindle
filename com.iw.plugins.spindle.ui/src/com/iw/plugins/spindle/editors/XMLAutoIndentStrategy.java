@@ -55,7 +55,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
   private static final String FORMATTER_USE_TABS_TO_INDENT = PreferenceConstants.FORMATTER_USE_TABS_TO_INDENT;
   private static final String EDITOR_DISPLAY_TAB_WIDTH = PreferenceConstants.EDITOR_DISPLAY_TAB_WIDTH;
 
-  private XMLDocumentPartitioner fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
+  private XMLDocumentPartitioner fPartitioner = new XMLDocumentPartitioner(
+      XMLDocumentPartitioner.SCANNER,
       XMLDocumentPartitioner.TYPES);
 
   private TypedPosition[] fTypedPositions;
@@ -78,7 +79,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
    */
   public void customizeDocumentCommand(IDocument document, DocumentCommand command)
   {
-    if (command.length == 0 && command.text != null && containsOnlyDelimiter(document, command.text))
+    if (command.length == 0 && command.text != null
+        && containsOnlyDelimiter(document, command.text))
     {
       int docLength = document.getLength();
       if (command.offset == -1 || docLength == 0)
@@ -99,7 +101,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
         } else
         {
           String type = artifact.getType();
-          boolean inside = offset <= artifact.getOffset() && offset < artifact.getOffset() + artifact.getLength();
+          boolean inside = offset <= artifact.getOffset()
+              && offset < artifact.getOffset() + artifact.getLength();
 
           String newType = null;
           if (inside && type != XMLDocumentPartitioner.TEXT)
@@ -112,7 +115,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
             {
               artifact = (XMLNode) walker.previous();
 
-            } while (artifact != null && artifact.getType() == XMLDocumentPartitioner.TEXT);
+            } while (artifact != null
+                && artifact.getType() == XMLDocumentPartitioner.TEXT);
           }
 
           if (artifact == null)
@@ -181,7 +185,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
     return false;
   }
 
-  private void connect(IDocument d) throws BadLocationException, BadPositionCategoryException
+  private void connect(IDocument d) throws BadLocationException,
+      BadPositionCategoryException
   {
     fPartitioner.connect(d);
     Position[] pos = d.getPositions(fPartitioner.getPositionCategory());
@@ -205,10 +210,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
   /**
    * Returns the indentation of the line of the given offset.
    * 
-   * @param document
-   *          the document
-   * @param offset
-   *          the offset
+   * @param document the document
+   * @param offset the offset
    * @return the indentation of the line of the offset
    */
   private int getIndent(IDocument document, int offset)
@@ -264,10 +267,8 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
    * write a given number of whitespace columns, using tabs or spaces depending
    * on preference
    * 
-   * @param indentCount
-   *          the number of indents to write
-   * @param buffer
-   *          the buffer to write to
+   * @param indentCount the number of indents to write
+   * @param buffer the buffer to write to
    * @return the number of characters inserted into the buffer
    */
   private int writeIndent(int indentCount, StringBuffer buffer, boolean useTabsToIndent)

@@ -35,7 +35,8 @@ import org.eclipse.core.runtime.CoreException;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 
 /**
- * Extends <code>org.apache.tapestry.IResourceLocation<code> to record additional
+ * Extends
+ * <code>org.apache.tapestry.IResourceLocation<code> to record additional
  * bits of information describing a Tapestry artifact found in the workspace.
  * 
  * @author glongman@intelligentworks.com
@@ -46,54 +47,52 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
 public interface IResourceWorkspaceLocation extends IResourceLocation
 {
 
-//    public boolean exists();
+  //    public boolean exists();
 
-    /**
-     * return the workspace storage associated with this descriptor
-     * <br>
-     * Using IStorage here instead of IResource as some things will come from
-     * Jar files.
-     */
-    public IStorage getStorage();
+  /**
+   * return the workspace storage associated with this descriptor <br>
+   * Using IStorage here instead of IResource as some things will come from Jar
+   * files.
+   */
+  public IStorage getStorage();
 
-    public boolean isWorkspaceResource();
-    
-    public boolean isOnClasspath();
-    
-    public boolean isBinary();
+  public boolean isWorkspaceResource();
 
-    /**
-     * return the project that contains the artifact
-     */
-    public IProject getProject();
+  public boolean isOnClasspath();
 
-    /**
-     * Returns an open input stream on the contents of this descriptor.
-     * The caller is responsible for closing the stream when finished.
-     * 
-     *   @exception CoreException if the contents of this storage could 
-     *		not be accessed.   See any refinements for more information.  
-     */
-    public InputStream getContents() throws CoreException;
+  public boolean isBinary();
 
-    /**
-     * iterate over all the direct descendants of this location
-     * passing each to the requestor
-     * 
-     * does not include folders
-     * 
-     * @param requestor an instance of IResourceLocationRequestor
-     * @throws CoreException
-     */
-    public void lookup(IResourceLocationAcceptor requestor) throws CoreException;
-    
-    /**
-     * return a propertly configured instance of ISearch
-     * 
-     * @throws CoreException if the search could not configured
-     */
-    
-    public ISearch getSearch() throws CoreException;
-    
+  /**
+   * return the project that contains the artifact
+   */
+  public IProject getProject();
+
+  /**
+   * Returns an open input stream on the contents of this descriptor. The caller
+   * is responsible for closing the stream when finished.
+   * 
+   * @exception CoreException if the contents of this storage could not be
+   *              accessed. See any refinements for more information.
+   */
+  public InputStream getContents() throws CoreException;
+
+  /**
+   * iterate over all the direct descendants of this location passing each to
+   * the requestor
+   * 
+   * does not include folders
+   * 
+   * @param requestor an instance of IResourceLocationRequestor
+   * @throws CoreException
+   */
+  public void lookup(IResourceLocationAcceptor requestor) throws CoreException;
+
+  /**
+   * return a propertly configured instance of ISearch
+   * 
+   * @throws CoreException if the search could not configured
+   */
+
+  public ISearch getSearch() throws CoreException;
 
 }

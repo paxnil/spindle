@@ -43,189 +43,200 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
-/** 
+/**
  * toolip handler for Trees, Tables & Toolbars!
  */
 
 public class ToolTipHandler
 {
 
-    private TooltipController tipController;
-    private boolean handlerEnabled = true;
+  private TooltipController tipController;
+  private boolean handlerEnabled = true;
+
+  /**
+   * Creates a new tooltip handler
+   * 
+   * @param parent the parent Shell
+   */
+  public ToolTipHandler(Shell parent)
+  {
+    tipController = new TooltipController(new TooltipCreator());
+  }
+
+  public boolean isHandlerEnabled()
+  {
+    return handlerEnabled;
+  }
+
+  public void setHandlerEnabled(boolean flag)
+  {
+    this.handlerEnabled = flag;
+  }
+
+  protected String getToolTipText(Object object, Point widgetPosition)
+  {
+    if (object instanceof Widget)
+    {
+      return (String) ((Widget) object).getData("TIP_TEXT");
+    }
+    return null;
+  }
+
+  /**
+   * Enables customized hover help for a specified control
+   * 
+   * @control the control on which to enable hoverhelp
+   */
+  public void activateHoverHelp(final Control control)
+  {
+
+    tipController.install(control);
+
+  }
+
+  public class TooltipCreator implements IInformationControlCreator
+  {
 
     /**
-     * Creates a new tooltip handler
-     *
-     * @param parent the parent Shell
+     * @see org.eclipse.jface.text.IInformationControlCreator#createInformationControl(Shell)
      */
-    public ToolTipHandler(Shell parent)
+    public IInformationControl createInformationControl(Shell parent)
     {
-        tipController = new TooltipController(new TooltipCreator());
+      return new DefaultInformationControl(parent, new TooltipPresenter());
     }
 
-    public boolean isHandlerEnabled()
-    {
-        return handlerEnabled;
-    }
+  }
 
-    public void setHandlerEnabled(boolean flag)
-    {
-        this.handlerEnabled = flag;
-    }
-
-    protected String getToolTipText(Object object, Point widgetPosition)
-    {
-        if (object instanceof Widget)
-        {
-            return (String) ((Widget) object).getData("TIP_TEXT");
-        }
-        return null;
-    }
+  class TooltipController extends AbstractHoverInformationControlManager
+  {
 
     /**
-     * Enables customized hover help for a specified control
+     * Constructor for InformationController.
      * 
-     * @control the control on which to enable hoverhelp
+     * @param creator
      */
-    public void activateHoverHelp(final Control control)
+    public TooltipController(IInformationControlCreator creator)
     {
-
-        tipController.install(control);
+      super(creator);
+      setAnchor(ANCHOR_TOP);
+      setFallbackAnchors(new Anchor[]{ANCHOR_LEFT, ANCHOR_BOTTOM, ANCHOR_RIGHT});
+      setSizeConstraints(50, 10, false, false);
 
     }
 
-    public class TooltipCreator implements IInformationControlCreator
+    /**
+     * Hides the information control and stops the information control closer.
+     */
+    protected void hideInformationControl()
+    {
+      IInformationControl control = getInformationControl();
+      if (control != null)
+      {
+        control.setVisible(false);
+        this.setEnabled(true);
+      }
+    }
+
+    /**
+     * @see org.eclipse.jface.text.AbstractInformationControlManager#computeInformation()
+     */
+    protected void computeInformation()
     {
 
-        /**
-         * @see org.eclipse.jface.text.IInformationControlCreator#createInformationControl(Shell)
-         */
-        public IInformationControl createInformationControl(Shell parent)
-        {
-            return new DefaultInformationControl(parent, new TooltipPresenter());
-        }
+      if (!handlerEnabled)
+      {
+        return;
+      }
+
+      Point widgetPosition = getHoverEventLocation();
+      int heightCue = -1;
+
+      Widget widget = (Widget) getSubjectControl();
+
+      if (widget instanceof ToolBar)
+      {
+        ToolBar w = (ToolBar) widget;
+        widget = w.getItem(widgetPosition);
+      }
+      if (widget instanceof Table)
+      {
+        Table w = (Table) widget;
+        heightCue = w.getItemHeight();
+        widget = w.getItem(widgetPosition);
+      }
+      if (widget instanceof Tree)
+      {
+        Tree w = (Tree) widget;
+        heightCue = w.getItemHeight();
+        widget = w.getItem(widgetPosition);
+      }
+
+      String information = null;
+
+      Rectangle area = null;
+      if (widget instanceof Control)
+      {
+
+        area = ((Control) widget).getBounds();
+        area.x = 0;
+        area.y = 0;
+
+      } else
+      {
+
+        area = new Rectangle(
+            widgetPosition.x - 16,
+            widgetPosition.y - 16,
+            32,
+            heightCue == -1 ? 32 : heightCue);
+
+      }
+      if (widget != null)
+      {
+        information = getToolTipText(widget, widgetPosition);
+      }
+
+      setInformation(information, area);
 
     }
 
-    class TooltipController extends AbstractHoverInformationControlManager
+  }
+
+  public static class TooltipPresenter implements IInformationPresenter
+  {
+
+    /**
+     * @see org.eclipse.jface.text.DefaultInformationControl.IInformationPresenter#updatePresentation(Display,
+     *      String, TextPresentation, int, int)
+     */
+    public String updatePresentation(
+        Display display,
+        String hoverInfo,
+        TextPresentation presentation,
+        int maxWidth,
+        int maxHeight)
     {
 
-        /**
-        * Constructor for InformationController.
-        * @param creator
-        */
-        public TooltipController(IInformationControlCreator creator)
-        {
-            super(creator);
-            setAnchor(ANCHOR_TOP);
-            setFallbackAnchors(new Anchor[] { ANCHOR_LEFT, ANCHOR_BOTTOM, ANCHOR_RIGHT });
-            setSizeConstraints(50, 10, false, false);
+      if (hoverInfo == null)
+        return null;
 
-        }
+      int firstLineBreak = hoverInfo.indexOf("\n");
+      firstLineBreak = (firstLineBreak == -1 ? hoverInfo.length() : firstLineBreak);
 
-        /**
-        * Hides the information control and stops the information control closer.
-        */
-        protected void hideInformationControl()
-        {
-            IInformationControl control = getInformationControl();
-            if (control != null)
-            {
-                control.setVisible(false);
-                this.setEnabled(true);
-            }
-        }
+      presentation.addStyleRange(new StyleRange(
+          0,
+          hoverInfo.length(),
+          null,
+          null,
+          SWT.BOLD));
 
-        /**
-         * @see org.eclipse.jface.text.AbstractInformationControlManager#computeInformation()
-         */
-        protected void computeInformation()
-        {
+      //      presentation.addStyleRange(new StyleRange(0, firstLineBreak, null,
+      // null, SWT.BOLD));
 
-            if (!handlerEnabled)
-            {
-                return;
-            }
-
-            Point widgetPosition = getHoverEventLocation();
-            int heightCue = -1;
-
-            Widget widget = (Widget) getSubjectControl();
-
-            if (widget instanceof ToolBar)
-            {
-                ToolBar w = (ToolBar) widget;
-                widget = w.getItem(widgetPosition);
-            }
-            if (widget instanceof Table)
-            {
-                Table w = (Table) widget;
-                heightCue = w.getItemHeight();
-                widget = w.getItem(widgetPosition);
-            }
-            if (widget instanceof Tree)
-            {
-                Tree w = (Tree) widget;
-                heightCue = w.getItemHeight();
-                widget = w.getItem(widgetPosition);
-            }
-
-            String information = null;
-
-            Rectangle area = null;
-            if (widget instanceof Control)
-            {
-
-                area = ((Control) widget).getBounds();
-                area.x = 0;
-                area.y = 0;
-
-            } else
-            {
-
-                area =
-                    new Rectangle(widgetPosition.x - 16, widgetPosition.y - 16, 32, heightCue == -1 ? 32 : heightCue);
-
-            }
-            if (widget != null)
-            {
-                information = getToolTipText(widget, widgetPosition);
-            }
-
-            setInformation(information, area);
-
-        }
+      return hoverInfo;
 
     }
 
-    public static class TooltipPresenter implements IInformationPresenter
-    {
-
-        /**
-        * @see org.eclipse.jface.text.DefaultInformationControl.IInformationPresenter#updatePresentation(Display, String, TextPresentation, int, int)
-        */
-        public String updatePresentation(
-            Display display,
-            String hoverInfo,
-            TextPresentation presentation,
-            int maxWidth,
-            int maxHeight)
-        {
-
-            if (hoverInfo == null)
-                return null;
-
-            int firstLineBreak = hoverInfo.indexOf("\n");
-            firstLineBreak = (firstLineBreak == -1 ? hoverInfo.length() : firstLineBreak);
-
-            presentation.addStyleRange(new StyleRange(0, hoverInfo.length(), null, null, SWT.BOLD));
-
-            //      presentation.addStyleRange(new StyleRange(0, firstLineBreak, null, null, SWT.BOLD));
-
-            return hoverInfo;
-
-        }
-
-    }
+  }
 
 }

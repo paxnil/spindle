@@ -54,25 +54,26 @@ public class PageFactory
       IContainer container,
       String componentName,
       IType specClass,
-      IProgressMonitor monitor)
-      throws CoreException, InterruptedException
+      IProgressMonitor monitor) throws CoreException, InterruptedException
   {
-      monitor.beginTask(UIPlugin.getString("ApplicationFactory.operationdesc", componentName), 3);
-      String fileName = componentName + ".page";
-      IFile newFile = container.getFile(new Path("/" + fileName));
+    monitor.beginTask(UIPlugin.getString(
+        "ApplicationFactory.operationdesc",
+        componentName), 3);
+    String fileName = componentName + ".page";
+    IFile newFile = container.getFile(new Path("/" + fileName));
 
-      monitor.worked(1);
+    monitor.worked(1);
 
-      String qualifiedSpecClassname = specClass.getFullyQualifiedName();
-      InputStream contents = new ByteArrayInputStream(getComponentContent(qualifiedSpecClassname).getBytes());
-      monitor.worked(1);
-      newFile.create(contents, false, new SubProgressMonitor(monitor, 1));
-      monitor.worked(1);
-      monitor.done();
-      return newFile;
+    String qualifiedSpecClassname = specClass.getFullyQualifiedName();
+    InputStream contents = new ByteArrayInputStream(getComponentContent(
+        qualifiedSpecClassname).getBytes());
+    monitor.worked(1);
+    newFile.create(contents, false, new SubProgressMonitor(monitor, 1));
+    monitor.worked(1);
+    monitor.done();
+    return newFile;
   }
-  
-  
+
   public static IFile createPage(
       IResourceWorkspaceLocation namespaceLocation,
       String componentName,
@@ -108,56 +109,56 @@ public class PageFactory
     return newFile;
 
   }
-// TODO remove
-//  public static IFile createPage(
-//      IPackageFragmentRoot root,
-//      IPackageFragment pack,
-//      String componentName,
-//      IType specClass,
-//      IProgressMonitor monitor) throws CoreException, InterruptedException
-//  {
-//
-//    return createPage(
-//        root,
-//        pack,
-//        componentName,
-//        specClass.getFullyQualifiedName(),
-//        monitor);
-//  }
-//
-//  public static IFile createPage(
-//      IPackageFragmentRoot root,
-//      IPackageFragment pack,
-//      String componentName,
-//      String specClass,
-//      IProgressMonitor monitor) throws CoreException, InterruptedException
-//  {
-//
-//    monitor.beginTask(UIPlugin.getString(
-//        "ApplicationFactory.operationdesc",
-//        componentName), 10);
-//    if (pack == null)
-//    {
-//      pack = root.getPackageFragment("");
-//    }
-//    if (!pack.exists())
-//    {
-//      String packName = pack.getElementName();
-//      pack = root.createPackageFragment(packName, true, null);
-//      pack.save(new SubProgressMonitor(monitor, 1), true);
-//    }
-//    monitor.worked(1);
-//    IContainer folder = (IContainer) pack.getUnderlyingResource();
-//    IFile file = folder.getFile(new Path(componentName + ".page"));
-//
-//    String qualifiedSpecClassname = specClass;
-//    InputStream contents = new ByteArrayInputStream(getComponentContent(
-//        qualifiedSpecClassname).getBytes());
-//    file.create(contents, false, new SubProgressMonitor(monitor, 1));
-//    monitor.worked(1);
-//    monitor.done();
-//    return file;
-//  }
+  // TODO remove
+  //  public static IFile createPage(
+  //      IPackageFragmentRoot root,
+  //      IPackageFragment pack,
+  //      String componentName,
+  //      IType specClass,
+  //      IProgressMonitor monitor) throws CoreException, InterruptedException
+  //  {
+  //
+  //    return createPage(
+  //        root,
+  //        pack,
+  //        componentName,
+  //        specClass.getFullyQualifiedName(),
+  //        monitor);
+  //  }
+  //
+  //  public static IFile createPage(
+  //      IPackageFragmentRoot root,
+  //      IPackageFragment pack,
+  //      String componentName,
+  //      String specClass,
+  //      IProgressMonitor monitor) throws CoreException, InterruptedException
+  //  {
+  //
+  //    monitor.beginTask(UIPlugin.getString(
+  //        "ApplicationFactory.operationdesc",
+  //        componentName), 10);
+  //    if (pack == null)
+  //    {
+  //      pack = root.getPackageFragment("");
+  //    }
+  //    if (!pack.exists())
+  //    {
+  //      String packName = pack.getElementName();
+  //      pack = root.createPackageFragment(packName, true, null);
+  //      pack.save(new SubProgressMonitor(monitor, 1), true);
+  //    }
+  //    monitor.worked(1);
+  //    IContainer folder = (IContainer) pack.getUnderlyingResource();
+  //    IFile file = folder.getFile(new Path(componentName + ".page"));
+  //
+  //    String qualifiedSpecClassname = specClass;
+  //    InputStream contents = new ByteArrayInputStream(getComponentContent(
+  //        qualifiedSpecClassname).getBytes());
+  //    file.create(contents, false, new SubProgressMonitor(monitor, 1));
+  //    monitor.worked(1);
+  //    monitor.done();
+  //    return file;
+  //  }
 
   static private String getComponentContent(String qualifiedSpecClassname)
   {

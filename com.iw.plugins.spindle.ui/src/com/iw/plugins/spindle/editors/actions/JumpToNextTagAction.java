@@ -48,58 +48,60 @@ import com.iw.plugins.spindle.UIPlugin;
 public class JumpToNextTagAction extends JumpToNextAttributeAction
 {
 
-    /**
-     * @param forward
-     */
-    public JumpToNextTagAction(boolean forward)
+  /**
+   * @param forward
+   */
+  public JumpToNextTagAction(boolean forward)
+  {
+    super(forward);
+  }
+
+  /**
+   * @param text
+   * @param forward
+   */
+  public JumpToNextTagAction(String text, boolean forward)
+  {
+    super(text, forward);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.actions.JumpToNextAttributeAction#buildRegionList(org.eclipse.jface.text.IDocument)
+   */
+  protected void buildRegionList(IDocument document)
+  {
+    attachPartitioner();
+
+    Position[] positions = null;
+    try
     {
-        super(forward);
+      positions = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
+    } catch (BadPositionCategoryException e)
+    {
+      UIPlugin.log(e);
+      return;
     }
 
-    /**
-     * @param text
-     * @param forward
-     */
-    public JumpToNextTagAction(String text, boolean forward)
+    Arrays.sort(positions, XMLNode.COMPARATOR);
+
+    ArrayList regionCollector = new ArrayList();
+
+    List attributes = null;
+
+    for (int i = 0; i < positions.length; i++)
     {
-        super(text, forward);
+      XMLNode node = (XMLNode) positions[i];
+      attributes = node.getAttributes();
+
+      if (attributes.isEmpty())
+        continue;
+
+      regionCollector.add(((XMLNode) attributes.get(0)).getAttributeValueRegion());
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.actions.JumpToNextAttributeAction#buildRegionList(org.eclipse.jface.text.IDocument)
-     */
-    protected void buildRegionList(IDocument document)
-    {
-        attachPartitioner();
-
-        Position[] positions = null;
-        try
-        {
-            positions = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
-        } catch (BadPositionCategoryException e)
-        {
-            UIPlugin.log(e);
-            return;
-        }
-
-        Arrays.sort(positions, XMLNode.COMPARATOR);
-
-        ArrayList regionCollector = new ArrayList();
-
-        List attributes = null;
-
-        for (int i = 0; i < positions.length; i++)
-        {
-            XMLNode node = (XMLNode) positions[i];
-            attributes = node.getAttributes();
-
-            if (attributes.isEmpty())
-                continue;
-
-            regionCollector.add(((XMLNode) attributes.get(0)).getAttributeValueRegion());
-        }
-
-        fRegions = (IRegion[]) regionCollector.toArray(new IRegion[regionCollector.size()]);
-    }
+    fRegions = (IRegion[]) regionCollector.toArray(new IRegion[regionCollector.size()]);
+  }
 
 }

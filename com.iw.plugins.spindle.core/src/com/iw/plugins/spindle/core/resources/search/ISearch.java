@@ -29,13 +29,13 @@ package com.iw.plugins.spindle.core.resources.search;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- *  Interface for all kinds of searches in the Tapestry context
+ * Interface for all kinds of searches in the Tapestry context
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public interface ISearch
 {
-    public abstract void configure(Object root) throws CoreException;
-    public abstract void search(ISearchAcceptor acceptor);
+  public abstract void configure(Object root) throws CoreException;
+  public abstract void search(ISearchAcceptor acceptor);
 }

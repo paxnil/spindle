@@ -58,514 +58,538 @@ import com.iw.plugins.spindle.UIPlugin;
 
 /**
  * Base implementation of a standard two list search widget
+ * 
  * @author gwl
  * @version $Id$
- *
- * Copyright 2002, Intelligent Works Inc.
- * All Rights Reserved.
+ * 
+ * Copyright 2002, Intelligent Works Inc. All Rights Reserved.
  */
 public class TwoListSearchWidget extends Viewer
 {
-    static private final Object[] empty = new Object[0];
+  static private final Object[] empty = new Object[0];
 
-    private int upperListHeightInChars = 8;
-    private int lowerListHeightInChars = 4;
-    private String filterLabel = UIPlugin.getString("two-list-chooser-widget-search");
-    private String upperListLabel = UIPlugin.getString("two-list-chooser-widget-choose");
-    private String lowerListLabel = UIPlugin.getString("two-list-chooser-widget-in");
-    private String initialFilter = UIPlugin.getString("two-list-chooser-widget-default-search");
+  private int upperListHeightInChars = 8;
+  private int lowerListHeightInChars = 4;
+  private String filterLabel = UIPlugin.getString("two-list-chooser-widget-search");
+  private String upperListLabel = UIPlugin.getString("two-list-chooser-widget-choose");
+  private String lowerListLabel = UIPlugin.getString("two-list-chooser-widget-in");
+  private String initialFilter = UIPlugin
+      .getString("two-list-chooser-widget-default-search");
 
-    private Text searchText;
-    private Table upperList;
-    private Table lowerList;
+  private Text searchText;
+  private Table upperList;
+  private Table lowerList;
 
-    private Composite control = null;
+  private Composite control = null;
 
-    private ILabelProvider upperListLabelProvider;
-    private ILabelProvider lowerListLabelProvider;
+  private ILabelProvider upperListLabelProvider;
+  private ILabelProvider lowerListLabelProvider;
 
-    private IStructuredContentProvider upperListContentProvider;
-    private IStructuredContentProvider lowerListContentProvider;
+  private IStructuredContentProvider upperListContentProvider;
+  private IStructuredContentProvider lowerListContentProvider;
 
-    private List doubleClickListeners = new ArrayList();
+  private List doubleClickListeners = new ArrayList();
 
-    /**
-     * Constructor for TwoListSearchWidget.
-     */
-    public TwoListSearchWidget()
+  /**
+   * Constructor for TwoListSearchWidget.
+   */
+  public TwoListSearchWidget()
+  {
+    super();
+  }
+
+  public Composite createControl(Composite parent)
+  {
+    Composite container = new Composite(parent, SWT.NONE);
+    container.setFont(parent.getFont());
+    FormLayout layout = new FormLayout();
+    layout.marginWidth = 4;
+    layout.marginHeight = 4;
+    container.setLayout(layout);
+
+    PixelConverter converter = new PixelConverter(container);
+
+    FormData formData = new FormData();
+    formData.top = new FormAttachment(0, 0);
+    formData.left = new FormAttachment(0, 0);
+    formData.right = new FormAttachment(100, 0);
+    formData.width = converter.convertWidthInCharsToPixels(25);
+
+    container.setLayoutData(formData);
+
+    Label searchLabel = new Label(container, SWT.NONE);
+    searchLabel.setText(filterLabel);
+
+    searchText = createText(container);
+
+    Label upperListLabelControl = new Label(container, SWT.NONE);
+    upperListLabelControl.setText(upperListLabel);
+
+    upperList = createUpperList(container);
+
+    Label lowerListLabelControl = new Label(container, SWT.NONE);
+    lowerListLabelControl.setText(lowerListLabel);
+
+    lowerList = createLowerList(container);
+
+    addControl(searchLabel, container, 4);
+
+    addControl(searchText, searchLabel, 4);
+
+    addControl(upperListLabelControl, searchText, 4);
+
+    addControl(upperList, upperListLabelControl, 4);
+
+    formData = (FormData) upperList.getLayoutData();
+    formData.height = converter.convertHeightInCharsToPixels(upperListHeightInChars);
+
+    addControl(lowerListLabelControl, upperList, 4);
+
+    addControl(lowerList, lowerListLabelControl, 4);
+
+    converter = new PixelConverter(lowerList);
+
+    formData = (FormData) lowerList.getLayoutData();
+    formData.height = converter.convertHeightInCharsToPixels(lowerListHeightInChars);
+
+    if (initialFilter != null)
     {
-        super();
+      searchText.setText(initialFilter);
+      searchText.selectAll();
     }
+    control = container;
+    return container;
+  }
 
-    public Composite createControl(Composite parent)
+  public Control getControl()
+  {
+    return control;
+  }
+
+  public void dispose()
+  {
+    searchText.dispose();
+    upperList.dispose();
+    lowerList.dispose();
+  }
+
+  public void setFocus()
+  {
+    searchText.selectAll();
+    searchText.setFocus();
+  }
+
+  private Text createText(Composite parent)
+  {
+    final Text text = new Text(parent, SWT.BORDER);
+    Listener l = new Listener()
     {
-        Composite container = new Composite(parent, SWT.NONE);
-        container.setFont(parent.getFont());
-        FormLayout layout = new FormLayout();
-        layout.marginWidth = 4;
-        layout.marginHeight = 4;
-        container.setLayout(layout);
+      public void handleEvent(Event evt)
+      {
 
-        PixelConverter converter = new PixelConverter(container);
-
-        FormData formData = new FormData();
-        formData.top = new FormAttachment(0, 0);
-        formData.left = new FormAttachment(0, 0);
-        formData.right = new FormAttachment(100, 0);
-        formData.width = converter.convertWidthInCharsToPixels(25);
-
-        container.setLayoutData(formData);
-
-        Label searchLabel = new Label(container, SWT.NONE);
-        searchLabel.setText(filterLabel);
-
-        searchText = createText(container);
-
-        Label upperListLabelControl = new Label(container, SWT.NONE);
-        upperListLabelControl.setText(upperListLabel);
-
-        upperList = createUpperList(container);
-
-        Label lowerListLabelControl = new Label(container, SWT.NONE);
-        lowerListLabelControl.setText(lowerListLabel);
-
-        lowerList = createLowerList(container);
-
-        addControl(searchLabel, container, 4);
-
-        addControl(searchText, searchLabel, 4);
-
-        addControl(upperListLabelControl, searchText, 4);
-
-        addControl(upperList, upperListLabelControl, 4);
-
-        formData = (FormData) upperList.getLayoutData();
-        formData.height = converter.convertHeightInCharsToPixels(upperListHeightInChars);
-
-        addControl(lowerListLabelControl, upperList, 4);
-
-        addControl(lowerList, lowerListLabelControl, 4);
-
-        converter = new PixelConverter(lowerList);
-
-        formData = (FormData) lowerList.getLayoutData();
-        formData.height = converter.convertHeightInCharsToPixels(lowerListHeightInChars);
-
-        if (initialFilter != null)
-        {
-            searchText.setText(initialFilter);
-            searchText.selectAll();
-        }
-        control = container;
-        return container;
-    }
-
-    public Control getControl()
-    {
-        return control;
-    }
-
-    public void dispose()
-    {
-        searchText.dispose();
-        upperList.dispose();
-        lowerList.dispose();
-    }
-
-    public void setFocus()
-    {
-        searchText.selectAll();
-        searchText.setFocus();
-    }
-
-    private Text createText(Composite parent)
-    {
-        final Text text = new Text(parent, SWT.BORDER);
-        Listener l = new Listener()
-        {
-            public void handleEvent(Event evt)
-            {
-
-                refresh();
-
-            }
-        };
-        text.addListener(SWT.Modify, l);
-        text.setFont(parent.getFont());
-        return text;
-    }
-
-    private Table createUpperList(Composite parent)
-    {
-        Table table = new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-        table.addListener(SWT.Selection, new Listener()
-        {
-            public void handleEvent(Event evt)
-            {
-                handleUpperSelectionChanged();
-            }
-        });
-
-        table.addListener(SWT.MouseDoubleClick, new Listener()
-        {
-            public void handleEvent(Event evt)
-            {
-                handleDoubleClick();
-            }
-        });
-        table.addDisposeListener(new DisposeListener()
-        {
-            public void widgetDisposed(DisposeEvent e)
-            {
-                upperListLabelProvider.dispose();
-            }
-        });
-        table.setFont(parent.getFont());
-        return table;
-    }
-
-    private Table createLowerList(Composite parent)
-    {
-        Table table = new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-        table.addListener(SWT.Selection, new Listener()
-        {
-            public void handleEvent(Event evt)
-            {
-                handleLowerSelectionChanged();
-            }
-        });
-        table.addListener(SWT.MouseDoubleClick, new Listener()
-        {
-            public void handleEvent(Event evt)
-            {
-                handleDoubleClick();
-            }
-        });
-        table.addDisposeListener(new DisposeListener()
-        {
-            public void widgetDisposed(DisposeEvent e)
-            {
-                lowerListLabelProvider.dispose();
-            }
-        });
-        table.setFont(parent.getFont());
-        return table;
-    }
-
-    /**
-     * Method handleDoubleClick.
-     */
-    private void handleDoubleClick()
-    {
-        for (Iterator iter = doubleClickListeners.iterator(); iter.hasNext();)
-        {
-            IDoubleClickListener listener = (IDoubleClickListener) iter.next();
-            listener.doubleClick(new DoubleClickEvent(this, getSelection()));
-        }
-    }
-
-    protected void handleUpperSelectionChanged()
-    {
-        TableItem[] selected = upperList.getSelection();
-
-        if (selected.length > 0)
-        {
-            TableItem selectedItem = upperList.getSelection()[0];
-            Object[] newLowerListData = lowerListContentProvider.getElements(selectedItem.getData());
-            updateListWidget(newLowerListData, lowerList, lowerListLabelProvider);
-        } else
-        {
-            updateListWidget(empty, lowerList, lowerListLabelProvider);
-        }
-        fireSelectionChanged(new SelectionChangedEvent(this, getSelection()));
-    }
-
-    protected void handleLowerSelectionChanged()
-    {
-        fireSelectionChanged(new SelectionChangedEvent(this, getSelection()));
-    }
-
-    public ISelection getSelection()
-    {
-        Object upperSelected = null;
-        int upperSelectionIndex = upperList.getSelectionIndex();
-
-        if (upperSelectionIndex >= 0)
-        {
-            upperSelected = upperList.getSelection()[0].getData();
-        } else
-        {
-            return StructuredSelection.EMPTY;
-        }
-
-        Object lowerSelected = null;
-        int lowerSelectionIndex = lowerList.getSelectionIndex();
-        if (lowerSelectionIndex >= 0)
-        {
-            lowerSelected = lowerList.getSelection()[0].getData();
-        }
-
-        StructuredSelection selection = new StructuredSelection(new Object[] { upperSelected, lowerSelected });
-
-        return selection;
-    }
-
-    private void updateListWidget(Object[] elements, Table table, ILabelProvider provider)
-    {
-        int size = elements.length;
-        table.setRedraw(false);
-        int itemCount = table.getItemCount();
-        if (size < itemCount)
-        {
-            table.remove(0, itemCount - size - 1);
-        }
-        TableItem[] items = table.getItems();
-        for (int i = 0; i < size; i++)
-        {
-            TableItem ti = null;
-            if (i < itemCount)
-            {
-                ti = items[i];
-            } else
-            {
-                ti = new TableItem(table, i);
-            }
-            ti.setText(provider.getText(elements[i]));
-            ti.setData(elements[i]);
-            Image img = provider.getImage(elements[i]);
-            if (img != null)
-            {
-                ti.setImage(img);
-            }
-        }
-        if (table.getItemCount() > 0)
-        {
-            table.setSelection(0);
-        }
-        table.setRedraw(true);
-        handleSelectionChanged(table);
-    }
-
-    protected void handleSelectionChanged(Table table)
-    {
-        if (table == upperList)
-        {
-            handleUpperSelectionChanged();
-        } else
-        {
-            fireSelectionChanged(new SelectionChangedEvent(this, getSelection()));
-        }
-    }
-
-    /**
-     * @see org.eclipse.jface.viewers.IInputProvider#getInput()
-     */
-    public Object getInput()
-    {
-        return null;
-    }
-
-    /**
-     * @see org.eclipse.jface.viewers.Viewer#refresh()
-     */
-    public void refresh()
-    {
-        Object[] upperListContents = upperListContentProvider.getElements(searchText.getText());
-        updateListWidget(upperListContents, upperList, upperListLabelProvider);
-    }
-
-    /**
-     * @see org.eclipse.jface.viewers.Viewer#setInput(Object)
-     */
-    public void setInput(Object input)
-    {
         refresh();
-    }
 
-    /**
-     * @see org.eclipse.jface.viewers.Viewer#setSelection(ISelection, boolean)
-     */
-    public void setSelection(ISelection selection, boolean reveal)
-    {}
+      }
+    };
+    text.addListener(SWT.Modify, l);
+    text.setFont(parent.getFont());
+    return text;
+  }
 
-    /**
-     * Sets the lowerListHeightInChars.
-     * @param lowerListHeightInChars The lowerListHeightInChars to set
-     */
-    public void setLowerListHeightInChars(int lowerListHeightInChars)
+  private Table createUpperList(Composite parent)
+  {
+    Table table = new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+    table.addListener(SWT.Selection, new Listener()
     {
-        this.lowerListHeightInChars = lowerListHeightInChars;
+      public void handleEvent(Event evt)
+      {
+        handleUpperSelectionChanged();
+      }
+    });
+
+    table.addListener(SWT.MouseDoubleClick, new Listener()
+    {
+      public void handleEvent(Event evt)
+      {
+        handleDoubleClick();
+      }
+    });
+    table.addDisposeListener(new DisposeListener()
+    {
+      public void widgetDisposed(DisposeEvent e)
+      {
+        upperListLabelProvider.dispose();
+      }
+    });
+    table.setFont(parent.getFont());
+    return table;
+  }
+
+  private Table createLowerList(Composite parent)
+  {
+    Table table = new Table(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+    table.addListener(SWT.Selection, new Listener()
+    {
+      public void handleEvent(Event evt)
+      {
+        handleLowerSelectionChanged();
+      }
+    });
+    table.addListener(SWT.MouseDoubleClick, new Listener()
+    {
+      public void handleEvent(Event evt)
+      {
+        handleDoubleClick();
+      }
+    });
+    table.addDisposeListener(new DisposeListener()
+    {
+      public void widgetDisposed(DisposeEvent e)
+      {
+        lowerListLabelProvider.dispose();
+      }
+    });
+    table.setFont(parent.getFont());
+    return table;
+  }
+
+  /**
+   * Method handleDoubleClick.
+   */
+  private void handleDoubleClick()
+  {
+    for (Iterator iter = doubleClickListeners.iterator(); iter.hasNext();)
+    {
+      IDoubleClickListener listener = (IDoubleClickListener) iter.next();
+      listener.doubleClick(new DoubleClickEvent(this, getSelection()));
+    }
+  }
+
+  protected void handleUpperSelectionChanged()
+  {
+    TableItem[] selected = upperList.getSelection();
+
+    if (selected.length > 0)
+    {
+      TableItem selectedItem = upperList.getSelection()[0];
+      Object[] newLowerListData = lowerListContentProvider.getElements(selectedItem
+          .getData());
+      updateListWidget(newLowerListData, lowerList, lowerListLabelProvider);
+    } else
+    {
+      updateListWidget(empty, lowerList, lowerListLabelProvider);
+    }
+    fireSelectionChanged(new SelectionChangedEvent(this, getSelection()));
+  }
+
+  protected void handleLowerSelectionChanged()
+  {
+    fireSelectionChanged(new SelectionChangedEvent(this, getSelection()));
+  }
+
+  public ISelection getSelection()
+  {
+    Object upperSelected = null;
+    int upperSelectionIndex = upperList.getSelectionIndex();
+
+    if (upperSelectionIndex >= 0)
+    {
+      upperSelected = upperList.getSelection()[0].getData();
+    } else
+    {
+      return StructuredSelection.EMPTY;
     }
 
-    /**
-     * Sets the upperListHeightInChars.
-     * @param upperListHeightInChars The upperListHeightInChars to set
-     */
-    public void setUpperListHeightInChars(int upperListHeightInChars)
+    Object lowerSelected = null;
+    int lowerSelectionIndex = lowerList.getSelectionIndex();
+    if (lowerSelectionIndex >= 0)
     {
-        this.upperListHeightInChars = upperListHeightInChars;
+      lowerSelected = lowerList.getSelection()[0].getData();
     }
 
-    protected void addControl(Control toBeAdded, Control parent)
-    {
-        addControl(toBeAdded, parent, 0);
-    }
+    StructuredSelection selection = new StructuredSelection(new Object[]{upperSelected,
+        lowerSelected});
 
-    protected void addControl(Control toBeAdded, Control parent, int verticalOffset)
-    {
-        FormData formData = new FormData();
-        formData.top = new FormAttachment(parent, verticalOffset);
-        formData.left = new FormAttachment(0, 0);
-        formData.right = new FormAttachment(100, 0);
-        toBeAdded.setLayoutData(formData);
-    }
+    return selection;
+  }
 
-    public void addDoubleClickListener(IDoubleClickListener listener)
+  private void updateListWidget(Object[] elements, Table table, ILabelProvider provider)
+  {
+    int size = elements.length;
+    table.setRedraw(false);
+    int itemCount = table.getItemCount();
+    if (size < itemCount)
     {
-        if (!doubleClickListeners.contains(listener))
-        {
-            doubleClickListeners.add(listener);
-        }
+      table.remove(0, itemCount - size - 1);
     }
+    TableItem[] items = table.getItems();
+    for (int i = 0; i < size; i++)
+    {
+      TableItem ti = null;
+      if (i < itemCount)
+      {
+        ti = items[i];
+      } else
+      {
+        ti = new TableItem(table, i);
+      }
+      ti.setText(provider.getText(elements[i]));
+      ti.setData(elements[i]);
+      Image img = provider.getImage(elements[i]);
+      if (img != null)
+      {
+        ti.setImage(img);
+      }
+    }
+    if (table.getItemCount() > 0)
+    {
+      table.setSelection(0);
+    }
+    table.setRedraw(true);
+    handleSelectionChanged(table);
+  }
 
-    public void removeDoubleClickListener(IDoubleClickListener listener)
+  protected void handleSelectionChanged(Table table)
+  {
+    if (table == upperList)
     {
-        doubleClickListeners.remove(listener);
+      handleUpperSelectionChanged();
+    } else
+    {
+      fireSelectionChanged(new SelectionChangedEvent(this, getSelection()));
     }
+  }
 
-    /**
-     * Returns the filterLabel.
-     * @return String
-     */
-    public String getFilterLabel()
-    {
-        return filterLabel;
-    }
+  /**
+   * @see org.eclipse.jface.viewers.IInputProvider#getInput()
+   */
+  public Object getInput()
+  {
+    return null;
+  }
 
-    /**
-     * Returns the lowerListLabel.
-     * @return String
-     */
-    public String getLowerListLabel()
-    {
-        return lowerListLabel;
-    }
+  /**
+   * @see org.eclipse.jface.viewers.Viewer#refresh()
+   */
+  public void refresh()
+  {
+    Object[] upperListContents = upperListContentProvider.getElements(searchText
+        .getText());
+    updateListWidget(upperListContents, upperList, upperListLabelProvider);
+  }
 
-    /**
-     * Returns the upperListLabel.
-     * @return String
-     */
-    public String getUpperListLabel()
-    {
-        return upperListLabel;
-    }
+  /**
+   * @see org.eclipse.jface.viewers.Viewer#setInput(Object)
+   */
+  public void setInput(Object input)
+  {
+    refresh();
+  }
 
-    /**
-     * Sets the filterLabel.
-     * @param filterLabel The filterLabel to set
-     */
-    public void setFilterLabel(String filterLabel)
-    {
-        this.filterLabel = filterLabel;
-    }
+  /**
+   * @see org.eclipse.jface.viewers.Viewer#setSelection(ISelection, boolean)
+   */
+  public void setSelection(ISelection selection, boolean reveal)
+  {
+  }
 
-    /**
-     * Sets the lowerListLabel.
-     * @param lowerListLabel The lowerListLabel to set
-     */
-    public void setLowerListLabel(String lowerListLabel)
-    {
-        this.lowerListLabel = lowerListLabel;
-    }
+  /**
+   * Sets the lowerListHeightInChars.
+   * 
+   * @param lowerListHeightInChars The lowerListHeightInChars to set
+   */
+  public void setLowerListHeightInChars(int lowerListHeightInChars)
+  {
+    this.lowerListHeightInChars = lowerListHeightInChars;
+  }
 
-    /**
-     * Sets the upperListLabel.
-     * @param upperListLabel The upperListLabel to set
-     */
-    public void setUpperListLabel(String upperListLabel)
-    {
-        this.upperListLabel = upperListLabel;
-    }
+  /**
+   * Sets the upperListHeightInChars.
+   * 
+   * @param upperListHeightInChars The upperListHeightInChars to set
+   */
+  public void setUpperListHeightInChars(int upperListHeightInChars)
+  {
+    this.upperListHeightInChars = upperListHeightInChars;
+  }
 
-    /**
-     * Returns the lowerListLabelProvider.
-     * @return ILabelProvider
-     */
-    public ILabelProvider getLowerListLabelProvider()
-    {
-        return lowerListLabelProvider;
-    }
+  protected void addControl(Control toBeAdded, Control parent)
+  {
+    addControl(toBeAdded, parent, 0);
+  }
 
-    /**
-     * Returns the upperListLabelProvider.
-     * @return ILabelProvider
-     */
-    public ILabelProvider getUpperListLabelProvider()
-    {
-        return upperListLabelProvider;
-    }
+  protected void addControl(Control toBeAdded, Control parent, int verticalOffset)
+  {
+    FormData formData = new FormData();
+    formData.top = new FormAttachment(parent, verticalOffset);
+    formData.left = new FormAttachment(0, 0);
+    formData.right = new FormAttachment(100, 0);
+    toBeAdded.setLayoutData(formData);
+  }
 
-    /**
-     * Sets the lowerListLabelProvider.
-     * @param lowerListLabelProvider The lowerListLabelProvider to set
-     */
-    public void setLowerListLabelProvider(ILabelProvider lowerListLabelProvider)
+  public void addDoubleClickListener(IDoubleClickListener listener)
+  {
+    if (!doubleClickListeners.contains(listener))
     {
-        this.lowerListLabelProvider = lowerListLabelProvider;
+      doubleClickListeners.add(listener);
     }
+  }
 
-    /**
-     * Sets the upperListLabelProvider.
-     * @param upperListLabelProvider The upperListLabelProvider to set
-     */
-    public void setUpperListLabelProvider(ILabelProvider upperListLabelProvider)
-    {
-        this.upperListLabelProvider = upperListLabelProvider;
-    }
+  public void removeDoubleClickListener(IDoubleClickListener listener)
+  {
+    doubleClickListeners.remove(listener);
+  }
 
-    /**
-     * Returns the lowerListContentProvider.
-     * @return IStructuredContentProvider
-     */
-    public IStructuredContentProvider getLowerListContentProvider()
-    {
-        return lowerListContentProvider;
-    }
+  /**
+   * Returns the filterLabel.
+   * 
+   * @return String
+   */
+  public String getFilterLabel()
+  {
+    return filterLabel;
+  }
 
-    /**
-     * Returns the upperListContentProvider.
-     * @return IStructuredContentProvider
-     */
-    public IStructuredContentProvider getUpperListContentProvider()
-    {
-        return upperListContentProvider;
-    }
+  /**
+   * Returns the lowerListLabel.
+   * 
+   * @return String
+   */
+  public String getLowerListLabel()
+  {
+    return lowerListLabel;
+  }
 
-    /**
-     * Sets the lowerListContentProvider.
-     * @param lowerListContentProvider The lowerListContentProvider to set
-     */
-    public void setLowerListContentProvider(IStructuredContentProvider lowerListContentProvider)
-    {
-        this.lowerListContentProvider = lowerListContentProvider;
-    }
+  /**
+   * Returns the upperListLabel.
+   * 
+   * @return String
+   */
+  public String getUpperListLabel()
+  {
+    return upperListLabel;
+  }
 
-    /**
-     * Sets the upperListContentProvider.
-     * @param upperListContentProvider The upperListContentProvider to set
-     */
-    public void setUpperListContentProvider(IStructuredContentProvider upperListContentProvider)
-    {
-        this.upperListContentProvider = upperListContentProvider;
-    }
+  /**
+   * Sets the filterLabel.
+   * 
+   * @param filterLabel The filterLabel to set
+   */
+  public void setFilterLabel(String filterLabel)
+  {
+    this.filterLabel = filterLabel;
+  }
 
-    /**
-     * Sets the initialFilter.
-     * @param initialFilter The initialFilter to set
-     */
-    public void setInitialFilter(String initialFilter)
-    {
-        this.initialFilter = initialFilter;
-    }
+  /**
+   * Sets the lowerListLabel.
+   * 
+   * @param lowerListLabel The lowerListLabel to set
+   */
+  public void setLowerListLabel(String lowerListLabel)
+  {
+    this.lowerListLabel = lowerListLabel;
+  }
+
+  /**
+   * Sets the upperListLabel.
+   * 
+   * @param upperListLabel The upperListLabel to set
+   */
+  public void setUpperListLabel(String upperListLabel)
+  {
+    this.upperListLabel = upperListLabel;
+  }
+
+  /**
+   * Returns the lowerListLabelProvider.
+   * 
+   * @return ILabelProvider
+   */
+  public ILabelProvider getLowerListLabelProvider()
+  {
+    return lowerListLabelProvider;
+  }
+
+  /**
+   * Returns the upperListLabelProvider.
+   * 
+   * @return ILabelProvider
+   */
+  public ILabelProvider getUpperListLabelProvider()
+  {
+    return upperListLabelProvider;
+  }
+
+  /**
+   * Sets the lowerListLabelProvider.
+   * 
+   * @param lowerListLabelProvider The lowerListLabelProvider to set
+   */
+  public void setLowerListLabelProvider(ILabelProvider lowerListLabelProvider)
+  {
+    this.lowerListLabelProvider = lowerListLabelProvider;
+  }
+
+  /**
+   * Sets the upperListLabelProvider.
+   * 
+   * @param upperListLabelProvider The upperListLabelProvider to set
+   */
+  public void setUpperListLabelProvider(ILabelProvider upperListLabelProvider)
+  {
+    this.upperListLabelProvider = upperListLabelProvider;
+  }
+
+  /**
+   * Returns the lowerListContentProvider.
+   * 
+   * @return IStructuredContentProvider
+   */
+  public IStructuredContentProvider getLowerListContentProvider()
+  {
+    return lowerListContentProvider;
+  }
+
+  /**
+   * Returns the upperListContentProvider.
+   * 
+   * @return IStructuredContentProvider
+   */
+  public IStructuredContentProvider getUpperListContentProvider()
+  {
+    return upperListContentProvider;
+  }
+
+  /**
+   * Sets the lowerListContentProvider.
+   * 
+   * @param lowerListContentProvider The lowerListContentProvider to set
+   */
+  public void setLowerListContentProvider(
+      IStructuredContentProvider lowerListContentProvider)
+  {
+    this.lowerListContentProvider = lowerListContentProvider;
+  }
+
+  /**
+   * Sets the upperListContentProvider.
+   * 
+   * @param upperListContentProvider The upperListContentProvider to set
+   */
+  public void setUpperListContentProvider(
+      IStructuredContentProvider upperListContentProvider)
+  {
+    this.upperListContentProvider = upperListContentProvider;
+  }
+
+  /**
+   * Sets the initialFilter.
+   * 
+   * @param initialFilter The initialFilter to set
+   */
+  public void setInitialFilter(String initialFilter)
+  {
+    this.initialFilter = initialFilter;
+  }
 
 }

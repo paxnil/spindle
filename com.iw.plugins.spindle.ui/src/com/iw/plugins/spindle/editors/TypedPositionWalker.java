@@ -30,80 +30,86 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.TypedPosition;
 import org.xmen.xml.XMLNode;
 
-
 /**
- * Helper class which has the ability to walk over the artifacts in the underlying 
- * document in both directions (forward and backwards).
+ * Helper class which has the ability to walk over the artifacts in the
+ * underlying document in both directions (forward and backwards).
  */
 class TypedPositionWalker
 {
-    private boolean modeForward;
-    private TypedPosition[] fTypedPositions;
-    private int fLastIndex, fNextIndex, fEndIndex;
+  private boolean modeForward;
+  private TypedPosition[] fTypedPositions;
+  private int fLastIndex, fNextIndex, fEndIndex;
 
-    /**
-     * create an instance to walk forward for a given length starting at the given offset
-     */
-    TypedPositionWalker(TypedPosition[] typedPositions, int offset, int length) throws BadLocationException
+  /**
+   * create an instance to walk forward for a given length starting at the given
+   * offset
+   */
+  TypedPositionWalker(TypedPosition[] typedPositions, int offset, int length)
+      throws BadLocationException
+  {
+    modeForward = true;
+    fTypedPositions = typedPositions;
+    fNextIndex = fLastIndex = getArtifactIndexAt(offset);
+    fEndIndex = getArtifactIndexAt(offset + length);
+  }
+
+  /**
+   * create an instance to walk only backward until the document start, starting
+   * at the given offset
+   */
+  TypedPositionWalker(TypedPosition[] documentArtifacts, int offset)
+      throws BadLocationException
+  {
+    modeForward = false;
+    fTypedPositions = documentArtifacts;
+    fLastIndex = fNextIndex = getArtifactIndexAt(offset);
+  }
+
+  public TypedPosition next() throws BadLocationException
+  {
+    if (!modeForward)
+      throw new UnsupportedOperationException(
+          "calling next on backward walker not allowed");
+
+    if (fNextIndex > fEndIndex)
+      return null;
+
+    XMLNode artifact = (XMLNode) fTypedPositions[fNextIndex];
+    fLastIndex = fNextIndex;
+    fNextIndex += 1;
+    return artifact;
+  }
+
+  public TypedPosition previous() throws BadLocationException
+  {
+    if (modeForward)
+      throw new UnsupportedOperationException(
+          "calling previous on forward walker not allowed");
+
+    if (fLastIndex == 0)
+      return null;
+
+    XMLNode artifact = (XMLNode) fTypedPositions[fNextIndex];
+    fLastIndex = fNextIndex;
+    fNextIndex -= 1;
+    return artifact;
+  }
+
+  /**
+   * get the index of postion found at the offset
+   * 
+   * @param offset
+   * @return the position found at the offset
+   * @throws BadLocationException
+   */
+  private int getArtifactIndexAt(int offset) throws BadLocationException
+  {
+    for (int i = 0; i < fTypedPositions.length; i++)
     {
-        modeForward = true;
-        fTypedPositions = typedPositions;
-        fNextIndex = fLastIndex = getArtifactIndexAt(offset);
-        fEndIndex = getArtifactIndexAt(offset + length);
+      if (offset >= fTypedPositions[i].getOffset()
+          && offset <= fTypedPositions[i].getOffset() + fTypedPositions[i].getLength())
+        return i;
     }
-
-    /**
-     * create an instance to walk only backward until the document start, starting at the given offset
-     */
-    TypedPositionWalker(TypedPosition[] documentArtifacts, int offset) throws BadLocationException
-    {
-        modeForward = false;
-        fTypedPositions = documentArtifacts;
-        fLastIndex = fNextIndex = getArtifactIndexAt(offset);
-    }
-
-    public TypedPosition next() throws BadLocationException
-    {
-        if (!modeForward)
-            throw new UnsupportedOperationException("calling next on backward walker not allowed");
-
-        if (fNextIndex > fEndIndex)
-            return null;
-
-        XMLNode artifact = (XMLNode) fTypedPositions[fNextIndex];
-        fLastIndex = fNextIndex;
-        fNextIndex += 1;
-        return artifact;
-    }
-
-    public TypedPosition previous() throws BadLocationException
-    {
-        if (modeForward)
-            throw new UnsupportedOperationException("calling previous on forward walker not allowed");
-
-        if (fLastIndex == 0)
-            return null;
-
-        XMLNode artifact = (XMLNode) fTypedPositions[fNextIndex];
-        fLastIndex = fNextIndex;
-        fNextIndex -= 1;
-        return artifact;
-    }
-
-    /**
-        * get the index of  postion  found at the offset
-        * @param offset
-        * @return the position found at the offset
-        * @throws BadLocationException
-        */
-    private int getArtifactIndexAt(int offset) throws BadLocationException
-    {
-        for (int i = 0; i < fTypedPositions.length; i++)
-        {
-            if (offset >= fTypedPositions[i].getOffset()
-                && offset <= fTypedPositions[i].getOffset() + fTypedPositions[i].getLength())
-                return i;
-        }
-        throw new BadLocationException();
-    }
+    throw new BadLocationException();
+  }
 }

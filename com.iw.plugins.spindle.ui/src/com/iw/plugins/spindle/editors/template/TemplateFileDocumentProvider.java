@@ -37,41 +37,42 @@ import com.iw.plugins.spindle.UIPlugin;
 
 /**
  * Document provider for templates that come from files
- * 
+ *  
  */
 public class TemplateFileDocumentProvider extends FileDocumentProvider
 {
-    /*
-     * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createDocument(Object)
-     */
-    protected IDocument createDocument(Object element) throws CoreException
+  /*
+   * @see org.eclipse.ui.texteditor.AbstractDocumentProvider#createDocument(Object)
+   */
+  protected IDocument createDocument(Object element) throws CoreException
+  {
+    IDocument document = super.createDocument(element);
+    if (document != null)
     {
-        IDocument document = super.createDocument(element);
-        if (document != null)
-        {
-            DefaultPartitioner defaultPartitioner = createParitioner();
+      DefaultPartitioner defaultPartitioner = createParitioner();
 
-            if (defaultPartitioner != null)
-            {
-                defaultPartitioner.connect(document);
-                document.setDocumentPartitioner(defaultPartitioner);
-            }
-        }
-
-        return document;
-    }
-    
-    protected DefaultPartitioner createParitioner() {
-        return UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
+      if (defaultPartitioner != null)
+      {
+        defaultPartitioner.connect(document);
+        document.setDocumentPartitioner(defaultPartitioner);
+      }
     }
 
-    protected IAnnotationModel createAnnotationModel(Object element) throws CoreException
+    return document;
+  }
+
+  protected DefaultPartitioner createParitioner()
+  {
+    return UIPlugin.getDefault().getTemplateTextTools().createXMLPartitioner();
+  }
+
+  protected IAnnotationModel createAnnotationModel(Object element) throws CoreException
+  {
+    if (element instanceof IFileEditorInput)
     {
-        if (element instanceof IFileEditorInput)
-        {
-            return new TemplateAnnotationModel((IFileEditorInput) element);
-        }
-
-        return super.createAnnotationModel(element);
+      return new TemplateAnnotationModel((IFileEditorInput) element);
     }
+
+    return super.createAnnotationModel(element);
+  }
 }

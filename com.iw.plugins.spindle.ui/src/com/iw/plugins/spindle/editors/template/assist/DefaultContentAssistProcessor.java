@@ -46,360 +46,375 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 
 /**
- *  Content assist inside of Tags (but not attributes)
+ * Content assist inside of Tags (but not attributes)
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: DefaultContentAssistProcessor.java,v 1.3 2004/06/10 15:50:47
+ *          glongman Exp $
  */
 public class DefaultContentAssistProcessor extends TemplateContentAssistProcessor
 {
 
-    public DefaultContentAssistProcessor(TemplateEditor editor)
+  public DefaultContentAssistProcessor(TemplateEditor editor)
+  {
+    super(editor);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.template.assist.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
+   *      int)
+   */
+  protected ICompletionProposal[] doComputeCompletionProposals(
+      ITextViewer viewer,
+      int documentOffset)
+  {
+    XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
+    int baseState = tag.getStateAt(documentOffset);
+
+    String type = tag.getType();
+
+    if (type == XMLDocumentPartitioner.TEXT)
+      return computeTextProposals(viewer, documentOffset);
+
+    if (type != XMLDocumentPartitioner.TAG && type != XMLDocumentPartitioner.EMPTYTAG)
+      return NoProposals;
+
+    if (tag.isTerminated() && documentOffset == tag.getOffset() + tag.getLength())
+      return NoProposals;
+
+    boolean addLeadingSpace = false;
+    if (baseState == XMLNode.TAG)
     {
-        super(editor);
+      String tagName = tag.getName();
+      if (tagName != null)
+      {
+        System.out.println(tag.getContentTo(documentOffset, false));
+        // we are inside , or at the end of the element name.
+        // can only insert if we are at the end of the name.
+        if (!tag.getContentTo(documentOffset, false).endsWith(tagName))
+          return NoProposals;
+      }
+      addLeadingSpace = true;
+
+    } else if (baseState == XMLNode.ATT_VALUE)
+    {
+      return new ICompletionProposal[]{new CompletionProposal("'"
+          + CompletionProposal.DEFAULT_ATTR_VALUE + "'", documentOffset, 0, new Point(
+          1,
+          CompletionProposal.DEFAULT_ATTR_VALUE.length()))};
+    } else
+    {
+      //ensure that we are in a legal position to insert. ie. not inside
+      // another attribute name!
+
+      addLeadingSpace = baseState == XMLNode.AFTER_ATT_VALUE;
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.template.assist.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
-     */
-    protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
+    List proposals = new ArrayList();
+    Map attrmap = tag.getAttributesMap();
+    String jwcid = null;
+    jwcid = getJwcid(attrmap);
+
+    XMLNode existingAttr = tag.getAttributeAt(documentOffset);
+    if (baseState != XMLNode.AFTER_ATT_VALUE && existingAttr != null
+        && existingAttr.getOffset() < documentOffset)
     {
-        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
-        int baseState = tag.getStateAt(documentOffset);
+      // no proposals if the attribute name is jwcid!
+      if (TemplateParser.JWCID_ATTRIBUTE_NAME.equalsIgnoreCase(existingAttr.getName()))
+      {
+        return NoProposals;
+      }
 
-        String type = tag.getType();
-
-        if (type == XMLDocumentPartitioner.TEXT)
-            return computeTextProposals(viewer, documentOffset);
-
-        if (type != XMLDocumentPartitioner.TAG && type != XMLDocumentPartitioner.EMPTYTAG)
-            return NoProposals;
-
-        if (tag.isTerminated() && documentOffset == tag.getOffset() + tag.getLength())
-            return NoProposals;
-
-        boolean addLeadingSpace = false;
-        if (baseState == XMLNode.TAG)
+      // if there's no jwcid already....
+      if (!attrmap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME)
+          && !attrmap.containsKey(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME))
+      {
+        if (existingAttr.getStateAt(documentOffset) == XMLNode.TAG)
         {
-            String tagName = tag.getName();
-            if (tagName != null)
-            {
-                System.out.println(tag.getContentTo(documentOffset, false));
-                // we are inside , or at the end of the element name.
-                // can only insert if we are at the end of the name.
-                if (!tag.getContentTo(documentOffset, false).endsWith(tagName))
-                    return NoProposals;
-            }
-            addLeadingSpace = true;
 
-        } else if (baseState == XMLNode.ATT_VALUE)
+          String currentName = existingAttr
+              .getContentTo(documentOffset, false)
+              .toLowerCase();
+
+          if (TemplateParser.JWCID_ATTRIBUTE_NAME.startsWith(currentName))
+          {
+            return new ICompletionProposal[]{CompletionProposal.getAttributeProposal(
+                TemplateParser.JWCID_ATTRIBUTE_NAME.substring(currentName.length()),
+                TemplateParser.JWCID_ATTRIBUTE_NAME,
+                "",
+                null,
+                false,
+                documentOffset)};
+
+          } else if (TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME
+              .startsWith(currentName))
+          {
+            return new ICompletionProposal[]{CompletionProposal.getAttributeProposal(
+                TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME.substring(currentName
+                    .length()),
+                TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
+                "",
+                null,
+                false,
+                documentOffset)};
+          }
+
+          return NoProposals;
+        }
+      } else
+      {
+        // we need to find parameter name replacements
+        computeAttributeNameReplacements(
+            documentOffset,
+            existingAttr,
+            jwcid,
+            new HashSet(attrmap.keySet()),
+            proposals);
+      }
+
+    } else if (!attrmap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME)
+        && !attrmap.containsKey(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME))
+    {
+      // we have no Tapestry attributes yet.
+      proposals.add(CompletionProposal.getAttributeProposal(
+          TemplateParser.JWCID_ATTRIBUTE_NAME,
+          addLeadingSpace,
+          documentOffset));
+      proposals.add(CompletionProposal.getAttributeProposal(
+          TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
+          addLeadingSpace,
+          documentOffset));
+
+    } else
+    {
+      computeAttributeProposals(documentOffset, addLeadingSpace, jwcid, new HashSet(
+          attrmap.keySet()), proposals);
+    }
+
+    if (proposals.isEmpty())
+      return NoSuggestions;
+
+    Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
+
+    return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals
+        .size()]);
+
+  }
+
+  protected void computeAttributeProposals(
+      int documentOffset,
+      boolean addLeadingSpace,
+      String jwcid,
+      HashSet existingAttributeNames,
+      List proposals)
+  {
+    try
+    {
+      TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
+      //            IStorage storage = (IStorage)
+      // fEditor.getEditorInput().getAdapter(IStorage.class);
+      //            IProject project = TapestryCore.getDefault().getProjectFor(storage);
+      //            helper.setFrameworkNamespace(
+      //                (ICoreNamespace)
+      // TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
+      helper.setJwcid(jwcid);
+      UITapestryAccess.Result[] infos = helper.findParameters(
+          null,
+          existingAttributeNames);
+      for (int i = 0; i < infos.length; i++)
+      {
+        CompletionProposal proposal = CompletionProposal.getAttributeProposal(
+            infos[i].name,
+            infos[i].name,
+            CompletionProposal.DEFAULT_ATTR_VALUE,
+            infos[i].description,
+            addLeadingSpace,
+            documentOffset);
+
+        if (infos[i].required)
+          proposal.setImage(Images.getSharedImage("bullet_pink.gif"));
+        proposals.add(proposal);
+
+        // now why am I using a map here?
+      }
+    } catch (IllegalArgumentException e)
+    {
+      //do nothing
+    }
+  }
+
+  protected void computeAttributeNameReplacements(
+      int documentOffset,
+      XMLNode existingAttribute,
+      String jwcid,
+      HashSet existingAttributeNames,
+      List proposals)
+  {
+    String name = existingAttribute.getName();
+    String value = existingAttribute.getAttributeValue();
+    //get index of whitespace
+    String fragment = existingAttribute.getContentTo(documentOffset, false);
+    if (fragment.length() > name.length())
+      return;
+
+    int replacementOffset = existingAttribute.getOffset();
+    int replacementLength = name.length();
+
+    if (fragment.length() == 0)
+      fragment = null;
+
+    try
+    {
+      // first get the matches
+      TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
+      helper.setJwcid(jwcid);
+
+      UITapestryAccess.Result[] infos = helper.findParameters(
+          fragment,
+          existingAttributeNames);
+      for (int i = 0; i < infos.length; i++)
+      {
+        CompletionProposal proposal;
+        if (value == null)
         {
-            return new ICompletionProposal[] {
-                 new CompletionProposal(
-                    "'" + CompletionProposal.DEFAULT_ATTR_VALUE + "'",
-                    documentOffset,
-                    0,
-                    new Point(1, CompletionProposal.DEFAULT_ATTR_VALUE.length()))};
+          proposal = new CompletionProposal(
+              infos[i].name + "=\"\"",
+              replacementOffset,
+              replacementLength,
+              new Point(infos[i].name.length(), 0),
+              infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
+                  .getSharedImage("bullet.gif"),
+              null,
+              null,
+              infos[i].description);
         } else
         {
-            //ensure that we are in a legal position to insert. ie. not inside another attribute name!
-
-            addLeadingSpace = baseState == XMLNode.AFTER_ATT_VALUE;
+          proposal = new CompletionProposal(
+              infos[i].name,
+              replacementOffset,
+              replacementLength,
+              new Point(infos[i].name.length(), 0),
+              infos[i].required ? Images.getSharedImage("bullet_pink.gif") : Images
+                  .getSharedImage("bullet.gif"),
+              null,
+              null,
+              infos[i].description);
         }
 
-        List proposals = new ArrayList();
-        Map attrmap = tag.getAttributesMap();
-        String jwcid = null;
-        jwcid = getJwcid(attrmap);
+        proposals.add(proposal);
+        existingAttributeNames.add(infos[i].name.toLowerCase());
+      }
 
-        XMLNode existingAttr = tag.getAttributeAt(documentOffset);
-        if (baseState != XMLNode.AFTER_ATT_VALUE && existingAttr != null && existingAttr.getOffset() < documentOffset)
+      //then get the replaces
+
+      infos = helper.findParameters(null, existingAttributeNames);
+      for (int i = 0; i < infos.length; i++)
+      {
+
+        CompletionProposal proposal;
+        if (value == null)
         {
-            // no proposals if the attribute name is jwcid!
-            if (TemplateParser.JWCID_ATTRIBUTE_NAME.equalsIgnoreCase(existingAttr.getName()))
-            {
-                return NoProposals;
-            }
-
-            // if there's no jwcid already....
-            if (!attrmap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME)
-                && !attrmap.containsKey(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME))
-            {
-                if (existingAttr.getStateAt(documentOffset) == XMLNode.TAG)
-                {
-
-                    String currentName = existingAttr.getContentTo(documentOffset, false).toLowerCase();
-
-                    if (TemplateParser.JWCID_ATTRIBUTE_NAME.startsWith(currentName))
-                    {
-                        return new ICompletionProposal[] {
-                             CompletionProposal.getAttributeProposal(
-                                TemplateParser.JWCID_ATTRIBUTE_NAME.substring(currentName.length()),
-                                TemplateParser.JWCID_ATTRIBUTE_NAME,
-                                "",
-                                null,
-                                false,
-                                documentOffset)};
-
-                    } else if (TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME.startsWith(currentName))
-                    {
-                        return new ICompletionProposal[] {
-                             CompletionProposal.getAttributeProposal(
-                                TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME.substring(currentName.length()),
-                                TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
-                                "",
-                                null,
-                                false,
-                                documentOffset)};
-                    }
-
-                    return NoProposals;
-                }
-            } else
-            {
-                // we need to find parameter name replacements
-                computeAttributeNameReplacements(
-                    documentOffset,
-                    existingAttr,
-                    jwcid,
-                    new HashSet(attrmap.keySet()),
-                    proposals);
-            }
-
-        } else if (
-            !attrmap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME)
-                && !attrmap.containsKey(TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME))
-        {
-            // we have no Tapestry attributes yet.
-            proposals.add(
-                CompletionProposal.getAttributeProposal(
-                    TemplateParser.JWCID_ATTRIBUTE_NAME,
-                    addLeadingSpace,
-                    documentOffset));
-            proposals.add(
-                CompletionProposal.getAttributeProposal(
-                    TemplateParser.LOCALIZATION_KEY_ATTRIBUTE_NAME,
-                    addLeadingSpace,
-                    documentOffset));
-
+          proposal = new CompletionProposal(
+              infos[i].name + "=\"\"",
+              replacementOffset,
+              replacementLength,
+              new Point(infos[i].name.length(), 0),
+              infos[i].required ? Images.getSharedImage("bullet_weird.gif") : Images
+                  .getSharedImage("bullet_d.gif"),
+              null,
+              null,
+              infos[i].description);
         } else
         {
-            computeAttributeProposals(documentOffset, addLeadingSpace, jwcid, new HashSet(attrmap.keySet()), proposals);
+
+          proposal = new CompletionProposal(
+              infos[i].name,
+              replacementOffset,
+              replacementLength,
+              new Point(infos[i].name.length(), 0),
+              infos[i].required ? Images.getSharedImage("bullet_weird.gif") : Images
+                  .getSharedImage("bullet_d.gif"),
+              null,
+              null,
+              infos[i].description);
         }
 
-        if (proposals.isEmpty())
-            return NoSuggestions;
+        proposal.setYOrder(1);
+        proposals.add(proposal);
+      }
 
-        Collections.sort(proposals, CompletionProposal.PROPOSAL_COMPARATOR);
-
-        return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
-
-    }
-
-    protected void computeAttributeProposals(
-        int documentOffset,
-        boolean addLeadingSpace,
-        String jwcid,
-        HashSet existingAttributeNames,
-        List proposals)
+    } catch (IllegalArgumentException e)
     {
-        try
-        {
-            TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-            //            IStorage storage = (IStorage) fEditor.getEditorInput().getAdapter(IStorage.class);
-            //            IProject project = TapestryCore.getDefault().getProjectFor(storage);
-            //            helper.setFrameworkNamespace(
-            //                (ICoreNamespace) TapestryArtifactManager.getTapestryArtifactManager().getFrameworkNamespace(project));
-            helper.setJwcid(jwcid);
-            UITapestryAccess.Result[] infos = helper.findParameters(null, existingAttributeNames);
-            for (int i = 0; i < infos.length; i++)
-            {
-                CompletionProposal proposal =
-                    CompletionProposal.getAttributeProposal(
-                        infos[i].name,
-                        infos[i].name,
-                        CompletionProposal.DEFAULT_ATTR_VALUE,
-                        infos[i].description,
-                        addLeadingSpace,
-                        documentOffset);
-
-                if (infos[i].required)
-                    proposal.setImage(Images.getSharedImage("bullet_pink.gif"));
-                proposals.add(proposal);
-
-                // now why am I using a map here?
-            }
-        } catch (IllegalArgumentException e)
-        {
-            //do nothing
-        }
+      //do nothing
     }
+  }
 
-    protected void computeAttributeNameReplacements(
-        int documentOffset,
-        XMLNode existingAttribute,
-        String jwcid,
-        HashSet existingAttributeNames,
-        List proposals)
-    {
-        String name = existingAttribute.getName();
-        String value = existingAttribute.getAttributeValue();
-        //get index of whitespace
-        String fragment = existingAttribute.getContentTo(documentOffset, false);
-        if (fragment.length() > name.length())
-            return;
+  /**
+   * @param tag
+   * @param fDocumentOffset
+   * @return
+   */
+  private ICompletionProposal[] computeTextProposals(
+      ITextViewer viewer,
+      int documentOffset)
+  {
+    ICompletionProposal endTagProposal = DefaultCompletionProcessor
+        .computeEndTagProposal(viewer, documentOffset);
+    if (endTagProposal == null)
+      return NoSuggestions;
 
-        int replacementOffset = existingAttribute.getOffset();
-        int replacementLength = name.length();
+    return new ICompletionProposal[]{endTagProposal};
+  }
 
-        if (fragment.length() == 0)
-            fragment = null;
+  // Not needed (I think)
 
-        try
-        {
-            // first get the matches
-            TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-            helper.setJwcid(jwcid);
-
-            UITapestryAccess.Result[] infos = helper.findParameters(fragment, existingAttributeNames);
-            for (int i = 0; i < infos.length; i++)
-            {
-                CompletionProposal proposal;
-                if (value == null)
-                {
-                    proposal =
-                        new CompletionProposal(
-                            infos[i].name + "=\"\"",
-                            replacementOffset,
-                            replacementLength,
-                            new Point(infos[i].name.length(), 0),
-                            infos[i].required
-                                ? Images.getSharedImage("bullet_pink.gif")
-                                : Images.getSharedImage("bullet.gif"),
-                            null,
-                            null,
-                            infos[i].description);
-                } else
-                {
-                    proposal =
-                        new CompletionProposal(
-                            infos[i].name,
-                            replacementOffset,
-                            replacementLength,
-                            new Point(infos[i].name.length(), 0),
-                            infos[i].required
-                                ? Images.getSharedImage("bullet_pink.gif")
-                                : Images.getSharedImage("bullet.gif"),
-                            null,
-                            null,
-                            infos[i].description);
-                }
-
-                proposals.add(proposal);
-                existingAttributeNames.add(infos[i].name.toLowerCase());
-            }
-
-            //then get the replaces
-
-            infos = helper.findParameters(null, existingAttributeNames);
-            for (int i = 0; i < infos.length; i++)
-            {
-
-                CompletionProposal proposal;
-                if (value == null)
-                {
-                    proposal =
-                        new CompletionProposal(
-                            infos[i].name + "=\"\"",
-                            replacementOffset,
-                            replacementLength,
-                            new Point(infos[i].name.length(), 0),
-                            infos[i].required
-                                ? Images.getSharedImage("bullet_weird.gif")
-                                : Images.getSharedImage("bullet_d.gif"),
-                            null,
-                            null,
-                            infos[i].description);
-                } else
-                {
-
-                    proposal =
-                        new CompletionProposal(
-                            infos[i].name,
-                            replacementOffset,
-                            replacementLength,
-                            new Point(infos[i].name.length(), 0),
-                            infos[i].required
-                                ? Images.getSharedImage("bullet_weird.gif")
-                                : Images.getSharedImage("bullet_d.gif"),
-                            null,
-                            null,
-                            infos[i].description);
-                }
-
-                proposal.setYOrder(1);
-                proposals.add(proposal);
-            }
-
-        } catch (IllegalArgumentException e)
-        {
-            //do nothing
-        }
-    }
-
-    /**
-     * @param tag
-     * @param fDocumentOffset
-     * @return
-     */
-    private ICompletionProposal[] computeTextProposals(ITextViewer viewer, int documentOffset)
-    {
-        ICompletionProposal endTagProposal = DefaultCompletionProcessor.computeEndTagProposal(viewer, documentOffset);
-        if (endTagProposal == null)
-            return NoSuggestions;
-
-        return new ICompletionProposal[] { endTagProposal };
-    }
-
-    // Not needed (I think)
-
-    //    /* (non-Javadoc)
-    //     * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer, int)
-    //     */
-    //    public IContextInformation[] doComputeContextInformation(ITextViewer viewer, int fDocumentOffset)
-    //    {
-    //        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), fDocumentOffset);
-    //        int baseState = tag.getStateAt(fDocumentOffset);
-    //        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
-    //            return NoInformation;
-    //
-    //        Map attrMap = tag.getAttributesMap();
-    //
-    //        if (!attrMap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME))
-    //            return NoInformation;
-    //
-    //        XMLNode attr = tag.getAttributeAt(fDocumentOffset);
-    //        if (attr == null || attr.getName().equalsIgnoreCase(TemplateParser.JWCID_ATTRIBUTE_NAME))
-    //        {
-    //            return NoInformation;
-    //        }
-    //
-    //        try
-    //        {
-    //            TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor) fEditor);
-    //            XMLNode jwcidAttr = (XMLNode) attrMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
-    //            helper.setJwcid(jwcidAttr.getAttributeValue());
-    //
-    //            UITapestryAccess.Result result = helper.getParameterContextInformation(attr.getName());
-    //
-    //            if (result != null)
-    //                return new IContextInformation[] { new ContextInformation(result.displayName, result.description)};
-    //
-    //        } catch (IllegalArgumentException e)
-    //        {
-    //            //do nothing
-    //        }
-    //
-    //        return NoInformation;
-    //    }
+  //    /* (non-Javadoc)
+  //     * @see
+  // com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeContextInformation(org.eclipse.jface.text.ITextViewer,
+  // int)
+  //     */
+  //    public IContextInformation[] doComputeContextInformation(ITextViewer
+  // viewer, int fDocumentOffset)
+  //    {
+  //        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), fDocumentOffset);
+  //        int baseState = tag.getStateAt(fDocumentOffset);
+  //        if (tag.getType() == XMLDocumentPartitioner.ENDTAG)
+  //            return NoInformation;
+  //
+  //        Map attrMap = tag.getAttributesMap();
+  //
+  //        if (!attrMap.containsKey(TemplateParser.JWCID_ATTRIBUTE_NAME))
+  //            return NoInformation;
+  //
+  //        XMLNode attr = tag.getAttributeAt(fDocumentOffset);
+  //        if (attr == null ||
+  // attr.getName().equalsIgnoreCase(TemplateParser.JWCID_ATTRIBUTE_NAME))
+  //        {
+  //            return NoInformation;
+  //        }
+  //
+  //        try
+  //        {
+  //            TemplateTapestryAccess helper = new TemplateTapestryAccess((TemplateEditor)
+  // fEditor);
+  //            XMLNode jwcidAttr = (XMLNode)
+  // attrMap.get(TemplateParser.JWCID_ATTRIBUTE_NAME);
+  //            helper.setJwcid(jwcidAttr.getAttributeValue());
+  //
+  //            UITapestryAccess.Result result =
+  // helper.getParameterContextInformation(attr.getName());
+  //
+  //            if (result != null)
+  //                return new IContextInformation[] { new
+  // ContextInformation(result.displayName, result.description)};
+  //
+  //        } catch (IllegalArgumentException e)
+  //        {
+  //            //do nothing
+  //        }
+  //
+  //        return NoInformation;
+  //    }
 }

@@ -32,13 +32,16 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 /**
- *  A resizable wizard dialog
+ * A resizable wizard dialog
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ResizableWizardDialog.java,v 1.1 2003/12/13 14:43:11 glongman
+ *          Exp $
  */
-public class ResizableWizardDialog extends WizardDialog {
-   public ResizableWizardDialog(Shell shell, IWizard wizard) {
+public class ResizableWizardDialog extends WizardDialog
+{
+  public ResizableWizardDialog(Shell shell, IWizard wizard)
+  {
     super(shell, wizard);
     setShellStyle(getShellStyle() | SWT.RESIZE);
   }

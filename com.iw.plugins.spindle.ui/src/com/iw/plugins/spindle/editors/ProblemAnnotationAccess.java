@@ -30,43 +30,50 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 
 /**
- *  Used by callers to access info about IAnnotations.
+ * Used by callers to access info about IAnnotations.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ProblemAnnotationAccess.java,v 1.3 2004/06/05 04:24:26 glongman
+ *          Exp $
  */
-public class ProblemAnnotationAccess extends DefaultMarkerAnnotationAccess {
+public class ProblemAnnotationAccess extends DefaultMarkerAnnotationAccess
+{
 
-    /*
-     * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
-     */
-    public Object getType(Annotation annotation) {
-        if (annotation instanceof IProblemAnnotation) {
-            IProblemAnnotation tapAnnotation= (IProblemAnnotation) annotation;
-            if (tapAnnotation.isRelevant())
-                return tapAnnotation.getType();
-        }
-        return super.getType(annotation);
+  /*
+   * @see org.eclipse.jface.text.source.IAnnotationAccess#getType(org.eclipse.jface.text.source.Annotation)
+   */
+  public Object getType(Annotation annotation)
+  {
+    if (annotation instanceof IProblemAnnotation)
+    {
+      IProblemAnnotation tapAnnotation = (IProblemAnnotation) annotation;
+      if (tapAnnotation.isRelevant())
+        return tapAnnotation.getType();
     }
+    return super.getType(annotation);
+  }
 
-    /*
-     * @see org.eclipse.jface.text.source.IAnnotationAccess#isMultiLine(org.eclipse.jface.text.source.Annotation)
-     */
-    public boolean isMultiLine(Annotation annotation) {
-        return true;
-    }
+  /*
+   * @see org.eclipse.jface.text.source.IAnnotationAccess#isMultiLine(org.eclipse.jface.text.source.Annotation)
+   */
+  public boolean isMultiLine(Annotation annotation)
+  {
+    return true;
+  }
 
-    /*
-     * @see org.eclipse.jface.text.source.IAnnotationAccess#isTemporary(org.eclipse.jface.text.source.Annotation)
-     */
-    public boolean isTemporary(Annotation annotation) {
-        if (annotation instanceof IProblemAnnotation) {
-            IProblemAnnotation tapAnnotation= (IProblemAnnotation) annotation;
-            if (tapAnnotation.isRelevant())
-                return tapAnnotation.isTemporary();
-        }
-        return super.isTemporary(annotation);
+  /*
+   * @see org.eclipse.jface.text.source.IAnnotationAccess#isTemporary(org.eclipse.jface.text.source.Annotation)
+   */
+  public boolean isTemporary(Annotation annotation)
+  {
+    if (annotation instanceof IProblemAnnotation)
+    {
+      IProblemAnnotation tapAnnotation = (IProblemAnnotation) annotation;
+      if (tapAnnotation.isRelevant())
+        return tapAnnotation.isTemporary();
     }
+    return super.isTemporary(annotation);
+  }
 };
 
 

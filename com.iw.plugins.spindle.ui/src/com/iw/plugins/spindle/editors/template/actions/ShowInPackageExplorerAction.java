@@ -38,49 +38,52 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.ui.util.Revealer;
 
 /**
- *  Show something interesting in the PackageExplorer
+ * Show something interesting in the PackageExplorer
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ShowInPackageExplorerAction.java,v 1.1 2003/11/09 21:24:41
+ *          glongman Exp $
  */
 public class ShowInPackageExplorerAction extends OpenDeclarationAction
 {
-    public static final String ACTION_ID = UIPlugin.PLUGIN_ID + ".template.showInPackageExplorer";
+  public static final String ACTION_ID = UIPlugin.PLUGIN_ID
+      + ".template.showInPackageExplorer";
 
-    public ShowInPackageExplorerAction()
+  public ShowInPackageExplorerAction()
+  {
+    super();
+    //      TODO I10N
+    setText("Show In Package Explorer");
+    setId(ACTION_ID);
+  }
+
+  protected void foundResult(Object result, String key, Object moreInfo)
+  {
+    IJavaProject jproject = null;
+    if (result instanceof BinaryType || result instanceof JarEntryFile)
     {
-        super();
-        //      TODO I10N
-        setText("Show In Package Explorer");
-        setId(ACTION_ID);
+      IStorage storage = fEditor.getStorage();
+      if (storage instanceof IResource)
+        jproject = TapestryCore.getDefault().getJavaProjectFor((IResource) storage);
+
+      if (jproject != null)
+      {
+        Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
+            .getDefault()
+            .getActiveWorkbenchWindow(), jproject);
+      } else
+      {
+        Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
+            .getDefault()
+            .getActiveWorkbenchWindow());
+      }
+    } else
+    {
+      Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin
+          .getDefault()
+          .getActiveWorkbenchWindow());
     }
 
-    protected void foundResult(Object result, String key, Object moreInfo)
-    {
-        IJavaProject jproject = null;
-        if (result instanceof BinaryType || result instanceof JarEntryFile)
-        {
-            IStorage storage = fEditor.getStorage();
-            if (storage instanceof IResource)
-                jproject = TapestryCore.getDefault().getJavaProjectFor((IResource) storage);
-
-            if (jproject != null)
-            {
-                Revealer.selectAndReveal(
-                    new StructuredSelection(result),
-                    UIPlugin.getDefault().getActiveWorkbenchWindow(),
-                    jproject);
-            } else
-            {
-                Revealer.selectAndReveal(
-                    new StructuredSelection(result),
-                    UIPlugin.getDefault().getActiveWorkbenchWindow());
-            }
-        } else
-        {
-            Revealer.selectAndReveal(new StructuredSelection(result), UIPlugin.getDefault().getActiveWorkbenchWindow());
-        }
-
-    }
+  }
 
 }

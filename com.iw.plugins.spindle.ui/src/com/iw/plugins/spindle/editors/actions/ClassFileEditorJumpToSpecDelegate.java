@@ -30,17 +30,18 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.ui.IEditorInput;
 
 /**
- *  TODO add type description
+ * TODO add type description
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: ClassFileEditorJumpToSpecDelegate.java,v 1.1 2004/05/06
+ *          17:21:16 glongman Exp $
  */
 public class ClassFileEditorJumpToSpecDelegate extends CUEditorJumpToSpecDelegate
 {
 
-    protected Object getInputObject(IEditorInput input)
-    {
-        return input.getAdapter(IClassFile.class);
-    }
+  protected Object getInputObject(IEditorInput input)
+  {
+    return input.getAdapter(IClassFile.class);
+  }
 
 }

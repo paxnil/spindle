@@ -33,41 +33,41 @@ import com.iw.plugins.spindle.core.spec.lookup.ComponentLookup;
 import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
 
 /**
- *  Extends org.apache.tapestry.INamespace to allow
- *  for the de-installation of pages and components.
+ * Extends org.apache.tapestry.INamespace to allow for the de-installation of
+ * pages and components.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public interface ICoreNamespace extends INamespace
 {
-    public void setParentNamespace(ICoreNamespace parent);
+  public void setParentNamespace(ICoreNamespace parent);
 
-    public IComponentSpecification deinstallPageSpecification(String pageName);
+  public IComponentSpecification deinstallPageSpecification(String pageName);
 
-    public IComponentSpecification deinstallComponentSpecification(String type);
+  public IComponentSpecification deinstallComponentSpecification(String type);
 
-    public void installChildNamespace(String id, INamespace child);
+  public void installChildNamespace(String id, INamespace child);
 
-    public INamespace deinstallChildNamespace(String id);
+  public INamespace deinstallChildNamespace(String id);
 
-    public ComponentLookup getComponentLookup(ICoreNamespace framework);
+  public ComponentLookup getComponentLookup(ICoreNamespace framework);
 
-    public PageLookup getPageLookup(ICoreNamespace framework);
+  public PageLookup getPageLookup(ICoreNamespace framework);
 
-    /** set only if this is the application namespace**/
-    public void setAppNameFromWebXML(String name);
-    
-    public void setResourceLookup(NamespaceResourceLookup lookup);
-    
-    public NamespaceResourceLookup getResourceLookup();
-    
-    public ComponentSpecificationResolver getComponentResolver();
-    
-    public void setComponentResolver(ComponentSpecificationResolver resolver);
-    
-    public PageSpecificationResolver getPageResolver();
-    
-    public void setPageResolver(PageSpecificationResolver resolver);
+  /** set only if this is the application namespace* */
+  public void setAppNameFromWebXML(String name);
+
+  public void setResourceLookup(NamespaceResourceLookup lookup);
+
+  public NamespaceResourceLookup getResourceLookup();
+
+  public ComponentSpecificationResolver getComponentResolver();
+
+  public void setComponentResolver(ComponentSpecificationResolver resolver);
+
+  public PageSpecificationResolver getPageResolver();
+
+  public void setPageResolver(PageSpecificationResolver resolver);
 
 }

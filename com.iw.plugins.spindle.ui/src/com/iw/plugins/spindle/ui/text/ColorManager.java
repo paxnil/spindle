@@ -40,21 +40,24 @@ import com.iw.plugins.spindle.UIPlugin;
 
 /**
  * @author administrator
- *
+ * 
  * To change this generated comment edit the template variable "typecomment":
  * Window>Preferences>Java>Templates.
  */
-public class ColorManager implements IColorManager, IColorConstants {
+public class ColorManager implements IColorManager, IColorConstants
+{
 
   private static Map fColorTable = new HashMap(10);
   private static int counter = 0;
 
-  public ColorManager() {
+  public ColorManager()
+  {
     initialize();
     counter++;
   }
 
-  public static void initializeDefaults(IPreferenceStore store) {
+  public static void initializeDefaults(IPreferenceStore store)
+  {
     PreferenceConverter.setDefault(store, P_JWCID, JWCID);
     PreferenceConverter.setDefault(store, P_XML_COMMENT, XML_COMMENT);
     PreferenceConverter.setDefault(store, P_PROC_INSTR, PROC_INSTR);
@@ -63,7 +66,8 @@ public class ColorManager implements IColorManager, IColorConstants {
     PreferenceConverter.setDefault(store, P_TAG, TAG);
   }
 
-  private void initialize() {
+  private void initialize()
+  {
     IPreferenceStore pstore = UIPlugin.getDefault().getPreferenceStore();
 
     putColor(pstore, P_JWCID);
@@ -75,55 +79,66 @@ public class ColorManager implements IColorManager, IColorConstants {
 
   }
 
-  public void dispose() {
+  public void dispose()
+  {
     counter--;
-    if (counter == 0) {
+    if (counter == 0)
+    {
       Iterator e = fColorTable.values().iterator();
       while (e.hasNext())
-         ((Color) e.next()).dispose();
+        ((Color) e.next()).dispose();
     }
   }
 
-  private void putColor(IPreferenceStore pstore, String property) { 
+  private void putColor(IPreferenceStore pstore, String property)
+  {
     RGB setting = PreferenceConverter.getColor(pstore, property);
     Color color = new Color(Display.getCurrent(), setting);
     fColorTable.put(property, color);
   }
 
-  public Color getColor(String key) {
+  public Color getColor(String key)
+  {
     Color color = (Color) fColorTable.get(key);
-    if (color == null) {
+    if (color == null)
+    {
       color = Display.getCurrent().getSystemColor(SWT.COLOR_MAGENTA);
     }
     return color;
   }
 
-  public Color getColor(RGB rgb) {
+  public Color getColor(RGB rgb)
+  {
     Color result = (Color) fColorTable.get(rgb);
-    if (result == null) {
-        bindColor(rgb, rgb);
-        result = (Color) fColorTable.get(rgb);
+    if (result == null)
+    {
+      bindColor(rgb, rgb);
+      result = (Color) fColorTable.get(rgb);
     }
     return result;
-        
-  }
-  
-  public void bindColor( Object key, RGB rgb ) {
-      Object value = fColorTable.get( key );
-      if ( value != null ) {
-          throw new UnsupportedOperationException();
-      }
 
-      Color color = new Color( Display.getCurrent(), rgb );
-
-      fColorTable.put( key, color );
   }
 
-  public void unbindColor( String key ) {
-      Color color = (Color) fColorTable.remove( key );
-      if ( color != null ) {
-          color.dispose();
-      }
+  public void bindColor(Object key, RGB rgb)
+  {
+    Object value = fColorTable.get(key);
+    if (value != null)
+    {
+      throw new UnsupportedOperationException();
+    }
+
+    Color color = new Color(Display.getCurrent(), rgb);
+
+    fColorTable.put(key, color);
+  }
+
+  public void unbindColor(String key)
+  {
+    Color color = (Color) fColorTable.remove(key);
+    if (color != null)
+    {
+      color.dispose();
+    }
   }
 
 }

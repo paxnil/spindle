@@ -32,9 +32,12 @@ import org.eclipse.jface.preference.IPreferenceStore;
  * Preference Initializer for the Spindle Core
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PreferenceInitializer.java,v 1.1 2004/06/05 04:16:31 glongman
+ *          Exp $
  */
-public class PreferenceInitializer extends AbstractPreferenceInitializer implements PreferenceConstants
+public class PreferenceInitializer extends AbstractPreferenceInitializer
+    implements
+      PreferenceConstants
 {
 
   public PreferenceInitializer()

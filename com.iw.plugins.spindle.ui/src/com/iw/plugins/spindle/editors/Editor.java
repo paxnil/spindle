@@ -77,7 +77,10 @@ import com.iw.plugins.spindle.ui.util.PreferenceStoreWrapper;
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
-public abstract class Editor extends AbstractDecoratedTextEditor implements IAdaptable, IReconcileWorker
+public abstract class Editor extends AbstractDecoratedTextEditor
+    implements
+      IAdaptable,
+      IReconcileWorker
 {
 
   class PreferenceListener implements IPropertyChangeListener
@@ -90,25 +93,27 @@ public abstract class Editor extends AbstractDecoratedTextEditor implements IAda
     public void propertyChange(PropertyChangeEvent event)
     {
       IPreferenceStore store = (IPreferenceStore) event.getSource();
-      if (PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST.equals(event.getProperty()) && fContentAssistant != null)
+      if (PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST.equals(event.getProperty())
+          && fContentAssistant != null)
       {
-        fContentAssistant.enableAutoInsert(store.getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST));
+        fContentAssistant.enableAutoInsert(store
+            .getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST));
       }
     }
   }
-
-
 
   /** contect menu groups for additions */
   protected final static String NAV_GROUP = UIPlugin.PLUGIN_ID + ".navigationGroup";
   protected final static String SOURCE_GROUP = UIPlugin.PLUGIN_ID + ".sourceGroup";
 
   /** jump action ids */
-  protected final static String JUMP_JAVA_ACTION_ID = UIPlugin.PLUGIN_ID + ".editor.commands.jump.java";
-  protected final static String JUMP_SPEC_ACTION_ID = UIPlugin.PLUGIN_ID + ".editor.commands.jump.spec";
-  protected final static String JUMP_TEMPLATE_ACTION_ID = UIPlugin.PLUGIN_ID + ".editor.commands.jump.template";
+  protected final static String JUMP_JAVA_ACTION_ID = UIPlugin.PLUGIN_ID
+      + ".editor.commands.jump.java";
+  protected final static String JUMP_SPEC_ACTION_ID = UIPlugin.PLUGIN_ID
+      + ".editor.commands.jump.spec";
+  protected final static String JUMP_TEMPLATE_ACTION_ID = UIPlugin.PLUGIN_ID
+      + ".editor.commands.jump.template";
 
- 
   protected boolean fReadyToReconcile = false;
 
   protected IEditorInput fInput;
@@ -127,14 +132,16 @@ public abstract class Editor extends AbstractDecoratedTextEditor implements IAda
   {
     super();
     setSourceViewerConfiguration(createSourceViewerConfiguration());
-    fPreferenceStore = new PreferenceStoreWrapper(UIPlugin.getDefault().getPreferenceStore(), XMLPlugin.getDefault()
-        .getPreferenceStore());
+    fPreferenceStore = new PreferenceStoreWrapper(UIPlugin
+        .getDefault()
+        .getPreferenceStore(), XMLPlugin.getDefault().getPreferenceStore());
 
     setPreferenceStore(fPreferenceStore);
     setRangeIndicator(new DefaultRangeIndicator());
     setKeyBindingScopes(new String[]{"com.iw.plugins.spindle.ui.editor.commands"});
     fPreferenceListener = new PreferenceListener();
-    UIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPreferenceListener);
+    UIPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(
+        fPreferenceListener);
   }
 
   public void init(IEditorSite site, IEditorInput input) throws PartInitException
@@ -158,8 +165,6 @@ public abstract class Editor extends AbstractDecoratedTextEditor implements IAda
   {
     return new ProblemAnnotationAccess();
   }
-  
-
 
   protected void createActions()
   {
@@ -168,7 +173,9 @@ public abstract class Editor extends AbstractDecoratedTextEditor implements IAda
     if (!UIPlugin.isEclipse3()) // Fix formatting!
     {
 
-      Action action = new TextOperationAction(UIPlugin.getDefault().getResourceBundle(), "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
+      Action action = new TextOperationAction(
+          UIPlugin.getDefault().getResourceBundle(),
+          "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
       //Hook the action to the format command (plugin.xml)
       action.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.format");
       setAction("Format", action);
@@ -182,23 +189,35 @@ public abstract class Editor extends AbstractDecoratedTextEditor implements IAda
 
     JumpToNextAttributeAction jumpNavNext = new JumpToNextAttributeAction(true);
     jumpNavNext.setActiveEditor(this);
-    jumpNavNext.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeRight");
-    setAction("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeRight", jumpNavNext);
+    jumpNavNext
+        .setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeRight");
+    setAction(
+        "com.iw.plugins.spindle.ui.editor.commands.navigate.attributeRight",
+        jumpNavNext);
 
     JumpToNextAttributeAction jumpNavPrevious = new JumpToNextAttributeAction(false);
     jumpNavPrevious.setActiveEditor(this);
-    jumpNavPrevious.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft");
-    setAction("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft", jumpNavPrevious);
+    jumpNavPrevious
+        .setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft");
+    setAction(
+        "com.iw.plugins.spindle.ui.editor.commands.navigate.attributeLeft",
+        jumpNavPrevious);
 
     JumpToNextTagAction jumpNextTag = new JumpToNextTagAction(true);
     jumpNextTag.setActiveEditor(this);
-    jumpNextTag.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeDown");
-    setAction("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeDown", jumpNextTag);
+    jumpNextTag
+        .setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeDown");
+    setAction(
+        "com.iw.plugins.spindle.ui.editor.commands.navigate.attributeDown",
+        jumpNextTag);
 
     JumpToNextTagAction jumpPreviousTag = new JumpToNextTagAction(false);
     jumpPreviousTag.setActiveEditor(this);
-    jumpPreviousTag.setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp");
-    setAction("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp", jumpPreviousTag);
+    jumpPreviousTag
+        .setActionDefinitionId("com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp");
+    setAction(
+        "com.iw.plugins.spindle.ui.editor.commands.navigate.attributeUp",
+        jumpPreviousTag);
 
     BaseEditorAction jumpToJava = new JumpToJavaAction();
     jumpToJava.setActiveEditor(this);
@@ -259,7 +278,8 @@ public abstract class Editor extends AbstractDecoratedTextEditor implements IAda
     {
       project = TapestryCore.getDefault().getProjectFor(storage);
     }
-    TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
+    TapestryArtifactManager manager = TapestryArtifactManager
+        .getTapestryArtifactManager();
     Map specs = manager.getSpecMap(project);
     if (specs != null)
       return specs.get(storage);
@@ -275,9 +295,6 @@ public abstract class Editor extends AbstractDecoratedTextEditor implements IAda
 
     return null;
   }
-  
-
-
 
   public abstract IContentOutlinePage createContentOutlinePage(IEditorInput input);
 
@@ -287,7 +304,8 @@ public abstract class Editor extends AbstractDecoratedTextEditor implements IAda
     {
       fContentAssistant = new ContentAssistant();
       IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-      fContentAssistant.enableAutoInsert(store.getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST));
+      fContentAssistant.enableAutoInsert(store
+          .getBoolean(PreferenceConstants.AUTO_ACTIVATE_CONTENT_ASSIST));
     }
     return fContentAssistant;
   }
@@ -349,7 +367,8 @@ public abstract class Editor extends AbstractDecoratedTextEditor implements IAda
     super.dispose();
     if (fPreferenceListener != null)
     {
-      UIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPreferenceListener);
+      UIPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(
+          fPreferenceListener);
       fPreferenceListener = null;
     }
   }

@@ -29,30 +29,28 @@ package com.iw.plugins.spindle.core.spec.bean;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 
 /**
- *  Spindle implementation Spindle implementation of an ExpressionBeanInitializer
+ * Spindle implementation Spindle implementation of an ExpressionBeanInitializer
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginExpressionBeanInitializer.java,v 1.2 2004/05/17 02:31:48
+ *          glongman Exp $
  */
 public class PluginExpressionBeanInitializer extends AbstractPluginBeanInitializer
 {
 
+  public PluginExpressionBeanInitializer()
+  {
+    super(BaseSpecification.EXPRESSION_BEAN_INIT);
+  }
 
-    public PluginExpressionBeanInitializer()
-    {
-        super(BaseSpecification.EXPRESSION_BEAN_INIT);
-    }
+  public String getExpression()
+  {
+    return getValue();
+  }
 
-    public String getExpression()
-    {
-        return getValue();
-    }
-
-    public void setExpression(String value)
-    {
-        setValue(value);
-    }
-
-   
+  public void setExpression(String value)
+  {
+    setValue(value);
+  }
 
 }

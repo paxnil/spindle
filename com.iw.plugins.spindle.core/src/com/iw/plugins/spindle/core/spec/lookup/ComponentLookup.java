@@ -31,46 +31,46 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 
 /**
- *  Lookup class for ComponentSpecifications
+ * Lookup class for ComponentSpecifications
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public class ComponentLookup extends AbstractLookup
 {
-    public IComponentSpecification lookupSpecification(String type)
+  public IComponentSpecification lookupSpecification(String type)
+  {
+    int colonx = type.indexOf(':');
+
+    if (colonx > 0)
     {
-        int colonx = type.indexOf(':');
-
-        if (colonx > 0)
-        {
-            String libraryId = type.substring(0, colonx);
-            String simpleType = type.substring(colonx + 1);
-            return lookupSpecification(libraryId, simpleType);
-        } else
-        {
-            return lookupSpecification(null, type);
-        }
-    }
-
-    protected IComponentSpecification lookupSpecification(String libraryId, String type)
+      String libraryId = type.substring(0, colonx);
+      String simpleType = type.substring(colonx + 1);
+      return lookupSpecification(libraryId, simpleType);
+    } else
     {
-        ICoreNamespace useNamespace = getNamespace();
-
-        IComponentSpecification result = null;
-
-        if (libraryId != null)
-            useNamespace = (ICoreNamespace) useNamespace.getChildNamespace(libraryId);
-
-        result = useNamespace.getComponentSpecification(type);
-
-        if (result == null && libraryId == null)
-        {
-            useNamespace = getFrameworkNamespace();
-            if (useNamespace != null)
-                return getFrameworkNamespace().getComponentSpecification(type);
-
-        }
-        return result;
+      return lookupSpecification(null, type);
     }
+  }
+
+  protected IComponentSpecification lookupSpecification(String libraryId, String type)
+  {
+    ICoreNamespace useNamespace = getNamespace();
+
+    IComponentSpecification result = null;
+
+    if (libraryId != null)
+      useNamespace = (ICoreNamespace) useNamespace.getChildNamespace(libraryId);
+
+    result = useNamespace.getComponentSpecification(type);
+
+    if (result == null && libraryId == null)
+    {
+      useNamespace = getFrameworkNamespace();
+      if (useNamespace != null)
+        return getFrameworkNamespace().getComponentSpecification(type);
+
+    }
+    return result;
+  }
 }

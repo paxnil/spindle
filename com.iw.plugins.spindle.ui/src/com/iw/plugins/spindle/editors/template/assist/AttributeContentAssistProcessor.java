@@ -39,202 +39,203 @@ import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.util.CompletionProposal;
 
 /**
- *  Content assist inside of Tags (but not attributes)
+ * Content assist inside of Tags (but not attributes)
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: AttributeContentAssistProcessor.java,v 1.5 2003/11/21 17:41:23
+ *          glongman Exp $
  */
 public class AttributeContentAssistProcessor extends TemplateContentAssistProcessor
 {
 
-    private static String[] MISSPELLINGS = new String[] { "ongl:" };
+  private static String[] MISSPELLINGS = new String[]{"ongl:"};
 
-    public AttributeContentAssistProcessor(TemplateEditor editor)
+  public AttributeContentAssistProcessor(TemplateEditor editor)
+  {
+    super(editor);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.template.assist.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
+   *      int)
+   */
+  protected ICompletionProposal[] doComputeCompletionProposals(
+      ITextViewer viewer,
+      int documentOffset)
+  {
+    XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
+    XMLNode attribute = tag.getAttributeAt(documentOffset);
+
+    int state = attribute.getStateAt(documentOffset);
+
+    if (state == XMLNode.TAG)
+      return NoProposals;
+
+    Point valueLocation = null;
+    String attributeValue = null;
+    try
     {
-        super(editor);
+      IDocument document = viewer.getDocument();
+      ITypedRegion region = document.getPartition(documentOffset);
+      valueLocation = new Point(region.getOffset() + 1, region.getLength() - 1);
+      char last = viewer.getDocument().getChar(valueLocation.x + valueLocation.y - 1);
+      if (last == '\'' || last == '"')
+        valueLocation.y -= 1;
+      attributeValue = document.get(valueLocation.x, valueLocation.y);
+      char[] chars = attributeValue.toCharArray();
+      int i = 0;
+      for (; i < chars.length; i++)
+      {
+        if (!Character.isWhitespace(chars[i]))
+          break;
+      }
+      if (i > 0)
+      {
+        valueLocation.x += i;
+        attributeValue = document.get(valueLocation.x, valueLocation.y);
+      }
+
+    } catch (BadLocationException e)
+    {
+      return NoProposals;
     }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.template.assist.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
-     */
-    protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
+    if (attributeValue.startsWith("ognl:"))
+      return computeDynamicProposals(documentOffset, attributeValue, valueLocation);
+
+    if (attributeValue.startsWith("message:"))
+      return computeMessageProposals(documentOffset, attributeValue, valueLocation);
+
+    // check for misspellings
+
+    String misspell = null;
+    for (int i = 0; i < MISSPELLINGS.length; i++)
     {
-        XMLNode tag = XMLNode.getArtifactAt(viewer.getDocument(), documentOffset);
-        XMLNode attribute = tag.getAttributeAt(documentOffset);
+      if (attributeValue.startsWith(MISSPELLINGS[i]))
+      {
+        misspell = MISSPELLINGS[i];
+        break;
+      }
+    }
+    if (misspell != null)
+    {
+      int delta = documentOffset - valueLocation.x;
 
-        int state = attribute.getStateAt(documentOffset);
-
-        if (state == XMLNode.TAG)
-            return NoProposals;
-
-        Point valueLocation = null;
-        String attributeValue = null;
-        try
-        {
-            IDocument document = viewer.getDocument();
-            ITypedRegion region = document.getPartition(documentOffset);
-            valueLocation = new Point(region.getOffset() + 1, region.getLength() - 1);
-            char last = viewer.getDocument().getChar(valueLocation.x + valueLocation.y - 1);
-            if (last == '\'' || last == '"')
-                valueLocation.y -= 1;
-            attributeValue = document.get(valueLocation.x, valueLocation.y);
-            char[] chars = attributeValue.toCharArray();
-            int i = 0;
-            for (; i < chars.length; i++)
-            {
-                if (!Character.isWhitespace(chars[i]))
-                    break;
-            }
-            if (i > 0)
-            {
-                valueLocation.x += i;
-                attributeValue = document.get(valueLocation.x, valueLocation.y);
-            }
-
-        } catch (BadLocationException e)
-        {
-            return NoProposals;
-        }
-
-        if (attributeValue.startsWith("ognl:"))
-            return computeDynamicProposals(documentOffset, attributeValue, valueLocation);
-
-        if (attributeValue.startsWith("message:"))
-            return computeMessageProposals(documentOffset, attributeValue, valueLocation);
-
-        // check for misspellings
-
-        String misspell = null;
-        for (int i = 0; i < MISSPELLINGS.length; i++)
-        {
-            if (attributeValue.startsWith(MISSPELLINGS[i]))
-            {
-                misspell = MISSPELLINGS[i];
-                break;
-            }
-        }
-        if (misspell != null)
-        {
-            int delta = documentOffset - valueLocation.x;
-
-            return new ICompletionProposal[] {
-                 new CompletionProposal(
-                    "ognl:",
-                    valueLocation.x,
-                    5,
-                    delta <= 0 ? new Point(0, 0) : new Point(delta, 0),
-                    Images.getSharedImage("oops.gif"),
-                    null,
-                    null,
-                    null)};
-        }
-
-        return computeStaticProposals(documentOffset, attributeValue, valueLocation);
+      return new ICompletionProposal[]{new CompletionProposal(
+          "ognl:",
+          valueLocation.x,
+          5,
+          delta <= 0 ? new Point(0, 0) : new Point(delta, 0),
+          Images.getSharedImage("oops.gif"),
+          null,
+          null,
+          null)};
     }
 
-    /**
-     * Compute proposals for converting a Dynamic to a Message or a Static binding
-     */
-    private ICompletionProposal[] computeDynamicProposals(
-        int documentOffset,
-        String attributeValue,
-        Point valueLocation)
-    {
-        int delta = documentOffset - valueLocation.x;
+    return computeStaticProposals(documentOffset, attributeValue, valueLocation);
+  }
 
-        ICompletionProposal[] result = new ICompletionProposal[2];
-        result[0] =
-            new CompletionProposal(
-                "message:",
-                valueLocation.x,
-                5,
-                delta <= 0 ? new Point(8, 0) : new Point(delta < 5 ? 8 : delta - 5 + 8, 0),
-                Images.getSharedImage("bind-string.gif"),
-                "Change to message binding",
-                null,
-                "change 'ognl' into 'message'");
-        result[1] =
-            new CompletionProposal(
-                "",
-                valueLocation.x,
-                5,
-                delta <= 0 ? new Point(0, 0) : new Point(delta < 5 ? 0 : delta - 5, 0),
-                Images.getSharedImage("bind-static.gif"),
-                "Change to static binding",
-                null,
-                "remove 'ognl:'");
+  /**
+   * Compute proposals for converting a Dynamic to a Message or a Static binding
+   */
+  private ICompletionProposal[] computeDynamicProposals(
+      int documentOffset,
+      String attributeValue,
+      Point valueLocation)
+  {
+    int delta = documentOffset - valueLocation.x;
 
-        return result;
-    }
+    ICompletionProposal[] result = new ICompletionProposal[2];
+    result[0] = new CompletionProposal(
+        "message:",
+        valueLocation.x,
+        5,
+        delta <= 0 ? new Point(8, 0) : new Point(delta < 5 ? 8 : delta - 5 + 8, 0),
+        Images.getSharedImage("bind-string.gif"),
+        "Change to message binding",
+        null,
+        "change 'ognl' into 'message'");
+    result[1] = new CompletionProposal(
+        "",
+        valueLocation.x,
+        5,
+        delta <= 0 ? new Point(0, 0) : new Point(delta < 5 ? 0 : delta - 5, 0),
+        Images.getSharedImage("bind-static.gif"),
+        "Change to static binding",
+        null,
+        "remove 'ognl:'");
 
-    /**
-     * Compute proposals for converting a Message to a Dynamic or a Static binding;
-     */
-    private ICompletionProposal[] computeMessageProposals(
-        int documentOffset,
-        String attributeValue,
-        Point valueLocation)
-    {
-        int delta = documentOffset - valueLocation.x;
+    return result;
+  }
 
-        ICompletionProposal[] result = new ICompletionProposal[2];
-        result[0] =
-            new CompletionProposal(
-                "ognl:",
-                valueLocation.x,
-                8,
-                delta <= 0 ? new Point(5, 0) : new Point(delta < 8 ? 5 : delta - 8 + 5, 0),
-                Images.getSharedImage("bind-dynamic.gif"),
-                "Change to dynamic binding",
-                null,
-                "change 'message' into 'ognl'");
-        result[1] =
-            new CompletionProposal(
-                "",
-                valueLocation.x,
-                8,
-                delta <= 0 ? new Point(0, 0) : new Point(delta < 8 ? 0 : delta - 8, 0),
-                Images.getSharedImage("bind-static.gif"),
-                "Change to static binding",
-                null,
-                "remove 'message:'");
+  /**
+   * Compute proposals for converting a Message to a Dynamic or a Static
+   * binding;
+   */
+  private ICompletionProposal[] computeMessageProposals(
+      int documentOffset,
+      String attributeValue,
+      Point valueLocation)
+  {
+    int delta = documentOffset - valueLocation.x;
 
-        return result;
-    }
+    ICompletionProposal[] result = new ICompletionProposal[2];
+    result[0] = new CompletionProposal(
+        "ognl:",
+        valueLocation.x,
+        8,
+        delta <= 0 ? new Point(5, 0) : new Point(delta < 8 ? 5 : delta - 8 + 5, 0),
+        Images.getSharedImage("bind-dynamic.gif"),
+        "Change to dynamic binding",
+        null,
+        "change 'message' into 'ognl'");
+    result[1] = new CompletionProposal(
+        "",
+        valueLocation.x,
+        8,
+        delta <= 0 ? new Point(0, 0) : new Point(delta < 8 ? 0 : delta - 8, 0),
+        Images.getSharedImage("bind-static.gif"),
+        "Change to static binding",
+        null,
+        "remove 'message:'");
 
-    /**
-     * Compute proposals for converting a Static to a Dynamic or a Message binding;
-     */
-    private ICompletionProposal[] computeStaticProposals(
-        int documentOffset,
-        String attributeValue,
-        Point valueLocation)
-    {
-        int delta = documentOffset - valueLocation.x;
+    return result;
+  }
 
-        ICompletionProposal[] result = new ICompletionProposal[2];
-        result[0] =
-            new CompletionProposal(
-                "ognl:",
-                valueLocation.x,
-                0,
-                delta <= 0 ? new Point(5, 0) : new Point(delta + 5, 0),
-                Images.getSharedImage("bind-dynamic.gif"),
-                "Make dynamic binding",
-                null,
-                "prepend 'ognl:' to '" + attributeValue);
-        result[1] =
-            new CompletionProposal(
-                "message:",
-                valueLocation.x,
-                0,
-                delta <= 0 ? new Point(8, 0) : new Point(delta + 8, 0),
-                Images.getSharedImage("bind-string.gif"),
-                "Make message binding",
-                null,
-                "prepend 'message:' to '" + attributeValue);
+  /**
+   * Compute proposals for converting a Static to a Dynamic or a Message
+   * binding;
+   */
+  private ICompletionProposal[] computeStaticProposals(
+      int documentOffset,
+      String attributeValue,
+      Point valueLocation)
+  {
+    int delta = documentOffset - valueLocation.x;
 
-        return result;
-    }
+    ICompletionProposal[] result = new ICompletionProposal[2];
+    result[0] = new CompletionProposal(
+        "ognl:",
+        valueLocation.x,
+        0,
+        delta <= 0 ? new Point(5, 0) : new Point(delta + 5, 0),
+        Images.getSharedImage("bind-dynamic.gif"),
+        "Make dynamic binding",
+        null,
+        "prepend 'ognl:' to '" + attributeValue);
+    result[1] = new CompletionProposal(
+        "message:",
+        valueLocation.x,
+        0,
+        delta <= 0 ? new Point(8, 0) : new Point(delta + 8, 0),
+        Images.getSharedImage("bind-string.gif"),
+        "Make message binding",
+        null,
+        "prepend 'message:' to '" + attributeValue);
+
+    return result;
+  }
 
 }

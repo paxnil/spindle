@@ -35,7 +35,7 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
 
 /**
- *  Base class for spec actions that need the xml partitioning.
+ * Base class for spec actions that need the xml partitioning.
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -43,74 +43,76 @@ import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
 public abstract class BaseTemplateAction extends BaseEditorAction
 {
 
-    protected XMLDocumentPartitioner fPartitioner;
-    protected INamespace fNamespace;
-    protected INamespace fFrameworkNamespace;
-    protected boolean fConnected = false;
+  protected XMLDocumentPartitioner fPartitioner;
+  protected INamespace fNamespace;
+  protected INamespace fFrameworkNamespace;
+  protected boolean fConnected = false;
 
-    protected IDocument fDocument;
+  protected IDocument fDocument;
 
-    public BaseTemplateAction()
+  public BaseTemplateAction()
+  {
+    super();
+    fPartitioner = new XMLDocumentPartitioner(
+        XMLDocumentPartitioner.SCANNER,
+        XMLDocumentPartitioner.TYPES);
+  }
+
+  public BaseTemplateAction(String text)
+  {
+    super(text);
+  }
+
+  public BaseTemplateAction(String text, ImageDescriptor image)
+  {
+    super(text, image);
+  }
+
+  public BaseTemplateAction(String text, int style)
+  {
+    super(text, style);
+  }
+
+  protected final void disconnect()
+  {
+    if (fConnected)
     {
-        super();
-        fPartitioner = new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
+      fPartitioner.disconnect();
+      fConnected = false;
+    }
+  }
+
+  public final void run()
+  {
+    super.run();
+
+    INamespace namespace = fEditor.getNamespace();
+    if (namespace == null)
+      return;
+
+    if (fDocumentOffset < 0)
+      return;
+
+    try
+    {
+      fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+      fPartitioner.connect(fDocument);
+      fConnected = true;
+      if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
+        return;
+      doRun();
+
+    } catch (RuntimeException e)
+    {
+      UIPlugin.log(e);
+      throw e;
+    } finally
+    {
+      disconnect();
     }
 
-    public BaseTemplateAction(String text)
-    {
-        super(text);
-    }
+  }
 
-    public BaseTemplateAction(String text, ImageDescriptor image)
-    {
-        super(text, image);
-    }
-
-    public BaseTemplateAction(String text, int style)
-    {
-        super(text, style);
-    }
-
-    protected final void disconnect()
-    {
-        if (fConnected)
-        {
-            fPartitioner.disconnect();
-            fConnected = false;
-        }
-    }
-
-    public final void run()
-    {
-        super.run();
-
-        INamespace namespace = fEditor.getNamespace();
-        if (namespace == null)
-            return;
-
-        if (fDocumentOffset < 0)
-            return;
-
-        try
-        {
-            fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-            fPartitioner.connect(fDocument);
-            fConnected = true;
-            if (fDocument.getLength() == 0 || fDocument.get().trim().length() == 0)
-                return;
-            doRun();
-
-        } catch (RuntimeException e)
-        {
-            UIPlugin.log(e);
-            throw e;
-        } finally
-        {
-            disconnect();
-        }
-
-    }
-
-    protected abstract void doRun();
+  protected abstract void doRun();
 
 }

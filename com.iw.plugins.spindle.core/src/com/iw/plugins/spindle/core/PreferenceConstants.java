@@ -41,6 +41,7 @@ public interface PreferenceConstants
   String CORE_STATUS_ERROR = "error";
   String CORE_STATUS_IGNORE = "ignore";
 
-  String[] CORE_STATUS_ARRAY = new String[]{CORE_STATUS_INFO, CORE_STATUS_WARN, CORE_STATUS_ERROR, CORE_STATUS_IGNORE};
+  String[] CORE_STATUS_ARRAY = new String[]{CORE_STATUS_INFO, CORE_STATUS_WARN,
+      CORE_STATUS_ERROR, CORE_STATUS_IGNORE};
 
 }

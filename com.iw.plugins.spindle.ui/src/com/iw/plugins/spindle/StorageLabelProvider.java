@@ -33,99 +33,113 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
 
 /**
- *  Label and Image provider for IStorage objects that are tapestry artifacts
+ * Label and Image provider for IStorage objects that are tapestry artifacts
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: StorageLabelProvider.java,v 1.1 2003/10/29 12:33:58 glongman
+ *          Exp $
  */
 public class StorageLabelProvider implements ILabelProvider
 {
 
-    private IStorage getStorage(Object element)
+  private IStorage getStorage(Object element)
+  {
+    IStorage storage = null;
+    if (element instanceof IStorage)
     {
-        IStorage storage = null;
-        if (element instanceof IStorage)
-        {
-            storage = (IStorage) element;
-        } else if (element instanceof IAdaptable)
-        {
-            storage = (IStorage) ((IAdaptable) element).getAdapter(IStorage.class);
-        }
-        
-        return storage;
+      storage = (IStorage) element;
+    } else if (element instanceof IAdaptable)
+    {
+      storage = (IStorage) ((IAdaptable) element).getAdapter(IStorage.class);
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
-     */
-    public Image getImage(Object element)
+    return storage;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
+   */
+  public Image getImage(Object element)
+  {
+    IStorage storage = getStorage(element);
+    if (storage != null)
     {
-        IStorage storage = getStorage(element);
-        if (storage != null)
-        {
-            String extension = storage.getFullPath().getFileExtension();
-            if ("jwc".equals(extension))
-            {
-                return Images.getSharedImage("component16.gif");
-            } else if ("page".equals(extension))
-            {
-                return Images.getSharedImage("page16.gif");
-            } else if ("library".equals(extension))
-            {
-                return Images.getSharedImage("library16.gif");
-            } else if ("application".equals(extension))
-            {
-                return Images.getSharedImage("application16.gif");
-            }
-        }
-        return null;
+      String extension = storage.getFullPath().getFileExtension();
+      if ("jwc".equals(extension))
+      {
+        return Images.getSharedImage("component16.gif");
+      } else if ("page".equals(extension))
+      {
+        return Images.getSharedImage("page16.gif");
+      } else if ("library".equals(extension))
+      {
+        return Images.getSharedImage("library16.gif");
+      } else if ("application".equals(extension))
+      {
+        return Images.getSharedImage("application16.gif");
+      }
     }
+    return null;
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-     */
-    public String getText(Object element)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
+   */
+  public String getText(Object element)
+  {
+    IStorage storage = getStorage(element);
+    if (storage != null)
     {
-        IStorage storage = getStorage(element);
-        if (storage != null)
-        {
-            return storage.getName();
-        }
-        return element.toString();
+      return storage.getName();
     }
+    return element.toString();
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.IBaseLabelProvider#addListener(org.eclipse.jface.viewers.ILabelProviderListener)
-     */
-    public void addListener(ILabelProviderListener listener)
-    {
-        // TODO Auto-generated method stub
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.IBaseLabelProvider#addListener(org.eclipse.jface.viewers.ILabelProviderListener)
+   */
+  public void addListener(ILabelProviderListener listener)
+  {
+    // TODO Auto-generated method stub
 
-    }
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
-     */
-    public void dispose()
-    {
-        // not needed - all images are shared
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
+   */
+  public void dispose()
+  {
+    // not needed - all images are shared
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.IBaseLabelProvider#isLabelProperty(java.lang.Object, java.lang.String)
-     */
-    public boolean isLabelProperty(Object element, String property)
-    {
-        return false;
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.IBaseLabelProvider#isLabelProperty(java.lang.Object,
+   *      java.lang.String)
+   */
+  public boolean isLabelProperty(Object element, String property)
+  {
+    return false;
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.IBaseLabelProvider#removeListener(org.eclipse.jface.viewers.ILabelProviderListener)
-     */
-    public void removeListener(ILabelProviderListener listener)
-    {
-        // TODO Auto-generated method stub
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.IBaseLabelProvider#removeListener(org.eclipse.jface.viewers.ILabelProviderListener)
+   */
+  public void removeListener(ILabelProviderListener listener)
+  {
+    // TODO Auto-generated method stub
 
-    }
+  }
 
 }

@@ -513,7 +513,7 @@ public abstract class NamespaceResolver
       } else
       {
         if (!jwcs[i].equals(result.get(type)))
-          Markers.recordProblems(jwcs[i], new IProblem[] { new DefaultProblem(
+          Markers.recordProblems(jwcs[i], new IProblem[]{new DefaultProblem(
               Markers.TAPESTRY_MARKER_TAG,
               IProblem.ERROR,
               TapestryCore
@@ -521,7 +521,7 @@ public abstract class NamespaceResolver
               1,
               0,
               0,
-              false) });
+              false)});
       }
     }
     return result;
@@ -567,7 +567,7 @@ public abstract class NamespaceResolver
       } else
       {
         if (!result.get(name).equals(pages[i]))
-          Markers.recordProblems(pages[i], new IProblem[] { new DefaultProblem(
+          Markers.recordProblems(pages[i], new IProblem[]{new DefaultProblem(
               Markers.TAPESTRY_MARKER_TAG,
               IProblem.ERROR,
               TapestryCore.getString("builder-hidden-page-file", pages[i], result
@@ -575,7 +575,7 @@ public abstract class NamespaceResolver
               1,
               0,
               0,
-              false) });
+              false)});
       }
     }
     return result;

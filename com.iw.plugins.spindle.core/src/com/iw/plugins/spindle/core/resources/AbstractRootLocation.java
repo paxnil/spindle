@@ -34,45 +34,45 @@ import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
-
 /**
- *  Abstract base class for root locations
+ * Abstract base class for root locations
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: AbstractRootLocation.java,v 1.2 2003/08/08 12:48:35 glongman
+ *          Exp $
  */
 public abstract class AbstractRootLocation implements IResourceWorkspaceLocation
 {
 
-    public IStorage getStorage()
-    {
-        throw new RuntimeException("can't get the storage from root!");
-    }
+  public IStorage getStorage()
+  {
+    throw new RuntimeException("can't get the storage from root!");
+  }
 
-    public InputStream getContents() throws CoreException
-    {
-        throw new RuntimeException("can't get the contents from root!");
-    }
+  public InputStream getContents() throws CoreException
+  {
+    throw new RuntimeException("can't get the contents from root!");
+  }
 
-    public IResourceLocation getLocalization(Locale arg0)
-    {
-        throw new RuntimeException("can't get the localization from root!");
-    }
+  public IResourceLocation getLocalization(Locale arg0)
+  {
+    throw new RuntimeException("can't get the localization from root!");
+  }
 
-    public String getName()
-    {
-        return "";
-    }
+  public String getName()
+  {
+    return "";
+  }
 
-    public String getPath()
-    {
-        return "/";
-    }
+  public String getPath()
+  {
+    return "/";
+  }
 
-    public URL getResourceURL()
-    {
-        return null;
-    } 
-    
-    abstract String toHashString();   
+  public URL getResourceURL()
+  {
+    return null;
+  }
+
+  abstract String toHashString();
 }

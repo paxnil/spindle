@@ -32,57 +32,68 @@ import org.eclipse.jface.text.ITextDoubleClickStrategy;
 import org.eclipse.jface.text.ITextViewer;
 
 /**
- *  Default strategy for selecting text on double click
+ * Default strategy for selecting text on double click
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: DefaultDoubleClickStrategy.java,v 1.1 2003/10/29 12:33:58
+ *          glongman Exp $
  */
-public class DefaultDoubleClickStrategy implements ITextDoubleClickStrategy {
-	/*
-	 * @see org.eclipse.jface.text.ITextDoubleClickStrategy#doubleClicked(ITextViewer)
-	 */
-	public void doubleClicked( ITextViewer viewer ) {
-		int offset = viewer.getSelectedRange().x;
-		if ( offset < 0 ) {
-			return;
-		}
+public class DefaultDoubleClickStrategy implements ITextDoubleClickStrategy
+{
+  /*
+   * @see org.eclipse.jface.text.ITextDoubleClickStrategy#doubleClicked(ITextViewer)
+   */
+  public void doubleClicked(ITextViewer viewer)
+  {
+    int offset = viewer.getSelectedRange().x;
+    if (offset < 0)
+    {
+      return;
+    }
 
-		selectWord( viewer, viewer.getDocument(), offset );
-	}
+    selectWord(viewer, viewer.getDocument(), offset);
+  }
 
-	protected void selectWord(
-		ITextViewer textViewer, IDocument document, int offset
-	) {
-		try {
-			int start = offset;
-			while ( start >= 0 ) {
-				char c = document.getChar( start );
+  protected void selectWord(ITextViewer textViewer, IDocument document, int offset)
+  {
+    try
+    {
+      int start = offset;
+      while (start >= 0)
+      {
+        char c = document.getChar(start);
 
-				if ( !Character.isUnicodeIdentifierPart(c) ) {
-					break;
-				}
+        if (!Character.isUnicodeIdentifierPart(c))
+        {
+          break;
+        }
 
-				--start;
-			}
+        --start;
+      }
 
-			int length = document.getLength();
+      int length = document.getLength();
 
-			int end = offset;
-			while ( end < length ) {
-				char c = document.getChar( end );
+      int end = offset;
+      while (end < length)
+      {
+        char c = document.getChar(end);
 
-				if ( !Character.isUnicodeIdentifierPart(c) ) {
-					break;
-				}
+        if (!Character.isUnicodeIdentifierPart(c))
+        {
+          break;
+        }
 
-				++end;
-			}
+        ++end;
+      }
 
-			if ( start == end ) {
-				textViewer.setSelectedRange( start, 0 );
-			} else {
-				textViewer.setSelectedRange( start + 1, end - start - 1 );
-			}
-		} catch ( BadLocationException x ) {}
-	}
+      if (start == end)
+      {
+        textViewer.setSelectedRange(start, 0);
+      } else
+      {
+        textViewer.setSelectedRange(start + 1, end - start - 1);
+      }
+    } catch (BadLocationException x)
+    {}
+  }
 }

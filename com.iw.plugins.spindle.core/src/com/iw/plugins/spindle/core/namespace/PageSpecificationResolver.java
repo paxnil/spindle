@@ -32,72 +32,71 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
- *  Resolver for Component Specifications
+ * Resolver for Component Specifications
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PageSpecificationResolver.java,v 1.1 2003/08/14 19:11:47
+ *          glongman Exp $
  */
 
 public class PageSpecificationResolver
 {
 
-    protected INamespace fFrameworkNamespace;
-    protected INamespace fContainerNamespace;
+  protected INamespace fFrameworkNamespace;
+  protected INamespace fContainerNamespace;
 
-    public PageSpecificationResolver(INamespace framework, INamespace containerNamespace)
+  public PageSpecificationResolver(INamespace framework, INamespace containerNamespace)
+  {
+    fFrameworkNamespace = framework;
+    Assert.isNotNull(containerNamespace);
+    fContainerNamespace = containerNamespace;
+  }
+
+  public IComponentSpecification resolve(String pageName)
+  {
+    int colonx = pageName.indexOf(':');
+
+    if (colonx > 0)
     {
-        fFrameworkNamespace = framework;
-        Assert.isNotNull(containerNamespace);
-        fContainerNamespace = containerNamespace;
-    }    
+      String libraryId = pageName.substring(0, colonx);
+      String simpleType = pageName.substring(colonx + 1);
 
-    public IComponentSpecification resolve(String pageName)
+      return resolve(libraryId, simpleType);
+    } else
+      return resolve(null, pageName);
+  }
+
+  public IComponentSpecification resolve(String libraryId, String pageName)
+  {
+    INamespace namespace = null;
+
+    if (libraryId != null && !libraryId.equals(fContainerNamespace.getId()))
+      namespace = fContainerNamespace.getChildNamespace(libraryId);
+    else
+      namespace = fContainerNamespace;
+
+    if (namespace == null)
+      return null;
+
+    if (namespace.containsPage(pageName))
     {
-        int colonx = pageName.indexOf(':');
-
-        if (colonx > 0)
-        {
-            String libraryId = pageName.substring(0, colonx);
-            String simpleType = pageName.substring(colonx + 1);
-
-            return resolve(libraryId, simpleType);
-        } else
-            return resolve(null, pageName);
+      return namespace.getPageSpecification(pageName);
     }
 
-  
+    if (libraryId == null)
+      return resolveInFramework(pageName);
 
-    public IComponentSpecification resolve(String libraryId, String pageName)
+    return null;
+  }
+
+  protected IComponentSpecification resolveInFramework(String pageName)
+  {
+    if (fFrameworkNamespace != null && fFrameworkNamespace.containsPage(pageName))
     {
-        INamespace namespace = null;
 
-        if (libraryId != null && !libraryId.equals(fContainerNamespace.getId()))
-            namespace = fContainerNamespace.getChildNamespace(libraryId);
-        else
-            namespace = fContainerNamespace;
-
-        if (namespace == null)
-            return null;
-
-        if (namespace.containsPage(pageName))
-        {
-            return namespace.getPageSpecification(pageName);
-        }
-
-        if (libraryId == null)
-            return resolveInFramework(pageName);
-
-        return null;
+      return fFrameworkNamespace.getPageSpecification(pageName);
     }
-
-    protected IComponentSpecification resolveInFramework(String pageName)
-    {
-        if (fFrameworkNamespace != null && fFrameworkNamespace.containsPage(pageName))
-        {
-
-            return fFrameworkNamespace.getPageSpecification(pageName);
-        }
-        return null;
-    }
+    return null;
+  }
 
 }

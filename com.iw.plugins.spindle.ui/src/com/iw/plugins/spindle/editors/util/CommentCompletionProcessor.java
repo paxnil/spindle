@@ -41,110 +41,124 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.editors.Editor;
 
 /**
- *  Processor for completing comments
+ * Processor for completing comments
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: CommentCompletionProcessor.java,v 1.1 2003/11/21 17:41:23
+ *          glongman Exp $
  */
 public class CommentCompletionProcessor extends ContentAssistProcessor
 {
 
-    private static Pattern ENDS_WITH_ANOTHER_COMMENT_PATTERN;
-    private static PatternMatcher PATTERN_MATCHER;
+  private static Pattern ENDS_WITH_ANOTHER_COMMENT_PATTERN;
+  private static PatternMatcher PATTERN_MATCHER;
 
-    static {
-        Perl5Compiler compiler = new Perl5Compiler();
+  static
+  {
+    Perl5Compiler compiler = new Perl5Compiler();
 
-        try
-        {
-            ENDS_WITH_ANOTHER_COMMENT_PATTERN = compiler.compile(".*<!--.*-->$", Perl5Compiler.SINGLELINE_MASK);
-        } catch (MalformedPatternException ex)
-        {
-            throw new Error(ex);
-        }
-
-        PATTERN_MATCHER = new Perl5Matcher();
-    }
-
-    /**
-     * @param editor
-     */
-    public CommentCompletionProcessor(Editor editor)
+    try
     {
-        super(editor);
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
-     */
-    protected ICompletionProposal[] doComputeCompletionProposals(ITextViewer viewer, int documentOffset)
+      ENDS_WITH_ANOTHER_COMMENT_PATTERN = compiler.compile(
+          ".*<!--.*-->$",
+          Perl5Compiler.SINGLELINE_MASK);
+    } catch (MalformedPatternException ex)
     {
-        IDocument document = viewer.getDocument();
-        XMLNode comment = XMLNode.getArtifactAt(document, documentOffset);
-        String to = comment.getContentTo(documentOffset, false);
-        if (to.length() < 4)
-        {
-            return NoProposals;
-        }
-
-        boolean addLeadingSpaces = to.length() == 4;
-
-        String content = comment.getContent().substring(4);
-        if (PATTERN_MATCHER.matches(content, ENDS_WITH_ANOTHER_COMMENT_PATTERN))
-        {
-            return new ICompletionProposal[] {
-                 new CompletionProposal(
-                    "-->",
-                    documentOffset,
-                    0,
-                    new Point(3, 0),
-                    Images.getSharedImage("bullet.gif"),
-                    "Close comment here. '-->'",
-                    null,
-                    null)};
-        }
-        if (content.endsWith("-->"))
-        {
-            return NoSuggestions;
-        }
-
-        return new ICompletionProposal[] {
-             new CompletionProposal(
-                addLeadingSpaces ? "  -->" : "-->",
-                documentOffset,
-                0,
-                addLeadingSpaces ? new Point(1, 0) : new Point(3, 0),
-                Images.getSharedImage("bullet.gif"),
-                "Close comment here. '-->'",
-                null,
-                null)};
-
+      throw new Error(ex);
     }
 
-    /**
-      * Return the default ICompletionProposal for inserting an XML Comment.
-      * <pre>
-      *  <!--  -->
-      * </pre>
-      * The cursor position after the proposal is applied is in the middle.
-      * 
-      * @param replacementOffset the location in the document where the proposal will be applied
-      * @param replacementLength the number of characters in the document from replacementOffset that will be replaced.
-      * @return
-      */
-    public static ICompletionProposal getDefaultInsertCommentProposal(int replacementOffset, int replacementLength)
+    PATTERN_MATCHER = new Perl5Matcher();
+  }
+
+  /**
+   * @param editor
+   */
+  public CommentCompletionProcessor(Editor editor)
+  {
+    super(editor);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.util.ContentAssistProcessor#doComputeCompletionProposals(org.eclipse.jface.text.ITextViewer,
+   *      int)
+   */
+  protected ICompletionProposal[] doComputeCompletionProposals(
+      ITextViewer viewer,
+      int documentOffset)
+  {
+    IDocument document = viewer.getDocument();
+    XMLNode comment = XMLNode.getArtifactAt(document, documentOffset);
+    String to = comment.getContentTo(documentOffset, false);
+    if (to.length() < 4)
     {
-        CompletionProposal proposal =
-            new CompletionProposal(
-                "<!--  -->",
-                replacementOffset,
-                replacementLength,
-                new Point(5, 0),
-                Images.getSharedImage("bullet_d.gif"),
-                "Insert comment",
-                null,
-                null);
-        proposal.setYOrder(99);
-        return proposal;
+      return NoProposals;
     }
+
+    boolean addLeadingSpaces = to.length() == 4;
+
+    String content = comment.getContent().substring(4);
+    if (PATTERN_MATCHER.matches(content, ENDS_WITH_ANOTHER_COMMENT_PATTERN))
+    {
+      return new ICompletionProposal[]{new CompletionProposal(
+          "-->",
+          documentOffset,
+          0,
+          new Point(3, 0),
+          Images.getSharedImage("bullet.gif"),
+          "Close comment here. '-->'",
+          null,
+          null)};
+    }
+    if (content.endsWith("-->"))
+    {
+      return NoSuggestions;
+    }
+
+    return new ICompletionProposal[]{new CompletionProposal(
+        addLeadingSpaces ? "  -->" : "-->",
+        documentOffset,
+        0,
+        addLeadingSpaces ? new Point(1, 0) : new Point(3, 0),
+        Images.getSharedImage("bullet.gif"),
+        "Close comment here. '-->'",
+        null,
+        null)};
+
+  }
+
+  /**
+   * Return the default ICompletionProposal for inserting an XML Comment.
+   * 
+   * <pre>
+   * 
+   *   &lt;!--  --&gt;
+   *  
+   * </pre>
+   * 
+   * The cursor position after the proposal is applied is in the middle.
+   * 
+   * @param replacementOffset the location in the document where the proposal
+   *          will be applied
+   * @param replacementLength the number of characters in the document from
+   *          replacementOffset that will be replaced.
+   * @return
+   */
+  public static ICompletionProposal getDefaultInsertCommentProposal(
+      int replacementOffset,
+      int replacementLength)
+  {
+    CompletionProposal proposal = new CompletionProposal(
+        "<!--  -->",
+        replacementOffset,
+        replacementLength,
+        new Point(5, 0),
+        Images.getSharedImage("bullet_d.gif"),
+        "Insert comment",
+        null,
+        null);
+    proposal.setYOrder(99);
+    return proposal;
+  }
 }

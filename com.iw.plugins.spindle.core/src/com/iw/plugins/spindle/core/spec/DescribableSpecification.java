@@ -31,54 +31,57 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *  Specification types that can have description tags
+ * Specification types that can have description tags
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: DescribableSpecification.java,v 1.2 2004/05/17 02:31:49
+ *          glongman Exp $
  */
-public class DescribableSpecification extends BaseSpecification implements IPluginDescribable
+public class DescribableSpecification extends BaseSpecification
+    implements
+      IPluginDescribable
 {
 
-    /**
-       *  The locations and values of all description declarations in a spec.
-       *  Immutable after a parse/scan episode.
-       */
-    private List fDescriptionDeclarations;
+  /**
+   * The locations and values of all description declarations in a spec.
+   * Immutable after a parse/scan episode.
+   */
+  private List fDescriptionDeclarations;
 
-    private String fDescription;
+  private String fDescription;
 
-    /**
-     * @param type
-     */
-    public DescribableSpecification(int type)
-    {
-        super(type);
-    }
+  /**
+   * @param type
+   */
+  public DescribableSpecification(int type)
+  {
+    super(type);
+  }
 
-    public String getDescription()
-    {
-        return fDescription;
-    }
+  public String getDescription()
+  {
+    return fDescription;
+  }
 
-    public void setDescription(String description)
-    {
-        fDescription = description;
-     }
+  public void setDescription(String description)
+  {
+    fDescription = description;
+  }
 
-    public void addDescriptionDeclaration(PluginDescriptionDeclaration decl)
-    {
-        if (fDescriptionDeclarations == null)
-            fDescriptionDeclarations = new ArrayList();
+  public void addDescriptionDeclaration(PluginDescriptionDeclaration decl)
+  {
+    if (fDescriptionDeclarations == null)
+      fDescriptionDeclarations = new ArrayList();
 
-        fDescriptionDeclarations.add(decl);
-    }
+    fDescriptionDeclarations.add(decl);
+  }
 
-    public List getDescriptionDeclarations()
-    {
-        if (fDescriptionDeclarations == null)
-            return Collections.EMPTY_LIST;
+  public List getDescriptionDeclarations()
+  {
+    if (fDescriptionDeclarations == null)
+      return Collections.EMPTY_LIST;
 
-        return fDescriptionDeclarations;
-    }
+    return fDescriptionDeclarations;
+  }
 
 }

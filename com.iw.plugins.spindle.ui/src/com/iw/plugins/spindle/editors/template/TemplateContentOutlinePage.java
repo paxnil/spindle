@@ -63,382 +63,402 @@ import com.iw.plugins.spindle.ui.util.StringSorter;
 
 /**
  * @author glongman@intelligentworks.com
- * @version $Id$
- *
- * Copyright 2003, Intelligent Works Inc.
- * All Rights Reserved.
+ * @version $Id: TemplateContentOutlinePage.java,v 1.4 2003/11/09 21:24:43
+ *          glongman Exp $
+ * 
+ * Copyright 2003, Intelligent Works Inc. All Rights Reserved.
  */
-public class TemplateContentOutlinePage
-    extends ContentOutlinePage
-    implements IDocumentPartitioningListener, IDocumentListener
+public class TemplateContentOutlinePage extends ContentOutlinePage
+    implements
+      IDocumentPartitioningListener,
+      IDocumentListener
 {
 
-    IDocument fDocument;
-    TemplateEditor fEditor;
-    ContentProvider contentProvider = new ContentProvider();
-    ImplicitIdMatcher fMatcher = new ImplicitIdMatcher();
+  IDocument fDocument;
+  TemplateEditor fEditor;
+  ContentProvider contentProvider = new ContentProvider();
+  ImplicitIdMatcher fMatcher = new ImplicitIdMatcher();
 
-    protected TemplateContentOutlinePage(TemplateEditor editor)
+  protected TemplateContentOutlinePage(TemplateEditor editor)
+  {
+    super();
+    this.fEditor = editor;
+  }
+
+  public void setDocument(IDocument document)
+  {
+    this.fDocument = document;
+    document.addDocumentPartitioningListener(this);
+    document.addDocumentListener(this);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.ui.part.IPage#createControl(org.eclipse.swt.widgets.Composite)
+   */
+  public void createControl(Composite parent)
+  {
+    super.createControl(parent);
+    TreeViewer viewer = getTreeViewer();
+    viewer.setContentProvider(contentProvider);
+    viewer.setLabelProvider(new LabelProvider());
+    MenuManager popupMenuManager = new MenuManager();
+    IMenuListener listener = new IMenuListener()
     {
-        super();
-        this.fEditor = editor;
+      public void menuAboutToShow(IMenuManager mng)
+      {
+        fillContextMenu(mng);
+      }
+    };
+    Tree treeControl = (Tree) viewer.getControl();
+    popupMenuManager.setRemoveAllWhenShown(true);
+    popupMenuManager.addMenuListener(listener);
+    Menu menu = popupMenuManager.createContextMenu(treeControl);
+    treeControl.setMenu(menu);
+
+    registerToolbarActions();
+
+    viewer.setInput("Go!");
+  }
+
+  private void registerToolbarActions()
+  {
+    IToolBarManager toolBarManager = getSite().getActionBars().getToolBarManager();
+    if (toolBarManager != null)
+    {
+      Action action = new AlphabeticalSortingAction();
+      toolBarManager.add(action);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.IDocumentPartitioningListener#documentPartitioningChanged(org.eclipse.jface.text.IDocument)
+   */
+  public void documentPartitioningChanged(IDocument document)
+  {
+    if (getTreeViewer() != null)
+      getTreeViewer().setInput(new Long(System.currentTimeMillis()));
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+   */
+  public void selectionChanged(SelectionChangedEvent event)
+  {
+    IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+    if (selection.size() == 1)
+    {
+      try
+      {
+        ITypedRegion region = (ITypedRegion) selection.getFirstElement();
+        fireSelectionChanged(new StructuredSelection(new Object[]{findJWCID(region)}));
+      } catch (BadLocationException e)
+      {
+        //swallow it
+      }
+    }
+  }
+
+  private void fillContextMenu(IMenuManager manager)
+  {
+  }
+
+  private String getJWCID(ITypedRegion region)
+  {
+    try
+    {
+      Position p = findJWCID(region);
+      if (p == null)
+      {
+        return null;
+      }
+      return fDocument.get(p.getOffset(), p.getLength());
+    } catch (BadLocationException blex)
+    {
+      return "error";
+    }
+  }
+
+  private Position findJWCID(ITypedRegion region) throws BadLocationException
+  {
+    if (region == null)
+      return null;
+
+    if (!region.getType().equals(TemplatePartitionScanner.TAPESTRY_JWCID_ATTRIBUTE))
+      return null;
+
+    int start = region.getOffset() + 1;
+    int length = region.getLength() - 1;
+    String value = fDocument.get(start, length);
+    if (value.endsWith("\"") || value.endsWith("'"))
+      length -= 1;
+
+    return new Position(start, length);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
+   */
+  /**
+   * @see IDocumentListener#documentAboutToBeChanged(DocumentEvent)
+   */
+  public void documentAboutToBeChanged(DocumentEvent arg0)
+  {
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
+   */
+  /**
+   * @see IDocumentListener#documentChanged(DocumentEvent)
+   */
+  public void documentChanged(DocumentEvent event)
+  {
+    TreeViewer viewer = getTreeViewer();
+    if (viewer != null)
+    {
+      getTreeViewer().setInput(new Long(System.currentTimeMillis()));
+    }
+  }
+
+  protected class ContentProvider implements ITreeContentProvider
+  {
+
+    ArrayList contents = null;
+
+    public Object[] getChildren(Object element)
+    {
+      return null;
     }
 
-    public void setDocument(IDocument document)
+    public Object getParent(Object element)
     {
-        this.fDocument = document;
-        document.addDocumentPartitioningListener(this);
-        document.addDocumentListener(this);
+      return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.ui.part.IPage#createControl(org.eclipse.swt.widgets.Composite)
-     */
-    public void createControl(Composite parent)
+    public boolean hasChildren(Object element)
     {
-        super.createControl(parent);
-        TreeViewer viewer = getTreeViewer();
-        viewer.setContentProvider(contentProvider);
-        viewer.setLabelProvider(new LabelProvider());
-        MenuManager popupMenuManager = new MenuManager();
-        IMenuListener listener = new IMenuListener()
-        {
-            public void menuAboutToShow(IMenuManager mng)
-            {
-                fillContextMenu(mng);
-            }
-        };
-        Tree treeControl = (Tree) viewer.getControl();
-        popupMenuManager.setRemoveAllWhenShown(true);
-        popupMenuManager.addMenuListener(listener);
-        Menu menu = popupMenuManager.createContextMenu(treeControl);
-        treeControl.setMenu(menu);
-
-        registerToolbarActions();
-
-        viewer.setInput("Go!");
+      return false;
     }
 
-    private void registerToolbarActions()
+    public Object[] getElements(Object ignored)
     {
-        IToolBarManager toolBarManager = getSite().getActionBars().getToolBarManager();
-        if (toolBarManager != null)
-        {
-            Action action = new AlphabeticalSortingAction();
-            toolBarManager.add(action);
-        }
-    }
+      getTreeViewer().setSelection(StructuredSelection.EMPTY);
+      if (contents == null)
+        contents = new ArrayList();
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.IDocumentPartitioningListener#documentPartitioningChanged(org.eclipse.jface.text.IDocument)
-     */
-    public void documentPartitioningChanged(IDocument document)
-    {
-        if (getTreeViewer() != null)
-            getTreeViewer().setInput(new Long(System.currentTimeMillis()));
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-     */
-    public void selectionChanged(SelectionChangedEvent event)
-    {
-        IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-        if (selection.size() == 1)
-        {
-            try
-            {
-                ITypedRegion region = (ITypedRegion) selection.getFirstElement();
-                fireSelectionChanged(new StructuredSelection(new Object[] { findJWCID(region)}));
-            } catch (BadLocationException e)
-            {
-                //swallow it
-            }
-        }
-    }
-
-    private void fillContextMenu(IMenuManager manager)
-    {}
-
-    private String getJWCID(ITypedRegion region)
-    {
+      ArrayList oldContents = (ArrayList) contents.clone();
+      //TODO why the heck am I keeping the old contents?
+      ArrayList addedList = new ArrayList();
+      contents.clear();
+      if (fDocument != null)
+      {
+        ITypedRegion[] partitions = null;
         try
         {
-            Position p = findJWCID(region);
-            if (p == null)
-            {
-                return null;
-            }
-            return fDocument.get(p.getOffset(), p.getLength());
-        } catch (BadLocationException blex)
+          partitions = fDocument.computePartitioning(0, fDocument.getLength() - 1);
+        } catch (BadLocationException ex)
         {
-            return "error";
+          return new Object[]{"error occured scanning source"};
         }
+        for (int i = 0; i < partitions.length; i++)
+        {
+          oldContents.remove(partitions[i]);
+          try
+          {
+            if (findJWCID(partitions[i]) != null)
+            {
+              if (!oldContents.contains(partitions[i]))
+                addedList.add(partitions[i]);
+
+              contents.add(partitions[i]);
+            }
+          } catch (BadLocationException e)
+          {
+            //swallow it
+          }
+
+        }
+      }
+      return contents.toArray();
     }
 
-    private Position findJWCID(ITypedRegion region) throws BadLocationException
+    public void dispose()
     {
-        if (region == null)
-            return null;
-
-        if (!region.getType().equals(TemplatePartitionScanner.TAPESTRY_JWCID_ATTRIBUTE))
-            return null;
-
-        int start = region.getOffset() + 1;
-        int length = region.getLength() - 1;
-        String value = fDocument.get(start, length);
-        if (value.endsWith("\"") || value.endsWith("'"))
-            length -= 1;
-
-        return new Position(start, length);
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
-     */
+    public void inputChanged(Viewer arg0, Object oldSource, Object newSource)
+    {
+    }
+
+  }
+
+  protected class LabelProvider implements ILabelProvider
+  {
+    Image notCreatedImage = Images.getSharedImage("property16.gif");
+    Image jwcImage = Images.getSharedImage("component16.gif");
+
     /**
-     * @see IDocumentListener#documentAboutToBeChanged(DocumentEvent)
+     * @see ILabelProvider#getImage(Object)
      */
-    public void documentAboutToBeChanged(DocumentEvent arg0)
-    {}
+    public Image getImage(Object element)
+    {
+      String jwcid = null;
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
-     */
+      try
+      {
+        jwcid = getJWCID((ITypedRegion) element);
+      } catch (Exception e)
+      {}
+
+      if (jwcid != null)
+      {
+        IComponentSpecification component = (IComponentSpecification) fEditor
+            .getSpecification();
+
+        if (component != null)
+        {
+          if (component.getComponent(jwcid) != null || isImplicitComponent(jwcid))
+          {
+            return jwcImage;
+
+          }
+        }
+      }
+      return notCreatedImage;
+    }
+
+    private boolean isImplicitComponent(String jwcid)
+    {
+      return fMatcher.isMatch(jwcid) && fMatcher.getSimpleType() != null;
+    }
+
     /**
-     * @see IDocumentListener#documentChanged(DocumentEvent)
+     * @see ILabelProvider#getText(Object)
      */
-    public void documentChanged(DocumentEvent event)
+    public String getText(Object element)
     {
-        TreeViewer viewer = getTreeViewer();
-        if (viewer != null)
-        {
-            getTreeViewer().setInput(new Long(System.currentTimeMillis()));
-        }
+      if (element instanceof String)
+        return (String) element;
+
+      if (element instanceof ITypedRegion)
+        return getJWCID((ITypedRegion) element);
+
+      return null;
     }
 
-    protected class ContentProvider implements ITreeContentProvider
+    /**
+     * @see IBaseLabelProvider#addListener(ILabelProviderListener)
+     */
+    public void addListener(ILabelProviderListener arg0)
     {
-
-        ArrayList contents = null;
-
-        public Object[] getChildren(Object element)
-        {
-            return null;
-        }
-
-        public Object getParent(Object element)
-        {
-            return null;
-        }
-
-        public boolean hasChildren(Object element)
-        {
-            return false;
-        }
-
-        public Object[] getElements(Object ignored)
-        {
-            getTreeViewer().setSelection(StructuredSelection.EMPTY);
-            if (contents == null)
-                contents = new ArrayList();
-
-            ArrayList oldContents = (ArrayList) contents.clone();
-            //TODO why the heck am I keeping the old contents?
-            ArrayList addedList = new ArrayList();
-            contents.clear();
-            if (fDocument != null)
-            {
-                ITypedRegion[] partitions = null;
-                try
-                {
-                    partitions = fDocument.computePartitioning(0, fDocument.getLength() - 1);
-                } catch (BadLocationException ex)
-                {
-                    return new Object[] { "error occured scanning source" };
-                }
-                for (int i = 0; i < partitions.length; i++)
-                {
-                    oldContents.remove(partitions[i]);
-                    try
-                    {
-                        if (findJWCID(partitions[i]) != null)
-                        {
-                            if (!oldContents.contains(partitions[i]))
-                                addedList.add(partitions[i]);
-
-                            contents.add(partitions[i]);
-                        }
-                    } catch (BadLocationException e)
-                    {
-                        //swallow it
-                    }
-
-                }
-            }
-            return contents.toArray();
-        }
-
-        public void dispose()
-        {}
-
-        public void inputChanged(Viewer arg0, Object oldSource, Object newSource)
-        {}
-
     }
 
-    protected class LabelProvider implements ILabelProvider
+    /**
+     * @see IBaseLabelProvider#dispose()
+     */
+    public void dispose()
     {
-        Image notCreatedImage = Images.getSharedImage("property16.gif");
-        Image jwcImage = Images.getSharedImage("component16.gif");
-
-        /**
-        * @see ILabelProvider#getImage(Object)
-        */
-        public Image getImage(Object element)
-        {
-            String jwcid = null;
-
-            try
-            {
-                jwcid = getJWCID((ITypedRegion) element);
-            } catch (Exception e)
-            {}
-
-            if (jwcid != null)
-            {
-                IComponentSpecification component = (IComponentSpecification) fEditor.getSpecification();
-
-                if (component != null)
-                {
-                    if (component.getComponent(jwcid) != null || isImplicitComponent(jwcid))
-                    {
-                        return jwcImage;
-
-                    }
-                }
-            }
-            return notCreatedImage;
-        }
-
-        private boolean isImplicitComponent(String jwcid)
-        {
-            return fMatcher.isMatch(jwcid) && fMatcher.getSimpleType() != null;
-        }
-
-        /**
-         * @see ILabelProvider#getText(Object)
-         */
-        public String getText(Object element)
-        {
-            if (element instanceof String)
-                return (String) element;
-
-            if (element instanceof ITypedRegion)
-                return getJWCID((ITypedRegion) element);
-
-            return null;
-        }
-
-        /**
-         * @see IBaseLabelProvider#addListener(ILabelProviderListener)
-         */
-        public void addListener(ILabelProviderListener arg0)
-        {}
-
-        /**
-         * @see IBaseLabelProvider#dispose()
-         */
-        public void dispose()
-        {
-            //shared images are disposed by the Plugin
-        }
-
-        /**
-         * @see IBaseLabelProvider#isLabelProperty(Object, String)
-         */
-        public boolean isLabelProperty(Object arg0, String arg1)
-        {
-            return false;
-        }
-
-        /**
-         * @see IBaseLabelProvider#removeListener(ILabelProviderListener)
-         */
-        public void removeListener(ILabelProviderListener arg0)
-        {}
-
+      //shared images are disposed by the Plugin
     }
 
-    protected class AlphabeticalSorter extends StringSorter
+    /**
+     * @see IBaseLabelProvider#isLabelProperty(Object, String)
+     */
+    public boolean isLabelProperty(Object arg0, String arg1)
     {
-
-        protected AlphabeticalSorter()
-        {
-            super();
-        }
-
-        public int compare(Viewer viewer, Object e1, Object e2)
-        {
-            LabelProvider provider = (LabelProvider) getTreeViewer().getLabelProvider();
-
-            String s1 = stripDollars(provider.getText(e1));
-            String s2 = stripDollars(provider.getText(e2));
-
-            return super.compare(viewer, s1, s2);
-        }
-
-        private String stripDollars(String string)
-        {
-            string = string.trim();
-
-            if (string.indexOf("$") >= 0)
-            {
-                if (string.startsWith("$"))
-                {
-                    string = string.substring(1);
-                }
-                if (string.endsWith("$"))
-                {
-                    string = string.substring(0, string.length() - 2);
-                }
-            }
-            return string;
-
-        }
+      return false;
     }
 
-    class AlphabeticalSortingAction extends Action
+    /**
+     * @see IBaseLabelProvider#removeListener(ILabelProviderListener)
+     */
+    public void removeListener(ILabelProviderListener arg0)
     {
-        private AlphabeticalSorter alphaSorter = new AlphabeticalSorter();
-        public AlphabeticalSortingAction()
+    }
+
+  }
+
+  protected class AlphabeticalSorter extends StringSorter
+  {
+
+    protected AlphabeticalSorter()
+    {
+      super();
+    }
+
+    public int compare(Viewer viewer, Object e1, Object e2)
+    {
+      LabelProvider provider = (LabelProvider) getTreeViewer().getLabelProvider();
+
+      String s1 = stripDollars(provider.getText(e1));
+      String s2 = stripDollars(provider.getText(e2));
+
+      return super.compare(viewer, s1, s2);
+    }
+
+    private String stripDollars(String string)
+    {
+      string = string.trim();
+
+      if (string.indexOf("$") >= 0)
+      {
+        if (string.startsWith("$"))
         {
-            super();
-            setText(UIPlugin.getString("template-content-outline-sort"));
-            setToolTipText(UIPlugin.getString("template-content-outline-sort-toggle"));
-            setImageDescriptor(Images.getImageDescriptor("alphab_sort_co.gif"));
-
-            IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
-
-            boolean checked = store.getBoolean("AlphabeticalSorting.isChecked");
-            valueChanged(checked, false);
+          string = string.substring(1);
         }
-
-        public void run()
+        if (string.endsWith("$"))
         {
-            valueChanged(isChecked(), true);
+          string = string.substring(0, string.length() - 2);
         }
+      }
+      return string;
 
-        private void valueChanged(boolean on, boolean store)
-        {
-            setChecked(on);
-            TreeViewer viewer = getTreeViewer();
-            viewer.setSorter(on ? alphaSorter : null);
-            documentChanged(null);
+    }
+  }
 
-            if (store)
-                UIPlugin.getDefault().getPreferenceStore().setValue("AlphabeticalSorting.isChecked", on);
-        }
-    };
+  class AlphabeticalSortingAction extends Action
+  {
+    private AlphabeticalSorter alphaSorter = new AlphabeticalSorter();
+    public AlphabeticalSortingAction()
+    {
+      super();
+      setText(UIPlugin.getString("template-content-outline-sort"));
+      setToolTipText(UIPlugin.getString("template-content-outline-sort-toggle"));
+      setImageDescriptor(Images.getImageDescriptor("alphab_sort_co.gif"));
+
+      IPreferenceStore store = UIPlugin.getDefault().getPreferenceStore();
+
+      boolean checked = store.getBoolean("AlphabeticalSorting.isChecked");
+      valueChanged(checked, false);
+    }
+
+    public void run()
+    {
+      valueChanged(isChecked(), true);
+    }
+
+    private void valueChanged(boolean on, boolean store)
+    {
+      setChecked(on);
+      TreeViewer viewer = getTreeViewer();
+      viewer.setSorter(on ? alphaSorter : null);
+      documentChanged(null);
+
+      if (store)
+        UIPlugin.getDefault().getPreferenceStore().setValue(
+            "AlphabeticalSorting.isChecked",
+            on);
+    }
+  };
 
 }

@@ -38,130 +38,145 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
- *  Spindle aware concrete implementation of IPropertySpecification
+ * Spindle aware concrete implementation of IPropertySpecification
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginPropertySpecification.java,v 1.5 2004/05/17 02:31:49
+ *          glongman Exp $
  */
-public class PluginPropertySpecification extends DescribableSpecification implements IPropertySpecification
+public class PluginPropertySpecification extends DescribableSpecification
+    implements
+      IPropertySpecification
 {
 
-    private String fName;
-    private String fType = "java.lang.Object";
-    private boolean fPersistent;
-    private String fInitialValue;
+  private String fName;
+  private String fType = "java.lang.Object";
+  private boolean fPersistent;
+  private String fInitialValue;
 
-    public PluginPropertySpecification()
+  public PluginPropertySpecification()
+  {
+    super(BaseSpecification.PROPERTY_SPEC);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IPropertySpecification#getInitialValue()
+   */
+  public String getInitialValue()
+  {
+    return fInitialValue;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IPropertySpecification#getName()
+   */
+  public String getName()
+  {
+    return fName;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IPropertySpecification#isPersistent()
+   */
+  public boolean isPersistent()
+  {
+    return fPersistent;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IPropertySpecification#getType()
+   */
+  public String getType()
+  {
+    return fType;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IPropertySpecification#setInitialValue(java.lang.String)
+   */
+  public void setInitialValue(String initialValue)
+  {
+    fInitialValue = initialValue;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IPropertySpecification#setName(java.lang.String)
+   */
+  public void setName(String name)
+  {
+    fName = name;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IPropertySpecification#setPersistent(boolean)
+   */
+  public void setPersistent(boolean persistant)
+  {
+    fPersistent = persistant;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.apache.tapestry.spec.IPropertySpecification#setType(java.lang.String)
+   */
+  public void setType(String type)
+  {
+    fType = type;
+  }
+
+  public void validate(Object parent, IScannerValidator validator)
+  {
+
+    IComponentSpecification component = (IComponentSpecification) parent;
+
+    ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+    if ("java.lang.Object".equals(fType))
+      return;
+
+    try
     {
-        super(BaseSpecification.PROPERTY_SPEC);
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IPropertySpecification#getInitialValue()
-     */
-    public String getInitialValue()
-    {
-        return fInitialValue;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IPropertySpecification#getName()
-     */
-    public String getName()
-    {
-        return fName;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IPropertySpecification#isPersistent()
-     */
-    public boolean isPersistent()
-    {
-        return fPersistent;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IPropertySpecification#getType()
-     */
-    public String getType()
-    {
-        return fType;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IPropertySpecification#setInitialValue(java.lang.String)
-     */
-    public void setInitialValue(String initialValue)
-    {
-        fInitialValue = initialValue;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IPropertySpecification#setName(java.lang.String)
-     */
-    public void setName(String name)
-    {
-        fName = name;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IPropertySpecification#setPersistent(boolean)
-     */
-    public void setPersistent(boolean persistant)
-    {
-        fPersistent = persistant;
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.tapestry.spec.IPropertySpecification#setType(java.lang.String)
-     */
-    public void setType(String type)
-    {
-        fType = type;
-    }
-
-    public void validate(Object parent, IScannerValidator validator)
-    {
-
-        IComponentSpecification component = (IComponentSpecification) parent;
-
-        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-        if ("java.lang.Object".equals(fType))
-            return;
-
-        try
+      if (!SpecificationScanner.TYPE_LIST.contains(fType))
+      {
+        if (fType.endsWith("[]"))
         {
-            if (!SpecificationScanner.TYPE_LIST.contains(fType))
-            {
-                if (fType.endsWith("[]"))
-                {
-                    String fixedType = fType.substring(0, fType.length() - 2);
-                    while (fixedType.endsWith("[]"))
-                    {
-                        fixedType = fixedType.substring(0, fixedType.length() - 2);
-                    }
-                    validator.validateTypeName(
-                        (IResourceWorkspaceLocation) component.getSpecificationLocation(),
-                        fixedType,
-                        IProblem.ERROR,
-                        sourceInfo.getAttributeSourceLocation("type"));
+          String fixedType = fType.substring(0, fType.length() - 2);
+          while (fixedType.endsWith("[]"))
+          {
+            fixedType = fixedType.substring(0, fixedType.length() - 2);
+          }
+          validator.validateTypeName((IResourceWorkspaceLocation) component
+              .getSpecificationLocation(), fixedType, IProblem.ERROR, sourceInfo
+              .getAttributeSourceLocation("type"));
 
-                } else
-                {
-
-                    validator.validateTypeName(
-                        (IResourceWorkspaceLocation) component.getSpecificationLocation(),
-                        fType,
-                        IProblem.ERROR,
-                        sourceInfo.getAttributeSourceLocation("type"));
-                }
-            }
-        } catch (ScannerException e)
+        } else
         {
-            TapestryCore.log(e);
-            e.printStackTrace();
+
+          validator.validateTypeName((IResourceWorkspaceLocation) component
+              .getSpecificationLocation(), fType, IProblem.ERROR, sourceInfo
+              .getAttributeSourceLocation("type"));
         }
+      }
+    } catch (ScannerException e)
+    {
+      TapestryCore.log(e);
+      e.printStackTrace();
     }
+  }
 
 }

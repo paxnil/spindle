@@ -74,7 +74,8 @@ import com.iw.plugins.spindle.ui.wizards.fields.TapestryProjectDialogField;
  * component classes!
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: TypeChooseWizardPage.java,v 1.2 2004/06/10 15:50:47 glongman
+ *          Exp $
  */
 public class TypeChooseWizardPage extends NewTypeWizardPage
 {
@@ -170,9 +171,9 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
 
     fNewClass = new RadioField(UIPlugin.getString(NEWCLASS));
     //    fNewClass.addListener(listener);
-    
-    setImageDescriptor(ImageDescriptor.createFromURL(Images
-        .getImageURL(UIPlugin.getString(PAGE_NAME+".image"))));
+
+    setImageDescriptor(ImageDescriptor.createFromURL(Images.getImageURL(UIPlugin
+        .getString(PAGE_NAME + ".image"))));
 
     setDescription(UIPlugin.getString(PAGE_NAME + ".description"));
 

@@ -40,7 +40,7 @@ import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.ui.util.WrappedImageDescriptor;
 
 /**
- *  TODO Add Type comment
+ * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -48,149 +48,150 @@ import com.iw.plugins.spindle.ui.util.WrappedImageDescriptor;
 public abstract class BaseJumpAction extends BaseEditorAction
 {
 
-    static protected ILabelProvider LABEL_PROVIDER = new LabelProvider();
+  static protected ILabelProvider LABEL_PROVIDER = new LabelProvider();
 
-    static private class LabelProvider implements ILabelProvider
+  static private class LabelProvider implements ILabelProvider
+  {
+    ILabelProvider javaElementProvider;
+    public LabelProvider()
     {
-        ILabelProvider javaElementProvider;
-        public LabelProvider()
-        {
-            super();
-            javaElementProvider =
-                new JavaElementLabelProvider(
-                    JavaElementLabelProvider.SHOW_DEFAULT
-                        | JavaElementLabelProvider.SHOW_QUALIFIED
-                        | JavaElementLabelProvider.SHOW_ROOT);
-        }
-
-        public Image getImage(Object element)
-        {
-            if (element instanceof IJavaElement)
-            {
-                return javaElementProvider.getImage(element);
-            } else
-            {
-                return null;
-            }
-        }
-
-        public String getText(Object element)
-        {
-            if (element instanceof IJavaElement)
-            {
-                return javaElementProvider.getText(element);
-            } else
-            {
-                return null;
-            }
-        }
-
-        public void addListener(ILabelProviderListener listener)
-        {}
-
-        public void dispose()
-        {
-            javaElementProvider.dispose();
-        }
-
-        public boolean isLabelProperty(Object element, String property)
-        {
-            return false;
-        }
-
-        public void removeListener(ILabelProviderListener listener)
-        {}
+      super();
+      javaElementProvider = new JavaElementLabelProvider(
+          JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_QUALIFIED
+              | JavaElementLabelProvider.SHOW_ROOT);
     }
 
-   
-    private XMLDocumentPartitioner fPartitioner = null;
-    protected IDocument fDocument = null;
-    /**
-     * 
-     */
-    public BaseJumpAction()
+    public Image getImage(Object element)
     {
-        super();
+      if (element instanceof IJavaElement)
+      {
+        return javaElementProvider.getImage(element);
+      } else
+      {
+        return null;
+      }
     }
 
-    /**
-     * @param text
-     */
-    public BaseJumpAction(String text)
+    public String getText(Object element)
     {
-        super(text);
+      if (element instanceof IJavaElement)
+      {
+        return javaElementProvider.getText(element);
+      } else
+      {
+        return null;
+      }
     }
 
-    /**
-     * @param text
-     * @param image
-     */
-    public BaseJumpAction(String text, ImageDescriptor image)
+    public void addListener(ILabelProviderListener listener)
     {
-        super(text, image);
     }
 
-    /**
-     * @param text
-     * @param style
-     */
-    public BaseJumpAction(String text, int style)
+    public void dispose()
     {
-        super(text, style);
+      javaElementProvider.dispose();
     }
 
-    public void run()
+    public boolean isLabelProperty(Object element, String property)
     {
-        super.run();
-        try
-        {
-            doRun();
-        } catch (RuntimeException e)
-        {
-            UIPlugin.log(e);
-        } finally
-        {
-            detachPartitioner();
-        }
+      return false;
     }
 
-    protected void detachPartitioner()
+    public void removeListener(ILabelProviderListener listener)
     {
-        try
-        {
-            if (fPartitioner != null)
-                fPartitioner.disconnect();
-        } catch (RuntimeException e1)
-        {
-            UIPlugin.log(e1);
-        } finally
-        {
-            fPartitioner = null;
-            fDocument = null;
-        }
     }
+  }
 
-    protected abstract void doRun();
+  private XMLDocumentPartitioner fPartitioner = null;
+  protected IDocument fDocument = null;
+  /**
+   *  
+   */
+  public BaseJumpAction()
+  {
+    super();
+  }
 
-    protected void attachPartitioner()
+  /**
+   * @param text
+   */
+  public BaseJumpAction(String text)
+  {
+    super(text);
+  }
+
+  /**
+   * @param text
+   * @param image
+   */
+  public BaseJumpAction(String text, ImageDescriptor image)
+  {
+    super(text, image);
+  }
+
+  /**
+   * @param text
+   * @param style
+   */
+  public BaseJumpAction(String text, int style)
+  {
+    super(text, style);
+  }
+
+  public void run()
+  {
+    super.run();
+    try
     {
-        Assert.isTrue(fPartitioner == null);
-        fPartitioner =
-            new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER, XMLDocumentPartitioner.TYPES);
-        fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-        fPartitioner.connect(fDocument);
-    }
-
-    protected IDocument getDocument()
+      doRun();
+    } catch (RuntimeException e)
     {
-        Assert.isTrue(fDocument != null);
-        return fDocument;
+      UIPlugin.log(e);
+    } finally
+    {
+      detachPartitioner();
     }
-    
-    protected ImageDescriptor getImageDescriptorFor(Image image) {
-        if (image == null)
-            return null;
-        return new WrappedImageDescriptor(image);
+  }
+
+  protected void detachPartitioner()
+  {
+    try
+    {
+      if (fPartitioner != null)
+        fPartitioner.disconnect();
+    } catch (RuntimeException e1)
+    {
+      UIPlugin.log(e1);
+    } finally
+    {
+      fPartitioner = null;
+      fDocument = null;
     }
+  }
+
+  protected abstract void doRun();
+
+  protected void attachPartitioner()
+  {
+    Assert.isTrue(fPartitioner == null);
+    fPartitioner = new XMLDocumentPartitioner(
+        XMLDocumentPartitioner.SCANNER,
+        XMLDocumentPartitioner.TYPES);
+    fDocument = fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+    fPartitioner.connect(fDocument);
+  }
+
+  protected IDocument getDocument()
+  {
+    Assert.isTrue(fDocument != null);
+    return fDocument;
+  }
+
+  protected ImageDescriptor getImageDescriptorFor(Image image)
+  {
+    if (image == null)
+      return null;
+    return new WrappedImageDescriptor(image);
+  }
 
 }

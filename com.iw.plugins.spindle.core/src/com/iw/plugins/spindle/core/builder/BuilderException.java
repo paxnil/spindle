@@ -34,23 +34,23 @@ package com.iw.plugins.spindle.core.builder;
 public class BuilderException extends RuntimeException
 {
 
-    public BuilderException()
-    {
-        super();
-    }
+  public BuilderException()
+  {
+    super();
+  }
 
-    public BuilderException(String arg0)
-    {
-        super(arg0);
-    }
+  public BuilderException(String arg0)
+  {
+    super(arg0);
+  }
 
-    public BuilderException(String arg0, Throwable arg1)
-    {
-        super(arg0, arg1);
-    }
+  public BuilderException(String arg0, Throwable arg1)
+  {
+    super(arg0, arg1);
+  }
 
-    public BuilderException(Throwable arg0)
-    {
-        super(arg0);
-    }
+  public BuilderException(Throwable arg0)
+  {
+    super(arg0);
+  }
 }

@@ -23,7 +23,7 @@
  *  glongman@intelligentworks.com
  *
  * ***** END LICENSE BLOCK ***** */
- package com.iw.plugins.spindle.ui.dialogfields;
+package com.iw.plugins.spindle.ui.dialogfields;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -39,23 +39,25 @@ import org.eclipse.swt.widgets.Text;
 /**
  * @author GWL
  * @version 
- *
- * Copyright 2002, Intelligent Works Incoporated
- * All Rights Reserved
+ * Copyright 2002, Intelligent Works Incoporated All Rights Reserved
  */
-public class StringField extends DialogField {
+public class StringField extends DialogField
+{
 
   private Text textControl;
 
-  public StringField(String label) {
+  public StringField(String label)
+  {
     super(label);
   }
 
-  public StringField(String label, int labelWidth) {
+  public StringField(String label, int labelWidth)
+  {
     super(label, labelWidth);
   }
 
-  public Control getControl(Composite parent) {
+  public Control getControl(Composite parent)
+  {
 
     Composite container = new Composite(parent, SWT.NULL);
     FormLayout layout = new FormLayout();
@@ -78,14 +80,18 @@ public class StringField extends DialogField {
     return container;
   }
 
-  public Text getTextControl(Composite parent) {
-    if (textControl == null) {
+  public Text getTextControl(Composite parent)
+  {
+    if (textControl == null)
+    {
       final DialogField field = this;
       textControl = new Text(parent, SWT.BORDER);
       textControl.setFont(parent.getFont());
-      textControl.addModifyListener(new ModifyListener() {
+      textControl.addModifyListener(new ModifyListener()
+      {
 
-        public void modifyText(ModifyEvent e) {
+        public void modifyText(ModifyEvent e)
+        {
           fireDialogFieldChanged(field);
         }
 
@@ -95,40 +101,49 @@ public class StringField extends DialogField {
     return textControl;
   }
 
-  public void setTextValue(String value) {
+  public void setTextValue(String value)
+  {
     setTextValue(value, true);
   }
 
-  public void setTextValue(String value, boolean update) {
-    if (textControl != null && !textControl.isDisposed()) {
+  public void setTextValue(String value, boolean update)
+  {
+    if (textControl != null && !textControl.isDisposed())
+    {
       textControl.setText(value);
-      if (update) {
+      if (update)
+      {
         fireDialogFieldChanged(this);
       }
     }
   }
 
-  public String getTextValue() {
-    if (textControl != null && !textControl.isDisposed()) {
+  public String getTextValue()
+  {
+    if (textControl != null && !textControl.isDisposed())
+    {
       return textControl.getText();
     }
     return null;
   }
 
-  public void setEnabled(boolean flag) {
-    if (textControl != null && !textControl.isDisposed()) {
+  public void setEnabled(boolean flag)
+  {
+    if (textControl != null && !textControl.isDisposed())
+    {
       textControl.setEnabled(flag);
     }
     super.setEnabled(flag);
   }
 
-  public boolean setFocus() {
-    if (textControl != null && !textControl.isDisposed()) {
+  public boolean setFocus()
+  {
+    if (textControl != null && !textControl.isDisposed())
+    {
       textControl.setFocus();
       textControl.selectAll();
     }
     return true;
   }
-  	
 
 }

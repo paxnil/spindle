@@ -70,7 +70,11 @@ import com.iw.plugins.spindle.core.util.Files;
  * @version $Id$
  * @author glongman@intelligentworks.com
  */
-public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProblemCollector
+public class Parser
+    implements
+      ISourceLocationResolver,
+      XMLErrorHandler,
+      IProblemCollector
 {
 
   private boolean fUsePullParser = false;
@@ -109,7 +113,8 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
   public void setDoValidation(boolean flag)
   {
     if (fDomParser != null || fPullParser != null)
-      throw new IllegalStateException("can only set validation flag before the first parse!");
+      throw new IllegalStateException(
+          "can only set validation flag before the first parse!");
 
     fDoValidation = flag;
   }
@@ -154,11 +159,18 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
       fPullParser.setSourceResolver(this);
       fPullParseConfiguration.setDocumentHandler(fPullParser);
       fPullParseConfiguration.setErrorHandler(this);
-      fPullParseConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
-      fPullParseConfiguration.setFeature("http://xml.org/sax/features/validation", fDoValidation);
-      fPullParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
+      fPullParseConfiguration.setFeature(
+          "http://apache.org/xml/features/continue-after-fatal-error",
+          false);
+      fPullParseConfiguration.setFeature(
+          "http://xml.org/sax/features/validation",
+          fDoValidation);
+      fPullParseConfiguration.setFeature(
+          "http://intelligentworks.com/xml/features/augmentations-location",
+          true);
       if (fDoValidation)
-        fPullParseConfiguration.setProperty("http://apache.org/xml/properties/internal/grammar-pool",
+        fPullParseConfiguration.setProperty(
+            "http://apache.org/xml/properties/internal/grammar-pool",
             TapestryDOMParserConfiguration.GRAMMAR_POOL);
 
     }
@@ -170,21 +182,33 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     if (fDomParser == null)
     {
 
-      fDomParseConfiguration = new TapestryDOMParserConfiguration(TapestryDOMParserConfiguration.GRAMMAR_POOL);
+      fDomParseConfiguration = new TapestryDOMParserConfiguration(
+          TapestryDOMParserConfiguration.GRAMMAR_POOL);
 
       fDomParser = new TapestryDOMParser(fDomParseConfiguration);
-      fDomParseConfiguration.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-      fDomParseConfiguration.setFeature("http://apache.org/xml/features/continue-after-fatal-error", false);
-      fDomParseConfiguration.setFeature("http://apache.org/xml/features/dom/include-ignorable-whitespace", false);
-      fDomParseConfiguration.setFeature("http://xml.org/sax/features/validation", fDoValidation);
-      fDomParseConfiguration.setFeature("http://intelligentworks.com/xml/features/augmentations-location", true);
+      fDomParseConfiguration.setFeature(
+          "http://apache.org/xml/features/dom/defer-node-expansion",
+          false);
+      fDomParseConfiguration.setFeature(
+          "http://apache.org/xml/features/continue-after-fatal-error",
+          false);
+      fDomParseConfiguration.setFeature(
+          "http://apache.org/xml/features/dom/include-ignorable-whitespace",
+          false);
+      fDomParseConfiguration.setFeature(
+          "http://xml.org/sax/features/validation",
+          fDoValidation);
+      fDomParseConfiguration.setFeature(
+          "http://intelligentworks.com/xml/features/augmentations-location",
+          true);
       fDomParser.setSourceResolver(this);
       fDomParseConfiguration.setDocumentHandler(fDomParser);
       fDomParseConfiguration.setErrorHandler(this);
     }
   }
 
-  public DocumentImpl parse(IStorage storage, String encoding) throws IOException, CoreException
+  public DocumentImpl parse(IStorage storage, String encoding) throws IOException,
+      CoreException
   {
 
     return parse(storage.getContents(), encoding);
@@ -281,7 +305,8 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
 
   public DocumentImpl getParsedDocument()
   {
-    Assert.isTrue(!fUsePullParser, "can't get the document as we are using pull parsing!");
+    Assert
+        .isTrue(!fUsePullParser, "can't get the document as we are using pull parsing!");
     return fXmlDocument;
   }
 
@@ -304,7 +329,10 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     return getColumnOffset(parserReportedLineNumber, parserReportedColumn, (char) 0);
   }
 
-  public int getColumnOffset(int parserReportedLineNumber, int parserReportedColumn, char expected)
+  public int getColumnOffset(
+      int parserReportedLineNumber,
+      int parserReportedColumn,
+      char expected)
   {
     int result = getLineOffset(parserReportedLineNumber);
     int lineCount = fEclipseDocument.getNumberOfLines();
@@ -318,7 +346,8 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
       {
         try
         {
-          int lastCharOnLine = result + fEclipseDocument.getLineLength(parserReportedLineNumber - 1);
+          int lastCharOnLine = result
+              + fEclipseDocument.getLineLength(parserReportedLineNumber - 1);
           result = Math.min(lastCharOnLine, result + parserReportedColumn - 1);
           result = Math.min(result, totalLength - 1);
           char c;
@@ -357,7 +386,9 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
    * 
    * @see com.iw.plugins.spindle.core.source.ISourceLocationResolver#getTagNameLocation(com.iw.plugins.spindle.core.source.ISourceLocation)
    */
-  public ISourceLocation getTagNameLocation(String elementName, ISourceLocation elementStartLocation)
+  public ISourceLocation getTagNameLocation(
+      String elementName,
+      ISourceLocation elementStartLocation)
   {
     int offset = -1;
     int line = -1;
@@ -365,7 +396,13 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     try
     {
       FindReplaceDocumentAdapter finder = new FindReplaceDocumentAdapter(fEclipseDocument);
-      IRegion region = finder.find(elementStartLocation.getCharStart(), elementName, true, false, true, false);
+      IRegion region = finder.find(
+          elementStartLocation.getCharStart(),
+          elementName,
+          true,
+          false,
+          true,
+          false);
       if (region != null)
       {
         offset = region.getOffset();
@@ -401,28 +438,45 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     }
   }
 
-  public void addProblem(int severity, ISourceLocation location, String message, boolean isTemporary)
+  public void addProblem(
+      int severity,
+      ISourceLocation location,
+      String message,
+      boolean isTemporary)
   {
-    addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity, message, location.getLineNumber(), location
-        .getCharStart(), location.getCharEnd(), isTemporary));
+    addProblem(new DefaultProblem(
+        ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+        severity,
+        message,
+        location.getLineNumber(),
+        location.getCharStart(),
+        location.getCharEnd(),
+        isTemporary));
   }
 
   public IProblem[] getProblems()
   {
     if (fCollectedProblems != null && !fCollectedProblems.isEmpty())
-      return (IProblem[]) fCollectedProblems.toArray(new IProblem[fCollectedProblems.size()]);
+      return (IProblem[]) fCollectedProblems.toArray(new IProblem[fCollectedProblems
+          .size()]);
 
     return new IProblem[0];
   }
 
   private IProblem createFatalProblem(XMLParseException parseException, int severity)
   {
-    return createParserProblem(ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER, parseException, severity);
+    return createParserProblem(
+        ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER,
+        parseException,
+        severity);
   }
 
   private IProblem createErrorProblem(XMLParseException parseException, int severity)
   {
-    return createParserProblem(ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER, parseException, severity);
+    return createParserProblem(
+        ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER,
+        parseException,
+        severity);
   }
 
   private IProblem createParserProblem(String type, XMLParseException ex, int severity)
@@ -435,13 +489,22 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     try
     {
       charStart = fEclipseDocument.getLineOffset(lineNumber);
-      charEnd = Math.max(charStart, charStart + fEclipseDocument.getLineLength(lineNumber) - 1);
+      charEnd = Math.max(charStart, charStart
+          + fEclipseDocument.getLineLength(lineNumber) - 1);
     } catch (BadLocationException e)
     {
-      TapestryCore.log("exception line:" + ex.getLineNumber() + "document line count:" + fEclipseDocument.getNumberOfLines(), e);
+      TapestryCore.log("exception line:" + ex.getLineNumber() + "document line count:"
+          + fEclipseDocument.getNumberOfLines(), e);
     }
 
-    return new DefaultProblem(type, severity, ex.getMessage(), lineNumber, charStart, charEnd, false);
+    return new DefaultProblem(
+        type,
+        severity,
+        ex.getMessage(),
+        lineNumber,
+        charStart,
+        charEnd,
+        false);
   }
 
   //*** XMLErrorHandler for DOM && PULL Parsing **

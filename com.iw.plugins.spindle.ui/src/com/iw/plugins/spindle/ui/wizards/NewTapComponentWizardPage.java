@@ -121,8 +121,8 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     GENERATE_HTML = PAGE_NAME + ".generateHTML";
     OPEN_ALL = PAGE_NAME + ".openAll";
 
-    this.setImageDescriptor(ImageDescriptor.createFromURL(Images
-        .getImageURL(UIPlugin.getString(PAGE_NAME+".image"))));
+    this.setImageDescriptor(ImageDescriptor.createFromURL(Images.getImageURL(UIPlugin
+        .getString(PAGE_NAME + ".image"))));
 
     this.setDescription(UIPlugin.getString(PAGE_NAME + ".description"));
 
@@ -166,7 +166,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     {
       fComponentNameDialogField.setTextValue("");
     }
-//    fComponentNameDialogField.init(null);
+    //    fComponentNameDialogField.init(null);
     fNamespaceDialogField.init(
         fTapestryProjectDialogField,
         fComponentNameDialogField,

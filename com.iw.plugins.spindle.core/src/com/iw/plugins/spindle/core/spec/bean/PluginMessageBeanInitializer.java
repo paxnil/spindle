@@ -29,27 +29,28 @@ package com.iw.plugins.spindle.core.spec.bean;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 
 /**
- *  Spindle implementation of a StringBeanInitializer
+ * Spindle implementation of a StringBeanInitializer
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: PluginMessageBeanInitializer.java,v 1.2 2004/05/17 02:31:48
+ *          glongman Exp $
  */
 public class PluginMessageBeanInitializer extends AbstractPluginBeanInitializer
 {
 
-    public PluginMessageBeanInitializer()
-    {
-        super(BaseSpecification.STRING_BEAN_INIT);
-    }
+  public PluginMessageBeanInitializer()
+  {
+    super(BaseSpecification.STRING_BEAN_INIT);
+  }
 
-    public String getKey()
-    {
-        return getValue();
-    }
+  public String getKey()
+  {
+    return getValue();
+  }
 
-    public void setKey(String value)
-    {
-        setValue(value);
-    }
+  public void setKey(String value)
+  {
+    setValue(value);
+  }
 
 }

@@ -1,30 +1,26 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
- *
+/*******************************************************************************
+ * ***** BEGIN LICENSE BLOCK Version: MPL 1.1
+ * 
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
+ * 1.1 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at http://www.mozilla.org/MPL/
+ * 
  * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+ * the specific language governing rights and limitations under the License.
+ * 
  * The Original Code is Spindle, an Eclipse Plugin for Tapestry.
- *
- * The Initial Developer of the Original Code is
- * Intelligent Works Incorporated.
- * Portions created by the Initial Developer are Copyright (C) 2003
- * the Initial Developer. All Rights Reserved.
- *
+ * 
+ * The Initial Developer of the Original Code is Intelligent Works Incorporated.
+ * Portions created by the Initial Developer are Copyright (C) 2003 the Initial
+ * Developer. All Rights Reserved.
+ * 
  * Contributor(s):
  * 
- *  glongman@intelligentworks.com
- *
- * ***** END LICENSE BLOCK ***** */
-
-
+ * glongman@intelligentworks.com
+ * 
+ * ***** END LICENSE BLOCK *****
+ */
 
 package com.iw.plugins.spindle.ui.widgets;
 
@@ -39,7 +35,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
 
-public abstract class SectionWidget implements IPropertyChangeListener {
+public abstract class SectionWidget implements IPropertyChangeListener
+{
   private String headerText;
   private Control client;
   protected Label header;
@@ -53,11 +50,13 @@ public abstract class SectionWidget implements IPropertyChangeListener {
   private int heightHint = SWT.DEFAULT;
   private Composite control;
 
-  class SectionLayout extends Layout {
+  class SectionLayout extends Layout
+  {
     int vspacing = 3;
     int sepHeight = 2;
 
-    protected Point computeSize(Composite parent, int wHint, int hHint, boolean flush) {
+    protected Point computeSize(Composite parent, int wHint, int hHint, boolean flush)
+    {
       int width = 0;
       int height = 0;
       int cwidth = 0;
@@ -70,9 +69,11 @@ public abstract class SectionWidget implements IPropertyChangeListener {
 
       cwidth = width;
 
-      if (client != null) {
+      if (client != null)
+      {
         Point csize = client.computeSize(SWT.DEFAULT, SWT.DEFAULT, flush);
-        if (width == 0) {
+        if (width == 0)
+        {
           width = csize.x;
           cwidth = width;
         }
@@ -82,7 +83,8 @@ public abstract class SectionWidget implements IPropertyChangeListener {
 
       Point toggleSize = null;
 
-      if (hHint == SWT.DEFAULT && headerPainted && header != null) {
+      if (hHint == SWT.DEFAULT && headerPainted && header != null)
+      {
         int hwidth = cwidth;
         if (toggleSize != null)
           hwidth = cwidth - toggleSize.x - 5;
@@ -92,25 +94,29 @@ public abstract class SectionWidget implements IPropertyChangeListener {
         height += vspacing;
       }
 
-      if (hHint == SWT.DEFAULT && addSeparator) {
+      if (hHint == SWT.DEFAULT && addSeparator)
+      {
         height += sepHeight;
         height += vspacing;
         collapsedHeight += vspacing + sepHeight;
       }
-      if (hHint == SWT.DEFAULT && descriptionPainted && descriptionLabel != null) {
+      if (hHint == SWT.DEFAULT && descriptionPainted && descriptionLabel != null)
+      {
         Point dsize = descriptionLabel.computeSize(cwidth, SWT.DEFAULT, flush);
         height += dsize.y;
         height += vspacing;
       }
       return new Point(width, height);
     }
-    protected void layout(Composite parent, boolean flush) {
+    protected void layout(Composite parent, boolean flush)
+    {
       int width = parent.getClientArea().width;
       int height = parent.getClientArea().height;
       int y = 0;
       Point toggleSize = null;
 
-      if (headerPainted && header != null) {
+      if (headerPainted && header != null)
+      {
         Point hsize;
 
         int availableWidth = width;
@@ -122,40 +128,47 @@ public abstract class SectionWidget implements IPropertyChangeListener {
 
         y += hsize.y + vspacing;
       }
-      if (addSeparator && separator != null) {
+      if (addSeparator && separator != null)
+      {
         separator.setBounds(0, y, width, 2);
         y += sepHeight + vspacing;
       }
-      if (descriptionPainted && descriptionLabel != null) {
+      if (descriptionPainted && descriptionLabel != null)
+      {
         Point dsize = descriptionLabel.computeSize(width, SWT.DEFAULT, flush);
         descriptionLabel.setBounds(0, y, width, dsize.y);
         y += dsize.y + vspacing;
       }
-      if (client != null) {
+      if (client != null)
+      {
         client.setBounds(0, y, width, height - y);
       }
     }
   }
 
-  public SectionWidget() {
+  public SectionWidget()
+  {
 
     JFaceResources.getFontRegistry().addListener(this);
 
   }
 
-  public void commitChanges(boolean onSave) {
+  public void commitChanges(boolean onSave)
+  {
   }
 
   public abstract Composite createClient(Composite parent);
 
-  public final Control createControl(Composite parent) {
+  public final Control createControl(Composite parent)
+  {
 
     Composite section = new Composite(parent, SWT.NULL);
     SectionLayout slayout = new SectionLayout();
     section.setLayout(slayout);
     section.setData(this);
 
-    if (headerPainted) {
+    if (headerPainted)
+    {
 
       header = new Label(section, SWT.WRAP);
       header.setText(getHeaderText());
@@ -163,14 +176,16 @@ public abstract class SectionWidget implements IPropertyChangeListener {
 
     }
 
-    if (addSeparator) {
+    if (addSeparator)
+    {
 
       separator = new Composite(section, SWT.NONE);
       separator.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
 
     }
 
-    if (descriptionPainted && description != null) {
+    if (descriptionPainted && description != null)
+    {
 
       descriptionLabel = new Label(section, SWT.WRAP);
       descriptionLabel.setText(description);
@@ -182,7 +197,8 @@ public abstract class SectionWidget implements IPropertyChangeListener {
     return section;
   }
 
-  protected void reflow() {
+  protected void reflow()
+  {
     control.setRedraw(false);
     control.getParent().setRedraw(false);
     control.layout(true);
@@ -191,71 +207,85 @@ public abstract class SectionWidget implements IPropertyChangeListener {
     control.getParent().setRedraw(true);
   }
 
-  public void dispose() {
+  public void dispose()
+  {
 
     JFaceResources.getFontRegistry().removeListener(this);
 
   }
 
-  public String getDescription() {
+  public String getDescription()
+  {
 
     return description;
 
   }
-  public String getHeaderText() {
+  public String getHeaderText()
+  {
 
     return headerText;
 
   }
-  public int getHeightHint() {
+  public int getHeightHint()
+  {
 
     return heightHint;
 
   }
-  public int getWidthHint() {
+  public int getWidthHint()
+  {
 
     return widthHint;
 
   }
 
-  public void initialize(Object input) {
+  public void initialize(Object input)
+  {
 
   }
 
-  public boolean isAddSeparator() {
+  public boolean isAddSeparator()
+  {
 
     return addSeparator;
 
   }
 
-  public boolean isDescriptionPainted() {
+  public boolean isDescriptionPainted()
+  {
 
     return descriptionPainted;
 
   }
 
-  public boolean isHeaderPainted() {
+  public boolean isHeaderPainted()
+  {
 
     return headerPainted;
 
   }
 
-  public void setAddSeparator(boolean value) {
+  public void setAddSeparator(boolean value)
+  {
 
     addSeparator = value;
 
   }
 
-  private String trimNewLines(String text) {
+  private String trimNewLines(String text)
+  {
     StringBuffer buf = new StringBuffer();
-    for (int i = 0; i < text.length(); i++) {
+    for (int i = 0; i < text.length(); i++)
+    {
 
       char c = text.charAt(i);
-      if (c == '\n') {
+      if (c == '\n')
+      {
 
         buf.append(' ');
 
-      } else {
+      } else
+      {
 
         buf.append(c);
 
@@ -264,53 +294,63 @@ public abstract class SectionWidget implements IPropertyChangeListener {
     return buf.toString();
   }
 
-  public void setDescription(String value) {
-    // trim the new lines 
+  public void setDescription(String value)
+  {
+    // trim the new lines
     description = trimNewLines(value);
 
-    if (descriptionLabel != null) {
+    if (descriptionLabel != null)
+    {
 
       descriptionLabel.setText(description);
 
     }
 
   }
-  public void setDescriptionPainted(boolean value) {
+  public void setDescriptionPainted(boolean value)
+  {
 
     descriptionPainted = value;
 
   }
 
-  public void setHeaderPainted(boolean value) {
+  public void setHeaderPainted(boolean value)
+  {
 
     headerPainted = value;
 
   }
-  public void setHeaderText(String value) {
+  public void setHeaderText(String value)
+  {
 
     headerText = value;
 
-    if (header != null) {
+    if (header != null)
+    {
 
       header.setText(headerText);
 
     }
   }
-  public void setHeightHint(int value) {
+  public void setHeightHint(int value)
+  {
 
     heightHint = value;
 
   }
 
-  public void setWidthHint(int value) {
+  public void setWidthHint(int value)
+  {
 
     widthHint = value;
 
   }
 
-  public void propertyChange(PropertyChangeEvent arg0) {
+  public void propertyChange(PropertyChangeEvent arg0)
+  {
 
-    if (control != null && header != null) {
+    if (control != null && header != null)
+    {
 
       header.setFont(JFaceResources.getBannerFont());
       control.layout(true);

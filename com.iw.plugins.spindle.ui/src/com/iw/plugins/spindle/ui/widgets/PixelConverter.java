@@ -24,8 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
 package com.iw.plugins.spindle.ui.widgets;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -36,49 +34,54 @@ import org.eclipse.swt.widgets.Control;
 /**
  * @author gwl
  * @version $Id$
- *
- * Copyright 2002, Intelligent Works Inc.
- * All Rights Reserved.
+ * 
+ * Copyright 2002, Intelligent Works Inc. All Rights Reserved.
  */
-public class PixelConverter {
-	
-	private FontMetrics fontMetrics; 
-	
-	public PixelConverter(Control control) {
-		GC gc = new GC(control);
-		gc.setFont(control.getFont());
-		fontMetrics= gc.getFontMetrics();
-		gc.dispose();
-	}
-	
-	private FontMetrics fgFontMetrics;
-		
-	/**
-	 * @see org.eclipse.jface.dialogs.DialogPage#convertHeightInCharsToPixels(int)
-	 */
-	public int convertHeightInCharsToPixels(int chars) {
-		return Dialog.convertHeightInCharsToPixels(fontMetrics, chars);
-	}
+public class PixelConverter
+{
 
-	/**
-	 * @see org.eclipse.jface.dialogs.DialogPage#convertHorizontalDLUsToPixels(int)
-	 */
-	public int convertHorizontalDLUsToPixels(int dlus) {
-		return Dialog.convertHorizontalDLUsToPixels(fontMetrics, dlus);
-	}
+  private FontMetrics fontMetrics;
 
-	/**
-	 * @see org.eclipse.jface.dialogs.DialogPage#convertVerticalDLUsToPixels(int)
-	 */
-	public int convertVerticalDLUsToPixels(int dlus) {
-		return Dialog.convertVerticalDLUsToPixels(fontMetrics, dlus);
-	}
-	
-	/**
-	 * @see org.eclipse.jface.dialogs.DialogPage#convertWidthInCharsToPixels(int)
-	 */
-	public int convertWidthInCharsToPixels(int chars) {
-		return Dialog.convertWidthInCharsToPixels(fontMetrics, chars);
-	}	
+  public PixelConverter(Control control)
+  {
+    GC gc = new GC(control);
+    gc.setFont(control.getFont());
+    fontMetrics = gc.getFontMetrics();
+    gc.dispose();
+  }
+
+  private FontMetrics fgFontMetrics;
+
+  /**
+   * @see org.eclipse.jface.dialogs.DialogPage#convertHeightInCharsToPixels(int)
+   */
+  public int convertHeightInCharsToPixels(int chars)
+  {
+    return Dialog.convertHeightInCharsToPixels(fontMetrics, chars);
+  }
+
+  /**
+   * @see org.eclipse.jface.dialogs.DialogPage#convertHorizontalDLUsToPixels(int)
+   */
+  public int convertHorizontalDLUsToPixels(int dlus)
+  {
+    return Dialog.convertHorizontalDLUsToPixels(fontMetrics, dlus);
+  }
+
+  /**
+   * @see org.eclipse.jface.dialogs.DialogPage#convertVerticalDLUsToPixels(int)
+   */
+  public int convertVerticalDLUsToPixels(int dlus)
+  {
+    return Dialog.convertVerticalDLUsToPixels(fontMetrics, dlus);
+  }
+
+  /**
+   * @see org.eclipse.jface.dialogs.DialogPage#convertWidthInCharsToPixels(int)
+   */
+  public int convertWidthInCharsToPixels(int chars)
+  {
+    return Dialog.convertWidthInCharsToPixels(fontMetrics, chars);
+  }
 
 }

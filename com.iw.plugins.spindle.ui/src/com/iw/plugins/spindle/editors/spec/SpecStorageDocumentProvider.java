@@ -39,50 +39,54 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.editors.template.TemplateStorageDocumentProvider;
 
 /**
- *  Document provider for specs that come out of Jar files
+ * Document provider for specs that come out of Jar files
  * 
- *  Users should not instantiate. Rather call UIPlugin.getDefault().getSpecStorageDocumentProvider()
+ * Users should not instantiate. Rather call
+ * UIPlugin.getDefault().getSpecStorageDocumentProvider()
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: SpecStorageDocumentProvider.java,v 1.3 2003/11/02 12:45:14
+ *          glongman Exp $
  */
 public class SpecStorageDocumentProvider extends TemplateStorageDocumentProvider
 {
-    protected void setDocumentContent(IDocument document, InputStream contentStream, String encoding)
-        throws CoreException
+  protected void setDocumentContent(
+      IDocument document,
+      InputStream contentStream,
+      String encoding) throws CoreException
+  {
+
+    Reader in = null;
+
+    try
     {
 
-        Reader in = null;
+      in = new InputStreamReader(new BufferedInputStream(contentStream), "UTF-8");
+      StringBuffer buffer = new StringBuffer();
+      char[] readBuffer = new char[2048];
+      int n = in.read(readBuffer);
+      while (n > 0)
+      {
+        buffer.append(readBuffer, 0, n);
+        n = in.read(readBuffer);
+      }
 
+      document.set(buffer.toString());
+
+    } catch (IOException x)
+    {
+      UIPlugin.log(x);
+    } finally
+    {
+      if (in != null)
+      {
         try
         {
-
-            in = new InputStreamReader(new BufferedInputStream(contentStream), "UTF-8");
-            StringBuffer buffer = new StringBuffer();
-            char[] readBuffer = new char[2048];
-            int n = in.read(readBuffer);
-            while (n > 0)
-            {
-                buffer.append(readBuffer, 0, n);
-                n = in.read(readBuffer);
-            }
-
-            document.set(buffer.toString());
-
+          in.close();
         } catch (IOException x)
-        {
-            UIPlugin.log(x);
-        } finally
-        {
-            if (in != null)
-            {
-                try
-                {
-                    in.close();
-                } catch (IOException x)
-                {}
-            }
-        }
+        {}
+      }
     }
+  }
 
 }

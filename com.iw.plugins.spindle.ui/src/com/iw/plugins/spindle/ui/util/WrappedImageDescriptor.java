@@ -31,37 +31,37 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 
 /**
- *  Descriptor wrapper for an existing image
+ * Descriptor wrapper for an existing image
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: WrappedImageDescriptor.java,v 1.1 2003/11/13 21:36:29 glongman
+ *          Exp $
  */
 public class WrappedImageDescriptor extends ImageDescriptor
 {
 
-    private Image wrappedImage;
+  private Image wrappedImage;
 
-    public WrappedImageDescriptor(Image image)
-    {
-        super();
-        wrappedImage = image;
-    }
+  public WrappedImageDescriptor(Image image)
+  {
+    super();
+    wrappedImage = image;
+  }
 
-    public ImageData getImageData()
-    {
-        return wrappedImage.getImageData();
-    }
+  public ImageData getImageData()
+  {
+    return wrappedImage.getImageData();
+  }
 
-    public boolean equals(Object obj)
-    {
-        return (obj != null)
-            && getClass().equals(obj.getClass())
-            && wrappedImage.equals(((WrappedImageDescriptor) obj).wrappedImage);
-    }
+  public boolean equals(Object obj)
+  {
+    return (obj != null) && getClass().equals(obj.getClass())
+        && wrappedImage.equals(((WrappedImageDescriptor) obj).wrappedImage);
+  }
 
-    public int hashCode()
-    {
-        return wrappedImage.hashCode();
-    }
+  public int hashCode()
+  {
+    return wrappedImage.hashCode();
+  }
 
 }

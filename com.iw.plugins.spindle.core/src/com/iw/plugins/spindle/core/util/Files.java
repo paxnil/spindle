@@ -48,97 +48,97 @@ import org.eclipse.core.runtime.CoreException;
 public class Files
 {
 
-    public static String readTextFile(IFile f) throws IOException
+  public static String readTextFile(IFile f) throws IOException
+  {
+
+    StringBuffer buf = new StringBuffer();
+
+    BufferedReader in;
+    try
     {
-
-        StringBuffer buf = new StringBuffer();
-
-        BufferedReader in;
-        try
-        {
-            in = new BufferedReader(new InputStreamReader(f.getContents()));
-        } catch (CoreException e)
-        {
-            throw new IOException(e.getMessage());
-        }
-        String inputLine;
-        while ((inputLine = in.readLine()) != null)
-        {
-            buf.append(inputLine);
-            buf.append('\n');
-        }
-
-        in.close();
-        return buf.toString();
-
+      in = new BufferedReader(new InputStreamReader(f.getContents()));
+    } catch (CoreException e)
+    {
+      throw new IOException(e.getMessage());
+    }
+    String inputLine;
+    while ((inputLine = in.readLine()) != null)
+    {
+      buf.append(inputLine);
+      buf.append('\n');
     }
 
-    public static void toTextFile(IFile f, String content) throws IOException
+    in.close();
+    return buf.toString();
+
+  }
+
+  public static void toTextFile(IFile f, String content) throws IOException
+  {
+    try
     {
-        try
-        {
-            if (!f.exists())
-            {
-                f.create(new ByteArrayInputStream(content.getBytes()), true, null);
-            } else
-            {
-                f.setContents(new ByteArrayInputStream(content.getBytes()), true, true, null);
-            }
-        } catch (CoreException e)
-        {
-            throw new IOException(e.getMessage());
-        }
-    }
-
-    public static void copy(String inputFilename, String outputFilename) throws IOException
+      if (!f.exists())
+      {
+        f.create(new ByteArrayInputStream(content.getBytes()), true, null);
+      } else
+      {
+        f.setContents(new ByteArrayInputStream(content.getBytes()), true, true, null);
+      }
+    } catch (CoreException e)
     {
-        copy(new File(inputFilename), new File(outputFilename));
+      throw new IOException(e.getMessage());
     }
+  }
 
-    public static void copy(File inputFile, File outputFile) throws IOException
+  public static void copy(String inputFilename, String outputFilename) throws IOException
+  {
+    copy(new File(inputFilename), new File(outputFilename));
+  }
+
+  public static void copy(File inputFile, File outputFile) throws IOException
+  {
+    BufferedInputStream fr = new BufferedInputStream(new FileInputStream(inputFile));
+    BufferedOutputStream fw = new BufferedOutputStream(new FileOutputStream(outputFile));
+    byte[] buf = new byte[8192];
+    int n;
+    while ((n = fr.read(buf)) >= 0)
+      fw.write(buf, 0, n);
+    fr.close();
+    fw.close();
+  }
+
+  public static String readPropertyInXMLFile(IFile file, String property) throws IOException
+  {
+    if (!file.exists())
+      return null;
+
+    String content = readTextFile(file);
+    int startTagIdx = content.indexOf("<" + property + ">");
+    if (startTagIdx < 0)
+      return null;
+
+    int endTagIdx = content.indexOf("</" + property + ">");
+    return content.substring(startTagIdx + property.length() + 2, endTagIdx);
+  }
+
+  public static String readFileToString(InputStream contentStream, String encoding) throws IOException
+  {
+    Reader in;
+    if (encoding == null)
+      in = new InputStreamReader(contentStream);
+    else
+      in = new InputStreamReader(contentStream, encoding);
+    int chunkSize = contentStream.available();
+    StringBuffer buffer = new StringBuffer(chunkSize);
+    char[] readBuffer = new char[chunkSize];
+    int n = in.read(readBuffer);
+    while (n > 0)
     {
-        BufferedInputStream fr = new BufferedInputStream(new FileInputStream(inputFile));
-        BufferedOutputStream fw = new BufferedOutputStream(new FileOutputStream(outputFile));
-        byte[] buf = new byte[8192];
-        int n;
-        while ((n = fr.read(buf)) >= 0)
-            fw.write(buf, 0, n);
-        fr.close();
-        fw.close();
+      buffer.append(readBuffer);
+      n = in.read(readBuffer);
     }
-
-    public static String readPropertyInXMLFile(IFile file, String property) throws IOException
-    {
-        if (!file.exists())
-            return null;
-
-        String content = readTextFile(file);
-        int startTagIdx = content.indexOf("<" + property + ">");
-        if (startTagIdx < 0)
-            return null;
-
-        int endTagIdx = content.indexOf("</" + property + ">");
-        return content.substring(startTagIdx + property.length() + 2, endTagIdx);
-    }
-
-    public static String readFileToString(InputStream contentStream, String encoding) throws IOException
-    {
-        Reader in;
-        if (encoding == null)
-            in = new InputStreamReader(contentStream);
-        else
-            in = new InputStreamReader(contentStream, encoding);
-        int chunkSize = contentStream.available();
-        StringBuffer buffer = new StringBuffer(chunkSize);
-        char[] readBuffer = new char[chunkSize];
-        int n = in.read(readBuffer);
-        while (n > 0)
-        {
-            buffer.append(readBuffer);
-            n = in.read(readBuffer);
-        }
-        in.close();
-        return buffer.toString();
-    }
+    in.close();
+    return buffer.toString();
+  }
 
 }

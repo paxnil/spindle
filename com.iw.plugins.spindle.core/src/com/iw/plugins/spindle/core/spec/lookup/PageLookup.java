@@ -31,31 +31,31 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 
 /**
- *  Lookup class for ComponentSpecifications
+ * Lookup class for ComponentSpecifications
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
  */
 public class PageLookup extends AbstractLookup
 {
-    protected IComponentSpecification lookupSpecification(String libraryId, String pageName)
+  protected IComponentSpecification lookupSpecification(String libraryId, String pageName)
+  {
+    ICoreNamespace useNamespace = getNamespace();
+
+    IComponentSpecification result = null;
+
+    if (libraryId != null)
+      useNamespace = (ICoreNamespace) useNamespace.getChildNamespace(libraryId);
+
+    result = useNamespace.getPageSpecification(pageName);
+
+    if (result == null && libraryId == null)
     {
-        ICoreNamespace useNamespace = getNamespace();
+      useNamespace = getFrameworkNamespace();
+      if (useNamespace != null)
+        return getFrameworkNamespace().getPageSpecification(pageName);
 
-        IComponentSpecification result = null;
-
-        if (libraryId != null)
-            useNamespace = (ICoreNamespace) useNamespace.getChildNamespace(libraryId);
-
-        result = useNamespace.getPageSpecification(pageName);
-
-        if (result == null && libraryId == null)
-        {
-            useNamespace = getFrameworkNamespace();
-            if (useNamespace != null)
-                return getFrameworkNamespace().getPageSpecification(pageName);
-
-        }
-        return result;
     }
+    return result;
+  }
 }

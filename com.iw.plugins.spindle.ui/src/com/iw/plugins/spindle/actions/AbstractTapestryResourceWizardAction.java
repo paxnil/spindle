@@ -37,43 +37,48 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.ui.wizards.NewTapestryElementWizard;
 
 /**
- *  TODO Add Type comment
+ * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: AbstractTapestryResourceWizardAction.java,v 1.1 2003/10/29
+ *          12:33:56 glongman Exp $
  */
-public abstract class AbstractTapestryResourceWizardAction extends AbstractTapestryResourceAction
+public abstract class AbstractTapestryResourceWizardAction
+    extends
+      AbstractTapestryResourceAction
 {
 
-    public AbstractTapestryResourceWizardAction()
-    {
-        super();
-    }
+  public AbstractTapestryResourceWizardAction()
+  {
+    super();
+  }
 
-    protected abstract NewTapestryElementWizard getWizard();
+  protected abstract NewTapestryElementWizard getWizard();
 
-    /**
-         * @see org.eclipse.ui.IActionDelegate#run(IAction)
-         */
-    public void run(IAction action)
+  /**
+   * @see org.eclipse.ui.IActionDelegate#run(IAction)
+   */
+  public void run(IAction action)
+  {
+    if (fSelection != null)
     {
-        if (fSelection != null)
+      try
+      {
+        for (Iterator iter = fSelection.iterator(); iter.hasNext();)
         {
-            try
-            {
-                for (Iterator iter = fSelection.iterator(); iter.hasNext();)
-                {
-                    IFile file = (IFile) iter.next();
-                    NewTapestryElementWizard wizard = getWizard();
-                    wizard.init(PlatformUI.getWorkbench(), fSelection, getName(file));
-                    WizardDialog wdialog = new WizardDialog(UIPlugin.getDefault().getActiveWorkbenchShell(), wizard);
-                    wdialog.open();
-                }
-            } catch (ClassCastException e)
-            {
-                // do nothing
-            }
+          IFile file = (IFile) iter.next();
+          NewTapestryElementWizard wizard = getWizard();
+          wizard.init(PlatformUI.getWorkbench(), fSelection, getName(file));
+          WizardDialog wdialog = new WizardDialog(UIPlugin
+              .getDefault()
+              .getActiveWorkbenchShell(), wizard);
+          wdialog.open();
         }
+      } catch (ClassCastException e)
+      {
+        // do nothing
+      }
     }
+  }
 
 }

@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 /**
- *  Exception type for Tapestry Model problems
+ * Exception type for Tapestry Model problems
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -38,13 +38,13 @@ import org.eclipse.core.runtime.IStatus;
 public class TapestryModelException extends CoreException
 {
 
-    /**
-     * @param status
-     */
-    public TapestryModelException(IStatus status)
-    {
-        super(status);
+  /**
+   * @param status
+   */
+  public TapestryModelException(IStatus status)
+  {
+    super(status);
 
-    }
+  }
 
 }

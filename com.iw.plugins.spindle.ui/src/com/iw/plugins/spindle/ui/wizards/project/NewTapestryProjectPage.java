@@ -381,7 +381,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage
     StringWriter swriter = new StringWriter();
     IndentingWriter iwriter = new IndentingWriter(swriter, useTabs, tabSize, 0, null);
 
-    XMLUtil.writeWebDOTXML( 
+    XMLUtil.writeWebDOTXML(
         projectName,
         getServletSpecPublicId(),
         writeRedirectFilter,

@@ -37,7 +37,7 @@ import java.util.Set;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
- *  A map that preserves the order things are added
+ * A map that preserves the order things are added
  * 
  * @author glongman@intelligentworks.com
  * @version $Id$
@@ -45,158 +45,182 @@ import com.iw.plugins.spindle.core.util.Assert;
 public class OrderPreservingMap implements Map
 {
 
-    List fKeys;
-    List fValues;
+  List fKeys;
+  List fValues;
 
-    public OrderPreservingMap()
+  public OrderPreservingMap()
+  {
+    super();
+    fKeys = new ArrayList();
+    fValues = new ArrayList();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#clear()
+   */
+  public void clear()
+  {
+    fKeys.clear();
+    fValues.clear();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#containsKey(java.lang.Object)
+   */
+  public boolean containsKey(Object key)
+  {
+    return fKeys.contains(key);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#containsValue(java.lang.Object)
+   */
+  public boolean containsValue(Object value)
+  {
+
+    return fValues.contains(value);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#entrySet()
+   */
+  public Set entrySet()
+  {
+    // not implemented
+    throw new RuntimeException("not implemented");
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#get(java.lang.Object)
+   */
+  public Object get(Object key)
+  {
+    int index = getKeyIndex(key);
+    if (index >= 0)
+      return fValues.get(index);
+
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#isEmpty()
+   */
+  public boolean isEmpty()
+  {
+    return fKeys.isEmpty();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#keySet()
+   */
+  public Set keySet()
+  {
+
+    return Collections.unmodifiableSet(new OrderPreservingSet(fKeys));
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#put(java.lang.Object, java.lang.Object)
+   */
+  public Object put(Object key, Object value)
+  {
+
+    Assert.isNotNull(key);
+    int index = getKeyIndex(key);
+    if (index >= 0)
     {
-        super();
-        fKeys = new ArrayList();
-        fValues = new ArrayList();
-    }
-
-    /* (non-Javadoc)
-     * @see java.util.Map#clear()
-     */
-    public void clear()
+      if (value == null)
+      {
+        return internalRemove(index);
+      } else
+      {
+        fValues.set(index, value);
+      }
+    } else
     {
-        fKeys.clear();
-        fValues.clear();
-    }
+      Assert.isNotNull(value);
+      fKeys.add(key);
+      fValues.add(value);
 
-    /* (non-Javadoc)
-     * @see java.util.Map#containsKey(java.lang.Object)
-     */
-    public boolean containsKey(Object key)
+    }
+    return value;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#putAll(java.util.Map)
+   */
+  public void putAll(Map aMap)
+  {
+    Assert.isNotNull(aMap);
+    for (Iterator iter = aMap.keySet().iterator(); iter.hasNext();)
     {
-        return fKeys.contains(key);
+      Object key = (Object) iter.next();
+      put(key, aMap.get(key));
+
     }
+  }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#containsValue(java.lang.Object)
-     */
-    public boolean containsValue(Object value)
-    {
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#remove(java.lang.Object)
+   */
+  public Object remove(Object key)
+  {
+    int index = getKeyIndex(key);
+    if (index >= 0)
+      return internalRemove(index);
 
-        return fValues.contains(value);
-    }
+    return null;
+  }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#entrySet()
-     */
-    public Set entrySet()
-    {
-        // not implemented
-        throw new RuntimeException("not implemented");
-    }
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#size()
+   */
+  public int size()
+  {
+    return fKeys.size();
+  }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#get(java.lang.Object)
-     */
-    public Object get(Object key)
-    {
-        int index = getKeyIndex(key);
-        if (index >= 0)
-            return fValues.get(index);
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.util.Map#values()
+   */
+  public Collection values()
+  {
+    return Collections.unmodifiableCollection(fValues);
+  }
 
-        return null;
-    }
+  private Object internalRemove(int index)
+  {
+    fKeys.remove(index);
+    return fValues.remove(index);
+  }
 
-    /* (non-Javadoc)
-     * @see java.util.Map#isEmpty()
-     */
-    public boolean isEmpty()
-    {
-        return fKeys.isEmpty();
-    }
-
-    /* (non-Javadoc)
-     * @see java.util.Map#keySet()
-     */
-    public Set keySet()
-    {
-
-        return Collections.unmodifiableSet(new OrderPreservingSet(fKeys));
-    }
-
-    /* (non-Javadoc)
-     * @see java.util.Map#put(java.lang.Object, java.lang.Object)
-     */
-    public Object put(Object key, Object value)
-    {
-
-        Assert.isNotNull(key);
-        int index = getKeyIndex(key);
-        if (index >= 0)
-        {
-            if (value == null)
-            {
-                return internalRemove(index);
-            } else
-            {
-                fValues.set(index, value);
-            }
-        } else
-        {
-            Assert.isNotNull(value);
-            fKeys.add(key);
-            fValues.add(value);
-
-        }
-        return value;
-    }
-
-    /* (non-Javadoc)
-     * @see java.util.Map#putAll(java.util.Map)
-     */
-    public void putAll(Map aMap)
-    {
-        Assert.isNotNull(aMap);
-        for (Iterator iter = aMap.keySet().iterator(); iter.hasNext();)
-        {
-            Object key = (Object) iter.next();
-            put(key, aMap.get(key));
-
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see java.util.Map#remove(java.lang.Object)
-     */
-    public Object remove(Object key)
-    {
-        int index = getKeyIndex(key);
-        if (index >= 0)
-            return internalRemove(index);
-
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see java.util.Map#size()
-     */
-    public int size()
-    {
-        return fKeys.size();
-    }
-
-    /* (non-Javadoc)
-     * @see java.util.Map#values()
-     */
-    public Collection values()
-    {
-        return Collections.unmodifiableCollection(fValues);
-    }
-
-    private Object internalRemove(int index)
-    {
-        fKeys.remove(index);
-        return fValues.remove(index);
-    }
-
-    protected int getKeyIndex(Object key)
-    {
-        return fKeys.indexOf(key);
-    }
+  protected int getKeyIndex(Object key)
+  {
+    return fKeys.indexOf(key);
+  }
 
 }

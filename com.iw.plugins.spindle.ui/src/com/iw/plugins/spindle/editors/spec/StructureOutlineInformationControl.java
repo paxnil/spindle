@@ -32,55 +32,62 @@ import org.eclipse.swt.widgets.Shell;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 
 /**
- *  TODO Add Type comment
+ * TODO Add Type comment
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: StructureOutlineInformationControl.java,v 1.3 2004/06/02
+ *          01:18:52 glongman Exp $
  */
 public class StructureOutlineInformationControl extends TreeInformationControl
 {
-    static private ViewerSorter sorter;
+  static private ViewerSorter sorter;
 
-    static {
-        TapestryOutlinePage.AlphaCategorySorter alphaSort = new TapestryOutlinePage.AlphaCategorySorter();
-        alphaSort.setUseCategorySort(true);
-        sorter = alphaSort;
-    }
-    private SpecEditor fEditor;
+  static
+  {
+    TapestryOutlinePage.AlphaCategorySorter alphaSort = new TapestryOutlinePage.AlphaCategorySorter();
+    alphaSort.setUseCategorySort(true);
+    sorter = alphaSort;
+  }
+  private SpecEditor fEditor;
 
-    public StructureOutlineInformationControl(Shell parent, int shellStyle, int treeStyle, SpecEditor editor)
+  public StructureOutlineInformationControl(Shell parent, int shellStyle, int treeStyle,
+      SpecEditor editor)
+  {
+    super(parent, shellStyle, treeStyle);
+    setContentProvider(new TapestryOutlinePage.ContentProvider());
+    setLabelProvider(new TapestryOutlinePage.BasicLabelProvider());
+    setSorter(sorter);
+
+    fEditor = editor;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#doSetInput(java.lang.Object)
+   */
+  protected void doSetInput(Object information)
+  {
+    if (information instanceof BaseSpecification)
+      fTreeViewer.setInput(information);
+    else
+      fTreeViewer.setInput(null);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#doGotoSelectedElement(java.lang.Object)
+   */
+  protected boolean doHandleSelectedElement(Object selected)
+  {
+    try
     {
-        super(parent, shellStyle, treeStyle);
-        setContentProvider(new TapestryOutlinePage.ContentProvider());
-        setLabelProvider(new TapestryOutlinePage.BasicLabelProvider());
-        setSorter(sorter);
-
-        fEditor = editor;
-    }
-
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#doSetInput(java.lang.Object)
-     */
-    protected void doSetInput(Object information)
+      fEditor.openTo(selected);
+    } finally
     {
-        if (information instanceof BaseSpecification)
-            fTreeViewer.setInput(information);
-        else
-            fTreeViewer.setInput(null);
-    }
 
-    /* (non-Javadoc)
-     * @see com.iw.plugins.spindle.editors.spec.OutlineInformationControl#doGotoSelectedElement(java.lang.Object)
-     */
-    protected boolean doHandleSelectedElement(Object selected)
-    {
-        try
-        {
-            fEditor.openTo(selected);
-        } finally
-        {
-            
-        }
-        return true;
     }
+    return true;
+  }
 }
