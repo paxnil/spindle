@@ -27,6 +27,7 @@
 package tests.util;
 
 import java.beans.PropertyChangeEvent;
+import java.util.Map;
 
 import com.iw.plugins.spindle.core.util.PropertyFiringMap;
 
@@ -38,7 +39,8 @@ import com.iw.plugins.spindle.core.util.PropertyFiringMap;
  */
 public class TestPropertyFiringMap extends PropertyFiringBase
 {
-
+    String testOwner = "Brian";
+    String eventProperty = "Brians Car";
     /**
      * Constructor for TestPropertyFiringMap.
      * @param arg0
@@ -48,6 +50,28 @@ public class TestPropertyFiringMap extends PropertyFiringBase
         super(arg0);
     }
 
+    private TestListener createDefaultListener()
+    {
+        return createListener(testOwner);
+    }
+
+    private TestListener createListener(String testOwner)
+    {
+        TestListener result = new TestListener(testOwner);
+
+        return result;
+    }
+    private PropertyFiringMap createDefaultMap()
+    {
+        return createMap(testOwner, eventProperty);
+    }
+
+    private PropertyFiringMap createMap(String testOwner, String eventProperty)
+    {
+        PropertyFiringMap result = new PropertyFiringMap(testOwner, eventProperty);
+
+        return result;
+    }
     public void testAddPCListenerInConstructor()
     {
         final String eventProperty = "testMap";
@@ -58,15 +82,38 @@ public class TestPropertyFiringMap extends PropertyFiringBase
             public void propertyChange(PropertyChangeEvent evt)
             {
                 super.propertyChange(evt);
-                assertEquals(propertyName, eventProperty);
-                assertNull(oldValue);
-                assertEquals(newValue,stored);
+                assertEquals(eventPropertyName, eventProperty);
+                assertNull(eventOldValue);
+                assertEquals(eventNewValue, stored);
             }
         };
 
         PropertyFiringMap map = new PropertyFiringMap(listener, eventProperty);
         map.put("blah", stored);
-   }
+    }
+
+    public void testRemovePropertyChangeListener()
+    {
+        PropertyFiringMap map = createDefaultMap();
+        TestListener listener1 = new OneShotListener("Brian", null, "Carrera", "Brians Car");
+        // TestListener listener2 = createListener("Geoff");
+        map.addPropertyChangeListener(listener1);
+        map.put("Porsche", "Carrera");
+        map.removePropertyChangeListener(listener1);
+        map.put("Porsche", "Carrera G3");
+
+    }
+
+    public void testAddAll()
+    {
+        Map testMap = createMap("Brian", "Brians Car");
+        testMap.put("porsche", "carrera");
+        testMap.put("subaru", "wrx");
+        testMap.put("honda", "civic");
+        PropertyFiringMap map = createDefaultMap();
+        map.putAll(testMap);
+
+    }
 
     public void testRemove()
     {
@@ -76,12 +123,11 @@ public class TestPropertyFiringMap extends PropertyFiringBase
         PropertyFiringMap map = new PropertyFiringMap(testOwner, propertyName);
 
         map.put("son", "dean");
-
         TestListener listener = new OneShotListener(testOwner, "dean", null, propertyName);
         map.addPropertyChangeListener(listener);
 
         map.remove("son");
-        
+
     }
 
     public void testPutAgain()
@@ -96,7 +142,7 @@ public class TestPropertyFiringMap extends PropertyFiringBase
         map.addPropertyChangeListener(listener);
 
         map.put("current-ride", "ferrari");
-     
+
     }
 
     public void testClear()
@@ -114,8 +160,6 @@ public class TestPropertyFiringMap extends PropertyFiringBase
 
         map.clear();
     }
-
-   
 
     public static void main(String[] args)
     {
