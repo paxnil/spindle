@@ -78,14 +78,14 @@ public class PreferenceTemplateSelector extends SimpleTemplateSelector
       old.removePropertyChangeListener(this);
 
     fPreferenceStore = store;
-    
+
     if (store != null)
       fPreferenceStore.addPropertyChangeListener(this);
 
     if (old != null)
       reload();
   }
-  
+
   public void propertyChange(PropertyChangeEvent event)
   {
     if (fCombo != null && !fCombo.isDisposed()
@@ -115,7 +115,7 @@ public class PreferenceTemplateSelector extends SimpleTemplateSelector
     fireSelectionChanged();
   }
 
-  private void select(String templateName)
+  public void select(String templateName)
   {
     if (fPreferenceStore == null)
       return;
@@ -180,6 +180,31 @@ public class PreferenceTemplateSelector extends SimpleTemplateSelector
           .getSelectionIndex()), UIPlugin.getString(fPreferenceKey + ".label")));
 
     return status;
+  }
+
+  public IStatus validate(String templateName)
+  {
+    SpindleStatus result = new SpindleStatus();
+    int i = 0;
+    while (i < fCombo.getItemCount())
+    {
+      Template template = (Template) fCombo.getData(fCombo.getItem(i));
+      if (template.getName().equals(templateName))
+        break;
+      i++;
+    }
+    if (i < fCombo.getItemCount())
+      return result;
+
+    result.setError(UIPlugin.getString("templates.missing.pref", templateName, UIPlugin
+        .getString(fPreferenceKey + ".label")));
+
+    return result;
+  }
+
+  public String getPreferenceKey()
+  {
+    return fPreferenceKey;
   }
 
   protected void populate()

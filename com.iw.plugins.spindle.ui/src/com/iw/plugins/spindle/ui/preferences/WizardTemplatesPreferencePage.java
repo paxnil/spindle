@@ -25,19 +25,38 @@
  * ***** END LICENSE BLOCK ***** */
 package com.iw.plugins.spindle.ui.preferences;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
@@ -47,13 +66,16 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.SpindleMultiStatus;
+import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.ui.widgets.PreferenceTemplateSelector;
 
 /**
  * @author GWL
  */
-public class WizardTemplatesPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
+public class WizardTemplatesPreferencePage extends PreferencePage
+    implements
+      IWorkbenchPreferencePage
 {
 
   class Listener implements ISelectionChangedListener
@@ -69,6 +91,9 @@ public class WizardTemplatesPreferencePage extends PreferencePage implements IWo
   private PreferenceTemplateSelector fComponentTemplateSelector;
   private PreferenceTemplateSelector fPageTemplateSelector;
   private PreferenceTemplateSelector fTapestryTemplateSelector;
+
+  private Button fImport;
+  private Button fExport;
 
   private OverlayPreferenceStore fOverlayStore;
   private Listener fListener;
@@ -163,14 +188,258 @@ public class WizardTemplatesPreferencePage extends PreferencePage implements IWo
     if (!mostSevere.isOK())
     {
       setValid(false);
+      if (fImport != null)
+      {
+        fImport.setEnabled(false);
+        fExport.setEnabled(false);
+      }
       setErrorMessage(mostSevere.getMessage());
     } else
     {
+      if (fImport != null)
+      {
+        fImport.setEnabled(true);
+        fExport.setEnabled(true);
+      }
       setErrorMessage(null);
       setValid(true);
     }
   }
 
+  protected void contributeButtons(Composite parent)
+  {
+    Font font = parent.getFont();
+    GridLayout layout = (GridLayout) parent.getLayout();
+    layout.numColumns += 2;
+
+    int heightHint = convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
+    int widthHint = convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+
+    fImport = new Button(parent, SWT.PUSH);
+    fImport.setText("Import");
+    Dialog.applyDialogFont(fImport);
+    GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+    data.heightHint = heightHint;
+    data.widthHint = Math.max(widthHint, fImport.computeSize(
+        SWT.DEFAULT,
+        SWT.DEFAULT,
+        true).x);
+    fImport.setLayoutData(data);
+    fImport.addSelectionListener(new SelectionAdapter()
+    {
+      public void widgetSelected(SelectionEvent e)
+      {
+        performImport();
+      }
+    });
+
+    fExport = new Button(parent, SWT.PUSH);
+    fExport.setText("Export");
+    Dialog.applyDialogFont(fImport);
+    data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+    data.heightHint = heightHint;
+    data.widthHint = Math.max(widthHint, fExport.computeSize(
+        SWT.DEFAULT,
+        SWT.DEFAULT,
+        true).x);
+    fExport.setLayoutData(data);
+    fExport.addSelectionListener(new SelectionAdapter()
+    {
+      public void widgetSelected(SelectionEvent e)
+      {
+        performExport();
+      }
+    });
+
+  }
+
+  protected void performImport()
+  {
+    FileDialog fileDialog = new FileDialog(getShell(), SWT.OPEN);
+    fileDialog.setFilterExtensions(new String[]{"*.wksp.prefs", "*.*"});
+    fileDialog.setText("Choose file to import");
+    String file = fileDialog.open();
+    if (file != null)
+    {
+      file = file.trim();
+      if (file.length() > 0)
+      {
+        Properties p = null;
+        try
+        {
+          FileInputStream in = new FileInputStream(file);
+          p = new Properties();
+          p.load(in);
+        } catch (FileNotFoundException e)
+        {
+          MessageDialog.openError(getShell(), "File Not Found", file + " does not exist");
+          return;
+        } catch (IOException e)
+        {
+          UIPlugin.log(e);
+          MessageDialog.openError(getShell(), "File Error", "unable to read: " + file);
+          return;
+        }
+        doImport(p);
+      }
+    }
+  }
+
+  private void doImport(Properties importProperties)
+  {
+    Map updateMap = new HashMap();
+    SpindleMultiStatus errors = new SpindleMultiStatus();
+
+    checkImport(fApplicationTemplateSelector, importProperties, updateMap, errors);
+    checkImport(fLibraryTemplateSelector, importProperties, updateMap, errors);
+    checkImport(fComponentTemplateSelector, importProperties, updateMap, errors);
+    checkImport(fPageTemplateSelector, importProperties, updateMap, errors);
+    checkImport(fTapestryTemplateSelector, importProperties, updateMap, errors);
+
+    boolean hasErrors = errors.getChildren().length > 0;
+    if (hasErrors)
+    {
+      if (!updateMap.isEmpty())
+      {
+        errors.setError("Invalid entries found");
+        int decision = ErrorDialog.openError(
+            getShell(),
+            null,
+            "Pressing 'Ok' will continue the import, while ignoring invalid entries.",
+            errors);
+
+        if (decision != ErrorDialog.OK)
+          return;
+      } else
+      {
+        ErrorDialog.openError(
+            getShell(),
+            "Import Abort",
+            "No valid entries found.",
+            errors);
+        return;
+      }
+    }
+
+    if (updateMap.isEmpty())
+    {
+      MessageDialog.openInformation(
+          getShell(),
+          "Import Abort",
+          "No entries found to import");
+      return;
+    }
+
+    for (Iterator iter = updateMap.keySet().iterator(); iter.hasNext();)
+    {
+      String contextType = (String) iter.next();
+      if (contextType.equals(XMLFileContextType.APPLICATION_FILE_CONTEXT_TYPE))
+      {
+        fApplicationTemplateSelector.select((String) updateMap.get(contextType));
+      } else if (contextType.equals(XMLFileContextType.LIBRARY_FILE_CONTEXT_TYPE))
+      {
+        fLibraryTemplateSelector.select((String) updateMap.get(contextType));
+      } else if (contextType.equals(XMLFileContextType.COMPONENT_FILE_CONTEXT_TYPE))
+      {
+        fComponentTemplateSelector.select((String) updateMap.get(contextType));
+      } else if (contextType.equals(XMLFileContextType.PAGE_FILE_CONTEXT_TYPE))
+      {
+        fPageTemplateSelector.select((String) updateMap.get(contextType));
+      } else if (contextType.equals(XMLFileContextType.TEMPLATE_FILE_CONTEXT_TYPE))
+      {
+        fTapestryTemplateSelector.select((String) updateMap.get(contextType));
+      }
+    }
+  }
+
+  private void checkImport(
+      PreferenceTemplateSelector selector,
+      Properties importProperties,
+      Map updateMap,
+      SpindleMultiStatus errors)
+  {
+    IStatus status;
+
+    String contextType = selector.getPreferenceKey();
+    String templateName = importProperties.getProperty(contextType, null);
+    if (templateName != null)
+    {
+      status = selector.validate(templateName);
+      if (status.isOK())
+      {
+        updateMap.put(contextType, templateName);
+      } else
+      {
+        errors.addStatus(status);
+      }
+    }
+  }
+
+  /**
+   *  
+   */
+  protected void performExport()
+  {
+    FileDialog fileDialog = new FileDialog(getShell(), SWT.SAVE);
+    fileDialog.setFilterExtensions(new String[]{"*.wksp.prefs", "*.*"});
+    fileDialog.setText("Choose file to export");
+    String filename = fileDialog.open();
+
+    if (filename != null)
+    {
+
+      File file = new File(filename);
+      if (file.exists())
+      {
+        if (!MessageDialog.openQuestion(
+            getShell(),
+            "File exists",
+            "Do you want to overwrite '" + file.getName() + "' ?"))
+          return;
+      }
+
+      Properties p = new Properties();
+      p.setProperty(
+          XMLFileContextType.APPLICATION_FILE_CONTEXT_TYPE,
+          fApplicationTemplateSelector.getSelectedTemplate().getName());
+
+      p.setProperty(
+          XMLFileContextType.LIBRARY_FILE_CONTEXT_TYPE,
+          fLibraryTemplateSelector.getSelectedTemplate().getName());
+
+      p.setProperty(
+          XMLFileContextType.COMPONENT_FILE_CONTEXT_TYPE,
+          fComponentTemplateSelector.getSelectedTemplate().getName());
+
+      p.setProperty(XMLFileContextType.PAGE_FILE_CONTEXT_TYPE, fPageTemplateSelector
+          .getSelectedTemplate()
+          .getName());
+
+      p.setProperty(
+          XMLFileContextType.TEMPLATE_FILE_CONTEXT_TYPE,
+          fTapestryTemplateSelector.getSelectedTemplate().getName());
+
+      try
+      {
+        FileOutputStream out = new FileOutputStream(filename);
+
+        StringBuffer buffer = new StringBuffer();       
+        p.store(out, "Spindle wizard template defaults - workspace\n");
+
+      } catch (IOException e)
+      {
+        SpindleStatus status = new SpindleStatus();
+        status.setError(e.getMessage());
+        ErrorDialog.openError(
+            getShell(),
+            "Export Failed",
+            e.getClass().toString(),
+            status);
+      }
+    }
+  }
+  
+  
   protected Control createContents(Composite parent)
   {
     initializeDialogUnits(parent);
@@ -184,7 +453,7 @@ public class WizardTemplatesPreferencePage extends PreferencePage implements IWo
     composite.setLayout(new GridLayout());
     composite.setLayoutData(new GridData(GridData.FILL_BOTH
         | GridData.VERTICAL_ALIGN_BEGINNING));
-    
+
     Label intro = new Label(composite, SWT.WRAP);
     intro.setText(UIPlugin.getString("preference-wizard-intro"));
     intro.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
@@ -192,9 +461,9 @@ public class WizardTemplatesPreferencePage extends PreferencePage implements IWo
     createVerticalSpacer(composite, 1);
 
     createComboGroup(composite);
-    
+
     createVerticalSpacer(composite, 1);
-    
+
     Label message = new Label(composite, SWT.WRAP);
     message.setText(UIPlugin.getString("preference-wizard-message"));
     message.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
@@ -272,7 +541,7 @@ public class WizardTemplatesPreferencePage extends PreferencePage implements IWo
       fOverlayStore.stop();
       fOverlayStore = null;
     }
-    
+
     fApplicationTemplateSelector.dispose();
     fLibraryTemplateSelector.dispose();
     fComponentTemplateSelector.dispose();
@@ -280,8 +549,7 @@ public class WizardTemplatesPreferencePage extends PreferencePage implements IWo
     fTapestryTemplateSelector.dispose();
     super.dispose();
   }
-  
-  
+
   public void init(IWorkbench workbench)
   {
     // TODO Auto-generated method stub
