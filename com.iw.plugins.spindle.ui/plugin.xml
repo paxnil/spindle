@@ -685,6 +685,16 @@ the new Spindle
             annotationImageProvider="com.iw.plugins.spindle.editors.ProblemAnnotationImageProvider">
       </specification>
       </extension>
+   <extension
+         point="org.eclipse.ui.ide.markerResolution">
+      <markerResolutionGenerator
+            class="com.iw.plugins.spindle.quickfix.TemplateStringAttributeToExpression"
+            markerType="com.iw.plugins.spindle.core.problemmarker">
+         <attribute
+               value="61"
+               name="code"/>
+      </markerResolutionGenerator>
+   </extension>
       
       
    
