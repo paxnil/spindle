@@ -36,11 +36,9 @@ import org.apache.tapestry.parse.TemplateParser;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.swt.graphics.Point;
 import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.xml.XMLNode;
 
-import com.iw.plugins.spindle.editors.assist.CompletionProposal;
 import com.iw.plugins.spindle.editors.assist.ProposalFactory;
 import com.iw.plugins.spindle.editors.assist.usertemplates.UserTemplateCompletionProcessor;
 import com.iw.plugins.spindle.editors.spec.assist.DefaultCompletionProcessor;

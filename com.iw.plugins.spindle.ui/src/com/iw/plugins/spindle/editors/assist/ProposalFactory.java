@@ -36,7 +36,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import com.iw.plugins.spindle.Images;
-import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator.ElementInfo;
 
 /**
  * ProposalFactory factory methods for common proposals.

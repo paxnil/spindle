@@ -40,7 +40,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IEditorInput;
 import org.xmen.internal.ui.text.ITypeConstants;
-import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.Images;
@@ -49,8 +48,6 @@ import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.assist.CompletionProposal;
 import com.iw.plugins.spindle.editors.assist.DTDProposalGenerator;
 import com.iw.plugins.spindle.editors.assist.usertemplates.UserTemplateCompletionProcessor;
-import com.iw.plugins.spindle.editors.template.TemplateEditor;
-import com.iw.plugins.spindle.editors.template.assist.TemplateContentAssistProcessor;
 
 /**
  * Processor for default content type

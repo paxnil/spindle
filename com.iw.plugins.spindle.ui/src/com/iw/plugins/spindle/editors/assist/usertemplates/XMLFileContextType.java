@@ -32,7 +32,6 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
  * XMLFileContextType context type for creating new xml files.
