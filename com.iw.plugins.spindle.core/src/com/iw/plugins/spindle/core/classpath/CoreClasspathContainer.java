@@ -45,14 +45,14 @@ import org.eclipse.jdt.internal.core.ClasspathEntry;
 import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
- *  Tapestry library container - resolves a classpath container variable to the Tapestry
- *  Libraries.
+ * Tapestry library container - resolves a classpath container variable to the
+ * Tapestry Libraries.
  * 
  * @author glongman@intelligentworks.com
- * @version $Id$
+ * @version $Id: CoreClasspathContainer.java,v 1.5 2004/02/13 05:30:52 glongman
+ *          Exp $
  */
-public class CoreClasspathContainer implements IClasspathContainer
-{
+public class CoreClasspathContainer implements IClasspathContainer {
 
     /**
      * Container path used to resolve to this Container
@@ -70,141 +70,132 @@ public class CoreClasspathContainer implements IClasspathContainer
      * @param plugin
      * @return classpath entries
      */
-    private static IClasspathEntry[] getClasspathEntries(TapestryCore plugin)
-    {
+    private static IClasspathEntry[] getClasspathEntries(TapestryCore plugin) {
         if (fClasspathEntries == null)
-            fClasspathEntries = computeClasspathEntries(plugin);
+                fClasspathEntries = computeClasspathEntries(plugin);
 
         return fClasspathEntries;
     }
 
     /**
-     * Computes the Tapestry framework classpath entries associated with the core plugin.
+     * Computes the Tapestry framework classpath entries associated with the
+     * core plugin.
      * 
      * @param vm
      * @return classpath entries
      */
-    private static IClasspathEntry[] computeClasspathEntries(TapestryCore plugin)
-    {
+    private static IClasspathEntry[] computeClasspathEntries(TapestryCore plugin) {
         List entries = new ArrayList();
         IPluginDescriptor descriptor = plugin.getDescriptor();
         URL installUrl = descriptor.getInstallURL();
 
         ILibrary[] libs = descriptor.getRuntimeLibraries();
 
-        for (int i = 0; i < libs.length; i++)
-        {
-            if (libs[i].getType() == ILibrary.RESOURCE)
-                continue;
+        for (int i = 0; i < libs.length; i++) {
+            if (libs[i].getType() == ILibrary.RESOURCE) continue;
 
             IPath path = libs[i].getPath();
             String jarName = path.lastSegment();
 
-            if (jarName.equals("core.jar"))
-                continue;
+            if (jarName.equals("core.jar")) continue;
 
-            if (jarName.equals("javax.servlet.jar"))
-                continue;
+            if (jarName.equals("javax.servlet.jar")) continue;
 
-            if (jarName.equals("dtdparser.jar"))
-                continue;
+            if (jarName.equals("dtdparser.jar")) continue;
 
-            try
-            {
+            try {
                 IPath sourceAttachmentPath = null;
                 IPath sourceAttachmentRootPath = null;
-                if (jarName.startsWith("tapestry-3"))
-                {
-                    sourceAttachmentPath = getSourceAttachmentPath(installUrl, "tapestry-src.jar");
-                } else if (jarName.startsWith("tapestry-contrib"))
-                {
-                    sourceAttachmentPath = getSourceAttachmentPath(installUrl, "tapestry-contrib-src.jar");
+                if (jarName.startsWith("tapestry-3")) {
+                    sourceAttachmentPath = getSourceAttachmentPath(installUrl,
+                            "tapestry-src.jar");
+                } else if (jarName.startsWith("tapestry-contrib")) {
+                    sourceAttachmentPath = getSourceAttachmentPath(installUrl,
+                            "tapestry-contrib-src.jar");
                 } else {
-                	try {
+
                     int index = jarName.lastIndexOf('-');
-                    String attachment = jarName.substring(0, index)+"-src.jar";
-                    sourceAttachmentPath = getSourceAttachmentPath(installUrl, attachment);
-                	} catch (IOException e) {
-                		//do nothing - src attachment not found!
-                	}
+                    String attachment = jarName.substring(0, index)
+                            + "-src.jar";
+                    sourceAttachmentPath = getSourceAttachmentPath(installUrl,
+                            attachment);
                 }
 
                 if (sourceAttachmentPath != null)
-                    sourceAttachmentRootPath = new Path("/");
+                        sourceAttachmentRootPath = new Path("/");
 
                 URL libUrl = new URL(installUrl, path.toString());
                 libUrl = Platform.resolve(libUrl);
-                entries.add(
-                    new ClasspathEntry(
-                        IPackageFragmentRoot.K_BINARY,
-                        ClasspathEntry.CPE_LIBRARY,
-                        new Path(libUrl.getFile()),
-                        new Path[] {},
-                        sourceAttachmentPath,
-                        sourceAttachmentRootPath,
-                        null,
-                        false));
-            } catch (MalformedURLException e)
-            {
+                entries.add(new ClasspathEntry(IPackageFragmentRoot.K_BINARY,
+                        ClasspathEntry.CPE_LIBRARY, new Path(libUrl.getFile()),
+                        new Path[] {}, sourceAttachmentPath,
+                        sourceAttachmentRootPath, null, false));
+            } catch (MalformedURLException e) {
                 TapestryCore.log(e);
-            } catch (IOException e)
-            {
+            } catch (IOException e) {
                 TapestryCore.log(e);
             }
 
         }
 
-        return (IClasspathEntry[]) entries.toArray(new IClasspathEntry[entries.size()]);
+        return (IClasspathEntry[]) entries.toArray(new IClasspathEntry[entries
+                .size()]);
     }
 
-    private static IPath getSourceAttachmentPath(URL installUrl, String srcJar)
-        throws MalformedURLException, IOException
-    {
-        URL temp = new URL(installUrl, "libsrc/"+srcJar);
-        temp = Platform.resolve(temp);
-        Path result = new Path(temp.getFile());
-        return result;
+    private static IPath getSourceAttachmentPath(URL installUrl, String srcJar) {
+        URL temp;
+        try {
+            temp = new URL(installUrl, "libsrc/" + srcJar);
+        } catch (MalformedURLException e1) {
+            return null;
+        }
+        try {
+            temp = Platform.resolve(temp);
+            Path result = new Path(temp.getFile());
+            return result;
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            TapestryCore.log("could not resolve src attachment URL: " + temp);
+        }
+        return null;
     }
 
     /**
      * Constructs a Tapestry classpath container
      * 
-     * @param path container path used to resolve this container
+     * @param path
+     *            container path used to resolve this container
      */
-    public CoreClasspathContainer(IPath path)
-    {
+    public CoreClasspathContainer(IPath path) {
         fPath = path;
     }
 
     /**
      * @see IClasspathContainer#getClasspathEntries()
      */
-    public IClasspathEntry[] getClasspathEntries()
-    {
+    public IClasspathEntry[] getClasspathEntries() {
         return getClasspathEntries(TapestryCore.getDefault());
     }
 
     /**
      * @see IClasspathContainer#getDescription()
      */
-    public String getDescription()
-    {
+    public String getDescription() {
         return TapestryCore.getString("core-classpath-container-label");
     }
 
     /**
      * @see IClasspathContainer#getKind()
      */
-    public int getKind()
-    {
+    public int getKind() {
         return IClasspathContainer.K_APPLICATION;
     }
 
     /**
      * @see IClasspathContainer#getPath()
      */
-    public IPath getPath()
-    {
+    public IPath getPath() {
         return fPath;
     }
 
