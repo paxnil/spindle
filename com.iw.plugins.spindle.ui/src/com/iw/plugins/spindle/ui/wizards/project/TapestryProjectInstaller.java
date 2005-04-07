@@ -8,11 +8,12 @@ package com.iw.plugins.spindle.ui.wizards.project;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -32,6 +32,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -91,9 +92,9 @@ public class TapestryProjectInstaller {
 				installData.getContextPath());
 
 		try {
+			filesBuilt.add(contextFolder);
 			if (!contextFolder.exists()) {
-				contextFolder.create(true, true, monitor);
-				filesBuilt.add(contextFolder);
+				contextFolder.create(true, true, monitor);				
 			}
 		} catch (CoreException e1) {
 			return e1.getStatus();
@@ -104,9 +105,9 @@ public class TapestryProjectInstaller {
 		IFolder webInfFolder = contextFolder.getFolder("WEB-INF");
 
 		try {
+			filesBuilt.add(webInfFolder);
 			if (!webInfFolder.exists()) {
-				webInfFolder.create(true, true, monitor);
-				filesBuilt.add(webInfFolder);
+				webInfFolder.create(true, true, monitor);				
 			}
 		} catch (CoreException e2) {
 			return e2.getStatus();
@@ -361,24 +362,53 @@ public class TapestryProjectInstaller {
 		File destFolder = new File(lib.getLocation().toString());
 
 		List toCopy = new ArrayList();
+		List statuses = new ArrayList();
 		for (Iterator iter = tapestryJarNames.keySet().iterator(); iter
 				.hasNext();) {
+
 			String jarName = (String) iter.next();
 			if (!overwriteExisting && collisions.contains(jarName))
 				continue;
-			try {
-				FileUtils.copyFile((File)tapestryJarNames.get(jarName), new File(
-						destFolder, jarName));
-			} catch (IOException e) {
-				UIPlugin.log(e);
-			}
+
+			File src = (File) tapestryJarNames.get(jarName);
+			IStatus status = copyJar(src, lib, jarName, monitor);
+			if (!status.isOK())
+				statuses.add(status);
 			monitor.worked(1);
 			toCopy.add(tapestryJarNames.get(jarName));
 		}
 
 		monitor.done();
+		
+		if (statuses.isEmpty()) {
+			return SpindleStatus.OK_STATUS;
+		} else {
+			return new MultiStatus(UIPlugin.PLUGIN_ID, 0,
+					(IStatus[]) statuses.toArray(new IStatus[statuses.size()]),
+					"Unable to populate project with all Tapestry libraries.",
+					null);
+		}
+	}
 
-		return SpindleStatus.OK_STATUS;
+	private IStatus copyJar(File src, IFolder destFolder, String name,
+			IProgressMonitor monitor) {
+		
+		SpindleStatus result = new SpindleStatus();
+		IFile dest = destFolder.getFile(name);
+		
+		try {
+			
+			dest.create(new FileInputStream(src), true, monitor);
+		} catch (CoreException e) {
+			
+			UIPlugin.log(e);
+			result.setError("Error creating file: " + dest.getName());
+		} catch (FileNotFoundException e) {
+			
+			UIPlugin.log(e);
+			result.setError("Error opening file: " + src.toString());
+		}
+		return result;
 	}
 
 	/**
