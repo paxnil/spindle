@@ -48,7 +48,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import com.iw.plugins.spindle.UIPlugin;

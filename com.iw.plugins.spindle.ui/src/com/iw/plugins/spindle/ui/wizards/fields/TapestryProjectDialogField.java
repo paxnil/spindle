@@ -54,7 +54,6 @@ import com.iw.plugins.spindle.core.builder.State;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
-import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 
 /**

@@ -51,7 +51,6 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
-import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 
 public class ContainerDialogField extends StringButtonField
