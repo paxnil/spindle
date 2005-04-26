@@ -1207,11 +1207,11 @@ public class XMLDTDScannerImpl extends XMLScanner
       // call handler
       if (fDTDHandler != null)
       {
-        String[] enum = null;
+        String[] enumeration = null;
         if (fEnumerationCount != 0)
         {
-          enum = new String[fEnumerationCount];
-          System.arraycopy(fEnumeration, 0, enum, 0, fEnumerationCount);
+          enumeration = new String[fEnumerationCount];
+          System.arraycopy(fEnumeration, 0, enumeration, 0, fEnumerationCount);
         }
         // Determine whether the default value to be passed should be null.
         // REVISIT: should probably check whether fLiteral.ch is null instead.
@@ -1223,7 +1223,7 @@ public class XMLDTDScannerImpl extends XMLScanner
               elName,
               name,
               type,
-              enum,
+              enumeration,
               defaultType,
               null,
               null,
@@ -1234,7 +1234,7 @@ public class XMLDTDScannerImpl extends XMLScanner
               elName,
               name,
               type,
-              enum,
+              enumeration,
               defaultType,
               fLiteral,
               fLiteral2,

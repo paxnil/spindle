@@ -114,10 +114,10 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
     }
 
     final ISelection useSelection = checkSelectionForJarEntryFile(selection, jproject);
-    Iterator enum = parts.iterator();
-    while (enum.hasNext())
+    Iterator enumeration = parts.iterator();
+    while (enumeration.hasNext())
     {
-      IWorkbenchPart part = (IWorkbenchPart) enum.next();
+      IWorkbenchPart part = (IWorkbenchPart) enumeration.next();
 
       // get the part's ISetSelectionTarget implementation
       ISetSelectionTarget target = null;

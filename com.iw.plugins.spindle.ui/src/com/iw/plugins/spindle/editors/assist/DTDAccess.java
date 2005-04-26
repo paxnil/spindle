@@ -342,7 +342,7 @@ public class DTDAccess
             Object type = dtdattr.type;
             if (type instanceof DTDEnumeration)
             {
-              DTDEnumeration enum = (DTDEnumeration) type;
+              DTDEnumeration enumeration = (DTDEnumeration) type;
               allowedValues = new ArrayList(((DTDEnumeration) type).getItemsVec());
             } else
             {

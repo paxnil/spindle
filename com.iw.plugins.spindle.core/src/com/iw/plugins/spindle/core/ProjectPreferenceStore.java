@@ -459,10 +459,10 @@ public class ProjectPreferenceStore implements IPersistentPreferenceStore
   public String[] preferenceNames()
   {
     ArrayList list = new ArrayList();
-    Enumeration enum = properties.propertyNames();
-    while (enum.hasMoreElements())
+    Enumeration enumeration = properties.propertyNames();
+    while (enumeration.hasMoreElements())
     {
-      list.add(enum.nextElement());
+      list.add(enumeration.nextElement());
     }
     return (String[]) list.toArray(new String[list.size()]);
   }
