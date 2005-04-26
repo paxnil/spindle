@@ -212,7 +212,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
   private void updateDefaultContainerAndPackage()
   {
     IPackageFragmentRoot root = null;
-    IPackageFragment fragment = null;
+    IPackageFragment fragment = getPackageFragment();
     INamespace namespace = fFirstPageNamespaceField.getSelectedNamespace();
 
     if (namespace != null)
