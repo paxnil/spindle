@@ -41,9 +41,10 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.internal.ide.IDEWorkbenchMessages;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.part.DrillDownComposite;
+
+import com.iw.plugins.spindle.UIPlugin;
 
 /**
  * Workbench-level composite for choosing a container.
@@ -72,9 +73,9 @@ public class ContainerSelectionGroup extends Composite
   private int widhtHint;
 
   // the message to display at the top of this dialog
-  private static final String DEFAULT_MSG_NEW_ALLOWED = IDEWorkbenchMessages
+  private static final String DEFAULT_MSG_NEW_ALLOWED = UIPlugin
       .getString("ContainerGroup.message"); //$NON-NLS-1$
-  private static final String DEFAULT_MSG_SELECT_ONLY = IDEWorkbenchMessages
+  private static final String DEFAULT_MSG_SELECT_ONLY = UIPlugin
       .getString("ContainerGroup.selectFolder"); //$NON-NLS-1$
 
   // sizing constants

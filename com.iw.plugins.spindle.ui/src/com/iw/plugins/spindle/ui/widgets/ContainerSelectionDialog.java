@@ -31,7 +31,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ISelectionValidator;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.internal.ide.IDEWorkbenchMessages;
+
+import com.iw.plugins.spindle.UIPlugin;
 
 /**
  * A standard selection dialog which solicits a container resource from the
@@ -90,13 +91,13 @@ public class ContainerSelectionDialog extends SelectionDialog
       boolean allowNewContainerName, String message)
   {
     super(parentShell);
-    setTitle(IDEWorkbenchMessages.getString("ContainerSelectionDialog.title")); //$NON-NLS-1$
+    setTitle(UIPlugin.getString("ContainerSelectionDialog.title")); //$NON-NLS-1$
     this.initialSelection = initialRoot;
     this.allowNewContainerName = allowNewContainerName;
     if (message != null)
       setMessage(message);
     else
-      setMessage(IDEWorkbenchMessages.getString("ContainerSelectionDialog.message")); //$NON-NLS-1$
+      setMessage(UIPlugin.getString("ContainerSelectionDialog.message")); //$NON-NLS-1$
     setShellStyle(getShellStyle() | SWT.RESIZE);
   }
   /*
