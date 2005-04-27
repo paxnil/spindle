@@ -244,8 +244,8 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
     if (!PreferenceConstants.getPreferenceStore().getBoolean(
         PreferenceConstants.LINK_PACKAGES_TO_EDITOR))
       return;
-    try
-    {
+//    try
+//    {
       IEditorPart editor = (IEditorPart) part.getAdapter(IEditorPart.class);
       if (editor != null)
       {
@@ -253,12 +253,13 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
         IEditorInput input = editor.getEditorInput();
         if (input instanceof FileEditorInput)
         {
-
+          //TODO use platform adapters
           FileEditorInput fei = (FileEditorInput) input;
-          storage = fei.getStorage();
+          storage = (IStorage) fei.getFile();
 
         } else if (input instanceof JarEntryEditorInput)
         {
+//          TODO use platform adapters
           JarEntryEditorInput jeei = (JarEntryEditorInput) input;
           storage = jeei.getStorage();
         }
@@ -266,10 +267,10 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
           selectAndReveal(new StructuredSelection(storage), fCurrentWindow);
 
       }
-    } catch (CoreException e)
-    {
-      // do nothing
-    }
+//    } catch (CoreException e)
+//    {
+//      // do nothing
+//    }
   }
 
   /**
