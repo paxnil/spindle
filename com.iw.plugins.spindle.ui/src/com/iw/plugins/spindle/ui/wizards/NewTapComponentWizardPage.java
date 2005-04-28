@@ -67,7 +67,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -412,7 +411,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         
 
         Control nameFields = createComponentNameControl(composite);
-        addControl(nameFields, composite, 0);
+        addControl(nameFields, null, 0);
 
         Control separator = createSeparator(composite, nameFields);
 
