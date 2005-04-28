@@ -127,7 +127,8 @@ public class TemplateFinder
             IProblemCollector collector) throws CoreException
     {
         ITapestryProject tapestryProject = getTapestryProject(specification);
-        fContextRoot = (IResourceWorkspaceLocation) tapestryProject.getWebContextLocation();
+        if (tapestryProject != null)
+            fContextRoot = (IResourceWorkspaceLocation) tapestryProject.getWebContextLocation();
         fProblemCollector = collector;
         fFindResults.clear();
         findTemplates((PluginComponentSpecification) specification);
