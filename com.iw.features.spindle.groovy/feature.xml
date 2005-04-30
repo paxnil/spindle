@@ -2,7 +2,7 @@
 <feature
       id="com.iw.features.spindle.groovy"
       label="Groovestry Support Add-in for SPindle"
-      version="3.1.19"
+      version="3.1.20"
       provider-name="Geoffrey Longman"
       image="spindle.gif">
 
@@ -43,7 +43,7 @@ All Rights Reserved
    </license>
 
    <url>
-      <update label="Spindle Updates" url="http://spindle.sourceforge.net/updates"/>
+      <update label="Spindle Updates" url="http://spindle.sourceforge.net/unstable"/>
    </url>
 
    <requires>
@@ -54,7 +54,7 @@ All Rights Reserved
          id="com.iw.plugins.spindle.core.groovy"
          download-size="0"
          install-size="0"
-         version="1.0.1"
+         version="3.1.19"
          fragment="true"/>
 
 </feature>

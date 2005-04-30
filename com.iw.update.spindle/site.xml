@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-
    <description url="http://spindle.sourceforge.net/unstable ">
       Eclipse update site for Spindle 3 integration builds. Select builds on this site are promoted to beta status and made available at http://spindle.sourceforge.net/updates.
    </description>
@@ -23,13 +22,19 @@
       <category name="old"/>
    </feature>
    <feature url="features/com.iw.features.spindle.groovy_3.1.19.jar" id="com.iw.features.spindle.groovy" version="3.1.19">
-      <category name="add ons"/>
+      <category name="old"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.1.20.jar" id="com.iw.features.spindle" version="3.1.20">
       <category name="old"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.1.21.jar" id="com.iw.features.spindle" version="3.1.21">
+      <category name="old"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.1.22.jar" id="com.iw.features.spindle" version="3.1.22">
       <category name="spindle_3_1_latest"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle.groovy_3.1.20.jar" id="com.iw.features.spindle.groovy" version="3.1.20">
+      <category name="add ons"/>
    </feature>
    <category-def name="spindle_3_1_latest" label="Spindle 3.1 - latest unstable build - Eclipse 3.0">
       <description>

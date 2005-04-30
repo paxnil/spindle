@@ -2,7 +2,7 @@
 <feature
       id="com.iw.features.spindle"
       label="Spindle 3, an Eclipse Plugin for Tapestry"
-      version="3.1.21"
+      version="3.1.22"
       provider-name="Geoffrey Longman"
       image="spindle.gif">
 
@@ -42,7 +42,7 @@ All Rights Reserved
    </license>
 
    <url>
-      <update label="Spindle Updates" url="http://spindle.sourceforge.net/updates"/>
+      <update label="Spindle Updates" url="http://spindle.sourceforge.net/unstable"/>
    </url>
 
    <requires>
@@ -62,10 +62,36 @@ All Rights Reserved
    </requires>
 
    <plugin
-         id="org.apache.xerces"
+         id="com.iw.plugins.spindle.core"
          download-size="0"
          install-size="0"
-         version="4.0.13"/>
+         version="3.1.22"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.docs"
+         download-size="0"
+         install-size="0"
+         version="3.1.22"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.docs.default"
+         download-size="0"
+         install-size="0"
+         version="3.1.22"
+         fragment="true"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.ui"
+         download-size="0"
+         install-size="0"
+         version="3.1.22"/>
+
+   <plugin
+         id="com.iw.plugins.spindle.ui.contrib"
+         download-size="0"
+         install-size="0"
+         version="3.1.22"
+         fragment="true"/>
 
    <plugin
          id="net.sf.solareclipse.ui"
@@ -80,35 +106,9 @@ All Rights Reserved
          version="0.4.0.spindle-dep-6"/>
 
    <plugin
-         id="com.iw.plugins.spindle.core"
+         id="org.apache.xerces"
          download-size="0"
          install-size="0"
-         version="3.1.21"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.docs"
-         download-size="0"
-         install-size="0"
-         version="3.1.21"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.docs.default"
-         download-size="0"
-         install-size="0"
-         version="3.1.21"
-         fragment="true"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.ui"
-         download-size="0"
-         install-size="0"
-         version="3.1.21"/>
-
-   <plugin
-         id="com.iw.plugins.spindle.ui.contrib"
-         download-size="0"
-         install-size="0"
-         version="3.1.21"
-         fragment="true"/>
+         version="4.0.13"/>
 
 </feature>
