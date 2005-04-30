@@ -360,6 +360,7 @@ public class SpecEditor extends Editor
         if (input instanceof IFileEditorInput)
         {
             setRulerContextMenuId("#TapestrySpecificationRulerContext"); //$NON-NLS-1$
+            setEditorContextMenuId("#TapestrySpecificationMenuContext");
             // only files have reconcilers
             IFile file = ((IFileEditorInput) input).getFile();
             String extension = file.getFullPath().getFileExtension();
@@ -382,6 +383,7 @@ public class SpecEditor extends Editor
         else
         {
             setRulerContextMenuId(AbstractTextEditor.DEFAULT_RULER_CONTEXT_MENU_ID);
+            setEditorContextMenuId(AbstractTextEditor.DEFAULT_EDITOR_CONTEXT_MENU_ID);
         }
 
     }
