@@ -87,7 +87,7 @@ public class FullBuild extends Build
   protected void resolveFramework(Parser parser)
   {
     IResourceWorkspaceLocation frameworkLocation = (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot
-        .getRelativeLocation("/org/apache/tapestry/Framework.library");
+        .getRelativeResource("/org/apache/tapestry/Framework.library");
     FrameworkResolver resolver = new FrameworkResolver(this, parser, frameworkLocation);
     fFrameworkNamespace = resolver.resolve();
     //        fFrameworkNamespace =
@@ -169,7 +169,7 @@ public class FullBuild extends Build
     // Scanners use the Spindle validator.
 
     IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot
-        .getRelativeLocation("WEB-INF/web.xml");
+        .getRelativeResource("WEB-INF/web.xml");
     IStorage storage = webXML.getStorage();
     if (storage != null)
     {

@@ -449,7 +449,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder {
 					+ "missing-context"));
 
 		IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fContextRoot
-				.getRelativeLocation("WEB-INF/web.xml");
+				.getRelativeResource("WEB-INF/web.xml");
 
 		if (webXML.getStorage() == null)
 			throw new BuilderException(TapestryCore.getString(STRING_KEY

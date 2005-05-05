@@ -230,9 +230,9 @@ public class WebXMLScanner extends AbstractScanner
             String expectedName = servletName + ".application";
 
             IResourceWorkspaceLocation webInfLocation = (IResourceWorkspaceLocation) context
-                    .getRelativeLocation("/WEB-INF/");
+                    .getRelativeResource("/WEB-INF/");
             IResourceWorkspaceLocation webInfAppLocation = (IResourceWorkspaceLocation) webInfLocation
-                    .getRelativeLocation(servletName + "/");
+                    .getRelativeResource(servletName + "/");
 
             IResourceWorkspaceLocation result = check(webInfAppLocation, expectedName);
             if (result != null)
@@ -248,7 +248,7 @@ public class WebXMLScanner extends AbstractScanner
             return null;
 
         IResourceWorkspaceLocation result = (IResourceWorkspaceLocation) location
-                .getRelativeLocation(name);
+                .getRelativeResource(name);
 
         if (result != null && result.getStorage() != null)
             return result;

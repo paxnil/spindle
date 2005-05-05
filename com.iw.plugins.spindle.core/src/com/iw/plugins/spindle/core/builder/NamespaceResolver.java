@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.Tapestry;
@@ -330,10 +331,10 @@ public abstract class NamespaceResolver
 
                 if (namespaceLocation.isOnClasspath())
                     libLocation = (IResourceWorkspaceLocation) namespaceLocation
-                            .getRelativeLocation(spec.getLibrarySpecificationPath(libraryId));
+                            .getRelativeResource(spec.getLibrarySpecificationPath(libraryId));
                 else
                     libLocation = (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot
-                            .getRelativeLocation(spec.getLibrarySpecificationPath(libraryId));
+                            .getRelativeResource(spec.getLibrarySpecificationPath(libraryId));
 
                 if (libLocation.getStorage() != null)
                 {
@@ -452,7 +453,7 @@ public abstract class NamespaceResolver
         for (int i = 0; i < count; i++)
         {
             String type = (String) cTypes.get(i);
-            IResourceLocation specLoc = location.getRelativeLocation(spec
+            Resource specLoc = location.getRelativeResource(spec
                     .getComponentSpecificationPath(type));
             result.put(type, specLoc);
         }
@@ -506,7 +507,7 @@ public abstract class NamespaceResolver
         for (Iterator iter = spec.getPageNames().iterator(); iter.hasNext();)
         {
             String type = (String) iter.next();
-            IResourceLocation specLoc = location.getRelativeLocation(spec
+            Resource specLoc = location.getRelativeResource(spec
                     .getPageSpecificationPath(type));
             result.put(type, specLoc);
         }

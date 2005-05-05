@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -388,7 +388,7 @@ public abstract class Build
   protected IApplicationSpecification resolveApplication(
       Parser parser,
       IStorage storage,
-      IResourceLocation location,
+      Resource location,
       String encoding)
   {
     IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
@@ -459,7 +459,7 @@ public abstract class Build
     }
   }
 
-  protected void recordFatalProblem(IResourceLocation location, ScannerException e)
+  protected void recordFatalProblem(Resource location, ScannerException e)
   {
     IResource resource = CoreUtils.toResource(location);
     if (resource != null)
@@ -484,7 +484,7 @@ public abstract class Build
   protected ILibrarySpecification resolveLibrarySpecification(
       Parser parser,
       IStorage storage,
-      IResourceLocation location,
+      Resource location,
       String encoding)
   {
     IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
@@ -644,7 +644,7 @@ public abstract class Build
   protected Document parseToDocument(
       Parser parser,
       IStorage storage,
-      IResourceLocation location,
+      Resource location,
       String encoding) throws IOException, CoreException
   {
     if (storage != null)
@@ -792,7 +792,7 @@ public abstract class Build
     return result;
   }
 
-  protected void finished(IResourceLocation location)
+  protected void finished(Resource location)
   {
     if (fBuildQueue.isWaiting(location))
     {

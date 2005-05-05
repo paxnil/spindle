@@ -25,13 +25,11 @@ package com.iw.plugins.spindle.core.builder;
  *
  * ***** END LICENSE BLOCK ***** */
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 /**
  * Notifies users of the progress of a Build
  * 
@@ -64,7 +62,7 @@ public class BuildNotifier
     aboutToProcess(resource.getName());
   }
 
-  public void aboutToProcess(IResourceWorkspaceLocation descriptor)
+  public void aboutToProcess(Resource descriptor)
   {
     aboutToProcess(descriptor.getName());
   }
@@ -79,7 +77,7 @@ public class BuildNotifier
     processed(resource.getName());
   }
 
-  public void processed(IResourceLocation descriptor)
+  public void processed(Resource descriptor)
   {
     processed(descriptor.getName());
   }

@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -71,8 +71,14 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         super(builder, projectDelta);
     }
 
-    protected IApplicationSpecification resolveApplication(Parser parser, IStorage storage,
-            IResourceLocation location, String encoding)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.builder.Build#resolveApplication(com.iw.plugins.spindle.core.parser.Parser,
+     *      org.eclipse.core.resources.IStorage, org.apache.hivemind.Resource, java.lang.String)
+     */
+    protected IApplicationSpecification resolveAppflication(Parser parser, IStorage storage,
+            Resource location, String encoding)
     {
         IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
         PluginApplicationSpecification result = null;
@@ -136,7 +142,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         return result;
     }
 
-    private boolean checkStorage(IResourceLocation location, IStorage storage)
+    private boolean checkStorage(Resource location, IStorage storage)
     {
         if (storage == null)
         {
@@ -149,11 +155,11 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.Build#parseLibrary(com.iw.plugins.spindle.core.parser.Parser,
-     *      org.apache.tapestry.IResourceLocation, java.lang.String)
+     * @see com.iw.plugins.spindle.core.builder.Build#resolveLibrarySpecification(com.iw.plugins.spindle.core.parser.Parser,
+     *      org.eclipse.core.resources.IStorage, org.apache.hivemind.Resource, java.lang.String)
      */
     protected ILibrarySpecification resolveLibrarySpecification(Parser parser, IStorage storage,
-            IResourceLocation location, String encoding)
+            Resource location, String encoding)
     {
 
         IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
@@ -230,6 +236,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      * 
      * @see com.iw.plugins.spindle.core.builder.Build#resolveIComponentSpecification(com.iw.plugins.spindle.core.parser.Parser,
      *      com.iw.plugins.spindle.core.namespace.ICoreNamespace,
+     *      org.eclipse.core.resources.IStorage,
      *      com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation, java.lang.String)
      */
     protected IComponentSpecification resolveIComponentSpecification(Parser parser,

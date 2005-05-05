@@ -57,6 +57,7 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
  * IBuildActions. The TapestryBuilder will execute them last! This is because some validations here
  * involve pages and pages are not resolved by the builder until after all of the components are.
  * 
+ * @deprecated
  * @author glongman@gmail.com
  */
 public class FrameworkComponentValidator
@@ -310,7 +311,7 @@ public class FrameworkComponentValidator
                         && !value.startsWith(BaseValidator.DefaultDummyString))
                 {
                     IResourceWorkspaceLocation scriptLocation = (IResourceWorkspaceLocation) scriptOwnerLocation
-                            .getRelativeLocation(value);
+                            .getRelativeResource(value);
                     if (scriptLocation.getStorage() == null)
                     {
                         ISourceLocation location;

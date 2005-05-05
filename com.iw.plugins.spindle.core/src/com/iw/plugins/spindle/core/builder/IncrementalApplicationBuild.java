@@ -3,7 +3,7 @@ package com.iw.plugins.spindle.core.builder;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -200,7 +200,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
 
     // The Tapestry framework library must exist in the state
     IResourceWorkspaceLocation frameworkLocation = (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot
-        .getRelativeLocation("/org/apache/tapestry/Framework.library");
+        .getRelativeResource("/org/apache/tapestry/Framework.library");
     if (!fLastState.fBinaryNamespaces.containsKey(frameworkLocation))
       return false;
 
@@ -229,7 +229,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
 
       //web.xml must exist
       IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot
-          .getRelativeLocation("WEB-INF/web.xml");
+          .getRelativeResource("WEB-INF/web.xml");
 
       IResource resource = (IResource) webXML.getStorage();
       if (resource == null)
@@ -317,9 +317,9 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
         return true;
 
       IResource existingSpecFile = null;
-      IResourceLocation previousSpecLocation = last.getSpecificationLocation();
+      Resource previousSpecLocation = last.getSpecificationLocation();
       IResourceWorkspaceLocation WEB_INF = (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot
-          .getRelativeLocation("WEB-INF");
+          .getRelativeResource("WEB-INF");
 
       if (!previousSpecLocation.equals(WEB_INF))
       {

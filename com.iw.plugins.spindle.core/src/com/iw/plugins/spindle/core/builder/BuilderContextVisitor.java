@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -124,7 +124,7 @@ public class BuilderContextVisitor implements IResourceVisitor
       String extension = resource.getFileExtension();
       if (knownExtensions.contains(extension))
       {
-        IResourceLocation location = fBuild.fTapestryBuilder.fContextRoot
+        Resource location = fBuild.fTapestryBuilder.fContextRoot
             .getRelativeLocation(resource);
         fCollector.add(location);
         debug(location, true);
@@ -133,7 +133,7 @@ public class BuilderContextVisitor implements IResourceVisitor
     return true;
   }
 
-  protected void debug(IResourceLocation location, boolean included)
+  protected void debug(Resource location, boolean included)
   {
     if (TapestryBuilder.DEBUG)
       System.out.println(location);
