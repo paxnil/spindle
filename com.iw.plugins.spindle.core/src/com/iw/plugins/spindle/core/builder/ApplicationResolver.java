@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
@@ -178,8 +178,8 @@ public class ApplicationResolver extends NamespaceResolver
   {
 
     PluginApplicationSpecification applicationSpec = new PluginApplicationSpecification();
-    IResourceLocation virtualLocation = fBuild.fTapestryBuilder.fContextRoot
-        .getRelativeLocation("/WEB-INF/");
+    Resource virtualLocation = fBuild.fTapestryBuilder.fContextRoot
+        .getRelativeResource("/WEB-INF/");
     applicationSpec.setSpecificationLocation(virtualLocation);
     applicationSpec.setName(servlet.name);
 
