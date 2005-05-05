@@ -1042,14 +1042,16 @@ public class XMLUtil
     } else
     {
       indenter.println("<?xml version=\"1.0\"?>");
-      indenter.println("<web-app xmlns=\"http://java.sun.com/xml/ns/j2ee\"");
+      indenter.println("<web-app version=\"2.4\"");
+      indenter.printlnIndented(1, "xmlns=\"http://java.sun.com/xml/ns/j2ee\"");
       indenter.printlnIndented(
           1,
-          "xmlns:xsi=\"http://www.w3.org/TR/xmlschema-1/\"");
+          "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
       indenter
-          .printIndented(
+          .printlnIndented(
               1,
-              "xsi:schemaLocation=\"http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd\" version=\"2.4\">");
+              "xsi:schemaLocation=\"http://java.sun.com/xml/ns/j2ee");
+      indenter.printIndented(1, "http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd\" >");
       indenter.println();
     }
     indenter.printlnIndented(1, "<display-name>" + servletName + "</display-name>");
