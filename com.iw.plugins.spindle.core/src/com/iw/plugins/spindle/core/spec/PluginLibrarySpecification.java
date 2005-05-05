@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.INamespace;
-import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
@@ -107,13 +106,6 @@ public class PluginLibrarySpecification extends BaseSpecLocatable
    * Immutable after a parse/scan episode.
    */
   private List fEngineServiceDeclarations;
-
-  /**
-   * Resource resolver
-   *  
-   */
-
-  private IResourceResolver fResourceResolver;
 
   private INamespace fNamespace;
 
@@ -366,15 +358,15 @@ public class PluginLibrarySpecification extends BaseSpecLocatable
     return fPublicId;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.ILibrarySpecification#getResourceResolver()
-   */
-  public IResourceResolver getResourceResolver()
-  {
-    return fResourceResolver;
-  }
+//  /*
+//   * (non-Javadoc)
+//   * 
+//   * @see org.apache.tapestry.spec.ILibrarySpecification#getResourceResolver()
+//   */
+//  public IResourceResolver getResourceResolver()
+//  {
+//    return fResourceResolver;
+//  }
 
   /*
    * (non-Javadoc)
@@ -569,15 +561,16 @@ public class PluginLibrarySpecification extends BaseSpecLocatable
     fPublicId = value;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.ILibrarySpecification#setResourceResolver(org.apache.tapestry.IResourceResolver)
-   */
-  public void setResourceResolver(IResourceResolver resolver)
-  {
-    this.fResourceResolver = resolver;
-  }
+    //  /*
+    //   * (non-Javadoc)
+    //   *
+    //   * @see
+    // org.apache.tapestry.spec.ILibrarySpecification#setResourceResolver(org.apache.tapestry.IResourceResolver)
+    //   */
+    //  public void setResourceResolver(IResourceResolver resolver)
+    //  {
+    //    this.fResourceResolver = resolver;
+    //  }
 
   /**
    * @return

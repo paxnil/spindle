@@ -100,13 +100,13 @@ public class TapestryCoreSpecFactory extends SpecFactory
   //    return new PluginFieldBeanInitializer(propertyName, fieldName);
   //  }
 
-  /**
-   * @see net.sf.tapestry.spec.SpecFactory#createExtensionSpecification()
-   */
-  public IExtensionSpecification createExtensionSpecification()
-  {
-    return new PluginExtensionSpecification();
-  }
+    //  /**
+    //   * @see net.sf.tapestry.spec.SpecFactory#createExtensionSpecification()
+    //   */
+    //  public IExtensionSpecification createExtensionSpecification()
+    //  {
+    //    return new PluginExtensionSpecification();
+    //  }
 
   /**
    * @see net.sf.tapestry.spec.SpecFactory#createLibrarySpecification()

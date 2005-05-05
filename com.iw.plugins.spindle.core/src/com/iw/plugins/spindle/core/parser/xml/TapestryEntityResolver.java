@@ -51,8 +51,8 @@ public class TapestryEntityResolver implements XMLEntityResolver
   {
     TapestryEntities = new HashMap();
     registerTapestryDTD(
-        SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID,
-        "Tapestry_1_3.dtd");
+        SpecificationParser.TAPESTRY_DTD_3_1_PUBLIC_ID,
+        "Tapestry_3_1.dtd");
     registerTapestryDTD(
         SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID,
         "Tapestry_3_0.dtd");

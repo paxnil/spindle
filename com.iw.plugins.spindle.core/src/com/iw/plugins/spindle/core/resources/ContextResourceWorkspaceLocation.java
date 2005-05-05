@@ -30,7 +30,7 @@ import java.io.InputStream;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -43,167 +43,168 @@ import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 
 /**
- * Implementation of IResourceWorkspaceLocation for resources found within the
- * context of a web application.
+ * Implementation of IResourceWorkspaceLocation for resources found within the context of a web
+ * application.
  * 
  * @author glongman@gmail.com
  */
 public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceLocation
 {
 
-  protected ContextResourceWorkspaceLocation(ContextRootLocation root, String path)
-  {
-    super(root, path);
-  }
-
-  public ContextResourceWorkspaceLocation(ContextRootLocation root, IResource resource)
-  {
-    this(root, root.findRelativePath(resource));
-  }
-
-  public IContainer getContainer()
-  {
-    return ((ContextRootLocation) fRoot).getContainer(this);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getStorage()
-   */
-  public IStorage getStorage()
-  {
-
-    //if we are in a build, the storages get cached for speed.
-    Map cache = TapestryBuilder.getStorageCache();
-
-    if (cache != null && cache.containsKey(this))
-      return (IStorage) cache.get(this);
-
-    IStorage result = null;
-    IContainer container = getContainer();
-    if (container != null && getName() != null)
+    protected ContextResourceWorkspaceLocation(ContextRootLocation root, String path)
     {
-      IStorage storage = (IStorage) container.getFile(new Path(getName()));
-      IResource resource = (IResource) storage.getAdapter(IResource.class);
-      if (resource != null && resource.exists())
-        result = storage;
+        super(root, path);
     }
 
-    if (cache != null)
-      cache.put(this, result);
-
-    return result;
-  }
-
-  public IResource getResource()
-  {
-    IContainer container = getContainer();
-    if (container != null && getName() != null)
+    public ContextResourceWorkspaceLocation(ContextRootLocation root, IResource resource)
     {
-      IResource resource = container.findMember(new Path(getName()));
-      if (resource == null || resource.exists())
-        return resource;
+        this(root, root.findRelativePath(resource));
     }
-    return null;
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isWorkspaceResource()
-   */
-  public boolean isWorkspaceResource()
-  {
-    return true;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getProject()
-   */
-  public IProject getProject()
-  {
-    IFile found = (IFile) getStorage();
-    return found.getProject();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getContents()
-   */
-  public InputStream getContents() throws CoreException
-  {
-    IStorage storage = getStorage();
-    if (storage != null)
-      return storage.getContents();
-
-    return null;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.IResourceLocation#getLocalization(java.util.Locale)
-   */
-  public IResourceLocation getLocalization(Locale locale)
-  {
-    // TODO implement later
-    throw new RuntimeException("not implemented");
-  }
-
-  //    public int hashCode()
-  //    {
-  //        HashCodeBuilder builder = new HashCodeBuilder(5589, 1117);
-  //
-  //        builder.append(getPath());
-  //        builder.append(fRoot);
-  //
-  //        return builder.toHashCode();
-  //    }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)
-   */
-  public void lookup(IResourceLocationAcceptor requestor) throws CoreException
-  {
-    IContainer container = getContainer();
-    if (container != null && container.exists())
+    public IContainer getContainer()
     {
-      IResource[] members = container.members(false);
-      for (int i = 0; i < members.length; i++)
-      {
-        if (members[i] instanceof IContainer)
-          continue;
-
-        if (!requestor.accept((IResourceWorkspaceLocation) getRelativeLocation(members[i]
-            .getName())))
-          break;
-      }
+        return ((ContextRootLocation) fRoot).getContainer(this);
     }
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getSearch()
-   */
-  public ISearch getSearch() throws CoreException
-  {
-    return fRoot.getSearch();
-  }
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
-   */
-  public boolean isBinary()
-  {
-    return false;
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getStorage()
+     */
+    public IStorage getStorage()
+    {
+
+        //if we are in a build, the storages get cached for speed.
+        Map cache = TapestryBuilder.getStorageCache();
+
+        if (cache != null && cache.containsKey(this))
+            return (IStorage) cache.get(this);
+
+        IStorage result = null;
+        IContainer container = getContainer();
+        if (container != null && getName() != null)
+        {
+            IStorage storage = (IStorage) container.getFile(new Path(getName()));
+            IResource resource = (IResource) storage.getAdapter(IResource.class);
+            if (resource != null && resource.exists())
+                result = storage;
+        }
+
+        if (cache != null)
+            cache.put(this, result);
+
+        return result;
+    }
+
+    public IResource getResource()
+    {
+        IContainer container = getContainer();
+        if (container != null && getName() != null)
+        {
+            IResource resource = container.findMember(new Path(getName()));
+            if (resource == null || resource.exists())
+                return resource;
+        }
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isWorkspaceResource()
+     */
+    public boolean isWorkspaceResource()
+    {
+        return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getProject()
+     */
+    public IProject getProject()
+    {
+        IFile found = (IFile) getStorage();
+        return found.getProject();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getContents()
+     */
+    public InputStream getContents() throws CoreException
+    {
+        IStorage storage = getStorage();
+        if (storage != null)
+            return storage.getContents();
+
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.hivemind.Resource#getLocalization(java.util.Locale)
+     */
+    public Resource getLocalization(Locale locale)
+    {
+        // TODO implement later
+        throw new RuntimeException("not implemented");
+    }
+
+    //    public int hashCode()
+    //    {
+    //        HashCodeBuilder builder = new HashCodeBuilder(5589, 1117);
+    //
+    //        builder.append(getPath());
+    //        builder.append(fRoot);
+    //
+    //        return builder.toHashCode();
+    //    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#seek(com.iw.plugins.spindle.core.resources.IResourceLocationRequestor)
+     */
+    public void lookup(IResourceLocationAcceptor requestor) throws CoreException
+    {
+        IContainer container = getContainer();
+        if (container != null && container.exists())
+        {
+            IResource[] members = container.members(false);
+            for (int i = 0; i < members.length; i++)
+            {
+                if (members[i] instanceof IContainer)
+                    continue;
+
+                if (!requestor.accept((IResourceWorkspaceLocation) getRelativeResource(members[i]
+                        .getName())))
+                    break;
+            }
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getSearch()
+     */
+    public ISearch getSearch() throws CoreException
+    {
+        return fRoot.getSearch();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
+     */
+    public boolean isBinary()
+    {
+        return false;
+    }
 
 }

@@ -27,7 +27,6 @@
 package com.iw.plugins.spindle.core.scanning;
 
 import org.apache.tapestry.INamespace;
-import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -105,14 +104,12 @@ public class LibraryScanner extends SpecificationScanner
                     IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_LIBRARY);
             return;
         }
-        scanLibrarySpecification(fRootNode, specification, null);
+        scanLibrarySpecification(fRootNode, specification);
     }
 
-    protected void scanLibrarySpecification(Node rootNode, ILibrarySpecification specification,
-            IResourceResolver resolver) throws ScannerException
+    protected void scanLibrarySpecification(Node rootNode, ILibrarySpecification specification)
+            throws ScannerException
     {
-        //   not needed by Spindle
-        //        specification.setResourceResolver(resolver);
 
         for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
         {
@@ -294,7 +291,7 @@ public class LibraryScanner extends SpecificationScanner
         exSpec.setImmediate(immediate);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(specification.getSpecificationLocation());
+        location.setResource(specification.getSpecificationLocation());
         exSpec.setLocation(location);
 
         exSpec.validateSelf(specification, fValidator);

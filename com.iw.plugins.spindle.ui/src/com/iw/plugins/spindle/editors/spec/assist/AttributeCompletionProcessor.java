@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
@@ -380,18 +379,8 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
                 && fIsAttributeTerminated)
             return chooseJavaTypeNameProposals(true, null);
 
-        if ("parameter".equals(fTagName) && fIsAttributeTerminated)
-        {
-            if (fDTD.getPublicId().equals(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID)
-                    && "java-type".equals(fAttributeName))
-            {
-                return chooseJavaTypeNameProposals(true, null);
-            }
-            else if ("type".equals(fAttributeName))
-            {
-                return chooseJavaTypeNameProposals(true, null);
-            }
-        }
+        if ("parameter".equals(fTagName) && fIsAttributeTerminated && "type".equals(fAttributeName))
+            return chooseJavaTypeNameProposals(true, null);
 
         if ("context-asset".equals(fTagName) && "path".equals(fAttributeName)
                 && fIsAttributeTerminated)
@@ -631,8 +620,8 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         IStorage storage = fEditor.getStorage();
         if (storage == null)
             return Collections.EMPTY_LIST;
-        
-        IJavaProject jproject = (IJavaProject)storage.getAdapter(IJavaProject.class);
+
+        IJavaProject jproject = (IJavaProject) storage.getAdapter(IJavaProject.class);
         if (jproject == null)
             return Collections.EMPTY_LIST;
 
@@ -646,10 +635,10 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     {
         IStorage storage = fEditor.getStorage();
         ITapestryProject tproject = null;
-        
-        if (storage != null)        
+
+        if (storage != null)
             tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
-        
+
         if (tproject == null)
             return Collections.EMPTY_LIST;
 
@@ -661,8 +650,8 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     {
         IStorage storage = fEditor.getStorage();
         ITapestryProject tproject = null;
-        
-        if (storage != null)        
+
+        if (storage != null)
             tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
 
         if (tproject == null)
@@ -686,8 +675,8 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
 
         IStorage storage = fEditor.getStorage();
         ITapestryProject tproject = null;
-        
-        if (storage != null)        
+
+        if (storage != null)
             tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
 
         if (tproject == null)
@@ -759,8 +748,8 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
     {
         IStorage storage = fEditor.getStorage();
         ITapestryProject tproject = null;
-        
-        if (storage != null)        
+
+        if (storage != null)
             tproject = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
 
         if (tproject == null)

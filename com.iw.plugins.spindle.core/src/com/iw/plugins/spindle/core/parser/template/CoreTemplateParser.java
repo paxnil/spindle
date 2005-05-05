@@ -30,15 +30,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.tapestry.ApplicationRuntimeException;
-import org.apache.tapestry.ILocation;
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.ApplicationRuntimeException;
+import org.apache.hivemind.Location;
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.parse.ITemplateParserDelegate;
 import org.apache.tapestry.parse.LocalizationToken;
 import org.apache.tapestry.parse.OpenToken;
 import org.apache.tapestry.parse.TemplateParseException;
 import org.apache.tapestry.parse.TemplateParser;
 import org.apache.tapestry.parse.TemplateToken;
+import org.apache.tapestry.parse.TemplateTokenFactory;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -75,14 +76,14 @@ public class CoreTemplateParser extends TemplateParser
         }
 
         public LocalizationToken createLocalizationToken(String tagName, String localizationKey,
-                boolean raw, Map attributes, ILocation startLocation)
+                boolean raw, Map attributes, Location startLocation)
         {
             return new CoreLocalizationToken(tagName, localizationKey, raw, attributes,
                     startLocation, eventHandler.getEventInfo());
         }
 
         public OpenToken createOpenToken(String tagName, String jwcId, String type,
-                ILocation location)
+                Location location)
         {
             return new CoreOpenToken(tagName, jwcId, type, location, eventHandler.getEventInfo());
         }
@@ -104,11 +105,11 @@ public class CoreTemplateParser extends TemplateParser
     public CoreTemplateParser()
     {
         super();
-        _factory = new CoreTemplateTokenFactory(fEventHandler);
+        setFactory(new CoreTemplateTokenFactory(fEventHandler));
     }
 
     public TemplateToken[] parse(char[] templateData, ITemplateParserDelegate delegate,
-            IResourceLocation resourceLocation) throws TemplateParseException
+            Resource resourceLocation) throws TemplateParseException
     {
         TemplateToken[] result = null;
 
@@ -195,7 +196,7 @@ public class CoreTemplateParser extends TemplateParser
      * @see org.apache.tapestry.parse.TemplateParser#templateParseProblem(java.lang.String,
      *      org.apache.tapestry.ILocation, int, int)
      */
-    protected void templateParseProblem(String message, ILocation location, int line, int cursor)
+    protected void templateParseProblem(String message, Location location, int line, int cursor)
             throws TemplateParseException
     {
         if (fProblemCollector != null)

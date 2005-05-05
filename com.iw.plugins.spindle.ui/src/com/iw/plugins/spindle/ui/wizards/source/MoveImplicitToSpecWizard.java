@@ -32,7 +32,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.tapestry.ILocationHolder;
+
+import org.apache.hivemind.LocationHolder;
 import org.apache.tapestry.parse.TemplateParser;
 import org.apache.tapestry.spec.BindingType;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -397,20 +398,20 @@ public class MoveImplicitToSpecWizard extends Wizard
   {
     PluginContainedComponent newContainedComponent = createNewContainedComponent(templateAttributesThatMove);
 
-    ILocationHolder found = fRelatedSpec;
+    LocationHolder found = fRelatedSpec;
     //check for existing ContainedComponents
     List componentIds = fRelatedSpec.getComponentIds();
 
     if (!componentIds.isEmpty())
     {
-      found = (ILocationHolder) fRelatedSpec.getComponent((String) componentIds
+      found = (LocationHolder) fRelatedSpec.getComponent((String) componentIds
           .get(componentIds.size() - 1));
     } else
     {
       List propertySpecs = fRelatedSpec.getPropertySpecificationNames();
       if (!propertySpecs.isEmpty())
       {
-        found = (ILocationHolder) fRelatedSpec
+        found = (LocationHolder) fRelatedSpec
             .getPropertySpecification((String) propertySpecs
                 .get(propertySpecs.size() - 1));
       } else
@@ -418,20 +419,20 @@ public class MoveImplicitToSpecWizard extends Wizard
         List propertyDecls = fRelatedSpec.getPropertyDeclarations();
         if (!propertyDecls.isEmpty())
         {
-          found = (ILocationHolder) propertyDecls.get(propertyDecls.size() - 1);
+          found = (LocationHolder) propertyDecls.get(propertyDecls.size() - 1);
         } else
         {
           List parameterDecls = fRelatedSpec.getParameterNames();
           if (!parameterDecls.isEmpty())
           {
-            found = (ILocationHolder) fRelatedSpec.getParameter((String) parameterDecls
+            found = (LocationHolder) fRelatedSpec.getParameter((String) parameterDecls
                 .get(parameterDecls.size() - 1));
           } else
           {
             List descriptionDecls = fRelatedSpec.getDescriptionDeclarations();
             if (!descriptionDecls.isEmpty())
             {
-              found = (ILocationHolder) descriptionDecls.get(descriptionDecls.size() - 1);
+              found = (LocationHolder) descriptionDecls.get(descriptionDecls.size() - 1);
             }
           }
         }

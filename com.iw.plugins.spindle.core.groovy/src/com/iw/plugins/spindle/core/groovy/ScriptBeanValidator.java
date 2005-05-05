@@ -146,9 +146,9 @@ public class ScriptBeanValidator implements IBeanSpecificationValidator
 
     IResourceWorkspaceLocation base = (IResourceWorkspaceLocation) bean
         .getLocation()
-        .getResourceLocation();
+        .getResource();
     IResourceWorkspaceLocation script = (IResourceWorkspaceLocation) base
-        .getRelativeLocation(scriptName + ".groovy");
+        .getRelativeResource(scriptName + ".groovy");
 
     IStorage storage = script.getStorage();
 

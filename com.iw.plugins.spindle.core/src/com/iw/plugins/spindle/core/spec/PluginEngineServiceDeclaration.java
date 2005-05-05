@@ -26,7 +26,7 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.ILocation;
+import org.apache.hivemind.Location;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -39,6 +39,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 /**
  * Record <service>tags in a document
  * 
+ * @deprecated ??
  * @author glongman@gmail.com
  */
 public class PluginEngineServiceDeclaration extends DescribableSpecification
@@ -48,7 +49,7 @@ public class PluginEngineServiceDeclaration extends DescribableSpecification
   String fServiceClass;
 
   public PluginEngineServiceDeclaration(String name, String serviceClass,
-      ILocation location)
+      Location location)
   {
     super(BaseSpecification.ENGINE_SERVICE_DECLARATION);
     fName = name;

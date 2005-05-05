@@ -263,7 +263,7 @@ public class TemplateFinder
         // need to ensure the base template exists.
         // if it does we look for localized versions of it!
         IResourceWorkspaceLocation baseLocation = (IResourceWorkspaceLocation) location
-                .getRelativeLocation(fTemplateBaseName + "." + fExtension);
+                .getRelativeResource(fTemplateBaseName + "." + fExtension);
         if (baseLocation.getStorage() != null)
         {
             fAcceptor.configure(fTemplateBaseName, fExtension);

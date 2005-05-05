@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.Direction;
@@ -57,7 +58,7 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
 public abstract class SpecificationScanner extends AbstractScanner
 {
 
-    protected IResourceLocation fResourceLocation;
+    protected Resource fResourceLocation;
 
     protected IStorage fStorage;
 
@@ -146,7 +147,7 @@ public abstract class SpecificationScanner extends AbstractScanner
         return super.afterScan(scanResults);
     }
 
-    public void setResourceInformation(IStorage storage, IResourceLocation location)
+    public void setResourceInformation(IStorage storage, Resource location)
     {
         fStorage = storage;
         fResourceLocation = location;

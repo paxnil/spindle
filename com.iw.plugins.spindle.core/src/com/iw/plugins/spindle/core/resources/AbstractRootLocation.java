@@ -30,7 +30,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Locale;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 
@@ -52,7 +52,7 @@ public abstract class AbstractRootLocation implements IResourceWorkspaceLocation
     throw new RuntimeException("can't get the contents from root!");
   }
 
-  public IResourceLocation getLocalization(Locale arg0)
+  public Resource getLocalization(Locale arg0)
   {
     throw new RuntimeException("can't get the localization from root!");
   }

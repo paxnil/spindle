@@ -29,7 +29,6 @@ package com.iw.plugins.spindle.editors.spec.actions;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.eclipse.core.resources.IStorage;
@@ -148,7 +147,8 @@ public class OpenDeclarationAction extends BaseSpecAction
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
-            ITapestryProject project = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
+            ITapestryProject project = (ITapestryProject) storage
+                    .getAdapter(ITapestryProject.class);
             if (project == null)
                 return;
 
@@ -157,7 +157,7 @@ public class OpenDeclarationAction extends BaseSpecAction
                 return;
 
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root
-                    .getRelativeLocation(path);
+                    .getRelativeResource(path);
             IStorage s = location.getStorage();
             if (s != null)
                 foundResult(s, null, null);
@@ -185,7 +185,8 @@ public class OpenDeclarationAction extends BaseSpecAction
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
-            ITapestryProject project = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
+            ITapestryProject project = (ITapestryProject) storage
+                    .getAdapter(ITapestryProject.class);
             if (project == null)
                 return;
 
@@ -194,7 +195,7 @@ public class OpenDeclarationAction extends BaseSpecAction
                 return;
 
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root
-                    .getRelativeLocation(path);
+                    .getRelativeResource(path);
             IStorage s = location.getStorage();
             if (s != null)
                 foundResult(s, null, null);
@@ -221,7 +222,8 @@ public class OpenDeclarationAction extends BaseSpecAction
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
-            ITapestryProject project = (ITapestryProject) storage.getAdapter(ITapestryProject.class);
+            ITapestryProject project = (ITapestryProject) storage
+                    .getAdapter(ITapestryProject.class);
             if (project == null)
                 return;
 
@@ -230,7 +232,7 @@ public class OpenDeclarationAction extends BaseSpecAction
                 return;
 
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) contextRoot
-                    .getRelativeLocation(path);
+                    .getRelativeResource(path);
             IStorage s = location.getStorage();
             if (s != null)
                 foundResult(s, null, null);
@@ -268,7 +270,7 @@ public class OpenDeclarationAction extends BaseSpecAction
                 return;
 
             IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) rootLocation
-                    .getRelativeLocation(path);
+                    .getRelativeResource(path);
             IStorage s = location.getStorage();
             if (s != null)
                 foundResult(s, null, null);
@@ -508,14 +510,7 @@ public class OpenDeclarationAction extends BaseSpecAction
             protected void doHandle(XMLNode artifact) throws IllegalArgumentException,
                     CoreException
             {
-                if (fDTD.getPublicId() == SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID)
-                {
-                    handleTypeLookup(artifact, "java-type");
-                }
-                else
-                {
-                    handleTypeLookup(artifact, "type");
-                }
+                handleTypeLookup(artifact, "type");
             }
         });
         Handler bindingHandler = new Handler(true)

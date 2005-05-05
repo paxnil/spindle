@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
-import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.w3c.dom.Node;
 
@@ -88,12 +87,11 @@ public class ApplicationScanner extends LibraryScanner
                     IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_APPLICATION);
             return;
         }
-        scanApplicationSpecification(fRootNode, specification, null);
+        scanApplicationSpecification(fRootNode, specification);
     }
 
     protected IApplicationSpecification scanApplicationSpecification(Node rootNode,
-            IApplicationSpecification specification, IResourceResolver resolver)
-            throws ScannerException
+            IApplicationSpecification specification) throws ScannerException
     {
 
         specification.setName(getAttribute(rootNode, "name"));
@@ -102,7 +100,7 @@ public class ApplicationScanner extends LibraryScanner
 
         ((PluginApplicationSpecification) specification).validateSelf(fValidator);
 
-        scanLibrarySpecification(rootNode, specification, resolver);
+        scanLibrarySpecification(rootNode, specification);
 
         return specification;
     }

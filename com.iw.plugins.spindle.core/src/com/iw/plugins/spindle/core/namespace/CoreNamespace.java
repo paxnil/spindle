@@ -31,9 +31,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.tapestry.ILocation;
+import org.apache.hivemind.Location;
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.INamespace;
-import org.apache.tapestry.IResourceLocation;
+import org.apache.tapestry.spec.ComponentSpecification;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -300,7 +301,7 @@ public class CoreNamespace implements ICoreNamespace
 
   /*
    * (non-Javadoc)
-   * 
+   * @deprecated
    * @see org.apache.tapestry.INamespace#getServiceClassName(java.lang.String)
    */
   public String getServiceClassName(String name)
@@ -310,7 +311,7 @@ public class CoreNamespace implements ICoreNamespace
 
   /*
    * (non-Javadoc)
-   * 
+   * @deprecated
    * @see org.apache.tapestry.INamespace#getServiceNames()
    */
   public List getServiceNames()
@@ -343,12 +344,11 @@ public class CoreNamespace implements ICoreNamespace
     return prefix + SEPARATOR + pageName;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.INamespace#getSpecificationLocation()
-   */
-  public IResourceLocation getSpecificationLocation()
+ 
+  /* (non-Javadoc)
+ * @see org.apache.tapestry.INamespace#getSpecificationLocation()
+ */
+    public Resource getSpecificationLocation()
   {
     return fSpecification.getSpecificationLocation();
   }
@@ -407,12 +407,11 @@ public class CoreNamespace implements ICoreNamespace
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.ILocatable#getLocation()
-   */
-  public ILocation getLocation()
+  
+  /* (non-Javadoc)
+ * @see org.apache.hivemind.Locatable#getLocation()
+ */
+    public Location getLocation()
   {
     if (fSpecification == null)
       return null;

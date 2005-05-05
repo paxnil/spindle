@@ -35,13 +35,13 @@ import java.util.Map;
 import ognl.Ognl;
 import ognl.OgnlException;
 
+import org.apache.hivemind.Resource;
 import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternCompiler;
 import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
-import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
@@ -331,8 +331,8 @@ public class BaseValidator implements IScannerValidator
         }
     }
 
-    public boolean validatePattern(String value, String pattern, String errorKey, int severity, int code)
-            throws ScannerException
+    public boolean validatePattern(String value, String pattern, String errorKey, int severity,
+            int code) throws ScannerException
     {
         return validatePattern(value, pattern, errorKey, severity, DefaultSourceLocation, code);
     }
@@ -388,13 +388,13 @@ public class BaseValidator implements IScannerValidator
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(java.lang.String,
      *      java.lang.String, com.iw.plugins.spindle.core.parser.ISourceLocation)
      */
-    public boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path,
+    public boolean validateLibraryResourceLocation(Resource specLocation, String path,
             String errorKey, ISourceLocation source) throws ScannerException
     {
         return false;
     }
 
-    public boolean validateResourceLocation(IResourceLocation location, String relativePath,
+    public boolean validateResourceLocation(Resource location, String relativePath,
             String errorKey, ISourceLocation source) throws ScannerException
     {
         return validateResourceLocation(location, relativePath, errorKey, source, false);
@@ -406,7 +406,7 @@ public class BaseValidator implements IScannerValidator
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(org.apache.tapestry.IResourceLocation,
      *      java.lang.String)
      */
-    public boolean validateResourceLocation(IResourceLocation location, String relativePath,
+    public boolean validateResourceLocation(Resource location, String relativePath,
             String errorKey, ISourceLocation source, boolean accountForI18N)
             throws ScannerException
     {
@@ -416,7 +416,7 @@ public class BaseValidator implements IScannerValidator
         if (!resourceLocationExists(location, relativePath))
         {
             IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) location
-                    .getRelativeLocation(relativePath);
+                    .getRelativeResource(relativePath);
             addProblem(
                     IProblem.ERROR,
                     source,
@@ -429,11 +429,11 @@ public class BaseValidator implements IScannerValidator
         return true;
     }
 
-    protected boolean resourceLocationExists(IResourceLocation location, String relativePath)
+    protected boolean resourceLocationExists(Resource location, String relativePath)
     {
         IResourceWorkspaceLocation real = (IResourceWorkspaceLocation) location;
         IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) real
-                .getRelativeLocation(relativePath);
+                .getRelativeResource(relativePath);
         return relative.getStorage() != null;
     }
 

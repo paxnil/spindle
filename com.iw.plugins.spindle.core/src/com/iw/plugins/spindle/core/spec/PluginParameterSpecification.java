@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.spec.Direction;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.eclipse.jdt.core.IType;
@@ -39,7 +38,6 @@ import com.iw.plugins.spindle.core.scanning.SpecificationScanner;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
  * Spindle aware concrete implementation of ILibrarySpecification
@@ -56,7 +54,7 @@ public class PluginParameterSpecification extends DescribableSpecification
   /** @since 2.0.3 * */
   private String fPropertyName;
 
-  private Direction fDirection = Direction.CUSTOM;
+//  private Direction fDirection = Direction.CUSTOM;
 
   private String fDefaultValue;
 
@@ -125,25 +123,25 @@ public class PluginParameterSpecification extends DescribableSpecification
     return fPropertyName;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IParameterSpecification#getDirection()
-   */
-  public Direction getDirection()
-  {
-    return fDirection;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IParameterSpecification#setDirection(org.apache.tapestry.spec.Direction)
-   */
-  public void setDirection(Direction direction)
-  {
-    fDirection = direction;
-  }
+//  /*
+//   * (non-Javadoc)
+//   * 
+//   * @see org.apache.tapestry.spec.IParameterSpecification#getDirection()
+//   */
+//  public Direction getDirection()
+//  {
+//    return fDirection;
+//  }
+//
+//  /*
+//   * (non-Javadoc)
+//   * 
+//   * @see org.apache.tapestry.spec.IParameterSpecification#setDirection(org.apache.tapestry.spec.Direction)
+//   */
+//  public void setDirection(Direction direction)
+//  {
+//    fDirection = direction;
+//  }
 
   /**
    * @see org.apache.tapestry.spec.IParameterSpecification#getDefaultValue()
@@ -171,17 +169,17 @@ public class PluginParameterSpecification extends DescribableSpecification
     {
 
       String typeAttr = "type";
-      int DTDVersion = XMLUtil.getDTDVersion(component.getPublicId());
-      switch (DTDVersion)
-      {
-        case XMLUtil.DTD_1_3 :
-          typeAttr = "java-type";
-          break;
-
-        case XMLUtil.DTD_3_0 :
-
-          break;
-      }
+//      int DTDVersion = XMLUtil.getDTDVersion(component.getPublicId());
+//      switch (DTDVersion)
+//      {
+//        case XMLUtil.DTD_1_3 :
+//          typeAttr = "java-type";
+//          break;
+//
+//        case XMLUtil.DTD_3_0 :
+//
+//          break;
+//      }
 
       if (!SpecificationScanner.TYPE_LIST.contains(fType))
       {

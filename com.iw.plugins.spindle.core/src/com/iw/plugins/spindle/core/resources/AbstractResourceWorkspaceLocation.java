@@ -29,7 +29,7 @@ package com.iw.plugins.spindle.core.resources;
 import java.net.URL;
 import java.util.Locale;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.eclipse.core.runtime.Path;
 
 /**
@@ -72,7 +72,10 @@ public abstract class AbstractResourceWorkspaceLocation
     return fName;
   }
 
-  public IResourceLocation getRelativeLocation(String name)
+  /* (non-Javadoc)
+ * @see org.apache.hivemind.Resource#getRelativeResource(java.lang.String)
+ */
+public Resource getRelativeResource(String name)
   {
     if (name.startsWith("/"))
     {
@@ -81,14 +84,14 @@ public abstract class AbstractResourceWorkspaceLocation
         return this;
       } else
       {
-        return fRoot.getRelativeLocation(name);
+        return fRoot.getRelativeResource(name);
       }
     }
 
     if (name.equals(getName()))
       return this;
 
-    return fRoot.getRelativeLocation(getPath() + "/" + name);
+    return fRoot.getRelativeResource(getPath() + "/" + name);
 
   }
 
@@ -153,7 +156,7 @@ public abstract class AbstractResourceWorkspaceLocation
    * 
    * @see org.apache.tapestry.IResourceLocation#getLocalization(java.util.Locale)
    */
-  public IResourceLocation getLocalization(Locale locale)
+  public Resource getLocalization(Locale locale)
   {
     throw new Error("Not useful in an Eclipse environment");
   }

@@ -34,15 +34,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hivemind.ApplicationRuntimeException;
+import org.apache.hivemind.Location;
+import org.apache.hivemind.Resource;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternMatcher;
-import org.apache.tapestry.ApplicationRuntimeException;
-import org.apache.tapestry.ILocation;
 import org.apache.tapestry.INamespace;
-import org.apache.tapestry.IResourceLocation;
-import org.apache.tapestry.parse.AttributeType;
 import org.apache.tapestry.parse.ITemplateParserDelegate;
-import org.apache.tapestry.parse.TemplateAttribute;
 import org.apache.tapestry.parse.TemplateParseException;
 import org.apache.tapestry.parse.TemplateParser;
 import org.apache.tapestry.parse.TemplateToken;
@@ -94,6 +92,8 @@ public class TemplateScanner extends AbstractScanner
     private PatternMatcher _patternMatcher;
 
     private PluginComponentSpecification fComponentSpec;
+    
+    private String fComponentAttributeName;
 
     private ICoreNamespace fNamespace;
 
@@ -117,7 +117,7 @@ public class TemplateScanner extends AbstractScanner
 
     // implicit components
 
-    public void scanTemplate(PluginComponentSpecification spec, IResourceLocation templateLocation,
+    public void scanTemplate(PluginComponentSpecification spec, Resource templateLocation,
             IScannerValidator validator) throws ScannerException
     {
         Assert.isNotNull(spec);
@@ -744,7 +744,7 @@ public class TemplateScanner extends AbstractScanner
 
     private ISourceLocation getJWCIDLocation(Map attributesLocations)
     {
-        return getAttributeLocation(TemplateParser.JWCID_ATTRIBUTE_NAME, attributesLocations);
+        return getAttributeLocation(fParserDelegate.getComponentAttributeName(), attributesLocations);
     }
 
     private ISourceLocation getAttributeLocation(String key, Map attributesLocations)
@@ -820,14 +820,20 @@ public class TemplateScanner extends AbstractScanner
 
     private class ScannerDelegate implements ITemplateParserDelegate
     {
-
+        /* (non-Javadoc)
+         * @see org.apache.tapestry.parse.ITemplateParserDelegate#getComponentAttributeName()
+         */
+        public String getComponentAttributeName()
+        {            
+            return fComponentAttributeName;
+        }
         /*
          * (non-Javadoc)
          * 
          * @see org.apache.tapestry.parse.ITemplateParserDelegate#getAllowBody(java.lang.String,
          *      org.apache.tapestry.ILocation)
          */
-        public boolean getAllowBody(String componentId, ILocation location)
+        public boolean getAllowBody(String componentId, Location location)
         {
             IContainedComponent embedded = fComponentSpec.getComponent(componentId);
             if (embedded == null)
@@ -853,7 +859,7 @@ public class TemplateScanner extends AbstractScanner
          * @see org.apache.tapestry.parse.ITemplateParserDelegate#getAllowBody(java.lang.String,
          *      java.lang.String, org.apache.tapestry.ILocation)
          */
-        public boolean getAllowBody(String libraryId, String type, ILocation location)
+        public boolean getAllowBody(String libraryId, String type, Location location)
         {
             if (libraryId != null)
             {

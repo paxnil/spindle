@@ -26,7 +26,7 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.ILocation;
+import org.apache.hivemind.Location;
 
 /**
  * Record <description>tags in a document
@@ -36,30 +36,31 @@ import org.apache.tapestry.ILocation;
 public class PluginDescriptionDeclaration extends BaseSpecification
 {
 
-  String fLang;
-  String fValue;
+    String fLang;
 
-  public PluginDescriptionDeclaration(String lang, String value, ILocation location)
-  {
-    super(BaseSpecification.DESCRIPTION_DECLARATION);
-    fLang = lang;
-    fValue = value;
-    setLocation(location);
-  }
+    String fValue;
 
-  public String getIdentifier()
-  {
-    return (fLang != null ? fLang + " : " + fValue : fValue);
-  }
+    public PluginDescriptionDeclaration(String lang, String value, Location location)
+    {
+        super(BaseSpecification.DESCRIPTION_DECLARATION);
+        fLang = lang;
+        fValue = value;
+        setLocation(location);
+    }
 
-  public String getLang()
-  {
-    return fLang;
-  }
+    public String getIdentifier()
+    {
+        return (fLang != null ? fLang + " : " + fValue : fValue);
+    }
 
-  public String getValue()
-  {
-    return fValue;
-  }
+    public String getLang()
+    {
+        return fLang;
+    }
+
+    public String getValue()
+    {
+        return fValue;
+    }
 
 }

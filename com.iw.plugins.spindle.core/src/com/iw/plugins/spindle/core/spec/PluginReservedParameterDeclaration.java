@@ -26,7 +26,7 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.ILocation;
+import org.apache.hivemind.Location;
 
 /**
  * Record <reserved-parameter>tags in a document
@@ -38,7 +38,7 @@ public class PluginReservedParameterDeclaration extends BaseSpecification
 
   String fReservedName;
 
-  public PluginReservedParameterDeclaration(String reservedName, ILocation location)
+  public PluginReservedParameterDeclaration(String reservedName, Location location)
   {
     super(BaseSpecification.RESERVED_PARAMETER_DECLARATION);
     fReservedName = reservedName;

@@ -28,32 +28,42 @@ package com.iw.plugins.spindle.core.source;
 
 import java.util.Set;
 
-import org.apache.tapestry.ILocation;
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Location;
+import org.apache.hivemind.Resource;
 
 /**
  * Records all the line and offset information for a chunk of markup.
  * 
  * @author glongman@gmail.com
- * 
  */
-public interface ISourceLocationInfo extends ILocation
+public interface ISourceLocationInfo extends Location
 {
 
-  public abstract boolean hasAttributes();
-  public abstract boolean isEmptyTag();
-  /** return a location for the element - includes all wrapped by it* */
-  public abstract ISourceLocation getSourceLocation();
-  /** return a location for all wrapped by the element* */
-  public abstract ISourceLocation getContentSourceLocation();
-  public abstract ISourceLocation getTagNameLocation();
-  public abstract ISourceLocation getStartTagSourceLocation();
-  public abstract ISourceLocation getEndTagSourceLocation();
-  public abstract ISourceLocation getAttributeSourceLocation(String rawname);
-  /** return a new set containing the names * */
-  public Set getAttributeNames();
-  public abstract void setResourceLocation(IResourceLocation location);
-  /** useful in Eclipse documents */
-  public int getOffset();
-  public int getLength();
+    public abstract boolean hasAttributes();
+
+    public abstract boolean isEmptyTag();
+
+    /** return a location for the element - includes all wrapped by it* */
+    public abstract ISourceLocation getSourceLocation();
+
+    /** return a location for all wrapped by the element* */
+    public abstract ISourceLocation getContentSourceLocation();
+
+    public abstract ISourceLocation getTagNameLocation();
+
+    public abstract ISourceLocation getStartTagSourceLocation();
+
+    public abstract ISourceLocation getEndTagSourceLocation();
+
+    public abstract ISourceLocation getAttributeSourceLocation(String rawname);
+
+    /** return a new set containing the names * */
+    public Set getAttributeNames();
+
+    public abstract void setResource(Resource location);
+
+    /** useful in Eclipse documents */
+    public int getOffset();
+
+    public int getLength();
 }

@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.core.resources;
 
 import java.util.Locale;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -43,199 +43,197 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
  * Used for the roots
  * 
  * @author glongman@gmail.com
- * 
  */
 public class ContextRootLocation extends AbstractRootLocation
 {
 
-  IFolder fRootFolder;
-  ContextSearch fSearch;
+    IFolder fRootFolder;
 
-  public ContextRootLocation(IFolder folder)
-  {
-    fRootFolder = folder;
-  }
+    ContextSearch fSearch;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#exists()
-   */
-  public boolean exists()
-  {
-    if (fRootFolder == null)
-      return false;
-
-    return fRootFolder.exists();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isWorkspaceResource()
-   */
-  public boolean isWorkspaceResource()
-  {
-    return true;
-  }
-
-  public IContainer getContainer()
-  {
-    return fRootFolder;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getProject()
-   */
-  public IProject getProject()
-  {
-    return fRootFolder.getProject();
-  }
-
-  public IResourceWorkspaceLocation getRelativeLocation(IResource resource)
-  {
-    if (findRelativePath(resource) == null)
-      return null;
-    return new ContextResourceWorkspaceLocation(this, resource);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.IResourceLocation#getRelativeLocation(java.lang.String)
-   */
-  public IResourceLocation getRelativeLocation(String name)
-  {
-    if (name.startsWith("/"))
+    public ContextRootLocation(IFolder folder)
     {
-      if (getPath().equals(name))
-      {
-        return this;
-      } else
-      {
-        return new ContextResourceWorkspaceLocation(this, new Path(name)
-            .makeAbsolute()
-            .toString());
-      }
-    }
-    return new ContextResourceWorkspaceLocation(this, name);
-  }
-
-  public void lookup(IResourceLocationAcceptor requestor) throws CoreException
-  {
-    IResource[] members = fRootFolder.members(false);
-    for (int i = 0; i < members.length; i++)
-    {
-      if (members[i] instanceof IContainer)
-        continue;
-
-      if (!requestor.accept((IResourceWorkspaceLocation) getRelativeLocation(members[i]
-          .getName())))
-        break;
-    }
-  }
-
-  public String findRelativePath(IResource resource)
-  {
-    IPath rootPath = fRootFolder.getFullPath();
-    IPath resourcePath = resource.getFullPath();
-    if (!rootPath.isPrefixOf(resourcePath))
-      return null;
-
-    IPath resultPath = resourcePath
-        .removeFirstSegments(rootPath.segmentCount())
-        .makeAbsolute();
-    if (resource instanceof IContainer && resultPath.segmentCount() > 0)
-      resultPath = resultPath.addTrailingSeparator();
-
-    return resultPath.toString();
-  }
-
-  protected IContainer getContainer(ContextResourceWorkspaceLocation location)
-  {
-    IPath p = new Path(location.getPath());
-    IFolder folder = fRootFolder.getFolder(p.removeTrailingSeparator());
-    if (folder != null && folder.exists())
-      return folder;
-
-    return null;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getSearch()
-   */
-  public ISearch getSearch() throws CoreException
-  {
-    if (fSearch == null)
-    {
-      fSearch = new ContextSearch();
-      fSearch.configure(fRootFolder);
-    }
-    return fSearch;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isOnClasspath()
-   */
-  public boolean isOnClasspath()
-  {
-    return false;
-  }
-
-  public String toString()
-  {
-    return "Context: " + fRootFolder.getFullPath() + "/ ";
-  }
-
-  String toHashString()
-  {
-    return toString();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
-   */
-  public boolean isBinary()
-  {
-    return false;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
-  public boolean equals(Object obj)
-  {
-    if (obj == null)
-      return false;
-
-    if (obj.getClass().equals(getClass()))
-    {
-      ContextRootLocation other = (ContextRootLocation) obj;
-      return fRootFolder.equals(other.fRootFolder);
+        fRootFolder = folder;
     }
 
-    return false;
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#exists()
+     */
+    public boolean exists()
+    {
+        if (fRootFolder == null)
+            return false;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.IResourceLocation#getLocale()
-   */
-  public Locale getLocale()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
+        return fRootFolder.exists();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isWorkspaceResource()
+     */
+    public boolean isWorkspaceResource()
+    {
+        return true;
+    }
+
+    public IContainer getContainer()
+    {
+        return fRootFolder;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getProject()
+     */
+    public IProject getProject()
+    {
+        return fRootFolder.getProject();
+    }
+
+    public IResourceWorkspaceLocation getRelativeLocation(IResource resource)
+    {
+        if (findRelativePath(resource) == null)
+            return null;
+        return new ContextResourceWorkspaceLocation(this, resource);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.hivemind.Resource#getRelativeResource(java.lang.String)
+     */
+    public Resource getRelativeResource(String name)
+    {
+        if (name.startsWith("/"))
+        {
+            if (getPath().equals(name))
+            {
+                return this;
+            }
+            else
+            {
+                return new ContextResourceWorkspaceLocation(this, new Path(name).makeAbsolute()
+                        .toString());
+            }
+        }
+        return new ContextResourceWorkspaceLocation(this, name);
+    }
+
+    public void lookup(IResourceLocationAcceptor requestor) throws CoreException
+    {
+        IResource[] members = fRootFolder.members(false);
+        for (int i = 0; i < members.length; i++)
+        {
+            if (members[i] instanceof IContainer)
+                continue;
+
+            if (!requestor.accept((IResourceWorkspaceLocation) getRelativeResource(members[i]
+                    .getName())))
+                break;
+        }
+    }
+
+    public String findRelativePath(IResource resource)
+    {
+        IPath rootPath = fRootFolder.getFullPath();
+        IPath resourcePath = resource.getFullPath();
+        if (!rootPath.isPrefixOf(resourcePath))
+            return null;
+
+        IPath resultPath = resourcePath.removeFirstSegments(rootPath.segmentCount()).makeAbsolute();
+        if (resource instanceof IContainer && resultPath.segmentCount() > 0)
+            resultPath = resultPath.addTrailingSeparator();
+
+        return resultPath.toString();
+    }
+
+    protected IContainer getContainer(ContextResourceWorkspaceLocation location)
+    {
+        IPath p = new Path(location.getPath());
+        IFolder folder = fRootFolder.getFolder(p.removeTrailingSeparator());
+        if (folder != null && folder.exists())
+            return folder;
+
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#getSearch()
+     */
+    public ISearch getSearch() throws CoreException
+    {
+        if (fSearch == null)
+        {
+            fSearch = new ContextSearch();
+            fSearch.configure(fRootFolder);
+        }
+        return fSearch;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isOnClasspath()
+     */
+    public boolean isOnClasspath()
+    {
+        return false;
+    }
+
+    public String toString()
+    {
+        return "Context: " + fRootFolder.getFullPath() + "/ ";
+    }
+
+    String toHashString()
+    {
+        return toString();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isBinary()
+     */
+    public boolean isBinary()
+    {
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+            return false;
+
+        if (obj.getClass().equals(getClass()))
+        {
+            ContextRootLocation other = (ContextRootLocation) obj;
+            return fRootFolder.equals(other.fRootFolder);
+        }
+
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.IResourceLocation#getLocale()
+     */
+    public Locale getLocale()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

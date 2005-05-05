@@ -26,40 +26,37 @@
 
 package com.iw.plugins.spindle.core.parser.template;
 
-import org.apache.tapestry.ILocation;
+import org.apache.hivemind.Location;
 import org.apache.tapestry.parse.OpenToken;
 
 /**
- * Token representing the open tag for a component. Extends the superclass by
- * recording source location info provided by the parser.
+ * Token representing the open tag for a component. Extends the superclass by recording source
+ * location info provided by the parser.
  * 
  * @see org.apache.tapestry.parse.OpenToken
  * @author glongman@gmail.com
- * 
- *  
  */
 
 public class CoreOpenToken extends OpenToken
 {
 
-  private TagEventInfo fEventInfo;
+    private TagEventInfo fEventInfo;
 
-  /**
-   * Creates a new token with the given tag, id and type, and source location
-   * info from the parser
-   */
+    /**
+     * Creates a new token with the given tag, id and type, and source location info from the parser
+     */
 
-  public CoreOpenToken(String tag, String id, String componentType, ILocation location,
-      TagEventInfo eventInfo)
-  {
-    super(tag, id, componentType, location);
+    public CoreOpenToken(String tag, String id, String componentType, Location location,
+            TagEventInfo eventInfo)
+    {
+        super(tag, id, componentType, location);
 
-    fEventInfo = eventInfo;
-  }
+        fEventInfo = eventInfo;
+    }
 
-  public TagEventInfo getEventInfo()
-  {
-    return fEventInfo;
-  }
+    public TagEventInfo getEventInfo()
+    {
+        return fEventInfo;
+    }
 
 }

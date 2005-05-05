@@ -74,22 +74,26 @@ import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
  */
 public class XMLUtil
 {
-
-  static public final int DTD_1_1 = 1;
-
-  static public final int DTD_1_2 = 2;
-
-  static public final int DTD_1_3 = 3;
+// not used anymore
+//  static public final int DTD_1_1 = 1;
+//
+//  static public final int DTD_1_2 = 2;
+//
+//  static public final int DTD_1_3 = 3;
 
   static public final int DTD_3_0 = 4;
+  
+  static public final int DTD_4_0 = 5;
 
-  static public final int DTD_SERVLET_2_2 = 5;
+  static public final int DTD_SERVLET_2_2 = 20;
 
-  static public final int DTD_SERVLET_2_3 = 6;
+  static public final int DTD_SERVLET_2_3 = 21;
+  
+  
 
   static public final int UNKNOWN_DTD = 999;
 
-  static public final int[] ALLOWED_SPEC_DTDS = new int[]{DTD_1_3, DTD_3_0};
+  static public final int[] ALLOWED_SPEC_DTDS = new int[]{DTD_3_0, DTD_4_0};
 
   static public final String SPEC_DTD_ERROR_KEY = "error-invalid-spec-public-id";
 
@@ -104,11 +108,14 @@ public class XMLUtil
     if (publicId == null)
       return UNKNOWN_DTD;
 
-    if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID))
-      return DTD_1_3;
+//    if (publicId.equals(SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID))
+//      return DTD_1_3;
 
     if (publicId.equals(SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID))
       return DTD_3_0;
+    
+    if (publicId.equals(SpecificationParser.TAPESTRY_DTD_3_1_PUBLIC_ID))
+        return DTD_4_0;
 
     if (publicId.equals(TapestryCore.SERVLET_2_2_PUBLIC_ID))
       return DTD_SERVLET_2_2;
@@ -129,10 +136,12 @@ public class XMLUtil
       //  		
       //  		case DTD_1_2: return SpecificationParser.TAPESTRY_DTD_1_2_PUBLIC_ID;
 
-      case DTD_1_3 :
-        return SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID;
+      //      case DTD_1_3 :
+      //        return SpecificationParser.TAPESTRY_DTD_1_3_PUBLIC_ID;
       case DTD_3_0 :
         return SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID;
+      case DTD_4_0 :
+          return SpecificationParser.TAPESTRY_DTD_3_1_PUBLIC_ID;
       case DTD_SERVLET_2_2 :
         return TapestryCore.SERVLET_2_2_PUBLIC_ID;
       case DTD_SERVLET_2_3 :
@@ -587,7 +596,7 @@ public class XMLUtil
     if (nextLine)
       indenter.println();
 
-    boolean isDTD13 = XMLUtil.getDTDVersion(publicId) == XMLUtil.DTD_1_3;
+    boolean isDTD13 = false; //XMLUtil.getDTDVersion(publicId) == XMLUtil.DTD_1_3;
     indenter.printlnIndented(indent, "<parameter");
     indenter.printIndented(indent + 1, "name=\"" + name);
     indenter.println("\"");
@@ -833,7 +842,7 @@ public class XMLUtil
     int currentDTD = XMLUtil.getDTDVersion(publicId);
     if (currentDTD == XMLUtil.UNKNOWN_DTD)
       currentDTD = XMLUtil.DTD_3_0;
-    boolean isDTD13 = currentDTD == XMLUtil.DTD_1_3;
+    boolean isDTD13 = false; //currentDTD == XMLUtil.DTD_1_3;
     boolean isDTD30OrBetter = currentDTD >= XMLUtil.DTD_3_0;
 
     char quot = '"';
@@ -1420,22 +1429,27 @@ public class XMLUtil
 
     switch (DTDVersion)
     {
-      case XMLUtil.DTD_1_1 :
-        indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
-        break;
-
-      case XMLUtil.DTD_1_2 :
-        indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
-        break;
-
-      case XMLUtil.DTD_1_3 :
-        indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd\">");
-        break;
+//      case XMLUtil.DTD_1_1 :
+//        indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_1.dtd\">");
+//        break;
+//
+//      case XMLUtil.DTD_1_2 :
+//        indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_2.dtd\">");
+//        break;
+//
+//      case XMLUtil.DTD_1_3 :
+//        indenter.println("      \"http://tapestry.sf.net/dtd/Tapestry_1_3.dtd\">");
+//        break;
 
       case XMLUtil.DTD_3_0 :
         indenter
-            .println("      \"http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd\">");
+        .println("      \""+getPublicId(XMLUtil.DTD_3_0)+"\">");
         break;
+        
+      case XMLUtil.DTD_4_0 :
+          indenter
+              .println("      \""+getPublicId(XMLUtil.DTD_4_0)+"\">");
+          break;
 
       case XMLUtil.DTD_SERVLET_2_2 :
         indenter.println("      \"http://java.sun.com/j2ee/dtds/web-app_2_2.dtd\">");

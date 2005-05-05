@@ -161,7 +161,7 @@ public class ComponentScanner extends SpecificationScanner
         asset.setPath(value);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(specification.getSpecificationLocation());
+        location.setResource(specification.getSpecificationLocation());
         asset.setLocation(location);
 
         specification.addAsset(name, asset);
@@ -219,7 +219,7 @@ public class ComponentScanner extends SpecificationScanner
         bspec.setLifecycle(lifecycle);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(specification.getSpecificationLocation());
+        location.setResource(specification.getSpecificationLocation());
         bspec.setLocation(location);
 
         specification.addBeanSpecification(name, bspec);
@@ -317,7 +317,7 @@ public class ComponentScanner extends SpecificationScanner
         binding.setValue(value);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(component.getLocation().getResourceLocation());
+        location.setResource(component.getLocation().getResource());
         binding.setLocation(location);
 
         // no point in making revalidatable - error state would only change if the
@@ -414,7 +414,7 @@ public class ComponentScanner extends SpecificationScanner
         c.setCopyOf(copyOf);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(specification.getSpecificationLocation());
+        location.setResource(specification.getSpecificationLocation());
         c.setLocation(location);
 
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
@@ -654,7 +654,7 @@ public class ComponentScanner extends SpecificationScanner
         binding.setValue(script);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(component.getLocation().getResourceLocation());
+        location.setResource(component.getLocation().getResource());
         binding.setLocation(location);
 
         component.setBinding(name, binding);
@@ -684,7 +684,7 @@ public class ComponentScanner extends SpecificationScanner
                 .createParameterSpecification();
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(specification.getSpecificationLocation());
+        location.setResource(specification.getSpecificationLocation());
         param.setLocation(location);
 
         // not revalidatable - error state would only change if the file changed!
@@ -697,17 +697,17 @@ public class ComponentScanner extends SpecificationScanner
                 IProblem.COMPONENT_INVALID_PARAMETER_NAME);
 
         String typeAttr = "type";
-        int DTDVersion = XMLUtil.getDTDVersion(specification.getPublicId());
-        switch (DTDVersion)
-        {
-            case XMLUtil.DTD_1_3:
-                typeAttr = "java-type";
-                break;
-
-            case XMLUtil.DTD_3_0:
-
-                break;
-        }
+//        int DTDVersion = XMLUtil.getDTDVersion(specification.getPublicId());
+//        switch (DTDVersion)
+//        {
+//            case XMLUtil.DTD_1_3:
+//                typeAttr = "java-type";
+//                break;
+//
+//            case XMLUtil.DTD_3_0:
+//
+//                break;
+//        }
 
         String type = getAttribute(node, typeAttr);
 
@@ -803,7 +803,7 @@ public class ComponentScanner extends SpecificationScanner
                 .createPropertySpecification();
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(spec.getSpecificationLocation());
+        location.setResource(spec.getSpecificationLocation());
         ps.setLocation(location);
 
         //   not revalidatable - error state would only change if the file changed!
@@ -930,7 +930,7 @@ public class ComponentScanner extends SpecificationScanner
         iz.setExpression(expression);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(spec.getLocation().getResourceLocation());
+        location.setResource(spec.getLocation().getResourceLocation());
         iz.setLocation(location);
 
         spec.addInitializer(iz);
@@ -973,7 +973,7 @@ public class ComponentScanner extends SpecificationScanner
         iz.setKey(key);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResourceLocation(spec.getLocation().getResourceLocation());
+        location.setResource(spec.getLocation().getResource());
         iz.setLocation(location);
 
         spec.addInitializer(iz);

@@ -25,7 +25,7 @@ package com.iw.plugins.spindle.core.util;
  *
  * ***** END LICENSE BLOCK ***** */
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -194,14 +194,14 @@ public class CoreUtils
   }
 
   /**
-   * Answer true iff the IResourceLocation in question referes to a workbench
+   * Answer true iff the Resource in question referes to a workbench
    * resource
    * 
-   * @param loc the IResourceLocation in question
+   * @param loc the Resource in question
    * @return true iff the location in question referes to a workbench resource
    *         (IResource)
    */
-  public static IResource toResource(IResourceLocation loc)
+  public static IResource toResource(Resource loc)
   {
     if (loc == null)
       return null;

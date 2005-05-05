@@ -26,7 +26,7 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
@@ -185,7 +185,7 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateResourceLocation(IResourceLocation location, String relativePath,
+    public boolean validateResourceLocation(Resource location, String relativePath,
             String errorKey, ISourceLocation source) throws ScannerException;
 
     /**
@@ -205,7 +205,7 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path,
+    public boolean validateLibraryResourceLocation(Resource specLocation, String path,
             String errorKey, ISourceLocation source) throws ScannerException;
 
     /**

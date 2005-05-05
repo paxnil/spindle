@@ -103,7 +103,7 @@ public class ComponentTypeResolver implements IComponentTypeResourceResolver
     
     String scriptName = specStorage.getFullPath().removeFileExtension().lastSegment();
     
-    IResourceWorkspaceLocation scriptLocation = (IResourceWorkspaceLocation) specificationLocation.getRelativeLocation(scriptName+".groovy");
+    IResourceWorkspaceLocation scriptLocation = (IResourceWorkspaceLocation) specificationLocation.getRelativeResource(scriptName+".groovy");
     
     fStorage = scriptLocation.getStorage();
     

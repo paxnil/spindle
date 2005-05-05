@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -167,7 +167,7 @@ public class ClasspathResourceWorkspaceLocation extends AbstractResourceWorkspac
    * 
    * @see org.apache.tapestry.IResourceLocation#getLocalization(java.util.Locale)
    */
-  public IResourceLocation getLocalization(Locale locale)
+  public Resource getLocalization(Locale locale)
   {
     // TODO implement later
     throw new RuntimeException("not implemented");

@@ -47,178 +47,199 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * 
  * @author glongman@gmail.com
  */
-public class PluginContainedComponent extends BasePropertyHolder
-    implements
-      IContainedComponent
+public class PluginContainedComponent extends BasePropertyHolder implements IContainedComponent
 {
 
-  private String fType;
+    private String fType;
 
-  private String fCopyOf;
+    private String fCopyOf;
 
-  private boolean fInheritInformalParameters;
+    private boolean fInheritInformalParameters;
 
-  protected Map fBindings;
-  private List fDeclaredBindings;
+    protected Map fBindings;
 
-  /**
-   * @param type
-   */
-  public PluginContainedComponent()
-  {
-    super(BaseSpecification.CONTAINED_COMPONENT_SPEC);
-  }
+    private List fDeclaredBindings;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IContainedComponent#getBinding(java.lang.String)
-   */
-  public IBindingSpecification getBinding(String name)
-  {
-    return (IBindingSpecification) get(fBindings, name);
-  }
+    private String fPropertyName;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IContainedComponent#getBindingNames()
-   */
-  public Collection getBindingNames()
-  {
-    return keys(fBindings);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IContainedComponent#getType()
-   */
-  public String getType()
-  {
-    if (fType != null && fCopyOf != null)
-      return "";
-
-    if (fCopyOf != null)
+    /**
+     * @param type
+     */
+    public PluginContainedComponent()
     {
-      IComponentSpecification spec = (IComponentSpecification) getParent();
-      IContainedComponent parentComponent = spec.getComponent(fCopyOf);
-
-      if (parentComponent == null)
-        return "";
-
-      return parentComponent.getType();
+        super(BaseSpecification.CONTAINED_COMPONENT_SPEC);
     }
 
-    return fType;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IContainedComponent#setBinding(java.lang.String,
-   *      org.apache.tapestry.spec.IBindingSpecification)
-   */
-  public void setBinding(String name, IBindingSpecification spec)
-  {
-    if (fBindings == null)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IContainedComponent#getBinding(java.lang.String)
+     */
+    public IBindingSpecification getBinding(String name)
     {
-      fBindings = new HashMap();
-      fDeclaredBindings = new ArrayList();
+        return (IBindingSpecification) get(fBindings, name);
     }
 
-    PluginBindingSpecification pluginSpec = (PluginBindingSpecification) spec;
-
-    pluginSpec.setIdentifier(name);
-    pluginSpec.setParent(this);
-
-    fDeclaredBindings.add(spec);
-
-    if (!fBindings.containsKey(name))
-      fBindings.put(name, spec);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IContainedComponent#setType(java.lang.String)
-   */
-  public void setType(String value)
-  {
-    fType = value;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IContainedComponent#setCopyOf(java.lang.String)
-   */
-  public void setCopyOf(String id)
-  {
-    fCopyOf = id;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IContainedComponent#getCopyOf()
-   */
-  public String getCopyOf()
-  {
-    return fCopyOf;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IContainedComponent#getInheritInformalParameters()
-   */
-  public boolean getInheritInformalParameters()
-  {
-    return fInheritInformalParameters;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IContainedComponent#setInheritInformalParameters(boolean)
-   */
-  public void setInheritInformalParameters(boolean value)
-  {
-    fInheritInformalParameters = value;
-  }
-
-  public void validate(Object parent, IScannerValidator validator)
-  {
-
-    PluginComponentSpecification spec = (PluginComponentSpecification) parent;
-
-    ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-    String id = getIdentifier();
-
-    try
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IContainedComponent#getBindingNames()
+     */
+    public Collection getBindingNames()
     {
-      if (fCopyOf == null)
-      {
-        validator.validateContainedComponent(spec, this, sourceInfo);
-      }
-    } catch (ScannerException e)
-    {
-      TapestryCore.log(e);
-      e.printStackTrace();
+        return keys(fBindings);
     }
-  }
 
-  /**
-   * @return List of bindings as declared in the XML source.
-   */
-  public List getDeclaredBindings()
-  {
-    if (fDeclaredBindings == null)
-      return Collections.EMPTY_LIST;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IContainedComponent#getType()
+     */
+    public String getType()
+    {
+        if (fType != null && fCopyOf != null)
+            return "";
 
-    return Collections.unmodifiableList(fDeclaredBindings);
-  }
+        if (fCopyOf != null)
+        {
+            IComponentSpecification spec = (IComponentSpecification) getParent();
+            IContainedComponent parentComponent = spec.getComponent(fCopyOf);
 
+            if (parentComponent == null)
+                return "";
+
+            return parentComponent.getType();
+        }
+
+        return fType;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IContainedComponent#setBinding(java.lang.String,
+     *      org.apache.tapestry.spec.IBindingSpecification)
+     */
+    public void setBinding(String name, IBindingSpecification spec)
+    {
+        if (fBindings == null)
+        {
+            fBindings = new HashMap();
+            fDeclaredBindings = new ArrayList();
+        }
+
+        PluginBindingSpecification pluginSpec = (PluginBindingSpecification) spec;
+
+        pluginSpec.setIdentifier(name);
+        pluginSpec.setParent(this);
+
+        fDeclaredBindings.add(spec);
+
+        if (!fBindings.containsKey(name))
+            fBindings.put(name, spec);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IContainedComponent#setType(java.lang.String)
+     */
+    public void setType(String value)
+    {
+        fType = value;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IContainedComponent#setCopyOf(java.lang.String)
+     */
+    public void setCopyOf(String id)
+    {
+        fCopyOf = id;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IContainedComponent#getCopyOf()
+     */
+    public String getCopyOf()
+    {
+        return fCopyOf;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IContainedComponent#getInheritInformalParameters()
+     */
+    public boolean getInheritInformalParameters()
+    {
+        return fInheritInformalParameters;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IContainedComponent#setInheritInformalParameters(boolean)
+     */
+    public void setInheritInformalParameters(boolean value)
+    {
+        fInheritInformalParameters = value;
+    }
+
+    public void validate(Object parent, IScannerValidator validator)
+    {
+
+        PluginComponentSpecification spec = (PluginComponentSpecification) parent;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        String id = getIdentifier();
+
+        try
+        {
+            if (fCopyOf == null)
+            {
+                validator.validateContainedComponent(spec, this, sourceInfo);
+            }
+        }
+        catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * @return List of bindings as declared in the XML source.
+     */
+    public List getDeclaredBindings()
+    {
+        if (fDeclaredBindings == null)
+            return Collections.EMPTY_LIST;
+
+        return Collections.unmodifiableList(fDeclaredBindings);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.PropertyInjectable#getPropertyName()
+     */
+    public String getPropertyName()
+    {
+        return fPropertyName;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.PropertyInjectable#setPropertyName(java.lang.String)
+     */
+    public void setPropertyName(String propertyName)
+    {
+        this.fPropertyName = propertyName;
+    }
 }

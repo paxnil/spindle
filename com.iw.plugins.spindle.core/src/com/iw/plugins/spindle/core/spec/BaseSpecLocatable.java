@@ -26,8 +26,8 @@
 
 package com.iw.plugins.spindle.core.spec;
 
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.INamespace;
-import org.apache.tapestry.IResourceLocation;
 
 /**
  * Superclass for Top level spec classes
@@ -38,7 +38,7 @@ import org.apache.tapestry.IResourceLocation;
 public abstract class BaseSpecLocatable extends BasePropertyHolder
 {
 
-  IResourceLocation fSpecificationLocation;
+    Resource fSpecificationLocation;
 
   public BaseSpecLocatable(int type)
   {
@@ -48,7 +48,7 @@ public abstract class BaseSpecLocatable extends BasePropertyHolder
   /**
    * @return
    */
-  public IResourceLocation getSpecificationLocation()
+  public Resource getSpecificationLocation()
   {
     return fSpecificationLocation;
   }
@@ -56,7 +56,7 @@ public abstract class BaseSpecLocatable extends BasePropertyHolder
   /**
    * @param location
    */
-  public void setSpecificationLocation(IResourceLocation location)
+  public void setSpecificationLocation(Resource location)
   {
     this.fSpecificationLocation = location;
   }

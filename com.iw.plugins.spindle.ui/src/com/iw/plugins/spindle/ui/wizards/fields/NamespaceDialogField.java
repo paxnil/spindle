@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceLocation;
 import org.eclipse.core.resources.IResource;
@@ -198,7 +199,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
       if (projectNamespace != null)
       {
         // add the primary namespace, if possible
-        IResourceLocation location = projectNamespace.getSpecificationLocation();
+        Resource location = projectNamespace.getSpecificationLocation();
         // special check to see if its a valid target.
         // the thing is that there may not be a .application file
         // as Tapestry may create one at runtime.
@@ -315,7 +316,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
     if (path == null || path.trim().length() == 0)
       return false;
     IResourceWorkspaceLocation checkLocation = (IResourceWorkspaceLocation) ((IResourceWorkspaceLocation) base)
-        .getRelativeLocation(path);
+        .getRelativeResource(path);
     return checkLocation.getStorage() != null;
 
   }

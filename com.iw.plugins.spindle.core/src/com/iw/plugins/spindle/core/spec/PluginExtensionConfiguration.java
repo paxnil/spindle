@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.core.spec;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.tapestry.ILocation;
+import org.apache.hivemind.Location;
 import org.apache.tapestry.spec.IExtensionSpecification;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -41,6 +41,7 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  * @author gwl Copyright 2002, Geoffrey Longman. All Rights Reserved.
+ * @deprecated
  */
 public class PluginExtensionConfiguration extends DescribableSpecification
 {
@@ -105,7 +106,7 @@ public class PluginExtensionConfiguration extends DescribableSpecification
     }
 
     public PluginExtensionConfiguration(String propertyName, String declaredValue,
-            String declaredType, ILocation location)
+            String declaredType, Location location)
     {
         this(propertyName, null);
         fDeclaredType = declaredType;

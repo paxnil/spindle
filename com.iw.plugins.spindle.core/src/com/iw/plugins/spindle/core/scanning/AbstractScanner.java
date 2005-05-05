@@ -29,7 +29,7 @@ package com.iw.plugins.spindle.core.scanning;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
@@ -363,14 +363,14 @@ public abstract class AbstractScanner implements IProblemCollector
         return fValidator.validateTypeName(dependant, fullyQualifiedType, severity, location);
     }
 
-    protected boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path,
+    protected boolean validateLibraryResourceLocation(Resource specLocation, String path,
             String errorKey, ISourceLocation source) throws ScannerException
     {
         return fValidator.validateLibraryResourceLocation(specLocation, path, errorKey, source);
 
     }
 
-    protected boolean validateResourceLocation(IResourceLocation location, String relativePath,
+    protected boolean validateResourceLocation(Resource location, String relativePath,
             String errorKey, ISourceLocation source) throws ScannerException
     {
         return fValidator.validateResourceLocation(location, relativePath, errorKey, source);

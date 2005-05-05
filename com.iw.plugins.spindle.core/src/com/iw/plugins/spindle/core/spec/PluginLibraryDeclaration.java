@@ -26,7 +26,7 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.ILocation;
+import org.apache.hivemind.Location;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -45,7 +45,7 @@ public class PluginLibraryDeclaration extends BaseSpecification
 
     String fResourcePath;
 
-    public PluginLibraryDeclaration(String name, String resourcePath, ILocation location)
+    public PluginLibraryDeclaration(String name, String resourcePath, Location location)
     {
         super(BaseSpecification.LIBRARY_DECLARATION);
         setIdentifier(name);

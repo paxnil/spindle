@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.tapestry.IResourceResolver;
 import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
@@ -47,7 +46,9 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 /**
  * Tapestry Extensions for Spindle
  * 
- * TODO complete transformation away from strict Tapestry interface adherence.
+ * @deprecated
+ * 
+ * FIXME: how do extensions work in the Picasso world?
  * 
  * @author glongman@gmail.com
  */
@@ -161,15 +162,23 @@ public class PluginExtensionSpecification extends BasePropertyHolder
 
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IExtensionSpecification#instantiateExtension(org.apache.tapestry.IResourceResolver)
-   */
-  public Object instantiateExtension(IResourceResolver resolver)
-  {
-    return null;
-  }
+    /* (non-Javadoc)
+     * @see org.apache.tapestry.spec.IExtensionSpecification#addConfiguration(java.lang.String, java.lang.String)
+     */
+    public void addConfiguration(String propertyName, String value)
+    {
+        // TODO Auto-generated method stub
+
+    }
+    /* (non-Javadoc)
+     * @see org.apache.tapestry.spec.IExtensionSpecification#instantiateExtension()
+     */
+    public Object instantiateExtension()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+  
 
   /*
    * (non-Javadoc)

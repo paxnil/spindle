@@ -27,7 +27,7 @@ package com.iw.plugins.spindle.core.resources;
 
 import java.io.InputStream;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
@@ -44,7 +44,7 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
  * @see org.apache.tapestry.IResourceLocation
  */
 
-public interface IResourceWorkspaceLocation extends IResourceLocation
+public interface IResourceWorkspaceLocation extends Resource
 {
 
   //    public boolean exists();

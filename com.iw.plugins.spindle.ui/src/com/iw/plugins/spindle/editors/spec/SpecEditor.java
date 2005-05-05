@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.tapestry.ILocatable;
+import org.apache.hivemind.Locatable;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -185,8 +185,6 @@ public class SpecEditor extends Editor
      */
     public void createPartControl(Composite parent)
     {
-        //TODO get rid of this kludge
-
         super.createPartControl(parent);
 
         IStorage storage = getStorage();
@@ -254,9 +252,9 @@ public class SpecEditor extends Editor
             }
             highlight(obj);
         }
-        else if (obj instanceof ILocatable)
+        else if (obj instanceof Locatable)
         {
-            ISourceLocationInfo info = (ISourceLocationInfo) ((ILocatable) obj).getLocation();
+            ISourceLocationInfo info = (ISourceLocationInfo) ((Locatable) obj).getLocation();
             ISourceLocation startTagLocation = info.getStartTagSourceLocation();
             selectAndReveal(startTagLocation.getCharStart(), startTagLocation.getLength());
             setHighlightRange(info.getOffset(), info.getLength(), true);
@@ -302,9 +300,9 @@ public class SpecEditor extends Editor
             }
             setHighlightRange(artifact.getOffset(), artifact.getLength(), false);
         }
-        else if (obj instanceof ILocatable)
+        else if (obj instanceof Locatable)
         {
-            ISourceLocationInfo info = (ISourceLocationInfo) ((ILocatable) obj).getLocation();
+            ISourceLocationInfo info = (ISourceLocationInfo) ((Locatable) obj).getLocation();
             setHighlightRange(info.getOffset(), info.getLength(), false);
         }
     }
@@ -318,7 +316,7 @@ public class SpecEditor extends Editor
     {
 
         IStorage storage = getStorage();
-        IProject project = (IProject)storage.getAdapter(IProject.class);
+        IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map specs = manager.getSpecMap(project);
         if (specs != null)
@@ -334,11 +332,11 @@ public class SpecEditor extends Editor
     public IComponentSpecification getComponent()
     {
         IStorage storage = getStorage();
-        IProject project = (IProject)storage.getAdapter(IProject.class);
+        IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map specs = manager.getSpecMap(project);
-        if (specs != null)        
-            return (IComponentSpecification) specs.get(storage);        
+        if (specs != null)
+            return (IComponentSpecification) specs.get(storage);
 
         return null;
     }
@@ -683,7 +681,7 @@ public class SpecEditor extends Editor
                         try
                         {
                             validator = new SpecificationValidator(project);// TODO perfrom
-                                                                            // deferred?, false);
+                            // deferred?, false);
                             reconcileResult = doReconcile(getDocumentProvider().getDocument(input)
                                     .get(), spec, validator);
                         }
