@@ -2,7 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src/"/>
 	<classpathentry kind="src" path="dtdparser/"/>
-	<classpathentry exported="true" sourcepath="Q:/etc/tapestry/3.1-alpha-1/framework/src" kind="lib" path="lib/tapestry/tapestry-3.1-alpha-1.jar"/>
+	<classpathentry exported="true" sourcepath="C:/etc/tapestry/tapestry-4.0-alpha-2/framework/src" kind="lib" path="lib/tapestry/tapestry-3.1-alpha-1.jar">
+		<attributes>
+		</attributes>
+	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/tapestry-contrib-3.1-alpha-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/bsf-2.3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/cglib-full-2.0.2.jar"/>
@@ -10,7 +13,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/commons-fileupload-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/commons-lang-2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/commons-logging-1.0.4.jar"/>
-	<classpathentry exported="true" sourcepath="Q:/etc/hivemind/hivemind-1.1-beta-1/framework/src" kind="lib" path="lib/tapestry/ext-package/lib/hivemind-1.1-alpha-1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/hivemind-1.1-alpha-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/hivemind-lib-1.1-alpha-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/javassist-3.0-rc-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tapestry/ext-package/lib/jboss-j2ee-3.2.1.jar"/>

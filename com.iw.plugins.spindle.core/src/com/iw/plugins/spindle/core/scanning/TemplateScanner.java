@@ -42,7 +42,6 @@ import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.parse.ITemplateParserDelegate;
 import org.apache.tapestry.parse.TemplateParseException;
-import org.apache.tapestry.parse.TemplateParser;
 import org.apache.tapestry.parse.TemplateToken;
 import org.apache.tapestry.parse.TokenType;
 import org.apache.tapestry.spec.BindingType;
@@ -53,8 +52,8 @@ import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.spec.SpecFactory;
 import org.eclipse.core.runtime.CoreException;
 
+import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.FrameworkComponentValidator;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.template.CoreOpenToken;
@@ -320,14 +319,14 @@ public class TemplateScanner extends AbstractScanner
             if (bindingType == BindingType.DYNAMIC)
             {
                 validateImplicitExpressionBinding(bspec, containedSpecification, location
-                        .getLocationOffset(TemplateParser.OGNL_EXPRESSION_PREFIX.length()));
+                        .getLocationOffset(PicassoMigration.OGNL_EXPRESSION_PREFIX.length()));
                 continue;
             }
 
             if (bindingType == BindingType.STRING)
             {
                 validateImplicitStringBinding(bspec, containedSpecification, location
-                        .getLocationOffset(TemplateParser.LOCALIZATION_KEY_PREFIX.length()));
+                        .getLocationOffset(PicassoMigration.LOCALIZATION_KEY_PREFIX.length()));
                 continue;
             }
 
@@ -335,17 +334,19 @@ public class TemplateScanner extends AbstractScanner
                 validateImplicitStaticBinding(bspec, containedSpecification, location);
 
         }
+		
+		//TODO deferred validations are to be revisited
 
-        if (fPerformDeferredValidations)
-            FrameworkComponentValidator.validateImplictComponent(
-                    (IResourceWorkspaceLocation) fComponentSpec.getSpecificationLocation(),
-                    fTemplateLocation,
-                    fComponentSpec.getNamespace(),
-                    token.getComponentType(),
-                    containedSpecification,
-                    contained,
-                    token.getEventInfo(),
-                    containedSpecification.getPublicId());
+//        if (fPerformDeferredValidations)
+//            FrameworkComponentValidator.validateImplictComponent(
+//                    (IResourceWorkspaceLocation) fComponentSpec.getSpecificationLocation(),
+//                    fTemplateLocation,
+//                    fComponentSpec.getNamespace(),
+//                    token.getComponentType(),
+//                    containedSpecification,
+//                    contained,
+//                    token.getEventInfo(),
+//                    containedSpecification.getPublicId());
 
     }
 

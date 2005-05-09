@@ -43,6 +43,7 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.runtime.Path;
 
+import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
@@ -563,7 +564,7 @@ public abstract class NamespaceResolver
         String result = fResultNamespace.getSpecification().getProperty(
                 Tapestry.TEMPLATE_EXTENSION_PROPERTY);
         if (result == null)
-            return Tapestry.DEFAULT_TEMPLATE_EXTENSION;
+            return PicassoMigration.DEFAULT_TEMPLATE_EXTENSION;
         return result;
     }
 

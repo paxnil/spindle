@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.spec;
 
-import org.apache.tapestry.spec.AssetType;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 
@@ -40,84 +39,85 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * 
  * @author glongman@gmail.com
  */
-public class PluginAssetSpecification extends BasePropertyHolder
-    implements
-      IAssetSpecification
-{
+public class PluginAssetSpecification extends BasePropertyHolder implements
+		IAssetSpecification {
 
-  private String fPath;
-  private AssetType fAssetType;
+	private String fPath;
 
-  /**
-   * @param type
-   */
-  public PluginAssetSpecification()
-  {
-    super(BaseSpecification.ASSET_SPEC);
-  }
+	private int fAssetType;
 
-  public PluginAssetSpecification(AssetType type, String path)
-  {
-    this();
-    this.fAssetType = type;
-    this.fPath = path;
-  }
+	private String fPropertyName;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IAssetSpecification#getPath()
-   */
-  public String getPath()
-  {
-    return fPath;
-  }
+	/**
+	 * @param type
+	 */
+	public PluginAssetSpecification() {
+		super(BaseSpecification.ASSET_SPEC);
+	}
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IAssetSpecification#getType()
-   */
-  public AssetType getType()
-  {
-    return fAssetType;
-  }
+	public PluginAssetSpecification(int type, String path, String propertyName) {
+		this();
+		this.fAssetType = type;
+		this.fPath = path;
+		this.fPropertyName = propertyName;
+	}
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IAssetSpecification#setPath(java.lang.String)
-   */
-  public void setPath(String path)
-  {
-    this.fPath = path;
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.apache.tapestry.spec.IAssetSpecification#getPath()
+	 */
+	public String getPath() {
+		return fPath;
+	}
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IAssetSpecification#setType(org.apache.tapestry.spec.AssetType)
-   */
-  public void setType(AssetType type)
-  {
-    this.fAssetType = type;
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.apache.tapestry.spec.IAssetSpecification#getType()
+	 */
+	public int getType() {
+		return fAssetType;
+	}
 
-  public void validate(Object parent, IScannerValidator validator)
-  {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.apache.tapestry.spec.IAssetSpecification#setPath(java.lang.String)
+	 */
+	public void setPath(String path) {
+		this.fPath = path;
+	}
 
-    IComponentSpecification component = (IComponentSpecification) parent;
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.apache.tapestry.spec.IAssetSpecification#setType(org.apache.tapestry.spec.AssetType)
+	 */
+	public void setType(int type) {
+		this.fAssetType = type;
+	}
 
-    ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+	public void validate(Object parent, IScannerValidator validator) {
 
-    try
-    {
-      validator.validateAsset(component, this, sourceInfo);
+		IComponentSpecification component = (IComponentSpecification) parent;
 
-    } catch (ScannerException e)
-    {
-      TapestryCore.log(e);
-      e.printStackTrace();
-    }
-  }
+		ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+		try {
+			validator.validateAsset(component, this, sourceInfo);
+
+		} catch (ScannerException e) {
+			TapestryCore.log(e);
+			e.printStackTrace();
+		}
+	}
+
+	public String getPropertyName() {
+		return fPropertyName;
+	}
+
+	public void setPropertyName(String propertyName) {
+		this.fPropertyName = propertyName;
+	}
 }

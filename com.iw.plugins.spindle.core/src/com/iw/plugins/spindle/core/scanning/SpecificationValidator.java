@@ -34,8 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.tapestry.IResourceLocation;
-import org.apache.tapestry.engine.ITemplateSource;
-import org.apache.tapestry.spec.AssetType;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -46,7 +44,6 @@ import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.FrameworkComponentValidator;
 import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
@@ -231,14 +228,15 @@ public class SpecificationValidator extends BaseValidator
         // occur
         // at the end of the
         // entire build!
-        FrameworkComponentValidator.validateContainedComponent(
-                (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
-                ((PluginComponentSpecification) specification).getNamespace(),
-                type,
-                containedSpecification,
-                component,
-                info,
-                containedSpecification.getPublicId());
+// TODO this will be replaced at some point		
+//        FrameworkComponentValidator.validateContainedComponent(
+//                (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
+//                ((PluginComponentSpecification) specification).getNamespace(),
+//                type,
+//                containedSpecification,
+//                component,
+//                info,
+//                containedSpecification.getPublicId());
 
         return true;
     }

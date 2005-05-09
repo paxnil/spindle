@@ -57,7 +57,10 @@ import com.iw.plugins.spindle.core.util.XMLUtil;
  * IBuildActions. The TapestryBuilder will execute them last! This is because some validations here
  * involve pages and pages are not resolved by the builder until after all of the components are.
  * 
- * @deprecated
+ * In the scope of Picasso, this class does not build and has been left ths way
+ * on purpose.
+ * 
+ * @deprecated - to be replaced
  * @author glongman@gmail.com
  */
 public class FrameworkComponentValidator

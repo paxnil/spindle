@@ -40,6 +40,7 @@ import org.apache.tapestry.spec.IListenerBindingSpecification;
 import org.eclipse.jdt.core.IType;
 import org.w3c.dom.Node;
 
+import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -123,9 +124,12 @@ public class ComponentScanner extends SpecificationScanner
         fNamespace = namespace;
     }
 
-    protected void scanAsset(IComponentSpecification specification, Node node, AssetType type,
+    protected void scanAsset_3_0(IComponentSpecification specification, Node node, AssetType type,
             String attributeName) throws ScannerException
     {
+		if (!SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID.equals(fPublicId))
+			return;
+		
         String name = getAttribute(node, "name", false);
 
         String value = getAttribute(node, attributeName);
@@ -145,7 +149,7 @@ public class ComponentScanner extends SpecificationScanner
         }
 
         // not revalidatable - error state would only change if the file changed!
-        if (name != null && !name.equals(ITemplateSource.TEMPLATE_ASSET_NAME))
+        if (name != null && !name.equals(PicassoMigration.TEMPLATE_ASSET_NAME))
             validatePattern(
                     name,
                     SpecificationParser.ASSET_NAME_PATTERN,
@@ -261,7 +265,7 @@ public class ComponentScanner extends SpecificationScanner
         bspec.validate(specification, fValidator);
     }
 
-    protected void scanBinding(IContainedComponent component, Node node, BindingType type,
+    protected void scanBinding_3_0(IContainedComponent component, Node node, BindingType type,
             String attributeName) throws ScannerException
     {
         String name = getAttribute(node, "name", true, true);
@@ -420,30 +424,30 @@ public class ComponentScanner extends SpecificationScanner
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
         {
             if (isElement(child, "binding"))
-            {
-                scanBinding(c, child, BindingType.DYNAMIC, "expression");
+            {				
+                scanBinding_3_0(c, child, BindingType.DYNAMIC, "expression");
                 continue;
             }
 
             // Field binding is in 1.3 DTD, but removed from 1.4
-
-            if (isElement(child, "field-binding"))
-            {
-                if (XMLUtil.getDTDVersion(fPublicId) < XMLUtil.DTD_3_0)
-                {
-                    scanBinding(c, child, BindingType.FIELD, "field-name");
-                }
-                else
-                {
-                    addProblem(
-                            IProblem.ERROR,
-                            getNodeStartSourceLocation(child),
-                            "field-binding not supported in DTD 3.0 and up.",
-                            false,
-                            IProblem.COMPONENT_SPEC_FIX_FIELD_BINDING);
-                }
-                continue;
-            }
+// NO LONGER NEEDED AS TAPESTRY PICASSO DOES NOT RECOGNIZE THE 1.3 DTD
+//            if (isElement(child, "field-binding"))
+//            {
+//                if (XMLUtil.getDTDVersion(fPublicId) < XMLUtil.DTD_3_0)
+//                {
+//                    scanBinding_3_0(c, child, BindingType.FIELD, "field-name");
+//                }
+//                else
+//                {
+//                    addProblem(
+//                            IProblem.ERROR,
+//                            getNodeStartSourceLocation(child),
+//                            "field-binding not supported in DTD 3.0 and up.",
+//                            false,
+//                            IProblem.COMPONENT_SPEC_FIX_FIELD_BINDING);
+//                }
+//                continue;
+//            }
 
             if (isElement(child, "listener-binding"))
             {
@@ -453,13 +457,13 @@ public class ComponentScanner extends SpecificationScanner
 
             if (isElement(child, "inherited-binding"))
             {
-                scanBinding(c, child, BindingType.INHERITED, "parameter-name");
+                scanBinding_3_0(c, child, BindingType.INHERITED, "parameter-name");
                 continue;
             }
 
             if (isElement(child, "static-binding"))
             {
-                scanBinding(c, child, BindingType.STATIC, "value");
+                scanBinding_3_0(c, child, BindingType.STATIC, "value");
                 continue;
             }
 
@@ -467,13 +471,13 @@ public class ComponentScanner extends SpecificationScanner
 
             if (isElement(child, "string-binding"))
             {
-                scanBinding(c, child, BindingType.STRING, "key");
+                scanBinding_3_0(c, child, BindingType.STRING, "key");
                 continue;
             }
 
             if (isElement(child, "message-binding"))
             {
-                scanBinding(c, child, BindingType.STRING, "key");
+                scanBinding_3_0(c, child, BindingType.STRING, "key");
                 continue;
             }
 
@@ -593,19 +597,19 @@ public class ComponentScanner extends SpecificationScanner
 
             if (isElement(node, "external-asset"))
             {
-                scanAsset(specification, node, AssetType.EXTERNAL, "URL");
+                scanAsset_3_0(specification, node, PicassoMigration.DEFAULT_ASSET, "URL");
                 continue;
             }
 
             if (isElement(node, "context-asset"))
             {
-                scanAsset(specification, node, AssetType.CONTEXT, "path");
+                scanAsset_3_0(specification, node, PicassoMigration.CONTEXT_ASSET, "path");
                 continue;
             }
 
             if (isElement(node, "private-asset"))
             {
-                scanAsset(specification, node, AssetType.PRIVATE, "resource-path");
+                scanAsset_3_0(specification, node, PicassoMigration.CLASSPATH_ASSET, "resource-path");
                 continue;
             }
 

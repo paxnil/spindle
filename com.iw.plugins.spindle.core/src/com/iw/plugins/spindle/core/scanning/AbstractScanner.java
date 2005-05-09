@@ -425,5 +425,7 @@ public abstract class AbstractScanner implements IProblemCollector
     {
         fExternalProblemCollector = collector;
     }
+	
+	
 
 }

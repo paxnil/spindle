@@ -32,13 +32,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.tapestry.Tapestry;
-import org.apache.tapestry.engine.ITemplateSource;
-import org.apache.tapestry.spec.AssetType;
+import org.apache.tapestry.services.TemplateSource;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
+import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
@@ -48,6 +48,7 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.spec.PluginAssetSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 
 /**
@@ -74,7 +75,7 @@ public class TemplateFinder
         String expectedExtension = namespace.getSpecification().getProperty(
                 Tapestry.TEMPLATE_EXTENSION_PROPERTY);
         if (expectedExtension == null)
-            expectedExtension = Tapestry.DEFAULT_TEMPLATE_EXTENSION;
+            expectedExtension = PicassoMigration.DEFAULT_TEMPLATE_EXTENSION;
 
         for (Iterator iter = locations.iterator(); iter.hasNext();)
         {
@@ -157,7 +158,7 @@ public class TemplateFinder
     private void findTemplates(PluginComponentSpecification specification) throws CoreException
     {
         IAssetSpecification templateAsset = specification
-                .getAsset(ITemplateSource.TEMPLATE_ASSET_NAME);
+                .getAsset(TemplateSource.TEMPLATE_ASSET_NAME);
 
         if (templateAsset != null)
             readTemplatesFromAsset(specification, templateAsset);
@@ -190,7 +191,7 @@ public class TemplateFinder
                     Tapestry.TEMPLATE_EXTENSION_PROPERTY);
 
         if (extension == null)
-            extension = Tapestry.DEFAULT_TEMPLATE_EXTENSION;
+            extension = PicassoMigration.DEFAULT_TEMPLATE_EXTENSION;
 
         fListener.templateExtensionSeen(extension);
 
@@ -200,10 +201,10 @@ public class TemplateFinder
     private void readTemplatesFromAsset(PluginComponentSpecification specification,
             IAssetSpecification templateAsset)
     {
-        AssetType type = templateAsset.getType();
+        int type = ((PluginAssetSpecification)templateAsset).getType();
         String templatePath = templateAsset.getPath();
         IResourceWorkspaceLocation templateLocation = null;
-        if (type == AssetType.EXTERNAL)
+        if (type == PicassoMigration.DEFAULT_ASSET)
         {
             addProblem(
                     IProblem.WARNING,
@@ -212,11 +213,11 @@ public class TemplateFinder
                     IProblem.NOT_QUICK_FIXABLE);
             return;
         }
-        if (type == AssetType.CONTEXT)
+        if (type == PicassoMigration.CONTEXT_ASSET)
         {
             if (fContextRoot != null)
                 templateLocation = (IResourceWorkspaceLocation) fContextRoot
-                        .getRelativeLocation(templatePath);
+                        .getRelativeResource(templatePath);
 
             if (templateLocation == null || templateLocation.getStorage() == null)
             {
@@ -227,10 +228,10 @@ public class TemplateFinder
                 return;
             }
         }
-        if (type == AssetType.PRIVATE)
+        if (type == PicassoMigration.CLASSPATH_ASSET)
         {
             templateLocation = (IResourceWorkspaceLocation) specification
-                    .getSpecificationLocation().getRelativeLocation(templatePath);
+                    .getSpecificationLocation().getRelativeResource(templatePath);
             if (templateLocation == null || templateLocation.getStorage() == null)
             {
                 addProblem(IProblem.ERROR, ((ISourceLocationInfo) templateAsset.getLocation())
