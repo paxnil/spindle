@@ -26,6 +26,8 @@
 
 package com.iw.plugins.spindle.core.namespace;
 
+import java.util.List;
+
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.spec.IComponentSpecification;
 
@@ -69,5 +71,7 @@ public interface ICoreNamespace extends INamespace
   public PageSpecificationResolver getPageResolver();
 
   public void setPageResolver(PageSpecificationResolver resolver);
+  
+  public List getComponentTypes();
 
 }

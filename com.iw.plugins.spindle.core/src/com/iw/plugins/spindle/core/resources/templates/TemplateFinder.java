@@ -41,7 +41,7 @@ import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
+import com.iw.plugins.spindle.core.properties.ComponentPropertySource;
 import com.iw.plugins.spindle.core.resources.I18NResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -68,14 +68,9 @@ public class TemplateFinder
      * @param namespace
      * @return List a list with any non templates or localized templates removed.
      */
-    public static List filterTemplateList(List locations, ICoreNamespace namespace)
+    public static List filterTemplateList(List locations, String expectedTemplateExtension)
     {
         List result = new ArrayList();
-
-        String expectedExtension = namespace.getSpecification().getProperty(
-                Tapestry.TEMPLATE_EXTENSION_PROPERTY);
-        if (expectedExtension == null)
-            expectedExtension = PicassoMigration.DEFAULT_TEMPLATE_EXTENSION;
 
         for (Iterator iter = locations.iterator(); iter.hasNext();)
         {
@@ -88,7 +83,7 @@ public class TemplateFinder
             {
                 foundName = name.substring(0, dotx);
                 foundExtension = name.substring(dotx + 1);
-                if (foundName.length() == 0 || !expectedExtension.equals(foundExtension))
+                if (foundName.length() == 0 || !expectedTemplateExtension.equals(foundExtension))
                     continue;
             }
             boolean ok = true;
@@ -113,9 +108,7 @@ public class TemplateFinder
 
     private IProblemCollector fProblemCollector;
 
-    private IResourceWorkspaceLocation fContextRoot;
-
-    private IResourceWorkspaceLocation fClasspathRoot;
+    private ITapestryProject fTapestryProject;
 
     private I18NResourceAcceptor fAcceptor = new I18NResourceAcceptor();
 
@@ -125,23 +118,18 @@ public class TemplateFinder
             .getTapestryArtifactManager();
 
     public IResourceWorkspaceLocation[] getTemplates(IComponentSpecification specification,
-            IProblemCollector collector) throws CoreException
+            ITapestryProject project, IProblemCollector collector) throws CoreException
     {
-        ITapestryProject tapestryProject = getTapestryProject(specification);
-        fContextRoot = (IResourceWorkspaceLocation) tapestryProject.getWebContextLocation();
+        fTapestryProject = project;
+        fExtension = ComponentPropertySource.getPropertyValue(
+                specification,
+                fTapestryProject,
+                "org.apache.tapestry.template-extension");
         fProblemCollector = collector;
         fFindResults.clear();
         findTemplates((PluginComponentSpecification) specification);
         return (IResourceWorkspaceLocation[]) fFindResults
                 .toArray(new IResourceWorkspaceLocation[fFindResults.size()]);
-    }
-
-    private ITapestryProject getTapestryProject(IComponentSpecification specification)
-            throws CoreException
-    {
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) specification
-                .getSpecificationLocation();
-        return (ITapestryProject) location.getProject().getNature(TapestryCore.NATURE_ID);
     }
 
     /**
@@ -163,7 +151,6 @@ public class TemplateFinder
         if (templateAsset != null)
             readTemplatesFromAsset(specification, templateAsset);
 
-        fExtension = getTemplateExtension(specification);
         String name = specification.getSpecificationLocation().getName();
         int dotx = name.lastIndexOf('.');
         fTemplateBaseName = name.substring(0, dotx);
@@ -177,31 +164,10 @@ public class TemplateFinder
         }
     }
 
-    /**
-     * @param specification
-     * @return
-     */
-    private String getTemplateExtension(PluginComponentSpecification specification)
-    {
-
-        String extension = specification == null ? null : specification
-                .getProperty(Tapestry.TEMPLATE_EXTENSION_PROPERTY);
-        if (extension == null)
-            extension = specification.getNamespace().getSpecification().getProperty(
-                    Tapestry.TEMPLATE_EXTENSION_PROPERTY);
-
-        if (extension == null)
-            extension = PicassoMigration.DEFAULT_TEMPLATE_EXTENSION;
-
-        fListener.templateExtensionSeen(extension);
-
-        return extension;
-    }
-
     private void readTemplatesFromAsset(PluginComponentSpecification specification,
             IAssetSpecification templateAsset)
     {
-        int type = ((PluginAssetSpecification)templateAsset).getType();
+        int type = ((PluginAssetSpecification) templateAsset).getType();
         String templatePath = templateAsset.getPath();
         IResourceWorkspaceLocation templateLocation = null;
         if (type == PicassoMigration.DEFAULT_ASSET)
@@ -215,8 +181,9 @@ public class TemplateFinder
         }
         if (type == PicassoMigration.CONTEXT_ASSET)
         {
-            if (fContextRoot != null)
-                templateLocation = (IResourceWorkspaceLocation) fContextRoot
+            IResourceWorkspaceLocation contextRoot = fTapestryProject.getWebContextLocation();
+            if (contextRoot != null)
+                templateLocation = (IResourceWorkspaceLocation) contextRoot
                         .getRelativeResource(templatePath);
 
             if (templateLocation == null || templateLocation.getStorage() == null)
@@ -230,8 +197,17 @@ public class TemplateFinder
         }
         if (type == PicassoMigration.CLASSPATH_ASSET)
         {
-            templateLocation = (IResourceWorkspaceLocation) specification
-                    .getSpecificationLocation().getRelativeResource(templatePath);
+            try
+            {
+                IResourceWorkspaceLocation contextRoot = fTapestryProject.getClasspathRoot();
+                if (contextRoot != null)
+                    templateLocation = (IResourceWorkspaceLocation) contextRoot
+                            .getRelativeResource(templatePath);
+            }
+            catch (CoreException e)
+            {
+                TapestryCore.log(e);
+            }
             if (templateLocation == null || templateLocation.getStorage() == null)
             {
                 addProblem(IProblem.ERROR, ((ISourceLocationInfo) templateAsset.getLocation())
@@ -256,7 +232,7 @@ public class TemplateFinder
     private void findPageTemplateInApplicationRoot(PluginComponentSpecification specification)
             throws CoreException
     {
-        find(fContextRoot);
+        find(fTapestryProject.getWebContextLocation());
     }
 
     private void find(IResourceWorkspaceLocation location) throws CoreException

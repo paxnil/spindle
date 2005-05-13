@@ -52,6 +52,7 @@ public class FullBuild extends Build
 {
 
   protected ServletInfo fApplicationServlet;
+  protected WebAppDescriptor fWebAppDescriptor;
   /**
    * Constructor for FullBuilder.
    */
@@ -120,6 +121,7 @@ public class FullBuild extends Build
     newState.fBinarySpecificationMap = fBinarySpecificationMap;
     newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
     newState.fApplicationServlet = fApplicationServlet;
+    newState.fWebAppDescriptor = fWebAppDescriptor;
     newState.fPrimaryNamespace = fApplicationNamespace;
     newState.fFrameworkNamespace = fFrameworkNamespace;
     newState.fCleanTemplates = fCleanTemplates;
@@ -191,29 +193,35 @@ public class FullBuild extends Build
       if (wxmlElement == null)
         throw new BrokenWebXMLException("Tapestry Build failed: could not parse web.xml. ");
 
-      ServletInfo[] servletInfos = null;
+      WebAppDescriptor descriptor = null;
       try
       {
         WebXMLScanner wscanner = new WebXMLScanner(this);
-        servletInfos = wscanner.scanServletInformation(wxmlElement);
+        descriptor = wscanner.scanWebAppDescriptor(wxmlElement);
         IResource resource = (IResource) webXML.getStorage();
         Markers.addTapestryProblemMarkersToResource(resource, wscanner.getProblems());
       } catch (ScannerException e)
       {
         TapestryCore.log(e);
       }
-
+      
+      if (descriptor == null)
+          throw new BrokenWebXMLException(TapestryCore.getString(TapestryBuilder.STRING_KEY
+                  + "abort-no-valid-application-servlets-found"));
+      
+      ServletInfo [] servletInfos = descriptor.getServletInfos();
       if (servletInfos == null || servletInfos.length == 0)
-      {
+      
         throw new BrokenWebXMLException(TapestryCore.getString(TapestryBuilder.STRING_KEY
             + "abort-no-valid-application-servlets-found"));
-      }
-      if (servletInfos.length > 1)
-      {
+      
+      if (servletInfos.length > 1)      
         throw new BrokenWebXMLException(TapestryCore.getString(TapestryBuilder.STRING_KEY
             + "abort-too-many-valid-servlets-found"));
-      }
+      
       fApplicationServlet = servletInfos[0];
+      fWebAppDescriptor = descriptor;
+     
 
     } else
     {

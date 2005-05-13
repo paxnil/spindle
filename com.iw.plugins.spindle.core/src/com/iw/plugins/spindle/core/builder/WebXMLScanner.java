@@ -27,7 +27,8 @@ package com.iw.plugins.spindle.core.builder;
  * ***** END LICENSE BLOCK ***** */
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IPath;
@@ -73,17 +74,16 @@ public class WebXMLScanner extends AbstractScanner
         this.fJavaProject = fBuilder.fJavaProject;
     }
 
-    public ServletInfo[] scanServletInformation(Object source) throws ScannerException
+    public WebAppDescriptor scanWebAppDescriptor(Object source) throws ScannerException
     {
         Node webxml = ((Document) source).getDocumentElement();
-        List result = (List) scan(webxml, null);
-        return (ServletInfo[]) result.toArray(new ServletInfo[result.size()]);
+        return (WebAppDescriptor) scan(webxml, null);
     }
 
     public Object beforeScan(Object source)
     {
         fSeenServletNames = new ArrayList();
-        return new ArrayList(11);
+        return new WebAppDescriptor();
     }
 
     protected void checkApplicationLocation(IResourceWorkspaceLocation location)
@@ -199,7 +199,9 @@ public class WebXMLScanner extends AbstractScanner
     protected void doScan(Object source, Object resultObject) throws ScannerException
     {
         Node rootNode = (Node) source;
-        ArrayList infos = (ArrayList) resultObject;
+        WebAppDescriptor descriptor = (WebAppDescriptor) resultObject;
+        ArrayList infos = new ArrayList(11);
+        Map contextParameters = new HashMap();
         for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
         {
             if (isElement(node, "servlet"))
@@ -207,9 +209,58 @@ public class WebXMLScanner extends AbstractScanner
                 ServletInfo info = getServletInfo(node);
                 if (info != null)
                     infos.add(info);
+                continue;
+            }
 
+            if (isElement(node, "context-param"))
+            {
+                scanContextParameter(node, contextParameters);
             }
         }
+        descriptor.setServletInfos((ServletInfo[]) infos.toArray(new ServletInfo[infos.size()]));
+        descriptor.setContextParameters(contextParameters);
+    }
+
+    private void scanContextParameter(Node contextParamNode, Map target)
+    {
+        String key = null;
+        String value = null;
+        ISourceLocation keyLoc = null;
+        ISourceLocation valueLoc = null;
+        for (Node node = contextParamNode.getFirstChild(); node != null; node = node
+                .getNextSibling())
+        {
+            if (isElement(node, "param-name"))
+            {
+                key = getValue(node);
+                keyLoc = getBestGuessSourceLocation(node, true);
+                if (key == null)
+                {
+                    addProblem(
+                            IProblem.ERROR,
+                            keyLoc,
+                            TapestryCore.getString("web-xml-context-param-null-key"),
+                            false,
+                            IProblem.NOT_QUICK_FIXABLE);
+                    return;
+                }
+                else if (target.containsKey(key))
+                {
+                    addProblem(IProblem.ERROR, keyLoc, TapestryCore.getString(
+                            "web-xml-context-param-duplicate-key",
+                            key), false, IProblem.NOT_QUICK_FIXABLE);
+                    return;
+                }
+            }
+
+            if (isElement(node, "param-value"))
+            {
+                value = getValue(node);
+                valueLoc = getBestGuessSourceLocation(node, true);
+            }
+        }
+        if (key != null && value != null)
+            target.put(key, value);
     }
 
     protected void cleanup()
@@ -273,7 +324,8 @@ public class WebXMLScanner extends AbstractScanner
                     if (servletType.isBinary())
                         throw new ScannerException(TapestryCore.getString(
                                 "builder-error-servlet-subclass-is-binary-attach-source",
-                                servletType.getFullyQualifiedName()), false, IProblem.NOT_QUICK_FIXABLE);
+                                servletType.getFullyQualifiedName()), false,
+                                IProblem.NOT_QUICK_FIXABLE);
 
                 }
                 else if (methodSource.trim().length() > 0)
@@ -380,8 +432,12 @@ public class WebXMLScanner extends AbstractScanner
                 keyLoc = getBestGuessSourceLocation(node, true);
                 if (key == null)
                 {
-                    addProblem(IProblem.ERROR, keyLoc, TapestryCore
-                            .getString("web-xml-init-param-null-key"), false, IProblem.NOT_QUICK_FIXABLE);
+                    addProblem(
+                            IProblem.ERROR,
+                            keyLoc,
+                            TapestryCore.getString("web-xml-init-param-null-key"),
+                            false,
+                            IProblem.NOT_QUICK_FIXABLE);
                     return false;
                 }
                 else if (currentInfo.parameters.containsKey(key))

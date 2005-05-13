@@ -117,7 +117,7 @@ public class TemplateScanner extends AbstractScanner
     // implicit components
 
     public void scanTemplate(PluginComponentSpecification spec, Resource templateLocation,
-            IScannerValidator validator) throws ScannerException
+            String componentAttributeName, IScannerValidator validator) throws ScannerException
     {
         Assert.isNotNull(spec);
         Assert.isNotNull(spec.getNamespace());
@@ -128,7 +128,7 @@ public class TemplateScanner extends AbstractScanner
         fParser.setProblemCollector(this);
         fSeenIds.clear();
         fContainsImplicitComponents = false;
-
+        fComponentAttributeName = componentAttributeName;
         scan(templateLocation, validator);
 
     }

@@ -14,10 +14,7 @@
       <library name="dtdparser.jar">
          <export name="*"/>
       </library>
-      <library name="lib/tapestry/tapestry-3.1-alpha-1.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/tapestry/tapestry-contrib-3.1-alpha-1.jar">
+      <library name="lib/tapestry/tapestry-4.0-alpha-2.jar">
          <export name="*"/>
       </library>
       <library name="lib/tapestry/ext-package/lib/bsf-2.3.0.jar">
@@ -38,28 +35,10 @@
       <library name="lib/tapestry/ext-package/lib/commons-logging-1.0.4.jar">
          <export name="*"/>
       </library>
-      <library name="lib/tapestry/ext-package/lib/hivemind-1.1-alpha-1.jar">
+      <library name="lib/tapestry/ext-package/lib/hivemind-1.1-beta-1.jar">
          <export name="*"/>
       </library>
-      <library name="lib/tapestry/ext-package/lib/hivemind-lib-1.1-alpha-1.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/tapestry/ext-package/lib/javassist-3.0-rc-1.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/tapestry/ext-package/lib/jboss-j2ee-3.2.1.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/tapestry/ext-package/lib/jdom-1.0.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/tapestry/ext-package/lib/junit-3.8.1.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/tapestry/ext-package/lib/jython-2.1.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/tapestry/ext-package/lib/log4j-1.2.8.jar">
+      <library name="lib/tapestry/ext-package/lib/hivemind-lib-1.1-beta-1.jar">
          <export name="*"/>
       </library>
       <library name="lib/tapestry/ext-package/lib/ognl-2.6.7.jar">
@@ -67,7 +46,7 @@
       </library>
       <library name="lib/tapestry/ext-package/lib/oro-2.0.8.jar">
          <export name="*"/>
-      </library>     
+      </library>
    </runtime>
    <requires>
       <import plugin="org.eclipse.ui.ide" export="true"/>

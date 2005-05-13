@@ -95,6 +95,11 @@ public class CoreTemplateParser extends TemplateParser
      */
 
     private TagEventHandler fEventHandler = new TagEventHandler();
+    
+    /**
+     * The component attribute name (usually 'jwcid')
+     */
+    private String fComponentAttributeName;
 
     /**
      * List of Problems found during the parse.
@@ -106,7 +111,7 @@ public class CoreTemplateParser extends TemplateParser
     {
         super();
         setFactory(new CoreTemplateTokenFactory(fEventHandler));
-    }
+    }    
 
     public TemplateToken[] parse(char[] templateData, ITemplateParserDelegate delegate,
             Resource resourceLocation) throws TemplateParseException
@@ -116,6 +121,7 @@ public class CoreTemplateParser extends TemplateParser
         try
         {
             beforeParse(templateData, delegate, resourceLocation);
+            fComponentAttributeName = delegate.getComponentAttributeName();
             try
             {
                 parse();
@@ -164,7 +170,7 @@ public class CoreTemplateParser extends TemplateParser
     {
         Map attrMap = fEventHandler.getEventInfo().getAttributeMap();
         ISourceLocation result = (ISourceLocation) findCaselessly(
-                TemplateParser.JWCID_ATTRIBUTE_NAME,
+                fComponentAttributeName,
                 attrMap);
         if (result == null)
             result = fEventHandler.getEventInfo().getStartTagLocation();

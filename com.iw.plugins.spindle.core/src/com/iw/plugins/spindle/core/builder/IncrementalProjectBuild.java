@@ -299,6 +299,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
                 result.validate(useValidator);
                 result.setTemplateLocations(TapestryBuilder.scanForTemplates(
                         result,
+                        fTapestryBuilder.fTapestryProject,
                         fProblemCollector));
                 for (Iterator iter = result.getTemplateLocations().iterator(); iter.hasNext();)
                 {

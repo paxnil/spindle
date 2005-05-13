@@ -91,9 +91,9 @@ public class DOMValidator implements IProblemCollector
 
             DTDS = new HashMap();
 
-            // TAP 3.1 DTD
+            // TAP 4.0 DTD
 
-            publicId = SpecificationParser.TAPESTRY_DTD_3_1_PUBLIC_ID;
+            publicId = SpecificationParser.TAPESTRY_DTD_4_0_PUBLIC_ID;
 
             resourceIdentifier = new XMLResourceIdentifierImpl(publicId, null, null, null);
 
@@ -104,7 +104,7 @@ public class DOMValidator implements IProblemCollector
                 throw new Error(errorMessage);
 
             DTDS.put(publicId, new DTDParser(new InputStreamReader(source.getByteStream()),
-                    SpecificationParser.TAPESTRY_DTD_3_1_PUBLIC_ID, debug).parse());
+                    SpecificationParser.TAPESTRY_DTD_4_0_PUBLIC_ID, debug).parse());
 
             // TAP 3.0 DTD
 

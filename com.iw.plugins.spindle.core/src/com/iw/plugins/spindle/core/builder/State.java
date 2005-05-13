@@ -89,6 +89,7 @@ public class State
 
   // the results of parsing web.xml
   ServletInfo fApplicationServlet;
+  WebAppDescriptor fWebAppDescriptor;
 
   // the main namespace result of the last build.
   ICoreNamespace fPrimaryNamespace;
@@ -141,6 +142,7 @@ public class State
         0,
         lastState.fLastKnownClasspath.length);
     fApplicationServlet = lastState.fApplicationServlet;
+    fWebAppDescriptor = lastState.fWebAppDescriptor;
     fPrimaryNamespace = lastState.fPrimaryNamespace;
     fFrameworkNamespace = lastState.fFrameworkNamespace;
 

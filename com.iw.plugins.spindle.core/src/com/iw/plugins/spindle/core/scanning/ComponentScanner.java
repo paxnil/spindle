@@ -27,6 +27,7 @@
 package com.iw.plugins.spindle.core.scanning;
 
 import org.apache.tapestry.INamespace;
+import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.engine.ITemplateSource;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.tapestry.spec.AssetType;
@@ -116,7 +117,34 @@ public class ComponentScanner extends SpecificationScanner
                 fRootNode,
                 "allow-informal-parameters"));
 
-        scanComponentSpecification(fRootNode, specification, fIsPageSpec);
+        verifyRootElement();
+
+        scanComponentSpecification(specification);
+
+    }
+
+    private void verifyRootElement()
+    {
+        String rootName = fRootNode.getNodeName();
+        if (fIsPageSpec)
+        {
+            if (!rootName.equals("page-specification"))
+
+                throw new ScannerException(TapestryCore.getTapestryString(
+                        "AbstractDocumentParser.incorrect-document-type",
+                        "page-specification",
+                        rootName), getBestGuessSourceLocation(fRootNode, false), false,
+                        IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_PAGE_SPECIFICATION);
+
+        }
+        else if (!rootName.equals("component-specification"))
+        {
+            throw new ScannerException(TapestryCore.getTapestryString(
+                    "AbstractDocumentParser.incorrect-document-type",
+                    "component-specification",
+                    rootName), getBestGuessSourceLocation(fRootNode, false), false,
+                    IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_COMPONENT_SPECIFICATION);
+        }
     }
 
     public void setNamespace(INamespace namespace)
@@ -124,17 +152,39 @@ public class ComponentScanner extends SpecificationScanner
         fNamespace = namespace;
     }
 
-    protected void scanAsset_3_0(IComponentSpecification specification, Node node, AssetType type,
-            String attributeName) throws ScannerException
+    protected boolean scanAsset(IComponentSpecification specification, Node node)
     {
-		if (!SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID.equals(fPublicId))
-			return;
-		
+        if (!fIsTapestry_4_0)
+            return scanAsset_3_0(specification, node);
+
+        if (!isElement(node, "asset"))
+            return scanAsset(specification, node, "path", null);
+
+        return true;
+    }
+
+    protected boolean scanAsset_3_0(IComponentSpecification specification, Node node)
+    {
+        boolean result = false;
+        if (isElement(node, "external-asset"))
+            result = scanAsset(specification, node, "URL", null);
+
+        if (isElement(node, "context-asset"))
+            result = scanAsset(specification, node, "path", "context:");
+
+        if (isElement(node, "private-asset"))
+            result = scanAsset(specification, node, "resource-path", "classpath:");
+
+        return result;
+    }
+
+    protected boolean scanAsset(IComponentSpecification specification, Node node,
+            String pathAttributeName, String prefix) throws ScannerException
+    {
         String name = getAttribute(node, "name", false);
+        String value = getAttribute(node, pathAttributeName);
+        String propertyName = getAttribute(node, "property", false);
 
-        String value = getAttribute(node, attributeName);
-
-        // not revalidatable - error state would only change if the file changed!
         if (specification.getAsset(name) != null)
         {
             addProblem(
@@ -148,7 +198,6 @@ public class ComponentScanner extends SpecificationScanner
                     IProblem.COMPONENT_SPEC_DUPLICATE_ASSET_ID);
         }
 
-        // not revalidatable - error state would only change if the file changed!
         if (name != null && !name.equals(PicassoMigration.TEMPLATE_ASSET_NAME))
             validatePattern(
                     name,
@@ -158,11 +207,20 @@ public class ComponentScanner extends SpecificationScanner
                     getAttributeSourceLocation(node, "name"),
                     IProblem.COMPONENT_INVALID_ASSET_NAME);
 
+        if (propertyName != null)
+            validatePattern(
+                    propertyName,
+                    SpecificationParser.PROPERTY_NAME_PATTERN,
+                    "SpecificationParser.invalid-property-name",
+                    IProblem.ERROR,
+                    getAttributeSourceLocation(node, "property"),
+                    IProblem.COMPONENT_INVALID_ASSET_PROPERTY_NAME);
+
         PluginAssetSpecification asset = (PluginAssetSpecification) fSpecificationFactory
                 .createAssetSpecification();
 
-        asset.setType(type);
         asset.setPath(value);
+        asset.setPropertyName(propertyName);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResource(specification.getSpecificationLocation());
@@ -174,15 +232,20 @@ public class ComponentScanner extends SpecificationScanner
 
         scanPropertiesInNode(asset, node);
 
+        return true;
+
     }
 
     /**
      * @since 1.0.4
      */
 
-    protected void scanBean(IComponentSpecification specification, Node node)
+    protected boolean scanBean(IComponentSpecification specification, Node node)
             throws ScannerException
     {
+        if (isElement(node, "bean"))
+            return false;
+
         String name = getAttribute(node, "name", true);
 
         // not revalidatable - error state would only change if the file changed!
@@ -263,9 +326,10 @@ public class ComponentScanner extends SpecificationScanner
         }
 
         bspec.validate(specification, fValidator);
+        return true;
     }
 
-    protected void scanBinding_3_0(IContainedComponent component, Node node, BindingType type,
+    protected void scanBinding(IContainedComponent component, Node node, BindingType type,
             String attributeName) throws ScannerException
     {
         String name = getAttribute(node, "name", true, true);
@@ -336,9 +400,12 @@ public class ComponentScanner extends SpecificationScanner
         component.setBinding(name, binding);
     }
 
-    protected void scanComponent(IComponentSpecification specification, Node node)
+    protected boolean scanComponent(IComponentSpecification specification, Node node)
             throws ScannerException
     {
+        if (!isElement(node, "component"))
+            return false;
+
         String id = getAttribute(node, "id", false);
 
         ISourceLocation idLoc = getAttributeSourceLocation(node, "id");
@@ -424,30 +491,30 @@ public class ComponentScanner extends SpecificationScanner
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
         {
             if (isElement(child, "binding"))
-            {				
-                scanBinding_3_0(c, child, BindingType.DYNAMIC, "expression");
+            {
+                scanBinding(c, child, BindingType.DYNAMIC, "expression");
                 continue;
             }
 
             // Field binding is in 1.3 DTD, but removed from 1.4
-// NO LONGER NEEDED AS TAPESTRY PICASSO DOES NOT RECOGNIZE THE 1.3 DTD
-//            if (isElement(child, "field-binding"))
-//            {
-//                if (XMLUtil.getDTDVersion(fPublicId) < XMLUtil.DTD_3_0)
-//                {
-//                    scanBinding_3_0(c, child, BindingType.FIELD, "field-name");
-//                }
-//                else
-//                {
-//                    addProblem(
-//                            IProblem.ERROR,
-//                            getNodeStartSourceLocation(child),
-//                            "field-binding not supported in DTD 3.0 and up.",
-//                            false,
-//                            IProblem.COMPONENT_SPEC_FIX_FIELD_BINDING);
-//                }
-//                continue;
-//            }
+
+            if (isElement(child, "field-binding"))
+            {
+                if (XMLUtil.getDTDVersion(fPublicId) < XMLUtil.DTD_3_0)
+                {
+                    scanBinding(c, child, BindingType.FIELD, "field-name");
+                }
+                else
+                {
+                    addProblem(
+                            IProblem.ERROR,
+                            getNodeStartSourceLocation(child),
+                            "field-binding not supported in DTD 3.0 and up.",
+                            false,
+                            IProblem.COMPONENT_SPEC_FIX_FIELD_BINDING);
+                }
+                continue;
+            }
 
             if (isElement(child, "listener-binding"))
             {
@@ -457,13 +524,13 @@ public class ComponentScanner extends SpecificationScanner
 
             if (isElement(child, "inherited-binding"))
             {
-                scanBinding_3_0(c, child, BindingType.INHERITED, "parameter-name");
+                scanBinding(c, child, BindingType.INHERITED, "parameter-name");
                 continue;
             }
 
             if (isElement(child, "static-binding"))
             {
-                scanBinding_3_0(c, child, BindingType.STATIC, "value");
+                scanBinding(c, child, BindingType.STATIC, "value");
                 continue;
             }
 
@@ -471,13 +538,13 @@ public class ComponentScanner extends SpecificationScanner
 
             if (isElement(child, "string-binding"))
             {
-                scanBinding_3_0(c, child, BindingType.STRING, "key");
+                scanBinding(c, child, BindingType.STRING, "key");
                 continue;
             }
 
             if (isElement(child, "message-binding"))
             {
-                scanBinding_3_0(c, child, BindingType.STRING, "key");
+                scanBinding(c, child, BindingType.STRING, "key");
                 continue;
             }
 
@@ -493,36 +560,15 @@ public class ComponentScanner extends SpecificationScanner
         // the revalidatable stuff
         c.validate(specification, fValidator);
 
+        return true;
+
     }
 
-    protected void scanComponentSpecification(Node rootNode, IComponentSpecification specification,
-            boolean isPage) throws ScannerException
+    protected void scanComponentSpecification(IComponentSpecification specification)
+            throws ScannerException
     {
 
-        //must be done here!
-        String rootName = rootNode.getNodeName();
-        if (isPage)
-        {
-            // not revalidatable - error state would only change if the file changed!
-            if (!rootName.equals("page-specification"))
-            {
-                throw new ScannerException(TapestryCore.getTapestryString(
-                        "AbstractDocumentParser.incorrect-document-type",
-                        "page-specification",
-                        rootName), getBestGuessSourceLocation(rootNode, false), false,
-                        IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_PAGE_SPECIFICATION);
-            }
-            // not revalidatable - error state would only change if the file changed!
-        }
-        else if (!rootName.equals("component-specification"))
-        {
-            throw new ScannerException(TapestryCore.getTapestryString(
-                    "AbstractDocumentParser.incorrect-document-type",
-                    "component-specification",
-                    rootName), getBestGuessSourceLocation(rootNode, false), false,
-                    IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_COMPONENT_SPECIFICATION);
-        }
-        String componentClassname = getAttribute(rootNode, "class");
+        String componentClassname = getAttribute(fRootNode, "class");
 
         PluginComponentSpecification pluginSpec = (PluginComponentSpecification) specification;
 
@@ -531,10 +577,12 @@ public class ComponentScanner extends SpecificationScanner
             if (fIsPageSpec)
             {
 
-                specification.setComponentClassName("org.apache.tapestry.html.BasePage");
+                specification.setComponentClassName(fPropertySource
+                        .getPropertyValue("org.apache.tapestry.default-page-class"));
             }
             else
             {
+                //TODO it appears that there is no default for components!
                 specification.setComponentClassName("org.apache.tapestry.BaseComponent");
             }
 
@@ -546,78 +594,22 @@ public class ComponentScanner extends SpecificationScanner
 
         pluginSpec.validateSelf(fValidator);
 
-        for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
+        for (Node node = fRootNode.getFirstChild(); node != null; node = node.getNextSibling())
         {
-            if (isElement(node, "parameter"))
-            {
-                try
-                {
-                    scanParameter(specification, node);
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
+            if (scanParameter(specification, node))
                 continue;
-            }
 
-            if (isElement(node, "reserved-parameter"))
-            {
-                if (isPage)
-                {
-                    // not revalidatable - error state would only change if the file
-                    // changed!
-                    addProblem(
-                            IProblem.ERROR,
-                            getNodeStartSourceLocation(node),
-                            TapestryCore.getTapestryString(
-                                    "SpecificationParser.not-allowed-for-page",
-                                    "reserved-parameter"),
-                            false,
-                            IProblem.COMPONENT_RESERVED_PARAMETER_NOT_ALLOWED);
-                }
-                else
-                {
-                    scanReservedParameter(specification, node);
-                }
+            if (scanReservedParameter(specification, node))
                 continue;
-            }
 
-            if (isElement(node, "bean"))
-            {
-                scanBean(specification, node);
+            if (scanBean(specification, node))
                 continue;
-            }
 
-            if (isElement(node, "component"))
-            {
-                scanComponent(specification, node);
+            if (scanComponent(specification, node))
                 continue;
-            }
 
-            if (isElement(node, "external-asset"))
-            {
-                scanAsset_3_0(specification, node, PicassoMigration.DEFAULT_ASSET, "URL");
+            if (scanMeta((IPluginPropertyHolder) specification, node))
                 continue;
-            }
-
-            if (isElement(node, "context-asset"))
-            {
-                scanAsset_3_0(specification, node, PicassoMigration.CONTEXT_ASSET, "path");
-                continue;
-            }
-
-            if (isElement(node, "private-asset"))
-            {
-                scanAsset_3_0(specification, node, PicassoMigration.CLASSPATH_ASSET, "resource-path");
-                continue;
-            }
-
-            if (isElement(node, "property"))
-            {
-                scanProperty((IPluginPropertyHolder) specification, node);
-                continue;
-            }
 
             if (isElement(node, "description"))
             {
@@ -636,6 +628,97 @@ public class ComponentScanner extends SpecificationScanner
                 continue;
             }
         }
+
+        //        for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
+        //        {
+        //            if (isElement(node, "parameter"))
+        //            {
+        //                try
+        //                {
+        //                    scanParameter(specification, node);
+        //                }
+        //                catch (Exception e)
+        //                {
+        //                    e.printStackTrace();
+        //                }
+        //                continue;
+        //            }
+        //
+        //            if (isElement(node, "reserved-parameter"))
+        //            {
+        //                if (isPage)
+        //                {
+        //                    // not revalidatable - error state would only change if the file
+        //                    // changed!
+        //                    addProblem(
+        //                            IProblem.ERROR,
+        //                            getNodeStartSourceLocation(node),
+        //                            TapestryCore.getTapestryString(
+        //                                    "SpecificationParser.not-allowed-for-page",
+        //                                    "reserved-parameter"),
+        //                            false,
+        //                            IProblem.COMPONENT_RESERVED_PARAMETER_NOT_ALLOWED);
+        //                }
+        //                else
+        //                {
+        //                    scanReservedParameter(specification, node);
+        //                }
+        //                continue;
+        //            }
+        //
+        //            if (isElement(node, "bean"))
+        //            {
+        //                scanBean(specification, node);
+        //                continue;
+        //            }
+        //
+        //            if (isElement(node, "component"))
+        //            {
+        //                scanComponent(specification, node);
+        //                continue;
+        //            }
+        //
+        //            if (isElement(node, "external-asset"))
+        //            {
+        //                scanAsset(specification, node, AssetType.EXTERNAL, "URL");
+        //                continue;
+        //            }
+        //
+        //            if (isElement(node, "context-asset"))
+        //            {
+        //                scanAsset(specification, node, AssetType.CONTEXT, "path");
+        //                continue;
+        //            }
+        //
+        //            if (isElement(node, "private-asset"))
+        //            {
+        //                scanAsset(specification, node, AssetType.PRIVATE, "resource-path");
+        //                continue;
+        //            }
+        //
+        //            if (isElement(node, "property"))
+        //            {
+        //                scanProperty((IPluginPropertyHolder) specification, node);
+        //                continue;
+        //            }
+        //
+        //            if (isElement(node, "description"))
+        //            {
+        //                String value = getValue(node);
+        //                specification.setDescription(value);
+        //                PluginDescriptionDeclaration declaration = new PluginDescriptionDeclaration(null,
+        //                        value, getSourceLocationInfo(node));
+        //                ((PluginComponentSpecification) specification)
+        //                        .addDescriptionDeclaration(declaration);
+        //                continue;
+        //            }
+        //
+        //            if (isElement(node, "property-specification"))
+        //            {
+        //                scanPropertySpecification(specification, node);
+        //                continue;
+        //            }
+        //        }
     }
 
     protected void scanListenerBinding(IContainedComponent component, Node node)
@@ -664,13 +747,14 @@ public class ComponentScanner extends SpecificationScanner
         component.setBinding(name, binding);
     }
 
-    protected void scanParameter(IComponentSpecification specification, Node node)
+    protected boolean scanParameter(IComponentSpecification specification, Node node)
             throws ScannerException
     {
+        if (isElement(node, "parameter"))
+            return false;
 
         String name = getAttribute(node, "name", true);
 
-        // not revalidatable - error state would only change if the file changed!
         if (specification.getParameter(name) != null)
         {
             addProblem(
@@ -691,7 +775,6 @@ public class ComponentScanner extends SpecificationScanner
         location.setResource(specification.getSpecificationLocation());
         param.setLocation(location);
 
-        // not revalidatable - error state would only change if the file changed!
         validatePattern(
                 name,
                 SpecificationParser.PARAMETER_NAME_PATTERN,
@@ -700,19 +783,7 @@ public class ComponentScanner extends SpecificationScanner
                 getAttributeSourceLocation(node, "name"),
                 IProblem.COMPONENT_INVALID_PARAMETER_NAME);
 
-        String typeAttr = "type";
-//        int DTDVersion = XMLUtil.getDTDVersion(specification.getPublicId());
-//        switch (DTDVersion)
-//        {
-//            case XMLUtil.DTD_1_3:
-//                typeAttr = "java-type";
-//                break;
-//
-//            case XMLUtil.DTD_3_0:
-//
-//                break;
-//        }
-
+        String typeAttr = "type";       
         String type = getAttribute(node, typeAttr);
 
         if (type == null)
@@ -783,14 +854,33 @@ public class ComponentScanner extends SpecificationScanner
         if (child != null && isElement(child, "description"))
             param.setDescription(getValue(child));
 
+        return true;
+
     }
 
-    /** @since 2.4 * */
-
-    protected void scanPropertySpecification(IComponentSpecification spec, Node node)
+    protected boolean scanPropertySpecification(IComponentSpecification spec, Node node)
             throws ScannerException
     {
+        if (!fIsTapestry_4_0)
+            return scanPropertySpecification_3_0(spec, node);
 
+        if (!isElement(node, "property"))
+            return false;
+        return scanPropertySpecification(spec, node, "persist");
+    }
+
+    protected boolean scanPropertySpecification_3_0(IComponentSpecification spec, Node node)
+            throws ScannerException
+    {
+        if (!isElement(node, "property-specification"))
+            return false;
+
+        return scanPropertySpecification(spec, node, "persistence");       
+    }
+
+    protected boolean scanPropertySpecification(IComponentSpecification spec, Node node,
+            String persistAttribute) throws ScannerException
+    {
         String name = getAttribute(node, "name", true);
 
         if (spec.getPropertySpecification(name) != null)
@@ -823,14 +913,15 @@ public class ComponentScanner extends SpecificationScanner
 
         String type = null;
 
-        type = getAttribute(node, "type");
+        if (!fIsTapestry_4_0)
+            type = getAttribute(node, "type");
 
         if (type == null || type.trim().length() == 0)
             type = "java.lang.Object";
 
         ps.setType(type);
 
-        boolean persistent = getBooleanAttribute(node, "persistent");
+        boolean persistent = getBooleanAttribute(node, persistAttribute);
 
         ps.setPersistent(persistent);
 
@@ -869,26 +960,43 @@ public class ComponentScanner extends SpecificationScanner
      * @since 1.0.5
      */
 
-    protected void scanReservedParameter(IComponentSpecification spec, Node node)
+    protected boolean scanReservedParameter(IComponentSpecification spec, Node node)
     {
+        if (!isElement(node, "reserved-parameter"))
+            return false;
+
+        if (fIsPageSpec)
+        {
+            addProblem(
+                    IProblem.ERROR,
+                    getNodeStartSourceLocation(node),
+                    TapestryCore.getTapestryString(
+                            "SpecificationParser.not-allowed-for-page",
+                            "reserved-parameter"),
+                    false,
+                    IProblem.COMPONENT_RESERVED_PARAMETER_NOT_ALLOWED);
+            return true;
+        }
+
         String name = getAttribute(node, "name", false);
 
         //   not revalidatable - error state would only change if the file changed!
         if (name != null && spec.isReservedParameterName(name))
-        {
+
             addProblem(
                     IProblem.ERROR,
                     getAttributeSourceLocation(node, "name"),
                     "duplicate reserved parameter name: " + name,
                     false,
                     IProblem.COMPONENT_DUPLICATE_RESERVED_PARAMETER_NAME);
-        }
+
         PluginReservedParameterDeclaration declaration = new PluginReservedParameterDeclaration(
                 name, getSourceLocationInfo(node));
 
         ((PluginComponentSpecification) spec).addReservedParameterDeclaration(declaration);
 
         spec.addReservedParameterName(name);
+        return true;
     }
 
     /**
@@ -1017,6 +1125,16 @@ public class ComponentScanner extends SpecificationScanner
             useName = "java.lang." + useName;
 
         return validateTypeName(dependant, useName, severity, location);
+
+    }
+
+    class TapestryDTD_3_0_Scanner
+    {
+
+        void doScan()
+        {
+
+        }
 
     }
 
