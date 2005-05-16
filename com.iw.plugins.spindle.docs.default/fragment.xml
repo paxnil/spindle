@@ -3,10 +3,10 @@
 <fragment
    id="com.iw.plugins.spindle.docs.default"
    name="Default Docs Fragment"
-   version="3.1.22"
+   version="3.1.23"
    provider-name="Geoffrey Longman"
    plugin-id="com.iw.plugins.spindle.docs"
-   plugin-version="3.1.22"
+   plugin-version="3.1.23"
    match="greaterOrEqual">
    
    

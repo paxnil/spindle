@@ -3,11 +3,11 @@
 <fragment
    id="com.iw.plugins.spindle.ui.contrib"
    name="UI Contrib Fragment"
-   version="3.1.22"
+   version="3.1.23"
    provider-name="Geoffrey Longman"
    plugin-id="com.iw.plugins.spindle.ui"
    plugin-version="3.1.19"
-   match="equivalent">
+   match="greaterOrEqual">
    <requires>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.core.runtime"/>
