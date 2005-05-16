@@ -9,13 +9,14 @@
    plugin-version="3.1.22"
    match="greaterOrEqual">
    
+   
    <extension point="org.eclipse.help.toc">      
-      <toc file="roottoc.xml" primary="true"/>      
-	  <toc file="defaultquickstarttoc.xml"/>
+      <toc file="roottoc.xml" primary="true"/> 
+      <toc file="defaultquickstarttoc.xml"/>     
 	  <toc file="defaultconceptstoc.xml"/>
 	  <toc file="defaulttaskstoc.xml"/>
-	  <toc file="defaultcreditstoc.xml"/> 
+	  <toc file="defaultcreditstoc.xml"/> 	
 	  <toc file="extraconceptstoc.xml"/>
-	  <toc file="extrataskstoc.xml"/>
-   </extension>
+	  <toc file="extrataskstoc.xml"/>  
+   </extension>   
 </fragment>
