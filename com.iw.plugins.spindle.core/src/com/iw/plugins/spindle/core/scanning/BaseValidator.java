@@ -42,6 +42,7 @@ import org.apache.oro.text.regex.PatternCompiler;
 import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
+import org.apache.tapestry.binding.BindingConstants;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
@@ -471,4 +472,23 @@ public class BaseValidator implements IScannerValidator
         return type;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateBindingReference(int,
+     *      com.iw.plugins.spindle.core.source.ISourceLocation, java.lang.String, boolean)
+     */
+    public void validateBindingReference(int severity, ISourceLocation sourceLocation,
+            String reference) throws ScannerException
+    {
+        if (TapestryCore.isNull(reference))
+            return;
+
+        if (reference.startsWith(BindingConstants.OGNL_PREFIX))
+            validateExpression(
+                    reference.substring(BindingConstants.OGNL_PREFIX.length()),
+                    severity,
+                    sourceLocation);
+
+    }
 }

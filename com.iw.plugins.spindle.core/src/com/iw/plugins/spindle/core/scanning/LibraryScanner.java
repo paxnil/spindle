@@ -168,14 +168,7 @@ public class LibraryScanner extends SpecificationScanner
     {
         String type = getAttribute(node, "type", true);
 
-        // validate here - the error status can only change if the file changed
-        validatePattern(
-                type,
-                SpecificationParser.COMPONENT_ALIAS_PATTERN,
-                "SpecificationParser.invalid-component-type",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "type"),
-                IProblem.LIBRARY_INVALID_COMPONENT_TYPE);
+        fValidator.validatePattern(type, SpecificationParser.COMPONENT_ALIAS_PATTERN, "SpecificationParser.invalid-component-type", IProblem.ERROR, getAttributeSourceLocation(node, "type"), IProblem.LIBRARY_INVALID_COMPONENT_TYPE);
 
         if (specification.getComponentTypes().contains(type))
         {
@@ -206,14 +199,7 @@ public class LibraryScanner extends SpecificationScanner
     {
         String propertyName = getAttribute(node, "property-name", false);
 
-        // validate here - the error status can only change if the file changed
-        validatePattern(
-                propertyName,
-                SpecificationParser.PROPERTY_NAME_PATTERN,
-                "SpecificationParser.invalid-property-name",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "property-name"),
-                IProblem.SPINDLE_INVALID_PROPERTY_ID);
+        fValidator.validatePattern(propertyName, SpecificationParser.PROPERTY_NAME_PATTERN, "SpecificationParser.invalid-property-name", IProblem.ERROR, getAttributeSourceLocation(node, "property-name"), IProblem.SPINDLE_INVALID_PROPERTY_ID);
 
         String type = getAttribute(node, "type");
 
@@ -259,13 +245,7 @@ public class LibraryScanner extends SpecificationScanner
     {
         String name = getAttribute(node, "name", true);
 
-        validatePattern(
-                name,
-                SpecificationParser.EXTENSION_NAME_PATTERN,
-                "SpecificationParser.invalid-extension-name",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"),
-                IProblem.EXTENSIION_INVALID_NAME);
+        fValidator.validatePattern(name, SpecificationParser.EXTENSION_NAME_PATTERN, "SpecificationParser.invalid-extension-name", IProblem.ERROR, getAttributeSourceLocation(node, "name"), IProblem.EXTENSIION_INVALID_NAME);
 
         String className = getAttribute(node, "class");
 
@@ -321,13 +301,7 @@ public class LibraryScanner extends SpecificationScanner
 
         String specificationPath = getAttribute(node, "specification-path", true);
 
-        validatePattern(
-                id,
-                SpecificationParser.LIBRARY_ID_PATTERN,
-                "SpecificationParser.invalid-library-id",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "id"),
-                IProblem.LIBRARY_INVALID_CHILD_LIB_ID);
+        fValidator.validatePattern(id, SpecificationParser.LIBRARY_ID_PATTERN, "SpecificationParser.invalid-library-id", IProblem.ERROR, getAttributeSourceLocation(node, "id"), IProblem.LIBRARY_INVALID_CHILD_LIB_ID);
 
         if (id != null && id.equals(INamespace.FRAMEWORK_NAMESPACE))
             addProblem(
@@ -352,13 +326,7 @@ public class LibraryScanner extends SpecificationScanner
     {
         String name = getAttribute(node, "name", false);
 
-        validatePattern(
-                name,
-                SpecificationParser.PAGE_NAME_PATTERN,
-                "SpecificationParser.invalid-page-name",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"),
-                IProblem.LIBRARY_INVALID_PAGE_NAME);
+        fValidator.validatePattern(name, SpecificationParser.PAGE_NAME_PATTERN, "SpecificationParser.invalid-page-name", IProblem.ERROR, getAttributeSourceLocation(node, "name"), IProblem.LIBRARY_INVALID_PAGE_NAME);
 
         //must be validated here
         if (specification.getPageNames().contains(name))
@@ -385,13 +353,7 @@ public class LibraryScanner extends SpecificationScanner
     {
         String name = getAttribute(node, "name", false);
 
-        validatePattern(
-                name,
-                SpecificationParser.SERVICE_NAME_PATTERN,
-                "SpecificationParser.invalid-service-name",
-                IProblem.ERROR,
-                getAttributeSourceLocation(node, "name"),
-                IProblem.LIBRARY_INVALID_SERVICE_NAME);
+        fValidator.validatePattern(name, SpecificationParser.SERVICE_NAME_PATTERN, "SpecificationParser.invalid-service-name", IProblem.ERROR, getAttributeSourceLocation(node, "name"), IProblem.LIBRARY_INVALID_SERVICE_NAME);
 
         String className = getAttribute(node, "class");
 

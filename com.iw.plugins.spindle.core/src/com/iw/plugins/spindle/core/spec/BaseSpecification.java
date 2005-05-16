@@ -108,29 +108,35 @@ public abstract class BaseSpecification implements IIdentifiable, Locatable, Loc
 
     public static final int PROPERTY_SPEC = 11;
 
+    /**@deprecated*/
     public static final int EXPRESSION_BEAN_INIT = 20;
 
+    /**@deprecated*/
     public static final int FIELD_BEAN_INIT = 21;
 
+    /**@deprecated*/
     public static final int STATIC_BEAN_INIT = 22;
 
+    /**@deprecated*/
     public static final int STRING_BEAN_INIT = 23;
+    
+    public static final int BINDING_BEAN_INIT = 24;
 
-    public static final int PROPERTY_DECLARATION = 24;
+    public static final int PROPERTY_DECLARATION = 50;
 
-    public static final int PAGE_DECLARATION = 25;
+    public static final int PAGE_DECLARATION = 51;
 
-    public static final int COMPONENT_TYPE_DECLARATION = 26;
+    public static final int COMPONENT_TYPE_DECLARATION = 52;
 
-    public static final int DESCRIPTION_DECLARATION = 27;
+    public static final int DESCRIPTION_DECLARATION = 53;
 
-    public static final int RESERVED_PARAMETER_DECLARATION = 28;
+    public static final int RESERVED_PARAMETER_DECLARATION = 54;
 
-    public static final int ENGINE_SERVICE_DECLARATION = 29;
+    public static final int ENGINE_SERVICE_DECLARATION = 55;
 
-    public static final int LIBRARY_DECLARATION = 30;
+    public static final int LIBRARY_DECLARATION = 56;
 
-    public static final int CONFIGURE_DECLARATION = 31;
+    public static final int CONFIGURE_DECLARATION = 57;
 
     private String fIdentifier;
 

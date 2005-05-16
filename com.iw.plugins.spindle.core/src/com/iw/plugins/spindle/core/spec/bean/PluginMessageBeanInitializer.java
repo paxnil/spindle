@@ -32,6 +32,7 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
  * Spindle implementation of a StringBeanInitializer
  * 
  * @author glongman@gmail.com
+ * @deprecated
  */
 public class PluginMessageBeanInitializer extends AbstractPluginBeanInitializer
 {

@@ -29,8 +29,6 @@ package com.iw.plugins.spindle.core.spec;
 import java.util.List;
 
 /**
- * Extends org.apache.tapestry.util.IPropertyHolder to also Hold the property
- * declarations found in a document during a parse/scan episode.
  * 
  * @author glongman@gmail.com
  * 
@@ -41,5 +39,9 @@ public interface IPluginDescribable
   public void addDescriptionDeclaration(PluginDescriptionDeclaration declaration);
 
   public List getDescriptionDeclarations();
+  
+  public void setDescription(String description);
+  
+  public String getDescription();
 
 }

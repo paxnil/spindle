@@ -211,6 +211,11 @@ public abstract class AbstractScanner implements IProblemCollector
     {
         return getAttribute(node, attributeName, false);
     }
+    
+    protected boolean getBooleanAttribute(Node node, String attributeName, boolean defaultValue)
+    {
+        return W3CAccess.getBooleanAttribute(node, attributeName, defaultValue);
+    }
 
     protected boolean getBooleanAttribute(Node node, String attributeName)
     {
@@ -325,69 +330,6 @@ public abstract class AbstractScanner implements IProblemCollector
             }
         }
         return result;
-    }
-
-    protected boolean validatePattern(String value, String pattern, String errorKey, int severity,
-            int code) throws ScannerException
-    {
-        return fValidator.validatePattern(value, pattern, errorKey, severity, code);
-    }
-
-    protected boolean validatePattern(String value, String pattern, String errorKey, int severity,
-            ISourceLocation location, int code) throws ScannerException
-    {
-        return fValidator.validatePattern(value, pattern, errorKey, severity, location, code);
-    }
-
-    protected boolean validateExpression(String expression, int severity) throws ScannerException
-    {
-        return fValidator.validateExpression(expression, severity);
-    }
-
-    protected boolean validateExpression(String expression, int severity, ISourceLocation location)
-            throws ScannerException
-    {
-        return fValidator.validateExpression(expression, severity, location);
-    }
-
-    protected IType validateTypeName(IResourceWorkspaceLocation dependant,
-            String fullyQualifiedType, int severity) throws ScannerException
-    {
-        return fValidator.validateTypeName(dependant, fullyQualifiedType, severity);
-    }
-
-    protected IType validateTypeName(IResourceWorkspaceLocation dependant,
-            String fullyQualifiedType, int severity, ISourceLocation location)
-            throws ScannerException
-    {
-        return fValidator.validateTypeName(dependant, fullyQualifiedType, severity, location);
-    }
-
-    protected boolean validateLibraryResourceLocation(Resource specLocation, String path,
-            String errorKey, ISourceLocation source) throws ScannerException
-    {
-        return fValidator.validateLibraryResourceLocation(specLocation, path, errorKey, source);
-
-    }
-
-    protected boolean validateResourceLocation(Resource location, String relativePath,
-            String errorKey, ISourceLocation source) throws ScannerException
-    {
-        return fValidator.validateResourceLocation(location, relativePath, errorKey, source);
-
-    }
-
-    protected boolean validateContainedComponent(IComponentSpecification specification,
-            IContainedComponent component, ISourceLocationInfo sourceLocation)
-            throws ScannerException
-    {
-        return fValidator.validateContainedComponent(specification, component, sourceLocation);
-    }
-
-    protected boolean validateAsset(IComponentSpecification specification,
-            IAssetSpecification asset, ISourceLocationInfo sourceLocation) throws ScannerException
-    {
-        return fValidator.validateAsset(specification, asset, sourceLocation);
     }
 
     /*

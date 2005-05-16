@@ -28,6 +28,7 @@ package com.iw.plugins.spindle.core.scanning;
 
 import java.util.Map;
 
+import org.apache.tapestry.Tapestry;
 import org.apache.xerces.dom.DocumentImpl;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
@@ -39,125 +40,132 @@ import com.iw.plugins.spindle.core.parser.xml.pull.PullParserNode;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
- * Static Helper methods for accessing data in DOM nodes
- * 
- * Includes transparent support for some PULL parser ideosyncracies. i.e. see
- * getAttribute() src if you care.
+ * Static Helper methods for accessing data in DOM nodes Includes transparent support for some PULL
+ * parser ideosyncracies. i.e. see getAttribute() src if you care.
  * 
  * @author glongman@gmail.com
- * 
  */
 public class W3CAccess
 {
 
-  public static String getAttribute(Node node, String attributeName)
-  {
-    String result = null;
-    if (node instanceof PullParserNode)
+    public static String getAttribute(Node node, String attributeName)
     {
-      PullParserNode ppnode = (PullParserNode) node;
-      Map attrs = ppnode.getKludgeAttributes();
-      if (attrs != null)
-        result = (String) attrs.get(attributeName);
+        String result = null;
+        if (node instanceof PullParserNode)
+        {
+            PullParserNode ppnode = (PullParserNode) node;
+            Map attrs = ppnode.getKludgeAttributes();
+            if (attrs != null)
+                result = (String) attrs.get(attributeName);
 
-    } else
-    {
-      NamedNodeMap map = node.getAttributes();
+        }
+        else
+        {
+            NamedNodeMap map = node.getAttributes();
 
-      if (map != null)
-      {
-        Node attributeNode = map.getNamedItem(attributeName);
+            if (map != null)
+            {
+                Node attributeNode = map.getNamedItem(attributeName);
 
-        if (attributeNode != null)
-          result = attributeNode.getNodeValue();
-      }
-    }
-    return result;
-  }
-
-  public static boolean getBooleanAttribute(Node node, String attributeName)
-  {
-    String attributeValue = getAttribute(node, attributeName);
-
-    return "yes".equals(attributeValue);
-  }
-
-  public static String getValue(Node node)
-  {
-    StringBuffer buffer = new StringBuffer();
-    for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
-    {
-      short type = child.getNodeType();
-      if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE)
-        buffer.append(child.getNodeValue());
+                if (attributeNode != null)
+                    result = attributeNode.getNodeValue();
+            }
+        }
+        return result;
     }
 
-    String result = buffer.toString().trim();
-    if (result == null || "".equals(result))
-      return null;
-
-    return result;
-  }
-
-  public static boolean isComment(Node node)
-  {
-    return node.getNodeType() == Node.COMMENT_NODE;
-  }
-
-  public static boolean isElement(Node node)
-  {
-    return node.getNodeType() == Node.ELEMENT_NODE;
-  }
-
-  public static boolean isElement(Node node, String elementName)
-  {
-    if (node == null || node.getNodeType() != Node.ELEMENT_NODE)
-      return false;
-
-    return node.getNodeName().equals(elementName);
-
-  }
-
-  public static ISourceLocationInfo getSourceLocationInfo(Node node)
-  {
-    ISourceLocationInfo result = null;
-    if (node instanceof PullParserNode)
+    public static boolean getBooleanAttribute(Node node, String attributeName)
     {
-      PullParserNode ppnode = (PullParserNode) node;
-      result = ppnode.getSourceLocationInfo();
+        String attributeValue = getAttribute(node, attributeName);
 
-    } else
-    {
-      DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
-      result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.PLUGIN_ID);
+        return "yes".equals(attributeValue);
     }
-    return result;
-  }
 
-  public static boolean isTextNode(Node child)
-  {
-    short type = child.getNodeType();
-    return type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE;
-  }
+    public static boolean getBooleanAttribute(Node node, String attributeName, boolean defaultValue)
+    {
+        String attributeValue = getAttribute(node, attributeName);
+        if (TapestryCore.isNull(attributeValue))
+            return defaultValue;
+        return "yes".equals(attributeValue);
+    }
 
-  /**
-   * @param document
-   * @return
-   */
-  public static String getPublicId(Document document)
-  {
-    DocumentType type = document.getDoctype();
-    if (type == null)
-      return null;
-    return type.getPublicId();
-  }
+    public static String getValue(Node node)
+    {
+        StringBuffer buffer = new StringBuffer();
+        for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
+        {
+            short type = child.getNodeType();
+            if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE)
+                buffer.append(child.getNodeValue());
+        }
 
-  public static String getDeclaredRootElement(Document document)
-  {
-    DocumentType type = document.getDoctype();
-    if (type == null)
-      return null;
-    return type.getName();
-  }
+        String result = buffer.toString().trim();
+        if (result == null || "".equals(result))
+            return null;
+
+        return result;
+    }
+
+    public static boolean isComment(Node node)
+    {
+        return node.getNodeType() == Node.COMMENT_NODE;
+    }
+
+    public static boolean isElement(Node node)
+    {
+        return node.getNodeType() == Node.ELEMENT_NODE;
+    }
+
+    public static boolean isElement(Node node, String elementName)
+    {
+        if (node == null || node.getNodeType() != Node.ELEMENT_NODE)
+            return false;
+
+        return node.getNodeName().equals(elementName);
+
+    }
+
+    public static ISourceLocationInfo getSourceLocationInfo(Node node)
+    {
+        ISourceLocationInfo result = null;
+        if (node instanceof PullParserNode)
+        {
+            PullParserNode ppnode = (PullParserNode) node;
+            result = ppnode.getSourceLocationInfo();
+
+        }
+        else
+        {
+            DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
+            result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.PLUGIN_ID);
+        }
+        return result;
+    }
+
+    public static boolean isTextNode(Node child)
+    {
+        short type = child.getNodeType();
+        return type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE;
+    }
+
+    /**
+     * @param document
+     * @return
+     */
+    public static String getPublicId(Document document)
+    {
+        DocumentType type = document.getDoctype();
+        if (type == null)
+            return null;
+        return type.getPublicId();
+    }
+
+    public static String getDeclaredRootElement(Document document)
+    {
+        DocumentType type = document.getDoctype();
+        if (type == null)
+            return null;
+        return type.getName();
+    }
 
 }

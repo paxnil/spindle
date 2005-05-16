@@ -30,7 +30,7 @@ import com.iw.plugins.spindle.core.spec.BaseSpecification;
 
 /**
  * Spindle implementation Spindle implementation of an ExpressionBeanInitializer
- * 
+ * @deprecated
  * @author glongman@gmail.com
  */
 public class PluginExpressionBeanInitializer extends AbstractPluginBeanInitializer

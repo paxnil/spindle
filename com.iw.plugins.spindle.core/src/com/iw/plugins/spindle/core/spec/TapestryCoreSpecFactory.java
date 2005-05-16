@@ -23,7 +23,9 @@
  */
 package com.iw.plugins.spindle.core.spec;
 
+import org.apache.tapestry.bean.BindingBeanInitializer;
 import org.apache.tapestry.bean.IBeanInitializer;
+import org.apache.tapestry.binding.BindingSource;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBeanSpecification;
@@ -38,6 +40,7 @@ import org.apache.tapestry.spec.IPropertySpecification;
 import org.apache.tapestry.spec.SpecFactory;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.spec.bean.PluginBindingBeanInitializer;
 import com.iw.plugins.spindle.core.spec.bean.PluginExpressionBeanInitializer;
 import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
 
@@ -121,16 +124,19 @@ public class TapestryCoreSpecFactory extends SpecFactory
     TapestryCore.log("Spindle broke - somebody asked for a FieldBeanInitializer", new Throwable().fillInStackTrace());
     return null;
   }
+  
+  
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.SpecFactory#createExpressionBeanInitializer()
-   */
-  public IBeanInitializer createExpressionBeanInitializer()
-  {
-    return new PluginExpressionBeanInitializer();
-  }
+    
+//  /*
+//   * (non-Javadoc)
+//   * 
+//   * @see org.apache.tapestry.spec.SpecFactory#createExpressionBeanInitializer()
+//   */
+//  public IBeanInitializer createExpressionBeanInitializer()
+//  {
+//    return new PluginExpressionBeanInitializer();
+//  }
 
   /*
    * (non-Javadoc)
@@ -153,14 +159,14 @@ public class TapestryCoreSpecFactory extends SpecFactory
     return new PluginPropertySpecification();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.SpecFactory#createStringBeanInitializer()
-   */
-  public IBeanInitializer createMessageBeanInitializer()
-  {
-    return new PluginMessageBeanInitializer();
-  }
+//  /*
+//   * (non-Javadoc)
+//   * 
+//   * @see org.apache.tapestry.spec.SpecFactory#createStringBeanInitializer()
+//   */
+//  public IBeanInitializer createMessageBeanInitializer()
+//  {
+//    return new PluginMessageBeanInitializer();
+//  }
 
 }

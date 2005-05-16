@@ -260,8 +260,10 @@ public interface IScannerValidator
     public void addProblem(int severity, ISourceLocation sourceLocation, String message,
             boolean isTemporary, int code) throws ScannerException;
 
-    public void addProblem(IStatus status, ISourceLocation sourceLocation,
+    public void addProblem(IStatus status, ISourceLocation sourceLocation, boolean isTemporary)
+            throws ScannerException;
 
-    boolean isTemporary) throws ScannerException;
+    public void validateBindingReference(int severity, ISourceLocation sourceLocation,
+            String reference) throws ScannerException;
 
 }

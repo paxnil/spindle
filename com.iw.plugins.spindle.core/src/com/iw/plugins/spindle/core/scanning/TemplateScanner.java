@@ -355,7 +355,7 @@ public class TemplateScanner extends AbstractScanner
             throws ScannerException
     {
 
-        if (!validateExpression(bspec.getValue(), IProblem.ERROR, location))
+        if (!fValidator.validateExpression(bspec.getValue(), IProblem.ERROR, location))
             return;
 
         IParameterSpecification parameter = containedSpecification.getParameter(bspec
@@ -588,7 +588,7 @@ public class TemplateScanner extends AbstractScanner
             throws ScannerException
     {
 
-        if (!validateExpression(expression, IProblem.ERROR, location))
+        if (!fValidator.validateExpression(expression, IProblem.ERROR, location))
             return;
 
         // If matches a formal parameter name, allow it to be set
