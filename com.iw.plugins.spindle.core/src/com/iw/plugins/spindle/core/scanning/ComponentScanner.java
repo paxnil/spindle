@@ -127,8 +127,7 @@ public class ComponentScanner extends SpecificationScanner
         {
             if (!rootName.equals("page-specification"))
 
-                throw new ScannerException(TapestryCore.getTapestryString(
-                        "AbstractDocumentParser.incorrect-document-type",
+                throw new ScannerException(TapestryParseMessages.incorrectDocumentType(
                         "page-specification",
                         rootName), getBestGuessSourceLocation(fRootNode, false), false,
                         IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_PAGE_SPECIFICATION);
@@ -136,8 +135,7 @@ public class ComponentScanner extends SpecificationScanner
         }
         else if (!rootName.equals("component-specification"))
         {
-            throw new ScannerException(TapestryCore.getTapestryString(
-                    "AbstractDocumentParser.incorrect-document-type",
+            throw new ScannerException(TapestryParseMessages.incorrectDocumentType(
                     "component-specification",
                     rootName), getBestGuessSourceLocation(fRootNode, false), false,
                     IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_COMPONENT_SPECIFICATION);
@@ -229,7 +227,7 @@ public class ComponentScanner extends SpecificationScanner
 
         asset.validate(specification, fValidator);
 
-        scanPropertiesInNode(asset, node);
+        allowMeta(asset, node);
 
         return true;
 
@@ -641,20 +639,6 @@ public class ComponentScanner extends SpecificationScanner
             if (scanPropertySpecification(specification, node))
                 continue;
         }
-    }
-
-    protected boolean scanDescription(IPluginDescribable describable, Node node)
-    {
-        if (!isElement(node, "description"))
-            return false;
-
-        String value = getValue(node);
-        describable.setDescription(value);
-        PluginDescriptionDeclaration declaration = new PluginDescriptionDeclaration(null, value,
-                getSourceLocationInfo(node));
-        describable.addDescriptionDeclaration(declaration);
-
-        return true;
     }
 
     protected boolean scanListenerBinding_3_0(IContainedComponent component, Node node)

@@ -46,10 +46,6 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 /**
  * Tapestry Extensions for Spindle
  * 
- * @deprecated
- * 
- * FIXME: how do extensions work in the Picasso world?
- * 
  * @author glongman@gmail.com
  */
 public class PluginExtensionSpecification extends BasePropertyHolder

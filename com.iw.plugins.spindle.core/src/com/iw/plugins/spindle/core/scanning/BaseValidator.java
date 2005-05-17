@@ -333,13 +333,13 @@ public class BaseValidator implements IScannerValidator
         }
     }
 
-    public boolean validatePattern(String value, String pattern, String errorMessage, int severity,
+    public boolean validatePattern(String value, String pattern, String errorKey, int severity,
             int code) throws ScannerException
     {
-        return validatePattern(value, pattern, errorMessage, severity, DefaultSourceLocation, code);
+        return validatePattern(value, pattern, errorKey, severity, DefaultSourceLocation, code);
     }
 
-    public boolean validatePattern(String value, String pattern, String errorMessage, int severity,
+    public boolean validatePattern(String value, String pattern, String errorKey, int severity,
             ISourceLocation location, int code) throws ScannerException
     {
 
@@ -368,7 +368,7 @@ public class BaseValidator implements IScannerValidator
                 addProblem(
                         severity,
                         location,
-                        TapestryParseMessages.invalidAttribute(errorMessage, value),
+                        TapestryParseMessages.invalidAttribute(errorKey, value),
                         false,
                         code);
                 return false;
@@ -378,7 +378,7 @@ public class BaseValidator implements IScannerValidator
         addProblem(
                 severity,
                 location,
-                TapestryParseMessages.invalidAttribute(errorMessage, "null value"),
+                TapestryParseMessages.invalidAttribute(errorKey, "null value"),
                 false,
                 -1);
         return false;

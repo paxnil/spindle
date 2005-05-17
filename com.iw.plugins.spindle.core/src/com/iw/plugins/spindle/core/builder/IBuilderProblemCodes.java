@@ -217,4 +217,6 @@ public interface IBuilderProblemCodes
 
     //  pattern violation
     int COMPONENT_INVALID_ASSET_PROPERTY_NAME = 68;
+    
+    int ASSET_UNRECOGNIZED_PREFIX=69;
 }

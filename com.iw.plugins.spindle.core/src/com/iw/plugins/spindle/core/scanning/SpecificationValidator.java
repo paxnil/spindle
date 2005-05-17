@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
+import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
@@ -228,15 +229,15 @@ public class SpecificationValidator extends BaseValidator
         // occur
         // at the end of the
         // entire build!
-// TODO this will be replaced at some point		
-//        FrameworkComponentValidator.validateContainedComponent(
-//                (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
-//                ((PluginComponentSpecification) specification).getNamespace(),
-//                type,
-//                containedSpecification,
-//                component,
-//                info,
-//                containedSpecification.getPublicId());
+        // TODO this will be replaced at some point
+        //        FrameworkComponentValidator.validateContainedComponent(
+        //                (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
+        //                ((PluginComponentSpecification) specification).getNamespace(),
+        //                type,
+        //                containedSpecification,
+        //                component,
+        //                info,
+        //                containedSpecification.getPublicId());
 
         return true;
     }
@@ -328,8 +329,12 @@ public class SpecificationValidator extends BaseValidator
             if (!isFormal && containedSpecification.isReservedParameterName(name))
             {
 
-                addProblem(IProblem.WARNING, location, "ignoring binding '" + name
-                        + "'. trying to bind to reserved parameter.", true, IProblem.NOT_QUICK_FIXABLE);
+                addProblem(
+                        IProblem.WARNING,
+                        location,
+                        "ignoring binding '" + name + "'. trying to bind to reserved parameter.",
+                        true,
+                        IProblem.NOT_QUICK_FIXABLE);
 
                 continue;
             }
@@ -369,20 +374,29 @@ public class SpecificationValidator extends BaseValidator
         PluginAssetSpecification pAsset = (PluginAssetSpecification) asset;
         IResourceWorkspaceLocation specLoc = (IResourceWorkspaceLocation) specification
                 .getSpecificationLocation();
-        AssetType type = asset.getType();
-        String assetPath = asset.getPath();
+
+        String path = pAsset.getPath();
+        if (path == null)
+            return true;
+
+        int colonx = path.indexOf(':');
+
+        if (colonx < 0)
+            return true;
+
+        String prefix = path.substring(0, colonx);
+        String truePath = path.substring(colonx + 1);
+
         String assetSpecName = pAsset.getIdentifier();
 
         IResourceWorkspaceLocation root = null;
-        ISourceLocation errorLoc;
-        if (type == AssetType.CONTEXT)
+        ISourceLocation errorLoc = sourceLocation.getStartTagSourceLocation();
+        if ("context".equals(prefix))
         {
-            errorLoc = sourceLocation.getAttributeSourceLocation("path");
             root = fContextRoot;
         }
-        else
+        else if ("classpath".equals(prefix))
         {
-            errorLoc = sourceLocation.getAttributeSourceLocation("resource-path");
             if (specLoc.isOnClasspath())
             {
                 root = specLoc;
@@ -392,6 +406,16 @@ public class SpecificationValidator extends BaseValidator
                 root = fClasspathRoot;
             }
         }
+        else
+        {
+            addProblem(
+                    IProblem.WARNING,
+                    errorLoc,
+                    "unrecognized asset prefix: " + prefix,
+                    true,
+                    IProblem.ASSET_UNRECOGNIZED_PREFIX);
+            return true;
+        }
 
         if (root == null)
             return true;
@@ -399,42 +423,11 @@ public class SpecificationValidator extends BaseValidator
         if (errorLoc == null)
             errorLoc = sourceLocation.getTagNameLocation();
 
-        if (assetPath == null && type != AssetType.EXTERNAL)
-        {
-            addProblem(IProblem.ERROR, errorLoc, TapestryCore
-                    .getString(
-                            "scan-component-missing-asset",
-                            (assetSpecName == null || assetSpecName
-                                    .startsWith(getDummyStringPrefix())) ? "not specified"
-                                    : assetSpecName,
-                            root.toString()), true, IProblem.COMPONENT_NULL_ASSET);
-            return false;
-        }
-
-        if (ITemplateSource.TEMPLATE_ASSET_NAME.equals(pAsset.getIdentifier()))
-        {
-            return checkTemplateAsset(specification, asset);
-        }
-
-        if (type == AssetType.EXTERNAL)
-        {
-            if (assetPath == null || assetPath.trim().length() == 0)
-            {
-                errorLoc = sourceLocation.getAttributeSourceLocation("URL");
-                if (errorLoc == null)
-                    errorLoc = sourceLocation.getAttributeSourceLocation("url");
-                addProblem(IProblem.ERROR, errorLoc, TapestryCore.getString(
-                        "scan-component-missing-external-url",
-                        assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified"
-                                : assetSpecName), true, IProblem.NOT_QUICK_FIXABLE);
-                return false;
-            }
-
-            return true;
-        }
+        if (PicassoMigration.TEMPLATE_ASSET_NAME.equals(pAsset.getIdentifier()))
+            return checkTemplateAsset(specification, asset, prefix, truePath);
 
         IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) root
-                .getRelativeLocation(assetPath);
+                .getRelativeResource(truePath);
         String fileName = relative.getName();
 
         if (relative.getStorage() == null)
@@ -489,16 +482,16 @@ public class SpecificationValidator extends BaseValidator
     }
 
     private boolean checkTemplateAsset(IComponentSpecification specification,
-            IAssetSpecification templateAsset) throws ScannerException
+            IAssetSpecification templateAsset, String prefix, String truePath)
+            throws ScannerException
     {
-        AssetType type = templateAsset.getType();
         String templatePath = templateAsset.getPath();
 
         //set relative to the context by default!
         IResourceWorkspaceLocation templateLocation = (IResourceWorkspaceLocation) fContextRoot
-                .getRelativeLocation(templatePath);
-        ;
-        if (type == AssetType.EXTERNAL)
+                .getRelativeResource(templatePath);
+
+        if (prefix == null)
         {
             addProblem(
                     IProblem.WARNING,
@@ -508,64 +501,17 @@ public class SpecificationValidator extends BaseValidator
                     IProblem.TEMPLATE_FROM_EXTERNAL_ASSET);
             return false;
         }
-        //    
-        // TODO remove - this check is no longer needed
-        //    if (type == AssetType.CONTEXT)
-        //    {
-        //      if (fTapestryProject.getProjectType() != TapestryProject.APPLICATION_PROJECT_TYPE)
-        //      {
-        //        addProblem(
-        //            IProblem.WARNING,
-        //            ((ISourceLocationInfo) templateAsset.getLocation()).getTagNameLocation(),
-        //            "Spindle can't resolve templates from context assets in Library projects",
-        //            true);
-        //        return false;
-        //      }
-        //
-        //      // templateLocation = (IResourceWorkspaceLocation)
-        //      // fContextRoot.getRelativeLocation(templatePath);
-        //
-        //      // if (templateLocation == null || !templateLocation.exists())
-        //      // {
-        //      // reportProblem(
-        //      // IProblem.ERROR,
-        //      // ((ISourceLocationInfo)
-        //      // templateAsset.getLocation()).getAttributeSourceLocation("path"),
-        //      // TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template",
-        //      // templatePath));
-        //      // return false;
-        //      // }
-        //    }
-        if (type == AssetType.PRIVATE)
-        {
+
+        if ("classpath".equals(prefix))
             templateLocation = (IResourceWorkspaceLocation) fClasspathRoot
-                    .getRelativeLocation(templatePath);
-            //            if (templateLocation == null || !templateLocation.exists())
-            //            {
-            //                reportProblem(
-            //                    IProblem.ERROR,
-            //                    ((ISourceLocationInfo)
-            // templateAsset.getLocation()).getAttributeSourceLocation("resource-path"),
-            //                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template",
-            // templatePath));
-            //                return false;
-            //            }
-        }
+                    .getRelativeResource(templatePath);
 
         if (templateLocation.getStorage() == null)
         {
             String fileName = templateLocation.getName();
             // find the attribute source location for the error
             ISourceLocationInfo sourceLocation = (ISourceLocationInfo) templateAsset.getLocation();
-            ISourceLocation errorLoc;
-            if (type == AssetType.CONTEXT)
-            {
-                errorLoc = sourceLocation.getAttributeSourceLocation("path");
-            }
-            else
-            {
-                errorLoc = sourceLocation.getAttributeSourceLocation("resource-path");
-            }
+            ISourceLocation errorLoc = sourceLocation.getStartTagSourceLocation();           
 
             String assetSpecName = ((PluginAssetSpecification) templateAsset).getIdentifier();
             IResourceWorkspaceLocation[] I18NEquivalents = getI18NAssetEquivalents(

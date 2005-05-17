@@ -41,7 +41,6 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 
 /**
  * @author gwl Copyright 2002, Geoffrey Longman. All Rights Reserved.
- * @deprecated
  */
 public class PluginExtensionConfiguration extends DescribableSpecification
 {

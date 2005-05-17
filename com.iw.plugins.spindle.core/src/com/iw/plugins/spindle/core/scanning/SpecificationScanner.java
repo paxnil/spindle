@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.engine.IPropertySource;
+import org.apache.tapestry.parse.TapestryParseMessages;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.SpecFactory;
 import org.apache.tapestry.util.IPropertyHolder;
@@ -43,7 +44,9 @@ import org.w3c.dom.Node;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.spec.IPluginDescribable;
 import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
+import com.iw.plugins.spindle.core.spec.PluginDescriptionDeclaration;
 import com.iw.plugins.spindle.core.spec.PluginPropertyDeclaration;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.XMLUtil;
@@ -162,7 +165,7 @@ public abstract class SpecificationScanner extends AbstractScanner
     {
         fPublicId = publicId;
         fPublicIdCode = XMLUtil.getDTDVersion(fPublicId);
-        fIsTapestry_4_0 = fPublicIdCode = XMLUtil.DTD_4_0;
+        fIsTapestry_4_0 = fPublicIdCode == XMLUtil.DTD_4_0;
     }
 
     public static interface IConverter
@@ -290,8 +293,6 @@ public abstract class SpecificationScanner extends AbstractScanner
         TYPE_CONVERSION_MAP.put("n", Boolean.FALSE);
         TYPE_CONVERSION_MAP.put("nay", Boolean.FALSE);
 
-       
-
         TYPE_CONVERSION_MAP.put("none", BeanLifecycle.NONE);
         TYPE_CONVERSION_MAP.put("request", BeanLifecycle.REQUEST);
         TYPE_CONVERSION_MAP.put("page", BeanLifecycle.PAGE);
@@ -404,15 +405,12 @@ public abstract class SpecificationScanner extends AbstractScanner
      * elements.
      */
 
-    protected void scanPropertiesInNode(IPropertyHolder holder, Node node) throws ScannerException
+    protected void allowMeta(IPropertyHolder holder, Node node) throws ScannerException
     {
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
         {
-            if (isElement(child, "property"))
-            {
-                scanProperty((IPluginPropertyHolder) holder, child);
+            if (scanMeta((IPluginPropertyHolder) holder, node))
                 continue;
-            }
         }
     }
 
@@ -453,17 +451,13 @@ public abstract class SpecificationScanner extends AbstractScanner
         boolean nullBodyValue = TapestryCore.isNull(bodyValue);
 
         if (!nullAttributeValue && !nullBodyValue)
-            throw new ScannerException(TapestryCore.getTapestryString(
-                    "SpecificationParser.no-attribute-and-body",
-                    attributeName,
-                    node.getNodeName()), getNodeBodySourceLocation(node), false,
+            throw new ScannerException(TapestryParseMessages.noAttributeAndBody(attributeName, node
+                    .getNodeName()), getNodeBodySourceLocation(node), false,
                     IProblem.EXTENDED_ATTRIBUTE_BOTH_VALUE_AND_BODY);
 
         if (required && nullAttributeValue && nullBodyValue)
-            throw new ScannerException(TapestryCore.getTapestryString(
-                    "SpecificationParser.required-extended-attribute",
-                    node.getNodeName(),
-                    attributeName), getNodeStartSourceLocation(node), false,
+            throw new ScannerException(TapestryParseMessages.requiredExtendedAttribute(node
+                    .getNodeName(), attributeName), getNodeStartSourceLocation(node), false,
                     IProblem.EXTENDED_ATTRIBUTE_NO_VALUE_OR_BODY);
 
         ExtendedAttributeResult result = new ExtendedAttributeResult();
@@ -488,31 +482,6 @@ public abstract class SpecificationScanner extends AbstractScanner
 
         public boolean fromAttribute;
     }
-
-    // static public class ExtendedAttributeException extends ScannerException
-    // {
-    //
-    // static public int ERROR_ATTR = 0;
-    //
-    // static public int ERROR_BODY = 1;
-    //
-    // static public int ERROR_BOTH = 2;
-    //
-    // public int errorType;
-    //
-    // /**
-    // * @param message
-    // * @param location
-    // */
-    // public ExtendedAttributeException(int errorType, String message,
-    // ISourceLocation location,
-    // int code)
-    // {
-    // super(message, location, false, code);
-    // this.errorType = errorType;
-    // }
-    //
-    // }
 
     /*
      * (non-Javadoc)
@@ -549,5 +518,19 @@ public abstract class SpecificationScanner extends AbstractScanner
     public void setPropertySource(IPropertySource propertySource)
     {
         this.fPropertySource = propertySource;
+    }
+
+    protected boolean scanDescription(IPluginDescribable describable, Node node)
+    {
+        if (!isElement(node, "description"))
+            return false;
+
+        String value = getValue(node);
+        describable.setDescription(value);
+        PluginDescriptionDeclaration declaration = new PluginDescriptionDeclaration(null, value,
+                getSourceLocationInfo(node));
+        describable.addDescriptionDeclaration(declaration);
+
+        return true;
     }
 }
