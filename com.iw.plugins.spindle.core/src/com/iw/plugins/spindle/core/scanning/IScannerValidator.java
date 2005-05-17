@@ -147,7 +147,7 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validatePattern(String value, String pattern, String errorKey, int severity,
+    public boolean validatePattern(String value, String pattern, String errorMessage, int severity,
             int code) throws ScannerException;
 
     /**
@@ -167,7 +167,7 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validatePattern(String value, String pattern, String errorKey, int severity,
+    public boolean validatePattern(String value, String pattern, String errorMessage, int severity,
             ISourceLocation location, int code) throws ScannerException;
 
     /**

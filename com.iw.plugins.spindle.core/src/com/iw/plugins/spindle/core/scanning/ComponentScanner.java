@@ -29,10 +29,11 @@ package com.iw.plugins.spindle.core.scanning;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.binding.BindingConstants;
 import org.apache.tapestry.parse.SpecificationParser;
-import org.apache.tapestry.services.impl.BindingPrefixContribution;
+import org.apache.tapestry.parse.TapestryParseMessages;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.BindingType;
 import org.apache.tapestry.spec.IBeanSpecification;
+import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IListenerBindingSpecification;
@@ -49,7 +50,6 @@ import com.iw.plugins.spindle.core.spec.IPluginDescribable;
 import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
 import com.iw.plugins.spindle.core.spec.PluginAssetSpecification;
 import com.iw.plugins.spindle.core.spec.PluginBeanSpecification;
-import com.iw.plugins.spindle.core.spec.PluginBindingSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.core.spec.PluginDescriptionDeclaration;
@@ -57,9 +57,6 @@ import com.iw.plugins.spindle.core.spec.PluginParameterSpecification;
 import com.iw.plugins.spindle.core.spec.PluginPropertySpecification;
 import com.iw.plugins.spindle.core.spec.PluginReservedParameterDeclaration;
 import com.iw.plugins.spindle.core.spec.bean.PluginBindingBeanInitializer;
-import com.iw.plugins.spindle.core.spec.bean.PluginExpressionBeanInitializer;
-import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
-import com.iw.plugins.spindle.core.util.XMLUtil;
 
 /**
  * Scanner that turns a node tree into a IComponentSpecification
@@ -312,8 +309,7 @@ public class ComponentScanner extends SpecificationScanner
         return true;
     }
 
-    protected void scanBinding(IContainedComponent component, Node node, BindingType type,
-            String attributeName) throws ScannerException
+    private String getBindingName(IContainedComponent component, Node node) throws ScannerException
     {
         String name = getAttribute(node, "name", true, true);
 
@@ -331,56 +327,13 @@ public class ComponentScanner extends SpecificationScanner
         if (name == null)
             name = "";
 
-        String value = null;
-        boolean fromAttribute = true;
-
-        if (type == BindingType.INHERITED || type == BindingType.STRING)
-        {
-            value = getAttribute(node, attributeName);
-        }
-        else
-        {
-            // must be done here - never revalidatable
-            try
-            {
-                ExtendedAttributeResult result = getExtendedAttribute(node, attributeName, true);
-                value = result.value;
-                fromAttribute = result.fromAttribute;
-
-            }
-            catch (ScannerException e)
-            {
-                int severity = IProblem.ERROR;
-
-                if (type == BindingType.STATIC)
-                    severity = IProblem.WARNING;
-
-                addProblem(IProblem.WARNING, e.getLocation(), e.getMessage(), false, e.getCode());
-
-                value = getNextDummyString();
-            }
-        }
-
-        PluginBindingSpecification binding = (PluginBindingSpecification) fSpecificationFactory
-                .createBindingSpecification();
-
-        binding.setType(type);
-        binding.setValue(value);
-
-        ISourceLocationInfo location = getSourceLocationInfo(node);
-        location.setResource(component.getLocation().getResource());
-        binding.setLocation(location);
-
-        // no point in making revalidatable - error state would only change if the
-        // file changed!
-        if (type == BindingType.DYNAMIC)
-        {
-            ISourceLocation src = fromAttribute ? getAttributeSourceLocation(node, attributeName)
-                    : getBestGuessSourceLocation(node, true);
-            fValidator.validateExpression(value, IProblem.ERROR, src);
-        }
-
-        component.setBinding(name, binding);
+        fValidator.validatePattern(
+                name,
+                SpecificationParser.PARAMETER_NAME_PATTERN,
+                "invalid-parameter-name",
+                IProblem.ERROR,
+                IProblem.NOT_QUICK_FIXABLE);
+        return name;
     }
 
     protected boolean scanComponent(IComponentSpecification specification, Node node)
@@ -397,15 +350,15 @@ public class ComponentScanner extends SpecificationScanner
         if (specification.getComponent(id) != null)
         {
             addProblem(IProblem.ERROR, idLoc, TapestryCore.getTapestryString(
-                    "ComponentSpecification.duplicate-component",
-                    specification.getSpecificationLocation().getName(),
-                    id), false, IProblem.COMPONENT_SPEC_DUPLICATE_COMPONENT_NAME);
+
+            "ComponentSpecification.duplicate-component", specification.getSpecificationLocation()
+                    .getName(), id), false, IProblem.COMPONENT_SPEC_DUPLICATE_COMPONENT_NAME);
         }
 
         fValidator.validatePattern(
                 id,
                 SpecificationParser.COMPONENT_ID_PATTERN,
-                "SpecificationParser.invalid-component-id",
+                "invalid-component-id",
                 IProblem.ERROR,
                 idLoc,
                 IProblem.COMPONENT_SPEC_INVALID_COMPONENT_ID);
@@ -417,24 +370,14 @@ public class ComponentScanner extends SpecificationScanner
         // file changed!
         if (type == null && copyOf == null)
         {
-            addProblem(
-                    IProblem.ERROR,
-                    getNodeStartSourceLocation(node),
-                    TapestryCore.getTapestryString(
-                            "SpecificationParser.missing-type-or-copy-of",
-                            id),
-                    false,
-                    IProblem.COMPONENT_SPEC_MISSING_TYPE_COPY_OF);
+            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), TapestryParseMessages
+                    .missingTypeOrCopyOf(id), false, IProblem.COMPONENT_SPEC_MISSING_TYPE_COPY_OF);
 
         }
         else if (type != null && copyOf != null)
         {
-            addProblem(
-                    IProblem.ERROR,
-                    getNodeStartSourceLocation(node),
-                    TapestryCore.getTapestryString("SpecificationParser.both-type-and-copy-of", id),
-                    false,
-                    IProblem.COMPONENT_SPEC_BOTH_TYPE_COPY_OF);
+            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), TapestryParseMessages
+                    .bothTypeAndCopyOf(id), false, IProblem.COMPONENT_SPEC_BOTH_TYPE_COPY_OF);
         }
         else if (copyOf != null)
         {
@@ -444,8 +387,7 @@ public class ComponentScanner extends SpecificationScanner
                 addProblem(
                         IProblem.ERROR,
                         getAttributeSourceLocation(node, "copy-of"),
-                        TapestryCore
-                                .getTapestryString("SpecificationParser.unable-to-copy", copyOf),
+                        TapestryParseMessages.unableToCopy(copyOf),
                         false,
                         IProblem.COMPONENT_SPEC_COPY_OF_MISSING);
             }
@@ -455,95 +397,197 @@ public class ComponentScanner extends SpecificationScanner
             fValidator.validatePattern(
                     type,
                     SpecificationParser.COMPONENT_TYPE_PATTERN,
-                    "SpecificationParser.invalid-component-type",
+                    "invalid-component-type",
                     IProblem.ERROR,
                     getAttributeSourceLocation(node, "type"),
                     IProblem.COMPONENT_SPEC_INVALID_COMPONENT_TYPE);
         }
 
-        PluginContainedComponent c = (PluginContainedComponent) fSpecificationFactory
+        PluginContainedComponent component = (PluginContainedComponent) fSpecificationFactory
                 .createContainedComponent();
-        c.setType(type);
-        c.setCopyOf(copyOf);
+        component.setType(type);
+        component.setCopyOf(copyOf);
 
         ISourceLocationInfo location = getSourceLocationInfo(node);
         location.setResource(specification.getSpecificationLocation());
-        c.setLocation(location);
+        component.setLocation(location);
 
         for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling())
         {
-            if (isElement(child, "binding"))
+            boolean consumed = false;
+            if (!fIsTapestry_4_0)
             {
-                scanBinding(c, child, BindingType.DYNAMIC, "expression");
-                continue;
+                if (isElement(node, "binding") && scanBinding_3_0(component, child))
+                    continue;
+
+                if (isElement(node, "listener-binding")
+                        && scanListenerBinding_3_0(component, child))
+                    continue;
+
+                if (isElement(node, "message-binding") && scanMessageBinding_3_0(component, child))
+                    continue;
+
+                if (isElement(node, "static-binding") && scanStaticBinding_3_0(component, child))
+                    continue;
+
+                if (isElement(node, "inherited-binding")
+                        && scanInhertiedBinding_3_0(component, child))
+                    continue;
             }
-
-            // Field binding is in 1.3 DTD, but removed from 1.4
-
-            if (isElement(child, "field-binding"))
-            {
-                if (XMLUtil.getDTDVersion(fPublicId) < XMLUtil.DTD_3_0)
-                {
-                    scanBinding(c, child, BindingType.FIELD, "field-name");
-                }
-                else
-                {
-                    addProblem(
-                            IProblem.ERROR,
-                            getNodeStartSourceLocation(child),
-                            "field-binding not supported in DTD 3.0 and up.",
-                            false,
-                            IProblem.COMPONENT_SPEC_FIX_FIELD_BINDING);
-                }
+            else if (isElement(node, "binding") && scanBinding_4_0(component, child))
                 continue;
-            }
 
-            if (isElement(child, "listener-binding"))
-            {
-                scanListenerBinding(c, child);
+            if (scanMeta((IPluginPropertyHolder) component, child))
                 continue;
-            }
 
-            if (isElement(child, "inherited-binding"))
-            {
-                scanBinding(c, child, BindingType.INHERITED, "parameter-name");
-                continue;
-            }
-
-            if (isElement(child, "static-binding"))
-            {
-                scanBinding(c, child, BindingType.STATIC, "value");
-                continue;
-            }
-
-            // <string-binding> added in release 2.0.4
-
-            if (isElement(child, "string-binding"))
-            {
-                scanBinding(c, child, BindingType.STRING, "key");
-                continue;
-            }
-
-            if (isElement(child, "message-binding"))
-            {
-                scanBinding(c, child, BindingType.STRING, "key");
-                continue;
-            }
-
-            if (isElement(child, "property"))
-            {
-                scanProperty((IPluginPropertyHolder) c, child);
-                continue;
-            }
         }
 
-        specification.addComponent(id, c);
+        specification.addComponent(id, component);
 
         // the revalidatable stuff
-        c.validate(specification, fValidator);
+        component.validate(specification, fValidator);
 
         return true;
 
+    }
+
+    private boolean scanBinding_4_0(PluginContainedComponent component, Node node)
+            throws ScannerException
+    {
+        String name = getBindingName(component, node);
+        String value = null;
+        boolean fromAttribute = true;
+        try
+        {
+            ExtendedAttributeResult result = getExtendedAttribute(node, "value", true);
+            value = result.value;
+            fromAttribute = result.fromAttribute;
+
+        }
+        catch (ScannerException e)
+        {
+            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false, e.getCode());
+            value = "";
+        }
+
+        IBindingSpecification spec = fSpecificationFactory.createBindingSpecification();
+        spec.setType(BindingType.PREFIXED);
+        spec.setValue(value);
+
+        ISourceLocationInfo location = getSourceLocationInfo(node);
+        location.setResource(component.getLocation().getResource());
+        spec.setLocation(location);
+
+        component.setBinding(name, spec);
+        return true;
+    }
+
+    private boolean scanInhertiedBinding_3_0(PluginContainedComponent component, Node node)
+            throws ScannerException
+    {
+        String name = getBindingName(component, node);
+        String parameterName = getAttribute(node, "parameter-name");
+
+        IBindingSpecification spec = fSpecificationFactory.createBindingSpecification();
+        spec.setType(BindingType.INHERITED);
+        spec.setValue(parameterName);
+
+        ISourceLocationInfo location = getSourceLocationInfo(node);
+        location.setResource(component.getLocation().getResource());
+        spec.setLocation(location);
+
+        component.setBinding(name, spec);
+        return true;
+    }
+
+    private boolean scanStaticBinding_3_0(PluginContainedComponent component, Node node)
+            throws ScannerException
+    {
+        String name = getBindingName(component, node);
+        String value = null;
+        boolean fromAttribute = true;
+        // must be done here - never revalidatable
+        try
+        {
+            ExtendedAttributeResult result = getExtendedAttribute(node, "value", true);
+            value = result.value;
+            fromAttribute = result.fromAttribute;
+
+        }
+        catch (ScannerException e)
+        {
+            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false, e.getCode());
+            value = "";
+        }
+
+        IBindingSpecification spec = fSpecificationFactory.createBindingSpecification();
+        spec.setType(BindingType.PREFIXED);
+        spec.setValue(BindingConstants.LITERAL_PREFIX + ":" + value);
+
+        ISourceLocationInfo location = getSourceLocationInfo(node);
+        location.setResource(component.getLocation().getResource());
+        spec.setLocation(location);
+
+        ISourceLocation src = fromAttribute ? getAttributeSourceLocation(node, "value")
+                : getBestGuessSourceLocation(node, true);
+
+        component.setBinding(name, spec);
+        return true;
+    }
+
+    private boolean scanMessageBinding_3_0(PluginContainedComponent component, Node node)
+            throws ScannerException
+    {
+        String name = getBindingName(component, node);
+        String key = getAttribute(node, "key");
+
+        IBindingSpecification spec = fSpecificationFactory.createBindingSpecification();
+        spec.setType(BindingType.PREFIXED);
+        spec.setValue(BindingConstants.MESSAGE_PREFIX + ":" + key);
+
+        ISourceLocationInfo location = getSourceLocationInfo(node);
+        location.setResource(component.getLocation().getResource());
+        spec.setLocation(location);
+
+        component.setBinding(name, spec);
+        return true;
+    }
+
+    private boolean scanBinding_3_0(PluginContainedComponent component, Node node)
+            throws ScannerException
+    {
+        String name = getBindingName(component, node);
+        String expression = null;
+        boolean fromAttribute = true;
+        // must be done here - never revalidatable
+        try
+        {
+            ExtendedAttributeResult result = getExtendedAttribute(node, "expression", true);
+            expression = result.value;
+            fromAttribute = result.fromAttribute;
+
+        }
+        catch (ScannerException e)
+        {
+            addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false, e.getCode());
+            expression = "";
+        }
+
+        IBindingSpecification spec = fSpecificationFactory.createBindingSpecification();
+        spec.setType(BindingType.PREFIXED);
+        spec.setValue(BindingConstants.OGNL_PREFIX + ":" + expression);
+
+        ISourceLocationInfo location = getSourceLocationInfo(node);
+        location.setResource(component.getLocation().getResource());
+        spec.setLocation(location);
+
+        ISourceLocation src = fromAttribute ? getAttributeSourceLocation(node, "expression")
+                : getBestGuessSourceLocation(node, true);
+        //TODO validate bindings of all different types!
+        fValidator.validateExpression(expression, IProblem.ERROR, src);
+
+        component.setBinding(name, spec);
+        return true;
     }
 
     protected void scanComponentSpecification(IComponentSpecification specification)
@@ -594,11 +638,8 @@ public class ComponentScanner extends SpecificationScanner
             if (scanDescription((IPluginDescribable) specification, node))
                 continue;
 
-            if (isElement(node, "property-specification"))
-            {
-                scanPropertySpecification(specification, node);
+            if (scanPropertySpecification(specification, node))
                 continue;
-            }
         }
     }
 
@@ -616,10 +657,10 @@ public class ComponentScanner extends SpecificationScanner
         return true;
     }
 
-    protected void scanListenerBinding(IContainedComponent component, Node node)
+    protected boolean scanListenerBinding_3_0(IContainedComponent component, Node node)
             throws ScannerException
     {
-        String name = getAttribute(node, "name", true);
+        String name = getBindingName(component, node);
 
         String language = getAttribute(node, "language");
 
@@ -630,8 +671,6 @@ public class ComponentScanner extends SpecificationScanner
         IListenerBindingSpecification binding = fSpecificationFactory
                 .createListenerBindingSpecification();
 
-        component.setBinding(name, binding);
-        binding.setType(BindingType.LISTENER);
         binding.setLanguage(language);
         binding.setValue(script);
 
@@ -640,6 +679,8 @@ public class ComponentScanner extends SpecificationScanner
         binding.setLocation(location);
 
         component.setBinding(name, binding);
+
+        return true;
     }
 
     protected boolean scanParameter(IComponentSpecification specification, Node node)
@@ -689,7 +730,7 @@ public class ComponentScanner extends SpecificationScanner
 
         String defaultValue = getAttribute(node, "default-value");
 
-        String prefix = fIsTapestry_4_0 ? null : BindingConstants.OGNL_PREFIX;
+        String prefix = fIsTapestry_4_0 ? null : BindingConstants.OGNL_PREFIX + ":";
         if (prefix != null)
             defaultValue = defaultValue == null ? prefix : prefix + defaultValue;
 
@@ -852,6 +893,9 @@ public class ComponentScanner extends SpecificationScanner
             addProblem(IProblem.ERROR, e.getLocation(), e.getMessage(), false, e.getCode());
         }
 
+        if (initialValue != null && !fIsTapestry_4_0)
+            initialValue = BindingConstants.OGNL_PREFIX + ":" + initialValue;
+
         fValidator.validateBindingReference(
                 IProblem.ERROR,
                 result.fromAttribute ? getAttributeSourceLocation(node, "initial-value")
@@ -945,11 +989,11 @@ public class ComponentScanner extends SpecificationScanner
             String prefix = null;
             if ("expression".equals(referenceAttributeName))
 
-                prefix = BindingConstants.OGNL_PREFIX;
+                prefix = BindingConstants.OGNL_PREFIX + ":";
 
             else if ("key".equals(referenceAttributeName))
 
-                prefix = BindingConstants.MESSAGE_PREFIX;
+                prefix = BindingConstants.MESSAGE_PREFIX + ":";
 
             if (prefix != null)
                 value = value == null ? prefix : prefix + value;
@@ -1123,5 +1167,76 @@ public class ComponentScanner extends SpecificationScanner
     //     return true;
     //
     // }
+
+    //  protected void scanBinding(IContainedComponent component, Node node, BindingType type,
+    //  String attributeName) throws ScannerException
+    //{
+    //String name = getAttribute(node, "name", true, true);
+    //
+    //if (name != null && component.getBinding(name) != null)
+    //{
+    //  addProblem(
+    //          IProblem.ERROR,
+    //          getAttributeSourceLocation(node, "name"),
+    //          "duplicate binding name '" + name + "'",
+    //          false,
+    //          IProblem.COMPONENT_SPEC_DUPLICATE_BINDING_NAME);
+    //  // TODO I18N
+    //}
+    //
+    //if (name == null)
+    //  name = "";
+    //
+    //String value = null;
+    //boolean fromAttribute = true;
+    //
+    //if (type == BindingType.INHERITED || type == BindingType.STRING)
+    //{
+    //  value = getAttribute(node, attributeName);
+    //}
+    //else
+    //{
+    //  // must be done here - never revalidatable
+    //  try
+    //  {
+    //      ExtendedAttributeResult result = getExtendedAttribute(node, attributeName, true);
+    //      value = result.value;
+    //      fromAttribute = result.fromAttribute;
+    //
+    //  }
+    //  catch (ScannerException e)
+    //  {
+    //      int severity = IProblem.ERROR;
+    //
+    //      if (type == BindingType.STATIC)
+    //          severity = IProblem.WARNING;
+    //
+    //      addProblem(IProblem.WARNING, e.getLocation(), e.getMessage(), false, e.getCode());
+    //
+    //      value = getNextDummyString();
+    //  }
+    //}
+    //
+    //PluginBindingSpecification binding = (PluginBindingSpecification) fSpecificationFactory
+    //      .createBindingSpecification();
+    //
+    //binding.setType(type);
+    //binding.setValue(value);
+    //
+    //ISourceLocationInfo location = getSourceLocationInfo(node);
+    //location.setResource(component.getLocation().getResource());
+    //binding.setLocation(location);
+    //
+    //// no point in making revalidatable - error state would only change if the
+    //// file changed!
+    //if (type == BindingType.DYNAMIC)
+    //{
+    //  ISourceLocation src = fromAttribute ? getAttributeSourceLocation(node, attributeName)
+    //          : getBestGuessSourceLocation(node, true);
+    //  fValidator.validateExpression(value, IProblem.ERROR, src);
+    //}
+    //
+    //component.setBinding(name, binding);
+    //}
 
 }

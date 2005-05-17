@@ -280,6 +280,7 @@ public abstract class SpecificationScanner extends AbstractScanner
         TYPE_CONVERSION_MAP.put("y", Boolean.TRUE);
         TYPE_CONVERSION_MAP.put("yes", Boolean.TRUE);
         TYPE_CONVERSION_MAP.put("on", Boolean.TRUE);
+        TYPE_CONVERSION_MAP.put("aye", Boolean.TRUE);
 
         TYPE_CONVERSION_MAP.put("false", Boolean.FALSE);
         TYPE_CONVERSION_MAP.put("f", Boolean.FALSE);
@@ -287,6 +288,9 @@ public abstract class SpecificationScanner extends AbstractScanner
         TYPE_CONVERSION_MAP.put("off", Boolean.FALSE);
         TYPE_CONVERSION_MAP.put("no", Boolean.FALSE);
         TYPE_CONVERSION_MAP.put("n", Boolean.FALSE);
+        TYPE_CONVERSION_MAP.put("nay", Boolean.FALSE);
+
+       
 
         TYPE_CONVERSION_MAP.put("none", BeanLifecycle.NONE);
         TYPE_CONVERSION_MAP.put("request", BeanLifecycle.REQUEST);

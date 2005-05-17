@@ -43,6 +43,7 @@ import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
 import org.apache.tapestry.binding.BindingConstants;
+import org.apache.tapestry.parse.TapestryParseMessages;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
@@ -332,13 +333,13 @@ public class BaseValidator implements IScannerValidator
         }
     }
 
-    public boolean validatePattern(String value, String pattern, String errorKey, int severity,
+    public boolean validatePattern(String value, String pattern, String errorMessage, int severity,
             int code) throws ScannerException
     {
-        return validatePattern(value, pattern, errorKey, severity, DefaultSourceLocation, code);
+        return validatePattern(value, pattern, errorMessage, severity, DefaultSourceLocation, code);
     }
 
-    public boolean validatePattern(String value, String pattern, String errorKey, int severity,
+    public boolean validatePattern(String value, String pattern, String errorMessage, int severity,
             ISourceLocation location, int code) throws ScannerException
     {
 
@@ -367,7 +368,7 @@ public class BaseValidator implements IScannerValidator
                 addProblem(
                         severity,
                         location,
-                        TapestryCore.getTapestryString(errorKey, value),
+                        TapestryParseMessages.invalidAttribute(errorMessage, value),
                         false,
                         code);
                 return false;
@@ -377,7 +378,7 @@ public class BaseValidator implements IScannerValidator
         addProblem(
                 severity,
                 location,
-                TapestryCore.getTapestryString(errorKey, "null value"),
+                TapestryParseMessages.invalidAttribute(errorMessage, "null value"),
                 false,
                 -1);
         return false;
