@@ -38,6 +38,9 @@
       <category name="add ons"/>
    </feature>
    <feature url="features/com.iw.features.spindle_3.1.23.jar" id="com.iw.features.spindle" version="3.1.23">
+      <category name="old"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.1.24.jar" id="com.iw.features.spindle" version="3.1.24">
       <category name="spindle_3_1_latest"/>
    </feature>
    <category-def name="spindle_3_1_latest" label="Spindle 3.1 - latest unstable build - Eclipse 3.0">
