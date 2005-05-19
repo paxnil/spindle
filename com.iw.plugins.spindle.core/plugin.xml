@@ -14,9 +14,6 @@
       <library name="dtdparser.jar">
          <export name="*"/>
       </library>
-      <library name="lib/tapestry/tapestry-4.0-alpha-2.jar">
-         <export name="*"/>
-      </library>
       <library name="lib/tapestry/ext-package/lib/bsf-2.3.0.jar">
          <export name="*"/>
       </library>

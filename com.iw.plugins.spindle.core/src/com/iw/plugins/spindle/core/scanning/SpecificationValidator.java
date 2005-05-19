@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -441,7 +442,7 @@ public class SpecificationValidator extends BaseValidator
                 int handleI18NPriority = TapestryCore.getDefault().getHandleAssetProblemPriority();
                 if (handleI18NPriority >= 0)
                 {
-                    addProblem(handleI18NPriority, errorLoc, TapestryCore.getString(
+                    addProblem(handleI18NPriority, errorLoc, CoreMessages.format(
                             "scan-component-missing-asset-but-has-i18n",
                             assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified"
                                     : assetSpecName,
@@ -450,7 +451,7 @@ public class SpecificationValidator extends BaseValidator
             }
             else
             {
-                addProblem(IProblem.ERROR, errorLoc, TapestryCore.getString(
+                addProblem(IProblem.ERROR, errorLoc, CoreMessages.format(
                         "scan-component-missing-asset",
                         assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified"
                                 : assetSpecName,
@@ -523,7 +524,7 @@ public class SpecificationValidator extends BaseValidator
                 int handleI18NPriority = TapestryCore.getDefault().getHandleAssetProblemPriority();
                 if (handleI18NPriority >= 0)
                 {
-                    addProblem(handleI18NPriority, errorLoc, TapestryCore.getString(
+                    addProblem(handleI18NPriority, errorLoc, CoreMessages.format(
                             "scan-component-missing-asset-but-has-i18n",
                             assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified"
                                     : assetSpecName,
@@ -532,7 +533,7 @@ public class SpecificationValidator extends BaseValidator
             }
             else
             {
-                addProblem(IProblem.ERROR, errorLoc, TapestryCore.getString(
+                addProblem(IProblem.ERROR, errorLoc, CoreMessages.format(
                         "scan-component-missing-asset",
                         assetSpecName.startsWith(getDummyStringPrefix()) ? "not specified"
                                 : assetSpecName,

@@ -40,7 +40,9 @@ import org.apache.hivemind.Resource;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.tapestry.INamespace;
+import org.apache.tapestry.binding.BindingConstants;
 import org.apache.tapestry.parse.ITemplateParserDelegate;
+import org.apache.tapestry.parse.OpenToken;
 import org.apache.tapestry.parse.TemplateParseException;
 import org.apache.tapestry.parse.TemplateToken;
 import org.apache.tapestry.parse.TokenType;
@@ -52,6 +54,7 @@ import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.spec.SpecFactory;
 import org.eclipse.core.runtime.CoreException;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
@@ -91,7 +94,7 @@ public class TemplateScanner extends AbstractScanner
     private PatternMatcher _patternMatcher;
 
     private PluginComponentSpecification fComponentSpec;
-    
+
     private String fComponentAttributeName;
 
     private ICoreNamespace fNamespace;
@@ -237,10 +240,11 @@ public class TemplateScanner extends AbstractScanner
             addProblem(
                     IProblem.ERROR,
                     getJWCIDLocation(token.getEventInfo().getAttributeMap()),
-                    TapestryCore.getTapestryString(
-                            "BaseComponent.multiple-component-references",
-                            fComponentSpec.getSpecificationLocation().getName(),
-                            id),
+                    TapestryImplMessages.multipleComponentReferences(component, id),
+                    //                    TapestryCore.getTapestryString(
+                    //                            "BaseComponent.multiple-component-references",
+                    //                            fComponentSpec.getSpecificationLocation().getName(),
+                    //                            id),
                     false,
                     IProblem.TEMPLATE_SCANNER_DUPLICATE_ID);
             return;
@@ -248,13 +252,10 @@ public class TemplateScanner extends AbstractScanner
         fSeenIds.add(id);
 
         if (componentType == null)
-        {
             validateExplicitComponent(component, token);
-        }
         else
-        {
             validateImplicitComponent(component, token);
-        }
+
     }
 
     private PluginContainedComponent createImplicitComponent(CoreOpenToken token, String id,
@@ -270,16 +271,67 @@ public class TemplateScanner extends AbstractScanner
 
         Map attributesMap = token.getAttributesMap();
 
-        if (attributesMap != null)
-            for (Iterator iter = attributesMap.keySet().iterator(); iter.hasNext();)
-            {
-                String attrName = (String) iter.next();
-                TemplateAttribute attr = (TemplateAttribute) attributesMap.get(attrName);
-                result.setBinding(attrName, createImplicitBinding(attr));
-            }
+        addTemplateBindings(result, token);
 
         return result;
 
+    }
+
+    private void addTemplateBindings(PluginContainedComponent component, OpenToken token)
+    {
+        Map attributes = token.getAttributesMap();
+
+        if (attributes == null)
+            return;
+
+        for (Iterator iter = attributes.entrySet().iterator(); iter.hasNext();)
+        {
+            Map.Entry entry = (Map.Entry) iter.next();
+            String name = (String) entry.getKey();
+            String value = (String) entry.getValue();
+
+            component.setBinding(name, createImplicitBinding(name, value));
+        }
+    }
+
+    private String getDefaultBindingType(String parameterName, String metaDefaultBindingType)
+    {
+        String result = null;
+
+        IParameterSpecification ps = fComponentSpec.getParameter(parameterName);
+
+        if (ps != null)
+            result = ps.getDefaultBindingType();
+
+        if (result == null)
+            result = metaDefaultBindingType;
+
+        return result;
+    }
+
+    private IBindingSpecification createImplicitBinding(String name, String reference)
+    {
+        PluginBindingSpecification result = (PluginBindingSpecification) fSpecificationFactory
+                .createBindingSpecification();
+
+        result.setType(BindingType.PREFIXED);
+
+        String prefix = getDefaultBindingType(name, BindingConstants.LITERAL_PREFIX);
+
+        int colonx = reference.indexOf(':');
+
+        if (colonx > 1)
+        {
+            result.setValue(reference);
+
+        }
+        else
+        {
+
+            result.setValue(prefix + ":" + reference);
+        }
+
+        return result;
     }
 
     private void validateImplicitComponent(PluginContainedComponent contained, CoreOpenToken token)
@@ -296,10 +348,12 @@ public class TemplateScanner extends AbstractScanner
             addProblem(
                     IProblem.ERROR,
                     token.getEventInfo().getStartTagLocation(),
-                    TapestryCore.getTapestryString(
-                            "PageLoader.required-parameter-not-bound",
-                            required.toString(),
-                            "'" + token.getComponentType() + "'"),
+                    TapestryPageloadMessages.requiredParameterNotBound(required.toString(), token
+                            .getComponentType()),
+                    //                    TapestryCore.getTapestryString(
+                    //                            "PageLoader.required-parameter-not-bound",
+                    //                            required.toString(),
+                    //                            "'" + token.getComponentType() + "'"),
                     false,
                     IProblem.TEMPLATE_SCANNER_REQUIRED_PARAMETER_NOT_BOUND);
         }
@@ -334,19 +388,19 @@ public class TemplateScanner extends AbstractScanner
                 validateImplicitStaticBinding(bspec, containedSpecification, location);
 
         }
-		
-		//TODO deferred validations are to be revisited
 
-//        if (fPerformDeferredValidations)
-//            FrameworkComponentValidator.validateImplictComponent(
-//                    (IResourceWorkspaceLocation) fComponentSpec.getSpecificationLocation(),
-//                    fTemplateLocation,
-//                    fComponentSpec.getNamespace(),
-//                    token.getComponentType(),
-//                    containedSpecification,
-//                    contained,
-//                    token.getEventInfo(),
-//                    containedSpecification.getPublicId());
+        //TODO deferred validations are to be revisited
+
+        //        if (fPerformDeferredValidations)
+        //            FrameworkComponentValidator.validateImplictComponent(
+        //                    (IResourceWorkspaceLocation) fComponentSpec.getSpecificationLocation(),
+        //                    fTemplateLocation,
+        //                    fComponentSpec.getNamespace(),
+        //                    token.getComponentType(),
+        //                    containedSpecification,
+        //                    contained,
+        //                    token.getEventInfo(),
+        //                    containedSpecification.getPublicId());
 
     }
 
@@ -508,26 +562,6 @@ public class TemplateScanner extends AbstractScanner
         return result;
     }
 
-    private IBindingSpecification createImplicitBinding(TemplateAttribute attr)
-    {
-        PluginBindingSpecification result = (PluginBindingSpecification) fSpecificationFactory
-                .createBindingSpecification();
-        result.setValue(attr.getValue());
-        if (attr.getType() == AttributeType.OGNL_EXPRESSION)
-        {
-            result.setType(BindingType.DYNAMIC);
-        }
-        else if (attr.getType() == AttributeType.LOCALIZATION_KEY)
-        {
-            result.setType(BindingType.STRING);
-        }
-        else if (attr.getType() == AttributeType.LITERAL)
-        {
-            result.setType(BindingType.STATIC);
-        }
-        return result;
-    }
-
     /**
      * check bindings based on attributes in the template. this is for explicit components only!
      */
@@ -549,8 +583,8 @@ public class TemplateScanner extends AbstractScanner
             Map.Entry entry = (Map.Entry) i.next();
 
             String name = (String) entry.getKey();
-            TemplateAttribute attribute = (TemplateAttribute) entry.getValue();
-            AttributeType type = attribute.getType();
+            String value = (String) entry.getValue();
+
             ISourceLocation location = getAttributeLocation(name, token.getEventInfo()
                     .getAttributeMap());
 
@@ -745,7 +779,9 @@ public class TemplateScanner extends AbstractScanner
 
     private ISourceLocation getJWCIDLocation(Map attributesLocations)
     {
-        return getAttributeLocation(fParserDelegate.getComponentAttributeName(), attributesLocations);
+        return getAttributeLocation(
+                fParserDelegate.getComponentAttributeName(),
+                attributesLocations);
     }
 
     private ISourceLocation getAttributeLocation(String key, Map attributesLocations)
@@ -821,13 +857,16 @@ public class TemplateScanner extends AbstractScanner
 
     private class ScannerDelegate implements ITemplateParserDelegate
     {
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see org.apache.tapestry.parse.ITemplateParserDelegate#getComponentAttributeName()
          */
         public String getComponentAttributeName()
-        {            
+        {
             return fComponentAttributeName;
         }
+
         /*
          * (non-Javadoc)
          * 
@@ -880,7 +919,7 @@ public class TemplateScanner extends AbstractScanner
                         .getTapestryString(
                                 "Namespace.no-such-component-type",
                                 type,
-                                libraryId == null ? TapestryCore.getString("project-namespace")
+                                libraryId == null ? CoreMessages.format("project-namespace")
                                         : libraryId));
 
             return spec.getAllowBody();

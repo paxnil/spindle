@@ -35,9 +35,11 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.w3c.dom.Document;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.properties.ProjectPropertySource;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.util.Markers;
@@ -178,7 +180,7 @@ public class FullBuild extends Build
       Document wxmlElement = null;
       try
       {
-        fTapestryBuilder.fNotifier.subTask(TapestryCore.getString(
+        fTapestryBuilder.fNotifier.subTask(CoreMessages.format(
             TapestryBuilder.STRING_KEY + "scanning",
             webXML.toString()));
         Markers.removeProblemsFor((IResource)storage);
@@ -197,7 +199,7 @@ public class FullBuild extends Build
       try
       {
         WebXMLScanner wscanner = new WebXMLScanner(this);
-        descriptor = wscanner.scanWebAppDescriptor(wxmlElement);
+        descriptor = wscanner.scanWebAppDescriptor(wxmlElement);        
         IResource resource = (IResource) webXML.getStorage();
         Markers.addTapestryProblemMarkersToResource(resource, wscanner.getProblems());
       } catch (ScannerException e)
@@ -206,23 +208,22 @@ public class FullBuild extends Build
       }
       
       if (descriptor == null)
-          throw new BrokenWebXMLException(TapestryCore.getString(TapestryBuilder.STRING_KEY
+          throw new BrokenWebXMLException(CoreMessages.format(TapestryBuilder.STRING_KEY
                   + "abort-no-valid-application-servlets-found"));
       
       ServletInfo [] servletInfos = descriptor.getServletInfos();
       if (servletInfos == null || servletInfos.length == 0)
       
-        throw new BrokenWebXMLException(TapestryCore.getString(TapestryBuilder.STRING_KEY
+        throw new BrokenWebXMLException(CoreMessages.format(TapestryBuilder.STRING_KEY
             + "abort-no-valid-application-servlets-found"));
       
       if (servletInfos.length > 1)      
-        throw new BrokenWebXMLException(TapestryCore.getString(TapestryBuilder.STRING_KEY
+        throw new BrokenWebXMLException(CoreMessages.format(TapestryBuilder.STRING_KEY
             + "abort-too-many-valid-servlets-found"));
       
       fApplicationServlet = servletInfos[0];
       fWebAppDescriptor = descriptor;
-     
-
+      fProjectPropertySource = new ProjectPropertySource(descriptor);     
     } else
     {
       IFolder definedWebRoot = fTapestryBuilder.fTapestryProject.getWebContextFolder();
@@ -230,7 +231,7 @@ public class FullBuild extends Build
       {
         Markers.addTapestryProblemMarkerToResource(
             fTapestryBuilder.getProject(),
-            TapestryCore.getString(
+            CoreMessages.format(
                 TapestryBuilder.STRING_KEY + "missing-context",
                 definedWebRoot.toString()),
             IMarker.SEVERITY_WARNING,

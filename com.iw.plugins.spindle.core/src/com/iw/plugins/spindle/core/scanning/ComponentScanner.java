@@ -53,10 +53,12 @@ import com.iw.plugins.spindle.core.spec.PluginBeanSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.core.spec.PluginDescriptionDeclaration;
+import com.iw.plugins.spindle.core.spec.PluginInjectSpecification;
 import com.iw.plugins.spindle.core.spec.PluginParameterSpecification;
 import com.iw.plugins.spindle.core.spec.PluginPropertySpecification;
 import com.iw.plugins.spindle.core.spec.PluginReservedParameterDeclaration;
 import com.iw.plugins.spindle.core.spec.bean.PluginBindingBeanInitializer;
+import com.iw.plugins.spindle.messages.ParseMessages;
 
 /**
  * Scanner that turns a node tree into a IComponentSpecification
@@ -127,7 +129,7 @@ public class ComponentScanner extends SpecificationScanner
         {
             if (!rootName.equals("page-specification"))
 
-                throw new ScannerException(TapestryParseMessages.incorrectDocumentType(
+                throw new ScannerException(ParseMessages.incorrectDocumentType(
                         "page-specification",
                         rootName), getBestGuessSourceLocation(fRootNode, false), false,
                         IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_PAGE_SPECIFICATION);
@@ -135,7 +137,7 @@ public class ComponentScanner extends SpecificationScanner
         }
         else if (!rootName.equals("component-specification"))
         {
-            throw new ScannerException(TapestryParseMessages.incorrectDocumentType(
+            throw new ScannerException(ParseMessages.incorrectDocumentType(
                     "component-specification",
                     rootName), getBestGuessSourceLocation(fRootNode, false), false,
                     IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_COMPONENT_SPECIFICATION);
@@ -368,13 +370,13 @@ public class ComponentScanner extends SpecificationScanner
         // file changed!
         if (type == null && copyOf == null)
         {
-            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), TapestryParseMessages
+            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), ParseMessages
                     .missingTypeOrCopyOf(id), false, IProblem.COMPONENT_SPEC_MISSING_TYPE_COPY_OF);
 
         }
         else if (type != null && copyOf != null)
         {
-            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), TapestryParseMessages
+            addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), ParseMessages
                     .bothTypeAndCopyOf(id), false, IProblem.COMPONENT_SPEC_BOTH_TYPE_COPY_OF);
         }
         else if (copyOf != null)
@@ -385,7 +387,7 @@ public class ComponentScanner extends SpecificationScanner
                 addProblem(
                         IProblem.ERROR,
                         getAttributeSourceLocation(node, "copy-of"),
-                        TapestryParseMessages.unableToCopy(copyOf),
+                        ParseMessages.unableToCopy(copyOf),
                         false,
                         IProblem.COMPONENT_SPEC_COPY_OF_MISSING);
             }
@@ -664,6 +666,21 @@ public class ComponentScanner extends SpecificationScanner
 
         component.setBinding(name, binding);
 
+        return true;
+    }
+    
+    protected boolean scanInjectSpecification(IComponentSpecification specification, Node node) {
+        if (isElement(node, "inject"))
+            return false;
+        
+        String property = getAttribute(node, "property", false);
+        
+        if (specification.getInjectSpecifications(name) != null)
+        
+        PluginInjectSpecification inject = new PluginInjectSpecification();
+        
+        
+         
         return true;
     }
 

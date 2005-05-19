@@ -68,6 +68,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
@@ -102,22 +103,22 @@ public class UIPlugin extends AbstractUIPlugin
     DEFAULT_COMPONENT_SPEC = new PluginComponentSpecification();
     DEFAULT_COMPONENT_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
     DEFAULT_COMPONENT_SPEC.setPageSpecification(false);
-    DEFAULT_COMPONENT_SPEC.setComponentClassName(TapestryCore
-        .getString("TapestryComponentSpec.defaultSpec"));
+    DEFAULT_COMPONENT_SPEC.setComponentClassName(CoreMessages
+        .format("TapestryComponentSpec.defaultSpec"));
     DEFAULT_COMPONENT_SPEC.setDescription(UIPlugin
         .getString("auto-create-spec-description"));
 
     DEFAULT_PAGE_SPEC = new PluginComponentSpecification();
     DEFAULT_PAGE_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
     DEFAULT_PAGE_SPEC.setPageSpecification(true);
-    DEFAULT_PAGE_SPEC.setComponentClassName(TapestryCore
-        .getString("TapestryPageSpec.defaultSpec"));
+    DEFAULT_PAGE_SPEC.setComponentClassName(CoreMessages
+        .format("TapestryPageSpec.defaultSpec"));
     DEFAULT_PAGE_SPEC.setDescription(UIPlugin.getString("auto-create-spec-description"));
 
     DEFAULT_APPLICATION_SPEC = new PluginApplicationSpecification();
     DEFAULT_APPLICATION_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
-    DEFAULT_APPLICATION_SPEC.setEngineClassName(TapestryCore
-        .getString("TapestryEngine.defaultEngine"));
+    DEFAULT_APPLICATION_SPEC.setEngineClassName(CoreMessages
+        .format("TapestryEngine.defaultEngine"));
     DEFAULT_APPLICATION_SPEC.setDescription(UIPlugin
         .getString("auto-create-spec-description"));
 

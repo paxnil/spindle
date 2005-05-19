@@ -79,6 +79,7 @@ import org.eclipse.ui.dialogs.ISelectionValidator;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
@@ -808,8 +809,8 @@ public class ProjectPropertyPage extends PropertyPage
                     }
                     try
                     {
-                        if (jproject.findType(TapestryCore
-                                .getString("TapestryComponentSpec.specInterface")) == null)
+                        if (jproject.findType(CoreMessages
+                                .format("TapestryComponentSpec.specInterface")) == null)
                         {
                             MessageDialog dialog = new MessageDialog(getShell(),
                                     "Tapestry jars missing", null,

@@ -54,6 +54,7 @@ import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.util.IPropertyHolder;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
@@ -1464,7 +1465,7 @@ public class XMLUtil
         break;
     }
 
-    indenter.println(TapestryCore.getString("TAPESTRY.xmlComment"));
+    indenter.println(CoreMessages.format("TAPESTRY.xmlComment"));
   }
 
   public static void writeLibraryServices(Map serviceMap, Writer writer, int indent)

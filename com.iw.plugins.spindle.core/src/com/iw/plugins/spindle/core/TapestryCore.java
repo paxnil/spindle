@@ -80,8 +80,6 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
 
     private static ResourceBundle TapestryStrings;
 
-    private static ResourceBundle SpindleCoreStrings;
-
     public static final String PLUGIN_ID = "com.iw.plugins.spindle.core";
 
     public static final String NATURE_ID = PLUGIN_ID + ".tapestrynature";
@@ -346,47 +344,6 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         }
     }
 
-    public static String getString(String key, Object[] args)
-    {
-        if (SpindleCoreStrings == null)
-            SpindleCoreStrings = ResourceBundle.getBundle("com.iw.plugins.spindle.core.resources");
-        try
-        {
-            String pattern = SpindleCoreStrings.getString(key);
-            if (args == null)
-                return pattern;
-
-            return MessageFormat.format(pattern, args);
-        }
-        catch (MissingResourceException e)
-        {
-            return "!" + key + "!";
-        }
-    }
-
-    public static String getString(String key)
-    {
-        return getString(key, null);
-    }
-
-    public static String getString(String key, Object arg)
-    {
-        return getString(key, new Object[]
-        { arg });
-    }
-
-    public static String getString(String key, Object arg1, Object arg2)
-    {
-        return getString(key, new Object[]
-        { arg1, arg2 });
-    }
-
-    public static String getString(String key, Object arg1, Object arg2, Object arg3)
-    {
-        return getString(key, new Object[]
-        { arg1, arg2, arg3 });
-    }
-
     public static String getTapestryString(String key, Object[] args)
     {
         if (TapestryStrings == null)
@@ -404,30 +361,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
         {
             return "!" + key + "!";
         }
-    }
-
-    public static String getTapestryString(String key)
-    {
-        return getTapestryString(key, null);
-    }
-
-    public static String getTapestryString(String key, Object arg)
-    {
-        return getTapestryString(key, new Object[]
-        { arg });
-    }
-
-    public static String getTapestryString(String key, Object arg1, Object arg2)
-    {
-        return getTapestryString(key, new Object[]
-        { arg1, arg2 });
-    }
-
-    public static String getTapestryString(String key, Object arg1, Object arg2, Object arg3)
-    {
-        return getTapestryString(key, new Object[]
-        { arg1, arg2, arg3 });
-    }
+    }    
 
     public static boolean isNull(String value)
     {
@@ -442,7 +376,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
 
     public static void logProblem(IStorage storage, IProblem problem)
     {
-        log(getString("core-non-resource-problem", storage.toString(), problem.toString()));
+        log(CoreMessages.format("core-non-resource-problem", storage.toString(), problem.toString()));
     }
 
     /**

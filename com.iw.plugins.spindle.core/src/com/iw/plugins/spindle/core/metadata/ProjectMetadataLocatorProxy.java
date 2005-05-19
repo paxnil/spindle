@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
@@ -32,7 +33,7 @@ public class ProjectMetadataLocatorProxy implements IProjectMetadataLocator
         result.fElement = element;
         if ("metadataLocator".equals(element.getName())) //$NON-NLS-1$
             return result;
-        TapestryCore.log(TapestryCore.getString("project-metadata-unexpected-element", element
+        TapestryCore.log(CoreMessages.format("project-metadata-unexpected-element", element
                 .getDeclaringExtension().getNamespace(), element.getName()));
         return null;
     }
@@ -100,7 +101,7 @@ public class ProjectMetadataLocatorProxy implements IProjectMetadataLocator
         String result = fElement.getAttribute("natureId"); //$NON-NLS-1$
         if (result != null)
             return result;
-        TapestryCore.log(TapestryCore.getString(TapestryCore.getString(
+        TapestryCore.log(CoreMessages.format(CoreMessages.format(
                 "project-metadata-missing-natureId",
                 fElement.getDeclaringExtension().getNamespace(),
                 fElement.getName())));

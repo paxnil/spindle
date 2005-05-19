@@ -51,6 +51,7 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.Markers;
 import com.iw.plugins.spindle.core.util.XMLUtil;
+import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 
 /**
  * Additional validation for Framework components. These are recorded in the Tapestry builder as
@@ -78,7 +79,7 @@ public class FrameworkComponentValidator
 
         PluginComponentSpecification frameworkSpec = (PluginComponentSpecification) frameworkComponentSpecification;
         //check to see if we are really talking about a framework component.
-        if (TapestryCore.getTapestryString("Namespace.framework-namespace").equals(
+        if (DefaultTapestryMessages.format("Namespace.framework-namespace").equals(
                 frameworkSpec.getNamespace().getNamespaceId()))
         {
             if ("PageLink".equals(frameworkComponentName))
@@ -141,7 +142,7 @@ public class FrameworkComponentValidator
 
             PluginComponentSpecification frameworkSpec = (PluginComponentSpecification) frameworkComponentSpecification;
             //check to see if we are really talking about a framework component.
-            if (TapestryCore.getTapestryString("Namespace.framework-namespace").equals(
+            if (DefaultTapestryMessages.format("Namespace.framework-namespace").equals(
                     frameworkSpec.getNamespace().getNamespaceId()))
             {
                 if ("Script".equals(frameworkComponentName))
@@ -256,7 +257,7 @@ public class FrameworkComponentValidator
                             Markers.addTapestryProblemMarkerToResource(
                                     fPutProblemsHere,
                                     new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
-                                            IProblem.ERROR, TapestryCore.getTapestryString(
+                                            IProblem.ERROR, DefaultTapestryMessages.format(
                                                     "Namespace.no-such-page",
                                                     value,
                                                     namespaceId), location.getLineNumber(),
@@ -268,7 +269,7 @@ public class FrameworkComponentValidator
                             StringWriter swriter = new StringWriter();
                             PrintWriter pwriter = new PrintWriter(swriter);
                             pwriter.println("FCV - page - no location");
-                            pwriter.println(TapestryCore.getTapestryString(
+                            pwriter.println(DefaultTapestryMessages.format(
                                     "Namespace.no-such-page",
                                     value,
                                     namespaceId));
@@ -340,7 +341,8 @@ public class FrameworkComponentValidator
                                             IProblem.ERROR, "Unable to find script: "
                                                     + scriptLocation.toString(), location
                                                     .getLineNumber(), location.getCharStart(),
-                                            location.getCharEnd(), true, IProblem.SPINDLE_MISSING_SCRIPT));
+                                            location.getCharEnd(), true,
+                                            IProblem.SPINDLE_MISSING_SCRIPT));
                         }
                         else
                         {

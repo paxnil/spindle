@@ -44,6 +44,7 @@ import org.jdom.Document;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
@@ -132,7 +133,7 @@ public class TapestryProjectInstaller {
 			// the project application spec
 			filesBuilt.add(applicationFactory.createApplication(webInfFolder,
 					installData.getApplicationFileTemplate(), applicationName,
-					TapestryCore.getString("TapestryEngine.defaultEngine"),
+					CoreMessages.format("TapestryEngine.defaultEngine"),
 					"Home.page", monitor));
 		} catch (CoreException e3) {
 			return e3.getStatus();
@@ -144,8 +145,8 @@ public class TapestryProjectInstaller {
 			//the home page spec
 			IFile pageFile = webInfFolder.getFile("Home.page");
 			filesBuilt.add(pageFactory.createPage(pageFile, templateSource
-					.getTemplate(pageFactory), TapestryCore
-					.getString("TapestryPageSpec.defaultSpec"), monitor));
+					.getTemplate(pageFactory), CoreMessages
+					.format("TapestryPageSpec.defaultSpec"), monitor));
 		} catch (CoreException e4) {
 			return e4.getStatus();
 		}

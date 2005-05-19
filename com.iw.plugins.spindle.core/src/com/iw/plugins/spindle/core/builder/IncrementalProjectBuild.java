@@ -45,6 +45,7 @@ import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.properties.ComponentPropertySource;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
@@ -241,7 +242,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      */
     protected IComponentSpecification resolveIComponentSpecification(Parser parser,
             ICoreNamespace namespace, IStorage storage, IResourceWorkspaceLocation location,
-            String encoding)
+            String templateExtension, String encoding)
     {
         PluginComponentSpecification result = null;
 
@@ -264,11 +265,12 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             if (result == null || result.isPlaceholder() || fileChanged(file))
             {
                 Markers.removeProblemsFor(file);
-                return super.resolveIComponentSpecification(
+                return super.resolveIComponentSpecification( 
                         parser,
                         namespace,
                         file,
                         location,
+                        templateExtension,
                         encoding);
             }
         }
@@ -281,6 +283,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
                     namespace,
                     storage,
                     location,
+                    templateExtension,
                     encoding);
         }
 
@@ -297,8 +300,11 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             try
             {
                 result.validate(useValidator);
+                List oldTemplates = new ArrayList(result.getTemplateLocations());
+                ComponentPropertySource source = new ComponentPropertySource(fProjectPropertySource, result);
                 result.setTemplateLocations(TapestryBuilder.scanForTemplates(
                         result,
+                        source.getPropertyValue("org.apache.tapestry.template-extension"),
                         fTapestryBuilder.fTapestryProject,
                         fProblemCollector));
                 for (Iterator iter = result.getTemplateLocations().iterator(); iter.hasNext();)

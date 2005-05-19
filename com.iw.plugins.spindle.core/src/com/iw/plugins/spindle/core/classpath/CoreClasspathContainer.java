@@ -43,6 +43,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
@@ -255,7 +256,7 @@ public class CoreClasspathContainer implements IClasspathContainer
      */
     public String getDescription()
     {
-        return TapestryCore.getString("core-classpath-container-label");
+        return CoreMessages.format("core-classpath-container-label");
     }
 
     /**

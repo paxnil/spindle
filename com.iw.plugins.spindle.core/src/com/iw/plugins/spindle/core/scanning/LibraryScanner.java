@@ -28,7 +28,6 @@ package com.iw.plugins.spindle.core.scanning;
 
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.parse.SpecificationParser;
-import org.apache.tapestry.parse.TapestryParseMessages;
 import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.w3c.dom.Node;
@@ -44,6 +43,7 @@ import com.iw.plugins.spindle.core.spec.PluginExtensionSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibraryDeclaration;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.spec.PluginPageDeclaration;
+import com.iw.plugins.spindle.messages.ParseMessages;
 
 /**
  * Scanner that turns a node tree into a ILibrarySpecification
@@ -96,7 +96,7 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                     IProblem.ERROR,
                     getBestGuessSourceLocation(fRootNode, false),
-                    TapestryParseMessages.incorrectDocumentType("library-specification", rootName),
+                    ParseMessages.incorrectDocumentType("library-specification", rootName),
                     false,
                     IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_LIBRARY);
             return;
@@ -309,7 +309,7 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                     IProblem.ERROR,
                     getAttributeSourceLocation(node, "id"),
-                    TapestryParseMessages.frameworkLibraryIdIsReserved(id),
+                    ParseMessages.frameworkLibraryIdIsReserved(id),
                     false,
                     IProblem.LIBRARY_INVALID_CHILD_LIB_ID);
 
@@ -367,7 +367,7 @@ public class LibraryScanner extends SpecificationScanner
         if (!isElement(node, "service"))
             return false;
 
-        addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), TapestryParseMessages
+        addProblem(IProblem.ERROR, getNodeStartSourceLocation(node), ParseMessages
                 .serviceElementNotSupported(), false, IProblem.NOT_QUICK_FIXABLE);
 
         return true;

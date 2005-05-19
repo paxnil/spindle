@@ -38,11 +38,11 @@ import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.lookup.ComponentLookup;
 import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
+import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 
 /**
  * Tapestry Core implementation of org.apache.tapestry.INamespace All pages and components must be
@@ -152,12 +152,12 @@ public class CoreNamespace implements ICoreNamespace
     public String getNamespaceId()
     {
         if (fIsFrameworkNamespace)
-            return TapestryCore.getTapestryString("Namespace.framework-namespace");
+            return DefaultTapestryMessages.format("Namespace.framework-namespace");
 
         if (fIsApplicationNamespace)
-            return TapestryCore.getTapestryString("Namespace.application-namespace");
+            return DefaultTapestryMessages.format("Namespace.application-namespace");
 
-        return TapestryCore.getTapestryString("Namespace.nested-namespace", getExtendedId());
+        return DefaultTapestryMessages.format("Namespace.nested-namespace", getExtendedId());
     }
 
     public boolean isBinary()
@@ -569,7 +569,7 @@ public class CoreNamespace implements ICoreNamespace
     {
         if (fSpecification != null)
             return fSpecification.getProperty(propertyName);
-        
+
         return null;
     }
 

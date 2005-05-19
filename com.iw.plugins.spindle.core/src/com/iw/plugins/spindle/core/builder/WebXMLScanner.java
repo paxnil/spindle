@@ -41,12 +41,14 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.AbstractScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
+import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 
 /**
  * A Processor class used by FullBuild that extracts Tapestry information from the file web.xml
@@ -93,7 +95,7 @@ public class WebXMLScanner extends AbstractScanner
             return;
 
         if (location.getStorage() == null)
-            throw new ScannerException(TapestryCore.getString(
+            throw new ScannerException(CoreMessages.format(
                     "web-xml-ignore-application-path-not-found",
                     location == null ? "no location found" : location.toString()), false,
                     IProblem.NOT_QUICK_FIXABLE);
@@ -101,9 +103,8 @@ public class WebXMLScanner extends AbstractScanner
         IPath ws_path = new Path(location.getName());
         String extension = ws_path.getFileExtension();
         if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
-            throw new ScannerException(TapestryCore.getString(
-                    "web-xml-wrong-file-extension",
-                    location.toString()), false, IProblem.NOT_QUICK_FIXABLE);
+            throw new ScannerException(CoreMessages.format("web-xml-wrong-file-extension", location
+                    .toString()), false, IProblem.NOT_QUICK_FIXABLE);
 
     }
 
@@ -112,7 +113,7 @@ public class WebXMLScanner extends AbstractScanner
     {
         if (currentInfo.isServletSubclass && currentInfo.applicationSpecLocation != null)
         {
-            addProblem(IProblem.WARNING, location, TapestryCore.getString(
+            addProblem(IProblem.WARNING, location, CoreMessages.format(
                     "web-xml-application-path-param-but-servlet-defines",
                     currentInfo.classname), false, IProblem.NOT_QUICK_FIXABLE);
             return;
@@ -120,7 +121,7 @@ public class WebXMLScanner extends AbstractScanner
 
         if (!value.endsWith(".application"))
         {
-            addProblem(IProblem.ERROR, location, TapestryCore.getString(
+            addProblem(IProblem.ERROR, location, CoreMessages.format(
                     "web-xml-wrong-file-extension",
                     value), false, IProblem.NOT_QUICK_FIXABLE);
             return;
@@ -129,7 +130,7 @@ public class WebXMLScanner extends AbstractScanner
         IResourceWorkspaceLocation ws_location = getApplicationLocation(currentInfo, value);
         if (ws_location == null)
         {
-            addProblem(IProblem.ERROR, location, TapestryCore.getString(
+            addProblem(IProblem.ERROR, location, CoreMessages.format(
                     "web-xml-ignore-application-path-not-found",
                     value), false, IProblem.NOT_QUICK_FIXABLE);
             return;
@@ -184,7 +185,7 @@ public class WebXMLScanner extends AbstractScanner
         fBuilder.typeChecked(className, found);
 
         if (found == null)
-            addProblem(IProblem.ERROR, location, TapestryCore.getTapestryString(
+            addProblem(IProblem.ERROR, location, DefaultTapestryMessages.format(
                     "unable-to-resolve-class",
                     className), false, IProblem.NOT_QUICK_FIXABLE);
 
@@ -239,14 +240,14 @@ public class WebXMLScanner extends AbstractScanner
                     addProblem(
                             IProblem.ERROR,
                             keyLoc,
-                            TapestryCore.getString("web-xml-context-param-null-key"),
+                            CoreMessages.format("web-xml-context-param-null-key"),
                             false,
                             IProblem.NOT_QUICK_FIXABLE);
                     return;
                 }
                 else if (target.containsKey(key))
                 {
-                    addProblem(IProblem.ERROR, keyLoc, TapestryCore.getString(
+                    addProblem(IProblem.ERROR, keyLoc, CoreMessages.format(
                             "web-xml-context-param-duplicate-key",
                             key), false, IProblem.NOT_QUICK_FIXABLE);
                     return;
@@ -322,7 +323,7 @@ public class WebXMLScanner extends AbstractScanner
                 if (methodSource == null)
                 {
                     if (servletType.isBinary())
-                        throw new ScannerException(TapestryCore.getString(
+                        throw new ScannerException(CoreMessages.format(
                                 "builder-error-servlet-subclass-is-binary-attach-source",
                                 servletType.getFullyQualifiedName()), false,
                                 IProblem.NOT_QUICK_FIXABLE);
@@ -435,14 +436,14 @@ public class WebXMLScanner extends AbstractScanner
                     addProblem(
                             IProblem.ERROR,
                             keyLoc,
-                            TapestryCore.getString("web-xml-init-param-null-key"),
+                            CoreMessages.format("web-xml-init-param-null-key"),
                             false,
                             IProblem.NOT_QUICK_FIXABLE);
                     return false;
                 }
                 else if (currentInfo.parameters.containsKey(key))
                 {
-                    addProblem(IProblem.ERROR, keyLoc, TapestryCore.getString(
+                    addProblem(IProblem.ERROR, keyLoc, CoreMessages.format(
                             "web-xml-init-param-duplicate-key",
                             key), false, IProblem.NOT_QUICK_FIXABLE);
                     return false;
@@ -457,7 +458,7 @@ public class WebXMLScanner extends AbstractScanner
                     addProblem(
                             IProblem.ERROR,
                             valueLoc,
-                            TapestryCore.getString("web-xml-init-param-null-value"),
+                            CoreMessages.format("web-xml-init-param-null-value"),
                             false,
                             IProblem.NOT_QUICK_FIXABLE);
 
@@ -481,7 +482,7 @@ public class WebXMLScanner extends AbstractScanner
 
         if (newInfo.classname == null)
         {
-            String message = TapestryCore.getString("web-xml-servlet-null-classname", newInfo.name);
+            String message = CoreMessages.format("web-xml-servlet-null-classname", newInfo.name);
             addProblem(
                     IMarker.SEVERITY_WARNING,
                     nodeLocation,
@@ -524,7 +525,7 @@ public class WebXMLScanner extends AbstractScanner
             }
             catch (ScannerException e)
             {
-                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, TapestryCore.getString(
+                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, CoreMessages.format(
                         "web-xml-ignore-invalid-application-path",
                         servletType.getElementName(),
                         path.toString()), false, IProblem.NOT_QUICK_FIXABLE);
@@ -542,7 +543,7 @@ public class WebXMLScanner extends AbstractScanner
             }
             catch (ScannerException e)
             {
-                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, TapestryCore.getString(
+                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, CoreMessages.format(
                         "web-xml-ignore-invalid-application-path",
                         servletType.getElementName(),
                         null), false, IProblem.NOT_QUICK_FIXABLE);
@@ -561,14 +562,14 @@ public class WebXMLScanner extends AbstractScanner
         ISourceLocation bestGuessSourceLocation = getBestGuessSourceLocation(node, true);
         if (newInfo.name == null || "".equals(newInfo.name.trim()))
         {
-            addProblem(IProblem.WARNING, bestGuessSourceLocation, TapestryCore
-                    .getString("web-xml-servlet-has-null-name"), false, IProblem.NOT_QUICK_FIXABLE);
+            addProblem(IProblem.WARNING, bestGuessSourceLocation, CoreMessages
+                    .format("web-xml-servlet-has-null-name"), false, IProblem.NOT_QUICK_FIXABLE);
             return false;
 
         }
         if (fSeenServletNames.contains(newInfo.name))
         {
-            addProblem(IProblem.WARNING, bestGuessSourceLocation, TapestryCore.getString(
+            addProblem(IProblem.WARNING, bestGuessSourceLocation, CoreMessages.format(
                     "web-xml-servlet-duplicate-name",
                     newInfo.name), false, IProblem.NOT_QUICK_FIXABLE);
             return false;
@@ -583,7 +584,7 @@ public class WebXMLScanner extends AbstractScanner
 
         if (fServletNames.contains(newInfo.name))
         {
-            String message = TapestryCore.getString("web-xml-servlet-duplicate-name", newInfo.name);
+            String message = CoreMessages.format("web-xml-servlet-duplicate-name", newInfo.name);
             addProblem(
                     IProblem.WARNING,
                     bestGuessSourceLocation,

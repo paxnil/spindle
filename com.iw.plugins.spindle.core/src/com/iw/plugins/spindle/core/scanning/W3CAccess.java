@@ -28,7 +28,6 @@ package com.iw.plugins.spindle.core.scanning;
 
 import java.util.Map;
 
-import org.apache.tapestry.Tapestry;
 import org.apache.xerces.dom.DocumentImpl;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;

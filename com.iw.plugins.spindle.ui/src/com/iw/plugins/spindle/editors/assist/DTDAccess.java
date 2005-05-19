@@ -39,6 +39,7 @@ import java.util.Vector;
 import org.apache.tapestry.util.MultiKey;
 import org.eclipse.jface.text.IDocument;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.wutka.dtd.DTD;
@@ -391,15 +392,15 @@ public class DTDAccess
       if ("application".equals(elementName))
       {
         if ("engine-class".equals(attrName))
-          result = TapestryCore.getString("TapestryEngine.defaultEngine");
+          result = CoreMessages.format("TapestryEngine.defaultEngine");
       } else if ("component-specification".equals(elementName))
       {
         if ("class".equals(attrName))
-          result = TapestryCore.getString("TapestryComponentSpec.defaultSpec");
+          result = CoreMessages.format("TapestryComponentSpec.defaultSpec");
       } else if ("page-specification".equals(elementName))
       {
         if ("class".equals(attrName))
-          result = TapestryCore.getString("TapestryPageSpec.defaultSpec");
+          result = CoreMessages.format("TapestryPageSpec.defaultSpec");
       }
     }
 

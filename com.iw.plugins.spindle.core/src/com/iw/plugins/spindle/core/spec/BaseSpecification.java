@@ -108,18 +108,18 @@ public abstract class BaseSpecification implements IIdentifiable, Locatable, Loc
 
     public static final int PROPERTY_SPEC = 11;
 
-    /**@deprecated*/
+    /** @deprecated */
     public static final int EXPRESSION_BEAN_INIT = 20;
 
-    /**@deprecated*/
+    /** @deprecated */
     public static final int FIELD_BEAN_INIT = 21;
 
-    /**@deprecated*/
+    /** @deprecated */
     public static final int STATIC_BEAN_INIT = 22;
 
-    /**@deprecated*/
+    /** @deprecated */
     public static final int STRING_BEAN_INIT = 23;
-    
+
     public static final int BINDING_BEAN_INIT = 24;
 
     public static final int PROPERTY_DECLARATION = 50;
@@ -137,6 +137,8 @@ public abstract class BaseSpecification implements IIdentifiable, Locatable, Loc
     public static final int LIBRARY_DECLARATION = 56;
 
     public static final int CONFIGURE_DECLARATION = 57;
+
+    public static final int INJECT = 58;
 
     private String fIdentifier;
 
@@ -172,6 +174,14 @@ public abstract class BaseSpecification implements IIdentifiable, Locatable, Loc
             return null;
 
         return map.get(key);
+    }
+
+    protected List safeList(List list)
+    {
+        if (list == null)
+            return Collections.EMPTY_LIST;
+
+        return Collections.unmodifiableList(list);
     }
 
     /*

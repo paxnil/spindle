@@ -39,10 +39,12 @@ import org.apache.hivemind.Resource;
 import org.apache.tapestry.INamespace;
 import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.Tapestry;
+import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.eclipse.core.runtime.Path;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
@@ -50,6 +52,7 @@ import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
 import com.iw.plugins.spindle.core.namespace.PageSpecificationResolver;
 import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.properties.NamespacePropertySource;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.TapestryResourceLocationAcceptor;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
@@ -100,6 +103,8 @@ public abstract class NamespaceResolver
      * the result Namespace
      */
     protected ICoreNamespace fResultNamespace;
+    
+    protected IPropertySource fResultNamespacePropertySource;
 
     /**
      * the Tapestry framwork Namespace
@@ -166,6 +171,7 @@ public abstract class NamespaceResolver
                     .getStorage(), fNamespaceSpecLocation, null);
             doResolve();
         }
+        fResultNamespacePropertySource = new NamespacePropertySource(fBuild.fProjectPropertySource, fResultNamespace);
         return fResultNamespace;
     }
 
@@ -377,7 +383,6 @@ public abstract class NamespaceResolver
     protected IComponentSpecification resolveComponent(String name,
             IResourceWorkspaceLocation location)
     {
-
         IComponentSpecification result = fResultNamespace.getComponentSpecification(name);
 
         if (result != null || location == null)
@@ -387,7 +392,7 @@ public abstract class NamespaceResolver
 
         if (fComponentStack.contains(location))
         {
-            throw new BuilderException(TapestryCore.getString(
+            throw new BuilderException(CoreMessages.format(
                     "build-failed-circular-component-reference",
                     getCircularErrorMessage(location)));
         }
@@ -457,15 +462,7 @@ public abstract class NamespaceResolver
             Resource specLoc = location.getRelativeResource(spec
                     .getComponentSpecificationPath(type));
             result.put(type, specLoc);
-        }
-        //        for (Iterator iter = spec.getComponentTypes().iterator();
-        // iter.hasNext();)
-        //        {
-        //            String type = (String) iter.next();
-        //            IResourceLocation specLoc =
-        // location.getRelativeLocation(spec.getComponentSpecificationPath(type));
-        //            result.put(type, specLoc);
-        //        }
+        }        
 
         TapestryResourceLocationAcceptor acceptor = new TapestryResourceLocationAcceptor("*",
                 false, TapestryResourceLocationAcceptor.ACCEPT_JWC);
@@ -484,8 +481,8 @@ public abstract class NamespaceResolver
             {
                 if (!jwcs[i].equals(result.get(type)))
                     Markers.recordProblems(jwcs[i], new IProblem[]
-                    { new DefaultProblem(Markers.TAPESTRY_MARKER_TAG, IProblem.ERROR, TapestryCore
-                            .getString("builder-hidden-jwc-file", jwcs[i], result.get(type)), 1, 0,
+                    { new DefaultProblem(Markers.TAPESTRY_MARKER_TAG, IProblem.ERROR, CoreMessages
+                            .format("builder-hidden-jwc-file", jwcs[i], result.get(type)), 1, 0,
                             0, false, IProblem.SPINDLE_BUILDER_HIDDEN_JWC_FILE) });
             }
         }
@@ -530,8 +527,8 @@ public abstract class NamespaceResolver
             {
                 if (!result.get(name).equals(pages[i]))
                     Markers.recordProblems(pages[i], new IProblem[]
-                    { new DefaultProblem(Markers.TAPESTRY_MARKER_TAG, IProblem.ERROR, TapestryCore
-                            .getString("builder-hidden-page-file", pages[i], result.get(name)), 1,
+                    { new DefaultProblem(Markers.TAPESTRY_MARKER_TAG, IProblem.ERROR, CoreMessages
+                            .format("builder-hidden-page-file", pages[i], result.get(name)), 1,
                             0, 0, false, IProblem.SPINDLE_BUILDER_HIDDEN_PAGE_FILE) });
             }
         }
@@ -624,55 +621,6 @@ public abstract class NamespaceResolver
         }
 
     }
-    //TODO remove
-    //    class ProblemCollector implements IProblemCollector
-    //    {
-    //        private List problems = new ArrayList();
-    //
-    //        private void reset()
-    //        {
-    //            problems.clear();
-    //        }
-    //
-    //        public void addProblem(int severity, ISourceLocation location, String
-    // message)
-    //        {
-    //            addProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity, location,
-    // message);
-    //        }
-    //
-    //        private void addProblem(String type, int severity, ISourceLocation
-    // location, String message)
-    //        {
-    //            addProblem(
-    //                new DefaultProblem(
-    //                    type,
-    //                    severity,
-    //                    message,
-    //                    location.getLineNumber(),
-    //                    location.getCharStart(),
-    //                    location.getCharEnd(),
-    //                    false));
-    //        }
-    //
-    //        public void addProblem(IProblem problem)
-    //        {
-    //            problems.add(problem);
-    //        }
-    //
-    //        public IProblem[] getProblems()
-    //        {
-    //            return (IProblem[]) problems.toArray(new IProblem[problems.size()]);
-    //        }
-    //
-    //        public void beginCollecting()
-    //        {
-    //            reset();
-    //        }
-    //
-    //        public void endCollecting()
-    //        {}
-    //
-    //    }
+    
 
 }

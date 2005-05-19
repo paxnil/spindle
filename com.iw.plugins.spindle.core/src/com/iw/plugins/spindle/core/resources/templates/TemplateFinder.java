@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.tapestry.Tapestry;
 import org.apache.tapestry.services.TemplateSource;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -41,15 +40,15 @@ import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.properties.ComponentPropertySource;
 import com.iw.plugins.spindle.core.resources.I18NResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
-import com.iw.plugins.spindle.core.spec.PluginAssetSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
+import com.iw.plugins.spindle.core.util.XMLUtil;
+import com.iw.plugins.spindle.messages.ImplMessages;
 
 /**
  * A utility class used to find all the templates for a component
@@ -118,13 +117,11 @@ public class TemplateFinder
             .getTapestryArtifactManager();
 
     public IResourceWorkspaceLocation[] getTemplates(IComponentSpecification specification,
-            ITapestryProject project, IProblemCollector collector) throws CoreException
+            ITapestryProject project, String templateExtension, IProblemCollector collector)
+            throws CoreException
     {
         fTapestryProject = project;
-        fExtension = ComponentPropertySource.getPropertyValue(
-                specification,
-                fTapestryProject,
-                "org.apache.tapestry.template-extension");
+        fExtension = templateExtension;
         fProblemCollector = collector;
         fFindResults.clear();
         findTemplates((PluginComponentSpecification) specification);
@@ -167,10 +164,12 @@ public class TemplateFinder
     private void readTemplatesFromAsset(PluginComponentSpecification specification,
             IAssetSpecification templateAsset)
     {
-        int type = ((PluginAssetSpecification) templateAsset).getType();
-        String templatePath = templateAsset.getPath();
+        String path = templateAsset.getPath();
         IResourceWorkspaceLocation templateLocation = null;
-        if (type == PicassoMigration.DEFAULT_ASSET)
+        boolean isDTD_4_0 = XMLUtil.getDTDVersion(specification.getPublicId()) == XMLUtil.DTD_4_0;
+
+        int colonx = path.indexOf(':');
+        if (colonx < 0)
         {
             addProblem(
                     IProblem.WARNING,
@@ -179,48 +178,76 @@ public class TemplateFinder
                     IProblem.NOT_QUICK_FIXABLE);
             return;
         }
-        if (type == PicassoMigration.CONTEXT_ASSET)
-        {
-            IResourceWorkspaceLocation contextRoot = fTapestryProject.getWebContextLocation();
-            if (contextRoot != null)
-                templateLocation = (IResourceWorkspaceLocation) contextRoot
-                        .getRelativeResource(templatePath);
 
-            if (templateLocation == null || templateLocation.getStorage() == null)
-            {
-                addProblem(IProblem.ERROR, ((ISourceLocationInfo) templateAsset.getLocation())
-                        .getAttributeSourceLocation("path"), TapestryCore.getTapestryString(
-                        "DefaultTemplateSource.unable-to-read-template",
-                        templatePath), IProblem.NOT_QUICK_FIXABLE);
-                return;
-            }
-        }
-        if (type == PicassoMigration.CLASSPATH_ASSET)
+        int assetType = PicassoMigration.getAssetType(path.substring(0, colonx));
+        String truePath = path.substring(colonx + 1);
+        switch (assetType)
         {
-            try
-            {
-                IResourceWorkspaceLocation contextRoot = fTapestryProject.getClasspathRoot();
+            case PicassoMigration.CONTEXT_ASSET:
+
+                IResourceWorkspaceLocation contextRoot = fTapestryProject.getWebContextLocation();
                 if (contextRoot != null)
                     templateLocation = (IResourceWorkspaceLocation) contextRoot
-                            .getRelativeResource(templatePath);
-            }
-            catch (CoreException e)
-            {
-                TapestryCore.log(e);
-            }
-            if (templateLocation == null || templateLocation.getStorage() == null)
-            {
-                addProblem(IProblem.ERROR, ((ISourceLocationInfo) templateAsset.getLocation())
-                        .getAttributeSourceLocation("resource-path"), TapestryCore
-                        .getTapestryString(
-                                "DefaultTemplateSource.unable-to-read-template",
-                                templatePath), IProblem.NOT_QUICK_FIXABLE);
-                return;
-            }
+                            .getRelativeResource(truePath);
+
+                if (templateLocation == null || templateLocation.getStorage() == null)
+                {
+                    ISourceLocation attributeLocation = getAssetSourceLocation(
+                            (ISourceLocationInfo) templateAsset.getLocation(),
+                            assetType,
+                            isDTD_4_0);
+                    addProblem(IProblem.ERROR, attributeLocation, ImplMessages
+                            .unableToReadTemplate(truePath), IProblem.NOT_QUICK_FIXABLE);
+                    return;
+                }
+                break;
+            case PicassoMigration.CLASSPATH_ASSET:
+
+                try
+                {
+                    IResourceWorkspaceLocation cpRoot = fTapestryProject.getClasspathRoot();
+                    if (cpRoot != null)
+                        templateLocation = (IResourceWorkspaceLocation) cpRoot
+                                .getRelativeResource(truePath);
+                }
+                catch (CoreException e)
+                {
+                    TapestryCore.log(e);
+                }
+                if (templateLocation == null || templateLocation.getStorage() == null)
+                {
+                    ISourceLocation attributeLocation = getAssetSourceLocation(
+                            (ISourceLocationInfo) templateAsset.getLocation(),
+                            assetType,
+                            isDTD_4_0);
+                    addProblem(IProblem.ERROR, attributeLocation, ImplMessages
+                            .unableToReadTemplate(truePath), IProblem.NOT_QUICK_FIXABLE);
+                    return;
+                }
+
         }
         if (templateLocation != null)
             fFindResults.add(templateLocation);
 
+    }
+
+    private ISourceLocation getAssetSourceLocation(ISourceLocationInfo sourceInfo, int assetType,
+            boolean isDTD_4_0)
+    {
+        if (isDTD_4_0)
+            return sourceInfo.getAttributeSourceLocation("path");
+
+        switch (assetType)
+        {
+            case PicassoMigration.CONTEXT_ASSET:
+                return sourceInfo.getAttributeSourceLocation("path");
+
+            case PicassoMigration.CLASSPATH_ASSET:
+                return sourceInfo.getAttributeSourceLocation("resource-path");
+
+            default:
+                return sourceInfo.getAttributeSourceLocation("URL");
+        }
     }
 
     private void findStandardTemplates(PluginComponentSpecification specification)

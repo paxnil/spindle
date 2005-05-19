@@ -63,6 +63,7 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
@@ -412,7 +413,7 @@ public class TemplateEditor extends Editor
             {
                 IEditorInput input = getEditorInput();
                 String contents = getDocumentProvider().getDocument(input).get();
-                String comment = TapestryCore.getString("TAPESTRY.xmlComment");
+                String comment = CoreMessages.format("TAPESTRY.xmlComment");
                 if (!contents.trim().startsWith(comment))
                 {
                     contents = comment + contents;

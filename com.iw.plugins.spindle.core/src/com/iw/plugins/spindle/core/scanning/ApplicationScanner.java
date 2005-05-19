@@ -26,12 +26,12 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
-import org.apache.tapestry.parse.TapestryParseMessages;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
+import com.iw.plugins.spindle.messages.ParseMessages;
 
 /**
  * Scanner that turns a node tree into a IApplicationSpecification
@@ -79,7 +79,7 @@ public class ApplicationScanner extends LibraryScanner
             addProblem(
                     IProblem.ERROR,
                     getBestGuessSourceLocation(fRootNode, false),
-                    TapestryParseMessages.incorrectDocumentType("application", rootName),
+                    ParseMessages.incorrectDocumentType("application", rootName),
                     false,
                     IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_APPLICATION);
             return;

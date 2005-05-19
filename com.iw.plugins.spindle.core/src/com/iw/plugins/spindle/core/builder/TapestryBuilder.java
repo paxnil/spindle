@@ -59,6 +59,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.ui.internal.Workbench;
 import org.osgi.framework.Bundle;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
@@ -147,14 +148,14 @@ public class TapestryBuilder extends IncrementalProjectBuilder
      * @return an array of IResourceWorkspaceLocation - the template locations.
      */
     public static IResourceWorkspaceLocation[] scanForTemplates(
-            IComponentSpecification specification, ITapestryProject project,
+            IComponentSpecification specification, String templateExtension, ITapestryProject project,
             IProblemCollector collector)
     {
         TemplateFinder finder = new TemplateFinder();
-        IResourceWorkspaceLocation[] locations = new IResourceWorkspaceLocation[0];
+        IResourceWorkspaceLocation[] locations = new IResourceWorkspaceLocation[0];        
         try
         {
-            return finder.getTemplates(specification, project, collector);
+            return finder.getTemplates(specification, project, templateExtension, collector);
 
         }
         catch (CoreException e)
@@ -256,9 +257,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         catch (CoreException e)
         {
             ErrorDialog.openError(TapestryCore.getDefault().getWorkbench()
-                    .getActiveWorkbenchWindow().getShell(), TapestryCore
-                    .getString("build-failed-core-title"), TapestryCore
-                    .getString("build-failed-core-message"), e.getStatus());
+                    .getActiveWorkbenchWindow().getShell(), CoreMessages
+                    .format("build-failed-core-title"), CoreMessages
+                    .format("build-failed-core-message"), e.getStatus());
         }
         catch (BrokenWebXMLException e)
         {
@@ -381,8 +382,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         if (TapestryBuilder.DEBUG)
             System.out.println("FULL Tapestry build");
 
-        fNotifier.subTask(TapestryCore
-                .getString(TapestryBuilder.STRING_KEY + "full-build-starting"));
+        fNotifier.subTask(CoreMessages.format(TapestryBuilder.STRING_KEY + "full-build-starting"));
 
         Markers.removeProblemsForProject(fCurrentProject);
 
@@ -409,7 +409,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             if (TapestryBuilder.DEBUG)
                 System.out.println("Incremental Tapestry build");
 
-            fNotifier.subTask(TapestryCore.getString(TapestryBuilder.STRING_KEY
+            fNotifier.subTask(CoreMessages.format(TapestryBuilder.STRING_KEY
                     + "incremental-build-starting"));
             incBuild.build();
         }
@@ -428,7 +428,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     {
 
         if (fJavaProject == null)
-            throw new BuilderException(TapestryCore.getString(STRING_KEY + "non-java-projects"));
+            throw new BuilderException(CoreMessages.format(STRING_KEY + "non-java-projects"));
 
         try
         {
@@ -436,8 +436,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         }
         catch (JavaModelException e3)
         {
-            throw new BuilderException(TapestryCore.getString(STRING_KEY
-                    + "classpath-not-determined"));
+            throw new BuilderException(CoreMessages.format(STRING_KEY + "classpath-not-determined"));
         }
 
         try
@@ -450,8 +449,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                         false,
                         IResource.DEPTH_ZERO);
             if (jprojectMarkers.length > 0)
-                throw new BuilderException(TapestryCore.getString(STRING_KEY
-                        + "java-builder-failed"));
+                throw new BuilderException(CoreMessages.format(STRING_KEY + "java-builder-failed"));
 
         }
         catch (CoreException e)
@@ -465,14 +463,13 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             IPath projectPath = fJavaProject.getPath();
 
             if (projectPath.equals(outputPath))
-                throw new BuilderException(TapestryCore.getString(STRING_KEY
+                throw new BuilderException(CoreMessages.format(STRING_KEY
                         + "abort-invalid-output-location", outputPath.toString()));
 
         }
         catch (JavaModelException e1)
         {
-            throw new BuilderException(TapestryCore.getString(STRING_KEY
-                    + "abort-no-output-location"));
+            throw new BuilderException(CoreMessages.format(STRING_KEY + "abort-no-output-location"));
         }
 
         // make sure all prereq projects have valid build states...
@@ -483,25 +480,24 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             if (getLastState(p) == null)
             {
                 if (DEBUG)
-                    System.out.println(TapestryCore.getString(
-                            STRING_KEY + "abort-prereq-not-built",
-                            p.getName()));
-                throw new BuilderException(TapestryCore.getString(STRING_KEY
+                    System.out.println(CoreMessages.format(STRING_KEY + "abort-prereq-not-built", p
+                            .getName()));
+                throw new BuilderException(CoreMessages.format(STRING_KEY
                         + "abort-prereq-not-built", p.getName()));
             }
         }
 
-        if (getType(TapestryCore.getString(STRING_KEY + "applicationServletClassname")) == null)
-            throw new BuilderException(TapestryCore.getString(STRING_KEY + "tapestry-jar-missing"));
+        if (getType(CoreMessages.format(STRING_KEY + "applicationServletClassname")) == null)
+            throw new BuilderException(CoreMessages.format(STRING_KEY + "tapestry-jar-missing"));
 
         if (fContextRoot == null || !fContextRoot.exists())
-            throw new BuilderException(TapestryCore.getString(STRING_KEY + "missing-context"));
+            throw new BuilderException(CoreMessages.format(STRING_KEY + "missing-context"));
 
         IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fContextRoot
                 .getRelativeResource("WEB-INF/web.xml");
 
         if (webXML.getStorage() == null)
-            throw new BuilderException(TapestryCore.getString(
+            throw new BuilderException(CoreMessages.format(
                     STRING_KEY + "abort-missing-web-xml",
                     webXML.toString()));
 
@@ -528,13 +524,13 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         try
         {
             fTapestryProject = (TapestryProject) fCurrentProject.getNature(TapestryCore.NATURE_ID);
-            fTapestryProject.clearMetadata();
+            fTapestryProject.clearMetadata();           
         }
         catch (CoreException e)
         {
             TapestryCore.log(e);
             throw new BuilderException("could not obtain the Tapestry Project!");
-        }
+        }                   
 
         fContextRoot = fTapestryProject.getWebContextLocation();
         if (fContextRoot == null)

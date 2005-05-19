@@ -43,13 +43,13 @@ import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
 import org.apache.tapestry.binding.BindingConstants;
-import org.apache.tapestry.parse.TapestryParseMessages;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IType;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.Build;
 import com.iw.plugins.spindle.core.builder.IDependencyListener;
@@ -58,6 +58,7 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.messages.ParseMessages;
 
 /**
  * TODO Add Type comment
@@ -368,7 +369,7 @@ public class BaseValidator implements IScannerValidator
                 addProblem(
                         severity,
                         location,
-                        TapestryParseMessages.invalidAttribute(errorKey, value),
+                        ParseMessages.invalidAttribute(errorKey, value),
                         false,
                         code);
                 return false;
@@ -378,7 +379,7 @@ public class BaseValidator implements IScannerValidator
         addProblem(
                 severity,
                 location,
-                TapestryParseMessages.invalidAttribute(errorKey, "null value"),
+                ParseMessages.invalidAttribute(errorKey, "null value"),
                 false,
                 -1);
         return false;
@@ -422,7 +423,7 @@ public class BaseValidator implements IScannerValidator
             addProblem(
                     IProblem.ERROR,
                     source,
-                    TapestryCore.getString(errorKey, relative.toString()),
+                    CoreMessages.format(errorKey, relative.toString()),
                     true,
                     IProblem.SPINDLE_RESOURCE_LOCATION_DOES_NOT_EXIST);
 

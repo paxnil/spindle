@@ -33,7 +33,6 @@ import java.util.Map;
 
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.engine.IPropertySource;
-import org.apache.tapestry.parse.TapestryParseMessages;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.SpecFactory;
 import org.apache.tapestry.util.IPropertyHolder;
@@ -41,6 +40,7 @@ import org.eclipse.core.resources.IStorage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -87,11 +87,11 @@ public abstract class SpecificationScanner extends AbstractScanner
         Document document = (Document) source;
         setPublicId(W3CAccess.getPublicId(document));
         if (fPublicId == null)
-            throw new ScannerException(TapestryCore.getString(XMLUtil.SPEC_DTD_ERROR_KEY), false,
+            throw new ScannerException(CoreMessages.format(XMLUtil.SPEC_DTD_ERROR_KEY), false,
                     IProblem.SPINDLE_MISSING_PUBLIC_ID);
         if (!checkPublicId())
         {
-            throw new ScannerException(TapestryCore.getString(XMLUtil.SPEC_DTD_ERROR_KEY), false,
+            throw new ScannerException(CoreMessages.format(XMLUtil.SPEC_DTD_ERROR_KEY), false,
                     IProblem.SPINDLE_INVALID_PUBLIC_ID);
         }
         fRootNode = document.getDocumentElement();

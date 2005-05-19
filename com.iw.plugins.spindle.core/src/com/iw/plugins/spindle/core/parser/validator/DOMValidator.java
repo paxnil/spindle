@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.xml.TapestryEntityResolver;
@@ -97,7 +98,7 @@ public class DOMValidator implements IProblemCollector
 
             resourceIdentifier = new XMLResourceIdentifierImpl(publicId, null, null, null);
 
-            String errorMessage = TapestryCore.getString("dom-validator-error-no-DTD", publicId);
+            String errorMessage = CoreMessages.format("dom-validator-error-no-DTD", publicId);
 
             XMLInputSource source = TapestryEntityResolver.doResolveEntity(resourceIdentifier);
             if (source == null)
@@ -138,7 +139,7 @@ public class DOMValidator implements IProblemCollector
         catch (IOException e)
         {
             e.printStackTrace();
-            throw new Error(TapestryCore.getString("dom-validator-error-no-DTD-parse", e
+            throw new Error(CoreMessages.format("dom-validator-error-no-DTD-parse", e
                     .getMessage()));
         }
     }
@@ -189,8 +190,8 @@ public class DOMValidator implements IProblemCollector
                 for (Iterator iterator = nodeList.iterator(); iterator.hasNext();)
                 {
                     Node node = (Node) iterator.next();
-                    recordAttributeError(node, "id", TapestryCore
-                            .getString("dom-validator-id-attribute-must-be-unique"));
+                    recordAttributeError(node, "id", CoreMessages
+                            .format("dom-validator-id-attribute-must-be-unique"));
                 }
             }
         }
@@ -221,7 +222,7 @@ public class DOMValidator implements IProblemCollector
 
         if (fDTD == null)
         {
-            reportDocumentError(TapestryCore.getString(
+            reportDocumentError(CoreMessages.format(
                     "dom-validator-error-no-doctype",
                     publicId != null ? publicId : "found null"));
             return false;
@@ -247,7 +248,7 @@ public class DOMValidator implements IProblemCollector
     {
         fIsRunning = false;
         if (!fSeenRootElement)
-            reportDocumentError(TapestryCore.getString("dom-validator-error-no-root"));
+            reportDocumentError(CoreMessages.format("dom-validator-error-no-root"));
 
     }
 
@@ -311,14 +312,14 @@ public class DOMValidator implements IProblemCollector
         {
             if (!W3CAccess.isElement(node))
             {
-                reportDocumentError(TapestryCore.getString("dom-validator-error-invalid-root"));
+                reportDocumentError(CoreMessages.format("dom-validator-error-invalid-root"));
                 return false;
             }
 
             fSeenRootElement = true;
             fIsRunning = name.equals(fRootElementName);
             if (!fIsRunning)
-                recordTagNameProblem(name, node, TapestryCore.getString(
+                recordTagNameProblem(name, node, CoreMessages.format(
                         "dom-validator-error-wrong-root-element",
                         fRootElementName,
                         name));
@@ -330,7 +331,7 @@ public class DOMValidator implements IProblemCollector
 
         if (!W3CAccess.isTextNode(node) && !DTDAccess.isDeclaredElement(fDTD, name))
         {
-            recordTagNameProblem(name, node, TapestryCore.getString(
+            recordTagNameProblem(name, node, CoreMessages.format(
                     "dom-validator-undeclared-element",
                     name));
             fNodeInfoMap.put(node, IGNORE);
@@ -393,7 +394,7 @@ public class DOMValidator implements IProblemCollector
                 {
                     if (!((DTDEnumeration) declaredAttribute.type).getItemsVec().contains(value))
                     {
-                        recordAttributeError(node, declaredAttrName, TapestryCore.getString(
+                        recordAttributeError(node, declaredAttrName, CoreMessages.format(
                                 "dom-validator-invalid-attr-value",
                                 declaredAttrName,
                                 declaredAttribute.type.toString()));
@@ -411,7 +412,7 @@ public class DOMValidator implements IProblemCollector
             }
             else if (declaredAttribute.decl == DTDDecl.REQUIRED)
             {
-                recordErrorOnTagName(node, TapestryCore.getString(
+                recordErrorOnTagName(node, CoreMessages.format(
                         "dom-validator-missing-attr",
                         declaredAttrName,
                         nodeName));
@@ -422,7 +423,7 @@ public class DOMValidator implements IProblemCollector
             for (Iterator iter = sourceAttributeNames.iterator(); iter.hasNext();)
             {
                 String undeclaredName = (String) iter.next();
-                recordAttributeError(node, undeclaredName, TapestryCore.getString(
+                recordAttributeError(node, undeclaredName, CoreMessages.format(
                         "dom-validator-undeclared-atttribute",
                         undeclaredName,
                         nodeName));
@@ -606,14 +607,14 @@ public class DOMValidator implements IProblemCollector
             {
                 if (allowsText)
                     return;
-                throw new ValidatorException(TapestryCore.getString(
+                throw new ValidatorException(CoreMessages.format(
                         "dom-validator-text-not-allowed",
                         elementName));
             }
             String childName = node.getNodeName();
             if (workingContent == null)
             {
-                throw new ValidatorException(TapestryCore.getString(
+                throw new ValidatorException(CoreMessages.format(
                         "dom-validator-child-not-allowed",
                         childName,
                         elementName));
@@ -638,7 +639,7 @@ public class DOMValidator implements IProblemCollector
                     }
                     else
                     {
-                        throw new ValidatorException(TapestryCore.getString(
+                        throw new ValidatorException(CoreMessages.format(
                                 "dom-validator-element-not-allowed",
                                 childName,
                                 getAllowedContent()));
@@ -661,7 +662,7 @@ public class DOMValidator implements IProblemCollector
         private boolean checkContainer(String childName, List items) throws ValidatorException
         {
             if (items.isEmpty())
-                throw new ValidatorException(TapestryCore.getString(
+                throw new ValidatorException(CoreMessages.format(
                         "dom-validator-child-not-allowed",
                         childName,
                         elementName));
@@ -681,7 +682,7 @@ public class DOMValidator implements IProblemCollector
                 if (cardinal == DTDCardinal.ONEMANY)
                 {
 
-                    throw new ValidatorException(TapestryCore.getString(
+                    throw new ValidatorException(CoreMessages.format(
                             "dom-validator-element-not-allowed",
                             childName,
                             item.toString()));
@@ -710,14 +711,14 @@ public class DOMValidator implements IProblemCollector
                         }
                         else if (cardinal == DTDCardinal.NONE || cardinal == DTDCardinal.ONEMANY)
                         {
-                            throw new ValidatorException(TapestryCore.getString(
+                            throw new ValidatorException(CoreMessages.format(
                                     "dom-validator-element-not-allowed",
                                     childName,
                                     item.toString()));
                         }
                     }
                     if (!found)
-                        throw new ValidatorException(TapestryCore.getString(
+                        throw new ValidatorException(CoreMessages.format(
                                 "dom-validator-element-not-allowed",
                                 childName,
                                 getAllowedContent()));
