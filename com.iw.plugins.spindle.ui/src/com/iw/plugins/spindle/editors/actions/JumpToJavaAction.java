@@ -156,6 +156,11 @@ public class JumpToJavaAction extends BaseJumpAction
 
                                 ITapestryProject tproject = (ITapestryProject) storage
                                         .getAdapter(ITapestryProject.class);
+                                
+                                if (tproject == null) {
+                                    UIPlugin.log("bug [ 1200049 ] NullPointerException[JumpToJava]");
+                                    return null;
+                                }
 
                                 IResourceWorkspaceLocation specLocation;
                                 if (storage instanceof IFile)
