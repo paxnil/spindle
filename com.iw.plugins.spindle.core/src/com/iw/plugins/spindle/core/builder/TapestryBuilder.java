@@ -56,7 +56,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.ui.internal.Workbench;
+import org.eclipse.ui.IWorkbench;
 import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -214,7 +214,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         TYPE_CACHE.set(new HashMap());
         STORAGE_CACHE.set(new HashMap());
 
-        Workbench workbench = (Workbench) TapestryCore.getDefault().getWorkbench();
+        IWorkbench workbench = (IWorkbench) TapestryCore.getDefault().getWorkbench();
         if (workbench.isClosing())
             return getRequiredProjects(true);
         fCurrentProject = getProject();
