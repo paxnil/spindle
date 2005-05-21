@@ -37,7 +37,6 @@ import java.util.Stack;
 
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.INamespace;
-import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.Tapestry;
 import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -46,7 +45,6 @@ import org.eclipse.core.runtime.Path;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.PicassoMigration;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
@@ -91,20 +89,22 @@ public abstract class NamespaceResolver
     protected Parser fParser;
 
     /**
-     * collector for any problems not handled by the Build
+     * collector for any problems not handled by the AbstractBuild
      */
     //    private ProblemCollector fProblemCollector = new ProblemCollector();
     /**
      * the instance of IBuild that instantiated the first Resolver
      */
-    protected Build fBuild;
+    protected AbstractBuild fBuild;
 
     /**
      * the result Namespace
      */
     protected ICoreNamespace fResultNamespace;
-    
+
     protected IPropertySource fResultNamespacePropertySource;
+
+    protected String fResultNamespaceTemplateExtension;
 
     /**
      * the Tapestry framwork Namespace
@@ -141,7 +141,7 @@ public abstract class NamespaceResolver
      * flag to indicate that this resolver is resolving the Tapestry Framework Namespace
      */
 
-    public NamespaceResolver(Build build, Parser parser)
+    public NamespaceResolver(AbstractBuild build, Parser parser)
     {
         super();
         fBuild = build;
@@ -171,7 +171,10 @@ public abstract class NamespaceResolver
                     .getStorage(), fNamespaceSpecLocation, null);
             doResolve();
         }
-        fResultNamespacePropertySource = new NamespacePropertySource(fBuild.fProjectPropertySource, fResultNamespace);
+        fResultNamespacePropertySource = new NamespacePropertySource(fBuild.fProjectPropertySource,
+                fResultNamespace);
+        fResultNamespaceTemplateExtension = fResultNamespacePropertySource
+                .getPropertyValue("org.apache.tapestry.template-extension");
         return fResultNamespace;
     }
 
@@ -375,7 +378,7 @@ public abstract class NamespaceResolver
     }
 
     /**
-     * resolve a single component as this method is called recursively, we keep a stack recording
+     * resolve a single component. As this method is called recursively, we keep a stack recording
      * the components being resolved. If we are asked to resolve a component that is already on the
      * stack, we throw a runtime exception as this is an indication that there is a circular
      * dependancy between components.
@@ -400,7 +403,7 @@ public abstract class NamespaceResolver
         fComponentStack.push(location);
 
         result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location
-                .getStorage(), location, null);
+                .getStorage(), location, fResultNamespaceTemplateExtension, null);
 
         if (result != null)
         {
@@ -462,7 +465,7 @@ public abstract class NamespaceResolver
             Resource specLoc = location.getRelativeResource(spec
                     .getComponentSpecificationPath(type));
             result.put(type, specLoc);
-        }        
+        }
 
         TapestryResourceLocationAcceptor acceptor = new TapestryResourceLocationAcceptor("*",
                 false, TapestryResourceLocationAcceptor.ACCEPT_JWC);
@@ -482,8 +485,8 @@ public abstract class NamespaceResolver
                 if (!jwcs[i].equals(result.get(type)))
                     Markers.recordProblems(jwcs[i], new IProblem[]
                     { new DefaultProblem(Markers.TAPESTRY_MARKER_TAG, IProblem.ERROR, CoreMessages
-                            .format("builder-hidden-jwc-file", jwcs[i], result.get(type)), 1, 0,
-                            0, false, IProblem.SPINDLE_BUILDER_HIDDEN_JWC_FILE) });
+                            .format("builder-hidden-jwc-file", jwcs[i], result.get(type)), 1, 0, 0,
+                            false, IProblem.SPINDLE_BUILDER_HIDDEN_JWC_FILE) });
             }
         }
         return result;
@@ -505,8 +508,7 @@ public abstract class NamespaceResolver
         for (Iterator iter = spec.getPageNames().iterator(); iter.hasNext();)
         {
             String type = (String) iter.next();
-            Resource specLoc = location.getRelativeResource(spec
-                    .getPageSpecificationPath(type));
+            Resource specLoc = location.getRelativeResource(spec.getPageSpecificationPath(type));
             result.put(type, specLoc);
         }
 
@@ -528,8 +530,8 @@ public abstract class NamespaceResolver
                 if (!result.get(name).equals(pages[i]))
                     Markers.recordProblems(pages[i], new IProblem[]
                     { new DefaultProblem(Markers.TAPESTRY_MARKER_TAG, IProblem.ERROR, CoreMessages
-                            .format("builder-hidden-page-file", pages[i], result.get(name)), 1,
-                            0, 0, false, IProblem.SPINDLE_BUILDER_HIDDEN_PAGE_FILE) });
+                            .format("builder-hidden-page-file", pages[i], result.get(name)), 1, 0,
+                            0, false, IProblem.SPINDLE_BUILDER_HIDDEN_PAGE_FILE) });
             }
         }
         return result;
@@ -579,7 +581,8 @@ public abstract class NamespaceResolver
         result = null;
 
         result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location
-                .getStorage(), location, null);
+                .getStorage(), location, fResultNamespaceTemplateExtension, null);
+        
         if (result != null)
         {
             fResultNamespace.installPageSpecification(name, result);
@@ -621,6 +624,5 @@ public abstract class NamespaceResolver
         }
 
     }
-    
 
 }

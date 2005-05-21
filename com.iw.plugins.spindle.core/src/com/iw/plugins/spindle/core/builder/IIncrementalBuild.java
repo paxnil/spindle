@@ -37,7 +37,7 @@ public interface IIncrementalBuild extends IBuild
   /**
    * A question asked of Incremental Builds by the TapestryBuilder.
    * <p>
-   * Answering false prompts a Full Build
+   * Answering false prompts a Full AbstractBuild
    * 
    * @return true if an incremental build is indicated, false otherwise.
    */

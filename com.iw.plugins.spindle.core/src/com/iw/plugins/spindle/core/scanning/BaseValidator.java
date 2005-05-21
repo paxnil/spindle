@@ -51,13 +51,14 @@ import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.Build;
+import com.iw.plugins.spindle.core.builder.AbstractBuild;
 import com.iw.plugins.spindle.core.builder.IDependencyListener;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 import com.iw.plugins.spindle.messages.ParseMessages;
 
 /**
@@ -187,7 +188,7 @@ public class BaseValidator implements IScannerValidator
             // eventually
         }
 
-        IDependencyListener depListener = Build.getDependencyListener();
+        IDependencyListener depListener = AbstractBuild.getDependencyListener();
         if (depListener != null && fullyQualifiedName != null
                 && fullyQualifiedName.trim().length() > 0)
             depListener.foundTypeDependency(dependant, fullyQualifiedName);
@@ -457,7 +458,7 @@ public class BaseValidator implements IScannerValidator
 
         if (fullyQualifiedType == null)
         {
-            addProblem(severity, location, TapestryCore.getTapestryString(
+            addProblem(severity, location, DefaultTapestryMessages.format(
                     "unable-to-resolve-class",
                     "null value"), true, -1);
             return null;
@@ -466,7 +467,7 @@ public class BaseValidator implements IScannerValidator
         IType type = findType(dependant, fullyQualifiedType);
         if (type == null)
         {
-            addProblem(severity, location, TapestryCore.getTapestryString(
+            addProblem(severity, location, DefaultTapestryMessages.format(
                     "unable-to-resolve-class",
                     fullyQualifiedType), true, IProblem.SPINDLE_MISSING_TYPE);
             return null;

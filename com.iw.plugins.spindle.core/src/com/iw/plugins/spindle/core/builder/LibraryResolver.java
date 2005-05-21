@@ -47,7 +47,7 @@ public class LibraryResolver extends NamespaceResolver
    * @param build
    * @param parser
    */
-  public LibraryResolver(Build build, Parser parser, ICoreNamespace framework,
+  public LibraryResolver(AbstractBuild build, Parser parser, ICoreNamespace framework,
       ICoreNamespace parent, String libraryId, IResourceWorkspaceLocation location)
   {
     super(build, parser);

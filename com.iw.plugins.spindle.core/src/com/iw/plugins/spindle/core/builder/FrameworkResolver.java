@@ -44,7 +44,7 @@ public class FrameworkResolver extends NamespaceResolver
    * @param build
    * @param parser
    */
-  public FrameworkResolver(Build build, Parser parser, IResourceWorkspaceLocation location)
+  public FrameworkResolver(AbstractBuild build, Parser parser, IResourceWorkspaceLocation location)
   {
     super(build, parser);
     fFrameworkLocation = location;

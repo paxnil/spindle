@@ -44,6 +44,9 @@
       <library name="lib/tapestry/ext-package/lib/oro-2.0.8.jar">
          <export name="*"/>
       </library>
+      <library name="lib/tapestry/tapestry-4.0-alpha-3.jar">
+         <export name="*"/>
+      </library>
    </runtime>
    <requires>
       <import plugin="org.eclipse.ui.ide" export="true"/>

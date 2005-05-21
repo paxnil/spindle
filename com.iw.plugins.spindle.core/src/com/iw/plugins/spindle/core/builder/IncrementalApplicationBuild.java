@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hivemind.Resource;
-import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -23,7 +22,6 @@ import org.eclipse.jdt.core.JavaCore;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.extensions.IncrementalBuildVetoController;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.CoreUtils;

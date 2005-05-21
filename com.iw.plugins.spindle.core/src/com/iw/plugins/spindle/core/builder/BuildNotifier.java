@@ -31,7 +31,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 /**
- * Notifies users of the progress of a Build
+ * Notifies users of the progress of a AbstractBuild
  * 
  * 
  * @author glongman@gmail.com

@@ -20,8 +20,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServlet;
-
 import org.apache.hivemind.HiveMind;
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.IComponent;
@@ -45,10 +43,10 @@ public class ImplMessages
         return _formatter.getMessage("initializer-contribution");
     }
 
-    public static String noApplicationSpecification(HttpServlet servlet)
-    {
-        return _formatter.format("no-application-specification", servlet.getServletName());
-    }
+//    public static String noApplicationSpecification(HttpServlet servlet)
+//    {
+//        return _formatter.format("no-application-specification", servlet.getServletName());
+//    }
 
     public static String errorInstantiatingEngine(Class engineClass, Throwable cause)
     {

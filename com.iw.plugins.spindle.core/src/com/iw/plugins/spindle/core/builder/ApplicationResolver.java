@@ -87,7 +87,7 @@ public class ApplicationResolver extends NamespaceResolver
      * @param build
      * @param parser
      */
-    public ApplicationResolver(Build build, Parser parser, ICoreNamespace framework,
+    public ApplicationResolver(AbstractBuild build, Parser parser, ICoreNamespace framework,
             ServletInfo servlet)
     {
         super(build, parser);
@@ -319,7 +319,7 @@ public class ApplicationResolver extends NamespaceResolver
                 fBuild.fTapestryBuilder.fTapestryProject,
                 null);
         specification.setTemplateLocations(templateLocs);
-
+        
         List templates = specification.getTemplateLocations();
 
         String name = location.getName();

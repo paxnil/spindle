@@ -18,7 +18,7 @@ public class CoreMessages
 
     public static String format(String key)
     {
-        return format(key, null);
+        return format(key, new Object [] {});
     }
 
     public static String format(String key, Object arg)

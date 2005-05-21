@@ -58,7 +58,7 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.Markers;
 
 /**
- * New Incremental Build - this one revalidates specs if thier underlying resource has not changed.
+ * New Incremental AbstractBuild - this one revalidates specs if thier underlying resource has not changed.
  * Note: templates are not revalidated, they are parsed as per a regular build.
  * 
  * @author glongman@gmail.com
@@ -75,7 +75,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.Build#resolveApplication(com.iw.plugins.spindle.core.parser.Parser,
+     * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveApplication(com.iw.plugins.spindle.core.parser.Parser,
      *      org.eclipse.core.resources.IStorage, org.apache.hivemind.Resource, java.lang.String)
      */
     protected IApplicationSpecification resolveAppflication(Parser parser, IStorage storage,
@@ -156,7 +156,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.Build#resolveLibrarySpecification(com.iw.plugins.spindle.core.parser.Parser,
+     * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveLibrarySpecification(com.iw.plugins.spindle.core.parser.Parser,
      *      org.eclipse.core.resources.IStorage, org.apache.hivemind.Resource, java.lang.String)
      */
     protected ILibrarySpecification resolveLibrarySpecification(Parser parser, IStorage storage,
@@ -235,7 +235,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.Build#resolveIComponentSpecification(com.iw.plugins.spindle.core.parser.Parser,
+     * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveIComponentSpecification(com.iw.plugins.spindle.core.parser.Parser,
      *      com.iw.plugins.spindle.core.namespace.ICoreNamespace,
      *      org.eclipse.core.resources.IStorage,
      *      com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation, java.lang.String)
@@ -347,11 +347,10 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.Build#parseTemplates(com.iw.plugins.spindle.core.spec.PluginComponentSpecification)
+     * @see com.iw.plugins.spindle.core.builder.AbstractBuild#parseTemplates(com.iw.plugins.spindle.core.spec.PluginComponentSpecification)
      */
     protected void parseTemplates(PluginComponentSpecification spec)
-    {
-
+    {        
         List locs = spec.getTemplateLocations();
         int count = locs.size();
 
@@ -494,7 +493,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.builder.Build#recordBuildMiss(int,
+     * @see com.iw.plugins.spindle.core.builder.AbstractBuild#recordBuildMiss(int,
      *      org.eclipse.core.resources.IResource)
      */
     protected void recordBuildMiss(int missPriority, IResource resource)

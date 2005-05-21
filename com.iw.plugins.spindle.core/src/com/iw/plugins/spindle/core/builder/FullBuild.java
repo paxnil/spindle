@@ -50,7 +50,7 @@ import com.iw.plugins.spindle.core.util.Markers;
  * 
  * @author glongman@gmail.com
  */
-public class FullBuild extends Build
+public class FullBuild extends AbstractBuild
 {
 
   protected ServletInfo fApplicationServlet;
@@ -193,7 +193,7 @@ public class FullBuild extends Build
         servletParser = null;
       }
       if (wxmlElement == null)
-        throw new BrokenWebXMLException("Tapestry Build failed: could not parse web.xml. ");
+        throw new BrokenWebXMLException("Tapestry AbstractBuild failed: could not parse web.xml. ");
 
       WebAppDescriptor descriptor = null;
       try

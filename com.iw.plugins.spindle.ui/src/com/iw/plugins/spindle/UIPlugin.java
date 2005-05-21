@@ -69,7 +69,6 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
@@ -339,7 +338,7 @@ public class UIPlugin extends AbstractUIPlugin
   public UIPlugin()
   {
     plugin = this;
-    setupRevealer();
+  //  setupRevealer();
   }
 
   private void setupRevealer()
