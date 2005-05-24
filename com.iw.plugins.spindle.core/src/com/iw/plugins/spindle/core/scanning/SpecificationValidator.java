@@ -28,7 +28,6 @@ package com.iw.plugins.spindle.core.scanning;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,6 @@ import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
-import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.IJavaType;

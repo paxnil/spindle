@@ -47,8 +47,8 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.XMLUtil;
+import com.iw.plugins.spindle.core.util.eclipse.EclipseUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 
@@ -72,7 +72,7 @@ public class FrameworkComponentValidator
             Object sourceInfo, String publicId)
     {
 
-        IResource putProblemsResource = CoreUtils.toResource(putErrorsHere);
+        IResource putProblemsResource = EclipseUtils.toResource(putErrorsHere);
         if (putProblemsResource == null)
             return;
 
@@ -83,7 +83,7 @@ public class FrameworkComponentValidator
         {
             if ("PageLink".equals(frameworkComponentName))
             {
-                TapestryBuilder.fDeferredActions.add(new PageLinkComponentValidation(
+                AbstractBuildInfrastructure.fDeferredActions.add(new PageLinkComponentValidation(
                         putProblemsResource, (ICoreNamespace) requestorNamespace, contained,
                         sourceInfo, publicId));
 
@@ -108,7 +108,7 @@ public class FrameworkComponentValidator
                 // tapestryGeneratedSpec.getSpecificationLocation();
                 //                }
 
-                TapestryBuilder.fDeferredActions.add(new ScriptComponentValidation(putErrorsHere,
+                AbstractBuildInfrastructure.fDeferredActions.add(new ScriptComponentValidation(putErrorsHere,
                         putProblemsResource, (ICoreNamespace) requestorNamespace, contained,
                         sourceInfo, publicId));
             }
@@ -135,7 +135,7 @@ public class FrameworkComponentValidator
         else
         {
 
-            IResource putProblemsResource = CoreUtils.toResource(putErrorsHere);
+            IResource putProblemsResource = EclipseUtils.toResource(putErrorsHere);
             if (putProblemsResource == null)
                 return;
 
@@ -165,7 +165,7 @@ public class FrameworkComponentValidator
                     // tapestryGeneratedSpec.getSpecificationLocation();
                     //                    }
 
-                    TapestryBuilder.fDeferredActions.add(new ScriptComponentValidation(
+                    AbstractBuildInfrastructure.fDeferredActions.add(new ScriptComponentValidation(
                             specificationLocation, putProblemsResource,
                             (ICoreNamespace) requestorNamespace, contained, sourceInfo, publicId));
                 }

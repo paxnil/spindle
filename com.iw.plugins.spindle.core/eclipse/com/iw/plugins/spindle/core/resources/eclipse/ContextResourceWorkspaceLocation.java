@@ -40,7 +40,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.TapestryBuilder;
+import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
 import com.iw.plugins.spindle.core.resources.AbstractResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -175,7 +175,7 @@ public class ContextResourceWorkspaceLocation extends AbstractResourceWorkspaceL
     public IStorage getStorage()
     {
         //if we are in a build, the storages get cached for speed.
-        Map cache = TapestryBuilder.getStorageCache();
+        Map cache = EclipseBuildInfrastructure.getStorageCache();
 
         if (cache != null && cache.containsKey(this))
             return (IStorage) cache.get(this);

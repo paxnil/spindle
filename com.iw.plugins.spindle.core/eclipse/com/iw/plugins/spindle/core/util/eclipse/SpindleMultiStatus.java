@@ -24,14 +24,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-package com.iw.plugins.spindle.core.util;
+package com.iw.plugins.spindle.core.util.eclipse;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 
-import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 
 /**
  * @author gwl

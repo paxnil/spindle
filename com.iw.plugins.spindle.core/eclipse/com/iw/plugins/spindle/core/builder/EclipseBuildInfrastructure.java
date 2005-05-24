@@ -30,7 +30,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,8 +39,8 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,11 +49,11 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.ui.internal.Workbench;
 import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.CoreMessages;
@@ -63,17 +62,18 @@ import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
+import com.iw.plugins.spindle.core.resources.search.ISearch;
+import com.iw.plugins.spindle.core.resources.search.eclipse.AbstractEclipseSearchAcceptor;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.util.IProblemPeristManager;
-import com.iw.plugins.spindle.core.util.eclipse.EclipseMarkers;
+import com.iw.plugins.spindle.core.util.eclipse.Markers;
 
 /**
  * The Tapestry Builder, kicks off full and incremental builds.
  * 
  * @author glongman@gmail.com
  */
-public class TapestryBuilder extends IncrementalProjectBuilder 
+public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 {
 
     private final Bundle systemBundle = Platform.getBundle("org.eclipse.osgi");
@@ -101,31 +101,6 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         return (Map) STORAGE_CACHE.get();
     }
 
-    public static final String STRING_KEY = "builder-";
-
-    public static final String APPLICATION_EXTENSION = "application";
-
-    public static final String COMPONENT_EXTENSION = "jwc";
-
-    public static final String PAGE_EXTENSION = "page";
-
-    public static final String TEMPLATE_EXTENSION = "html";
-
-    public static final String SCRIPT_EXTENSION = "script";
-
-    public static final String LIBRARY_EXTENSION = "library";
-
-    public static final String[] KnownExtensions = new String[]
-    { APPLICATION_EXTENSION, COMPONENT_EXTENSION, PAGE_EXTENSION, TEMPLATE_EXTENSION,
-    // SCRIPT_EXTENSION,
-            LIBRARY_EXTENSION };
-
-    public static final String APP_SPEC_PATH_PARAM = "org.apache.tapestry.application-specification";
-
-    public static final String ENGINE_CLASS_PARAM = "org.apache.tapestry.engine-class";
-
-    public static boolean DEBUG = true;
-
     // TODO this is really ugly, but I need this fast.
     public static List fDeferredActions = new ArrayList();
 
@@ -143,71 +118,43 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
     IJavaProject fJavaProject;
 
-    TapestryProject fTapestryProject;
-
     IWorkspaceRoot fWorkspaceRoot;
 
-    ContextRootLocation fContextRoot;
-
-    ClasspathRootLocation fClasspathRoot;
-
-    IProblemPeristManager fProblemPersister;
-
-    int fProjectType;
-
-    boolean fValidateWebXML;
-
-    private IBuild fBuild;
-
-    BuildNotifier fNotifier;
-
     IClasspathEntry[] fClasspath;
+
+    IResourceDelta fDelta;
 
     /**
      * Constructor for TapestryBuilder.
      */
-    public TapestryBuilder()
+    public EclipseBuildInfrastructure(IProject project, IProgressMonitor monitor,
+            IResourceDelta delta)
     {
         super();
+        fCurrentProject = project;
+        fNotifier = new BuildNotifier(monitor, fCurrentProject);
     }
 
-    /**
-     * @see org.eclipse.core.internal.events.InternalBuilder#build(int, Map, IProgressMonitor)
-     */
-    protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException
+    public void build(boolean requestIncremental, Map args)
     {
+        fProblemPersister = new Markers();
 
-        if (systemBundle.getState() == Bundle.STOPPING)
-            throw new OperationCanceledException();
-
-        fProblemPersister = new EclipseMarkers();
+        fNotifier.begin();
 
         PACKAGE_CACHE.set(new HashMap());
         TYPE_CACHE.set(new HashMap());
         STORAGE_CACHE.set(new HashMap());
 
-        Workbench workbench = (Workbench) TapestryCore.getDefault().getWorkbench();
-        if (workbench.isClosing())
-            return getRequiredProjects(true);
-        fCurrentProject = getProject();
-        if (fCurrentProject == null || !fCurrentProject.isAccessible())
-            return new IProject[0];
-
-        long start = System.currentTimeMillis();
-        if (DEBUG)
-            System.out.println("\nStarting build of " + fCurrentProject.getName() + " @ "
-                    + new Date(System.currentTimeMillis()));
-        this.fNotifier = new BuildNotifier(monitor, fCurrentProject);
-        fNotifier.begin();
         boolean ok = false;
+
         try
         {
             fNotifier.checkCancel();
-            initializeBuilder();
-
+            initialize();
             if (isWorthBuilding())
             {
-                if (kind == FULL_BUILD)
+
+                if (!requestIncremental)
                 {
                     buildAll();
                 }
@@ -248,10 +195,6 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             TapestryCore.log(e);
             throw e;
         }
-        catch (OperationCanceledException e)
-        {
-            throw e;
-        }
         catch (RuntimeException e)
         {
             TapestryCore.log(e);
@@ -264,35 +207,15 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             STORAGE_CACHE.set(null);
             if (!ok)
                 // If the build failed, clear the previously built state,
-                // forcing a full
-                // build next time.
+                // forcing a full build next time.
                 clearLastState();
             fNotifier.done();
             fDeferredActions.clear();
-            cleanup();
             TapestryCore.getDefault().buildOccurred();
         }
-        IProject[] requiredProjects = getRequiredProjects(true);
-        long stop = System.currentTimeMillis();
-        if (DEBUG)
-            System.out.println("Finished build of " + fCurrentProject.getName() + " @ "
-                    + new Date(stop));
-        System.out.println("elapsed (ms) = " + (stop - start));
-        return requiredProjects;
     }
 
-    /**
-     * Method cleanup.
-     */
-    private void cleanup()
-    {
-        if (fBuild != null)
-            fBuild.cleanUp();
-
-        fClasspath = null;
-    }
-
-    private IProject[] getRequiredProjects(boolean includeBinaryPrerequisites)
+    public IProject[] getRequiredProjects(boolean includeBinaryPrerequisites)
     {
         if (fJavaProject == null || fWorkspaceRoot == null)
             return new IProject[0];
@@ -330,11 +253,41 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         return result;
     }
 
-    State getLastState(IProject project)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.builder.AbstractBuildInfrastructure#getClasspathMemento()
+     */
+    Object getClasspathMemento()
+    {
+        return fClasspath;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.builder.AbstractBuildInfrastructure#copyClasspathMemento()
+     */
+    Object copyClasspathMemento(Object memento)
+    {
+        IClasspathEntry[] source = (IClasspathEntry[]) memento;
+        IClasspathEntry[] result = new IClasspathEntry[source.length];
+        System.arraycopy(source, 0, result, 0, source.length);
+        return result;
+    }
+
+    State getLastState()
     {
         return (State) TapestryArtifactManager.getTapestryArtifactManager().getLastBuildState(
                 fCurrentProject,
                 false);
+    }
+
+    void persistState(State state)
+    {
+        TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
+                fCurrentProject,
+                state);
     }
 
     /**
@@ -352,10 +305,11 @@ public class TapestryBuilder extends IncrementalProjectBuilder
      */
     private void buildAll() throws BuilderException, CoreException
     {
-        if (TapestryBuilder.DEBUG)
+        if (AbstractBuildInfrastructure.DEBUG)
             System.out.println("FULL Tapestry build");
 
-        fNotifier.subTask(CoreMessages.format(TapestryBuilder.STRING_KEY + "full-build-starting"));
+        fNotifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
+                + "full-build-starting"));
 
         fProblemPersister.removeProblems(fTapestryProject);
 
@@ -368,10 +322,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     private void buildIncremental() throws BuilderException, CoreException
     {
 
-        IIncrementalBuild incBuild = null;
-        IResourceDelta delta = getDelta(fTapestryProject.getProject());
-
-        incBuild = new IncrementalProjectBuild(this, delta);
+        IIncrementalBuild incBuild = new IncrementalEclipseProjectBuild(this, fDelta);
 
         if (incBuild.canIncrementalBuild())
         {
@@ -379,11 +330,10 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 return;
 
             fBuild = incBuild;
-            if (TapestryBuilder.DEBUG)
+            if (DEBUG)
                 System.out.println("Incremental Tapestry build");
 
-            fNotifier.subTask(CoreMessages.format(TapestryBuilder.STRING_KEY
-                    + "incremental-build-starting"));
+            fNotifier.subTask(CoreMessages.format(STRING_KEY + "incremental-build-starting"));
             incBuild.build();
         }
         else
@@ -450,7 +400,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         next: for (int i = 0, length = requiredProjects.length; i < length; i++)
         {
             IProject p = requiredProjects[i];
-            if (getLastState(p) == null)
+            if (getLastState() == null)
             {
                 if (DEBUG)
                     System.out.println(CoreMessages.format(STRING_KEY + "abort-prereq-not-built", p
@@ -460,7 +410,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             }
         }
 
-        if (fTapestryProject.findType(CoreMessages.format(STRING_KEY + "applicationServletClassname")) == null)
+        if (fTapestryProject.findType(CoreMessages.format(STRING_KEY
+                + "applicationServletClassname")) == null)
             throw new BuilderException(CoreMessages.format(STRING_KEY + "tapestry-jar-missing"));
 
         if (fContextRoot == null || !fContextRoot.exists())
@@ -480,9 +431,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     /**
      * Method initializeBuilder.
      */
-    private void initializeBuilder()
+    private void initialize()
     {
-
         try
         {
             fJavaProject = (IJavaProject) fCurrentProject.getNature(JavaCore.NATURE_ID);
@@ -496,8 +446,10 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
         try
         {
-            fTapestryProject = (TapestryProject) fCurrentProject.getNature(TapestryCore.NATURE_ID);
-            fTapestryProject.clearMetadata();
+            TapestryProject project = (TapestryProject) fCurrentProject
+                    .getNature(TapestryCore.NATURE_ID);
+            fTapestryProject = project;
+            project.clearMetadata();
         }
         catch (CoreException e)
         {
@@ -517,9 +469,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
     }
 
-    protected boolean conflictsWithJavaOutputDirectory(IResource resource)
+    boolean conflictsWithJavaOutputDirectory(IResource resource)
     {
-        try 
+        try
         {
             IPath containerPath = fJavaProject.getOutputLocation();
             return containerPath.isPrefixOf(resource.getFullPath());
@@ -531,4 +483,95 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         return false;
     }
 
+    /**
+     * Find and add all files with Tapestry extensions found in the classpath to a List.
+     */
+    public void findAllTapestryArtifactsInClasspath(final ArrayList found)
+    {
+        ISearch searcher = null;
+        try
+        {
+            searcher = fClasspathRoot.getSearch();
+        }
+        catch (RuntimeException e)
+        {
+            TapestryCore.log(e);
+        }
+        if (searcher != null)
+        {
+            searcher.search(new ArtifactCollector()
+            {
+                public boolean acceptTapestry(Object parent, Object leaf)
+                {
+                    IPackageFragment fragment = (IPackageFragment) parent;
+                    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) ((ClasspathRootLocation) fClasspathRoot)
+                            .getRelativeLocation(fragment, (IStorage) leaf);
+                    found.add(location);
+
+                    return keepGoing();
+                }
+            });
+        }
+    }
+
+    /**
+     * Find and add all files with Tapestry extensions found in the web context to a List.
+     */
+    public void findAllTapestryArtifactsInWebContext(final ArrayList found)
+    {
+        ISearch searcher = null;
+        try
+        {
+            searcher = fContextRoot.getSearch();
+        }
+        catch (RuntimeException e)
+        {
+            TapestryCore.log(e);
+        }
+        if (searcher != null)
+        {
+            searcher.search(new ArtifactCollector()
+            {
+                public boolean acceptTapestry(Object parent, Object leaf)
+                {
+                    IResource resource = (IResource) leaf;
+                    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) ((ContextRootLocation) fContextRoot)
+                            .getRelativeResource(resource);
+
+                    if (!conflictsWithJavaOutputDirectory(resource))
+                        found.add(location);
+
+                    return keepGoing();
+
+                }
+            });
+        }
+    }
+
+    /**
+     * A search acceptor that is used to find all the Tapestry artifacts in the web context or the
+     * classpath.
+     */
+
+    abstract class ArtifactCollector extends AbstractEclipseSearchAcceptor
+    {
+
+        public ArtifactCollector()
+        {
+            super();
+        }
+
+        public boolean keepGoing()
+        {
+            try
+            {
+                fNotifier.checkCancel();
+            }
+            catch (OperationCanceledException e)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
 }

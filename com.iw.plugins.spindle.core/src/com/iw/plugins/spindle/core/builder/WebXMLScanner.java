@@ -93,7 +93,7 @@ public class WebXMLScanner extends AbstractScanner
 
         Path ws_path = new Path(location.getName());
         String extension = ws_path.getFileExtension();
-        if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
+        if (extension == null || !extension.equals(AbstractBuildInfrastructure.APPLICATION_EXTENSION))
             throw new ScannerException(CoreMessages.format("web-xml-wrong-file-extension", location
                     .toString()), false, IProblem.NOT_QUICK_FIXABLE);
 
@@ -243,12 +243,12 @@ public class WebXMLScanner extends AbstractScanner
     {
         if (path != null)
         {
-            return check(fBuilder.fTapestryBuilder.fClasspathRoot, path);
+            return check(fBuilder.fInfrastructure.fClasspathRoot, path);
         }
         else
         {
 
-            IResourceWorkspaceLocation context = fBuilder.fTapestryBuilder.fContextRoot;
+            IResourceWorkspaceLocation context = fBuilder.fInfrastructure.fContextRoot;
             String servletName = info.name;
             String expectedName = servletName + ".application";
 
@@ -317,7 +317,7 @@ public class WebXMLScanner extends AbstractScanner
                 }
             }
         }
-        if (TapestryBuilder.DEBUG)
+        if (AbstractBuildInfrastructure.DEBUG)
         {
             System.out.println("parsing web.xml found servlet:");
             System.out.println(newInfo.toString());
@@ -385,7 +385,7 @@ public class WebXMLScanner extends AbstractScanner
         }
         if (key != null && value != null)
         {
-            if (TapestryBuilder.APP_SPEC_PATH_PARAM.equals(key))
+            if (AbstractBuildInfrastructure.APP_SPEC_PATH_PARAM.equals(key))
                 checkApplicationServletPathParam(value, currentInfo, valueLoc);
 
             currentInfo.parameters.put(key, value);
@@ -509,7 +509,7 @@ public class WebXMLScanner extends AbstractScanner
                     message,
                     false,
                     IProblem.NOT_QUICK_FIXABLE);
-            if (TapestryBuilder.DEBUG)
+            if (AbstractBuildInfrastructure.DEBUG)
             {
                 System.out.println(message);
             }

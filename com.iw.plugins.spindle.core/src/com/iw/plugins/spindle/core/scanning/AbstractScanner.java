@@ -60,27 +60,22 @@ public abstract class AbstractScanner implements IProblemCollector
     protected List fProblems = new ArrayList();
 
     protected IScannerValidator fValidator;
-    
+
     protected IJavaTypeFinder fJavaTypeFinder;
-    
+
     protected boolean isCachingJavaTypes = false;
 
     public Object scan(Object source, IScannerValidator validator) throws ScannerException
     {
         Assert.isNotNull(source);
+        Assert.isNotNull(validator);
         Object resultObject = null;
         beginCollecting();
         try
         {
-            if (validator == null)
-            {
-                this.fValidator = new BaseValidator();
-            }
-            else
-            {
-                this.fValidator = validator;
-            }
-            this.fValidator.setProblemCollector(this);
+
+            fValidator = validator;
+            fValidator.setProblemCollector(this);
             resultObject = beforeScan(source);
             if (resultObject == null)
                 return null;
@@ -98,8 +93,8 @@ public abstract class AbstractScanner implements IProblemCollector
             }
             else
             {
-                addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER,
-                        IProblem.ERROR, scex.getMessage(), 0, 0, 0, false, scex.getCode()));
+                addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR,
+                        scex.getMessage(), 0, 0, 0, false, scex.getCode()));
             }
             return null;
         }
@@ -126,7 +121,7 @@ public abstract class AbstractScanner implements IProblemCollector
     protected Object afterScan(Object scanResults) throws ScannerException
     {
         return scanResults;
-    }    
+    }
 
     public void beginCollecting()
     {
@@ -157,9 +152,8 @@ public abstract class AbstractScanner implements IProblemCollector
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
     {
-        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message,
-                location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
-                isTemporary, code));
+        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message, location
+                .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary, code));
     }
 
     public void addProblems(IProblem[] problems)
@@ -200,7 +194,7 @@ public abstract class AbstractScanner implements IProblemCollector
     {
         return getAttribute(node, attributeName, false);
     }
-    
+
     protected boolean getBooleanAttribute(Node node, String attributeName, boolean defaultValue)
     {
         return W3CAccess.getBooleanAttribute(node, attributeName, defaultValue);
@@ -356,7 +350,5 @@ public abstract class AbstractScanner implements IProblemCollector
     {
         fExternalProblemCollector = collector;
     }
-	
-	
 
 }

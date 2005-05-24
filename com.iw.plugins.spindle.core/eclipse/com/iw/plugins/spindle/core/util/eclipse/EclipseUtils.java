@@ -1,4 +1,4 @@
-package com.iw.plugins.spindle.core.util;
+package com.iw.plugins.spindle.core.util.eclipse;
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -44,9 +44,9 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
+import com.iw.plugins.spindle.core.util.Assert;
 
 /**
  * A Utility class
@@ -54,7 +54,7 @@ import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
  * 
  * @author glongman@gmail.com
  */
-public class CoreUtils
+public class EclipseUtils
 {
   /**
    * Do some common checks on a Storage
@@ -208,7 +208,7 @@ public class CoreUtils
       return null;
     try
     {
-      return (IResource) ((IResourceWorkspaceLocation) loc).getStorage();
+      return (IResource) ((IEclipseResource) loc).getStorage();
     } catch (RuntimeException e)
     {
       return null;
@@ -285,17 +285,4 @@ public class CoreUtils
         element,
         IJavaElement.PACKAGE_FRAGMENT_ROOT);
   }
-
-  public static String abbreviate(String str, int maxWidth)
-  {
-    if (str == null)
-      return null;
-
-    if (maxWidth < 4)
-      throw new IllegalArgumentException("Minimum abbreviation width is 4");
-
-    return str.substring(0, maxWidth - 3) + "...";
-
-  }
-
 }

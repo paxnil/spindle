@@ -150,7 +150,7 @@ public class ApplicationResolver extends NamespaceResolver
         NamespaceResourceLookup lookup = new NamespaceResourceLookup();
         lookup.configure(
                 (PluginApplicationSpecification) fResultNamespace.getSpecification(),
-                fBuild.fTapestryBuilder.fContextRoot,
+                fBuild.fInfrastructure.fContextRoot,
                 fServlet.name);
 
         return lookup;
@@ -168,7 +168,7 @@ public class ApplicationResolver extends NamespaceResolver
     {
 
         PluginApplicationSpecification applicationSpec = new PluginApplicationSpecification();
-        Resource virtualLocation = fBuild.fTapestryBuilder.fContextRoot
+        Resource virtualLocation = fBuild.fInfrastructure.fContextRoot
                 .getRelativeResource("/WEB-INF/");
         applicationSpec.setSpecificationLocation(virtualLocation);
         applicationSpec.setName(servlet.name);
@@ -233,7 +233,7 @@ public class ApplicationResolver extends NamespaceResolver
 
         //now find all the html files in the application root
 
-        IResourceWorkspaceLocation appRoot = fBuild.fTapestryBuilder.fContextRoot;
+        IResourceWorkspaceLocation appRoot = fBuild.fInfrastructure.fContextRoot;
 
         IResourceAcceptor acceptor = new IResourceAcceptor()
         {
@@ -315,7 +315,7 @@ public class ApplicationResolver extends NamespaceResolver
         IResourceWorkspaceLocation[] templateLocs = TemplateFinder.scanForTemplates(
                 specification,
                 templateExtension,
-                fBuild.fTapestryBuilder.fTapestryProject,
+                fBuild.fInfrastructure.fTapestryProject,
                 null);
         specification.setTemplateLocations(templateLocs);
         

@@ -37,7 +37,7 @@ public interface IIncrementalBuild extends IBuild
   /**
    * A question asked of Incremental Builds by the TapestryBuilder.
    * <p>
-   * Answering false prompts a Full AbstractBuild
+   * Answering false prompts a Full build
    * 
    * @return true if an incremental build is indicated, false otherwise.
    */
@@ -46,7 +46,9 @@ public interface IIncrementalBuild extends IBuild
   /**
    * A question asked of Incremental Builds by the TapestryBuilder.
    * <p>
-   * Answering false prompts aborts an incremental build
+   * Answering false says that yes, an incremental build is indicated but
+   * would be fruitless and the build state would not change.
+   * In this case no build at all is needed.
    * 
    * @return true if an build is indicated, false otherwise.
    */

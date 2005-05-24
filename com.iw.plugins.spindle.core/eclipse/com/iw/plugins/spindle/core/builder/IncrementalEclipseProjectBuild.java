@@ -38,15 +38,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.core.IJavaTypeFinder;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.properties.ComponentPropertySource;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
@@ -65,13 +63,13 @@ import com.iw.plugins.spindle.core.util.eclipse.Markers;
  * 
  * @author glongman@gmail.com
  */
-public class IncrementalProjectBuild extends IncrementalApplicationBuild
+public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBuild
 {
     private IProblemCollector fProblemCollector = new ProblemCollector();
 
-    public IncrementalProjectBuild(TapestryBuilder builder, IResourceDelta projectDelta)
+    public IncrementalEclipseProjectBuild(EclipseBuildInfrastructure builder, IResourceDelta projectDelta)
     {
-        super(builder, projectDelta);
+        super(builder, projectDelta); 
     }
 
     /*
@@ -80,9 +78,10 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveApplication(com.iw.plugins.spindle.core.parser.Parser,
      *      org.eclipse.core.resources.IStorage, org.apache.hivemind.Resource, java.lang.String)
      */
-    protected IApplicationSpecification resolveApplication(Parser parser, Resource location, String encoding)
+    protected IApplicationSpecification resolveApplication(Parser parser, Resource location,
+            String encoding)
     {
-        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
+        IEclipseResource useLocation = (IEclipseResource) location;
         PluginApplicationSpecification result = null;
 
         if (!checkResource(useLocation))
@@ -91,6 +90,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         // pull the preexisting spec (if it exists) from the last build.
         result = (PluginApplicationSpecification) fLastState.getSpecificationMap().get(location);
 
+        IStorage storage = useLocation.getStorage();
         IFile file = null;
 
         if (storage instanceof IFile)
@@ -99,21 +99,21 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             if (result == null || result.isPlaceholder() || fileChanged(file))
             {
                 Markers.removeProblemsFor(file);
-                return super.resolveApplication(parser, storage, location, encoding);
+                return super.resolveApplication(parser, location, encoding);
             }
         }
         else
         {
             //this can only happen if somebody added a library tag to the
             // .application file
-            return super.resolveApplication(parser, storage, location, encoding);
+            return super.resolveApplication(parser, location, encoding);
         }
 
         try
         {
             //revalidate the spec.
             IScannerValidator useValidator = new SpecificationValidator(
-                    fTapestryBuilder.fTapestryProject);
+                    fInfrastructure.fTapestryProject);
             useValidator.addListener(this);
 
             fProblemCollector.beginCollecting();
@@ -131,10 +131,6 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             }
 
             Markers.recordProblems(useLocation, fProblemCollector.getProblems());
-        }
-        catch (CoreException e)
-        {
-            TapestryCore.log(e);
         }
         finally
         {
@@ -165,7 +161,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             String encoding)
     {
 
-        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
+        IEclipseResource useLocation = (IEclipseResource) location;
         PluginLibrarySpecification result = null;
 
         // to avoid double processing of specs that are accessible
@@ -173,11 +169,13 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         if (fProcessedLocations.containsKey(useLocation))
             return (ILibrarySpecification) fProcessedLocations.get(useLocation);
 
-        if (!checkResource(location))
+        if (!checkResource(useLocation))
             return null;
 
         // pull the preexisting spec (if it exists) from the last build.
-        result = (PluginLibrarySpecification) fLastState.getSpecificationMap().get(storage);
+        result = (PluginLibrarySpecification) fLastState.getSpecificationMap().get(useLocation);
+
+        IStorage storage = useLocation.getStorage();
 
         IFile file = null;
 
@@ -187,21 +185,21 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             if (result == null || result.isPlaceholder() || fileChanged(file))
             {
                 Markers.removeProblemsFor(file);
-                return super.resolveLibrarySpecification(parser, storage, location, encoding);
+                return super.resolveLibrarySpecification(parser, location, encoding);
             }
         }
         else
         {
             //this can only happen if somebody added a library tag to the
             // .application file
-            return super.resolveLibrarySpecification(parser, storage, location, encoding);
+            return super.resolveLibrarySpecification(parser, location, encoding);
         }
 
         try
         {
             //revalidate the spec.
-            IScannerValidator useValidator = new SpecificationValidator(
-                    (IJavaTypeFinder) this, fTapestryBuilder.fTapestryProject);
+            IScannerValidator useValidator = new SpecificationValidator((IJavaTypeFinder) this,
+                    fInfrastructure.fTapestryProject);
             useValidator.addListener(this);
 
             fProblemCollector.beginCollecting();
@@ -220,15 +218,11 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
 
             Markers.recordProblems(useLocation, fProblemCollector.getProblems());
         }
-        catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
         finally
         {
             finished(useLocation);
         }
-        rememberSpecification(storage, result);
+        rememberSpecification(useLocation, result);
         fProcessedLocations.put(location, result);
 
         return result;
@@ -258,13 +252,11 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             return null;
 
         // pull the preexisting spec (if it exists) from the last build.
-        result = (PluginComponentSpecification) fLastState.getSpecificationMap().get(storage);
+        result = (PluginComponentSpecification) fLastState.getSpecificationMap().get(location);
 
-        IFile file = null;
-
-        if (storage instanceof IFile)
+        IFile file = (IFile) (((IEclipseResource) location).getStorage()).getAdapter(IFile.class);
+        if (file != null)
         {
-            file = (IFile) storage;
             if (result == null || result.isPlaceholder() || fileChanged(file))
             {
                 Markers.removeProblemsFor(file);
@@ -280,6 +272,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         {
             //this can only happen if somebody added a library tag to the
             // .application file
+            // so the resolve is the same as the full build and we stop here.
             return super.resolveIComponentSpecification(
                     parser,
                     namespace,
@@ -291,8 +284,8 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         try
         {
             //revalidate the spec.
-            IScannerValidator useValidator = new SpecificationValidator(
-                    (IJavaTypeFinder) this, fTapestryBuilder.fTapestryProject);
+            IScannerValidator useValidator = new SpecificationValidator((IJavaTypeFinder) this,
+                    fInfrastructure.fTapestryProject);
             useValidator.addListener(this);
 
             fProblemCollector.beginCollecting();
@@ -308,11 +301,11 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
                 result.setTemplateLocations(TemplateFinder.scanForTemplates(
                         result,
                         source.getPropertyValue("org.apache.tapestry.template-extension"),
-                        fTapestryBuilder.fTapestryProject,
+                        fInfrastructure.fTapestryProject,
                         fProblemCollector));
                 for (Iterator iter = result.getTemplateLocations().iterator(); iter.hasNext();)
                 {
-                    IResourceWorkspaceLocation template = (IResourceWorkspaceLocation) iter.next();
+                    IEclipseResource template = (IEclipseResource) iter.next();
                     try
                     {
                         IFile templateFile = (IFile) template.getStorage();
@@ -332,10 +325,6 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             }
 
             Markers.recordProblems(location, fProblemCollector.getProblems());
-        }
-        catch (CoreException e)
-        {
-            TapestryCore.log(e);
         }
         finally
         {
@@ -359,14 +348,11 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
 
         for (int i = 0; i < count; i++)
         {
-            IResourceWorkspaceLocation template = (IResourceWorkspaceLocation) locs.get(i);
+            IEclipseResource template = (IEclipseResource) locs.get(i);
             IStorage templateStorage = template.getStorage();
             if (templateStorage != null && templateStorage instanceof IResource)
-            {
                 Markers.removeProblemsFor((IResource) templateStorage);
-            }
         }
-
         super.parseTemplates(spec);
     }
 
@@ -382,19 +368,21 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      */
     protected boolean shouldParseTemplate(Resource ownerSpec, Resource template)
     {
+        IFile specFile = (IFile)(((IEclipseResource)ownerSpec).getStorage()).getAdapter(IFile.class);
+        IFile templateFile = (IFile)(((IEclipseResource)ownerSpec).getStorage()).getAdapter(IFile.class);
+        
         boolean mustParse = false;
         boolean cleanLastBuild = fLastState.fCleanTemplates.contains(template);
 
-        if (template instanceof IFile)
-        {
-            IFile file = (IFile) template;
-            if (!cleanLastBuild || fileChanged(file))
+        if (templateFile != null)
+        {            
+            if (!cleanLastBuild || fileChanged(templateFile))
             {
                 mustParse = true;
             }
-            else if (ownerSpec instanceof IFile)
+            else if (specFile != null)
             {
-                mustParse = fileChanged((IFile) ownerSpec);
+                mustParse = fileChanged(specFile);
             }
         }
 
@@ -433,23 +421,11 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
                 boolean isTemporary, int code)
         {
 
-            addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity,
-                    message, location.getLineNumber(), location.getCharStart(), location
-                            .getCharEnd(), isTemporary, code));
+            addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message,
+                    location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
+                    isTemporary, code));
 
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(org.eclipse.core.runtime.IStatus,
-         *      com.iw.plugins.spindle.core.source.ISourceLocation, boolean)
-         */
-        public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
-        {
-            addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, status, location
-                    .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary));
-        }
+        }        
 
         /*
          * (non-Javadoc)
@@ -499,9 +475,9 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      * @see com.iw.plugins.spindle.core.builder.AbstractBuild#recordBuildMiss(int,
      *      org.eclipse.core.resources.IResource)
      */
-    protected void recordBuildMiss(int missPriority, IResource resource)
+    protected void recordBuildMiss(int missPriority, Resource resource)
     {
-        Markers.removeProblemsFor(resource);
+        fInfrastructure.fProblemPersister.removeTemporaryProblemsForResource(resource);
         super.recordBuildMiss(missPriority, resource);
     }
 

@@ -46,7 +46,6 @@ import org.apache.tapestry.binding.BindingConstants;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
-import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.IJavaType;
@@ -151,7 +150,6 @@ public class BaseValidator implements IScannerValidator
 
     private IJavaTypeFinder createCachingTypeFinder(final IJavaTypeFinder finder)
     {
-        // TODO Auto-generated method stub
         return new IJavaTypeFinder()
         {
             Map cache;
@@ -253,6 +251,19 @@ public class BaseValidator implements IScannerValidator
 
             throw new Error(ex);
         }
+    }
+
+    /**
+     * Base Implementation always fails!
+     * 
+     * @param fullyQualifiedName
+     * @return
+     */
+    public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
+    {
+        IJavaType result = getJavaTypeFinder().findType(fullyQualifiedName);
+        fireTypeDependency(dependant, fullyQualifiedName, result);
+        return result;
     }
 
     /*

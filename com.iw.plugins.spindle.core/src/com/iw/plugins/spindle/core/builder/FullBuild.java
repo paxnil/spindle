@@ -33,7 +33,6 @@ import org.w3c.dom.Document;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.eclipse.EclipseWebXMLScanner;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.properties.ProjectPropertySource;
@@ -57,9 +56,9 @@ public class FullBuild extends AbstractBuild
     /**
      * Constructor for FullBuilder.
      */
-    public FullBuild(TapestryBuilder builder)
+    public FullBuild(AbstractBuildInfrastructure infrastructure)
     {
-        super(builder);
+        super(infrastructure);
     }
 
     /**
@@ -77,7 +76,7 @@ public class FullBuild extends AbstractBuild
     protected void postBuild()
     {
         BuilderDependencyListener listener = (BuilderDependencyListener) getDependencyListener();
-        if (fTapestryBuilder.DEBUG)
+        if (fInfrastructure.DEBUG)
         {
             listener.dump();
         }
@@ -88,7 +87,7 @@ public class FullBuild extends AbstractBuild
      */
     protected void resolveFramework(Parser parser)
     {
-        IResourceWorkspaceLocation frameworkLocation = (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot
+        IResourceWorkspaceLocation frameworkLocation = (IResourceWorkspaceLocation) fInfrastructure.fClasspathRoot
                 .getRelativeResource("/org/apache/tapestry/Framework.library");
         FrameworkResolver resolver = new FrameworkResolver(this, parser, frameworkLocation);
         fFrameworkNamespace = resolver.resolve();
@@ -107,10 +106,10 @@ public class FullBuild extends AbstractBuild
     }
 
     public void saveState()
-    {
-        State newState = new State(fTapestryBuilder);
+    {        
+        State newState = new State(fInfrastructure);
         //    newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
-        newState.fLastKnownClasspath = fTapestryBuilder.fClasspath;
+        newState.fLastKnownClasspath = fInfrastructure.getClasspathMemento();
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
         newState.fTemplateMap = fTemplateMap;
@@ -125,9 +124,7 @@ public class FullBuild extends AbstractBuild
 
         // save the processed binary libraries
         saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
-        TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
-                fTapestryBuilder.fCurrentProject,
-                newState);
+        fInfrastructure.persistState(newState);        
     }
 
     protected void saveBinaryLibraries(ICoreNamespace framework, ICoreNamespace namespace,
@@ -161,20 +158,20 @@ public class FullBuild extends AbstractBuild
     protected void findDeclaredApplication() 
     {
         Parser servletParser = new Parser();
-        servletParser.setDoValidation(fTapestryBuilder.fValidateWebXML);
+        servletParser.setDoValidation(fInfrastructure.fValidateWebXML);
         // Parser does not validate by default.
         // Scanners use the Spindle validator.
 
-        IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot
+        IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fInfrastructure.fContextRoot
                 .getRelativeResource("WEB-INF/web.xml");
         if (webXML.exists())
         {
             Document wxmlElement = null;
             try
             {
-                fTapestryBuilder.fNotifier.subTask(CoreMessages.format(TapestryBuilder.STRING_KEY
+                fInfrastructure.fNotifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
                         + "scanning", webXML.toString()));
-                fTapestryBuilder.fProblemPersister.removeAllProblemsFor(webXML);
+                fInfrastructure.fProblemPersister.removeAllProblemsFor(webXML);
                 wxmlElement = parseToDocument(servletParser, webXML, null);
             }
             catch (IOException e1)
@@ -194,7 +191,7 @@ public class FullBuild extends AbstractBuild
             {
                 WebXMLScanner wscanner = new EclipseWebXMLScanner(this);
                 descriptor = wscanner.scanWebAppDescriptor(wxmlElement);
-                fTapestryBuilder.fProblemPersister.recordProblems(webXML, wscanner.getProblems());
+                fInfrastructure.fProblemPersister.recordProblems(webXML, wscanner.getProblems());
             }
             catch (ScannerException e)
             {
@@ -202,17 +199,17 @@ public class FullBuild extends AbstractBuild
             }
 
             if (descriptor == null)
-                throw new BrokenWebXMLException(CoreMessages.format(TapestryBuilder.STRING_KEY
+                throw new BrokenWebXMLException(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
                         + "abort-no-valid-application-servlets-found"));
 
             ServletInfo[] servletInfos = descriptor.getServletInfos();
             if (servletInfos == null || servletInfos.length == 0)
 
-                throw new BrokenWebXMLException(CoreMessages.format(TapestryBuilder.STRING_KEY
+                throw new BrokenWebXMLException(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
                         + "abort-no-valid-application-servlets-found"));
 
             if (servletInfos.length > 1)
-                throw new BrokenWebXMLException(CoreMessages.format(TapestryBuilder.STRING_KEY
+                throw new BrokenWebXMLException(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
                         + "abort-too-many-valid-servlets-found"));
 
             fApplicationServlet = servletInfos[0];
@@ -221,13 +218,13 @@ public class FullBuild extends AbstractBuild
         }
         else
         {
-            IFolder definedWebRoot = fTapestryBuilder.fTapestryProject.getWebContextFolder();
+            IFolder definedWebRoot = fInfrastructure.fTapestryProject.getWebContextFolder();
             if (definedWebRoot != null)
 
-                fTapestryBuilder.fProblemPersister.recordProblem(
-                        fTapestryBuilder.fTapestryProject,
+                fInfrastructure.fProblemPersister.recordProblem(
+                        fInfrastructure.fTapestryProject,
                         new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER,
-                                IProblem.WARNING, CoreMessages.format(TapestryBuilder.STRING_KEY
+                                IProblem.WARNING, CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
                                         + "missing-context", definedWebRoot.toString()), 1, 0, 0,
                                 false, IProblem.NOT_QUICK_FIXABLE));
         }

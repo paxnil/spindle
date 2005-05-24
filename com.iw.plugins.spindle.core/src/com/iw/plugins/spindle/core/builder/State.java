@@ -35,8 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.core.IClasspathEntry;
-
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
@@ -58,12 +56,11 @@ public class State
 
   public static byte VERSION = 0x0001;
 
-  String fProjectName;
   IResourceWorkspaceLocation fContextRoot;
   byte fVersion = VERSION;
   int fBuildNumber;
   Map fBinaryNamespaces = new HashMap();
-  IClasspathEntry[] fLastKnownClasspath;
+  Object fLastKnownClasspath;
 
   // following are used to determine if an incremental Tapestry build is
   // required at all.
@@ -115,10 +112,9 @@ public class State
    * 
    * @param builder
    */
-  State(TapestryBuilder builder)
-  {
-    fProjectName = builder.getProject().getName();
-    fContextRoot = builder.fContextRoot;
+  State(AbstractBuildInfrastructure infrastructure)
+  {   
+    fContextRoot = infrastructure.fContextRoot;
     fBuildNumber = 0;
   }
 
@@ -127,20 +123,13 @@ public class State
     fBuildNumber = -1;
   }
   // used by incremental builds only
-  void copyFrom(State lastState)
+  void copyFrom(State lastState, AbstractBuildInfrastructure infrastructure)
   {
-    fProjectName = lastState.fProjectName;
     fContextRoot = lastState.fContextRoot; 
     fBuildNumber = lastState.fBuildNumber + 1;
     fBinaryNamespaces = new HashMap(lastState.fBinaryNamespaces);
     fBinarySpecificationMap = new HashMap(lastState.fBinarySpecificationMap);
-    fLastKnownClasspath = new IClasspathEntry[lastState.fLastKnownClasspath.length];
-    System.arraycopy(
-        lastState.fLastKnownClasspath,
-        0,
-        fLastKnownClasspath,
-        0,
-        lastState.fLastKnownClasspath.length);
+    fLastKnownClasspath = infrastructure.copyClasspathMemento(lastState.fLastKnownClasspath);
     fApplicationServlet = lastState.fApplicationServlet;
     fWebAppDescriptor = lastState.fWebAppDescriptor;
     fPrimaryNamespace = lastState.fPrimaryNamespace;

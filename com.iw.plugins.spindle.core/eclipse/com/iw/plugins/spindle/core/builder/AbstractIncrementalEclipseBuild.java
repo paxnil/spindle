@@ -23,8 +23,8 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.extensions.eclipse.IncrementalBuildVetoController;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
-import com.iw.plugins.spindle.core.util.CoreUtils;
+import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
+import com.iw.plugins.spindle.core.util.eclipse.EclipseUtils;
 
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
@@ -66,7 +66,7 @@ import com.iw.plugins.spindle.core.util.CoreUtils;
  *
  * @author glongman@gmail.com
  */
-public class IncrementalApplicationBuild extends FullBuild implements IIncrementalBuild
+public abstract class AbstractIncrementalEclipseBuild extends FullBuild implements IIncrementalBuild
 {
   public static int REMOVED_REPLACED = IResourceDelta.REMOVED | IResourceDelta.REPLACED;
   public static int MOVED_OR_SYNCHED_OR_CHANGED_TYPE = IResourceDelta.MOVED_FROM
@@ -79,7 +79,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
    * 
    * @param builder
    */
-  public IncrementalApplicationBuild(TapestryBuilder builder, IResourceDelta projectDelta)
+  public AbstractIncrementalEclipseBuild(EclipseBuildInfrastructure builder, IResourceDelta projectDelta)
   {
     super(builder);
     fProjectDelta = projectDelta;
@@ -105,8 +105,8 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
   {
     if (fProjectDelta == null)
       return false;
-    fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
-    final List knownTapestryExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
+    fLastState = fInfrastructure.getLastState();
+    final List knownTapestryExtensions = Arrays.asList(AbstractBuildInfrastructure.KnownExtensions);
 
     // check for java files that changed, or have been added
     try
@@ -192,14 +192,14 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
     if (fProjectDelta == null)
       return false;
 
-    fLastState = fTapestryBuilder.getLastState(fTapestryBuilder.fCurrentProject);
+    fLastState = fInfrastructure.getLastState();
     //ensure the last build didn't fail and that state version sync up.
     if (fLastState == null || fLastState.fBuildNumber < 0
         || fLastState.fVersion != State.VERSION)
       return false;
 
     // The Tapestry framework library must exist in the state
-    IResourceWorkspaceLocation frameworkLocation = (IResourceWorkspaceLocation) fTapestryBuilder.fClasspathRoot
+    IResourceWorkspaceLocation frameworkLocation = (IResourceWorkspaceLocation) fInfrastructure.fClasspathRoot
         .getRelativeResource("/org/apache/tapestry/Framework.library");
     if (!fLastState.fBinaryNamespaces.containsKey(frameworkLocation))
       return false;
@@ -209,32 +209,32 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
       return false;
 
     //the context root exist and be the same as the one used for the last build.
-    ContextRootLocation contextRoot = fTapestryBuilder.fContextRoot;
+    IEclipseResource contextRoot = (IEclipseResource) fInfrastructure.fContextRoot;
     if (contextRoot != null)
     {
       if (!contextRoot.equals(fLastState.fContextRoot))
       {
-        if (TapestryBuilder.DEBUG)
+        if (AbstractBuildInfrastructure.DEBUG)
           System.out.println("inc build abort - context root not same in last state");
         return false;
       }
 
       if (!contextRoot.exists())
       {
-        if (TapestryBuilder.DEBUG)
+        if (AbstractBuildInfrastructure.DEBUG)
           System.out.println("inc build abort - context root does not exist"
               + contextRoot);
         return false;
       }
 
       //web.xml must exist
-      IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot
+      IEclipseResource webXML = (IEclipseResource) fInfrastructure.fContextRoot
           .getRelativeResource("WEB-INF/web.xml");
 
       IResource resource = (IResource) webXML.getStorage();
       if (resource == null)
       {
-        if (TapestryBuilder.DEBUG)
+        if (AbstractBuildInfrastructure.DEBUG)
           System.out.println("inc build abort - web.xml does not exist" + webXML);
         return false;
       }
@@ -245,7 +245,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
 
       if (webXMLDelta != null)
       {
-        if (TapestryBuilder.DEBUG)
+        if (AbstractBuildInfrastructure.DEBUG)
           System.out.println("inc build abort - web.xml changed since last build");
         return false;
       }
@@ -257,7 +257,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
     } else
     {
       //must have a context root
-      if (TapestryBuilder.DEBUG)
+      if (AbstractBuildInfrastructure.DEBUG)
         System.out.println("inc build abort - no context root found in TapestryBuilder!");
       return false;
     }
@@ -273,12 +273,12 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
 
   protected boolean hasClasspathChanged()
   {
-    IClasspathEntry[] currentEntries = fTapestryBuilder.fClasspath;
-
-    if (currentEntries.length != fLastState.fLastKnownClasspath.length)
+    IClasspathEntry[] currentEntries = (IClasspathEntry[]) fInfrastructure.getClasspathMemento();
+    IClasspathEntry [] lastStateEntries = (IClasspathEntry[]) fLastState.fLastKnownClasspath;
+    if (currentEntries.length != lastStateEntries.length)
       return true;
 
-    List old = Arrays.asList(fLastState.fLastKnownClasspath);
+    List old = Arrays.asList(lastStateEntries);
     List current = Arrays.asList(currentEntries);
 
     return !current.containsAll(old);
@@ -289,7 +289,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
     IResourceWorkspaceLocation appSpecLocation = fLastState.fApplicationServlet.applicationSpecLocation;
     if (appSpecLocation != null)
     {
-      IResource specResource = CoreUtils.toResource(appSpecLocation);
+      IResource specResource = EclipseUtils.toResource(appSpecLocation);
       if (specResource == null)
         return false;
       IResourceDelta specDelta = fProjectDelta.findMember(specResource
@@ -318,12 +318,12 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
 
       IResource existingSpecFile = null;
       Resource previousSpecLocation = last.getSpecificationLocation();
-      IResourceWorkspaceLocation WEB_INF = (IResourceWorkspaceLocation) fTapestryBuilder.fContextRoot
+      IResourceWorkspaceLocation WEB_INF = (IResourceWorkspaceLocation) fInfrastructure.fContextRoot
           .getRelativeResource("WEB-INF");
 
       if (!previousSpecLocation.equals(WEB_INF))
       {
-        existingSpecFile = CoreUtils.toResource(previousSpecLocation);
+        existingSpecFile = EclipseUtils.toResource(previousSpecLocation);
       }
 
       if (existingSpecFile != null)
@@ -340,7 +340,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
           {
             if ((kind & REMOVED_REPLACED) > 0)
             {
-              if (TapestryBuilder.DEBUG)
+              if (AbstractBuildInfrastructure.DEBUG)
                 System.out.println("inc build abort - " + existingSpecFile
                     + "was removed or replaced");
               return true;
@@ -348,7 +348,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
             int flags = specDelta.getFlags();
             if ((flags & MOVED_OR_SYNCHED_OR_CHANGED_TYPE) > 0)
             {
-              if (TapestryBuilder.DEBUG)
+              if (AbstractBuildInfrastructure.DEBUG)
                 System.out.println("inc build abort - " + existingSpecFile
                     + "was moved or synced");
               return true;
@@ -370,7 +370,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
               IFile file = (IFile) resource;
               if ("application".equals(file.getFullPath().getFileExtension()))
               {
-                if (TapestryBuilder.DEBUG)
+                if (AbstractBuildInfrastructure.DEBUG)
                   System.out.println("inc build abort - new app spec found");
                 throw new BuilderException();
               }
@@ -401,7 +401,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
   public void saveState()
   {
     State newState = new State();
-    newState.copyFrom(fLastState);
+    newState.copyFrom(fLastState, fInfrastructure);
     newState.fJavaDependencies = fFoundTypes;
     newState.fMissingJavaTypes = fMissingTypes;
     newState.fTemplateMap = fTemplateMap;
@@ -410,9 +410,7 @@ public class IncrementalApplicationBuild extends FullBuild implements IIncrement
     newState.fSeenTemplateExtensions = fSeenTemplateExtensions;
     newState.fCleanTemplates = fCleanTemplates;
 
-    TapestryArtifactManager.getTapestryArtifactManager().setLastBuildState(
-        fTapestryBuilder.fCurrentProject,
-        newState);
+    fInfrastructure.persistState(newState);   
   }
 
 

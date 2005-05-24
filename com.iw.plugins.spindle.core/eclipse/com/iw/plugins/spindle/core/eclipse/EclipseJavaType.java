@@ -6,7 +6,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import com.iw.plugins.spindle.core.IJavaType;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.core.util.CoreUtils;
+import com.iw.plugins.spindle.core.util.eclipse.EclipseUtils;
+
 
 /**
  * @author gwl
@@ -106,7 +107,7 @@ public class EclipseJavaType implements IJavaType
     {
         try
         {
-            return CoreUtils.extendsType((IType) candidate.getUnderlier(), fType);
+            return EclipseUtils.extendsType((IType) candidate.getUnderlier(), fType);
         }
         catch (JavaModelException e)
         {

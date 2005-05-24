@@ -37,7 +37,6 @@ import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLParseException;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
@@ -204,7 +203,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             fDomParseConfiguration.setErrorHandler(this);
         }
     }
-   
+
     public DocumentImpl parse(InputStream input, String encoding) throws IOException
     {
         String content = Files.readFileToString(input, encoding);
@@ -280,8 +279,10 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             // XMLErrorHandler
             return null;
 
-        } catch (Throwable e1) {
-			e1.printStackTrace();
+        }
+        catch (Throwable e1)
+        {
+            e1.printStackTrace();
         }
         finally
         {
@@ -289,7 +290,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
 
         fXmlDocument = (DocumentImpl) fDomParser.getDocument();
-		
+
         return fXmlDocument;
     }
 
@@ -475,15 +476,8 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
     {
-        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message,
-                location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
-                isTemporary, code));
-    }
-
-    public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
-    {
-        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, status, location
-                .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary));
+        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message, location
+                .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary, code));
     }
 
     public IProblem[] getProblems()
@@ -496,10 +490,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
 
     private IProblem createFatalProblem(XMLParseException parseException, int severity)
     {
-        return createParserProblem(
-                IProblem.TAPESTRY_FATAL_PROBLEM_MARKER,
-                parseException,
-                severity);
+        return createParserProblem(IProblem.TAPESTRY_FATAL_PROBLEM_MARKER, parseException, severity);
     }
 
     private IProblem createErrorProblem(XMLParseException parseException, int severity)

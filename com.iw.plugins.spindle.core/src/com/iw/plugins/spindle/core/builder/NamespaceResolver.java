@@ -345,7 +345,7 @@ public abstract class NamespaceResolver
                     libLocation = (IResourceWorkspaceLocation) namespaceLocation
                             .getRelativeResource(spec.getLibrarySpecificationPath(libraryId));
                 else
-                    libLocation = (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot
+                    libLocation = (IResourceWorkspaceLocation) fBuild.fInfrastructure.fClasspathRoot
                             .getRelativeResource(spec.getLibrarySpecificationPath(libraryId));
 
                 if (libLocation.exists())
@@ -356,7 +356,7 @@ public abstract class NamespaceResolver
                     ICoreNamespace childNamespace = childResolver.resolve();
 
                 }
-                else if (fBuild.fTapestryBuilder.DEBUG)
+                else if (fBuild.fInfrastructure.DEBUG)
                 {
                     System.out.println("not found:" + libLocation);
                 }
@@ -488,7 +488,7 @@ public abstract class NamespaceResolver
             }
             else if (!jwcs[i].equals(result.get(type)))
 
-                fBuild.fTapestryBuilder.fProblemPersister.recordProblem(
+                fBuild.fInfrastructure.fProblemPersister.recordProblem(
                         jwcs[i],
                         new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR,
                                 CoreMessages.format("builder-hidden-jwc-file", jwcs[i], result
@@ -533,7 +533,7 @@ public abstract class NamespaceResolver
 
             }
             else if (!result.get(name).equals(pages[i]))
-                fBuild.fTapestryBuilder.fProblemPersister.recordProblem(
+                fBuild.fInfrastructure.fProblemPersister.recordProblem(
                         pages[i],
                         new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR,
                                 CoreMessages.format("builder-hidden-page-file", pages[i], result

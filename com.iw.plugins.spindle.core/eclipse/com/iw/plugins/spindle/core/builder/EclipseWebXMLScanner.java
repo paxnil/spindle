@@ -1,4 +1,4 @@
-package com.iw.plugins.spindle.core.builder.eclipse;
+package com.iw.plugins.spindle.core.builder;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;

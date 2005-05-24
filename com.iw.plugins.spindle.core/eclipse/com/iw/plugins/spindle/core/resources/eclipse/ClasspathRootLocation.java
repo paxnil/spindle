@@ -48,7 +48,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.TapestryBuilder;
+import com.iw.plugins.spindle.core.builder.EclipseBuildInfrastructure;
 import com.iw.plugins.spindle.core.resources.AbstractRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
@@ -380,7 +380,7 @@ public class ClasspathRootLocation extends AbstractRootLocation  implements IEcl
 
     public IPackageFragment[] getAllPackageFragments(String packageName)
     {
-        Map cache = TapestryBuilder.getPackageCache();
+        Map cache = EclipseBuildInfrastructure.getPackageCache();
 
         if (cache != null && cache.containsKey(packageName))
             return (IPackageFragment[]) cache.get(packageName);

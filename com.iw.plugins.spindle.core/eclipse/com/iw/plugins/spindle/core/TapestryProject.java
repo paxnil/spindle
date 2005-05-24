@@ -52,6 +52,8 @@ import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 /**
  * The Tapestry project nature. Configures and Deconfigures the builder
  * 
+ * TODO the metadata stuff is to be extracted to generic land.
+ * 
  * @author glongman@gmail.com
  */
 public class TapestryProject implements IProjectNature, ITapestryProject, IJavaTypeFinder

@@ -39,7 +39,7 @@ import org.eclipse.core.runtime.Path;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.core.util.Files;
+import com.iw.plugins.spindle.core.util.eclipse.EclipseFiles;
 
 /**
  * Utility class for obtaining and setting the metadata spindle needs to run. This data is stored in
@@ -179,7 +179,7 @@ public class DefaultTapestryMetadata
         String result = null;
         try
         {
-            result = Files.readPropertyInXMLFile(getPropertiesFile(), key);
+            result = EclipseFiles.readPropertyInXMLFile(getPropertiesFile(), key);
         }
         catch (IOException e)
         {
@@ -222,7 +222,7 @@ public class DefaultTapestryMetadata
 
             fileContent.append("</tapestry-project-properties>\n");
             monitor.subTask("saving project properties");
-            Files.toTextFile(getPropertiesFile(), fileContent.toString(), monitor);
+            EclipseFiles.toTextFile(getPropertiesFile(), fileContent.toString(), monitor);
             monitor.worked(1);
         }
         catch (Exception ex)

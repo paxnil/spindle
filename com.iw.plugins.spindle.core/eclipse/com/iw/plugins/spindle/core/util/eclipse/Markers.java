@@ -43,13 +43,11 @@ import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.IProblemPeristManager;
 
 /**
  * Marker utililties
  * 
- * @deprecated
  * @author glongman@gmail.com
  */
 public class Markers implements IProblemPeristManager
@@ -128,7 +126,7 @@ public class Markers implements IProblemPeristManager
 
     public static void recordProblems(IResourceWorkspaceLocation location, IProblem[] problems)
     {
-        IResource res = CoreUtils.toResource(location);
+        IResource res = EclipseUtils.toResource(location);
         boolean workspace = res != null;
         for (int i = 0; i < problems.length; i++)
         {
