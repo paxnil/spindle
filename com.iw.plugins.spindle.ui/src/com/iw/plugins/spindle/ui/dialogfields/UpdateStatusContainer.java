@@ -35,7 +35,7 @@ import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.wutka.dtd.OrderPreservingMap;
 
 /**
@@ -108,7 +108,7 @@ public class UpdateStatusContainer implements IDialogFieldChangedListener
           enabled.add(field);
         } catch (ClassCastException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
         }
       }
       entries = enabled;

@@ -49,8 +49,9 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.XMLPublicIDUtil;
 import com.iw.plugins.spindle.core.util.XMLUtil;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.properties.ProjectPropertyPage;
 import com.iw.plugins.spindle.ui.wizards.factories.ApplicationFactory;
 import com.iw.plugins.spindle.ui.wizards.factories.IFactoryTemplateSource;
@@ -179,7 +180,7 @@ public class TapestryProjectInstaller {
 		IndentingWriter iwriter = new IndentingWriter(swriter, useTabs,
 				tabSize, 0, null);
 
-		XMLUtil.writeWebDOTXML(projectName, XMLUtil.getPublicId(installData
+		XMLUtil.writeWebDOTXML(projectName, XMLPublicIDUtil.getPublicId(installData
 				.getServletSpecPublicId()), writeRedirectFilter, iwriter);
 		iwriter.flush();
 		IFile webDotXML = webInfFolder.getFile("web.xml");
@@ -248,7 +249,7 @@ public class TapestryProjectInstaller {
 					ProjectPropertyPage.CONTEXT_ROOT_PROPERTY), "/"
 					+ contextPath);
 
-			boolean validate = installData.getServletSpecPublicId() != XMLUtil.UNKNOWN_DTD;
+			boolean validate = installData.getServletSpecPublicId() != XMLPublicIDUtil.UNKNOWN_DTD;
 
 			project.setPersistentProperty(new QualifiedName("",
 					ProjectPropertyPage.VALIDATE_WEBXML_PROPERTY), Boolean
@@ -311,7 +312,7 @@ public class TapestryProjectInstaller {
 					result.add(name);
 			}
 		} catch (CoreException e) {
-			UIPlugin.log(e);
+			UIPlugin.log_it(e);
 		}
 		return result;
 
@@ -402,11 +403,11 @@ public class TapestryProjectInstaller {
 			dest.create(new FileInputStream(src), true, monitor);
 		} catch (CoreException e) {
 			
-			UIPlugin.log(e);
+			UIPlugin.log_it(e);
 			result.setError("Error creating file: " + dest.getName());
 		} catch (FileNotFoundException e) {
 			
-			UIPlugin.log(e);
+			UIPlugin.log_it(e);
 			result.setError("Error opening file: " + src.toString());
 		}
 		return result;
@@ -431,7 +432,7 @@ public class TapestryProjectInstaller {
 			ext = new File(new URI(extFolderUrl.toString()));
 
 		} catch (Exception e) {
-			UIPlugin.log(e);
+			UIPlugin.log_it(e);
 			return;
 		}
 		tapestryJarNames = new HashMap();

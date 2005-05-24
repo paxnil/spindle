@@ -42,7 +42,6 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 
@@ -117,7 +116,7 @@ public class TemplateStringAttributeToExpression implements IMarkerResolutionGen
             }
             catch (BadLocationException e)
             {
-                UIPlugin.log(e);
+                UIPlugin.log_it(e);
             }
         }
 
@@ -155,7 +154,7 @@ public class TemplateStringAttributeToExpression implements IMarkerResolutionGen
 
         IFile file = getFile(marker);
         if (file == null
-                || marker.getAttribute(ITapestryMarker.PROBLEM_CODE, -1) != IProblem.TEMPLATE_SCANNER_CHANGE_TO_EXPRESSION)
+                || marker.getAttribute(IProblem.PROBLEM_CODE, -1) != IProblem.TEMPLATE_SCANNER_CHANGE_TO_EXPRESSION)
             return NO_RESOLUTIONS;
 
         int charstart = marker.getAttribute(IMarker.CHAR_START, -1);
@@ -183,13 +182,13 @@ public class TemplateStringAttributeToExpression implements IMarkerResolutionGen
             }
             catch (BadLocationException e)
             {
-                UIPlugin.log(e);
+                UIPlugin.log_it(e);
             }
         }
         catch (CoreException e)
         {
 
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
         }
         finally
         {

@@ -31,6 +31,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
+
 /**
  * @author gwl
  * 

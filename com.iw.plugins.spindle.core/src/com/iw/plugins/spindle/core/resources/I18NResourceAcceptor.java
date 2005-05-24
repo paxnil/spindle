@@ -52,7 +52,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  * 
  * @author glongman@gmail.com
  */
-public class I18NResourceAcceptor implements IResourceLocationAcceptor
+public class I18NResourceAcceptor implements IResourceAcceptor
 {
   private static Map CachedNamePatterns = new HashMap();
   private static Perl5Util PERL;

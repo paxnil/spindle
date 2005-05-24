@@ -158,7 +158,7 @@ public class CompletionProposal implements OrderedProposal
       return usePoint;
     } catch (RuntimeException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
       throw e;
     } finally
     {

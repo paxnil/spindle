@@ -30,7 +30,6 @@ import java.net.URL;
 import java.util.Locale;
 
 import org.apache.hivemind.Resource;
-import org.eclipse.core.runtime.Path;
 
 /**
  * Abstract base class for implementations of IResourceWorkspaceLocations.
@@ -136,9 +135,9 @@ public Resource getRelativeResource(String name)
    * 
    * @see com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation#isOnClasspath()
    */
-  public boolean isOnClasspath()
+  public boolean isClasspathResource()
   {
-    return fRoot.isOnClasspath();
+    return fRoot.isClasspathResource();
   }
 
   public String toString()

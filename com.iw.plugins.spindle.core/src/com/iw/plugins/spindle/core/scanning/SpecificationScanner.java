@@ -34,9 +34,7 @@ import java.util.Map;
 import org.apache.hivemind.Resource;
 import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.spec.BeanLifecycle;
-import org.apache.tapestry.spec.SpecFactory;
 import org.apache.tapestry.util.IPropertyHolder;
-import org.eclipse.core.resources.IStorage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -49,7 +47,8 @@ import com.iw.plugins.spindle.core.spec.IPluginPropertyHolder;
 import com.iw.plugins.spindle.core.spec.PluginDescriptionDeclaration;
 import com.iw.plugins.spindle.core.spec.PluginPropertyDeclaration;
 import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.core.util.XMLUtil;
+import com.iw.plugins.spindle.core.util.XMLPublicIDUtil;
+import com.iw.plugins.spindle.messages.ParseMessages;
 
 /**
  * Scanner for building Tapestry Specs - this is the base class for Component, Library, and
@@ -61,8 +60,6 @@ public abstract class SpecificationScanner extends AbstractScanner
 {
 
     protected Resource fResourceLocation;
-
-    protected IStorage fStorage;
 
     protected String fPublicId;
 
@@ -87,11 +84,11 @@ public abstract class SpecificationScanner extends AbstractScanner
         Document document = (Document) source;
         setPublicId(W3CAccess.getPublicId(document));
         if (fPublicId == null)
-            throw new ScannerException(CoreMessages.format(XMLUtil.SPEC_DTD_ERROR_KEY), false,
+            throw new ScannerException(CoreMessages.format(XMLPublicIDUtil.SPEC_DTD_ERROR_KEY), false,
                     IProblem.SPINDLE_MISSING_PUBLIC_ID);
         if (!checkPublicId())
         {
-            throw new ScannerException(CoreMessages.format(XMLUtil.SPEC_DTD_ERROR_KEY), false,
+            throw new ScannerException(CoreMessages.format(XMLPublicIDUtil.SPEC_DTD_ERROR_KEY), false,
                     IProblem.SPINDLE_INVALID_PUBLIC_ID);
         }
         fRootNode = document.getDocumentElement();
@@ -106,12 +103,12 @@ public abstract class SpecificationScanner extends AbstractScanner
         boolean ok = false;
         if (fPublicId != null)
         {
-            int version = XMLUtil.getDTDVersion(fPublicId);
-            if (version != XMLUtil.UNKNOWN_DTD)
+            int version = XMLPublicIDUtil.getDTDVersion(fPublicId);
+            if (version != XMLPublicIDUtil.UNKNOWN_DTD)
             {
-                for (int i = 0; i < XMLUtil.ALLOWED_SPEC_DTDS.length; i++)
+                for (int i = 0; i < XMLPublicIDUtil.ALLOWED_SPEC_DTDS.length; i++)
                 {
-                    if (XMLUtil.ALLOWED_SPEC_DTDS[i] == version)
+                    if (XMLPublicIDUtil.ALLOWED_SPEC_DTDS[i] == version)
                     {
                         ok = true;
                         break;
@@ -155,17 +152,16 @@ public abstract class SpecificationScanner extends AbstractScanner
         return super.afterScan(scanResults);
     }
 
-    public void setResourceInformation(IStorage storage, Resource location)
+    public void setResourceLocation(Resource location)
     {
-        fStorage = storage;
         fResourceLocation = location;
     }
 
     protected void setPublicId(String publicId)
     {
         fPublicId = publicId;
-        fPublicIdCode = XMLUtil.getDTDVersion(fPublicId);
-        fIsTapestry_4_0 = fPublicIdCode == XMLUtil.DTD_4_0;
+        fPublicIdCode = XMLPublicIDUtil.getDTDVersion(fPublicId);
+        fIsTapestry_4_0 = fPublicIdCode == XMLPublicIDUtil.DTD_4_0;
     }
 
     public static interface IConverter
@@ -181,9 +177,8 @@ public abstract class SpecificationScanner extends AbstractScanner
             Object result = TYPE_CONVERSION_MAP.get(value.toLowerCase());
 
             if (result == null || !(result instanceof Boolean))
-                throw new ScannerException(TapestryCore.getTapestryString(
-                        "SpecificationParser.fail-convert-boolean",
-                        value), false, IProblem.TAP_FAILED_TO_CONVERT_TO_BOOLEAN);
+                throw new ScannerException(ParseMessages.failConvertBoolean(value), false,
+                        IProblem.TAP_FAILED_TO_CONVERT_TO_BOOLEAN);
 
             return result;
         }
@@ -199,9 +194,8 @@ public abstract class SpecificationScanner extends AbstractScanner
             }
             catch (NumberFormatException ex)
             {
-                throw new ScannerException(TapestryCore.getTapestryString(
-                        "SpecificationParser.fail-convert-int",
-                        value), ex, false, IProblem.TAP_FAILED_TO_CONVERT_TO_INT);
+                throw new ScannerException(ParseMessages.failConvertInt(value), ex, false,
+                        IProblem.TAP_FAILED_TO_CONVERT_TO_INT);
             }
         }
     }
@@ -216,9 +210,8 @@ public abstract class SpecificationScanner extends AbstractScanner
             }
             catch (NumberFormatException ex)
             {
-                throw new ScannerException(TapestryCore.getTapestryString(
-                        "SpecificationParser.fail-convert-long",
-                        value), ex, false, IProblem.TAP_FAILED_TO_CONVERT_TO_LONG);
+                throw new ScannerException(ParseMessages.failConvertLong(value), ex, false,
+                        IProblem.TAP_FAILED_TO_CONVERT_TO_LONG);
             }
         }
     }
@@ -233,9 +226,8 @@ public abstract class SpecificationScanner extends AbstractScanner
             }
             catch (NumberFormatException ex)
             {
-                throw new ScannerException(TapestryCore.getTapestryString(
-                        "SpecificationParser.fail-convert-double",
-                        value), ex, false, IProblem.TAP_FAILED_TO_CONVERT_TO_DOUBLE);
+                throw new ScannerException(ParseMessages.failConvertDouble(value), ex, false,
+                        IProblem.TAP_FAILED_TO_CONVERT_TO_DOUBLE);
             }
         }
     }
@@ -258,7 +250,10 @@ public abstract class SpecificationScanner extends AbstractScanner
 
     }
 
-    protected SpecFactory fSpecificationFactory;
+//    /**
+//     * @deprecated
+//     */
+//    protected SpecFactory fSpecificationFactory;
 
     /**
      * We can share a single map for all the XML attribute to object conversions, since the keys are
@@ -414,27 +409,27 @@ public abstract class SpecificationScanner extends AbstractScanner
         }
     }
 
-    /**
-     * Sets the SpecFactory which instantiates Tapestry spec objects.
-     * 
-     * @since 1.0.9
-     */
-
-    public void setFactory(SpecFactory factory)
-    {
-        fSpecificationFactory = factory;
-    }
-
-    /**
-     * Returns the current SpecFactory which instantiates Tapestry spec objects.
-     * 
-     * @since 1.0.9
-     */
-
-    public SpecFactory getFactory()
-    {
-        return fSpecificationFactory;
-    }
+//    /**
+//     * Sets the SpecFactory which instantiates Tapestry spec objects.
+//     * @de
+//     * @since 1.0.9
+//     */
+//
+//    public void setFactory(SpecFactory factory)
+//    {
+//        fSpecificationFactory = factory;
+//    }
+//
+//    /**
+//     * Returns the current SpecFactory which instantiates Tapestry spec objects.
+//     * 
+//     * @since 1.0.9
+//     */
+//
+//    public SpecFactory getFactory()
+//    {
+//        return fSpecificationFactory;
+//    }
 
     /**
      * Used with many elements that allow a value to be specified as either an attribute, or as
@@ -451,12 +446,12 @@ public abstract class SpecificationScanner extends AbstractScanner
         boolean nullBodyValue = TapestryCore.isNull(bodyValue);
 
         if (!nullAttributeValue && !nullBodyValue)
-            throw new ScannerException(TapestryParseMessages.noAttributeAndBody(attributeName, node
+            throw new ScannerException(ParseMessages.noAttributeAndBody(attributeName, node
                     .getNodeName()), getNodeBodySourceLocation(node), false,
                     IProblem.EXTENDED_ATTRIBUTE_BOTH_VALUE_AND_BODY);
 
         if (required && nullAttributeValue && nullBodyValue)
-            throw new ScannerException(TapestryParseMessages.requiredExtendedAttribute(node
+            throw new ScannerException(ParseMessages.requiredExtendedAttribute(node
                     .getNodeName(), attributeName), getNodeStartSourceLocation(node), false,
                     IProblem.EXTENDED_ATTRIBUTE_NO_VALUE_OR_BODY);
 

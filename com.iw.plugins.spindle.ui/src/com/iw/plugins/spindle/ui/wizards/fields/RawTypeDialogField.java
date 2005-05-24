@@ -38,7 +38,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 
@@ -86,7 +86,7 @@ public class RawTypeDialogField extends StringButtonField
       requiredType = resolveTypeName(hierarchyRoot);
     } catch (JavaModelException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
   }
 
@@ -174,7 +174,7 @@ public class RawTypeDialogField extends StringButtonField
       }
     } catch (JavaModelException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
 
     return status;
@@ -234,7 +234,7 @@ public class RawTypeDialogField extends StringButtonField
       }
     } catch (JavaModelException jmex)
     {
-      UIPlugin.log(jmex);
+      UIPlugin.log_it(jmex);
     }
     return null;
   }
@@ -298,7 +298,7 @@ public class RawTypeDialogField extends StringButtonField
     {
       for (int i = 0; i < superInterfaces.length; i++)
       {
-        if (candidate.isBinary() && interfaceName.endsWith(superInterfaces[i]))
+        if (candidate.isBinaryResource() && interfaceName.endsWith(superInterfaces[i]))
         {
           match = true;
         } else

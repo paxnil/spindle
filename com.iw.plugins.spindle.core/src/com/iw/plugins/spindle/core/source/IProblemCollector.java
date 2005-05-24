@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.source;
 
-import org.eclipse.core.runtime.IStatus;
 
 /**
  * Interface for collecting the problems found by Spindle parsers and Scanners.
@@ -40,8 +39,6 @@ public interface IProblemCollector
 
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code);
-
-    public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary);
 
     public IProblem[] getProblems();
 

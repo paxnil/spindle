@@ -39,12 +39,10 @@ import java.util.Set;
 import org.apache.tapestry.parse.SpecificationParser;
 import org.apache.xerces.util.XMLResourceIdentifierImpl;
 import org.apache.xerces.xni.parser.XMLInputSource;
-import org.eclipse.core.runtime.IStatus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.xml.TapestryEntityResolver;
 import com.iw.plugins.spindle.core.scanning.W3CAccess;
@@ -487,7 +485,7 @@ public class DOMValidator implements IProblemCollector
      */
     private void reportDocumentError(String message)
     {
-        addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR,
+        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR,
                 message, 1, -1, -1, false, IProblem.NOT_QUICK_FIXABLE));
     }
 
@@ -777,17 +775,11 @@ public class DOMValidator implements IProblemCollector
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
     {
-        fProblems.add(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity,
+        fProblems.add(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity,
                 message, location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
                 isTemporary, code));
     }
-
-    public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
-    {
-        addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, status, location
-                .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary));
-    }
-
+   
     /*
      * (non-Javadoc)
      * 

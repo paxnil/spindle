@@ -26,7 +26,7 @@
 
 package com.iw.plugins.spindle.core.scanning;
 
-import org.eclipse.jdt.core.IType;
+import com.iw.plugins.spindle.core.IJavaType;
 
 /**
  * Listener interface for classes that are interested in things the Validators
@@ -42,6 +42,6 @@ public interface IScannerValidatorListener
    *          Tapestry artifact
    * @param result the IType the fullyQualifiedName resolved to, if any
    */
-  void typeChecked(String fullyQualifiedName, IType result);
+  void typeChecked(String fullyQualifiedName, IJavaType result);
 
 }

@@ -408,7 +408,7 @@ public abstract class AbstractPreferencePage extends PreferencePage
       }
     } catch (IOException io)
     {
-      UIPlugin.log(io);
+      UIPlugin.log_it(io);
     } finally
     {
       if (reader != null)

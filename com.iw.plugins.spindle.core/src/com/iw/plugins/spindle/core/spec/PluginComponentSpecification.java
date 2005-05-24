@@ -46,11 +46,10 @@ import org.apache.tapestry.spec.IContainedComponent;
 import org.apache.tapestry.spec.IParameterSpecification;
 import org.apache.tapestry.spec.IPropertySpecification;
 import org.apache.tapestry.spec.InjectSpecification;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.extensions.ComponentTypeResourceResolvers;
+import com.iw.plugins.spindle.core.extensions.IComponentTypeResourceResolver;
+import com.iw.plugins.spindle.core.extensions.SpindleExtensionException;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
@@ -65,6 +64,8 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 public class PluginComponentSpecification extends BaseSpecLocatable implements
         IComponentSpecification
 {
+    public static IComponentTypeResourceResolver COMPONENT_TYPE_RESOURCE_RESOLVERS;
+
     private String fComponentClassName;
 
     /**
@@ -209,13 +210,9 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
             fAssets = new HashMap();
         }
 
-        if (fAssetObjects.contains(asset))
-        {
-            throw new IllegalStateException("tried to add the same asset specification twice!");
-        }
-
         PluginAssetSpecification pAsset = (PluginAssetSpecification) asset;
         pAsset.setIdentifier(name);
+        pAsset.setParent(this);
 
         fAssetObjects.add(asset);
 
@@ -465,7 +462,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
     }
 
     /*
-     * (non-Javadoc)
+     * (non-Javadoc) scanners should not call this method directly!
      * 
      * @see org.apache.tapestry.spec.IComponentSpecification#addReservedParameterName(java.lang.String)
      */
@@ -481,7 +478,11 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
     {
         if (fReservedParameterDeclarations == null)
             fReservedParameterDeclarations = new ArrayList();
+
         fReservedParameterDeclarations.add(decl);
+        String reservedName = decl.getReservedName();
+        if (!TapestryCore.isNull(reservedName))
+            addReservedParameterName(reservedName);
     }
 
     public List getReservedParameterDeclarations()
@@ -655,27 +656,33 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
         if (!fPageSpecification && "org.apache.tapestry.BaseComponent".equals(fComponentClassName))
             return;
 
-        IType type = validator.validateTypeName(
+        Object type = validator.validateTypeName(
                 (IResourceWorkspaceLocation) getSpecificationLocation(),
                 fComponentClassName,
                 IProblem.ERROR,
                 sourceInfo.getAttributeSourceLocation("class"));
 
-        if (type != null)
-        {
-            ComponentTypeResourceResolvers contributedResolvers = new ComponentTypeResourceResolvers();
-            if (contributedResolvers.canResolve(type))
-            {
-                IStatus status = contributedResolvers.doResolve((IResourceWorkspaceLocation) this
-                        .getSpecificationLocation(), this);
-                if (!status.isOK())
-                    validator.addProblem(
-                            status,
-                            sourceInfo.getAttributeSourceLocation("class"),
-                            false);
+        if (type == null || COMPONENT_TYPE_RESOURCE_RESOLVERS == null)
+            return;
 
+        if (COMPONENT_TYPE_RESOURCE_RESOLVERS.canResolve(type))
+        {
+            try
+            {
+                COMPONENT_TYPE_RESOURCE_RESOLVERS.doResolve((IResourceWorkspaceLocation) this
+                        .getSpecificationLocation(), this);
+            }
+            catch (SpindleExtensionException e)
+            {
+                validator.addProblem(
+                        IProblem.ERROR,
+                        sourceInfo.getAttributeSourceLocation("class"),
+                        e.getMessage(),
+                        true,
+                        IProblem.NOT_QUICK_FIXABLE);
             }
         }
+
     }
 
     public void validate(IScannerValidator validator)
@@ -773,9 +780,10 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
         throw new UnsupportedOperationException();
 
     }
-    
-    public List getInjectPropertyNames() {
+
+    public List getInjectPropertyNames()
+    {
         return keys(fInjectSpecifications);
     }
-    
+
 }

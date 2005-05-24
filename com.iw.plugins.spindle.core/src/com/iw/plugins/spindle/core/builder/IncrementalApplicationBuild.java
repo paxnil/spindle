@@ -20,10 +20,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.extensions.IncrementalBuildVetoController;
+import com.iw.plugins.spindle.core.extensions.eclipse.IncrementalBuildVetoController;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
 import com.iw.plugins.spindle.core.util.CoreUtils;
 
 /* ***** BEGIN LICENSE BLOCK *****

@@ -27,7 +27,7 @@ package com.iw.plugins.spindle.core.resources;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TapestryResourceLocationAcceptor implements IResourceLocationAcceptor
+public class TapestryResourceLocationAcceptor implements IResourceAcceptor
 {
   /**
    * Accept flag for specifying .jwc files.

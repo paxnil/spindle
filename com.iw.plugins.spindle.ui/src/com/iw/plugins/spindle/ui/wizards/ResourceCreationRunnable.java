@@ -97,7 +97,7 @@ class ResourceCreationRunnable implements IRunnableWithProgress
     } catch (CoreException e)
     {
       // log it and eat it.
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     } finally
     {
       createdResources.clear();

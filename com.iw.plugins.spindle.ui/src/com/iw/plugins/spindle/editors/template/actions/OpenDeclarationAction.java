@@ -200,11 +200,11 @@ public class OpenDeclarationAction extends BaseTemplateAction
             }
             catch (PartInitException e)
             {
-                UIPlugin.log(e);
+                UIPlugin.log_it(e);
             }
             catch (JavaModelException e)
             {
-                UIPlugin.log(e);
+                UIPlugin.log_it(e);
             }
         }
         else if (result instanceof IStorage)
@@ -266,7 +266,7 @@ public class OpenDeclarationAction extends BaseTemplateAction
         }
         catch (Exception e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
         }
     }
 

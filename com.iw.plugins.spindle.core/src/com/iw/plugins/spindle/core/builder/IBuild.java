@@ -26,7 +26,8 @@
 
 package com.iw.plugins.spindle.core.builder;
 
-import org.eclipse.core.runtime.CoreException;
+import com.iw.plugins.spindle.core.IJavaTypeFinder;
+
 
 /**
  * Interface for Builders
@@ -34,8 +35,8 @@ import org.eclipse.core.runtime.CoreException;
  * @author glongman@gmail.com
  * 
  */
-public interface IBuild
+public interface IBuild extends IJavaTypeFinder
 {
-  public void build() throws BuilderException, CoreException;
+  public void build() throws BuilderException;
   public void cleanUp();
 }

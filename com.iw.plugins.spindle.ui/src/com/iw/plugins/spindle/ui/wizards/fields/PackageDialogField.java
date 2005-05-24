@@ -37,7 +37,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 
@@ -200,7 +200,7 @@ public class PackageDialogField extends StringButtonField
         }
       } catch (JavaModelException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
         // let pass
       }
 
@@ -224,7 +224,7 @@ public class PackageDialogField extends StringButtonField
           }
         } catch (JavaModelException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
         }
       }
     } else
@@ -274,7 +274,7 @@ public class PackageDialogField extends StringButtonField
       }
     } catch (JavaModelException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
     return null;
   }

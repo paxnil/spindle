@@ -623,7 +623,7 @@ public class XMLNode extends TypedPosition
       return content.substring(0, index).trim();
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
     return null;
   }
@@ -678,7 +678,7 @@ public class XMLNode extends TypedPosition
       return content.substring(1, content.length() - 1);
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
 
     return null;
@@ -692,7 +692,7 @@ public class XMLNode extends TypedPosition
       return content.indexOf('=') > 0 && getAttributeValueStart() > 0;
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
     return false;
   }
@@ -793,7 +793,7 @@ public class XMLNode extends TypedPosition
       content = document.get(getOffset(), getLength());
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
       return attrs;
     }
 
@@ -972,7 +972,7 @@ public class XMLNode extends TypedPosition
       content = document.get(getOffset(), offset - getOffset());
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
       return TAG;
     }
 

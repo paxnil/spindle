@@ -59,7 +59,7 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.builder.TapestryBuilder;
-import com.iw.plugins.spindle.core.util.JarEntryFileUtil;
+import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
 
 /**
  * Reveals IStorages in the workbench as editors are selected
@@ -202,7 +202,7 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
 
     } catch (CoreException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
     return useSelection;
   }

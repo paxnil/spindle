@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
+import com.iw.plugins.spindle.core.ICoreListener;
 import com.iw.plugins.spindle.core.TapestryCore;
 
 /**
@@ -44,7 +45,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 public abstract class AbstractDecorator
     implements
       ILightweightLabelDecorator,
-      TapestryCore.ICoreListener
+      ICoreListener
 {
   public AbstractDecorator()
   {

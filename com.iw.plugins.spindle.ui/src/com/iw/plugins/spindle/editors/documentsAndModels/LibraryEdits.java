@@ -40,6 +40,7 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.spec.PluginPageDeclaration;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
+import com.iw.plugins.spindle.core.util.XMLPublicIDUtil;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.wutka.dtd.DTD;
 
@@ -167,7 +168,7 @@ public class LibraryEdits extends SpecificationEdits
    */
   protected DTD getDefaultDTD()
   {
-    return DOMValidator.getDTD(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
+    return DOMValidator.getDTD(XMLPublicIDUtil.getPublicId(XMLPublicIDUtil.DTD_3_0));
   }
 
   /*

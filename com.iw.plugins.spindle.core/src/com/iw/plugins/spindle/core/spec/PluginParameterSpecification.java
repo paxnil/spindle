@@ -28,7 +28,6 @@ package com.iw.plugins.spindle.core.spec;
 
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
-import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
@@ -174,17 +173,6 @@ public class PluginParameterSpecification extends DescribableSpecification imple
         {
 
             String typeAttr = "type";
-            //      int DTDVersion = XMLUtil.getDTDVersion(component.getPublicId());
-            //      switch (DTDVersion)
-            //      {
-            //        case XMLUtil.DTD_1_3 :
-            //          typeAttr = "java-type";
-            //          break;
-            //
-            //        case XMLUtil.DTD_3_0 :
-            //
-            //          break;
-            //      }
 
             if (!SpecificationScanner.TYPE_LIST.contains(fType))
             {
@@ -203,7 +191,7 @@ public class PluginParameterSpecification extends DescribableSpecification imple
         }
     }
 
-    private IType validateTypeSpecial(IScannerValidator validator,
+    private Object validateTypeSpecial(IScannerValidator validator,
             IResourceWorkspaceLocation dependant, String typeName, int severity,
             ISourceLocation location) throws ScannerException
     {

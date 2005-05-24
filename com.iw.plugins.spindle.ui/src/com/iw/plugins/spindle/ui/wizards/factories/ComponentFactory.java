@@ -85,7 +85,7 @@ public class ComponentFactory extends TemplateFactory
           qualifiedComponentClass).getBytes());
     } catch (Exception e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
       contents = new ByteArrayInputStream("\n\n\n\nan error occured. Check the log"
           .getBytes());
     }

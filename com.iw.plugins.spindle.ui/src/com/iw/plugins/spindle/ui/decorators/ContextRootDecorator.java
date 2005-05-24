@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
+import com.iw.plugins.spindle.core.ICoreListener;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 
@@ -47,7 +48,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 public class ContextRootDecorator extends AbstractDecorator
     implements
       ILightweightLabelDecorator,
-      TapestryCore.ICoreListener
+      ICoreListener
 {
 
   public ContextRootDecorator()
@@ -66,7 +67,7 @@ public class ContextRootDecorator extends AbstractDecorator
 
     if (decoration == null)
     {
-      UIPlugin.log("ContextRootDecorator.decorate() called with null decoration");
+      UIPlugin.log_it("ContextRootDecorator.decorate() called with null decoration");
       return;
     }
 

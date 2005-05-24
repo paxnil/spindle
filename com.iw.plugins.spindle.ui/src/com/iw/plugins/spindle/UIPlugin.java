@@ -72,6 +72,7 @@ import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
+import com.iw.plugins.spindle.core.util.XMLPublicIDUtil;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.SharedTextColors;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
@@ -100,7 +101,7 @@ public class UIPlugin extends AbstractUIPlugin
   static
   {
     DEFAULT_COMPONENT_SPEC = new PluginComponentSpecification();
-    DEFAULT_COMPONENT_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
+    DEFAULT_COMPONENT_SPEC.setPublicId(XMLPublicIDUtil.getPublicId(XMLPublicIDUtil.DTD_3_0));
     DEFAULT_COMPONENT_SPEC.setPageSpecification(false);
     DEFAULT_COMPONENT_SPEC.setComponentClassName(CoreMessages
         .format("TapestryComponentSpec.defaultSpec"));
@@ -108,21 +109,21 @@ public class UIPlugin extends AbstractUIPlugin
         .getString("auto-create-spec-description"));
 
     DEFAULT_PAGE_SPEC = new PluginComponentSpecification();
-    DEFAULT_PAGE_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
+    DEFAULT_PAGE_SPEC.setPublicId(XMLPublicIDUtil.getPublicId(XMLPublicIDUtil.DTD_3_0));
     DEFAULT_PAGE_SPEC.setPageSpecification(true);
     DEFAULT_PAGE_SPEC.setComponentClassName(CoreMessages
         .format("TapestryPageSpec.defaultSpec"));
     DEFAULT_PAGE_SPEC.setDescription(UIPlugin.getString("auto-create-spec-description"));
 
     DEFAULT_APPLICATION_SPEC = new PluginApplicationSpecification();
-    DEFAULT_APPLICATION_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
+    DEFAULT_APPLICATION_SPEC.setPublicId(XMLPublicIDUtil.getPublicId(XMLPublicIDUtil.DTD_3_0));
     DEFAULT_APPLICATION_SPEC.setEngineClassName(CoreMessages
         .format("TapestryEngine.defaultEngine"));
     DEFAULT_APPLICATION_SPEC.setDescription(UIPlugin
         .getString("auto-create-spec-description"));
 
     DEFAULT_LIBRARY_SPEC = new PluginApplicationSpecification();
-    DEFAULT_LIBRARY_SPEC.setPublicId(XMLUtil.getPublicId(XMLUtil.DTD_3_0));
+    DEFAULT_LIBRARY_SPEC.setPublicId(XMLPublicIDUtil.getPublicId(XMLPublicIDUtil.DTD_3_0));
     DEFAULT_LIBRARY_SPEC.setDescription(UIPlugin
         .getString("auto-create-spec-description"));
 
@@ -182,7 +183,7 @@ public class UIPlugin extends AbstractUIPlugin
   {
     ILog log = getDefault().getLog();
     Status status = new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, msg + "\n", null);
-    log.log(status);
+    log.log_it(status);
   }
 
   static public void warn(Throwable e)
@@ -191,12 +192,12 @@ public class UIPlugin extends AbstractUIPlugin
     buffer.append(e.getClass().getName());
     buffer.append('\n');
     buffer.append(e.getStackTrace()[0].toString());
-    log(buffer.toString());
+    log_it(buffer.toString());
   }
 
   static public void warn(String message)
   {
-    log("Warning:" + message);
+    log_it("Warning:" + message);
   }
 
   static public void log(Throwable ex)
@@ -207,7 +208,7 @@ public class UIPlugin extends AbstractUIPlugin
     String msg = stringWriter.getBuffer().toString();
 
     Status status = new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, msg, null);
-    log.log(status);
+    log.log_it(status);
   }
 
   public static IResource getActiveEditorFileInput()
@@ -303,7 +304,7 @@ public class UIPlugin extends AbstractUIPlugin
 
     } catch (PartInitException piex)
     {
-      UIPlugin.log(piex);
+      UIPlugin.log_it(piex);
     }
     return null;
   }

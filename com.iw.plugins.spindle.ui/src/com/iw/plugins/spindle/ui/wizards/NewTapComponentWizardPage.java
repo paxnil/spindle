@@ -89,7 +89,7 @@ import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.Files;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.editors.documentsAndModels.ApplicationEdits;
 import com.iw.plugins.spindle.editors.documentsAndModels.LibraryEdits;
@@ -715,7 +715,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
             file.getProject().build(TapestryBuilder.INCREMENTAL_BUILD, monitor);
           } catch (CoreException e1)
           {
-            UIPlugin.log(e1);
+            UIPlugin.log_it(e1);
             throw new InvocationTargetException(e1);
           }
 
@@ -769,15 +769,15 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
           helper.apply();
         } catch (MalformedTreeException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
           throw new InvocationTargetException(e);
         } catch (BadLocationException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
           throw new InvocationTargetException(e);
         } catch (TapestryException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
           throw new InvocationTargetException(e);
         }
 
@@ -792,7 +792,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
             file.setContents(b, true, true, monitor);
           } catch (CoreException e1)
           {
-            UIPlugin.log(e1);
+            UIPlugin.log_it(e1);
             throw new InvocationTargetException(e1);
           }
         }
@@ -872,7 +872,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         result = folder.getFile(fileName);
       } catch (JavaModelException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
       }
     }
     return result;
@@ -950,7 +950,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     INamespace namespace = fNamespaceDialogField.getSelectedNamespace();
     IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
         .getSpecificationLocation();
-    if (location.isOnClasspath())
+    if (location.isClasspathResource())
     {
       //check if location exists!
       IFile file = (IFile) location.getStorage();

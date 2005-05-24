@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 
 public class NewTapComponentWizard extends NewTapestryElementWizard
 {
@@ -110,7 +110,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
       } catch (Exception e1)
       {
         //eat it
-        UIPlugin.log(e1);
+        UIPlugin.log_it(e1);
       } finally
       {
         fPage1.clearResource();
@@ -184,7 +184,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
       return true;
     } catch (Exception e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
       MessageDialog.openError(
           getShell(),
           "Operation Failed",

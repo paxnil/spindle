@@ -26,13 +26,10 @@
 package com.iw.plugins.spindle.core.extensions;
 
 import org.apache.tapestry.spec.IComponentSpecification;
-import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 
-
+//TODO javadoc is out of date
 /**
  * Interface for resolving a Tapestry page/component's type.
  * <p>
@@ -80,11 +77,10 @@ public interface IComponentTypeResourceResolver
    * @param type IType the type found in the component spec xml.
    * @return true if this instance can proceed to resolve, false otherwise.
    */
-  boolean canResolve(IType type);
+  boolean canResolve(Object typeObject);
 
   /**
-   * resolve the component type's IStorage object and return a status indicating
-   * sucesss or failure
+   * resolve the component type's IStorage object and throw and Exception on failure
    * <p>
    * Called second
    * @param specificationLocation the location of the specification we are trying
@@ -96,17 +92,17 @@ public interface IComponentTypeResourceResolver
    * @return an instance of IStatus. <code>getStorage()</code> will only be
    *                 called if the status returned is OK.
    */
-  IStatus doResolve(
+  void doResolve(
       IResourceWorkspaceLocation specificationLocation,
-      IComponentSpecification componentSpec);
+      IComponentSpecification componentSpec) throws SpindleExtensionException;
 
   /**
-   * Called only if <code>doResolve()</code> returned an OK status.
+   * Called only if <code>doResolve()</code> did not throw an Exception.
    * <p>
    * called last
    * 
    * @return the component type's resolve storage object. Must not be null!
    */
-  IStorage getStorage();
+  Object getStorage();
 
 }

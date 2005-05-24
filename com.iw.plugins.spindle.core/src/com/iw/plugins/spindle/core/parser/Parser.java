@@ -37,8 +37,6 @@ import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLParseException;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -48,7 +46,6 @@ import org.eclipse.jface.text.IRegion;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
-import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParser;
 import com.iw.plugins.spindle.core.parser.xml.dom.TapestryDOMParserConfiguration;
@@ -207,28 +204,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             fDomParseConfiguration.setErrorHandler(this);
         }
     }
-
-    public DocumentImpl parse(IStorage storage, String encoding) throws IOException, CoreException
-    {
-
-        try
-        {
-            return parse(storage.getContents(), encoding);
-
-        }
-        catch (CoreException e)
-        {
-            //      if (e.getStatus().getCode() == IResourceStatus.OUT_OF_SYNC_LOCAL) {
-            //        ErrorDialog.openError(TapestryCore.getDefault().getActiveWorkbenchShell(), "Resource
-            // out of Sync", null, e.getStatus());
-            //      } else {
-
-            e.printStackTrace();
-            //      }
-            throw e;
-        }
-    }
-
+   
     public DocumentImpl parse(InputStream input, String encoding) throws IOException
     {
         String content = Files.readFileToString(input, encoding);
@@ -499,14 +475,14 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
     {
-        addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity, message,
+        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message,
                 location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
                 isTemporary, code));
     }
 
     public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
     {
-        addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, status, location
+        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, status, location
                 .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary));
     }
 
@@ -521,7 +497,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     private IProblem createFatalProblem(XMLParseException parseException, int severity)
     {
         return createParserProblem(
-                ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER,
+                IProblem.TAPESTRY_FATAL_PROBLEM_MARKER,
                 parseException,
                 severity);
     }
@@ -529,7 +505,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     private IProblem createErrorProblem(XMLParseException parseException, int severity)
     {
         return createParserProblem(
-                ITapestryMarker.TAPESTRY_SOURCE_PROBLEM_MARKER,
+                IProblem.TAPESTRY_SOURCE_PROBLEM_MARKER,
                 parseException,
                 severity);
     }

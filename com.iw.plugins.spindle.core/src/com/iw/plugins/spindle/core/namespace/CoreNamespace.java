@@ -166,7 +166,7 @@ public class CoreNamespace implements ICoreNamespace
         if (location == null)
             return false;
 
-        return location.isBinary();
+        return location.isBinaryResource();
     }
 
     public boolean isOnClassPath()
@@ -175,7 +175,7 @@ public class CoreNamespace implements ICoreNamespace
         if (location == null)
             return false;
 
-        return location.isOnClasspath();
+        return location.isClasspathResource();
     }
 
     /*

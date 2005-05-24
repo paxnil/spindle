@@ -41,13 +41,15 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-import com.iw.plugins.spindle.core.ITapestryMarker;
+import com.iw.plugins.spindle.core.IJavaTypeFinder;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.properties.ComponentPropertySource;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
@@ -55,11 +57,11 @@ import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
-import com.iw.plugins.spindle.core.util.Markers;
+import com.iw.plugins.spindle.core.util.eclipse.Markers;
 
 /**
- * New Incremental AbstractBuild - this one revalidates specs if thier underlying resource has not changed.
- * Note: templates are not revalidated, they are parsed as per a regular build.
+ * New Incremental AbstractBuild - this one revalidates specs if thier underlying resource has not
+ * changed. Note: templates are not revalidated, they are parsed as per a regular build.
  * 
  * @author glongman@gmail.com
  */
@@ -78,17 +80,16 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveApplication(com.iw.plugins.spindle.core.parser.Parser,
      *      org.eclipse.core.resources.IStorage, org.apache.hivemind.Resource, java.lang.String)
      */
-    protected IApplicationSpecification resolveAppflication(Parser parser, IStorage storage,
-            Resource location, String encoding)
+    protected IApplicationSpecification resolveApplication(Parser parser, Resource location, String encoding)
     {
         IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
         PluginApplicationSpecification result = null;
 
-        if (!checkStorage(location, storage))
+        if (!checkResource(useLocation))
             return null;
 
         // pull the preexisting spec (if it exists) from the last build.
-        result = (PluginApplicationSpecification) fLastState.getSpecificationMap().get(storage);
+        result = (PluginApplicationSpecification) fLastState.getSpecificationMap().get(location);
 
         IFile file = null;
 
@@ -111,7 +112,8 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         try
         {
             //revalidate the spec.
-            IScannerValidator useValidator = new BuilderValidator(this, fTypeFinder, true);
+            IScannerValidator useValidator = new SpecificationValidator(
+                    fTapestryBuilder.fTapestryProject);
             useValidator.addListener(this);
 
             fProblemCollector.beginCollecting();
@@ -139,13 +141,13 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             finished(useLocation);
         }
 
-        rememberSpecification(storage, result);
+        rememberSpecification(useLocation, result);
         return result;
     }
 
-    private boolean checkStorage(Resource location, IStorage storage)
+    private boolean checkResource(IResourceWorkspaceLocation location)
     {
-        if (storage == null)
+        if (!location.exists())
         {
             finished(location);
             return false;
@@ -159,8 +161,8 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveLibrarySpecification(com.iw.plugins.spindle.core.parser.Parser,
      *      org.eclipse.core.resources.IStorage, org.apache.hivemind.Resource, java.lang.String)
      */
-    protected ILibrarySpecification resolveLibrarySpecification(Parser parser, IStorage storage,
-            Resource location, String encoding)
+    protected ILibrarySpecification resolveLibrarySpecification(Parser parser, Resource location,
+            String encoding)
     {
 
         IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
@@ -171,7 +173,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         if (fProcessedLocations.containsKey(useLocation))
             return (ILibrarySpecification) fProcessedLocations.get(useLocation);
 
-        if (!checkStorage(location, storage))
+        if (!checkResource(location))
             return null;
 
         // pull the preexisting spec (if it exists) from the last build.
@@ -198,7 +200,8 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         try
         {
             //revalidate the spec.
-            IScannerValidator useValidator = new BuilderValidator(this, fTypeFinder, true);
+            IScannerValidator useValidator = new SpecificationValidator(
+                    (IJavaTypeFinder) this, fTapestryBuilder.fTapestryProject);
             useValidator.addListener(this);
 
             fProblemCollector.beginCollecting();
@@ -241,7 +244,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      *      com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation, java.lang.String)
      */
     protected IComponentSpecification resolveIComponentSpecification(Parser parser,
-            ICoreNamespace namespace, IStorage storage, IResourceWorkspaceLocation location,
+            ICoreNamespace namespace, IResourceWorkspaceLocation location,
             String templateExtension, String encoding)
     {
         PluginComponentSpecification result = null;
@@ -251,7 +254,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         if (fProcessedLocations.containsKey(location))
             return (IComponentSpecification) fProcessedLocations.get(location);
 
-        if (!checkStorage(location, storage))
+        if (!checkResource(location))
             return null;
 
         // pull the preexisting spec (if it exists) from the last build.
@@ -265,10 +268,9 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             if (result == null || result.isPlaceholder() || fileChanged(file))
             {
                 Markers.removeProblemsFor(file);
-                return super.resolveIComponentSpecification( 
+                return super.resolveIComponentSpecification(
                         parser,
                         namespace,
-                        file,
                         location,
                         templateExtension,
                         encoding);
@@ -281,7 +283,6 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             return super.resolveIComponentSpecification(
                     parser,
                     namespace,
-                    storage,
                     location,
                     templateExtension,
                     encoding);
@@ -290,7 +291,8 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         try
         {
             //revalidate the spec.
-            IScannerValidator useValidator = new BuilderValidator(this, fTypeFinder, true);
+            IScannerValidator useValidator = new SpecificationValidator(
+                    (IJavaTypeFinder) this, fTapestryBuilder.fTapestryProject);
             useValidator.addListener(this);
 
             fProblemCollector.beginCollecting();
@@ -301,8 +303,9 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
             {
                 result.validate(useValidator);
                 List oldTemplates = new ArrayList(result.getTemplateLocations());
-                ComponentPropertySource source = new ComponentPropertySource(fProjectPropertySource, result);
-                result.setTemplateLocations(TapestryBuilder.scanForTemplates(
+                ComponentPropertySource source = new ComponentPropertySource(
+                        fProjectPropertySource, result);
+                result.setTemplateLocations(TemplateFinder.scanForTemplates(
                         result,
                         source.getPropertyValue("org.apache.tapestry.template-extension"),
                         fTapestryBuilder.fTapestryProject,
@@ -338,7 +341,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
         {
             finished(location);
         }
-        rememberSpecification(storage, result);
+        rememberSpecification(location, result);
         fProcessedLocations.put(location, result);
 
         return result;
@@ -350,7 +353,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      * @see com.iw.plugins.spindle.core.builder.AbstractBuild#parseTemplates(com.iw.plugins.spindle.core.spec.PluginComponentSpecification)
      */
     protected void parseTemplates(PluginComponentSpecification spec)
-    {        
+    {
         List locs = spec.getTemplateLocations();
         int count = locs.size();
 
@@ -377,7 +380,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
      *            the IStorage for the template
      * @return true iff the template should be parsed (expensive)
      */
-    protected boolean shouldParseTemplate(IStorage ownerSpec, IStorage template)
+    protected boolean shouldParseTemplate(Resource ownerSpec, Resource template)
     {
         boolean mustParse = false;
         boolean cleanLastBuild = fLastState.fCleanTemplates.contains(template);
@@ -430,7 +433,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
                 boolean isTemporary, int code)
         {
 
-            addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity,
+            addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity,
                     message, location.getLineNumber(), location.getCharStart(), location
                             .getCharEnd(), isTemporary, code));
 
@@ -444,7 +447,7 @@ public class IncrementalProjectBuild extends IncrementalApplicationBuild
          */
         public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
         {
-            addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, status, location
+            addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, status, location
                     .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary));
         }
 

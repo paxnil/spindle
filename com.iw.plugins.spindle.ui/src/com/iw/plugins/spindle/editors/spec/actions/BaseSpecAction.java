@@ -113,7 +113,7 @@ public abstract class BaseSpecAction extends BaseEditorAction
       doRun();
     } catch (RuntimeException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
       throw e;
     }
   }

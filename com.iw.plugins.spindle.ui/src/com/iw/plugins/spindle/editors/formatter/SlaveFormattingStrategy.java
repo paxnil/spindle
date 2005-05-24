@@ -107,10 +107,10 @@ public class SlaveFormattingStrategy extends ContextBasedFormattingStrategy
           ((TextEdit) result).apply(document);
         } catch (MalformedTreeException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
         } catch (BadLocationException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
         }
     }
   }

@@ -29,10 +29,9 @@ package com.iw.plugins.spindle.core.scanning;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.IStatus;
 import org.w3c.dom.Node;
 
-import com.iw.plugins.spindle.core.ITapestryMarker;
+import com.iw.plugins.spindle.core.IJavaTypeFinder;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -61,6 +60,10 @@ public abstract class AbstractScanner implements IProblemCollector
     protected List fProblems = new ArrayList();
 
     protected IScannerValidator fValidator;
+    
+    protected IJavaTypeFinder fJavaTypeFinder;
+    
+    protected boolean isCachingJavaTypes = false;
 
     public Object scan(Object source, IScannerValidator validator) throws ScannerException
     {
@@ -69,7 +72,6 @@ public abstract class AbstractScanner implements IProblemCollector
         beginCollecting();
         try
         {
-
             if (validator == null)
             {
                 this.fValidator = new BaseValidator();
@@ -85,7 +87,6 @@ public abstract class AbstractScanner implements IProblemCollector
 
             doScan(source, resultObject);
             return afterScan(resultObject);
-
         }
         catch (ScannerException scex)
         {
@@ -97,7 +98,7 @@ public abstract class AbstractScanner implements IProblemCollector
             }
             else
             {
-                addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+                addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER,
                         IProblem.ERROR, scex.getMessage(), 0, 0, 0, false, scex.getCode()));
             }
             return null;
@@ -125,7 +126,7 @@ public abstract class AbstractScanner implements IProblemCollector
     protected Object afterScan(Object scanResults) throws ScannerException
     {
         return scanResults;
-    }
+    }    
 
     public void beginCollecting()
     {
@@ -156,15 +157,9 @@ public abstract class AbstractScanner implements IProblemCollector
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
     {
-        addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity, message,
+        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message,
                 location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
                 isTemporary, code));
-    }
-
-    public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
-    {
-        addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, status, location
-                .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary));
     }
 
     public void addProblems(IProblem[] problems)

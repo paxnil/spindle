@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.extensions.IComponentTypeResourceResolver;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 
 /**
  *  Resolve groovy files for Groovestry Pages and Components
@@ -81,7 +81,7 @@ public class ComponentTypeResolver implements IComponentTypeResourceResolver
 //        return true;
     } catch (JavaModelException e)
     {
-      TapestryCore.log(e);    
+      TapestryCore.log_it(e);    
     }
     return false;
   }

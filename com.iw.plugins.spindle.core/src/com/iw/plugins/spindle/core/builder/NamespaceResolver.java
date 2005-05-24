@@ -41,7 +41,6 @@ import org.apache.tapestry.Tapestry;
 import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
-import org.eclipse.core.runtime.Path;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.PicassoMigration;
@@ -52,12 +51,12 @@ import com.iw.plugins.spindle.core.namespace.PageSpecificationResolver;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.properties.NamespacePropertySource;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.Path;
 import com.iw.plugins.spindle.core.resources.TapestryResourceLocationAcceptor;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
-import com.iw.plugins.spindle.core.util.Markers;
 
 /**
  * Resolver for a Namespace To resolve a namespace you need: Given, the framework namespace, or null
@@ -167,8 +166,11 @@ public abstract class NamespaceResolver
         }
         else
         {
-            fResultNamespace = fBuild.createNamespace(fParser, fNamespaceId, fNamespaceSpecLocation
-                    .getStorage(), fNamespaceSpecLocation, null);
+            fResultNamespace = fBuild.createNamespace(
+                    fParser,
+                    fNamespaceId,
+                    fNamespaceSpecLocation,
+                    null);
             doResolve();
         }
         fResultNamespacePropertySource = new NamespacePropertySource(fBuild.fProjectPropertySource,
@@ -339,14 +341,14 @@ public abstract class NamespaceResolver
 
                 IResourceWorkspaceLocation libLocation;
 
-                if (namespaceLocation.isOnClasspath())
+                if (namespaceLocation.isClasspathResource())
                     libLocation = (IResourceWorkspaceLocation) namespaceLocation
                             .getRelativeResource(spec.getLibrarySpecificationPath(libraryId));
                 else
                     libLocation = (IResourceWorkspaceLocation) fBuild.fTapestryBuilder.fClasspathRoot
                             .getRelativeResource(spec.getLibrarySpecificationPath(libraryId));
 
-                if (libLocation.getStorage() != null)
+                if (libLocation.exists())
                 {
                     NamespaceResolver childResolver = new LibraryResolver(fBuild, fParser,
                             fFrameworkNamespace, fResultNamespace, libraryId, libLocation);
@@ -402,8 +404,12 @@ public abstract class NamespaceResolver
 
         fComponentStack.push(location);
 
-        result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location
-                .getStorage(), location, fResultNamespaceTemplateExtension, null);
+        result = fBuild.resolveIComponentSpecification(
+                fParser,
+                fResultNamespace,
+                location,
+                fResultNamespaceTemplateExtension,
+                null);
 
         if (result != null)
         {
@@ -469,7 +475,7 @@ public abstract class NamespaceResolver
 
         TapestryResourceLocationAcceptor acceptor = new TapestryResourceLocationAcceptor("*",
                 false, TapestryResourceLocationAcceptor.ACCEPT_JWC);
-        IResourceWorkspaceLocation[] jwcs = fResultNamespace.getResourceLookup().lookup(acceptor);
+        Resource[] jwcs = fResultNamespace.getResourceLookup().lookup(acceptor);
 
         // remaining typed by thier filename
         for (int i = 0; i < jwcs.length; i++)
@@ -480,14 +486,15 @@ public abstract class NamespaceResolver
                 result.put(type, jwcs[i]);
 
             }
-            else
-            {
-                if (!jwcs[i].equals(result.get(type)))
-                    Markers.recordProblems(jwcs[i], new IProblem[]
-                    { new DefaultProblem(Markers.TAPESTRY_MARKER_TAG, IProblem.ERROR, CoreMessages
-                            .format("builder-hidden-jwc-file", jwcs[i], result.get(type)), 1, 0, 0,
-                            false, IProblem.SPINDLE_BUILDER_HIDDEN_JWC_FILE) });
-            }
+            else if (!jwcs[i].equals(result.get(type)))
+
+                fBuild.fTapestryBuilder.fProblemPersister.recordProblem(
+                        jwcs[i],
+                        new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR,
+                                CoreMessages.format("builder-hidden-jwc-file", jwcs[i], result
+                                        .get(type)), 1, 0, 0, false,
+                                IProblem.SPINDLE_BUILDER_HIDDEN_JWC_FILE));
+
         }
         return result;
     }
@@ -514,7 +521,7 @@ public abstract class NamespaceResolver
 
         TapestryResourceLocationAcceptor acceptor = new TapestryResourceLocationAcceptor("*",
                 false, TapestryResourceLocationAcceptor.ACCEPT_PAGE);
-        IResourceWorkspaceLocation[] pages = fResultNamespace.getResourceLookup().lookup(acceptor);
+        Resource[] pages = fResultNamespace.getResourceLookup().lookup(acceptor);
 
         // remaining named by thier filename
         for (int i = 0; i < pages.length; i++)
@@ -525,14 +532,14 @@ public abstract class NamespaceResolver
                 result.put(name, pages[i]);
 
             }
-            else
-            {
-                if (!result.get(name).equals(pages[i]))
-                    Markers.recordProblems(pages[i], new IProblem[]
-                    { new DefaultProblem(Markers.TAPESTRY_MARKER_TAG, IProblem.ERROR, CoreMessages
-                            .format("builder-hidden-page-file", pages[i], result.get(name)), 1, 0,
-                            0, false, IProblem.SPINDLE_BUILDER_HIDDEN_PAGE_FILE) });
-            }
+            else if (!result.get(name).equals(pages[i]))
+                fBuild.fTapestryBuilder.fProblemPersister.recordProblem(
+                        pages[i],
+                        new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR,
+                                CoreMessages.format("builder-hidden-page-file", pages[i], result
+                                        .get(name)), 1, 0, 0, false,
+                                IProblem.SPINDLE_BUILDER_HIDDEN_PAGE_FILE));
+
         }
         return result;
     }
@@ -580,9 +587,13 @@ public abstract class NamespaceResolver
 
         result = null;
 
-        result = fBuild.resolveIComponentSpecification(fParser, fResultNamespace, location
-                .getStorage(), location, fResultNamespaceTemplateExtension, null);
-        
+        result = fBuild.resolveIComponentSpecification(
+                fParser,
+                fResultNamespace,
+                location,
+                fResultNamespaceTemplateExtension,
+                null);
+
         if (result != null)
         {
             fResultNamespace.installPageSpecification(name, result);
@@ -612,10 +623,9 @@ public abstract class NamespaceResolver
 
             IComponentSpecification result = null;
             result = fContainerNamespace.getComponentSpecification(type);
+
             if (result == null && fJwcFiles.containsKey(type))
-            {
                 result = resolveComponent(type, (IResourceWorkspaceLocation) fJwcFiles.get(type));
-            }
 
             if (result == null)
                 result = resolveInFramework(type);

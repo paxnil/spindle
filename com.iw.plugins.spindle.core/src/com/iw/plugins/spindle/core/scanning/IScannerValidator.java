@@ -30,8 +30,6 @@ import org.apache.hivemind.Resource;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
@@ -216,11 +214,12 @@ public interface IScannerValidator
      * @param fullyQualifiedType
      * @param severity
      *            the severity to use when reporting problems
-     * @return true iff the type exists in the project
+     * @return non null iff the type exists in the project. The object returned is implementation
+     *         specific
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public IType validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
+    public Object validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
             int severity) throws ScannerException;
 
     /**
@@ -237,10 +236,10 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public IType validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
+    public Object validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
             int severity, ISourceLocation location) throws ScannerException;
 
-    public IType findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName);
+    public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName);
 
     public void addListener(IScannerValidatorListener listener);
 
@@ -259,9 +258,7 @@ public interface IScannerValidator
      */
     public void addProblem(int severity, ISourceLocation sourceLocation, String message,
             boolean isTemporary, int code) throws ScannerException;
-
-    public void addProblem(IStatus status, ISourceLocation sourceLocation, boolean isTemporary)
-            throws ScannerException;
+    
 
     public void validateBindingReference(int severity, ISourceLocation sourceLocation,
             String reference) throws ScannerException;

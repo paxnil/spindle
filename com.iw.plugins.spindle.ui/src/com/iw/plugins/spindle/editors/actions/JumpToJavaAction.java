@@ -43,7 +43,7 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.extensions.ComponentTypeResourceResolvers;
+import com.iw.plugins.spindle.core.extensions.eclipse.EclipseComponentTypeResourceResolvers;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
@@ -102,7 +102,7 @@ public class JumpToJavaAction extends BaseJumpAction
             IType type = resolveType(typeName);
             if (type != null)
             {
-                ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
+                EclipseComponentTypeResourceResolvers resolver = new EclipseComponentTypeResourceResolvers();
                 if (!resolver.canResolve(type))
                     return type;
 
@@ -161,7 +161,7 @@ public class JumpToJavaAction extends BaseJumpAction
                                 if (storage instanceof IFile)
                                 {
                                     specLocation = tproject.getWebContextLocation()
-                                            .getRelativeLocation((IFile) storage);
+                                            .getRelativeResource((IFile) storage);
                                 }
                                 else
                                 {
@@ -172,7 +172,7 @@ public class JumpToJavaAction extends BaseJumpAction
                                 IComponentSpecification componentSpec = (IComponentSpecification) fEditor
                                         .getSpecification();
 
-                                ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
+                                EclipseComponentTypeResourceResolvers resolver = new EclipseComponentTypeResourceResolvers();
                                 if (!resolver.canResolve(javaType))
                                     return javaType;
 
@@ -183,7 +183,7 @@ public class JumpToJavaAction extends BaseJumpAction
                             }
                             catch (CoreException e)
                             {
-                                UIPlugin.log(e);
+                                UIPlugin.log_it(e);
                             }
                         }
                     }

@@ -88,9 +88,9 @@ public class ImplMessages
                 cause);
     }
 
-    public static String multipleComponentReferences(IComponent component, String id)
+    public static String multipleComponentReferences(String componentName, String id)
     {
-        return _formatter.format("multiple-component-references", component.getExtendedId(), id);
+        return _formatter.format("multiple-component-references", componentName, id);
     }
 
     public static String dupeComponentId(String id, IContainedComponent containedComponent)

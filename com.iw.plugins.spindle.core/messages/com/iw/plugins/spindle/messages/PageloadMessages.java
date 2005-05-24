@@ -35,15 +35,20 @@ public class PageloadMessages
                 name);
     }
 
+    public static String parameterMustHaveNoDefaultValue(String componentName, String name)
+    {
+        return _formatter.format("parameter-must-have-no-default-value", componentName, name);
+    }
+
     public static String unableToInitializeProperty(String propertyName, IComponent component,
             Throwable cause)
     {
         return _formatter.format("unable-to-initialize-property", propertyName, component, cause);
     }
 
-    public static String requiredParameterNotBound(String name, IComponent component)
+    public static String requiredParameterNotBound(String name, String containedName)
     {
-        return _formatter.format("required-parameter-not-bound", name, component.getExtendedId());
+        return _formatter.format("required-parameter-not-bound", name, containedName);
     }
 
     public static String inheritInformalInvalidComponentFormalOnly(IComponent component)
@@ -59,10 +64,16 @@ public class PageloadMessages
                 .getExtendedId(), component.getExtendedId());
     }
 
-    public static String formalParametersOnly(IComponent component, String parameterName)
+//    public static String formalParametersOnly(IComponent component, String parameterName)
+//    {
+//        return _formatter
+//                .format("formal-parameters-only", component.getExtendedId(), parameterName);
+//    }
+    
+    public static String formalParametersOnly(String containedName, String parameterName)
     {
         return _formatter
-                .format("formal-parameters-only", component.getExtendedId(), parameterName);
+                .format("formal-parameters-only", containedName, parameterName);
     }
 
     public static String unableToInstantiateComponent(IComponent container, Throwable cause)

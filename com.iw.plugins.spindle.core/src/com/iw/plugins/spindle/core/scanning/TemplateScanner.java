@@ -69,6 +69,9 @@ import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginContainedComponent;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.Files;
+import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
+import com.iw.plugins.spindle.messages.ImplMessages;
+import com.iw.plugins.spindle.messages.PageloadMessages;
 
 /**
  * Scanner for Tapestry templates. It is assumed that the component we are scanning templates on
@@ -105,6 +108,7 @@ public class TemplateScanner extends AbstractScanner
 
     private List fSeenIds = new ArrayList();
 
+    /** @dperecated */
     private SpecFactory fSpecificationFactory;
 
     private IResourceWorkspaceLocation fTemplateLocation;
@@ -181,10 +185,10 @@ public class TemplateScanner extends AbstractScanner
                 data = Files.readFileToString(in, fEncoding == null ? "UTF-8" : fEncoding)
                         .toCharArray();
             }
-            catch (CoreException e)
-            {
-                TapestryCore.log(e);
-            }
+//            catch (CoreException e)
+//            {
+//                TapestryCore.log(e);
+//            }
             catch (IOException e)
             {
                 TapestryCore.log(e);
@@ -240,11 +244,8 @@ public class TemplateScanner extends AbstractScanner
             addProblem(
                     IProblem.ERROR,
                     getJWCIDLocation(token.getEventInfo().getAttributeMap()),
-                    TapestryImplMessages.multipleComponentReferences(component, id),
-                    //                    TapestryCore.getTapestryString(
-                    //                            "BaseComponent.multiple-component-references",
-                    //                            fComponentSpec.getSpecificationLocation().getName(),
-                    //                            id),
+                    ImplMessages.multipleComponentReferences(fComponentSpec
+                            .getSpecificationLocation().getName(), id),
                     false,
                     IProblem.TEMPLATE_SCANNER_DUPLICATE_ID);
             return;
@@ -422,8 +423,7 @@ public class TemplateScanner extends AbstractScanner
         if (!isFormal && !isAllowInformalParameters)
         {
 
-            addProblem(IProblem.ERROR, location, TapestryCore.getTapestryString(
-                    "PageLoader.formal-parameters-only",
+            addProblem(IProblem.ERROR, location, PageloadMessages.formalParametersOnly(
                     containedSpecification.getSpecificationLocation().getName(),
                     bspec.getIdentifier()), false, IProblem.TEMPLATE_SCANNER_NO_INFORMALS_ALLOWED);
         }
@@ -826,6 +826,7 @@ public class TemplateScanner extends AbstractScanner
     }
 
     /**
+     * @deprecated
      * Sets the SpecFactory which instantiates Tapestry spec objects.
      */
 
@@ -877,7 +878,7 @@ public class TemplateScanner extends AbstractScanner
         {
             IContainedComponent embedded = fComponentSpec.getComponent(componentId);
             if (embedded == null)
-                throw new ApplicationRuntimeException(TapestryCore.getTapestryString(
+                throw new ApplicationRuntimeException(DefaultTapestryMessages.format(
                         "no-such-component",
                         fComponentSpec.getSpecificationLocation(),
                         componentId));
@@ -885,7 +886,7 @@ public class TemplateScanner extends AbstractScanner
             IComponentSpecification containedSpec = fNamespace.getComponentResolver().resolve(
                     embedded.getType());
             if (containedSpec == null)
-                throw new ApplicationRuntimeException(TapestryCore.getTapestryString(
+                throw new ApplicationRuntimeException(DefaultTapestryMessages.format(
                         "no-such-component",
                         fComponentSpec.getSpecificationLocation(),
                         componentId));
@@ -906,7 +907,7 @@ public class TemplateScanner extends AbstractScanner
                 INamespace namespace = fNamespace.getChildNamespace(libraryId);
                 if (namespace == null)
                     throw new ApplicationRuntimeException("Unable to resolve "
-                            + TapestryCore.getTapestryString(
+                            + DefaultTapestryMessages.format(
                                     "Namespace.nested-namespace",
                                     libraryId));
             }
@@ -915,12 +916,10 @@ public class TemplateScanner extends AbstractScanner
                     libraryId,
                     type);
             if (spec == null)
-                throw new ApplicationRuntimeException(TapestryCore
-                        .getTapestryString(
-                                "Namespace.no-such-component-type",
-                                type,
-                                libraryId == null ? CoreMessages.format("project-namespace")
-                                        : libraryId));
+                throw new ApplicationRuntimeException(DefaultTapestryMessages.format(
+                        "Namespace.no-such-component-type",
+                        type,
+                        libraryId == null ? CoreMessages.format("project-namespace") : libraryId));
 
             return spec.getAllowBody();
         }

@@ -26,11 +26,6 @@
 
 package com.iw.plugins.spindle.core.source;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.IStatus;
-
-import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.core.util.SpindleStatusWithLocation;
 
 /**
  * Default impl of IProblem
@@ -56,42 +51,6 @@ public class DefaultProblem implements IProblem
 
     private int fCode;
 
-    static private int statusToMarkerServerity(IStatus status)
-    {
-        switch (status.getSeverity())
-        {
-            case IStatus.ERROR:
-                return ERROR;
-            case IStatus.WARNING:
-                return WARNING;
-            case IStatus.INFO:
-                return INFO;
-        }
-        Assert
-                .isLegal(
-                        false,
-                        "only statii with severity: ERROR, WARNING, && INFO can be problems!");
-        return ERROR;
-    }
-
-    public DefaultProblem(String type, IStatus status, int lineNumber, int charStart, int charEnd,
-            boolean isTemporary)
-    {
-        this(
-                type,
-                statusToMarkerServerity(status),
-                status.getMessage(),
-                (status instanceof SpindleStatusWithLocation) ? ((SpindleStatusWithLocation) status)
-                        .getLineNumber()
-                        : lineNumber,
-                (status instanceof SpindleStatusWithLocation) ? ((SpindleStatusWithLocation) status)
-                        .getCharStart()
-                        : charStart,
-                (status instanceof SpindleStatusWithLocation) ? ((SpindleStatusWithLocation) status)
-                        .getCharEnd()
-                        : charEnd, isTemporary, status.getCode());
-    }
-
     public DefaultProblem(String type, int severity, String message, int lineNumber, int charStart,
             int charEnd, boolean isTemporary, int code)
     {
@@ -116,13 +75,13 @@ public class DefaultProblem implements IProblem
         buffer.append("[");
         switch (fSeverity)
         {
-            case IMarker.SEVERITY_ERROR:
+            case ERROR:
                 buffer.append("ERROR");
                 break;
-            case IMarker.SEVERITY_WARNING:
+            case WARNING:
                 buffer.append("WARNING");
                 break;
-            case IMarker.SEVERITY_INFO:
+            case INFO:
                 buffer.append("INFO");
                 break;
 

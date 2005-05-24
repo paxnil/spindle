@@ -52,8 +52,8 @@ import com.iw.plugins.spindle.actions.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
-import com.iw.plugins.spindle.core.util.Markers;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.Markers;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 import com.iw.plugins.spindle.editors.template.TemplatePartitionScanner;
 import com.iw.plugins.spindle.ui.util.UIUtils;
@@ -140,7 +140,7 @@ public class MoveToSpecAction extends BaseTemplateAction
         .getSpecificationLocation();
     IStorage storage = location.getStorage();
     if (storage == null)
-      UIPlugin.log("Move Implicit..storage was null");
+      UIPlugin.log_it("Move Implicit..storage was null");
 
     IFile file = null;
     if (!(storage instanceof IFile))

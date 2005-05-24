@@ -49,7 +49,7 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.util.CoreUtils;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 
@@ -160,7 +160,7 @@ public class ContainerDialogField extends StringButtonField
           }
         } catch (JavaModelException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
         }
         if (initRoot == null)
         {
@@ -204,7 +204,7 @@ public class ContainerDialogField extends StringButtonField
           return true;
         } catch (JavaModelException e)
         {
-          UIPlugin.log(e); // just log, no ui in validation
+          UIPlugin.log_it(e); // just log, no ui in validation
         }
         return false;
       }
@@ -233,7 +233,7 @@ public class ContainerDialogField extends StringButtonField
             return (((IPackageFragmentRoot) element).getKind() == IPackageFragmentRoot.K_SOURCE);
           } catch (JavaModelException e)
           {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
             return false;
           }
         }

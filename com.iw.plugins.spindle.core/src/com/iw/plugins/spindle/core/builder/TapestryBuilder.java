@@ -36,7 +36,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -51,7 +50,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
@@ -60,22 +58,22 @@ import org.eclipse.ui.internal.Workbench;
 import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.TapestryProject;
-import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
-import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
-import com.iw.plugins.spindle.core.source.IProblemCollector;
-import com.iw.plugins.spindle.core.util.Markers;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
+import com.iw.plugins.spindle.core.source.DefaultProblem;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.util.IProblemPeristManager;
+import com.iw.plugins.spindle.core.util.eclipse.EclipseMarkers;
 
 /**
  * The Tapestry Builder, kicks off full and incremental builds.
  * 
  * @author glongman@gmail.com
  */
-public class TapestryBuilder extends IncrementalProjectBuilder
+public class TapestryBuilder extends IncrementalProjectBuilder 
 {
 
     private final Bundle systemBundle = Platform.getBundle("org.eclipse.osgi");
@@ -96,11 +94,6 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     public static Map getPackageCache()
     {
         return (Map) PACKAGE_CACHE.get();
-    }
-
-    public static Map getTypeCache()
-    {
-        return (Map) TYPE_CACHE.get();
     }
 
     public static Map getStorageCache()
@@ -136,35 +129,6 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     // TODO this is really ugly, but I need this fast.
     public static List fDeferredActions = new ArrayList();
 
-    /**
-     * Obtain all the template locations for a component specification
-     * 
-     * @param specification
-     *            the IComponentSpecification we want to find templates for
-     * @param project
-     *            the Tapestry project containing the component specF
-     * @param collector
-     *            an IProblemCollector to collect any problems encountered.
-     * @return an array of IResourceWorkspaceLocation - the template locations.
-     */
-    public static IResourceWorkspaceLocation[] scanForTemplates(
-            IComponentSpecification specification, String templateExtension, ITapestryProject project,
-            IProblemCollector collector)
-    {
-        TemplateFinder finder = new TemplateFinder();
-        IResourceWorkspaceLocation[] locations = new IResourceWorkspaceLocation[0];        
-        try
-        {
-            return finder.getTemplates(specification, project, templateExtension, collector);
-
-        }
-        catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
-        return new IResourceWorkspaceLocation[] {};
-    }
-
     public static State readState(DataInputStream in) throws IOException
     {
         return State.read(in);
@@ -186,6 +150,8 @@ public class TapestryBuilder extends IncrementalProjectBuilder
     ContextRootLocation fContextRoot;
 
     ClasspathRootLocation fClasspathRoot;
+
+    IProblemPeristManager fProblemPersister;
 
     int fProjectType;
 
@@ -213,6 +179,9 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
         if (systemBundle.getState() == Bundle.STOPPING)
             throw new OperationCanceledException();
+
+        fProblemPersister = new EclipseMarkers();
+
         PACKAGE_CACHE.set(new HashMap());
         TYPE_CACHE.set(new HashMap());
         STORAGE_CACHE.set(new HashMap());
@@ -263,12 +232,16 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         }
         catch (BrokenWebXMLException e)
         {
-            Markers.addBuildBrokenProblemMarkerToResource(getProject(), e.getMessage());
+            fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
+                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(), 0, 0, 0,
+                    false, IProblem.NOT_QUICK_FIXABLE));
         }
         catch (BuilderException e)
         {
-            Markers.removeProblemsForProject(fCurrentProject);
-            Markers.addBuildBrokenProblemMarkerToResource(getProject(), e.getMessage());
+            fProblemPersister.removeAllProblems(fTapestryProject);
+            fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
+                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(), 0, 0, 0,
+                    false, IProblem.NOT_QUICK_FIXABLE));
         }
         catch (NullPointerException e)
         {
@@ -384,7 +357,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
 
         fNotifier.subTask(CoreMessages.format(TapestryBuilder.STRING_KEY + "full-build-starting"));
 
-        Markers.removeProblemsForProject(fCurrentProject);
+        fProblemPersister.removeProblems(fTapestryProject);
 
         fBuild = new FullBuild(this);
 
@@ -487,7 +460,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             }
         }
 
-        if (getType(CoreMessages.format(STRING_KEY + "applicationServletClassname")) == null)
+        if (fTapestryProject.findType(CoreMessages.format(STRING_KEY + "applicationServletClassname")) == null)
             throw new BuilderException(CoreMessages.format(STRING_KEY + "tapestry-jar-missing"));
 
         if (fContextRoot == null || !fContextRoot.exists())
@@ -496,7 +469,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fContextRoot
                 .getRelativeResource("WEB-INF/web.xml");
 
-        if (webXML.getStorage() == null)
+        if (!webXML.exists())
             throw new BuilderException(CoreMessages.format(
                     STRING_KEY + "abort-missing-web-xml",
                     webXML.toString()));
@@ -524,57 +497,29 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         try
         {
             fTapestryProject = (TapestryProject) fCurrentProject.getNature(TapestryCore.NATURE_ID);
-            fTapestryProject.clearMetadata();           
+            fTapestryProject.clearMetadata();
         }
         catch (CoreException e)
         {
             TapestryCore.log(e);
             throw new BuilderException("could not obtain the Tapestry Project!");
-        }                   
+        }
 
         fContextRoot = fTapestryProject.getWebContextLocation();
-        if (fContextRoot == null)
+        if (fContextRoot == null || !fContextRoot.exists())
             throw new BuilderException("could not obtain the servlet context root folder");
 
-        try
-        {
-            fClasspathRoot = fTapestryProject.getClasspathRoot();
-        }
-        catch (CoreException e1)
-        {
+        fClasspathRoot = fTapestryProject.getClasspathRoot();
+        if (fClasspathRoot == null || !fClasspathRoot.exists())
             throw new BuilderException("could not obtain the Classpath Root!");
-        }
 
         fValidateWebXML = fTapestryProject.isValidatingWebXML();
 
     }
 
-    protected IType getType(String fullyQualifiedName)
-    {
-        Map cache = getTypeCache();
-
-        if (cache != null && cache.containsKey(fullyQualifiedName))
-            return (IType) cache.get(fullyQualifiedName);
-
-        IType result = null;
-        try
-        {
-            result = fJavaProject.findType(fullyQualifiedName);
-        }
-        catch (JavaModelException e)
-        {
-            // do nothing
-        }
-
-        if (cache != null)
-            cache.put(fullyQualifiedName, result);
-
-        return result;
-    }
-
     protected boolean conflictsWithJavaOutputDirectory(IResource resource)
     {
-        try
+        try 
         {
             IPath containerPath = fJavaProject.getOutputLocation();
             return containerPath.isPrefixOf(resource.getFullPath());

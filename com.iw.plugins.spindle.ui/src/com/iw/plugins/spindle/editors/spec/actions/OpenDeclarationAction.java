@@ -47,10 +47,10 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.extensions.ComponentTypeResourceResolvers;
-import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
-import com.iw.plugins.spindle.core.resources.ContextRootLocation;
+import com.iw.plugins.spindle.core.extensions.eclipse.EclipseComponentTypeResourceResolvers;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.spec.assist.SpecTapestryAccess;
@@ -119,7 +119,7 @@ public class OpenDeclarationAction extends BaseSpecAction
         }
         catch (CoreException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
             ErrorDialog.openError(
                     UIPlugin.getDefault().getActiveWorkbenchShell(),
                     "Operation Aborted",
@@ -411,7 +411,7 @@ public class OpenDeclarationAction extends BaseSpecAction
 
         if (useComponentResolver)
         {
-            ComponentTypeResourceResolvers resolver = new ComponentTypeResourceResolvers();
+            EclipseComponentTypeResourceResolvers resolver = new EclipseComponentTypeResourceResolvers();
 
             if (resolver.canResolve(type))
             {
@@ -491,7 +491,7 @@ public class OpenDeclarationAction extends BaseSpecAction
         }
         catch (Exception e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
         }
     }
 

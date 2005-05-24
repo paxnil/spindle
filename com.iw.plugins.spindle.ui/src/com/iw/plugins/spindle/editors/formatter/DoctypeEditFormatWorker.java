@@ -93,7 +93,7 @@ public class DoctypeEditFormatWorker extends FormatWorker
         walker = new TagWalker(document, node);
       } catch (BadLocationException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
         return null;
       }
 
@@ -124,7 +124,7 @@ public class DoctypeEditFormatWorker extends FormatWorker
       return document.getLineOfOffset(startOffset) == document.getLineOfOffset(endOffset);
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
     return false;
   }

@@ -125,7 +125,7 @@ public class BuilderContextVisitor implements IResourceVisitor
       if (knownExtensions.contains(extension))
       {
         Resource location = fBuild.fTapestryBuilder.fContextRoot
-            .getRelativeLocation(resource);
+            .getRelativeResource(resource);
         fCollector.add(location);
         debug(location, true);
       }

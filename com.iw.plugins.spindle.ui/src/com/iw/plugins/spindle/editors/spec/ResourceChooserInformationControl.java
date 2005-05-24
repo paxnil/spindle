@@ -58,8 +58,8 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.resources.AbstractRootLocation;
-import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
-import com.iw.plugins.spindle.core.resources.ContextRootLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.editors.spec.assist.ChooseResourceProposal;
 import com.iw.plugins.spindle.editors.util.BusyIndicatorSpindle;
@@ -112,7 +112,7 @@ public class ResourceChooserInformationControl extends TreeInformationControl
           }
         } catch (JavaModelException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
         }
       }
       return 0;
@@ -297,7 +297,7 @@ public class ResourceChooserInformationControl extends TreeInformationControl
         }
       } catch (JavaModelException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
       }
 
       return resultElements.toArray();
@@ -443,7 +443,7 @@ public class ResourceChooserInformationControl extends TreeInformationControl
         }
       } catch (CoreException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
       }
     }
 
@@ -556,7 +556,7 @@ public class ResourceChooserInformationControl extends TreeInformationControl
         }
       } catch (JavaModelException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
       }
 
       return javaVerboseLabels.getText(fragment);
@@ -679,7 +679,7 @@ public class ResourceChooserInformationControl extends TreeInformationControl
       fTreeViewer.setInput(fRootLocation);
     } else
     {
-      UIPlugin.log("argh");
+      UIPlugin.log_it("argh");
     }
   }
 

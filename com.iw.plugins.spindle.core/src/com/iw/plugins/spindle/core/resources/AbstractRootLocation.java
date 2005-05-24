@@ -31,8 +31,6 @@ import java.net.URL;
 import java.util.Locale;
 
 import org.apache.hivemind.Resource;
-import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.CoreException;
 
 /**
  * Abstract base class for root locations
@@ -42,12 +40,7 @@ import org.eclipse.core.runtime.CoreException;
 public abstract class AbstractRootLocation implements IResourceWorkspaceLocation
 {
 
-  public IStorage getStorage()
-  {
-    throw new RuntimeException("can't get the storage from root!");
-  }
-
-  public InputStream getContents() throws CoreException
+   public InputStream getContents() 
   {
     throw new RuntimeException("can't get the contents from root!");
   }
@@ -72,5 +65,5 @@ public abstract class AbstractRootLocation implements IResourceWorkspaceLocation
     return null;
   }
 
-  abstract String toHashString();
+  public abstract String toHashString();
 }

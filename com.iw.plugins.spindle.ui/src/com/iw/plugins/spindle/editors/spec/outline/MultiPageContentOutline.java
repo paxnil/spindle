@@ -184,7 +184,7 @@ public class MultiPageContentOutline
       fPageTurner.post(fMessagePage);
     } catch (RuntimeException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
       throw e;
     } finally
     {

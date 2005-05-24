@@ -46,10 +46,11 @@ import org.apache.tapestry.binding.BindingConstants;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.CoreMessages;
+import com.iw.plugins.spindle.core.IJavaType;
+import com.iw.plugins.spindle.core.IJavaTypeFinder;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.AbstractBuild;
 import com.iw.plugins.spindle.core.builder.IDependencyListener;
@@ -133,12 +134,52 @@ public class BaseValidator implements IScannerValidator
 
     private List fListeners;
 
-    /**
-     *  
-     */
-    public BaseValidator()
+    private IJavaTypeFinder fJavaTypeFinder;
+
+    public BaseValidator(IJavaTypeFinder finder)
     {
         super();
+        setJavaTypeFinder(finder);
+    }
+
+    public void setJavaTypeFinder(IJavaTypeFinder finder)
+    {
+        if (!finder.isCachingJavaTypes())
+            finder = createCachingTypeFinder(finder);
+        fJavaTypeFinder = finder;
+    }
+
+    private IJavaTypeFinder createCachingTypeFinder(final IJavaTypeFinder finder)
+    {
+        // TODO Auto-generated method stub
+        return new IJavaTypeFinder()
+        {
+            Map cache;
+
+            public IJavaType findType(String fullyQualifiedName)
+            {
+                if (cache == null)
+                    cache = new HashMap();
+
+                IJavaType result = (IJavaType) cache.get(fullyQualifiedName);
+                if (result == null)
+                {
+                    result = finder.findType(fullyQualifiedName);
+                    cache.put(fullyQualifiedName, result);
+                }
+                return result;
+            }
+
+            public boolean isCachingJavaTypes()
+            {
+                return true;
+            }
+        };
+    }
+
+    public IJavaTypeFinder getJavaTypeFinder()
+    {
+        return fJavaTypeFinder;
     }
 
     /*
@@ -175,7 +216,7 @@ public class BaseValidator implements IScannerValidator
      *            the resolved IType, if any
      */
     protected void fireTypeDependency(IResourceWorkspaceLocation dependant,
-            String fullyQualifiedName, IType result)
+            String fullyQualifiedName, IJavaType result)
     {
         if (fListeners == null)
             return;
@@ -212,17 +253,6 @@ public class BaseValidator implements IScannerValidator
 
             throw new Error(ex);
         }
-    }
-
-    /**
-     * Base Implementation always fails!
-     * 
-     * @param fullyQualifiedName
-     * @return
-     */
-    public IType findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
-    {
-        return null;
     }
 
     /*
@@ -321,20 +351,6 @@ public class BaseValidator implements IScannerValidator
         }
     }
 
-    public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
-            throws ScannerException
-    {
-        if (fProblemCollector == null)
-        {
-            throw new ScannerException(status.getMessage(), isTemporary, status.getCode());
-        }
-        else
-        {
-            fProblemCollector.addProblem(status, (location == null ? DefaultSourceLocation
-                    : location), isTemporary);
-        }
-    }
-
     public boolean validatePattern(String value, String pattern, String errorKey, int severity,
             int code) throws ScannerException
     {
@@ -417,10 +433,12 @@ public class BaseValidator implements IScannerValidator
         if (relativePath == null || relativePath.startsWith(getDummyStringPrefix()))
             return false;
 
-        if (!resourceLocationExists(location, relativePath))
+        IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) location
+                .getRelativeResource(relativePath);
+
+        if (!relative.exists())
         {
-            IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) location
-                    .getRelativeResource(relativePath);
+
             addProblem(
                     IProblem.ERROR,
                     source,
@@ -433,15 +451,7 @@ public class BaseValidator implements IScannerValidator
         return true;
     }
 
-    protected boolean resourceLocationExists(Resource location, String relativePath)
-    {
-        IResourceWorkspaceLocation real = (IResourceWorkspaceLocation) location;
-        IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) real
-                .getRelativeResource(relativePath);
-        return relative.getStorage() != null;
-    }
-
-    public IType validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
+    public Object validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
             int severity) throws ScannerException
     {
         return validateTypeName(dependant, fullyQualifiedType, severity, DefaultSourceLocation);
@@ -452,7 +462,7 @@ public class BaseValidator implements IScannerValidator
      * 
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
      */
-    public IType validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
+    public Object validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
             int severity, ISourceLocation location) throws ScannerException
     {
 
@@ -464,7 +474,7 @@ public class BaseValidator implements IScannerValidator
             return null;
         }
 
-        IType type = findType(dependant, fullyQualifiedType);
+        Object type = findType(dependant, fullyQualifiedType);
         if (type == null)
         {
             addProblem(severity, location, DefaultTapestryMessages.format(

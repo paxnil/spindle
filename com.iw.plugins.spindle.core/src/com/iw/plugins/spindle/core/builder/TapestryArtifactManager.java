@@ -53,7 +53,8 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
-import com.iw.plugins.spindle.core.util.Markers;
+import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
+import com.iw.plugins.spindle.core.util.eclipse.Markers;
 
 /**
  * The <code>TapestryArtifactManager</code> manages all the Tapestry Artifacts in the workspace.
@@ -92,7 +93,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
      */
     public void setLastBuildState(IProject project, Object state)
     {
-        if (!TapestryCore.hasTapestryNature(project))
+        if (!EclipsePluginUtils.hasTapestryNature(project))
             return;
 
         setProjectState(project, state);
@@ -111,7 +112,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         if (project == null)
             return null;
 
-        if (!TapestryCore.hasTapestryNature(project))
+        if (!EclipsePluginUtils.hasTapestryNature(project))
             return null;
 
         Object state = getProjectState(project);
@@ -180,7 +181,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         if (project == null)
             return null;
 
-        if (!TapestryCore.hasTapestryNature(project))
+        if (!EclipsePluginUtils.hasTapestryNature(project))
             return null;
 
         Object state = getProjectState(project);

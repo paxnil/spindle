@@ -219,4 +219,6 @@ public interface IBuilderProblemCodes
     int COMPONENT_INVALID_ASSET_PROPERTY_NAME = 68;
     
     int ASSET_UNRECOGNIZED_PREFIX=69;
+    
+    int COMPONENT_INVALID_INJECT_PROPERTY_NAME=70;
 }

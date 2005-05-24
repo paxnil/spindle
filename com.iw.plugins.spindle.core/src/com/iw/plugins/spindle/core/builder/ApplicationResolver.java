@@ -33,16 +33,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.hivemind.Resource;
-import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
 import com.iw.plugins.spindle.core.parser.Parser;
-import com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor;
+import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.scanning.ComponentScanner;
@@ -103,16 +100,14 @@ public class ApplicationResolver extends NamespaceResolver
             fNamespaceSpecLocation = fServlet.applicationSpecLocation;
             if (fNamespaceSpecLocation != null)
             {
-                IStorage storage = fNamespaceSpecLocation.getStorage();
-                if (storage == null)
+                if (!fNamespaceSpecLocation.exists())
                     throw new BuilderException(CoreMessages.format(
                             "build-failed-missing-application-spec",
                             fNamespaceSpecLocation.toString()));
 
                 fResultNamespace = fBuild.createNamespace(
                         fParser,
-                        fNamespaceId,
-                        storage,
+                        fNamespaceId,                       
                         fNamespaceSpecLocation,
                         null);
             }
@@ -240,7 +235,7 @@ public class ApplicationResolver extends NamespaceResolver
 
         IResourceWorkspaceLocation appRoot = fBuild.fTapestryBuilder.fContextRoot;
 
-        IResourceLocationAcceptor acceptor = new IResourceLocationAcceptor()
+        IResourceAcceptor acceptor = new IResourceAcceptor()
         {
             public boolean accept(IResourceWorkspaceLocation location)
             {
@@ -276,15 +271,19 @@ public class ApplicationResolver extends NamespaceResolver
                 return null;
             }
         };
+        
+        
+        appRoot.lookup(acceptor);
+        
 
-        try
-        {
-            appRoot.lookup(acceptor);
-        }
-        catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
+//        try
+//        {
+//            
+//        }
+//        catch (CoreException e)
+//        {
+//            TapestryCore.log(e);
+//        }
 
         // need to filter out localized page templates. They will be picked up
         // again later.
@@ -313,7 +312,7 @@ public class ApplicationResolver extends NamespaceResolver
         specification.setNamespace(fResultNamespace);
 
         ComponentScanner scanner = new ComponentScanner();
-        IResourceWorkspaceLocation[] templateLocs = TapestryBuilder.scanForTemplates(
+        IResourceWorkspaceLocation[] templateLocs = TemplateFinder.scanForTemplates(
                 specification,
                 templateExtension,
                 fBuild.fTapestryBuilder.fTapestryProject,

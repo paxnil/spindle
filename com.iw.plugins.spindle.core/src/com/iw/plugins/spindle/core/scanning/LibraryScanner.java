@@ -32,7 +32,6 @@ import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 import org.w3c.dom.Node;
 
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.IPluginDescribable;
@@ -43,6 +42,7 @@ import com.iw.plugins.spindle.core.spec.PluginExtensionSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibraryDeclaration;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 import com.iw.plugins.spindle.core.spec.PluginPageDeclaration;
+import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 import com.iw.plugins.spindle.messages.ParseMessages;
 
 /**
@@ -73,7 +73,7 @@ public class LibraryScanner extends SpecificationScanner
         {
             return null;
         }
-        return fSpecificationFactory.createLibrarySpecification();
+        return new PluginLibrarySpecification();
     }
 
     /*
@@ -154,7 +154,7 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                     IProblem.ERROR,
                     getAttributeSourceLocation(node, "type"),
-                    TapestryCore.getTapestryString(
+                    DefaultTapestryMessages.format(
                             "LibrarySpecification.duplicate-component-alias",
                             type),
                     false,
@@ -199,7 +199,7 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                     IProblem.ERROR,
                     getAttributeSourceLocation(node, "property-name"),
-                    TapestryCore.getTapestryString(
+                    DefaultTapestryMessages.format(
                             "ExtensionSpecification.duplicate-property",
                             "extension",
                             propertyName),
@@ -254,7 +254,7 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                     IProblem.ERROR,
                     getAttributeSourceLocation(node, "name"),
-                    TapestryCore.getTapestryString(
+                    DefaultTapestryMessages.format(
                             "LibrarySpecification.duplicate-extension-name",
                             name),
                     false,
@@ -306,12 +306,8 @@ public class LibraryScanner extends SpecificationScanner
                 IProblem.LIBRARY_INVALID_CHILD_LIB_ID);
 
         if (id != null && id.equals(INamespace.FRAMEWORK_NAMESPACE))
-            addProblem(
-                    IProblem.ERROR,
-                    getAttributeSourceLocation(node, "id"),
-                    ParseMessages.frameworkLibraryIdIsReserved(id),
-                    false,
-                    IProblem.LIBRARY_INVALID_CHILD_LIB_ID);
+            addProblem(IProblem.ERROR, getAttributeSourceLocation(node, "id"), ParseMessages
+                    .frameworkLibraryIdIsReserved(id), false, IProblem.LIBRARY_INVALID_CHILD_LIB_ID);
 
         PluginLibraryDeclaration declaration = new PluginLibraryDeclaration(id, specificationPath,
                 getSourceLocationInfo(node));
@@ -345,8 +341,8 @@ public class LibraryScanner extends SpecificationScanner
             addProblem(
                     IProblem.ERROR,
                     getAttributeSourceLocation(node, "name"),
-                    TapestryCore
-                            .getTapestryString("LibrarySpecification.duplicate-page-name", name),
+                    DefaultTapestryMessages
+                            .format("LibrarySpecification.duplicate-page-name", name),
                     false,
                     IProblem.LIBRARY_DUPLICATE_PAGE_NAME);
 

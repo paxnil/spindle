@@ -28,9 +28,6 @@ package com.iw.plugins.spindle.core.resources;
 import java.io.InputStream;
 
 import org.apache.hivemind.Resource;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 
@@ -47,34 +44,19 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
 public interface IResourceWorkspaceLocation extends Resource
 {
 
-  //    public boolean exists();
-
-  /**
-   * return the workspace storage associated with this descriptor <br>
-   * Using IStorage here instead of IResource as some things will come from Jar
-   * files.
-   */
-  public IStorage getStorage();
+  public boolean exists();
 
   public boolean isWorkspaceResource();
 
-  public boolean isOnClasspath();
+  public boolean isClasspathResource();
 
-  public boolean isBinary();
-
-  /**
-   * return the project that contains the artifact
-   */
-  public IProject getProject();
+  public boolean isBinaryResource();
 
   /**
    * Returns an open input stream on the contents of this descriptor. The caller
    * is responsible for closing the stream when finished.
-   * 
-   * @exception CoreException if the contents of this storage could not be
-   *              accessed. See any refinements for more information.
    */
-  public InputStream getContents() throws CoreException;
+  public InputStream getContents();
 
   /**
    * iterate over all the direct descendants of this location passing each to
@@ -85,7 +67,7 @@ public interface IResourceWorkspaceLocation extends Resource
    * @param requestor an instance of IResourceLocationRequestor
    * @throws CoreException
    */
-  public void lookup(IResourceLocationAcceptor requestor) throws CoreException;
+  public void lookup(IResourceAcceptor requestor);
 
   /**
    * return a propertly configured instance of ISearch
@@ -93,6 +75,6 @@ public interface IResourceWorkspaceLocation extends Resource
    * @throws CoreException if the search could not configured
    */
 
-  public ISearch getSearch() throws CoreException;
+  public ISearch getSearch();
 
 }

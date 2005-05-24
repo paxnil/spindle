@@ -35,86 +35,81 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
  * Base class for lookups
  * 
  * @author glongman@gmail.com
- * 
  */
 public abstract class AbstractLookup
 {
 
-  private ICoreNamespace fFrameworkNamespace;
+    private ICoreNamespace fFrameworkNamespace;
 
-  private ICoreNamespace fNamespace;
+    private ICoreNamespace fNamespace;
 
-  private IResourceWorkspaceLocation fRootLocation;
+    private IResourceWorkspaceLocation fRootLocation;
 
-  private IResourceWorkspaceLocation fWebInfLocation;
+    private IResourceWorkspaceLocation fWebInfLocation;
 
-  private IResourceWorkspaceLocation fWebInfAppLocation;
+    private IResourceWorkspaceLocation fWebInfAppLocation;
 
-  public void configure(ICoreNamespace namespace, ICoreNamespace frameworkNamespace)
-  {
-    this.fNamespace = namespace;
-    this.fRootLocation = (IResourceWorkspaceLocation) namespace
-        .getSpecificationLocation();
-    fWebInfLocation = null;
-    fWebInfAppLocation = null;
-  }
-
-  public void configure(
-      ICoreNamespace applicationNamespace,
-      ICoreNamespace frameworkNamespace,
-      String appNameFromWebXML)
-  {
-    this.fNamespace = applicationNamespace;
-    this.fRootLocation = (IResourceWorkspaceLocation) applicationNamespace
-        .getSpecificationLocation();
-    fWebInfLocation = (IResourceWorkspaceLocation) fRootLocation
-        .getRelativeLocation("WEB-INF");
-    fWebInfAppLocation = (IResourceWorkspaceLocation) fWebInfLocation
-        .getRelativeLocation(appNameFromWebXML);
-  }
-
-  protected IResourceWorkspaceLocation getRootLocation()
-  {
-    return fRootLocation;
-  }
-  protected IResourceWorkspaceLocation getWebInfLocation()
-  {
-    return fWebInfLocation;
-  }
-
-  protected IResourceWorkspaceLocation getWebInfAppLocation()
-  {
-    return fWebInfAppLocation;
-  }
-
-  protected ICoreNamespace getNamespace()
-  {
-    return fNamespace;
-  }
-
-  protected ICoreNamespace getFrameworkNamespace()
-  {
-    return fFrameworkNamespace;
-  }
-
-  public IComponentSpecification lookupSpecification(String name)
-  {
-    int colonx = name.indexOf(':');
-
-    if (colonx > 0)
+    public void configure(ICoreNamespace namespace, ICoreNamespace frameworkNamespace)
     {
-      String libraryId = name.substring(0, colonx);
-      String simpleType = name.substring(colonx + 1);
-
-      return lookupSpecification(libraryId, simpleType);
-    } else
-    {
-      return lookupSpecification(null, name);
+        this.fNamespace = namespace;
+        this.fRootLocation = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
+        fWebInfLocation = null;
+        fWebInfAppLocation = null;
     }
-  }
 
-  protected abstract IComponentSpecification lookupSpecification(
-      String libraryId,
-      String type);
+    public void configure(ICoreNamespace applicationNamespace, ICoreNamespace frameworkNamespace,
+            String appNameFromWebXML)
+    {
+        this.fNamespace = applicationNamespace;
+        this.fRootLocation = (IResourceWorkspaceLocation) applicationNamespace
+                .getSpecificationLocation();
+        fWebInfLocation = (IResourceWorkspaceLocation) fRootLocation.getRelativeResource("WEB-INF");
+        fWebInfAppLocation = (IResourceWorkspaceLocation) fWebInfLocation
+                .getRelativeResource(appNameFromWebXML);
+    }
+
+    protected IResourceWorkspaceLocation getRootLocation()
+    {
+        return fRootLocation;
+    }
+
+    protected IResourceWorkspaceLocation getWebInfLocation()
+    {
+        return fWebInfLocation;
+    }
+
+    protected IResourceWorkspaceLocation getWebInfAppLocation()
+    {
+        return fWebInfAppLocation;
+    }
+
+    protected ICoreNamespace getNamespace()
+    {
+        return fNamespace;
+    }
+
+    protected ICoreNamespace getFrameworkNamespace()
+    {
+        return fFrameworkNamespace;
+    }
+
+    public IComponentSpecification lookupSpecification(String name)
+    {
+        int colonx = name.indexOf(':');
+
+        if (colonx > 0)
+        {
+            String libraryId = name.substring(0, colonx);
+            String simpleType = name.substring(colonx + 1);
+
+            return lookupSpecification(libraryId, simpleType);
+        }
+        else
+        {
+            return lookupSpecification(null, name);
+        }
+    }
+
+    protected abstract IComponentSpecification lookupSpecification(String libraryId, String type);
 
 }

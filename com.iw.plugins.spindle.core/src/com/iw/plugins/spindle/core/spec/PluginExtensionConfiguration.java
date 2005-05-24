@@ -38,6 +38,7 @@ import com.iw.plugins.spindle.core.scanning.SpecificationScanner;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 
 /**
  * @author gwl Copyright 2002, Geoffrey Longman. All Rights Reserved.
@@ -299,7 +300,7 @@ public class PluginExtensionConfiguration extends DescribableSpecification
                 if (converter == null)
                 {
                     validator.addProblem(IProblem.ERROR, sourceInfo
-                            .getAttributeSourceLocation("type"), TapestryCore.getTapestryString(
+                            .getAttributeSourceLocation("type"), DefaultTapestryMessages.format(
                             "SpecificationParser.unknown-static-value-type",
                             fDeclaredType), true, IProblem.EXTENSION_CONFIG_MISSING_TYPE_CONVERTER);
                 }

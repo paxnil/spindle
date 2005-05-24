@@ -32,12 +32,10 @@ import java.util.List;
 import org.apache.tapestry.bean.IBeanInitializer;
 import org.apache.tapestry.spec.BeanLifecycle;
 import org.apache.tapestry.spec.IBeanSpecification;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.extensions.BeanSpecificationValidators;
 import com.iw.plugins.spindle.core.extensions.IBeanSpecificationValidator;
+import com.iw.plugins.spindle.core.extensions.SpindleExtensionException;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
@@ -49,156 +47,179 @@ import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
  * 
  * @author glongman@gmail.com
  */
-public class PluginBeanSpecification extends BasePropertyHolder
-    implements
-      IBeanSpecification
+public class PluginBeanSpecification extends BasePropertyHolder implements IBeanSpecification
 {
-  protected String fClassName;
-  protected BeanLifecycle fLifecycle;
+    public static IBeanSpecificationValidator CONTRIBUTED_BEAN_SPEC_VALIDATORS = null;
 
-  /** @since 1.0.9 * */
-  private String fDescription;
+    protected String fClassName;
 
-  /**
-   * A List of {@link IBeanInitializer}.
-   *  
-   */
+    protected String propertyName;
 
-  protected List fInitializers;
-  /**
-   * @param type
-   */
-  public PluginBeanSpecification()
-  {
-    super(BaseSpecification.BEAN_SPEC);
-  }
+    protected BeanLifecycle fLifecycle;
 
-  public PluginBeanSpecification(String className, BeanLifecycle lifecycle)
-  {
-    this();
-    fClassName = className;
-    fLifecycle = lifecycle;
-  }
+    /** @since 1.0.9 * */
+    private String fDescription;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IBeanSpecification#getClassName()
-   */
-  public String getClassName()
-  {
-    return fClassName;
-  }
+    /**
+     * A List of {@link IBeanInitializer}.
+     */
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IBeanSpecification#getLifecycle()
-   */
-  public BeanLifecycle getLifecycle()
-  {
-    return fLifecycle;
-  }
+    protected List fInitializers;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IBeanSpecification#addInitializer(org.apache.tapestry.bean.IBeanInitializer)
-   */
-  public void addInitializer(IBeanInitializer initializer)
-  {
-    if (fInitializers == null)
-      fInitializers = new ArrayList();
-
-    fInitializers.add(initializer);
-  }
-
-  public void removeInitializer(IBeanInitializer initializer)
-  {
-    remove(fInitializers, initializer);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IBeanSpecification#getInitializers()
-   */
-  public List getInitializers()
-  {
-    return fInitializers;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IBeanSpecification#getDescription()
-   */
-  public String getDescription()
-  {
-    return fDescription;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IBeanSpecification#setDescription(java.lang.String)
-   */
-  public void setDescription(String desc)
-  {
-    fDescription = desc;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IBeanSpecification#setClassName(java.lang.String)
-   */
-  public void setClassName(String className)
-  {
-    this.fClassName = className;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.apache.tapestry.spec.IBeanSpecification#setLifecycle(org.apache.tapestry.spec.BeanLifecycle)
-   */
-  public void setLifecycle(BeanLifecycle lifecycle)
-  {
-    fLifecycle = lifecycle;
-  }
-
-  public void validate(Object parent, IScannerValidator validator)
-  {
-
-    PluginComponentSpecification component = (PluginComponentSpecification) parent;
-
-    ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
-
-    try
+    public PluginBeanSpecification()
     {
-      IType type = validator.validateTypeName((IResourceWorkspaceLocation) component
-          .getSpecificationLocation(), fClassName, IProblem.ERROR, (fClassName != null ? sourceInfo
-          .getAttributeSourceLocation("class") : sourceInfo.getTagNameLocation()));
-
-      if (type != null)
-      {
-        IBeanSpecificationValidator beanValidator = new BeanSpecificationValidators();
-        if (beanValidator.canValidate(this))
-        {
-          IStatus status = beanValidator.validate(this);
-          if (!status.isOK())
-          {
-            validator.addProblem(status, sourceInfo.getStartTagSourceLocation(), false);
-          }
-        }
-      }
-    } catch (ScannerException e)
-    {
-      TapestryCore.log(e);
-      e.printStackTrace();
+        super(BaseSpecification.BEAN_SPEC);
     }
 
-  }
+    public PluginBeanSpecification(String className, BeanLifecycle lifecycle)
+    {
+        this();
+        fClassName = className;
+        fLifecycle = lifecycle;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IBeanSpecification#getClassName()
+     */
+    public String getClassName()
+    {
+        return fClassName;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IBeanSpecification#getLifecycle()
+     */
+    public BeanLifecycle getLifecycle()
+    {
+        return fLifecycle;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IBeanSpecification#addInitializer(org.apache.tapestry.bean.IBeanInitializer)
+     */
+    public void addInitializer(IBeanInitializer initializer)
+    {
+        if (fInitializers == null)
+            fInitializers = new ArrayList();
+
+        fInitializers.add(initializer);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IBeanSpecification#getInitializers()
+     */
+    public List getInitializers()
+    {
+        return fInitializers;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.spec.IPluginDescribable#getDescription()
+     */
+    public String getDescription()
+    {
+        return fDescription;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.spec.IPluginDescribable#setDescription(java.lang.String)
+     */
+    public void setDescription(String desc)
+    {
+        fDescription = desc;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IBeanSpecification#setClassName(java.lang.String)
+     */
+    public void setClassName(String className)
+    {
+        this.fClassName = className;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.IBeanSpecification#setLifecycle(org.apache.tapestry.spec.BeanLifecycle)
+     */
+    public void setLifecycle(BeanLifecycle lifecycle)
+    {
+        fLifecycle = lifecycle;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.PropertyInjectable#getPropertyName()
+     */
+    public String getPropertyName()
+    {
+        return propertyName;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.tapestry.spec.PropertyInjectable#setPropertyName(java.lang.String)
+     */
+    public void setPropertyName(String propertyName)
+    {
+        this.propertyName = propertyName;
+    }
+
+    public void validate(Object parent, IScannerValidator validator)
+    {
+
+        PluginComponentSpecification component = (PluginComponentSpecification) parent;
+
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+
+        try
+        {
+            Object type = validator.validateTypeName(
+                    (IResourceWorkspaceLocation) component.getSpecificationLocation(),
+                    fClassName,
+                    IProblem.ERROR,
+                    (fClassName != null ? sourceInfo.getAttributeSourceLocation("class")
+                            : sourceInfo.getTagNameLocation()));
+
+            if (type == null || CONTRIBUTED_BEAN_SPEC_VALIDATORS == null)
+                return;
+
+            if (CONTRIBUTED_BEAN_SPEC_VALIDATORS.canValidate(this))
+            {
+                try
+                {
+                    CONTRIBUTED_BEAN_SPEC_VALIDATORS.validate(this);
+                }
+                catch (SpindleExtensionException e1)
+                {
+                    validator.addProblem(IProblem.ERROR, sourceInfo.getStartTagSourceLocation(), e1
+                            .getMessage(), true, IProblem.NOT_QUICK_FIXABLE);
+                }
+            }
+
+        }
+        catch (ScannerException e)
+        {
+            TapestryCore.log(e);
+            e.printStackTrace();
+        }
+
+    }
 
 }

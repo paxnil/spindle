@@ -43,9 +43,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 
 /**
  * A Utility class
@@ -90,7 +91,7 @@ public class CoreUtils
       }
 
       IMarker[] markers = project.findMarkers(
-          ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER,
+          IProblem.TAPESTRY_BUILDBROKEN_MARKER,
           false,
           IResource.DEPTH_ONE);
 
@@ -101,7 +102,7 @@ public class CoreUtils
       }
 
       markers = resource.findMarkers(
-          ITapestryMarker.TAPESTRY_FATAL_PROBLEM_MARKER,
+          IProblem.TAPESTRY_FATAL_PROBLEM_MARKER,
           false,
           IResource.DEPTH_ONE);
 

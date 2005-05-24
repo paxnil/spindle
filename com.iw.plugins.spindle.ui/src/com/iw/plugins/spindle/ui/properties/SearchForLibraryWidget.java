@@ -49,14 +49,16 @@ import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
-import com.iw.plugins.spindle.core.resources.search.AbstractTapestrySearchAcceptor;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
+import com.iw.plugins.spindle.core.resources.search.eclipse.AbstractEclipseSearchAcceptor;
 import com.iw.plugins.spindle.ui.widgets.TwoListSearchWidget;
 
 /**
  * A subclass of TwoListSearchWidget used for picking a library in the source
  * path of a Java Project
+ * 
+ * TODO REMOVE
  * 
  * @author glongman@gmail.com
  * 
@@ -87,7 +89,7 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
 
   public int getAcceptFlags()
   {
-    return AbstractTapestrySearchAcceptor.ACCEPT_LIBRARIES;
+    return AbstractEclipseSearchAcceptor.ACCEPT_LIBRARIES;
   }
 
   public ISelection getSelection()
@@ -135,7 +137,7 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
 
     } catch (CoreException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
   }
 
@@ -208,7 +210,7 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
     }
   }
 
-  class SearchAcceptor extends AbstractTapestrySearchAcceptor
+  class SearchAcceptor extends AbstractEclipseSearchAcceptor
   {
     String matchString;
 
@@ -292,7 +294,7 @@ public class SearchForLibraryWidget extends TwoListSearchWidget
         }
       } catch (JavaModelException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
         return true;
       }
       String name = storage.getName();

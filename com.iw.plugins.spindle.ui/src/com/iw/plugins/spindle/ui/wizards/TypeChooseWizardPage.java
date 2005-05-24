@@ -66,7 +66,7 @@ import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.CoreUtils;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.IDialogFieldChangedListener;
@@ -219,7 +219,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
     {
       IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
           .getSpecificationLocation();
-      if (location.isOnClasspath())
+      if (location.isClasspathResource())
       {
 
         IFile file = (IFile) location.getStorage();
@@ -276,7 +276,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         result = (IFile) generated.getUnderlyingResource();
     } catch (JavaModelException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
     return result;
   }
@@ -534,7 +534,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
 
         } catch (CoreException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
         }
 
         status = spindle.getSeverity() >= status.getSeverity() ? spindle : status;
@@ -625,7 +625,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         result = CoreUtils.extendsType(baseType, tapestryclass);
     } catch (JavaModelException e)
     {
-      UIPlugin.log(e); // but do nothing else
+      UIPlugin.log_it(e); // but do nothing else
     }
     try
     {
@@ -633,7 +633,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         result = CoreUtils.implementsInterface(baseType, tapestryinterface);
     } catch (JavaModelException e1)
     {
-      UIPlugin.log(e1); // but do nothing else
+      UIPlugin.log_it(e1); // but do nothing else
     }
     return result;
   }
@@ -707,7 +707,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         }
       } catch (CoreException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
       }
     }
   }

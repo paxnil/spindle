@@ -189,7 +189,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         }
         catch (RuntimeException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
             throw e;
         }
         finally
@@ -266,7 +266,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         }
         catch (RuntimeException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
             throw e;
         }
         finally
@@ -664,7 +664,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         }
         catch (CoreException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
         }
 
         return Collections.EMPTY_LIST;
@@ -689,11 +689,11 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         }
         catch (RuntimeException e)
         {
-            TapestryCore.log(e);
+            TapestryCore.log_it(e);
         }
         catch (Exception e)
         {
-            TapestryCore.log(e);
+            TapestryCore.log_it(e);
         }
 
         if (location == null)
@@ -702,12 +702,12 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         AbstractRootLocation root = null;
         try
         {
-            root = location.isOnClasspath() ? (AbstractRootLocation) tproject.getClasspathRoot()
+            root = location.isClasspathResource() ? (AbstractRootLocation) tproject.getClasspathRoot()
                     : (AbstractRootLocation) tproject.getWebContextLocation();
         }
         catch (CoreException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
         }
 
         return choosePath(filter, root);
@@ -727,7 +727,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         ChooseResourceProposal proposal = new ChooseResourceProposal((SpecEditor) fEditor, state,
                 root, fDocumentOffset, fValueLocation.x, fAttributeValue.length());
 
-        if (root.isOnClasspath())
+        if (root.isClasspathResource())
         {
             proposal.setContainerExclusionFilter(proposal.EXCLUDE_PACKAGES);
             proposal.setFileExclusionFilter(proposal.EXCLUDE_PACKAGE_DOT_HTML);
@@ -763,7 +763,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         }
         catch (CoreException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
         }
 
         if (root == null)
@@ -778,7 +778,7 @@ public class AttributeCompletionProcessor extends SpecCompletionProcessor
         ChooseResourceProposal proposal = new ChooseResourceProposal((SpecEditor) fEditor, state,
                 root, fDocumentOffset, fValueLocation.x, fAttributeValue.length());
 
-        if (root.isOnClasspath())
+        if (root.isClasspathResource())
         {
             proposal.setContainerExclusionFilter(proposal.EXCLUDE_PACKAGES);
             proposal.setFileExclusionFilter(proposal.EXCLUDE_PACKAGE_DOT_HTML);

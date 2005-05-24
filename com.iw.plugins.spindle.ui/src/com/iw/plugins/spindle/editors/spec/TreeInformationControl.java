@@ -520,7 +520,7 @@ public abstract class TreeInformationControl
 
       } catch (Exception ex)
       {
-        UIPlugin.log(ex);
+        UIPlugin.log_it(ex);
       }
     }
   }

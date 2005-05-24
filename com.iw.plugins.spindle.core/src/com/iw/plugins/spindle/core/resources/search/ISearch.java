@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.resources.search;
 
-import org.eclipse.core.runtime.CoreException;
 
 /**
  * Interface for all kinds of searches in the Tapestry context
@@ -36,6 +35,6 @@ import org.eclipse.core.runtime.CoreException;
  */
 public interface ISearch
 {
-  public abstract void configure(Object root) throws CoreException;
+  public abstract void configure(Object root);
   public abstract void search(ISearchAcceptor acceptor);
 }

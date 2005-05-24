@@ -193,7 +193,7 @@ public class SpecFoldingStructureProvider implements IProjectionListener
       updateFoldingRegions(model, regions);
     } catch (BadLocationException be)
     {
-      UIPlugin.log(be);
+      UIPlugin.log_it(be);
     }
   }
 

@@ -153,7 +153,7 @@ public class DefaultCompletionProcessor extends SpecCompletionProcessor
       }
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
 
     proposals = ProposalFactory.findRawNewTagProposals(

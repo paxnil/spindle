@@ -72,7 +72,6 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -169,7 +168,7 @@ public class SpecEditor extends Editor
         }
         catch (RuntimeException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
             throw e;
         }
         finally
@@ -678,17 +677,12 @@ public class SpecEditor extends Editor
                     {
 
                         SpecificationValidator validator;
-                        try
-                        {
-                            validator = new SpecificationValidator(project);// TODO perfrom
-                            // deferred?, false);
-                            reconcileResult = doReconcile(getDocumentProvider().getDocument(input)
-                                    .get(), spec, validator);
-                        }
-                        catch (CoreException e)
-                        {
-                            UIPlugin.log(e);
-                        }
+
+                        validator = new SpecificationValidator(project);
+                        // deferred?, false);
+                        reconcileResult = doReconcile(getDocumentProvider().getDocument(input)
+                                .get(), spec, validator);
+
                         didReconcile = true;
                     }
                 }
@@ -764,7 +758,6 @@ public class SpecEditor extends Editor
         {
             super();
             scanner = new ComponentScanner();
-            scanner.setFactory(TapestryCore.getSpecificationFactory());
         }
 
         protected Object doReconcile(String content, Object spec, IScannerValidator validator)
@@ -786,8 +779,7 @@ public class SpecEditor extends Editor
                         {
                             scanner.setNamespace(useSpec.getNamespace());
                             scanner.setExternalProblemCollector(collector);
-                            scanner.setResourceInformation(((IStorageEditorInput) getEditorInput())
-                                    .getStorage(), useSpec.getSpecificationLocation());
+                            scanner.setResourceLocation(useSpec.getSpecificationLocation());
                             validator.setProblemCollector(scanner);
 
                             return scanner.scan(document, validator);
@@ -816,7 +808,6 @@ public class SpecEditor extends Editor
         {
             super();
             scanner = new LibraryScanner();
-            scanner.setFactory(TapestryCore.getSpecificationFactory());
         }
 
         protected boolean isSpecOk(Object spec)
@@ -827,7 +818,7 @@ public class SpecEditor extends Editor
         protected SpecificationScanner getInitializedScanner(ILibrarySpecification library)
         {
             scanner.setExternalProblemCollector(collector);
-            scanner.setResourceInformation(null, library.getSpecificationLocation());
+            scanner.setResourceLocation(library.getSpecificationLocation());
             String publicId = W3CAccess.getPublicId(fParser.getParsedDocument());
             if (publicId == null)
                 return null;
@@ -922,7 +913,6 @@ public class SpecEditor extends Editor
         {
             super();
             scanner = new ApplicationScanner();
-            scanner.setFactory(TapestryCore.getSpecificationFactory());
         }
 
         protected boolean isSpecOk(Object spec)
@@ -933,7 +923,7 @@ public class SpecEditor extends Editor
         protected SpecificationScanner getInitializedScanner(IApplicationSpecification application)
         {
             scanner.setExternalProblemCollector(collector);
-            scanner.setResourceInformation(null, application.getSpecificationLocation());
+            scanner.setResourceLocation(application.getSpecificationLocation());
             String publicId = W3CAccess.getPublicId(fParser.getParsedDocument());
             if (publicId == null)
                 return null;

@@ -58,7 +58,7 @@ public class ApplicationScanner extends LibraryScanner
         {
             return null;
         }
-        return fSpecificationFactory.createApplicationSpecification();
+        return new PluginApplicationSpecification();
     }
 
     /*

@@ -49,7 +49,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 import com.iw.plugins.spindle.ui.widgets.ContainerSelectionDialog;
@@ -284,7 +284,7 @@ public class ComponentLocationChooserField extends StringButtonField
         outputLocation = jproject.getOutputLocation();
       } catch (CoreException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
       }
     }
     public boolean select(Viewer viewer, Object parentElement, Object element)

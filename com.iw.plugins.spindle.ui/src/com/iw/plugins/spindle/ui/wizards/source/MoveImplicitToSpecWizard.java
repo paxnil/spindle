@@ -191,7 +191,7 @@ public class MoveImplicitToSpecWizard extends Wizard
         fSpecAnnotationModel.connect(fOriginalSpecDocument);
       } catch (CoreException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
       }
     }
 
@@ -232,10 +232,10 @@ public class MoveImplicitToSpecWizard extends Wizard
       getContainer().run(false, false, getRunnable());
     } catch (InvocationTargetException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     } catch (InterruptedException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     } finally
     {
       cleanup();
@@ -314,7 +314,7 @@ public class MoveImplicitToSpecWizard extends Wizard
     {
       // TODO Auto-generated catch block
       e.printStackTrace();
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
 
     fTemplateCommand = computeTemplateModification(id, staying);
@@ -328,7 +328,7 @@ public class MoveImplicitToSpecWizard extends Wizard
     {
       // TODO Auto-generated catch block
       e1.printStackTrace();
-      UIPlugin.log(e1);
+      UIPlugin.log_it(e1);
     }
   }
 
@@ -349,10 +349,10 @@ public class MoveImplicitToSpecWizard extends Wizard
       fTemplateCommand.execute(fOriginalTemplateDocument);
     } catch (CoreException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     } finally
     {
       if (fSpecProvider != null)

@@ -30,20 +30,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.CoreMessages;
+import com.iw.plugins.spindle.core.IJavaType;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.Path;
 import com.iw.plugins.spindle.core.scanning.AbstractScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -60,8 +54,6 @@ public class WebXMLScanner extends AbstractScanner
 
     protected FullBuild fBuilder;
 
-    protected IJavaProject fJavaProject;
-
     protected ArrayList fServletNames;
 
     protected ArrayList fSeenServletNames;
@@ -73,7 +65,6 @@ public class WebXMLScanner extends AbstractScanner
     {
         super();
         this.fBuilder = fullBuilder;
-        this.fJavaProject = fBuilder.fJavaProject;
     }
 
     public WebAppDescriptor scanWebAppDescriptor(Object source) throws ScannerException
@@ -94,13 +85,13 @@ public class WebXMLScanner extends AbstractScanner
         if (location == null)
             return;
 
-        if (location.getStorage() == null)
+        if (!location.exists())
             throw new ScannerException(CoreMessages.format(
                     "web-xml-ignore-application-path-not-found",
                     location == null ? "no location found" : location.toString()), false,
                     IProblem.NOT_QUICK_FIXABLE);
 
-        IPath ws_path = new Path(location.getName());
+        Path ws_path = new Path(location.getName());
         String extension = ws_path.getFileExtension();
         if (extension == null || !extension.equals(TapestryBuilder.APPLICATION_EXTENSION))
             throw new ScannerException(CoreMessages.format("web-xml-wrong-file-extension", location
@@ -138,50 +129,30 @@ public class WebXMLScanner extends AbstractScanner
         currentInfo.applicationSpecLocation = ws_location;
     }
 
-    protected boolean checkJavaSubclassOfImplements(IType superclass, IType candidate,
+    protected boolean checkJavaSubclassOfImplements(IJavaType superclass, IJavaType candidate,
             ISourceLocation location)
     {
         boolean match = false;
         if (superclass.equals(candidate))
-            return match;
+            return true;
 
-        try
+        if (candidate.isInterface() || candidate.isAnnotation())
         {
-            if (candidate.isInterface())
-                addProblem(
-                        IProblem.ERROR,
-                        location,
-                        "web-xml-must-be-class-not-interface",
-                        false,
-                        IProblem.WEB_XML_INCORRECT_APPLICATION_SERVLET_CLASS);
-
-            ITypeHierarchy hierarchy = candidate.newSupertypeHierarchy(null);
-            if (hierarchy.exists())
-            {
-                IType[] superClasses = hierarchy.getAllSupertypes(candidate);
-                for (int i = 0; i < superClasses.length; i++)
-                {
-                    match = superClasses[i].equals(superclass);
-                    if (match)
-                        break;
-
-                }
-            }
+            addProblem(
+                    IProblem.ERROR,
+                    location,
+                    "web-xml-must-be-class-not-interface",
+                    false,
+                    IProblem.WEB_XML_INCORRECT_APPLICATION_SERVLET_CLASS);
+            return false;
         }
-        catch (JavaModelException e)
-        {
-            TapestryCore.log(e);
-            e.printStackTrace();
-        }
-        //        if (!match)
-        //            addProblem(IProblem.ERROR, location, "web-xml-does-not-subclass");
 
-        return match;
+        return superclass.isSuperTypeOf(candidate);
     }
 
-    protected IType checkJavaType(String className, ISourceLocation location)
+    protected IJavaType checkJavaType(String className, ISourceLocation location)
     {
-        IType found = fBuilder.fTapestryBuilder.getType(className);
+        IJavaType found = fBuilder.findType(className);
         fBuilder.typeChecked(className, found);
 
         if (found == null)
@@ -302,68 +273,16 @@ public class WebXMLScanner extends AbstractScanner
         IResourceWorkspaceLocation result = (IResourceWorkspaceLocation) location
                 .getRelativeResource(name);
 
-        if (result != null && result.getStorage() != null)
+        if (result != null && result.exists())
             return result;
 
         return null;
     }
 
-    private String getApplicationPathFromServlet(IType servletType) throws ScannerException
+    /** Should override in platform specific way */
+    protected String getApplicationPathFromServlet(IJavaType servletType) throws ScannerException
     {
-        String result = null;
-
-        try
-        {
-            IMethod pathMethod = servletType.getMethod(
-                    "getApplicationSpecificationPath",
-                    new String[0]);
-            if (pathMethod != null)
-            {
-                String methodSource = pathMethod.getSource();
-                if (methodSource == null)
-                {
-                    if (servletType.isBinary())
-                        throw new ScannerException(CoreMessages.format(
-                                "builder-error-servlet-subclass-is-binary-attach-source",
-                                servletType.getFullyQualifiedName()), false,
-                                IProblem.NOT_QUICK_FIXABLE);
-
-                }
-                else if (methodSource.trim().length() > 0)
-                {
-                    if (servletType.isBinary())
-                    {
-                        int signatureIndex = methodSource
-                                .indexOf("public String getApplicationSpecificationPath");
-                        if (signatureIndex > 0)
-                        {
-                            int start = methodSource.indexOf('{', signatureIndex);
-                            int end = methodSource.indexOf('}', start);
-                            methodSource = methodSource.substring(start, end);
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-
-                    int start = methodSource.indexOf("return");
-
-                    methodSource = methodSource.substring(start);
-                    int first = methodSource.indexOf("\"");
-                    int last = methodSource.lastIndexOf("\"");
-                    if (first >= 0 && last > first)
-                        result = methodSource.substring(first + 1, last);
-
-                }
-            }
-        }
-        catch (JavaModelException e)
-        {
-            TapestryCore.log("Not a valid Tapestry ApplicationServlet subclass", e);
-        }
-
-        return result;
+        return null;
     }
 
     protected ServletInfo getServletInfo(Node servletNode)
@@ -406,7 +325,7 @@ public class WebXMLScanner extends AbstractScanner
         return newInfo;
     }
 
-    private boolean isTapestryServlet(IType candidate, ISourceLocation location)
+    private boolean isTapestryServlet(IJavaType candidate, ISourceLocation location)
     {
         if (candidate == null)
             return false;
@@ -484,7 +403,7 @@ public class WebXMLScanner extends AbstractScanner
         {
             String message = CoreMessages.format("web-xml-servlet-null-classname", newInfo.name);
             addProblem(
-                    IMarker.SEVERITY_WARNING,
+                    IProblem.WARNING,
                     nodeLocation,
                     message,
                     false,
@@ -492,7 +411,7 @@ public class WebXMLScanner extends AbstractScanner
             return false;
         }
 
-        IType servletType = checkJavaType(newInfo.classname, nodeLocation);
+        IJavaType servletType = checkJavaType(newInfo.classname, nodeLocation);
         if (servletType == null)
             return false;
 
@@ -513,8 +432,7 @@ public class WebXMLScanner extends AbstractScanner
             }
             catch (ScannerException e1)
             {
-                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, e1.getMessage(), false, e1
-                        .getCode());
+                addProblem(IProblem.ERROR, nodeLocation, e1.getMessage(), false, e1.getCode());
                 return false;
             }
 
@@ -525,9 +443,9 @@ public class WebXMLScanner extends AbstractScanner
             }
             catch (ScannerException e)
             {
-                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, CoreMessages.format(
+                addProblem(IProblem.ERROR, nodeLocation, CoreMessages.format(
                         "web-xml-ignore-invalid-application-path",
-                        servletType.getElementName(),
+                        servletType.getFullyQualifiedName(),
                         path.toString()), false, IProblem.NOT_QUICK_FIXABLE);
 
                 return false;
@@ -543,9 +461,9 @@ public class WebXMLScanner extends AbstractScanner
             }
             catch (ScannerException e)
             {
-                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, CoreMessages.format(
+                addProblem(IProblem.ERROR, nodeLocation, CoreMessages.format(
                         "web-xml-ignore-invalid-application-path",
-                        servletType.getElementName(),
+                        servletType.getFullyQualifiedName(),
                         null), false, IProblem.NOT_QUICK_FIXABLE);
 
                 return false;

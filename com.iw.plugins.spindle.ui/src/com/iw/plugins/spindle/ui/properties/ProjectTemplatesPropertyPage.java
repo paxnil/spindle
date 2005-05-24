@@ -75,7 +75,7 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ProjectPreferenceStore;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.util.SpindleMultiStatus;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.ui.preferences.OverlayPreferenceStore;
 import com.iw.plugins.spindle.ui.widgets.PreferenceTemplateSelector;
@@ -290,7 +290,7 @@ public class ProjectTemplatesPropertyPage extends PropertyPage
           .getJavaProjects();
     } catch (JavaModelException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
       jprojects = new IJavaProject[0];
     }
 
@@ -449,7 +449,7 @@ public class ProjectTemplatesPropertyPage extends PropertyPage
           return;
         } catch (IOException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
           MessageDialog.openError(getShell(), "File Error", "unable to read: " + file);
           return;
         }
@@ -687,7 +687,7 @@ public class ProjectTemplatesPropertyPage extends PropertyPage
       store.save();
     } catch (IOException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
       return false;
     }
     return true;

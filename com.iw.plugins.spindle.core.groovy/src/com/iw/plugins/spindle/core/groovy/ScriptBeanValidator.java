@@ -43,8 +43,8 @@ import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.bean.PluginExpressionBeanInitializer;
 import com.iw.plugins.spindle.core.spec.bean.PluginMessageBeanInitializer;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
-import com.iw.plugins.spindle.core.util.SpindleStatusWithLocation;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatusWithLocation;
 
 /**
  * Validates that a ScriptBean is ok.

@@ -41,7 +41,7 @@ import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.util.Markers;
+import com.iw.plugins.spindle.core.util.eclipse.Markers;
 
 /**
  * Decorator that indicates extra info about Tapestry projects

@@ -130,7 +130,7 @@ public class TemplateFactory
     TemplateBuffer buffer = context.evaluate(template);
     String content = buffer.getString();
     if (format)
-      content = XMLUtil.fomat(content);
+      content = XMLUtil.format(content);
 
     return content;
   }

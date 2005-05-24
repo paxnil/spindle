@@ -224,11 +224,11 @@ public abstract class PositionUpdatingFormatWorker extends FormatWorker
 
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e); //shouldnt happen
+      UIPlugin.log_it(e); //shouldnt happen
       return null;
     } catch (RuntimeException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
       throw e;
     } finally
     {

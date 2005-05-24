@@ -59,7 +59,7 @@ import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ProjectPreferenceStore;
 import com.iw.plugins.spindle.core.util.SpindleMultiStatus;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.ui.preferences.WizardTemplatesPreferencePage;
 import com.iw.plugins.spindle.ui.util.UIUtils;
@@ -356,7 +356,7 @@ public class BaseTemplateSelectionPage extends TapestryWizardPage implements IFa
 
           } catch (Exception e)
           {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
             throw new InvocationTargetException(e);
           }
         }

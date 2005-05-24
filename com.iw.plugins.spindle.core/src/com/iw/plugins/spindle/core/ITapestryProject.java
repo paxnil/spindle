@@ -12,22 +12,20 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
 
-import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
-import com.iw.plugins.spindle.core.resources.ContextRootLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
 
 /**
- * @author Administrator
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * @author gwl
  */
-public interface ITapestryProject
+public interface ITapestryProject extends IJavaTypeFinder
 {
     /*
      * (non-Javadoc)
      * 
      * @see org.eclipse.core.resources.IProjectNature#getProject()
-     */public IProject getProject();
+     */
+    public IProject getProject();
 
     public boolean isOnOutputPath(IPath candidate);
 
@@ -37,9 +35,10 @@ public interface ITapestryProject
 
     public boolean isValidatingWebXML();
 
-    public ClasspathRootLocation getClasspathRoot() throws CoreException;
+    public ClasspathRootLocation getClasspathRoot() ;
 
     public IFolder getWebContextFolder();
 
     public ContextRootLocation getWebContextLocation();
+        
 }

@@ -2,6 +2,10 @@ package com.iw.plugins.spindle.core.spec;
 
 import org.apache.tapestry.spec.InjectSpecification;
 
+import com.iw.plugins.spindle.core.scanning.IScannerValidator;
+import com.iw.plugins.spindle.core.scanning.ScannerException;
+import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+
 /**
  * @author gwl
  */
@@ -57,6 +61,14 @@ public class PluginInjectSpecification extends BaseSpecification implements Inje
     public void setType(String type)
     {
         this.type = type;
+    }
+
+    public void validateSelf(IScannerValidator validator) throws ScannerException
+    {
+        ISourceLocationInfo sourceInfo = (ISourceLocationInfo) getLocation();
+        
+        
+        
     }
 
    

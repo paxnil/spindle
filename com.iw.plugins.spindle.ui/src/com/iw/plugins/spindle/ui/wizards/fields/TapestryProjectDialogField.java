@@ -47,12 +47,12 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.State;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
 
@@ -143,7 +143,7 @@ public class TapestryProjectDialogField extends StringButtonField
         tproject = (ITapestryProject) project.getNature(TapestryCore.NATURE_ID);
       } catch (CoreException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
       }
     }
 
@@ -157,7 +157,7 @@ public class TapestryProjectDialogField extends StringButtonField
       return (ITapestryProject) project.getNature(TapestryCore.NATURE_ID);
     } catch (CoreException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
     return null;
   }
@@ -171,7 +171,7 @@ public class TapestryProjectDialogField extends StringButtonField
         thisProject = fCurrentTapestryProject.getJavaProject();
     } catch (CoreException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
 
     final IJavaProject useProject = thisProject;
@@ -234,7 +234,7 @@ public class TapestryProjectDialogField extends StringButtonField
               .getNature(TapestryCore.NATURE_ID);
         } catch (CoreException e)
         {
-          UIPlugin.log(e);
+          UIPlugin.log_it(e);
         }
       }
     }
@@ -290,7 +290,7 @@ public class TapestryProjectDialogField extends StringButtonField
       try
       {
         IMarker[] brokenBuildMarkers = proj.findMarkers(
-            ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER,
+            IProblem.TAPESTRY_BUILDBROKEN_MARKER,
             false,
             IResource.DEPTH_ZERO);
 
@@ -302,7 +302,7 @@ public class TapestryProjectDialogField extends StringButtonField
         }
       } catch (CoreException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
       }
 
       State state = (State) TapestryArtifactManager
@@ -331,7 +331,7 @@ public class TapestryProjectDialogField extends StringButtonField
       return (ITapestryProject) project.getNature(TapestryCore.NATURE_ID);
     } catch (CoreException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
 
     }
     return null;
@@ -344,7 +344,7 @@ public class TapestryProjectDialogField extends StringButtonField
       return project.hasNature(TapestryCore.NATURE_ID);
     } catch (CoreException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
 
     }
     return false;

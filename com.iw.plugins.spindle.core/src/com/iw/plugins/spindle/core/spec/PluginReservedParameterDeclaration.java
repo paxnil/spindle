@@ -47,10 +47,10 @@ public class PluginReservedParameterDeclaration extends BaseSpecification
 
   public String getIdentfier()
   {
-    return getResevedName();
+    return getReservedName();
   }
 
-  public String getResevedName()
+  public String getReservedName()
   {
     return fReservedName;
   }

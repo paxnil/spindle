@@ -36,7 +36,6 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 import org.eclipse.core.resources.IResource;
 
-import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.PageSpecificationResolver;
@@ -49,8 +48,8 @@ import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.CoreUtils;
-import com.iw.plugins.spindle.core.util.Markers;
 import com.iw.plugins.spindle.core.util.XMLUtil;
+import com.iw.plugins.spindle.core.util.eclipse.Markers;
 import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 
 /**
@@ -256,7 +255,7 @@ public class FrameworkComponentValidator
 
                             Markers.addTapestryProblemMarkerToResource(
                                     fPutProblemsHere,
-                                    new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+                                    new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER,
                                             IProblem.ERROR, DefaultTapestryMessages.format(
                                                     "Namespace.no-such-page",
                                                     value,
@@ -337,7 +336,7 @@ public class FrameworkComponentValidator
 
                             Markers.addTapestryProblemMarkerToResource(
                                     fPutProblemsHere,
-                                    new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER,
+                                    new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER,
                                             IProblem.ERROR, "Unable to find script: "
                                                     + scriptLocation.toString(), location
                                                     .getLineNumber(), location.getCharStart(),

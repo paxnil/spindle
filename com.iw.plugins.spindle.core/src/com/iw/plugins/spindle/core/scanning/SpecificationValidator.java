@@ -38,27 +38,28 @@ import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 
 import com.iw.plugins.spindle.core.CoreMessages;
+import com.iw.plugins.spindle.core.IJavaType;
+import com.iw.plugins.spindle.core.IJavaTypeFinder;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.PicassoMigration;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.ClasspathRootLocation;
-import com.iw.plugins.spindle.core.resources.ContextRootLocation;
 import com.iw.plugins.spindle.core.resources.I18NResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.PluginAssetSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
+import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
+import com.iw.plugins.spindle.messages.PageloadMessages;
 
 /**
  * A completely functional validator for scanning Tapestry specs.
@@ -75,42 +76,21 @@ public class SpecificationValidator extends BaseValidator
 
     boolean fPeformDeferredValidations = true;
 
-    TypeFinder fTypeFinder;
+    Map fTypeCache;
 
-    public SpecificationValidator(ITapestryProject project) throws CoreException
+    public SpecificationValidator(IJavaTypeFinder finder, ITapestryProject project) 
     {
-        this(project, null, null);
-    }
-
-    /** not to be used by clients - for the builder * */
-    public SpecificationValidator(ITapestryProject project, ContextRootLocation webContextRoot,
-            ClasspathRootLocation classpathRoot) throws CoreException
-    {
+        super(finder);
         Assert.isNotNull(project);
         fTapestryProject = project;
-        if (webContextRoot != null)
-            fContextRoot = webContextRoot;
-        else
-            fContextRoot = project.getWebContextLocation();
-        if (classpathRoot != null)
-            fClasspathRoot = classpathRoot;
-        else
-            fClasspathRoot = project.getClasspathRoot();
+        fContextRoot = project.getWebContextLocation();
+        fClasspathRoot = project.getClasspathRoot();
         Assert.isNotNull(fContextRoot);
         Assert.isNotNull(fClasspathRoot);
     }
-
-    public TypeFinder getTypeFinder() throws CoreException
-    {
-        if (fTypeFinder == null)
-            fTypeFinder = new TypeFinder(fTapestryProject.getJavaProject());
-
-        return fTypeFinder;
-    }
-
-    public void setTypeFinder(TypeFinder finder)
-    {
-        fTypeFinder = finder;
+    
+    public SpecificationValidator(ITapestryProject project) {
+        this (project, project);
     }
 
     /*
@@ -118,17 +98,9 @@ public class SpecificationValidator extends BaseValidator
      * 
      * @see com.iw.plugins.spindle.core.scanning.BaseValidator#findType(java.lang.String)
      */
-    public IType findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
+    public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
     {
-        IType result = null;
-        try
-        {
-            result = getTypeFinder().findType(fullyQualifiedName);
-        }
-        catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
+        IJavaType result = getJavaTypeFinder().findType(fullyQualifiedName);                  
         fireTypeDependency(dependant, fullyQualifiedName, result);
         return result;
     }
@@ -159,7 +131,7 @@ public class SpecificationValidator extends BaseValidator
             addProblem(
                     IProblem.ERROR,
                     info.getAttributeSourceLocation("type"),
-                    TapestryCore.getTapestryString(
+                    DefaultTapestryMessages.format(
                             "Namespace.no-such-component-type",
                             type,
                             "unknown"),
@@ -193,7 +165,7 @@ public class SpecificationValidator extends BaseValidator
                             IProblem.ERROR,
                             info.getAttributeSourceLocation("type"),
                             "Unable to resolve "
-                                    + TapestryCore.getTapestryString(
+                                    + DefaultTapestryMessages.format(
                                             "Namespace.nested-namespace",
                                             namespaceId),
                             true,
@@ -205,7 +177,7 @@ public class SpecificationValidator extends BaseValidator
                     addProblem(
                             IProblem.ERROR,
                             info.getAttributeSourceLocation("type"),
-                            TapestryCore.getTapestryString(
+                            DefaultTapestryMessages.format(
                                     "Namespace.no-such-component-type",
                                     type,
                                     namespaceId),
@@ -217,9 +189,15 @@ public class SpecificationValidator extends BaseValidator
             else
             {
 
-                addProblem(IProblem.ERROR, info.getAttributeSourceLocation("type"), TapestryCore
-                        .getTapestryString("Namespace.no-such-component-type", type, use_namespace
-                                .getNamespaceId()), true, IProblem.COMPONENT_TYPE_DOES_NOT_EXIST);
+                addProblem(
+                        IProblem.ERROR,
+                        info.getAttributeSourceLocation("type"),
+                        DefaultTapestryMessages.format(
+                                "Namespace.no-such-component-type",
+                                type,
+                                use_namespace.getNamespaceId()),
+                        true,
+                        IProblem.COMPONENT_TYPE_DOES_NOT_EXIST);
 
             }
             return false;
@@ -253,10 +231,14 @@ public class SpecificationValidator extends BaseValidator
         required.removeAll(bindingNames);
         if (!required.isEmpty())
         {
-            addProblem(IProblem.ERROR, sourceInfo.getTagNameLocation(), TapestryCore
-                    .getTapestryString("PageLoader.required-parameter-not-bound", required
-                            .toString(), containedSpecification.getSpecificationLocation()
-                            .getName()), true, IProblem.COMPONENT_REQUIRED_PARAMETER_NOT_BOUND);
+            addProblem(
+                    IProblem.ERROR,
+                    sourceInfo.getTagNameLocation(),
+                    PageloadMessages.requiredParameterNotBound(
+                            required.toString(),
+                            containedSpecification.getSpecificationLocation().getName()),
+                    true,
+                    IProblem.COMPONENT_REQUIRED_PARAMETER_NOT_BOUND);
         }
 
         boolean formalOnly = !containedSpecification.getAllowInformalParameters();
@@ -274,7 +256,7 @@ public class SpecificationValidator extends BaseValidator
         //                reportProblem(
         //                    IProblem.ERROR,
         //                    location,
-        //                    TapestryCore.getTapestryString(
+        //                    DefaultTapestryMessages.format(
         //                        "PageLoader.inherit-informal-invalid-component-formal-only",
         //                        containedName));
         //                return false;
@@ -285,7 +267,7 @@ public class SpecificationValidator extends BaseValidator
         //                reportProblem(
         //                    IProblem.ERROR,
         //                    location,
-        //                    TapestryCore.getTapestryString(
+        //                    DefaultTapestryMessages.format(
         //                        "PageLoader.inherit-informal-invalid-container-formal-only",
         //                        containerName,
         //                        containedName));
@@ -315,8 +297,7 @@ public class SpecificationValidator extends BaseValidator
 
             if (formalOnly && !isFormal)
             {
-                addProblem(IProblem.ERROR, location, TapestryCore.getTapestryString(
-                        "PageLoader.formal-parameters-only",
+                addProblem(IProblem.ERROR, location, PageloadMessages.formalParametersOnly(
                         containedName,
                         name), true, IProblem.COMPONENT_INFORMALS_NOT_ALLOWED);
 
@@ -398,7 +379,7 @@ public class SpecificationValidator extends BaseValidator
         }
         else if ("classpath".equals(prefix))
         {
-            if (specLoc.isOnClasspath())
+            if (specLoc.isClasspathResource())
             {
                 root = specLoc;
             }
@@ -431,7 +412,7 @@ public class SpecificationValidator extends BaseValidator
                 .getRelativeResource(truePath);
         String fileName = relative.getName();
 
-        if (relative.getStorage() == null)
+        if (!relative.exists())
         {
             IResourceWorkspaceLocation[] I18NEquivalents = getI18NAssetEquivalents(
                     relative,
@@ -469,16 +450,18 @@ public class SpecificationValidator extends BaseValidator
     private IResourceWorkspaceLocation[] getI18NAssetEquivalents(
             IResourceWorkspaceLocation baseLocation, String name)
     {
+
         try
         {
             fI18NAcceptor.configure(name);
             baseLocation.lookup(fI18NAcceptor);
             return fI18NAcceptor.getResults();
         }
-        catch (CoreException e)
+        catch (RuntimeException e)
         {
             TapestryCore.log(e);
         }
+
         return new IResourceWorkspaceLocation[] {};
     }
 
@@ -507,12 +490,12 @@ public class SpecificationValidator extends BaseValidator
             templateLocation = (IResourceWorkspaceLocation) fClasspathRoot
                     .getRelativeResource(templatePath);
 
-        if (templateLocation.getStorage() == null)
+        if (!templateLocation.exists())
         {
             String fileName = templateLocation.getName();
             // find the attribute source location for the error
             ISourceLocationInfo sourceLocation = (ISourceLocationInfo) templateAsset.getLocation();
-            ISourceLocation errorLoc = sourceLocation.getStartTagSourceLocation();           
+            ISourceLocation errorLoc = sourceLocation.getStartTagSourceLocation();
 
             String assetSpecName = ((PluginAssetSpecification) templateAsset).getIdentifier();
             IResourceWorkspaceLocation[] I18NEquivalents = getI18NAssetEquivalents(
@@ -550,61 +533,9 @@ public class SpecificationValidator extends BaseValidator
     {
         IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) specLocation;
 
-        if (!useLocation.isOnClasspath())
+        if (!useLocation.isClasspathResource())
             useLocation = fClasspathRoot;
 
         return validateResourceLocation(useLocation, path, errorKey, source);
-    }
-
-    /**
-     * A Utility class used to lookup types. If this object is created during a build, the
-     * TapestryBuilder's type cache is used. If not, instances of this object will use thier own Map
-     * to cache. Note, one the cache Map is set, you can't change it.
-     * 
-     * @author glongman@gmail.com
-     */
-    public static class TypeFinder
-    {
-        IJavaProject project;
-
-        Map cache;
-
-        /**
-         *  
-         */
-        public TypeFinder(IJavaProject project)
-        {
-            Assert.isNotNull(project);
-            this.project = project;
-            cache = TapestryBuilder.getTypeCache();
-            if (cache == null)
-                cache = new HashMap();
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.iw.plugins.spindle.core.scanning.BaseValidator#findType(java.lang.String)
-         */
-        public IType findType(String fullyQualifiedName)
-        {
-            IType result = null;
-
-            if (cache.containsKey(fullyQualifiedName))
-                return (IType) cache.get(fullyQualifiedName);
-
-            try
-            {
-                result = project.getJavaProject().findType(fullyQualifiedName);
-            }
-            catch (CoreException e)
-            {
-                TapestryCore.log(e);
-            }
-
-            cache.put(fullyQualifiedName, result);
-
-            return result;
-        }
     }
 }

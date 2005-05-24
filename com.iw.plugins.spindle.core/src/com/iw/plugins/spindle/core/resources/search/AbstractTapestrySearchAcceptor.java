@@ -27,12 +27,7 @@
 package com.iw.plugins.spindle.core.resources.search;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import org.eclipse.core.resources.IStorage;
-
-import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 
 /**
  * Acceptor that will accept/reject things based on the flags set in it.
@@ -71,7 +66,7 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
    */
   public static final int ACCEPT_ANY = 0x00000100;
 
-  private List fSeekExtensions = Arrays.asList(TapestryBuilder.KnownExtensions);
+  private List fSeekExtensions;// = Arrays.asList(TapestryBuilder.KnownExtensions);
 
   private List fResults = new ArrayList();
 
@@ -82,9 +77,10 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
     reset(ACCEPT_ANY);
   }
 
-  public AbstractTapestrySearchAcceptor(int acceptFlags)
+  public AbstractTapestrySearchAcceptor(int acceptFlags, List allowedTemplateExtensions)
   {
     reset(acceptFlags);
+    fSeekExtensions = allowedTemplateExtensions;
   }
 
   public void reset()
@@ -97,10 +93,12 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
     reset();
     this.fAcceptFlags = flags;
   }
+  
+  protected abstract String getFileExtension(Object leaf);
 
-  protected boolean acceptAsTapestry(IStorage storage)
+  protected boolean acceptAsTapestry(Object leaf)
   {
-    String extension = storage.getFullPath().getFileExtension();
+    String extension = getFileExtension(leaf);
     if (!fSeekExtensions.contains(extension))
       return false;
 
@@ -128,20 +126,15 @@ public abstract class AbstractTapestrySearchAcceptor implements ISearchAcceptor
     return true;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.search.ISearchAcceptor#accept(java.lang.Object,
-   *      org.eclipse.core.resources.IStorage)
-   */
-  public final boolean accept(Object parent, IStorage storage)
+  
+  public final boolean accept(Object parent, Object leaf)
   {
-    if (!acceptAsTapestry(storage))
+    if (!acceptAsTapestry(leaf))
       return true; // continue the search
 
-    return acceptTapestry(parent, storage);
+    return acceptTapestry(parent, leaf);
   }
 
   /** return false to abort the search * */
-  public abstract boolean acceptTapestry(Object parent, IStorage storage);
+  public abstract boolean acceptTapestry(Object parent, Object leaf);
 }

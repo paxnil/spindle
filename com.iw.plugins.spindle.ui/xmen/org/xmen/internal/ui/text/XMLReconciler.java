@@ -208,7 +208,7 @@ public class XMLReconciler implements IDocumentListener, XMLDocumentPartitioner.
       //            }
     } catch (BadPositionCategoryException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
   }
 
@@ -392,7 +392,7 @@ public class XMLReconciler implements IDocumentListener, XMLDocumentPartitioner.
     } catch (BadLocationException e)
     {
 
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
   }
 
@@ -404,7 +404,7 @@ public class XMLReconciler implements IDocumentListener, XMLDocumentPartitioner.
       fDocument.replace(to.getOffset() + to.getLength(), 0, "<" + name + "/>");
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
   }
 
@@ -637,7 +637,7 @@ public class XMLReconciler implements IDocumentListener, XMLDocumentPartitioner.
       sendOnlyAdditions = true;
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
   }
 
@@ -705,7 +705,7 @@ public class XMLReconciler implements IDocumentListener, XMLDocumentPartitioner.
       fDocument.replace(to.getOffset() + to.getLength() - 1, 0, " " + name + "=\"\"");
     } catch (BadLocationException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
     }
   }
 

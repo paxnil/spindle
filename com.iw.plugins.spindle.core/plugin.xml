@@ -49,13 +49,24 @@
       </library>
    </runtime>
    <requires>
+   <!--
       <import plugin="org.eclipse.ui.ide" export="true"/>
       <import plugin="org.eclipse.core.resources" export="true"/>
       <import plugin="org.eclipse.jdt.core" export="true"/>
-      <import plugin="org.eclipse.ui" export="true"/>
-      <import plugin="org.apache.xerces" export="true"/>
-      <import plugin="org.eclipse.jface.text"/> 
+      
+     
+      
+      
+      -->
+      
+      <import plugin="org.eclipse.ui.ide" export="true"/>
+      <import plugin="org.eclipse.core.resources" export="true"/>
+      <import plugin="org.eclipse.jdt.core" export="true"/>
+      
       <import plugin="org.eclipse.core.runtime" export="true"/>
+       <import plugin="org.apache.xerces" export="true"/>
+       <import plugin="org.eclipse.jface.text"/> 
+       <import plugin="org.eclipse.ui" export="true"/>
    </requires>
    <extension-point id="componentTypeResolver" name="Component Type Resolvers" schema="schema/componentTypeResolver.exsd"/>
    <extension-point id="incrementalBuildVeto" name="Option to veto an incremental build" schema="schema/incrementalBuildVeto.exsd"/>

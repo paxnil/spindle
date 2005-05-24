@@ -26,8 +26,7 @@
 
 package com.iw.plugins.spindle.core.source;
 
-import org.eclipse.core.resources.IMarker;
-
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.IBuilderProblemCodes;
 
 /**
@@ -37,24 +36,41 @@ import com.iw.plugins.spindle.core.builder.IBuilderProblemCodes;
  */
 public interface IProblem extends IBuilderProblemCodes
 {
-    /**
-     * Error severity constant indicating an error state.
-     */
-    public static final int ERROR = IMarker.SEVERITY_ERROR;
 
     /**
      * Info severity constant indicating information only.
      * 
      * @see #getAttribute
      */
-    public static final int INFO = IMarker.SEVERITY_INFO;
+    public static final int INFO = 0;
 
     /**
      * Warning severity constant indicating a warning.
      * 
      * @see #getAttribute
      */
-    public static final int WARNING = IMarker.SEVERITY_WARNING;
+    public static final int WARNING = 1;
+
+    /**
+     * Error severity constant indicating an error state.
+     */
+    public static final int ERROR = 2;
+
+    public static final String TEMPORARY_FLAG = "temporary";
+
+    public static final String PROBLEM_CODE = "code";
+
+    static public final String TAPESTRY_PROBLEM_MARKER = TapestryCore.PLUGIN_ID
+      + ".problemmarker";
+
+    static public final String TAPESTRY_SOURCE_PROBLEM_MARKER = TapestryCore.PLUGIN_ID
+      + ".problemmarker.source";
+
+    static public final String TAPESTRY_FATAL_PROBLEM_MARKER = TapestryCore.PLUGIN_ID
+      + ".fatalproblemmarker";
+
+    static public final String TAPESTRY_BUILDBROKEN_MARKER = TapestryCore.PLUGIN_ID
+      + ".buildBroken";
 
     /**
      * An integer value indicating where a problem ends. This attribute is zero-relative and

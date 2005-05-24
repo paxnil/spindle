@@ -28,7 +28,6 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
@@ -251,7 +250,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
                         }
                         catch (BadLocationException e1)
                         {
-                            UIPlugin.log(e1);
+                            UIPlugin.log_it(e1);
                         }
 
                         temporaryProblemsChanged = true;
@@ -459,7 +458,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
     {
-        addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, severity, message,
+        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message,
                 location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
                 isTemporary, code));
     }
@@ -472,7 +471,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
      */
     public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
     {
-        addProblem(new DefaultProblem(ITapestryMarker.TAPESTRY_PROBLEM_MARKER, status, location
+        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, status, location
                 .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary));
     }
 

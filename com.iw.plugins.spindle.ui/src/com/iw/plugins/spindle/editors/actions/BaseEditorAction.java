@@ -179,7 +179,7 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         }
         catch (JavaModelException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
         }
         return null;
     }
@@ -192,7 +192,7 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         }
         catch (JavaModelException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
         }
         return null;
     }
@@ -205,11 +205,11 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         }
         catch (PartInitException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
         }
         catch (JavaModelException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
         }
     }
 

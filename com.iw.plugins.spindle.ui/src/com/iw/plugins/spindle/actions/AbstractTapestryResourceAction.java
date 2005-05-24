@@ -41,9 +41,9 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-import com.iw.plugins.spindle.core.ITapestryMarker;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.source.IProblem;
 
 /**
  * Base class for actions that need to use the workbench selection
@@ -127,7 +127,7 @@ public abstract class AbstractTapestryResourceAction extends Action
             return false;
 
           if (project.findMarkers(
-              ITapestryMarker.TAPESTRY_BUILDBROKEN_MARKER,
+              IProblem.TAPESTRY_BUILDBROKEN_MARKER,
               false,
               IResource.DEPTH_INFINITE).length > 0)
             return false;

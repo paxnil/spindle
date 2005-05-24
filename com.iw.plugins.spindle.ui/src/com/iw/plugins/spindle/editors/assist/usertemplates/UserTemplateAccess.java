@@ -82,7 +82,7 @@ public class UserTemplateAccess
         fStore.load();
       } catch (IOException e)
       {
-        UIPlugin.log(e);
+        UIPlugin.log_it(e);
       }
     }
     return fStore;

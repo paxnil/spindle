@@ -41,7 +41,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.wizards.NewTapestryElementWizard;
 import com.iw.plugins.spindle.ui.wizards.factories.ApplicationFactory;
 import com.iw.plugins.spindle.ui.wizards.factories.PageFactory;

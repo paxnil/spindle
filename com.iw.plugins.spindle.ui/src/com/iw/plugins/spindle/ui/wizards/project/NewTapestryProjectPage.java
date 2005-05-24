@@ -54,6 +54,7 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.util.XMLPublicIDUtil;
 import com.iw.plugins.spindle.core.util.XMLUtil;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
@@ -237,11 +238,11 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage {
 		fServletSpecVersionCombo.select(1);
 		fServletSpecVersionCombo.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				int dtdId = XMLUtil.getDTDVersion(getServletSpecPublicId());
+				int dtdId = XMLPublicIDUtil.getDTDVersion(getServletSpecPublicId());
 				fInstallData.setServletSpecPublicId(dtdId);
 				if (fInsertTapestryFilter != null)
 					fInsertTapestryFilter
-							.setEnabled(dtdId >= XMLUtil.DTD_SERVLET_2_3);
+							.setEnabled(dtdId >= XMLPublicIDUtil.DTD_SERVLET_2_3);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -268,9 +269,9 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage {
 		setGroupEnabled(fTapestryGroup, nameSpecified);
 		setGroupEnabled(fTemplateGroup, nameSpecified);
 
-		int dtdId = XMLUtil.getDTDVersion(getServletSpecPublicId());
+		int dtdId = XMLPublicIDUtil.getDTDVersion(getServletSpecPublicId());
 		boolean enableFilterSelection = fServletSpecVersionCombo.isEnabled()
-				&& nameSpecified && dtdId >= XMLUtil.DTD_SERVLET_2_3;
+				&& nameSpecified && dtdId >= XMLPublicIDUtil.DTD_SERVLET_2_3;
 
 		if (fInsertTapestryFilter != null) {
 			fInsertTapestryFilter.setEnabled(enableFilterSelection);

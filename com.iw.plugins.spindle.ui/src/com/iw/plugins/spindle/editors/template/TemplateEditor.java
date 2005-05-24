@@ -127,7 +127,7 @@ public class TemplateEditor extends Editor
         }
         catch (IOException e)
         {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
         }
     }
 
@@ -300,7 +300,6 @@ public class TemplateEditor extends Editor
                 didReconcile = true;
                 fScanner.setExternalProblemCollector(collector);
                 fScanner.setPerformDeferredValidations(false);
-                fScanner.setFactory(TapestryCore.getSpecificationFactory());
                 fValidator.setProblemCollector(fScanner);
                 try
                 {
@@ -507,7 +506,7 @@ public class TemplateEditor extends Editor
             }
             catch (Exception e)
             {
-                UIPlugin.log(e);
+                UIPlugin.log_it(e);
             }
             finally
             {

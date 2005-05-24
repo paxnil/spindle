@@ -43,7 +43,7 @@ import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.CoreUtils;
-import com.iw.plugins.spindle.core.util.SpindleStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.UneditableComboBoxDialogField;
 
@@ -109,7 +109,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
       INamespace namespace = (INamespace) iter.next();
 
       if (firstClasspathNamespace == -1 && ((IResourceWorkspaceLocation) namespace
-          .getSpecificationLocation()).isOnClasspath())
+          .getSpecificationLocation()).isClasspathResource())
         firstClasspathNamespace = count;
 
     }
@@ -140,7 +140,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
       IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
           .getSpecificationLocation();
 
-      if (firstClasspathNamespace == -1 && location.isOnClasspath())
+      if (firstClasspathNamespace == -1 && location.isClasspathResource())
         firstClasspathNamespace = count;
 
       if (location.getStorage().equals(initResource))
@@ -229,7 +229,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
             element = (INamespace) iter.next();
           } catch (RuntimeException e)
           {
-            UIPlugin.log(e);
+            UIPlugin.log_it(e);
             throw e;
           }
           IStorage storage = ((IResourceWorkspaceLocation) element
@@ -269,7 +269,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
       INamespace childNamespace = parentNamespace.getChildNamespace(childName);
       if (childNamespace == null)
       {
-        UIPlugin.log("null namespace found - Namespace Dialog Field!");
+        UIPlugin.log_it("null namespace found - Namespace Dialog Field!");
         continue;
       }
       IResourceWorkspaceLocation childLocation = (IResourceWorkspaceLocation) childNamespace

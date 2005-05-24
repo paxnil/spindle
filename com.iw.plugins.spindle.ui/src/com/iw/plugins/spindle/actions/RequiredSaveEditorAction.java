@@ -94,7 +94,7 @@ public class RequiredSaveEditorAction
       //            new ProgressMonitorDialog(getShell()).run(false, false, );
     } catch (InvocationTargetException e)
     {
-      UIPlugin.log(e);
+      UIPlugin.log_it(e);
       return false;
     } catch (InterruptedException e)
     {
