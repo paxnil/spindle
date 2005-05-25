@@ -89,10 +89,8 @@ public class WebXMLScanner extends AbstractScanner
     protected void checkApplicationLocation(IResourceWorkspaceLocation location)
             throws ScannerException
     {
-        if (location == null)
-            return;
 
-        if (location.getStorage() == null)
+        if (location == null || location.getStorage() == null)
             throw new ScannerException(TapestryCore.getString(
                     "web-xml-ignore-application-path-not-found",
                     location == null ? "no location found" : location.toString()), false,
@@ -172,8 +170,8 @@ public class WebXMLScanner extends AbstractScanner
             TapestryCore.log(e);
             e.printStackTrace();
         }
-        //        if (!match)
-        //            addProblem(IProblem.ERROR, location, "web-xml-does-not-subclass");
+        // if (!match)
+        // addProblem(IProblem.ERROR, location, "web-xml-does-not-subclass");
 
         return match;
     }
@@ -273,25 +271,24 @@ public class WebXMLScanner extends AbstractScanner
                     if (servletType.isBinary())
                         throw new ScannerException(TapestryCore.getString(
                                 "builder-error-servlet-subclass-is-binary-attach-source",
-                                servletType.getFullyQualifiedName()), false, IProblem.NOT_QUICK_FIXABLE);
+                                servletType.getFullyQualifiedName()), false,
+                                IProblem.NOT_QUICK_FIXABLE);
 
                 }
                 else if (methodSource.trim().length() > 0)
                 {
-                    if (servletType.isBinary())
+
+                    int signatureIndex = methodSource
+                            .indexOf("protected String getApplicationSpecificationPath");
+                    if (signatureIndex >= 0)
                     {
-                        int signatureIndex = methodSource
-                                .indexOf("public String getApplicationSpecificationPath");
-                        if (signatureIndex > 0)
-                        {
-                            int start = methodSource.indexOf('{', signatureIndex);
-                            int end = methodSource.indexOf('}', start);
-                            methodSource = methodSource.substring(start, end);
-                        }
-                        else
-                        {
-                            return null;
-                        }
+                        int start = methodSource.indexOf('{', signatureIndex);
+                        int end = methodSource.indexOf('}', start);
+                        methodSource = methodSource.substring(start, end);
+                    }
+                    else
+                    {
+                        return null;
                     }
 
                     int start = methodSource.indexOf("return");
@@ -380,8 +377,12 @@ public class WebXMLScanner extends AbstractScanner
                 keyLoc = getBestGuessSourceLocation(node, true);
                 if (key == null)
                 {
-                    addProblem(IProblem.ERROR, keyLoc, TapestryCore
-                            .getString("web-xml-init-param-null-key"), false, IProblem.NOT_QUICK_FIXABLE);
+                    addProblem(
+                            IProblem.ERROR,
+                            keyLoc,
+                            TapestryCore.getString("web-xml-init-param-null-key"),
+                            false,
+                            IProblem.NOT_QUICK_FIXABLE);
                     return false;
                 }
                 else if (currentInfo.parameters.containsKey(key))
