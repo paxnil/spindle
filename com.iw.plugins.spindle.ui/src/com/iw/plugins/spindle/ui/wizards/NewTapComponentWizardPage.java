@@ -35,6 +35,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -82,13 +83,12 @@ import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.ProjectPreferenceStore;
 import com.iw.plugins.spindle.core.TapestryException;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.builder.TapestryBuilder;
 import com.iw.plugins.spindle.core.namespace.CoreNamespace;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
-import com.iw.plugins.spindle.core.util.CoreUtils;
 import com.iw.plugins.spindle.core.util.Files;
+import com.iw.plugins.spindle.core.util.eclipse.CoreUtils;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.editors.documentsAndModels.ApplicationEdits;
@@ -643,7 +643,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         IFile file = null;
 
         library = (PluginLibrarySpecification) namespace.getSpecification();
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+        IEclipseResource location = (IEclipseResource) namespace
             .getSpecificationLocation();
 
         file = (IFile) location.getStorage();
@@ -712,10 +712,10 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
           try
           {
-            file.getProject().build(TapestryBuilder.INCREMENTAL_BUILD, monitor);
+            file.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, monitor);
           } catch (CoreException e1)
           {
-            UIPlugin.log_it(e1);
+            UIPlugin.log(e1);
             throw new InvocationTargetException(e1);
           }
 
@@ -769,15 +769,15 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
           helper.apply();
         } catch (MalformedTreeException e)
         {
-          UIPlugin.log_it(e);
+          UIPlugin.log(e);
           throw new InvocationTargetException(e);
         } catch (BadLocationException e)
         {
-          UIPlugin.log_it(e);
+          UIPlugin.log(e);
           throw new InvocationTargetException(e);
         } catch (TapestryException e)
         {
-          UIPlugin.log_it(e);
+          UIPlugin.log(e);
           throw new InvocationTargetException(e);
         }
 
@@ -792,7 +792,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
             file.setContents(b, true, true, monitor);
           } catch (CoreException e1)
           {
-            UIPlugin.log_it(e1);
+            UIPlugin.log(e1);
             throw new InvocationTargetException(e1);
           }
         }
@@ -872,7 +872,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         result = folder.getFile(fileName);
       } catch (JavaModelException e)
       {
-        UIPlugin.log_it(e);
+        UIPlugin.log(e);
       }
     }
     return result;
@@ -948,7 +948,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     SpindleStatus status = (SpindleStatus) fComponentNameDialogField.getStatus();
     String name = fComponentNameDialogField.getTextValue();
     INamespace namespace = fNamespaceDialogField.getSelectedNamespace();
-    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+    IEclipseResource location = (IEclipseResource) namespace
         .getSpecificationLocation();
     if (location.isClasspathResource())
     {
@@ -1129,7 +1129,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         String name = fComponentNameDialogField.getTextValue();
         INamespace namespace = namespaceField.getSelectedNamespace();
 
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+        IEclipseResource location = (IEclipseResource) namespace
             .getSpecificationLocation();
 
         IFolder folder = (IFolder) ((IFile) location.getStorage()).getParent();

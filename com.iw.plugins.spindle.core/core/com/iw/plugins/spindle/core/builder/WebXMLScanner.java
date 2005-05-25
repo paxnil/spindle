@@ -52,7 +52,7 @@ import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
 public class WebXMLScanner extends AbstractScanner
 {
 
-    protected FullBuild fBuilder;
+    protected AbstractBuild fBuilder;
 
     protected ArrayList fServletNames;
 
@@ -61,7 +61,7 @@ public class WebXMLScanner extends AbstractScanner
     /**
      * Constructor for WebXMLProcessor.
      */
-    public WebXMLScanner(FullBuild fullBuilder)
+    public WebXMLScanner(AbstractBuild fullBuilder)
     {
         super();
         this.fBuilder = fullBuilder;

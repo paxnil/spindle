@@ -187,7 +187,7 @@ public class FullBuild extends AbstractBuild
             WebAppDescriptor descriptor = null;
             try
             {
-                WebXMLScanner wscanner = new EclipseWebXMLScanner(this);
+                WebXMLScanner wscanner = fInfrastructure.createWebXMLScanner();
                 descriptor = wscanner.scanWebAppDescriptor(wxmlElement);
                 fInfrastructure.fProblemPersister.recordProblems(webXML, wscanner.getProblems());
             }

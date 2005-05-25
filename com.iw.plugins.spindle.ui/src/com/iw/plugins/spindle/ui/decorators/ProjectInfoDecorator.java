@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
@@ -73,7 +74,7 @@ public class ProjectInfoDecorator extends AbstractDecorator
     try
     {
       ITapestryProject tproject = (ITapestryProject) project
-          .getNature(TapestryCore.NATURE_ID);
+          .getNature(TapestryCorePlugin.NATURE_ID);
       if (tproject != null)
       {
         decoration.addSuffix(getDecorationSuffix(project));
@@ -141,7 +142,7 @@ public class ProjectInfoDecorator extends AbstractDecorator
     try
     {
       IProject project = (IProject) ((IAdaptable) element).getAdapter(IProject.class);
-      return project.hasNature(TapestryCore.NATURE_ID);
+      return project.hasNature(TapestryCorePlugin.NATURE_ID);
     } catch (CoreException e)
     {} catch (ClassCastException e)
     {}

@@ -63,7 +63,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.util.SpindleMultiStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleMultiStatus;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.ui.widgets.PreferenceTemplateSelector;

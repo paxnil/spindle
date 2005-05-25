@@ -42,6 +42,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.source.IProblem;
 
@@ -123,7 +124,7 @@ public abstract class AbstractTapestryResourceAction extends Action
         try
         {
 
-          if (!project.isOpen() || !project.hasNature(TapestryCore.NATURE_ID))
+          if (!project.isOpen() || !project.hasNature(TapestryCorePlugin.NATURE_ID))
             return false;
 
           if (project.findMarkers(

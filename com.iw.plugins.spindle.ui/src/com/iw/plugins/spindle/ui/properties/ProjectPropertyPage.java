@@ -82,6 +82,7 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
 import com.iw.plugins.spindle.ui.util.Revealer;
@@ -242,11 +243,11 @@ public class ProjectPropertyPage extends PropertyPage
         }
     }
 
-    public static final String PROJECT_TYPE_PROPERTY = TapestryCore.PLUGIN_ID + ".project-type";
+    public static final String PROJECT_TYPE_PROPERTY = TapestryCore.IDENTIFIER + ".project-type";
 
-    public static final String CONTEXT_ROOT_PROPERTY = TapestryCore.PLUGIN_ID + ".context-root";
+    public static final String CONTEXT_ROOT_PROPERTY = TapestryCore.IDENTIFIER + ".context-root";
 
-    public static final String VALIDATE_WEBXML_PROPERTY = TapestryCore.PLUGIN_ID
+    public static final String VALIDATE_WEBXML_PROPERTY = TapestryCore.IDENTIFIER
             + ".validate-web-xml";
 
     private static final int TEXT_FIELD_WIDTH = 30;
@@ -319,7 +320,7 @@ public class ProjectPropertyPage extends PropertyPage
         try
         {
             fIsTapestryProjectCheck.setSelection(getJavaProject().getProject().hasNature(
-                    TapestryCore.NATURE_ID));
+                    TapestryCorePlugin.NATURE_ID));
         }
         catch (CoreException ex)
         {
@@ -558,7 +559,7 @@ public class ProjectPropertyPage extends PropertyPage
         String result = ((IResource) getElement()).getPersistentProperty(key);
         if (result == null)
         {
-            throw new CoreException(new Status(IStatus.ERROR, TapestryCore.PLUGIN_ID, 0,
+            throw new CoreException(new Status(IStatus.ERROR, TapestryCore.IDENTIFIER, 0,
                     "not found", null));
         }
         return result;
@@ -824,7 +825,7 @@ public class ProjectPropertyPage extends PropertyPage
                                 List entries = Arrays.asList(jproject.getRawClasspath());
                                 ArrayList useEntries = new ArrayList(entries);
                                 useEntries.add(JavaCore.newContainerEntry(new Path(
-                                        TapestryCore.CORE_CONTAINER)));
+                                        TapestryCorePlugin.CORE_CONTAINER)));
                                 jproject.setRawClasspath((IClasspathEntry[]) useEntries
                                         .toArray(new IClasspathEntry[entries.size()]), monitor);
                             }

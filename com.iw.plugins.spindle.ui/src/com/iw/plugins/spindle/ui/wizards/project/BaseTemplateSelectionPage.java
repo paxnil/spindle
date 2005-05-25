@@ -58,7 +58,7 @@ import org.eclipse.swt.widgets.Label;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ProjectPreferenceStore;
-import com.iw.plugins.spindle.core.util.SpindleMultiStatus;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleMultiStatus;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.ui.preferences.WizardTemplatesPreferencePage;

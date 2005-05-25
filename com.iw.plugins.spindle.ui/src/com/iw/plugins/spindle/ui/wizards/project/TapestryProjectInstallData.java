@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.templates.Template;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.ui.wizards.factories.ApplicationFactory;
 import com.iw.plugins.spindle.ui.wizards.factories.IFactoryTemplateSource;
 import com.iw.plugins.spindle.ui.wizards.factories.PageFactory;
@@ -18,7 +19,7 @@ import com.iw.plugins.spindle.ui.wizards.factories.TapestryTemplateFactory;
 public class TapestryProjectInstallData {
 
 	static public final IClasspathEntry TAPESTRY_FRAMEWORK = JavaCore
-			.newContainerEntry(new Path(TapestryCore.CORE_CONTAINER), false);
+			.newContainerEntry(new Path(TapestryCorePlugin.CORE_CONTAINER), false);
 
 	public static final int COPY_TAP_JARS = 0;
 

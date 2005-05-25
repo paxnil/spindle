@@ -58,7 +58,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.builder.TapestryBuilder;
+import com.iw.plugins.spindle.core.builder.AbstractBuildInfrastructure;
 import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
 
 /**
@@ -71,7 +71,7 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
 {
   private static Revealer instance;
 
-  private static List Known_Extensions = Arrays.asList(TapestryBuilder.KnownExtensions);
+  private static List Known_Extensions = Arrays.asList(AbstractBuildInfrastructure.KnownExtensions);
 
   public static synchronized void start()
   {
@@ -202,7 +202,7 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
 
     } catch (CoreException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     }
     return useSelection;
   }

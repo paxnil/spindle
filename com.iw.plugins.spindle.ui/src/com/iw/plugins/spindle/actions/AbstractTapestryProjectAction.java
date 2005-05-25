@@ -38,6 +38,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 
 /**
  * Copyright 2002 Intelligent Works Inc. All rights reserved
@@ -124,7 +125,7 @@ public abstract class AbstractTapestryProjectAction extends Action
     try
     {
 
-      return !project.hasNature(TapestryCore.NATURE_ID);
+      return !project.hasNature(TapestryCorePlugin.NATURE_ID);
 
     } catch (CoreException e)
     {

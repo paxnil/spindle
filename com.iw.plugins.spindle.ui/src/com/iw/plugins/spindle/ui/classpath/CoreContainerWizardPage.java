@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Label;
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 
 /**
  * Extension to allow a user to associate the default Tapestry Framework with a
@@ -72,7 +73,7 @@ public class CoreContainerWizardPage extends WizardPage
    */
   public boolean finish()
   {
-    fSelection = JavaCore.newContainerEntry(new Path(TapestryCore.CORE_CONTAINER));
+    fSelection = JavaCore.newContainerEntry(new Path(TapestryCorePlugin.CORE_CONTAINER));
 
     return true;
   }

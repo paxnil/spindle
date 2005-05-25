@@ -42,7 +42,7 @@ import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.TapestryException;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.util.Assert;
@@ -288,7 +288,7 @@ public abstract class SpecificationEdits
       return fDocument.getLineOffset(fDocument.getLineOfOffset(desiredOffset));
     } catch (BadLocationException e)
     {
-      TapestryCore.throwErrorException(e.getMessage());
+      TapestryCorePlugin.throwErrorException(e.getMessage());
     }
     return -1;
   }
@@ -302,7 +302,7 @@ public abstract class SpecificationEdits
       return fDocument.getLineOffset(line);
     } catch (BadLocationException e)
     {
-      TapestryCore.throwErrorException(e.getMessage());
+        TapestryCorePlugin.throwErrorException(e.getMessage());
     }
     return -1;
   }

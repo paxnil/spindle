@@ -369,22 +369,22 @@ public class TemplateScanner extends AbstractScanner
 
             BindingType bindingType = bspec.getType();
 
-//            if (bindingType == BindingType.DYNAMIC)
-//            {
-//                validateImplicitExpressionBinding(bspec, containedSpecification, location
-//                        .getLocationOffset(PicassoMigration.OGNL_EXPRESSION_PREFIX.length()));
-//                continue;
-//            }
-//
-//            if (bindingType == BindingType.STRING)
-//            {
-//                validateImplicitStringBinding(bspec, containedSpecification, location
-//                        .getLocationOffset(PicassoMigration.LOCALIZATION_KEY_PREFIX.length()));
-//                continue;
-//            }
-//
-//            if (bindingType == BindingType.STATIC)
-//                validateImplicitStaticBinding(bspec, containedSpecification, location);
+            if (bindingType == BindingType.DYNAMIC)
+            {
+                validateImplicitExpressionBinding(bspec, containedSpecification, location
+                        .getLocationOffset(PicassoMigration.OGNL_EXPRESSION_PREFIX.length()));
+                continue;
+            }
+
+            if (bindingType == BindingType.STRING)
+            {
+                validateImplicitStringBinding(bspec, containedSpecification, location
+                        .getLocationOffset(PicassoMigration.LOCALIZATION_KEY_PREFIX.length()));
+                continue;
+            }
+
+            if (bindingType == BindingType.STATIC)
+                validateImplicitStaticBinding(bspec, containedSpecification, location);
 
         }
 

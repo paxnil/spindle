@@ -46,6 +46,7 @@ import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
 import com.iw.plugins.spindle.core.util.IndentingWriter;
@@ -486,7 +487,7 @@ public class TapestryProjectInstaller {
 			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 				if (!hasTapestryEntry)
 					hasTapestryEntry = entry.getPath().segment(0).equals(
-							TapestryCore.CORE_CONTAINER);
+							TapestryCorePlugin.CORE_CONTAINER);
 			}
 		}
 		return hasTapestryEntry;

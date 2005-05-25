@@ -7,8 +7,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.IJavaType;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.builder.FullBuild;
-import com.iw.plugins.spindle.core.builder.WebXMLScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
 
@@ -19,7 +17,7 @@ import com.iw.plugins.spindle.core.source.IProblem;
 public class EclipseWebXMLScanner extends WebXMLScanner
 {
 
-    public EclipseWebXMLScanner(FullBuild fullBuilder)
+    public EclipseWebXMLScanner(AbstractBuild fullBuilder)
     {
         super(fullBuilder);
     }

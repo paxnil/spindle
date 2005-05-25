@@ -82,7 +82,6 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
     private static ThreadLocal PACKAGE_CACHE;
 
-
     private static ThreadLocal STORAGE_CACHE;
 
     static
@@ -124,6 +123,8 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
     IResourceDelta fDelta;
 
+    private WebXMLScanner fWebXMLScanner;
+
     /**
      * Constructor for TapestryBuilder.
      */
@@ -141,7 +142,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
         fNotifier.begin();
 
-        PACKAGE_CACHE.set(new HashMap());       
+        PACKAGE_CACHE.set(new HashMap());
         STORAGE_CACHE.set(new HashMap());
 
         boolean ok = false;
@@ -200,7 +201,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         }
         finally
         {
-            PACKAGE_CACHE.set(null);            
+            PACKAGE_CACHE.set(null);
             STORAGE_CACHE.set(null);
             if (!ok)
                 // If the build failed, clear the previously built state,
@@ -288,6 +289,16 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
                 state);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.builder.AbstractBuildInfrastructure#createWebXMLScanner()
+     */
+    WebXMLScanner createWebXMLScanner()
+    {
+        return new EclipseWebXMLScanner(fBuild);
+    }
+
     /**
      * Method clearLastState.
      */
@@ -320,7 +331,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
     private void buildIncremental() throws BuilderException, CoreException
     {
 
-        IIncrementalBuild incBuild = new IncrementalEclipseProjectBuild(this, fDelta);
+        IncrementalEclipseProjectBuild incBuild = new IncrementalEclipseProjectBuild(this, fDelta);
 
         if (incBuild.canIncrementalBuild())
         {
@@ -545,7 +556,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             });
         }
     }
-    
+
     /**
      * A search acceptor that is used to find all the Tapestry artifacts in the web context or the
      * classpath.

@@ -49,6 +49,7 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.builder.State;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -140,7 +141,7 @@ public class TapestryProjectDialogField extends StringButtonField
     {
       try
       {
-        tproject = (ITapestryProject) project.getNature(TapestryCore.NATURE_ID);
+        tproject = (ITapestryProject) project.getNature(TapestryCorePlugin.NATURE_ID);
       } catch (CoreException e)
       {
         UIPlugin.log_it(e);
@@ -154,7 +155,7 @@ public class TapestryProjectDialogField extends StringButtonField
   {
     try
     {
-      return (ITapestryProject) project.getNature(TapestryCore.NATURE_ID);
+      return (ITapestryProject) project.getNature(TapestryCorePlugin.NATURE_ID);
     } catch (CoreException e)
     {
       UIPlugin.log_it(e);
@@ -231,7 +232,7 @@ public class TapestryProjectDialogField extends StringButtonField
         {
           return (ITapestryProject) jproject
               .getProject()
-              .getNature(TapestryCore.NATURE_ID);
+              .getNature(TapestryCorePlugin.NATURE_ID);
         } catch (CoreException e)
         {
           UIPlugin.log_it(e);
@@ -328,7 +329,7 @@ public class TapestryProjectDialogField extends StringButtonField
 
     try
     {
-      return (ITapestryProject) project.getNature(TapestryCore.NATURE_ID);
+      return (ITapestryProject) project.getNature(TapestryCorePlugin.NATURE_ID);
     } catch (CoreException e)
     {
       UIPlugin.log_it(e);
@@ -341,7 +342,7 @@ public class TapestryProjectDialogField extends StringButtonField
   {
     try
     {
-      return project.hasNature(TapestryCore.NATURE_ID);
+      return project.hasNature(TapestryCorePlugin.NATURE_ID);
     } catch (CoreException e)
     {
       UIPlugin.log_it(e);

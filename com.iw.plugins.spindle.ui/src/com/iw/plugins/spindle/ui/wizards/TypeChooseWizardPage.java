@@ -64,8 +64,9 @@ import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.util.CoreUtils;
+import com.iw.plugins.spindle.core.util.eclipse.CoreUtils;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
@@ -505,7 +506,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
           IJavaProject current = getPackageFragmentRoot().getJavaProject();
           if (current != null)
           {
-            if (!current.getProject().hasNature(TapestryCore.NATURE_ID))
+            if (!current.getProject().hasNature(TapestryCorePlugin.NATURE_ID))
             {
               spindle.setWarning(UIPlugin.getString(PAGE_NAME + ".newclass.project"));
 

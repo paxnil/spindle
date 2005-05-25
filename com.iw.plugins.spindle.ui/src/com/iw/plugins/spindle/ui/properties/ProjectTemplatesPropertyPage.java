@@ -74,7 +74,8 @@ import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ProjectPreferenceStore;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.util.SpindleMultiStatus;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.util.eclipse.SpindleMultiStatus;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.editors.assist.usertemplates.XMLFileContextType;
 import com.iw.plugins.spindle.ui.preferences.OverlayPreferenceStore;
@@ -305,7 +306,7 @@ public class ProjectTemplatesPropertyPage extends PropertyPage
           continue;
 
         if (workbenchProject.isAccessible()
-            && workbenchProject.hasNature(TapestryCore.NATURE_ID))
+            && workbenchProject.hasNature(TapestryCorePlugin.NATURE_ID))
           list.add(workbenchProject);
       }
     } catch (CoreException e1)

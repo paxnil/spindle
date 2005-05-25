@@ -39,6 +39,7 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ICoreListener;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 
 /**
  * Decorator that indicates Tapestry projects
@@ -79,7 +80,7 @@ public class ContextRootDecorator extends AbstractDecorator
       {
         IProject project = container.getProject();
         ITapestryProject tproject = (ITapestryProject) project
-            .getNature(TapestryCore.NATURE_ID);
+            .getNature(TapestryCorePlugin.NATURE_ID);
         if (tproject != null)
         {
           IContainer projectWebContextRoot = tproject.getWebContextFolder();

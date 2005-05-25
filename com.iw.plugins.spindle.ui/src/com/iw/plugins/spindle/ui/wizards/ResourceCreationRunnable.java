@@ -39,6 +39,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.util.Assert;
 
 class ResourceCreationRunnable implements IRunnableWithProgress
@@ -109,7 +110,7 @@ class ResourceCreationRunnable implements IRunnableWithProgress
     if (file.exists())
     {
       if (!okIfExists)
-        throw new InvocationTargetException(TapestryCore.createErrorException(file
+        throw new InvocationTargetException(TapestryCorePlugin.createErrorException(file
             .getName()
             + " already exists"));
       return;
@@ -144,7 +145,7 @@ class ResourceCreationRunnable implements IRunnableWithProgress
       createdResources.add(file);
     } catch (CoreException e)
     {
-      throw new InvocationTargetException(TapestryCore.createErrorException(e
+      throw new InvocationTargetException(TapestryCorePlugin.createErrorException(e
           .getStatus()
           .getMessage()));
     }
@@ -155,7 +156,7 @@ class ResourceCreationRunnable implements IRunnableWithProgress
     if (folder.exists())
     {
       if (!okIfExists)
-        throw new InvocationTargetException(TapestryCore.createErrorException(folder
+        throw new InvocationTargetException(TapestryCorePlugin.createErrorException(folder
             .getFullPath()
             .toString()
             + " already exists"));
@@ -168,7 +169,7 @@ class ResourceCreationRunnable implements IRunnableWithProgress
       createdResources.add(folder);
     } catch (CoreException e)
     {
-      throw new InvocationTargetException(TapestryCore.createErrorException(e
+      throw new InvocationTargetException(TapestryCorePlugin.createErrorException(e
           .getStatus()
           .getMessage()));
     }

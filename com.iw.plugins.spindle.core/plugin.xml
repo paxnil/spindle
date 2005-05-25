@@ -11,15 +11,6 @@
       <library name="core.jar">
          <export name="*"/>
       </library>
-      <library name="parser.jar">
-         <export name="*"/>
-      </library>
-      <library name="dtdparser.jar">
-         <export name="*"/>
-      </library>
-      <library name="eclipse.jar">
-         <export name="*"/>
-      </library>
       <library name="lib/tapestry/ext-package/lib/bsf-2.3.0.jar">
          <export name="*"/>
       </library>

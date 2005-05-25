@@ -56,6 +56,7 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 
 /**
  * As addition to the JavaCapabilityConfigurationPage, the wizard does an early project creation (so
@@ -309,7 +310,7 @@ public class BaseNewTapestryProjectJavaPage extends JavaCapabilityConfigurationP
             {
                 if (!hasTapestryEntry)
                     hasTapestryEntry = element.getPath().segment(0).equals(
-                            TapestryCore.CORE_CONTAINER);
+                            TapestryCorePlugin.CORE_CONTAINER);
                 if (!hasDefaultJREEntry)
                     hasDefaultJREEntry = element.getPath().segment(0).equals(
                             JavaRuntime.JRE_CONTAINER);
@@ -509,7 +510,7 @@ public class BaseNewTapestryProjectJavaPage extends JavaCapabilityConfigurationP
                         && classpath[i].getEntryKind() == IClasspathEntry.CPE_SOURCE)
                 {
                     IPath path = classpath[i].getPath();
-                    if (path.segment(0).equals(TapestryCore.CORE_CONTAINER))
+                    if (path.segment(0).equals(TapestryCorePlugin.CORE_CONTAINER))
                     {
                         hasTapestryFramework = true;
                     }
@@ -520,7 +521,7 @@ public class BaseNewTapestryProjectJavaPage extends JavaCapabilityConfigurationP
             if (!hasSrcEntry)
             {
 
-                tapStatus = new Status(IStatus.ERROR, TapestryCore.PLUGIN_ID, 0, UIPlugin
+                tapStatus = new Status(IStatus.ERROR, TapestryCore.IDENTIFIER, 0, UIPlugin
                         .getString("new-project-wizard-must-have-src-folder"), null);
             }
 

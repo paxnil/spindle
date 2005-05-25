@@ -110,9 +110,10 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
     BuildNotifier fNotifier;
 
-    IBuild fBuild;
+    AbstractBuild fBuild;
+   
+    private CorePropertySource fProjectPropertySource;
 
-    private IPropertySource fBuildPropertySource;
 
     /**
      * Constructor for TapestryBuilder.
@@ -175,9 +176,10 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
     abstract Object copyClasspathMemento(Object memento);
 
     abstract void persistState(State state);
+    
+    abstract WebXMLScanner createWebXMLScanner();
 
-    private CorePropertySource fProjectPropertySource;
-
+ 
     public IPropertySource installBasePropertySource(WebAppDescriptor webAppDescriptor)
     {
         Assert.isTrue(fProjectPropertySource == null, "can't install twice!");
