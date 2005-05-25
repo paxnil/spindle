@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
@@ -86,7 +87,7 @@ public class BuildJob extends Job
     {
       fProject.build(
           IncrementalProjectBuilder.FULL_BUILD,
-          TapestryCore.BUILDER_ID,
+          TapestryCorePlugin.BUILDER_ID,
           new HashMap(),
           monitor);
     } catch (CoreException e)

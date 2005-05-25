@@ -43,7 +43,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.util.Assert;
@@ -84,7 +84,7 @@ public class EclipseUtils
         return result;
       }
 
-      if (!project.hasNature(TapestryCore.NATURE_ID))
+      if (!project.hasNature(TapestryCorePlugin.NATURE_ID))
       {
         result.setError(resource.getName() + " is not in a Tapestry project.");
         return result;

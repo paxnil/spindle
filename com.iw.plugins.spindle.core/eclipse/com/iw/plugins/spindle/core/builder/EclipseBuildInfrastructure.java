@@ -58,6 +58,7 @@ import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
@@ -66,6 +67,7 @@ import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.search.eclipse.AbstractEclipseSearchAcceptor;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 
 /**
@@ -80,14 +82,12 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
 
     private static ThreadLocal PACKAGE_CACHE;
 
-    private static ThreadLocal TYPE_CACHE;
 
     private static ThreadLocal STORAGE_CACHE;
 
     static
     {
         PACKAGE_CACHE = new ThreadLocal();
-        TYPE_CACHE = new ThreadLocal();
         STORAGE_CACHE = new ThreadLocal();
     }
 
@@ -135,14 +135,13 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         fNotifier = new BuildNotifier(monitor, fCurrentProject);
     }
 
-    public void build(boolean requestIncremental, Map args)
+    public void executeBuild(boolean requestIncremental, Map args)
     {
         fProblemPersister = new Markers();
 
         fNotifier.begin();
 
-        PACKAGE_CACHE.set(new HashMap());
-        TYPE_CACHE.set(new HashMap());
+        PACKAGE_CACHE.set(new HashMap());       
         STORAGE_CACHE.set(new HashMap());
 
         boolean ok = false;
@@ -172,9 +171,8 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         }
         catch (CoreException e)
         {
-            ErrorDialog.openError(TapestryCore.getDefault().getWorkbench()
-                    .getActiveWorkbenchWindow().getShell(), CoreMessages
-                    .format("build-failed-core-title"), CoreMessages
+            ErrorDialog.openError(EclipsePluginUtils.getWorkbench().getActiveWorkbenchWindow()
+                    .getShell(), CoreMessages.format("build-failed-core-title"), CoreMessages
                     .format("build-failed-core-message"), e.getStatus());
         }
         catch (BrokenWebXMLException e)
@@ -202,13 +200,13 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         }
         finally
         {
-            PACKAGE_CACHE.set(null);
-            TYPE_CACHE.set(null);
+            PACKAGE_CACHE.set(null);            
             STORAGE_CACHE.set(null);
             if (!ok)
                 // If the build failed, clear the previously built state,
                 // forcing a full build next time.
                 clearLastState();
+            fBuild.cleanUp();
             fNotifier.done();
             fDeferredActions.clear();
             TapestryCore.getDefault().buildOccurred();
@@ -234,7 +232,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
                     if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT)
                     {
                         IProject workspaceProject = fWorkspaceRoot.getProject(path.lastSegment());
-                        if (workspaceProject.hasNature(TapestryCore.NATURE_ID))
+                        if (workspaceProject.hasNature(TapestryCorePlugin.NATURE_ID))
                             p = workspaceProject;
 
                     }
@@ -447,7 +445,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         try
         {
             TapestryProject project = (TapestryProject) fCurrentProject
-                    .getNature(TapestryCore.NATURE_ID);
+                    .getNature(TapestryCorePlugin.NATURE_ID);
             fTapestryProject = project;
             project.clearMetadata();
         }
@@ -457,11 +455,11 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             throw new BuilderException("could not obtain the Tapestry Project!");
         }
 
-        fContextRoot = fTapestryProject.getWebContextLocation();
+        fContextRoot = (IResourceWorkspaceLocation) fTapestryProject.getWebContextLocation();
         if (fContextRoot == null || !fContextRoot.exists())
             throw new BuilderException("could not obtain the servlet context root folder");
 
-        fClasspathRoot = fTapestryProject.getClasspathRoot();
+        fClasspathRoot = (IResourceWorkspaceLocation) fTapestryProject.getClasspathRoot();
         if (fClasspathRoot == null || !fClasspathRoot.exists())
             throw new BuilderException("could not obtain the Classpath Root!");
 
@@ -547,12 +545,11 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             });
         }
     }
-
+    
     /**
      * A search acceptor that is used to find all the Tapestry artifacts in the web context or the
      * classpath.
      */
-
     abstract class ArtifactCollector extends AbstractEclipseSearchAcceptor
     {
 

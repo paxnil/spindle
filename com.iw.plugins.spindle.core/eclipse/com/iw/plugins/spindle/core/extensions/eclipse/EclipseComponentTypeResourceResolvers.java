@@ -57,7 +57,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  */
 public class EclipseComponentTypeResourceResolvers implements IComponentTypeResourceResolver
 {
-    public static final String EXTENSION_ID = TapestryCore.PLUGIN_ID + ".componentTypeResolver";
+    public static final String EXTENSION_ID = TapestryCore.IDENTIFIER + ".componentTypeResolver";
 
     private static List RESOLVERS;
 

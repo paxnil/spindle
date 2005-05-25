@@ -15,6 +15,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 
 /**
  * @author gwl
@@ -80,7 +81,7 @@ public class EclipsePluginUtils
     {
         try
         {
-            return project.hasNature(TapestryCore.NATURE_ID);
+            return project.hasNature(TapestryCorePlugin.NATURE_ID);
         }
         catch (CoreException e)
         {

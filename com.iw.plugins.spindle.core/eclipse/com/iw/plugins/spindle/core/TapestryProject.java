@@ -26,12 +26,14 @@ package com.iw.plugins.spindle.core;
  *
  * ***** END LICENSE BLOCK ***** */
 
+import org.apache.hivemind.Resource;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaProject;
@@ -56,7 +58,7 @@ import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
  * 
  * @author glongman@gmail.com
  */
-public class TapestryProject implements IProjectNature, ITapestryProject, IJavaTypeFinder
+public class TapestryProject implements IProjectNature, ITapestryProject, IJavaTypeFinder, IAdaptable
 {
     static public IStatus addTapestryNature(IJavaProject project, boolean forceOrder)
     {
@@ -68,7 +70,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
 
         try
         {
-            EclipsePluginUtils.addNatureToProject(project, TapestryCore.NATURE_ID, forceOrder);
+            EclipsePluginUtils.addNatureToProject(project, TapestryCorePlugin.NATURE_ID, forceOrder);
         }
         catch (CoreException ex)
         {
@@ -85,7 +87,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         {
             ITapestryProject tproject = create(project);
             EclipsePluginUtils
-                    .removeNatureFromProject(project.getProject(), TapestryCore.NATURE_ID);
+                    .removeNatureFromProject(project.getProject(), TapestryCorePlugin.NATURE_ID);
         }
         catch (CoreException ex)
         {
@@ -104,7 +106,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         TapestryProject result = null;
         try
         {
-            result = (TapestryProject) javaProject.getProject().getNature(TapestryCore.NATURE_ID);
+            result = (TapestryProject) javaProject.getProject().getNature(TapestryCorePlugin.NATURE_ID);
         }
         catch (CoreException ex)
         {
@@ -149,6 +151,25 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         super();
     }
 
+    /* (non-Javadoc)
+     * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+     */
+    public Object getAdapter(Class adapter)
+    {
+        if (adapter == ITapestryProject.class)
+            return this;
+        
+        if (adapter == IProject.class)
+            return fProject;
+        
+        if (adapter == IJavaProject.class) {
+            IJavaProject jproject = JavaCore.create(fProject);
+            if (jproject.exists())
+                return jproject;
+        }
+        
+        return null;
+    }
     public void clearMetadata()
     {
         fMetadataLoaded = false;
@@ -179,7 +200,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
 
     private boolean loadMetadataFromExtensions()
     {
-        ProjectExternalMetadataLocator locator = TapestryCore.getDefault()
+        ProjectExternalMetadataLocator locator = TapestryCorePlugin.getDefault()
                 .getExternalMetadataLocator();
         IProject project = getProject();
         try
@@ -236,7 +257,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
      */
     public void configure() throws CoreException
     {
-        addToBuildSpec(TapestryCore.BUILDER_ID);
+        addToBuildSpec(TapestryCorePlugin.BUILDER_ID);
     }
 
     /*
@@ -244,7 +265,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
      */
     public void deconfigure() throws CoreException
     {
-        removeFromBuildSpec(TapestryCore.BUILDER_ID);
+        removeFromBuildSpec(TapestryCorePlugin.BUILDER_ID);
         Markers.removeAllProblems(getProject());
 
         TapestryArtifactManager.getTapestryArtifactManager().clearBuildState(getProject());
@@ -322,7 +343,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         return fUsingExternalMetadata;
     }
 
-    public ClasspathRootLocation getClasspathRoot()
+    public Resource getClasspathRoot()
     {
         try
         {
@@ -341,7 +362,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         return fWebContextFolder;
     }
 
-    public ContextRootLocation getWebContextLocation()
+    public Resource getWebContextLocation()
     {
         IFolder folder = getWebContextFolder();
         if (folder == null || !folder.exists())
@@ -386,7 +407,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         ICommand[] commands = description.getBuildSpec();
         for (int i = 0; i < commands.length; ++i)
         {
-            if (commands[i].getBuilderName().equals(TapestryCore.BUILDER_ID))
+            if (commands[i].getBuilderName().equals(TapestryCorePlugin.BUILDER_ID))
                 return commands[i];
 
         }

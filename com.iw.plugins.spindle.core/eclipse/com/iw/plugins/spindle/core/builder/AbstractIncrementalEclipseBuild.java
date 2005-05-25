@@ -106,6 +106,7 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
     if (fProjectDelta == null)
       return false;
     fLastState = fInfrastructure.getLastState();
+    fInfrastructure.installBasePropertySource(fLastState.fWebAppDescriptor);
     final List knownTapestryExtensions = Arrays.asList(AbstractBuildInfrastructure.KnownExtensions);
 
     // check for java files that changed, or have been added

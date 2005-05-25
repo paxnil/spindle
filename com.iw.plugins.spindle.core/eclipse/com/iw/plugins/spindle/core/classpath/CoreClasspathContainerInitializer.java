@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 
 /**
  * Resolves a container for a Tapestry classpath container entry
@@ -51,7 +51,7 @@ public class CoreClasspathContainerInitializer extends ClasspathContainerInitial
     int size = containerPath.segmentCount();
     if (size > 0)
     {
-      if (containerPath.segment(0).equals(TapestryCore.CORE_CONTAINER))
+      if (containerPath.segment(0).equals(TapestryCorePlugin.CORE_CONTAINER))
       {
         CoreClasspathContainer container = new CoreClasspathContainer(containerPath);
         JavaCore.setClasspathContainer(

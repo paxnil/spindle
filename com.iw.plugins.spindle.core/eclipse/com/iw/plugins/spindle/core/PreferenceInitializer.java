@@ -34,27 +34,27 @@ import org.eclipse.jface.util.IPropertyChangeListener;
  * 
  * @author glongman@gmail.com
  */
-public class PreferenceInitializer extends AbstractPreferenceInitializer
-    implements
-      PreferenceConstants
+public class PreferenceInitializer extends AbstractPreferenceInitializer implements
+        IPreferenceConstants
 {
 
-  public PreferenceInitializer()
-  {
-    super();
-  }
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
-   */
-  public void initializeDefaultPreferences()
-  {
-    IPreferenceStore store = TapestryCore.getDefault().getPreferenceStore();
-    store.setDefault(CACHE_GRAMMAR_PREFERENCE, true);
-    store.setDefault(BUILDER_MARKER_MISSES, CORE_STATUS_WARN);
-    store.setDefault(BUILDER_HANDLE_ASSETS, CORE_STATUS_WARN);
-    store.addPropertyChangeListener((IPropertyChangeListener) TapestryCore.getDefault());
-  }
+    public PreferenceInitializer()
+    {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
+     */
+    public void initializeDefaultPreferences()
+    {
+        IPreferenceStore store = TapestryCorePlugin.getDefault().getPreferenceStore();
+        store.setDefault(CACHE_GRAMMAR_PREFERENCE, true);
+        store.setDefault(BUILDER_MARKER_MISSES, CORE_STATUS_WARN);
+        store.setDefault(BUILDER_HANDLE_ASSETS, CORE_STATUS_WARN);
+        store.addPropertyChangeListener((IPropertyChangeListener) TapestryCore.getDefault());
+    }
 
 }

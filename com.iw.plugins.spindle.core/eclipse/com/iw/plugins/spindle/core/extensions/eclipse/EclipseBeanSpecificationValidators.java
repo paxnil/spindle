@@ -56,7 +56,7 @@ import com.iw.plugins.spindle.core.util.Assert;
  */
 public class EclipseBeanSpecificationValidators implements IBeanSpecificationValidator
 {
-    public static final String EXTENSION_ID = TapestryCore.PLUGIN_ID
+    public static final String EXTENSION_ID = TapestryCore.IDENTIFIER
             + ".beanSpecificationValidators";
 
     private static List VALIDATORS;

@@ -44,6 +44,7 @@ import org.eclipse.core.runtime.IRegistryChangeListener;
 import org.eclipse.core.runtime.Platform;
 
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 
 /**
  * <p>
@@ -88,7 +89,7 @@ public class ProjectExternalMetadataLocator implements IRegistryChangeListener
     public void registryChanged(IRegistryChangeEvent event)
     {
         HashSet toRemove = null;
-        String id = TapestryCore.NATURE_ID + ".projectMetaDataLocator";
+        String id = TapestryCorePlugin.NATURE_ID + ".projectMetaDataLocator";
         IExtensionDelta[] deltas = event.getExtensionDeltas();
 
         for (int i = 0; i < deltas.length; i++)
@@ -170,7 +171,7 @@ public class ProjectExternalMetadataLocator implements IRegistryChangeListener
     {
         IExtensionRegistry registry = Platform.getExtensionRegistry();
         IExtensionPoint point = registry.getExtensionPoint(
-                TapestryCore.PLUGIN_ID,
+                TapestryCore.IDENTIFIER,
                 "projectMetaDataLocator");
         if (point == null)
             return;

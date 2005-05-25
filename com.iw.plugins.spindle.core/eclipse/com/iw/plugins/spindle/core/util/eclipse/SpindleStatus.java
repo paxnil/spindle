@@ -229,7 +229,7 @@ public class SpindleStatus implements IStatus
      */
     public String getPlugin()
     {
-        return TapestryCore.PLUGIN_ID;
+        return TapestryCore.IDENTIFIER;
     }
 
     /**

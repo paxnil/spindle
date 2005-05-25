@@ -11,7 +11,13 @@
       <library name="core.jar">
          <export name="*"/>
       </library>
+      <library name="parser.jar">
+         <export name="*"/>
+      </library>
       <library name="dtdparser.jar">
+         <export name="*"/>
+      </library>
+      <library name="eclipse.jar">
          <export name="*"/>
       </library>
       <library name="lib/tapestry/ext-package/lib/bsf-2.3.0.jar">
@@ -49,18 +55,10 @@
       </library>
    </runtime>
    <requires>
-   <!--
-      <import plugin="org.eclipse.ui.ide" export="true"/>
       <import plugin="org.eclipse.core.resources" export="true"/>
-      <import plugin="org.eclipse.jdt.core" export="true"/>
-      
-     
-      
-      
-      -->
+  
       
       <import plugin="org.eclipse.ui.ide" export="true"/>
-      <import plugin="org.eclipse.core.resources" export="true"/>
       <import plugin="org.eclipse.jdt.core" export="true"/>
       
       <import plugin="org.eclipse.core.runtime" export="true"/>

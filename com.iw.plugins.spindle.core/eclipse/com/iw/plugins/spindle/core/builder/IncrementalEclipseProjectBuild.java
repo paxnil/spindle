@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hivemind.Resource;
+import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
@@ -42,7 +43,6 @@ import org.eclipse.core.resources.IStorage;
 import com.iw.plugins.spindle.core.IJavaTypeFinder;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
-import com.iw.plugins.spindle.core.properties.ComponentPropertySource;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
@@ -67,9 +67,10 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
 {
     private IProblemCollector fProblemCollector = new ProblemCollector();
 
-    public IncrementalEclipseProjectBuild(EclipseBuildInfrastructure builder, IResourceDelta projectDelta)
+    public IncrementalEclipseProjectBuild(EclipseBuildInfrastructure builder,
+            IResourceDelta projectDelta)
     {
-        super(builder, projectDelta); 
+        super(builder, projectDelta);
     }
 
     /*
@@ -296,14 +297,18 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             {
                 result.validate(useValidator);
                 List oldTemplates = new ArrayList(result.getTemplateLocations());
-                ComponentPropertySource source = new ComponentPropertySource(
-                        fProjectPropertySource, result);
+                IPropertySource source = fInfrastructure.createPropertySource(result);    
+                
+                String seek_extension = source.getPropertyValue("org.apache.tapestry.template-extension");
+                templateExtensionSeen(seek_extension);
                 result.setTemplateLocations(TemplateFinder.scanForTemplates(
                         result,
-                        source.getPropertyValue("org.apache.tapestry.template-extension"),
+                        seek_extension,
                         fInfrastructure.fTapestryProject,
-                        fProblemCollector));
-                for (Iterator iter = result.getTemplateLocations().iterator(); iter.hasNext();)
+                        fProblemCollector));                
+
+                oldTemplates.addAll(result.getTemplateLocations());
+                for (Iterator iter = oldTemplates.iterator(); iter.hasNext();)
                 {
                     IEclipseResource template = (IEclipseResource) iter.next();
                     try
@@ -368,14 +373,16 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
      */
     protected boolean shouldParseTemplate(Resource ownerSpec, Resource template)
     {
-        IFile specFile = (IFile)(((IEclipseResource)ownerSpec).getStorage()).getAdapter(IFile.class);
-        IFile templateFile = (IFile)(((IEclipseResource)ownerSpec).getStorage()).getAdapter(IFile.class);
-        
+        IFile specFile = (IFile) (((IEclipseResource) ownerSpec).getStorage())
+                .getAdapter(IFile.class);
+        IFile templateFile = (IFile) (((IEclipseResource) ownerSpec).getStorage())
+                .getAdapter(IFile.class);
+
         boolean mustParse = false;
         boolean cleanLastBuild = fLastState.fCleanTemplates.contains(template);
 
         if (templateFile != null)
-        {            
+        {
             if (!cleanLastBuild || fileChanged(templateFile))
             {
                 mustParse = true;
@@ -425,7 +432,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
                     location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
                     isTemporary, code));
 
-        }        
+        }
 
         /*
          * (non-Javadoc)

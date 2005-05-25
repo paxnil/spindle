@@ -46,7 +46,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
  */
 public class IncrementalBuildVetoController 
 {
-  public static final String EXTENSION_ID = TapestryCore.PLUGIN_ID
+  public static final String EXTENSION_ID = TapestryCore.IDENTIFIER
       + ".incrementalBuildVeto";
 
   private static List VETO_EXTENSIONS;

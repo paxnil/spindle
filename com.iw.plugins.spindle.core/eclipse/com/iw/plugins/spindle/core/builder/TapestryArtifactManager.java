@@ -50,7 +50,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
@@ -64,7 +65,7 @@ import com.iw.plugins.spindle.core.util.eclipse.Markers;
  * 
  * @author glongman@gmail.com
  */
-public class TapestryArtifactManager implements ITemplateFinderListener
+public class TapestryArtifactManager 
 {
 
     static final Object MANAGER_JOB_FAMILY = new Object();
@@ -133,7 +134,7 @@ public class TapestryArtifactManager implements ITemplateFinderListener
                         {
                             project.build(
                                     IncrementalProjectBuilder.FULL_BUILD,
-                                    TapestryCore.BUILDER_ID,
+                                    TapestryCorePlugin.BUILDER_ID,
                                     new HashMap(),
                                     monitor);
                         }
@@ -268,49 +269,6 @@ public class TapestryArtifactManager implements ITemplateFinderListener
             buildJob.schedule();
         }
         return buildJob;
-
-    } /*
-       * (non-Javadoc)
-       * 
-       * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#addListener(com.iw.plugins.spindle.core.scanning.IScannerValidatorListener)
-       */
-
-    public void addTemplateFinderListener(ITemplateFinderListener listener)
-    {
-        if (fTemplateExtensionListeners == null)
-            fTemplateExtensionListeners = new ArrayList();
-
-        if (!fTemplateExtensionListeners.contains(listener))
-            fTemplateExtensionListeners.add(listener);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#removeListener(com.iw.plugins.spindle.core.scanning.IScannerValidatorListener)
-     */
-    public void removeTemplateFinderListener(ITemplateFinderListener listener)
-    {
-        if (fTemplateExtensionListeners != null)
-            fTemplateExtensionListeners.remove(listener);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener#templateExtensionSeen(java.lang.String)
-     */
-    public void templateExtensionSeen(String extension)
-    {
-        if (fTemplateExtensionListeners == null)
-            return;
-
-        for (Iterator iter = fTemplateExtensionListeners.iterator(); iter.hasNext();)
-        {
-            ITemplateFinderListener listener = (ITemplateFinderListener) iter.next();
-            listener.templateExtensionSeen(extension);
-        }
-
     }
 
     public Map getTemplateMap(IProject project)
@@ -357,9 +315,10 @@ public class TapestryArtifactManager implements ITemplateFinderListener
         return null;
     }
 
-    public IPropertySource getPropertySource(ITapestryProject project)
+    public IPropertySource getPropertySource(ITapestryProject tproject)
     {
-        State state = (State) getLastBuildState(project.getProject(), false);
+        IProject project = ((TapestryProject) tproject).getProject();
+        State state = (State) getLastBuildState(project, false);
         if (state != null)
             return state.fWebAppDescriptor;
         return null;

@@ -43,6 +43,7 @@ import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 
 /**
  * Tapestry library container - resolves a classpath container variable to the Tapestry Libraries.
@@ -68,7 +69,7 @@ public class CoreClasspathContainer implements IClasspathContainer
      * @param plugin
      * @return classpath entries
      */
-    private IClasspathEntry[] getClasspathEntries(TapestryCore plugin, IPath containerPath)
+    private IClasspathEntry[] getClasspathEntries(TapestryCorePlugin plugin, IPath containerPath)
     {
         if (fClasspathEntries == null)
         {
@@ -215,7 +216,7 @@ public class CoreClasspathContainer implements IClasspathContainer
      */
     public IClasspathEntry[] getClasspathEntries()
     {
-        return getClasspathEntries(TapestryCore.getDefault(), fPath);
+        return getClasspathEntries(TapestryCorePlugin.getDefault(), fPath);
     }
 
     /**
