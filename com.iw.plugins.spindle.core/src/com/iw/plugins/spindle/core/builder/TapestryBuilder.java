@@ -215,7 +215,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         STORAGE_CACHE.set(new HashMap());
 
         IWorkbench workbench = (IWorkbench) TapestryCore.getDefault().getWorkbench();
-        if (workbench.isClosing())
+        if (TapestryCore.isWorkbenchClosing())
             return getRequiredProjects(true);
         fCurrentProject = getProject();
         if (fCurrentProject == null || !fCurrentProject.isAccessible())
