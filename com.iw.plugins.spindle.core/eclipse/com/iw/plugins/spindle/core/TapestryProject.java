@@ -52,13 +52,13 @@ import com.iw.plugins.spindle.core.util.eclipse.Markers;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 
 /**
- * The Tapestry project nature. Configures and Deconfigures the builder
- * 
- * TODO the metadata stuff is to be extracted to generic land.
+ * The Tapestry project nature. Configures and Deconfigures the builder TODO the metadata stuff is
+ * to be extracted to generic land.
  * 
  * @author glongman@gmail.com
  */
-public class TapestryProject implements IProjectNature, ITapestryProject, IJavaTypeFinder, IAdaptable
+public class TapestryProject implements IProjectNature, ITapestryProject, IJavaTypeFinder,
+        IAdaptable
 {
     static public IStatus addTapestryNature(IJavaProject project, boolean forceOrder)
     {
@@ -70,7 +70,8 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
 
         try
         {
-            EclipsePluginUtils.addNatureToProject(project, TapestryCorePlugin.NATURE_ID, forceOrder);
+            EclipsePluginUtils
+                    .addNatureToProject(project, TapestryCorePlugin.NATURE_ID, forceOrder);
         }
         catch (CoreException ex)
         {
@@ -86,8 +87,9 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         try
         {
             ITapestryProject tproject = create(project);
-            EclipsePluginUtils
-                    .removeNatureFromProject(project.getProject(), TapestryCorePlugin.NATURE_ID);
+            EclipsePluginUtils.removeNatureFromProject(
+                    project.getProject(),
+                    TapestryCorePlugin.NATURE_ID);
         }
         catch (CoreException ex)
         {
@@ -106,7 +108,8 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         TapestryProject result = null;
         try
         {
-            result = (TapestryProject) javaProject.getProject().getNature(TapestryCorePlugin.NATURE_ID);
+            result = (TapestryProject) javaProject.getProject().getNature(
+                    TapestryCorePlugin.NATURE_ID);
         }
         catch (CoreException ex)
         {
@@ -151,25 +154,29 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         super();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
      */
     public Object getAdapter(Class adapter)
     {
         if (adapter == ITapestryProject.class)
             return this;
-        
+
         if (adapter == IProject.class)
             return fProject;
-        
-        if (adapter == IJavaProject.class) {
+
+        if (adapter == IJavaProject.class)
+        {
             IJavaProject jproject = JavaCore.create(fProject);
             if (jproject.exists())
                 return jproject;
         }
-        
+
         return null;
     }
+
     public void clearMetadata()
     {
         fMetadataLoaded = false;
@@ -454,13 +461,35 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
     public IJavaType findType(String fullyQualifiedName)
     {
         IType type = null;
+        IJavaProject javaProject = null;
         try
         {
-            type = getJavaProject().findType(fullyQualifiedName);
+            javaProject = getJavaProject();
         }
         catch (CoreException e)
         {
             TapestryCore.log(e);
+        }
+        if (javaProject != null)
+        {
+            try
+            {
+                type = javaProject.findType(fullyQualifiedName);
+            }
+            catch (CoreException e)
+            {
+                TapestryCore.log(e);
+            }
+            // bug [ spindle-Bugs-1186225 ] Java inner classes trigger error message
+            if (type == null && fullyQualifiedName.indexOf("$") > 0)
+                try
+                {
+                    type = javaProject.findType(fullyQualifiedName.replaceAll("$", "."));
+                }
+                catch (CoreException e)
+                {
+                    // do nothing
+                }
         }
         if (type != null)
             return new EclipseJavaType(type);
