@@ -127,7 +127,7 @@ public class ReconcilingStrategy
    */
   public void initialReconcile()
   {
-    //Do nothing
+    reconcile();
   }
 
 }

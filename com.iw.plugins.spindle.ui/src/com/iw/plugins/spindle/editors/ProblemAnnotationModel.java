@@ -329,6 +329,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     {
         fCollectedProblems = new ArrayList();
         fGeneratedAnnotations = new ArrayList();
+        fireModelChanged();
     }
 
     /**
@@ -343,6 +344,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
         }
         fCollectedProblems = null;
         fGeneratedAnnotations = null;
+        fireModelChanged();
     }
 
     /*
@@ -368,7 +370,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     {
         fProgressMonitor = monitor;
     }
-
+   
     public void setIsActive(boolean isActive)
     {
         if (fIsActive != isActive)

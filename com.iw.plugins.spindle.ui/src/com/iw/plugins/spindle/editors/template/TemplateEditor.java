@@ -139,6 +139,7 @@ public class TemplateEditor extends Editor
     public TemplateEditor()
     {
         super();
+        fReconcileSwitchKey = PreferenceConstants.RECONCILE_TEMPLATE_EDITOR;
     }
 
     protected boolean affectsTextPresentation(PropertyChangeEvent event)

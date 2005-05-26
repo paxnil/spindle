@@ -98,6 +98,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
     store.setDefault(FORMATTER_TAB_CHAR, false);
     
     store.setDefault(EDITOR_FOLDING_ENABLED, true);
+    
+    store.setDefault(RECONCILE_SPEC_EDITOR, true);
+    store.setDefault(RECONCILE_TEMPLATE_EDITOR, true);
 
     setTemplateDefaults(store);
   }

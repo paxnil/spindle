@@ -149,6 +149,7 @@ public class SpecEditor extends Editor
     public SpecEditor()
     {
         super();
+        fReconcileSwitchKey = PreferenceConstants.RECONCILE_SPEC_EDITOR;
     }
 
     public Object getInformationControlInput()
@@ -185,7 +186,7 @@ public class SpecEditor extends Editor
      */
     public void createPartControl(Composite parent)
     {
-        //TODO get rid of this kludge
+        // TODO get rid of this kludge
 
         super.createPartControl(parent);
 
@@ -318,7 +319,7 @@ public class SpecEditor extends Editor
     {
 
         IStorage storage = getStorage();
-        IProject project = (IProject)storage.getAdapter(IProject.class);
+        IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map specs = manager.getSpecMap(project);
         if (specs != null)
@@ -334,11 +335,11 @@ public class SpecEditor extends Editor
     public IComponentSpecification getComponent()
     {
         IStorage storage = getStorage();
-        IProject project = (IProject)storage.getAdapter(IProject.class);
+        IProject project = (IProject) storage.getAdapter(IProject.class);
         TapestryArtifactManager manager = TapestryArtifactManager.getTapestryArtifactManager();
         Map specs = manager.getSpecMap(project);
-        if (specs != null)        
-            return (IComponentSpecification) specs.get(storage);        
+        if (specs != null)
+            return (IComponentSpecification) specs.get(storage);
 
         return null;
     }
@@ -374,10 +375,11 @@ public class SpecEditor extends Editor
             {
                 fReconciler = new ComponentReconciler();
             }
+
             else if ("library".equals(extension))
             {
                 fReconciler = new LibraryReconciler();
-            }
+            }            
             initializeFoldingRegions();
         }
         else
@@ -541,41 +543,41 @@ public class SpecEditor extends Editor
 
     private void reconcileOutline()
     {
-        //    if (fOutlinePartitioner == null)
-        //      fOutlinePartitioner = new
+        // if (fOutlinePartitioner == null)
+        // fOutlinePartitioner = new
         // XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
         // XMLDocumentPartitioner.TYPES);
         // TODO remove ? try
-        //    {
-        //      IDocument document = getDocumentProvider().getDocument(getEditorInput());
-        //      if (document.getLength() == 0 || document.get().trim().length() == 0)
-        //      {
-        //        ((MultiPageContentOutline) fOutline).setInput(null);
-        //      } else
-        //      {
+        // {
+        // IDocument document = getDocumentProvider().getDocument(getEditorInput());
+        // if (document.getLength() == 0 || document.get().trim().length() == 0)
+        // {
+        // ((MultiPageContentOutline) fOutline).setInput(null);
+        // } else
+        // {
         //
-        //        // fOutlinePartitioner.connect(document);
-        //        try
-        //        {
-        //          ((MultiPageContentOutline)
+        // // fOutlinePartitioner.connect(document);
+        // try
+        // {
+        // ((MultiPageContentOutline)
         // fOutline).setInput(XMLNode.createTree(document, -1));
-        //        } catch (BadLocationException e)
-        //        {
-        //          // do nothing
-        //        }
-        //      }
-        //      if (fUpdater != null)
-        //        fUpdater.post();
+        // } catch (BadLocationException e)
+        // {
+        // // do nothing
+        // }
+        // }
+        // if (fUpdater != null)
+        // fUpdater.post();
         //
-        //    } catch (RuntimeException e)
-        //    {
-        //      UIPlugin.log(e);
-        //      throw e;
-        //    }
-        //    finally
-        //    {
-        //      fOutlinePartitioner.disconnect();
-        //    }
+        // } catch (RuntimeException e)
+        // {
+        // UIPlugin.log(e);
+        // throw e;
+        // }
+        // finally
+        // {
+        // fOutlinePartitioner.disconnect();
+        // }
     }
 
     /**
@@ -685,7 +687,7 @@ public class SpecEditor extends Editor
                         try
                         {
                             validator = new SpecificationValidator(project);// TODO perfrom
-                                                                            // deferred?, false);
+                            // deferred?, false);
                             reconcileResult = doReconcile(getDocumentProvider().getDocument(input)
                                     .get(), spec, validator);
                         }
@@ -744,7 +746,7 @@ public class SpecEditor extends Editor
          */
         public void addReconcileListener(IReconcileListener listener)
         {
-            //ignore
+            // ignore
 
         }
 
@@ -755,7 +757,7 @@ public class SpecEditor extends Editor
          */
         public void removeReconcileListener(IReconcileListener listener)
         {
-            //ignore
+            // ignore
         }
 
     }
