@@ -43,6 +43,7 @@ import org.apache.tapestry.spec.IContainedComponent;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
@@ -266,32 +267,32 @@ public class SpecificationValidator extends BaseValidator
         String containerName = containerSpecification.getSpecificationLocation().getName();
         String containedName = containedSpecification.getSpecificationLocation().getName();
 
-        //        if (contained.getInheritInformalParameters())
-        //        {
-        //            if (formalOnly)
-        //            {
+        // if (contained.getInheritInformalParameters())
+        // {
+        // if (formalOnly)
+        // {
         //
-        //                reportProblem(
-        //                    IProblem.ERROR,
-        //                    location,
-        //                    TapestryCore.getTapestryString(
-        //                        "PageLoader.inherit-informal-invalid-component-formal-only",
-        //                        containedName));
-        //                return false;
-        //            }
+        // reportProblem(
+        // IProblem.ERROR,
+        // location,
+        // TapestryCore.getTapestryString(
+        // "PageLoader.inherit-informal-invalid-component-formal-only",
+        // containedName));
+        // return false;
+        // }
         //
-        //            if (containerFormalOnly)
-        //            {
-        //                reportProblem(
-        //                    IProblem.ERROR,
-        //                    location,
-        //                    TapestryCore.getTapestryString(
-        //                        "PageLoader.inherit-informal-invalid-container-formal-only",
-        //                        containerName,
-        //                        containedName));
-        //                return false;
-        //            }
-        //        }
+        // if (containerFormalOnly)
+        // {
+        // reportProblem(
+        // IProblem.ERROR,
+        // location,
+        // TapestryCore.getTapestryString(
+        // "PageLoader.inherit-informal-invalid-container-formal-only",
+        // containerName,
+        // containedName));
+        // return false;
+        // }
+        // }
 
         Iterator i = bindingNames.iterator();
 
@@ -330,8 +331,12 @@ public class SpecificationValidator extends BaseValidator
             if (!isFormal && containedSpecification.isReservedParameterName(name))
             {
 
-                addProblem(IProblem.WARNING, location, "ignoring binding '" + name
-                        + "'. trying to bind to reserved parameter.", true, IProblem.NOT_QUICK_FIXABLE);
+                addProblem(
+                        IProblem.WARNING,
+                        location,
+                        "ignoring binding '" + name + "'. trying to bind to reserved parameter.",
+                        true,
+                        IProblem.NOT_QUICK_FIXABLE);
 
                 continue;
             }
@@ -342,16 +347,16 @@ public class SpecificationValidator extends BaseValidator
 
     private List findRequiredParameterNames(IComponentSpecification spec)
     {
-        //        List result = new ArrayList();
-        //        for (Iterator iter = spec.getParameterNames().iterator();
+        // List result = new ArrayList();
+        // for (Iterator iter = spec.getParameterNames().iterator();
         // iter.hasNext();)
-        //        {
-        //            String name = (String) iter.next();
-        //            IParameterSpecification pspec = spec.getParameter(name);
-        //            if (pspec.isRequired())
-        //                result.add(name);
-        //        }
-        //        return result;
+        // {
+        // String name = (String) iter.next();
+        // IParameterSpecification pspec = spec.getParameter(name);
+        // if (pspec.isRequired())
+        // result.add(name);
+        // }
+        // return result;
         ArrayList result = new ArrayList();
         result.addAll(((PluginComponentSpecification) spec).getRequiredParameterNames());
         return result;
@@ -496,7 +501,7 @@ public class SpecificationValidator extends BaseValidator
         AssetType type = templateAsset.getType();
         String templatePath = templateAsset.getPath();
 
-        //set relative to the context by default!
+        // set relative to the context by default!
         IResourceWorkspaceLocation templateLocation = (IResourceWorkspaceLocation) fContextRoot
                 .getRelativeLocation(templatePath);
         ;
@@ -512,46 +517,46 @@ public class SpecificationValidator extends BaseValidator
         }
         //    
         // TODO remove - this check is no longer needed
-        //    if (type == AssetType.CONTEXT)
-        //    {
-        //      if (fTapestryProject.getProjectType() != TapestryProject.APPLICATION_PROJECT_TYPE)
-        //      {
-        //        addProblem(
-        //            IProblem.WARNING,
-        //            ((ISourceLocationInfo) templateAsset.getLocation()).getTagNameLocation(),
-        //            "Spindle can't resolve templates from context assets in Library projects",
-        //            true);
-        //        return false;
-        //      }
+        // if (type == AssetType.CONTEXT)
+        // {
+        // if (fTapestryProject.getProjectType() != TapestryProject.APPLICATION_PROJECT_TYPE)
+        // {
+        // addProblem(
+        // IProblem.WARNING,
+        // ((ISourceLocationInfo) templateAsset.getLocation()).getTagNameLocation(),
+        // "Spindle can't resolve templates from context assets in Library projects",
+        // true);
+        // return false;
+        // }
         //
-        //      // templateLocation = (IResourceWorkspaceLocation)
-        //      // fContextRoot.getRelativeLocation(templatePath);
+        // // templateLocation = (IResourceWorkspaceLocation)
+        // // fContextRoot.getRelativeLocation(templatePath);
         //
-        //      // if (templateLocation == null || !templateLocation.exists())
-        //      // {
-        //      // reportProblem(
-        //      // IProblem.ERROR,
-        //      // ((ISourceLocationInfo)
-        //      // templateAsset.getLocation()).getAttributeSourceLocation("path"),
-        //      // TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template",
-        //      // templatePath));
-        //      // return false;
-        //      // }
-        //    }
+        // // if (templateLocation == null || !templateLocation.exists())
+        // // {
+        // // reportProblem(
+        // // IProblem.ERROR,
+        // // ((ISourceLocationInfo)
+        // // templateAsset.getLocation()).getAttributeSourceLocation("path"),
+        // // TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template",
+        // // templatePath));
+        // // return false;
+        // // }
+        // }
         if (type == AssetType.PRIVATE)
         {
             templateLocation = (IResourceWorkspaceLocation) fClasspathRoot
                     .getRelativeLocation(templatePath);
-            //            if (templateLocation == null || !templateLocation.exists())
-            //            {
-            //                reportProblem(
-            //                    IProblem.ERROR,
-            //                    ((ISourceLocationInfo)
+            // if (templateLocation == null || !templateLocation.exists())
+            // {
+            // reportProblem(
+            // IProblem.ERROR,
+            // ((ISourceLocationInfo)
             // templateAsset.getLocation()).getAttributeSourceLocation("resource-path"),
-            //                    TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template",
+            // TapestryCore.getTapestryString("DefaultTemplateSource.unable-to-read-template",
             // templatePath));
-            //                return false;
-            //            }
+            // return false;
+            // }
         }
 
         if (templateLocation.getStorage() == null)
@@ -648,14 +653,27 @@ public class SpecificationValidator extends BaseValidator
             if (cache.containsKey(fullyQualifiedName))
                 return (IType) cache.get(fullyQualifiedName);
 
+            IJavaProject jproject = project.getJavaProject();
+
             try
             {
-                result = project.getJavaProject().findType(fullyQualifiedName);
+                result = jproject.findType(fullyQualifiedName);
             }
             catch (CoreException e)
             {
                 TapestryCore.log(e);
             }
+
+            // bug [ spindle-Bugs-1186225 ] Java inner classes trigger error message
+            if (result == null && fullyQualifiedName.indexOf("$") > 0)
+                try
+                {
+                    result = jproject.findType(fullyQualifiedName.replaceAll("$", "."));
+                }
+                catch (JavaModelException e)
+                {
+                    // do nothing
+                }
 
             cache.put(fullyQualifiedName, result);
 

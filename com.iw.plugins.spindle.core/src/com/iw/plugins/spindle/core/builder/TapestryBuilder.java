@@ -568,6 +568,17 @@ public class TapestryBuilder extends IncrementalProjectBuilder
             // do nothing
         }
 
+        // bug [ spindle-Bugs-1186225 ] Java inner classes trigger error message
+        if (result == null && fullyQualifiedName.indexOf("$") > 0)
+            try
+            {
+                result = fJavaProject.findType(fullyQualifiedName.replaceAll("$", "."));
+            }
+            catch (JavaModelException e)
+            {
+                // do nothing
+            }
+
         if (cache != null)
             cache.put(fullyQualifiedName, result);
 
