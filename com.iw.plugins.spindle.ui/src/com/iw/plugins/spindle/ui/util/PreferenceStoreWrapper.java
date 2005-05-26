@@ -31,10 +31,8 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 /**
- * Wrapper for a store that will consult the wrapped plugins preferences if the
- * normal preferences does not provide a value.
- * 
- * This wrapper will fire a property change event if the EditorsPlugin
+ * Wrapper for a store that will consult the wrapped plugins preferences if the normal preferences
+ * does not provide a value. This wrapper will fire a property change event if the EditorsPlugin
  * preferences change.
  * 
  * @author glongman@gmail.com
@@ -42,429 +40,414 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 public class PreferenceStoreWrapper implements IPreferenceStore, IPropertyChangeListener
 {
 
-  IPreferenceStore fPluginPreferences;
-  IPreferenceStore fWrappedPreferences;
+    IPreferenceStore fPluginPreferences;
 
-  public PreferenceStoreWrapper(IPreferenceStore pluginPreferences,
-      IPreferenceStore wrapped)
-  {
-    this.fPluginPreferences = pluginPreferences;
-    fWrappedPreferences = wrapped;
-    fWrappedPreferences.addPropertyChangeListener(this);
-  }
+    IPreferenceStore fWrappedPreferences;
 
-  public void dispose()
-  {
-    fWrappedPreferences.removePropertyChangeListener(this);
-  }
-
-  /*
-   * The EditorsPlugin preferences changed. We'd better inform the listeners!
-   * 
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
-   */
-  public void propertyChange(PropertyChangeEvent event)
-  {
-    fPluginPreferences.firePropertyChangeEvent(
-        event.getProperty(),
-        event.getOldValue(),
-        event.getNewValue());
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#addPropertyChangeListener(org.eclipse.jface.util.IPropertyChangeListener)
-   */
-  public void addPropertyChangeListener(IPropertyChangeListener listener)
-  {
-    fPluginPreferences.addPropertyChangeListener(listener);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#contains(java.lang.String)
-   */
-  public boolean contains(String name)
-  {
-    boolean result = fPluginPreferences.contains(name);
-    if (!result)
+    public PreferenceStoreWrapper(IPreferenceStore pluginPreferences, IPreferenceStore wrapped)
     {
-      result = fWrappedPreferences.contains(name);
+        this.fPluginPreferences = pluginPreferences;
+        fWrappedPreferences = wrapped;
+        fWrappedPreferences.addPropertyChangeListener(this);
     }
-    return false;
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#firePropertyChangeEvent(java.lang.String,
-   *      java.lang.Object, java.lang.Object)
-   */
-  public void firePropertyChangeEvent(String name, Object oldValue, Object newValue)
-  {
-    fPluginPreferences.firePropertyChangeEvent(name, oldValue, newValue);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getBoolean(java.lang.String)
-   */
-  public boolean getBoolean(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    public void dispose()
     {
-      return fPluginPreferences.getBoolean(name);
+        fWrappedPreferences.removePropertyChangeListener(this);
     }
-    return fWrappedPreferences.getBoolean(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultBoolean(java.lang.String)
-   */
-  public boolean getDefaultBoolean(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    /*
+     * The EditorsPlugin preferences changed. We'd better inform the listeners! (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+     */
+    public void propertyChange(PropertyChangeEvent event)
     {
-      return fPluginPreferences.getDefaultBoolean(name);
+        fPluginPreferences.firePropertyChangeEvent(event.getProperty(), event.getOldValue(), event
+                .getNewValue());
     }
-    return fWrappedPreferences.getDefaultBoolean(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultDouble(java.lang.String)
-   */
-  public double getDefaultDouble(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#addPropertyChangeListener(org.eclipse.jface.util.IPropertyChangeListener)
+     */
+    public void addPropertyChangeListener(IPropertyChangeListener listener)
     {
-      return fPluginPreferences.getDefaultDouble(name);
+        fPluginPreferences.addPropertyChangeListener(listener);
     }
-    return fWrappedPreferences.getDefaultDouble(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultFloat(java.lang.String)
-   */
-  public float getDefaultFloat(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#contains(java.lang.String)
+     */
+    public boolean contains(String name)
     {
-      return fPluginPreferences.getDefaultFloat(name);
-    }
-    return fWrappedPreferences.getDefaultFloat(name);
-  }
+        boolean result = fPluginPreferences.contains(name);
+        if (!result)
+            result = fWrappedPreferences.contains(name);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultInt(java.lang.String)
-   */
-  public int getDefaultInt(String name)
-  {
-    if (fPluginPreferences.contains(name))
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#firePropertyChangeEvent(java.lang.String,
+     *      java.lang.Object, java.lang.Object)
+     */
+    public void firePropertyChangeEvent(String name, Object oldValue, Object newValue)
     {
-      return fPluginPreferences.getDefaultInt(name);
+        fPluginPreferences.firePropertyChangeEvent(name, oldValue, newValue);
     }
-    return fWrappedPreferences.getDefaultInt(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultLong(java.lang.String)
-   */
-  public long getDefaultLong(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getBoolean(java.lang.String)
+     */
+    public boolean getBoolean(String name)
     {
-      return fPluginPreferences.getDefaultLong(name);
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getBoolean(name);
+        }
+        return fWrappedPreferences.getBoolean(name);
     }
-    return fWrappedPreferences.getDefaultLong(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultString(java.lang.String)
-   */
-  public String getDefaultString(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultBoolean(java.lang.String)
+     */
+    public boolean getDefaultBoolean(String name)
     {
-      return fPluginPreferences.getDefaultString(name);
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getDefaultBoolean(name);
+        }
+        return fWrappedPreferences.getDefaultBoolean(name);
     }
-    return fWrappedPreferences.getDefaultString(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getDouble(java.lang.String)
-   */
-  public double getDouble(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultDouble(java.lang.String)
+     */
+    public double getDefaultDouble(String name)
     {
-      return fPluginPreferences.getDouble(name);
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getDefaultDouble(name);
+        }
+        return fWrappedPreferences.getDefaultDouble(name);
     }
-    return fWrappedPreferences.getDouble(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getFloat(java.lang.String)
-   */
-  public float getFloat(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultFloat(java.lang.String)
+     */
+    public float getDefaultFloat(String name)
     {
-      return fPluginPreferences.getFloat(name);
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getDefaultFloat(name);
+        }
+        return fWrappedPreferences.getDefaultFloat(name);
     }
-    return fWrappedPreferences.getFloat(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getInt(java.lang.String)
-   */
-  public int getInt(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultInt(java.lang.String)
+     */
+    public int getDefaultInt(String name)
     {
-      return fPluginPreferences.getInt(name);
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getDefaultInt(name);
+        }
+        return fWrappedPreferences.getDefaultInt(name);
     }
-    return fWrappedPreferences.getInt(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getLong(java.lang.String)
-   */
-  public long getLong(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultLong(java.lang.String)
+     */
+    public long getDefaultLong(String name)
     {
-      return fPluginPreferences.getLong(name);
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getDefaultLong(name);
+        }
+        return fWrappedPreferences.getDefaultLong(name);
     }
-    return fWrappedPreferences.getLong(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#getString(java.lang.String)
-   */
-  public String getString(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getDefaultString(java.lang.String)
+     */
+    public String getDefaultString(String name)
     {
-      return fPluginPreferences.getString(name);
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getDefaultString(name);
+        }
+        return fWrappedPreferences.getDefaultString(name);
     }
-    return fWrappedPreferences.getString(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#isDefault(java.lang.String)
-   */
-  public boolean isDefault(String name)
-  {
-    if (fPluginPreferences.contains(name))
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getDouble(java.lang.String)
+     */
+    public double getDouble(String name)
     {
-      return fPluginPreferences.isDefault(name);
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getDouble(name);
+        }
+        return fWrappedPreferences.getDouble(name);
     }
-    return fWrappedPreferences.isDefault(name);
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#needsSaving()
-   */
-  public boolean needsSaving()
-  {
-    return fPluginPreferences.needsSaving();
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getFloat(java.lang.String)
+     */
+    public float getFloat(String name)
+    {
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getFloat(name);
+        }
+        return fWrappedPreferences.getFloat(name);
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#putValue(java.lang.String,
-   *      java.lang.String)
-   */
-  public void putValue(String name, String value)
-  {
-    fPluginPreferences.putValue(name, value);
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getInt(java.lang.String)
+     */
+    public int getInt(String name)
+    {
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getInt(name);
+        }
+        return fWrappedPreferences.getInt(name);
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#removePropertyChangeListener(org.eclipse.jface.util.IPropertyChangeListener)
-   */
-  public void removePropertyChangeListener(IPropertyChangeListener listener)
-  {
-    fPluginPreferences.removePropertyChangeListener(listener);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getLong(java.lang.String)
+     */
+    public long getLong(String name)
+    {
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getLong(name);
+        }
+        return fWrappedPreferences.getLong(name);
+    }
 
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#getString(java.lang.String)
+     */
+    public String getString(String name)
+    {
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.getString(name);
+        }
+        return fWrappedPreferences.getString(name);
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String,
-   *      boolean)
-   */
-  public void setDefault(String name, boolean value)
-  {
-    fPluginPreferences.setDefault(name, value);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#isDefault(java.lang.String)
+     */
+    public boolean isDefault(String name)
+    {
+        if (fPluginPreferences.contains(name))
+        {
+            return fPluginPreferences.isDefault(name);
+        }
+        return fWrappedPreferences.isDefault(name);
+    }
 
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#needsSaving()
+     */
+    public boolean needsSaving()
+    {
+        return fPluginPreferences.needsSaving();
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String,
-   *      double)
-   */
-  public void setDefault(String name, double value)
-  {
-    fPluginPreferences.setDefault(name, value);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#putValue(java.lang.String,
+     *      java.lang.String)
+     */
+    public void putValue(String name, String value)
+    {
+        fPluginPreferences.putValue(name, value);
+    }
 
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#removePropertyChangeListener(org.eclipse.jface.util.IPropertyChangeListener)
+     */
+    public void removePropertyChangeListener(IPropertyChangeListener listener)
+    {
+        fPluginPreferences.removePropertyChangeListener(listener);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String,
-   *      float)
-   */
-  public void setDefault(String name, float value)
-  {
-    fPluginPreferences.setDefault(name, value);
-  }
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String,
-   *      int)
-   */
-  public void setDefault(String name, int value)
-  {
-    fPluginPreferences.setDefault(name, value);
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String, boolean)
+     */
+    public void setDefault(String name, boolean value)
+    {
+        fPluginPreferences.setDefault(name, value);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String,
-   *      long)
-   */
-  public void setDefault(String name, long value)
-  {
-    fPluginPreferences.setDefault(name, value);
-  }
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String,
-   *      java.lang.String)
-   */
-  public void setDefault(String name, String defaultObject)
-  {
-    fPluginPreferences.setDefault(name, defaultObject);
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String, double)
+     */
+    public void setDefault(String name, double value)
+    {
+        fPluginPreferences.setDefault(name, value);
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setToDefault(java.lang.String)
-   */
-  public void setToDefault(String name)
-  {
-    fPluginPreferences.setToDefault(name);
-  }
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String,
-   *      boolean)
-   */
-  public void setValue(String name, boolean value)
-  {
-    fPluginPreferences.setValue(name, value);
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String, float)
+     */
+    public void setDefault(String name, float value)
+    {
+        fPluginPreferences.setDefault(name, value);
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String,
-   *      double)
-   */
-  public void setValue(String name, double value)
-  {
-    fPluginPreferences.setValue(name, value);
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String, int)
+     */
+    public void setDefault(String name, int value)
+    {
+        fPluginPreferences.setDefault(name, value);
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String,
-   *      float)
-   */
-  public void setValue(String name, float value)
-  {
-    fPluginPreferences.setValue(name, value);
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String, long)
+     */
+    public void setDefault(String name, long value)
+    {
+        fPluginPreferences.setDefault(name, value);
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String,
-   *      int)
-   */
-  public void setValue(String name, int value)
-  {
-    fPluginPreferences.setValue(name, value);
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setDefault(java.lang.String,
+     *      java.lang.String)
+     */
+    public void setDefault(String name, String defaultObject)
+    {
+        fPluginPreferences.setDefault(name, defaultObject);
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String,
-   *      long)
-   */
-  public void setValue(String name, long value)
-  {
-    fPluginPreferences.setValue(name, value);
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setToDefault(java.lang.String)
+     */
+    public void setToDefault(String name)
+    {
+        fPluginPreferences.setToDefault(name);
+    }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String,
-   *      java.lang.String)
-   */
-  public void setValue(String name, String value)
-  {
-    fPluginPreferences.setValue(name, value);
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String, boolean)
+     */
+    public void setValue(String name, boolean value)
+    {
+        fPluginPreferences.setValue(name, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String, double)
+     */
+    public void setValue(String name, double value)
+    {
+        fPluginPreferences.setValue(name, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String, float)
+     */
+    public void setValue(String name, float value)
+    {
+        fPluginPreferences.setValue(name, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String, int)
+     */
+    public void setValue(String name, int value)
+    {
+        fPluginPreferences.setValue(name, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String, long)
+     */
+    public void setValue(String name, long value)
+    {
+        fPluginPreferences.setValue(name, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.preference.IPreferenceStore#setValue(java.lang.String,
+     *      java.lang.String)
+     */
+    public void setValue(String name, String value)
+    {
+        fPluginPreferences.setValue(name, value);
+    }
 
 }
