@@ -2,11 +2,11 @@ package com.iw.plugins.spindle.ui.wizards;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
 public class TypeChoosePageHelper
 {
     public static IMethod[] createInheritedMethodsEclipse30(IType type, ImportsManager imports,
-            IProgressMonitor monitor) throws JavaModelException
+            IProgressMonitor monitor) throws CoreException
     {
         ArrayList newMethods = new ArrayList();
         ITypeHierarchy hierarchy = null;
