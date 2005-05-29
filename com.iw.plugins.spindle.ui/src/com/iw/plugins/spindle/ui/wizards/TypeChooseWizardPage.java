@@ -42,13 +42,9 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
@@ -190,13 +186,13 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         fDefaultInterface = UIPlugin.getString(PAGE_NAME + ".defaultInterface");
 
         fChooseClass = new RadioField(UIPlugin.getString(CHOOSECLASS));
-        //    fChooseClass.addListener(listener);
+        // fChooseClass.addListener(listener);
 
         fChooseSpecClassDialogField = createChooseSpecClassField(SPEC_CLASS);
-        //    fChooseSpecClassDialogField.addListener(listener);
+        // fChooseSpecClassDialogField.addListener(listener);
 
         fNewClass = new RadioField(UIPlugin.getString(NEWCLASS));
-        //    fNewClass.addListener(listener);
+        // fNewClass.addListener(listener);
 
         setImageDescriptor(ImageDescriptor.createFromURL(Images.getImageURL(UIPlugin
                 .getString(PAGE_NAME + ".image"))));
@@ -271,7 +267,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         }
         catch (CoreException e)
         {
-            //eat it
+            // eat it
         }
         return null;
     }
@@ -355,10 +351,10 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         Button browseSpecClassButton = fChooseSpecClassDialogField.getButtonControl(container);
         data = new GridData();
         data.horizontalSpan = 1;
-        //    data.horizontalAlignment= GridData.FILL;
+        // data.horizontalAlignment= GridData.FILL;
         data.grabExcessHorizontalSpace = false;
 
-        //    data.heightHint = SWTUtil.getButtonHeightHint(browseSpecClassButton);
+        // data.heightHint = SWTUtil.getButtonHeightHint(browseSpecClassButton);
         data.widthHint = SWTUtil.getButtonWidthHint(browseSpecClassButton);
         browseSpecClassButton.setLayoutData(data);
 
@@ -480,7 +476,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         doStatusUpdate();
     }
 
-    //------ validation --------
+    // ------ validation --------
     // for new java class fields + choose spec class field.
     private void doStatusUpdate()
     {
@@ -488,7 +484,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
 
         if (fChooseClass.getCheckBoxValue())
         {
-            //status of choose type component
+            // status of choose type component
             status = fChooseSpecClassDialogField.getStatus();
         }
         else
@@ -503,8 +499,8 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
 
             if (status.getSeverity() < IStatus.ERROR || getSuperClass().trim().length() == 0)
             {
-                //need to extra checks to see if the new class conforms
-                //to Tapestry norms.
+                // need to extra checks to see if the new class conforms
+                // to Tapestry norms.
                 SpindleStatus spindle = new SpindleStatus();
                 if (isEnclosingTypeSelected())
                     checkEnclosingModifiers(spindle);
@@ -825,87 +821,18 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
     protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor)
             throws CoreException
     {
-        createInheritedMethods(newType, false, true, imports, monitor);
+        createInheritedMethods(newType, imports, monitor);
     }
 
-    /**
-     * Creates the bodies of all unimplemented methods and constructors and adds them to the type.
-     * Method is typically called by implementers of <code>NewTypeWizardPage</code> to add needed
-     * method and constructors.
-     * 
-     * @param type
-     *            the type for which the new methods and constructor are to be created
-     * @param doConstructors
-     *            if <code>true</code> unimplemented constructors are created
-     * @param doUnimplementedMethods
-     *            if <code>true</code> unimplemented methods are created
-     * @param imports
-     *            an import manager to add all needed import statements
-     * @param monitor
-     *            a progress monitor to report progress
-     * @return the created methods.
-     * @throws CoreException
-     *             thrown when the creation fails.
-     */
-    //	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean
-    // doUnimplementedMethods, ImportsManager imports, IProgressMonitor monitor) throws
-    // CoreException {
-    protected IMethod[] createInheritedMethods(IType type, boolean doConstructors,
-            boolean doUnimplementedMethods, ImportsManager imports, IProgressMonitor monitor)
-            throws CoreException
+    protected IMethod[] createInheritedMethods(IType type, ImportsManager imports,
+            IProgressMonitor monitor) throws CoreException
     {
-        ArrayList newMethods = new ArrayList();
-        ITypeHierarchy hierarchy = null;
-        CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings();
 
-        //        if (doConstructors)
-        //        {
-        //            hierarchy = type.newSupertypeHierarchy(monitor);
-        //            IType superclass = hierarchy.getSuperclass(type);
-        //            if (superclass != null)
-        //            {
-        //                String[] constructors = StubUtility.evalConstructors(
-        //                        type,
-        //                        superclass,
-        //                        settings,
-        //                        imports);
-        //                if (constructors != null)
-        //                {
-        //                    for (int i = 0; i < constructors.length; i++)
-        //                    {
-        //                        newMethods.add(constructors[i]);
-        //                    }
-        //                }
-        //
-        //            }
-        //        }
-        if (doUnimplementedMethods)
-        {
-            if (hierarchy == null)
-            {
-                hierarchy = type.newSupertypeHierarchy(monitor);
-            }
-            String[] unimplemented = StubUtility.evalUnimplementedMethods(
-                    type,
-                    hierarchy,
-                    false,
-                    settings,
-                    imports);
-            if (unimplemented != null)
-            {
-                for (int i = 0; i < unimplemented.length; i++)
-                {
-                    newMethods.add(unimplemented[i]);
-                }
-            }
-        }
-        IMethod[] createdMethods = new IMethod[newMethods.size()];
-        for (int i = 0; i < newMethods.size(); i++)
-        {
-            String content = (String) newMethods.get(i) + '\n'; // content will be formatted, OK to
-            // use \n
-            createdMethods[i] = type.createMethod(content, null, false, null);
-        }
-        return createdMethods;
+        // this is easily done in Elcipse 3.1+
+        if (TapestryCore.getDefault().checkEclipseVersion(3, 1, true))
+            return super.createInheritedMethods(type, false, true, imports, monitor);
+
+        // not so easy in Eclipse 3.0
+        return TypeChoosePageHelper.createInheritedMethodsEclipse30(type, imports, monitor);
     }
 }
