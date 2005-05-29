@@ -102,15 +102,7 @@ public class TapestryCore extends AbstractUIPlugin implements IPropertyChangeLis
     public static final String SERVLET_2_3_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN";
 
     public static final String SERVLET_2_4_SCHEMA = "http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd";
-
-    static
-    {
-        Bundle systemBundle = Platform.getBundle("org.eclipse.osgi");
-        PluginVersionIdentifier id = new PluginVersionIdentifier((String) systemBundle.getHeaders()
-                .get(Constants.BUNDLE_VERSION));
-
-    }
-
+  
     /**
      * SpecFactory instance used by the Scanners
      */
