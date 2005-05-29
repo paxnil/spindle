@@ -234,7 +234,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage {
 		fServletSpecVersionCombo.add(TapestryCore.SERVLET_2_3_PUBLIC_ID);
 		fServletSpecVersionCombo.add(TapestryCore.SERVLET_2_2_PUBLIC_ID);
 		fServletSpecVersionCombo.setFont(parent.getFont());
-		fServletSpecVersionCombo.select(1);
+		fServletSpecVersionCombo.select(1);		
 		fServletSpecVersionCombo.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				int dtdId = XMLUtil.getDTDVersion(getServletSpecPublicId());
@@ -269,6 +269,7 @@ public class NewTapestryProjectPage extends WizardNewProjectCreationPage {
 		setGroupEnabled(fTemplateGroup, nameSpecified);
 
 		int dtdId = XMLUtil.getDTDVersion(getServletSpecPublicId());
+		fInstallData.setServletSpecPublicId(dtdId);
 		boolean enableFilterSelection = fServletSpecVersionCombo.isEnabled()
 				&& nameSpecified && dtdId >= XMLUtil.DTD_SERVLET_2_3;
 
