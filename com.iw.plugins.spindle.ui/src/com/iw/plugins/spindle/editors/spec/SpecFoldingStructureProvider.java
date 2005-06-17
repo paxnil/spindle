@@ -40,6 +40,7 @@ import org.eclipse.jface.text.source.projection.IProjectionListener;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.xmen.internal.ui.text.ITypeConstants;
@@ -53,202 +54,224 @@ import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 public class SpecFoldingStructureProvider implements IProjectionListener
 {
 
-  private SpecEditor fEditor;
-  private IDocument fDocument;
-  private ProjectionViewer fViewer;
+    private SpecEditor fEditor;
 
-  private XMLModelListener fXMLDocumentListener = new XMLModelListener()
-  {
+    private IDocument fDocument;
 
-    public void modelChanged(XMLReconciler reconciler)
+    private ProjectionViewer fViewer;
+
+    private XMLModelListener fXMLDocumentListener = new XMLModelListener()
     {
-      updateFoldingRegions(reconciler);
-    }
-  };
-  private XMLReconciler fXMLModel;
 
-  public SpecFoldingStructureProvider()
-  {
-  }
-
-  public void install(ITextEditor editor, ProjectionViewer viewer)
-  {
-    if (editor instanceof SpecEditor)
-    {
-      fEditor = (SpecEditor) editor;
-      fViewer = viewer;
-      fViewer.addProjectionListener(this);
-    }
-  }
-
-  public void uninstall()
-  {
-    if (isInstalled())
-    {
-      projectionDisabled();
-      fViewer.removeProjectionListener(this);
-      fViewer = null;
-      fEditor = null;
-    }
-  }
-
-  protected boolean isInstalled()
-  {
-    return fEditor != null;
-  }
-
-  public void initialize()
-  {
-
-    if (!isInstalled())
-      return;
-
-    initializePreferences();
-
-    IDocumentProvider provider = fEditor.getDocumentProvider();
-    fDocument = provider.getDocument(fEditor.getEditorInput());
-
-    IXMLModelProvider xmlprovider = UIPlugin.getDefault().getXMLModelProvider();
-    fXMLModel = xmlprovider.getModel(fDocument);
-    fXMLModel.addListener(fXMLDocumentListener);
-    updateFoldingRegions(fXMLModel);
-  }
-
-  private void initializePreferences()
-  {
-    // TODO For Later
-
-  }
-
-  public void projectionDisabled()
-  {
-    fDocument = null;
-    if (fXMLModel != null)
-      fXMLModel.removeListener(fXMLDocumentListener);
-
-  }
-  public void projectionEnabled()
-  {
-    projectionDisabled();
-    
-    initialize();
-
-  }
-  private void updateFoldingRegions(ProjectionAnnotationModel model, Set currentRegions)
-  {
-    Annotation[] deletions = computeDifferences(model, currentRegions);
-
-    Map additionsMap = new HashMap();
-    for (Iterator iter = currentRegions.iterator(); iter.hasNext();)
-    {
-      additionsMap.put(new ProjectionAnnotation(), iter.next());
-    }
-
-    if ((deletions.length != 0 || additionsMap.size() != 0))
-    {
-      model.modifyAnnotations(deletions, additionsMap, new Annotation[]{});
-    }
-  }
-
-  private Annotation[] computeDifferences(ProjectionAnnotationModel model, Set additions)
-  {
-    List deletions = new ArrayList();
-    for (Iterator iter = model.getAnnotationIterator(); iter.hasNext();)
-    {
-      Object annotation = iter.next();
-      if (annotation instanceof ProjectionAnnotation)
-      {
-        Position position = model.getPosition((Annotation) annotation);
-        if (additions.contains(position))
+        public void modelChanged(final XMLReconciler reconciler)
         {
-          additions.remove(position);
-        } else
-        {
-          deletions.add(annotation);
+            //The model has changed but in Eclipse 3.1 the event is arriving
+            //before the underlying document has been updated completely.
+            //
+            // So, lets defer our folding update until the text operation
+            // is complete!
+            // [ 1215636 ] Index out of bounds exception on Eclipse 3.1RC1
+            Display.getCurrent().asyncExec(new Runnable()
+            {               
+                public void run()
+                {
+                    updateFoldingRegions(reconciler);
+                }
+            });
         }
-      }
+    };
+
+    private XMLReconciler fXMLModel;
+
+    public SpecFoldingStructureProvider()
+    {
     }
-    return (Annotation[]) deletions.toArray(new Annotation[deletions.size()]);
-  }
 
-  public void updateFoldingRegions(XMLReconciler reconciler)
-  {
-    if (reconciler.getDocument() != fDocument)
-      return;
-    try
+    public void install(ITextEditor editor, ProjectionViewer viewer)
     {
-      ProjectionAnnotationModel model = (ProjectionAnnotationModel) fEditor
-          .getAdapter(ProjectionAnnotationModel.class);
-      if (model == null || reconciler == null)
-        return;
-
-      Set regions = new HashSet();
-      XMLNode root = reconciler.getRoot();
-      if (root == null)
-        return;
-
-      List children = new ArrayList(1);
-      children.add(root);
-      addFoldingRegions(regions, children, new ArrayList());
-      updateFoldingRegions(model, regions);
-    } catch (BadLocationException be)
-    {
-      UIPlugin.log(be);
-    }
-  }
-
-  private void addFoldingRegions(Set regions, List children, List ignore) throws BadLocationException
-  {
-    // add a Position to 'regions' for each foldable region
-    Iterator iter = children.iterator();
-    XMLNode element = null;
-    while (iter.hasNext())
-    {
-      element = (XMLNode) iter.next();
-      String type = element.getType();
-      if (ignore.contains(element) || ITypeConstants.TEXT.equals(type))
-        continue;
-
-      int startLine = -1;
-      int endLine = -1;
-      if (!"/".equals(type))
-      {
-
-        if (ITypeConstants.DECL.equals(type) || ITypeConstants.COMMENT.equals(type)
-            || ITypeConstants.EMPTYTAG.equals(type))
+        if (editor instanceof SpecEditor)
         {
-          startLine = fDocument.getLineOfOffset(element.getOffset());
-          endLine = fDocument.getLineOfOffset(element.getOffset() + element.getLength());
-
-        } else
-        {
-          startLine = fDocument.getLineOfOffset(element.getOffset());
-          XMLNode corresponder = element.getCorrespondingNode();
-          if (corresponder == null)
-            corresponder = element;
-          endLine = fDocument.getLineOfOffset(corresponder.getOffset()
-              + corresponder.getLength());
-          ignore.add(corresponder);
+            fEditor = (SpecEditor) editor;
+            fViewer = viewer;
+            fViewer.addProjectionListener(this);
         }
-        createFoldingRegion(regions, startLine, endLine);
-      }
-      children = element == null ? null : element.getChildren();
-      if (children != null)
-      {
-        addFoldingRegions(regions, children, ignore);
-      }
     }
-  }
 
-  private void createFoldingRegion(Set regions, int startLine, int endLine) throws BadLocationException
-  {
-    if (startLine < endLine)
+    public void uninstall()
     {
-      int start = fDocument.getLineOffset(startLine);
-      int end = fDocument.getLineOffset(endLine) + fDocument.getLineLength(endLine);
-      Position position = new Position(start, end - start);
-      regions.add(position);
+        if (isInstalled())
+        {
+            projectionDisabled();
+            fViewer.removeProjectionListener(this);
+            fViewer = null;
+            fEditor = null;
+        }
     }
-  }
+
+    protected boolean isInstalled()
+    {
+        return fEditor != null;
+    }
+
+    public void initialize()
+    {
+
+        if (!isInstalled())
+            return;
+
+        initializePreferences();
+
+        IDocumentProvider provider = fEditor.getDocumentProvider();
+        fDocument = provider.getDocument(fEditor.getEditorInput());
+
+        IXMLModelProvider xmlprovider = UIPlugin.getDefault().getXMLModelProvider();
+        fXMLModel = xmlprovider.getModel(fDocument);
+        fXMLModel.addListener(fXMLDocumentListener);
+        updateFoldingRegions(fXMLModel);
+    }
+
+    private void initializePreferences()
+    {
+        // TODO For Later
+
+    }
+
+    public void projectionDisabled()
+    {
+        fDocument = null;
+        if (fXMLModel != null)
+            fXMLModel.removeListener(fXMLDocumentListener);
+
+    }
+
+    public void projectionEnabled()
+    {
+        projectionDisabled();
+
+        initialize();
+
+    }
+
+    private void updateFoldingRegions(ProjectionAnnotationModel model, Set currentRegions)
+    {
+        Annotation[] deletions = computeDifferences(model, currentRegions);
+
+        Map additionsMap = new HashMap();
+        for (Iterator iter = currentRegions.iterator(); iter.hasNext();)
+        {
+            additionsMap.put(new ProjectionAnnotation(), iter.next());
+        }
+
+        if ((deletions.length != 0 || additionsMap.size() != 0))
+        {
+            model.modifyAnnotations(deletions, additionsMap, new Annotation[] {});
+        }
+    }
+
+    private Annotation[] computeDifferences(ProjectionAnnotationModel model, Set additions)
+    {
+        List deletions = new ArrayList();
+        for (Iterator iter = model.getAnnotationIterator(); iter.hasNext();)
+        {
+            Object annotation = iter.next();
+            if (annotation instanceof ProjectionAnnotation)
+            {
+                Position position = model.getPosition((Annotation) annotation);
+                if (additions.contains(position))
+                {
+                    additions.remove(position);
+                }
+                else
+                {
+                    deletions.add(annotation);
+                }
+            }
+        }
+        return (Annotation[]) deletions.toArray(new Annotation[deletions.size()]);
+    }
+
+    public void updateFoldingRegions(XMLReconciler reconciler)
+    {
+        if (reconciler.getDocument() != fDocument)
+            return;
+        try
+        {
+            ProjectionAnnotationModel model = (ProjectionAnnotationModel) fEditor
+                    .getAdapter(ProjectionAnnotationModel.class);
+            if (model == null || reconciler == null)
+                return;
+
+            Set regions = new HashSet();
+            XMLNode root = reconciler.getRoot();
+            if (root == null)
+                return;
+
+            List children = new ArrayList(1);
+            children.add(root);
+            addFoldingRegions(regions, children, new ArrayList());
+            updateFoldingRegions(model, regions);
+        }
+        catch (BadLocationException be)
+        {
+            UIPlugin.log(be);
+        }
+    }
+
+    private void addFoldingRegions(Set regions, List children, List ignore)
+            throws BadLocationException
+    {
+        // add a Position to 'regions' for each foldable region
+        Iterator iter = children.iterator();
+        XMLNode element = null;
+        while (iter.hasNext())
+        {
+            element = (XMLNode) iter.next();
+            String type = element.getType();
+            if (ignore.contains(element) || ITypeConstants.TEXT.equals(type))
+                continue;
+
+            int startLine = -1;
+            int endLine = -1;
+            if (!"/".equals(type))
+            {
+
+                if (ITypeConstants.DECL.equals(type) || ITypeConstants.COMMENT.equals(type)
+                        || ITypeConstants.EMPTYTAG.equals(type))
+                {
+                    startLine = fDocument.getLineOfOffset(element.getOffset());
+                    endLine = fDocument.getLineOfOffset(element.getOffset() + element.getLength());
+
+                }
+                else
+                {
+                    startLine = fDocument.getLineOfOffset(element.getOffset());
+                    XMLNode corresponder = element.getCorrespondingNode();
+                    if (corresponder == null)
+                        corresponder = element;
+                    endLine = fDocument.getLineOfOffset(corresponder.getOffset()
+                            + corresponder.getLength());
+                    ignore.add(corresponder);
+                }
+                createFoldingRegion(regions, startLine, endLine);
+            }
+            List nestedChildren = element == null ? null : element.getChildren();
+            if (nestedChildren != null)
+            {
+                addFoldingRegions(regions, nestedChildren, ignore);
+            }
+        }
+    }
+
+    private void createFoldingRegion(Set regions, int startLine, int endLine)
+            throws BadLocationException
+    {
+        if (startLine < endLine)
+        {
+            int start = fDocument.getLineOffset(startLine);
+            int end = fDocument.getLineOffset(endLine) + fDocument.getLineLength(endLine);
+            Position position = new Position(start, end - start);
+            regions.add(position);
+        }
+    }
 
 }

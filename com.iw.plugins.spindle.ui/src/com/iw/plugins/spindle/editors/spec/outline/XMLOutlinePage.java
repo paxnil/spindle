@@ -61,284 +61,297 @@ import com.iw.plugins.spindle.editors.util.XMLNodeLabelProvider;
  * TODO Add Type comment
  * 
  * @author glongman@gmail.com
- *  
  */
 public class XMLOutlinePage extends ContentOutlinePage implements XMLModelListener
 {
 
-  private SpecEditor fEditor;
-  private Tree fTree;
-  private TreeViewer treeViewer;
-  private XMLNode fRoot;
-  private Object[] fFlatChildren = new XMLNode[0];
-  private Object[] fCorresponders = new XMLNode[0];
+    private SpecEditor fEditor;
 
-  public XMLOutlinePage(SpecEditor editor, IEditorInput input)
-  {
-    fEditor = editor;
-    connect(input);
-  }
+    private Tree fTree;
 
-  private void connect(IEditorInput input)
-  {
+    private TreeViewer treeViewer;
 
-    IDocumentProvider provider = fEditor.getDocumentProvider();
+    private XMLNode fRoot;
 
-    //force creation of the document & the model.
-    IDocument document = provider.getDocument(input);
-    IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
-    XMLReconciler model = (modelProvider).getModel(document);
-    if (model != null)
+    private Object[] fFlatChildren = new XMLNode[0];
+
+    private Object[] fCorresponders = new XMLNode[0];
+
+    public XMLOutlinePage(SpecEditor editor, IEditorInput input)
     {
-      fRoot = model.getRoot();
-      model.addListener(this);
-    }
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.xmen.internal.ui.text.XMLModelListener#modelChanged(org.xmen.internal.ui.text.XMLReconciler)
-   */
-  public void modelChanged(XMLReconciler reconciler)
-  {
-    setInput(reconciler.getRoot());
-  }
-
-  private void disconnect()
-  {
-    IEditorInput input = fEditor.getEditorInput();
-    IDocumentProvider provider = null;
-    if (input instanceof IFileEditorInput)
-    {
-      provider = UIPlugin.getDefault().getSpecFileDocumentProvider();
-    } else
-    {
-      provider = UIPlugin.getDefault().getSpecStorageDocumentProvider();
-    }
-    IDocument document = provider.getDocument(input);
-    IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
-    XMLReconciler model = modelProvider.getModel(document);
-    if (model != null)
-    {
-      model.removeListener(this);
-    }
-  }
-
-  public void createControl(Composite parent)
-  {
-    fTree = new Tree(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-    treeViewer = new TreeViewer(fTree);
-    treeViewer.addSelectionChangedListener(this);
-    treeViewer.setContentProvider(createContentProvider());
-    treeViewer.setLabelProvider(createLabelProvider());
-    treeViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
-    treeViewer.setUseHashlookup(true);
-    treeViewer.addDoubleClickListener(new IDoubleClickListener()
-    {
-      public void doubleClick(DoubleClickEvent event)
-      {
-        IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
-        if (!selection.isEmpty())
-          fireSelectionChanged(new DoubleClickSelection(selection.getFirstElement()));
-      }
-    });
-    setInput(fRoot);
-  }
-
-  public void dispose()
-  {
-    disconnect();
-    super.dispose();
-  }
-
-  public void setInput(final Object input)
-  {
-
-    if (fTree == null || fTree.isDisposed())
-      return;
-
-    fRoot = (XMLNode) input;
-
-    if (fRoot == null)
-    {
-      treeViewer.setInput(null);
-      return;
+        fEditor = editor;
+        connect(input);
     }
 
-    Display d = fTree.getDisplay();
-    d.asyncExec(new Runnable()
+    private void connect(IEditorInput input)
     {
-      public void run()
-      {
-        try
+
+        IDocumentProvider provider = fEditor.getDocumentProvider();
+
+        // force creation of the document & the model.
+        IDocument document = provider.getDocument(input);
+        IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+        XMLReconciler model = (modelProvider).getModel(document);
+        if (model != null)
         {
-          ISelection oldSelection = getSelection();
-
-          treeViewer.setInput(fRoot);
-          treeViewer.setSelection(oldSelection);
-
-        } catch (RuntimeException e)
-        {
-          UIPlugin.log(e);
+            fRoot = model.getRoot();
+            model.addListener(this);
         }
-      }
-    });
-  }
+    }
 
-  protected ITreeContentProvider createContentProvider()
-  {
-    return new OutlineContentProvider();
-  }
-
-  protected ILabelProvider createLabelProvider()
-  {
-    return new XMLNodeLabelProvider();
-  }
-
-  public Control getControl()
-  {
-    return treeViewer != null ? treeViewer.getControl() : null;
-  }
-
-  public void setFocus()
-  {
-    if (treeViewer != null)
-      treeViewer.getTree().setFocus();
-  }
-
-  public ISelection getSelection()
-  {
-    if (treeViewer == null)
-      return StructuredSelection.EMPTY;
-    return treeViewer.getSelection();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
-   */
-  public void setSelection(ISelection selection)
-  {
-    if (!selection.isEmpty() && selection instanceof IStructuredSelection)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.xmen.internal.ui.text.XMLModelListener#modelChanged(org.xmen.internal.ui.text.XMLReconciler)
+     */
+    public void modelChanged(XMLReconciler reconciler)
     {
-      Object selected = ((IStructuredSelection) selection).getFirstElement();
-      if (selected instanceof IRegion && fRoot != null)
-      {
-        int documentOffset = ((IRegion) selected).getOffset();
-        Object found = null;
-        for (int i = 0; i < fFlatChildren.length; i++)
+        setInput(reconciler.getRoot());
+    }
+
+    private void disconnect()
+    {
+        IEditorInput input = fEditor.getEditorInput();
+        IDocumentProvider provider = null;
+        if (input instanceof IFileEditorInput)
         {
-          Position p = (Position) fFlatChildren[i];
-          if (p.offset <= documentOffset && documentOffset < p.offset + p.length)
-          {
-            found = p;
-          }
+            provider = UIPlugin.getDefault().getSpecFileDocumentProvider();
         }
-        if (found == null)
+        else
         {
-          int index = 0;
-          boolean exists = false;
-          for (; index < fCorresponders.length; index++)
-          {
-            Position p = (Position) fCorresponders[index];
-            if (p != null && p.offset <= documentOffset
-                && documentOffset < p.offset + p.length)
+            provider = UIPlugin.getDefault().getSpecStorageDocumentProvider();
+        }
+        IDocument document = provider.getDocument(input);
+        IXMLModelProvider modelProvider = UIPlugin.getDefault().getXMLModelProvider();
+        XMLReconciler model = modelProvider.getModel(document);
+        if (model != null)
+        {
+            model.removeListener(this);
+        }
+    }
+
+    public void createControl(Composite parent)
+    {
+        fTree = new Tree(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+        treeViewer = new TreeViewer(fTree);
+        treeViewer.addSelectionChangedListener(this);
+        treeViewer.setContentProvider(createContentProvider());
+        treeViewer.setLabelProvider(createLabelProvider());
+        treeViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
+        treeViewer.setUseHashlookup(true);
+        treeViewer.addDoubleClickListener(new IDoubleClickListener()
+        {
+            public void doubleClick(DoubleClickEvent event)
             {
-              exists = true;
-              break;
+                IStructuredSelection selection = (IStructuredSelection) treeViewer.getSelection();
+                if (!selection.isEmpty())
+                    fireSelectionChanged(new DoubleClickSelection(selection.getFirstElement()));
             }
-          }
-          if (exists)
-            found = fFlatChildren[index];
-        }
-        if (found != null)
-        {
-          treeViewer.setSelection(new StructuredSelection(found));
-        } else if (treeViewer != null && !treeViewer.getControl().isDisposed())
-        {
-          treeViewer.setSelection(StructuredSelection.EMPTY);
-        }
-      }
-      super.setSelection(selection);
+        });
+        setInput(fRoot);
     }
 
-  }
-
-  public class OutlineContentProvider implements ITreeContentProvider
-  {
-    public Object[] getElements(Object obj)
-    {
-      if (fRoot != null)
-      {
-        Object[] result = fRoot.getChildren(fRoot);
-        addAll(result);
-        return result;
-      }
-      return new Object[]{};
-    }
-    public Object[] getChildren(Object obj)
-    {
-      if (obj instanceof XMLNode)
-      {
-        Object[] result = ((XMLNode) obj).getChildren(obj);
-        addAll(result);
-        return result;
-      }
-
-      return new Object[0];
-    }
-    public boolean hasChildren(Object obj)
-    {
-      return getChildren(obj).length > 0;
-    }
-    public Object getParent(Object obj)
-    {
-      if (obj == fRoot)
-        return null;
-      return ((XMLNode) obj).getParent();
-    }
     public void dispose()
     {
+        disconnect();
+        super.dispose();
     }
 
-    private void addAll(Object[] elements)
+    public void setInput(final Object input)
     {
-      if (elements == null || elements.length == 0)
-        return;
 
-      if (fFlatChildren.length == 0)
-      {
-        fFlatChildren = elements;
-        fCorresponders = new Object[elements.length];
-        for (int i = 0; i < elements.length; i++)
-          fCorresponders[i] = ((XMLNode) elements[i]).getCorrespondingNode();
-        return;
-      }
+        if (fTree == null || fTree.isDisposed())
+            return;
 
-      Object[] expandedFlat = new Object[fFlatChildren.length + elements.length];
-      System.arraycopy(fFlatChildren, 0, expandedFlat, 0, fFlatChildren.length);
-      System.arraycopy(elements, 0, expandedFlat, fFlatChildren.length, elements.length);
-      Object[] expandedCorresponders = new Object[fCorresponders.length + elements.length];
-      System
-          .arraycopy(fCorresponders, 0, expandedCorresponders, 0, fCorresponders.length);
-      for (int i = 0; i < elements.length; i++)
-      {
-        expandedCorresponders[fCorresponders.length + i] = ((XMLNode) elements[i])
-            .getCorrespondingNode();
-      }
+        fRoot = (XMLNode) input;
 
-      fFlatChildren = expandedFlat;
-      fCorresponders = expandedCorresponders;
+        if (fRoot == null)
+        {
+            treeViewer.setInput(null);
+            return;
+        }
 
+        if (treeViewer.getContentProvider() == null)
+            return;
+
+        Display d = fTree.getDisplay();
+        d.asyncExec(new Runnable()
+        {
+            public void run()
+            {
+                try
+                {
+                    ISelection oldSelection = getSelection();
+                    treeViewer.setInput(fRoot);
+                    treeViewer.setSelection(oldSelection);
+
+                }
+                catch (RuntimeException e)
+                {
+                    UIPlugin.log(e);
+                }
+            }
+        });
     }
-    public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
+
+    protected ITreeContentProvider createContentProvider()
     {
-      fFlatChildren = new XMLNode[0];
-      fCorresponders = new XMLNode[0];
+        return new OutlineContentProvider();
     }
 
-  }
+    protected ILabelProvider createLabelProvider()
+    {
+        return new XMLNodeLabelProvider();
+    }
+
+    public Control getControl()
+    {
+        return treeViewer != null ? treeViewer.getControl() : null;
+    }
+
+    public void setFocus()
+    {
+        if (treeViewer != null)
+            treeViewer.getTree().setFocus();
+    }
+
+    public ISelection getSelection()
+    {
+        if (treeViewer == null)
+            return StructuredSelection.EMPTY;
+        return treeViewer.getSelection();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
+     */
+    public void setSelection(ISelection selection)
+    {
+        if (!selection.isEmpty() && selection instanceof IStructuredSelection)
+        {
+            Object selected = ((IStructuredSelection) selection).getFirstElement();
+            if (selected instanceof IRegion && fRoot != null)
+            {
+                int documentOffset = ((IRegion) selected).getOffset();
+                Object found = null;
+                for (int i = 0; i < fFlatChildren.length; i++)
+                {
+                    Position p = (Position) fFlatChildren[i];
+                    if (p.offset <= documentOffset && documentOffset < p.offset + p.length)
+                    {
+                        found = p;
+                    }
+                }
+                if (found == null)
+                {
+                    int index = 0;
+                    boolean exists = false;
+                    for (; index < fCorresponders.length; index++)
+                    {
+                        Position p = (Position) fCorresponders[index];
+                        if (p != null && p.offset <= documentOffset
+                                && documentOffset < p.offset + p.length)
+                        {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (exists)
+                        found = fFlatChildren[index];
+                }
+                if (found != null)
+                {
+                    treeViewer.setSelection(new StructuredSelection(found));
+                }
+                else if (treeViewer != null && !treeViewer.getControl().isDisposed())
+                {
+                    treeViewer.setSelection(StructuredSelection.EMPTY);
+                }
+            }
+            super.setSelection(selection);
+        }
+
+    }
+
+    public class OutlineContentProvider implements ITreeContentProvider
+    {
+        public Object[] getElements(Object obj)
+        {
+            if (fRoot != null)
+            {
+                Object[] result = fRoot.getChildren(fRoot);
+                addAll(result);
+                return result;
+            }
+            return new Object[] {};
+        }
+
+        public Object[] getChildren(Object obj)
+        {
+            if (obj instanceof XMLNode)
+            {
+                Object[] result = ((XMLNode) obj).getChildren(obj);
+                addAll(result);
+                return result;
+            }
+
+            return new Object[0];
+        }
+
+        public boolean hasChildren(Object obj)
+        {
+            return getChildren(obj).length > 0;
+        }
+
+        public Object getParent(Object obj)
+        {
+            if (obj == fRoot)
+                return null;
+            return ((XMLNode) obj).getParent();
+        }
+
+        public void dispose()
+        {
+        }
+
+        private void addAll(Object[] elements)
+        {
+            if (elements == null || elements.length == 0)
+                return;
+
+            if (fFlatChildren.length == 0)
+            {
+                fFlatChildren = elements;
+                fCorresponders = new Object[elements.length];
+                for (int i = 0; i < elements.length; i++)
+                    fCorresponders[i] = ((XMLNode) elements[i]).getCorrespondingNode();
+                return;
+            }
+
+            Object[] expandedFlat = new Object[fFlatChildren.length + elements.length];
+            System.arraycopy(fFlatChildren, 0, expandedFlat, 0, fFlatChildren.length);
+            System.arraycopy(elements, 0, expandedFlat, fFlatChildren.length, elements.length);
+            Object[] expandedCorresponders = new Object[fCorresponders.length + elements.length];
+            System.arraycopy(fCorresponders, 0, expandedCorresponders, 0, fCorresponders.length);
+            for (int i = 0; i < elements.length; i++)
+            {
+                expandedCorresponders[fCorresponders.length + i] = ((XMLNode) elements[i])
+                        .getCorrespondingNode();
+            }
+
+            fFlatChildren = expandedFlat;
+            fCorresponders = expandedCorresponders;
+
+        }
+
+        public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
+        {
+            fFlatChildren = new XMLNode[0];
+            fCorresponders = new XMLNode[0];
+        }
+
+    }
 
 }

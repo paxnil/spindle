@@ -668,7 +668,7 @@ public class SpecificationValidator extends BaseValidator
             if (result == null && fullyQualifiedName.indexOf("$") > 0)
                 try
                 {
-                    result = jproject.findType(fullyQualifiedName.replaceAll("$", "."));
+                    result = jproject.findType(fullyQualifiedName.replace('$', '.'));
                 }
                 catch (JavaModelException e)
                 {

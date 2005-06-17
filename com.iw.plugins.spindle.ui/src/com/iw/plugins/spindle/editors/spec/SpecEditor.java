@@ -379,7 +379,7 @@ public class SpecEditor extends Editor
             else if ("library".equals(extension))
             {
                 fReconciler = new LibraryReconciler();
-            }            
+            }
             initializeFoldingRegions();
         }
         else
@@ -392,7 +392,8 @@ public class SpecEditor extends Editor
 
     private void initializeFoldingRegions()
     {
-        if (fFoldingStructureProvider != null)
+        if (fFoldingStructureProvider != null && getSourceViewer() != null
+                && getSourceViewer().getTextWidget() != null)
             fFoldingStructureProvider.initialize();
     }
 
