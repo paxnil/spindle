@@ -3,11 +3,11 @@
 <fragment
    id="com.iw.plugins.spindle.docs.default"
    name="Default Docs Fragment"
-   version="3.1.23"
+   version="3.1.27"
    provider-name="Geoffrey Longman"
    plugin-id="com.iw.plugins.spindle.docs"
-   plugin-version="3.1.23"
-   match="greaterOrEqual">
+   plugin-version="3.1.27"
+   match="perfect">
    
    
    <extension point="org.eclipse.help.toc">      

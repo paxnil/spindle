@@ -1,28 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-
    <description url="http://spindle.sourceforge.net/unstable ">
       Eclipse update site for Spindle 3 integration builds. Select builds on this site are promoted to beta status and made available at http://spindle.sourceforge.net/updates.
    </description>
-   <feature url="features/com.iw.features.spindle.groovy_1.0.1.jar" id="com.iw.features.spindle.groovy" version="1.0.1">
-      <category name="old"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.1.15.jar" id="com.iw.features.spindle" version="3.1.15">
-      <category name="old"/>
-   </feature>
    <feature url="features/com.iw.features.spindle.groovy_3.1.20.jar" id="com.iw.features.spindle.groovy" version="3.1.20">
       <category name="add ons"/>
    </feature>
-   <feature url="features/com.iw.features.spindle_3.1.23.jar" id="com.iw.features.spindle" version="3.1.23">
-      <category name="old"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.1.24.jar" id="com.iw.features.spindle" version="3.1.24">
-      <category name="old"/>
-   </feature>
-   <feature url="features/com.iw.features.spindle_3.1.25.jar" id="com.iw.features.spindle" version="3.1.25">
-      <category name="old"/>
-   </feature>
    <feature url="features/com.iw.features.spindle_3.1.26.jar" id="com.iw.features.spindle" version="3.1.26">
+      <category name="old"/>
+   </feature>
+   <feature url="features/com.iw.features.spindle_3.1.27.jar" id="com.iw.features.spindle" version="3.1.27">
       <category name="spindle_3_1_latest"/>
    </feature>
    <category-def name="spindle_3_1_latest" label="Spindle 3.1 - latest unstable build - Eclipse 3.0">
