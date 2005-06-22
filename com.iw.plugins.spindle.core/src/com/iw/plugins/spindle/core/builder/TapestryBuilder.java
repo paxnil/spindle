@@ -579,7 +579,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
                 // do nothing
             }
 
-        if (cache != null)
+        if (result != null)
             cache.put(fullyQualifiedName, result);
 
         return result;
