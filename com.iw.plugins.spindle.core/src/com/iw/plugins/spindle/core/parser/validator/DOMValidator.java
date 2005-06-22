@@ -694,10 +694,11 @@ public class DOMValidator implements IProblemCollector
                     {
                         item = (DTDItem) items.get(i);
                         cardinal = item.getCardinal();
-                        if (found = match(item, childName))
+                        found = match(item, childName);
+                        if (found) 
                         {
                             int j = 0;
-                            for (Iterator iter = items.iterator(); iter.hasNext() && j < i;)
+                            for (Iterator iter = items.iterator(); iter.hasNext() && (j < i);)
                             {
                                 iter.next();
                                 iter.remove();
@@ -708,7 +709,7 @@ public class DOMValidator implements IProblemCollector
                                 items.remove(i);
                             break;
                         }
-                        else if (cardinal == DTDCardinal.NONE || cardinal == DTDCardinal.ONEMANY)
+                        else if ((cardinal == DTDCardinal.NONE) || (cardinal == DTDCardinal.ONEMANY))
                         {
                             throw new ValidatorException(TapestryCore.getString(
                                     "dom-validator-element-not-allowed",
