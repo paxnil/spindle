@@ -3,7 +3,7 @@
 <plugin
    id="com.iw.plugins.spindle.core"
    name="Spindle Core Plugin"
-   version="3.1.27"
+   version="3.2.0"
    provider-name="Geoffrey Longman"
    class="com.iw.plugins.spindle.core.TapestryCore">
 

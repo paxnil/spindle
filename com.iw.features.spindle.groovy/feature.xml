@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.iw.features.spindle.groovy"
-      label="Groovestry Support Add-in for SPindle"
-      version="3.1.20"
+      label="Groovestry Support Add-in for Spindle"
+      version="3.2.0"
       provider-name="Geoffrey Longman"
       image="spindle.gif">
 
@@ -43,18 +43,18 @@ All Rights Reserved
    </license>
 
    <url>
-      <update label="Spindle Updates" url="http://spindle.sourceforge.net/unstable"/>
+      <update label="Spindle Updates" url="http://spindle.sourceforge.net/updates"/>
    </url>
 
    <requires>
-      <import feature="com.iw.features.spindle" version="3.1.19" match="greaterOrEqual"/>
+      <import feature="com.iw.features.spindle" version="3.2.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
          id="com.iw.plugins.spindle.core.groovy"
          download-size="0"
          install-size="0"
-         version="3.1.19"
+         version="3.2.0"
          fragment="true"/>
 
 </feature>
