@@ -255,7 +255,7 @@ public class Revealer implements IWindowListener, IPageListener, IPartListener
         {
           //TODO use platform adapters
           FileEditorInput fei = (FileEditorInput) input;
-          storage = (IStorage) fei.getFile();
+          storage = fei.getFile();
 
         } else if (input instanceof JarEntryEditorInput)
         {

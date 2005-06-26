@@ -35,7 +35,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -53,8 +52,6 @@ public class BuilderContextVisitor implements IResourceVisitor
   private IFolder fContextLocation;
   private IFolder fOutputLocation;
   private TapestryProject fTapestryProject;
-  private boolean fContextSeen;
-
   public BuilderContextVisitor(FullBuild build, ArrayList collector)
   {
     this.fCollector = collector;
@@ -70,7 +67,6 @@ public class BuilderContextVisitor implements IResourceVisitor
     {
       TapestryCore.log(e);
     }
-    fContextSeen = false;
   }
 
   private boolean isOnContextPath(IResource resource)
@@ -91,7 +87,7 @@ public class BuilderContextVisitor implements IResourceVisitor
     return JavaCore.create(folder) != null;
   }
 
-  public boolean visit(IResource resource) throws CoreException
+  public boolean visit(IResource resource) 
   {
     if (resource instanceof IProject)
       return true;
@@ -127,16 +123,11 @@ public class BuilderContextVisitor implements IResourceVisitor
         IResourceLocation location = fBuild.fTapestryBuilder.fContextRoot
             .getRelativeLocation(resource);
         fCollector.add(location);
-        debug(location, true);
+        if (TapestryBuilder.DEBUG)
+          System.out.println(location);
       }
     }
     return true;
-  }
-
-  protected void debug(IResourceLocation location, boolean included)
-  {
-    if (TapestryBuilder.DEBUG)
-      System.out.println(location);
   }
 
 }

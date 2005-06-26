@@ -38,13 +38,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
@@ -489,11 +487,8 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         }
         else
         {
-            // we want to morph the package status to severe if ! First we must obtain
-            // it for later analysis...
-            IStatus packageStatus = isEnclosingTypeSelected() ? null : fPackageStatus;
             // status of all new java type components
-            status = StatusUtil.getMostSevere(new IStatus[]
+            status = TapestryWizardPage.getMostSevere(new IStatus[]
             { fContainerStatus, isEnclosingTypeSelected() ? fEnclosingTypeStatus : fPackageStatus,
                     fTypeNameStatus, fModifierStatus, fSuperClassStatus, fSuperInterfacesStatus });
 
@@ -583,9 +578,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
      */
     protected void checkNewType(SpindleStatus status, IJavaProject jproject)
             throws JavaModelException
-    {
-        boolean superClassGood = true;
-        boolean hasGoodIface = true;
+    {       
         IType superType = jproject.findType(getSuperClass());
         boolean success = false;
         if (superType != null)
@@ -699,7 +692,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
             try
             {
                 IJavaProject jproject = project.getJavaProject();
-                fChooseSpecClassDialogField.init(jproject, (IRunnableContext) getWizard()
+                fChooseSpecClassDialogField.init(jproject, getWizard()
                         .getContainer());
                 String existingSpecClassname = fChooseSpecClassDialogField.getTextValue();
                 if (existingSpecClassname == null || existingSpecClassname.trim().length() == 0)
@@ -821,18 +814,6 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
     protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor)
             throws CoreException
     {
-        createInheritedMethods(newType, imports, monitor);
-    }
-
-    protected IMethod[] createInheritedMethods(IType type, ImportsManager imports,
-            IProgressMonitor monitor) throws CoreException
-    {
-
-        // this is easily done in Elcipse 3.1+
-        if (TapestryCore.getDefault().checkEclipseVersion(3, 1, true))
-            return super.createInheritedMethods(type, false, true, imports, monitor);
-
-        // not so easy in Eclipse 3.0
-        return TypeChoosePageHelper.createInheritedMethodsEclipse30(type, imports, monitor);
+        super.createInheritedMethods(newType, false, true, imports, monitor);
     }
 }

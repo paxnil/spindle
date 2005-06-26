@@ -29,7 +29,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import org.apache.tapestry.INamespace;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -45,7 +44,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -54,6 +53,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -68,7 +68,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.PageBook;
@@ -292,7 +291,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
     public void init(IJavaElement jelem, IResource initResource, String prepopulateName)
     {
         WizardDialog container = (WizardDialog) getWizard().getContainer();
-        IRunnableContext context = (IRunnableContext) container;
+        IRunnableContext context = container;
 
         fTapestryProjectDialogField.init(jelem, context);
         if (fTapestryProjectDialogField.isProjectBroken())
@@ -408,7 +407,6 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         formData.left = new FormAttachment(0, 0);
         formData.width = 400;
         composite.setLayoutData(formData);
-        
 
         Control nameFields = createComponentNameControl(composite);
         addControl(nameFields, null, 0);
@@ -463,8 +461,8 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
         fComponentNameDialogField.fillIntoGrid(container, 3);
 
-        int heightHint = convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
-        int widthHint = convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+        // int heightHint = convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
+        // int widthHint = convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
 
         fToggleAdvancedOptions = new Button(container, SWT.PUSH);
         fToggleAdvancedOptions.setText(fShowingAdvanced ? "Hide Advanced Options"
@@ -638,8 +636,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
 
         final boolean addingNewComponent = getWizard().getClass() == NewTapComponentWizard.class;
         final String name = fComponentNameDialogField.getTextValue();
-        final Shell useShell = getShell();
-        final IFolder applicationLocation = fApplicationLocationField.getSpecLocation();
+
         ITapestryProject tproject = fTapestryProjectDialogField.getTapestryProject();
         final IFolder webInf = tproject.getWebContextFolder().getFolder("WEB-INF");
 
@@ -882,12 +879,11 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         {
             if (forTemplate)
             {
-                result = result = ((IFolder) fApplicationLocationField.getTemplateLocation())
-                        .getFile(fileName);
+                result = result = fApplicationLocationField.getTemplateLocation().getFile(fileName);
             }
             else
             {
-                result = ((IFolder) fApplicationLocationField.getSpecLocation()).getFile(fileName);
+                result = fApplicationLocationField.getSpecLocation().getFile(fileName);
             }
         }
         else
@@ -965,33 +961,33 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         updateStatus();
     }
 
-    /**
-     *  
-     */
-    private void simpleComponentNameChanged()
-    {
-        if (fComponentNameDialogField.getStatus().getSeverity() == IStatus.ERROR)
-            return;
-        if (fNamespaceDialogField.getStatus().getSeverity() == IStatus.ERROR)
-            return;
-        SpindleStatus status = (SpindleStatus) fComponentNameDialogField.getStatus();
-        String name = fComponentNameDialogField.getTextValue();
-        INamespace namespace = fNamespaceDialogField.getSelectedNamespace();
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
-                .getSpecificationLocation();
-        if (location.isOnClasspath())
-        {
-            // check if location exists!
-            IFile file = (IFile) location.getStorage();
-            IContainer container = file.getParent();
-            // file =
-        }
-        else
-        {
-            // check if exists in webinf.,
-        }
-
-    }
+//    /**
+//     *  
+//     */
+//    private void simpleComponentNameChanged()
+//    {
+//        if (fComponentNameDialogField.getStatus().getSeverity() == IStatus.ERROR)
+//            return;
+//        if (fNamespaceDialogField.getStatus().getSeverity() == IStatus.ERROR)
+//            return;
+//        SpindleStatus status = (SpindleStatus) fComponentNameDialogField.getStatus();
+//        String name = fComponentNameDialogField.getTextValue();
+//        INamespace namespace = fNamespaceDialogField.getSelectedNamespace();
+//        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+//                .getSpecificationLocation();
+//        if (location.isOnClasspath())
+//        {
+//            // check if location exists!
+//            IFile file = (IFile) location.getStorage();
+//            IContainer container = file.getParent();
+//            // file =
+//        }
+//        else
+//        {
+//            // check if exists in webinf.,
+//        }
+//
+//    }
 
     public String getChosenComponentName()
     {

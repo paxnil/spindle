@@ -77,7 +77,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
     IFile java = null;
 
     spec = (IFile) fPage1.getResource();
-    template = (IFile) fPage1.getTemplateFile();
+    template = fPage1.getTemplateFile();
 
     ResourceCreationRunnable createRunnable = new ResourceCreationRunnable();
     // the new spec file;
