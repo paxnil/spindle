@@ -487,10 +487,7 @@ public class WebXMLScanner extends AbstractScanner
             }
             catch (ScannerException e)
             {
-                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, TapestryCore.getString(
-                        "web-xml-ignore-invalid-application-path",
-                        servletType.getElementName(),
-                        null), false, IProblem.NOT_QUICK_FIXABLE);
+                addProblem(IMarker.SEVERITY_ERROR, nodeLocation, e.getMessage(), false, IProblem.NOT_QUICK_FIXABLE);
 
                 return false;
             }
