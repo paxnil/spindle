@@ -1,71 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<plugin
-   id="com.iw.plugins.spindle.core"
-   name="Spindle Core Plugin"
-   version="3.2.0"
-   provider-name="Geoffrey Longman"
-   class="com.iw.plugins.spindle.core.TapestryCore">
+<plugin>
 
-   <runtime>
-      <library name="core.jar">
-         <export name="*"/>
-      </library>
-      <library name="dtdparser.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/tapestry-3.0.3.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/tapestry-contrib-3.0.3.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/ext/bsf-2.3.0.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/ext/commons-beanutils-1.6.1.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/ext/commons-codec-1.2.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/ext/commons-collections-2.1.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/ext/commons-digester-1.5.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/ext/commons-fileupload-1.0.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/spindle/commons-lang-cvs-HEAD.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/ext/commons-logging-1.0.2.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/ext/jakarta-oro-2.0.6.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/ext/javassist-2.5.1.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/ext/ognl-2.6.7.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/j2ee/javax.servlet.jar">
-         <export name="*"/>
-      </library>
-   </runtime>
-   <requires>
-      <import plugin="org.eclipse.ui.ide" export="true"/>
-      <import plugin="org.eclipse.core.resources" export="true"/>
-      <import plugin="org.eclipse.jdt.core" export="true"/>
-      <import plugin="org.eclipse.ui" export="true"/>
-      <import plugin="org.apache.xerces" export="true"/>
-      <import plugin="org.eclipse.jface.text"/> 
-      <import plugin="org.eclipse.core.runtime" export="true"/>
-   </requires>
    <extension-point id="componentTypeResolver" name="Component Type Resolvers" schema="schema/componentTypeResolver.exsd"/>
    <extension-point id="incrementalBuildVeto" name="Option to veto an incremental build" schema="schema/incrementalBuildVeto.exsd"/>
    <extension-point id="beanSpecificationValidators" name="Contributed Validators for Tapestry Bean Specs" schema="schema/beanSpecificationValidators.exsd"/>
