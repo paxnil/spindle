@@ -35,7 +35,7 @@ Add Ons are always located in the unstable update site.
    <category-def name="old" label="Older Spindle Stuff"/>
    <category-def name="spindle_3_2" label="Spindle 3.2  - for Eclipse 3.1">
       <description>
-         Builds of Spindle targeted for Eclipse 3.1
+         Builds of Spindle targeted for Eclipse 3.1 (Final)
       </description>
    </category-def>
 </site>
