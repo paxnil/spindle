@@ -7,7 +7,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.templates.Template;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.ui.wizards.factories.ApplicationFactory;
 import com.iw.plugins.spindle.ui.wizards.factories.IFactoryTemplateSource;
 import com.iw.plugins.spindle.ui.wizards.factories.PageFactory;

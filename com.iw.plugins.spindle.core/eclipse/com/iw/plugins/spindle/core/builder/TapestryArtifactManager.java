@@ -50,8 +50,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryCorePlugin;
-import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.eclipse.TapestryProject;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;

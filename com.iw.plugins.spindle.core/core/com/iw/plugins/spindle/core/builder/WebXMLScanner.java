@@ -35,7 +35,6 @@ import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.IJavaType;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.Path;
 import com.iw.plugins.spindle.core.scanning.AbstractScanner;
@@ -49,12 +48,10 @@ import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
  * 
  * @author glongman@gmail.com
  */
-public class WebXMLScanner extends AbstractScanner
+public abstract class WebXMLScanner extends AbstractScanner
 {
 
     protected AbstractBuild fBuilder;
-
-    protected ArrayList fServletNames;
 
     protected ArrayList fSeenServletNames;
 
@@ -93,7 +90,8 @@ public class WebXMLScanner extends AbstractScanner
 
         Path ws_path = new Path(location.getName());
         String extension = ws_path.getFileExtension();
-        if (extension == null || !extension.equals(AbstractBuildInfrastructure.APPLICATION_EXTENSION))
+        if (extension == null
+                || !extension.equals(AbstractBuildInfrastructure.APPLICATION_EXTENSION))
             throw new ScannerException(CoreMessages.format("web-xml-wrong-file-extension", location
                     .toString()), false, IProblem.NOT_QUICK_FIXABLE);
 
@@ -132,7 +130,6 @@ public class WebXMLScanner extends AbstractScanner
     protected boolean checkJavaSubclassOfImplements(IJavaType superclass, IJavaType candidate,
             ISourceLocation location)
     {
-        boolean match = false;
         if (superclass.equals(candidate))
             return true;
 
@@ -168,7 +165,7 @@ public class WebXMLScanner extends AbstractScanner
      * 
      * @see com.iw.plugins.spindle.core.processing.AbstractProcessor#doProcessing(org.w3c.dom.Node)
      */
-    protected void doScan(Object source, Object resultObject) throws ScannerException
+    protected void doScan(Object source, Object resultObject)
     {
         Node rootNode = (Node) source;
         WebAppDescriptor descriptor = (WebAppDescriptor) resultObject;
@@ -178,7 +175,7 @@ public class WebXMLScanner extends AbstractScanner
         {
             if (isElement(node, "servlet"))
             {
-                ServletInfo info = getServletInfo(node);
+                ServletInfo info = extractServletInfo(node);
                 if (info != null)
                     infos.add(info);
                 continue;
@@ -186,14 +183,14 @@ public class WebXMLScanner extends AbstractScanner
 
             if (isElement(node, "context-param"))
             {
-                scanContextParameter(node, contextParameters);
+                extractContextParameter(node, contextParameters);
             }
         }
         descriptor.setServletInfos((ServletInfo[]) infos.toArray(new ServletInfo[infos.size()]));
         descriptor.setContextParameters(contextParameters);
     }
 
-    private void scanContextParameter(Node contextParamNode, Map target)
+    private void extractContextParameter(Node contextParamNode, Map target)
     {
         String key = null;
         String value = null;
@@ -229,6 +226,13 @@ public class WebXMLScanner extends AbstractScanner
             {
                 value = getValue(node);
                 valueLoc = getBestGuessSourceLocation(node, true);
+                if (value == null)
+                    addProblem(
+                            IProblem.ERROR,
+                            valueLoc,
+                            CoreMessages.format("web-xml-context-param-null-value"),
+                            false,
+                            IProblem.NOT_QUICK_FIXABLE);
             }
         }
         if (key != null && value != null)
@@ -279,42 +283,51 @@ public class WebXMLScanner extends AbstractScanner
         return null;
     }
 
-    /** Should override in platform specific way */
-    protected String getApplicationPathFromServlet(IJavaType servletType) throws ScannerException
-    {
-        return null;
-    }
+    /**
+     * Legacy (pre Tapestry 3.0) applications could only specify the location of the application
+     * specification in one way. By overriding the method getApplicationSpecificationPath() in
+     * ApplicationServlet.
+     * <p>
+     * This is Spindle's attempt to support this legacy method. Subclasses must override.
+     * 
+     * @param servletType
+     *            the subclass of org.apache.tapestry.ApplicationServlet
+     * @return the path to the Application specification.
+     * @throws ScannerException
+     *             if the lookup fails to obtain a path
+     */
+    protected abstract String getApplicationPathFromServletSubclassOverride(IJavaType servletType)
+            throws ScannerException;
 
-    protected ServletInfo getServletInfo(Node servletNode)
+    /**
+     * @param servletNode
+     *            a servlet xml node
+     * @return an instance of ServletInfo is the node contains a valid Tapestry servlet
+     */
+    protected ServletInfo extractServletInfo(Node servletNode)
     {
         ServletInfo newInfo = new ServletInfo();
         for (Node node = servletNode.getFirstChild(); node != null; node = node.getNextSibling())
         {
             if (isElement(node, "servlet-name"))
             {
-                if (!scanServletName(node, newInfo))
+                if (!extractServletName(node, newInfo))
                     return null;
+                continue;
 
             }
             if (isElement(node, "servlet-class"))
             {
-                if (!scanServletClass(node, newInfo))
+                if (!extractServletClassAndApplicationSpecLocation(node, newInfo))
                     return null;
+                continue;
 
             }
             if (isElement(node, "init-param"))
             {
-                try
-                {
-                    if (!scanInitParam(node, newInfo))
-                        return null;
-
-                }
-                catch (ScannerException e)
-                {
-                    TapestryCore.log(e.getMessage());
+                if (!extractServletInitParameter(node, newInfo))
                     return null;
-                }
+                continue;
             }
         }
         if (AbstractBuildInfrastructure.DEBUG)
@@ -325,20 +338,15 @@ public class WebXMLScanner extends AbstractScanner
         return newInfo;
     }
 
-    private boolean isTapestryServlet(IJavaType candidate, ISourceLocation location)
+    private boolean isTapestryServletOrSubclass(IJavaType candidate, ISourceLocation location)
     {
-        if (candidate == null)
-            return false;
-
         if (candidate.equals(fBuilder.fTapestryServletType))
             return true;
 
         return checkJavaSubclassOfImplements(fBuilder.fTapestryServletType, candidate, location);
-
     }
 
-    protected boolean scanInitParam(Node initParamNode, ServletInfo currentInfo)
-            throws ScannerException
+    protected boolean extractServletInitParameter(Node initParamNode, ServletInfo currentInfo)
     {
         String key = null;
         String value = null;
@@ -394,10 +402,21 @@ public class WebXMLScanner extends AbstractScanner
         return true;
     }
 
-    protected boolean scanServletClass(Node node, ServletInfo newInfo)
+    /**
+     * update the servlet info with the servlet class defined in the node and find the location of
+     * the application specification; logging any problems encountered
+     * 
+     * @param node
+     *            the servlet-class xml node
+     * @param newInfo
+     *            the ServletInfo to store extracted info into
+     * @return true iff
+     */
+    protected boolean extractServletClassAndApplicationSpecLocation(Node node, ServletInfo newInfo)
     {
         newInfo.classname = getValue(node);
         ISourceLocation nodeLocation = getBestGuessSourceLocation(node, true);
+        IResourceWorkspaceLocation applicationSpecLocation = null;
 
         if (newInfo.classname == null)
         {
@@ -410,112 +429,103 @@ public class WebXMLScanner extends AbstractScanner
                     IProblem.WEB_XML_MISSING_APPLICATION_SERVLET_CLASS);
             return false;
         }
-
-        IJavaType servletType = checkJavaType(newInfo.classname, nodeLocation);
-        if (servletType == null)
-            return false;
-
-        IResourceWorkspaceLocation location = null;
-        if (!isTapestryServlet(servletType, nodeLocation))
-        {
-            return false;
-
-        }
-
-        if (!fBuilder.fTapestryServletType.equals(servletType))
-        {
-            newInfo.isServletSubclass = true; // its a subclass
-            String path = null;
-            try
-            {
-                path = getApplicationPathFromServlet(servletType);
-            }
-            catch (ScannerException e1)
-            {
-                addProblem(IProblem.ERROR, nodeLocation, e1.getMessage(), false, e1.getCode());
-                return false;
-            }
-
-            try
-            {
-                location = getApplicationLocation(newInfo, path);
-                checkApplicationLocation(location);
-            }
-            catch (ScannerException e)
-            {
-                addProblem(IProblem.ERROR, nodeLocation, CoreMessages.format(
-                        "web-xml-ignore-invalid-application-path",
-                        servletType.getFullyQualifiedName(),
-                        path.toString()), false, IProblem.NOT_QUICK_FIXABLE);
-
-                return false;
-            }
-
-        }
         else
         {
-            try
+            IJavaType servletType = checkJavaType(newInfo.classname, nodeLocation);
+            if (servletType != null && isTapestryServletOrSubclass(servletType, nodeLocation))
             {
-                location = getApplicationLocation(newInfo, null);
-                checkApplicationLocation(location);
-            }
-            catch (ScannerException e)
-            {
-                addProblem(IProblem.ERROR, nodeLocation, CoreMessages.format(
-                        "web-xml-ignore-invalid-application-path",
-                        servletType.getFullyQualifiedName(),
-                        null), false, IProblem.NOT_QUICK_FIXABLE);
+                newInfo.isServletSubclass = fBuilder.fTapestryServletType.equals(servletType);
 
-                return false;
+                if (newInfo.isServletSubclass)
+                {
+                    try
+                    {
+                        String path = getApplicationPathFromServletSubclassOverride(servletType);
+                        try
+                        {
+
+                            applicationSpecLocation = getApplicationLocation(newInfo, path);
+                            checkApplicationLocation(applicationSpecLocation);
+                        }
+                        catch (ScannerException e)
+                        {
+                            addProblem(IProblem.ERROR, nodeLocation, CoreMessages.format(
+                                    "web-xml-ignore-invalid-application-path",
+                                    servletType.getFullyQualifiedName(),
+                                    path.toString()), false, IProblem.NOT_QUICK_FIXABLE);
+                        }
+                    }
+                    catch (ScannerException e)
+                    {
+                        addProblem(
+                                IProblem.ERROR,
+                                nodeLocation,
+                                e.getMessage(),
+                                false,
+                                IProblem.NOT_QUICK_FIXABLE);
+                    }
+
+                }
+                else
+                {
+                    try
+                    {
+                        applicationSpecLocation = getApplicationLocation(newInfo, null);
+                        checkApplicationLocation(applicationSpecLocation);
+                    }
+                    catch (ScannerException e)
+                    {
+                        addProblem(IProblem.ERROR, nodeLocation, CoreMessages.format(
+                                "web-xml-ignore-invalid-application-path",
+                                servletType.getFullyQualifiedName(),
+                                null), false, IProblem.NOT_QUICK_FIXABLE);
+                    }
+                }
             }
         }
-
-        newInfo.applicationSpecLocation = location;
-        return true;
+        newInfo.applicationSpecLocation = applicationSpecLocation;
+        return applicationSpecLocation != null;
     }
 
-    protected boolean scanServletName(Node node, ServletInfo newInfo)
+    /**
+     * Extract the servlet's name and validate it.
+     * <ul>
+     * <li>Must not be null or an empty string</li>
+     * <li>Must not be a duplicate</li>
+     * </ul>
+     * 
+     * @param node
+     *            the servlet-name xml node
+     * @param newInfo
+     *            the ServletInfo that carries the extracted information about the servlet
+     * @return iff the node has a valid servlet name
+     */
+    protected boolean extractServletName(Node node, ServletInfo newInfo)
     {
-        newInfo.name = getValue(node);
+        String servletName = getValue(node);
+
         ISourceLocation bestGuessSourceLocation = getBestGuessSourceLocation(node, true);
-        if (newInfo.name == null || "".equals(newInfo.name.trim()))
+        if (servletName == null)
         {
             addProblem(IProblem.WARNING, bestGuessSourceLocation, CoreMessages
                     .format("web-xml-servlet-has-null-name"), false, IProblem.NOT_QUICK_FIXABLE);
-            return false;
 
-        }
-        if (fSeenServletNames.contains(newInfo.name))
-        {
-            addProblem(IProblem.WARNING, bestGuessSourceLocation, CoreMessages.format(
-                    "web-xml-servlet-duplicate-name",
-                    newInfo.name), false, IProblem.NOT_QUICK_FIXABLE);
-            return false;
         }
         else
         {
-            fSeenServletNames.add(newInfo.name);
-        }
-
-        if (fServletNames == null)
-            fServletNames = new ArrayList(11);
-
-        if (fServletNames.contains(newInfo.name))
-        {
-            String message = CoreMessages.format("web-xml-servlet-duplicate-name", newInfo.name);
-            addProblem(
-                    IProblem.WARNING,
-                    bestGuessSourceLocation,
-                    message,
-                    false,
-                    IProblem.NOT_QUICK_FIXABLE);
-            if (AbstractBuildInfrastructure.DEBUG)
+            if (fSeenServletNames.contains(servletName))
             {
-                System.out.println(message);
+                addProblem(IProblem.WARNING, bestGuessSourceLocation, CoreMessages.format(
+                        "web-xml-servlet-duplicate-name",
+                        newInfo.name), false, IProblem.NOT_QUICK_FIXABLE);
             }
-            return false;
+            else
+            {
+                fSeenServletNames.add(servletName);
+                newInfo.name = servletName;
+            }
         }
-        return true;
+        return newInfo.name != null;
     }
 
 }

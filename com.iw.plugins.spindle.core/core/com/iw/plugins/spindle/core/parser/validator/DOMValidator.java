@@ -29,7 +29,6 @@ package com.iw.plugins.spindle.core.parser.validator;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -117,9 +116,9 @@ public class DOMValidator implements IProblemCollector
 
             DTDS.put(publicId, new DTDParser(new InputStreamReader(source.getByteStream()),
                     SpecificationParser.TAPESTRY_DTD_3_0_PUBLIC_ID, debug).parse());
-            
-            //Servlet 2.3
-            
+
+            // Servlet 2.3
+
             publicId = TapestryCore.SERVLET_2_3_PUBLIC_ID;
 
             resourceIdentifier = new XMLResourceIdentifierImpl(publicId, null, null, null);
@@ -129,16 +128,13 @@ public class DOMValidator implements IProblemCollector
                 throw new Error(errorMessage);
 
             DTDS.put(publicId, new DTDParser(new InputStreamReader(source.getByteStream()),
-            		TapestryCore.SERVLET_2_3_PUBLIC_ID, debug).parse());
-            
-            
+                    TapestryCore.SERVLET_2_3_PUBLIC_ID, debug).parse());
 
         }
         catch (IOException e)
         {
             e.printStackTrace();
-            throw new Error(CoreMessages.format("dom-validator-error-no-DTD-parse", e
-                    .getMessage()));
+            throw new Error(CoreMessages.format("dom-validator-error-no-DTD-parse", e.getMessage()));
         }
     }
 
@@ -301,7 +297,7 @@ public class DOMValidator implements IProblemCollector
      */
     private void checkNodeHasAllRequiredChildren(String name, Node node)
     {
-        //might not need this.
+        // might not need this.
     }
 
     private boolean checkNodeAllowedHere(String name, Node node)
@@ -350,7 +346,7 @@ public class DOMValidator implements IProblemCollector
         }
         catch (ValidatorException e)
         {
-            //add a problem
+            // add a problem
             recordTagNameProblem(name, node, e.getMessage());
             return false;
         }
@@ -362,8 +358,7 @@ public class DOMValidator implements IProblemCollector
      */
     private void checkAttributes(String elementName, Node node)
     {
-        String nodeName = node.getNodeName();
-        DTDElement element = DTDAccess.getDTDElement(fDTD, nodeName);
+        DTDElement element = DTDAccess.getDTDElement(fDTD, elementName);
         if (element == null)
             throw new Error("expected dtd info here!");
 
@@ -413,7 +408,7 @@ public class DOMValidator implements IProblemCollector
                 recordErrorOnTagName(node, CoreMessages.format(
                         "dom-validator-missing-attr",
                         declaredAttrName,
-                        nodeName));
+                        elementName));
             }
         }
         if (!sourceAttributeNames.isEmpty())
@@ -424,7 +419,7 @@ public class DOMValidator implements IProblemCollector
                 recordAttributeError(node, undeclaredName, CoreMessages.format(
                         "dom-validator-undeclared-atttribute",
                         undeclaredName,
-                        nodeName));
+                        elementName));
             }
         }
     }
@@ -485,8 +480,8 @@ public class DOMValidator implements IProblemCollector
      */
     private void reportDocumentError(String message)
     {
-        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR,
-                message, 1, -1, -1, false, IProblem.NOT_QUICK_FIXABLE));
+        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR, message, 1,
+                -1, -1, false, IProblem.NOT_QUICK_FIXABLE));
     }
 
     private ISourceLocation getTagNameLocation(String name, Node node)
@@ -502,12 +497,6 @@ public class DOMValidator implements IProblemCollector
     private ISourceLocationInfo getNodeSourceInfo(Node node)
     {
         return W3CAccess.getSourceLocationInfo(node);
-    }
-
-    private ISourceLocation getAttributeSourceLocation(String attributeName, Node node)
-    {
-        ISourceLocationInfo info = W3CAccess.getSourceLocationInfo(node);
-        return info.getAttributeSourceLocation(attributeName);
     }
 
     private static class DTDAccess
@@ -526,7 +515,6 @@ public class DOMValidator implements IProblemCollector
          */
         public static DTDNodeInfo createElementInfo(DTD dtd, String elementName)
         {
-            List result = Collections.EMPTY_LIST;
             DTDElement declaredElement = getDTDElement(dtd, elementName);
             if (declaredElement != null)
             {
@@ -669,7 +657,7 @@ public class DOMValidator implements IProblemCollector
             DTDItemType type = item.getItemType();
             DTDCardinal cardinal = item.getCardinal();
             if (match(item, childName))
-            { //there can be only ONE!
+            { // there can be only ONE!
                 if (cardinal == DTDCardinal.NONE)
                 {
                     items.remove(0);
@@ -688,12 +676,13 @@ public class DOMValidator implements IProblemCollector
                 else
                 {
                     boolean found = false;
-                    //go down the line looking for a match
+                    // go down the line looking for a match
                     for (int i = 1; i < items.size(); i++)
                     {
                         item = (DTDItem) items.get(i);
                         cardinal = item.getCardinal();
-                        if (found = match(item, childName))
+                        found = match(item, childName);
+                        if (found)
                         {
                             int j = 0;
                             for (Iterator iter = items.iterator(); iter.hasNext() && j < i;)
@@ -763,7 +752,6 @@ public class DOMValidator implements IProblemCollector
         public void childSeen(Node node) throws ValidatorException
         {
         }
-
     }
 
     /*
@@ -775,11 +763,11 @@ public class DOMValidator implements IProblemCollector
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
     {
-        fProblems.add(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity,
-                message, location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
+        fProblems.add(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message,
+                location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
                 isTemporary, code));
     }
-   
+
     /*
      * (non-Javadoc)
      * 

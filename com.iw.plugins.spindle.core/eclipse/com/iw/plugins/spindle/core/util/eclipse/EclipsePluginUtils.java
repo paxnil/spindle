@@ -15,7 +15,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 
 /**
  * @author gwl

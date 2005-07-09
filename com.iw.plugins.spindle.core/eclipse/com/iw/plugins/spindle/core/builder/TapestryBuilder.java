@@ -12,7 +12,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.internal.Workbench;
 import org.osgi.framework.Bundle;
 
-import com.iw.plugins.spindle.core.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 
 /**
  * @author gwl

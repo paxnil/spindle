@@ -54,7 +54,7 @@ public class FullBuild extends AbstractBuild
     /**
      * Constructor for FullBuilder.
      */
-    public FullBuild(AbstractBuildInfrastructure infrastructure)
+    public FullBuild(AbstractBuildInfrastructure infrastructure) 
     {
         super(infrastructure);
     }

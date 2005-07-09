@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import com.iw.plugins.spindle.core.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 
 /**
  * Resolves a container for a Tapestry classpath container entry

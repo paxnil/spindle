@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *    glongman@gmail.com - tweaks for Spindle.
  *******************************************************************************/
-package com.iw.plugins.spindle.core;
+package com.iw.plugins.spindle.core.eclipse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -33,6 +33,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 /**
  * A concrete preference store implementation based on an internal

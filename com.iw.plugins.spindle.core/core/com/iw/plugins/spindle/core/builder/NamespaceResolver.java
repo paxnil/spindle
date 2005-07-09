@@ -203,10 +203,7 @@ public abstract class NamespaceResolver
             //            fProblemCollector.beginCollecting();
             if (fResultNamespace == null)
                 throw new RuntimeException("Null namespace!");
-
-            IResourceWorkspaceLocation specLocation = (IResourceWorkspaceLocation) fResultNamespace
-                    .getSpecificationLocation();
-
+            
             NamespaceResourceLookup lookup = create();
 
             fResultNamespace.setResourceLookup(lookup);

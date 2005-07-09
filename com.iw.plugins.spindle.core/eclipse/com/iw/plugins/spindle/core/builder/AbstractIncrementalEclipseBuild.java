@@ -79,7 +79,7 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
    * 
    * @param builder
    */
-  public AbstractIncrementalEclipseBuild(EclipseBuildInfrastructure builder, IResourceDelta projectDelta)
+  public AbstractIncrementalEclipseBuild(EclipseBuildInfrastructure builder, IResourceDelta projectDelta) 
   {
     super(builder);
     fProjectDelta = projectDelta;
@@ -107,6 +107,8 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
       return false;
     fLastState = fInfrastructure.getLastState();
     fInfrastructure.installBasePropertySource(fLastState.fWebAppDescriptor);
+    
+    //TODO - this is not right - template extension is configurable
     final List knownTapestryExtensions = Arrays.asList(AbstractBuildInfrastructure.KnownExtensions);
 
     // check for java files that changed, or have been added
@@ -139,7 +141,7 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
 
             String name = path.removeFileExtension().lastSegment();
             IContainer container = resource.getParent();
-            IJavaElement element = (IJavaElement) JavaCore.create((IFolder) container);
+            IJavaElement element = JavaCore.create((IFolder) container);
             if (element == null)
               return true;
             if (element instanceof IPackageFragmentRoot

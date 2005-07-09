@@ -1,4 +1,4 @@
-package com.iw.plugins.spindle.core;
+package com.iw.plugins.spindle.core.eclipse;
 
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
@@ -41,8 +41,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
+import com.iw.plugins.spindle.core.IJavaType;
+import com.iw.plugins.spindle.core.IJavaTypeFinder;
+import com.iw.plugins.spindle.core.ITapestryProject;
+import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.eclipse.EclipseJavaType;
 import com.iw.plugins.spindle.core.metadata.DefaultTapestryMetadata;
 import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
@@ -52,7 +55,8 @@ import com.iw.plugins.spindle.core.util.eclipse.Markers;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 
 /**
- * The Tapestry project nature. Configures and Deconfigures the builder TODO the metadata stuff is
+ * The Tapestry project nature. Configures and Deconfigures the builder 
+ * TODO the metadata stuff is
  * to be extracted to generic land.
  * 
  * @author glongman@gmail.com
@@ -86,8 +90,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
     {
         try
         {
-            ITapestryProject tproject = create(project);
-            EclipsePluginUtils.removeNatureFromProject(
+             EclipsePluginUtils.removeNatureFromProject(
                     project.getProject(),
                     TapestryCorePlugin.NATURE_ID);
         }
@@ -193,7 +196,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
             fUsingExternalMetadata = loadMetadataFromExtensions();
             if (!fUsingExternalMetadata)
             {
-                //load from default file (.tapestryplugin)
+                // load from default file (.tapestryplugin)
                 DefaultTapestryMetadata meta = new DefaultTapestryMetadata(getProject(), false);
                 fWebContextFolder = meta.getWebContextFolder();
                 fValidateWebXML = meta.isValidatingWebXML();
@@ -409,7 +412,7 @@ public class TapestryProject implements IProjectNature, ITapestryProject, IJavaT
         }
     }
 
-    private ICommand getTapestryCommand(IProjectDescription description) throws CoreException
+    private ICommand getTapestryCommand(IProjectDescription description) 
     {
         ICommand[] commands = description.getBuildSpec();
         for (int i = 0; i < commands.length; ++i)

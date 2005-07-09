@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.ui.IFileEditorInput;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.eclipse.TapestryProject;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathSearch;
 
 /**
@@ -132,7 +132,7 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
                 continue;
 
             lookup.configure(jproject);
-            if (lookup != null && lookup.projectContainsJarEntry((JarEntryFile) jarFile))
+            if (lookup != null && lookup.projectContainsJarEntry(jarFile))
                 return projects[i];
 
         }

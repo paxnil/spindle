@@ -42,7 +42,6 @@ import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
-import com.iw.plugins.spindle.core.scanning.ComponentScanner;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
@@ -243,26 +242,21 @@ public class ApplicationResolver extends NamespaceResolver
         {
             public boolean accept(IResourceWorkspaceLocation location)
             {
-                String fullname = location.getName();
-                String name = null;
+                String fullname = location.getName();              
                 String extension = null;
 
                 if (fullname != null)
                 {
                     int cut = fullname.lastIndexOf('.');
-                    if (cut < 0)
-                    {
-                        name = fullname;
-                    }
-                    else if (cut == 0)
+                    if (cut == 0)
                     {
                         extension = fullname;
                     }
-                    else
+                    else if (cut > 0)
                     {
-                        name = fullname.substring(0, cut);
+                        
                         extension = fullname.substring(cut + 1);
-                    }
+                    } 
                     if (fResultNamespaceTemplateExtension.equals(extension)
                             && !allTemplates.contains(location))
                         speclessPages.add(location);
@@ -306,7 +300,6 @@ public class ApplicationResolver extends NamespaceResolver
         specification.setSpecificationLocation(location);
         specification.setNamespace(fResultNamespace);
 
-        ComponentScanner scanner = new ComponentScanner();
         specification.setTemplateLocations(TemplateFinder.scanForTemplates(
                 specification,
                 templateExtension,

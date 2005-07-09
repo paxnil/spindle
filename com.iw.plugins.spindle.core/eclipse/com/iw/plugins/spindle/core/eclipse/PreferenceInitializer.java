@@ -23,11 +23,13 @@
  *  glongman@gmail.com
  *
  * ***** END LICENSE BLOCK ***** */
-package com.iw.plugins.spindle.core;
+package com.iw.plugins.spindle.core.eclipse;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
+
+import com.iw.plugins.spindle.core.IPreferenceConstants;
 
 /**
  * Preference Initializer for the Spindle Core
@@ -54,7 +56,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer impleme
         store.setDefault(CACHE_GRAMMAR_PREFERENCE, true);
         store.setDefault(BUILDER_MARKER_MISSES, CORE_STATUS_WARN);
         store.setDefault(BUILDER_HANDLE_ASSETS, CORE_STATUS_WARN);
-        store.addPropertyChangeListener((IPropertyChangeListener) TapestryCore.getDefault());
+        store.addPropertyChangeListener((IPropertyChangeListener) TapestryCorePlugin.getDefault());
     }
 
 }

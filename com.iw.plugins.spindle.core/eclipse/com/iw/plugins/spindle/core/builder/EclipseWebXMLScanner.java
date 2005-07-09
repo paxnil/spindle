@@ -27,7 +27,7 @@ public class EclipseWebXMLScanner extends WebXMLScanner
     /* (non-Javadoc)
      * @see com.iw.plugins.spindle.core.builder.WebXMLScanner#getApplicationPathFromServlet(com.iw.plugins.spindle.core.IJavaType)
      */
-    protected String getApplicationPathFromServlet(IJavaType servletType) throws ScannerException
+    protected String getApplicationPathFromServletSubclassOverride(IJavaType servletType) throws ScannerException
     {
        String result = null;
        

@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.eclipse.TapestryProject;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
 
 public class BuilderContextVisitor implements IResourceVisitor
@@ -125,13 +125,13 @@ public class BuilderContextVisitor implements IResourceVisitor
                 Resource location = ((ContextRootLocation) fInfrastructure.fContextRoot)
                         .getRelativeResource(resource);
                 fCollector.add(location);
-                debug(location, true);
+                debug(location);
             }
         }
         return true;
     }
 
-    protected void debug(Resource location, boolean included)
+    protected void debug(Resource location)
     {
         if (AbstractBuildInfrastructure.DEBUG)
             System.out.println(location);

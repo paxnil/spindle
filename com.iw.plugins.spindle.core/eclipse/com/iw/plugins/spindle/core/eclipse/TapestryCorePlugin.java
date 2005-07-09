@@ -1,4 +1,4 @@
-package com.iw.plugins.spindle.core;
+package com.iw.plugins.spindle.core.eclipse;
 
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
@@ -26,14 +26,17 @@ package com.iw.plugins.spindle.core;
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-import org.eclipse.core.internal.runtime.InternalPlatform;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-import com.iw.plugins.spindle.core.eclipse.EclipseCoreListeners;
-import com.iw.plugins.spindle.core.eclipse.EclipsePluginLogger;
+import com.iw.plugins.spindle.core.ICoreListeners;
+import com.iw.plugins.spindle.core.ILogger;
+import com.iw.plugins.spindle.core.IPreferenceConstants;
+import com.iw.plugins.spindle.core.IPreferenceSource;
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryException;
 import com.iw.plugins.spindle.core.metadata.ProjectExternalMetadataLocator;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 
@@ -43,7 +46,7 @@ import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
  * @author glongman@gmail.com
  */
 public class TapestryCorePlugin extends AbstractUIPlugin implements IPreferenceConstants
-        
+
 {
     public static final String PLUGIN_ID = TapestryCore.IDENTIFIER;
 
@@ -53,19 +56,20 @@ public class TapestryCorePlugin extends AbstractUIPlugin implements IPreferenceC
 
     public static final String CORE_CONTAINER = PLUGIN_ID + ".TAPESTRY_FRAMEWORK";
 
-    //The shared instance.
+    // The shared instance.
     private static TapestryCorePlugin plugin;
 
     private ProjectExternalMetadataLocator externalMetadataLocator;
-    
+
     class PropertySource implements IPreferenceSource
-    {        
-        public boolean getBoolean(String name) {
+    {
+        public boolean getBoolean(String name)
+        {
             return getPreferenceStore().getBoolean(name);
         }
-        
+
         public double getDouble(String name)
-        {           
+        {
             return getPreferenceStore().getDouble(name);
         }
 
@@ -77,7 +81,7 @@ public class TapestryCorePlugin extends AbstractUIPlugin implements IPreferenceC
 
         public int getInt(String name)
         {
-            
+
             return getPreferenceStore().getInt(name);
         }
 
@@ -99,8 +103,7 @@ public class TapestryCorePlugin extends AbstractUIPlugin implements IPreferenceC
     {
         super();
         plugin = this;
-        ILogger logger = new EclipsePluginLogger(InternalPlatform.getDefault()
-                .getLog((Bundle) this), PLUGIN_ID);
+        ILogger logger = new EclipsePluginLogger(Platform.getLog((Bundle) this), PLUGIN_ID);
         ICoreListeners coreListeners = new EclipseCoreListeners();
         new TapestryCore(logger, coreListeners, new PropertySource());
 

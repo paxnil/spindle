@@ -58,8 +58,8 @@ import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryCorePlugin;
-import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.eclipse.TapestryProject;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
 import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;

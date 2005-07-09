@@ -56,7 +56,7 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 
 /**
  * As addition to the JavaCapabilityConfigurationPage, the wizard does an early project creation (so

@@ -47,7 +47,7 @@ public class TapestryCore implements IPreferenceConstants
 
     ICoreListeners coreListeners;
 
-    IPreferenceSource source;
+    IPreferenceSource preferenceSource;
 
     //The shared instance.
     private static TapestryCore instance;
@@ -61,7 +61,7 @@ public class TapestryCore implements IPreferenceConstants
         instance = this;
         this.logger = logger;
         this.coreListeners = coreListeners;
-        this.source = source;
+        this.preferenceSource = source;
     }
 
     ILogger getLogger()
@@ -125,13 +125,13 @@ public class TapestryCore implements IPreferenceConstants
 
     public int getBuildMissPriority()
     {
-        String pref = source.getString(BUILDER_MARKER_MISSES);
+        String pref = preferenceSource.getString(BUILDER_MARKER_MISSES);
         return convertCoreStatusToPriority(pref);
     }
 
     public int getHandleAssetProblemPriority()
     {
-        String pref = source.getString(BUILDER_HANDLE_ASSETS);
+        String pref = preferenceSource.getString(BUILDER_HANDLE_ASSETS);
         return convertCoreStatusToPriority(pref);
     }
 

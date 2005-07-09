@@ -43,7 +43,7 @@ import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 
 /**
  * Tapestry library container - resolves a classpath container variable to the Tapestry Libraries.

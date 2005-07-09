@@ -46,10 +46,10 @@ public class EclipseFiles
         {
           if (!f.exists())
           {
-            f.create(new ByteArrayInputStream(content.getBytes()), true, null);
+            f.create(new ByteArrayInputStream(content.getBytes()), true, monitor);
           } else
           {
-            f.setContents(new ByteArrayInputStream(content.getBytes()), true, true, null);
+            f.setContents(new ByteArrayInputStream(content.getBytes()), true, true, monitor);
           }
         } catch (CoreException e)
         {

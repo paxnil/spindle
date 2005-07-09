@@ -88,7 +88,7 @@
    
    <extension
          point="org.eclipse.core.runtime.preferences">
-      <initializer class="com.iw.plugins.spindle.core.PreferenceInitializer"/>
+      <initializer class="com.iw.plugins.spindle.core.eclipse.PreferenceInitializer"/>
    </extension>
 
    <extension
@@ -97,7 +97,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="com.iw.plugins.spindle.core.TapestryProject">
+               class="com.iw.plugins.spindle.core.eclipse.TapestryProject">
          </run>
       </runtime>
       <requires-nature
