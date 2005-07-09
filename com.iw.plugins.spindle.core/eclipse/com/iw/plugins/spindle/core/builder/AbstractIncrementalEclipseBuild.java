@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.JavaCore;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.extensions.eclipse.IncrementalBuildVetoController;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.util.eclipse.EclipseUtils;
 
@@ -202,7 +202,7 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
       return false;
 
     // The Tapestry framework library must exist in the state
-    IResourceWorkspaceLocation frameworkLocation = (IResourceWorkspaceLocation) fInfrastructure.fClasspathRoot
+    ICoreResource frameworkLocation = (ICoreResource) fInfrastructure.fClasspathRoot
         .getRelativeResource("/org/apache/tapestry/Framework.library");
     if (!fLastState.fBinaryNamespaces.containsKey(frameworkLocation))
       return false;
@@ -289,7 +289,7 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
 
   private boolean needFullBuildDueToAppSpecChange()
   {
-    IResourceWorkspaceLocation appSpecLocation = fLastState.fApplicationServlet.applicationSpecLocation;
+    ICoreResource appSpecLocation = fLastState.fApplicationServlet.applicationSpecLocation;
     if (appSpecLocation != null)
     {
       IResource specResource = EclipseUtils.toResource(appSpecLocation);
@@ -321,7 +321,7 @@ public abstract class AbstractIncrementalEclipseBuild extends FullBuild implemen
 
       IResource existingSpecFile = null;
       Resource previousSpecLocation = last.getSpecificationLocation();
-      IResourceWorkspaceLocation WEB_INF = (IResourceWorkspaceLocation) fInfrastructure.fContextRoot
+      ICoreResource WEB_INF = (ICoreResource) fInfrastructure.fContextRoot
           .getRelativeResource("WEB-INF");
 
       if (!previousSpecLocation.equals(WEB_INF))

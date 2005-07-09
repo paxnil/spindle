@@ -40,7 +40,7 @@ import org.eclipse.core.runtime.Platform;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.extensions.IComponentTypeResourceResolver;
 import com.iw.plugins.spindle.core.extensions.SpindleExtensionException;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
@@ -148,10 +148,10 @@ public class EclipseComponentTypeResourceResolvers implements IComponentTypeReso
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.core.extensions.IComponentTypeResourceResolver#doResolve(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation,
+     * @see com.iw.plugins.spindle.core.extensions.IComponentTypeResourceResolver#doResolve(com.iw.plugins.spindle.core.resources.ICoreResource,
      *      org.apache.tapestry.spec.IComponentSpecification)
      */
-    public void doResolve(IResourceWorkspaceLocation specificationLocation,
+    public void doResolve(ICoreResource specificationLocation,
             IComponentSpecification componentSpec) throws SpindleExtensionException
     {
         Assert.isTrue(fResolver != null, "Error - call canResolve before doResolve()");

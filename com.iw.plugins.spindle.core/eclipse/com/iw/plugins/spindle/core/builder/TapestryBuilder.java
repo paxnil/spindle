@@ -9,7 +9,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.ui.internal.Workbench;
+import org.eclipse.ui.IWorkbench;
 import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
@@ -33,7 +33,7 @@ public class TapestryBuilder extends IncrementalProjectBuilder
         if (systemBundle.getState() == Bundle.STOPPING)
             throw new OperationCanceledException();
 
-        Workbench workbench = (Workbench) TapestryCorePlugin.getDefault().getWorkbench();
+        IWorkbench workbench = TapestryCorePlugin.getDefault().getWorkbench();
         if (workbench.isClosing())
             return getRequiredProjects(true);
 

@@ -58,15 +58,19 @@ import org.osgi.framework.Bundle;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCoreException;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
-import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathResource;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextResource;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.search.eclipse.AbstractEclipseSearchAcceptor;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.SourceLocation;
 import com.iw.plugins.spindle.core.util.eclipse.EclipsePluginUtils;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 
@@ -179,14 +183,14 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         catch (BrokenWebXMLException e)
         {
             fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
-                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(), 0, 0, 0,
-                    false, IProblem.NOT_QUICK_FIXABLE));
+                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(),
+                    SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
         }
         catch (BuilderException e)
         {
             fProblemPersister.removeAllProblems(fTapestryProject);
             fProblemPersister.recordProblem(fTapestryProject, new DefaultProblem(
-                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(), 0, 0, 0,
+                    IProblem.TAPESTRY_BUILDBROKEN_MARKER, IProblem.ERROR, e.getMessage(), SourceLocation.FOLDER_LOCATION,
                     false, IProblem.NOT_QUICK_FIXABLE));
         }
         catch (NullPointerException e)
@@ -426,8 +430,7 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         if (fContextRoot == null || !fContextRoot.exists())
             throw new BuilderException(CoreMessages.format(STRING_KEY + "missing-context"));
 
-        IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fContextRoot
-                .getRelativeResource("WEB-INF/web.xml");
+        ICoreResource webXML = (ICoreResource) fContextRoot.getRelativeResource("WEB-INF/web.xml");
 
         if (!webXML.exists())
             throw new BuilderException(CoreMessages.format(
@@ -466,11 +469,11 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
             throw new BuilderException("could not obtain the Tapestry Project!");
         }
 
-        fContextRoot = (IResourceWorkspaceLocation) fTapestryProject.getWebContextLocation();
+        fContextRoot = fTapestryProject.getWebContextLocation();
         if (fContextRoot == null || !fContextRoot.exists())
             throw new BuilderException("could not obtain the servlet context root folder");
 
-        fClasspathRoot = (IResourceWorkspaceLocation) fTapestryProject.getClasspathRoot();
+        fClasspathRoot = fTapestryProject.getClasspathRoot();
         if (fClasspathRoot == null || !fClasspathRoot.exists())
             throw new BuilderException("could not obtain the Classpath Root!");
 
@@ -501,25 +504,22 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         try
         {
             searcher = fClasspathRoot.getSearch();
-        }
-        catch (RuntimeException e)
-        {
-            TapestryCore.log(e);
-        }
-        if (searcher != null)
-        {
             searcher.search(new ArtifactCollector()
             {
                 public boolean acceptTapestry(Object parent, Object leaf)
                 {
                     IPackageFragment fragment = (IPackageFragment) parent;
-                    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) ((ClasspathRootLocation) fClasspathRoot)
-                            .getRelativeLocation(fragment, (IStorage) leaf);
+                    ClasspathRoot root = (ClasspathRoot) fClasspathRoot;
+                    ICoreResource location = new ClasspathResource(root, fragment, (IStorage) leaf);
                     found.add(location);
 
                     return keepGoing();
                 }
             });
+        }
+        catch (TapestryCoreException e)
+        {
+            TapestryCore.log(e);
         }
     }
 
@@ -532,28 +532,25 @@ public class EclipseBuildInfrastructure extends AbstractBuildInfrastructure
         try
         {
             searcher = fContextRoot.getSearch();
-        }
-        catch (RuntimeException e)
-        {
-            TapestryCore.log(e);
-        }
-        if (searcher != null)
-        {
             searcher.search(new ArtifactCollector()
             {
                 public boolean acceptTapestry(Object parent, Object leaf)
                 {
                     IResource resource = (IResource) leaf;
-                    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) ((ContextRootLocation) fContextRoot)
-                            .getRelativeResource(resource);
+                    ContextRoot contextRoot = (ContextRoot) fContextRoot;
+                    ICoreResource coreResource = new ContextResource(contextRoot, resource);
 
-                    if (!conflictsWithJavaOutputDirectory(resource))
-                        found.add(location);
+                    if (coreResource.exists() && !conflictsWithJavaOutputDirectory(resource))
+                        found.add(coreResource);
 
                     return keepGoing();
 
                 }
             });
+        }
+        catch (TapestryCoreException e)
+        {
+            TapestryCore.log(e);
         }
     }
 

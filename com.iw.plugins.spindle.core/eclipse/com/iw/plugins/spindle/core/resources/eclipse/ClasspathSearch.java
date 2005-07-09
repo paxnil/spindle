@@ -24,13 +24,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.TapestryModelException;
+import com.iw.plugins.spindle.core.TapestryCoreException;
 import com.iw.plugins.spindle.core.resources.search.ISearch;
 import com.iw.plugins.spindle.core.resources.search.ISearchAcceptor;
+import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
 
 // does not stay up to date as time goes on!
 
@@ -51,7 +51,7 @@ public class ClasspathSearch implements ISearch
     {
     }
 
-    public void configure(Object root)
+    public void configure(Object root) throws TapestryCoreException
     {
         this.fJavaProject = (IJavaProject) root;
         try
@@ -59,45 +59,36 @@ public class ClasspathSearch implements ISearch
             configureClasspath();
             fInitialized = true;
         }
-        catch (TapestryModelException e)
+        catch (CoreException e)
         {
-            TapestryCore.log(e);
+            throw new TapestryCoreException(e);
         }
     }
 
     /* pull the classpath info we need from the JavaModel */
-    protected void configureClasspath() throws TapestryModelException
+    protected void configureClasspath() throws CoreException
     {
-        try
+        fPackageFragmentRoots = fJavaProject.getAllPackageFragmentRoots();
+        fPackageFragments = new HashMap();
+        IPackageFragment[] frags = getPackageFragmentsInRoots(fPackageFragmentRoots, fJavaProject);
+        for (int i = 0; i < frags.length; i++)
         {
-            fPackageFragmentRoots = fJavaProject.getAllPackageFragmentRoots();
-            fPackageFragments = new HashMap();
-            IPackageFragment[] frags = getPackageFragmentsInRoots(
-                    fPackageFragmentRoots,
-                    fJavaProject);
-            for (int i = 0; i < frags.length; i++)
+            IPackageFragment fragment = frags[i];
+            IPackageFragment[] entry = (IPackageFragment[]) fPackageFragments.get(fragment
+                    .getElementName());
+            if (entry == null)
             {
-                IPackageFragment fragment = frags[i];
-                IPackageFragment[] entry = (IPackageFragment[]) fPackageFragments.get(fragment
-                        .getElementName());
-                if (entry == null)
-                {
-                    entry = new IPackageFragment[1];
-                    entry[0] = fragment;
-                    fPackageFragments.put(fragment.getElementName(), entry);
-                }
-                else
-                {
-                    IPackageFragment[] copy = new IPackageFragment[entry.length + 1];
-                    System.arraycopy(entry, 0, copy, 0, entry.length);
-                    copy[entry.length] = fragment;
-                    fPackageFragments.put(fragment.getElementName(), copy);
-                }
+                entry = new IPackageFragment[1];
+                entry[0] = fragment;
+                fPackageFragments.put(fragment.getElementName(), entry);
             }
-        }
-        catch (JavaModelException e)
-        {
-            throw new TapestryModelException(e.getStatus());
+            else
+            {
+                IPackageFragment[] copy = new IPackageFragment[entry.length + 1];
+                System.arraycopy(entry, 0, copy, 0, entry.length);
+                copy[entry.length] = fragment;
+                fPackageFragments.put(fragment.getElementName(), copy);
+            }
         }
     }
 
@@ -216,19 +207,19 @@ public class ClasspathSearch implements ISearch
         int length = jarFiles.length;
         for (int i = 0; i < length; i++)
         {
-            JarEntryFile jarFile = null;
+            IStorage fileInJar = null;
             try
             {
-                jarFile = (JarEntryFile) jarFiles[i];
+                fileInJar = (IStorage) jarFiles[i];
             }
             catch (ClassCastException ccex)
             {
-                //skip it
+                // skip it
                 continue;
             }
 
-            if (requestor.accept(pkg, (IStorage) jarFile))
-                return false; //stop the search
+            if (requestor.accept(pkg, fileInJar))
+                return false; // stop the search
         }
         return true; // continue the search.
     }
@@ -264,7 +255,7 @@ public class ClasspathSearch implements ISearch
             }
 
             if (requestor.accept(pkg, (IStorage) file))
-                return false; //stop the search
+                return false; // stop the search
 
         }
         return true; // continue the search
@@ -279,11 +270,11 @@ public class ClasspathSearch implements ISearch
     private Object[] getSourcePackageResources(IPackageFragment pkg) throws CoreException
     {
         Object[] result = new Object[0];
-        //        if (!pkg.isDefaultPackage())
-        //        {
-        //            result = pkg.getNonJavaResources();
-        //        } else
-        //        {
+        // if (!pkg.isDefaultPackage())
+        // {
+        // result = pkg.getNonJavaResources();
+        // } else
+        // {
         IContainer container = (IContainer) pkg.getUnderlyingResource();
         if (container != null && container.exists())
         {
@@ -296,17 +287,17 @@ public class ClasspathSearch implements ISearch
             }
             result = resultList.toArray();
         }
-        //        }
+        // }
         return result;
     }
 
-    class JarEntryAcceptor implements ISearchAcceptor
+    private static class ExactMatchAcceptor implements ISearchAcceptor
     {
-        private JarEntryFile fToBeFound;
+        private Object fToBeFound;
 
         public boolean success = false;
 
-        public JarEntryAcceptor(JarEntryFile toBeFound)
+        public ExactMatchAcceptor(Object toBeFound)
         {
             fToBeFound = toBeFound;
         }
@@ -318,9 +309,11 @@ public class ClasspathSearch implements ISearch
         }
     }
 
-    public boolean projectContainsJarEntry(final JarEntryFile entry)
+    public boolean projectContainsJarEntry(final Object jarEntryFile)
     {
-        JarEntryAcceptor acceptor = new JarEntryAcceptor(entry);
+        if (!JarEntryFileUtil.isJarEntryFile(jarEntryFile))
+            return false;
+        ExactMatchAcceptor acceptor = new ExactMatchAcceptor(jarEntryFile);
         search(acceptor);
         return acceptor.success;
     }

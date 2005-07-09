@@ -32,17 +32,14 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
-import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
-import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.IProblemPeristManager;
 
 /**
@@ -52,43 +49,6 @@ import com.iw.plugins.spindle.core.util.IProblemPeristManager;
  */
 public class Markers implements IProblemPeristManager
 {
-
-    static private int statusToProblemServerity(IStatus status)
-    {
-        switch (status.getSeverity())
-        {
-            case IStatus.ERROR:
-                return IProblem.ERROR;
-            case IStatus.WARNING:
-                return IProblem.WARNING;
-            case IStatus.INFO:
-                return IProblem.INFO;
-        }
-        Assert
-                .isLegal(
-                        false,
-                        "only statii with severity: ERROR, WARNING, && INFO can be problems!");
-        return IProblem.INFO;
-    }
-
-    public static IProblem createProblemFromStatus(String type, IStatus status, int lineNumber,
-            int charStart, int charEnd, boolean isTemporary)
-    {
-        return new DefaultProblem(
-                type,
-                statusToProblemServerity(status),
-                status.getMessage(),
-                (status instanceof SpindleStatusWithLocation) ? ((SpindleStatusWithLocation) status)
-                        .getLineNumber()
-                        : lineNumber,
-                (status instanceof SpindleStatusWithLocation) ? ((SpindleStatusWithLocation) status)
-                        .getCharStart()
-                        : charStart,
-                (status instanceof SpindleStatusWithLocation) ? ((SpindleStatusWithLocation) status)
-                        .getCharEnd()
-                        : charEnd, isTemporary, status.getCode());
-    }
-
     /**
      * Method addBuildBrokenProblemMarkerToResource.
      * 
@@ -124,7 +84,7 @@ public class Markers implements IProblemPeristManager
         }
     }
 
-    public static void recordProblems(IResourceWorkspaceLocation location, IProblem[] problems)
+    public static void recordProblems(ICoreResource location, IProblem[] problems)
     {
         IResource res = EclipseUtils.toResource(location);
         boolean workspace = res != null;
@@ -178,15 +138,23 @@ public class Markers implements IProblemPeristManager
         {
             IMarker marker = resource.createMarker(problem.getType());
 
-            marker.setAttributes(
-                    new String[]
-                    { IMarker.MESSAGE, IMarker.SEVERITY, IMarker.LINE_NUMBER, IMarker.CHAR_START,
-                            IMarker.CHAR_END, IProblem.TEMPORARY_FLAG, IProblem.PROBLEM_CODE },
-                    new Object[]
-                    { problem.getMessage(), new Integer(problem.getSeverity()),
-                            new Integer(problem.getLineNumber()),
-                            new Integer(problem.getCharStart()), new Integer(problem.getCharEnd()),
-                            new Boolean(problem.isTemporary()), new Integer(problem.getCode()) });
+            marker.setAttributes(new String[]
+                {
+                    IMarker.MESSAGE,
+                    IMarker.SEVERITY,
+                    IMarker.LINE_NUMBER,
+                    IMarker.CHAR_START,
+                    IMarker.CHAR_END,
+                    IProblem.TEMPORARY_FLAG,
+                    IProblem.PROBLEM_CODE }, new Object[]
+                {
+                    problem.getMessage(),
+                    new Integer(problem.getSeverity()),
+                    new Integer(problem.getLineNumber()),
+                    new Integer(problem.getCharStart()),
+                    new Integer(problem.getCharEnd()),
+                    new Boolean(problem.isTemporary()),
+                    new Integer(problem.getCode()) });
 
         }
         catch (CoreException e)
@@ -196,22 +164,22 @@ public class Markers implements IProblemPeristManager
 
     }
 
-    //    public static void addTapestryProblemMarkerToResource(
-    //        IResource resource,
-    //        String message,
-    //        int severity,
-    //        ISourceLocation source)
-    //    {
+    // public static void addTapestryProblemMarkerToResource(
+    // IResource resource,
+    // String message,
+    // int severity,
+    // ISourceLocation source)
+    // {
     //
-    //        addTapestryProblemMarkerToResource(
-    //            resource,
-    //            message,
-    //            severity,
-    //            source.getLineNumber(),
-    //            source.getCharStart(),
-    //            source.getCharEnd());
+    // addTapestryProblemMarkerToResource(
+    // resource,
+    // message,
+    // severity,
+    // source.getLineNumber(),
+    // source.getCharStart(),
+    // source.getCharEnd());
     //
-    //    }
+    // }
 
     public static void addTapestryProblemMarkerToResource(IResource resource, String message,
             int severity, int lineNumber, int charStart, int charEnd)
@@ -249,9 +217,13 @@ public class Markers implements IProblemPeristManager
             IMarker marker = resource.createMarker(markerTag);
 
             marker.setAttributes(new String[]
-            { IMarker.MESSAGE, IMarker.SEVERITY, IMarker.LINE_NUMBER, IMarker.CHAR_START,
+                {
+                    IMarker.MESSAGE,
+                    IMarker.SEVERITY,
+                    IMarker.LINE_NUMBER,
+                    IMarker.CHAR_START,
                     IMarker.CHAR_END }, new Object[]
-            { message, severity, lineNumber, charStart, charEnd });
+                { message, severity, lineNumber, charStart, charEnd });
         }
         catch (CoreException e)
         {
@@ -386,15 +358,14 @@ public class Markers implements IProblemPeristManager
             }
             catch (CoreException e)
             {
-                //      assume there were no problems
+                // assume there were no problems
             }
         }
 
     }
 
     /**
-     * @param fCurrentProject
-     *            TODO remove?
+     * @param fCurrentProject TODO remove?
      */
     public static void removeBuildProblemsForProject(IProject iProject)
     {
@@ -438,19 +409,19 @@ public class Markers implements IProblemPeristManager
     public void recordProblem(ITapestryProject project, IProblem problem)
     {
         recordProblems(project, new IProblem[]
-        { problem });
+            { problem });
     }
 
     public void recordProblems(ITapestryProject project, IProblem[] problems)
-    {       
-        addTapestryProblemMarkersToResource(((TapestryProject)project).getProject(), problems);
+    {
+        addTapestryProblemMarkersToResource(((TapestryProject) project).getProject(), problems);
 
     }
 
     public void recordProblem(Resource resource, IProblem problem)
     {
         recordProblems(resource, new IProblem[]
-        { problem });
+            { problem });
 
     }
 
@@ -484,7 +455,7 @@ public class Markers implements IProblemPeristManager
     {
         removeProblemsFor(getResource(resource));
 
-    }  
+    }
 
     private IResource getResource(Resource resource)
     {

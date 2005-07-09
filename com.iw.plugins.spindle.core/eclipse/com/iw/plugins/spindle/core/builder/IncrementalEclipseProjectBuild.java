@@ -43,7 +43,7 @@ import org.eclipse.core.resources.IStorage;
 import com.iw.plugins.spindle.core.IJavaTypeFinder;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
@@ -105,14 +105,14 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         }
         else
         {
-            //this can only happen if somebody added a library tag to the
+            // this can only happen if somebody added a library tag to the
             // .application file
             return super.resolveApplication(parser, location, encoding);
         }
 
         try
         {
-            //revalidate the spec.
+            // revalidate the spec.
             IScannerValidator useValidator = new SpecificationValidator(
                     fInfrastructure.fTapestryProject);
             useValidator.addListener(this);
@@ -142,7 +142,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         return result;
     }
 
-    private boolean checkResource(IResourceWorkspaceLocation location)
+    private boolean checkResource(ICoreResource location)
     {
         if (!location.exists())
         {
@@ -191,14 +191,14 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         }
         else
         {
-            //this can only happen if somebody added a library tag to the
+            // this can only happen if somebody added a library tag to the
             // .application file
             return super.resolveLibrarySpecification(parser, location, encoding);
         }
 
         try
         {
-            //revalidate the spec.
+            // revalidate the spec.
             IScannerValidator useValidator = new SpecificationValidator((IJavaTypeFinder) this,
                     fInfrastructure.fTapestryProject);
             useValidator.addListener(this);
@@ -236,10 +236,10 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
      * @see com.iw.plugins.spindle.core.builder.AbstractBuild#resolveIComponentSpecification(com.iw.plugins.spindle.core.parser.Parser,
      *      com.iw.plugins.spindle.core.namespace.ICoreNamespace,
      *      org.eclipse.core.resources.IStorage,
-     *      com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation, java.lang.String)
+     *      com.iw.plugins.spindle.core.resources.ICoreResource, java.lang.String)
      */
     protected IComponentSpecification resolveIComponentSpecification(Parser parser,
-            ICoreNamespace namespace, IResourceWorkspaceLocation location,
+            ICoreNamespace namespace, ICoreResource location,
             String templateExtension, String encoding)
     {
         PluginComponentSpecification result = null;
@@ -271,7 +271,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
         }
         else
         {
-            //this can only happen if somebody added a library tag to the
+            // this can only happen if somebody added a library tag to the
             // .application file
             // so the resolve is the same as the full build and we stop here.
             return super.resolveIComponentSpecification(
@@ -284,7 +284,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
 
         try
         {
-            //revalidate the spec.
+            // revalidate the spec.
             IScannerValidator useValidator = new SpecificationValidator((IJavaTypeFinder) this,
                     fInfrastructure.fTapestryProject);
             useValidator.addListener(this);
@@ -297,15 +297,16 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
             {
                 result.validate(useValidator);
                 List oldTemplates = new ArrayList(result.getTemplateLocations());
-                IPropertySource source = fInfrastructure.createPropertySource(result);    
-                
-                String seek_extension = source.getPropertyValue("org.apache.tapestry.template-extension");
+                IPropertySource source = fInfrastructure.createPropertySource(result);
+
+                String seek_extension = source
+                        .getPropertyValue("org.apache.tapestry.template-extension");
                 templateExtensionSeen(seek_extension);
                 result.setTemplateLocations(TemplateFinder.scanForTemplates(
                         result,
                         seek_extension,
                         fInfrastructure.fTapestryProject,
-                        fProblemCollector));                
+                        fProblemCollector));
 
                 oldTemplates.addAll(result.getTemplateLocations());
                 for (Iterator iter = oldTemplates.iterator(); iter.hasNext();)
@@ -318,7 +319,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
                     }
                     catch (ClassCastException e1)
                     {
-                        //Ignore - its a binary resource;
+                        // Ignore - its a binary resource;
                     }
                 }
 
@@ -428,9 +429,7 @@ public class IncrementalEclipseProjectBuild extends AbstractIncrementalEclipseBu
                 boolean isTemporary, int code)
         {
 
-            addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message,
-                    location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
-                    isTemporary, code));
+            addProblem(new DefaultProblem(severity, message, location, isTemporary, code));
 
         }
 

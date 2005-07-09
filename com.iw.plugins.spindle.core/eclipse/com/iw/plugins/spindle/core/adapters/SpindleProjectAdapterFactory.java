@@ -16,12 +16,14 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.ui.IFileEditorInput;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
+import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.TapestryCoreException;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
 import com.iw.plugins.spindle.core.resources.eclipse.ClasspathSearch;
+import com.iw.plugins.spindle.core.util.eclipse.JarEntryFileUtil;
 
 /**
  * @author Administrator TODO To change the template for this generated type comment go to Window -
@@ -32,7 +34,7 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
     public Class[] getAdapterList()
     {
         return new Class[]
-        { IJavaElement.class, IResource.class, IStorage.class, IFileEditorInput.class };
+            { IJavaElement.class, IResource.class, IStorage.class, IFileEditorInput.class };
 
     }
 
@@ -76,17 +78,17 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
             return ((IResource) obj).getProject();
 
         }
-        else if (obj instanceof JarEntryFile)
+        else if (JarEntryFileUtil.isJarEntryFile(obj))
         {
 
-            return getProjectFor((JarEntryFile) obj);
+            return getProjectForJarEntryFile(obj);
 
         }
         else if (obj instanceof IFileEditorInput)
         {
 
             IFile file = ((IFileEditorInput) obj).getFile();
-            return file == null || !file.exists() ? null : file.getProject();
+            return file == null ? null : file.getProject();
         }
         return null;
 
@@ -112,8 +114,11 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
 
     }
 
-    private IProject getProjectFor(JarEntryFile jarFile)
+    private IProject getProjectForJarEntryFile(Object jarFile)
     {
+        if (!JarEntryFileUtil.isJarEntryFile(jarFile))
+            return null;
+
         ClasspathSearch lookup = null;
 
         IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -124,16 +129,22 @@ public class SpindleProjectAdapterFactory implements IAdapterFactory
                 continue;
 
             if (lookup == null)
-
                 lookup = new ClasspathSearch();
 
             IJavaProject jproject = JavaCore.create(projects[i]);
             if (jproject == null || !jproject.exists())
                 continue;
 
-            lookup.configure(jproject);
-            if (lookup != null && lookup.projectContainsJarEntry(jarFile))
-                return projects[i];
+            try
+            {
+                lookup.configure(jproject);
+                if (lookup.projectContainsJarEntry(jarFile))
+                    return projects[i];
+            }
+            catch (TapestryCoreException e)
+            {
+                TapestryCore.log(e);
+            }
 
         }
         return null;
