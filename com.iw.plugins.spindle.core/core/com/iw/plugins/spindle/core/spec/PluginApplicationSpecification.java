@@ -29,7 +29,7 @@ package com.iw.plugins.spindle.core.spec;
 import org.apache.tapestry.spec.IApplicationSpecification;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -101,7 +101,7 @@ public class PluginApplicationSpecification extends PluginLibrarySpecification
       try
       {
         validator.validateTypeName(
-            (IResourceWorkspaceLocation) getSpecificationLocation(),
+            (ICoreResource) getSpecificationLocation(),
             fEngineClassName,
             IProblem.ERROR,
             sourceInfo.getAttributeSourceLocation("engine-class"));

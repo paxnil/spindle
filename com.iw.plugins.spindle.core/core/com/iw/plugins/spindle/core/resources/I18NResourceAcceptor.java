@@ -39,8 +39,7 @@ import org.apache.tapestry.util.MultiKey;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
- * An acceptor that will accept all permutations of a file that matches Tapestry
- * I18N specs.
+ * An acceptor that will accept all permutations of a file that matches Tapestry I18N specs.
  * <p>
  * The following would match for Hello.gif
  * <ul>
@@ -54,168 +53,171 @@ import com.iw.plugins.spindle.core.util.Assert;
  */
 public class I18NResourceAcceptor implements IResourceAcceptor
 {
-  private static Map CachedNamePatterns = new HashMap();
-  private static Perl5Util PERL;
-  private static final String PatternPrefix = "/^";
-  private static String PatternSuffix;
+    private static Map CachedNamePatterns = new HashMap();
 
-  public static String[] ALL_I18N_SUFFIXES;
+    public static Perl5Util PERL;
 
-  static
-  {
-    Locale[] all = Locale.getAvailableLocales();
-    List suffixes = new ArrayList();
-    StringBuffer buffer = new StringBuffer();
-    for (int i = 0; i < all.length; i++)
+    public static final String PatternPrefix = "/^";
+
+    public static String PatternSuffix;
+
+    public static String[] ALL_I18N_SUFFIXES;
+
+    static
     {
-      String next = "_" + all[i].toString();
-      suffixes.add(next);
-      buffer.append(next);
-      if (i < all.length - 1)
-      {
-        buffer.append('|');
-      }
+
+        PERL = new Perl5Util(new PatternCacheLRU(100));
+        Locale[] all = Locale.getAvailableLocales();
+        List suffixes = new ArrayList();
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < all.length; i++)
+        {
+            String next = "_" + all[i].toString();
+            suffixes.add(next);
+            buffer.append(next);
+            if (i < all.length - 1)
+            {
+                buffer.append('|');
+            }
+        }
+
+        ALL_I18N_SUFFIXES = new String[suffixes.size()];
+        suffixes.toArray(ALL_I18N_SUFFIXES);
+
+        PatternSuffix = "(" + buffer.toString() + "){0,1}$/i";
     }
 
-    ALL_I18N_SUFFIXES = new String[suffixes.size()];
-    suffixes.toArray(ALL_I18N_SUFFIXES);
+    private String fExtension;
 
-    PatternSuffix = "(" + buffer.toString() + "){0,1}$/i";
-  }
+    private String fPattern;
 
-  private String fExtension;
-  private String fPattern;
-  private ArrayList fResults = new ArrayList();
+    private ArrayList fResults = new ArrayList();
 
-  public void configure(String fileNameInclExtension)
-  {
-    if (fileNameInclExtension == null)
-      return;
-
-    fileNameInclExtension = fileNameInclExtension.trim();
-
-    if (fileNameInclExtension.length() == 0)
-      return;
-
-    String baseName = fileNameInclExtension;
-    String extension = null;
-    int dotx = fileNameInclExtension.lastIndexOf('.');
-    if (dotx > 0)
+    public void configure(String fileNameInclExtension)
     {
-      baseName = fileNameInclExtension.substring(0, dotx);
-      extension = fileNameInclExtension.substring(dotx + 1);
+        if (fileNameInclExtension == null)
+            return;
+
+        fileNameInclExtension = fileNameInclExtension.trim();
+
+        if (fileNameInclExtension.length() == 0)
+            return;
+
+        String baseName = fileNameInclExtension;
+        String extension = null;
+        int dotx = fileNameInclExtension.lastIndexOf('.');
+        if (dotx > 0)
+        {
+            baseName = fileNameInclExtension.substring(0, dotx);
+            extension = fileNameInclExtension.substring(dotx + 1);
+        }
+        configure(baseName, extension);
     }
-    configure(baseName, extension);
-  }
 
-  public void configure(String baseName, String extension)
-  {
-    Assert.isNotNull(baseName);
-    fResults.clear();
-    fExtension = extension;
-    fPattern = null;
-
-    MultiKey key = new MultiKey(new Object[]{baseName,
-        fExtension == null ? "NULL" : fExtension}, false);
-    fPattern = (String) CachedNamePatterns.get(key);
-    if (fPattern == null)
+    public void configure(String baseName, String extension)
     {
-      fPattern = PatternPrefix + baseName + PatternSuffix;
-      CachedNamePatterns.put(key, fPattern);
+        Assert.isNotNull(baseName);
+        fResults.clear();
+        fExtension = extension;
+        fPattern = null;
+
+        MultiKey key = new MultiKey(new Object[]
+            { baseName, fExtension == null ? "NULL" : fExtension }, false);
+        fPattern = (String) CachedNamePatterns.get(key);
+        if (fPattern == null)
+        {
+            fPattern = PatternPrefix + baseName + PatternSuffix;
+            CachedNamePatterns.put(key, fPattern);
+        }
     }
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor#accept(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
-   */
-  public boolean accept(IResourceWorkspaceLocation location)
-  {
-    // stop the lookup if there is no pattern!
-    if (fPattern == null)
-      return false;
-
-    if (PERL == null)
-      PERL = new Perl5Util(new PatternCacheLRU(100));
-
-    String name = location.getName();
-    if (name != null && name.trim().length() > 0)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor#accept(com.iw.plugins.spindle.core.resources.ICoreResource)
+     */
+    public boolean accept(ICoreResource location)
     {
-      String foundName = name;
-      String foundExtension = null;
-      int dotx = name.lastIndexOf('.');
-      if (dotx > 0)
-      {
-        foundName = name.substring(0, dotx);
-        foundExtension = name.substring(dotx + 1);
-      }
-      if (fExtension.equals(foundExtension) && PERL.match(fPattern, foundName))
-        fResults.add(location);
+        // stop the lookup if there is no pattern!
+        if (fPattern == null)
+            return false;
+
+        String name = location.getName();
+        if (name != null && name.trim().length() > 0)
+        {
+            String foundName = name;
+            String foundExtension = null;
+            int dotx = name.lastIndexOf('.');
+            if (dotx > 0)
+            {
+                foundName = name.substring(0, dotx);
+                foundExtension = name.substring(dotx + 1);
+            }
+            if (fExtension.equals(foundExtension) && PERL.match(fPattern, foundName))
+                fResults.add(location);
+        }
+        return true;
     }
-    return true;
-  }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor#getResults()
-   */
-  public IResourceWorkspaceLocation[] getResults()
-  {
-    return (IResourceWorkspaceLocation[]) fResults
-        .toArray(new IResourceWorkspaceLocation[fResults.size()]);
-  }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor#getResults()
+     */
+    public ICoreResource[] getResults()
+    {
+        return (ICoreResource[]) fResults.toArray(new ICoreResource[fResults.size()]);
+    }
 
-  //    public static void main(String[] args) throws Exception
-  //    {
-  //        Perl5Util util = new Perl5Util();
-  //
-  //        String pattern = PatternPrefix + "Test" + PatternSuffix;
-  //
-  //        testOld(util, "Test", pattern);
-  //        testOld(util, "boo_en", pattern);
-  //        testOld(util, "Test_en", pattern);
-  //        testOld(util, "Test_en_ca", pattern);
-  //        testOld(util, "boo", pattern);
-  //
-  //        Perl5Matcher matcher = new Perl5Matcher();
-  //
-  //        Pattern compiled = (new Perl5Compiler()).compile(pattern,);
-  //
-  //        testNew(matcher, "Test", compiled);
-  //        testNew(matcher, "boo_en", compiled);
-  //        testNew(matcher, "Test_en", compiled);
-  //        testNew(matcher, "Test_en_ca", compiled);
-  //        testNew(matcher, "boo", compiled);
-  //
-  //    }
-  //
-  //    private static void testOld(Perl5Util util, String test, String pattern)
-  //    {
-  //        System.out.print(test + "[ " + pattern.substring(0, 7) + "]");
-  //        if (util.match(pattern, test))
-  //        {
-  //            System.out.println("pass");
-  //        } else
-  //        {
-  //            System.out.println("fail");
-  //        }
-  //
-  //    }
-  //
-  //    private static void testNew(Perl5Matcher util, String test, Pattern
-  // pattern)
-  //    {
-  //        System.out.print(test + "[ " + pattern.getPattern().substring(0, 7) + "]");
-  //        if (util.matches(test, pattern))
-  //        {
-  //            System.out.println("pass");
-  //        } else
-  //        {
-  //            System.out.println("fail");
-  //        }
-  //
-  //    }
+    // public static void main(String[] args) throws Exception
+    // {
+    // Perl5Util util = new Perl5Util();
+    //
+    // String pattern = PatternPrefix + "Test" + PatternSuffix;
+    //
+    // testOld(util, "Test", pattern);
+    // testOld(util, "boo_en", pattern);
+    // testOld(util, "Test_en", pattern);
+    // testOld(util, "Test_en_ca", pattern);
+    // testOld(util, "boo", pattern);
+    //
+    // Perl5Matcher matcher = new Perl5Matcher();
+    //
+    // Pattern compiled = (new Perl5Compiler()).compile(pattern,);
+    //
+    // testNew(matcher, "Test", compiled);
+    // testNew(matcher, "boo_en", compiled);
+    // testNew(matcher, "Test_en", compiled);
+    // testNew(matcher, "Test_en_ca", compiled);
+    // testNew(matcher, "boo", compiled);
+    //
+    // }
+    //
+    // private static void testOld(Perl5Util util, String test, String pattern)
+    // {
+    // System.out.print(test + "[ " + pattern.substring(0, 7) + "]");
+    // if (util.match(pattern, test))
+    // {
+    // System.out.println("pass");
+    // } else
+    // {
+    // System.out.println("fail");
+    // }
+    //
+    // }
+    //
+    // private static void testNew(Perl5Matcher util, String test, Pattern
+    // pattern)
+    // {
+    // System.out.print(test + "[ " + pattern.getPattern().substring(0, 7) + "]");
+    // if (util.matches(test, pattern))
+    // {
+    // System.out.println("pass");
+    // } else
+    // {
+    // System.out.println("fail");
+    // }
+    //
+    // }
 
 }

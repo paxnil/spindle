@@ -38,7 +38,7 @@ import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.spec.lookup.ComponentLookup;
 import com.iw.plugins.spindle.core.spec.lookup.PageLookup;
@@ -93,7 +93,7 @@ public class CoreNamespace implements ICoreNamespace
 
     public CoreNamespace(String id, ILibrarySpecification specification)
     {
-        this.fId = id;
+        this.fId = id; 
         this.fSpecification = specification;
 
         fIsApplicationNamespace = (id == null && specification instanceof IApplicationSpecification);
@@ -162,7 +162,7 @@ public class CoreNamespace implements ICoreNamespace
 
     public boolean isBinary()
     {
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) getSpecificationLocation();
+        ICoreResource location = (ICoreResource) getSpecificationLocation();
         if (location == null)
             return false;
 
@@ -171,7 +171,7 @@ public class CoreNamespace implements ICoreNamespace
 
     public boolean isOnClassPath()
     {
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) getSpecificationLocation();
+        ICoreResource location = (ICoreResource) getSpecificationLocation();
         if (location == null)
             return false;
 
@@ -565,6 +565,9 @@ public class CoreNamespace implements ICoreNamespace
         fPageResolver = resolver;
     }
 
+    /* (non-Javadoc)
+     * @see org.apache.tapestry.engine.IPropertySource#getPropertyValue(java.lang.String)
+     */
     public String getPropertyValue(String propertyName)
     {
         if (fSpecification != null)

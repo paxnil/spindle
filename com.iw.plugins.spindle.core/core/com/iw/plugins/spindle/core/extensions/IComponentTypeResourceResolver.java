@@ -27,7 +27,7 @@ package com.iw.plugins.spindle.core.extensions;
 
 import org.apache.tapestry.spec.IComponentSpecification;
 
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 
 //TODO javadoc is out of date
 /**
@@ -93,7 +93,7 @@ public interface IComponentTypeResourceResolver
    *                 called if the status returned is OK.
    */
   void doResolve(
-      IResourceWorkspaceLocation specificationLocation,
+      ICoreResource specificationLocation,
       IComponentSpecification componentSpec) throws SpindleExtensionException;
 
   /**

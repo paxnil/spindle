@@ -40,88 +40,81 @@ import com.iw.plugins.spindle.core.util.Assert;
 public class ComponentSpecificationResolver
 {
 
-  protected INamespace fFrameworkNamespace;
-  protected INamespace fContainerNamespace;
+    protected INamespace fFrameworkNamespace;
 
-  public ComponentSpecificationResolver(INamespace framework,
-      INamespace containerNamespace)
-  {
-    fFrameworkNamespace = framework;
-    Assert.isNotNull(containerNamespace);
-    fContainerNamespace = containerNamespace;
-  }
+    protected INamespace fContainerNamespace;
 
-  /**
-   * Passed the namespace of a container (to resolve the type in) and the type
-   * to resolve, performs the processing. A "bare type" (without a library
-   * prefix) may be in the containerNamespace, or the framework namespace (a
-   * search occurs in that order).
-   * 
-   * @param containerNamespace namespace that may contain a library referenced
-   *          in the type
-   * @param type the component specification to find, either a simple name, or
-   *          prefixed with a library id (defined for the container namespace)
-   *  
-   */
-
-  public IComponentSpecification resolve(String type)
-  {
-    int colonx = type.indexOf(':');
-
-    if (colonx > 0)
+    public ComponentSpecificationResolver(INamespace framework, INamespace containerNamespace)
     {
-      String libraryId = type.substring(0, colonx);
-      String simpleType = type.substring(colonx + 1);
-
-      return resolve(libraryId, simpleType);
-    } else
-      return resolve(null, type);
-  }
-
-  /**
-   * Like {@link #resolve(INamespace, String)}, but used when the type has
-   * already been parsed into a library id and a simple type.
-   * 
-   * @param containerNamespace namespace that may contain a library referenced
-   *          in the type
-   * @param libraryId the library id within the container namespace, or null
-   * @param type the component specification to find as a simple name (without a
-   *          library prefix)
-   * @throws ApplicationRuntimeException if the type cannot be resolved
-   *  
-   */
-
-  public IComponentSpecification resolve(String libraryId, String type)
-  {
-    INamespace namespace = null;
-
-    if (libraryId != null && !libraryId.equals(fContainerNamespace.getId()))
-      namespace = fContainerNamespace.getChildNamespace(libraryId);
-    else
-      namespace = fContainerNamespace;
-
-    if (namespace == null)
-      return null;
-
-    if (namespace.containsComponentType(type))
-    {
-      return namespace.getComponentSpecification(type);
+        Assert.isTrue(framework != null ? INamespace.FRAMEWORK_NAMESPACE.equals(framework.getId())
+                : true);
+        fFrameworkNamespace = framework;
+        Assert.isNotNull(containerNamespace);
+        fContainerNamespace = containerNamespace;
     }
 
-    if (libraryId == null)
-      return resolveInFramework(type);
+    /**
+     * Passed the namespace of a container (to resolve the type in) and the type to resolve,
+     * performs the processing. A "bare type" (without a library prefix) may be in the
+     * containerNamespace, or the framework namespace (a search occurs in that order).
+     * 
+     * @param containerNamespace namespace that may contain a library referenced in the type
+     * @param type the component specification to find, either a simple name, or prefixed with a
+     *            library id (defined for the container namespace)
+     */
 
-    return null;
-  }
-
-  protected IComponentSpecification resolveInFramework(String type)
-  {
-    if (fFrameworkNamespace != null && fFrameworkNamespace.containsComponentType(type))
+    public IComponentSpecification resolve(String type)
     {
+        int colonx = type.indexOf(':');
 
-      return fFrameworkNamespace.getComponentSpecification(type);
+        if (colonx > 0)
+        {
+            String libraryId = type.substring(0, colonx);
+            String simpleType = type.substring(colonx + 1);
+
+            return resolve(libraryId, simpleType);
+        }
+        else
+            return resolve(null, type);
     }
-    return null;
-  }
+
+    /**
+     * Like {@link #resolve(INamespace, String)}, but used when the type has already been parsed
+     * into a library id and a simple type.
+     * 
+     * @param containerNamespace namespace that may contain a library referenced in the type
+     * @param libraryId the library id within the container namespace, or null
+     * @param type the component specification to find as a simple name (without a library prefix)
+     * @throws ApplicationRuntimeException if the type cannot be resolved
+     */
+
+    public IComponentSpecification resolve(String libraryId, String type)
+    {
+        INamespace namespace = null;
+
+        if (libraryId != null && !libraryId.equals(fContainerNamespace.getId()))
+            namespace = fContainerNamespace.getChildNamespace(libraryId);
+        else
+            namespace = fContainerNamespace;
+
+        if (namespace == null)
+            return null;
+
+        if (namespace.containsComponentType(type))
+            return namespace.getComponentSpecification(type);
+
+        if (libraryId == null)
+            return resolveInFramework(type);
+
+        return null;
+    }
+
+    protected IComponentSpecification resolveInFramework(String type)
+    {
+        if (fFrameworkNamespace != null && fFrameworkNamespace.containsComponentType(type))
+            return fFrameworkNamespace.getComponentSpecification(type);
+
+        return null;
+    }
 
 }

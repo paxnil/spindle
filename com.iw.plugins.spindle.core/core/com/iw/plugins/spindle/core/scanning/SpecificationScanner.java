@@ -71,6 +71,8 @@ public abstract class SpecificationScanner extends AbstractScanner
 
     protected IPropertySource fPropertySource;
 
+    protected boolean fValidating = true;
+
     /*
      * (non-Javadoc)
      * 
@@ -84,12 +86,12 @@ public abstract class SpecificationScanner extends AbstractScanner
         Document document = (Document) source;
         setPublicId(W3CAccess.getPublicId(document));
         if (fPublicId == null)
-            throw new ScannerException(CoreMessages.format(XMLPublicIDUtil.SPEC_DTD_ERROR_KEY), false,
-                    IProblem.SPINDLE_MISSING_PUBLIC_ID);
+            throw new ScannerException(CoreMessages.format(XMLPublicIDUtil.SPEC_DTD_ERROR_KEY),
+                    false, IProblem.SPINDLE_MISSING_PUBLIC_ID);
         if (!checkPublicId())
         {
-            throw new ScannerException(CoreMessages.format(XMLPublicIDUtil.SPEC_DTD_ERROR_KEY), false,
-                    IProblem.SPINDLE_INVALID_PUBLIC_ID);
+            throw new ScannerException(CoreMessages.format(XMLPublicIDUtil.SPEC_DTD_ERROR_KEY),
+                    false, IProblem.SPINDLE_INVALID_PUBLIC_ID);
         }
         fRootNode = document.getDocumentElement();
         return document;
@@ -132,13 +134,11 @@ public abstract class SpecificationScanner extends AbstractScanner
 
     protected void validate(Object source)
     {
+        if (!isValidating())
+            return;
         DOMValidator validator = new DOMValidator();
         validator.validate((Document) source);
-        IProblem[] validationProblems = validator.getProblems();
-        for (int i = 0; i < validationProblems.length; i++)
-        {
-            addProblem(validationProblems[i]);
-        }
+        addProblems(validator.getProblems());
     }
 
     /*
@@ -250,10 +250,10 @@ public abstract class SpecificationScanner extends AbstractScanner
 
     }
 
-//    /**
-//     * @deprecated
-//     */
-//    protected SpecFactory fSpecificationFactory;
+    // /**
+    // * @deprecated
+    // */
+    // protected SpecFactory fSpecificationFactory;
 
     /**
      * We can share a single map for all the XML attribute to object conversions, since the keys are
@@ -409,27 +409,27 @@ public abstract class SpecificationScanner extends AbstractScanner
         }
     }
 
-//    /**
-//     * Sets the SpecFactory which instantiates Tapestry spec objects.
-//     * @de
-//     * @since 1.0.9
-//     */
-//
-//    public void setFactory(SpecFactory factory)
-//    {
-//        fSpecificationFactory = factory;
-//    }
-//
-//    /**
-//     * Returns the current SpecFactory which instantiates Tapestry spec objects.
-//     * 
-//     * @since 1.0.9
-//     */
-//
-//    public SpecFactory getFactory()
-//    {
-//        return fSpecificationFactory;
-//    }
+    // /**
+    // * Sets the SpecFactory which instantiates Tapestry spec objects.
+    // * @de
+    // * @since 1.0.9
+    // */
+    //
+    // public void setFactory(SpecFactory factory)
+    // {
+    // fSpecificationFactory = factory;
+    // }
+    //
+    // /**
+    // * Returns the current SpecFactory which instantiates Tapestry spec objects.
+    // *
+    // * @since 1.0.9
+    // */
+    //
+    // public SpecFactory getFactory()
+    // {
+    // return fSpecificationFactory;
+    // }
 
     /**
      * Used with many elements that allow a value to be specified as either an attribute, or as
@@ -451,8 +451,9 @@ public abstract class SpecificationScanner extends AbstractScanner
                     IProblem.EXTENDED_ATTRIBUTE_BOTH_VALUE_AND_BODY);
 
         if (required && nullAttributeValue && nullBodyValue)
-            throw new ScannerException(ParseMessages.requiredExtendedAttribute(node
-                    .getNodeName(), attributeName), getNodeStartSourceLocation(node), false,
+            throw new ScannerException(ParseMessages.requiredExtendedAttribute(
+                    node.getNodeName(),
+                    attributeName), getNodeStartSourceLocation(node), false,
                     IProblem.EXTENDED_ATTRIBUTE_NO_VALUE_OR_BODY);
 
         ExtendedAttributeResult result = new ExtendedAttributeResult();
@@ -507,8 +508,7 @@ public abstract class SpecificationScanner extends AbstractScanner
     }
 
     /**
-     * @param propertySource
-     *            The propertySource to set.
+     * @param propertySource The propertySource to set.
      */
     public void setPropertySource(IPropertySource propertySource)
     {
@@ -527,5 +527,15 @@ public abstract class SpecificationScanner extends AbstractScanner
         describable.addDescriptionDeclaration(declaration);
 
         return true;
+    }
+
+    public boolean isValidating()
+    {
+        return fValidating;
+    }
+
+    public void setValidating(boolean validating)
+    {
+        this.fValidating = validating;
     }
 }

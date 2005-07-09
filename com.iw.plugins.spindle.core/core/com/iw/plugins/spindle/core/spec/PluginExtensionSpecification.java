@@ -37,7 +37,7 @@ import org.apache.tapestry.spec.IExtensionSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -228,7 +228,7 @@ public class PluginExtensionSpecification extends BasePropertyHolder
     try
     {
 
-      validator.validateTypeName((IResourceWorkspaceLocation) library
+      validator.validateTypeName((ICoreResource) library
           .getSpecificationLocation(), fClassName, IProblem.ERROR, sourceInfo
           .getAttributeSourceLocation("class"));
 

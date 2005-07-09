@@ -1044,7 +1044,7 @@ public class ComponentScanner extends SpecificationScanner
         }
     }
 
-//    public IType validateTypeSpecial(IResourceWorkspaceLocation dependant, String typeName,
+//    public IType validateTypeSpecial(ICoreResource dependant, String typeName,
 //            int severity, ISourceLocation location) throws ScannerException
 //    {
 //        String useName = typeName;

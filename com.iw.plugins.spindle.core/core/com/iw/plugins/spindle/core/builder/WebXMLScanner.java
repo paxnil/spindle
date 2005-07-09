@@ -35,8 +35,9 @@ import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.IJavaType;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.resources.Path;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.IResourceRoot;
+import com.iw.plugins.spindle.core.resources.PathUtils;
 import com.iw.plugins.spindle.core.scanning.AbstractScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -76,7 +77,7 @@ public abstract class WebXMLScanner extends AbstractScanner
         return new WebAppDescriptor();
     }
 
-    protected void checkApplicationLocation(IResourceWorkspaceLocation location)
+    protected void checkApplicationLocation(ICoreResource location)
             throws ScannerException
     {
         if (location == null)
@@ -88,7 +89,7 @@ public abstract class WebXMLScanner extends AbstractScanner
                     location == null ? "no location found" : location.toString()), false,
                     IProblem.NOT_QUICK_FIXABLE);
 
-        Path ws_path = new Path(location.getName());
+        PathUtils ws_path = new PathUtils(location.getName());
         String extension = ws_path.getFileExtension();
         if (extension == null
                 || !extension.equals(AbstractBuildInfrastructure.APPLICATION_EXTENSION))
@@ -116,7 +117,7 @@ public abstract class WebXMLScanner extends AbstractScanner
             return;
         }
 
-        IResourceWorkspaceLocation ws_location = getApplicationLocation(currentInfo, value);
+        ICoreResource ws_location = getApplicationLocation(currentInfo, value);
         if (ws_location == null)
         {
             addProblem(IProblem.ERROR, location, CoreMessages.format(
@@ -243,7 +244,7 @@ public abstract class WebXMLScanner extends AbstractScanner
     {
     }
 
-    protected IResourceWorkspaceLocation getApplicationLocation(ServletInfo info, String path)
+    protected ICoreResource getApplicationLocation(ServletInfo info, String path)
     {
         if (path != null)
         {
@@ -252,29 +253,43 @@ public abstract class WebXMLScanner extends AbstractScanner
         else
         {
 
-            IResourceWorkspaceLocation context = fBuilder.fInfrastructure.fContextRoot;
+            IResourceRoot context = fBuilder.fInfrastructure.fContextRoot;
             String servletName = info.name;
             String expectedName = servletName + ".application";
 
-            IResourceWorkspaceLocation webInfLocation = (IResourceWorkspaceLocation) context
+            ICoreResource webInfLocation = (ICoreResource) context
                     .getRelativeResource("/WEB-INF/");
-            IResourceWorkspaceLocation webInfAppLocation = (IResourceWorkspaceLocation) webInfLocation
+            ICoreResource webInfAppLocation = (ICoreResource) webInfLocation
                     .getRelativeResource(servletName + "/");
 
-            IResourceWorkspaceLocation result = check(webInfAppLocation, expectedName);
+            ICoreResource result = check(webInfAppLocation, expectedName);
             if (result != null)
                 return result;
 
             return check(webInfLocation, expectedName);
         }
     }
-
-    private IResourceWorkspaceLocation check(IResourceWorkspaceLocation location, String name)
+    
+    private ICoreResource check(ICoreResource location, String name)
     {
         if (location == null)
             return null;
 
-        IResourceWorkspaceLocation result = (IResourceWorkspaceLocation) location
+        ICoreResource result = (ICoreResource) location
+                .getRelativeResource(name);
+
+        if (result != null && result.exists())
+            return result;
+
+        return null;
+    }
+
+    private ICoreResource check(IResourceRoot root, String name)
+    {
+        if (root == null)
+            return null;
+
+        ICoreResource result = (ICoreResource) root
                 .getRelativeResource(name);
 
         if (result != null && result.exists())
@@ -416,7 +431,7 @@ public abstract class WebXMLScanner extends AbstractScanner
     {
         newInfo.classname = getValue(node);
         ISourceLocation nodeLocation = getBestGuessSourceLocation(node, true);
-        IResourceWorkspaceLocation applicationSpecLocation = null;
+        ICoreResource applicationSpecLocation = null;
 
         if (newInfo.classname == null)
         {

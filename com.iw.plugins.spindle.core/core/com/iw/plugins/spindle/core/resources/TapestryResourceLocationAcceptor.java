@@ -64,9 +64,9 @@ public class TapestryResourceLocationAcceptor implements IResourceAcceptor
   /*
    * (non-Javadoc)
    * 
-   * @see com.iw.plugins.spindle.core.resources.IResourceLocationRequestor#accept(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
+   * @see com.iw.plugins.spindle.core.resources.IResourceLocationRequestor#accept(com.iw.plugins.spindle.core.resources.ICoreResource)
    */
-  public boolean accept(IResourceWorkspaceLocation location)
+  public boolean accept(ICoreResource location)
   {
     String fullname = location.getName();
     String name = null;
@@ -123,10 +123,10 @@ public class TapestryResourceLocationAcceptor implements IResourceAcceptor
     return true;
   }
 
-  public IResourceWorkspaceLocation[] getResults()
+  public ICoreResource[] getResults()
   {
-    return (IResourceWorkspaceLocation[]) fResults
-        .toArray(new IResourceWorkspaceLocation[fResults.size()]);
+    return (ICoreResource[]) fResults
+        .toArray(new ICoreResource[fResults.size()]);
   }
 
 }

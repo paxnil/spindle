@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.tapestry.IResourceLocation;
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -47,7 +47,9 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.resources.I18NResourceAcceptor;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.IResourceRoot;
+import com.iw.plugins.spindle.core.resources.ResourceExtension;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
@@ -66,27 +68,28 @@ public class SpecificationValidator extends BaseValidator
 {
     ITapestryProject fTapestryProject;
 
-    IResourceWorkspaceLocation fContextRoot;
+    IResourceRoot fContextRoot;
 
-    IResourceWorkspaceLocation fClasspathRoot;
+    IResourceRoot fClasspathRoot;
 
     boolean fPeformDeferredValidations = true;
 
     Map fTypeCache;
 
-    public SpecificationValidator(IJavaTypeFinder finder, ITapestryProject project) 
+    public SpecificationValidator(IJavaTypeFinder finder, ITapestryProject project)
     {
         super(finder);
         Assert.isNotNull(project);
         fTapestryProject = project;
-        fContextRoot = (IResourceWorkspaceLocation) project.getWebContextLocation();
-        fClasspathRoot = (IResourceWorkspaceLocation) project.getClasspathRoot();
+        fContextRoot = project.getWebContextLocation();
+        fClasspathRoot = project.getClasspathRoot();
         Assert.isNotNull(fContextRoot);
         Assert.isNotNull(fClasspathRoot);
     }
-    
-    public SpecificationValidator(ITapestryProject project) {
-        this (project, project);
+
+    public SpecificationValidator(ITapestryProject project)
+    {
+        this(project, project);
     }
 
     /*
@@ -94,9 +97,9 @@ public class SpecificationValidator extends BaseValidator
      * 
      * @see com.iw.plugins.spindle.core.scanning.BaseValidator#findType(java.lang.String)
      */
-    public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
+    public Object findType(Resource dependant, String fullyQualifiedName)
     {
-        IJavaType result = getJavaTypeFinder().findType(fullyQualifiedName);                  
+        IJavaType result = getJavaTypeFinder().findType(fullyQualifiedName);
         fireTypeDependency(dependant, fullyQualifiedName, result);
         return result;
     }
@@ -205,14 +208,14 @@ public class SpecificationValidator extends BaseValidator
         // at the end of the
         // entire build!
         // TODO this will be replaced at some point
-        //        FrameworkComponentValidator.validateContainedComponent(
-        //                (IResourceWorkspaceLocation) specification.getSpecificationLocation(),
-        //                ((PluginComponentSpecification) specification).getNamespace(),
-        //                type,
-        //                containedSpecification,
-        //                component,
-        //                info,
-        //                containedSpecification.getPublicId());
+        // FrameworkComponentValidator.validateContainedComponent(
+        // (ICoreResource) specification.getSpecificationLocation(),
+        // ((PluginComponentSpecification) specification).getNamespace(),
+        // type,
+        // containedSpecification,
+        // component,
+        // info,
+        // containedSpecification.getPublicId());
 
         return true;
     }
@@ -244,32 +247,32 @@ public class SpecificationValidator extends BaseValidator
         String containerName = containerSpecification.getSpecificationLocation().getName();
         String containedName = containedSpecification.getSpecificationLocation().getName();
 
-        //        if (contained.getInheritInformalParameters())
-        //        {
-        //            if (formalOnly)
-        //            {
+        // if (contained.getInheritInformalParameters())
+        // {
+        // if (formalOnly)
+        // {
         //
-        //                reportProblem(
-        //                    IProblem.ERROR,
-        //                    location,
-        //                    DefaultTapestryMessages.format(
-        //                        "PageLoader.inherit-informal-invalid-component-formal-only",
-        //                        containedName));
-        //                return false;
-        //            }
+        // reportProblem(
+        // IProblem.ERROR,
+        // location,
+        // DefaultTapestryMessages.format(
+        // "PageLoader.inherit-informal-invalid-component-formal-only",
+        // containedName));
+        // return false;
+        // }
         //
-        //            if (containerFormalOnly)
-        //            {
-        //                reportProblem(
-        //                    IProblem.ERROR,
-        //                    location,
-        //                    DefaultTapestryMessages.format(
-        //                        "PageLoader.inherit-informal-invalid-container-formal-only",
-        //                        containerName,
-        //                        containedName));
-        //                return false;
-        //            }
-        //        }
+        // if (containerFormalOnly)
+        // {
+        // reportProblem(
+        // IProblem.ERROR,
+        // location,
+        // DefaultTapestryMessages.format(
+        // "PageLoader.inherit-informal-invalid-container-formal-only",
+        // containerName,
+        // containedName));
+        // return false;
+        // }
+        // }
 
         Iterator i = bindingNames.iterator();
 
@@ -323,16 +326,16 @@ public class SpecificationValidator extends BaseValidator
 
     private List findRequiredParameterNames(IComponentSpecification spec)
     {
-        //        List result = new ArrayList();
-        //        for (Iterator iter = spec.getParameterNames().iterator();
+        // List result = new ArrayList();
+        // for (Iterator iter = spec.getParameterNames().iterator();
         // iter.hasNext();)
-        //        {
-        //            String name = (String) iter.next();
-        //            IParameterSpecification pspec = spec.getParameter(name);
-        //            if (pspec.isRequired())
-        //                result.add(name);
-        //        }
-        //        return result;
+        // {
+        // String name = (String) iter.next();
+        // IParameterSpecification pspec = spec.getParameter(name);
+        // if (pspec.isRequired())
+        // result.add(name);
+        // }
+        // return result;
         ArrayList result = new ArrayList();
         result.addAll(((PluginComponentSpecification) spec).getRequiredParameterNames());
         return result;
@@ -350,8 +353,7 @@ public class SpecificationValidator extends BaseValidator
     {
 
         PluginAssetSpecification pAsset = (PluginAssetSpecification) asset;
-        IResourceWorkspaceLocation specLoc = (IResourceWorkspaceLocation) specification
-                .getSpecificationLocation();
+        ICoreResource specLoc = (ICoreResource) specification.getSpecificationLocation();
 
         String path = pAsset.getPath();
         if (path == null)
@@ -367,7 +369,7 @@ public class SpecificationValidator extends BaseValidator
 
         String assetSpecName = pAsset.getIdentifier();
 
-        IResourceWorkspaceLocation root = null;
+        ResourceExtension root = null;
         ISourceLocation errorLoc = sourceLocation.getStartTagSourceLocation();
         if ("context".equals(prefix))
         {
@@ -404,15 +406,12 @@ public class SpecificationValidator extends BaseValidator
         if (PicassoMigration.TEMPLATE_ASSET_NAME.equals(pAsset.getIdentifier()))
             return checkTemplateAsset(specification, asset, prefix, truePath);
 
-        IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) root
-                .getRelativeResource(truePath);
+        ICoreResource relative = (ICoreResource) root.getRelativeResource(truePath);
         String fileName = relative.getName();
 
         if (!relative.exists())
         {
-            IResourceWorkspaceLocation[] I18NEquivalents = getI18NAssetEquivalents(
-                    relative,
-                    fileName);
+            ICoreResource[] I18NEquivalents = getI18NAssetEquivalents(relative, fileName);
 
             if (I18NEquivalents.length > 0)
             {
@@ -443,8 +442,7 @@ public class SpecificationValidator extends BaseValidator
 
     private I18NResourceAcceptor fI18NAcceptor = new I18NResourceAcceptor();
 
-    private IResourceWorkspaceLocation[] getI18NAssetEquivalents(
-            IResourceWorkspaceLocation baseLocation, String name)
+    private ICoreResource[] getI18NAssetEquivalents(ICoreResource baseLocation, String name)
     {
 
         try
@@ -458,7 +456,7 @@ public class SpecificationValidator extends BaseValidator
             TapestryCore.log(e);
         }
 
-        return new IResourceWorkspaceLocation[] {};
+        return new ICoreResource[] {};
     }
 
     private boolean checkTemplateAsset(IComponentSpecification specification,
@@ -467,8 +465,8 @@ public class SpecificationValidator extends BaseValidator
     {
         String templatePath = templateAsset.getPath();
 
-        //set relative to the context by default!
-        IResourceWorkspaceLocation templateLocation = (IResourceWorkspaceLocation) fContextRoot
+        // set relative to the context by default!
+        ICoreResource templateLocation = (ICoreResource) fContextRoot
                 .getRelativeResource(templatePath);
 
         if (prefix == null)
@@ -483,8 +481,7 @@ public class SpecificationValidator extends BaseValidator
         }
 
         if ("classpath".equals(prefix))
-            templateLocation = (IResourceWorkspaceLocation) fClasspathRoot
-                    .getRelativeResource(templatePath);
+            templateLocation = (ICoreResource) fClasspathRoot.getRelativeResource(templatePath);
 
         if (!templateLocation.exists())
         {
@@ -494,9 +491,7 @@ public class SpecificationValidator extends BaseValidator
             ISourceLocation errorLoc = sourceLocation.getStartTagSourceLocation();
 
             String assetSpecName = ((PluginAssetSpecification) templateAsset).getIdentifier();
-            IResourceWorkspaceLocation[] I18NEquivalents = getI18NAssetEquivalents(
-                    templateLocation,
-                    fileName);
+            ICoreResource[] I18NEquivalents = getI18NAssetEquivalents(templateLocation, fileName);
 
             if (I18NEquivalents.length > 0)
             {
@@ -524,14 +519,14 @@ public class SpecificationValidator extends BaseValidator
         return true;
     }
 
-    public boolean validateLibraryResourceLocation(IResourceLocation specLocation, String path,
-            String errorKey, ISourceLocation source) throws ScannerException
+    public boolean validateLibraryResource(Resource specLocation, String path, String errorKey,
+            ISourceLocation source) throws ScannerException
     {
-        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) specLocation;
+        Resource useLocation = specLocation;
 
-        if (!useLocation.isClasspathResource())
-            useLocation = fClasspathRoot;
+        if (!((ICoreResource)useLocation).isClasspathResource())
+            useLocation = fClasspathRoot.getRelativeResource("/");
 
-        return validateResourceLocation(useLocation, path, errorKey, source);
+        return validateResource(useLocation, path, errorKey, source);
     }
 }

@@ -26,7 +26,6 @@
 
 package com.iw.plugins.spindle.core.source;
 
-
 /**
  * Default impl of IProblem
  * 
@@ -51,8 +50,30 @@ public class DefaultProblem implements IProblem
 
     private int fCode;
 
-    public DefaultProblem(String type, int severity, String message, int lineNumber, int charStart,
+    public DefaultProblem(int severity, String message, ISourceLocation location,
+            boolean isTemporary, int code)
+    {
+        this(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message, location != null ? location
+                : SourceLocation.FILE_LOCATION, isTemporary, code);
+
+    }
+
+    public DefaultProblem(String type, int severity, String message, ISourceLocation location,
+            boolean isTemporary, int code)
+    {
+        this(type, severity, message, location.getLineNumber(), location.getCharStart(), location
+                .getCharEnd(), isTemporary, code);
+    }
+
+    protected DefaultProblem(int severity, String message, int lineNumber, int charStart,
             int charEnd, boolean isTemporary, int code)
+    {
+        this(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message, lineNumber, charStart, charEnd,
+                isTemporary, code);
+    }
+
+    protected DefaultProblem(String type, int severity, String message, int lineNumber,
+            int charStart, int charEnd, boolean isTemporary, int code)
     {
         fType = type;
         fSeverity = severity;
@@ -180,7 +201,7 @@ public class DefaultProblem implements IProblem
      * @see com.iw.plugins.spindle.core.source.IProblem#getCode()
      */
     public int getCode()
-    {        
+    {
         return fCode;
     }
 

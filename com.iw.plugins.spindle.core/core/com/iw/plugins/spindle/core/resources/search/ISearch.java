@@ -26,6 +26,8 @@
 
 package com.iw.plugins.spindle.core.resources.search;
 
+import com.iw.plugins.spindle.core.TapestryCoreException;
+
 
 /**
  * Interface for all kinds of searches in the Tapestry context
@@ -35,6 +37,6 @@ package com.iw.plugins.spindle.core.resources.search;
  */
 public interface ISearch
 {
-  public abstract void configure(Object root);
+  public abstract void configure(Object root) throws TapestryCoreException;
   public abstract void search(ISearchAcceptor acceptor);
 }

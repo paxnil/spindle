@@ -27,14 +27,14 @@
 package com.iw.plugins.spindle.core.resources;
 
 /**
- * A requestor that is invoked by the seek method in IResourceWorkspaceLocation.
+ * A requestor that is invoked by the seek method in ICoreResource.
  * 
  * @author glongman@gmail.com
  */
 public interface IResourceAcceptor
 {
   /** should return false to cancel the operation */
-  public boolean accept(IResourceWorkspaceLocation location);
+  public boolean accept(ICoreResource location);
 
-  public IResourceWorkspaceLocation[] getResults();
+  public ICoreResource[] getResults();
 }

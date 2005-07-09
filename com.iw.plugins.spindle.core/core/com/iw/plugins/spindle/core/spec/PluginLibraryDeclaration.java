@@ -93,7 +93,7 @@ public class PluginLibraryDeclaration extends BaseSpecification
             {
                 ILibrarySpecification parentLib = (ILibrarySpecification) parent;
 
-                validator.validateLibraryResourceLocation(
+                validator.validateLibraryResource(
                         parentLib.getSpecificationLocation(),
                         fResourcePath,
                         "scan-library-missing-library",

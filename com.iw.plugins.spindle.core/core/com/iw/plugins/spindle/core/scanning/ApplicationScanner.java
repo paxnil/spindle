@@ -54,10 +54,6 @@ public class ApplicationScanner extends LibraryScanner
 
     protected Object createResult()
     {
-        if (!isElement(fRootNode, "application"))
-        {
-            return null;
-        }
         return new PluginApplicationSpecification();
     }
 
@@ -82,12 +78,14 @@ public class ApplicationScanner extends LibraryScanner
                     ParseMessages.incorrectDocumentType("application", rootName),
                     false,
                     IProblem.SPINDLE_INCORRECT_DOCUMENT_ROOT_EXPECT_APPLICATION);
-            return;
         }
-        scanApplicationSpecification(fRootNode, specification);
+        else
+        {
+            scanApplicationSpecification(fRootNode, specification);
+        }
     }
 
-    protected IApplicationSpecification scanApplicationSpecification(Node rootNode,
+    protected void scanApplicationSpecification(Node rootNode,
             IApplicationSpecification specification) throws ScannerException
     {
 
@@ -98,7 +96,5 @@ public class ApplicationScanner extends LibraryScanner
         ((PluginApplicationSpecification) specification).validateSelf(fValidator);
 
         scanLibrarySpecification(rootNode, specification);
-
-        return specification;
     }
 }

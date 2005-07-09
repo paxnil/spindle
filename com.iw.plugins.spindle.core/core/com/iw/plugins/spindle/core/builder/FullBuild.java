@@ -34,10 +34,11 @@ import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.SourceLocation;
 
 /**
  * Builds a Tapestry project from scratch.
@@ -85,11 +86,11 @@ public class FullBuild extends AbstractBuild
      */
     protected void resolveFramework(Parser parser)
     {
-        IResourceWorkspaceLocation frameworkLocation = (IResourceWorkspaceLocation) fInfrastructure.fClasspathRoot
+        ICoreResource frameworkLocation = (ICoreResource) fInfrastructure.fClasspathRoot
                 .getRelativeResource("/org/apache/tapestry/Framework.library");
         FrameworkResolver resolver = new FrameworkResolver(this, parser, frameworkLocation);
         fFrameworkNamespace = resolver.resolve();
-        //        fFrameworkNamespace =
+        // fFrameworkNamespace =
         // fNSResolver.resolveFrameworkNamespace(frameworkLocation);
     }
 
@@ -104,9 +105,9 @@ public class FullBuild extends AbstractBuild
     }
 
     public void saveState()
-    {        
+    {
         State newState = new State(fInfrastructure);
-        //    newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
+        // newState.fLibraryLocation = fTapestryBuilder.fTapestryProject.getLibrarySpecPath();
         newState.fLastKnownClasspath = fInfrastructure.getClasspathMemento();
         newState.fJavaDependencies = fFoundTypes;
         newState.fMissingJavaTypes = fMissingTypes;
@@ -122,7 +123,7 @@ public class FullBuild extends AbstractBuild
 
         // save the processed binary libraries
         saveBinaryLibraries(fFrameworkNamespace, fApplicationNamespace, newState);
-        fInfrastructure.persistState(newState);        
+        fInfrastructure.persistState(newState);
     }
 
     protected void saveBinaryLibraries(ICoreNamespace framework, ICoreNamespace namespace,
@@ -134,7 +135,7 @@ public class FullBuild extends AbstractBuild
 
     private void saveBinaryLibraries(ICoreNamespace namespace, State state)
     {
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+        ICoreResource location = (ICoreResource) namespace
                 .getSpecificationLocation();
         if (location.isBinaryResource())
             state.fBinaryNamespaces.put(location, namespace);
@@ -153,22 +154,23 @@ public class FullBuild extends AbstractBuild
         super.cleanUp();
     }
 
-    protected void findDeclaredApplication() 
+    protected void findDeclaredApplication()
     {
         Parser servletParser = new Parser();
         servletParser.setDoValidation(fInfrastructure.fValidateWebXML);
         // Parser does not validate by default.
         // Scanners use the Spindle validator.
 
-        IResourceWorkspaceLocation webXML = (IResourceWorkspaceLocation) fInfrastructure.fContextRoot
+        ICoreResource webXML = (ICoreResource) fInfrastructure.fContextRoot
                 .getRelativeResource("WEB-INF/web.xml");
         if (webXML.exists())
         {
             Document wxmlElement = null;
             try
             {
-                fInfrastructure.fNotifier.subTask(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                        + "scanning", webXML.toString()));
+                fInfrastructure.fNotifier.subTask(CoreMessages.format(
+                        AbstractBuildInfrastructure.STRING_KEY + "scanning",
+                        webXML.toString()));
                 fInfrastructure.fProblemPersister.removeAllProblemsFor(webXML);
                 wxmlElement = parseToDocument(servletParser, webXML, null);
             }
@@ -197,18 +199,21 @@ public class FullBuild extends AbstractBuild
             }
 
             if (descriptor == null)
-                throw new BrokenWebXMLException(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                        + "abort-no-valid-application-servlets-found"));
+                throw new BrokenWebXMLException(CoreMessages
+                        .format(AbstractBuildInfrastructure.STRING_KEY
+                                + "abort-no-valid-application-servlets-found"));
 
             ServletInfo[] servletInfos = descriptor.getServletInfos();
             if (servletInfos == null || servletInfos.length == 0)
 
-                throw new BrokenWebXMLException(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                        + "abort-no-valid-application-servlets-found"));
+                throw new BrokenWebXMLException(CoreMessages
+                        .format(AbstractBuildInfrastructure.STRING_KEY
+                                + "abort-no-valid-application-servlets-found"));
 
             if (servletInfos.length > 1)
-                throw new BrokenWebXMLException(CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                        + "abort-too-many-valid-servlets-found"));
+                throw new BrokenWebXMLException(CoreMessages
+                        .format(AbstractBuildInfrastructure.STRING_KEY
+                                + "abort-too-many-valid-servlets-found"));
 
             fApplicationServlet = servletInfos[0];
             fWebAppDescriptor = descriptor;
@@ -216,15 +221,16 @@ public class FullBuild extends AbstractBuild
         }
         else
         {
-            IResourceWorkspaceLocation definedWebRoot = (IResourceWorkspaceLocation) fInfrastructure.fTapestryProject.getWebContextLocation();
+            ICoreResource definedWebRoot = (ICoreResource) fInfrastructure.fTapestryProject
+                    .getWebContextLocation();
             if (definedWebRoot != null || !definedWebRoot.exists())
 
                 fInfrastructure.fProblemPersister.recordProblem(
                         fInfrastructure.fTapestryProject,
-                        new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER,
-                                IProblem.WARNING, CoreMessages.format(AbstractBuildInfrastructure.STRING_KEY
-                                        + "missing-context", definedWebRoot.toString()), 1, 0, 0,
-                                false, IProblem.NOT_QUICK_FIXABLE));
+                        new DefaultProblem(IProblem.WARNING, CoreMessages.format(
+                                AbstractBuildInfrastructure.STRING_KEY + "missing-context",
+                                definedWebRoot.toString()), SourceLocation.FOLDER_LOCATION, false,
+                                IProblem.NOT_QUICK_FIXABLE));
         }
     }
 

@@ -31,7 +31,7 @@ public final class Assert
    * <code>AssertionFailedException</code> is a runtime exception thrown by
    * some of the methods in <code>Assert</code>.
    */
-  private static class AssertionFailedException extends RuntimeException
+  public static class AssertionFailedException extends RuntimeException
   {
 
     public AssertionFailedException()

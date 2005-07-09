@@ -26,7 +26,8 @@
 
 package com.iw.plugins.spindle.core.builder;
 
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import org.apache.hivemind.Resource;
+
 
 /**
  * Various components in the build will fire simple events when the Tapestry
@@ -58,7 +59,7 @@ public interface IDependencyListener
    * @param fullyQualifiedTypeName the fully qualified type name.
    */
   void foundTypeDependency(
-      IResourceWorkspaceLocation dependant,
+      Resource dependant,
       String fullyQualifiedTypeName);
   /**
    * Notification that a dependant has a dependency on another resource.
@@ -67,6 +68,6 @@ public interface IDependencyListener
    * @param dependancy the location of the dependancy.
    */
   void foundResourceDependency(
-      IResourceWorkspaceLocation dependant,
-      IResourceWorkspaceLocation dependancy);
+      Resource dependant,
+      Resource dependancy);
 }

@@ -30,7 +30,9 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.eclipse.TapestryProject;
-import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
+
+
 
 public class BuilderContextVisitor implements IResourceVisitor
 {
@@ -55,7 +57,7 @@ public class BuilderContextVisitor implements IResourceVisitor
         this.fCollector = collector;
         fInfrastructure = (EclipseBuildInfrastructure) build.fInfrastructure;
         this.fTapestryProject = (TapestryProject) fInfrastructure.fTapestryProject;
-        ContextRootLocation eclipseCtxRoot = (ContextRootLocation) fInfrastructure.fContextRoot;
+        ContextRoot eclipseCtxRoot = (ContextRoot) fInfrastructure.fContextRoot;
         this.fContextLocation = (IFolder) eclipseCtxRoot.getContainer();
         try
         {
@@ -121,11 +123,13 @@ public class BuilderContextVisitor implements IResourceVisitor
 
             String extension = resource.getFileExtension();
             if (knownExtensions.contains(extension))
+
             {
-                Resource location = ((ContextRootLocation) fInfrastructure.fContextRoot)
+                Resource location = ((ContextRoot) fInfrastructure.fContextRoot)
                         .getRelativeResource(resource);
                 fCollector.add(location);
                 debug(location);
+
             }
         }
         return true;

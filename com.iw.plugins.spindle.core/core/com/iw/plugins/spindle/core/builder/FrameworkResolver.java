@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.core.builder;
 
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 
 /**
  * Namespace reolver for the Tapestry framework and its contained libraries.
@@ -38,13 +38,13 @@ import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
  */
 public class FrameworkResolver extends NamespaceResolver
 {
-  private IResourceWorkspaceLocation fFrameworkLocation;
+  private ICoreResource fFrameworkLocation;
 
   /**
    * @param build
    * @param parser
    */
-  public FrameworkResolver(AbstractBuild build, Parser parser, IResourceWorkspaceLocation location)
+  public FrameworkResolver(AbstractBuild build, Parser parser, ICoreResource location)
   {
     super(build, parser);
     fFrameworkLocation = location;

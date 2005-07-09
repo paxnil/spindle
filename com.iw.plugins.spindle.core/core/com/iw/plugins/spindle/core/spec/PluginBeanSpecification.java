@@ -36,7 +36,7 @@ import org.apache.tapestry.spec.IBeanSpecification;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.extensions.IBeanSpecificationValidator;
 import com.iw.plugins.spindle.core.extensions.SpindleExtensionException;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -191,7 +191,7 @@ public class PluginBeanSpecification extends BasePropertyHolder implements IBean
         try
         {
             Object type = validator.validateTypeName(
-                    (IResourceWorkspaceLocation) component.getSpecificationLocation(),
+                    (ICoreResource) component.getSpecificationLocation(),
                     fClassName,
                     IProblem.ERROR,
                     (fClassName != null ? sourceInfo.getAttributeSourceLocation("class")

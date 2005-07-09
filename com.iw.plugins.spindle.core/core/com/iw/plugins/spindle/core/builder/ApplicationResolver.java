@@ -40,7 +40,8 @@ import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
 import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.IResourceRoot;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
@@ -113,7 +114,7 @@ public class ApplicationResolver extends NamespaceResolver
             else
             {
                 fResultNamespace = createStandinApplicationNamespace(fServlet);
-                fNamespaceSpecLocation = (IResourceWorkspaceLocation) fResultNamespace
+                fNamespaceSpecLocation = (ICoreResource) fResultNamespace
                         .getSpecificationLocation();
             }
             if (fResultNamespace != null)
@@ -236,11 +237,11 @@ public class ApplicationResolver extends NamespaceResolver
         final List speclessPages = new ArrayList();
         //now find all the html files in the application root
 
-        IResourceWorkspaceLocation appRoot = fBuild.fInfrastructure.fContextRoot;
+        IResourceRoot appRoot = fBuild.fInfrastructure.fContextRoot;
 
         IResourceAcceptor acceptor = new IResourceAcceptor()
         {
-            public boolean accept(IResourceWorkspaceLocation location)
+            public boolean accept(ICoreResource location)
             {
                 String fullname = location.getName();              
                 String extension = null;
@@ -265,7 +266,7 @@ public class ApplicationResolver extends NamespaceResolver
             }
 
             // not used
-            public IResourceWorkspaceLocation[] getResults()
+            public ICoreResource[] getResults()
             {
                 return null;
             }
@@ -281,7 +282,7 @@ public class ApplicationResolver extends NamespaceResolver
                 fResultNamespaceTemplateExtension);
         for (Iterator iter = filtered.iterator(); iter.hasNext();)
         {
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
+            ICoreResource location = (ICoreResource) iter.next();
             resolveSpeclessPage(location, fResultNamespaceTemplateExtension);
         }
     }
@@ -293,7 +294,7 @@ public class ApplicationResolver extends NamespaceResolver
      * @param location
      *            the location object for the template file.
      */
-    protected void resolveSpeclessPage(IResourceWorkspaceLocation location, String templateExtension)
+    protected void resolveSpeclessPage(ICoreResource location, String templateExtension)
     {
         PluginComponentSpecification specification = new PluginComponentSpecification();
         specification.setPageSpecification(true);

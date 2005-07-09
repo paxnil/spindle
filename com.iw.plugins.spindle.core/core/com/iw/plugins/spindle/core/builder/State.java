@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.IResourceRoot;
 
 /**
  * An object intended to store the state of the build between builds. Normally,
@@ -56,7 +56,7 @@ public class State
 
   public static byte VERSION = 0x0001;
 
-  IResourceWorkspaceLocation fContextRoot;
+  IResourceRoot fContextRoot;
   byte fVersion = VERSION;
   int fBuildNumber;
   Map fBinaryNamespaces = new HashMap();

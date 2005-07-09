@@ -30,7 +30,7 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IPropertySpecification;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.scanning.SpecificationScanner;
@@ -162,13 +162,13 @@ public class PluginPropertySpecification extends DescribableSpecification implem
                     {
                         fixedType = fixedType.substring(0, fixedType.length() - 2);
                     }
-                    validator.validateTypeName((IResourceWorkspaceLocation) component
+                    validator.validateTypeName((ICoreResource) component
                             .getSpecificationLocation(), fixedType, IProblem.ERROR, sourceInfo
                             .getAttributeSourceLocation("type"));
                 }
                 else
                 {
-                    validator.validateTypeName((IResourceWorkspaceLocation) component
+                    validator.validateTypeName((ICoreResource) component
                             .getSpecificationLocation(), fType, IProblem.ERROR, sourceInfo
                             .getAttributeSourceLocation("type"));
                 }

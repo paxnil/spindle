@@ -48,7 +48,7 @@ import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
 import com.iw.plugins.spindle.core.scanning.ApplicationScanner;
@@ -61,6 +61,7 @@ import com.iw.plugins.spindle.core.scanning.SpecificationValidator;
 import com.iw.plugins.spindle.core.scanning.TemplateScanner;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
 import com.iw.plugins.spindle.core.source.IProblem;
+import com.iw.plugins.spindle.core.source.SourceLocation;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
@@ -196,8 +197,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             while (fBuildQueue.getWaitingCount() > 0)
             {
 
-                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fBuildQueue
-                        .peekWaiting();
+                ICoreResource location = (ICoreResource) fBuildQueue.peekWaiting();
                 fNotifier.processed(location);
                 fBuildQueue.finished(location);
 
@@ -219,10 +219,9 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             // capability.
             return;
 
-        fInfrastructure.fProblemPersister.recordProblem(resource, new DefaultProblem(
-                IProblem.TAPESTRY_PROBLEM_MARKER, missPriority, CoreMessages.format(
-                        "builder-missed-file-message",
-                        resource.getName()), 0, 0, 0, false, IProblem.NOT_QUICK_FIXABLE));
+        fInfrastructure.fProblemPersister.recordProblem(resource, new DefaultProblem(missPriority,
+                CoreMessages.format("builder-missed-file-message", resource.getName()),
+                SourceLocation.FOLDER_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
     }
 
     protected abstract void saveState();
@@ -251,7 +250,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         fCleanTemplates = null;
     }
 
-    protected ICoreNamespace getPreBuiltNamespace(IResourceWorkspaceLocation location)
+    protected ICoreNamespace getPreBuiltNamespace(ICoreResource location)
     {
         if (fLastState != null)
         {
@@ -262,8 +261,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         return null;
     }
 
-    protected ICoreNamespace createNamespace(Parser parser, String id,
-            IResourceWorkspaceLocation location, String encoding)
+    protected ICoreNamespace createNamespace(Parser parser, String id, ICoreResource location,
+            String encoding)
     {
 
         ICoreNamespace result = null;
@@ -314,7 +313,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     protected IApplicationSpecification resolveApplication(Parser parser, Resource location,
             String encoding)
     {
-        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
+        ICoreResource useLocation = (ICoreResource) location;
         IApplicationSpecification result = null;
         try
         {
@@ -371,8 +370,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         return result;
     }
 
-    protected void rememberSpecification(IResourceWorkspaceLocation location,
-            BaseSpecification result)
+    protected void rememberSpecification(ICoreResource location, BaseSpecification result)
     {
         if (!location.exists())
         {
@@ -391,8 +389,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     protected void recordFatalProblem(Resource location, ScannerException e)
     {
         fInfrastructure.fProblemPersister.recordProblem(location, new DefaultProblem(
-                IProblem.TAPESTRY_FATAL_PROBLEM_MARKER, IProblem.ERROR, e.getMessage(), 1, 0, 0,
-                false, IProblem.NOT_QUICK_FIXABLE));
+                IProblem.TAPESTRY_FATAL_PROBLEM_MARKER, IProblem.ERROR, e.getMessage(),
+                SourceLocation.FILE_LOCATION, false, IProblem.NOT_QUICK_FIXABLE));
     }
 
     /**
@@ -404,7 +402,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     protected ILibrarySpecification resolveLibrarySpecification(Parser parser, Resource location,
             String encoding)
     {
-        IResourceWorkspaceLocation useLocation = (IResourceWorkspaceLocation) location;
+        ICoreResource useLocation = (ICoreResource) location;
         ILibrarySpecification result = null;
         if (fProcessedLocations.containsKey(useLocation))
             return (ILibrarySpecification) fProcessedLocations.get(useLocation);
@@ -484,7 +482,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         TemplateScanner scanner = new TemplateScanner();
         for (Iterator iter = spec.getTemplateLocations().iterator(); iter.hasNext();)
         {
-            IResourceWorkspaceLocation templateLocation = (IResourceWorkspaceLocation) iter.next();
+            ICoreResource templateLocation = (ICoreResource) iter.next();
 
             if (fProcessedLocations.containsKey(templateLocation))
                 continue;
@@ -555,10 +553,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      * Always returns true here. Incremental builds may override to check if the template really
      * needs to be parsed.
      * 
-     * @param ownerSpec
-     *            the Resource for the specification that owns this template
-     * @param template
-     *            the Resource for the template
+     * @param ownerSpec the Resource for the specification that owns this template
+     * @param template the Resource for the template
      * @return true iff the template should be parsed (expensive)
      */
     protected boolean shouldParseTemplate(Resource ownerSpec, Resource template)
@@ -573,8 +569,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      * If the IStorage is really a resource in the workspace, the problems are recorded as resource
      * markers. Otherwise, the problem is logged.
      */
-    protected Document parseToDocument(Parser parser, IResourceWorkspaceLocation location,
-            String encoding) throws IOException
+    protected Document parseToDocument(Parser parser, ICoreResource location, String encoding)
+            throws IOException
     {
         if (!location.exists())
             throw new IOException(CoreMessages.format("core-resource-does-not-exist", location));
@@ -623,8 +619,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     protected abstract void resolveFramework(Parser parser);
 
     protected IComponentSpecification resolveIComponentSpecification(Parser parser,
-            ICoreNamespace namespace, IResourceWorkspaceLocation location,
-            String templateExtension, String encoding)
+            ICoreNamespace namespace, ICoreResource location, String templateExtension,
+            String encoding)
 
     {
         // to avoid double parsing specs that are accessible
@@ -757,11 +753,10 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         /*
          * (non-Javadoc)
          * 
-         * @see com.iw.plugins.spindle.core.builder.IDependencyListener#foundResourceDependency(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation,
-         *      com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
+         * @see com.iw.plugins.spindle.core.builder.IDependencyListener#foundResourceDependency(com.iw.plugins.spindle.core.resources.ICoreResource,
+         *      com.iw.plugins.spindle.core.resources.ICoreResource)
          */
-        public void foundResourceDependency(IResourceWorkspaceLocation dependant,
-                IResourceWorkspaceLocation dependancy)
+        public void foundResourceDependency(Resource dependant, Resource dependancy)
         {
             // do nothing
         }
@@ -769,11 +764,10 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         /*
          * (non-Javadoc)
          * 
-         * @see com.iw.plugins.spindle.core.builder.IDependencyListener#foundTypeDependency(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation,
+         * @see com.iw.plugins.spindle.core.builder.IDependencyListener#foundTypeDependency(com.iw.plugins.spindle.core.resources.ICoreResource,
          *      java.lang.String)
          */
-        public void foundTypeDependency(IResourceWorkspaceLocation dependant,
-                String fullyQualifiedTypeName)
+        public void foundTypeDependency(Resource dependant, String fullyQualifiedTypeName)
         {
             // do nothing
         }
@@ -787,13 +781,13 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         /*
          * (non-Javadoc)
          * 
-         * @see com.iw.plugins.spindle.core.builder.IDependencyListener#foundResourceDependency(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation,
-         *      com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
+         * @see com.iw.plugins.spindle.core.builder.IDependencyListener#foundResourceDependency(com.iw.plugins.spindle.core.resources.ICoreResource,
+         *      com.iw.plugins.spindle.core.resources.ICoreResource)
          */
-        public void foundResourceDependency(IResourceWorkspaceLocation dependant,
-                IResourceWorkspaceLocation dependancy)
+        public void foundResourceDependency(Resource dependant, Resource dependancy)
         {
-            if (dependant.isBinaryResource())
+
+            if (((ICoreResource) dependant).isBinaryResource())
                 return;
 
             if (dependencyMap == null)
@@ -803,7 +797,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         }
 
-        private DependencyInfo getInfo(IResourceWorkspaceLocation dependant)
+        private DependencyInfo getInfo(Resource dependant)
         {
             DependencyInfo info = (DependencyInfo) dependencyMap.get(dependant);
             if (info == null)
@@ -817,13 +811,12 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         /*
          * (non-Javadoc)
          * 
-         * @see com.iw.plugins.spindle.core.builder.IDependencyListener#foundTypeDependency(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation,
+         * @see com.iw.plugins.spindle.core.builder.IDependencyListener#foundTypeDependency(com.iw.plugins.spindle.core.resources.ICoreResource,
          *      java.lang.String)
          */
-        public void foundTypeDependency(IResourceWorkspaceLocation dependant,
-                String fullyQualifiedTypeName)
+        public void foundTypeDependency(Resource dependant, String fullyQualifiedTypeName)
         {
-            if (dependant.isBinaryResource())
+            if (((ICoreResource) dependant).isBinaryResource())
                 return;
 
             if (dependencyMap == null)
@@ -848,7 +841,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             {
                 for (Iterator iter = dependencyMap.keySet().iterator(); iter.hasNext();)
                 {
-                    IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
+                    ICoreResource element = (ICoreResource) iter.next();
                     System.out.println("Deps for: " + element);
 
                     DependencyInfo info = getInfo(element);

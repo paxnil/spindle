@@ -79,7 +79,7 @@ public class PluginComponentTypeDeclaration extends DescribableSpecification
 
       ILibrarySpecification parentLib = (ILibrarySpecification) parent;
 
-      validator.validateResourceLocation(
+      validator.validateResource(
           parentLib.getSpecificationLocation(),
           fResourcePath,
           "scan-library-missing-component",

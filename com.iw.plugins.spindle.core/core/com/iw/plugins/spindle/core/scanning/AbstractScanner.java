@@ -38,6 +38,7 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.source.SourceLocation;
 import com.iw.plugins.spindle.core.util.Assert;
 
 /**
@@ -93,8 +94,8 @@ public abstract class AbstractScanner implements IProblemCollector
             }
             else
             {
-                addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR,
-                        scex.getMessage(), 0, 0, 0, false, scex.getCode()));
+                addProblem(new DefaultProblem(IProblem.ERROR,
+                        scex.getMessage(), SourceLocation.FILE_LOCATION, false, scex.getCode()));
             }
             return null;
         }
@@ -152,8 +153,7 @@ public abstract class AbstractScanner implements IProblemCollector
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
     {
-        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message, location
-                .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary, code));
+        addProblem(new DefaultProblem(severity, message, location, isTemporary, code));
     }
 
     public void addProblems(IProblem[] problems)

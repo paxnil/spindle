@@ -31,7 +31,6 @@ import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;
 
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
@@ -183,7 +182,7 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateResourceLocation(Resource location, String relativePath,
+    public boolean validateResource(Resource location, String relativePath,
             String errorKey, ISourceLocation source) throws ScannerException;
 
     /**
@@ -203,7 +202,7 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public boolean validateLibraryResourceLocation(Resource specLocation, String path,
+    public boolean validateLibraryResource(Resource specLocation, String path,
             String errorKey, ISourceLocation source) throws ScannerException;
 
     /**
@@ -219,7 +218,7 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public Object validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
+    public Object validateTypeName(Resource dependant, String fullyQualifiedType,
             int severity) throws ScannerException;
 
     /**
@@ -236,10 +235,10 @@ public interface IScannerValidator
      * @throws ScannerException
      *             optional, called if the validator method cannot properly report a problem.
      */
-    public Object validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
+    public Object validateTypeName(Resource dependant, String fullyQualifiedType,
             int severity, ISourceLocation location) throws ScannerException;
 
-    public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName);
+    public Object findType(Resource dependant, String fullyQualifiedName);
 
     public void addListener(IScannerValidatorListener listener);
 

@@ -34,13 +34,11 @@ import java.util.List;
 import org.apache.tapestry.services.TemplateSource;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
-import org.eclipse.core.runtime.CoreException;
 
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.PicassoMigration;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.resources.I18NResourceAcceptor;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
@@ -72,7 +70,7 @@ public class TemplateFinder
 
         for (Iterator iter = locations.iterator(); iter.hasNext();)
         {
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
+            ICoreResource location = (ICoreResource) iter.next();
             String name = location.getName();
             String foundName = null;
             String foundExtension = null;
@@ -112,17 +110,33 @@ public class TemplateFinder
 
     private String fTemplateBaseName;
 
-    public IResourceWorkspaceLocation[] getTemplates(IComponentSpecification specification,
+    /**
+     * Obtain all the template locations for a component specification
+     * 
+     * @param specification the IComponentSpecification we want to find templates for
+     * @param project the Tapestry project containing the component specF
+     * @param collector an IProblemCollector to collect any problems encountered.
+     * @return an array of ICoreResource - the template locations.
+     */
+    public static ICoreResource[] scanForTemplates(IComponentSpecification specification,
+            String templateExtension, ITapestryProject project, IProblemCollector collector)
+    {
+        TemplateFinder finder = new TemplateFinder();
+        ICoreResource[] locations = new ICoreResource[0];
+    
+        return finder.getTemplates(specification, project, templateExtension, collector);
+    }
+
+    protected ICoreResource[] getTemplates(IComponentSpecification specification,
             ITapestryProject project, String templateExtension, IProblemCollector collector)
-            throws CoreException
+
     {
         fTapestryProject = project;
         fExtension = templateExtension;
         fProblemCollector = collector;
         fFindResults.clear();
         findTemplates((PluginComponentSpecification) specification);
-        return (IResourceWorkspaceLocation[]) fFindResults
-                .toArray(new IResourceWorkspaceLocation[fFindResults.size()]);
+        return (ICoreResource[]) fFindResults.toArray(new ICoreResource[fFindResults.size()]);
     }
 
     /**
@@ -136,7 +150,7 @@ public class TemplateFinder
      * @param specification
      * @throws CoreException
      */
-    private void findTemplates(PluginComponentSpecification specification) throws CoreException
+    private void findTemplates(PluginComponentSpecification specification)
     {
         IAssetSpecification templateAsset = specification
                 .getAsset(TemplateSource.TEMPLATE_ASSET_NAME);
@@ -161,7 +175,7 @@ public class TemplateFinder
             IAssetSpecification templateAsset)
     {
         String path = templateAsset.getPath();
-        IResourceWorkspaceLocation templateLocation = null;
+        ICoreResource templateLocation = null;
         boolean isDTD_4_0 = XMLPublicIDUtil.getDTDVersion(specification.getPublicId()) == XMLPublicIDUtil.DTD_4_0;
 
         int colonx = path.indexOf(':');
@@ -181,11 +195,10 @@ public class TemplateFinder
         {
             case PicassoMigration.CONTEXT_ASSET:
 
-                IResourceWorkspaceLocation contextRoot = (IResourceWorkspaceLocation) fTapestryProject
+                ICoreResource contextRoot = (ICoreResource) fTapestryProject
                         .getWebContextLocation();
                 if (contextRoot != null)
-                    templateLocation = (IResourceWorkspaceLocation) contextRoot
-                            .getRelativeResource(truePath);
+                    templateLocation = (ICoreResource) contextRoot.getRelativeResource(truePath);
 
                 if (templateLocation == null || !templateLocation.exists())
                 {
@@ -200,11 +213,9 @@ public class TemplateFinder
                 break;
             case PicassoMigration.CLASSPATH_ASSET:
 
-                IResourceWorkspaceLocation cpRoot = (IResourceWorkspaceLocation) fTapestryProject
-                        .getClasspathRoot();
+                ICoreResource cpRoot = (ICoreResource) fTapestryProject.getClasspathRoot();
                 if (cpRoot != null)
-                    templateLocation = (IResourceWorkspaceLocation) cpRoot
-                            .getRelativeResource(truePath);
+                    templateLocation = (ICoreResource) cpRoot.getRelativeResource(truePath);
 
                 if (templateLocation == null || !templateLocation.exists())
                 {
@@ -243,23 +254,23 @@ public class TemplateFinder
     }
 
     private void findStandardTemplates(PluginComponentSpecification specification)
-            throws CoreException
+
     {
-        find((IResourceWorkspaceLocation) specification.getSpecificationLocation());
+        find((ICoreResource) specification.getSpecificationLocation());
     }
 
     private void findPageTemplateInApplicationRoot(PluginComponentSpecification specification)
-            throws CoreException
+
     {
-        find((IResourceWorkspaceLocation) fTapestryProject.getWebContextLocation());
+        find((ICoreResource) fTapestryProject.getWebContextLocation());
     }
 
-    private void find(IResourceWorkspaceLocation location) throws CoreException
+    private void find(ICoreResource location)
     {
         // need to ensure the base template exists.
         // if it does we look for localized versions of it!
-        IResourceWorkspaceLocation baseLocation = (IResourceWorkspaceLocation) location
-                .getRelativeResource(fTemplateBaseName + "." + fExtension);
+        ICoreResource baseLocation = (ICoreResource) location.getRelativeResource(fTemplateBaseName
+                + "." + fExtension);
         if (baseLocation.exists())
         {
             fAcceptor.configure(fTemplateBaseName, fExtension);
@@ -274,45 +285,11 @@ public class TemplateFinder
             fProblemCollector.addProblem(severity, location, message, true, code);
 
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.iw.plugins.spindle.core.resources.IResourceLocationAcceptor#getResults()
-     */
-    public IResourceWorkspaceLocation[] getResults()
-    {
-        IResourceWorkspaceLocation[] results = new IResourceWorkspaceLocation[fFindResults.size()];
-        return (IResourceWorkspaceLocation[]) fFindResults.toArray(results);
-    }
-
-    /**
-     * Obtain all the template locations for a component specification
-     * 
-     * @param specification
-     *            the IComponentSpecification we want to find templates for
-     * @param project
-     *            the Tapestry project containing the component specF
-     * @param collector
-     *            an IProblemCollector to collect any problems encountered.
-     * @return an array of IResourceWorkspaceLocation - the template locations.
-     */
-    public static IResourceWorkspaceLocation[] scanForTemplates(
-            IComponentSpecification specification, String templateExtension,
-            ITapestryProject project, IProblemCollector collector)
-    {
-        TemplateFinder finder = new TemplateFinder();
-        IResourceWorkspaceLocation[] locations = new IResourceWorkspaceLocation[0];
-        try
-        {
-            return finder.getTemplates(specification, project, templateExtension, collector);
-
-        }
-        catch (CoreException e)
-        {
-            TapestryCore.log(e);
-        }
-        return new IResourceWorkspaceLocation[] {};
-    }
+    
+//    public ICoreResource[] getResults()
+//    {
+//        ICoreResource[] results = new ICoreResource[fFindResults.size()];
+//        return (ICoreResource[]) fFindResults.toArray(results);
+//    }
 
 }

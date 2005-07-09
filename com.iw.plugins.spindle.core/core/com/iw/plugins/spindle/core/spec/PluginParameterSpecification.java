@@ -30,7 +30,7 @@ import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IParameterSpecification;
 
 import com.iw.plugins.spindle.core.TapestryCore;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.scanning.SpecificationScanner;
@@ -178,7 +178,7 @@ public class PluginParameterSpecification extends DescribableSpecification imple
             {
                 try
                 {
-                    validateTypeSpecial(validator, (IResourceWorkspaceLocation) component
+                    validateTypeSpecial(validator, (ICoreResource) component
                             .getSpecificationLocation(), fType, IProblem.ERROR, sourceInfo
                             .getAttributeSourceLocation(typeAttr));
                 }
@@ -192,7 +192,7 @@ public class PluginParameterSpecification extends DescribableSpecification imple
     }
 
     private Object validateTypeSpecial(IScannerValidator validator,
-            IResourceWorkspaceLocation dependant, String typeName, int severity,
+            ICoreResource dependant, String typeName, int severity,
             ISourceLocation location) throws ScannerException
     {
         String useName = typeName;

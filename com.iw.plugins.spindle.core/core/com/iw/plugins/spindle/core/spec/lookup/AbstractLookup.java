@@ -29,7 +29,7 @@ package com.iw.plugins.spindle.core.spec.lookup;
 import org.apache.tapestry.spec.IComponentSpecification;
 
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 
 /**
  * Base class for lookups
@@ -43,16 +43,16 @@ public abstract class AbstractLookup
 
     private ICoreNamespace fNamespace;
 
-    private IResourceWorkspaceLocation fRootLocation;
+    private ICoreResource fRootLocation;
 
-    private IResourceWorkspaceLocation fWebInfLocation;
+    private ICoreResource fWebInfLocation;
 
-    private IResourceWorkspaceLocation fWebInfAppLocation;
+    private ICoreResource fWebInfAppLocation;
 
     public void configure(ICoreNamespace namespace, ICoreNamespace frameworkNamespace)
     {
         this.fNamespace = namespace;
-        this.fRootLocation = (IResourceWorkspaceLocation) namespace.getSpecificationLocation();
+        this.fRootLocation = (ICoreResource) namespace.getSpecificationLocation();
         fWebInfLocation = null;
         fWebInfAppLocation = null;
     }
@@ -61,24 +61,24 @@ public abstract class AbstractLookup
             String appNameFromWebXML)
     {
         this.fNamespace = applicationNamespace;
-        this.fRootLocation = (IResourceWorkspaceLocation) applicationNamespace
+        this.fRootLocation = (ICoreResource) applicationNamespace
                 .getSpecificationLocation();
-        fWebInfLocation = (IResourceWorkspaceLocation) fRootLocation.getRelativeResource("WEB-INF");
-        fWebInfAppLocation = (IResourceWorkspaceLocation) fWebInfLocation
+        fWebInfLocation = (ICoreResource) fRootLocation.getRelativeResource("WEB-INF");
+        fWebInfAppLocation = (ICoreResource) fWebInfLocation
                 .getRelativeResource(appNameFromWebXML);
     }
 
-    protected IResourceWorkspaceLocation getRootLocation()
+    protected ICoreResource getRootLocation()
     {
         return fRootLocation;
     }
 
-    protected IResourceWorkspaceLocation getWebInfLocation()
+    protected ICoreResource getWebInfLocation()
     {
         return fWebInfLocation;
     }
 
-    protected IResourceWorkspaceLocation getWebInfAppLocation()
+    protected ICoreResource getWebInfAppLocation()
     {
         return fWebInfAppLocation;
     }

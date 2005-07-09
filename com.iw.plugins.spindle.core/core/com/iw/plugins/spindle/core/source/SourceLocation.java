@@ -25,6 +25,9 @@ package com.iw.plugins.spindle.core.source;
 
 public class SourceLocation implements ISourceLocation
 {
+    
+  public static final ISourceLocation FILE_LOCATION = new SourceLocation(1, 0, 0);
+  public static final ISourceLocation FOLDER_LOCATION = new SourceLocation(0, 0, 0);
 
   private int fLineNumber;
   private int fCharStart;

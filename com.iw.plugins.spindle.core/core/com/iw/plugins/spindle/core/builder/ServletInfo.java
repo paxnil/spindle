@@ -27,7 +27,7 @@ package com.iw.plugins.spindle.core.builder;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 
 public class ServletInfo
 {
@@ -36,7 +36,7 @@ public class ServletInfo
   String classname;
   Map parameters = new HashMap();
   boolean isServletSubclass;
-  IResourceWorkspaceLocation applicationSpecLocation;
+  ICoreResource applicationSpecLocation;
   public String toString()
   {
     StringBuffer buffer = new StringBuffer("ServletInfo(");

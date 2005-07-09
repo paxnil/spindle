@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.hivemind.Resource;
 import org.apache.tapestry.INamespace;
-import org.apache.tapestry.IResourceLocation;
 import org.apache.tapestry.spec.IAssetSpecification;
 import org.apache.tapestry.spec.IBeanSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
@@ -50,7 +50,7 @@ import org.apache.tapestry.spec.InjectSpecification;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.extensions.IComponentTypeResourceResolver;
 import com.iw.plugins.spindle.core.extensions.SpindleExtensionException;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.scanning.IScannerValidator;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
@@ -611,7 +611,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
         this.fNamespace = namespace;
     }
 
-    public void addTemplate(IResourceLocation location)
+    public void addTemplate(Resource location)
     {
         if (fTemplates == null)
         {
@@ -632,7 +632,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
     /**
      * @param locations
      */
-    public void setTemplateLocations(IResourceWorkspaceLocation[] locations)
+    public void setTemplateLocations(ICoreResource[] locations)
     {
         if (fTemplates == null)
         {
@@ -657,7 +657,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
             return;
 
         Object type = validator.validateTypeName(
-                (IResourceWorkspaceLocation) getSpecificationLocation(),
+                (ICoreResource) getSpecificationLocation(),
                 fComponentClassName,
                 IProblem.ERROR,
                 sourceInfo.getAttributeSourceLocation("class"));
@@ -669,7 +669,7 @@ public class PluginComponentSpecification extends BaseSpecLocatable implements
         {
             try
             {
-                COMPONENT_TYPE_RESOURCE_RESOLVERS.doResolve((IResourceWorkspaceLocation) this
+                COMPONENT_TYPE_RESOURCE_RESOLVERS.doResolve((ICoreResource) this
                         .getSpecificationLocation(), this);
             }
             catch (SpindleExtensionException e)

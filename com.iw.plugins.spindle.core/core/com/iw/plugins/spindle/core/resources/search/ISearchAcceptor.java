@@ -28,7 +28,7 @@ package com.iw.plugins.spindle.core.resources.search;
 
 
 /**
- * An acceptor that is invoked by the find methods in ClasspathRootLocation.
+ * An acceptor that is invoked by the find methods in ClasspathRoot.
  * 
  * @author glongman@gmail.com
  * 

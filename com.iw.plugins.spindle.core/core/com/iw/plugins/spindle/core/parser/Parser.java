@@ -36,7 +36,6 @@ import org.apache.xerces.dom.DocumentImpl;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
 import org.apache.xerces.xni.parser.XMLParseException;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
@@ -130,20 +129,20 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         return fEclipseDocument;
     }
 
-    //    public String getPublicId()
-    //    {
-    //        if (!fUsePullParser)
-    //        {
-    //            DocumentType type = fXmlDocument.getDoctype();
-    //            if (type != null)
-    //                return type.getPublicId();
+    // public String getPublicId()
+    // {
+    // if (!fUsePullParser)
+    // {
+    // DocumentType type = fXmlDocument.getDoctype();
+    // if (type != null)
+    // return type.getPublicId();
     //
-    //        } else
-    //        {
-    //            return fPullParser.getPublicId();
-    //        }
-    //        return null;
-    //    }
+    // } else
+    // {
+    // return fPullParser.getPublicId();
+    // }
+    // return null;
+    // }
 
     private void checkPullParser()
     {
@@ -236,27 +235,27 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     protected DocumentImpl pullParse(String content) throws IOException
     {
         Assert.isTrue(false, "pull parser on the way out!");
-        //        Node result = null;
-        //        StringReader reader = new StringReader(content);
-        //        try
-        //        {
+        // Node result = null;
+        // StringReader reader = new StringReader(content);
+        // try
+        // {
         //
-        //            checkPullParser();
-        //            fPullParseConfiguration.setInputSource(new XMLInputSource(null, "", null,
+        // checkPullParser();
+        // fPullParseConfiguration.setInputSource(new XMLInputSource(null, "", null,
         // reader, null));
-        //            fPullParseConfiguration.parse();
-        //            if (!fHasFatalErrors)
-        //                result = (Node) fPullParser.getRoot();
+        // fPullParseConfiguration.parse();
+        // if (!fHasFatalErrors)
+        // result = (Node) fPullParser.getRoot();
         //
-        //        } catch (ParserRuntimeException e1)
-        //        {
-        //            // this could happen while scanning the prolog
-        //            createFatalProblem(e1, IProblem.ERROR);
-        //        } catch (Exception e1)
-        //        {
-        //            e1.printStackTrace();
-        //        }
-        //        return result;
+        // } catch (ParserRuntimeException e1)
+        // {
+        // // this could happen while scanning the prolog
+        // createFatalProblem(e1, IProblem.ERROR);
+        // } catch (Exception e1)
+        // {
+        // e1.printStackTrace();
+        // }
+        // return result;
         return null;
     }
 
@@ -273,7 +272,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
         catch (Exception e)
         {
-            //e.printStackTrace();
+            // e.printStackTrace();
             // there was a fatal error - return null
             // all the exceptions are collected already because I am an
             // XMLErrorHandler
@@ -411,7 +410,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
         }
         catch (BadLocationException e)
         {
-            //eat it.
+            // eat it.
         }
         return result;
     }
@@ -476,8 +475,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
     {
-        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message, location
-                .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary, code));
+        addProblem(new DefaultProblem(severity, message, location, isTemporary, code));
     }
 
     public IProblem[] getProblems()
@@ -520,18 +518,18 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
                     + fEclipseDocument.getNumberOfLines(), e);
         }
 
-        return new DefaultProblem(type, severity, ex.getMessage(), lineNumber, charStart, charEnd,
+        return new ParserProblem(type, severity, ex.getMessage(), lineNumber, charStart, charEnd,
                 false, IProblem.NOT_QUICK_FIXABLE);
     }
 
-    //*** XMLErrorHandler for DOM && PULL Parsing **
+    // *** XMLErrorHandler for DOM && PULL Parsing **
 
     /**
      * @see org.apache.xerces.xni.parser.XMLErrorHandler#error(String, String, XMLParseException)
      */
     public void error(String domain, String key, XMLParseException exception) throws XNIException
     {
-        addProblem(createErrorProblem(exception, IMarker.SEVERITY_ERROR));
+        addProblem(createErrorProblem(exception, IProblem.ERROR));
     }
 
     /**
@@ -542,7 +540,7 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
             throws XNIException
     {
         fHasFatalErrors = true;
-        addProblem(createFatalProblem(exception, IMarker.SEVERITY_ERROR));
+        addProblem(createFatalProblem(exception, IProblem.ERROR));
     }
 
     /**
@@ -550,9 +548,9 @@ public class Parser implements ISourceLocationResolver, XMLErrorHandler, IProble
      */
     public void warning(String domain, String key, XMLParseException exception) throws XNIException
     {
-        addProblem(createErrorProblem(exception, IMarker.SEVERITY_WARNING));
+        addProblem(createErrorProblem(exception, IProblem.WARNING));
     }
 
-    ///*** END OF XMLErrorHandler for DOM && PULL Parsing **
+    // /*** END OF XMLErrorHandler for DOM && PULL Parsing **
 
 }

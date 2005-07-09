@@ -132,8 +132,17 @@ public class W3CAccess
 //        }
 //        else
 //        {
-            DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
-            result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.IDENTIFIER);
+       
+            try
+            {
+                DocumentImpl document = (DocumentImpl) node.getOwnerDocument();
+                result = (ISourceLocationInfo) document.getUserData(node, TapestryCore.IDENTIFIER);
+            }
+            catch (RuntimeException e)
+            {
+               
+                e.printStackTrace();
+            }
 //        }
         return result;
     }

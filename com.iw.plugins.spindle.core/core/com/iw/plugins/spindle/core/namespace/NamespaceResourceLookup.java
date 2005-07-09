@@ -33,7 +33,8 @@ import java.util.List;
 import org.apache.hivemind.Resource;
 
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.IResourceRoot;
 import com.iw.plugins.spindle.core.spec.PluginApplicationSpecification;
 import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
 
@@ -54,7 +55,7 @@ public class NamespaceResourceLookup
         fLocations.add(specification.getSpecificationLocation());
     }
 
-    public void configure(PluginApplicationSpecification specification, Resource contextRoot,
+    public void configure(PluginApplicationSpecification specification, IResourceRoot contextRoot,
             String servletName)
     {
         fLocations = new ArrayList();
@@ -74,7 +75,7 @@ public class NamespaceResourceLookup
 
         for (Iterator iter = fLocations.iterator(); iter.hasNext();)
         {
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) iter.next();
+            ICoreResource location = (ICoreResource) iter.next();
             location.lookup(acceptor);
         }
         return acceptor.getResults();

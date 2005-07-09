@@ -53,7 +53,7 @@ import com.iw.plugins.spindle.core.IJavaTypeFinder;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.AbstractBuild;
 import com.iw.plugins.spindle.core.builder.IDependencyListener;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
@@ -213,7 +213,7 @@ public class BaseValidator implements IScannerValidator
      * @param result
      *            the resolved IType, if any
      */
-    protected void fireTypeDependency(IResourceWorkspaceLocation dependant,
+    protected void fireTypeDependency(Resource dependant,
             String fullyQualifiedName, IJavaType result)
     {
         if (fListeners == null)
@@ -259,7 +259,7 @@ public class BaseValidator implements IScannerValidator
      * @param fullyQualifiedName
      * @return
      */
-    public Object findType(IResourceWorkspaceLocation dependant, String fullyQualifiedName)
+    public Object findType(Resource dependant, String fullyQualifiedName)
     {
         IJavaType result = getJavaTypeFinder().findType(fullyQualifiedName);
         fireTypeDependency(dependant, fullyQualifiedName, result);
@@ -419,13 +419,13 @@ public class BaseValidator implements IScannerValidator
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateResourceLocation(java.lang.String,
      *      java.lang.String, com.iw.plugins.spindle.core.parser.ISourceLocation)
      */
-    public boolean validateLibraryResourceLocation(Resource specLocation, String path,
+    public boolean validateLibraryResource(Resource specLocation, String path,
             String errorKey, ISourceLocation source) throws ScannerException
     {
         return false;
     }
 
-    public boolean validateResourceLocation(Resource location, String relativePath,
+    public boolean validateResource(Resource location, String relativePath,
             String errorKey, ISourceLocation source) throws ScannerException
     {
         return validateResourceLocation(location, relativePath, errorKey, source, false);
@@ -444,7 +444,7 @@ public class BaseValidator implements IScannerValidator
         if (relativePath == null || relativePath.startsWith(getDummyStringPrefix()))
             return false;
 
-        IResourceWorkspaceLocation relative = (IResourceWorkspaceLocation) location
+        ICoreResource relative = (ICoreResource) location
                 .getRelativeResource(relativePath);
 
         if (!relative.exists())
@@ -462,7 +462,7 @@ public class BaseValidator implements IScannerValidator
         return true;
     }
 
-    public Object validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
+    public Object validateTypeName(Resource dependant, String fullyQualifiedType,
             int severity) throws ScannerException
     {
         return validateTypeName(dependant, fullyQualifiedType, severity, DefaultSourceLocation);
@@ -473,7 +473,7 @@ public class BaseValidator implements IScannerValidator
      * 
      * @see com.iw.plugins.spindle.core.scanning.IScannerValidator#validateTypeName(java.lang.String)
      */
-    public Object validateTypeName(IResourceWorkspaceLocation dependant, String fullyQualifiedType,
+    public Object validateTypeName(Resource dependant, String fullyQualifiedType,
             int severity, ISourceLocation location) throws ScannerException
     {
 

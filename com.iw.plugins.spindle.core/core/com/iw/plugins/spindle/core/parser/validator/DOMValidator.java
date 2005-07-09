@@ -50,6 +50,7 @@ import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
+import com.iw.plugins.spindle.core.source.SourceLocation;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.wutka.dtd.DTD;
 import com.wutka.dtd.DTDAttribute;
@@ -480,8 +481,8 @@ public class DOMValidator implements IProblemCollector
      */
     private void reportDocumentError(String message)
     {
-        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, IProblem.ERROR, message, 1,
-                -1, -1, false, IProblem.NOT_QUICK_FIXABLE));
+        addProblem(new DefaultProblem(IProblem.ERROR, message, SourceLocation.FILE_LOCATION, false,
+                IProblem.NOT_QUICK_FIXABLE));
     }
 
     private ISourceLocation getTagNameLocation(String name, Node node)
@@ -654,7 +655,7 @@ public class DOMValidator implements IProblemCollector
                         elementName));
             // does it match the first?
             DTDItem item = (DTDItem) items.get(0);
-            DTDItemType type = item.getItemType();
+//            DTDItemType type = item.getItemType();
             DTDCardinal cardinal = item.getCardinal();
             if (match(item, childName))
             { // there can be only ONE!
@@ -763,9 +764,7 @@ public class DOMValidator implements IProblemCollector
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
     {
-        fProblems.add(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message,
-                location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
-                isTemporary, code));
+        fProblems.add(new DefaultProblem(severity, message, location, isTemporary, code));
     }
 
     /*
@@ -776,7 +775,6 @@ public class DOMValidator implements IProblemCollector
     public void addProblem(IProblem problem)
     {
         fProblems.add(problem);
-
     }
 
     /*

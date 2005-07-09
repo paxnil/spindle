@@ -38,7 +38,7 @@ import com.iw.plugins.spindle.core.IJavaType;
 import com.iw.plugins.spindle.core.IJavaTypeFinder;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.properties.CorePropertySource;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.IResourceRoot;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.IProblemPeristManager;
@@ -100,9 +100,9 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
 
     ITapestryProject fTapestryProject;
 
-    IResourceWorkspaceLocation fContextRoot;
+    IResourceRoot fContextRoot;
 
-    IResourceWorkspaceLocation fClasspathRoot;
+    IResourceRoot fClasspathRoot;
 
     IProblemPeristManager fProblemPersister;
 

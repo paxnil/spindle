@@ -59,7 +59,7 @@ import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.template.CoreOpenToken;
 import com.iw.plugins.spindle.core.parser.template.CoreTemplateParser;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.spec.PluginBindingSpecification;
@@ -109,7 +109,7 @@ public class TemplateScanner extends AbstractScanner
     /** @dperecated */
     private SpecFactory fSpecificationFactory;
 
-    private IResourceWorkspaceLocation fTemplateLocation;
+    private ICoreResource fTemplateLocation;
 
     private String fContents;
 
@@ -126,7 +126,7 @@ public class TemplateScanner extends AbstractScanner
     {
         Assert.isNotNull(spec);
         Assert.isNotNull(spec.getNamespace());
-        fTemplateLocation = (IResourceWorkspaceLocation) templateLocation;
+        fTemplateLocation = (ICoreResource) templateLocation;
         fComponentSpec = spec;
         fNamespace = (ICoreNamespace) spec.getNamespace();
         fParser = new CoreTemplateParser();
@@ -369,22 +369,22 @@ public class TemplateScanner extends AbstractScanner
 
             BindingType bindingType = bspec.getType();
 
-            if (bindingType == BindingType.DYNAMIC)
-            {
-                validateImplicitExpressionBinding(bspec, containedSpecification, location
-                        .getLocationOffset(PicassoMigration.OGNL_EXPRESSION_PREFIX.length()));
-                continue;
-            }
-
-            if (bindingType == BindingType.STRING)
-            {
-                validateImplicitStringBinding(bspec, containedSpecification, location
-                        .getLocationOffset(PicassoMigration.LOCALIZATION_KEY_PREFIX.length()));
-                continue;
-            }
-
-            if (bindingType == BindingType.STATIC)
-                validateImplicitStaticBinding(bspec, containedSpecification, location);
+//            if (bindingType == BindingType.DYNAMIC)
+//            {
+//                validateImplicitExpressionBinding(bspec, containedSpecification, location
+//                        .getLocationOffset(PicassoMigration.OGNL_EXPRESSION_PREFIX.length()));
+//                continue;
+//            }
+//
+//            if (bindingType == BindingType.STRING)
+//            {
+//                validateImplicitStringBinding(bspec, containedSpecification, location
+//                        .getLocationOffset(PicassoMigration.LOCALIZATION_KEY_PREFIX.length()));
+//                continue;
+//            }
+//
+//            if (bindingType == BindingType.STATIC)
+//                validateImplicitStaticBinding(bspec, containedSpecification, location);
 
         }
 
@@ -392,7 +392,7 @@ public class TemplateScanner extends AbstractScanner
 
         //        if (fPerformDeferredValidations)
         //            FrameworkComponentValidator.validateImplictComponent(
-        //                    (IResourceWorkspaceLocation) fComponentSpec.getSpecificationLocation(),
+        //                    (ICoreResource) fComponentSpec.getSpecificationLocation(),
         //                    fTemplateLocation,
         //                    fComponentSpec.getNamespace(),
         //                    token.getComponentType(),
