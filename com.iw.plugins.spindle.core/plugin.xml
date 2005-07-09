@@ -5,7 +5,7 @@
    name="Spindle Core Plugin"
    version="3.1.21"
    provider-name="Geoffrey Longman"
-   class="com.iw.plugins.spindle.core.TapestryCore">
+   class="com.iw.plugins.spindle.core.TapestryCorePlugin">
 
    <runtime>
       <library name="core.jar">
@@ -88,7 +88,7 @@
    
    <extension
          point="org.eclipse.core.runtime.preferences">
-      <initializer class="com.iw.plugins.spindle.core.eclipse.PreferenceInitializer"/>
+      <initializer class="com.iw.plugins.spindle.core.PreferenceInitializer"/>
    </extension>
 
    <extension
@@ -97,7 +97,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="com.iw.plugins.spindle.core.eclipse.TapestryProject">
+               class="com.iw.plugins.spindle.core.TapestryProject">
          </run>
       </runtime>
       <requires-nature

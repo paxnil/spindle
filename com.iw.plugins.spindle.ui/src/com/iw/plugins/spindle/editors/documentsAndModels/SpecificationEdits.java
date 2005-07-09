@@ -42,8 +42,8 @@ import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryException;
-import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
+import com.iw.plugins.spindle.core.TapestryPluginException;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.assist.DTDAccess;
@@ -141,7 +141,7 @@ public abstract class SpecificationEdits
     }
   }
 
-  protected EditFactory getFactoryFromDocumentPartitioning(String desiredTag) throws TapestryException
+  protected EditFactory getFactoryFromDocumentPartitioning(String desiredTag) throws TapestryPluginException
   {
 
     EditFactory factory = new EditFactory();
@@ -281,7 +281,7 @@ public abstract class SpecificationEdits
     }
     return factory;
   }
-  protected final int getDocumentInsertBeforeOffset(int desiredOffset) throws TapestryException
+  protected final int getDocumentInsertBeforeOffset(int desiredOffset) throws TapestryPluginException
   {
     try
     {
@@ -293,7 +293,7 @@ public abstract class SpecificationEdits
     return -1;
   }
 
-  protected final int getDocumentInsertAfterOffset(int desiredOffset) throws TapestryException
+  protected final int getDocumentInsertAfterOffset(int desiredOffset) throws TapestryPluginException
   {
     try
     {
@@ -307,7 +307,7 @@ public abstract class SpecificationEdits
     return -1;
   }
 
-  private final int getDocumentInsertAfterOffset(XMLNode node) throws TapestryException
+  private final int getDocumentInsertAfterOffset(XMLNode node) throws TapestryPluginException
   {
     XMLNode correspondingNode = node.getCorrespondingNode();
     if (node.isEmptyTag() || correspondingNode == null)
