@@ -57,7 +57,7 @@ import org.xmen.internal.ui.text.ITypeConstants;
 import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.editors.formatter.DoctypeEditFormatWorker;
 import com.iw.plugins.spindle.editors.formatter.FixedMultiPassContentFormatter;
 import com.iw.plugins.spindle.editors.formatter.FormattingPreferences;
@@ -97,7 +97,7 @@ public class UIUtils
         ITypeConstants.TYPES);
   }
 
-  public static IEditorPart getEditorFor(IResourceWorkspaceLocation location)
+  public static IEditorPart getEditorFor(ICoreResource location)
   {
     IStorage storage = location.getStorage();
     if (storage != null)

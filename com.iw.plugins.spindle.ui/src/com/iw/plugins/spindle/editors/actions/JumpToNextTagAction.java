@@ -78,7 +78,7 @@ public class JumpToNextTagAction extends JumpToNextAttributeAction
       positions = document.getPositions(XMLDocumentPartitioner.CONTENT_TYPES_CATEGORY);
     } catch (BadPositionCategoryException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
       return;
     }
 

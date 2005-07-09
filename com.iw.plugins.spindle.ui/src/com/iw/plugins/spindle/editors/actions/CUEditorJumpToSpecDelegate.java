@@ -44,8 +44,10 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.ITapestryProject;
+import com.iw.plugins.spindle.core.TapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
 
@@ -117,7 +119,7 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
         if (file != null)
         {
             // must be a file
-            ITapestryProject tproject = (ITapestryProject) file.getAdapter(ITapestryProject.class);
+            TapestryProject tproject = (TapestryProject) file.getAdapter(ITapestryProject.class);
             if (tproject != null)
             {
                 // must have tapestry nature
@@ -190,7 +192,7 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
         if (foundSpecs.size() == 1)
         {
             BaseSpecLocatable locatable = (BaseSpecLocatable) foundSpecs.get(0);
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) locatable
+            ICoreResource location = (ICoreResource) locatable
                     .getSpecificationLocation();
             reveal(location);
         }
@@ -200,9 +202,9 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
             for (Iterator iter = foundSpecs.iterator(); iter.hasNext();)
             {
                 BaseSpecLocatable element = (BaseSpecLocatable) iter.next();
-                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) element
+                ICoreResource location = (ICoreResource) element
                         .getSpecificationLocation();
-                if (location != null && location.getStorage() != null)
+                if (location != null && location.exists())
                     locations.add(location);
             }
             new ChooseSpecPopup(locations, true).run();
@@ -240,9 +242,9 @@ public class CUEditorJumpToSpecDelegate extends BaseJumpAction implements IEdito
         /*
          * (non-Javadoc)
          * 
-         * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
+         * @see com.iw.plugins.spindle.editors.actions.BaseEditorAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.ICoreResource)
          */
-        protected Image getImage(IResourceWorkspaceLocation location)
+        protected Image getImage(ICoreResource location)
         {
             String name = location.getName();
             if (name.endsWith(".jwc"))

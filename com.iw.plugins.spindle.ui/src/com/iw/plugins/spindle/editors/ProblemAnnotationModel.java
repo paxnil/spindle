@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
@@ -250,7 +249,7 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
                         }
                         catch (BadLocationException e1)
                         {
-                            UIPlugin.log_it(e1);
+                            UIPlugin.log(e1);
                         }
 
                         temporaryProblemsChanged = true;
@@ -458,22 +457,8 @@ public abstract class ProblemAnnotationModel extends ResourceMarkerAnnotationMod
     public void addProblem(int severity, ISourceLocation location, String message,
             boolean isTemporary, int code)
     {
-        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, severity, message,
-                location.getLineNumber(), location.getCharStart(), location.getCharEnd(),
-                isTemporary, code));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.iw.plugins.spindle.core.source.IProblemCollector#addProblem(org.eclipse.core.runtime.IStatus,
-     *      com.iw.plugins.spindle.core.source.ISourceLocation, boolean)
-     */
-    public void addProblem(IStatus status, ISourceLocation location, boolean isTemporary)
-    {
-        addProblem(new DefaultProblem(IProblem.TAPESTRY_PROBLEM_MARKER, status, location
-                .getLineNumber(), location.getCharStart(), location.getCharEnd(), isTemporary));
-    }
+        addProblem(new DefaultProblem(severity, message, location, isTemporary, code));
+    }    
 
     /*
      * (non-Javadoc)

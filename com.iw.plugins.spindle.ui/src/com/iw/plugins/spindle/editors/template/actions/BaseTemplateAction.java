@@ -82,7 +82,7 @@ public abstract class BaseTemplateAction extends BaseEditorAction
 
     } catch (RuntimeException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
       throw e;
     }
 

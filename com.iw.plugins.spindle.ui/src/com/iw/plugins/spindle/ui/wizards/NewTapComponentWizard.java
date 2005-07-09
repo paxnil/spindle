@@ -110,7 +110,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
       } catch (Exception e1)
       {
         //eat it
-        UIPlugin.log_it(e1);
+        UIPlugin.log(e1);
       } finally
       {
         fPage1.clearResource();
@@ -184,7 +184,7 @@ public class NewTapComponentWizard extends NewTapestryElementWizard
       return true;
     } catch (Exception e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
       MessageDialog.openError(
           getShell(),
           "Operation Failed",

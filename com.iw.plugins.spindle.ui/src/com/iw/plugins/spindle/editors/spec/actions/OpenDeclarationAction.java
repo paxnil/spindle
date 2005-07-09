@@ -48,9 +48,10 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.extensions.eclipse.EclipseComponentTypeResourceResolvers;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
-import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRootLocation;
-import com.iw.plugins.spindle.core.resources.eclipse.ContextRootLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
+import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.editors.spec.assist.SpecTapestryAccess;
@@ -119,7 +120,7 @@ public class OpenDeclarationAction extends BaseSpecAction
         }
         catch (CoreException e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
             ErrorDialog.openError(
                     UIPlugin.getDefault().getActiveWorkbenchShell(),
                     "Operation Aborted",
@@ -142,8 +143,8 @@ public class OpenDeclarationAction extends BaseSpecAction
             throw new IllegalArgumentException(
                     "could not location the 'specification-path' attribute value");
 
-        //here we are doing a classpath lookup,
-        //need to get access to the ClasspathRoot
+        // here we are doing a classpath lookup,
+        // need to get access to the ClasspathRoot
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
@@ -152,12 +153,11 @@ public class OpenDeclarationAction extends BaseSpecAction
             if (project == null)
                 return;
 
-            ClasspathRootLocation root = project.getClasspathRoot();
+            ClasspathRoot root = (ClasspathRoot) project.getClasspathRoot();
             if (root == null)
                 return;
 
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root
-                    .getRelativeResource(path);
+            IEclipseResource location = (IEclipseResource) root.getRelativeResource(path);
             IStorage s = location.getStorage();
             if (s != null)
                 foundResult(s, null, null);
@@ -180,8 +180,8 @@ public class OpenDeclarationAction extends BaseSpecAction
             throw new IllegalArgumentException(
                     "could not location the 'resource-path' attribute value");
 
-        //here we are doing a classpath lookup,
-        //need to get access to the ClasspathRoot
+        // here we are doing a classpath lookup,
+        // need to get access to the ClasspathRoot
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
@@ -190,12 +190,11 @@ public class OpenDeclarationAction extends BaseSpecAction
             if (project == null)
                 return;
 
-            ClasspathRootLocation root = project.getClasspathRoot();
+            ClasspathRoot root = (ClasspathRoot) project.getClasspathRoot();
             if (root == null)
                 return;
 
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) root
-                    .getRelativeResource(path);
+            IEclipseResource location = (IEclipseResource) root.getRelativeResource(path);
             IStorage s = location.getStorage();
             if (s != null)
                 foundResult(s, null, null);
@@ -217,8 +216,8 @@ public class OpenDeclarationAction extends BaseSpecAction
         if (path == null)
             throw new IllegalArgumentException("could not location the 'path' attribute value");
 
-        //here we are doing a context lookup,
-        //need to get access to the ContextRoot
+        // here we are doing a context lookup,
+        // need to get access to the ContextRoot
         IStorage storage = fEditor.getStorage();
         if (storage != null)
         {
@@ -227,12 +226,11 @@ public class OpenDeclarationAction extends BaseSpecAction
             if (project == null)
                 return;
 
-            ContextRootLocation contextRoot = project.getWebContextLocation();
+            ContextRoot contextRoot = (ContextRoot) project.getWebContextLocation();
             if (contextRoot == null)
                 return;
 
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) contextRoot
-                    .getRelativeResource(path);
+            IEclipseResource location = (IEclipseResource) contextRoot.getRelativeResource(path);
             IStorage s = location.getStorage();
             if (s != null)
                 foundResult(s, null, null);
@@ -257,20 +255,18 @@ public class OpenDeclarationAction extends BaseSpecAction
         if (path == null)
             return;
 
-        //here we are doing a relative lookup
-        //need to get the location object for the Spec we are editing
-        //That means it can have no error markers (parsed without error in the last
+        // here we are doing a relative lookup
+        // need to get the location object for the Spec we are editing
+        // That means it can have no error markers (parsed without error in the last
         // build)
         BaseSpecLocatable spec = (BaseSpecLocatable) fEditor.getSpecification();
         if (spec != null)
         {
-            IResourceWorkspaceLocation rootLocation = (IResourceWorkspaceLocation) spec
-                    .getSpecificationLocation();
+            ICoreResource rootLocation = (ICoreResource) spec.getSpecificationLocation();
             if (rootLocation == null)
                 return;
 
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) rootLocation
-                    .getRelativeResource(path);
+            IEclipseResource location = (IEclipseResource) rootLocation.getRelativeResource(path);
             IStorage s = location.getStorage();
             if (s != null)
                 foundResult(s, null, null);
@@ -300,12 +296,13 @@ public class OpenDeclarationAction extends BaseSpecAction
         if (spec == null)
             throw new IllegalArgumentException("could not resolve '" + typeName + "'");
 
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) spec
-                .getSpecificationLocation();
-        if (location == null || location.getStorage() == null)
+        IEclipseResource location = (IEclipseResource) spec.getSpecificationLocation();
+
+        IStorage s = null;
+        if (location == null || (s = location.getStorage()) == null)
             return;
 
-        foundResult(location.getStorage(), null, null);
+        foundResult(s, null, null);
 
     }
 
@@ -380,12 +377,14 @@ public class OpenDeclarationAction extends BaseSpecAction
 
         IParameterSpecification parameterSpec = spec.getParameter(parameterName);
 
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) spec
-                .getSpecificationLocation();
-        if (location == null || location.getStorage() == null)
+        IEclipseResource location = (IEclipseResource) spec.getSpecificationLocation();
+
+        IStorage s = null;
+        if (location == null || (s = location.getStorage()) == null)
             return;
 
-        foundResult(location.getStorage(), parameterName, parameterSpec);
+        foundResult(s, parameterName, parameterSpec);
+       
     }
 
     private void handleTypeLookup(XMLNode artifact, String attrName)
@@ -491,7 +490,7 @@ public class OpenDeclarationAction extends BaseSpecAction
         }
         catch (Exception e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
         }
     }
 

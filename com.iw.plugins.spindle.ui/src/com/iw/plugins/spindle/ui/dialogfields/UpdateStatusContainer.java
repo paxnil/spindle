@@ -108,7 +108,7 @@ public class UpdateStatusContainer implements IDialogFieldChangedListener
           enabled.add(field);
         } catch (ClassCastException e)
         {
-          UIPlugin.log_it(e);
+          UIPlugin.log(e);
         }
       }
       entries = enabled;

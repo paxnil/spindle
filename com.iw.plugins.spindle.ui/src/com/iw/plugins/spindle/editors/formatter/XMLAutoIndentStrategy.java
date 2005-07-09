@@ -133,7 +133,7 @@ public class XMLAutoIndentStrategy extends DefaultAutoIndentStrategy
         }
       } catch (Exception e)
       {
-        UIPlugin.log_it(e);
+        UIPlugin.log(e);
         super.customizeDocumentCommand(document, command);
       }
     }

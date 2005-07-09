@@ -267,7 +267,7 @@ public class TagCompletionProcessor extends SpecCompletionProcessor
       }
     } catch (BadLocationException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
       return NoSuggestions;
     }
 

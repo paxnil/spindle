@@ -38,7 +38,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IStatus;
 
 import com.iw.plugins.spindle.core.extensions.IBeanSpecificationValidator;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.bean.PluginExpressionBeanInitializer;
@@ -144,10 +144,10 @@ public class ScriptBeanValidator implements IBeanSpecificationValidator
       return status;
     }
 
-    IResourceWorkspaceLocation base = (IResourceWorkspaceLocation) bean
+    ICoreResource base = (ICoreResource) bean
         .getLocation()
         .getResource();
-    IResourceWorkspaceLocation script = (IResourceWorkspaceLocation) base
+    ICoreResource script = (ICoreResource) base
         .getRelativeResource(scriptName + ".groovy");
 
     IStorage storage = script.getStorage();

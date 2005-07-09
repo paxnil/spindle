@@ -86,7 +86,7 @@ public class RawTypeDialogField extends StringButtonField
       requiredType = resolveTypeName(hierarchyRoot);
     } catch (JavaModelException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     }
   }
 
@@ -174,7 +174,7 @@ public class RawTypeDialogField extends StringButtonField
       }
     } catch (JavaModelException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     }
 
     return status;
@@ -234,7 +234,7 @@ public class RawTypeDialogField extends StringButtonField
       }
     } catch (JavaModelException jmex)
     {
-      UIPlugin.log_it(jmex);
+      UIPlugin.log(jmex);
     }
     return null;
   }

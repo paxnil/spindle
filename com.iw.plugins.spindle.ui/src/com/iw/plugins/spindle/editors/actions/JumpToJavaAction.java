@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IType;
@@ -44,7 +45,11 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.extensions.eclipse.EclipseComponentTypeResourceResolvers;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathResource;
+import com.iw.plugins.spindle.core.resources.eclipse.ClasspathRoot;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextResource;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.editors.template.TemplateEditor;
 
@@ -107,7 +112,7 @@ public class JumpToJavaAction extends BaseJumpAction
                     return type;
 
                 if (!resolver.doResolve(
-                        (IResourceWorkspaceLocation) componentSpec.getSpecificationLocation(),
+                        (ICoreResource) componentSpec.getSpecificationLocation(),
                         componentSpec).isOK())
                     return null;
 
@@ -157,17 +162,15 @@ public class JumpToJavaAction extends BaseJumpAction
                                 ITapestryProject tproject = (ITapestryProject) storage
                                         .getAdapter(ITapestryProject.class);
 
-                                IResourceWorkspaceLocation specLocation;
+                                ICoreResource specLocation;
                                 if (storage instanceof IFile)
                                 {
-                                    specLocation = tproject.getWebContextLocation()
-                                            .getRelativeResource((IFile) storage);
+                                    specLocation = new ContextResource(((ContextRoot)tproject.getWebContextLocation()),(IResource) storage);
                                 }
                                 else
                                 {
-                                    specLocation = tproject.getClasspathRoot().getRelativeLocation(
-                                            storage);
-                                }
+                                    specLocation = new ClasspathResource(((ClasspathRoot)tproject.getClasspathRoot()), storage);
+                                }                                                           
 
                                 IComponentSpecification componentSpec = (IComponentSpecification) fEditor
                                         .getSpecification();
@@ -183,7 +186,7 @@ public class JumpToJavaAction extends BaseJumpAction
                             }
                             catch (CoreException e)
                             {
-                                UIPlugin.log_it(e);
+                                UIPlugin.log(e);
                             }
                         }
                     }

@@ -291,7 +291,7 @@ public class ProjectTemplatesPropertyPage extends PropertyPage
           .getJavaProjects();
     } catch (JavaModelException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
       jprojects = new IJavaProject[0];
     }
 
@@ -450,7 +450,7 @@ public class ProjectTemplatesPropertyPage extends PropertyPage
           return;
         } catch (IOException e)
         {
-          UIPlugin.log_it(e);
+          UIPlugin.log(e);
           MessageDialog.openError(getShell(), "File Error", "unable to read: " + file);
           return;
         }
@@ -688,7 +688,7 @@ public class ProjectTemplatesPropertyPage extends PropertyPage
       store.save();
     } catch (IOException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
       return false;
     }
     return true;

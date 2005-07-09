@@ -26,10 +26,10 @@ package com.iw.plugins.spindle.core;
  *
  * ***** END LICENSE BLOCK ***** */
 
-import com.iw.plugins.spindle.core.util.Assert;
-
 /**
- * The main plugin class to be used in the desktop.
+ * TODO this has de-evolved into a util class. if and when we go with Hivemind, this stuff can all be
+ * pushed into services. ie. a Logger service to replace the log calls, a CoreEvent service to
+ * replace CoreListeners, a PreferenceService to obtain preference values
  * 
  * @author glongman@gmail.com
  */
@@ -49,7 +49,7 @@ public class TapestryCore implements IPreferenceConstants
 
     IPreferenceSource preferenceSource;
 
-    //The shared instance.
+    // The shared instance.
     private static TapestryCore instance;
 
     /**
@@ -57,11 +57,16 @@ public class TapestryCore implements IPreferenceConstants
      */
     public TapestryCore(ILogger logger, ICoreListeners coreListeners, IPreferenceSource source)
     {
-        Assert.isTrue(instance == null, "Only one instance of TapestryCore is allowed");
         instance = this;
         this.logger = logger;
         this.coreListeners = coreListeners;
         this.preferenceSource = source;
+    }
+
+    /** for testing only */
+    public void setLogger(ILogger logger)
+    {
+        this.logger = logger;
     }
 
     ILogger getLogger()

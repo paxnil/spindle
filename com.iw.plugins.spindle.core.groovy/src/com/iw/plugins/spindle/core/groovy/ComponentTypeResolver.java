@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.extensions.IComponentTypeResourceResolver;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 
 /**
@@ -81,16 +81,16 @@ public class ComponentTypeResolver implements IComponentTypeResourceResolver
 //        return true;
     } catch (JavaModelException e)
     {
-      TapestryCore.log_it(e);    
+      TapestryCore.log(e);    
     }
     return false;
   }
 
   /* (non-Javadoc)
-   * @see com.iw.plugins.spindle.core.extensions.IComponentTypeResourceResolver#doResolve(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation, org.apache.tapestry.spec.IComponentSpecification)
+   * @see com.iw.plugins.spindle.core.extensions.IComponentTypeResourceResolver#doResolve(com.iw.plugins.spindle.core.resources.ICoreResource, org.apache.tapestry.spec.IComponentSpecification)
    */
   public IStatus doResolve(
-      IResourceWorkspaceLocation specificationLocation,
+      ICoreResource specificationLocation,
       IComponentSpecification componentSpec)
   {
     SpindleStatus status = new SpindleStatus();
@@ -103,7 +103,7 @@ public class ComponentTypeResolver implements IComponentTypeResourceResolver
     
     String scriptName = specStorage.getFullPath().removeFileExtension().lastSegment();
     
-    IResourceWorkspaceLocation scriptLocation = (IResourceWorkspaceLocation) specificationLocation.getRelativeResource(scriptName+".groovy");
+    ICoreResource scriptLocation = (ICoreResource) specificationLocation.getRelativeResource(scriptName+".groovy");
     
     fStorage = scriptLocation.getStorage();
     

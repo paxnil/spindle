@@ -202,7 +202,7 @@ public class ProjectPropertyPage extends PropertyPage
                 IPath selected = (IPath) selection;
 
                 if (DEBUG)
-                    UIPlugin.log_it("validation path: " + selected);
+                    UIPlugin.log("validation path: " + selected);
 
                 IWorkspaceRoot root = UIPlugin.getWorkspace().getRoot();
 
@@ -214,7 +214,7 @@ public class ProjectPropertyPage extends PropertyPage
                 if (!project.equals(selectedProject))
                 {
                     if (DEBUG)
-                        UIPlugin.log_it("validation failed: wrong project");
+                        UIPlugin.log("validation failed: wrong project");
                     return UIPlugin.getString("property-page-wrong-project");
                 }
 
@@ -222,18 +222,18 @@ public class ProjectPropertyPage extends PropertyPage
                 if (isOnOutputPath(jproject, selected))
                 {
                     if (DEBUG)
-                        UIPlugin.log_it("validation failed: path is in the compiler output folder");
+                        UIPlugin.log("validation failed: path is in the compiler output folder");
                     return UIPlugin.getString("property-page-output-folder");
                 }
                 if (isOnSourcePath(jproject, selected))
                 {
                     if (DEBUG)
-                        UIPlugin.log_it("validation failed: path is in the java source path");
+                        UIPlugin.log("validation failed: path is in the java source path");
                     return UIPlugin.getString("property-page-no-source-path");
                 }
 
                 if (DEBUG)
-                    UIPlugin.log_it("validation passed");
+                    UIPlugin.log("validation passed");
                 return null;
             }
             catch (CoreException e)
@@ -324,7 +324,7 @@ public class ProjectPropertyPage extends PropertyPage
         }
         catch (CoreException ex)
         {
-            TapestryCore.log_it(ex.getMessage());
+            TapestryCore.log(ex.getMessage());
         }
     }
 
@@ -431,7 +431,7 @@ public class ProjectPropertyPage extends PropertyPage
         }
         catch (CoreException e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
         }
 
         if (jproject == null)
@@ -455,7 +455,7 @@ public class ProjectPropertyPage extends PropertyPage
         }
         catch (CoreException e1)
         {
-            UIPlugin.log_it(e1);
+            UIPlugin.log(e1);
         }
 
         if (!fIsTapestryProjectCheck.getSelection())
@@ -481,7 +481,7 @@ public class ProjectPropertyPage extends PropertyPage
             return false;
         }
         if (DEBUG)
-            UIPlugin.log_it("isValid() ->about to validate the context root: " + wcroot);
+            UIPlugin.log("isValid() ->about to validate the context root: " + wcroot);
         String badApp;
         try
         {
@@ -490,7 +490,7 @@ public class ProjectPropertyPage extends PropertyPage
         catch (RuntimeException e2)
         {
             if (DEBUG)
-                UIPlugin.log_it("isValid() -> an exception ocurred");
+                UIPlugin.log("isValid() -> an exception ocurred");
             throw e2;
         }
         if (badApp != null)
@@ -623,7 +623,7 @@ public class ProjectPropertyPage extends PropertyPage
     protected String getContextRootLocation()
     {
         if (DEBUG)
-            UIPlugin.log_it("getting the context root");
+            UIPlugin.log("getting the context root");
 
         String result = "/context";
         try
@@ -634,25 +634,25 @@ public class ProjectPropertyPage extends PropertyPage
             {
                 if (DEBUG)
                     UIPlugin
-                            .log_it("tapestry project is not null - trying to get the context from it..");
+                            .log("tapestry project is not null - trying to get the context from it..");
                 result = "/"
                         + prj.getWebContextFolder().getFullPath().removeFirstSegments(1).toString();
                 if (result == null || "".equals(result.trim()))
                 {
                     if (DEBUG)
-                        UIPlugin.log_it("The tapestry project returned: '" + result
+                        UIPlugin.log("The tapestry project returned: '" + result
                                 + "' going to the workspace properties....");
 
                     result = getPropertyFromWorkspace(key);
 
                     if (DEBUG)
-                        UIPlugin.log_it("got: " + result + " from the workspace properites.");
+                        UIPlugin.log("got: " + result + " from the workspace properites.");
 
                 }
                 else
                 {
                     if (DEBUG)
-                        UIPlugin.log_it("got: " + result + " from the tapestry project");
+                        UIPlugin.log("got: " + result + " from the tapestry project");
                 }
             }
             else
@@ -663,12 +663,12 @@ public class ProjectPropertyPage extends PropertyPage
                 if (result == null || "".equals(result.trim()))
                 {
                     if (DEBUG)
-                        UIPlugin.log_it("No Tapeestry project, going to the workspace properties...");
+                        UIPlugin.log("No Tapeestry project, going to the workspace properties...");
 
                     result = getPropertyFromWorkspace(key);
 
                     if (DEBUG)
-                        UIPlugin.log_it("got: " + result + " from the workspace properites.");
+                        UIPlugin.log("got: " + result + " from the workspace properites.");
                 }
             }
 
@@ -676,11 +676,11 @@ public class ProjectPropertyPage extends PropertyPage
         catch (CoreException ex)
         {
             if (DEBUG)
-                UIPlugin.log_it("A CoreException occurred accessing the context root");
+                UIPlugin.log("A CoreException occurred accessing the context root");
         }
 
         if (DEBUG)
-            UIPlugin.log_it("returning context root = " + result);
+            UIPlugin.log("returning context root = " + result);
         return result;
     }
 
@@ -690,7 +690,7 @@ public class ProjectPropertyPage extends PropertyPage
     protected Control createContents(Composite parent)
     {
         if (DEBUG)
-            UIPlugin.log_it("Tapestry Properties Page creation started.");
+            UIPlugin.log("Tapestry Properties Page creation started.");
         Composite composite = new Composite(parent, SWT.NONE);
         GridLayout layout = new GridLayout();
         composite.setLayout(layout);
@@ -705,7 +705,7 @@ public class ProjectPropertyPage extends PropertyPage
         //        addLibrarySection(composite);
 
         if (DEBUG)
-            UIPlugin.log_it("Tapestry Properties Page creation done.");
+            UIPlugin.log("Tapestry Properties Page creation done.");
         return composite;
     }
 
@@ -732,7 +732,7 @@ public class ProjectPropertyPage extends PropertyPage
             }
             catch (CoreException e)
             {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
             }
         }
         else
@@ -750,18 +750,18 @@ public class ProjectPropertyPage extends PropertyPage
                         }
                         catch (CoreException e)
                         {
-                            UIPlugin.log_it(e);
+                            UIPlugin.log(e);
                         }
                     }
                 });
             }
             catch (InvocationTargetException e)
             {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
             }
             catch (InterruptedException e)
             {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
             }
         }
 
@@ -833,7 +833,7 @@ public class ProjectPropertyPage extends PropertyPage
                     }
                     catch (JavaModelException e)
                     {
-                        UIPlugin.log_it(e);
+                        UIPlugin.log(e);
                     }
 
                 }
@@ -872,7 +872,7 @@ public class ProjectPropertyPage extends PropertyPage
         }
         catch (CoreException e)
         {
-            TapestryCore.log_it(e);
+            TapestryCore.log(e);
             System.err.println(e.getStatus().getMessage());
         }
     }
@@ -897,7 +897,7 @@ public class ProjectPropertyPage extends PropertyPage
     public void dispose()
     {
         if (DEBUG)
-            UIPlugin.log_it("Tapestry Property Page closed (disposed)\n\n\n");
+            UIPlugin.log("Tapestry Property Page closed (disposed)\n\n\n");
         super.dispose();
     }
 

@@ -32,7 +32,7 @@ import org.eclipse.jface.text.IDocument;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.TapestryException;
+import com.iw.plugins.spindle.core.TapestryPluginException;
 import com.iw.plugins.spindle.core.parser.validator.DOMValidator;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.PluginComponentTypeDeclaration;
@@ -74,7 +74,7 @@ public class LibraryEdits extends SpecificationEdits
         PreferenceConstants.FORMATTER_TAB_SIZE);
   }
 
-  public void addPageDeclaration(String name, String resourcePath) throws TapestryException
+  public void addPageDeclaration(String name, String resourcePath) throws TapestryPluginException
   {
     if (fPageEditFactory == null)
       createPageFactory();
@@ -95,7 +95,7 @@ public class LibraryEdits extends SpecificationEdits
     setEdit(fPageEditFactory.getTextEdit(content));
   }
 
-  public void addComponentDeclaration(String id, String resourcePath) throws TapestryException
+  public void addComponentDeclaration(String id, String resourcePath) throws TapestryPluginException
   {
     if (fComponentEditFactory == null)
       createComponentFactory();
@@ -116,7 +116,7 @@ public class LibraryEdits extends SpecificationEdits
     setEdit(fComponentEditFactory.getTextEdit(content));
   }
 
-  private void createPageFactory() throws TapestryException
+  private void createPageFactory() throws TapestryPluginException
   {
 
     if (fSpec == null)
@@ -139,7 +139,7 @@ public class LibraryEdits extends SpecificationEdits
       fPageEditFactory = getFactoryFromDocumentPartitioning("page");
   }
 
-  private void createComponentFactory() throws TapestryException
+  private void createComponentFactory() throws TapestryPluginException
   {
     if (fSpec == null)
     {

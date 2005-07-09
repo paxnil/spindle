@@ -96,7 +96,7 @@ public class ApplicationFactory extends TemplateFactory
           homePagePath).getBytes());
     } catch (Exception e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
       contents = new ByteArrayInputStream("\n\n\n\nan error occured. Check the log"
           .getBytes());
     }

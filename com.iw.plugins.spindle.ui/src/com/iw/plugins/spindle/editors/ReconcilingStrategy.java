@@ -87,7 +87,7 @@ public class ReconcilingStrategy
 
     } catch (Exception x)
     {
-      UIPlugin.log_it(x);
+      UIPlugin.log(x);
     }
   }
 

@@ -224,7 +224,7 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
               addAnnotation(annotation, position, false);
             } catch (BadLocationException e1)
             {
-              UIPlugin.log_it(e1);
+              UIPlugin.log(e1);
             }
 
             temporaryParserProblemsChanged = true;
@@ -295,7 +295,7 @@ public class SpecAnnotationModel extends ProblemAnnotationModel
               addAnnotation(annotation, position, false);
             } catch (BadLocationException e1)
             {
-              UIPlugin.log_it(e1);
+              UIPlugin.log(e1);
             }
 
             temporaryProblemsChanged = true;

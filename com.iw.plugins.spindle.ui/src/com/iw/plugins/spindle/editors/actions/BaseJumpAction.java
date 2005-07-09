@@ -144,7 +144,7 @@ public abstract class BaseJumpAction extends BaseEditorAction
       doRun();
     } catch (RuntimeException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     } 
   }
 

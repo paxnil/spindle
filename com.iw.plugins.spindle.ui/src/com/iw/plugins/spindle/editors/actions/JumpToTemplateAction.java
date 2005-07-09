@@ -39,7 +39,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 
 import com.iw.plugins.spindle.Images;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
 import com.iw.plugins.spindle.core.util.Assert;
@@ -89,7 +90,7 @@ public class JumpToTemplateAction extends BaseJumpAction
       new ChooseTemplateLocationPopup(possibles, true).run();
     } else
     {
-      reveal((IResourceWorkspaceLocation) possibles.get(0));
+      reveal((ICoreResource) possibles.get(0));
     }
 
   }
@@ -113,7 +114,7 @@ public class JumpToTemplateAction extends BaseJumpAction
     List finalResult = new ArrayList();
     for (Iterator iter = locations.iterator(); iter.hasNext();)
     {
-      IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
+      IEclipseResource element = (IEclipseResource) iter.next();
       IStorage storage = element.getStorage();
       if (storage == null || storage.equals(currentStorage))
         continue;
@@ -135,9 +136,9 @@ public class JumpToTemplateAction extends BaseJumpAction
       List possibles = getTemplateLocations((PluginComponentSpecification) spec);
       for (Iterator iter = possibles.iterator(); iter.hasNext();)
       {
-        IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
+        ICoreResource element = (ICoreResource) iter.next();
         Action openAction = new MenuOpenTemplateAction(element);
-        openAction.setEnabled(element.getStorage() != null);
+        openAction.setEnabled(element.exists());
         menu.add(openAction);
       }
     }
@@ -146,9 +147,9 @@ public class JumpToTemplateAction extends BaseJumpAction
 
   class MenuOpenTemplateAction extends Action
   {
-    IResourceWorkspaceLocation location;
+    ICoreResource location;
 
-    public MenuOpenTemplateAction(IResourceWorkspaceLocation location)
+    public MenuOpenTemplateAction(ICoreResource location)
     {
       Assert.isNotNull(location);
       this.location = location;
@@ -175,9 +176,9 @@ public class JumpToTemplateAction extends BaseJumpAction
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
+     * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.ICoreResource)
      */
-    protected Image getImage(IResourceWorkspaceLocation location)
+    protected Image getImage(ICoreResource location)
     {
       return Images.getSharedImage("html16.gif");
     }

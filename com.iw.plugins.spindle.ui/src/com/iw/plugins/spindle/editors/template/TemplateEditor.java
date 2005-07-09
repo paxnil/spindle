@@ -33,6 +33,7 @@ import java.util.Map;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.core.JarEntryFile;
 import org.eclipse.jface.action.Action;
@@ -64,7 +65,8 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.CoreMessages;
-import com.iw.plugins.spindle.core.TapestryCore;
+import com.iw.plugins.spindle.core.ITapestryProject;
+import com.iw.plugins.spindle.core.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.scanning.BaseValidator;
@@ -127,13 +129,13 @@ public class TemplateEditor extends Editor
         }
         catch (IOException e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
         }
     }
 
     private TemplateScanner fScanner = new TemplateScanner();
 
-    private IScannerValidator fValidator = new BaseValidator();
+    private IScannerValidator fValidator;
 
     private HighlightUpdater fHighlightUpdater;
 
@@ -156,10 +158,10 @@ public class TemplateEditor extends Editor
 
         IAction action = new SaveHTMLTemplateAction(
                 "Save this file as the template used by Tapestry Wizards");
-        //TODO I10N
+        // TODO I10N
         action.setActionDefinitionId(SAVE_HTML_TEMPLATE);
         setAction(SAVE_HTML_TEMPLATE, action);
-        action = new RevertTemplateAction("Revert the saved template to the default value"); //TODO
+        action = new RevertTemplateAction("Revert the saved template to the default value"); // TODO
         // I10N
         action.setActionDefinitionId(REVERT_HTML_TEMPLATE);
         setAction(REVERT_HTML_TEMPLATE, action);
@@ -185,7 +187,7 @@ public class TemplateEditor extends Editor
     protected void editorContextMenuAboutToShow(IMenuManager menu)
     {
         super.editorContextMenuAboutToShow(menu);
-         if (!(getStorage() instanceof JarEntryFile))
+        if (!(getStorage() instanceof JarEntryFile))
         {
             addAction(menu, NAV_GROUP, OpenDeclarationAction.ACTION_ID);
             addAction(menu, NAV_GROUP, ShowInPackageExplorerAction.ACTION_ID);
@@ -198,14 +200,14 @@ public class TemplateEditor extends Editor
         if (!moreNav.isEmpty())
             menu.appendToGroup(NAV_GROUP, moreNav);
 
-        //        menu.insertBefore(ITextEditorActionConstants.GROUP_SAVE, new
+        // menu.insertBefore(ITextEditorActionConstants.GROUP_SAVE, new
         // GroupMarker(HTML_GROUP));
-        //        MenuManager templateMenu = new MenuManager("Template");
-        //        templateMenu.add(getAction(SAVE_HTML_TEMPLATE));
-        //        templateMenu.add(getAction(REVERT_HTML_TEMPLATE));
-        //        menu.appendToGroup(HTML_GROUP, templateMenu);
-        //        addAction(menu, HTML_GROUP, SAVE_HTML_TEMPLATE);
-        //        addAction(menu, HTML_GROUP, REVERT_HTML_TEMPLATE);
+        // MenuManager templateMenu = new MenuManager("Template");
+        // templateMenu.add(getAction(SAVE_HTML_TEMPLATE));
+        // templateMenu.add(getAction(REVERT_HTML_TEMPLATE));
+        // menu.appendToGroup(HTML_GROUP, templateMenu);
+        // addAction(menu, HTML_GROUP, SAVE_HTML_TEMPLATE);
+        // addAction(menu, HTML_GROUP, REVERT_HTML_TEMPLATE);
 
         MenuManager sourceMenu = new MenuManager("Refactor");
         MoveToSpecAction moveAction = (MoveToSpecAction) getAction(MoveToSpecAction.ACTION_ID);
@@ -297,16 +299,25 @@ public class TemplateEditor extends Editor
 
             if (component != null)
             {
-                didReconcile = true;
+
                 fScanner.setExternalProblemCollector(collector);
                 fScanner.setPerformDeferredValidations(false);
-                fValidator.setProblemCollector(fScanner);
                 try
                 {
+                    IProject project = (IProject) getStorage().getAdapter(IProject.class);
+                    ITapestryProject tproject = (ITapestryProject) project
+                            .getNature(TapestryCorePlugin.NATURE_ID);
+                    fValidator = new BaseValidator(tproject);
+                    fValidator.setProblemCollector(fScanner);
                     fScanner.scanTemplate(component, getDocumentProvider().getDocument(
                             getEditorInput()).get(), fValidator);
+                    didReconcile = true;
                 }
                 catch (ScannerException e)
+                {
+                    UIPlugin.log(e);
+                }
+                catch (CoreException e)
                 {
                     UIPlugin.log(e);
                 }
@@ -376,7 +387,7 @@ public class TemplateEditor extends Editor
         {
             if (MessageDialog
                     .openConfirm(getEditorSite().getShell(), "Confirm revert to Default",
-                    //TODO I10N
+                    // TODO I10N
                             "All new components or pages created with the wizard will use the default template.\n\nProceed?"))
             {
                 IEditorInput input = getEditorInput();
@@ -452,7 +463,7 @@ public class TemplateEditor extends Editor
 
         private int fOffset;
 
-        //        private XMLDocumentPartitioner fHighlightPartitioner;
+        // private XMLDocumentPartitioner fHighlightPartitioner;
 
         public HighlightUpdater()
         {
@@ -463,17 +474,17 @@ public class TemplateEditor extends Editor
          */
         public void run()
         {
-            //            if (fHighlightPartitioner == null)
-            //                fHighlightPartitioner =
-            //                    new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
+            // if (fHighlightPartitioner == null)
+            // fHighlightPartitioner =
+            // new XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
             // XMLDocumentPartitioner.TYPES);
 
             IDocument document = getDocumentProvider().getDocument(getEditorInput());
 
             try
             {
-                //                fHighlightPartitioner.connect(document);
-                //                XMLNode.createTree(document, -1);
+                // fHighlightPartitioner.connect(document);
+                // XMLNode.createTree(document, -1);
                 XMLNode artifact = XMLNode.getArtifactAt(document, fOffset);
                 if (artifact == null)
                     return;
@@ -506,18 +517,18 @@ public class TemplateEditor extends Editor
             }
             catch (Exception e)
             {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
             }
             finally
             {
                 fPosted = false;
-                //                try
-                //                {
-                //                    fHighlightPartitioner.disconnect();
-                //                } catch (Exception e)
-                //                {
-                //                    UIPlugin.log(e);
-                //                }
+                // try
+                // {
+                // fHighlightPartitioner.disconnect();
+                // } catch (Exception e)
+                // {
+                // UIPlugin.log(e);
+                // }
             }
 
         }

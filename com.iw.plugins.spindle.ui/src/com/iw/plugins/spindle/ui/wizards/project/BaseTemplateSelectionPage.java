@@ -356,7 +356,7 @@ public class BaseTemplateSelectionPage extends TapestryWizardPage implements IFa
 
           } catch (Exception e)
           {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
             throw new InvocationTargetException(e);
           }
         }

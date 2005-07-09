@@ -69,7 +69,8 @@ import org.xmen.internal.ui.text.XMLReconciler;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.editors.Editor;
 import com.iw.plugins.spindle.editors.documentsAndModels.IXMLModelProvider;
 
@@ -163,7 +164,7 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         }
         catch (JavaModelException e)
         {
-            //do nothing
+            // do nothing
         }
         return null;
     }
@@ -179,7 +180,7 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         }
         catch (JavaModelException e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
         }
         return null;
     }
@@ -192,7 +193,7 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         }
         catch (JavaModelException e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
         }
         return null;
     }
@@ -205,11 +206,11 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         }
         catch (PartInitException e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
         }
         catch (JavaModelException e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
         }
     }
 
@@ -276,7 +277,7 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         {
             if (selection != null)
             {
-                IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) selection;
+                ICoreResource location = (ICoreResource) selection;
                 reveal(location);
             }
         }
@@ -340,15 +341,15 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
             Rectangle displayBounds = display.getClientArea();
             Rectangle parentBounds = dialog.getParent().getBounds();
 
-            //Place it in the center of its parent;
+            // Place it in the center of its parent;
             dialogBounds.x = parentBounds.x + ((parentBounds.width - dialogBounds.width) / 2);
             dialogBounds.y = parentBounds.y + ((parentBounds.height - dialogBounds.height) / 2);
             if (!displayBounds.contains(dialogBounds.x, dialogBounds.y)
                     || !displayBounds.contains(dialogBounds.x + dialogBounds.width, dialogBounds.y
                             + dialogBounds.height))
             {
-                //Place it in the center of the display if it is not visible
-                //when placed in the center of its parent;
+                // Place it in the center of the display if it is not visible
+                // when placed in the center of its parent;
                 dialogBounds.x = (displayBounds.width - dialogBounds.width) / 2;
                 dialogBounds.y = (displayBounds.height - dialogBounds.height) / 2;
             }
@@ -395,7 +396,7 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         {
             for (Iterator iter = fTemplateLocations.iterator(); iter.hasNext();)
             {
-                IResourceWorkspaceLocation element = (IResourceWorkspaceLocation) iter.next();
+                IEclipseResource element = (IEclipseResource) iter.next();
                 if (element.getStorage() == null)
                     continue;
                 TableItem item = new TableItem(table, SWT.NONE);
@@ -405,7 +406,7 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
             }
         }
 
-        protected abstract Image getImage(IResourceWorkspaceLocation location);
+        protected abstract Image getImage(ICoreResource location);
 
         private void addKeyListener(final Table table, final Shell dialog)
         {
@@ -423,70 +424,70 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
                     int accelerator = stateMask
                             | (keyCode != 0 ? keyCode : convertCharacter(character));
 
-                    //                    System.out.println("\nPRESSED");
-                    //                    printKeyEvent(e);
-                    //                    System.out.println(
-                    //                        "accelerat:\t"
-                    //                            + accelerator
-                    //                            + "\t ("
-                    //                            + KeySupport.formatStroke(Stroke.create(accelerator), true)
-                    //                            + ")");
+                    // System.out.println("\nPRESSED");
+                    // printKeyEvent(e);
+                    // System.out.println(
+                    // "accelerat:\t"
+                    // + accelerator
+                    // + "\t ("
+                    // + KeySupport.formatStroke(Stroke.create(accelerator), true)
+                    // + ")");
 
                     boolean acceleratorForward = false;
                     boolean acceleratorBackward = false;
-                    //TODO revisit
-                    //                    if (commandForward != null)
-                    //                    {
-                    //                        Map commandMap =
+                    // TODO revisit
+                    // if (commandForward != null)
+                    // {
+                    // Map commandMap =
                     // Manager.getInstance().getKeyMachine().getCommandMap();
-                    //                        SortedSet sequenceSet = (SortedSet) commandMap.get(commandForward);
+                    // SortedSet sequenceSet = (SortedSet) commandMap.get(commandForward);
                     //
-                    //                        if (sequenceSet != null)
-                    //                        {
-                    //                            Iterator iterator = sequenceSet.iterator();
+                    // if (sequenceSet != null)
+                    // {
+                    // Iterator iterator = sequenceSet.iterator();
                     //
-                    //                            while (iterator.hasNext())
-                    //                            {
-                    //                                Sequence sequence = (Sequence) iterator.next();
-                    //                                List strokes = sequence.getStrokes();
-                    //                                int size = strokes.size();
+                    // while (iterator.hasNext())
+                    // {
+                    // Sequence sequence = (Sequence) iterator.next();
+                    // List strokes = sequence.getStrokes();
+                    // int size = strokes.size();
                     //
-                    //                                if (size > 0 && accelerator == ((Stroke) strokes.get(size -
+                    // if (size > 0 && accelerator == ((Stroke) strokes.get(size -
                     // 1)).getValue())
-                    //                                {
-                    //                                    acceleratorForward = true;
-                    //                                    break;
-                    //                                }
-                    //                            }
-                    //                        }
-                    //                    }
+                    // {
+                    // acceleratorForward = true;
+                    // break;
+                    // }
+                    // }
+                    // }
+                    // }
                     //
-                    //                    if (commandBackward != null)
-                    //                    {
-                    //                        Map commandMap =
+                    // if (commandBackward != null)
+                    // {
+                    // Map commandMap =
                     // Manager.getInstance().getKeyMachine().getCommandMap();
-                    //                        SortedSet sequenceSet = (SortedSet)
+                    // SortedSet sequenceSet = (SortedSet)
                     // commandMap.get(commandBackward);
                     //
-                    //                        if (sequenceSet != null)
-                    //                        {
-                    //                            Iterator iterator = sequenceSet.iterator();
+                    // if (sequenceSet != null)
+                    // {
+                    // Iterator iterator = sequenceSet.iterator();
                     //
-                    //                            while (iterator.hasNext())
-                    //                            {
-                    //                                Sequence sequence = (Sequence) iterator.next();
-                    //                                List strokes = sequence.getStrokes();
-                    //                                int size = strokes.size();
+                    // while (iterator.hasNext())
+                    // {
+                    // Sequence sequence = (Sequence) iterator.next();
+                    // List strokes = sequence.getStrokes();
+                    // int size = strokes.size();
                     //
-                    //                                if (size > 0 && accelerator == ((Stroke) strokes.get(size -
+                    // if (size > 0 && accelerator == ((Stroke) strokes.get(size -
                     // 1)).getValue())
-                    //                                {
-                    //                                    acceleratorBackward = true;
-                    //                                    break;
-                    //                                }
-                    //                            }
-                    //                        }
-                    //                    }
+                    // {
+                    // acceleratorBackward = true;
+                    // break;
+                    // }
+                    // }
+                    // }
+                    // }
 
                     if (character == SWT.CR || character == SWT.LF)
                         ok(dialog, table);
@@ -523,14 +524,14 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
                     int accelerator = stateMask
                             | (keyCode != 0 ? keyCode : convertCharacter(character));
 
-                    //                    System.out.println("\nRELEASED");
-                    //                    printKeyEvent(e);
-                    //                    System.out.println(
-                    //                        "accelerat:\t"
-                    //                            + accelerator
-                    //                            + "\t ("
-                    //                            + KeySupport.formatStroke(Stroke.create(accelerator), true)
-                    //                            + ")");
+                    // System.out.println("\nRELEASED");
+                    // printKeyEvent(e);
+                    // System.out.println(
+                    // "accelerat:\t"
+                    // + accelerator
+                    // + "\t ("
+                    // + KeySupport.formatStroke(Stroke.create(accelerator), true)
+                    // + ")");
 
                     if ((firstKey || quickReleaseMode) && keyCode == stateMask
                             && keyCode != SWT.ALT)
@@ -545,23 +546,23 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
         }
 
         //    
-        //        private void printKeyEvent(KeyEvent keyEvent)
-        //        {
-        //            System.out.println(
-        //                "keyCode:\t"
-        //                    + keyEvent.keyCode
-        //                    + "\t ("
-        //                    + KeySupport.formatStroke(Stroke.create(keyEvent.keyCode), true)
-        //                    + ")");
-        //            System.out.println(
-        //                "stateMask:\t"
-        //                    + keyEvent.stateMask
-        //                    + "\t ("
-        //                    + KeySupport.formatStroke(Stroke.create(keyEvent.stateMask), true)
-        //                    + ")");
-        //            System.out.println("character:\t" + (int) keyEvent.character + "\t (" +
+        // private void printKeyEvent(KeyEvent keyEvent)
+        // {
+        // System.out.println(
+        // "keyCode:\t"
+        // + keyEvent.keyCode
+        // + "\t ("
+        // + KeySupport.formatStroke(Stroke.create(keyEvent.keyCode), true)
+        // + ")");
+        // System.out.println(
+        // "stateMask:\t"
+        // + keyEvent.stateMask
+        // + "\t ("
+        // + KeySupport.formatStroke(Stroke.create(keyEvent.stateMask), true)
+        // + ")");
+        // System.out.println("character:\t" + (int) keyEvent.character + "\t (" +
         // keyEvent.character + ")");
-        //        }
+        // }
 
         /*
          * Close the dialog saving the selection
@@ -616,17 +617,17 @@ public abstract class BaseEditorAction extends Action implements IEditorActionDe
     /**
      * @param location
      */
-    protected void reveal(IResourceWorkspaceLocation location)
+    protected void reveal(ICoreResource location)
     {
         if (location == null)
             return;
-        reveal(location.getStorage());
+        reveal(((IEclipseResource)location).getStorage());
     }
 
     protected void reveal(IStorage storage)
     {
         if (storage != null)
             UIPlugin.openTapestryEditor((IStorage) storage);
-    }   
+    }
 
 }

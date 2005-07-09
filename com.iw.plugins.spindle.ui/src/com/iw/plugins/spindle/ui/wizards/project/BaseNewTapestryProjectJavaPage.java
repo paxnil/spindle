@@ -132,12 +132,12 @@ public class BaseNewTapestryProjectJavaPage extends JavaCapabilityConfigurationP
                 if (getWizard() == null)
                 {
                     UIPlugin
-                            .log_it("creating : wizard is null: bug [ 843021 ] Is this what 3 Beta is supposed to do");
+                            .log("creating : wizard is null: bug [ 843021 ] Is this what 3 Beta is supposed to do");
                 }
                 else
                 {
                     UIPlugin
-                            .log_it("creating : container not set in wizard: bug [ 843021 ] Is this what 3 Beta is supposed to do");
+                            .log("creating : container not set in wizard: bug [ 843021 ] Is this what 3 Beta is supposed to do");
                 }
                 context = (IRunnableContext) UIPlugin.getDefault().getActivePage();
             }
@@ -228,7 +228,7 @@ public class BaseNewTapestryProjectJavaPage extends JavaCapabilityConfigurationP
         }
         catch (SecurityException e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
         }
         catch (NoSuchMethodException e)
         {
@@ -244,7 +244,7 @@ public class BaseNewTapestryProjectJavaPage extends JavaCapabilityConfigurationP
             }
             catch (Throwable e)
             {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
             }
             return detector;
         }
@@ -257,7 +257,7 @@ public class BaseNewTapestryProjectJavaPage extends JavaCapabilityConfigurationP
         }
         catch (SecurityException e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
         }
         catch (NoSuchMethodException e)
         {
@@ -273,7 +273,7 @@ public class BaseNewTapestryProjectJavaPage extends JavaCapabilityConfigurationP
             }
             catch (Throwable e)
             {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
             }            
         }
         return detector;
@@ -359,7 +359,7 @@ public class BaseNewTapestryProjectJavaPage extends JavaCapabilityConfigurationP
             }
             catch (CoreException e)
             {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
             }
         }
     }
@@ -453,12 +453,12 @@ public class BaseNewTapestryProjectJavaPage extends JavaCapabilityConfigurationP
                 if (getWizard() == null)
                 {
                     UIPlugin
-                            .log_it("removing : wizard is null: bug [ 843021 ] Is this what 3 Beta is supposed to do");
+                            .log("removing : wizard is null: bug [ 843021 ] Is this what 3 Beta is supposed to do");
                 }
                 else
                 {
                     UIPlugin
-                            .log_it("removing : container not set in wizard: bug [ 843021 ] Is this what 3 Beta is supposed to do");
+                            .log("removing : container not set in wizard: bug [ 843021 ] Is this what 3 Beta is supposed to do");
                 }
                 context = (IRunnableContext) UIPlugin.getDefault().getActivePage();
             }

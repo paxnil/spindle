@@ -144,7 +144,7 @@ public class TapestryProjectDialogField extends StringButtonField
         tproject = (ITapestryProject) project.getNature(TapestryCorePlugin.NATURE_ID);
       } catch (CoreException e)
       {
-        UIPlugin.log_it(e);
+        UIPlugin.log(e);
       }
     }
 
@@ -158,7 +158,7 @@ public class TapestryProjectDialogField extends StringButtonField
       return (ITapestryProject) project.getNature(TapestryCorePlugin.NATURE_ID);
     } catch (CoreException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     }
     return null;
   }
@@ -172,7 +172,7 @@ public class TapestryProjectDialogField extends StringButtonField
         thisProject = fCurrentTapestryProject.getJavaProject();
     } catch (CoreException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     }
 
     final IJavaProject useProject = thisProject;
@@ -235,7 +235,7 @@ public class TapestryProjectDialogField extends StringButtonField
               .getNature(TapestryCorePlugin.NATURE_ID);
         } catch (CoreException e)
         {
-          UIPlugin.log_it(e);
+          UIPlugin.log(e);
         }
       }
     }
@@ -303,7 +303,7 @@ public class TapestryProjectDialogField extends StringButtonField
         }
       } catch (CoreException e)
       {
-        UIPlugin.log_it(e);
+        UIPlugin.log(e);
       }
 
       State state = (State) TapestryArtifactManager
@@ -332,7 +332,7 @@ public class TapestryProjectDialogField extends StringButtonField
       return (ITapestryProject) project.getNature(TapestryCorePlugin.NATURE_ID);
     } catch (CoreException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
 
     }
     return null;
@@ -345,7 +345,7 @@ public class TapestryProjectDialogField extends StringButtonField
       return project.hasNature(TapestryCorePlugin.NATURE_ID);
     } catch (CoreException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
 
     }
     return false;

@@ -95,7 +95,7 @@ public abstract class NewTapestryElementWizard extends BasicNewResourceWizard
                 IDE.openEditor(activePage, (IFile) resource);
               } catch (PartInitException e)
               {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
               }
             }
           });
@@ -118,7 +118,7 @@ public abstract class NewTapestryElementWizard extends BasicNewResourceWizard
       getContainer().run(false, true, op);
     } catch (InvocationTargetException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
       return false;
     } catch (InterruptedException e)
     {
@@ -270,7 +270,7 @@ public abstract class NewTapestryElementWizard extends BasicNewResourceWizard
 
     } catch (CoreException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     }
 
   }

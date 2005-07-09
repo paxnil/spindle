@@ -80,6 +80,7 @@ import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.actions.RequiredSaveEditorAction;
 import com.iw.plugins.spindle.core.ITapestryProject;
+import com.iw.plugins.spindle.core.TapestryPluginException;
 import com.iw.plugins.spindle.core.TapestryException;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.eclipse.ProjectPreferenceStore;
@@ -775,7 +776,7 @@ public class NewTapComponentWizardPage extends TapestryWizardPage
         {
           UIPlugin.log(e);
           throw new InvocationTargetException(e);
-        } catch (TapestryException e)
+        } catch (TapestryPluginException e)
         {
           UIPlugin.log(e);
           throw new InvocationTargetException(e);

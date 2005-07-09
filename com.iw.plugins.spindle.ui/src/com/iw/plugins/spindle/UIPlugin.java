@@ -183,7 +183,7 @@ public class UIPlugin extends AbstractUIPlugin
   {
     ILog log = getDefault().getLog();
     Status status = new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, msg + "\n", null);
-    log.log_it(status);
+    log.log(status);
   }
 
   static public void warn(Throwable e)
@@ -192,12 +192,12 @@ public class UIPlugin extends AbstractUIPlugin
     buffer.append(e.getClass().getName());
     buffer.append('\n');
     buffer.append(e.getStackTrace()[0].toString());
-    log_it(buffer.toString());
+    log(buffer.toString());
   }
 
   static public void warn(String message)
   {
-    log_it("Warning:" + message);
+    log("Warning:" + message);
   }
 
   static public void log(Throwable ex)
@@ -208,7 +208,7 @@ public class UIPlugin extends AbstractUIPlugin
     String msg = stringWriter.getBuffer().toString();
 
     Status status = new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, msg, null);
-    log.log_it(status);
+    log.log(status);
   }
 
   public static IResource getActiveEditorFileInput()
@@ -304,7 +304,7 @@ public class UIPlugin extends AbstractUIPlugin
 
     } catch (PartInitException piex)
     {
-      UIPlugin.log_it(piex);
+      UIPlugin.log(piex);
     }
     return null;
   }

@@ -65,7 +65,8 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.TapestryProject;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.util.eclipse.CoreUtils;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.CheckBoxField;
@@ -218,7 +219,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
 
     if (namespace != null)
     {
-      IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+      ICoreResource location = (ICoreResource) namespace
           .getSpecificationLocation();
       if (location.isClasspathResource())
       {
@@ -277,7 +278,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         result = (IFile) generated.getUnderlyingResource();
     } catch (JavaModelException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     }
     return result;
   }
@@ -535,7 +536,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
 
         } catch (CoreException e)
         {
-          UIPlugin.log_it(e);
+          UIPlugin.log(e);
         }
 
         status = spindle.getSeverity() >= status.getSeverity() ? spindle : status;
@@ -626,7 +627,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         result = CoreUtils.extendsType(baseType, tapestryclass);
     } catch (JavaModelException e)
     {
-      UIPlugin.log_it(e); // but do nothing else
+      UIPlugin.log(e); // but do nothing else
     }
     try
     {
@@ -634,7 +635,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         result = CoreUtils.implementsInterface(baseType, tapestryinterface);
     } catch (JavaModelException e1)
     {
-      UIPlugin.log_it(e1); // but do nothing else
+      UIPlugin.log(e1); // but do nothing else
     }
     return result;
   }
@@ -673,7 +674,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
 
   private void tapestryProjectChanged()
   {
-    ITapestryProject project = fFirstPageProjectField.getTapestryProject();
+    TapestryProject project = (TapestryProject) fFirstPageProjectField.getTapestryProject();
     if (project == null)
     {
       setPackageFragmentRoot(null, false);
@@ -708,7 +709,7 @@ public class TypeChooseWizardPage extends NewTypeWizardPage
         }
       } catch (CoreException e)
       {
-        UIPlugin.log_it(e);
+        UIPlugin.log(e);
       }
     }
   }

@@ -87,7 +87,6 @@ import org.xmen.xml.XMLNode;
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
-import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.parser.Parser;
@@ -168,7 +167,7 @@ public class SpecEditor extends Editor
         }
         catch (RuntimeException e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
             throw e;
         }
         finally
@@ -536,41 +535,41 @@ public class SpecEditor extends Editor
 
     private void reconcileOutline()
     {
-        //    if (fOutlinePartitioner == null)
-        //      fOutlinePartitioner = new
+        // if (fOutlinePartitioner == null)
+        // fOutlinePartitioner = new
         // XMLDocumentPartitioner(XMLDocumentPartitioner.SCANNER,
         // XMLDocumentPartitioner.TYPES);
         // TODO remove ? try
-        //    {
-        //      IDocument document = getDocumentProvider().getDocument(getEditorInput());
-        //      if (document.getLength() == 0 || document.get().trim().length() == 0)
-        //      {
-        //        ((MultiPageContentOutline) fOutline).setInput(null);
-        //      } else
-        //      {
+        // {
+        // IDocument document = getDocumentProvider().getDocument(getEditorInput());
+        // if (document.getLength() == 0 || document.get().trim().length() == 0)
+        // {
+        // ((MultiPageContentOutline) fOutline).setInput(null);
+        // } else
+        // {
         //
-        //        // fOutlinePartitioner.connect(document);
-        //        try
-        //        {
-        //          ((MultiPageContentOutline)
+        // // fOutlinePartitioner.connect(document);
+        // try
+        // {
+        // ((MultiPageContentOutline)
         // fOutline).setInput(XMLNode.createTree(document, -1));
-        //        } catch (BadLocationException e)
-        //        {
-        //          // do nothing
-        //        }
-        //      }
-        //      if (fUpdater != null)
-        //        fUpdater.post();
+        // } catch (BadLocationException e)
+        // {
+        // // do nothing
+        // }
+        // }
+        // if (fUpdater != null)
+        // fUpdater.post();
         //
-        //    } catch (RuntimeException e)
-        //    {
-        //      UIPlugin.log(e);
-        //      throw e;
-        //    }
-        //    finally
-        //    {
-        //      fOutlinePartitioner.disconnect();
-        //    }
+        // } catch (RuntimeException e)
+        // {
+        // UIPlugin.log(e);
+        // throw e;
+        // }
+        // finally
+        // {
+        // fOutlinePartitioner.disconnect();
+        // }
     }
 
     /**
@@ -734,7 +733,7 @@ public class SpecEditor extends Editor
          */
         public void addReconcileListener(IReconcileListener listener)
         {
-            //ignore
+            // ignore
 
         }
 
@@ -745,7 +744,7 @@ public class SpecEditor extends Editor
          */
         public void removeReconcileListener(IReconcileListener listener)
         {
-            //ignore
+            // ignore
         }
 
     }
@@ -788,12 +787,7 @@ public class SpecEditor extends Editor
                         {
                             e.printStackTrace();
                         }
-                        catch (CoreException e)
-                        {
-                            e.printStackTrace();
-                        }
                     }
-
                 }
             }
             return null;

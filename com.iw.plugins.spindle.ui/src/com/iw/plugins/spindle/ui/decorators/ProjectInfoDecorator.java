@@ -40,6 +40,7 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.eclipse.TapestryCorePlugin;
 import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
 import com.iw.plugins.spindle.core.util.eclipse.Markers;
@@ -111,7 +112,7 @@ public class ProjectInfoDecorator extends AbstractDecorator
         INamespace namespace = (INamespace) TapestryArtifactManager
             .getTapestryArtifactManager()
             .getProjectNamespace(project, false);
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+        ICoreResource location = (ICoreResource) namespace
             .getSpecificationLocation();
         if (location == null || location.getStorage() == null)
         {

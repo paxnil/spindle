@@ -96,7 +96,7 @@ public abstract class AbstractContentAssistProcessor implements IContentAssistPr
       return NoProposals;
     } catch (RuntimeException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
       throw e;
     }
   }

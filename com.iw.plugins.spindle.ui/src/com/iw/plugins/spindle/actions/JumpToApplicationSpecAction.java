@@ -36,7 +36,8 @@ import org.eclipse.ui.IEditorPart;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
+import com.iw.plugins.spindle.core.resources.eclipse.IEclipseResource;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 
 /**
@@ -91,7 +92,7 @@ public class JumpToApplicationSpecAction extends AbstractTapestryProjectAction
     if (namespace == null)
       return null;
 
-    IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+    IEclipseResource location = (IEclipseResource) namespace
         .getSpecificationLocation();
 
     return location.getStorage();

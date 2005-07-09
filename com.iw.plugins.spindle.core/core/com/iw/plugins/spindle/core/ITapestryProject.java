@@ -6,7 +6,7 @@
  */
 package com.iw.plugins.spindle.core;
 
-import org.apache.hivemind.Resource;
+import com.iw.plugins.spindle.core.resources.IResourceRoot;
 
 /**
  * @author gwl
@@ -15,8 +15,8 @@ public interface ITapestryProject extends IJavaTypeFinder
 {
     public boolean isValidatingWebXML();
 
-    public Resource getClasspathRoot() ;
+    public IResourceRoot getClasspathRoot() ;
 
-    public Resource getWebContextLocation();
+    public IResourceRoot getWebContextLocation();
         
 }

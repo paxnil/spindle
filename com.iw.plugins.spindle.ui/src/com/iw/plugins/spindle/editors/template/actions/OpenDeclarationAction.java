@@ -48,7 +48,7 @@ import org.xmen.internal.ui.text.XMLDocumentPartitioner;
 import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.editors.template.assist.TemplateTapestryAccess;
 import com.iw.plugins.spindle.ui.util.UIUtils;
 
@@ -127,19 +127,19 @@ public class OpenDeclarationAction extends BaseTemplateAction
      */
     private void handleComponentLookup(IComponentSpecification componentSpec)
     {
-        IResourceWorkspaceLocation location = null;
+        ICoreResource location = null;
         IContainedComponent contained = fAccess.getContainedComponent();
         if (contained != null)
         {
             String simpleId = fAccess.getSimpleId();
-            location = (IResourceWorkspaceLocation) fAccess.getBaseSpecification()
+            location = (ICoreResource) fAccess.getBaseSpecification()
                     .getSpecificationLocation();
             if (location != null && location.getStorage() != null)
                 foundResult(location.getStorage(), simpleId, contained);
         }
         else
         {
-            location = (IResourceWorkspaceLocation) componentSpec.getSpecificationLocation();
+            location = (ICoreResource) componentSpec.getSpecificationLocation();
             if (location == null || location.getStorage() == null)
                 return;
 
@@ -158,7 +158,7 @@ public class OpenDeclarationAction extends BaseTemplateAction
                 .getParameter(parameterName);
         if (parameterSpec != null)
         {
-            IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) componentSpec
+            ICoreResource location = (ICoreResource) componentSpec
                     .getSpecificationLocation();
             if (location == null || location.getStorage() == null)
                 return;
@@ -200,11 +200,11 @@ public class OpenDeclarationAction extends BaseTemplateAction
             }
             catch (PartInitException e)
             {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
             }
             catch (JavaModelException e)
             {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
             }
         }
         else if (result instanceof IStorage)
@@ -266,7 +266,7 @@ public class OpenDeclarationAction extends BaseTemplateAction
         }
         catch (Exception e)
         {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
         }
     }
 

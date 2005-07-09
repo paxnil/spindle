@@ -68,7 +68,7 @@ public class ContextRootDecorator extends AbstractDecorator
 
     if (decoration == null)
     {
-      UIPlugin.log_it("ContextRootDecorator.decorate() called with null decoration");
+      UIPlugin.log("ContextRootDecorator.decorate() called with null decoration");
       return;
     }
 

@@ -116,7 +116,7 @@ public class TemplateStringAttributeToExpression implements IMarkerResolutionGen
             }
             catch (BadLocationException e)
             {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
             }
         }
 
@@ -182,13 +182,13 @@ public class TemplateStringAttributeToExpression implements IMarkerResolutionGen
             }
             catch (BadLocationException e)
             {
-                UIPlugin.log_it(e);
+                UIPlugin.log(e);
             }
         }
         catch (CoreException e)
         {
 
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
         }
         finally
         {

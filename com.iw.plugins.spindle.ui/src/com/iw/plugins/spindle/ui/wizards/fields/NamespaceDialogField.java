@@ -40,7 +40,7 @@ import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.util.Assert;
 import com.iw.plugins.spindle.core.util.eclipse.CoreUtils;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
@@ -108,7 +108,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
     {
       INamespace namespace = (INamespace) iter.next();
 
-      if (firstClasspathNamespace == -1 && ((IResourceWorkspaceLocation) namespace
+      if (firstClasspathNamespace == -1 && ((ICoreResource) namespace
           .getSpecificationLocation()).isClasspathResource())
         firstClasspathNamespace = count;
 
@@ -137,7 +137,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
     {
       INamespace namespace = (INamespace) iter.next();
 
-      IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) namespace
+      ICoreResource location = (ICoreResource) namespace
           .getSpecificationLocation();
 
       if (firstClasspathNamespace == -1 && location.isClasspathResource())
@@ -204,7 +204,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
         // the thing is that there may not be a .application file
         // as Tapestry may create one at runtime.
         boolean canAddProjectNamespace = true;
-        IResourceWorkspaceLocation realLocation = (IResourceWorkspaceLocation) location;
+        ICoreResource realLocation = (ICoreResource) location;
         IStorage locationStorage = realLocation.getStorage();
         if (locationStorage != null)
           canAddProjectNamespace = CoreUtils.toResource(location) != null;
@@ -229,10 +229,10 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
             element = (INamespace) iter.next();
           } catch (RuntimeException e)
           {
-            UIPlugin.log_it(e);
+            UIPlugin.log(e);
             throw e;
           }
-          IStorage storage = ((IResourceWorkspaceLocation) element
+          IStorage storage = ((ICoreResource) element
               .getSpecificationLocation()).getStorage();
           if (storage != null && !alreadySeen.contains(storage))
           {
@@ -269,10 +269,10 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
       INamespace childNamespace = parentNamespace.getChildNamespace(childName);
       if (childNamespace == null)
       {
-        UIPlugin.log_it("null namespace found - Namespace Dialog Field!");
+        UIPlugin.log("null namespace found - Namespace Dialog Field!");
         continue;
       }
-      IResourceWorkspaceLocation childLocation = (IResourceWorkspaceLocation) childNamespace
+      ICoreResource childLocation = (ICoreResource) childNamespace
           .getSpecificationLocation();
       if (CoreUtils.toResource(childLocation) != null)
       {
@@ -315,7 +315,7 @@ public class NamespaceDialogField extends UneditableComboBoxDialogField
   {
     if (path == null || path.trim().length() == 0)
       return false;
-    IResourceWorkspaceLocation checkLocation = (IResourceWorkspaceLocation) ((IResourceWorkspaceLocation) base)
+    ICoreResource checkLocation = (ICoreResource) ((ICoreResource) base)
         .getRelativeResource(path);
     return checkLocation.getStorage() != null;
 

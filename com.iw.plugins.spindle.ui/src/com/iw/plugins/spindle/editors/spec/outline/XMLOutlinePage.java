@@ -180,7 +180,7 @@ public class XMLOutlinePage extends ContentOutlinePage implements XMLModelListen
 
         } catch (RuntimeException e)
         {
-          UIPlugin.log_it(e);
+          UIPlugin.log(e);
         }
       }
     });

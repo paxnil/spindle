@@ -57,7 +57,7 @@ import org.xmen.xml.XMLNode;
 
 import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
 import com.iw.plugins.spindle.core.source.ISourceLocationInfo;
 import com.iw.plugins.spindle.core.spec.PluginBindingSpecification;
@@ -181,7 +181,7 @@ public class MoveImplicitToSpecWizard extends Wizard
       fSpecProvider = UIPlugin.getDefault().getSpecFileDocumentProvider();
       try
       {
-        IResourceWorkspaceLocation location = (IResourceWorkspaceLocation) fRelatedSpec
+        ICoreResource location = (ICoreResource) fRelatedSpec
             .getSpecificationLocation();
         IFile file = (IFile) location.getStorage();
         fSpecFileInput = new FileEditorInput(file);
@@ -191,7 +191,7 @@ public class MoveImplicitToSpecWizard extends Wizard
         fSpecAnnotationModel.connect(fOriginalSpecDocument);
       } catch (CoreException e)
       {
-        UIPlugin.log_it(e);
+        UIPlugin.log(e);
       }
     }
 
@@ -232,10 +232,10 @@ public class MoveImplicitToSpecWizard extends Wizard
       getContainer().run(false, false, getRunnable());
     } catch (InvocationTargetException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     } catch (InterruptedException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     } finally
     {
       cleanup();
@@ -314,7 +314,7 @@ public class MoveImplicitToSpecWizard extends Wizard
     {
       // TODO Auto-generated catch block
       e.printStackTrace();
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     }
 
     fTemplateCommand = computeTemplateModification(id, staying);
@@ -328,7 +328,7 @@ public class MoveImplicitToSpecWizard extends Wizard
     {
       // TODO Auto-generated catch block
       e1.printStackTrace();
-      UIPlugin.log_it(e1);
+      UIPlugin.log(e1);
     }
   }
 
@@ -349,10 +349,10 @@ public class MoveImplicitToSpecWizard extends Wizard
       fTemplateCommand.execute(fOriginalTemplateDocument);
     } catch (CoreException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     } catch (BadLocationException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     } finally
     {
       if (fSpecProvider != null)

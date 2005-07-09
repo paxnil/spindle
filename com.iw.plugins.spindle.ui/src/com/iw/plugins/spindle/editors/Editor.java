@@ -67,7 +67,7 @@ import com.iw.plugins.spindle.PreferenceConstants;
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.source.IProblemCollector;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.editors.actions.BaseEditorAction;
@@ -312,11 +312,11 @@ public abstract class Editor extends TextEditor implements IAdaptable, IReconcil
     return null;
   }
 
-  public IResourceWorkspaceLocation getLocation()
+  public ICoreResource getLocation()
   {
     BaseSpecLocatable spec = (BaseSpecLocatable) getSpecification();
     if (spec != null)
-      return (IResourceWorkspaceLocation) spec.getSpecificationLocation();
+      return (ICoreResource) spec.getSpecificationLocation();
 
     return null;
   }

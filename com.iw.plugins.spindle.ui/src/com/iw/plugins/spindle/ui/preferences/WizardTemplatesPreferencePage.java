@@ -274,7 +274,7 @@ public class WizardTemplatesPreferencePage extends PreferencePage
           return;
         } catch (IOException e)
         {
-          UIPlugin.log_it(e);
+          UIPlugin.log(e);
           MessageDialog.openError(getShell(), "File Error", "unable to read: " + file);
           return;
         }

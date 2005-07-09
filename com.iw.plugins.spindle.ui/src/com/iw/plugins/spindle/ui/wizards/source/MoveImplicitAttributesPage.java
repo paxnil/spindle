@@ -101,7 +101,7 @@ public class MoveImplicitAttributesPage extends WizardPage
   private ArrayList fAttributesThatStay = new ArrayList();
   private ArrayList fAttributesThatMove = new ArrayList();
 
-  private IScannerValidator fValidator = new BaseValidator();
+  private IScannerValidator fValidator = new BaseValidator(null);
 
   private Status fCurrentStatus;
 

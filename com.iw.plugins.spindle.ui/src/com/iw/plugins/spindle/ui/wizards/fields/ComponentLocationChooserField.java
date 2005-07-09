@@ -49,6 +49,8 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.iw.plugins.spindle.UIPlugin;
 import com.iw.plugins.spindle.core.ITapestryProject;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextResource;
+import com.iw.plugins.spindle.core.resources.eclipse.ContextRoot;
 import com.iw.plugins.spindle.core.util.eclipse.SpindleStatus;
 import com.iw.plugins.spindle.ui.dialogfields.DialogField;
 import com.iw.plugins.spindle.ui.dialogfields.StringButtonField;
@@ -58,341 +60,345 @@ import com.iw.plugins.spindle.ui.widgets.ContainerSelectionDialog;
  * ComponentLocationChooserField TODO add something here
  * 
  * @author glongman@gmail.com
- *  
  */
 public class ComponentLocationChooserField extends StringButtonField
 {
-  private IFolder fResultLocation;
-  private String fName;
-  private boolean fForPage;
-  private Button fTemplateLocationButton;
-  private Button fGenTemplate;
+    private IFolder fResultLocation;
 
-  private AbstractNameField fNameField;
-  private TapestryProjectDialogField fTapestryProjectField;
+    private String fName;
 
-  public ComponentLocationChooserField(String name)
-  {
-    this(name, false);
-  }
+    private boolean fForPage;
 
-  public ComponentLocationChooserField(String name, boolean forPage)
-  {
-    super(UIPlugin.getString(name + ".label"));
-    fName = name;
-    fForPage = forPage;
-  }
+    private Button fTemplateLocationButton;
 
-  public void fillIntoGrid(Composite parent, int numcols)
-  {
-    super.fillIntoGrid(parent, numcols);
-    if (fForPage)
+    private Button fGenTemplate;
+
+    private AbstractNameField fNameField;
+
+    private TapestryProjectDialogField fTapestryProjectField;
+
+    public ComponentLocationChooserField(String name)
     {
-      Font font = parent.getFont();
-      fTemplateLocationButton = new Button(parent, SWT.CHECK);
-      GridData data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-      data.horizontalSpan = numcols;
-      fTemplateLocationButton.setLayoutData(data);
+        this(name, false);
     }
-  }
-  public void init(
-      AbstractNameField nameField,
-      TapestryProjectDialogField projectField,
-      Button genTemplate,
-      IResource initResource,
-      IRunnableContext context)
-  {
-    fNameField = nameField;
-    nameField.addListener(this);
-    fGenTemplate = genTemplate;
-    fGenTemplate.addSelectionListener(new SelectionListener()
-    {
-      public void widgetSelected(SelectionEvent e)
-      {
-        if (fTemplateLocationButton != null && !fTemplateLocationButton.isDisposed())
-          fTemplateLocationButton.setEnabled(fGenTemplate.getSelection() && isEnabled());
-      }
-      public void widgetDefaultSelected(SelectionEvent e)
-      {
-        //eat it
-      }
-    });
-    this.init(projectField, initResource, context);
-  }
 
-  public void setEnabled(boolean flag)
-  {
-    super.setEnabled(flag);
-    if (fTemplateLocationButton != null && !fTemplateLocationButton.isDisposed() && fGenTemplate != null )
-      fTemplateLocationButton.setEnabled(fGenTemplate.getSelection() && flag);
-  } 
-  public void init(
-      TapestryProjectDialogField projectField,
-      IResource initResource,
-      IRunnableContext context)
-  {
-    super.init(context);
-    fTapestryProjectField = projectField;
-    projectField.addListener(this);
-    setButtonLabel(UIPlugin.getString(fName + ".button"));
-    ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
-    if (tproject == null)
+    public ComponentLocationChooserField(String name, boolean forPage)
     {
-      setTextValue("");
-    } else
+        super(UIPlugin.getString(name + ".label"));
+        fName = name;
+        fForPage = forPage;
+    }
+
+    public void fillIntoGrid(Composite parent, int numcols)
     {
-      IFolder webinf = tproject.getWebContextFolder().getFolder("WEB-INF");
+        super.fillIntoGrid(parent, numcols);
+        if (fForPage)
+        {
+            Font font = parent.getFont();
+            fTemplateLocationButton = new Button(parent, SWT.CHECK);
+            GridData data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+            data.horizontalSpan = numcols;
+            fTemplateLocationButton.setLayoutData(data);
+        }
+    }
 
-      if (fForPage)
-      {
-        if (tproject != null)
-          fTemplateLocationButton.setText(UIPlugin.getString(fName
-              + ".templateInContextQuestion", tproject
-              .getWebContextFolder()
-              .getFullPath()
-              .toString()));
-      }
+    public void init(AbstractNameField nameField, TapestryProjectDialogField projectField,
+            Button genTemplate, IResource initResource, IRunnableContext context)
+    {
+        fNameField = nameField;
+        nameField.addListener(this);
+        fGenTemplate = genTemplate;
+        fGenTemplate.addSelectionListener(new SelectionListener()
+        {
+            public void widgetSelected(SelectionEvent e)
+            {
+                if (fTemplateLocationButton != null && !fTemplateLocationButton.isDisposed())
+                    fTemplateLocationButton.setEnabled(fGenTemplate.getSelection() && isEnabled());
+            }
 
-      if (initResource != null && webinf.exists())
-      {
-        IContainer container = (initResource instanceof IContainer)
-            ? (IContainer) initResource : initResource.getParent();
+            public void widgetDefaultSelected(SelectionEvent e)
+            {
+                // eat it
+            }
+        });
+        this.init(projectField, initResource, context);
+    }
+
+    public void setEnabled(boolean flag)
+    {
+        super.setEnabled(flag);
+        if (fTemplateLocationButton != null && !fTemplateLocationButton.isDisposed()
+                && fGenTemplate != null)
+            fTemplateLocationButton.setEnabled(fGenTemplate.getSelection() && flag);
+    }
+
+    public void init(TapestryProjectDialogField projectField, IResource initResource,
+            IRunnableContext context)
+    {
+        super.init(context);
+        fTapestryProjectField = projectField;
+        projectField.addListener(this);
+        setButtonLabel(UIPlugin.getString(fName + ".button"));
+        ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
+        if (tproject == null)
+        {
+            setTextValue("");
+        }
+        else
+        {
+            IFolder webinf = null;
+            webinf = getContextFolder(tproject);
+
+            if (fForPage)
+            {
+                if (tproject != null)
+                    fTemplateLocationButton.setText(UIPlugin.getString(fName
+                            + ".templateInContextQuestion", tproject.getWebContextFolder()
+                            .getFullPath().toString()));
+            }
+
+            if (initResource != null && webinf.exists())
+            {
+                IContainer container = (initResource instanceof IContainer) ? (IContainer) initResource
+                        : initResource.getParent();
+                IPath webinfPath = webinf.getFullPath();
+                IPath containerPath = container.getFullPath();
+                if (webinfPath.isPrefixOf(containerPath))
+                {
+                    setTextValue(containerPath.removeFirstSegments(webinfPath.segmentCount() - 1)
+                            .toString());
+                }
+                else
+                {
+                    setTextValue("WEB-INF/");
+                }
+            }
+            else
+            {
+                setTextValue("WEB-INF/");
+            }
+        }
+    }
+
+    private IFolder getContextFolder(ITapestryProject tproject)
+    {
+        ContextResource resource = (ContextResource) tproject.getWebContextLocation()
+                .getRelativeResource("WEB-INF");
+        return (IFolder) resource.getStorage();
+
+    }
+
+    public void dialogFieldChanged(DialogField field)
+    {
+
+        if (field == fTapestryProjectField)
+            projectChanged();
+
+        if (field == this)
+            refreshStatus();
+
+        if (fNameField != null && field == fNameField)
+            refreshStatus();
+    }
+
+    public void refreshStatus()
+    {
+        setStatus(locationChanged());
+    }
+
+    public IFolder getSpecLocation()
+    {
+        return fResultLocation;
+    }
+
+    public IFolder getTemplateLocation()
+    {
+        if (!fForPage || fTemplateLocationButton == null || !fTemplateLocationButton.isEnabled()
+                || !fTemplateLocationButton.getSelection() || !fGenTemplate.getSelection())
+            return fResultLocation;
+
+        ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
+        return getContextFolder(tproject);
+    }
+
+    public void dialogFieldButtonPressed(DialogField field)
+    {
+        if (field == this)
+            chooseLocation();
+    }
+
+    /**
+     *  
+     */
+    private void chooseLocation()
+    {
+        IStatus status = fTapestryProjectField.getStatus();
+        if (!status.isOK())
+        {
+            MessageDialog.openError(getShell(), "Project Field has errors", status.getMessage());
+            return;
+        }
+
+        IFolder webinf = fTapestryProjectField.getTapestryProject().getWebContextFolder()
+                .getFolder("WEB-INF");
         IPath webinfPath = webinf.getFullPath();
-        IPath containerPath = container.getFullPath();
-        if (webinfPath.isPrefixOf(containerPath))
+
+        IFolder selection;
+
+        if (fResultLocation != null && fResultLocation.exists()
+                && webinfPath.isPrefixOf(fResultLocation.getFullPath()))
         {
-          setTextValue(containerPath
-              .removeFirstSegments(webinfPath.segmentCount() - 1)
-              .toString());
-        } else
-        {
-          setTextValue("WEB-INF/");
+            selection = fResultLocation;
         }
-      } else
-      {
-        setTextValue("WEB-INF/");
-      }
-    }
-  }
+        else
+        {
+            selection = webinf;
+        }
 
-  public void dialogFieldChanged(DialogField field)
-  {
+        ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(), webinf, true,
+                null);
+        dialog.setInitialSelections(new Object[]
+        { selection });
+        dialog.setFilter(new OutputDirFilter());
+        if (dialog.open() == dialog.OK)
+        {
+            Object[] results = dialog.getResult();
+            if (results != null && results.length > 0)
+            {
+                IPath resultPath = (IPath) results[0];
 
-    if (field == fTapestryProjectField)
-      projectChanged();
+                setTextValue(resultPath.removeFirstSegments(webinfPath.segmentCount() - 1)
+                        .toString());
 
-    if (field == this)
-      refreshStatus();
-
-    if (fNameField != null && field == fNameField)
-      refreshStatus();
-  }
-
-  public void refreshStatus()
-  {
-    setStatus(locationChanged());
-  }
-
-  public IFolder getSpecLocation()
-  {
-    return fResultLocation;
-  }
-
-  public IFolder getTemplateLocation()
-  {
-    if (!fForPage || fTemplateLocationButton == null
-        || !fTemplateLocationButton.isEnabled()
-        || !fTemplateLocationButton.getSelection() || !fGenTemplate.getSelection())
-      return fResultLocation;
-
-    ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
-    return tproject.getWebContextFolder();
-  }
-
-  public void dialogFieldButtonPressed(DialogField field)
-  {
-    if (field == this)
-      chooseLocation();
-  }
-
-  /**
-   *  
-   */
-  private void chooseLocation()
-  {
-    IStatus status = fTapestryProjectField.getStatus();
-    if (!status.isOK())
-    {
-      MessageDialog
-          .openError(getShell(), "Project Field has errors", status.getMessage());
-      return;
+                locationChanged();
+            }
+        }
     }
 
-    IFolder webinf = fTapestryProjectField
-        .getTapestryProject()
-        .getWebContextFolder()
-        .getFolder("WEB-INF");
-    IPath webinfPath = webinf.getFullPath();
-
-    IFolder selection;
-
-    if (fResultLocation != null && fResultLocation.exists()
-        && webinfPath.isPrefixOf(fResultLocation.getFullPath()))
+    class OutputDirFilter extends ViewerFilter
     {
-      selection = fResultLocation;
-    } else
-    {
-      selection = webinf;
+
+        IPath outputLocation;
+
+        public OutputDirFilter()
+        {
+            super();
+            try
+            {
+                IJavaProject jproject = fTapestryProjectField.getTapestryProject().getJavaProject();
+                outputLocation = jproject.getOutputLocation();
+            }
+            catch (CoreException e)
+            {
+                UIPlugin.log(e);
+            }
+        }
+
+        public boolean select(Viewer viewer, Object parentElement, Object element)
+        {
+            if (outputLocation == null)
+                return true;
+
+            return !outputLocation.isPrefixOf(((IContainer) element).getFullPath());
+        }
     }
 
-    ContainerSelectionDialog dialog = new ContainerSelectionDialog(
-        getShell(),
-        webinf,
-        true,
-        null);
-    dialog.setInitialSelections(new Object[]{selection});
-    dialog.setFilter(new OutputDirFilter());
-    if (dialog.open() == dialog.OK)
+    /**
+     * @return
+     */
+    private IStatus locationChanged()
     {
-      Object[] results = dialog.getResult();
-      if (results != null && results.length > 0)
-      {
-        IPath resultPath = (IPath) results[0];
+        fResultLocation = null;
+        SpindleStatus result = new SpindleStatus();
 
-        setTextValue(resultPath
-            .removeFirstSegments(webinfPath.segmentCount() - 1)
-            .toString());
+        if (fTapestryProjectField == null)
+            return result;
 
-        locationChanged();
-      }
-    }
-  }
+        String value = getTextValue().trim();
 
-  class OutputDirFilter extends ViewerFilter
-  {
+        if (!"WEB-INF".equals(value) && !value.startsWith("WEB-INF/"))
+        {
+            result.setError("must be a path prefixed with WEB-INF");
+            return result;
+        }
 
-    IPath outputLocation;
+        if (fTapestryProjectField.getStatus().isOK())
+        {
 
-    public OutputDirFilter()
-    {
-      super();
-      try
-      {
-        IJavaProject jproject = fTapestryProjectField
-            .getTapestryProject()
-            .getJavaProject();
-        outputLocation = jproject.getOutputLocation();
-      } catch (CoreException e)
-      {
-        UIPlugin.log_it(e);
-      }
-    }
-    public boolean select(Viewer viewer, Object parentElement, Object element)
-    {
-      if (outputLocation == null)
-        return true;
+            ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
+            IProject project = tproject.getProject();
 
-      return !outputLocation.isPrefixOf(((IContainer) element).getFullPath());
-    }
-  }
+            IFolder webContext = tproject.getWebContextFolder().getFolder("WEB-INF");
 
-  /**
-   * @return
-   */
-  private IStatus locationChanged()
-  {
-    fResultLocation = null;
-    SpindleStatus result = new SpindleStatus();
+            IPath path = webContext.getFullPath();
 
-    if (fTapestryProjectField == null)
-      return result;
+            if (!path.isValidPath(value))
+            {
+                result.setError("Not a valid path: " + value);
+                return result;
+            }
 
-    String value = getTextValue().trim();
+            IPath enteredPath = new Path(value).removeTrailingSeparator();
 
-    if (!"WEB-INF".equals(value) && !value.startsWith("WEB-INF/"))
-    {
-      result.setError("must be a path prefixed with WEB-INF");
-      return result;
-    }
+            if (enteredPath.segmentCount() == 1 && "WEB-INF".equals(enteredPath.segment(0)))
+            {
+                fResultLocation = webContext;
+            }
+            else
+            {
 
-    if (fTapestryProjectField.getStatus().isOK())
-    {
+                if (!webContext.exists())
+                {
+                    result.setError("'" + path.toString() + "'  does not exist.");
+                    return result;
+                }
 
-      ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
-      IProject project = tproject.getProject();
+                if (!path.isValidPath(value))
+                {
+                    result.setError("Not a valid path: " + value);
+                    return result;
+                }
 
-      IFolder webContext = tproject.getWebContextFolder().getFolder("WEB-INF");
+                fResultLocation = webContext.getFolder(enteredPath.removeFirstSegments(1));
+            }
+        }
 
-      IPath path = webContext.getFullPath();
+        if (fResultLocation != null && fNameField != null)
+        {
 
-      if (!path.isValidPath(value))
-      {
-        result.setError("Not a valid path: " + value);
+            boolean isComponent = fNameField.getKind() == fNameField.COMPONENT_NAME;
+            IFile file = fResultLocation.getFile(new Path(fNameField.getTextValue()
+                    + (isComponent ? ".jwc" : ".page")));
+            if (file.exists())
+            {
+                result.setError(UIPlugin.getString(fName + ".error.ComponentAlreadyExists", file
+                        .getFullPath().toString()));
+                return result;
+            }
+        }
+
         return result;
-      }
+    }
 
-      IPath enteredPath = new Path(value).removeTrailingSeparator();
-
-      if (enteredPath.segmentCount() == 1 && "WEB-INF".equals(enteredPath.segment(0)))
-      {
-        fResultLocation = webContext;
-      } else
-      {
-
-        if (!webContext.exists())
+    /**
+     * @return
+     */
+    private void projectChanged()
+    {
+        if (!fTapestryProjectField.getStatus().isOK())
         {
-          result.setError("'" + path.toString() + "'  does not exist.");
-          return result;
+            setStatus(new SpindleStatus());
         }
 
-        if (!path.isValidPath(value))
+        if (fForPage)
         {
-          result.setError("Not a valid path: " + value);
-          return result;
+            ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
+            if (tproject != null)
+                fTemplateLocationButton.setText(UIPlugin.getString(fName
+                        + ".templateInContextQuestion", tproject.getWebContextFolder()
+                        .getFullPath().toString()));
         }
 
-        fResultLocation = webContext.getFolder(enteredPath.removeFirstSegments(1));
-      }
+        setTextValue("");
     }
-
-    if (fResultLocation != null && fNameField != null)
-    {
-
-      boolean isComponent = fNameField.getKind() == fNameField.COMPONENT_NAME;
-      IFile file = fResultLocation.getFile(new Path(fNameField.getTextValue()
-          + (isComponent ? ".jwc" : ".page")));
-      if (file.exists())
-      {
-        result.setError(UIPlugin.getString(fName + ".error.ComponentAlreadyExists", file
-            .getFullPath()
-            .toString()));
-        return result;
-      }
-    }
-
-    return result;
-  }
-  /**
-   * @return
-   */
-  private void projectChanged()
-  {
-    if (!fTapestryProjectField.getStatus().isOK())
-    {
-      setStatus(new SpindleStatus());
-    }
-
-    if (fForPage)
-    {
-      ITapestryProject tproject = fTapestryProjectField.getTapestryProject();
-      if (tproject != null)
-        fTemplateLocationButton.setText(UIPlugin.getString(fName
-            + ".templateInContextQuestion", tproject
-            .getWebContextFolder()
-            .getFullPath()
-            .toString()));
-    }
-
-    setTextValue("");
-  }
 }

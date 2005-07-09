@@ -70,7 +70,7 @@ public class TapestryTemplateFactory extends TemplateFactory
       contents = new ByteArrayInputStream(getContent(template).getBytes());
     } catch (Exception e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
       contents = new ByteArrayInputStream("\n\n\n\nan error occured. Check the log"
           .getBytes());
     }

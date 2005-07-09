@@ -34,7 +34,7 @@ import org.eclipse.ui.IEditorActionDelegate;
 
 import com.iw.plugins.spindle.Images;
 import com.iw.plugins.spindle.core.builder.TapestryArtifactManager;
-import com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation;
+import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.spec.BaseSpecLocatable;
 import com.iw.plugins.spindle.core.spec.BaseSpecification;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
@@ -95,7 +95,7 @@ public class CUEditorJumpToTemplateDelegate extends CUEditorJumpToSpecDelegate
 
     if (locations.size() == 1)
     {
-      reveal((IResourceWorkspaceLocation) locations.get(0));
+      reveal((ICoreResource) locations.get(0));
     } else
     {
       new ChooseTemplateLocationPopup(locations, true).run();
@@ -116,9 +116,9 @@ public class CUEditorJumpToTemplateDelegate extends CUEditorJumpToSpecDelegate
     /*
      * (non-Javadoc)
      * 
-     * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.IResourceWorkspaceLocation)
+     * @see com.iw.plugins.spindle.editors.actions.JumpToTemplateAction.ChooseLocationPopup#getImage(com.iw.plugins.spindle.core.resources.ICoreResource)
      */
-    protected Image getImage(IResourceWorkspaceLocation location)
+    protected Image getImage(ICoreResource location)
     {
       return Images.getSharedImage("html16.gif");
     }

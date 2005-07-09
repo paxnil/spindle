@@ -200,7 +200,7 @@ public class PackageDialogField extends StringButtonField
         }
       } catch (JavaModelException e)
       {
-        UIPlugin.log_it(e);
+        UIPlugin.log(e);
         // let pass
       }
 
@@ -224,7 +224,7 @@ public class PackageDialogField extends StringButtonField
           }
         } catch (JavaModelException e)
         {
-          UIPlugin.log_it(e);
+          UIPlugin.log(e);
         }
       }
     } else
@@ -274,7 +274,7 @@ public class PackageDialogField extends StringButtonField
       }
     } catch (JavaModelException e)
     {
-      UIPlugin.log_it(e);
+      UIPlugin.log(e);
     }
     return null;
   }

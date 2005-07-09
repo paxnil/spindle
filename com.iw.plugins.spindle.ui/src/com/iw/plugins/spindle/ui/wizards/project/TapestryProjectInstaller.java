@@ -313,7 +313,7 @@ public class TapestryProjectInstaller {
 					result.add(name);
 			}
 		} catch (CoreException e) {
-			UIPlugin.log_it(e);
+			UIPlugin.log(e);
 		}
 		return result;
 
@@ -404,11 +404,11 @@ public class TapestryProjectInstaller {
 			dest.create(new FileInputStream(src), true, monitor);
 		} catch (CoreException e) {
 			
-			UIPlugin.log_it(e);
+			UIPlugin.log(e);
 			result.setError("Error creating file: " + dest.getName());
 		} catch (FileNotFoundException e) {
 			
-			UIPlugin.log_it(e);
+			UIPlugin.log(e);
 			result.setError("Error opening file: " + src.toString());
 		}
 		return result;
@@ -418,7 +418,7 @@ public class TapestryProjectInstaller {
 	 *  
 	 */
 	private void collectTapestryJars() {
-		URL installUrl = TapestryCore.getDefault().getBundle().getEntry("/");
+		URL installUrl = TapestryCorePlugin.getDefault().getBundle().getEntry("/");
 		tapestryJarNames = Collections.EMPTY_MAP;
 		File lib = null;
 		File ext = null;
@@ -433,7 +433,7 @@ public class TapestryProjectInstaller {
 			ext = new File(new URI(extFolderUrl.toString()));
 
 		} catch (Exception e) {
-			UIPlugin.log_it(e);
+			UIPlugin.log(e);
 			return;
 		}
 		tapestryJarNames = new HashMap();
