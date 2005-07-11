@@ -38,7 +38,6 @@ import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
-import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.IResourceAcceptor;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.IResourceRoot;
@@ -84,10 +83,9 @@ public class ApplicationResolver extends NamespaceResolver
      * @param build
      * @param parser
      */
-    public ApplicationResolver(AbstractBuild build, Parser parser, ICoreNamespace framework,
-            ServletInfo servlet)
+    public ApplicationResolver(AbstractBuild build, ICoreNamespace framework, ServletInfo servlet)
     {
-        super(build, parser);
+        super(build);
         fFrameworkNamespace = framework;
         fServlet = servlet;
     }
@@ -106,7 +104,6 @@ public class ApplicationResolver extends NamespaceResolver
                             fNamespaceSpecLocation.toString()));
 
                 fResultNamespace = fBuild.createNamespace(
-                        fParser,
                         fNamespaceId,
                         fNamespaceSpecLocation,
                         null);

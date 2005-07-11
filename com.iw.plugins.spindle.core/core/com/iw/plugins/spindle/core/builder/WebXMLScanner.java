@@ -35,10 +35,11 @@ import org.w3c.dom.Node;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.IJavaType;
+import com.iw.plugins.spindle.core.parser.dom.IDOMModel;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.IResourceRoot;
 import com.iw.plugins.spindle.core.resources.PathUtils;
-import com.iw.plugins.spindle.core.scanning.AbstractScanner;
+import com.iw.plugins.spindle.core.scanning.AbstractDOMScanner;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.IProblem;
 import com.iw.plugins.spindle.core.source.ISourceLocation;
@@ -49,7 +50,7 @@ import com.iw.plugins.spindle.messages.DefaultTapestryMessages;
  * 
  * @author glongman@gmail.com
  */
-public abstract class WebXMLScanner extends AbstractScanner
+public abstract class WebXMLScanner extends AbstractDOMScanner
 {
 
     protected AbstractBuild fBuilder;
@@ -65,20 +66,18 @@ public abstract class WebXMLScanner extends AbstractScanner
         this.fBuilder = fullBuilder;
     }
 
-    public WebAppDescriptor scanWebAppDescriptor(Object source) throws ScannerException
+    public WebAppDescriptor scanWebAppDescriptor(IDOMModel source) throws ScannerException
     {
-        Node webxml = ((Document) source).getDocumentElement();
-        return (WebAppDescriptor) scan(webxml, null);
+        return (WebAppDescriptor) scan(source, null);
     }
 
-    public Object beforeScan(Object source)
+    protected Object beforeScan()
     {
         fSeenServletNames = new ArrayList();
         return new WebAppDescriptor();
     }
 
-    protected void checkApplicationLocation(ICoreResource location)
-            throws ScannerException
+    protected void checkApplicationLocation(ICoreResource location) throws ScannerException
     {
         if (location == null)
             return;
@@ -166,10 +165,10 @@ public abstract class WebXMLScanner extends AbstractScanner
      * 
      * @see com.iw.plugins.spindle.core.processing.AbstractProcessor#doProcessing(org.w3c.dom.Node)
      */
-    protected void doScan(Object source, Object resultObject)
+    protected void doScan()
     {
-        Node rootNode = (Node) source;
-        WebAppDescriptor descriptor = (WebAppDescriptor) resultObject;
+        Document d = getDOMModel().getDocument();
+        Node rootNode = d.getDocumentElement();
         ArrayList infos = new ArrayList(11);
         Map contextParameters = new HashMap();
         for (Node node = rootNode.getFirstChild(); node != null; node = node.getNextSibling())
@@ -187,6 +186,7 @@ public abstract class WebXMLScanner extends AbstractScanner
                 extractContextParameter(node, contextParameters);
             }
         }
+        WebAppDescriptor descriptor = (WebAppDescriptor) fResultObject;
         descriptor.setServletInfos((ServletInfo[]) infos.toArray(new ServletInfo[infos.size()]));
         descriptor.setContextParameters(contextParameters);
     }
@@ -257,8 +257,7 @@ public abstract class WebXMLScanner extends AbstractScanner
             String servletName = info.name;
             String expectedName = servletName + ".application";
 
-            ICoreResource webInfLocation = (ICoreResource) context
-                    .getRelativeResource("/WEB-INF/");
+            ICoreResource webInfLocation = (ICoreResource) context.getRelativeResource("/WEB-INF/");
             ICoreResource webInfAppLocation = (ICoreResource) webInfLocation
                     .getRelativeResource(servletName + "/");
 
@@ -269,14 +268,13 @@ public abstract class WebXMLScanner extends AbstractScanner
             return check(webInfLocation, expectedName);
         }
     }
-    
+
     private ICoreResource check(ICoreResource location, String name)
     {
         if (location == null)
             return null;
 
-        ICoreResource result = (ICoreResource) location
-                .getRelativeResource(name);
+        ICoreResource result = (ICoreResource) location.getRelativeResource(name);
 
         if (result != null && result.exists())
             return result;
@@ -289,8 +287,7 @@ public abstract class WebXMLScanner extends AbstractScanner
         if (root == null)
             return null;
 
-        ICoreResource result = (ICoreResource) root
-                .getRelativeResource(name);
+        ICoreResource result = (ICoreResource) root.getRelativeResource(name);
 
         if (result != null && result.exists())
             return result;
@@ -305,18 +302,15 @@ public abstract class WebXMLScanner extends AbstractScanner
      * <p>
      * This is Spindle's attempt to support this legacy method. Subclasses must override.
      * 
-     * @param servletType
-     *            the subclass of org.apache.tapestry.ApplicationServlet
+     * @param servletType the subclass of org.apache.tapestry.ApplicationServlet
      * @return the path to the Application specification.
-     * @throws ScannerException
-     *             if the lookup fails to obtain a path
+     * @throws ScannerException if the lookup fails to obtain a path
      */
     protected abstract String getApplicationPathFromServletSubclassOverride(IJavaType servletType)
             throws ScannerException;
 
     /**
-     * @param servletNode
-     *            a servlet xml node
+     * @param servletNode a servlet xml node
      * @return an instance of ServletInfo is the node contains a valid Tapestry servlet
      */
     protected ServletInfo extractServletInfo(Node servletNode)
@@ -421,10 +415,8 @@ public abstract class WebXMLScanner extends AbstractScanner
      * update the servlet info with the servlet class defined in the node and find the location of
      * the application specification; logging any problems encountered
      * 
-     * @param node
-     *            the servlet-class xml node
-     * @param newInfo
-     *            the ServletInfo to store extracted info into
+     * @param node the servlet-class xml node
+     * @param newInfo the ServletInfo to store extracted info into
      * @return true iff
      */
     protected boolean extractServletClassAndApplicationSpecLocation(Node node, ServletInfo newInfo)
@@ -509,10 +501,8 @@ public abstract class WebXMLScanner extends AbstractScanner
      * <li>Must not be a duplicate</li>
      * </ul>
      * 
-     * @param node
-     *            the servlet-name xml node
-     * @param newInfo
-     *            the ServletInfo that carries the extracted information about the servlet
+     * @param node the servlet-name xml node
+     * @param newInfo the ServletInfo that carries the extracted information about the servlet
      * @return iff the node has a valid servlet name
      */
     protected boolean extractServletName(Node node, ServletInfo newInfo)

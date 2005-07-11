@@ -27,7 +27,6 @@
 package com.iw.plugins.spindle.core.builder;
 
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
 
 /**
@@ -44,9 +43,9 @@ public class FrameworkResolver extends NamespaceResolver
    * @param build
    * @param parser
    */
-  public FrameworkResolver(AbstractBuild build, Parser parser, ICoreResource location)
+  public FrameworkResolver(AbstractBuild build, ICoreResource location)
   {
-    super(build, parser);
+    super(build);
     fFrameworkLocation = location;
   }
 

@@ -48,7 +48,6 @@ import com.iw.plugins.spindle.core.namespace.ComponentSpecificationResolver;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
 import com.iw.plugins.spindle.core.namespace.NamespaceResourceLookup;
 import com.iw.plugins.spindle.core.namespace.PageSpecificationResolver;
-import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.PathUtils;
 import com.iw.plugins.spindle.core.resources.TapestryResourceLocationAcceptor;
@@ -81,12 +80,7 @@ import com.iw.plugins.spindle.core.spec.PluginLibrarySpecification;
  * @author glongman@gmail.com
  */
 public abstract class NamespaceResolver
-{
-    /**
-     * The parser used to parse Tapestry xml files
-     */
-    protected Parser fParser;
-
+{  
     /**
      * collector for any problems not handled by the AbstractBuild
      */
@@ -140,11 +134,10 @@ public abstract class NamespaceResolver
      * flag to indicate that this resolver is resolving the Tapestry Framework Namespace
      */
 
-    public NamespaceResolver(AbstractBuild build, Parser parser)
+    public NamespaceResolver(AbstractBuild build)
     {
         super();
         fBuild = build;
-        fParser = parser;
     }
 
     /**
@@ -167,7 +160,6 @@ public abstract class NamespaceResolver
         else
         {
             fResultNamespace = fBuild.createNamespace(
-                    fParser,
                     fNamespaceId,
                     fNamespaceSpecLocation,
                     null);
@@ -348,10 +340,10 @@ public abstract class NamespaceResolver
 
                 if (libLocation.exists())
                 {
-                    NamespaceResolver childResolver = new LibraryResolver(fBuild, fParser,
-                            fFrameworkNamespace, fResultNamespace, libraryId, libLocation);
+                    NamespaceResolver childResolver = new LibraryResolver(fBuild, fFrameworkNamespace,
+                            fResultNamespace, libraryId, libLocation);
 
-                    ICoreNamespace childNamespace = childResolver.resolve();
+                    childResolver.resolve();
 
                 }
                 else if (fBuild.fInfrastructure.DEBUG)
@@ -402,7 +394,6 @@ public abstract class NamespaceResolver
         fComponentStack.push(location);
 
         result = fBuild.resolveIComponentSpecification(
-                fParser,
                 fResultNamespace,
                 location,
                 fResultNamespaceTemplateExtension,
@@ -582,7 +573,6 @@ public abstract class NamespaceResolver
         result = null;
 
         result = fBuild.resolveIComponentSpecification(
-                fParser,
                 fResultNamespace,
                 location,
                 fResultNamespaceTemplateExtension,

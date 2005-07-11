@@ -37,6 +37,7 @@ import org.apache.tapestry.engine.IPropertySource;
 import com.iw.plugins.spindle.core.IJavaType;
 import com.iw.plugins.spindle.core.IJavaTypeFinder;
 import com.iw.plugins.spindle.core.ITapestryProject;
+import com.iw.plugins.spindle.core.parser.dom.IDOMModelSource;
 import com.iw.plugins.spindle.core.properties.CorePropertySource;
 import com.iw.plugins.spindle.core.resources.IResourceRoot;
 import com.iw.plugins.spindle.core.spec.PluginComponentSpecification;
@@ -111,6 +112,8 @@ public abstract class AbstractBuildInfrastructure implements IJavaTypeFinder
     BuildNotifier fNotifier;
 
     AbstractBuild fBuild;
+    
+    IDOMModelSource fDOMModelSource;
    
     private CorePropertySource fProjectPropertySource;
 

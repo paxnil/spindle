@@ -27,7 +27,6 @@
 package com.iw.plugins.spindle.core.builder;
 
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.parser.Parser;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
 
 /**
@@ -47,10 +46,10 @@ public class LibraryResolver extends NamespaceResolver
    * @param build
    * @param parser
    */
-  public LibraryResolver(AbstractBuild build, Parser parser, ICoreNamespace framework,
-      ICoreNamespace parent, String libraryId, ICoreResource location)
+  public LibraryResolver(AbstractBuild build, ICoreNamespace framework, ICoreNamespace parent,
+      String libraryId, ICoreResource location)
   {
-    super(build, parser);
+    super(build);
     fFrameworkNamespace = framework;
     fParentNamespace = parent;
     fLibraryId = libraryId;

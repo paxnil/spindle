@@ -30,7 +30,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import org.apache.tapestry.INamespace;
-import org.apache.tapestry.spec.BindingType;
 import org.apache.tapestry.spec.IBindingSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.IContainedComponent;

@@ -28,12 +28,10 @@ package com.iw.plugins.spindle.core.builder;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.w3c.dom.Document;
-
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.parser.dom.IDOMModel;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.scanning.ScannerException;
 import com.iw.plugins.spindle.core.source.DefaultProblem;
@@ -55,7 +53,7 @@ public class FullBuild extends AbstractBuild
     /**
      * Constructor for FullBuilder.
      */
-    public FullBuild(AbstractBuildInfrastructure infrastructure) 
+    public FullBuild(AbstractBuildInfrastructure infrastructure)
     {
         super(infrastructure);
     }
@@ -84,11 +82,11 @@ public class FullBuild extends AbstractBuild
     /**
      * Resolve the Tapesty framework namespace
      */
-    protected void resolveFramework(Parser parser)
+    protected void resolveFramework()
     {
         ICoreResource frameworkLocation = (ICoreResource) fInfrastructure.fClasspathRoot
                 .getRelativeResource("/org/apache/tapestry/Framework.library");
-        FrameworkResolver resolver = new FrameworkResolver(this, parser, frameworkLocation);
+        FrameworkResolver resolver = new FrameworkResolver(this, frameworkLocation);
         fFrameworkNamespace = resolver.resolve();
         // fFrameworkNamespace =
         // fNSResolver.resolveFrameworkNamespace(frameworkLocation);
@@ -97,9 +95,9 @@ public class FullBuild extends AbstractBuild
     /**
      * Resolve the application namespace
      */
-    protected void doBuild(Parser parser)
+    protected void doBuild()
     {
-        ApplicationResolver resolver = new ApplicationResolver(this, parser, fFrameworkNamespace,
+        ApplicationResolver resolver = new ApplicationResolver(this, fFrameworkNamespace,
                 fApplicationServlet);
         fApplicationNamespace = resolver.resolve();
     }
@@ -135,8 +133,7 @@ public class FullBuild extends AbstractBuild
 
     private void saveBinaryLibraries(ICoreNamespace namespace, State state)
     {
-        ICoreResource location = (ICoreResource) namespace
-                .getSpecificationLocation();
+        ICoreResource location = (ICoreResource) namespace.getSpecificationLocation();
         if (location.isBinaryResource())
             state.fBinaryNamespaces.put(location, namespace);
 
@@ -156,68 +153,75 @@ public class FullBuild extends AbstractBuild
 
     protected void findDeclaredApplication()
     {
-        Parser servletParser = new Parser();
-        servletParser.setDoValidation(fInfrastructure.fValidateWebXML);
-        // Parser does not validate by default.
-        // Scanners use the Spindle validator.
-
         ICoreResource webXML = (ICoreResource) fInfrastructure.fContextRoot
                 .getRelativeResource("WEB-INF/web.xml");
+
         if (webXML.exists())
         {
-            Document wxmlElement = null;
+            IDOMModel model = null;
             try
             {
                 fInfrastructure.fNotifier.subTask(CoreMessages.format(
                         AbstractBuildInfrastructure.STRING_KEY + "scanning",
                         webXML.toString()));
                 fInfrastructure.fProblemPersister.removeAllProblemsFor(webXML);
-                wxmlElement = parseToDocument(servletParser, webXML, null);
-            }
-            catch (IOException e1)
-            {
-                TapestryCore.log(e1);
+
+                try
+                {
+                    model = getDOMModel(webXML, null, fInfrastructure.fValidateWebXML);
+                }
+                catch (IOException e)
+                {
+                    TapestryCore.log(e);
+                }
+
+                if (model == null || model.getDocument() == null)
+                {
+                    // fInfrastructure.fProblemPersister.recordProblems(webXML,
+                    // model.getProblems());
+                    throw new BrokenWebXMLException(
+                            "Tapestry AbstractBuild failed: could not parse web.xml. ");
+                }
+
+                WebAppDescriptor descriptor = null;
+
+                WebXMLScanner wscanner = fInfrastructure.createWebXMLScanner();
+                try
+                {
+                    descriptor = wscanner.scanWebAppDescriptor(model);
+                }
+                catch (ScannerException e)
+                {
+                    TapestryCore.log(e);
+                }
+                fInfrastructure.fProblemPersister.recordProblems(webXML, wscanner.getProblems());
+
+                if (descriptor == null)
+                    throw new BrokenWebXMLException(CoreMessages
+                            .format(AbstractBuildInfrastructure.STRING_KEY
+                                    + "abort-no-valid-application-servlets-found"));
+
+                ServletInfo[] servletInfos = descriptor.getServletInfos();
+                if (servletInfos == null || servletInfos.length == 0)
+
+                    throw new BrokenWebXMLException(CoreMessages
+                            .format(AbstractBuildInfrastructure.STRING_KEY
+                                    + "abort-no-valid-application-servlets-found"));
+
+                if (servletInfos.length > 1)
+                    throw new BrokenWebXMLException(CoreMessages
+                            .format(AbstractBuildInfrastructure.STRING_KEY
+                                    + "abort-too-many-valid-servlets-found"));
+
+                fApplicationServlet = servletInfos[0];
+                fWebAppDescriptor = descriptor;
+                fInfrastructure.installBasePropertySource(fWebAppDescriptor);
             }
             finally
             {
-                servletParser = null;
+                if (model != null)
+                    model.release();
             }
-            if (wxmlElement == null)
-                throw new BrokenWebXMLException(
-                        "Tapestry AbstractBuild failed: could not parse web.xml. ");
-
-            WebAppDescriptor descriptor = null;
-            try
-            {
-                WebXMLScanner wscanner = fInfrastructure.createWebXMLScanner();
-                descriptor = wscanner.scanWebAppDescriptor(wxmlElement);
-                fInfrastructure.fProblemPersister.recordProblems(webXML, wscanner.getProblems());
-            }
-            catch (ScannerException e)
-            {
-                TapestryCore.log(e);
-            }
-
-            if (descriptor == null)
-                throw new BrokenWebXMLException(CoreMessages
-                        .format(AbstractBuildInfrastructure.STRING_KEY
-                                + "abort-no-valid-application-servlets-found"));
-
-            ServletInfo[] servletInfos = descriptor.getServletInfos();
-            if (servletInfos == null || servletInfos.length == 0)
-
-                throw new BrokenWebXMLException(CoreMessages
-                        .format(AbstractBuildInfrastructure.STRING_KEY
-                                + "abort-no-valid-application-servlets-found"));
-
-            if (servletInfos.length > 1)
-                throw new BrokenWebXMLException(CoreMessages
-                        .format(AbstractBuildInfrastructure.STRING_KEY
-                                + "abort-too-many-valid-servlets-found"));
-
-            fApplicationServlet = servletInfos[0];
-            fWebAppDescriptor = descriptor;
-            fInfrastructure.installBasePropertySource(fWebAppDescriptor);
         }
         else
         {

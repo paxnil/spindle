@@ -40,14 +40,13 @@ import org.apache.tapestry.engine.IPropertySource;
 import org.apache.tapestry.spec.IApplicationSpecification;
 import org.apache.tapestry.spec.IComponentSpecification;
 import org.apache.tapestry.spec.ILibrarySpecification;
-import org.w3c.dom.Document;
 
 import com.iw.plugins.spindle.core.CoreMessages;
 import com.iw.plugins.spindle.core.IJavaType;
 import com.iw.plugins.spindle.core.TapestryCore;
 import com.iw.plugins.spindle.core.namespace.CoreNamespace;
 import com.iw.plugins.spindle.core.namespace.ICoreNamespace;
-import com.iw.plugins.spindle.core.parser.Parser;
+import com.iw.plugins.spindle.core.parser.dom.IDOMModel;
 import com.iw.plugins.spindle.core.resources.ICoreResource;
 import com.iw.plugins.spindle.core.resources.templates.ITemplateFinderListener;
 import com.iw.plugins.spindle.core.resources.templates.TemplateFinder;
@@ -132,9 +131,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     protected IJavaType fTapestryServletType;
 
     /**
-     * @throws BuilderException
-     *             a runtime exception thrown if the Tapestry application serlvet class can't be
-     *             located
+     * @throws BuilderException a runtime exception thrown if the Tapestry application serlvet class
+     *             can't be located
      */
     public AbstractBuild(AbstractBuildInfrastructure infrastructure)
     {
@@ -164,9 +162,6 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
     public void build() throws BuilderException
     {
-
-        Parser parser = new Parser(false);
-
         preBuild();
 
         fNotifier.updateProgressDelta(0.1f);
@@ -176,10 +171,10 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
         fBuildQueue.addAll(findAllTapestryArtifacts());
 
-        resolveFramework(parser);
+        resolveFramework();
         try
         {
-            doBuild(parser);
+            doBuild();
 
             postBuild();
 
@@ -261,8 +256,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         return null;
     }
 
-    protected ICoreNamespace createNamespace(Parser parser, String id, ICoreResource location,
-            String encoding)
+    protected ICoreNamespace createNamespace(String id, ICoreResource location, String encoding)
     {
 
         ICoreNamespace result = null;
@@ -272,11 +266,11 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         String name = location.getName();
         if (name.endsWith(".application"))
         {
-            lib = resolveApplication(parser, location, encoding);
+            lib = resolveApplication(location, encoding);
         }
         else if (name.endsWith(".library"))
         {
-            lib = resolveLibrarySpecification(parser, location, encoding);
+            lib = resolveLibrarySpecification(location, encoding);
         }
         if (lib != null)
             result = new CoreNamespace(id, lib);
@@ -289,7 +283,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
     /**
      * Perform the build.
      */
-    protected abstract void doBuild(Parser parser);
+    protected abstract void doBuild();
 
     /**
      * Find all files in the project that have Tapestry extensions.
@@ -310,17 +304,16 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      * If the entity referred to by the location is really a file in the workspace, the problems are
      * recorded as resource markers. Otherwise, the problem is logged.
      */
-    protected IApplicationSpecification resolveApplication(Parser parser, Resource location,
-            String encoding)
+    protected IApplicationSpecification resolveApplication(Resource location, String encoding)
     {
         ICoreResource useLocation = (ICoreResource) location;
         IApplicationSpecification result = null;
+        IDOMModel model = null;
         try
         {
-            Document document = parseToDocument(parser, useLocation, encoding == null ? "UTF-8"
-                    : encoding);
+            model = getDOMModel(useLocation, encoding == null ? "UTF-8" : encoding, false);
             // Node node = parseToNode(location);
-            if (document != null)
+            if (model != null)
             {
                 ApplicationScanner scanner = new ApplicationScanner();
                 scanner.setResourceLocation(useLocation);
@@ -332,7 +325,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
 
                 try
                 {
-                    result = (IApplicationSpecification) scanner.scan(document, useValidator);
+                    result = (IApplicationSpecification) scanner.scan(model, useValidator);
                     fInfrastructure.fProblemPersister.recordProblems(useLocation, scanner
                             .getProblems());
                 }
@@ -366,6 +359,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         finally
         {
             finished(useLocation);
+            if (model != null)
+                model.release();
         }
         return result;
     }
@@ -399,20 +394,19 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      * If the entity referred to by the location is really a resource in the workspace, the problems
      * are recorded as resource markers. Otherwise, the problem is logged.
      */
-    protected ILibrarySpecification resolveLibrarySpecification(Parser parser, Resource location,
-            String encoding)
+    protected ILibrarySpecification resolveLibrarySpecification(Resource location, String encoding)
     {
         ICoreResource useLocation = (ICoreResource) location;
         ILibrarySpecification result = null;
         if (fProcessedLocations.containsKey(useLocation))
             return (ILibrarySpecification) fProcessedLocations.get(useLocation);
 
+        IDOMModel model = null;
         try
         {
-            Document document = parseToDocument(parser, useLocation, encoding == null ? "UTF-8"
-                    : encoding);
+            model = getDOMModel(useLocation, encoding == null ? "UTF-8" : encoding, false);
 
-            if (document != null)
+            if (model != null)
             {
                 LibraryScanner scanner = new LibraryScanner();
                 scanner.setResourceLocation(useLocation);
@@ -422,7 +416,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                 try
                 {
                     useValidator.addListener(this);
-                    result = (ILibrarySpecification) scanner.scan(document, useValidator);
+                    result = (ILibrarySpecification) scanner.scan(model, useValidator);
 
                 }
                 finally
@@ -448,10 +442,6 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         {
             TapestryCore.log(e);
         }
-        // catch (CoreException e)
-        // {
-        // TapestryCore.log(e);
-        // }
         catch (ScannerException e)
         {
             recordFatalProblem(location, e);
@@ -459,6 +449,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         finally
         {
             finished(useLocation);
+            if (model != null)
+                model.release();
         }
         if (result != null)
             fProcessedLocations.put(useLocation, result);
@@ -569,33 +561,24 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      * If the IStorage is really a resource in the workspace, the problems are recorded as resource
      * markers. Otherwise, the problem is logged.
      */
-    protected Document parseToDocument(Parser parser, ICoreResource location, String encoding)
-            throws IOException
+    protected IDOMModel getDOMModel(ICoreResource location, String encoding, boolean validate) throws IOException
     {
         if (!location.exists())
             throw new IOException(CoreMessages.format("core-resource-does-not-exist", location));
-        Document result = null;
-        try
+
+        IDOMModel result = fInfrastructure.fDOMModelSource.parseDocument(
+                location,
+                encoding,
+                validate,
+                this);
+
+        fInfrastructure.fProblemPersister.recordProblems(location, result.getProblems());
+
+        if (result.getDocument() == null)
         {
-            result = parser.parse(location.getContents(), encoding);
-
+            result.release();
+            result = null;
         }
-        catch (RuntimeException e)
-        {
-            TapestryCore.log(e);
-            throw e;
-        }
-        catch (IOException e)
-        {
-            TapestryCore.log(e);
-            throw e;
-        }
-
-        fInfrastructure.fProblemPersister.recordProblems(location, parser.getProblems());
-
-        if (parser.getHasFatalErrors())
-            return null;
-
         return result;
     }
 
@@ -616,11 +599,10 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
      * Resolve the Tapestry Framework namespace here. Library builds check to see if the library
      * being built *is* the framework library. If so it skips this step.
      */
-    protected abstract void resolveFramework(Parser parser);
+    protected abstract void resolveFramework();
 
-    protected IComponentSpecification resolveIComponentSpecification(Parser parser,
-            ICoreNamespace namespace, ICoreResource location, String templateExtension,
-            String encoding)
+    protected IComponentSpecification resolveIComponentSpecification(ICoreNamespace namespace,
+            ICoreResource location, String templateExtension, String encoding)
 
     {
         // to avoid double parsing specs that are accessible
@@ -631,28 +613,27 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
         Assert.isNotNull(templateExtension);
 
         PluginComponentSpecification result = null;
+        IDOMModel model = null;
         if (location.exists())
             try
             {
-                Document document = parseToDocument(parser, location, encoding == null ? "UTF-8"
-                        : encoding);
+                model = getDOMModel(location, encoding == null ? "UTF-8" : encoding, false);
                 // while editor reconcilers can re-use the scanner, we can't here
                 // because scanning may invoke the scanning of another, nested,
                 // component.
-                ComponentScanner scanner = new ComponentScanner();
 
-                if (document != null)
+                if (model != null)
                 {
+                    ComponentScanner scanner = new ComponentScanner();
                     scanner.setResourceLocation(location);
                     scanner.setNamespace(namespace);
 
-                    IScannerValidator useValidator = new SpecificationValidator(this,
+                    IScannerValidator scanValidator = new SpecificationValidator(this,
                             fInfrastructure.fTapestryProject);
-                    useValidator.addListener(this);
+                    scanValidator.addListener(this);
                     try
                     {
-                        result = (PluginComponentSpecification) scanner
-                                .scan(document, useValidator);
+                        result = (PluginComponentSpecification) scanner.scan(model, scanValidator);
                         if (result != null)
 
                             result.setTemplateLocations(TemplateFinder.scanForTemplates(
@@ -663,7 +644,7 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
                     }
                     finally
                     {
-                        useValidator.removeListener(this);
+                        scanValidator.removeListener(this);                       
                     }
 
                     fInfrastructure.fProblemPersister.recordProblems(location, scanner
@@ -690,10 +671,6 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             {
                 e.printStackTrace();
             }
-            // catch (CoreException e)
-            // {
-            // e.printStackTrace();
-            // }
             catch (ScannerException e)
             {
                 recordFatalProblem(location, e);
@@ -702,6 +679,8 @@ public abstract class AbstractBuild implements IBuild, IScannerValidatorListener
             finally
             {
                 finished(location);
+                if (model != null)
+                    model.release();
             }
 
         if (result != null)
